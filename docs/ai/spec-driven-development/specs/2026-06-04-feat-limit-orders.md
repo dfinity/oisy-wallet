@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-|                  |                               |
+| | |
 | ---------------- | ----------------------------- |
-| Display name     | OISY DEX                      |
-| Repo             | `dfinity/dex` (private)       |
+| Display name | OISY DEX |
+| Repo | `dfinity/dex` (private) |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed    |
+| Mainnet canister | TBD — update when deployed |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -41,6 +41,15 @@ Depositing requires two steps: first `icrc2_approve` on the token's ledger (auth
 **Asynchronous matching.** `add_limit_order` returns an `OrderId` immediately. The matching engine processes orders on the next timer tick. Clients must poll `get_order_status` to observe the lifecycle: `Pending → Open → Filled / Canceled`.
 
 **Orders need a price and quantity.** Price is in quote-token units per base-token unit and must be a positive multiple of the pair's `tick_size`. Quantity is in base-token units and must be a positive multiple of `lot_size`. Both values come from `get_trading_pairs`.
+
+**Maker/taker fee model.** Each trading pair has a maker fee and a taker fee, both in basis points (1 bps = 0.01%). The fee is deducted from the proceeds at fill time, in the asset the side receives. For a sell order (receiving quote tokens), the fee is deducted from the quote amount received:
+
+- **Maker** (order rests in the book, fills later): `proceeds × maker_fee_bps / 10_000` deducted from received amount.
+- **Taker** (order crosses an existing order immediately): `proceeds × taker_fee_bps / 10_000` deducted. Taker fee is typically higher.
+
+At order placement time, oisy cannot know whether the order will fill as maker or taker. The "You receive" amount shown in the form and review is therefore the **gross amount before fees**. The actual received amount will be slightly less.
+
+**Important gap**: `TradingPairInfo` (returned by `get_trading_pairs`) does not currently include `maker_fee_bps` or `taker_fee_bps`. These must be added by the DEX team before oisy can display specific fee rates. See Open questions.
 
 ### Relevant canister methods
 
@@ -79,7 +88,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface                         | Type        | Purpose                                                           |
+| Surface | Type | Purpose |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -164,15 +173,14 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market    | Label                               | Warning                                                                                                                            |
-| ------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                                                                               |
-| Pay token     | below market | "When 1 [pay token] is at least"    | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Price display | vs market | Label | Warning |
+| ------------- | ------------ | --------------------------------------- | --------------------------------------------------------------------------- |
+| Pay token | above market | "When 1 [pay token] reaches" | none |
+| Pay token | below market | "When 1 [pay token] is at least" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
 | Receive token | above market | "When 1 [receive token] is at most" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                                                                               |
+| Receive token | below market | "When 1 [receive token] dropped to" | none |
 
 Notes on the label choice:
-
 - "reaches" implies waiting for the price to rise to the target — correct when the limit is above market.
 - "is at least" and "is at most" reflect a condition that is already met (>= / <=) — correct when the limit is below market and the order will fill immediately.
 - "dropped to" implies waiting for the price to fall to the target — correct when the receive-token price needs to decrease.
@@ -199,9 +207,13 @@ Three values are always linked: pay amount, receive amount, price. Editing any o
 
 **Lot size rounding.** `lot_size` constrains the base token quantity (e.g. ICP in an ICP/ckUSDC pair). The rounding always applies to the base token amount regardless of which field the user typed into. When the user enters a quote token amount that produces a non-integer base amount, the base is rounded down to the nearest valid lot size multiple and both fields update to reflect the rounded values. The user always sees the final rounded amounts before confirming.
 
+**Tick size rounding.** `tick_size` constrains the price in quote-per-base terms (e.g. ckUSDC per ICP). The DEX always stores and validates price in this canonical direction. When the user enters a price via the reciprocal display (e.g. ICP per ckUSDC), the value must be converted back to quote-per-base and rounded to the nearest valid `tick_size` multiple before submission. Both the reciprocal display and the canonical price update to reflect the rounded value. The user always sees the rounded price before confirming.
+
 ### Language
 
-Use "You pay" and "You receive" — matching oisy's existing swap UI labels exactly. Avoid "Buy/Sell" and "Base/Quote".
+The Limit Order tab uses **"You sell"** and **"You buy"** — not "You pay" / "You receive". This distinction matters because "You receive" is reserved for the net post-fee amount, which cannot be shown as a single value at placement time (maker vs taker is unknown until fill). "You buy" clearly expresses the gross target amount the order is priced to achieve.
+
+The Swap tab continues to use "You pay" / "You receive" (existing behaviour unchanged).
 
 ### Constraint rules
 
@@ -231,6 +243,20 @@ The same cascading rule applies when "You receive" changes: clear DEX if the new
 
 Both entry points use the same form. The only difference is which fields arrive pre-filled and locked.
 
+### Fee display
+
+The "You buy" amount always shows the **gross amount before fees**. Fees are deducted from proceeds at fill time. Whether the order fills as maker or taker is not known at placement time — it depends on the order book state at execution.
+
+**On the form** — the DEX selector row is expandable (same pattern as swap fees). Collapsed it shows the DEX name and the CLOB best ask (labelled "best ask", clearly distinct from the oisy price feed market reference shown in the price section). Expanded it shows two lines:
+- "Maker fee · 0% (No fee)" — shown in green when 0 bps
+- "Taker fee · 0.05% (5 bps)"
+
+Fee rates come from `maker_fee_bps` / `taker_fee_bps` in `TradingPairInfo` once available (see Open questions). Until then, show a static note in the expanded section.
+
+**Market reference vs CLOB price** — the price section shows "market X (oisy price feed)" based on oisy's own price feeds, used for value difference and label logic. The DEX expanded row separately shows "best ask Y" from the CLOB order book. These are two distinct data sources and must be labelled differently.
+
+**On the review step** — a single "Fee (maker / taker)" row shows both rates (e.g. "0% / 0.05%"). A (?) next to the label expands a short explanation: "Fees are deducted from your proceeds at fill time. Whether your order fills as maker or taker depends on the order book state at execution and cannot be predicted." with a Learn more link. There is no "You receive" row on the review — the gross "You buy" amount is shown in the hero, and the fee row gives the context needed.
+
 ### Insufficient balance
 
 If the user's DEX free balance for the "You pay" token is less than the order requires, show the shortfall clearly and offer an inline deposit step before confirming. The user sees the deposit as an explicit action, not a hidden side effect.
@@ -241,13 +267,14 @@ The Limit Order tab follows the same wizard pattern as the existing swap flow: *
 
 **Form step** — the full form described above. Button label: "Review".
 
-**Review step** — mirrors `SwapReview`. Shows:
+**Review step** — title: "Review limit order". Shows:
 
-- Token amounts: "You pay X ICP / You receive Y ckUSDC" (same `TokensReview` component as swap).
-- Limit price row: "When 1 ICP reaches 2.75 ckUSDC" with market reference.
-- Value difference (same `SwapValueDifference` component).
+- Hero: "You sell X ICP" and "You buy Y ckUSDC" (gross, pre-fee) with fiat equivalents.
+- Limit price row with market reference: "market 2.69 (oisy price feed)".
+- Value difference.
 - DEX row: "OISY DEX".
-- If value difference is below 0%: warning box shown (amber or red depending on severity). If below −5%, a confirmation checkbox is required inside the same box before "Place order" is enabled.
+- Fee row: "Fee (maker / taker) · 0% / 0.05%" with a (?) that expands an explanation and Learn more link.
+- If value difference is below 0%: warning box shown (amber or red). If below −5%, a confirmation checkbox is required before "Place order" is enabled.
 - Back + "Place order" buttons.
 
 **Progress step** — single step: submitting the order to the DEX. On success, closes the modal and the order appears in the Trading tab Active Orders with status Pending. Status updates via polling.
@@ -375,3 +402,4 @@ Status is refreshed by polling while the Trading tab is visible. When an order t
 1. **Mainnet canister ID** — fill in once the DEX is deployed to mainnet.
 2. **Token logos** — `list_supported_tokens` returns symbol and decimals but no logo URL. Confirm whether the existing oisy token registry covers all DEX-listed tokens, or whether a fallback is needed.
 3. **USD price feeds** — confirm that all DEX-listed tokens already have USD price data in the existing price store (needed for the hero total).
+4. **Fee rates in `TradingPairInfo`** — `maker_fee_bps` and `taker_fee_bps` are currently only on `AddTradingPairRequest` (admin write endpoint) and are not queryable by clients. Request the DEX team add them to `TradingPairInfo` so oisy can display them. Until this is done, show a static fee notice instead of specific rates.
