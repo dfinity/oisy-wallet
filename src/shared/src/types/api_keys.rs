@@ -8,9 +8,9 @@ pub struct ApiKeys {
     pub infura_api_key: Option<String>,
     pub alchemy_api_key: Option<String>,
     pub coingecko_api_key: Option<String>,
-    /// When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-    /// `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-    /// (misconfiguration with no key does not run refresh).
+    /// Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+    /// `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+    /// both keep refresh disabled (and a missing key never runs refresh either).
     pub exchange_rate_enabled: Option<bool>,
 }
 

@@ -2,10 +2,15 @@
 	import IconAddressBook from '$lib/components/icons/IconAddressBook.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TRANSACTIONS_FILTER_CONTACTS_EMPTY_CTA } from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	const learnMoreUrl = 'https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts';
 
 	const openAddressBook = () => {
 		modalStore.openAddressBook({ id: Symbol() });
@@ -25,11 +30,16 @@
 				><IconShieldCheck size="16" /></span
 			>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
 		>{$i18n.transaction.filter.contacts_empty_description}<br />
-		<a
-			class="blue-link no-underline"
-			href="https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts"
-			rel="noopener noreferrer"
-			target="_blank">{$i18n.core.text.learn_more}</a
+		<ExternalLink
+			ariaLabel={$i18n.core.text.learn_more}
+			color="blue"
+			href={learnMoreUrl}
+			iconVisible={false}
+			trackEvent={buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TRANSACTIONS,
+				labelKey: 'core.text.learn_more',
+				url: learnMoreUrl
+			})}>{$i18n.core.text.learn_more}</ExternalLink
 		>
 	</p>
 

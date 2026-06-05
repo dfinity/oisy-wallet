@@ -202,9 +202,9 @@ export type AllowSigningResult =
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
 	/**
-	 * When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-	 * `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-	 * (misconfiguration with no key does not run refresh).
+	 * Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+	 * `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+	 * both keep refresh disabled (and a missing key never runs refresh either).
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
@@ -1968,6 +1968,17 @@ export interface _SERVICE {
 	 * Add or update custom token for the user.
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+	 *
+	 * Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+	 * keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+	 * them resume (still gated on a `CoinGecko` key being set, see
+	 * [`is_exchange_rate_refresh_enabled`]).
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
