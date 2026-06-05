@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-|                  |                               |
+| | |
 | ---------------- | ----------------------------- |
-| Display name     | OISY DEX                      |
-| Repo             | `dfinity/dex` (private)       |
+| Display name | OISY DEX |
+| Repo | `dfinity/dex` (private) |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed    |
+| Mainnet canister | TBD — update when deployed |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -88,7 +88,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface                         | Type        | Purpose                                                           |
+| Surface | Type | Purpose |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -140,6 +140,8 @@ _Has assets and orders:_
 
 DEX balances (`free + reserved`) are included in the total net worth in the hero element. Tokens deposited to the DEX do **not** appear in the Tokens tab list — they are visible only in the Trading tab. The hero total must remain accurate.
 
+The hero shows only the total balance figure — no breakdown label, no "includes DEX deposits" annotation. The total speaks for itself.
+
 ---
 
 ## Order placement form
@@ -173,15 +175,14 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market    | Label                               | Warning                                                                                                                            |
-| ------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                                                                               |
-| Pay token     | below market | "When 1 [pay token] is at least"    | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
+| Price display | vs market | Label | Warning |
+| ------------- | ------------ | --------------------------------------- | --------------------------------------------------------------------------- |
+| Pay token | above market | "When 1 [pay token] reaches" | none |
+| Pay token | below market | "When 1 [pay token] is at least" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
 | Receive token | above market | "When 1 [receive token] is at most" | "This price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                                                                               |
+| Receive token | below market | "When 1 [receive token] dropped to" | none |
 
 Notes on the label choice:
-
 - "reaches" implies waiting for the price to rise to the target — correct when the limit is above market.
 - "is at least" and "is at most" reflect a condition that is already met (>= / <=) — correct when the limit is below market and the order will fill immediately.
 - "dropped to" implies waiting for the price to fall to the target — correct when the receive-token price needs to decrease.
@@ -197,14 +198,46 @@ On the form step the warning text reads: **"This price is below market — your 
 
 On the review step the warning text reads: **"The specified price is below market — your order will fill almost immediately. You'll receive approximately $X less than at market price."** (refers to the limit price row visible directly above it).
 
-### Pay / receive / price linkage
+### Field linkage and rounding rules
 
-Three values are always linked: pay amount, receive amount, price. Editing any one recomputes one of the others:
+Three values are always linked: "You sell", "You buy", and price. The relationship is always `quote = base × price`, where the base token may be in either "You sell" or "You buy" depending on the trade direction (flip).
 
-- **Change pay amount** → receive updates (price stays). Always, regardless of lock.
-- **Change price** → receive updates (pay stays). Always, regardless of lock.
-- **Change receive amount, lock off** → price updates (pay stays).
-- **Change receive amount, lock on** → pay updates (price stays).
+**Two constraints apply:**
+- The **base token amount** must be a positive multiple of `lot_size` — always rounded down.
+- The **price** must be a positive multiple of `tick_size` — always rounded down.
+- The **quote token amount** is always derived and has no constraint of its own.
+
+**Rules by edited field:**
+
+The base token field and price field are the two primary inputs. The quote token field is always the output — it is recomputed last after all rounding is applied.
+
+| What user edits | Base direction | Lock | What happens |
+|---|---|---|---|
+| Base token field | either | either | Round base to lot_size. Recompute quote = rounded_base × price. |
+| Price field | either | either | Round price to tick_size. Recompute quote = base × rounded_price. |
+| Quote token field | either | off | Derive price = quote ÷ base. Round price to tick_size. Recompute quote = base × rounded_price. |
+| Quote token field | either | on | Derive base = quote ÷ price. Round base to lot_size. Recompute quote = rounded_base × price. |
+
+**Decorations** — shown inline below the relevant field when rounding causes a visible difference:
+- Base token field: "→ Order quantity: X [token]" (amber) when the entered value is not a valid lot_size multiple.
+- Price field: "→ Rounded to: X" (amber) when the entered or derived price is not a valid tick_size multiple.
+- Quote token field: "→ Actual: X [token]" (blue) when the final computed quote differs from what the user typed, due to rounding of base or price.
+
+All downstream calculations (value difference, fiat equivalents, review step values) always use the rounded values, not the raw input.
+
+**Interaction timing — live vs. blur:**
+
+- **On input** (as the user types): fields recalculate live. The derived field updates immediately. No rounding is applied yet — the user may still be mid-entry.
+- **On blur** (when the user leaves a field): rounding constraints are checked. If any value violates lot_size or tick_size, or the derived field no longer matches:
+  1. The **Review button is disabled**.
+  2. An **apply box** appears listing all the changes that will be made (e.g. "You sell: 10.15 → 10.1 ICP (lot size 0.1)").
+  3. A **"Use these values"** button in the box, when clicked, updates all fields to the rounded values, hides the box, and re-enables Review.
+
+The apply box is dismissed and Review re-enabled only after the user explicitly confirms the rounded values. This prevents accidentally submitting an order with values that don't match what the DEX will accept.
+
+Note: when the user clicks Review while a field is focused, the browser fires blur before the click. The blur triggers the apply box and disables Review, so the click lands on a disabled button. The user sees the apply box and must confirm before proceeding. This is the correct outcome.
+
+See the interactive HTML wireframe `wireframe-rounding-demo.html` for a live demonstration of all 8 cases (4 edit scenarios × 2 base directions).
 
 **Lot size rounding.** `lot_size` constrains the base token quantity (e.g. ICP in an ICP/ckUSDC pair). The rounding always applies to the base token amount regardless of which field the user typed into. When the user enters a quote token amount that produces a non-integer base amount, the base is rounded down to the nearest valid lot size multiple and both fields update to reflect the rounded values. The user always sees the final rounded amounts before confirming.
 
@@ -216,25 +249,25 @@ The Limit Order tab uses **"You sell"** and **"You buy"** — not "You pay" / "Y
 
 The Swap tab continues to use "You pay" / "You receive" (existing behaviour unchanged).
 
-### Constraint rules
+### Token selection and pairing rules
 
-The form flows strictly top to bottom. No field affects fields above it.
+Both "You sell" and "You buy" token selectors open a token selector modal. The selection is symmetrical — either token can be chosen first.
 
-The "You pay" field always shows both balances: DEX free balance and wallet balance. Both are shown at all times — the wallet balance is context for how much more the user could deposit if needed.
+**Default filter.** When neither token is selected, both selectors show only tokens that appear in at least one CLOB pair on the integrated DEXes.
 
-**Fiat values** are shown in the user's selected currency throughout the form: pay amount, receive amount, price, and market reference all show fiat equivalents. Fiat conversion uses the same price feeds and currency setting as the rest of oisy.
+**After one token is selected.** The other selector is further filtered to tokens that form a valid pair with the already-selected token.
 
-- **"You pay" token selected** → "You receive" selector shows only tokens that form a valid pair across all integrated DEXes. DEX selector remains disabled.
-- **"You receive" token selected** → DEX selector becomes enabled, showing only DEXes that have the pair, with best ask price per DEX.
-- **DEX selected** → Price section becomes active.
+**"Show all tokens" toggle.** Inside the token selector modal (not on the main form), a "Show all tokens" toggle removes the pairing filter and shows the full DEX-supported token list. If the user picks a token that has no valid pair with the already-selected token, the other token field and its amount are both cleared. The main form always shows the filtered view — "show all tokens" is only visible inside the modal.
 
-**When "You pay" token changes after "You receive" and/or DEX are already filled:**
+**Cascade clear on change.** When either token changes and the other no longer forms a valid pair, the other token and its entered amount are cleared. Cleared fields are shown in their empty/placeholder state — no silent stale values.
 
-- Keep "You receive" if it still forms a valid pair with the new token. Clear it otherwise.
-- Keep DEX if the new pair is still available on it. Clear it otherwise.
-- Always show cleared fields visually in their empty/placeholder state. Never silently retain an invalid value.
+**DEX selector.** Enabled only after both tokens are selected. Shows only DEXes that support the chosen pair, with best ask price per DEX.
 
-The same cascading rule applies when "You receive" changes: clear DEX if the new pair is not available on it.
+**Price section.** Becomes active after a DEX is selected.
+
+**Fiat values** are shown in the user's selected currency throughout the form: sell amount, buy amount, price, and market reference all show fiat equivalents. Fiat conversion uses the same price feeds and currency setting as the rest of oisy.
+
+The "You sell" field always shows both balances: DEX free balance and wallet balance. Both are shown at all times — the wallet balance is context for how much more the user could deposit if needed.
 
 ### Entry points
 
@@ -249,7 +282,6 @@ Both entry points use the same form. The only difference is which fields arrive 
 The "You buy" amount always shows the **gross amount before fees**. Fees are deducted from proceeds at fill time. Whether the order fills as maker or taker is not known at placement time — it depends on the order book state at execution.
 
 **On the form** — the DEX selector row is expandable (same pattern as swap fees). Collapsed it shows the DEX name and the CLOB best ask (labelled "best ask", clearly distinct from the oisy price feed market reference shown in the price section). Expanded it shows two lines:
-
 - "Maker fee · 0% (No fee)" — shown in green when 0 bps
 - "Taker fee · 0.05% (5 bps)"
 
@@ -285,11 +317,14 @@ The Limit Order tab follows the same wizard pattern as the existing swap flow: *
 
 ## Deposit flow
 
-Triggered from: "+ Deposit" link in the Trading tab, or inline when placing an order with insufficient balance.
+Triggered from two entry points:
 
-The flow mirrors the Harvest Autopilot stake wizard pattern: Form → Review → Progress.
+- **"+ Deposit" link in the Trading tab** (section header) — no token context. The token selector starts empty; the user picks any token the DEX supports that they hold in their wallet. If the user holds no DEX-supported tokens, the selector shows no options and a hint: "You don't hold any tokens supported by OISY DEX."
+- **Inline from the order form** (when DEX free balance is insufficient for the order being placed) — the "You sell" token and the exact shortfall amount (required − free) are pre-filled. The deposit flow opens **directly at the Review step**, skipping the form. Note: lot_size does not apply to deposits — any transfer amount is valid; the shortfall is deposited as-is.
 
-**Form step:**
+The flow mirrors the Harvest Autopilot stake wizard pattern: Form → Review → Progress. The inline entry point bypasses the Form step.
+
+**Form step** (not shown for inline entry):
 
 - Token selector (only tokens the DEX supports that the user holds in their wallet).
 - Amount input with wallet balance shown below and fiat equivalent.
