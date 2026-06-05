@@ -1968,6 +1968,17 @@ export interface _SERVICE {
 	 * Add or update custom token for the user.
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+	 *
+	 * Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+	 * keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+	 * them resume (still gated on a `CoinGecko` key being set, see
+	 * [`is_exchange_rate_refresh_enabled`]).
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.

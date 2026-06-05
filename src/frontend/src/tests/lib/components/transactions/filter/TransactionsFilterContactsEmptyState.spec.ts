@@ -42,7 +42,7 @@ describe('TransactionsFilterContactsEmptyState', () => {
 			'https://docs.oisy.com/introduction/oisy-keeps-you-protected#contacts'
 		);
 		expect(link).toHaveAttribute('target', '_blank');
-		expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+		expect(link).toHaveAttribute('rel', 'external noopener noreferrer');
 	});
 
 	it('renders the CTA button that opens the address book', async () => {
