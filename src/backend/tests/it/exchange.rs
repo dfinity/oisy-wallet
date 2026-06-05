@@ -15,26 +15,27 @@ fn api_keys_with_coingecko() -> ApiKeys {
 fn set_exchange_rate_enabled_toggles_without_touching_keys() {
     let pic_setup = setup();
 
-    // Configure a CoinGecko key so refresh is enabled by default.
+    // Configure a CoinGecko key. Refresh is opt-in, so it stays disabled until
+    // explicitly enabled, even with a key present.
     assert_eq!(
         pic_setup.update::<()>(controller(), "set_api_keys", api_keys_with_coingecko()),
         Ok(())
     );
     assert_eq!(
         pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
-        Ok(true),
-        "Refresh should be enabled once a CoinGecko key is set."
+        Ok(false),
+        "Refresh should stay disabled until explicitly enabled, even with a CoinGecko key set."
     );
 
-    // Disable refresh without re-supplying the keys.
+    // Enable refresh without re-supplying the keys.
     assert_eq!(
-        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", false),
+        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", true),
         Ok(())
     );
     assert_eq!(
         pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
-        Ok(false),
-        "Refresh should be disabled after toggling it off."
+        Ok(true),
+        "Refresh should be enabled after toggling it on."
     );
 
     // The stored keys must be preserved across the toggle.
@@ -46,17 +47,17 @@ fn set_exchange_rate_enabled_toggles_without_touching_keys() {
         Some("test-key".to_string()),
         "Toggling refresh must not clear the configured keys."
     );
-    assert_eq!(stored.exchange_rate_enabled, Some(false));
+    assert_eq!(stored.exchange_rate_enabled, Some(true));
 
-    // Re-enable refresh.
+    // Disable refresh again.
     assert_eq!(
-        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", true),
+        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", false),
         Ok(())
     );
     assert_eq!(
         pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
-        Ok(true),
-        "Refresh should be enabled again after toggling it back on."
+        Ok(false),
+        "Refresh should be disabled after toggling it back off."
     );
 }
 

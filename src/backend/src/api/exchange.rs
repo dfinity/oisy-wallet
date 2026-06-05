@@ -58,7 +58,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    let refresh_lock = if stale.is_empty() {
+    let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
         None
     } else {
         try_acquire_refresh_lock()
