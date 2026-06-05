@@ -23,12 +23,12 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-|                  |                               |
+| | |
 | ---------------- | ----------------------------- |
-| Display name     | OISY DEX                      |
-| Repo             | `dfinity/dex` (private)       |
+| Display name | OISY DEX |
+| Repo | `dfinity/dex` (private) |
 | Staging canister | `proc5-daaaa-aaaar-qb5va-cai` |
-| Mainnet canister | TBD — update when deployed    |
+| Mainnet canister | TBD — update when deployed |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/dex` repo.
 
@@ -46,20 +46,20 @@ Depositing requires two steps: first `icrc2_approve` on the token's ledger (auth
 
 ```
 // Discovery
-get_trading_pairs()         → vec TradingPairInfo         // pairs, tick_size, lot_size
-list_supported_tokens()     → vec Token                   // symbol, decimals
-get_order_book_ticker(pair) → { bid, ask }                // best bid/ask prices
+get_trading_pairs() → vec TradingPairInfo // pairs, tick_size, lot_size
+list_supported_tokens() → vec Token // symbol, decimals
+get_order_book_ticker(pair) → { bid, ask } // best bid/ask prices
 
 // Balances
-get_balances(null)          → { token, balance: { free, reserved } } for all tokens with non-zero balance
-get_balances(opt filter)    → same, filtered to specific tokens
+get_balances(null) → { token, balance: { free, reserved } } for all tokens with non-zero balance
+get_balances(opt filter) → same, filtered to specific tokens
 
 // Lifecycle
-deposit(token, amount)      → Ok | Err   (requires prior icrc2_approve)
-withdraw(token, amount)     → Ok | Err
+deposit(token, amount) → Ok | Err (requires prior icrc2_approve)
+withdraw(token, amount) → Ok | Err
 add_limit_order(pair, side, price, quantity) → Ok(OrderId) | Err
 cancel_limit_order(orderId) → Ok(OrderRecord) | Err
-get_order_status(orderId)   → Pending | Open | Filled | Canceled | NotFound
+get_order_status(orderId) → Pending | Open | Filled | Canceled | NotFound
 ```
 
 ### Listing user orders (v1 fallback)
@@ -79,7 +79,7 @@ The top-level navigation stays unchanged: **Assets · Activity · Earn · Explor
 
 This feature adds one new surface:
 
-| Surface                         | Type        | Purpose                                                           |
+| Surface | Type | Purpose |
 | ------------------------------- | ----------- | ----------------------------------------------------------------- |
 | **Trading tab** (inside Assets) | Status view | "Where is my money?" — DEX deposits and active orders at a glance |
 
@@ -164,12 +164,12 @@ A flip button between "You pay" and "You receive" lets the user reverse directio
 
 The dynamic label and warning depend on two factors: which token is currently shown in the price display, and whether the limit price is above or below market in that display direction.
 
-| Price display | vs market    | Label                               | Warning                                                                         |
+| Price display | vs market | Label | Warning |
 | ------------- | ------------ | ----------------------------------- | ------------------------------------------------------------------------------- |
-| Pay token     | above market | "When 1 [pay token] reaches"        | none                                                                            |
-| Pay token     | below market | "When 1 [pay token] drops to"       | "This price is already below market — your order will fill almost immediately." |
-| Receive token | above market | "When 1 [receive token] rises to"   | "This price is already above market — your order will fill almost immediately." |
-| Receive token | below market | "When 1 [receive token] dropped to" | none                                                                            |
+| Pay token | above market | "When 1 [pay token] reaches" | none |
+| Pay token | below market | "When 1 [pay token] drops to" | "This price is already below market — your order will fill almost immediately." |
+| Receive token | above market | "When 1 [receive token] rises to" | "This price is already above market — your order will fill almost immediately." |
+| Receive token | below market | "When 1 [receive token] dropped to" | none |
 
 The warning replaces the market reference line when shown.
 
@@ -218,11 +218,23 @@ Both entry points use the same form. The only difference is which fields arrive 
 
 ### Insufficient balance
 
-If the user's DEX free balance for the Spend token is less than the order requires, show the shortfall clearly and offer an inline deposit step before confirming. The user sees the deposit as an explicit action, not a hidden side effect.
+If the user's DEX free balance for the "You pay" token is less than the order requires, show the shortfall clearly and offer an inline deposit step before confirming. The user sees the deposit as an explicit action, not a hidden side effect.
 
-### Placement
+### Wizard steps
 
-On confirm, the order is submitted to the DEX. An `OrderId` is returned immediately. The order appears in the Active Orders section of the DEX card with status Pending. Status updates via polling.
+The Limit Order tab follows the same wizard pattern as the existing swap flow: **Form → Review → Progress**.
+
+**Form step** — the full form described above. Button label: "Review".
+
+**Review step** — mirrors `SwapReview`. Shows:
+- Token amounts: "You pay X ICP / You receive Y ckUSDC" (same `TokensReview` component as swap).
+- Limit price row: "When 1 ICP reaches 2.75 ckUSDC" with market reference.
+- Value difference (same `SwapValueDifference` component).
+- DEX row: "OISY DEX".
+- If value difference is below −5%: same warning confirmation checkbox as swap (must be checked to enable confirm button).
+- Back + "Place order" buttons.
+
+**Progress step** — single step: submitting the order to the DEX. On success, closes the modal and the order appears in the Trading tab Active Orders with status Pending. Status updates via polling.
 
 ---
 
@@ -285,7 +297,7 @@ The flow mirrors deposit: Form → Review → Progress.
 
 ## Cancel order flow
 
-Triggered from: Cancel action on an order row in the Active Orders section.
+Triggered from: Cancel action on an order row in the Active Orders section of the Trading tab.
 
 Show a confirmation step to prevent accidental cancels. On confirm, reserved funds return to free balance and the order is removed from the active list.
 
@@ -295,7 +307,7 @@ Show a confirmation step to prevent accidental cancels. On confirm, reserved fun
 
 Shows all orders with status Pending or Open for the connected user on a given DEX.
 
-Each row shows: pair, direction (Spend → Get), price, amount, status (Pending with spinner, or Open), and a Cancel button.
+Each row shows: pair, direction (You pay → You receive), price, amount, status (Pending with spinner, or Open), and a Cancel button.
 
 Status is refreshed by polling while the Trading tab is visible. When an order transitions to Filled or Canceled it moves from the Active tab to the History tab.
 
@@ -332,10 +344,12 @@ Status is refreshed by polling while the Trading tab is visible. When an order t
 - [ ] Base token amount is always rounded down to the nearest lot size multiple after any input change.
 - [ ] Both pay and receive fields update to reflect rounded values before the user confirms.
 - [ ] Confirm is blocked when DEX free balance is insufficient; inline deposit is offered instead.
-- [ ] Placed order appears immediately in Active Orders with status Pending.
+- [ ] Limit Order tab follows Form → Review → Progress wizard steps.
+- [ ] Review step shows token amounts, limit price, value difference, DEX, and warning checkbox when below −5%.
+- [ ] Placed order appears immediately in Trading tab Active Orders with status Pending.
 - [ ] Active orders update via polling without requiring a page reload.
 - [ ] Cancel returns reserved funds to free balance.
-- [ ] Flow B pre-fills DEX and Spend token from the position context.
+- [ ] Flow B pre-fills DEX and "You pay" token from the position context.
 
 ---
 
