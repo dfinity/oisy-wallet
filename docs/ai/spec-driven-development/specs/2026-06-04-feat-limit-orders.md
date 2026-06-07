@@ -124,7 +124,6 @@ The two things the user actively sets — **base amount** and **price** — are 
    _Why the price resets:_ a price sensible for one direction is usually wrong for the other. A Sell target above current value would, kept as-is on a Buy, mean "buy above current value" — an immediate-fill / overpay. The price re-anchors to current value rather than carrying a nonsensical target across.
 
 2. **Merged trade-pair box** — one container holding both tokens, linked by a direction word so it reads as a sentence:
-
    - **Base row:** the **amount** (white editable field, the user's primary input) on the left with its fiat equivalent and free balance on the sub-line (see _Free balance + Max_); the base **token pill** on the right. On a **Buy**, the maker/taker fee is taken from the base received, so a "you keep slightly less, before fees" note shows here.
    - **Connector:** a thin divider carrying the direction word — **"for"** on a Sell, **"with"** on a Buy — so the box reads "Sell ICP **for** ckUSDC" / "Buy ICP **with** ckUSDC".
    - **Quote row:** the **derived amount** as **plain read-only text** (clearly not an input) — **"at least" (≥)** on a Sell, **"at most" (≤)** on a Buy — with a side-aware sub-line; the quote **token pill** on the right (opens the quote picker). Both token pills are right-aligned so choosing the two tokens is a single vertical move.
@@ -132,7 +131,6 @@ The two things the user actively sets — **base amount** and **price** — are 
    The amount is **not an estimate** — `quote = base × price`, exact at the limit price. It is a **bound** because a limit fills at the limit price _or better_ (price improvement): a Sell receives _at least_ this much quote (could be more); a Buy pays _at most_ this much (could be less). Sub-line is side-aware because the fee lands on the asset the side receives: **Sell** → "gross, before fees" (fee reduces the quote you get); **Buy** → "max at your limit price" (a clean cap; the before-fees note lives on the base row).
 
    **Free balance + Max (spend-side).** Each row shows the user's **free DEX balance** of its token on the sub-line ("Free 15.4994 ICP"), so both balances are always visible for reference. Only the **spend side** carries a clickable **Max** — because the amount field is always the base, but the token you spend flips with side:
-
    - **Sell** (spend = base): Max sits on the **base** row. It fills the amount with the free base, floored to `lot_size` (e.g. free 15.4994 ICP, lot 0.25 → 15.25). The displayed Free is the true balance; Max fills the largest valid multiple, so it never trips validation.
    - **Buy** (spend = quote): Max sits on the **quote** row. It converts the free quote into a base amount via the price — `base = floor((freeQuote ÷ price) / lot_size) · lot_size` — so you spend as much quote as the lot grid allows (a small remainder may stay unspent; the "You pay ≤" readout shows the real spend). Max is **disabled until a price is set** (the conversion needs one); shown greyed with a "Set a price first" hint.
 
@@ -151,10 +149,10 @@ There is **no lock toggle** and **no reciprocal toggle**: both existed to suppor
 
 ### Two reference prices (and which drives what)
 
-| Reference            | Source                                     | Drives                                                                                              |
-| -------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| **Current value**    | oisy price feed                            | The presets (`0% · ±1% · ±5%`) and the **value-difference %**. The user's "what are my tokens worth" anchor. Labelled "current value", never "spot". |
-| **Best bid / ask**   | Aggregate order book (best across venues)  | Whether the order **fills immediately** and its realistic execution price. Surfaced at the routing step. |
+| Reference          | Source                                    | Drives                                                                                                                                               |
+| ------------------ | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Current value**  | oisy price feed                           | The presets (`0% · ±1% · ±5%`) and the **value-difference %**. The user's "what are my tokens worth" anchor. Labelled "current value", never "spot". |
+| **Best bid / ask** | Aggregate order book (best across venues) | Whether the order **fills immediately** and its realistic execution price. Surfaced at the routing step.                                             |
 
 The feed is the **value** anchor; the aggregate book is the **execution** reality. A limit above current value but still above the best bid (Sell) simply rests until the book rises to it. The immediate-fill warning fires only when the price crosses the book.
 
@@ -168,11 +166,11 @@ The user defines the order entirely from market data — value (feed) and aggreg
 
 With side declared and base fixed, the label and warning depend on whether the price **crosses the order book**; the give-up is stated versus **current value**.
 
-| Side | Limit vs book     | Label                        | Warning                                                                                                   |
-| ---- | ----------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                      |
+| Side | Limit vs book     | Label                        | Warning                                                                                                        |
+| ---- | ----------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                           |
 | Sell | at/below best bid | "Sell now, while 1 [base] ≥" | "This price crosses the order book — your order will fill almost immediately, about ≈ $X below current value." |
-| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                      |
+| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                           |
 | Buy  | at/above best ask | "Buy now, while 1 [base] ≤"  | "This price crosses the order book — your order will fill almost immediately, about ≈ $X above current value." |
 
 While the order **rests**, the value-difference is neutral regardless of sign — informational, not realized. It turns **amber** (give-up 0 to 5%) or **red** (beyond 5%) with the warning box only when the price crosses the book. On the review step a confirmation checkbox is required before "Place order" when the give-up exceeds 5%.
