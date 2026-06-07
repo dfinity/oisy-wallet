@@ -97,7 +97,7 @@ DEX balances (`free + reserved`) are included in the hero net-worth total. DEX-d
 > **⚠ Two candidate form designs — a decision is required before implementation (see Open questions).** The text below describes the **intent-based** design. Two interactive wireframes are provided:
 >
 > - **Intent-based** (what this section specifies): [`trade-modal-intent.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-intent.html)
-> - **Original fixed Buy/Sell + price** layout: [`trade-modal-sell-buy.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-sell-buy.html)
+> - **Original fixed sell-buy + price** layout: [`trade-modal-sell-buy.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-sell-buy.html)
 
 A single modal form, reached from the **Swap** hero button (Limit order tab) or pre-filled from the Trading tab "+ Limit order" link. One form, fields revealed progressively as prerequisites are met.
 
@@ -300,9 +300,9 @@ Shows all Pending/Open orders for the connected user. Each row: pair, direction 
 
 ## Open questions
 
-0. **⚠ Form design — intent-based vs. fixed Buy/Sell (DECIDE BEFORE IMPLEMENTATION).** This spec is written around the **intent-based** form ([`trade-modal-intent.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-intent.html)): a Buy/Sell control drives a single merged trade box, get/pay labels, value-anchored pricing, base→quote chaining, etc. The alternative is the **original fixed layout** ([`trade-modal-sell-buy.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-sell-buy.html)): the swap-style two-field form ("You pay" / "You receive") with reciprocal- and lock-price toggles inside a Swap + Limit-order tabbed modal. **Pick one before building** — if the fixed layout is chosen, the entire "Order placement form" section (and its acceptance criteria) is replaced to match it.
+0. **⚠ Form design — intent-based vs. fixed sell-buy (DECIDE BEFORE IMPLEMENTATION).** This spec is written around the **intent-based** form ([`trade-modal-intent.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-intent.html)): a Buy/Sell control drives a single merged trade box, get/pay labels, value-anchored pricing, base→quote chaining, etc. The alternative is the **original fixed layout** ([`trade-modal-sell-buy.html`](./2026-06-04-feat-limit-orders/wireframes/trade-modal-sell-buy.html)): the swap-style two-field form ("You pay" / "You receive") with reciprocal- and lock-price toggles inside a Swap + Limit-order tabbed modal. **Pick one before building** — if the fixed layout is chosen, the entire "Order placement form" section (and its acceptance criteria) is replaced to match it.
    - _Intent-based_ — removes direction ambiguity and the reciprocal/lock controls, reads as a sentence ("Sell ICP for ckUSDC"), handles quote-only tokens; but diverges from the existing Swap form and is net-new UI.
-   - _Fixed Buy/Sell_ — matches the current Swap UX and is already prototyped; but keeps the ambiguity and the reciprocal/lock complexity this redesign set out to remove.
+   - _Fixed sell-buy_ — matches the current Swap UX and is already prototyped; but keeps the ambiguity and the reciprocal/lock complexity this redesign set out to remove.
 1. **Mainnet canister ID** — fill in once deployed.
 2. **Token logos** — confirm the oisy registry covers all DEX-listed tokens, or add a fallback.
 3. **USD price feeds** — confirm all DEX-listed tokens have USD price data (needed for the hero total and current-value anchor).
