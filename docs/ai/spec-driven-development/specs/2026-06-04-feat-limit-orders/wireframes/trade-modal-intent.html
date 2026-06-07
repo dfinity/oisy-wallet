@@ -1,0 +1,927 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Trade Modal — Limit order (merged trade-pair box)</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-info: #185fa5;
+				--color-border-success: #3b6d11;
+				--color-border-warning: #854f0b;
+				--color-border-danger: #a32d2d;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* { box-sizing: border-box; margin: 0; padding: 0; }
+			body { font-family: var(--font-sans); background: var(--color-background-tertiary); padding: 1.5rem; }
+			.scene { background: var(--color-background-tertiary); border-radius: var(--border-radius-lg); padding: 1.5rem; max-width: 480px; margin: 0 auto; }
+			.note { max-width: 380px; margin: 0 auto 1rem; font-size: 11px; color: var(--color-text-tertiary); line-height: 1.5; text-align: center; }
+			.steps { display: flex; gap: 6px; margin-bottom: 1.25rem; align-items: center; }
+			.step-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(0, 0, 0, 0.2); }
+			.step-dot.active { background: var(--color-text-primary); }
+			.step-dot.done { background: var(--color-text-secondary); }
+			.step-label { font-size: 11px; color: var(--color-text-tertiary); margin-left: 4px; }
+			.modal { position: relative; background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); max-width: 380px; margin: 0 auto; overflow: hidden; }
+			.modal-tabs { display: flex; border-bottom: 0.5px solid var(--color-border-tertiary); }
+			.modal-tab { flex: 1; padding: 12px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+			.modal-tab.active { border-bottom-color: var(--color-text-primary); }
+			.tab-name { font-size: 14px; font-weight: 500; color: var(--color-text-secondary); }
+			.modal-tab.active .tab-name { color: var(--color-text-primary); }
+			.tab-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1px; }
+			.body { padding: 1.25rem; }
+
+			/* Buy / Sell segmented control */
+			.side-seg { display: flex; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 3px; margin-bottom: 12px; }
+			.side-opt { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--color-text-tertiary); user-select: none; }
+			.side-opt i { font-size: 15px; }
+			.side-opt.active.sell { background: var(--color-background-danger); color: var(--color-text-danger); }
+			.side-opt.active.buy { background: var(--color-background-success); color: var(--color-text-success); }
+
+			.taf { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+			.taf.derived { background: var(--color-background-tertiary); }
+			.taf-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+			.taf-label { font-size: 12px; font-weight: 600; color: var(--color-text-secondary); display: flex; align-items: center; gap: 5px; }
+			.derived-tag { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 1px 6px; }
+			.bal-line { font-size: 11px; color: var(--color-text-tertiary); }
+			.taf-main { display: flex; align-items: center; gap: 8px; }
+			.amt-side { flex: 1; min-width: 0; }
+			.amt-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 6px; outline: none; width: 100%; padding: 4px 8px; font-family: var(--font-sans); }
+			.amt-input:focus { border-color: var(--color-text-primary); }
+			.amt-input.ro { color: var(--color-text-secondary); }
+			.amt-fiat { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+			.round-dec { font-size: 11px; color: var(--color-text-warning); margin-top: 4px; display: none; }
+			.round-dec.err { color: var(--color-text-danger); }
+			.amt-input.invalid, .price-input.invalid { border-color: var(--color-border-danger); }
+			.tok-pill { display: flex; align-items: center; gap: 5px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 20px; padding: 4px 8px 4px 6px; cursor: pointer; flex-shrink: 0; }
+			.tok-pill.empty { border-style: dashed; color: var(--color-text-info); }
+			.tok-pill.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+			.tok-pill.disabled .tok-sym { color: var(--color-text-tertiary); }
+			.tok-dot { width: 20px; height: 20px; border-radius: 50%; background: var(--color-background-info); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 500; color: var(--color-text-info); }
+			.tok-dot-u { background: var(--color-background-success); color: var(--color-text-success); }
+			.tok-sym { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+			.tok-pill.empty .tok-sym { color: var(--color-text-info); }
+
+			.price-section { border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 8px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); }
+			.price-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+			.price-lbl { font-size: 12px; color: var(--color-text-secondary); }
+			.price-lbl strong { color: var(--color-text-primary); font-weight: 600; }
+			.price-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+			.preset-link { font-size: 11px; color: var(--color-text-info); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; user-select: none; }
+			.preset-link.ap { font-weight: 600; text-decoration: none; color: var(--color-text-primary); }
+			.preset-link.fill { color: var(--color-text-warning); }
+			.preset-sep { font-size: 11px; color: var(--color-text-tertiary); }
+			.price-value-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+			.price-input { font-size: 20px; font-weight: 500; color: var(--color-text-primary); background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 6px; outline: none; font-family: var(--font-sans); width: 130px; padding: 4px 8px; }
+			.price-input:focus { border-color: var(--color-text-primary); }
+			.price-unit { font-size: 12px; color: var(--color-text-secondary); margin-left: 4px; }
+			.diff { font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
+			.diff-pos { background: var(--color-background-success); color: var(--color-text-success); }
+			.diff-neg { background: var(--color-background-warning); color: var(--color-text-warning); }
+			.diff-danger { background: var(--color-background-danger); color: var(--color-text-danger); }
+			.diff-neutral { background: var(--color-background-tertiary); color: var(--color-text-secondary); }
+			.price-ctx { font-size: 11px; color: var(--color-text-tertiary); }
+			.warn-box { border-radius: var(--border-radius-md); padding: 8px 10px; margin-top: 6px; font-size: 11px; line-height: 1.5; display: none; align-items: flex-start; gap: 6px; }
+			.warn-box.amber { background: var(--color-background-warning); color: var(--color-text-warning); }
+			.warn-box.red { background: var(--color-background-danger); color: var(--color-text-danger); }
+
+			.disabled-block { opacity: 0.4; pointer-events: none; }
+
+			.prov { margin-top: 8px; border: 0.5px solid var(--color-border-info); border-radius: var(--border-radius-md); background: var(--color-background-info); overflow: hidden; }
+			.prov-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
+			.prov-dot { width: 18px; height: 18px; border-radius: 4px; background: var(--color-background-success); flex-shrink: 0; }
+			/* quiet routing element */
+			.route { margin-top: 8px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); overflow: hidden; }
+			.route-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
+			.route-mark { width: 16px; height: 16px; border-radius: 4px; background: var(--color-background-success); flex-shrink: 0; }
+			.route-name { font-size: 12px; color: var(--color-text-secondary); flex: 1; }
+			.route-name strong { color: var(--color-text-primary); font-weight: 600; }
+			.route-tag { font-size: 10px; color: var(--color-text-tertiary); background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: 10px; padding: 1px 7px; }
+			.route-line { display: flex; justify-content: space-between; padding: 6px 10px; font-size: 12px; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); }
+			.route-line:last-child { border-bottom: none; }
+			/* merged trade-pair box */
+			.trade { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); padding: 4px 12px; }
+			.trade-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: default; }
+			.connector { display: flex; align-items: center; gap: 8px; height: 0; }
+			.connector::before, .connector::after { content: ''; flex: 1; border-top: 0.5px solid var(--color-border-tertiary); }
+			.conn-word { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 0 8px; }
+			/* derived (read-only) value, deliberately styled as plain text, not an input */
+			.derived-val { font-size: 16px; font-weight: 500; color: var(--color-text-secondary); }
+			/* sub-line under each field: fiat/note on the left, balance (+ Max) on the right */
+			.sub-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 2px; }
+			.bal { font-size: 11px; color: var(--color-text-tertiary); text-align: right; white-space: nowrap; }
+			.maxlink { color: var(--color-text-info); font-weight: 500; cursor: pointer; }
+			.maxlink.disabled { color: var(--color-text-tertiary); cursor: default; opacity: 0.6; }
+			/* compact quote selector */
+			.qsel { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding: 8px 12px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; }
+			.qsel-left { display: flex; flex-direction: column; gap: 2px; }
+			.qsel-lbl { font-size: 12px; color: var(--color-text-secondary); }
+			.qsel-ctx { font-size: 11px; color: var(--color-text-tertiary); }
+			.venues { font-size: 10px; font-weight: 600; color: var(--color-text-secondary); background: var(--color-background-tertiary); padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+			/* aggregate liquidity chip (market-wide, not a single book) */
+			.liq { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+			.liq.deep { background: var(--color-background-success); color: var(--color-text-success); }
+			.liq.moderate { background: var(--color-background-tertiary); color: var(--color-text-secondary); }
+			.liq.thin { background: var(--color-background-warning); color: var(--color-text-warning); }
+			.apply-box { border: 0.5px solid var(--color-border-warning); background: var(--color-background-warning); color: var(--color-text-warning); border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 10px; font-size: 12px; line-height: 1.5; display: none; }
+			.apply-box button { margin-top: 8px; background: var(--color-text-warning); color: #fff; border: none; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+
+			.btn-group { display: flex; gap: 8px; margin-top: 12px; }
+			.btn { flex: 1; padding: 10px; border-radius: var(--border-radius-md); font-size: 14px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); }
+			.btn-primary { background: var(--color-text-primary); color: var(--color-background-primary); border-color: transparent; }
+			.btn-primary:disabled { opacity: 0.35; cursor: default; }
+
+			/* token picker overlay */
+			.picker { position: absolute; inset: 0; background: var(--color-background-primary); display: none; flex-direction: column; z-index: 5; }
+			.picker.open { display: flex; }
+			.picker-head { padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; }
+			.picker-title { font-size: 14px; font-weight: 600; color: var(--color-text-primary); }
+			.picker-close { cursor: pointer; color: var(--color-text-tertiary); font-size: 16px; }
+			/* quote-only escape hatch in the base picker */
+			.picker-hint { padding: 10px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+			.picker-hint-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 12px; color: var(--color-text-info); }
+			.picker-hint-head i { font-size: 13px; transition: transform 0.2s; }
+			.picker-hint-body { font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; margin-top: 8px; }
+			.picker-hint-body strong { color: var(--color-text-primary); font-weight: 600; }
+			.learn-more { color: var(--color-text-info); text-decoration: underline; cursor: pointer; margin-left: 4px; }
+			.hint-btn { display: block; margin-top: 10px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: 6px; padding: 8px 10px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+			.reversal-note { display: none; font-size: 11px; line-height: 1.45; color: var(--color-text-info); background: var(--color-background-info); border: 0.5px solid var(--color-border-info); border-radius: var(--border-radius-md); padding: 7px 10px; margin-bottom: 10px; }
+			.picker-sub { font-size: 11px; color: var(--color-text-tertiary); padding: 8px 16px 4px; }
+			.picker-list { overflow-y: auto; }
+			.pick-row { display: flex; align-items: center; gap: 10px; padding: 11px 16px; cursor: pointer; border-bottom: 0.5px solid var(--color-border-tertiary); }
+			.pick-row:hover { background: var(--color-background-secondary); }
+			.pick-meta { flex: 1; min-width: 0; }
+			.pick-sym { font-size: 13px; font-weight: 600; color: var(--color-text-primary); }
+			.pick-px { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+			.depth { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; }
+			.depth.deep { background: var(--color-background-success); color: var(--color-text-success); }
+			.depth.thin { background: var(--color-background-warning); color: var(--color-text-warning); }
+			.depth.none { background: var(--color-background-tertiary); color: var(--color-text-tertiary); }
+			.picker-toggle { padding: 10px 16px; font-size: 12px; color: var(--color-text-info); border-top: 0.5px solid var(--color-border-tertiary); cursor: pointer; }
+
+			/* review / progress */
+			.hero-rows { display: flex; flex-direction: column; gap: 4px; margin-bottom: 1rem; }
+			.hero-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); }
+			.hero-token { display: flex; align-items: center; gap: 8px; }
+			.hero-sym { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+			.hero-amount { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+			.hero-fiat-sm { font-size: 11px; color: var(--color-text-tertiary); text-align: right; }
+			.arrow-row { display: flex; justify-content: center; font-size: 14px; color: var(--color-text-tertiary); }
+			.mv { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+			.mv.nb { border-bottom: none; }
+			.mv-lbl { color: var(--color-text-secondary); }
+			.mv-val { font-weight: 500; color: var(--color-text-primary); text-align: right; }
+			.mv-sub { font-size: 11px; color: var(--color-text-tertiary); text-align: right; }
+			.confirm-box { border-radius: var(--border-radius-md); padding: 10px 12px; margin-top: 10px; font-size: 12px; line-height: 1.5; display: none; }
+			.confirm-box.amber { background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); color: var(--color-text-warning); }
+			.confirm-box.red { background: var(--color-background-danger); border: 0.5px solid var(--color-border-danger); color: var(--color-text-danger); }
+			.confirm-check { display: none; align-items: flex-start; gap: 8px; cursor: pointer; padding-top: 8px; border-top: 0.5px solid rgba(0, 0, 0, 0.1); margin-top: 8px; }
+			.checkbox { width: 18px; height: 18px; border-radius: 4px; border: 0.5px solid currentColor; background: var(--color-background-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 12px; }
+			.modal-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1.25rem; }
+			.prog-steps { display: flex; flex-direction: column; gap: 14px; padding: 1rem 0; }
+			.prog-step { display: flex; align-items: center; gap: 12px; }
+			.prog-dot { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+			.prog-dot.active { background: var(--color-background-warning); border-color: var(--color-border-warning); color: var(--color-text-warning); }
+			.prog-dot.done { background: var(--color-background-success); border-color: var(--color-border-success); color: var(--color-text-success); }
+			.prog-dot.pending { background: var(--color-background-secondary); color: var(--color-text-tertiary); }
+			.prog-lbl { font-size: 13px; color: var(--color-text-primary); }
+			.prog-sub { font-size: 11px; color: var(--color-text-tertiary); }
+			@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+		</style>
+	</head>
+	<body>
+		<div class="scene">
+			<div class="note">
+				Variant — <strong>merged trade-pair box</strong>, starting <strong>empty</strong>. Pick a base token, then a quote token
+				(filtered to what pairs with the base — try ICP vs ckBTC), then enter amount and price. Base and quote live in one
+				box linked by a direction word — <strong>"for"</strong> on a sell, <strong>"with"</strong> on a buy. Review stays
+				disabled until both tokens and both values are set.
+			</div>
+			<div class="steps">
+				<div class="step-dot active" id="d1"></div>
+				<div class="step-dot" id="d2"></div>
+				<div class="step-dot" id="d3"></div>
+				<span class="step-label" id="step-lbl">Form</span>
+			</div>
+
+			<div id="s-form">
+				<div class="modal">
+					<div class="modal-tabs">
+						<div class="modal-tab" id="t-swap">
+							<div class="tab-name">Swap</div>
+							<div class="tab-sub">Executes now at market price</div>
+						</div>
+						<div class="modal-tab active" id="t-lo">
+							<div class="tab-name">Limit order</div>
+							<div class="tab-sub">Executes at your target price</div>
+						</div>
+					</div>
+					<div class="body">
+						<!-- Buy / Sell segmented control -->
+						<div class="side-seg">
+							<div class="side-opt sell active" id="opt-sell" onclick="setSide('sell')">
+								<i class="ti ti-arrow-up-right"></i> Sell
+							</div>
+							<div class="side-opt buy" id="opt-buy" onclick="setSide('buy')">
+								<i class="ti ti-arrow-down-left"></i> Buy
+							</div>
+						</div>
+
+						<!-- shown when a quote-only token was traded via the quote-first path (side reversed) -->
+						<div class="reversal-note" id="reversal-note"></div>
+
+						<!-- Merged trade-pair box: base + quote in one container, linked by a direction word -->
+						<div class="trade">
+							<!-- base row -->
+							<div class="trade-row">
+								<div class="amt-side">
+									<span class="taf-label" id="base-lbl">You sell</span>
+									<input class="amt-input" id="ib" type="text" value="" placeholder="Amount" oninput="onBase()" />
+									<div class="sub-row"><span class="amt-fiat" id="fb"></span><span class="bal" id="base-bal"></span></div>
+									<div class="round-dec" id="base-dec"></div>
+								</div>
+								<div class="tok-pill empty" id="base-pill" onclick="openPickerFromForm('base')">
+									<div class="tok-dot" id="base-dot" style="display: none"></div>
+									<span class="tok-sym" id="base-sym">Select</span>
+									<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+								</div>
+							</div>
+							<!-- direction connector: "for" (sell) / "with" (buy) -->
+							<div class="connector"><span class="conn-word" id="conn">for</span></div>
+							<!-- quote row: token + the derived amount shown as plain text (clearly not an input) -->
+							<div class="trade-row">
+								<div class="amt-side">
+									<span class="taf-label" id="quote-row-lbl">You get</span>
+									<div class="derived-val" id="q-amt">—</div>
+									<div class="sub-row"><span class="amt-fiat" id="q-sub"></span><span class="bal" id="quote-bal"></span></div>
+								</div>
+								<div class="tok-pill empty disabled" id="quote-pill" onclick="openPickerFromForm('quote')">
+									<div class="tok-dot tok-dot-u" id="quote-dot" style="display: none"></div>
+									<span class="tok-sym" id="quote-sym">Select</span>
+									<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+								</div>
+							</div>
+						</div>
+
+						<!-- Price section -->
+						<div class="price-section" id="psec">
+							<div class="price-header">
+								<span class="price-lbl" id="plbl">When 1 <strong>ICP</strong> reaches</span>
+								<div class="price-controls">
+									<span class="preset-link" id="ps" onclick="setP('market')">0%</span>
+									<span class="preset-sep">·</span>
+									<span class="preset-link" id="p1" onclick="setP(1)">+1%</span>
+									<span class="preset-sep">·</span>
+									<span class="preset-link" id="p5" onclick="setP(5)">+5%</span>
+								</div>
+							</div>
+							<div class="price-value-row">
+								<div style="display: flex; align-items: baseline; gap: 4px">
+									<input class="price-input" id="ipr" type="text" value="" placeholder="Price" oninput="onPrice()" />
+									<span class="price-unit" id="punit">ckUSDC / ICP</span>
+								</div>
+								<span class="diff diff-neutral" id="dbadge">+1.00%</span>
+							</div>
+							<div class="round-dec" id="price-dec"></div>
+							<div class="price-ctx" id="pctx">current value 2.69 ckUSDC / ICP (oisy feed)</div>
+							<div class="warn-box amber" id="wbox">
+								<i class="ti ti-alert-triangle" style="font-size: 13px; flex-shrink: 0; margin-top: 1px"></i>
+								<span id="wtext"></span>
+							</div>
+						</div>
+
+						<!-- Routing — quiet element; venue selection becomes a real choice once multiple DEXes exist -->
+						<div class="route" id="route">
+							<div class="route-head" onclick="toggleProvFees()">
+								<div class="route-mark"></div>
+								<span class="route-name">Routed via <strong>OISY DEX</strong></span>
+								<span class="route-tag">best execution</span>
+								<i class="ti ti-chevron-down" id="prov-icon" style="font-size: 12px; color: var(--color-text-tertiary); transition: transform 0.2s"></i>
+							</div>
+							<div id="prov-fees" style="display: none; border-top: 0.5px solid var(--color-border-tertiary)">
+								<div class="route-line"><span id="pdet-lbl">OISY DEX best bid</span><span id="pdet">2.68 ckUSDC / ICP</span></div>
+								<div class="route-line"><span>Maker fee</span><span style="color: var(--color-text-success)">No fee</span></div>
+								<div class="route-line"><span>Taker fee</span><span>0.05% (5 bps)</span></div>
+							</div>
+						</div>
+
+						<div class="btn-group">
+							<button class="btn">Cancel</button>
+							<button class="btn btn-primary" id="reviewbtn" onclick="goReview()">Review</button>
+						</div>
+					</div>
+
+					<!-- Quote token picker overlay -->
+					<div class="picker" id="picker">
+						<div class="picker-head">
+							<span class="picker-title" id="picker-title">Select a token to buy with</span>
+							<span class="picker-close" onclick="cancelPicker()"><i class="ti ti-x"></i></span>
+						</div>
+						<div class="picker-sub" id="picker-subtitle">Quote tokens paired with ICP — price, venue count, and total liquidity across all venues.</div>
+						<!-- quote-only escape hatch (shown in the base picker) -->
+						<div class="picker-hint" id="picker-hint">
+							<div class="picker-hint-head" onclick="toggleHint()">
+								<span id="picker-hint-q">Don't see the token you want to sell?</span>
+								<i class="ti ti-chevron-down" id="hint-icon"></i>
+							</div>
+							<div class="picker-hint-body" id="picker-hint-body" style="display: none">
+								Some tokens — like stablecoins — can only be traded as the <strong>counter-currency</strong>, so they don't show up in this list. You can still trade it: pick it as the counter-currency, then choose what to trade it against.
+								<span class="learn-more">Learn more ↗</span>
+								<button class="hint-btn" onclick="enterQuoteFirst()">Pick the counter-currency first</button>
+							</div>
+						</div>
+						<div class="picker-list" id="picker-list"></div>
+						<div class="picker-toggle" id="picker-toggle" style="display: none">Show all tokens</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Review -->
+			<div id="s-review" style="display: none">
+				<div class="modal">
+					<div class="body">
+						<div class="modal-title">Review limit order</div>
+						<div class="hero-rows">
+							<div class="hero-row">
+								<div class="hero-token"><div class="tok-dot" id="r-bdot">ICP</div><span class="hero-sym" id="r-bsym">ICP</span></div>
+								<div style="text-align: right">
+									<div style="font-size: 11px; color: var(--color-text-tertiary)" id="rl1">You sell</div>
+									<div class="hero-amount" id="rba">100 ICP</div>
+									<div class="hero-fiat-sm" id="rbf">$269.00</div>
+								</div>
+							</div>
+							<div class="arrow-row"><i class="ti ti-arrow-down"></i></div>
+							<div class="hero-row">
+								<div class="hero-token"><div class="tok-dot tok-dot-u" id="r-qdot">USD</div><span class="hero-sym" id="rqsym">ckUSDC</span></div>
+								<div style="text-align: right">
+									<div style="font-size: 11px; color: var(--color-text-tertiary)" id="rl2">You buy</div>
+									<div class="hero-amount" id="rqa">275.00 ckUSDC</div>
+									<div class="hero-fiat-sm" id="rqf">$275.00</div>
+								</div>
+							</div>
+						</div>
+						<div class="mv">
+							<span class="mv-lbl">Limit price</span>
+							<div><div class="mv-val" id="rpr">2.75 ckUSDC / ICP</div><div class="mv-sub" id="rmkt">current value 2.69 (oisy feed)</div></div>
+						</div>
+						<div class="mv"><span class="mv-lbl">Value difference</span><span class="diff diff-neutral" id="rdf">+1.00%</span></div>
+						<div class="mv"><span class="mv-lbl">DEX</span><span class="mv-val">OISY DEX</span></div>
+						<div class="mv nb"><span class="mv-lbl">Fee (maker / taker)</span><span class="mv-val">0% / 0.05%</span></div>
+						<div class="confirm-box amber" id="rbox">
+							<div id="rboxtext"></div>
+							<div id="rchkrow" class="confirm-check" onclick="toggleChk()">
+								<div class="checkbox" id="rchk"></div>
+								<span style="font-size: 11px; line-height: 1.4" id="rchklbl">I understand this order will fill immediately at a price worse than market.</span>
+							</div>
+						</div>
+						<div class="btn-group">
+							<button class="btn" onclick="goStep('form')"><i class="ti ti-arrow-left"></i> Back</button>
+							<button class="btn btn-primary" id="rconf" onclick="goStep('progress')">Place order</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Progress -->
+			<div id="s-progress" style="display: none">
+				<div class="modal">
+					<div class="body">
+						<div class="modal-title" id="ptitle">Placing order</div>
+						<div class="prog-steps">
+							<div class="prog-step">
+								<div class="prog-dot active" id="pp1"><i class="ti ti-loader-2" style="animation: spin 1s linear infinite"></i></div>
+								<div><div class="prog-lbl">Submitting order</div><div class="prog-sub">Sending limit order to OISY DEX</div></div>
+							</div>
+							<div class="prog-step">
+								<div class="prog-dot pending" id="pp2"><i class="ti ti-check"></i></div>
+								<div><div class="prog-lbl" id="pp2l" style="color: var(--color-text-tertiary)">Done</div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			// --- model: tokens + order books (base/quote pairs) -------------
+			const TOKENS = {
+				ICP:    { dot: 'ICP', cls: '' },
+				ckBTC:  { dot: 'BTC', cls: '' },
+				ckUSDC: { dot: 'USD', cls: 'tok-dot-u' },
+				ckUSDT: { dot: 'USD', cls: 'tok-dot-u' },
+			};
+			const USD = { ICP: 2.69, ckBTC: 60000, ckUSDC: 1, ckUSDT: 1 }; // for fiat
+			const FREE = { ICP: 15.4994, ckBTC: 0.05, ckUSDC: 25.2719, ckUSDT: 40 }; // free DEX balances
+			const DEC = { ICP: 4, ckBTC: 8, ckUSDC: 2, ckUSDT: 2 };        // amount display decimals
+			const LOT = { ICP: 0.25, ckBTC: 0.0001 }; // base-amount step per base token
+			const TICK = 0.000001;                    // default price step (wireframe)
+			const PAIRS = [
+				{ base: 'ICP',   quote: 'ckUSDC', market: 2.69,      bid: 2.68,      ask: 2.70,      tick: 0.000001,   venues: 3, liq: 'deep' },
+				{ base: 'ICP',   quote: 'ckUSDT', market: 2.68,      bid: 2.66,      ask: 2.71,      tick: 0.000001,   venues: 2, liq: 'moderate' },
+				{ base: 'ICP',   quote: 'ckBTC',  market: 0.0000448, bid: 0.0000447, ask: 0.0000449, tick: 0.00000001, venues: 1, liq: 'thin' },
+				{ base: 'ckBTC', quote: 'ckUSDC', market: 60000,     bid: 59950,     ask: 60050,     tick: 0.000001,   venues: 2, liq: 'moderate' },
+			];
+
+			let side = 'sell';     // 'sell' | 'buy'
+			let base = null;       // nothing selected at start
+			let quote = null;
+			let preset = null;
+			let chk = false;
+			let pickMode = 'quote';
+			let chaining = false;  // true while in the base→quote "both tokens" flow
+			let quoteFirst = false; // true while in the quote-first (quote-only token) flow
+			let snapshot = null;    // committed state captured when a picker gesture opens (for ✕ = no change)
+
+			const g = (id) => document.getElementById(id);
+			const num = (v) => parseFloat(String(v).replace(/[^0-9.]/g, '')) || 0;
+			const fmt = (n, d) => (isNaN(n) ? '0' : parseFloat(n.toFixed(d)).toString());
+			// decimal places of a step — robust for non-powers-of-ten (0.25 → 2) and exponential ("1e-7" → 7)
+			function decimalsOf(step) {
+				const s = step.toString();
+				if (/e/i.test(s)) { const [m, e] = s.toLowerCase().split('e'); const md = m.includes('.') ? m.split('.')[1].length : 0; return Math.max(0, md - parseInt(e, 10)); }
+				return s.includes('.') ? s.split('.')[1].length : 0;
+			}
+			const isMultipleOf = (v, step) => { const n = v / step; return Math.abs(n - Math.round(n)) < 1e-6; };
+			const nearestValid = (v, step) => parseFloat((Math.round(v / step) * step).toFixed(decimalsOf(step)));
+			function limitDecimals(str, dmax) {
+				str = str.replace(/[^0-9.]/g, '');
+				const i = str.indexOf('.');
+				if (i < 0) return str;
+				if (dmax === 0) return str.slice(0, i);
+				return str.slice(0, i) + '.' + str.slice(i + 1).replace(/\./g, '').slice(0, dmax);
+			}
+
+			// pair / step helpers
+			const bases = () => [...new Set(PAIRS.map((p) => p.base))];
+			const quotesFor = (b) => b ? PAIRS.filter((p) => p.base === b).map((p) => p.quote) : [...new Set(PAIRS.map((p) => p.quote))];
+			const pairOf = (b, qt) => PAIRS.find((p) => p.base === b && p.quote === qt);
+			const pair = () => pairOf(base, quote);
+			const ready = () => !!pair();
+			const mkt = () => pair().market;
+			const pdec = () => DEC[quote] ?? 2;
+			const lotOf = () => LOT[base];
+			const tickOf = () => (pair() ? pair().tick : TICK); // per-pair price step
+			const tickDecimals = (t) => decimalsOf(t); // kept name; now robust
+
+			const rawVal = (id) => { const r = g(id).value.trim(); if (r === '') return NaN; const n = parseFloat(r); return isNaN(n) ? NaN : n; };
+			const inputsValid = () => {
+				if (!ready()) return false;
+				const b = rawVal('ib'), p = rawVal('ipr');
+				if (!(b > 0 && p > 0)) return false;
+				if (!(isMultipleOf(b, lotOf()) && isMultipleOf(p, tickOf()))) return false;
+				const need = side === 'sell' ? b : b * p;            // spend-side amount
+				const free = side === 'sell' ? FREE[base] : FREE[quote];
+				return need <= free + 1e-9;                          // must not exceed free balance
+			};
+			function updateReview() { g('reviewbtn').disabled = !inputsValid(); }
+
+			// free balances + Max (spend side). Both balances always shown; only the spend side is clickable.
+			function floorToStep(v, step) { const k = Math.floor(v / step + 1e-9); return parseFloat((k * step).toFixed(decimalsOf(step))); }
+			function balLine(tok, withMax, maxEnabled) {
+				let s = 'Free ' + fmt(FREE[tok], 4) + ' ' + tok;
+				if (withMax) s += ' · <span class="maxlink' + (maxEnabled ? '' : ' disabled') + '"' + (maxEnabled ? ' onclick="maxSpend()"' : '') + (maxEnabled ? '' : ' title="Set a price first"') + '>Max</span>';
+				return s;
+			}
+			function renderBalances() {
+				// base row: spend side on a Sell
+				g('base-bal').innerHTML = base ? balLine(base, side === 'sell', true) : '';
+				// quote row: spend side on a Buy (Max needs a price to convert quote → base)
+				g('quote-bal').innerHTML = quote ? balLine(quote, side === 'buy', ready() && rawVal('ipr') > 0) : '';
+			}
+			function maxSpend() {
+				if (!ready()) return;
+				const lot = lotOf();
+				if (side === 'sell') { g('ib').value = fmt(floorToStep(FREE[base], lot), decimalsOf(lot)); }
+				else { const price = rawVal('ipr'); if (!(price > 0)) return; g('ib').value = fmt(floorToStep(FREE[quote] / price, lot), decimalsOf(lot)); }
+				recompute();
+			}
+
+			// --- core recompute ---------------------------------------------
+			function recompute() {
+				g('punit').textContent = (base && quote) ? quote + ' / ' + base : '';
+				renderBalances();
+				const bRaw = rawVal('ib'), baseOk = bRaw > 0;
+				g('fb').textContent = (base && baseOk) ? '≈ $' + fmt(bRaw * USD[base], 2) + (side === 'buy' ? ' · you keep slightly less, before fees' : '') : '';
+
+				if (!ready()) { // tokens not fully chosen yet
+					const msg = !base
+						? (quote ? 'Pick the token to trade against ' + quote : 'Pick a token to begin')
+						: 'Pick a token to price ' + base + ' against';
+					blankDerived(msg);
+					g('plbl').innerHTML = base
+						? (side === 'sell' ? 'When 1 <strong>' + base + '</strong> reaches' : 'When 1 <strong>' + base + '</strong> drops to')
+						: 'Limit price';
+					updateReview();
+					return;
+				}
+
+				const m = mkt(), td = tickDecimals(tickOf());
+				const pRaw = rawVal('ipr'), priceOk = pRaw > 0;
+				if (!(baseOk && priceOk)) {
+					blankDerived('current value ' + fmt(m, td) + ' ' + quote + ' / ' + base + ' (oisy feed)');
+					g('plbl').innerHTML = (side === 'sell' ? 'When 1 <strong>' + base + '</strong> reaches' : 'When 1 <strong>' + base + '</strong> drops to');
+					updateReview();
+					return;
+				}
+
+				const bAmt = bRaw, price = pRaw, q = bAmt * price;
+				g('q-amt').textContent = (side === 'sell' ? 'at least ' : 'at most ') + fmt(q, pdec());
+				g('q-sub').textContent = (side === 'sell' ? 'gross, before fees' : 'max at your limit price');
+
+				// inline step validation (multiple-of-lot / multiple-of-tick); decimals are hard-limited on input
+				const lot = lotOf();
+				const need = side === 'sell' ? bAmt : bAmt * price;
+				const free = side === 'sell' ? FREE[base] : FREE[quote];
+				const tok = side === 'sell' ? base : quote;
+				if (need > free + 1e-9) {
+					// affordability takes precedence — "you don't have that much" matters more than rounding
+					validateField('ib', 'base-dec', false, side === 'sell'
+						? 'Exceeds your free balance — ' + fmt(free, 4) + ' ' + tok + ' available'
+						: 'Costs ' + fmt(need, pdec()) + ' ' + tok + ' — only ' + fmt(free, 4) + ' free');
+				} else if (!isMultipleOf(bAmt, lot)) {
+					validateField('ib', 'base-dec', false, 'Enter a multiple of ' + lot + ' ' + base + ' — e.g. ' + fmt(nearestValid(bAmt, lot) || lot, decimalsOf(lot)));
+				} else {
+					validateField('ib', 'base-dec', true);
+				}
+				validateField('ipr', 'price-dec', isMultipleOf(price, tickOf()), 'Enter a multiple of ' + tickOf());
+
+				const pr = pair(), bid = pr.bid, ask = pr.ask;
+				const immediate = side === 'sell' ? price <= bid : price >= ask;
+				const vd = side === 'sell' ? (price / m - 1) * 100 : (m - price) / m * 100;
+				const db = g('dbadge');
+				db.textContent = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
+				db.className = !immediate ? 'diff diff-neutral' : 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+
+				updateLabelAndWarning(price, bAmt, vd, immediate);
+				g('pctx').textContent = 'current value ' + fmt(m, td) + ' ' + quote + ' / ' + base + ' (oisy feed)';
+				updateReview();
+			}
+
+			// show/hide an inline field-validation message and red border
+			function validateField(inputId, msgId, ok, msg) {
+				const e = g(msgId), inp = g(inputId);
+				if (ok) { e.style.display = 'none'; inp.className = inp.className.replace(' invalid', ''); }
+				else { e.textContent = '→ ' + msg; e.className = 'round-dec err'; e.style.display = 'block'; if (!inp.className.includes('invalid')) inp.className += ' invalid'; }
+			}
+			function clearFieldErrors() { validateField('ib', 'base-dec', true); validateField('ipr', 'price-dec', true); }
+			function blankDerived(ctxText) {
+				clearFieldErrors();
+				g('q-amt').textContent = '—';
+				g('q-sub').textContent = '';
+				g('dbadge').textContent = '—';
+				g('dbadge').className = 'diff diff-neutral';
+				g('wbox').style.display = 'none';
+				g('pctx').style.display = 'block';
+				g('pctx').textContent = ctxText;
+				g('psec').style.borderColor = '';
+			}
+
+			// Value/presets anchor to the oisy feed (m); immediate-fill is decided by the book (bid/ask).
+			function updateLabelAndWarning(price, bAmt, vd, immediate) {
+				const m = mkt(), pr = pair(), bid = pr.bid, ask = pr.ask, td = tickDecimals(tickOf());
+				const lbl = g('plbl'), wb = g('wbox'), wt = g('wtext'), ps = g('psec');
+				let text = '';
+				if (side === 'sell') {
+					if (!immediate) { lbl.innerHTML = 'When 1 <strong>' + base + '</strong> reaches'; }
+					else { lbl.innerHTML = 'Sell now, while 1 <strong>' + base + '</strong> &ge;';
+						text = 'This price crosses the order book (best bid ' + fmt(bid, td) + ') — your order will fill almost immediately, about <strong>$' + fmt(bAmt * (m - price) * USD[quote], 2) + '</strong> below current value.'; }
+				} else {
+					if (!immediate) { lbl.innerHTML = 'When 1 <strong>' + base + '</strong> drops to'; }
+					else { lbl.innerHTML = 'Buy now, while 1 <strong>' + base + '</strong> &le;';
+						text = 'This price crosses the order book (best ask ' + fmt(ask, td) + ') — your order will fill almost immediately, about <strong>$' + fmt(bAmt * (price - m) * USD[quote], 2) + '</strong> above current value.'; }
+				}
+				if (immediate) {
+					wb.style.display = 'flex';
+					wb.className = 'warn-box ' + (vd >= -5 ? 'amber' : 'red');
+					wt.innerHTML = text;
+					g('pctx').style.display = 'none';
+					ps.style.borderColor = vd >= -5 ? 'var(--color-border-warning)' : 'var(--color-border-danger)';
+				} else {
+					wb.style.display = 'none';
+					g('pctx').style.display = 'block';
+					ps.style.borderColor = '';
+				}
+			}
+
+			// --- side switch -------------------------------------------------
+			function renderSideUI() { // UI only, no price change (used by setSide and restore)
+				g('opt-sell').className = 'side-opt sell' + (side === 'sell' ? ' active' : '');
+				g('opt-buy').className = 'side-opt buy' + (side === 'buy' ? ' active' : '');
+				g('base-lbl').textContent = side === 'sell' ? 'You sell' : 'You buy';
+				g('conn').textContent = side === 'sell' ? 'for' : 'with';
+				g('quote-row-lbl').textContent = side === 'sell' ? 'You get' : 'You pay';
+				renderPresets();
+			}
+			function setSide(s) {
+				side = s;
+				g('reversal-note').style.display = 'none'; // manual toggle clears the quote-first note
+				renderSideUI();
+				updateRouting();
+				setP('market'); // re-anchor (resets price to current value)
+			}
+			function updateRouting() {
+				if (!ready()) { g('pdet-lbl').textContent = 'OISY DEX'; g('pdet').textContent = '—'; return; }
+				const pr = pair(), td = tickDecimals(tickOf());
+				g('pdet-lbl').textContent = 'OISY DEX best ' + (side === 'sell' ? 'bid' : 'ask');
+				g('pdet').textContent = fmt(side === 'sell' ? pr.bid : pr.ask, td) + ' ' + quote + ' / ' + base;
+			}
+
+			function renderPresets() {
+				if (side === 'sell') { g('p1').textContent = '+1%'; g('p5').textContent = '+5%'; }
+				else { g('p1').textContent = '−1%'; g('p5').textContent = '−5%'; }
+			}
+
+			// --- presets -----------------------------------------------------
+			function setP(v) {
+				if (!ready()) { g('ipr').value = ''; preset = null; highlightPresets(); recompute(); return; }
+				preset = v;
+				const m = mkt(), tick = tickOf();
+				let price;
+				if (v === 'market') price = m;
+				else { const sign = side === 'sell' ? 1 : -1; price = m * (1 + sign * v / 100); }
+				price = Math.round(price / tick) * tick; // snap to nearest tradable tick
+				g('ipr').value = fmt(price, tickDecimals(tick));
+				highlightPresets();
+				recompute();
+			}
+			function highlightPresets() {
+				['ps', 'p1', 'p5'].forEach((id) => g(id).className = 'preset-link');
+				const map = { market: 'ps', 1: 'p1', 5: 'p5' };
+				if (map[preset]) g(map[preset]).className += ' ap';
+			}
+
+			// --- input handlers: hard-limit decimals to the lot/tick precision, then validate live ---
+			function onBase() { if (base) g('ib').value = limitDecimals(g('ib').value, decimalsOf(lotOf())); recompute(); }
+			function onPrice() { if (ready()) g('ipr').value = limitDecimals(g('ipr').value, decimalsOf(tickOf())); preset = null; highlightPresets(); recompute(); }
+
+			// --- token pickers (base + quote, incl. quote-first path) -------
+			// snapshot the committed state when a gesture begins; ✕ restores it (atomic, incl. chains)
+			function snap() { return { base, quote, side, ib: g('ib').value, ipr: g('ipr').value, preset }; }
+			function restore(s) {
+				base = s.base; quote = s.quote; side = s.side; preset = s.preset;
+				g('ib').value = s.ib; g('ipr').value = s.ipr;
+				setPill('base-pill', 'base-dot', 'base-sym', base);
+				renderQuotePill();
+				renderSideUI();
+				highlightPresets();
+				g('reversal-note').style.display = 'none';
+				updateRouting();
+				recompute();
+			}
+			function openPickerFromForm(which) { // entry from a pill — starts a fresh gesture
+				if (which === 'quote' && !base) return; // quote pill inactive until a base is chosen
+				snapshot = snap();
+				openPicker(which);
+			}
+			function openPicker(which) { // render a step (no snapshot — chains reuse the open gesture)
+				pickMode = which;
+				g('picker-hint').style.display = (which === 'base') ? 'block' : 'none';
+				g('picker-hint-body').style.display = 'none';
+				g('hint-icon').style.transform = '';
+				if (which === 'base') {
+					g('picker-title').textContent = 'Select token to ' + (side === 'sell' ? 'sell' : 'buy');
+					g('picker-subtitle').textContent = 'Base tokens you can trade.';
+					g('picker-hint-q').textContent = "Don't see the token you want to " + (side === 'sell' ? 'sell' : 'buy') + '?';
+					renderBasePicker();
+				} else if (which === 'quote') {
+					g('picker-title').textContent = side === 'sell' ? 'You get — pick a token' : 'You pay — pick a token';
+					g('picker-subtitle').textContent = 'Tokens paired with ' + base + ' — current price, venue count, and total liquidity across venues.';
+					renderQuotePicker();
+				} else if (which === 'qf-quote') {
+					g('picker-title').textContent = 'Pick the token you want to ' + (side === 'sell' ? 'sell' : 'buy');
+					g('picker-subtitle').textContent = "It'll be the counter-currency — you'll choose what to trade it against next.";
+					renderQfQuoteList();
+				} else if (which === 'qf-base') {
+					g('picker-title').textContent = 'Trade ' + quote + ' against…';
+					g('picker-subtitle').textContent = 'Pick what to ' + (side === 'sell' ? 'buy' : 'sell') + ' with your ' + quote + ' — current price, venue count, and liquidity.';
+					renderQfBaseList();
+				}
+				g('picker').classList.add('open');
+			}
+			function closePicker() { g('picker').classList.remove('open'); }
+			function commitPicker() { snapshot = null; quoteFirst = false; closePicker(); } // selection sticks
+			function cancelPicker() { if (snapshot) restore(snapshot); snapshot = null; quoteFirst = false; closePicker(); } // ✕ = no change
+
+			function toggleHint() {
+				const b = g('picker-hint-body'), open = b.style.display === 'none';
+				b.style.display = open ? 'block' : 'none';
+				g('hint-icon').style.transform = open ? 'rotate(180deg)' : '';
+			}
+			function enterQuoteFirst() { quoteFirst = true; openPicker('qf-quote'); } // continues the open gesture
+
+			function renderBasePicker() {
+				const list = g('picker-list');
+				list.innerHTML = '';
+				bases().forEach((sym) => {
+					const t = TOKENS[sym], n = quotesFor(sym).length;
+					const row = document.createElement('div');
+					row.className = 'pick-row';
+					row.onclick = () => selectBase(sym);
+					row.innerHTML = '<div class="tok-dot ' + t.cls + '">' + t.dot + '</div>'
+						+ '<div class="pick-meta"><div class="pick-sym">' + sym + '</div>'
+						+ '<div class="pick-px">' + n + ' market' + (n === 1 ? '' : 's') + '</div></div>';
+					list.appendChild(row);
+				});
+			}
+			function renderQuotePicker() {
+				const list = g('picker-list');
+				list.innerHTML = '';
+				quotesFor(base).forEach((sym) => {
+					const pr = pairOf(base, sym), t = TOKENS[sym], td = tickDecimals(pr.tick);
+					const row = document.createElement('div');
+					row.className = 'pick-row';
+					row.onclick = () => selectQuote(sym);
+					const liqLabel = { deep: 'Deep', moderate: 'Moderate', thin: 'Thin' }[pr.liq];
+					row.innerHTML = '<div class="tok-dot ' + t.cls + '">' + t.dot + '</div>'
+						+ '<div class="pick-meta"><div class="pick-sym">' + sym + '</div>'
+						+ '<div class="pick-px">current ' + fmt(pr.market, td) + ' · ' + pr.venues + (pr.venues === 1 ? ' venue' : ' venues') + '</div></div>'
+						+ '<span class="liq ' + pr.liq + '">' + liqLabel + '</span>';
+					list.appendChild(row);
+				});
+			}
+			// quote-first path: step 1 = pick the (counter-currency) token to trade; step 2 = pick what to trade it against
+			const basesForQuote = (q) => [...new Set(PAIRS.filter((p) => p.quote === q).map((p) => p.base))];
+			function renderQfQuoteList() {
+				const list = g('picker-list');
+				list.innerHTML = '';
+				quotesFor(null).forEach((sym) => {
+					const t = TOKENS[sym], n = basesForQuote(sym).length;
+					const row = document.createElement('div');
+					row.className = 'pick-row';
+					row.onclick = () => selectQuoteFirst(sym);
+					row.innerHTML = '<div class="tok-dot ' + t.cls + '">' + t.dot + '</div>'
+						+ '<div class="pick-meta"><div class="pick-sym">' + sym + '</div>'
+						+ '<div class="pick-px">tradable against ' + n + ' token' + (n === 1 ? '' : 's') + '</div></div>';
+					list.appendChild(row);
+				});
+			}
+			function renderQfBaseList() {
+				const list = g('picker-list');
+				list.innerHTML = '';
+				basesForQuote(quote).forEach((sym) => {
+					const pr = pairOf(sym, quote), t = TOKENS[sym], td = tickDecimals(pr.tick);
+					const row = document.createElement('div');
+					row.className = 'pick-row';
+					row.onclick = () => selectQuoteFirstBase(sym);
+					const liqLabel = { deep: 'Deep', moderate: 'Moderate', thin: 'Thin' }[pr.liq];
+					row.innerHTML = '<div class="tok-dot ' + t.cls + '">' + t.dot + '</div>'
+						+ '<div class="pick-meta"><div class="pick-sym">' + sym + '</div>'
+						+ '<div class="pick-px">current ' + fmt(pr.market, td) + ' · ' + pr.venues + (pr.venues === 1 ? ' venue' : ' venues') + '</div></div>'
+						+ '<span class="liq ' + pr.liq + '">' + liqLabel + '</span>';
+					list.appendChild(row);
+				});
+			}
+			function selectQuoteFirst(sym) { quote = sym; openPicker('qf-base'); } // tentative; continues gesture
+			function selectQuoteFirstBase(sym) {
+				base = sym;
+				side = side === 'sell' ? 'buy' : 'sell'; // the order is reversed: selling the quote = buying the base
+				setPill('base-pill', 'base-dot', 'base-sym', base);
+				renderQuotePill();
+				g('ib').value = '';
+				renderSideUI();
+				updateRouting();
+				setP('market');
+				// explain the reversal
+				const verb = side === 'sell' ? 'Sell' : 'Buy', join = side === 'sell' ? ' for ' : ' with ';
+				g('reversal-note').textContent = quote + ' trades as a counter-currency, so this is set up as ' + verb + ' ' + base + join + quote + '.';
+				g('reversal-note').style.display = 'block';
+				commitPicker();
+				const f = g('ib'); if (f.focus) f.focus();
+			}
+			// pill rendering
+			function setPill(pillId, dotId, symId, sym) {
+				if (sym) {
+					const t = TOKENS[sym];
+					g(dotId).style.display = ''; g(dotId).textContent = t.dot; g(dotId).className = 'tok-dot ' + t.cls;
+					g(symId).textContent = sym;
+					g(pillId).className = 'tok-pill';
+				} else {
+					g(dotId).style.display = 'none';
+					g(symId).textContent = 'Select';
+					g(pillId).className = 'tok-pill empty';
+				}
+			}
+			// quote pill is gated on the base: inactive until a base token is chosen
+			function renderQuotePill() {
+				if (!base) { g('quote-dot').style.display = 'none'; g('quote-sym').textContent = 'Select'; g('quote-pill').className = 'tok-pill empty disabled'; return; }
+				setPill('quote-pill', 'quote-dot', 'quote-sym', quote);
+			}
+			function selectBase(sym) {
+				g('reversal-note').style.display = 'none';
+				const wasQuoteEmpty = !quote;          // chain to quote only on a fresh pair
+				const baseChanged = base && base !== sym; // a real change, not the first pick
+				base = sym;
+				setPill('base-pill', 'base-dot', 'base-sym', sym);
+				// cascade: if the current quote no longer pairs with the new base, clear it
+				if (quote && !quotesFor(base).includes(quote)) quote = null;
+				renderQuotePill();
+				if (baseChanged) g('ib').value = ''; // reset the amount only when switching base, not on first pick
+				updateRouting();
+				setP('market'); // re-anchor (or clear price until a quote is chosen)
+				// both-tokens flow: if the quote was empty, chain into the quote picker (gesture continues)
+				if (wasQuoteEmpty && !quote) { chaining = true; openPicker('quote'); }
+				else commitPicker();
+			}
+			function selectQuote(sym) {
+				g('reversal-note').style.display = 'none';
+				quote = sym;
+				renderQuotePill();
+				updateRouting();
+				setP('market');
+				commitPicker();
+				if (chaining) { chaining = false; const f = g('ib'); if (f.focus) f.focus(); } // land in the amount field
+			}
+
+			function toggleProvFees() {
+				const f = g('prov-fees'), i = g('prov-icon');
+				const open = f.style.display === 'none';
+				f.style.display = open ? 'block' : 'none';
+				i.style.transform = open ? 'rotate(180deg)' : '';
+			}
+
+			// --- review / progress ------------------------------------------
+			function goReview() {
+				if (!inputsValid()) return; // guard: both fields required
+				const bAmt = num(g('ib').value), price = num(g('ipr').value), q = bAmt * price, m = mkt();
+				const pr = pair(), td = tickDecimals(tickOf());
+				const vd = side === 'sell' ? (price / m - 1) * 100 : (m - price) / m * 100;
+				const bt = TOKENS[base], qt = TOKENS[quote];
+				g('rl1').textContent = side === 'sell' ? 'You sell' : 'You buy';
+				g('rl2').textContent = (side === 'sell' ? 'You get (at least)' : 'You pay (at most)');
+				g('r-bdot').textContent = bt.dot; g('r-bdot').className = 'tok-dot ' + bt.cls;
+				g('r-bsym').textContent = base;
+				g('rba').textContent = fmt(bAmt, DEC[base]) + ' ' + base;
+				g('rbf').textContent = '$' + fmt(bAmt * USD[base], 2);
+				g('r-qdot').textContent = qt.dot; g('r-qdot').className = 'tok-dot ' + qt.cls;
+				g('rqsym').textContent = quote;
+				g('rqa').textContent = (side === 'sell' ? '≥ ' : '≤ ') + fmt(q, DEC[quote]) + ' ' + quote;
+				g('rqf').textContent = '$' + fmt(q * USD[quote], 2);
+				g('rpr').textContent = fmt(price, td) + ' ' + quote + ' / ' + base;
+				g('rmkt').textContent = 'current value ' + fmt(m, td) + ' (oisy feed)';
+				// immediate-fill decided by the book; value-difference is a realized give-up only when crossing
+				const immediate = side === 'sell' ? price <= pr.bid : price >= pr.ask;
+				const rd = g('rdf');
+				rd.textContent = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
+				rd.className = !immediate ? 'diff diff-neutral' : 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+				const box = g('rbox');
+				if (immediate) {
+					box.style.display = 'block';
+					box.className = 'confirm-box ' + (vd >= -5 ? 'amber' : 'red');
+					const give = (side === 'sell' ? bAmt * (m - price) : bAmt * (price - m)) * USD[quote];
+					g('rboxtext').innerHTML = (side === 'sell'
+						? 'This price crosses the order book — your order will fill almost immediately, about <strong>$' + fmt(give, 2) + '</strong> below current value.'
+						: 'This price crosses the order book — your order will fill almost immediately, about <strong>$' + fmt(give, 2) + '</strong> above current value.');
+					const severe = vd < -5;
+					g('rchkrow').style.display = severe ? 'flex' : 'none';
+					chk = false; g('rchk').textContent = ''; g('rconf').disabled = severe;
+				} else {
+					box.style.display = 'none';
+					g('rconf').disabled = false;
+				}
+				goStep('review');
+			}
+			function toggleChk() { chk = !chk; g('rchk').textContent = chk ? '✓' : ''; g('rconf').disabled = !chk; }
+
+			function goStep(s) {
+				['form', 'review', 'progress'].forEach((x) => (g('s-' + x).style.display = 'none'));
+				g('s-' + s).style.display = 'block';
+				const nums = { form: 1, review: 2, progress: 3 }, labels = { form: 'Form', review: 'Review', progress: 'Placing order' };
+				g('step-lbl').textContent = labels[s];
+				[1, 2, 3].forEach((i) => { const n = nums[s]; g('d' + i).className = 'step-dot' + (i === n ? ' active' : i < n ? ' done' : ''); });
+				if (s === 'progress') setTimeout(() => {
+					g('pp1').className = 'prog-dot done'; g('pp1').innerHTML = '<i class="ti ti-check"></i>';
+					g('pp2').className = 'prog-dot done'; g('pp2l').style.color = 'var(--color-text-success)';
+					g('ptitle').textContent = 'Order placed';
+				}, 1800);
+			}
+
+			// init — empty modal: no tokens, no values, Review off, quote pill inactive
+			renderPresets();
+			highlightPresets();
+			renderQuotePill();
+			updateRouting();
+			recompute();
+		</script>
+	</body>
+</html>
