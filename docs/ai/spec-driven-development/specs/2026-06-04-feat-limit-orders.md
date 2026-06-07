@@ -431,6 +431,7 @@ Triggered from the Cancel action on an Active order row. A confirmation step pre
 Shows all Pending/Open orders for the connected user. Each row: pair, direction (You sell → You get / You buy → You pay), price, amount, status (Pending with spinner, or Open), and a Cancel button. Status refreshes by polling while the Trading tab is visible; on transition to Filled/Canceled the order moves to History.
 
 ---
+
 ## Acceptance criteria
 
 **Common (apply to both form options)**
