@@ -29,6 +29,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import {
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getTransferInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
@@ -883,15 +884,7 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
 
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should map a valid System instruction', () => {
@@ -931,8 +924,14 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 
 			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
@@ -949,7 +948,23 @@ describe('sol-instructions.utils', () => {
 			);
 		});
 
-		it('should forward the delegate as destination for an `Approve` instruction', () => {
+		it('should flag a Token `Transfer` instruction as ambiguous until SPL review is supported', () => {
+			const instruction = getTransferInstruction({
+				source: address(mockSolAddress),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				ambiguous: true
+			});
+		});
+
+		it('should forward the delegate as destination and flag an `Approve` instruction as ambiguous', () => {
 			const instruction = getApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -960,11 +975,12 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
-				destination: mockSolAddress2
+				destination: mockSolAddress2,
+				ambiguous: true
 			});
 		});
 
-		it('should forward the delegate as destination for an `ApproveChecked` instruction', () => {
+		it('should forward the delegate as destination and flag an `ApproveChecked` instruction as ambiguous', () => {
 			const instruction = getApproveCheckedInstruction({
 				source: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address),
@@ -977,7 +993,8 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
-				destination: mockSolAddress2
+				destination: mockSolAddress2,
+				ambiguous: true
 			});
 		});
 
@@ -996,7 +1013,10 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction2).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 
 			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
 			expect(parseSolSystemInstruction).not.toHaveBeenCalled();

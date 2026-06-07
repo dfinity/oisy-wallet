@@ -89,6 +89,24 @@ describe('sol-transactions.utils', () => {
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: 5n });
 		});
 
+		it('should flag a transaction as ambiguous when an instruction is not faithfully reviewable', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 5n, source: mockSolAddress, destination: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: undefined, ambiguous: true });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 5n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				ambiguous: true
+			});
+		});
+
 		it('should treat zero amounts correctly (sum remains accurate)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: ZERO })

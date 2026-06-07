@@ -413,9 +413,12 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return { amount: undefined, ambiguous: true };
 };
 
+// The WalletConnect review currently uses native SOL metadata and a single
+// send-style summary, so SPL transfers/approvals must fail closed until they
+// can be displayed with their token mint and instruction semantics.
 const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -431,7 +434,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -447,7 +451,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -463,7 +468,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -479,13 +485,14 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return { amount: undefined, ambiguous: true };
 };
 
 const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -503,7 +510,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -519,7 +527,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -535,7 +544,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
@@ -551,20 +561,21 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			ambiguous: true
 		};
 	}
 
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return { amount: undefined, ambiguous: true };
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
 	if (!('instructionType' in parsedInstruction)) {
-		return { amount: undefined };
+		return { amount: undefined, ambiguous: true };
 	}
 
 	const { programAddress } = parsedInstruction;
@@ -581,7 +592,14 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolToken2022Instruction(parsedInstruction);
 	}
 
+	if (
+		programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS ||
+		programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS
+	) {
+		return { amount: undefined };
+	}
+
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
 
-	return { amount: undefined };
+	return { amount: undefined, ambiguous: true };
 };
