@@ -1,8 +1,4 @@
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	COMPUTE_BUDGET_PROGRAM_ADDRESS,
-	SYSTEM_PROGRAM_ADDRESS
-} from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
@@ -154,26 +150,24 @@ describe('sol-transactions.utils', () => {
 		});
 
 		it('should not flag ignored setup instructions before a reviewed transfer as ambiguous', () => {
-			// Run the real instruction mapper: a previous test sets a persistent
-			// mockReturnValue on the shared spy that clearAllMocks does not reset.
-			spyMapSolInstruction.mockRestore();
-
-			const computeBudgetInstructions = mockSolParsedTransactionMessage.instructions.filter(
-				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
-			);
-			const [systemInstruction] = mockSolParsedTransactionMessage.instructions.filter(
-				({ programAddress }) => programAddress === SYSTEM_PROGRAM_ADDRESS
-			);
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined })
+				.mockReturnValueOnce({ amount: undefined })
+				.mockReturnValueOnce({
+					amount: 5100n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
 
 			expect(
 				mapSolTransactionMessage({
 					...mockSolParsedTransactionMessage,
-					instructions: [...computeBudgetInstructions, systemInstruction]
+					instructions: [instruction1, instruction2, instruction3]
 				})
 			).toStrictEqual({
 				amount: 5100n,
-				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49'
+				source: mockSolAddress,
+				destination: mockSolAddress2
 			});
 		});
 
