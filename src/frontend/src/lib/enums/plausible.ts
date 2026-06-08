@@ -18,7 +18,8 @@ export enum PLAUSIBLE_EVENTS {
 	NETWORK_FILTER = 'network_filter',
 	NETWORK_MANAGE = 'network_manage',
 	TRANSACTION_FILTER = 'transaction_filter',
-	TOKEN_MANAGE = 'token_manage'
+	TOKEN_MANAGE = 'token_manage',
+	EXPORT_DATA = 'export_data'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
@@ -31,7 +32,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
-	NETWORKS = 'networks'
+	NETWORKS = 'networks',
+	LEARN_MORE = 'learn_more'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -69,7 +71,11 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT_PAGE = 'nft-page',
 	EARN_PAGE = 'earn-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
-	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page'
+	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
+	TOKENS_BASIC = 'tokens_basic',
+	TOKENS_EXTENDED = 'tokens_extended',
+	TRANSACTIONS_BASIC = 'transactions_basic',
+	TRANSACTIONS_EXTENDED = 'transactions_extended'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
@@ -86,7 +92,17 @@ export enum PLAUSIBLE_EVENT_SOURCES {
 export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	ACTIVITY_PAGE = 'activity_page',
 	MANAGE_TOKENS = 'manage_tokens',
-	TOKEN_DETAILS = 'token_details'
+	TOKEN_DETAILS = 'token_details',
+	SETTINGS_PAGE = 'settings_page',
+	LOCK = 'lock',
+	NFT = 'nft',
+	REFERRAL = 'referral',
+	SCANNER = 'scanner',
+	WELCOME = 'welcome',
+	EARN = 'earn',
+	SIGNER = 'signer',
+	REWARDS = 'rewards',
+	TRANSACTIONS = 'transactions'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
@@ -99,7 +115,9 @@ export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
 	NETWORK = 'network',
 	TRANSACTION_TYPE = 'transaction_type',
 	TOKEN = 'token',
-	CONTACT = 'contact'
+	CONTACT = 'contact',
+	TYPE = 'type',
+	LINK = 'link'
 }
 
 export enum PLAUSIBLE_EVENT_FILTER_MODIFIERS {

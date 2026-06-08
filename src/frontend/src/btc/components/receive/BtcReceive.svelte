@@ -10,7 +10,7 @@
 	import { modalBtcReceive } from '$lib/derived/modal.derived';
 	import { networkAddressStore } from '$lib/derived/network-address.derived';
 	import { networkId } from '$lib/derived/network.derived';
-	import { waitWalletReady } from '$lib/services/actions.services';
+	import { openOnWalletReady } from '$lib/services/actions.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
@@ -27,17 +27,8 @@
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
-	const openReceive = async (modalId: symbol) => {
-		if (isDisabled()) {
-			const status = await waitWalletReady(isDisabled);
-
-			if (status === 'timeout') {
-				return;
-			}
-		}
-
-		modalStore.openBtcReceive(modalId);
-	};
+	const openReceive = (modalId: symbol) =>
+		openOnWalletReady({ isDisabled, open: () => modalStore.openBtcReceive(modalId) });
 </script>
 
 <ReceiveButtonWithModal isOpen={$modalBtcReceive} open={openReceive}>

@@ -2,6 +2,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 import { Currency } from '$lib/enums/currency';
+import { trackExportData } from '$lib/services/export-data-analytics.services';
 import { exportTokensCsv, exportTransactionsCsv } from '$lib/services/export-data.services';
 import { toastsShow } from '$lib/stores/toasts.store';
 import { consoleError } from '$lib/utils/console.utils';
@@ -32,6 +33,10 @@ vi.mock('$lib/stores/toasts.store', () => ({
 
 vi.mock('$lib/utils/console.utils', () => ({
 	consoleError: vi.fn()
+}));
+
+vi.mock('$lib/services/export-data-analytics.services', () => ({
+	trackExportData: vi.fn()
 }));
 
 vi.mock(import('$lib/utils/csv.utils'), async (importOriginal) => {
@@ -123,6 +128,7 @@ describe('export-data.services', () => {
 	const mockDownloadCsv = vi.mocked(downloadCsv);
 	const mockToastsShow = vi.mocked(toastsShow);
 	const mockConsoleError = vi.mocked(consoleError);
+	const mockTrackExportData = vi.mocked(trackExportData);
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -155,6 +161,11 @@ describe('export-data.services', () => {
 				level: 'error',
 				duration: 4000
 			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'tokens_extended',
+				resultStatus: 'error',
+				errorCode: 'fx_rate_unavailable'
+			});
 		});
 
 		it('downloads the requested token CSV variant and shows a success toast', () => {
@@ -175,17 +186,22 @@ describe('export-data.services', () => {
 				level: 'success',
 				duration: 2000
 			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'tokens_basic',
+				resultStatus: 'success'
+			});
 		});
 	});
 
 	describe('exportTransactionsCsv', () => {
-		it('does nothing when the identity is missing', async () => {
+		it('tracks a no_identity error and skips the export when the identity is missing', async () => {
 			const buildTransactions = vi.fn(() => []);
 
 			const result = await exportTransactionsCsv({
 				...defaultTransactionParams(),
 				identity: null,
-				buildTransactions
+				buildTransactions,
+				variant: 'basic'
 			});
 
 			expect(result).toBeFalsy();
@@ -194,6 +210,11 @@ describe('export-data.services', () => {
 			expect(buildTransactions).not.toHaveBeenCalled();
 			expect(mockDownloadCsv).not.toHaveBeenCalled();
 			expect(mockToastsShow).not.toHaveBeenCalled();
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_basic',
+				resultStatus: 'error',
+				errorCode: 'no_identity'
+			});
 		});
 
 		it('keeps exporting after one paginated token loader fails', async () => {
@@ -232,6 +253,10 @@ describe('export-data.services', () => {
 				level: 'success',
 				duration: 2000
 			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_basic',
+				resultStatus: 'success'
+			});
 		});
 
 		it('shows an error toast when building the export throws', async () => {
@@ -249,6 +274,12 @@ describe('export-data.services', () => {
 				text: en.settings.error.export_failed,
 				level: 'error',
 				duration: 4000
+			});
+			expect(mockTrackExportData).toHaveBeenCalledExactlyOnceWith({
+				type: 'transactions_extended',
+				resultStatus: 'error',
+				errorCode: 'build_failed',
+				error: 'row build failed'
 			});
 		});
 	});

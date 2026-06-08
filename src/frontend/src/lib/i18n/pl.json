@@ -1606,6 +1606,7 @@
 			"wallet_not_initialized": "Nieoczekiwany błąd. Twój adres portfela nie jest zainicjowany.",
 			"from_address_not_wallet": "Adres nadawcy żądany dla transakcji nie jest adresem tego portfela.",
 			"unknown_destination": "Nieznany adres docelowy.",
+			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
 		}

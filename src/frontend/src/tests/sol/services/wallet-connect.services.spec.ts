@@ -630,5 +630,35 @@ describe('wallet-connect.services', () => {
 				expect(console.warn).not.toHaveBeenCalled();
 			});
 		});
+
+		describe('with an ambiguous transaction', () => {
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					...mockMappedTransaction,
+					ambiguous: true
+				});
+			});
+
+			it('should refuse to sign and reject the request', async () => {
+				const result = await sign(mockParams);
+
+				expect(result).toEqual({ success: false });
+
+				expect(spyToastsError).toHaveBeenCalledWith({
+					msg: { text: en.wallet_connect.error.ambiguous_transaction }
+				});
+
+				expect(mockParams.modalNext).not.toHaveBeenCalled();
+				expect(executeSign).not.toHaveBeenCalled();
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+			});
+		});
 	});
 });
