@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
 	import {
@@ -26,6 +26,7 @@
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
+	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import {
 		sign as signService,
 		decode as decodeService
@@ -71,13 +72,22 @@
 
 	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
+	let tokenAddress = $state<OptionSolAddress>();
 
 	const updateData = async () => {
-		({ amount, destination } = await decodeService({
+		({ amount, destination, tokenAddress } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
 	};
+
+	// When the transaction moves an SPL token we know, review it with that token's
+	// metadata; otherwise fall back to the network's native SOL token.
+	let reviewToken = $derived(
+		nonNullish(tokenAddress)
+			? ($enabledSplTokens.find(({ address }) => address === tokenAddress) ?? token)
+			: token
+	);
 
 	$effect(() => {
 		[data, networkId];
@@ -172,7 +182,7 @@
 				onApprove={sign}
 				onReject={reject}
 				source={address ?? ''}
-				{token}
+				token={reviewToken}
 			/>
 		{/if}
 	{/key}

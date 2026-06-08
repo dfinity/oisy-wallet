@@ -29,6 +29,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import {
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getTransferCheckedInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
@@ -964,7 +965,25 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate as destination for an `ApproveChecked` instruction', () => {
+		it('should surface the mint as tokenAddress for a `TransferChecked` instruction', () => {
+			const instruction = getTransferCheckedInstruction({
+				source: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: JUP_TOKEN.address
+			});
+		});
+
+		it('should forward the delegate as destination and surface the mint for an `ApproveChecked` instruction', () => {
 			const instruction = getApproveCheckedInstruction({
 				source: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address),
@@ -977,7 +996,8 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
-				destination: mockSolAddress2
+				destination: mockSolAddress2,
+				tokenAddress: JUP_TOKEN.address
 			});
 		});
 

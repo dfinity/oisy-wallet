@@ -80,6 +80,27 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, instruction3);
 		});
 
+		it('should propagate the tokenAddress of an SPL token instruction', () => {
+			spyMapSolInstruction.mockReturnValueOnce({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSolAddress3
+			});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1]
+				})
+			).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSolAddress3
+			});
+		});
+
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
