@@ -10,8 +10,7 @@ This workflow uses **Cowork** for specification and **Claude Code** for implemen
 
 ```
 dfinity/oisy-wallet/
-├── .claude/
-│   └── CLAUDE.md                                       # Instructions for Claude Code (references PRODUCT.md and specs/)
+├── CLAUDE.md                                           # Instructions for Claude Code (references PRODUCT.md and specs/)
 └── docs/
     └── ai/
         ├── PRODUCT.md                                  # Living description of all current product behaviors
