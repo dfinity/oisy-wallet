@@ -447,7 +447,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -483,7 +484,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			amount,
 			source,
 			destination,
-			tokenAddress
+			tokenAddress,
+			isApproval: true
 		};
 	}
 
@@ -523,7 +525,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -559,7 +562,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			amount,
 			source,
 			destination,
-			tokenAddress
+			tokenAddress,
+			isApproval: true
 		};
 	}
 

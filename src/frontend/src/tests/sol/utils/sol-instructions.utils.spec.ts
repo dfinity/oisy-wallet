@@ -950,7 +950,7 @@ describe('sol-instructions.utils', () => {
 			);
 		});
 
-		it('should forward the delegate as destination for an `Approve` instruction', () => {
+		it('should forward the delegate as destination and flag an `Approve` instruction as an approval', () => {
 			const instruction = getApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -961,7 +961,8 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
-				destination: mockSolAddress2
+				destination: mockSolAddress2,
+				isApproval: true
 			});
 		});
 
@@ -983,7 +984,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate as destination and surface the mint for an `ApproveChecked` instruction', () => {
+		it('should forward the delegate as destination, surface the mint and flag an `ApproveChecked` instruction as an approval', () => {
 			const instruction = getApproveCheckedInstruction({
 				source: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address),
@@ -997,7 +998,8 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				tokenAddress: JUP_TOKEN.address
+				tokenAddress: JUP_TOKEN.address,
+				isApproval: true
 			});
 		});
 

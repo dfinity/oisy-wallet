@@ -101,6 +101,27 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		it('should propagate the isApproval flag of an approval instruction', () => {
+			spyMapSolInstruction.mockReturnValueOnce({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1]
+				})
+			).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			});
+		});
+
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
