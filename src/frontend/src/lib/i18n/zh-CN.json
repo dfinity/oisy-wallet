@@ -767,7 +767,7 @@
 		"text": {
 			"title": "设置",
 			"general": "通用",
-			"preferences": "",
+			"preferences": "偏好设置",
 			"principal": "你的 Principal",
 			"principal_copied": "Principal 已复制到剪贴板",
 			"principal_description": "你在 $oisy_name 中的身份标识，由 Internet Identity 创建。",

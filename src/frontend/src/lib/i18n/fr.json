@@ -767,7 +767,7 @@
 		"text": {
 			"title": "Paramètres",
 			"general": "Général",
-			"preferences": "",
+			"preferences": "Préférences",
 			"principal": "Votre Principal",
 			"principal_copied": "Principal copié dans le presse-papiers",
 			"principal_description": "Votre ID pour $oisy_name. Créé par votre Internet Identity.",
