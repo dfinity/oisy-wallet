@@ -13,11 +13,9 @@ describe('SettingsPreferences', () => {
 	});
 
 	it('renders the language and currency dropdowns', () => {
-		const { container } = render(SettingsPreferences);
+		const { container, getByTestId } = render(SettingsPreferences);
 
 		expect(container.querySelector('.lang-selector')).toBeInTheDocument();
-		expect(
-			container.querySelector(`button[data-tid="${CURRENCY_SWITCHER_BUTTON}"]`)
-		).toBeInTheDocument();
+		expect(getByTestId(CURRENCY_SWITCHER_BUTTON)).toBeInTheDocument();
 	});
 });
