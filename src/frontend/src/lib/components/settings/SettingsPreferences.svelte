@@ -2,7 +2,7 @@
 	import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
 	import CurrencyDropdown from '$lib/components/currency/CurrencyDropdown.svelte';
 	import IconDollarSign from '$lib/components/icons/IconDollarSign.svelte';
-	import IconLanguage from '$lib/components/icons/IconLanguage.svelte';
+	import IconWorld from '$lib/components/icons/IconWorld.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -14,7 +14,7 @@
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<IconLanguage />
+				<IconWorld />
 				{$i18n.core.text.language}
 			</span>
 		{/snippet}
