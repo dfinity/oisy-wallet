@@ -50,7 +50,8 @@ Note the asymmetry today:
 The selectors are thin wrappers around reusable dropdowns:
 
 - `src/frontend/src/lib/components/core/MenuLanguageSelector.svelte` — label +
-  `IconLanguage` + `LanguageDropdown`.
+  `IconLanguage` + `LanguageDropdown` (this PR swaps the icon to `IconWorld`;
+  see the UX rules section below).
 - `src/frontend/src/lib/components/currency/MenuCurrencySelector.svelte` — label
   - `IconDollarSign` + `CurrencyDropdown`.
 
@@ -120,7 +121,7 @@ on, and anything added later. They are non-negotiable.
    a Japanese-only user staring at "言語" tells them nothing if they cannot
    read the UI's current language. The switcher must therefore carry a
    universal visual cue alongside the label: in oisy that cue is
-   [`IconLanguage`](../../../src/frontend/src/lib/components/icons/IconLanguage.svelte)
+   [`IconWorld`](../../../src/frontend/src/lib/components/icons/IconWorld.svelte)
    (a globe-style icon), rendered inline next to the label. **Never ship a
    language-switcher entry that is text-only.**
 
@@ -151,7 +152,7 @@ following the same `SettingsCard` + `SettingsCardItem` pattern as
 wrappers — their menu-specific styling, e.g. `pl-3` and the tertiary inline
 label, does not match the settings card layout) **and carry the icon cue
 prescribed by the [UX rules](#ux-rules-for-the-language-switcher-must-hold-everywhere-it-is-rendered)
-above** — `IconLanguage` next to the language label, `IconDollarSign` next to
+above** — `IconWorld` next to the language label, `IconDollarSign` next to
 the currency label, rendered inline inside the `key` snippet:
 
 ```svelte
@@ -159,7 +160,7 @@ the currency label, rendered inline inside the `key` snippet:
 	import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
 	import CurrencyDropdown from '$lib/components/currency/CurrencyDropdown.svelte';
 	import IconDollarSign from '$lib/components/icons/IconDollarSign.svelte';
-	import IconLanguage from '$lib/components/icons/IconLanguage.svelte';
+	import IconWorld from '$lib/components/icons/IconWorld.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -171,7 +172,7 @@ the currency label, rendered inline inside the `key` snippet:
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<IconLanguage />
+				<IconWorld />
 				{$i18n.core.text.language}
 			</span>
 		{/snippet}
@@ -315,7 +316,7 @@ No Rust files change, so backend gates are not required.
 - [ ] A new **"Preferences"** card appears on the Settings page containing a
       **Language** row and a **Currency** row, each backed by the existing
       `LanguageDropdown` / `CurrencyDropdown`.
-- [ ] The **language** row renders `IconLanguage` inline before the localized
+- [ ] The **language** row renders `IconWorld` inline before the localized
       "Language" label, and the **currency** row renders `IconDollarSign`
       inline before the localized "Currency" label — satisfying UX rule 1
       (language switcher discoverable without reading the current UI
