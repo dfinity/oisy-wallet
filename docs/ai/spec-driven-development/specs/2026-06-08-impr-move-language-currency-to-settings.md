@@ -106,6 +106,38 @@ This yields the following matrix:
 
 ---
 
+## UX rules for the language switcher (MUST hold everywhere it is rendered)
+
+These two rules apply to **every** rendering of the language switcher, anywhere
+in the app — the user menu today, the Settings Preferences card from this spec
+on, and anything added later. They are non-negotiable.
+
+1. **A user who does not speak the current UI language must still be able to
+   locate the language switcher.** This means the localized text label is
+   **not sufficient on its own** — a German-only user staring at "Sprache" or
+   a Japanese-only user staring at "言語" tells them nothing if they cannot
+   read the UI's current language. The switcher must therefore carry a
+   universal visual cue alongside the label: in oisy that cue is
+   [`IconLanguage`](../../../src/frontend/src/lib/components/icons/IconLanguage.svelte)
+   (a globe-style icon), rendered inline next to the label. **Never ship a
+   language-switcher entry that is text-only.**
+
+2. **Every language option in the dropdown is rendered as an autonym** — in
+   its own script, never translated into the current UI language. "Deutsch"
+   not "German"; "日本語" not "Japanese"; "Русский" not "Russian". This is
+   already enforced by the `LANGUAGES` map in
+   [`src/frontend/src/env/i18n.ts`](../../../src/frontend/src/env/i18n.ts)
+   (note the inline comment: _"We don't need to translate it as we always
+   show it in its own language"_) and consumed verbatim by `LanguageDropdown`.
+   Do not change either side of that contract without an explicit decision.
+
+The same icon-cue principle is applied to the **currency** row for visual
+symmetry and because money/$ is similarly recognizable across languages —
+[`IconDollarSign`](../../../src/frontend/src/lib/components/icons/IconDollarSign.svelte)
+sits inline next to the currency label.
+
+---
+
 ## Implementation
 
 ### 1. New component: `SettingsPreferences.svelte`
@@ -115,12 +147,17 @@ following the same `SettingsCard` + `SettingsCardItem` pattern as
 `SettingsExportData.svelte`. It renders a "Preferences" card with two rows that
 **reuse the existing dropdowns directly** (do not reuse the `Menu*Selector`
 wrappers — their menu-specific styling, e.g. `pl-3` and the tertiary inline
-label, does not match the settings card layout):
+label, does not match the settings card layout) **and carry the icon cue
+prescribed by the [UX rules](#ux-rules-for-the-language-switcher-must-hold-everywhere-it-is-rendered)
+above** — `IconLanguage` next to the language label, `IconDollarSign` next to
+the currency label, rendered inline inside the `key` snippet:
 
 ```svelte
 <script lang="ts">
-	import CurrencyDropdown from '$lib/components/currency/CurrencyDropdown.svelte';
 	import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
+	import CurrencyDropdown from '$lib/components/currency/CurrencyDropdown.svelte';
+	import IconDollarSign from '$lib/components/icons/IconDollarSign.svelte';
+	import IconLanguage from '$lib/components/icons/IconLanguage.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -130,12 +167,22 @@ label, does not match the settings card layout):
 	{#snippet title()}{$i18n.settings.text.preferences}{/snippet}
 
 	<SettingsCardItem>
-		{#snippet key()}{$i18n.core.text.language}{/snippet}
+		{#snippet key()}
+			<span class="flex items-center gap-2">
+				<IconLanguage />
+				{$i18n.core.text.language}
+			</span>
+		{/snippet}
 		{#snippet value()}<LanguageDropdown />{/snippet}
 	</SettingsCardItem>
 
 	<SettingsCardItem>
-		{#snippet key()}{$i18n.core.text.currency}{/snippet}
+		{#snippet key()}
+			<span class="flex items-center gap-2">
+				<IconDollarSign />
+				{$i18n.core.text.currency}
+			</span>
+		{/snippet}
 		{#snippet value()}<CurrencyDropdown />{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
@@ -144,7 +191,8 @@ label, does not match the settings card layout):
 Notes:
 
 - Reuse the existing i18n labels `core.text.language` and `core.text.currency`
-  for the row keys.
+  for the row keys, and **always render them alongside the icon** — text-only
+  is a violation of UX rule 1 and must be flagged in review.
 - No `info` snippet is passed, so `SettingsCardItem` suppresses the help-icon
   button (matches its documented behaviour).
 - Consider adding a `data-tid` test id for the card / rows in
@@ -265,6 +313,15 @@ No Rust files change, so backend gates are not required.
 - [ ] A new **"Preferences"** card appears on the Settings page containing a
       **Language** row and a **Currency** row, each backed by the existing
       `LanguageDropdown` / `CurrencyDropdown`.
+- [ ] The **language** row renders `IconLanguage` inline before the localized
+      "Language" label, and the **currency** row renders `IconDollarSign`
+      inline before the localized "Currency" label — satisfying UX rule 1
+      (language switcher discoverable without reading the current UI
+      language).
+- [ ] The language dropdown lists each option as an **autonym** ("Deutsch",
+      "日本語", "Русский", …) — UX rule 2; verified by the existing
+      `LANGUAGES` map in `src/frontend/src/env/i18n.ts`, which this PR does
+      not modify.
 - [ ] Changing language or currency from the Settings page works exactly as it
       did from the menu (persists and updates the UI / exchange rate).
 - [ ] The **currency** selector no longer appears anywhere in the user menu.
