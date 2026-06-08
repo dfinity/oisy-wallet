@@ -46,7 +46,7 @@ We work through open questions together: scope, edge cases, constraints, accepta
 
 Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/specs/` in your local repo. The spec is intentionally written for Claude Code — it references real file paths, component names, and existing patterns where possible.
 
-**Spec header:** Every spec must begin with the following line so Claude Code knows it is part of this workflow:
+**Spec header:** Every new spec must begin with the following line so Claude Code knows it is part of this workflow:
 
 > This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 
