@@ -8,7 +8,6 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 >
 > - Frontend → [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)
 > - Backend → [`docs/ai/backend/README.md`](./docs/ai/backend/README.md)
-> - Implementing a spec → [`docs/ai/spec-driven-development/workflow.md`](./docs/ai/spec-driven-development/workflow.md)
 
 ---
 
@@ -25,6 +24,25 @@ Claude-specific runtime layer. Anything not contradicted here defers to
   - Adding a new dependency (npm or Cargo).
   - Adding a new top-level folder.
   - Touching `backend.did`, generated `declarations/`, or stable state.
+
+---
+
+## Workflows
+
+### Spec-driven development
+
+oisy has a spec-driven development workflow for new features,
+improvements, and bugfixes — see
+[`docs/ai/spec-driven-development/workflow.md`](./docs/ai/spec-driven-development/workflow.md).
+A spec is authored in Cowork first, then implemented in Claude Code on
+a branch / PR.
+
+**Always ask before using it.** When the user describes a feature,
+improvement, or bugfix without naming the workflow, acknowledge that the
+workflow exists and ask whether to use it. Only follow the workflow
+after the user agrees. If they decline (or the change is clearly too
+small to warrant a spec, e.g. a one-line typo), implement directly —
+still following the rest of CLAUDE.md and AGENTS.md.
 
 ---
 
