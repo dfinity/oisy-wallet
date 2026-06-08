@@ -94,9 +94,11 @@ If the implementation reveals gaps or the spec needs updating, the spec is the s
 After the PR merges:
 
 1. **Update `docs/ai/PRODUCT.md`** to reflect the new behavior. This keeps the product spec accurate for all future builds.
-2. **Remove the spec's asset folder** (`specs/<name>/` — wireframes, designs, etc.). The spec `.md` stays; the assets were planning artifacts that don't track later UI changes and become silent traps once the implementation diverges. Git history retains them if they're ever needed again.
+2. **Remove the spec's `wireframes/` folder** (`specs/<name>/wireframes/`). Wireframes are rough planning mocks that don't track later UI changes and become silent traps once the implementation diverges. Git history retains them if needed. Other asset subfolders — `designs/` in particular — typically stay: higher-fidelity outputs are useful as cross-feature reference and age better than throwaway HTML mocks. If `specs/<name>/` ends up empty after the cleanup, remove the empty parent folder too.
 
-Both updates can land in a single small cleanup PR. A project can deviate from step 2 (e.g. if assets are linked from external docs and must remain browseable), but the decision should be explicit in the project's `CLAUDE.md` so the convention isn't skipped silently.
+Before deleting wireframes, scan for any pattern worth promoting to a curated reference (e.g. `docs/ai/frontend/patterns/` or a Storybook entry) — a pattern that first appeared in a wireframe and proves useful across features deserves a home outside the per-spec folder.
+
+Both updates can land in a single small cleanup PR. A project can deviate (e.g. keep wireframes for external linking, or also delete designs), but the deviation should be explicit in the project's `CLAUDE.md` so the convention isn't skipped silently.
 
 ---
 
