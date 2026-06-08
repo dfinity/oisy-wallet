@@ -197,9 +197,11 @@ fn set_exchange_rate_enabled_rejects_authenticated_non_controller() {
                 .to_string()
         )
     );
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
     assert_eq!(
-        pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
-        Ok(false),
-        "Rejected non-controller calls must not mutate the refresh setting."
+        stored.exchange_rate_enabled, None,
+        "Rejected non-controller calls must not mutate the stored refresh setting."
     );
 }
