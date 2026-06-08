@@ -3,7 +3,7 @@ import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
 	getBase64Encoder,
@@ -55,11 +55,21 @@ export const mapSolTransactionMessage = ({
 			// disagrees on source, destination or payer would be silently dropped from the
 			// review screen. We flag it instead, leaving it to the signing flow to refuse a
 			// transaction it cannot display faithfully.
+			//
+			// The same applies to the token: the summary shows a single token's metadata and
+			// sums every amount into one figure. Bundling movements of different mints — or
+			// mixing a known SPL token with a native/unknown one — cannot be shown faithfully.
+			const mixesTokenWithNonToken =
+				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
+				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
+
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
 				conflicts({ current: acc.source, next: source }) ||
 				conflicts({ current: acc.destination, next: destination }) ||
-				conflicts({ current: acc.payer, next: payer });
+				conflicts({ current: acc.payer, next: payer }) ||
+				conflicts({ current: acc.tokenAddress, next: tokenAddress }) ||
+				mixesTokenWithNonToken;
 
 			return {
 				...acc,

@@ -83,10 +83,13 @@
 	};
 
 	// When the transaction moves an SPL token we know, review it with that token's
-	// metadata; otherwise fall back to the network's native SOL token.
+	// metadata; otherwise fall back to the network's native SOL token. The same mint
+	// can exist on several clusters, so we match the current network too.
 	let reviewToken = $derived(
 		nonNullish(tokenAddress)
-			? ($enabledSplTokens.find(({ address }) => address === tokenAddress) ?? token)
+			? ($enabledSplTokens.find(
+					({ address, network: { id } }) => address === tokenAddress && id === networkId
+				) ?? token)
 			: token
 	);
 

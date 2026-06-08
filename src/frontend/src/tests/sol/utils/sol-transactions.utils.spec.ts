@@ -122,6 +122,32 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		it('should flag a transaction as ambiguous when it bundles different SPL mints', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 1n, tokenAddress: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 2n, tokenAddress: mockSolAddress3 });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+		});
+
+		it('should flag a transaction as ambiguous when it mixes an SPL token with a native movement', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 5n, tokenAddress: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 10n });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+		});
+
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
