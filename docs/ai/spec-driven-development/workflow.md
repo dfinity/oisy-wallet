@@ -10,8 +10,7 @@ This workflow uses **Cowork** for specification and **Claude Code** for implemen
 
 ```
 dfinity/oisy-wallet/
-├── .claude/
-│   └── CLAUDE.md                                       # Instructions for Claude Code (references PRODUCT.md and specs/)
+├── CLAUDE.md                                           # Instructions for Claude Code (references PRODUCT.md and specs/)
 └── docs/
     └── ai/
         ├── PRODUCT.md                                  # Living description of all current product behaviors
@@ -92,7 +91,12 @@ If the implementation reveals gaps or the spec needs updating, the spec is the s
 
 ### Step 6 — Merge & Update (Claude Code)
 
-After the PR merges, update `docs/ai/PRODUCT.md` to reflect the new behavior. This keeps the product spec accurate for all future builds.
+After the PR merges:
+
+1. **Update `docs/ai/PRODUCT.md`** to reflect the new behavior. This keeps the product spec accurate for all future builds.
+2. **Remove the spec's asset folder** (`specs/<name>/` — wireframes, designs, etc.). The spec `.md` stays; the assets were planning artifacts. Once the feature ships, the shipped app is the source of truth — the code itself, plus `PRODUCT.md` for behaviour and the design-system / component library for visual conventions. Holding on to spec assets after merge just creates silent traps once the implementation evolves. Git history retains them if they're ever genuinely needed again.
+
+Both updates can land in a single small cleanup PR. A project can deviate from step 2 (e.g. if assets are linked from external docs and must remain browseable), but the decision should be explicit in the project's `CLAUDE.md` so the convention isn't skipped silently.
 
 ---
 
