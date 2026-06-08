@@ -19,6 +19,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -31,6 +32,7 @@ import {
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';
 import {
@@ -74,7 +76,43 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	return mapSolTransactionMessage(parsedTransactionMessage);
+	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
+
+	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
+	// not surfaced by the mapper. Recover it from the source (or destination) token
+	// account so the review can still show the correct token instead of native SOL.
+	if (nonNullish(mapped.tokenAddress)) {
+		return mapped;
+	}
+
+	const tokenAddress = await resolveSplTokenAddress({
+		addresses: [mapped.source, mapped.destination],
+		network: solNetwork
+	});
+
+	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+};
+
+const resolveSplTokenAddress = async ({
+	addresses,
+	network
+}: {
+	addresses: OptionSolAddress[];
+	network: SolanaNetworkType;
+}): Promise<SplTokenAddress | undefined> => {
+	for (const address of addresses.filter(nonNullish)) {
+		const { value } = await getAccountInfo({ address, network });
+
+		if (nonNullish(value) && 'parsed' in value.data) {
+			const { mint } = value.data.parsed.info as { mint?: SplTokenAddress };
+
+			if (nonNullish(mint)) {
+				return mint;
+			}
+		}
+	}
+
+	return undefined;
 };
 
 const getSignatureWithoutSending = async ({

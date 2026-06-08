@@ -11,6 +11,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -36,7 +37,12 @@ import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
-import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
+import {
+	mockAtaAddress,
+	mockSolAddress,
+	mockSolAddress2,
+	mockSplAddress
+} from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { SignatureBytes } from '@solana/keys';
 import {
@@ -67,6 +73,10 @@ vi.mock(import('$sol/utils/sol-transactions.utils'), async (importOriginal) => {
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
 	solanaHttpRpc: vi.fn(),
 	solanaWebSocketRpc: vi.fn()
+}));
+
+vi.mock('$sol/api/solana.api', () => ({
+	getAccountInfo: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -113,6 +123,10 @@ describe('wallet-connect.services', () => {
 			() => mockSolSignedTransaction
 		);
 
+		vi.mocked(getAccountInfo).mockResolvedValue({
+			value: null
+		} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
+
 		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
@@ -156,6 +170,33 @@ describe('wallet-connect.services', () => {
 			});
 			expect(mapSolTransactionMessage).toHaveBeenCalledWith(mockParsedTransaction);
 			expect(result).toEqual(mockMappedTransaction);
+		});
+
+		it('should recover the SPL mint from the token account when the mapper did not surface it', async () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+				amount: 123n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2
+			});
+
+			vi.mocked(getAccountInfo).mockResolvedValue({
+				value: { data: { parsed: { info: { mint: mockSplAddress } } } }
+			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
+
+			const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+			expect(getAccountInfo).toHaveBeenCalledWith(
+				expect.objectContaining({ address: mockAtaAddress })
+			);
+			expect(result).toEqual({
+				amount: 123n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSplAddress
+			});
 		});
 	});
 
