@@ -8,6 +8,7 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 >
 > - Frontend → [`docs/ai/frontend/README.md`](./docs/ai/frontend/README.md)
 > - Backend → [`docs/ai/backend/README.md`](./docs/ai/backend/README.md)
+> - Implementing a spec → [`docs/ai/spec-driven-development/workflow.md`](./docs/ai/spec-driven-development/workflow.md)
 
 ---
 
