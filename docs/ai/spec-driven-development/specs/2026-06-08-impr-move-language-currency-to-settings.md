@@ -1,3 +1,5 @@
+This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
+
 # Spec: Move Language & Currency Selectors from the User Menu to the Settings Page
 
 ## Goal
