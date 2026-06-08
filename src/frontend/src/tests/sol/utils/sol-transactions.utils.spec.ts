@@ -1,4 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
+	SYSTEM_PROGRAM_ADDRESS
+} from '$sol/constants/sol.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
@@ -32,6 +36,7 @@ describe('sol-transactions.utils', () => {
 		it('should map a sol transaction message', () => {
 			expect(mapSolTransactionMessage(mockSolParsedTransactionMessage)).toStrictEqual({
 				amount: 2044380n,
+				ambiguous: true,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
@@ -146,6 +151,52 @@ describe('sol-transactions.utils', () => {
 					instructions: [instruction1, instruction2]
 				})
 			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+		});
+
+		it('should not flag ignored setup instructions before a reviewed transfer as ambiguous', () => {
+			// Run the real instruction mapper: a previous test sets a persistent
+			// mockReturnValue on the shared spy that clearAllMocks does not reset.
+			spyMapSolInstruction.mockRestore();
+
+			const computeBudgetInstructions = mockSolParsedTransactionMessage.instructions.filter(
+				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
+			);
+			const [systemInstruction] = mockSolParsedTransactionMessage.instructions.filter(
+				({ programAddress }) => programAddress === SYSTEM_PROGRAM_ADDRESS
+			);
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [...computeBudgetInstructions, systemInstruction]
+				})
+			).toStrictEqual({
+				amount: 5100n,
+				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49'
+			});
+		});
+
+		it('should flag a transaction with an unreviewed instruction as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({
+					amount: 1n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				})
+				.mockReturnValueOnce({ amount: undefined, unreviewed: true });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				ambiguous: true
+			});
 		});
 
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {

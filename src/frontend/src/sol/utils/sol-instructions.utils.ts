@@ -25,8 +25,14 @@ import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
-import { TokenInstruction } from '@solana-program/token';
+import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
+
+const ignoredInstruction = (): MappedSolTransaction => ({ amount: undefined });
+const unreviewedInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	unreviewed: true
+});
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -413,7 +419,7 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };
 
 const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -491,7 +497,7 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };
 
 const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -569,17 +575,36 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
+};
+
+const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	if (
+		instructionType === AssociatedTokenInstruction.CreateAssociatedToken ||
+		instructionType === AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
+	) {
+		return ignoredInstruction();
+	}
+
+	consoleWarn(`Could not map Solana ATA instruction of type ${instructionType}`);
+
+	return unreviewedInstruction();
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
 	if (!('instructionType' in parsedInstruction)) {
-		return { amount: undefined };
+		return unreviewedInstruction();
 	}
 
 	const { programAddress } = parsedInstruction;
+
+	if (programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+		return ignoredInstruction();
+	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction(parsedInstruction);
@@ -593,7 +618,11 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolToken2022Instruction(parsedInstruction);
 	}
 
+	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		return mapSolAtaInstruction(parsedInstruction);
+	}
+
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };

@@ -889,15 +889,7 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
 			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
 
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should map a valid System instruction', () => {
@@ -937,8 +929,14 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
 
 			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
@@ -1076,7 +1074,10 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction2).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
 
 			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
 			expect(parseSolSystemInstruction).not.toHaveBeenCalled();
