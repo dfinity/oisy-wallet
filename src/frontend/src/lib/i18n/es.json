@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Configuración",
 			"general": "General",
+			"preferences": "",
 			"principal": " Principal",
 			"principal_copied": "Principal copiado al portapapeles",
 			"principal_description": "Tu ID para $oisy_name. Creado por tu Internet Identity.",

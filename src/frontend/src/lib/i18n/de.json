@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Einrichten",
 			"general": "Allgemein",
+			"preferences": "",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",
 			"principal_description": "Deine ID für $oisy_name. Erstellt durch deine Internet Identity.",

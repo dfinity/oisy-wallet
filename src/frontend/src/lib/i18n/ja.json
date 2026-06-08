@@ -767,6 +767,7 @@
 		"text": {
 			"title": "設定",
 			"general": "一般",
+			"preferences": "",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました。",
 			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます。",

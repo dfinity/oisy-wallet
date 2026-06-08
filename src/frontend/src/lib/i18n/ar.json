@@ -767,6 +767,7 @@
 		"text": {
 			"title": "الإعدادات",
 			"general": "",
+			"preferences": "",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",

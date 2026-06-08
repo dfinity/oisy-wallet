@@ -767,6 +767,7 @@
 		"text": {
 			"title": "설정",
 			"general": "일반",
+			"preferences": "",
 			"principal": "내 프린시팔",
 			"principal_copied": "프린시팔이 클립보드에 복사되었습니다",
 			"principal_description": "$oisy_name의 내 ID. 인터넷 아이덴티티로 생성됩니다.",

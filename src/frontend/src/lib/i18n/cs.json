@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
