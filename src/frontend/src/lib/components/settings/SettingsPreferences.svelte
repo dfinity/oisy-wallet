@@ -1,6 +1,8 @@
 <script lang="ts">
 	import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
 	import CurrencyDropdown from '$lib/components/currency/CurrencyDropdown.svelte';
+	import IconDollarSign from '$lib/components/icons/IconDollarSign.svelte';
+	import IconLanguage from '$lib/components/icons/IconLanguage.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,12 +12,22 @@
 	{#snippet title()}{$i18n.settings.text.preferences}{/snippet}
 
 	<SettingsCardItem>
-		{#snippet key()}{$i18n.core.text.language}{/snippet}
+		{#snippet key()}
+			<span class="flex items-center gap-2">
+				<IconLanguage />
+				{$i18n.core.text.language}
+			</span>
+		{/snippet}
 		{#snippet value()}<LanguageDropdown />{/snippet}
 	</SettingsCardItem>
 
 	<SettingsCardItem>
-		{#snippet key()}{$i18n.core.text.currency}{/snippet}
+		{#snippet key()}
+			<span class="flex items-center gap-2">
+				<IconDollarSign />
+				{$i18n.core.text.currency}
+			</span>
+		{/snippet}
 		{#snippet value()}<CurrencyDropdown />{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
