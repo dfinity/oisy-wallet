@@ -172,7 +172,9 @@ the currency label, rendered inline inside the `key` snippet:
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<IconWorld />
+				<span class="flex text-tertiary">
+					<IconWorld size="20" />
+				</span>
 				{$i18n.core.text.language}
 			</span>
 		{/snippet}
@@ -182,7 +184,9 @@ the currency label, rendered inline inside the `key` snippet:
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<IconDollarSign />
+				<span class="flex text-tertiary">
+					<IconDollarSign size="20" />
+				</span>
 				{$i18n.core.text.currency}
 			</span>
 		{/snippet}
@@ -196,6 +200,12 @@ Notes:
 - Reuse the existing i18n labels `core.text.language` and `core.text.currency`
   for the row keys, and **always render them alongside the icon** — text-only
   is a violation of UX rule 1 and must be flagged in review.
+- **Harmonize the icons** so they read as equal-weight affordances: wrap each
+  in a `text-tertiary` span (mirrors the existing `MenuLanguageSelector`
+  convention) and pass `size="20"` to both. Without this, `IconWorld`
+  (`stroke="currentColor"`, default `size="24"`) renders darker and larger
+  than `IconDollarSign` (`fill="#6C757D"` hardcoded, default `size="20"`),
+  which looks unintentional.
 - No `info` snippet is passed, so `SettingsCardItem` suppresses the help-icon
   button (matches its documented behaviour).
 - Consider adding a `data-tid` test id for the card / rows in
