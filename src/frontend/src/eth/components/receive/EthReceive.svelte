@@ -6,7 +6,7 @@
 	import { modalEthReceive } from '$lib/derived/modal.derived';
 	import { networkAddress } from '$lib/derived/network-address.derived';
 	import { networkEthereum } from '$lib/derived/network.derived';
-	import { waitWalletReady } from '$lib/services/actions.services';
+	import { openOnWalletReady } from '$lib/services/actions.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
@@ -19,17 +19,8 @@
 
 	const isDisabled = (): boolean => $metamaskNotInitialized;
 
-	const openReceive = async (modalId: symbol) => {
-		if (isDisabled()) {
-			const status = await waitWalletReady(isDisabled);
-
-			if (status === 'timeout') {
-				return;
-			}
-		}
-
-		modalStore.openEthReceive(modalId);
-	};
+	const openReceive = (modalId: symbol) =>
+		openOnWalletReady({ isDisabled, open: () => modalStore.openEthReceive(modalId) });
 </script>
 
 <ReceiveButtonWithModal isOpen={$modalEthReceive} open={openReceive}>

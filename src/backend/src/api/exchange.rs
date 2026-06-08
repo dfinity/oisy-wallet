@@ -4,13 +4,13 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 use crate::{
     exchange::{
         cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
-        priceable_tokens_for_caller, release_refresh_lock, stale_or_missing_tokens,
-        try_acquire_refresh_lock,
+        note_rate_request, priceable_tokens_for_caller, release_refresh_lock,
+        stale_or_missing_tokens, try_acquire_refresh_lock,
     },
-    state::read_state,
+    state::{mutate_api_keys, read_state},
     token,
     types::{StoredPrincipal, StoredTokenId},
-    utils::guards::caller_is_not_anonymous,
+    utils::guards::{caller_is_controller, caller_is_not_anonymous},
 };
 
 /// Returns the latest USD prices for the caller's priceable tokens.
@@ -44,6 +44,10 @@ use crate::{
 pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     let caller = StoredPrincipal(msg_caller());
 
+    // Signal that a caller wants rates, so the recurring timer keeps the
+    // always-on native tokens warm (see `should_refresh_natives`).
+    note_rate_request();
+
     let tokens = priceable_tokens_for_caller(caller);
 
     if tokens.is_empty() {
@@ -54,7 +58,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
     token::mark_tokens_active(&active_ids);
 
     let stale = stale_or_missing_tokens(&tokens);
-    let refresh_lock = if stale.is_empty() {
+    let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
         None
     } else {
         try_acquire_refresh_lock()
@@ -101,4 +105,17 @@ pub fn get_exchange_rate(token_id: TokenId) -> Option<ExchangeRate> {
 #[must_use]
 pub fn exchange_rate_enabled() -> bool {
     is_exchange_rate_refresh_enabled()
+}
+
+/// Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+///
+/// Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+/// keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+/// them resume (still gated on a `CoinGecko` key being set, see
+/// [`is_exchange_rate_refresh_enabled`]).
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_enabled(enabled: bool) {
+    mutate_api_keys(|keys| keys.exchange_rate_enabled = Some(enabled));
 }
