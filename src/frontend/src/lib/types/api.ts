@@ -1,4 +1,3 @@
-import type { BtcAddress } from '$btc/types/address';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,

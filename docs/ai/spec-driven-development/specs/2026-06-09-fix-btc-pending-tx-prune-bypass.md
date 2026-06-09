@@ -12,12 +12,12 @@ Source: HackenProof report **ICPBB-120** (Business Logic Errors, severity **Low*
 
 ## Background
 
-OISY's backend tracks *pending* BTC transactions per principal so a user cannot select the same UTXOs for two unconfirmed transactions. Two endpoints in `src/backend/src/api/bitcoin.rs` touch this state. One derives the caller's BTC address from the caller's principal; the other takes it from the request:
+OISY's backend tracks _pending_ BTC transactions per principal so a user cannot select the same UTXOs for two unconfirmed transactions. Two endpoints in `src/backend/src/api/bitcoin.rs` touch this state. One derives the caller's BTC address from the caller's principal; the other takes it from the request:
 
-| Endpoint                        | Address source                                                                              |
-| ------------------------------- | ------------------------------------------------------------------------------------------- |
-| `btc_add_pending_transaction`   | derived: `signer::btc_principal_to_p2wpkh_address(params.network, &principal)` (line ~103)  |
-| `btc_get_pending_transactions`  | **`params.address` — caller-controlled** (lines ~189 and ~202)                              |
+| Endpoint                       | Address source                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `btc_add_pending_transaction`  | derived: `signer::btc_principal_to_p2wpkh_address(params.network, &principal)` (line ~103) |
+| `btc_get_pending_transactions` | **`params.address` — caller-controlled** (lines ~189 and ~202)                             |
 
 ### Root cause
 
@@ -104,7 +104,7 @@ let none_of_tx_utxos_are_still_present = !current_utxos.is_empty()
 
 The rest of the retain predicate (`!is_old && !none_of_tx_utxos_are_still_present`) is unchanged: when `current_utxos` is empty, `none_of_tx_utxos_are_still_present` is now `false`, so non-expired transactions are retained.
 
-Update the doc comment on `prune_pending_transactions` to record the invariant: *an empty current-UTXO set is treated as unknown, not as "all confirmed"; such transactions are only freed by the 1-hour age rule.*
+Update the doc comment on `prune_pending_transactions` to record the invariant: _an empty current-UTXO set is treated as unknown, not as "all confirmed"; such transactions are only freed by the 1-hour age rule._
 
 > **Behavior note (in scope, intended):** with this guard, a transaction whose UTXOs have genuinely all been spent **and** whose address now reports zero UTXOs is no longer pruned immediately — it is freed by the 1-hour age timeout instead. This matches the existing documented fallback ("if a pending transaction is older than one hour we consider it failed and free the UTXOs") and is an acceptable trade-off: at most one hour of stale reservation, only in the all-spent-to-zero edge case. Call this out in the PR body.
 
@@ -170,6 +170,7 @@ Then sweep the FE test suite for any other `getPendingBtcTransactions` / `btcGet
 ## Tests (regression + coverage)
 
 **Backend unit — prune guard (primary regression test).** In the existing `mod tests` of `src/backend/src/bitcoin/pending_tx_model.rs` (starts line ~185), add a test that seeds a principal with a non-expired pending transaction and calls `prune_pending_transactions(principal, &[], now_ns)` (empty `current_utxos`):
+
 - asserts the non-expired transaction is **retained** (this is the bypass; it fails on `main`);
 - asserts an **expired** (`created_at + HOUR_IN_NS < now_ns`) transaction is still pruned with an empty set (age rule still applies).
 
@@ -214,7 +215,7 @@ Plus `npm run generate` for the regenerated `.did` / declarations.
 
 - `btc_add_pending_transaction` — already derives the address from the principal; no change beyond the prune-guard behavior it shares via `prune_pending_transactions`.
 - UTXO selection, fee estimation, and delegation/rate-limiter logic.
-- Any change to how pending transactions are *stored* (still keyed by the derived address).
+- Any change to how pending transactions are _stored_ (still keyed by the derived address).
 - Multi-address-per-principal support — not a current product behavior; the derived single P2WPKH address is the only one used.
 
 ---
