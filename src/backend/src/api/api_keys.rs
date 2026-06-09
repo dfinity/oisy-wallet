@@ -22,11 +22,14 @@ pub fn get_api_keys() -> ApiKeys {
 ///
 /// Restricted to canister controllers only.
 #[update(guard = "caller_is_controller")]
-pub fn set_api_keys(mut api_keys: ApiKeys) {
+pub fn set_api_keys(api_keys: ApiKeys) {
     mutate_api_keys(|stored| {
-        api_keys.exchange_rate_enabled = api_keys
+        let exchange_rate_enabled = api_keys
             .exchange_rate_enabled
             .or(stored.exchange_rate_enabled);
-        *stored = api_keys;
+        *stored = ApiKeys {
+            exchange_rate_enabled,
+            ..api_keys
+        };
     });
 }
