@@ -97,6 +97,45 @@ fn exchange_rate_enabled_requires_coingecko_key_when_explicitly_enabled() {
 }
 
 #[test]
+fn set_api_keys_preserves_enabled_refresh_when_flag_is_omitted() {
+    let pic_setup = setup();
+
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", api_keys_with_coingecko()),
+        Ok(())
+    );
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", true),
+        Ok(())
+    );
+
+    let rotated_api_keys = ApiKeys {
+        coingecko_api_key: Some("rotated-test-key".to_string()),
+        ..ApiKeys::default()
+    };
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", rotated_api_keys),
+        Ok(())
+    );
+
+    assert_eq!(
+        pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
+        Ok(true),
+        "Key rotation that omits exchange_rate_enabled must not pause refresh."
+    );
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(
+        stored.coingecko_api_key,
+        Some("rotated-test-key".to_string()),
+        "Key rotation should still replace the configured key."
+    );
+    assert_eq!(stored.exchange_rate_enabled, Some(true));
+}
+
+#[test]
 fn set_exchange_rate_enabled_is_controller_only() {
     let pic_setup = setup();
 
