@@ -120,10 +120,17 @@ on, and anything added later. They are non-negotiable.
    **not sufficient on its own** — a German-only user staring at "Sprache" or
    a Japanese-only user staring at "言語" tells them nothing if they cannot
    read the UI's current language. The switcher must therefore carry a
-   universal visual cue alongside the label: in oisy that cue is
-   [`IconWorld`](../../../src/frontend/src/lib/components/icons/IconWorld.svelte)
-   (a globe-style icon), rendered inline next to the label. **Never ship a
-   language-switcher entry that is text-only.**
+   universal visual cue alongside the label, and that cue **must be a
+   globe** — the pattern Apple/iOS, browsers, Wikipedia and Google all use
+   for language selection. In oisy that is
+   [`IconWorld`](../../../src/frontend/src/lib/components/icons/IconWorld.svelte).
+
+   **Do not use a translation-script glyph** (e.g. oisy's existing
+   [`IconLanguage`](../../../src/frontend/src/lib/components/icons/IconLanguage.svelte)
+   — a "文"-style mark next to an "A") for this purpose: it depicts
+   "translation between scripts", not "language selection", and is a
+   second-tier cue at best. **Never ship a language-switcher entry that is
+   text-only.**
 
 2. **Every language option in the dropdown is rendered as an autonym** — in
    its own script, never translated into the current UI language. "Deutsch"
@@ -200,12 +207,9 @@ Notes:
 - Reuse the existing i18n labels `core.text.language` and `core.text.currency`
   for the row keys, and **always render them alongside the icon** — text-only
   is a violation of UX rule 1 and must be flagged in review.
-- **Harmonize the icons** so they read as equal-weight affordances: wrap each
-  in a `text-tertiary` span (mirrors the existing `MenuLanguageSelector`
-  convention) and pass `size="20"` to both. Without this, `IconWorld`
-  (`stroke="currentColor"`, default `size="24"`) renders darker and larger
-  than `IconDollarSign` (`fill="#6C757D"` hardcoded, default `size="20"`),
-  which looks unintentional.
+- **The language and currency icons should look visually balanced** — same
+  weight, same size, same color. They are equal-status affordances; neither
+  should compete for attention. Mechanics are an implementation choice.
 - No `info` snippet is passed, so `SettingsCardItem` suppresses the help-icon
   button (matches its documented behaviour).
 - Consider adding a `data-tid` test id for the card / rows in
