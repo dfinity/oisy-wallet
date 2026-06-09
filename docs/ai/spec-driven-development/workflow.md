@@ -46,6 +46,10 @@ We work through open questions together: scope, edge cases, constraints, accepta
 
 Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/specs/` in your local repo. The spec is intentionally written for Claude Code — it references real file paths, component names, and existing patterns where possible.
 
+**Spec header:** Every new spec must begin with the following line so Claude Code knows it is part of this workflow:
+
+> This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
+
 **Spec filename convention:** `YYYY-MM-DD-<type>-<short-description>.md`
 
 The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
@@ -81,6 +85,8 @@ Open Claude Code in the oisy-wallet repo and say:
 
 Claude Code reads the spec, reads `docs/ai/PRODUCT.md` for system context, and begins building. It has the GitHub MCP configured and can open PRs, create branches, and interact with issues directly.
 
+**Update `docs/ai/PRODUCT.md` in the same PR** as the behaviour change, not afterwards. Claude Code is best placed to write the description because by the time the PR is ready, it has the implementation context (what _actually_ shipped, including any [Step 5 — Adjust](#step-5--adjust-claude-code--spec) deviations from the spec). Landing PRODUCT.md alongside the code also keeps `main` from briefly disagreeing with itself between merge and the cleanup PR. Cowork can still review the draft if a product re-think emerges.
+
 ### Step 5 — Adjust (Claude Code ↔ Spec)
 
 If the implementation reveals gaps or the spec needs updating, the spec is the source of truth — keep it in sync with reality.
@@ -89,14 +95,15 @@ If the implementation reveals gaps or the spec needs updating, the spec is the s
 
 **Come back to Cowork** if the gap reveals a deeper ambiguity — something that requires rethinking scope, resolving a product question, or deciding between approaches. Cowork is better for that dialogue, and the updated spec should reflect the decision before Code continues.
 
-### Step 6 — Merge & Update (Claude Code)
+### Step 6 — Post-merge cleanup (Claude Code)
 
 After the PR merges:
 
-1. **Update `docs/ai/PRODUCT.md`** to reflect the new behavior. This keeps the product spec accurate for all future builds.
-2. **Remove the spec's asset folder** (`specs/<name>/` — wireframes, designs, etc.). The spec `.md` stays; the assets were planning artifacts. Once the feature ships, the shipped app is the source of truth — the code itself, plus `PRODUCT.md` for behaviour and the design-system / component library for visual conventions. Holding on to spec assets after merge just creates silent traps once the implementation evolves. Git history retains them if they're ever genuinely needed again.
+1. **Remove the spec's asset folder** (`specs/<name>/` — wireframes, designs, etc.). The spec `.md` stays; the assets were planning artifacts. Once the feature ships, the shipped app is the source of truth — the code itself, plus `PRODUCT.md` for behaviour and the design-system / component library for visual conventions. Holding on to spec assets after merge just creates silent traps once the implementation evolves. Git history retains them if they're ever genuinely needed again.
 
-Both updates can land in a single small cleanup PR. A project can deviate from step 2 (e.g. if assets are linked from external docs and must remain browseable), but the decision should be explicit in the project's `CLAUDE.md` so the convention isn't skipped silently.
+This can land as a small follow-up PR. A project can deviate (e.g. if assets are linked from external docs and must remain browseable), but the decision should be explicit in the project's `CLAUDE.md` so the convention isn't skipped silently.
+
+(`PRODUCT.md` is updated in the **same** PR as the behaviour change — see [Step 4](#step-4--build-claude-code) — not here.)
 
 ---
 
@@ -112,7 +119,7 @@ Before closing a PR, Claude Code diffs the final implementation against the spec
 
 ### PRODUCT.md stays current
 
-`PRODUCT.md` is updated as part of every merge, not as an afterthought. Claude Code should be instructed in `CLAUDE.md` to patch `PRODUCT.md` as part of its standard post-implementation step.
+`PRODUCT.md` is updated in the **same PR** as the behaviour change, not as a post-merge afterthought. This keeps `main` from briefly carrying code whose product description does not yet match, and means the description is written by Claude Code with the implementation context fresh.
 
 ### CLAUDE.md wires everything together
 
@@ -120,7 +127,7 @@ Before closing a PR, Claude Code diffs the final implementation against the spec
 
 - Always read `docs/ai/PRODUCT.md` at session start
 - Look for specs in `docs/ai/spec-driven-development/specs/`
-- Update `PRODUCT.md` after merging
+- Update `PRODUCT.md` in the same PR as the behaviour change (not post-merge)
 
 ---
 
