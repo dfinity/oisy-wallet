@@ -7,6 +7,8 @@
 
 use candid::{CandidType, Deserialize};
 
+use crate::types::signer::RateLimitError;
+
 /// A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
 /// `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
 /// `key` to lowercase before signing.
@@ -35,4 +37,8 @@ pub enum SignOnramperWidgetUrlError {
     /// frontend should treat this the same as a hard failure: the widget cannot be opened until
     /// the secret is configured.
     SecretNotConfigured,
+    /// The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
+    /// arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
+    /// signing oracle.
+    RateLimited(RateLimitError),
 }

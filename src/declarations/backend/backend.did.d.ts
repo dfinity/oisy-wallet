@@ -1231,14 +1231,23 @@ export interface Settings {
 /**
  * Errors returned by `sign_onramper_widget_url`.
  */
-export type SignOnramperWidgetUrlError = {
-	/**
-	 * Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
-	 * frontend should treat this the same as a hard failure: the widget cannot be opened until
-	 * the secret is configured.
-	 */
-	SecretNotConfigured: null;
-};
+export type SignOnramperWidgetUrlError =
+	| {
+			/**
+			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
+			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
+			 * signing oracle.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
+			 * frontend should treat this the same as a hard failure: the widget cannot be opened until
+			 * the secret is configured.
+			 */
+			SecretNotConfigured: null;
+	  };
 /**
  * Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
  * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
@@ -2000,6 +2009,14 @@ export interface _SERVICE {
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
+	 * Returns whether the `OnRamper` widget can be signed, i.e. whether controllers have provisioned
+	 * the signing secret via `set_api_keys`.
+	 *
+	 * Exposed as an unauthenticated query (mirroring `exchange_rate_enabled`) so the frontend can
+	 * disable the buy flow up front when the secret is missing, rather than failing on widget open.
+	 */
+	onramper_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
@@ -2041,6 +2058,14 @@ export interface _SERVICE {
 	 */
 	set_new_user_signups_allowed: ActorMethod<[boolean], undefined>;
 	/**
+	 * Sets or clears the `OnRamper` signing secret used by [`sign_onramper_widget_url`].
+	 *
+	 * Restricted to canister controllers. Uses a single-field mutation, so it never overwrites the
+	 * other configured API keys the way a full `set_api_keys` call would — the safe way to provision
+	 * or rotate the secret per environment.
+	 */
+	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
+	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
 	 * # Returns
@@ -2056,6 +2081,10 @@ export interface _SERVICE {
 	 *
 	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
 	 * Authenticated callers only: anonymous principals cannot extract signatures.
+	 *
+	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
+	 * can persist its sliding window — a query would discard the recorded call. The frontend already
+	 * invokes it as a certified (replicated) call, so there is no added latency.
 	 */
 	sign_onramper_widget_url: ActorMethod<
 		[SignOnramperWidgetUrlRequest],

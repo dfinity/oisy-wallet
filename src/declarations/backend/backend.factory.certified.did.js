@@ -664,6 +664,7 @@ export const idlFactory = ({ IDL }) => {
 		wallet_address_tags: IDL.Vec(OnramperSignedEntry)
 	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
+		RateLimited: RateLimitError,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({
@@ -787,6 +788,7 @@ export const idlFactory = ({ IDL }) => {
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
+		onramper_enabled: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],
@@ -798,10 +800,12 @@ export const idlFactory = ({ IDL }) => {
 		set_exchange_rate_enabled: IDL.Func([IDL.Bool], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
+		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		sign_onramper_widget_url: IDL.Func(
 			[SignOnramperWidgetUrlRequest],
-			[SignOnramperWidgetUrlResult]
+			[SignOnramperWidgetUrlResult],
+			[]
 		),
 		stats: IDL.Func([], [Stats]),
 		top_up_cycles_ledger: IDL.Func(

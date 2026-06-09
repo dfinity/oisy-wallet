@@ -1,10 +1,21 @@
 <script lang="ts">
-	import { ONRAMPER_ENABLED } from '$env/rest/onramper.env';
+	import { BACKEND_ONRAMPER_ENABLED, ONRAMPER_ENABLED } from '$env/rest/onramper.env';
 	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
 	import OnramperWidget from '$lib/components/onramper/OnramperWidget.svelte';
+	import { loadBackendOnramperEnabled } from '$lib/services/backend-onramper-enabled.services';
+
+	// Whether the backend has the OnRamper signing secret provisioned. Resolved at runtime so a
+	// missing secret shows the unavailable notice up front instead of a widget that fails on open.
+	let backendOnramperEnabled = $state<boolean>(BACKEND_ONRAMPER_ENABLED);
+
+	$effect(() => {
+		void loadBackendOnramperEnabled().then((enabled) => {
+			backendOnramperEnabled = enabled;
+		});
+	});
 </script>
 
-{#if ONRAMPER_ENABLED}
+{#if ONRAMPER_ENABLED && backendOnramperEnabled}
 	<div class="stretch flex overflow-hidden">
 		<div class="w-full overflow-auto">
 			<OnramperWidget />

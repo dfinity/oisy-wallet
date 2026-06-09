@@ -2,6 +2,10 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
 export const ONRAMPER_ENABLED = true as boolean;
 
+// Optimistic fallback for the runtime `onramper_enabled` backend query: assume the widget is
+// available when the query cannot be reached, since the widget self-disables on a missing secret.
+export const BACKEND_ONRAMPER_ENABLED = true as boolean;
+
 const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
 
 export const isOnRamperDev = ONRAMPER_ENV === 'dev';
