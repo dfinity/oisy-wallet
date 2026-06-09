@@ -82,7 +82,9 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 ///
 /// Sends a GET request to `url` with a `User-Agent` header and validates
 /// that the response status is in the 2xx range. Attaches
-/// [`http_request_transform`] so IC replicas can reach consensus.
+/// [`http_request_transform`] to normalise the response (it strips volatile
+/// headers); in replicated mode that normalisation is also what lets the
+/// replicas reach consensus.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.

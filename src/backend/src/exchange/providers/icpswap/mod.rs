@@ -98,11 +98,9 @@ impl IcpSwapProvider {
     }
 
     #[expect(dead_code)]
-    pub(crate) fn with_base_url(base_url: String) -> Self {
-        Self {
-            base_url,
-            ..Self::default()
-        }
+    pub(crate) fn with_base_url(mut self, base_url: String) -> Self {
+        self.base_url = base_url;
+        self
     }
 
     async fn fetch_icrc_token_usd(
