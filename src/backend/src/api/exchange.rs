@@ -119,3 +119,16 @@ pub fn exchange_rate_enabled() -> bool {
 pub fn set_exchange_rate_enabled(enabled: bool) {
     mutate_api_keys(|keys| keys.exchange_rate_enabled = Some(enabled));
 }
+
+/// Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+/// keys.
+///
+/// Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+/// consensus (every replica issues the request); `false` sends them non-replicated (a single
+/// replica). See [`crate::exchange::is_exchange_rate_replicated`].
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_replicated(replicated: bool) {
+    mutate_api_keys(|keys| keys.exchange_rate_replicated = Some(replicated));
+}
