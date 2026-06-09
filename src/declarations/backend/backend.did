@@ -323,8 +323,7 @@ type BtcGetPendingTransactionsReponse = record {
 };
 type BtcGetPendingTransactionsRequest = record {
 	ii_delegation_chain : opt IIDelegationChain;
-	network : Network;
-	address : text
+	network : Network
 };
 type BtcGetPendingTransactionsResult = variant {
 	// The pending transactions were retrieved successfully.
