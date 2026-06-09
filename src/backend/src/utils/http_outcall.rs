@@ -50,6 +50,7 @@ fn build_request(
         max_response_bytes: Some(max_response_bytes),
         transform: None,
         headers,
+        is_replicated: None,
     }
 }
 
