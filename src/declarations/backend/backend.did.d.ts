@@ -1854,7 +1854,7 @@ export interface _SERVICE {
 	 * background refresh timer keeps them warm. If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
-	 * background** (via `ic_cdk::futures::spawn`) and returns the current cache
+	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
 	 * snapshot immediately. Entries that are still missing or stale at the
 	 * moment of the call are returned as `None`; subsequent calls will pick up
 	 * the refreshed values once the spawned fetch lands.
