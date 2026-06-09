@@ -163,5 +163,9 @@ export const mapSignOnramperWidgetUrlError = (
 		);
 	}
 
+	if ('RateLimited' in err) {
+		return mapRateLimitError(err.RateLimited);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown SignOnramperWidgetUrlError'));
 };
