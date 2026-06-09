@@ -95,7 +95,21 @@ If the implementation reveals gaps or the spec needs updating, the spec is the s
 
 **Come back to Cowork** if the gap reveals a deeper ambiguity — something that requires rethinking scope, resolving a product question, or deciding between approaches. Cowork is better for that dialogue, and the updated spec should reflect the decision before Code continues.
 
-### Step 6 — Post-merge cleanup (Claude Code)
+### Step 6 — Review (Cowork)
+
+Before the PR merges, hand the result back to Cowork for an independent review. Cowork holds the original intent and the spec context but did not write the code — that distance is the point. Paste the PR (or its diff) into the spec's Cowork session and ask for a review of three artifacts:
+
+- **The code / diff** — does it deliver what the spec described? Walk the acceptance criteria one by one, confirm the negative guarantees ("does _not_ do X") actually hold, and probe edge cases the spec implied but the diff might miss (theme variants, logged-out states, empty/error paths). This is where reasoning-level bugs surface — e.g. an icon hardcoding a color instead of inheriting `currentColor`, which looks fine in the diff and only diverges in dark mode.
+- **`PRODUCT.md`** — accurate against what actually shipped, complete, and does it keep the deliberate "does not do X" statements that let a future reader tell "excluded on purpose" from "forgotten"?
+- **The final spec** — after any [Step 5 — Adjust](#step-5--adjust-claude-code--spec) edits, does it still match what shipped and stay at product altitude (intent and behaviour, not Tailwind classes and prop names)?
+
+**What this review is and isn't.** It is a reasoning and divergence check by a second agent — it complements, it does not replace, human visual QA and CI. Cowork reads code and descriptions; it does not run the app. A "correct in the diff" finding still needs a human to confirm in the running UI (in every theme), and the gates (`format` / `lint` / `check` / `test`) remain the structural backstop.
+
+**Why a second agent.** Claude Code already self-checks via the [divergence check before closing PRs](#divergence-check-before-closing-prs), but the implementer reviewing its own output is the weakest form of review. The two checks run in opposite directions and are complementary: Code, reading the spec to build, catches errors in the **spec** (e.g. a spec claiming a test file does not exist when it does); Cowork, reading the output against the intent, catches errors in the **code and the description**. Note the asymmetry — Cowork authored the spec, so it is a poor reviewer of its _own_ spec's blind spots; its value here is on the code and `PRODUCT.md` that Code produced.
+
+Findings go back to you. You decide what to act on; fixes flow through the [Step 5 — Adjust](#step-5--adjust-claude-code--spec) loop (Cowork for product re-thinks, Code for small gaps) before merge.
+
+### Step 7 — Post-merge cleanup (Claude Code)
 
 After the PR merges:
 
@@ -116,6 +130,8 @@ Before finalizing a spec, Claude Code (or Cowork via search) scans the codebase 
 ### Divergence check before closing PRs
 
 Before closing a PR, Claude Code diffs the final implementation against the spec and flags any gaps. You decide whether to update the spec or revert the code. This prevents silent drift.
+
+This is Claude Code's self-check; it is distinct from the independent [Step 6 — Review (Cowork)](#step-6--review-cowork), where a second agent that did not write the code reviews the diff, `PRODUCT.md`, and final spec against the original intent.
 
 ### PRODUCT.md stays current
 
