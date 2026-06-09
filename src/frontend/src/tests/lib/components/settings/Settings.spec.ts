@@ -2,8 +2,8 @@ import Settings from '$lib/components/settings/Settings.svelte';
 import { CURRENCY_SWITCHER_BUTTON } from '$lib/constants/test-ids.constants';
 import { authRemainingTimeStore } from '$lib/stores/auth.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import en from '$tests/mocks/i18n.mock';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { render } from '@testing-library/svelte';
 
