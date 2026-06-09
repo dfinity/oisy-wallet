@@ -208,8 +208,13 @@ Notes:
   for the row keys, and **always render them alongside the icon** — text-only
   is a violation of UX rule 1 and must be flagged in review.
 - **The language and currency icons should look visually balanced** — same
-  weight, same size, same color. They are equal-status affordances; neither
-  should compete for attention. Mechanics are an implementation choice.
+  weight, same size, same color, **in both light and dark mode**. They are
+  equal-status affordances; neither should compete for attention. In
+  practice the icon's colour must follow the surrounding theme wrapper
+  (i.e. inherit `currentColor`) rather than carry a hardcoded fill or
+  stroke — otherwise the icon stays one literal colour while its neighbour
+  theme-adapts and the two diverge in dark mode. Mechanics beyond that are
+  an implementation choice.
 - No `info` snippet is passed, so `SettingsCardItem` suppresses the help-icon
   button (matches its documented behaviour).
 - Consider adding a `data-tid` test id for the card / rows in
