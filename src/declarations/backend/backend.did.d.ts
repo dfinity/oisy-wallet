@@ -209,6 +209,12 @@ export interface ApiKeys {
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
+	/**
+	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 */
+	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
 	infura_api_key: [] | [string];
 }

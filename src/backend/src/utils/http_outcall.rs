@@ -89,13 +89,18 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 /// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
+/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
+///   response; when `false`, a single replica handles it (cheaper, but unverified). The
+///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
 pub(crate) async fn get(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
+    replicated: bool,
 ) -> Result<HttpRequestResult, String> {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
+    request.is_replicated = Some(replicated);
     request.transform = Some(transform_context_from_query(
         "http_request_transform".to_string(),
         vec![],

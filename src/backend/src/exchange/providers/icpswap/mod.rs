@@ -72,20 +72,32 @@ fn parse_icpswap_body(body: &[u8]) -> Option<ExchangeData> {
 #[derive(Debug, Clone)]
 pub(crate) struct IcpSwapProvider {
     base_url: String,
+    replicated: bool,
 }
 
 impl Default for IcpSwapProvider {
     fn default() -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
+            replicated: false,
         }
     }
 }
 
 impl IcpSwapProvider {
+    pub(crate) fn new(replicated: bool) -> Self {
+        Self {
+            replicated,
+            ..Self::default()
+        }
+    }
+
     #[expect(dead_code)]
     pub(crate) fn with_base_url(base_url: String) -> Self {
-        Self { base_url }
+        Self {
+            base_url,
+            ..Self::default()
+        }
     }
 
     async fn fetch_icrc_token_usd(
@@ -104,6 +116,7 @@ impl IcpSwapProvider {
                 value: "application/json".to_string(),
             }],
             MAX_RESPONSE_BYTES,
+            self.replicated,
         )
         .await?;
 

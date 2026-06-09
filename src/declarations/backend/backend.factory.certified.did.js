@@ -448,6 +448,7 @@ export const idlFactory = ({ IDL }) => {
 		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
+		exchange_rate_replicated: IDL.Opt(IDL.Bool),
 		coingecko_api_key: IDL.Opt(IDL.Text),
 		infura_api_key: IDL.Opt(IDL.Text)
 	});

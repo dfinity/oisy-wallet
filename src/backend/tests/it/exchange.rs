@@ -72,3 +72,32 @@ fn set_exchange_rate_enabled_is_controller_only() {
         "Anonymous caller must not be able to toggle exchange-rate refresh."
     );
 }
+
+#[test]
+fn set_api_keys_persists_exchange_rate_replicated() {
+    let pic_setup = setup();
+
+    // Defaults to non-replicated when unset.
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_replicated, None);
+
+    let keys = ApiKeys {
+        exchange_rate_replicated: Some(true),
+        ..api_keys_with_coingecko()
+    };
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_api_keys", keys),
+        Ok(())
+    );
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(
+        stored.exchange_rate_replicated,
+        Some(true),
+        "exchange_rate_replicated must round-trip through set_api_keys/get_api_keys."
+    );
+}
