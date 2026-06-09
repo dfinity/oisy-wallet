@@ -50,6 +50,8 @@ Cowork produces a spec file. You copy it into `docs/ai/spec-driven-development/s
 
 > This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 
+**Workflow-step references:** When a spec (or any document) references a step in this workflow, include the **full title**, not just the number — e.g. `Step 6 — Review (Cowork)`, not `Step 6`. Step numbers can shift as the workflow evolves; titles stay stable, so a title-anchored pointer survives renumbering and stays readable. (Retro-fitting every older spec when numbers move isn't always practical — the title convention prevents the problem in the first place.)
+
 **Spec filename convention:** `YYYY-MM-DD-<type>-<short-description>.md`
 
 The date prefix keeps specs sorted chronologically in the directory. The type prefix signals the nature of the work at a glance:
