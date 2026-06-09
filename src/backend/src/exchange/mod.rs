@@ -277,14 +277,15 @@ pub(crate) fn start_exchange_rate_timer() {
     // right after init / upgrade, matching the previous always-on behaviour.
     note_rate_request();
 
-    set_timer(Duration::ZERO, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
-    });
+    set_timer(
+        Duration::ZERO,
+        refresh_exchange_rates_guarded("initial refresh"),
+    );
 
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("refresh"));
+        refresh_exchange_rates_guarded("refresh")
     });
 }
 
