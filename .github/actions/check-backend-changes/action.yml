@@ -18,6 +18,10 @@ runs:
         # The backend source code.
         # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
         # The dockerfile used in this CI run, and the scripts it COPY's.
+        # The scripts that drive the backend build and tests (e.g. test.backend.sh,
+        # download-canister-api, download-immutable.sh) — a change to one of these
+        # would otherwise leave the backend jobs silently skipped, so the very fix
+        # to such a script never gets exercised by its own CI run.
         filters: |
           backend:
             - '**/*backend*'
@@ -28,3 +32,4 @@ runs:
             - '**/*rust*'
             - 'Dockerfile'
             - 'docker/**'
+            - 'scripts/**'
