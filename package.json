@@ -122,7 +122,7 @@
 		"jsqr": "^1.4.0",
 		"lockfile-lint": "^5.0.0",
 		"pem-file": "^1.0.1",
-		"postcss": "^8.5.10",
+		"postcss": "^8.5.14",
 		"prettier": "^3.8.1",
 		"prettier-plugin-motoko": "^0.13.0",
 		"prettier-plugin-organize-imports": "^4.3.0",
