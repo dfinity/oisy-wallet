@@ -1967,6 +1967,9 @@ export interface _SERVICE {
 	/**
 	 * Overwrites the stored API keys.
 	 *
+	 * If `exchange_rate_enabled` is omitted, the existing refresh toggle is preserved so that routine
+	 * key rotation does not accidentally pause exchange-rate refreshes.
+	 *
 	 * Restricted to canister controllers only.
 	 */
 	set_api_keys: ActorMethod<[ApiKeys], undefined>;
