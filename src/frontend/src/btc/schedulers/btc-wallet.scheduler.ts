@@ -121,7 +121,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			const pendingTransactions = await getPendingBtcTransactions({
 				identity,
 				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(bitcoinNetwork),
-				address: btcAddress,
 				iiDelegationChain: extractIIDelegationChain(identity)
 			});
 

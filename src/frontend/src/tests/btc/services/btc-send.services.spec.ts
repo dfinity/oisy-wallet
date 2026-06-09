@@ -156,7 +156,6 @@ describe('btc-send.services', () => {
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
-				address: defaultParams.source,
 				txId: new Uint8Array(),
 				utxos: defaultParams.utxosFee.utxos,
 				iiDelegationChain: []

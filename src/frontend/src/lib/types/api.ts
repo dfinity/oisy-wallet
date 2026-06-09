@@ -64,7 +64,6 @@ export interface AllowSigningOutcome {
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
-	address: BtcAddress;
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
