@@ -184,9 +184,13 @@ pub async fn btc_get_pending_transactions(
         )
         .map_err(|msg| BtcGetPendingTransactionsError::InvalidDelegationChain { msg })?;
 
+        let source_address = signer::btc_principal_to_p2wpkh_address(params.network, &principal)
+            .await
+            .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+
         let current_utxos = api::get_all_utxos(
             params.network,
-            params.address.clone(),
+            source_address.clone(),
             Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
         )
         .await
@@ -199,7 +203,7 @@ pub async fn btc_get_pending_transactions(
                 None,
             );
             model.prune_pending_transactions(principal, &current_utxos, now_ns);
-            model.get_pending_transactions(&principal, &params.address)
+            model.get_pending_transactions(&principal, &source_address)
         });
 
         let pending_transactions = stored_transactions
