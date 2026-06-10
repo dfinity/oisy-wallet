@@ -54,6 +54,23 @@ fn build_request(
     }
 }
 
+fn build_get_request(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    replicated: bool,
+) -> HttpRequestArgs {
+    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+
+    request.is_replicated = Some(replicated);
+    request.transform = Some(transform_context_from_query(
+        "http_request_transform".to_string(),
+        vec![],
+    ));
+
+    request
+}
+
 /// Returns the response unchanged if its status is in the 2xx range,
 /// otherwise returns an error containing the status code.
 fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, String> {
@@ -100,15 +117,13 @@ pub(crate) async fn get(
     max_response_bytes: u64,
     replicated: bool,
 ) -> Result<HttpRequestResult, String> {
-    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
-
-    request.is_replicated = Some(replicated);
-    request.transform = Some(transform_context_from_query(
-        "http_request_transform".to_string(),
-        vec![],
-    ));
-
-    execute(request).await
+    execute(build_get_request(
+        url,
+        headers,
+        max_response_bytes,
+        replicated,
+    ))
+    .await
 }
 
 /// Performs an HTTP POST outcall with a JSON body.
@@ -182,7 +197,7 @@ mod tests {
     use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
     use pretty_assertions::assert_eq;
 
-    use super::{build_request, validate_response, USER_AGENT};
+    use super::{build_get_request, build_request, validate_response, USER_AGENT};
 
     #[test]
     fn test_build_request_sets_url() {
@@ -298,6 +313,35 @@ mod tests {
         let request = build_request("https://example.com", HttpMethod::GET, None, extra, 1024);
         assert_eq!(request.headers.len(), 2);
         assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[1].name, "Authorization");
+        assert_eq!(request.headers[1].value, "Bearer token");
+    }
+
+    #[test]
+    fn test_build_get_request_sets_replicated_flag() {
+        for replicated in [true, false] {
+            let request = build_get_request("https://example.com", vec![], 1024, replicated);
+
+            assert_eq!(request.is_replicated, Some(replicated));
+        }
+    }
+
+    #[test]
+    fn test_build_get_request_preserves_request_fields() {
+        let extra = vec![HttpHeader {
+            name: "Authorization".to_string(),
+            value: "Bearer token".to_string(),
+        }];
+        let request = build_get_request("https://example.com/api", extra, 4096, true);
+
+        assert_eq!(request.url, "https://example.com/api");
+        assert!(matches!(request.method, HttpMethod::GET));
+        assert_eq!(request.body, None);
+        assert_eq!(request.max_response_bytes, Some(4096));
+        assert!(request.transform.is_some());
+        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[0].value, USER_AGENT);
         assert_eq!(request.headers[1].name, "Authorization");
         assert_eq!(request.headers[1].value, "Bearer token");
     }
