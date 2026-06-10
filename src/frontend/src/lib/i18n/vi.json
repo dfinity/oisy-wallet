@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Cài đặt",
 			"general": "Chung",
+			"preferences": "Tuỳ chọn",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",
@@ -1604,6 +1605,7 @@
 			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
+			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
 		}

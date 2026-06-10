@@ -54,6 +54,7 @@ fn build_request(
         max_response_bytes: Some(max_response_bytes),
         transform: None,
         headers,
+        is_replicated: None,
     }
 }
 
@@ -87,20 +88,26 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 /// Factored out so [`get_tagged`] can hand the *exact* request to
 /// [`cost_http_request`] before sending it — the cost the IC charges is
 /// a function of this struct (URL + headers + body + transform name and
-/// context), so costing anything else would diverge from reality.
+/// context + `is_replicated`), so costing anything else would diverge
+/// from reality.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
 /// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs (the IC charges against this, not the actual response size).
+/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
+///   response; when `false`, a single replica handles it (cheaper, but unverified). The
+///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
 fn build_get_request(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
+    replicated: bool,
 ) -> HttpRequestArgs {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
+    request.is_replicated = Some(replicated);
     request.transform = Some(transform_context_from_query(
         "http_request_transform".to_string(),
         vec![],
@@ -123,10 +130,16 @@ pub(crate) struct OutcallTag<'a> {
     pub requested_tokens: &'a [String],
 }
 
-/// Same as [`get`] but records a per-call entry in
+/// GET outcall that records a per-call entry in
 /// [`crate::exchange::cost_log`]. Used by the exchange-rate fetcher so
 /// the controller-facing report can attribute cycle cost to each
 /// provider call.
+///
+/// `replicated` controls IC consensus: `true` runs the request on every
+/// replica with the [`http_request_transform`] reconciliation step
+/// (expensive but verified); `false` runs it on a single replica
+/// (cheaper, unverified). Threaded into [`build_get_request`] so the
+/// flag is part of the costed [`HttpRequestArgs`].
 ///
 /// Cycle cost is taken from the [`cost_http_request`] system API on the
 /// exact request we dispatch. That is what `http_request` itself uses to
@@ -141,10 +154,11 @@ pub(crate) async fn get_tagged(
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
     tag: OutcallTag<'_>,
+    replicated: bool,
 ) -> Result<HttpRequestResult, String> {
     let started_ns = time();
 
-    let request = build_get_request(url, headers, max_response_bytes);
+    let request = build_get_request(url, headers, max_response_bytes, replicated);
     let cycles_charged = cost_http_request(&request);
 
     let outcome = execute(request).await;

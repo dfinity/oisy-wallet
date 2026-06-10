@@ -767,6 +767,7 @@
 		"text": {
 			"title": "الإعدادات",
 			"general": "",
+			"preferences": "التفضيلات",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
@@ -1604,6 +1605,7 @@
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
 		}

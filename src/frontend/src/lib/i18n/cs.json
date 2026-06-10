@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -1604,6 +1605,7 @@
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
+			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
 		}

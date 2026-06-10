@@ -58,13 +58,15 @@ impl From<CoinGeckoPrice> for ExchangeData {
 pub struct CoinGeckoClient {
     base_url: String,
     api_key: String,
+    replicated: bool,
 }
 
 impl CoinGeckoClient {
-    pub fn new(api_key: String) -> Self {
+    pub fn new(api_key: String, replicated: bool) -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
             api_key,
+            replicated,
         }
     }
 
@@ -98,6 +100,7 @@ impl CoinGeckoClient {
                 path_for_log,
                 requested_tokens,
             },
+            self.replicated,
         )
         .await?;
 

@@ -20,9 +20,9 @@ pub struct CoinGeckoProvider {
 }
 
 impl CoinGeckoProvider {
-    pub fn new(api_key: String) -> Self {
+    pub fn new(api_key: String, replicated: bool) -> Self {
         Self {
-            client: CoinGeckoClient::new(api_key),
+            client: CoinGeckoClient::new(api_key, replicated),
         }
     }
 
@@ -230,5 +230,138 @@ impl ExchangePriceProvider for CoinGeckoProvider {
         }
 
         Ok(result)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use candid::Principal;
+    use pretty_assertions::assert_eq;
+    use shared::types::{
+        custom_token::{ErcTokenId, SplTokenId},
+        token_id::TokenId,
+    };
+
+    use super::*;
+
+    fn erc20(address: &str, chain_id: u64) -> StoredTokenId {
+        StoredTokenId(TokenId::Erc20(ErcTokenId(address.to_string()), chain_id))
+    }
+
+    fn icrc(principal: &str) -> StoredTokenId {
+        StoredTokenId(TokenId::Icrc(Principal::from_text(principal).unwrap()))
+    }
+
+    fn spl(address: &str) -> StoredTokenId {
+        StoredTokenId(TokenId::SplMainnet(SplTokenId(address.to_string())))
+    }
+
+    #[test]
+    fn classify_tokens_groups_native_tokens_by_coingecko_coin_id() {
+        let eth = StoredTokenId(TokenId::EvmNative(1));
+        let base_eth = StoredTokenId(TokenId::EvmNative(8453));
+        let bnb = StoredTokenId(TokenId::EvmNative(56));
+        let icp = StoredTokenId(TokenId::IcpNative);
+        let sol = StoredTokenId(TokenId::SolNativeMainnet);
+        let btc = StoredTokenId(TokenId::BtcNativeMainnet);
+        let unsupported_evm = StoredTokenId(TokenId::EvmNative(999));
+        let btc_testnet = StoredTokenId(TokenId::BtcNativeTestnet);
+        let sol_devnet = StoredTokenId(TokenId::SolNativeDevnet);
+
+        let tokens = [
+            eth.clone(),
+            base_eth.clone(),
+            bnb.clone(),
+            icp.clone(),
+            sol.clone(),
+            btc.clone(),
+            unsupported_evm,
+            btc_testnet,
+            sol_devnet,
+        ];
+        let classified = classify_tokens(&tokens);
+
+        assert_eq!(
+            classified.native_coins.get("ethereum"),
+            Some(&vec![eth, base_eth])
+        );
+        assert_eq!(classified.native_coins.get("binancecoin"), Some(&vec![bnb]));
+        assert_eq!(
+            classified.native_coins.get("internet-computer"),
+            Some(&vec![icp])
+        );
+        assert_eq!(classified.native_coins.get("solana"), Some(&vec![sol]));
+        assert_eq!(classified.native_coins.get("bitcoin"), Some(&vec![btc]));
+        assert_eq!(classified.native_coins.len(), 5);
+        assert!(classified.contract_platforms.is_empty());
+        assert!(classified.address_to_token_id.is_empty());
+    }
+
+    #[test]
+    fn classify_tokens_groups_contracts_by_platform_and_lowercases_lookup_keys() {
+        let ethereum = erc20("0xABCDEF", 1);
+        let base = erc20("0xBaseToken", 8453);
+        let icrc = icrc("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let spl = spl("So11111111111111111111111111111111111111112");
+        let unsupported_chain = erc20("0xUnsupported", 999);
+        let erc721 = StoredTokenId(TokenId::Erc721(ErcTokenId("0xNFT".to_string()), 1));
+
+        let tokens = [
+            ethereum.clone(),
+            base.clone(),
+            icrc.clone(),
+            spl.clone(),
+            unsupported_chain,
+            erc721,
+        ];
+        let classified = classify_tokens(&tokens);
+
+        assert!(classified.native_coins.is_empty());
+        assert_eq!(
+            classified.contract_platforms.get("ethereum"),
+            Some(&vec!["0xABCDEF".to_string()])
+        );
+        assert_eq!(
+            classified.contract_platforms.get("base"),
+            Some(&vec!["0xBaseToken".to_string()])
+        );
+        assert_eq!(
+            classified.contract_platforms.get("internet-computer"),
+            Some(&vec!["ryjl3-tyaaa-aaaaa-aaaba-cai".to_string()])
+        );
+        assert_eq!(
+            classified.contract_platforms.get("solana"),
+            Some(&vec![
+                "So11111111111111111111111111111111111111112".to_string()
+            ])
+        );
+        assert_eq!(classified.contract_platforms.len(), 4);
+        assert_eq!(
+            classified
+                .address_to_token_id
+                .get(&("ethereum".to_string(), "0xabcdef".to_string())),
+            Some(&ethereum)
+        );
+        assert_eq!(
+            classified
+                .address_to_token_id
+                .get(&("base".to_string(), "0xbasetoken".to_string())),
+            Some(&base)
+        );
+        assert_eq!(
+            classified.address_to_token_id.get(&(
+                "internet-computer".to_string(),
+                "ryjl3-tyaaa-aaaaa-aaaba-cai".to_string()
+            )),
+            Some(&icrc)
+        );
+        assert_eq!(
+            classified.address_to_token_id.get(&(
+                "solana".to_string(),
+                "so11111111111111111111111111111111111111112".to_string()
+            )),
+            Some(&spl)
+        );
+        assert_eq!(classified.address_to_token_id.len(), 4);
     }
 }
