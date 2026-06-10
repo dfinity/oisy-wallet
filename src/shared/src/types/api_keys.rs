@@ -12,6 +12,10 @@ pub struct ApiKeys {
     /// `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
     /// both keep refresh disabled (and a missing key never runs refresh either).
     pub exchange_rate_enabled: Option<bool>,
+    /// Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+    /// issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+    /// `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+    pub exchange_rate_replicated: Option<bool>,
 }
 
 impl Debug for ApiKeys {
@@ -24,6 +28,7 @@ impl Debug for ApiKeys {
             .field("alchemy_api_key", &redact(&self.alchemy_api_key))
             .field("coingecko_api_key", &redact(&self.coingecko_api_key))
             .field("exchange_rate_enabled", &self.exchange_rate_enabled)
+            .field("exchange_rate_replicated", &self.exchange_rate_replicated)
             .finish()
     }
 }

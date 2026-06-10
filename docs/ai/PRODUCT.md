@@ -57,3 +57,26 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
+
+---
+
+## User Preferences
+
+### Language and currency selectors
+
+Signed-in users change their UI **language** and their display **currency** on the **Settings** page (`/settings`), inside a dedicated **Preferences** card placed above the Networks card. Each row pairs the existing dropdown (`LanguageDropdown` / `CurrencyDropdown`) with an icon next to the localized label.
+
+The row icons are theme-adaptive: they inherit the surrounding text colour rather than carrying a hardcoded fill, so they keep visual parity with each other in both light and dark mode.
+
+Two UX rules apply to every rendering of the language switcher, anywhere in the app:
+
+1. **The switcher carries a globe icon next to the localized label.** In oisy that is `IconWorld` — the universally-recognised cue Apple/iOS, browsers, Wikipedia, and Google all use for language selection. A translation-script glyph like `IconLanguage` is the wrong cue (it depicts "translation between scripts", not "language selection") and must not be used.
+2. **Every language option in the dropdown is an autonym** — rendered in its own script ("Deutsch" not "German", "日本語" not "Japanese", "Русский" not "Russian"). Enforced by the `LANGUAGES` map in `src/frontend/src/env/i18n.ts`.
+
+### User menu
+
+The user-menu popover (the `IconUser` button) carries a **Language** selector for **logged-out users only** — the Settings page lives behind authentication, so the menu is their only entry point. Signed in, the menu drops the language row; the Settings Preferences card takes over.
+
+The user menu also carries the **theme/appearance** selector when signed in (unchanged).
+
+The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.

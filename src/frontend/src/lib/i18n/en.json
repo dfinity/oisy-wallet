@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Settings",
 			"general": "General",
+			"preferences": "Preferences",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",

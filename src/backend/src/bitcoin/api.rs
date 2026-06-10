@@ -123,9 +123,9 @@ pub fn init_fee_percentiles_cache() {
     }
 
     // Schedule the initial cache population and timer setup to run after init completes
-    set_timer(FEE_PERCENTILES_INITIAL_DELAY, || {
+    set_timer(FEE_PERCENTILES_INITIAL_DELAY, async {
         // Set up the recurring timer to update the data
-        set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
+        set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || async {
             spawn_fee_update_if_idle();
         });
 
