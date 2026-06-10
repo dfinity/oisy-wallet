@@ -90,7 +90,7 @@ export const getNftSendCloseRedirectUrl = ({
 	collectionNfts: Nft[];
 }): string | undefined =>
 	isNftsPage &&
-	nonNullish(routeNft) &&
+	notEmptyString(routeNft) &&
 	sendProgressStep === ProgressStepsSend.DONE &&
 	nonNullish(selectedNft)
 		? getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts })

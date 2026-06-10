@@ -160,6 +160,7 @@ describe('send.utils', () => {
 		it.each([
 			{ description: 'is not on the NFTs page', override: { isNftsPage: false } },
 			{ description: 'has no NFT route parameter', override: { routeNft: undefined } },
+			{ description: 'has an empty NFT route parameter', override: { routeNft: '' } },
 			{
 				description: 'has not completed the send',
 				override: { sendProgressStep: ProgressStepsSend.INITIALIZATION }
