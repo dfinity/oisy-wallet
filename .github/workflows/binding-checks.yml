@@ -65,12 +65,8 @@ jobs:
               - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
                 '**/Cargo*'
               - '**/*rust*'
-              - # Scripts that download external Candid files, with false positives.
-                'scripts/build.*.sh'
-              - # Scripts that generate the declarations.
-                'scripts/generate.sh'
-              - # Scripts that download the candid files.
-                'scripts/did.sh'
+              - # The binding-gen scripts and the helpers they call.
+                'scripts/**'
               - # This workflow
                 '.github/workflows/binding-checks.yml'
 

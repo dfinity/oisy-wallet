@@ -230,7 +230,21 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination } = mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous } = mapSolTransactionMessage(parsedTransactionMessage);
+
+			// The review screen collapses the transaction to a single source/destination/amount.
+			// When the message bundles instructions that disagree on those fields, that summary
+			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
+			// one). Refuse to sign anything we cannot display faithfully.
+			if (ambiguous) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			// TODO: add assertions checks about amount, payer, source and destination when we will able to properly parse them for ALL the transactions
 

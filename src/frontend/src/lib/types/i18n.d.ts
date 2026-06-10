@@ -505,6 +505,7 @@ interface I18nSettings {
 	text: {
 		title: string;
 		general: string;
+		preferences: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -1276,6 +1277,7 @@ interface I18nWallet_connect {
 		wallet_not_initialized: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};

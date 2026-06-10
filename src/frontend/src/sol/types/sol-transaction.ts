@@ -72,6 +72,11 @@ export interface MappedSolTransaction {
 	payer?: SolAddress;
 	source?: SolAddress;
 	destination?: SolAddress;
+	// `true` when the message bundles instructions that disagree on source,
+	// destination or payer. The summary keeps a single value per field, so such
+	// a transaction cannot be faithfully represented on the review screen and
+	// must not be signed without the user seeing every fund movement.
+	ambiguous?: boolean;
 }
 
 export interface SolMappedTransaction {
