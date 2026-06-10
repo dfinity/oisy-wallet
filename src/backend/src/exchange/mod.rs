@@ -765,4 +765,56 @@ mod tests {
             floor
         ));
     }
+
+    #[test]
+    fn caller_staleness_floor_aligns_refresh_trigger_with_snapshot_filter() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = staleness_floor_ns(now);
+        let missing = custom_token(1);
+        let stale = custom_token(2);
+        let boundary = custom_token(3);
+        let fresh = custom_token(4);
+        let tokens = vec![
+            missing.clone(),
+            stale.clone(),
+            boundary.clone(),
+            fresh.clone(),
+        ];
+
+        let cached_rate = |token_id: &StoredTokenId| {
+            if *token_id == stale {
+                Some(exchange_rate(floor - 1))
+            } else if *token_id == boundary {
+                Some(exchange_rate(floor))
+            } else if *token_id == fresh {
+                Some(exchange_rate(now))
+            } else {
+                None
+            }
+        };
+
+        let due = tokens_missing_or_older_than(&tokens, cached_rate, floor);
+        let snapshot: Vec<(StoredTokenId, Option<ExchangeRate>)> = tokens
+            .iter()
+            .map(|token_id| {
+                (
+                    token_id.clone(),
+                    cached_rate(token_id).and_then(|rate| {
+                        exchange_rate_is_fresh_enough(&rate, floor).then_some(rate)
+                    }),
+                )
+            })
+            .collect();
+
+        assert_eq!(due, vec![missing.clone(), stale.clone()]);
+        assert_eq!(
+            snapshot,
+            vec![
+                (missing, None),
+                (stale, None),
+                (boundary, Some(exchange_rate(floor))),
+                (fresh, Some(exchange_rate(now)))
+            ]
+        );
+    }
 }

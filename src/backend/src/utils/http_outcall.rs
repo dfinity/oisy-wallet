@@ -3,7 +3,7 @@ use ic_cdk::{
     api::time,
     management_canister::{
         cost_http_request, http_request, transform_context_from_query, HttpHeader, HttpMethod,
-        HttpRequestArgs, HttpRequestResult, TransformArgs,
+        HttpRequestArgs, HttpRequestResult, TransformArgs, TransformContext,
     },
     query,
 };
@@ -58,6 +58,21 @@ fn build_request(
     }
 }
 
+fn build_get_request(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    replicated: bool,
+    transform: Option<TransformContext>,
+) -> HttpRequestArgs {
+    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+
+    request.is_replicated = Some(replicated);
+    request.transform = transform;
+
+    request
+}
+
 /// Returns the response unchanged if its status is in the 2xx range,
 /// otherwise returns an error containing the status code.
 fn validate_response(response: HttpRequestResult) -> Result<HttpRequestResult, String> {
@@ -82,40 +97,6 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
     }
 }
 
-/// Builds the canonical GET [`HttpRequestArgs`] (with the consensus
-/// transform attached) that [`get_tagged`] dispatches.
-///
-/// Factored out so [`get_tagged`] can hand the *exact* request to
-/// [`cost_http_request`] before sending it — the cost the IC charges is
-/// a function of this struct (URL + headers + body + transform name and
-/// context + `is_replicated`), so costing anything else would diverge
-/// from reality.
-///
-/// # Arguments
-/// * `url` - The URL to fetch.
-/// * `headers` - Additional headers appended after `User-Agent`.
-/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
-///   to minimise cycle costs (the IC charges against this, not the actual response size).
-/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
-///   response; when `false`, a single replica handles it (cheaper, but unverified). The
-///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
-fn build_get_request(
-    url: &str,
-    headers: Vec<HttpHeader>,
-    max_response_bytes: u64,
-    replicated: bool,
-) -> HttpRequestArgs {
-    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
-
-    request.is_replicated = Some(replicated);
-    request.transform = Some(transform_context_from_query(
-        "http_request_transform".to_string(),
-        vec![],
-    ));
-
-    request
-}
-
 /// Telemetry tag for an outgoing exchange-rate outcall. Threaded into
 /// [`get_tagged`] so the per-call cost ends up attributed to the right
 /// provider in the [`crate::exchange::cost_log`] ring buffer.
@@ -138,8 +119,8 @@ pub(crate) struct OutcallTag<'a> {
 /// `replicated` controls IC consensus: `true` runs the request on every
 /// replica with the [`http_request_transform`] reconciliation step
 /// (expensive but verified); `false` runs it on a single replica
-/// (cheaper, unverified). Threaded into [`build_get_request`] so the
-/// flag is part of the costed [`HttpRequestArgs`].
+/// (cheaper, unverified). The transform is attached regardless so the
+/// response (status + body) is normalised the same way in both modes.
 ///
 /// Cycle cost is taken from the [`cost_http_request`] system API on the
 /// exact request we dispatch. That is what `http_request` itself uses to
@@ -158,7 +139,15 @@ pub(crate) async fn get_tagged(
 ) -> Result<HttpRequestResult, String> {
     let started_ns = time();
 
-    let request = build_get_request(url, headers, max_response_bytes, replicated);
+    let transform = transform_context_from_query("http_request_transform".to_string(), vec![]);
+
+    let request = build_get_request(
+        url,
+        headers,
+        max_response_bytes,
+        replicated,
+        Some(transform),
+    );
     let cycles_charged = cost_http_request(&request);
 
     let outcome = execute(request).await;
@@ -259,11 +248,23 @@ pub(crate) async fn post(
 
 #[cfg(test)]
 mod tests {
-    use candid::Nat;
-    use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
+    use candid::{Func, Nat, Principal};
+    use ic_cdk::management_canister::{
+        HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
+    };
     use pretty_assertions::assert_eq;
 
-    use super::{build_request, validate_response, USER_AGENT};
+    use super::{build_get_request, build_request, validate_response, USER_AGENT};
+
+    fn mock_transform_context() -> TransformContext {
+        TransformContext {
+            function: TransformFunc(Func {
+                principal: Principal::from_slice(&[1]),
+                method: "http_request_transform".to_string(),
+            }),
+            context: vec![],
+        }
+    }
 
     #[test]
     fn test_build_request_sets_url() {
@@ -379,6 +380,42 @@ mod tests {
         let request = build_request("https://example.com", HttpMethod::GET, None, extra, 1024);
         assert_eq!(request.headers.len(), 2);
         assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[1].name, "Authorization");
+        assert_eq!(request.headers[1].value, "Bearer token");
+    }
+
+    #[test]
+    fn test_build_get_request_sets_replicated_flag() {
+        for replicated in [true, false] {
+            let request = build_get_request("https://example.com", vec![], 1024, replicated, None);
+
+            assert_eq!(request.is_replicated, Some(replicated));
+        }
+    }
+
+    #[test]
+    fn test_build_get_request_preserves_request_fields() {
+        let extra = vec![HttpHeader {
+            name: "Authorization".to_string(),
+            value: "Bearer token".to_string(),
+        }];
+        let transform = mock_transform_context();
+        let request = build_get_request(
+            "https://example.com/api",
+            extra,
+            4096,
+            true,
+            Some(transform.clone()),
+        );
+
+        assert_eq!(request.url, "https://example.com/api");
+        assert!(matches!(request.method, HttpMethod::GET));
+        assert_eq!(request.body, None);
+        assert_eq!(request.max_response_bytes, Some(4096));
+        assert_eq!(request.transform, Some(transform));
+        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[0].value, USER_AGENT);
         assert_eq!(request.headers[1].name, "Authorization");
         assert_eq!(request.headers[1].value, "Bearer token");
     }
