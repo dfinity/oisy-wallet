@@ -35,15 +35,24 @@ fn still_missing(
 /// Runs the primary provider, then each supplemental in order, merging only valid prices.
 ///
 /// Later supplementals only see tokens that still lack a valid price after earlier steps.
+///
+/// When `primary_enabled` is `false` the primary is skipped entirely (treated as an empty
+/// result), so every requested token flows straight through to the supplementals. This is the
+/// code-level kill-switch for the primary provider (see `COINGECKO_PROVIDER_ENABLED`).
 pub(crate) async fn fetch_all_prices<P: ExchangePriceProvider>(
     primary: &P,
+    primary_enabled: bool,
     supplementals: &[Box<dyn SupplementalPriceProvider>],
     token_ids: &[StoredTokenId],
 ) -> Vec<(StoredTokenId, ExchangeData)> {
-    let primary_rows = primary.fetch_prices(token_ids).await.unwrap_or_else(|e| {
-        ic_cdk::println!("Primary exchange provider failed: {e}");
+    let primary_rows = if primary_enabled {
+        primary.fetch_prices(token_ids).await.unwrap_or_else(|e| {
+            ic_cdk::println!("Primary exchange provider failed: {e}");
+            Vec::new()
+        })
+    } else {
         Vec::new()
-    });
+    };
 
     let mut map = merge_valid_primary(primary_rows);
     let mut missing = still_missing(token_ids, &map);
@@ -221,7 +230,7 @@ mod tests {
         ]));
         let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
 
-        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+        let prices = block_on(fetch_all_prices(&primary, true, &supplementals, &requested));
 
         assert_eq!(
             prices,
@@ -245,7 +254,7 @@ mod tests {
             MockSupplementalProvider::boxed(Ok(vec![(invalid.clone(), data(Some(2.0)))]));
         let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
 
-        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+        let prices = block_on(fetch_all_prices(&primary, true, &supplementals, &requested));
 
         assert_eq!(
             *requested_by_supplemental.borrow(),
@@ -269,9 +278,62 @@ mod tests {
             MockSupplementalProvider::boxed(Err("supplemental unavailable".to_string()));
         let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
 
-        let prices = block_on(fetch_all_prices(&primary, &supplementals, &requested));
+        let prices = block_on(fetch_all_prices(&primary, true, &supplementals, &requested));
 
         assert_eq!(prices, vec![(valid, data(Some(1.0)))]);
         assert_eq!(*requested_by_supplemental.borrow(), vec![vec![missing]]);
+    }
+
+    #[test]
+    fn fetch_all_prices_skips_disabled_primary_and_passes_all_tokens_to_supplementals() {
+        let first = native_token();
+        let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![first.clone(), second.clone()];
+        // The primary would return valid prices, but a disabled primary must never be queried.
+        let primary = MockPrimaryProvider {
+            result: Ok(vec![
+                (first.clone(), data(Some(99.0))),
+                (second.clone(), data(Some(99.0))),
+            ]),
+        };
+        let (supplemental, requested_by_supplemental) = MockSupplementalProvider::boxed(Ok(vec![
+            (first.clone(), data(Some(1.0))),
+            (second.clone(), data(Some(2.0))),
+        ]));
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![supplemental];
+
+        let prices = block_on(fetch_all_prices(
+            &primary,
+            false,
+            &supplementals,
+            &requested,
+        ));
+
+        // The supplemental sees every requested token (the primary contributed nothing) ...
+        assert_eq!(*requested_by_supplemental.borrow(), vec![requested]);
+        // ... and the result is sourced entirely from the supplemental, not the primary.
+        assert_eq!(
+            prices,
+            vec![(first, data(Some(1.0))), (second, data(Some(2.0)))]
+        );
+    }
+
+    #[test]
+    fn fetch_all_prices_both_disabled_returns_no_prices() {
+        let first = native_token();
+        let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
+        let requested = vec![first, second];
+        let primary = MockPrimaryProvider { result: Ok(vec![]) };
+        // Both providers off: no supplementals supplied, primary disabled.
+        let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![];
+
+        let prices = block_on(fetch_all_prices(
+            &primary,
+            false,
+            &supplementals,
+            &requested,
+        ));
+
+        assert!(prices.is_empty());
     }
 }

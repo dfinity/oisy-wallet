@@ -300,6 +300,14 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
     });
 }
 
+/// Per-provider code-level kill-switches. These are hardcoded `const`s by design: they are flipped
+/// in a PR, not via runtime config. They are intentionally **not** `ApiKeys` fields and **not**
+/// part of the candid interface, mirroring the frontend `*_PROVIDER_ENABLED` convention. The
+/// orthogonal runtime `exchange_rate_enabled` gate ([`is_exchange_rate_refresh_enabled`]) still
+/// wins: when refresh is off, neither provider runs regardless of these flags.
+const COINGECKO_PROVIDER_ENABLED: bool = true;
+const ICPSWAP_PROVIDER_ENABLED: bool = true;
+
 /// Ordered supplemental sources that run after `CoinGecko` for tokens still missing a valid USD
 /// price.
 ///
@@ -307,7 +315,11 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
 /// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
 /// priority order (first match wins; later providers only see still-missing tokens).
 fn supplemental_price_providers(replicated: bool) -> Vec<Box<dyn SupplementalPriceProvider>> {
-    vec![Box::new(IcpSwapProvider::new(replicated))]
+    if ICPSWAP_PROVIDER_ENABLED {
+        vec![Box::new(IcpSwapProvider::new(replicated))]
+    } else {
+        Vec::new()
+    }
 }
 
 /// Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
@@ -356,14 +368,26 @@ pub(crate) async fn fetch_and_update_prices(
         return Err(ExchangeError::Disabled);
     }
 
-    let api_key =
-        with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
-
     let replicated = is_exchange_rate_replicated();
+
+    // The CoinGecko API key is only required when CoinGecko actually runs. When the provider is
+    // disabled it is never queried, so we skip the key requirement and build it with a placeholder
+    // that `fetch_all_prices` never touches (it short-circuits the primary on `primary_enabled`).
+    let api_key = if COINGECKO_PROVIDER_ENABLED {
+        with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?
+    } else {
+        String::new()
+    };
     let provider = CoinGeckoProvider::new(api_key, replicated);
     let supplementals = supplemental_price_providers(replicated);
 
-    let prices = fetch_all_prices(&provider, &supplementals, token_ids).await;
+    let prices = fetch_all_prices(
+        &provider,
+        COINGECKO_PROVIDER_ENABLED,
+        &supplementals,
+        token_ids,
+    )
+    .await;
 
     for (token_id, exchange_data) in prices {
         update_price(&token_id, &exchange_data);
