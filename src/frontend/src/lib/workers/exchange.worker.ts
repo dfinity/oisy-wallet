@@ -19,8 +19,10 @@ import {
 	exchangeRateUsdToCurrency,
 	fetchExchangeRatesFromBackend
 } from '$lib/services/exchange.services';
-import type { CoingeckoPlatformId, CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
-import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
@@ -28,6 +30,14 @@ import type {
 } from '$lib/types/post-message';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
+import {
+	buildErc20PriceParams,
+	findMissingErc20ContractAddresses,
+	findMissingLedgerCanisterIds,
+	findMissingSplTokenAddresses,
+	mergeExchangePrices,
+	type ProviderFallbackPrices
+} from '$lib/utils/exchange.utils';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -107,37 +117,6 @@ interface SyncExchangeParams {
 	splTokenAddresses: SplTokenAddress[];
 	erc4626TokensExchangeData: Erc4626TokensExchangeData[];
 }
-
-const buildErc20PriceParams = (
-	erc20ContractAddresses: Erc20ContractAddressWithNetwork[]
-): CoingeckoErc20PriceParams[] =>
-	Object.values(
-		erc20ContractAddresses.reduce<Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>>(
-			(acc, { address, coingeckoId }) => {
-				if (
-					coingeckoId !== 'ethereum' &&
-					coingeckoId !== 'base' &&
-					coingeckoId !== 'binance-smart-chain' &&
-					coingeckoId !== 'polygon-pos' &&
-					coingeckoId !== 'arbitrum-one'
-				) {
-					return acc;
-				}
-
-				return {
-					...acc,
-					[coingeckoId]: {
-						coingeckoPlatformId: coingeckoId,
-						contractAddresses: [
-							...(acc[coingeckoId]?.contractAddresses ?? []),
-							{ address, coingeckoId }
-						]
-					}
-				};
-			},
-			{} as Record<CoingeckoPlatformId, CoingeckoErc20PriceParams>
-		)
-	);
 
 const syncExchangeFromBackend = async ({
 	currentCurrency,
@@ -343,6 +322,140 @@ const syncExchangeFromProviders = async ({
 	};
 };
 
+const settledValue = <T>(result: PromiseSettledResult<T>): T | undefined =>
+	result.status === 'fulfilled' ? result.value : undefined;
+
+// Native ETH on Arbitrum and Base reuses the Ethereum spot price (matching the
+// providers path), so all three share the single `exchangeRateETHToUsd` call.
+const fetchProviderFallbackPrices = async ({
+	backendData,
+	params
+}: {
+	backendData: PostMessageDataResponseExchange;
+	params: SyncExchangeParams;
+}): Promise<ProviderFallbackPrices | undefined> => {
+	const missingErc20 = findMissingErc20ContractAddresses({
+		allErc20ContractAddresses: params.erc20ContractAddresses,
+		coingeckoResponse: backendData.currentErc20Prices
+	});
+	const missingIcrc = findMissingLedgerCanisterIds({
+		allLedgerCanisterIds: params.icrcLedgerCanisterIds,
+		coingeckoResponse: backendData.currentIcrcPrices
+	});
+	const missingSpl = findMissingSplTokenAddresses({
+		allSplTokenAddresses: params.splTokenAddresses,
+		coingeckoResponse: backendData.currentSplPrices ?? {}
+	});
+
+	const missingEth = isNullish(backendData.currentEthPrice);
+	const missingBtc = isNullish(backendData.currentBtcPrice);
+	const missingIcp = isNullish(backendData.currentIcpPrice);
+	const missingSol = isNullish(backendData.currentSolPrice);
+	const missingBnb = isNullish(backendData.currentBnbPrice);
+	const missingPol = isNullish(backendData.currentPolPrice);
+	const missingArbitrumEth = isNullish(backendData.currentArbitrumEthPrice);
+	const missingBaseEth = isNullish(backendData.currentBaseEthPrice);
+	// ETH, Arbitrum-ETH and Base-ETH all resolve to the same Ethereum spot price,
+	// so a single CoinGecko call covers whichever of the three are missing.
+	const needsEth = missingEth || missingArbitrumEth || missingBaseEth;
+
+	const erc20PriceParams = buildErc20PriceParams(missingErc20);
+
+	const nothingMissing =
+		erc20PriceParams.length === 0 &&
+		missingIcrc.length === 0 &&
+		missingSpl.length === 0 &&
+		!needsEth &&
+		!missingBtc &&
+		!missingIcp &&
+		!missingSol &&
+		!missingBnb &&
+		!missingPol;
+
+	if (nothingMissing) {
+		return undefined;
+	}
+
+	const erc20PricesPromise = Promise.allSettled(
+		erc20PriceParams.map((priceParams) => exchangeRateERC20ToUsd(priceParams))
+	);
+
+	const [
+		erc20PricesSettled,
+		icrcPricesResult,
+		splPricesResult,
+		ethPriceResult,
+		btcPriceResult,
+		icpPriceResult,
+		solPriceResult,
+		bnbPriceResult,
+		polPriceResult
+	] = await Promise.all([
+		erc20PricesPromise,
+		missingIcrc.length > 0
+			? exchangeRateICRCToUsd(missingIcrc).catch(() => undefined)
+			: Promise.resolve(undefined),
+		missingSpl.length > 0
+			? exchangeRateSPLToUsd(missingSpl).catch(() => undefined)
+			: Promise.resolve(undefined),
+		needsEth ? exchangeRateETHToUsd().catch(() => undefined) : Promise.resolve(undefined),
+		missingBtc ? exchangeRateBTCToUsd().catch(() => undefined) : Promise.resolve(undefined),
+		missingIcp ? exchangeRateICPToUsd().catch(() => undefined) : Promise.resolve(undefined),
+		missingSol ? exchangeRateSOLToUsd().catch(() => undefined) : Promise.resolve(undefined),
+		missingBnb ? exchangeRateBNBToUsd().catch(() => undefined) : Promise.resolve(undefined),
+		missingPol ? exchangeRatePOLToUsd().catch(() => undefined) : Promise.resolve(undefined)
+	]);
+
+	const erc20Prices =
+		erc20PriceParams.length > 0
+			? erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>((acc, result) => {
+					const value = settledValue(result);
+					if (nonNullish(value)) {
+						Object.assign(acc, value);
+					}
+					return acc;
+				}, {})
+			: undefined;
+
+	const ethPrice: CoingeckoSimplePriceResponse | undefined = ethPriceResult ?? undefined;
+
+	return {
+		erc20Prices,
+		icrcPrices: icrcPricesResult,
+		splPrices: splPricesResult,
+		ethPrice: missingEth ? ethPrice : undefined,
+		btcPrice: btcPriceResult,
+		icpPrice: icpPriceResult,
+		solPrice: solPriceResult,
+		bnbPrice: bnbPriceResult,
+		polPrice: polPriceResult,
+		arbitrumEthPrice: missingArbitrumEth ? ethPrice : undefined,
+		baseEthPrice: missingBaseEth ? ethPrice : undefined
+	};
+};
+
+const syncExchangeWithFallback = async (
+	params: SyncExchangeParams
+): Promise<PostMessageDataResponseExchange> => {
+	const backendData = await syncExchangeFromBackend(params);
+
+	const providerPrices = await fetchProviderFallbackPrices({ backendData, params });
+
+	if (isNullish(providerPrices)) {
+		return backendData;
+	}
+
+	return await mergeExchangePrices({
+		backendData,
+		providerPrices,
+		erc4626Prices: (mergedErc20Prices) =>
+			calculateErc4626Prices({
+				erc20Prices: mergedErc20Prices,
+				erc4626TokensExchangeData: params.erc4626TokensExchangeData
+			})
+	});
+};
+
 const paramsFromTimerData = (
 	data: PostMessageDataRequestExchangeTimer | undefined
 ): SyncExchangeParams => ({
@@ -392,7 +505,7 @@ const syncLatestExchange = async (generation: number) => {
 const syncExchange = async (params: SyncExchangeParams) => {
 	try {
 		const data = backendExchangeEnabledFromTimerData(latestTimerData)
-			? await syncExchangeFromBackend(params)
+			? await syncExchangeWithFallback(params)
 			: await syncExchangeFromProviders(params);
 
 		postMessage({

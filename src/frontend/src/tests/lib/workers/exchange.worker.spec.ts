@@ -1234,7 +1234,7 @@ describe('exchange.worker', () => {
 				});
 			});
 
-			it('should return native prices as undefined when backend has no data for them', async () => {
+			it('should fill native prices from the providers when the backend has no data for them', async () => {
 				vi.mocked(getExchangeRates).mockResolvedValue([]);
 
 				const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
@@ -1255,12 +1255,14 @@ describe('exchange.worker', () => {
 
 				const postedData = postMessageMock.mock.calls[0][0].data;
 
-				expect(postedData.currentEthPrice).toBeUndefined();
-				expect(postedData.currentBtcPrice).toBeUndefined();
-				expect(postedData.currentIcpPrice).toBeUndefined();
-				expect(postedData.currentSolPrice).toBeUndefined();
-				expect(postedData.currentBnbPrice).toBeUndefined();
-				expect(postedData.currentPolPrice).toBeUndefined();
+				expect(postedData.currentEthPrice).toEqual({ ethereum: { usd: 1 } });
+				expect(postedData.currentBtcPrice).toEqual({ bitcoin: { usd: 1 } });
+				expect(postedData.currentIcpPrice).toEqual({ 'internet-computer': { usd: 1 } });
+				expect(postedData.currentSolPrice).toEqual({ solana: { usd: 1 } });
+				expect(postedData.currentBnbPrice).toEqual({ binancecoin: { usd: 1 } });
+				expect(postedData.currentPolPrice).toEqual({ 'polygon-ecosystem-token': { usd: 1 } });
+				expect(postedData.currentArbitrumEthPrice).toEqual({ ethereum: { usd: 1 } });
+				expect(postedData.currentBaseEthPrice).toEqual({ ethereum: { usd: 1 } });
 			});
 
 			it('should include native token prices when backend provides them', async () => {
@@ -1331,7 +1333,9 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(mockEvent);
 
-				expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
+				// The FX cross-rate call is still issued for the non-USD currency (alongside the
+				// provider fallback calls that fill the natives the backend did not price).
+				expect(simplePrice).toHaveBeenCalledWith({
 					ids: 'bitcoin',
 					vs_currencies: `${Currency.USD},${Currency.EUR}`,
 					include_24hr_change: true
@@ -1411,6 +1415,7 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(mockEvent);
 
+				// The backend response is empty, so the provider fallback fills every native price.
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
 					data: {
@@ -1419,18 +1424,18 @@ describe('exchange.worker', () => {
 							exchangeRate24hChangeMultiplier: 1,
 							currency: Currency.USD
 						},
-						currentEthPrice: undefined,
-						currentBtcPrice: undefined,
+						currentEthPrice: { ethereum: { usd: 1 } },
+						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
-						currentIcpPrice: undefined,
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
 						currentIcrcPrices: {},
-						currentSolPrice: undefined,
+						currentSolPrice: { solana: { usd: 1 } },
 						currentSplPrices: {},
 						currentErc4626Prices: {},
-						currentBnbPrice: undefined,
-						currentPolPrice: undefined,
-						currentArbitrumEthPrice: undefined,
-						currentBaseEthPrice: undefined
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 			});
@@ -1482,6 +1487,8 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(mockEvent);
 
+				// No identity → the backend response is empty, so the provider fallback fills the
+				// native prices while the FX rate stays null (the identity error is logged).
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 					msg: 'syncExchange',
 					data: {
@@ -1490,16 +1497,18 @@ describe('exchange.worker', () => {
 							exchangeRate24hChangeMultiplier: null,
 							currency: Currency.USD
 						},
-						currentEthPrice: undefined,
-						currentBtcPrice: undefined,
+						currentEthPrice: { ethereum: { usd: 1 } },
+						currentBtcPrice: { bitcoin: { usd: 1 } },
 						currentErc20Prices: {},
-						currentIcpPrice: undefined,
+						currentIcpPrice: { 'internet-computer': { usd: 1 } },
 						currentIcrcPrices: {},
-						currentSolPrice: undefined,
+						currentSolPrice: { solana: { usd: 1 } },
 						currentSplPrices: {},
 						currentErc4626Prices: {},
-						currentBnbPrice: undefined,
-						currentPolPrice: undefined
+						currentBnbPrice: { binancecoin: { usd: 1 } },
+						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
+						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
+						currentBaseEthPrice: { ethereum: { usd: 1 } }
 					}
 				});
 
@@ -1509,6 +1518,184 @@ describe('exchange.worker', () => {
 				);
 
 				expect(getExchangeRates).not.toHaveBeenCalled();
+			});
+
+			describe('frontend provider fallback', () => {
+				const allNativesBackendRates = (): Array<[TokenId, BackendExchangeRate | undefined]> =>
+					mockMyRates(
+						[{ EvmNative: 1n }, mockExchangeRate],
+						[{ BtcNativeMainnet: null }, mockExchangeRate],
+						[{ IcpNative: null }, mockExchangeRate],
+						[{ SolNativeMainnet: null }, mockExchangeRate],
+						[{ EvmNative: 56n }, mockExchangeRate],
+						[{ EvmNative: 137n }, mockExchangeRate],
+						[{ EvmNative: 42161n }, mockExchangeRate],
+						[{ EvmNative: 8453n }, mockExchangeRate]
+					);
+
+				it('should not call any provider when the backend priced everything', async () => {
+					vi.mocked(getExchangeRates).mockResolvedValue(
+						mockMyRates(
+							...allNativesBackendRates(),
+							[{ Erc20: ['0xabc', 1n] }, mockExchangeRate],
+							[{ Icrc: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') }, mockExchangeRate]
+						)
+					);
+
+					const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+						...createEvent(msg),
+						data: {
+							msg,
+							data: {
+								currentCurrency: Currency.USD,
+								erc20Addresses: [{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n }],
+								icrcCanisterIds: ['ryjl3-tyaaa-aaaaa-aaaba-cai'],
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					expect(simpleTokenPrice).not.toHaveBeenCalled();
+					expect(simplePrice).not.toHaveBeenCalled();
+					expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
+				});
+
+				it('should fill only the tokens the backend left unpriced', async () => {
+					// Backend prices everything except one ERC-20, one ICRC and one SPL token.
+					vi.mocked(getExchangeRates).mockResolvedValue(
+						mockMyRates(...allNativesBackendRates(), [
+							{ Erc20: ['0xpriced', 1n] },
+							mockExchangeRate
+						])
+					);
+
+					const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+						...createEvent(msg),
+						data: {
+							msg,
+							data: {
+								currentCurrency: Currency.USD,
+								erc20Addresses: [
+									{ address: '0xpriced', coingeckoId: 'ethereum', chainId: 1n },
+									{ address: '0xmissing', coingeckoId: 'ethereum', chainId: 1n }
+								],
+								icrcCanisterIds: ['icrc1'],
+								splAddresses: ['spl1'],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					// No native CoinGecko calls — backend priced all natives.
+					expect(simplePrice).not.toHaveBeenCalled();
+
+					// Only the missing ERC-20 (0xmissing), missing ICRC (icrc1) and missing SPL (spl1).
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'ethereum',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['0xmissing'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'internet-computer',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['icrc1'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+					expect(simpleTokenPrice).toHaveBeenCalledWith({
+						id: 'solana',
+						vs_currencies: Currency.USD,
+						contract_addresses: ['spl1'],
+						include_market_cap: true,
+						include_24hr_change: true
+					});
+
+					const postedData = postMessageMock.mock.calls[0][0].data;
+
+					// Backend keeps its priced ERC-20, provider fills the missing one.
+					expect(postedData.currentErc20Prices['0xpriced']).toBeDefined();
+					expect(postedData.currentErc20Prices['0xmissing']).toEqual({ usd: 1 });
+					expect(postedData.currentIcrcPrices.icrc1).toEqual({ usd: 1 });
+					expect(postedData.currentSplPrices.spl1).toEqual({ usd: 1 });
+				});
+
+				it('should fill missing native prices from the providers via a single shared ETH call', async () => {
+					// Backend prices nothing → all natives missing.
+					vi.mocked(getExchangeRates).mockResolvedValue([]);
+
+					const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+						...createEvent(msg),
+						data: {
+							msg,
+							data: {
+								currentCurrency: Currency.USD,
+								erc20Addresses: [],
+								icrcCanisterIds: [],
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					// ETH, BTC, ICP, SOL, BNB, POL — ETH covers Arbitrum + Base too (no duplicate).
+					expect(simplePrice).toHaveBeenCalledTimes(6);
+					expect(simplePrice).toHaveBeenCalledWith({
+						ids: 'ethereum',
+						vs_currencies: Currency.USD,
+						include_24hr_change: true
+					});
+
+					const postedData = postMessageMock.mock.calls[0][0].data;
+
+					expect(postedData.currentEthPrice).toEqual({ ethereum: { usd: 1 } });
+					expect(postedData.currentArbitrumEthPrice).toEqual({ ethereum: { usd: 1 } });
+					expect(postedData.currentBaseEthPrice).toEqual({ ethereum: { usd: 1 } });
+					expect(postedData.currentBtcPrice).toEqual({ bitcoin: { usd: 1 } });
+				});
+
+				it('should recompute erc4626 prices from the merged erc20 prices', async () => {
+					vi.mocked(getExchangeRates).mockResolvedValue(
+						mockMyRates(...allNativesBackendRates(), [
+							{ Erc20: ['0xpriced', 1n] },
+							mockExchangeRate
+						])
+					);
+					vi.mocked(calculateErc4626Prices).mockResolvedValue({});
+
+					const mockEvent: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>> = {
+						...createEvent(msg),
+						data: {
+							msg,
+							data: {
+								currentCurrency: Currency.USD,
+								erc20Addresses: [
+									{ address: '0xpriced', coingeckoId: 'ethereum', chainId: 1n },
+									{ address: '0xmissing', coingeckoId: 'ethereum', chainId: 1n }
+								],
+								icrcCanisterIds: [],
+								splAddresses: [],
+								erc4626TokensExchangeData: []
+							}
+						}
+					};
+
+					await onExchangeMessage(mockEvent);
+
+					const erc4626Call = vi.mocked(calculateErc4626Prices).mock.calls.at(-1)?.[0];
+
+					expect(Object.keys(erc4626Call?.erc20Prices ?? {})).toEqual(
+						expect.arrayContaining(['0xpriced', '0xmissing'])
+					);
+				});
 			});
 		});
 	});
