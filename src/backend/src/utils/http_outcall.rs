@@ -2,7 +2,7 @@ use candid::Nat;
 use ic_cdk::{
     management_canister::{
         http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-        HttpRequestResult, TransformArgs,
+        HttpRequestResult, TransformArgs, TransformContext,
     },
     query,
 };
@@ -59,14 +59,12 @@ fn build_get_request(
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
     replicated: bool,
+    transform: Option<TransformContext>,
 ) -> HttpRequestArgs {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
     request.is_replicated = Some(replicated);
-    request.transform = Some(transform_context_from_query(
-        "http_request_transform".to_string(),
-        vec![],
-    ));
+    request.transform = transform;
 
     request
 }
@@ -117,11 +115,14 @@ pub(crate) async fn get(
     max_response_bytes: u64,
     replicated: bool,
 ) -> Result<HttpRequestResult, String> {
+    let transform = transform_context_from_query("http_request_transform".to_string(), vec![]);
+
     execute(build_get_request(
         url,
         headers,
         max_response_bytes,
         replicated,
+        Some(transform),
     ))
     .await
 }
@@ -193,11 +194,23 @@ pub(crate) async fn post(
 
 #[cfg(test)]
 mod tests {
-    use candid::Nat;
-    use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
+    use candid::{Func, Nat, Principal};
+    use ic_cdk::management_canister::{
+        HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
+    };
     use pretty_assertions::assert_eq;
 
     use super::{build_get_request, build_request, validate_response, USER_AGENT};
+
+    fn mock_transform_context() -> TransformContext {
+        TransformContext {
+            function: TransformFunc(Func {
+                principal: Principal::from_slice(&[1]),
+                method: "http_request_transform".to_string(),
+            }),
+            context: vec![],
+        }
+    }
 
     #[test]
     fn test_build_request_sets_url() {
@@ -320,7 +333,7 @@ mod tests {
     #[test]
     fn test_build_get_request_sets_replicated_flag() {
         for replicated in [true, false] {
-            let request = build_get_request("https://example.com", vec![], 1024, replicated);
+            let request = build_get_request("https://example.com", vec![], 1024, replicated, None);
 
             assert_eq!(request.is_replicated, Some(replicated));
         }
@@ -332,13 +345,20 @@ mod tests {
             name: "Authorization".to_string(),
             value: "Bearer token".to_string(),
         }];
-        let request = build_get_request("https://example.com/api", extra, 4096, true);
+        let transform = mock_transform_context();
+        let request = build_get_request(
+            "https://example.com/api",
+            extra,
+            4096,
+            true,
+            Some(transform.clone()),
+        );
 
         assert_eq!(request.url, "https://example.com/api");
         assert!(matches!(request.method, HttpMethod::GET));
         assert_eq!(request.body, None);
         assert_eq!(request.max_response_bytes, Some(4096));
-        assert!(request.transform.is_some());
+        assert_eq!(request.transform, Some(transform));
         assert_eq!(request.headers.len(), 2);
         assert_eq!(request.headers[0].name, "User-Agent");
         assert_eq!(request.headers[0].value, USER_AGENT);
