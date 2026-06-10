@@ -60,13 +60,14 @@ Two related changes to the exchange-rate flow:
 
   ```ts
   const data = backendExchangeEnabledFromTimerData(latestTimerData)
-      ? await syncExchangeFromBackend(params)   // backend only
-      : await syncExchangeFromProviders(params); // providers only
+  	? await syncExchangeFromBackend(params) // backend only
+  	: await syncExchangeFromProviders(params); // providers only
   ```
 
   `backendExchangeEnabled` is a runtime value queried from the backend
   (`exchange_rate_enabled`), with the build-time `BACKEND_EXCHANGE_ENABLED`
   (`= LOCAL || STAGING`) as the until-loaded fallback.
+
 - `syncExchangeFromBackend` ([`exchange.worker.ts:142`](../../../src/frontend/src/lib/workers/exchange.worker.ts))
   calls `fetchExchangeRatesFromBackend` and returns a `PostMessageDataResponseExchange`
   whose price categories are: native singles (`currentEthPrice`, `currentBtcPrice`,
@@ -231,7 +232,7 @@ Implementation notes:
 - The refresh **interval** stays driven by `backendExchangeEnabled`
   ([`exchange.constants.ts`](../../../src/frontend/src/lib/constants/exchange.constants.ts));
   this PR does not change timer cadence. (Note for review: the fill adds public
-  provider calls on the faster backend cadence only for the *missing* subset —
+  provider calls on the faster backend cadence only for the _missing_ subset —
   acceptable because that subset is small by construction; flag if it isn't.)
 
 Update [`docs/ai/PRODUCT.md`](../../../docs/ai/PRODUCT.md) in **this** PR to
@@ -254,11 +255,11 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 
 ## Delivery plan (atomic PRs / waves)
 
-| Wave | PR | Layer | Depends on | Parallel-safe with |
-| ---- | -- | ----- | ---------- | ------------------ |
-| 1 | **PR-1** — backend per-provider flags | backend | — | PR-2 (no file overlap) |
-| 1 | **PR-2** — frontend CoinGecko flag | frontend | — | PR-1 |
-| 2 | **PR-3** — frontend backend-then-fallback merge | frontend | PR-2 (reuses the gated provider path) | — |
+| Wave | PR                                              | Layer    | Depends on                            | Parallel-safe with     |
+| ---- | ----------------------------------------------- | -------- | ------------------------------------- | ---------------------- |
+| 1    | **PR-1** — backend per-provider flags           | backend  | —                                     | PR-2 (no file overlap) |
+| 1    | **PR-2** — frontend CoinGecko flag              | frontend | —                                     | PR-1                   |
+| 2    | **PR-3** — frontend backend-then-fallback merge | frontend | PR-2 (reuses the gated provider path) | —                      |
 
 - **Wave 1** runs PR-1 and PR-2 fully in parallel (backend vs frontend, zero
   shared files).
