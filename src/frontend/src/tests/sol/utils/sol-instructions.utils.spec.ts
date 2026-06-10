@@ -29,6 +29,8 @@ import { assertNonNullish } from '@dfinity/utils';
 import {
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getCreateAssociatedTokenIdempotentInstruction,
+	getCreateAssociatedTokenInstruction,
 	getTransferCheckedInstruction,
 	TokenInstruction
 } from '@solana-program/token';
@@ -1057,6 +1059,34 @@ describe('sol-instructions.utils', () => {
 				tokenAddress: JUP_TOKEN.address,
 				isApproval: true
 			});
+		});
+
+		it('should ignore a Create Associated Token instruction', () => {
+			const instruction = getCreateAssociatedTokenInstruction({
+				payer: address(mockSolAddress),
+				ata: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a Create Associated Token Idempotent instruction', () => {
+			const instruction = getCreateAssociatedTokenIdempotentInstruction({
+				payer: address(mockSolAddress),
+				ata: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should return undefined for unrecognized instruction', () => {
