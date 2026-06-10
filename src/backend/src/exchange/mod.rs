@@ -185,6 +185,12 @@ pub(crate) fn release_refresh_lock(lock: RefreshLock) {
 /// timer invocations (e.g. overlapping ticks) become no-ops rather than
 /// starting a parallel refresh.
 async fn refresh_exchange_rates_guarded(source: &'static str) {
+    // Refresh is opt-in; when it's off this is a no-op rather than acquiring the
+    // lock and logging an `Err(Disabled)` on every tick.
+    if !is_exchange_rate_refresh_enabled() {
+        return;
+    }
+
     let Some(lock) = try_acquire_refresh_lock() else {
         ic_cdk::println!("Exchange rate {source} skipped: previous refresh still in flight");
         return;
@@ -271,14 +277,15 @@ pub(crate) fn start_exchange_rate_timer() {
     // right after init / upgrade, matching the previous always-on behaviour.
     note_rate_request();
 
-    set_timer(Duration::ZERO, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
-    });
+    set_timer(
+        Duration::ZERO,
+        refresh_exchange_rates_guarded("initial refresh"),
+    );
 
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("refresh"));
+        refresh_exchange_rates_guarded("refresh")
     });
 }
 
@@ -299,8 +306,29 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
 /// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
 /// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
 /// priority order (first match wins; later providers only see still-missing tokens).
-fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
-    vec![Box::new(IcpSwapProvider::default())]
+fn supplemental_price_providers(replicated: bool) -> Vec<Box<dyn SupplementalPriceProvider>> {
+    vec![Box::new(IcpSwapProvider::new(replicated))]
+}
+
+/// Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+/// issues the request) or *non-replicated* (a single replica handles it).
+///
+/// Replicated only when `exchange_rate_replicated` is explicitly `Some(true)`; `None` (the
+/// default) and `Some(false)` both mean non-replicated.
+pub(crate) fn is_exchange_rate_replicated() -> bool {
+    with_api_keys(|keys| keys.exchange_rate_replicated == Some(true))
+}
+
+/// Returns whether the backend will actually issue exchange-rate refresh outcalls.
+///
+/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is
+/// explicitly set to `Some(true)`. Refresh is opt-in: `None` (the default) and
+/// `Some(false)` both keep it disabled. Single source of truth for both the refresh
+/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
+pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
+    with_api_keys(|keys| {
+        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled == Some(true)
+    })
 }
 
 /// Fetches USD prices for `token_ids` from the configured providers and
@@ -314,20 +342,9 @@ fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
 ///
 /// Returns:
 /// - `Ok(())` once the (possibly empty) set of fresh prices has been written.
-/// - `Err(ExchangeError::Disabled)` if `exchange_rate_enabled` is `Some(false)`.
+/// - `Err(ExchangeError::Disabled)` if refresh is not enabled (see
+///   [`is_exchange_rate_refresh_enabled`]).
 /// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
-///
-/// Returns whether the backend will actually issue exchange-rate refresh outcalls.
-///
-/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is not
-/// explicitly set to `Some(false)`. Single source of truth for both the refresh
-/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
-pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
-    with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled != Some(false)
-    })
-}
-
 pub(crate) async fn fetch_and_update_prices(
     token_ids: &[StoredTokenId],
 ) -> Result<(), ExchangeError> {
@@ -342,8 +359,9 @@ pub(crate) async fn fetch_and_update_prices(
     let api_key =
         with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
-    let provider = CoinGeckoProvider::new(api_key);
-    let supplementals = supplemental_price_providers();
+    let replicated = is_exchange_rate_replicated();
+    let provider = CoinGeckoProvider::new(api_key, replicated);
+    let supplementals = supplemental_price_providers(replicated);
 
     let prices = fetch_all_prices(&provider, &supplementals, token_ids).await;
 
@@ -557,6 +575,57 @@ mod tests {
 
         release_refresh_lock(second);
         assert!(REFRESH_IN_FLIGHT.with(std::cell::Cell::get).is_none());
+    }
+
+    fn set_exchange_config(coingecko_api_key: Option<&str>, exchange_rate_enabled: Option<bool>) {
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            coingecko_api_key: coingecko_api_key.map(str::to_string),
+            exchange_rate_enabled,
+            ..Default::default()
+        });
+    }
+
+    #[test]
+    fn refresh_enabled_only_when_explicitly_opted_in() {
+        // Opt-in: a key plus an explicit `Some(true)` is the only enabled combination.
+        set_exchange_config(Some("key"), Some(true));
+        assert!(is_exchange_rate_refresh_enabled());
+
+        // Unset defaults to disabled, even with a key configured.
+        set_exchange_config(Some("key"), None);
+        assert!(!is_exchange_rate_refresh_enabled());
+
+        // Explicitly disabled.
+        set_exchange_config(Some("key"), Some(false));
+        assert!(!is_exchange_rate_refresh_enabled());
+
+        // No key never refreshes, regardless of the flag.
+        set_exchange_config(None, Some(true));
+        assert!(!is_exchange_rate_refresh_enabled());
+    }
+
+    #[test]
+    fn replicated_only_when_explicitly_opted_in() {
+        // Replicated is opt-in: only an explicit `Some(true)` enables consensus outcalls.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: Some(true),
+            ..Default::default()
+        });
+        assert!(is_exchange_rate_replicated());
+
+        // Unset defaults to non-replicated.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: None,
+            ..Default::default()
+        });
+        assert!(!is_exchange_rate_replicated());
+
+        // Explicitly non-replicated.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: Some(false),
+            ..Default::default()
+        });
+        assert!(!is_exchange_rate_replicated());
     }
 
     fn custom_token(seed: u8) -> StoredTokenId {

@@ -1,9 +1,10 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
-	type PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
@@ -11,10 +12,12 @@ import {
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
+import en from '$lib/i18n/en.json';
 import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
@@ -143,4 +146,63 @@ export const trackTransactionFilter = ({
 			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 		}
 	});
+};
+
+/**
+ * Resolve a dot-path i18n key against the bundled English locale and expand
+ * OISY placeholders (e.g. `$oisy_short` → `OISY`). Always English, regardless
+ * of the user's locale, so analytics dashboards stay consistent. Returns
+ * `undefined` if the key cannot be resolved or does not point at a string.
+ */
+const resolveEnglishLabel = (key: string): string | undefined => {
+	const value = key
+		.split('.')
+		.reduce<unknown>(
+			(acc, segment) =>
+				typeof acc === 'object' && nonNullish(acc)
+					? (acc as Record<string, unknown>)[segment]
+					: undefined,
+			en
+		);
+
+	return typeof value === 'string' ? replaceOisyPlaceholders(value) : undefined;
+};
+
+/**
+ * Build a `TrackEventParams` payload for a "Learn more" documentation link click.
+ *
+ * Returns the params object rather than firing the event so callers can pass it
+ * straight to `ExternalLink.trackEvent`, which fires on click. Centralising the
+ * payload keeps the thirteen UI usage sites in sync with the schema.
+ *
+ * Emits a derived `source_path` field — a slash-joined identity
+ * (`<source_location> / <source_sublocation?> / <English label>`) intended
+ * for at-a-glance dashboard scanning. Filtering and grouping should still
+ * use the discrete `source_location` / `source_sublocation` fields.
+ */
+export const buildLearnMoreEvent = ({
+	sourceLocation,
+	sourceSublocation,
+	labelKey,
+	url
+}: {
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	labelKey: string;
+	url: string;
+}): TrackEventParams => {
+	const label = resolveEnglishLabel(labelKey);
+	const source_path = [sourceLocation, sourceSublocation, label].filter(nonNullish).join(' / ');
+
+	return {
+		name: TRACK_OPEN_DOCUMENTATION,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.LEARN_MORE,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
+			event_value: url,
+			source_location: sourceLocation,
+			...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
+			source_path
+		}
+	};
 };

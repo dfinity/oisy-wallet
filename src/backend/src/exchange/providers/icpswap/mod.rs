@@ -11,8 +11,13 @@ use crate::{
 };
 
 const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
-/// `ICPSwap` token info responses are small JSON objects; keep the cap tight for cycle costs.
-const MAX_RESPONSE_BYTES: u64 = 8_192;
+/// `ICPSwap` token-info responses measure ~1.1 KiB on the wire (~0.7 KiB body + ~0.4 KiB headers).
+/// `max_response_bytes` is charged on headers + body, so 2 KiB keeps a safe margin over the
+/// observed size while minimising cycle cost.
+const MAX_RESPONSE_BYTES: u64 = 2_048;
+/// `api.icpswap.com` carries an HTTP-style status in the JSON envelope's `code` field; `200` marks
+/// success while errors use other codes (e.g. `404` for an unknown token).
+const ICPSWAP_SUCCESS_CODE: i64 = 200;
 /// Pools with TVL at or below this threshold are considered stale and their prices are discarded.
 const MIN_TVL_USD: f64 = 500.0;
 
@@ -38,7 +43,7 @@ fn exchange_data_from_icpswap_envelope(
     parsed: IcpSwapEnvelope,
     timestamp_ns: u64,
 ) -> Option<ExchangeData> {
-    if parsed.code != 0 {
+    if parsed.code != ICPSWAP_SUCCESS_CODE {
         return None;
     }
     let token = parsed.data?;
@@ -72,20 +77,30 @@ fn parse_icpswap_body(body: &[u8]) -> Option<ExchangeData> {
 #[derive(Debug, Clone)]
 pub(crate) struct IcpSwapProvider {
     base_url: String,
+    replicated: bool,
 }
 
 impl Default for IcpSwapProvider {
     fn default() -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
+            replicated: false,
         }
     }
 }
 
 impl IcpSwapProvider {
+    pub(crate) fn new(replicated: bool) -> Self {
+        Self {
+            replicated,
+            ..Self::default()
+        }
+    }
+
     #[expect(dead_code)]
-    pub(crate) fn with_base_url(base_url: String) -> Self {
-        Self { base_url }
+    pub(crate) fn with_base_url(mut self, base_url: String) -> Self {
+        self.base_url = base_url;
+        self
     }
 
     async fn fetch_icrc_token_usd(
@@ -104,6 +119,7 @@ impl IcpSwapProvider {
                 value: "application/json".to_string(),
             }],
             MAX_RESPONSE_BYTES,
+            self.replicated,
         )
         .await?;
 
@@ -158,7 +174,7 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_success() {
-        let json = br#"{"code":0,"message":null,"data":{"tokenLedgerId":"ryjl3-tyaaa-aaaaa-aaaba-cai","tokenName":"x","tokenSymbol":"X","price":"1.25","priceChange24H":"-2.5","tvlUSD":"50000","tvlUSDChange24H":"0","txCount24H":"0","volumeUSD24H":"0","volumeUSD7D":"0","totalVolumeUSD":"0","priceLow24H":"0","priceHigh24H":"0","priceLow7D":"0","priceHigh7D":"0","priceLow30D":"0","priceHigh30D":"0"}}"#;
+        let json = br#"{"code":200,"message":null,"data":{"tokenLedgerId":"ryjl3-tyaaa-aaaaa-aaaba-cai","tokenName":"x","tokenSymbol":"X","price":"1.25","priceChange24H":"-2.5","tvlUSD":"50000","tvlUSDChange24H":"0","txCount24H":"0","volumeUSD24H":"0","volumeUSD7D":"0","totalVolumeUSD":"0","priceLow24H":"0","priceHigh24H":"0","priceLow7D":"0","priceHigh7D":"0","priceLow30D":"0","priceHigh30D":"0"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 99).unwrap();
         assert_eq!(d.timestamp_ns, 99);
@@ -167,8 +183,15 @@ mod tests {
     }
 
     #[test]
-    fn parse_icpswap_body_rejects_nonzero_code() {
+    fn parse_icpswap_body_rejects_error_code() {
         let json = br#"{"code":404,"message":"not found","data":null}"#;
+        let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
+        assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
+    }
+
+    #[test]
+    fn parse_icpswap_body_rejects_legacy_zero_code() {
+        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"50000"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
@@ -176,7 +199,7 @@ mod tests {
     #[test]
     fn parse_icpswap_body_filters_non_finite_price_change() {
         let json =
-            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"1000"}}"#;
+            br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.0","priceChange24H":"NaN","tvlUSD":"1000"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.0));
@@ -185,35 +208,35 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_rejects_bad_price() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"0","priceChange24H":"0","tvlUSD":"100"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"0","priceChange24H":"0","tvlUSD":"100"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_rejects_tvl_below_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"100"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"100"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_rejects_zero_tvl() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"0"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"0"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_rejects_tvl_at_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_accepts_tvl_above_threshold() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500.01"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"500.01"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         let d = exchange_data_from_icpswap_envelope(parsed, 0).unwrap();
         assert_eq!(d.price, Some(1.25));
@@ -221,14 +244,14 @@ mod tests {
 
     #[test]
     fn parse_icpswap_body_rejects_nan_tvl() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"NaN"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"NaN"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
 
     #[test]
     fn parse_icpswap_body_rejects_negative_tvl() {
-        let json = br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"-500"}}"#;
+        let json = br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5","tvlUSD":"-500"}}"#;
         let parsed: IcpSwapEnvelope = serde_json::from_slice(json).unwrap();
         assert!(exchange_data_from_icpswap_envelope(parsed, 0).is_none());
     }
@@ -236,7 +259,7 @@ mod tests {
     #[test]
     fn parse_icpswap_body_rejects_missing_tvl() {
         let json =
-            br#"{"code":0,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5"}}"#;
+            br#"{"code":200,"data":{"tokenLedgerId":"x","price":"1.25","priceChange24H":"-2.5"}}"#;
         let parsed: Result<IcpSwapEnvelope, _> = serde_json::from_slice(json);
         assert!(parsed
             .ok()

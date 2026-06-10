@@ -202,13 +202,19 @@ export type AllowSigningResult =
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
 	/**
-	 * When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-	 * `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-	 * (misconfiguration with no key does not run refresh).
+	 * Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+	 * `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+	 * both keep refresh disabled (and a missing key never runs refresh either).
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
+	/**
+	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 */
+	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
 	/**
 	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
@@ -1915,7 +1921,7 @@ export interface _SERVICE {
 	 * background refresh timer keeps them warm. If any cached price is
 	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 	 * seconds, the endpoint kicks off a refresh for that subset **in the
-	 * background** (via `ic_cdk::futures::spawn`) and returns the current cache
+	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
 	 * snapshot immediately. Entries that are still missing or stale at the
 	 * moment of the call are returned as `None`; subsequent calls will pick up
 	 * the refreshed values once the spawned fetch lands.
@@ -2048,6 +2054,17 @@ export interface _SERVICE {
 	 * Restricted to canister controllers only.
 	 */
 	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+	 * keys.
+	 *
+	 * Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+	 * consensus (every replica issues the request); `false` sends them non-replicated (a single
+	 * replica). See [`crate::exchange::is_exchange_rate_replicated`].
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_replicated: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
