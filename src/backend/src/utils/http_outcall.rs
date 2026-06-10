@@ -82,20 +82,27 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 ///
 /// Sends a GET request to `url` with a `User-Agent` header and validates
 /// that the response status is in the 2xx range. Attaches
-/// [`http_request_transform`] so IC replicas can reach consensus.
+/// [`http_request_transform`] to normalise the response (it strips volatile
+/// headers); in replicated mode that normalisation is also what lets the
+/// replicas reach consensus.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
 /// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
+/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
+///   response; when `false`, a single replica handles it (cheaper, but unverified). The
+///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
 pub(crate) async fn get(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
+    replicated: bool,
 ) -> Result<HttpRequestResult, String> {
     let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
 
+    request.is_replicated = Some(replicated);
     request.transform = Some(transform_context_from_query(
         "http_request_transform".to_string(),
         vec![],

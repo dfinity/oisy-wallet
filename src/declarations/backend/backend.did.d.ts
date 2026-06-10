@@ -209,6 +209,12 @@ export interface ApiKeys {
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
+	/**
+	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 */
+	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
 	infura_api_key: [] | [string];
 }
@@ -1979,6 +1985,17 @@ export interface _SERVICE {
 	 * Restricted to canister controllers only.
 	 */
 	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+	 * keys.
+	 *
+	 * Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+	 * consensus (every replica issues the request); `false` sends them non-replicated (a single
+	 * replica). See [`crate::exchange::is_exchange_rate_replicated`].
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_replicated: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
