@@ -2,7 +2,10 @@ use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::api_keys::ApiKeys;
 
-use crate::utils::pocketic::{controller, setup, PicCanisterTrait};
+use crate::utils::{
+    mock::USER_1,
+    pocketic::{controller, setup, PicCanisterTrait},
+};
 
 fn api_keys_with_coingecko() -> ApiKeys {
     ApiKeys {
@@ -59,6 +62,38 @@ fn set_exchange_rate_enabled_toggles_without_touching_keys() {
         Ok(false),
         "Refresh should be disabled after toggling it back off."
     );
+}
+
+#[test]
+fn exchange_rate_enabled_defaults_to_false_for_anonymous_query() {
+    let pic_setup = setup();
+
+    assert_eq!(
+        pic_setup.query::<bool>(Principal::anonymous(), "exchange_rate_enabled", ()),
+        Ok(false),
+        "Refresh must be disabled until a CoinGecko key is configured, even for anonymous callers."
+    );
+}
+
+#[test]
+fn exchange_rate_enabled_requires_coingecko_key_when_explicitly_enabled() {
+    let pic_setup = setup();
+
+    assert_eq!(
+        pic_setup.update::<()>(controller(), "set_exchange_rate_enabled", true),
+        Ok(())
+    );
+    assert_eq!(
+        pic_setup.query::<bool>(controller(), "exchange_rate_enabled", ()),
+        Ok(false),
+        "Explicitly enabling refresh without a CoinGecko key must not start refresh outcalls."
+    );
+
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(stored.exchange_rate_enabled, Some(true));
+    assert_eq!(stored.coingecko_api_key, None);
 }
 
 #[test]
@@ -147,5 +182,26 @@ fn set_exchange_rate_replicated_is_controller_only() {
             .update::<()>(Principal::anonymous(), "set_exchange_rate_replicated", true)
             .is_err(),
         "Anonymous caller must not be able to toggle exchange-rate replication."
+    );
+}
+
+#[test]
+fn set_exchange_rate_enabled_rejects_authenticated_non_controller() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(USER_1).expect("valid non-controller principal");
+
+    assert_eq!(
+        pic_setup.update::<()>(caller, "set_exchange_rate_enabled", false),
+        Err(
+            "Update call error. RejectionCode: CanisterReject, Error: Caller is not a controller."
+                .to_string()
+        )
+    );
+    let stored = pic_setup
+        .query::<ApiKeys>(controller(), "get_api_keys", ())
+        .expect("controller can read API keys");
+    assert_eq!(
+        stored.exchange_rate_enabled, None,
+        "Rejected non-controller calls must not mutate the stored refresh setting."
     );
 }
