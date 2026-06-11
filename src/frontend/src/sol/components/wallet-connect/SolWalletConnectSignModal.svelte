@@ -74,9 +74,10 @@
 	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
+	let ambiguous = $state<boolean | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress } = await decodeService({
+		({ amount, destination, tokenAddress, ambiguous } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
@@ -88,7 +89,7 @@
 	);
 	let reviewToken = $derived(reviewSplToken ?? token);
 	let reviewedTokenAddress = $derived(isTokenSpl(reviewToken) ? reviewToken.address : undefined);
-	let approve = $derived(isNullish(tokenAddress) || nonNullish(reviewSplToken));
+	let approve = $derived(!ambiguous && (isNullish(tokenAddress) || nonNullish(reviewSplToken)));
 
 	$effect(() => {
 		[data, networkId];
