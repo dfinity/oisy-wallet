@@ -1154,7 +1154,7 @@ describe('exchange.worker', () => {
 			};
 
 			const mockMyRates = (
-				...entries: [TokenId, BackendExchangeRate][]
+				...entries: [TokenId, BackendExchangeRate | undefined][]
 			): Array<[TokenId, BackendExchangeRate | undefined]> => entries;
 
 			beforeEach(() => {
