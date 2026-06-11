@@ -277,14 +277,15 @@ pub(crate) fn start_exchange_rate_timer() {
     // right after init / upgrade, matching the previous always-on behaviour.
     note_rate_request();
 
-    set_timer(Duration::ZERO, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("initial refresh"));
-    });
+    set_timer(
+        Duration::ZERO,
+        refresh_exchange_rates_guarded("initial refresh"),
+    );
 
     let refresh_interval = Duration::from_secs(PRICE_REFRESH_INTERVAL_SEC);
 
     let _ = set_timer_interval(refresh_interval, || {
-        ic_cdk::futures::spawn(refresh_exchange_rates_guarded("refresh"));
+        refresh_exchange_rates_guarded("refresh")
     });
 }
 
@@ -305,8 +306,17 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
 /// To add another provider: implement [`SupplementalPriceProvider`] for a new type (any token
 /// variant you support), place it under `exchange/providers/`, and append `Box::new(...)` here in
 /// priority order (first match wins; later providers only see still-missing tokens).
-fn supplemental_price_providers() -> Vec<Box<dyn SupplementalPriceProvider>> {
-    vec![Box::new(IcpSwapProvider::default())]
+fn supplemental_price_providers(replicated: bool) -> Vec<Box<dyn SupplementalPriceProvider>> {
+    vec![Box::new(IcpSwapProvider::new(replicated))]
+}
+
+/// Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+/// issues the request) or *non-replicated* (a single replica handles it).
+///
+/// Replicated only when `exchange_rate_replicated` is explicitly `Some(true)`; `None` (the
+/// default) and `Some(false)` both mean non-replicated.
+pub(crate) fn is_exchange_rate_replicated() -> bool {
+    with_api_keys(|keys| keys.exchange_rate_replicated == Some(true))
 }
 
 /// Returns whether the backend will actually issue exchange-rate refresh outcalls.
@@ -349,8 +359,9 @@ pub(crate) async fn fetch_and_update_prices(
     let api_key =
         with_api_keys(|keys| keys.coingecko_api_key.clone()).ok_or(ExchangeError::ApiKeyNotSet)?;
 
-    let provider = CoinGeckoProvider::new(api_key);
-    let supplementals = supplemental_price_providers();
+    let replicated = is_exchange_rate_replicated();
+    let provider = CoinGeckoProvider::new(api_key, replicated);
+    let supplementals = supplemental_price_providers(replicated);
 
     let prices = fetch_all_prices(&provider, &supplementals, token_ids).await;
 
@@ -593,6 +604,30 @@ mod tests {
         assert!(!is_exchange_rate_refresh_enabled());
     }
 
+    #[test]
+    fn replicated_only_when_explicitly_opted_in() {
+        // Replicated is opt-in: only an explicit `Some(true)` enables consensus outcalls.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: Some(true),
+            ..Default::default()
+        });
+        assert!(is_exchange_rate_replicated());
+
+        // Unset defaults to non-replicated.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: None,
+            ..Default::default()
+        });
+        assert!(!is_exchange_rate_replicated());
+
+        // Explicitly non-replicated.
+        crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
+            exchange_rate_replicated: Some(false),
+            ..Default::default()
+        });
+        assert!(!is_exchange_rate_replicated());
+    }
+
     fn custom_token(seed: u8) -> StoredTokenId {
         StoredTokenId(TokenId::Icrc(Principal::from_slice(&[seed])))
     }
@@ -706,5 +741,57 @@ mod tests {
             Some(&exchange_rate(floor)),
             floor
         ));
+    }
+
+    #[test]
+    fn caller_staleness_floor_aligns_refresh_trigger_with_snapshot_filter() {
+        let now = 1_000 * NANOS_PER_SEC;
+        let floor = staleness_floor_ns(now);
+        let missing = custom_token(1);
+        let stale = custom_token(2);
+        let boundary = custom_token(3);
+        let fresh = custom_token(4);
+        let tokens = vec![
+            missing.clone(),
+            stale.clone(),
+            boundary.clone(),
+            fresh.clone(),
+        ];
+
+        let cached_rate = |token_id: &StoredTokenId| {
+            if *token_id == stale {
+                Some(exchange_rate(floor - 1))
+            } else if *token_id == boundary {
+                Some(exchange_rate(floor))
+            } else if *token_id == fresh {
+                Some(exchange_rate(now))
+            } else {
+                None
+            }
+        };
+
+        let due = tokens_missing_or_older_than(&tokens, cached_rate, floor);
+        let snapshot: Vec<(StoredTokenId, Option<ExchangeRate>)> = tokens
+            .iter()
+            .map(|token_id| {
+                (
+                    token_id.clone(),
+                    cached_rate(token_id).and_then(|rate| {
+                        exchange_rate_is_fresh_enough(&rate, floor).then_some(rate)
+                    }),
+                )
+            })
+            .collect();
+
+        assert_eq!(due, vec![missing.clone(), stale.clone()]);
+        assert_eq!(
+            snapshot,
+            vec![
+                (missing, None),
+                (stale, None),
+                (boundary, Some(exchange_rate(floor))),
+                (fresh, Some(exchange_rate(now)))
+            ]
+        );
     }
 }

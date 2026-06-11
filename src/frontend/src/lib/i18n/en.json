@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Settings",
 			"general": "General",
+			"preferences": "Preferences",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": "You burn"
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "Active transactions",
+			"open_aria_label": "Open active transactions",
+			"empty": "You have no active transactions.",
+			"section_in_progress": "In progress",
+			"section_failed": "Failed",
+			"section_previous": "Previous",
+			"dismiss_aria_label": "Dismiss this transaction"
+		},
+		"error": {
+			"dismiss_failed": "Could not dismiss the transaction."
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Scan QR Code",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
+			"starting_to_swap": "Submitting your swap...",
+			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1176,7 +1193,6 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
-			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again."
+			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
+			"swap_refunded": "The swap transaction was refunded."
 		}
 	},
 	"buy": {

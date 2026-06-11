@@ -9,7 +9,6 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
-	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
@@ -280,11 +279,11 @@
 	</div>
 
 	<div class="flex max-w-80 flex-col gap-5 py-5">
-		<MenuLanguageSelector />
+		{#if $authNotSignedIn}
+			<MenuLanguageSelector />
+		{/if}
 
 		{#if $authSignedIn}
-			<MenuCurrencySelector />
-
 			<MenuThemeSelector />
 		{/if}
 	</div>

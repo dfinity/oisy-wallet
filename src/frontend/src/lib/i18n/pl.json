@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Ustawienia",
 			"general": "",
+			"preferences": "Preferencje",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Skanuj kod QR",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "Wykonywanie transakcji...",
 			"initializing": "Inicjowanie transakcji...",
 			"swapping": "Wymiana...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
 			"swap_provider_website": "Strona internetowa",
@@ -1176,7 +1193,6 @@
 			"select_token": "Wybierz token",
 			"select_network_filter": "Wybierz sieć",
 			"withdrawing": "Wypłacanie...",
-			"bridging": "Trwa bridging... (Prosimy o cierpliwość, może to potrwać do 2 minut.)",
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Wymiana została zakończona, ale Twoje tokeny nie mogły zostać automatycznie wypłacone. Kliknij przycisk Wypłać poniżej, aby wypłacić je ręcznie.<br> Lub postępuj zgodnie z",
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
