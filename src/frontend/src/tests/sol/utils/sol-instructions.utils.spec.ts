@@ -39,7 +39,13 @@ import {
 	getApproveInstruction as getToken2022ApproveInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
 } from '@solana-program/token-2022';
-import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import {
+	address,
+	createNoopSigner,
+	type Base58EncodedBytes,
+	type Rpc,
+	type SolanaRpcApi
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -1063,7 +1069,7 @@ describe('sol-instructions.utils', () => {
 
 		it('should ignore a Create Associated Token instruction', () => {
 			const instruction = getCreateAssociatedTokenInstruction({
-				payer: address(mockSolAddress),
+				payer: createNoopSigner(address(mockSolAddress)),
 				ata: address(mockSolAddress2),
 				owner: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address)
@@ -1077,7 +1083,7 @@ describe('sol-instructions.utils', () => {
 
 		it('should ignore a Create Associated Token Idempotent instruction', () => {
 			const instruction = getCreateAssociatedTokenIdempotentInstruction({
-				payer: address(mockSolAddress),
+				payer: createNoopSigner(address(mockSolAddress)),
 				ata: address(mockSolAddress2),
 				owner: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address)
