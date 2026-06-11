@@ -11,6 +11,14 @@ secret never ships in the frontend bundle.
 | `VITE_ONRAMPER_API_KEY_DEV` / `_PROD` | Public widget `apiKey` (the `?apiKey=` in the URL) | Frontend bundle             | Build-time env / GitHub secrets, like every other `VITE_*` key  |
 | `onramper_signing_secret`             | HMAC secret used to sign URLs                      | Backend canister state only | Controller call to `set_onramper_signing_secret` (this runbook) |
 
+## Availability (feature flag)
+
+The buy widget is gated by `ONRAMPER_ENABLED` (`src/frontend/src/env/rest/onramper.env.ts`), which
+is enabled only on **local, staging and beta** — `LOCAL || STAGING || BETA` (`STAGING` covers the
+`test_fe_*` / `audit` / `e2e` environments). On **production (`ic`)** the flag is `false`, so the
+buy flow shows the unavailable notice regardless of backend state. Within the enabled environments,
+the widget is additionally gated on `onramper_enabled` (secret provisioned) — see below.
+
 ## Runtime behavior
 
 - `sign_onramper_widget_url` (update, authenticated, rate-limited): signs the caller's
