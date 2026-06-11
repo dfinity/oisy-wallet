@@ -79,14 +79,16 @@ export const decode = async ({
 	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
-	// not surfaced by the mapper. Recover it from the source (or destination) token
-	// account so the review can still show the correct token instead of native SOL.
+	// not surfaced by the mapper. Recover it from the source token account (the account
+	// being debited) so the review can still show the correct token instead of native
+	// SOL. We deliberately do not look at the destination: a native SOL transfer *to* a
+	// token account would otherwise be misread as an SPL transfer.
 	if (nonNullish(mapped.tokenAddress)) {
 		return mapped;
 	}
 
 	const tokenAddress = await resolveSplTokenAddress({
-		addresses: [mapped.source, mapped.destination],
+		address: mapped.source,
 		network: solNetwork
 	});
 
@@ -94,22 +96,27 @@ export const decode = async ({
 };
 
 const resolveSplTokenAddress = async ({
-	addresses,
+	address,
 	network
 }: {
-	addresses: OptionSolAddress[];
+	address: OptionSolAddress;
 	network: SolanaNetworkType;
 }): Promise<SplTokenAddress | undefined> => {
-	for (const address of addresses.filter(nonNullish)) {
+	if (isNullish(address)) {
+		return undefined;
+	}
+
+	try {
 		const { value } = await getAccountInfo({ address, network });
 
 		if (nonNullish(value) && 'parsed' in value.data) {
 			const { mint } = value.data.parsed.info as { mint?: SplTokenAddress };
 
-			if (nonNullish(mint)) {
-				return mint;
-			}
+			return mint;
 		}
+	} catch (_: unknown) {
+		// Best-effort: a failed lookup must not break the review, which simply falls
+		// back to the native SOL token.
 	}
 
 	return undefined;
