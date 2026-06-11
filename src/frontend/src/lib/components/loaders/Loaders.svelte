@@ -9,6 +9,7 @@
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
+	import LoaderActiveUserTransactions from '$lib/components/loaders/LoaderActiveUserTransactions.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
@@ -49,6 +50,8 @@
 		<UserSnapshotWorker />
 
 		<LoaderContacts />
+
+		<LoaderActiveUserTransactions />
 
 		<TransactionsIdbSetter />
 

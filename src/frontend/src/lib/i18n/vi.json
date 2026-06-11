@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Cài đặt",
 			"general": "Chung",
+			"preferences": "Tuỳ chọn",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Quét mã QR",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "Đang thực hiện giao dịch...",
 			"initializing": "Đang khởi tạo giao dịch...",
 			"swapping": "Đang hoán đổi...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
 			"swap_provider_website": "Trang web",
@@ -1176,7 +1193,6 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

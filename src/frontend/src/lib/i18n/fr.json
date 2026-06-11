@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Paramètres",
 			"general": "Général",
+			"preferences": "Préférences",
 			"principal": "Votre Principal",
 			"principal_copied": "Principal copié dans le presse-papiers",
 			"principal_description": "Votre ID pour $oisy_name. Créé par votre Internet Identity.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Scanner le code QR",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "Exécution de la transaction...",
 			"initializing": "Initialisation de la transaction...",
 			"swapping": "Échange en cours...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Actualisation de l'interface",
 			"swap_provider": "Fournisseur d'échange",
 			"swap_provider_website": "Site web",
@@ -1176,7 +1193,6 @@
 			"select_token": "Sélectionner le token",
 			"select_network_filter": "Sélectionner le réseau",
 			"withdrawing": "Retrait en cours...",
-			"bridging": "Bridge en cours... (Veuillez patienter, cela peut prendre jusqu'à 2 minutes.)",
 			"network_cost": "Coût du réseau",
 			"gasless": "Sans gaz",
 			"swap_fees": "Frais d'échange",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "L'échange est terminé, mais vos tokens n'ont pas pu être retirés automatiquement. Cliquez sur le bouton Retirer ci-dessous pour les retirer manuellement.<br> Ou suivez",
 			"swap_sucess_manually_withdraw_success": "Les tokens de votre précédent échange ont été retirés avec succès. Vous pouvez maintenant fermer cette fenêtre.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

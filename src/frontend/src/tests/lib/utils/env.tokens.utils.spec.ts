@@ -1,7 +1,12 @@
+import {
+	ICRC7_BUILTIN_TOKENS,
+	ICRC7_BUILTIN_TOKENS_INDEXED
+} from '$env/tokens/tokens-icrc7/tokens.icrc7.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import * as appConstants from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('env.tokens.utils', () => {
 	describe('defineSupportedTokens', () => {
@@ -60,6 +65,22 @@ describe('env.tokens.utils', () => {
 				const { localTokens: _, ...params } = mockParams;
 
 				expect(defineSupportedTokens(params)).toEqual([...mainnetTokens, ...testnetTokens]);
+			});
+		});
+	});
+
+	describe('ICRC7_BUILTIN_TOKENS_INDEXED', () => {
+		it('should index every curated ICRC-7 token without collapsing canister ids', () => {
+			expect(ICRC7_BUILTIN_TOKENS_INDEXED.size).toBe(ICRC7_BUILTIN_TOKENS.length);
+
+			ICRC7_BUILTIN_TOKENS.forEach((token) => {
+				expect(ICRC7_BUILTIN_TOKENS_INDEXED.get(token.canisterId)).toEqual(token);
+			});
+		});
+
+		it('should only include valid canonical principal canister ids', () => {
+			ICRC7_BUILTIN_TOKENS.forEach(({ canisterId }) => {
+				expect(Principal.fromText(canisterId).toText()).toBe(canisterId);
 			});
 		});
 	});
