@@ -480,8 +480,12 @@ describe('exchange.services', () => {
 			vi.doUnmock('$env/rest/coingecko.env');
 		});
 
+		// After `vi.resetModules()` the dynamically imported service may bind to a freshly
+		// instantiated mock module, so every assertion re-imports the mocked module and
+		// asserts on that instance instead of the file-scope import.
 		it('should short-circuit the native helpers without calling Coingecko', async () => {
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			await expect(services.exchangeRateETHToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRateBTCToUsd()).resolves.toEqual({});
@@ -490,11 +494,12 @@ describe('exchange.services', () => {
 			await expect(services.exchangeRateBNBToUsd()).resolves.toEqual({});
 			await expect(services.exchangeRatePOLToUsd()).resolves.toEqual({});
 
-			expect(simplePrice).not.toHaveBeenCalled();
+			expect(coingeckoRest.simplePrice).not.toHaveBeenCalled();
 		});
 
 		it('should short-circuit the ERC-20 helper without calling Coingecko', async () => {
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			const result = await services.exchangeRateERC20ToUsd({
 				coingeckoPlatformId: 'ethereum',
@@ -502,36 +507,39 @@ describe('exchange.services', () => {
 			});
 
 			expect(result).toEqual({});
-			expect(simpleTokenPrice).not.toHaveBeenCalled();
+			expect(coingeckoRest.simpleTokenPrice).not.toHaveBeenCalled();
 		});
 
 		it('should short-circuit the SPL helper without calling Coingecko', async () => {
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			const result = await services.exchangeRateSPLToUsd(['SoLaddr1']);
 
 			expect(result).toEqual({});
-			expect(simpleTokenPrice).not.toHaveBeenCalled();
+			expect(coingeckoRest.simpleTokenPrice).not.toHaveBeenCalled();
 		});
 
 		it('should short-circuit the FX helper for non-USD without calling Coingecko', async () => {
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			const result = await services.exchangeRateUsdToCurrency(Currency.EUR);
 
 			expect(result).toBeUndefined();
-			expect(simplePrice).not.toHaveBeenCalled();
+			expect(coingeckoRest.simplePrice).not.toHaveBeenCalled();
 		});
 
 		it('should still return 1 for USD in the FX helper', async () => {
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			await expect(services.exchangeRateUsdToCurrency(Currency.USD)).resolves.toStrictEqual({
 				rate: 1,
 				fx24hChangeMultiplier: 1
 			});
 
-			expect(simplePrice).not.toHaveBeenCalled();
+			expect(coingeckoRest.simplePrice).not.toHaveBeenCalled();
 		});
 
 		it('should start the ICRC cascade from {} and still return ICPSwap results', async () => {
@@ -539,22 +547,26 @@ describe('exchange.services', () => {
 				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1
 			};
 
-			vi.mocked(findMissingLedgerCanisterIds)
+			const exchangeUtils = await import('$lib/utils/exchange.utils');
+			const icpSwapRest = await import('$lib/rest/icpswap.rest');
+
+			vi.mocked(exchangeUtils.findMissingLedgerCanisterIds)
 				.mockReturnValueOnce([MOCK_CANISTER_ID_1])
 				.mockReturnValueOnce([]);
-			vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue(['mockRawToken' as never]);
-			vi.mocked(formatIcpSwapToCoingeckoPrices).mockReturnValue(icpSwapFallback);
+			vi.mocked(icpSwapRest.fetchBatchIcpSwapPrices).mockResolvedValue(['mockRawToken' as never]);
+			vi.mocked(exchangeUtils.formatIcpSwapToCoingeckoPrices).mockReturnValue(icpSwapFallback);
 
 			const services = await import('$lib/services/exchange.services');
+			const coingeckoRest = await import('$lib/rest/coingecko.rest');
 
 			const result = await services.exchangeRateICRCToUsd([MOCK_CANISTER_ID_1]);
 
-			expect(simpleTokenPrice).not.toHaveBeenCalled();
-			expect(findMissingLedgerCanisterIds).toHaveBeenCalledWith({
+			expect(coingeckoRest.simpleTokenPrice).not.toHaveBeenCalled();
+			expect(exchangeUtils.findMissingLedgerCanisterIds).toHaveBeenCalledWith({
 				allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
 				coingeckoResponse: {}
 			});
-			expect(fetchBatchIcpSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_1]);
+			expect(icpSwapRest.fetchBatchIcpSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_1]);
 			expect(result).toEqual(icpSwapFallback);
 		});
 	});
