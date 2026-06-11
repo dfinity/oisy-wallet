@@ -456,14 +456,16 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -472,14 +474,16 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -528,14 +532,16 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -544,14 +550,16 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 

@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QR Code scannen",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "Führe Transaktion aus...",
 			"initializing": "Transaktion initialisieren...",
 			"swapping": "Tausche...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI aktualisieren",
 			"swap_provider": "Tausch-Anbieter",
 			"swap_provider_website": "Website",
@@ -1177,7 +1193,6 @@
 			"select_token": "Token auswählen",
 			"select_network_filter": "Netzwerk auswählen",
 			"withdrawing": "Abheben...",
-			"bridging": "Bridge-Vorgang läuft... (Bitte haben Sie Geduld, dies kann bis zu 2 Minuten dauern.)",
 			"network_cost": "Netzwerk Kosten",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Gebühren",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
 			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

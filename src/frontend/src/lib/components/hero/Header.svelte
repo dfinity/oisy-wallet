@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
+	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -25,6 +26,7 @@
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
 	let menuOpen = $state(false);
+	let activeUserTransactionsOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
@@ -41,7 +43,7 @@
 	// pointer events on top of the modal backdrop. We also keep the
 	// `1.5xl` signed-in default at `z-10` so those banners render at
 	// the same level as the Header instead of behind it.
-	let popoverOpen = $derived(menuOpen || networkSwitcherOpen);
+	let popoverOpen = $derived(menuOpen || networkSwitcherOpen || activeUserTransactionsOpen);
 
 	let biggerOverlay = $derived(popoverOpen || modalsOpen);
 
@@ -89,6 +91,8 @@
 			{#if nonNullish($walletConnectListenerStore)}
 				<WalletConnect />
 			{/if}
+
+			<ActiveUserTransactionsButton bind:visible={activeUserTransactionsOpen} />
 
 			<Scanner />
 		{/if}
