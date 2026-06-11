@@ -9,6 +9,7 @@ import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { MediaStatusEnum } from '$lib/enums/media-status';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft } from '$lib/types/nft';
@@ -22,6 +23,7 @@ import {
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	getNftSendCloseRedirectUrl,
 	getNftSendRedirectUrl,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -267,6 +269,56 @@ describe('nfts.utils', () => {
 			expect(result).toBe(
 				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
 			);
+		});
+	});
+	describe('getNftSendCloseRedirectUrl', () => {
+		const sentNft = mockValidErc721Nft;
+		const remainingNft = { ...mockValidErc721Nft, id: parseNftId('173564') };
+
+		const detailSendDone = {
+			isNftsPage: true,
+			routeNft: sentNft.id,
+			sendProgressStep: ProgressStepsSend.DONE,
+			selectedNft: sentNft
+		};
+
+		it('returns the collection URL after a completed NFT detail-page send with siblings left', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBe(
+				`${AppPath.Nfts}?collection=${sentNft.collection.address}&network=${sentNft.collection.network.id.description}`
+			);
+		});
+
+		it('returns the NFT root URL after a completed NFT detail-page send of the last item', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft]
+				})
+			).toBe(AppPath.Nfts);
+		});
+
+		it.each([
+			{ description: 'is not on the NFTs page', override: { isNftsPage: false } },
+			{ description: 'has no NFT route parameter', override: { routeNft: undefined } },
+			{ description: 'has an empty NFT route parameter', override: { routeNft: '' } },
+			{
+				description: 'has not completed the send',
+				override: { sendProgressStep: ProgressStepsSend.INITIALIZATION }
+			},
+			{ description: 'has no selected NFT', override: { selectedNft: undefined } }
+		])('returns undefined when the modal $description', ({ override }) => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					...override,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBeUndefined();
 		});
 	});
 

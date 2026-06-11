@@ -68,9 +68,9 @@
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getNftSendCloseRedirectUrl } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
-	import { getNftSendCloseRedirectUrl, shouldSkipDestinationStep } from '$lib/utils/send.utils';
+	import { shouldSkipDestinationStep } from '$lib/utils/send.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
