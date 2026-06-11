@@ -306,7 +306,7 @@ fn update_price(token_id: &StoredTokenId, exchange_data: &ExchangeData) {
 /// orthogonal runtime `exchange_rate_enabled` gate ([`is_exchange_rate_refresh_enabled`]) still
 /// wins: when refresh is off, neither provider runs regardless of these flags.
 const COINGECKO_PROVIDER_ENABLED: bool = true;
-const ICPSWAP_PROVIDER_ENABLED: bool = true;
+const ICPSWAP_PROVIDER_ENABLED: bool = false;
 
 /// Ordered supplemental sources that run after `CoinGecko` for tokens still missing a valid USD
 /// price.
