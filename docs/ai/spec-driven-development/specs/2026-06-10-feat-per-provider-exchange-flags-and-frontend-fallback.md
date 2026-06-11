@@ -40,15 +40,15 @@ Two related changes to the exchange-rate flow:
 
 ### Backend (today)
 
-- `fetch_and_update_prices` ([`src/backend/src/exchange/mod.rs:348`](../../../src/backend/src/exchange/mod.rs))
+- `fetch_and_update_prices` ([`src/backend/src/exchange/mod.rs:370`](../../../src/backend/src/exchange/mod.rs))
   builds a `CoinGeckoProvider` primary + `supplemental_price_providers(replicated)`
   (which returns `vec![Box::new(IcpSwapProvider::new(replicated))]`) and calls
   `fetch_all_prices`.
-- `fetch_all_prices` ([`src/backend/src/exchange/composite.rs:38`](../../../src/backend/src/exchange/composite.rs))
+- `fetch_all_prices` ([`src/backend/src/exchange/composite.rs:42`](../../../src/backend/src/exchange/composite.rs))
   runs the primary, keeps only valid prices (`has_valid_price`), then runs each
   supplemental **only for the tokens still missing a valid price**, in order.
 - There is a **global** opt-in gate, `is_exchange_rate_refresh_enabled()`
-  ([`mod.rs:328`](../../../src/backend/src/exchange/mod.rs), backed by the
+  ([`mod.rs:342`](../../../src/backend/src/exchange/mod.rs), backed by the
   `ApiKeys` cell), but **no per-provider toggles** — to drop a provider today you
   edit the provider list / call site.
 - KongSwap is **not** a backend provider and is out of scope here.
@@ -143,7 +143,7 @@ Gate the two providers:
   `IcpSwapProvider` only when `ICPSWAP_PROVIDER_ENABLED`. When disabled, return
   an empty `Vec`.
 - **CoinGecko (primary):** the primary is currently a required `&P` in
-  `fetch_all_prices` ([`composite.rs:38`](../../../src/backend/src/exchange/composite.rs)).
+  `fetch_all_prices` ([`composite.rs:42`](../../../src/backend/src/exchange/composite.rs)).
   Make the primary skippable. Preferred mechanics (implementer's choice, keep it
   minimal and testable): thread a `primary_enabled: bool` into `fetch_all_prices`
   and, when `false`, skip the primary fetch (treat it as an empty result) so the

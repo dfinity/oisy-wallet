@@ -333,14 +333,24 @@ pub(crate) fn is_exchange_rate_replicated() -> bool {
 
 /// Returns whether the backend will actually issue exchange-rate refresh outcalls.
 ///
-/// `true` iff a `CoinGecko` API key is configured and `exchange_rate_enabled` is
-/// explicitly set to `Some(true)`. Refresh is opt-in: `None` (the default) and
-/// `Some(false)` both keep it disabled. Single source of truth for both the refresh
-/// timer ([`fetch_and_update_prices`]) and the public `exchange_rate_enabled` query.
+/// `true` iff `exchange_rate_enabled` is explicitly set to `Some(true)` and, when the
+/// `CoinGecko` provider is enabled, its API key is configured. Refresh is opt-in: `None`
+/// (the default) and `Some(false)` both keep it disabled. With `CoinGecko` disabled, no
+/// key is required so a supplemental-only (e.g. `ICPSwap`) refresh can still run. Single
+/// source of truth for both the refresh timer ([`fetch_and_update_prices`]) and the
+/// public `exchange_rate_enabled` query.
 pub(crate) fn is_exchange_rate_refresh_enabled() -> bool {
-    with_api_keys(|keys| {
-        keys.coingecko_api_key.is_some() && keys.exchange_rate_enabled == Some(true)
-    })
+    with_api_keys(|keys| refresh_enabled_with(keys, COINGECKO_PROVIDER_ENABLED))
+}
+
+/// [`is_exchange_rate_refresh_enabled`] with the `CoinGecko` provider flag injected, so
+/// both flag branches stay unit-testable while the flag itself is a compile-time `const`.
+fn refresh_enabled_with(
+    keys: &shared::types::api_keys::ApiKeys,
+    coingecko_provider_enabled: bool,
+) -> bool {
+    (!coingecko_provider_enabled || keys.coingecko_api_key.is_some())
+        && keys.exchange_rate_enabled == Some(true)
 }
 
 /// Fetches USD prices for `token_ids` from the configured providers and
@@ -623,9 +633,32 @@ mod tests {
         set_exchange_config(Some("key"), Some(false));
         assert!(!is_exchange_rate_refresh_enabled());
 
-        // No key never refreshes, regardless of the flag.
+        // No key never refreshes while the CoinGecko provider is enabled.
         set_exchange_config(None, Some(true));
         assert!(!is_exchange_rate_refresh_enabled());
+    }
+
+    #[test]
+    fn refresh_enabled_requires_coingecko_key_only_when_provider_enabled() {
+        let no_key_opted_in = shared::types::api_keys::ApiKeys {
+            coingecko_api_key: None,
+            exchange_rate_enabled: Some(true),
+            ..Default::default()
+        };
+
+        // CoinGecko enabled: its key is mandatory.
+        assert!(!refresh_enabled_with(&no_key_opted_in, true));
+
+        // CoinGecko disabled: a supplemental-only refresh runs without a key.
+        assert!(refresh_enabled_with(&no_key_opted_in, false));
+
+        // The runtime opt-in still wins when CoinGecko is disabled.
+        let no_key_not_opted_in = shared::types::api_keys::ApiKeys {
+            coingecko_api_key: None,
+            exchange_rate_enabled: Some(false),
+            ..Default::default()
+        };
+        assert!(!refresh_enabled_with(&no_key_not_opted_in, false));
     }
 
     #[test]
