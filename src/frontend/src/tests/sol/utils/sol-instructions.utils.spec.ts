@@ -34,6 +34,7 @@ import {
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
+	getApproveInstruction as getToken2022ApproveInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
 } from '@solana-program/token-2022';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
@@ -1022,6 +1023,22 @@ describe('sol-instructions.utils', () => {
 				source: mockSolAddress,
 				destination: mockSolAddress2,
 				tokenAddress: JUP_TOKEN.address
+			});
+		});
+
+		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an approval', () => {
+			const instruction = getToken2022ApproveInstruction({
+				source: address(mockSolAddress),
+				delegate: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
 			});
 		});
 
