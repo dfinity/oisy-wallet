@@ -271,6 +271,7 @@ describe('nfts.utils', () => {
 			);
 		});
 	});
+
 	describe('getNftSendCloseRedirectUrl', () => {
 		const sentNft = mockValidErc721Nft;
 		const remainingNft = { ...mockValidErc721Nft, id: parseNftId('173564') };
