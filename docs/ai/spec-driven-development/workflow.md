@@ -107,6 +107,21 @@ This can land as a small follow-up PR. A project can deviate (e.g. if assets are
 
 ---
 
+## Spec structure
+
+Specs are free-form Markdown — there is no fixed template. The one convention worth following concerns how a spec records what is still unresolved, because these are read and acted on differently during the Build step.
+
+### Open questions vs. pending decisions
+
+Keep two distinct end-of-spec sections rather than one mixed "open items" list. The distinction is whether the relevant **facts are known**:
+
+- **Open questions (facts to confirm)** — the answer is not yet known and must be found out or verified: e.g. confirm an SDK method's contract, check whether a pool is live, verify a field exists in the registry. These often need research, a docs lookup, or a question to another team, and may still reshape the spec.
+- **Pending decisions (facts are clear — we just need to decide)** — all the relevant facts are understood; what remains is a product or architecture call: e.g. choosing between two valid approaches, or whether something ships in v1 vs. a fast-follow. These need an owner to decide, not more information.
+
+Why separate them: the two route to different people and actions. Open questions go to whoever can find the answer; pending decisions go to whoever owns the call. It also keeps the spec honest — it's easy to disguise an undecided choice as an "open question" and stall. When an open question gets answered, it usually becomes a pending decision: move it across rather than leaving it ambiguous.
+
+---
+
 ## Improvements Over a Basic Workflow
 
 ### Ground specs in real code
