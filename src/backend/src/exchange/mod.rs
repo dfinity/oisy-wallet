@@ -366,7 +366,8 @@ fn refresh_enabled_with(
 /// - `Ok(())` once the (possibly empty) set of fresh prices has been written.
 /// - `Err(ExchangeError::Disabled)` if refresh is not enabled (see
 ///   [`is_exchange_rate_refresh_enabled`]).
-/// - `Err(ExchangeError::ApiKeyNotSet)` if no `CoinGecko` API key is configured.
+/// - `Err(ExchangeError::ApiKeyNotSet)` if the `CoinGecko` provider is enabled but its API
+///   key is not configured. With `CoinGecko` disabled, no key is required.
 pub(crate) async fn fetch_and_update_prices(
     token_ids: &[StoredTokenId],
 ) -> Result<(), ExchangeError> {

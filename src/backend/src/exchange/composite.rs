@@ -114,6 +114,19 @@ mod tests {
         }
     }
 
+    /// Fails the test if queried: proves a disabled primary is truly skipped, not merely
+    /// ignored (skipping is what saves the outcall).
+    struct PanickingPrimaryProvider;
+
+    impl ExchangePriceProvider for PanickingPrimaryProvider {
+        async fn fetch_prices(
+            &self,
+            _token_ids: &[StoredTokenId],
+        ) -> Result<Vec<(StoredTokenId, ExchangeData)>, String> {
+            panic!("a disabled primary provider must never be queried");
+        }
+    }
+
     struct MockSupplementalProvider {
         result: Result<Vec<(StoredTokenId, ExchangeData)>, String>,
         requested: RequestedTokensLog,
@@ -289,13 +302,7 @@ mod tests {
         let first = native_token();
         let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
         let requested = vec![first.clone(), second.clone()];
-        // The primary would return valid prices, but a disabled primary must never be queried.
-        let primary = MockPrimaryProvider {
-            result: Ok(vec![
-                (first.clone(), data(Some(99.0))),
-                (second.clone(), data(Some(99.0))),
-            ]),
-        };
+        let primary = PanickingPrimaryProvider;
         let (supplemental, requested_by_supplemental) = MockSupplementalProvider::boxed(Ok(vec![
             (first.clone(), data(Some(1.0))),
             (second.clone(), data(Some(2.0))),
@@ -323,8 +330,8 @@ mod tests {
         let first = native_token();
         let second = icrc_token("ryjl3-tyaaa-aaaaa-aaaba-cai");
         let requested = vec![first, second];
-        let primary = MockPrimaryProvider { result: Ok(vec![]) };
         // Both providers off: no supplementals supplied, primary disabled.
+        let primary = PanickingPrimaryProvider;
         let supplementals: Vec<Box<dyn SupplementalPriceProvider>> = vec![];
 
         let prices = block_on(fetch_all_prices(
