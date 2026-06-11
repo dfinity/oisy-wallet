@@ -59,6 +59,7 @@ interface WalletConnectDecodeTransactionParams {
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
+	reviewedTokenAddress?: OptionSolAddress;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => void;
 	token: Token;
@@ -87,12 +88,16 @@ export const decode = async ({
 		return mapped;
 	}
 
-	const tokenAddress = await resolveSplTokenAddress({
+	const { tokenAddress, failed } = await resolveSplTokenAddress({
 		address: mapped.source,
 		network: solNetwork
 	});
 
-	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+	if (nonNullish(tokenAddress)) {
+		return { ...mapped, tokenAddress };
+	}
+
+	return failed ? { ...mapped, ambiguous: true } : mapped;
 };
 
 const resolveSplTokenAddress = async ({
@@ -101,9 +106,9 @@ const resolveSplTokenAddress = async ({
 }: {
 	address: OptionSolAddress;
 	network: SolanaNetworkType;
-}): Promise<SplTokenAddress | undefined> => {
+}): Promise<{ tokenAddress?: SplTokenAddress; failed?: boolean }> => {
 	if (isNullish(address)) {
-		return undefined;
+		return {};
 	}
 
 	try {
@@ -112,14 +117,15 @@ const resolveSplTokenAddress = async ({
 		if (nonNullish(value) && 'parsed' in value.data) {
 			const { mint } = value.data.parsed.info as { mint?: SplTokenAddress };
 
-			return mint;
+			return { tokenAddress: mint };
 		}
 	} catch (_: unknown) {
-		// Best-effort: a failed lookup must not break the review, which simply falls
-		// back to the native SOL token.
+		// A failed lookup leaves unchecked SPL transfers indistinguishable from native
+		// SOL, so callers must refuse to sign instead of reviewing with the wrong token.
+		return { failed: true };
 	}
 
-	return undefined;
+	return {};
 };
 
 const getSignatureWithoutSending = async ({
@@ -229,6 +235,7 @@ const getSignatureWithSending = async ({
 
 export const sign = ({
 	address,
+	reviewedTokenAddress,
 	modalNext,
 	token,
 	progress,
@@ -270,18 +277,24 @@ export const sign = ({
 
 			const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
-			const parsedTransactionMessage = await parseSolBase64TransactionMessage({
-				transactionMessage: base64EncodedTransactionMessage,
-				rpc: solanaHttpRpc(solNetwork)
+			const {
+				amount,
+				destination,
+				ambiguous,
+				tokenAddress: decodedTokenAddress
+			} = await decode({
+				base64EncodedTransactionMessage,
+				networkId
 			});
-
-			const { amount, destination, ambiguous } = mapSolTransactionMessage(parsedTransactionMessage);
 
 			// The review screen collapses the transaction to a single source/destination/amount.
 			// When the message bundles instructions that disagree on those fields, that summary
 			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
 			// one). Refuse to sign anything we cannot display faithfully.
-			if (ambiguous) {
+			if (
+				ambiguous ||
+				(nonNullish(decodedTokenAddress) && decodedTokenAddress !== reviewedTokenAddress)
+			) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
 				});

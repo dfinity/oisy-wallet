@@ -26,13 +26,14 @@
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
 	import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-	import { enabledSplTokens } from '$sol/derived/spl.derived';
+	import { splTokens } from '$sol/derived/spl.derived';
 	import {
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import { isTokenSpl } from '$sol/utils/spl.utils';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -81,16 +82,13 @@
 		}));
 	};
 
-	// When the transaction moves an SPL token we know, review it with that token's
-	// metadata; otherwise fall back to the network's native SOL token. The same mint
-	// can exist on several clusters, so we match the current network too.
-	let reviewToken = $derived(
-		nonNullish(tokenAddress)
-			? ($enabledSplTokens.find(
-					({ address, network: { id } }) => address === tokenAddress && id === networkId
-				) ?? token)
-			: token
+	// The same mint can exist on several clusters, so we match the current network too.
+	let reviewSplToken = $derived(
+		$splTokens.find(({ address, network: { id } }) => address === tokenAddress && id === networkId)
 	);
+	let reviewToken = $derived(reviewSplToken ?? token);
+	let reviewedTokenAddress = $derived(isTokenSpl(reviewToken) ? reviewToken.address : undefined);
+	let approve = $derived(isNullish(tokenAddress) || nonNullish(reviewSplToken));
 
 	$effect(() => {
 		[data, networkId];
@@ -151,6 +149,7 @@
 			request,
 			listener,
 			address,
+			reviewedTokenAddress,
 			modalNext: modal.next,
 			token,
 			progress: (step: ProgressStepsSign | ProgressStepsSendSol.SEND) => (signProgressStep = step),
@@ -180,6 +179,7 @@
 			<SolWalletConnectSignReview
 				{amount}
 				{application}
+				{approve}
 				{data}
 				destination={destination ?? ''}
 				onApprove={sign}

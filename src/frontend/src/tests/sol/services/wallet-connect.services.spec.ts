@@ -224,7 +224,7 @@ describe('wallet-connect.services', () => {
 			expect(result).toEqual({ amount: 5n, source: mockSolAddress, destination: mockAtaAddress });
 		});
 
-		it('should fall back to native SOL when the token account lookup throws', async () => {
+		it('should mark the transaction as ambiguous when the token account lookup throws', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
 
@@ -238,7 +238,12 @@ describe('wallet-connect.services', () => {
 
 			const result = await decode({ base64EncodedTransactionMessage, networkId });
 
-			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+			expect(result).toEqual({
+				amount: 7n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2,
+				ambiguous: true
+			});
 		});
 	});
 

@@ -15,12 +15,22 @@
 		application: string;
 		data?: string;
 		token: Token;
+		approve?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
 
-	let { amount, destination, source, application, data, token, onApprove, onReject }: Props =
-		$props();
+	let {
+		amount,
+		destination,
+		source,
+		application,
+		data,
+		token,
+		approve = true,
+		onApprove,
+		onReject
+	}: Props = $props();
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 </script>
@@ -37,6 +47,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {onApprove} {onReject} />
+		<WalletConnectActions {approve} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>
