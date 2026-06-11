@@ -198,6 +198,48 @@ describe('wallet-connect.services', () => {
 				tokenAddress: mockSplAddress
 			});
 		});
+
+		it('should not recover a tokenAddress for a native SOL transfer to a token account', async () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			// Native SOL transfer: the source is the sender wallet (a non-parsed system
+			// account), while the destination happens to be a token account (which would
+			// carry a `mint`). Only the source must be consulted.
+			vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+				amount: 5n,
+				source: mockSolAddress,
+				destination: mockAtaAddress
+			});
+
+			vi.mocked(getAccountInfo).mockResolvedValue({
+				value: { data: ['', 'base64'] }
+			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
+
+			const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+			expect(getAccountInfo).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({ address: mockSolAddress })
+			);
+			expect(result).toEqual({ amount: 5n, source: mockSolAddress, destination: mockAtaAddress });
+		});
+
+		it('should fall back to native SOL when the token account lookup throws', async () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+				amount: 7n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2
+			});
+
+			vi.mocked(getAccountInfo).mockRejectedValue(new Error('RPC down'));
+
+			const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+		});
 	});
 
 	describe('sign', () => {

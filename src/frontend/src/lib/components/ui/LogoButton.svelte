@@ -14,6 +14,8 @@
 		rounded?: boolean;
 		condensed?: boolean;
 		styleClass?: string;
+		titleStyleClass?: string;
+		subtitleStyleClass?: string;
 		testId?: string;
 		logo?: Snippet;
 		title?: Snippet;
@@ -43,7 +45,9 @@
 		descriptionEnd,
 		action,
 		onClick,
-		fullWidth = false
+		fullWidth = false,
+		titleStyleClass = '',
+		subtitleStyleClass = ''
 	}: Props = $props();
 </script>
 
@@ -81,7 +85,7 @@
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
 							<span
-								class="text-lg font-bold text-nowrap text-primary"
+								class={`text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
 								class:min-w-0={isNullish(subtitle)}
 								class:truncate={isNullish(subtitle)}
 							>
@@ -92,7 +96,7 @@
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="truncate text-base text-nowrap text-tertiary">
+							<span class={`truncate text-base text-nowrap text-tertiary ${subtitleStyleClass}`}>
 								{@render subtitle()}
 							</span>
 						{/if}

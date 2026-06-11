@@ -559,6 +559,44 @@ describe('nfts.utils', () => {
 			expect(res).toEqual([custom]);
 		});
 
+		it('keeps nameless NFTs in empty-filter results', () => {
+			const nameless = {
+				...nftAzuki1,
+				name: undefined,
+				id: parseNftId('42'),
+				collection: {
+					...nftAzuki1.collection,
+					name: undefined
+				}
+			};
+
+			const res = filterSortByCollection({
+				items: [nameless],
+				filter: ''
+			});
+
+			expect(res).toEqual([nameless]);
+		});
+
+		it('filters nameless NFTs by nft.id', () => {
+			const nameless = {
+				...nftAzuki1,
+				name: undefined,
+				id: parseNftId('424242'),
+				collection: {
+					...nftAzuki1.collection,
+					name: undefined
+				}
+			};
+
+			const res = filterSortByCollection({
+				items: [nameless, nftDeGods],
+				filter: '424242'
+			});
+
+			expect(res).toEqual([nameless]);
+		});
+
 		it('filters collection UIs by collection.name', () => {
 			const res = filterSortByCollection({
 				items: collections,

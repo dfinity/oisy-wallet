@@ -767,6 +767,7 @@
 		"text": {
 			"title": "الإعدادات",
 			"general": "",
+			"preferences": "التفضيلات",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "مسح رمز QR",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "جاري تنفيذ المعاملة...",
 			"initializing": "جاري تهيئة المعاملة...",
 			"swapping": "جاري التبديل...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
 			"swap_provider_website": "الموقع الإلكتروني",
@@ -1176,7 +1193,6 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

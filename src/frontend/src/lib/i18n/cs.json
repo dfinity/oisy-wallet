@@ -767,6 +767,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -1044,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Naskenovat QR kód",
@@ -1160,6 +1175,8 @@
 			"executing_transaction": "Provádění transakce...",
 			"initializing": "Inicializace transakce...",
 			"swapping": "Výměna...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
 			"swap_provider_website": "Webové stránky",
@@ -1176,7 +1193,6 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
@@ -1206,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
