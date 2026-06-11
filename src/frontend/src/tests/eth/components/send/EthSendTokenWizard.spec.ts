@@ -47,22 +47,19 @@ describe('EthSendTokenWizard.spec', () => {
 
 	const mockSendContext = ({
 		sendToken,
-		sendTokenId,
 		sendTokenDecimals
 	}: {
 		sendToken: Token | NonFungibleToken;
-		sendTokenId: string;
 		sendTokenDecimals: number;
 	}) => ({
 		sendToken: writable(sendToken),
-		sendTokenId: writable(sendTokenId),
+		sendTokenId: writable(sendToken.id),
 		sendTokenDecimals: writable(sendTokenDecimals),
 		sendEthCustomNonce: writable(undefined)
 	});
 
 	const mockContext = (params: {
 		sendToken: Token | NonFungibleToken;
-		sendTokenId: string;
 		sendTokenDecimals: number;
 	}): Map<unknown, unknown> =>
 		new Map<unknown, unknown>([
@@ -114,7 +111,6 @@ describe('EthSendTokenWizard.spec', () => {
 		amount,
 		nativeEthereumToken,
 		sendToken,
-		sendTokenId,
 		sendTokenDecimals
 	}: {
 		currentStep: WizardStep;
@@ -125,7 +121,6 @@ describe('EthSendTokenWizard.spec', () => {
 		amount?: number | string;
 		nativeEthereumToken: Token;
 		sendToken: Token | NonFungibleToken;
-		sendTokenId: string;
 		sendTokenDecimals: number;
 	}) =>
 		render(EthSendTokenWizard, {
@@ -143,7 +138,7 @@ describe('EthSendTokenWizard.spec', () => {
 				onSendBack: vi.fn(),
 				onTokensList: vi.fn()
 			},
-			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
+			context: mockContext({ sendToken, sendTokenDecimals })
 		});
 
 	it('sends token via executeSend on icSend', async () => {
@@ -155,7 +150,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: ETHEREUM_TOKEN,
-			sendTokenId: String(ETHEREUM_TOKEN.id),
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
@@ -189,7 +183,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: collectionToken,
-			sendTokenId: String(collectionToken.id),
 			sendTokenDecimals: 0
 		});
 
@@ -229,7 +222,6 @@ describe('EthSendTokenWizard.spec', () => {
 				destination,
 				sendContext: mockSendContext({
 					sendToken: collectionToken,
-					sendTokenId: String(collectionToken.id),
 					sendTokenDecimals: 0
 				}),
 				sourceNetwork: ETHEREUM_NETWORK,
@@ -257,7 +249,6 @@ describe('EthSendTokenWizard.spec', () => {
 			sourceNetwork: ETHEREUM_NETWORK,
 			nativeEthereumToken: ETHEREUM_TOKEN,
 			sendToken: ETHEREUM_TOKEN,
-			sendTokenId: String(ETHEREUM_TOKEN.id),
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
