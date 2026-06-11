@@ -107,7 +107,7 @@ This can land as a small follow-up PR. A project can deviate (e.g. if assets are
 
 ---
 
-## Spec structure
+## Spec Structure
 
 Specs are free-form Markdown — there is no fixed template. The one convention worth following concerns how a spec records what is still unresolved, because these are read and acted on differently during the Build step.
 
