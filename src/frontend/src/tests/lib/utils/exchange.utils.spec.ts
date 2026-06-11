@@ -425,6 +425,19 @@ describe('exchange.utils', () => {
 			expect(result).toEqual([erc20('0xBBB')]);
 		});
 
+		it('treats mixed-case response keys as priced', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				'0xAbCd': { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = findMissingErc20ContractAddresses({
+				allErc20ContractAddresses: [erc20('0xabcd'), erc20('0xBBB')],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([erc20('0xBBB')]);
+		});
+
 		it('returns all addresses when response is empty', () => {
 			const result = findMissingErc20ContractAddresses({
 				allErc20ContractAddresses: [erc20('0xAAA'), erc20('0xBBB')],
@@ -644,6 +657,37 @@ describe('exchange.utils', () => {
 				'0xbackend': tokenPrice(100),
 				'0xprovider': tokenPrice(5)
 			});
+		});
+
+		it('keeps the backend erc4626 prices when the fallback filled no erc20 prices', async () => {
+			const backendErc4626 = { '0xvault': tokenPrice(7) };
+			const backendData: PostMessageDataResponseExchange = {
+				...baseBackendData(),
+				currentErc20Prices: { '0xbackend': tokenPrice(100) },
+				currentErc4626Prices: backendErc4626
+			};
+
+			const erc4626Spy = vi.fn(
+				(prices: CoingeckoSimpleTokenPriceResponse): Promise<CoingeckoSimpleTokenPriceResponse> =>
+					Promise.resolve(prices)
+			);
+
+			// Fallback filled other categories only — erc20Prices absent and empty respectively.
+			for (const providerPrices of [
+				{ icrcPrices: { icrc1: tokenPrice(2) } },
+				{ erc20Prices: {}, icrcPrices: { icrc1: tokenPrice(2) } }
+			] satisfies ProviderFallbackPrices[]) {
+				const merged = await mergeExchangePrices({
+					backendData,
+					providerPrices,
+					erc4626Prices: erc4626Spy
+				});
+
+				expect(merged.currentErc4626Prices).toEqual(backendErc4626);
+				expect(merged.currentErc20Prices).toEqual({ '0xbackend': tokenPrice(100) });
+			}
+
+			expect(erc4626Spy).not.toHaveBeenCalled();
 		});
 	});
 });

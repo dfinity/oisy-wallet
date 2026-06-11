@@ -376,6 +376,14 @@ const fetchProviderFallbackPrices = async ({
 		return undefined;
 	}
 
+	// Failures in the fill are non-fatal (the merged response simply keeps the
+	// backend's gaps), but they must stay observable — mirror the logging of the
+	// full provider path.
+	const logFallbackError = (err: unknown): undefined => {
+		consoleError('Error while fetching fallback exchange rate:', err);
+		return undefined;
+	};
+
 	const erc20PricesPromise = Promise.allSettled(
 		erc20PriceParams.map((priceParams) => exchangeRateERC20ToUsd(priceParams))
 	);
@@ -393,22 +401,26 @@ const fetchProviderFallbackPrices = async ({
 	] = await Promise.all([
 		erc20PricesPromise,
 		missingIcrc.length > 0
-			? exchangeRateICRCToUsd(missingIcrc).catch(() => undefined)
+			? exchangeRateICRCToUsd(missingIcrc).catch(logFallbackError)
 			: Promise.resolve(undefined),
 		missingSpl.length > 0
-			? exchangeRateSPLToUsd(missingSpl).catch(() => undefined)
+			? exchangeRateSPLToUsd(missingSpl).catch(logFallbackError)
 			: Promise.resolve(undefined),
-		needsEth ? exchangeRateETHToUsd().catch(() => undefined) : Promise.resolve(undefined),
-		missingBtc ? exchangeRateBTCToUsd().catch(() => undefined) : Promise.resolve(undefined),
-		missingIcp ? exchangeRateICPToUsd().catch(() => undefined) : Promise.resolve(undefined),
-		missingSol ? exchangeRateSOLToUsd().catch(() => undefined) : Promise.resolve(undefined),
-		missingBnb ? exchangeRateBNBToUsd().catch(() => undefined) : Promise.resolve(undefined),
-		missingPol ? exchangeRatePOLToUsd().catch(() => undefined) : Promise.resolve(undefined)
+		needsEth ? exchangeRateETHToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		missingBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		missingIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		missingSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		missingBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		missingPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
 	]);
 
 	const erc20Prices =
 		erc20PriceParams.length > 0
 			? erc20PricesSettled.reduce<CoingeckoSimpleTokenPriceResponse>((acc, result) => {
+					if (result.status === 'rejected') {
+						logFallbackError(result.reason);
+						return acc;
+					}
 					const value = settledValue(result);
 					if (nonNullish(value)) {
 						Object.assign(acc, value);

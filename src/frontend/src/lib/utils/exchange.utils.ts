@@ -115,7 +115,7 @@ export const findMissingErc20ContractAddresses = ({
 	allErc20ContractAddresses: Erc20ContractAddressWithNetwork[];
 	coingeckoResponse: CoingeckoSimpleTokenPriceResponse;
 }): Erc20ContractAddressWithNetwork[] => {
-	const found = new Set(Object.keys(coingeckoResponse));
+	const found = new Set(Object.keys(coingeckoResponse).map((key) => key.toLowerCase()));
 	return allErc20ContractAddresses.filter(({ address }) => !found.has(address.toLowerCase()));
 };
 
@@ -215,7 +215,9 @@ const mergeNative = ({
 /**
  * Merges the frontend-provider fallback prices into the backend response, with
  * the backend winning on every collision, and recomputes the derived ERC-4626
- * prices from the merged ERC-20 prices.
+ * prices from the merged ERC-20 prices — but only when the fallback actually
+ * contributed ERC-20 entries: `erc4626Prices` can issue network calls, so an
+ * unchanged ERC-20 map keeps the backend's already-computed ERC-4626 prices.
  *
  * Pure aside from `calculateErc4626Prices` (the caller injects it to avoid a
  * worker/Infura dependency here and keep the merge unit-testable).
@@ -231,12 +233,17 @@ export const mergeExchangePrices = async ({
 		mergedErc20Prices: CoingeckoSimpleTokenPriceResponse
 	) => Promise<CoingeckoSimpleTokenPriceResponse>;
 }): Promise<PostMessageDataResponseExchange> => {
+	const fallbackFilledErc20 =
+		nonNullish(providerPrices.erc20Prices) && Object.keys(providerPrices.erc20Prices).length > 0;
+
 	const currentErc20Prices = mergeMaps({
 		providerMap: providerPrices.erc20Prices,
 		backendMap: backendData.currentErc20Prices
 	});
 
-	const currentErc4626Prices = await erc4626Prices(currentErc20Prices);
+	const currentErc4626Prices = fallbackFilledErc20
+		? await erc4626Prices(currentErc20Prices)
+		: backendData.currentErc4626Prices;
 
 	return {
 		...backendData,
