@@ -8,7 +8,7 @@ Let users **supply (lend)** and **borrow** native assets through the [Liquidium]
 
 The integration uses Liquidium's official TypeScript SDK, [`@liquidium/client`](https://www.npmjs.com/package/@liquidium/client), via its **account-based profile path** (`client.accounts`, `client.lending`, `client.positions`, `client.market`, `client.quote`). This is the path Liquidium documents for apps that "own a full lending dashboard" — supply, borrow, repay, withdraw, and monitor positions across sessions.
 
-This feature follows the **Earn pattern**, not Trade. (The limit-orders spec, [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limit-orders.md), already states: *"Lend & Borrow (coming later) follows the Earn pattern, not Trade."*) Liquidium appears as a new provider on the existing **Earn** surface and opens a dedicated management page, mirroring how Harvest Autopilot works today.
+This feature follows the **Earn pattern**, not Trade. (The limit-orders spec, [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limit-orders.md), already states: _"Lend & Borrow (coming later) follows the Earn pattern, not Trade."_) Liquidium appears as a new provider on the existing **Earn** surface and opens a dedicated management page, mirroring how Harvest Autopilot works today.
 
 ---
 
@@ -34,9 +34,9 @@ This feature follows the **Earn pattern**, not Trade. (The limit-orders spec, [`
 
 The "optimal" integration was chosen against three constraints: reuse oisy's existing patterns, keep protocol logic on Liquidium's side, and ship safely behind a flag.
 
-1. **Account-based SDK path, not Instant Loans.** The user requirement is to *deposit BTC/USDC/USDT and borrow against that deposit as collateral*, and to manage positions over time. That is exactly Liquidium's "account-based profile flow." Instant Loans is an accountless, single-shot borrow flow with no persistent supply/collateral dashboard, so it does not satisfy the requirement. We use `client.lending` + `client.positions` + `client.accounts`.
+1. **Account-based SDK path, not Instant Loans.** The user requirement is to _deposit BTC/USDC/USDT and borrow against that deposit as collateral_, and to manage positions over time. That is exactly Liquidium's "account-based profile flow." Instant Loans is an accountless, single-shot borrow flow with no persistent supply/collateral dashboard, so it does not satisfy the requirement. We use `client.lending` + `client.positions` + `client.accounts`.
 
-2. **Provider-card pattern, two intent-based entries.** oisy already has a config-driven provider-card system (`EarningProvider` in `src/frontend/src/lib/types/earning-provider.ts`, assembled in `src/frontend/src/lib/providers/earning.providers.ts`, cards configured in `$env/earning-providers.json`), where a card's action navigates to a dedicated provider page — exactly like Harvest Autopilot (`HARVEST_AUTOPILOT_PROVIDER_ID`). Liquidium reuses this on **two** surfaces: the existing **Earn** page (lend framing) and a **new top-level Borrow** page (borrow framing), both pointing to one shared provider page. Earn and Borrow are kept distinct because they serve different users — *Earn is the simple, mainstream "get yield" entry; Borrow is the advanced "take on debt for liquidity" entry* — and Earn deliberately stays even if a DeFi umbrella is added later (see Navigation context → Future direction).
+2. **Provider-card pattern, two intent-based entries.** oisy already has a config-driven provider-card system (`EarningProvider` in `src/frontend/src/lib/types/earning-provider.ts`, assembled in `src/frontend/src/lib/providers/earning.providers.ts`, cards configured in `$env/earning-providers.json`), where a card's action navigates to a dedicated provider page — exactly like Harvest Autopilot (`HARVEST_AUTOPILOT_PROVIDER_ID`). Liquidium reuses this on **two** surfaces: the existing **Earn** page (lend framing) and a **new top-level Borrow** page (borrow framing), both pointing to one shared provider page. Earn and Borrow are kept distinct because they serve different users — _Earn is the simple, mainstream "get yield" entry; Borrow is the advanced "take on debt for liquidity" entry_ — and Earn deliberately stays even if a DeFi umbrella is added later (see Navigation context → Future direction).
 
 3. **Reuse the swap wizard.** Supply / Borrow / Repay / Withdraw are each a `Form → Review → Progress` modal wizard, reusing the structure and components under `src/frontend/src/lib/components/swap/` (`SwapModal.svelte`, `SwapForm.svelte`, `SwapReview.svelte`, `SwapProgress.svelte`, `SwapModalWizardSteps.svelte`) and the Harvest Autopilot stake wizard as the closest existing precedent.
 
@@ -48,13 +48,13 @@ The "optimal" integration was chosen against three constraints: reuse oisy's exi
 
 ### SDK
 
-|              |                                                                            |
-| ------------ | -------------------------------------------------------------------------- |
-| Package      | `@liquidium/client`                                                        |
-| Client       | `LiquidiumClient` (bundles Liquidium mainnet canister IDs by default)      |
-| Docs         | https://liquidium-inc.github.io/liquidium-sdk/                             |
-| Source       | https://github.com/Liquidium-Inc/liquidium-sdk                             |
-| Runtime      | Browser `fetch`, `BigInt`, ESM; viem public client for EVM (ETH) reads     |
+|         |                                                                        |
+| ------- | ---------------------------------------------------------------------- |
+| Package | `@liquidium/client`                                                    |
+| Client  | `LiquidiumClient` (bundles Liquidium mainnet canister IDs by default)  |
+| Docs    | https://liquidium-inc.github.io/liquidium-sdk/                         |
+| Source  | https://github.com/Liquidium-Inc/liquidium-sdk                         |
+| Runtime | Browser `fetch`, `BigInt`, ESM; viem public client for EVM (ETH) reads |
 
 Client construction (in a new `src/frontend/src/lib/api/liquidium.api.ts`):
 
@@ -62,9 +62,9 @@ Client construction (in a new `src/frontend/src/lib/api/liquidium.api.ts`):
 import { LiquidiumClient } from '@liquidium/client';
 
 const client = new LiquidiumClient({
-  identity,                         // oisy's signed-in IC identity (for client.lending canister calls)
-  evmRpcUrl: VITE_EVM_RPC_URL,      // only needed for ETH/USDT(ERC) reads & external withdrawals
-  headers: { 'x-client-name': 'oisy' }
+	identity, // oisy's signed-in IC identity (for client.lending canister calls)
+	evmRpcUrl: VITE_EVM_RPC_URL, // only needed for ETH/USDT(ERC) reads & external withdrawals
+	headers: { 'x-client-name': 'oisy' }
 });
 ```
 
@@ -72,14 +72,14 @@ const client = new LiquidiumClient({
 
 ### Core dependency — the `WalletAdapter` (oisy signer bridge)
 
-**This is the single most load-bearing piece of the integration.** Every Liquidium *write* flow — profile creation, supply, borrow, repay, withdraw — authorizes through a SDK `WalletAdapter` that oisy must implement, backed by oisy's existing signer(s). It is **one multi-chain adapter** (not one per chain); the SDK calls only the capability methods a given flow needs (all optional):
+**This is the single most load-bearing piece of the integration.** Every Liquidium _write_ flow — profile creation, supply, borrow, repay, withdraw — authorizes through a SDK `WalletAdapter` that oisy must implement, backed by oisy's existing signer(s). It is **one multi-chain adapter** (not one per chain); the SDK calls only the capability methods a given flow needs (all optional):
 
-| `WalletAdapter` method | Used for | oisy backing |
-| ---------------------- | -------- | ------------ |
-| `signMessage(req)`        | profile creation, borrow, withdraw (authorization) | sign with the relevant chain address's key |
-| `sendEthTransaction(req)` | ERC stablecoin / contract-interaction supply, ETH native sends | oisy ETH signer |
-| `sendBtcTransaction(req)` | native-BTC transfer-path supply | oisy BTC signer (signer canister / threshold-ECDSA) |
-| `signPsbt(req)`           | PSBT-based BTC actions (when exposed) | oisy BTC PSBT signing |
+| `WalletAdapter` method    | Used for                                                       | oisy backing                                        |
+| ------------------------- | -------------------------------------------------------------- | --------------------------------------------------- |
+| `signMessage(req)`        | profile creation, borrow, withdraw (authorization)             | sign with the relevant chain address's key          |
+| `sendEthTransaction(req)` | ERC stablecoin / contract-interaction supply, ETH native sends | oisy ETH signer                                     |
+| `sendBtcTransaction(req)` | native-BTC transfer-path supply                                | oisy BTC signer (signer canister / threshold-ECDSA) |
+| `signPsbt(req)`           | PSBT-based BTC actions (when exposed)                          | oisy BTC PSBT signing                               |
 
 Notes:
 
@@ -89,14 +89,14 @@ Notes:
 
 ### SDK modules used
 
-| Module             | Used for                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| `client.accounts`  | Create/reuse the Liquidium profile for the signed-in identity; linked-wallet lookup   |
-| `client.market`    | `pools`, `prices`, pool rate lookups — drives the asset list, APYs, caps, availability |
-| `client.lending`   | `supply(...)`, `borrow(...)`, `withdraw(...)`, repay, inflow reporting                 |
-| `client.positions` | Per-pool positions, health factor, aggregate stats — drives the dashboard + hero total |
-| `client.quote`     | `calculateLtv(...)`, `getMinimumBorrowAmount(asset)` — pre-submit validation           |
-| `client.activities`/`client.history` | Optional: feed position/transaction history into oisy's Activity view (stretch) |
+| Module                               | Used for                                                                               |
+| ------------------------------------ | -------------------------------------------------------------------------------------- |
+| `client.accounts`                    | Create/reuse the Liquidium profile for the signed-in identity; linked-wallet lookup    |
+| `client.market`                      | `pools`, `prices`, pool rate lookups — drives the asset list, APYs, caps, availability |
+| `client.lending`                     | `supply(...)`, `borrow(...)`, `withdraw(...)`, repay, inflow reporting                 |
+| `client.positions`                   | Per-pool positions, health factor, aggregate stats — drives the dashboard + hero total |
+| `client.quote`                       | `calculateLtv(...)`, `getMinimumBorrowAmount(asset)` — pre-submit validation           |
+| `client.activities`/`client.history` | Optional: feed position/transaction history into oisy's Activity view (stretch)        |
 
 > **Repay method:** Liquidium's product surface lists Repay as a first-class action and the `client.lending` module is documented as "Supply, borrow, withdraw, and inflow reporting." The exact repay entry point (`client.lending.repay(...)` vs. a borrow-position settlement call) must be confirmed against the generated API reference before implementation. See Open questions.
 
@@ -106,7 +106,7 @@ Notes:
 
 **Supply is collateral.** When a user supplies an asset, it automatically counts toward collateral. Borrowing is over-collateralised: total collateral value must exceed borrow value with a safety buffer.
 
-**Max LTV vs. liquidation threshold.** *Max LTV* caps how much can be borrowed when opening/increasing a position. *Liquidation threshold* (higher than max LTV) is where the position becomes liquidatable. The gap is the safety buffer. Both are per-pool; a portfolio with multiple collaterals uses a weighted-average liquidation threshold.
+**Max LTV vs. liquidation threshold.** _Max LTV_ caps how much can be borrowed when opening/increasing a position. _Liquidation threshold_ (higher than max LTV) is where the position becomes liquidatable. The gap is the safety buffer. Both are per-pool; a portfolio with multiple collaterals uses a weighted-average liquidation threshold.
 
 **Health factor.** Portfolio health is surfaced as a percentage: `100%` = no debt; `>0%..99%` = safe (higher is safer); near `0%` = at risk; `0%` = partially liquidatable. oisy displays the percentage form (Liquidium's default).
 
@@ -122,12 +122,12 @@ Before any borrow (and before a withdraw that reduces collateral), validate with
 
 ```ts
 const ltv = client.quote.calculateLtv(
-  { collateralPoolId, borrowPoolId, collateralAmount, borrowAmount },
-  pools,
-  prices
+	{ collateralPoolId, borrowPoolId, collateralAmount, borrowAmount },
+	pools,
+	prices
 );
 if (ltv.validationErrors.length > 0) {
-  // surface ltv.validationErrors[].message inline; disable Review/Confirm
+	// surface ltv.validationErrors[].message inline; disable Review/Confirm
 }
 ```
 
@@ -152,14 +152,14 @@ Liquidium is reached from **two** top-level surfaces, framed by user intent, bot
 
 Both cards' actions navigate to the same shared provider page (`/providers/liquidium/`), which contains the full supply + borrow + repay + withdraw experience. Keeping `Earn` and `Borrow` as separate verbs is deliberate: **Earn is the low-knowledge, mainstream "get yield" entry; Borrow is the more advanced "take on debt for liquidity" entry.** They are not merged so the simple use case stays simple.
 
-| Surface                                          | Type            | Purpose                                                                      |
-| ------------------------------------------------ | --------------- | ---------------------------------------------------------------------------- |
-| **Liquidium card on Earn** (`/earn/`)            | Entry point     | Lend framing — supply APY, your supplied value                               |
-| **Liquidium card on Borrow** (`/borrow/`)        | Entry point     | Borrow framing — borrow rate, your borrowing power / debt                    |
-| **Liquidium provider page** (`/providers/liquidium/`) | Management view | Per-provider full picture — positions, health, supply/borrow/repay/withdraw |
-| **Assets page tabs** (Earning + new Liabilities) | Holdings view   | "Where are all my assets/debts?" — positions grouped **by type**, across all providers |
+| Surface                                               | Type            | Purpose                                                                                |
+| ----------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------- |
+| **Liquidium card on Earn** (`/earn/`)                 | Entry point     | Lend framing — supply APY, your supplied value                                         |
+| **Liquidium card on Borrow** (`/borrow/`)             | Entry point     | Borrow framing — borrow rate, your borrowing power / debt                              |
+| **Liquidium provider page** (`/providers/liquidium/`) | Management view | Per-provider full picture — positions, health, supply/borrow/repay/withdraw            |
+| **Assets page tabs** (Earning + new Liabilities)      | Holdings view   | "Where are all my assets/debts?" — positions grouped **by type**, across all providers |
 
-**Grouping principle (Assets page).** On the Assets page, positions are grouped by *type* (asset vs. liability), **not** by provider. There is no "Liquidium section." A Liquidium supply appears in the **Earning** tab next to Harvest Autopilot stakes; a Liquidium borrow appears in the new **Liabilities** tab. Each card names its provider. Rationale: on Assets the user cares about *what kind* of holding it is; on the provider page they care about *that provider*.
+**Grouping principle (Assets page).** On the Assets page, positions are grouped by _type_ (asset vs. liability), **not** by provider. There is no "Liquidium section." A Liquidium supply appears in the **Earning** tab next to Harvest Autopilot stakes; a Liquidium borrow appears in the new **Liabilities** tab. Each card names its provider. Rationale: on Assets the user cares about _what kind_ of holding it is; on the provider page they care about _that provider_.
 
 New routes/constants in `src/frontend/src/lib/constants/routes.constants.ts`:
 
@@ -233,7 +233,7 @@ Assets page
 
 - **On the Assets → Liabilities tab (compact):** a single colour-coded **health tag next to the provider group title** — e.g. "Healthy at 68%" (green), "At risk at 16%" (amber), "Critical at 7%" (red). One small element; it deliberately does not take a full banner here, to keep the Assets page dense. This risk colour is a **separate axis** from the red "owed" amount styling, so "this is debt" and "this is dangerous" never blur together.
 - **On the provider page (`/providers/liquidium/`, large):** the full health display — big percentage, coloured track, "Liquidation at 0%", and an alert with direct **Repay** / **Add collateral** actions when in the amber/red band.
-- **On the Liabilities tab label itself (status dot):** a small indicator circle in the top-right of the **Liabilities** tab label, so the user sees a problem even when that tab is not selected. **Amber** when any borrow provider is *at risk*, **red** when any is *critical*, hidden when all are healthy. With multiple providers it shows the **worst** state. Implemented in `Assets.svelte`'s `Tabs` config (the tab gets a status badge derived from the per-provider health stores).
+- **On the Liabilities tab label itself (status dot):** a small indicator circle in the top-right of the **Liabilities** tab label, so the user sees a problem even when that tab is not selected. **Amber** when any borrow provider is _at risk_, **red** when any is _critical_, hidden when all are healthy. With multiple providers it shows the **worst** state. Implemented in `Assets.svelte`'s `Tabs` config (the tab gets a status badge derived from the per-provider health stores).
 
 (Active push/notification alerting when health approaches the threshold is a candidate fast-follow; v1 guarantees the always-visible in-app status described here. Exact amber/red band thresholds to match Liquidium's own UI — see Open questions.)
 
@@ -255,15 +255,15 @@ Gated by `LIQUIDIUM_ENABLED`. Three regions:
 
 **Three states:**
 
-- *New user (no profile / no positions):* My positions shows an empty state with a prominent **Supply** CTA; the Markets list is the focus. Borrow actions are disabled until the user has collateral.
-- *Has supply, no borrow:* position rows with Supply/Withdraw; Borrow becomes enabled; health factor shows `100%` (no debt).
-- *Has supply and borrow:* full rows with all four actions; live health factor with colour coding.
+- _New user (no profile / no positions):_ My positions shows an empty state with a prominent **Supply** CTA; the Markets list is the focus. Borrow actions are disabled until the user has collateral.
+- _Has supply, no borrow:_ position rows with Supply/Withdraw; Borrow becomes enabled; health factor shows `100%` (no debt).
+- _Has supply and borrow:_ full rows with all four actions; live health factor with colour coding.
 
 ### Hero net-worth total
 
 Liquidium **net value** (Σ supplied − Σ borrowed, in fiat) is added to the hero net-worth total, consistent with how the limit-orders spec rolls DEX balances into the hero. Supplied collateral adds to the total; outstanding debt subtracts from it. The hero shows only the total figure — no breakdown label.
 
-**Where positions are visible:** Liquidium supplied/borrowed balances do **not** appear in the **Tokens** tab — that tab is strictly spot wallet balances. Supplies appear in the **Earning** tab, borrows appear in the **Liabilities** tab, and both are summarised on `/providers/liquidium/`. Note that funds the user *received* from a borrow (e.g. borrowed USDC now sitting in their wallet) are real spot balances and **do** show in Tokens as normal — that is distinct from the protocol-side debt shown under Liabilities.
+**Where positions are visible:** Liquidium supplied/borrowed balances do **not** appear in the **Tokens** tab — that tab is strictly spot wallet balances. Supplies appear in the **Earning** tab, borrows appear in the **Liabilities** tab, and both are summarised on `/providers/liquidium/`. Note that funds the user _received_ from a borrow (e.g. borrowed USDC now sitting in their wallet) are real spot balances and **do** show in Tokens as normal — that is distinct from the protocol-side debt shown under Liabilities.
 
 ---
 
@@ -286,6 +286,7 @@ Entry points: the Markets list "Supply" CTA, and a position row "Supply" action.
 Entry points: a position row "Borrow" action; or "Borrow" from a market the user already supplies to. Disabled entirely until the user has collateral.
 
 **Form** —
+
 - **Collateral context:** read-only summary of current collateral and available borrowing power (from `client.positions` + `calculateLtv`).
 - **Borrow asset selector** + amount, with fiat equivalent.
 - **Minimum borrow** shown from `getMinimumBorrowAmount(asset)`; submit blocked below it.
@@ -331,7 +332,7 @@ Liquidium actions don't all settle synchronously — native-BTC legs need multip
 
 **The existing mechanism (OneSec is the reference implementation):**
 
-- Backend (user-profile canister) stores an `ActiveUserTransaction` per user: `id` (FE-generated UUIDv4), `status` (`Pending → Executing → Succeeded | Failed`, transitions enforced by the backend), `external_refs` (learned-mid-flow `{ key, value }` pointers — e.g. a tx hash — that say *where to read status*), `progress_step` (FE-written step label), `data` (a per-integration variant), `updated_at_ns`, and `error`. API: `create`/`get`/`update`/`delete` in `src/frontend/src/lib/api/backend.api.ts`.
+- Backend (user-profile canister) stores an `ActiveUserTransaction` per user: `id` (FE-generated UUIDv4), `status` (`Pending → Executing → Succeeded | Failed`, transitions enforced by the backend), `external_refs` (learned-mid-flow `{ key, value }` pointers — e.g. a tx hash — that say _where to read status_), `progress_step` (FE-written step label), `data` (a per-integration variant), `updated_at_ns`, and `error`. API: `create`/`get`/`update`/`delete` in `src/frontend/src/lib/api/backend.api.ts`.
 - Frontend: `activeUserTransactionsStore` (`src/frontend/src/lib/stores/active-user-transactions.store.ts`, persisted per principal); services `createActiveUserTransaction` / `updateActiveUserTransaction` / `loadActiveUserTransactions` / `applyActiveUserTransactionPollUpdate` (`active-user-transactions.services.ts`); `LoaderActiveUserTransactions.svelte` runs a global poll timer over `activeUserTransactionsPending`; and the active-transactions UI (`ActiveUserTransactionsButton`/`List`/`Item`) surfaces them with an unseen badge. Terminal transactions trigger a wallet/balance refresh once (guarded by `terminalSideEffectsApplied`).
 
 **What Liquidium adds:**
@@ -456,7 +457,7 @@ The facts are understood; these need a product/architecture call.
 1. **Profile ownership** — SDK contract is confirmed (`getProfileId(walletAddress)`, `createProfile({ account, chain, walletAdapter })`, `prepareCreateProfile({ account })`; a profile is owned by a wallet `account` on a `chain`, creation signature-gated via `walletAdapter.signMessage(...)`; silent bootstrap specified in "Profile bootstrapping"). **Decide:** which oisy-controlled address (BTC vs. ETH) owns the Liquidium profile, and whether one profile across the user's assets is right vs. multiple linked wallets (`listLinkedWallets`). Distinct from the rail question above (this is about account ownership, not the funds rail).
 2. **EVM RPC config** — ETH/USDT(ERC) reads need an EVM RPC (`evmRpcUrl`/viem). **Decide:** reuse an existing oisy RPC config or add a `VITE_EVM_RPC_URL`. If absent, ETH-side pools degrade to "temporarily unavailable."
 3. **Withdraw destinations** — v1 keeps borrows/withdrawals to oisy-controlled addresses. **Decide:** whether external-address withdrawal (CEX/Ledger) is a v1 inclusion or a fast follow.
-4. **Active liquidation alerting** — v1 always shows the in-app health status (Liabilities tab + provider page) — decided. **Decide:** whether to add *active* alerting (push/email/in-wallet notification) as a fast-follow when health approaches the threshold.
+4. **Active liquidation alerting** — v1 always shows the in-app health status (Liabilities tab + provider page) — decided. **Decide:** whether to add _active_ alerting (push/email/in-wallet notification) as a fast-follow when health approaches the threshold.
 5. **Backend `ActiveUserTransactionData` variant** — the active-transactions mechanism requires the backend canister to add Liquidium variant(s) to the `ActiveUserTransactionData` Candid type (currently OneSec-only); this is a known prerequisite (Rust + `.did`) that must land before the FE wiring. **Decide:** the variant shape (per-action `LiquidiumSupply`/`Borrow`/`Repay`/`Withdraw` vs. one `Liquidium` variant with an action field). See "Asynchronous settlement & active transactions".
 6. **[PARKED — revisit] Risk on the hero/overview** — since debt grows on its own, **decide** whether to surface a small health indicator near the net-worth total (visible whenever the user holds debt), so a user who never opens the Liabilities tab is still warned. Deferred by request.
 
