@@ -9,6 +9,11 @@
 	let backendOnramperEnabled = $state<boolean>(BACKEND_ONRAMPER_ENABLED);
 
 	$effect(() => {
+		// Skip the backend round-trip entirely when the build-time flag already hides the widget.
+		if (!ONRAMPER_ENABLED) {
+			return;
+		}
+
 		void loadBackendOnramperEnabled().then((enabled) => {
 			backendOnramperEnabled = enabled;
 		});

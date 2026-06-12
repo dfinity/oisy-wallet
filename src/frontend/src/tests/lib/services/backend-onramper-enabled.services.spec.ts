@@ -10,6 +10,10 @@ describe('backend-onramper-enabled.services', () => {
 			vi.spyOn(consoleUtils, 'consoleError').mockImplementation(() => undefined);
 		});
 
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
 		it('returns the value reported by the backend query', async () => {
 			const spy = vi.spyOn(backendApi, 'onramperEnabled').mockResolvedValue(true);
 
