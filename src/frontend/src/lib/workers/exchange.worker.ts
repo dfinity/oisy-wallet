@@ -1,4 +1,5 @@
 import { BACKEND_EXCHANGE_ENABLED } from '$env/exchange.env';
+import { COINGECKO_FALLBACK_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
 import { calculateErc4626Prices } from '$eth/services/erc4626-exchange.services';
 import type { Erc4626TokensExchangeData } from '$eth/types/erc4626';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
@@ -17,7 +18,8 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
-	fetchExchangeRatesFromBackend
+	fetchExchangeRatesFromBackend,
+	fillIcrcPricesFromFallbackProviders
 } from '$lib/services/exchange.services';
 import type {
 	CoingeckoSimplePriceResponse,
@@ -359,18 +361,30 @@ const fetchProviderFallbackPrices = async ({
 	// so a single CoinGecko call covers whichever of the three are missing.
 	const needsEth = missingEth || missingArbitrumEth || missingBaseEth;
 
-	const erc20PriceParams = buildErc20PriceParams(missingErc20);
+	// Natives, ERC-20 and SPL fills are CoinGecko-only: when the fallback flag is
+	// off they are skipped entirely (the tokens stay unpriced) and only the
+	// ICPSwap/Kong ICRC cascade runs.
+	const erc20PriceParams = COINGECKO_FALLBACK_PROVIDER_ENABLED
+		? buildErc20PriceParams(missingErc20)
+		: [];
+	const splToFill = COINGECKO_FALLBACK_PROVIDER_ENABLED ? missingSpl : [];
+	const fillEth = COINGECKO_FALLBACK_PROVIDER_ENABLED && needsEth;
+	const fillBtc = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBtc;
+	const fillIcp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingIcp;
+	const fillSol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingSol;
+	const fillBnb = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBnb;
+	const fillPol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingPol;
 
 	const nothingMissing =
 		erc20PriceParams.length === 0 &&
 		missingIcrc.length === 0 &&
-		missingSpl.length === 0 &&
-		!needsEth &&
-		!missingBtc &&
-		!missingIcp &&
-		!missingSol &&
-		!missingBnb &&
-		!missingPol;
+		splToFill.length === 0 &&
+		!fillEth &&
+		!fillBtc &&
+		!fillIcp &&
+		!fillSol &&
+		!fillBnb &&
+		!fillPol;
 
 	if (nothingMissing) {
 		return undefined;
@@ -401,17 +415,20 @@ const fetchProviderFallbackPrices = async ({
 	] = await Promise.all([
 		erc20PricesPromise,
 		missingIcrc.length > 0
-			? exchangeRateICRCToUsd(missingIcrc).catch(logFallbackError)
+			? (COINGECKO_FALLBACK_PROVIDER_ENABLED
+					? exchangeRateICRCToUsd(missingIcrc)
+					: fillIcrcPricesFromFallbackProviders({ ledgerCanisterIds: missingIcrc })
+				).catch(logFallbackError)
 			: Promise.resolve(undefined),
-		missingSpl.length > 0
-			? exchangeRateSPLToUsd(missingSpl).catch(logFallbackError)
+		splToFill.length > 0
+			? exchangeRateSPLToUsd(splToFill).catch(logFallbackError)
 			: Promise.resolve(undefined),
-		needsEth ? exchangeRateETHToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		missingBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		missingIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		missingSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		missingBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
-		missingPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
+		fillEth ? exchangeRateETHToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
 	]);
 
 	const erc20Prices =
