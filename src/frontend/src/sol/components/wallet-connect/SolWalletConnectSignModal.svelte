@@ -73,9 +73,10 @@
 	let amount = $state<bigint | undefined>();
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
+	let isApproval = $state<boolean | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress } = await decodeService({
+		({ amount, destination, tokenAddress, isApproval } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
@@ -182,6 +183,7 @@
 				{application}
 				{data}
 				destination={destination ?? ''}
+				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}
 				source={address ?? ''}
