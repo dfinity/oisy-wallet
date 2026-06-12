@@ -1,4 +1,3 @@
-import type { BtcAddress } from '$btc/types/address';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -76,7 +75,6 @@ export interface AllowSigningOutcome {
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
-	address: BtcAddress;
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 

@@ -40,7 +40,6 @@ export const loadBtcPendingSentTransactions = async ({
 		}
 		const pendingTransactions = await getPendingBtcTransactions({
 			identity,
-			address,
 			network: mapToSignerBitcoinNetwork({ network }),
 			iiDelegationChain: extractIIDelegationChain(identity)
 		});
