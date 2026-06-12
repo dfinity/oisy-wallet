@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QR कोड स्कैन करें",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "लेनदेन निष्पादित हो रहा है...",
 			"initializing": "लेनदेन प्रारंभ कर रहा है...",
 			"swapping": "स्वैप कर रहा है...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1177,7 +1193,6 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
-			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें 2 मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

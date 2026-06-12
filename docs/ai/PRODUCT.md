@@ -60,6 +60,20 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 
 ---
 
+## Exchange-rate sourcing
+
+OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
+
+**Backend is the primary source.** When backend exchange rates are enabled, the price worker (`src/frontend/src/lib/workers/exchange.worker.ts`) asks the backend for the caller's token set. The backend prices native tokens plus the caller's priceable custom tokens via CoinGecko (primary) and ICPSwap (supplemental, ICRC-only). By design this is a subset: tokens CoinGecko doesn't cover and ICPSwap can't supplement come back without a price and are simply absent from the backend response.
+
+**The frontend fills the gaps.** Rather than showing no price for those tokens, the worker then runs its own providers, but **only for the tokens the backend returned without a price** — the missing ERC-20 / SPL / ICRC tokens and any unpriced native singles. It fetches just that missing subset (skipping any category that has nothing missing, and skipping the provider step entirely when the backend priced everything), then merges the provider results into the backend response with **the backend winning on every collision**. The derived ERC-4626 prices are recomputed from the merged ERC-20 prices. When backend rates are disabled, the frontend takes the unchanged full-provider path.
+
+**The fill excludes CoinGecko by default.** `COINGECKO_FALLBACK_PROVIDER_ENABLED` (in `src/frontend/src/env/rest/coingecko.env.ts`, default `false`) governs CoinGecko's participation in the backend-mode fill only: the CoinGecko-only categories (natives, ERC-20, SPL) are skipped entirely and the ICRC gaps are filled via the ICPSwap/Kong cascade alone. The flag is separate from `COINGECKO_PROVIDER_ENABLED` (which stays on and governs the backend-disabled full-provider path), and the BTC-cross FX rate for non-USD display currencies keeps using CoinGecko in both modes — the backend provides no FX substitute.
+
+**Per-provider kill-switches exist in both layers.** Each price provider has a hardcoded enable flag, flipped by editing code rather than runtime config — a code-level kill-switch per provider. The backend exposes two Rust `const` flags (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`); the frontend exposes three `*_PROVIDER_ENABLED` consts in `src/frontend/src/env/rest/` (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`, `KONGSWAP_PROVIDER_ENABLED`). KongSwap is frontend-only. The fallback fill goes through the same flag-gated provider helpers, so a disabled frontend provider does not participate in the fill either.
+
+---
+
 ## User Preferences
 
 ### Language and currency selectors

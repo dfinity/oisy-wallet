@@ -2,7 +2,7 @@ use candid::Nat;
 use ic_cdk::{
     management_canister::{
         http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-        HttpRequestResult, TransformArgs,
+        HttpRequestResult, TransformArgs, TransformContext,
     },
     query,
 };
@@ -50,7 +50,23 @@ fn build_request(
         max_response_bytes: Some(max_response_bytes),
         transform: None,
         headers,
+        is_replicated: None,
     }
+}
+
+fn build_get_request(
+    url: &str,
+    headers: Vec<HttpHeader>,
+    max_response_bytes: u64,
+    replicated: bool,
+    transform: Option<TransformContext>,
+) -> HttpRequestArgs {
+    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+
+    request.is_replicated = Some(replicated);
+    request.transform = transform;
+
+    request
 }
 
 /// Returns the response unchanged if its status is in the 2xx range,
@@ -81,26 +97,34 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
 ///
 /// Sends a GET request to `url` with a `User-Agent` header and validates
 /// that the response status is in the 2xx range. Attaches
-/// [`http_request_transform`] so IC replicas can reach consensus.
+/// [`http_request_transform`] to normalise the response (it strips volatile
+/// headers); in replicated mode that normalisation is also what lets the
+/// replicas reach consensus.
 ///
 /// # Arguments
 /// * `url` - The URL to fetch.
 /// * `headers` - Additional headers appended after `User-Agent`.
 /// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
 ///   to minimise cycle costs.
+/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
+///   response; when `false`, a single replica handles it (cheaper, but unverified). The
+///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
 pub(crate) async fn get(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
+    replicated: bool,
 ) -> Result<HttpRequestResult, String> {
-    let mut request = build_request(url, HttpMethod::GET, None, headers, max_response_bytes);
+    let transform = transform_context_from_query("http_request_transform".to_string(), vec![]);
 
-    request.transform = Some(transform_context_from_query(
-        "http_request_transform".to_string(),
-        vec![],
-    ));
-
-    execute(request).await
+    execute(build_get_request(
+        url,
+        headers,
+        max_response_bytes,
+        replicated,
+        Some(transform),
+    ))
+    .await
 }
 
 /// Performs an HTTP POST outcall with a JSON body.
@@ -170,11 +194,23 @@ pub(crate) async fn post(
 
 #[cfg(test)]
 mod tests {
-    use candid::Nat;
-    use ic_cdk::management_canister::{HttpHeader, HttpMethod, HttpRequestResult};
+    use candid::{Func, Nat, Principal};
+    use ic_cdk::management_canister::{
+        HttpHeader, HttpMethod, HttpRequestResult, TransformContext, TransformFunc,
+    };
     use pretty_assertions::assert_eq;
 
-    use super::{build_request, validate_response, USER_AGENT};
+    use super::{build_get_request, build_request, validate_response, USER_AGENT};
+
+    fn mock_transform_context() -> TransformContext {
+        TransformContext {
+            function: TransformFunc(Func {
+                principal: Principal::from_slice(&[1]),
+                method: "http_request_transform".to_string(),
+            }),
+            context: vec![],
+        }
+    }
 
     #[test]
     fn test_build_request_sets_url() {
@@ -290,6 +326,42 @@ mod tests {
         let request = build_request("https://example.com", HttpMethod::GET, None, extra, 1024);
         assert_eq!(request.headers.len(), 2);
         assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[1].name, "Authorization");
+        assert_eq!(request.headers[1].value, "Bearer token");
+    }
+
+    #[test]
+    fn test_build_get_request_sets_replicated_flag() {
+        for replicated in [true, false] {
+            let request = build_get_request("https://example.com", vec![], 1024, replicated, None);
+
+            assert_eq!(request.is_replicated, Some(replicated));
+        }
+    }
+
+    #[test]
+    fn test_build_get_request_preserves_request_fields() {
+        let extra = vec![HttpHeader {
+            name: "Authorization".to_string(),
+            value: "Bearer token".to_string(),
+        }];
+        let transform = mock_transform_context();
+        let request = build_get_request(
+            "https://example.com/api",
+            extra,
+            4096,
+            true,
+            Some(transform.clone()),
+        );
+
+        assert_eq!(request.url, "https://example.com/api");
+        assert!(matches!(request.method, HttpMethod::GET));
+        assert_eq!(request.body, None);
+        assert_eq!(request.max_response_bytes, Some(4096));
+        assert_eq!(request.transform, Some(transform));
+        assert_eq!(request.headers.len(), 2);
+        assert_eq!(request.headers[0].name, "User-Agent");
+        assert_eq!(request.headers[0].value, USER_AGENT);
         assert_eq!(request.headers[1].name, "Authorization");
         assert_eq!(request.headers[1].value, "Bearer token");
     }

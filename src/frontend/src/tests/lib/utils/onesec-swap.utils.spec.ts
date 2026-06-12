@@ -1,19 +1,41 @@
+import type { ActiveUserTransactionRef } from '$declarations/backend/backend.did';
 import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import en from '$lib/i18n/en.json';
+import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
+import { SwapProvider } from '$lib/types/swap';
 import {
+	buildOneSecSwapTrackingMetadata,
 	computeReceiveAmount,
+	findMatchingOneSecTransfer,
 	ICP_LEDGER_TO_TOKEN,
+	isOneSecActiveUserTransaction,
 	oneSecCompatibleDestinations,
 	oneSecEvmSupportedTokens,
-	oneSecIcpSupportedTokens
+	oneSecIcpSupportedTokens,
+	oneSecStatusError,
+	toActiveUserTransactionStatus,
+	toOneSecDisplayRefs,
+	toOneSecEvmToIcpData,
+	toOneSecExternalRefs,
+	toOneSecExternalRefsMap,
+	toOneSecIcpToEvmData
 } from '$lib/utils/onesec-swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import {
+	mockActiveUserTransaction,
+	mockOneSecIcpToEvmData
+} from '$tests/mocks/active-user-transactions.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 // Real values from onesec-bridge DEFAULT_CONFIG
 const USDC_LEDGER = '53nhb-haaaa-aaaar-qbn5q-cai';
@@ -340,6 +362,280 @@ describe('onesec-swap.utils', () => {
 				expect(result?.evm).toBeUndefined();
 				expect(result?.sol).toBeUndefined();
 			});
+		});
+	});
+
+	describe('isOneSecActiveUserTransaction', () => {
+		it('returns true for OneSec variants', () => {
+			expect(
+				isOneSecActiveUserTransaction({
+					...mockActiveUserTransaction,
+					status: { Pending: null }
+				})
+			).toBeTruthy();
+		});
+	});
+
+	describe('toActiveUserTransactionStatus', () => {
+		it('maps Succeeded → Succeeded', () => {
+			expect(toActiveUserTransactionStatus({ Succeeded: null })).toEqual({ Succeeded: null });
+		});
+
+		it('maps Failed → Failed', () => {
+			expect(toActiveUserTransactionStatus({ Failed: { error: 'x' } })).toEqual({ Failed: null });
+		});
+
+		it('maps Refunded → Failed (terminal: the source tokens were returned)', () => {
+			expect(toActiveUserTransactionStatus({ Refunded: {} })).toEqual({ Failed: null });
+		});
+
+		it('maps PendingSourceTx / PendingDestinationTx / PendingRefundTx → Executing', () => {
+			expect(toActiveUserTransactionStatus({ PendingSourceTx: null })).toEqual({
+				Executing: null
+			});
+			expect(toActiveUserTransactionStatus({ PendingDestinationTx: null })).toEqual({
+				Executing: null
+			});
+			expect(toActiveUserTransactionStatus({ PendingRefundTx: null })).toEqual({
+				Executing: null
+			});
+		});
+	});
+
+	describe('oneSecStatusError', () => {
+		it('returns the message for Failed', () => {
+			expect(oneSecStatusError({ Failed: { error: 'reverted' } })).toBe('reverted');
+		});
+
+		it('returns the i18n swap_refunded message for Refunded', () => {
+			expect(oneSecStatusError({ Refunded: {} })).toBe(en.swap.error.swap_refunded);
+		});
+
+		it('returns undefined for non-terminal statuses', () => {
+			expect(oneSecStatusError({ Succeeded: null })).toBeUndefined();
+			expect(oneSecStatusError({ PendingSourceTx: null })).toBeUndefined();
+		});
+	});
+
+	describe('findMatchingOneSecTransfer', () => {
+		const sourceAmount = mockOneSecIcpToEvmData.amount;
+
+		it('matches an ICP→EVM row to a transfer with source.chain === ICP and equal amount', () => {
+			const match = findMatchingOneSecTransfer({
+				transfers: [
+					{
+						source: { chain: 'ICP', amount: sourceAmount },
+						destination: { chain: 'Ethereum', amount: sourceAmount },
+						status: { Succeeded: null }
+					}
+				],
+				data: { OneSecIcpToEvm: mockOneSecIcpToEvmData }
+			});
+
+			expect(match).toBeDefined();
+		});
+
+		it('does not match if amounts differ', () => {
+			const match = findMatchingOneSecTransfer({
+				transfers: [
+					{
+						source: { chain: 'ICP', amount: sourceAmount + 1n },
+						destination: { chain: 'Ethereum', amount: sourceAmount },
+						status: { Succeeded: null }
+					}
+				],
+				data: { OneSecIcpToEvm: mockOneSecIcpToEvmData }
+			});
+
+			expect(match).toBeUndefined();
+		});
+
+		it('does not match if the direction differs', () => {
+			const match = findMatchingOneSecTransfer({
+				transfers: [
+					{
+						source: { chain: 'Ethereum', amount: sourceAmount },
+						destination: { chain: 'ICP', amount: sourceAmount },
+						status: { Succeeded: null }
+					}
+				],
+				data: { OneSecIcpToEvm: mockOneSecIcpToEvmData }
+			});
+
+			expect(match).toBeUndefined();
+		});
+	});
+
+	describe('toOneSecIcpToEvmData', () => {
+		it('maps ledger canister id to the Icrc variant and chain id to Erc20', () => {
+			const data = toOneSecIcpToEvmData({
+				sourceToken: makeIcToken(USDC_LEDGER),
+				destinationToken: makeErc20Token({ address: USDC_ETHEREUM }),
+				amount: 10n,
+				recipientEvmAddress: mockEthAddress
+			});
+
+			expect(data).toEqual({
+				OneSecIcpToEvm: {
+					source_token: { Icrc: Principal.fromText(USDC_LEDGER) },
+					dest_token: {
+						Erc20: [USDC_ETHEREUM, BigInt(ETHEREUM_NETWORK.chainId)]
+					},
+					amount: 10n,
+					recipient_evm_address: mockEthAddress
+				}
+			});
+		});
+	});
+
+	describe('toOneSecEvmToIcpData', () => {
+		it('maps recipient principal and chain id correctly', () => {
+			const data = toOneSecEvmToIcpData({
+				sourceToken: makeErc20Token({ address: USDC_ETHEREUM }),
+				destinationToken: makeIcToken(USDC_LEDGER),
+				amount: 5n,
+				recipientPrincipal: mockPrincipal
+			});
+
+			expect(data).toEqual({
+				OneSecEvmToIcp: {
+					source_token: {
+						Erc20: [USDC_ETHEREUM, BigInt(ETHEREUM_NETWORK.chainId)]
+					},
+					dest_token: { Icrc: Principal.fromText(USDC_LEDGER) },
+					amount: 5n,
+					recipient_principal: mockPrincipal
+				}
+			});
+		});
+	});
+
+	describe('toOneSecExternalRefs', () => {
+		it('returns a sorted list of populated key/value pairs', () => {
+			const refs = toOneSecExternalRefs({
+				[ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID]: '42',
+				[ONESEC_EXTERNAL_REF_KEYS.FORWARDING_ADDRESS]: '0xfwd'
+			});
+
+			expect(refs).toEqual([
+				{ key: ONESEC_EXTERNAL_REF_KEYS.FORWARDING_ADDRESS, value: '0xfwd' },
+				{ key: ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID, value: '42' }
+			]);
+		});
+
+		it('skips undefined or empty values', () => {
+			const refs = toOneSecExternalRefs({
+				[ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID]: '42',
+				[ONESEC_EXTERNAL_REF_KEYS.FORWARDING_ADDRESS]: '',
+				[ONESEC_EXTERNAL_REF_KEYS.BASELINE_TRANSFER_ID]: undefined
+			});
+
+			expect(refs).toEqual([{ key: ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID, value: '42' }]);
+		});
+
+		it('returns an empty array when nothing is set', () => {
+			expect(toOneSecExternalRefs({})).toEqual([]);
+		});
+	});
+
+	describe('toOneSecDisplayRefs', () => {
+		it('snapshots source/destination symbols, network names and the raw amount', () => {
+			const sourceToken = { ...mockValidIcToken, symbol: 'ckBTC' };
+			const destinationToken = { ...mockValidErc20Token, symbol: 'USDC' };
+
+			expect(toOneSecDisplayRefs({ sourceToken, destinationToken, amount: '0.5' })).toEqual({
+				[ONESEC_EXTERNAL_REF_KEYS.AMOUNT]: '0.5',
+				[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]: 'ckBTC',
+				[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL]: sourceToken.network.name,
+				[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]: 'USDC',
+				[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL]: destinationToken.network.name
+			});
+		});
+	});
+
+	describe('toOneSecExternalRefsMap', () => {
+		it('turns the wire array into a key/value lookup map', () => {
+			const refs: ActiveUserTransactionRef[] = [
+				{ key: ONESEC_EXTERNAL_REF_KEYS.AMOUNT, value: '0.5' },
+				{ key: ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ckBTC' }
+			];
+
+			const map = toOneSecExternalRefsMap(refs);
+
+			expect(map[ONESEC_EXTERNAL_REF_KEYS.AMOUNT]).toBe('0.5');
+			expect(map[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL]).toBe('ckBTC');
+			expect(map[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]).toBeUndefined();
+		});
+
+		it('returns an empty map for an empty array', () => {
+			expect(toOneSecExternalRefsMap([])).toEqual({});
+		});
+
+		it('preserves unknown keys (refs written by a different provider or older FE)', () => {
+			const map = toOneSecExternalRefsMap([
+				{ key: 'unknown_key', value: 'whatever' }
+			] as ActiveUserTransactionRef[]);
+
+			expect((map as Record<string, string>).unknown_key).toBe('whatever');
+		});
+	});
+
+	describe('buildOneSecSwapTrackingMetadata', () => {
+		const txWithRefs = ({
+			refs,
+			overrides = {}
+		}: {
+			refs: ActiveUserTransactionRef[];
+			overrides?: Partial<typeof mockActiveUserTransaction>;
+		}): typeof mockActiveUserTransaction => ({
+			...mockActiveUserTransaction,
+			status: { Succeeded: null },
+			external_refs: refs,
+			...overrides
+		});
+
+		it('reads symbols, network names and amount off the row external_refs snapshot', () => {
+			const tx = txWithRefs({
+				refs: [
+					{ key: ONESEC_EXTERNAL_REF_KEYS.AMOUNT, value: '0.5' },
+					{ key: ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ckBTC' },
+					{ key: ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
+					{ key: ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
+					{ key: ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
+				]
+			});
+
+			expect(buildOneSecSwapTrackingMetadata({ tx })).toEqual({
+				sourceToken: 'ckBTC',
+				destinationToken: 'USDC',
+				dApp: SwapProvider.ONE_SEC,
+				tokenAmount: '0.5',
+				sourceNetwork: 'Internet Computer',
+				destinationNetwork: 'Ethereum'
+			});
+		});
+
+		it('falls back to empty strings when the snapshot refs are missing (legacy rows)', () => {
+			expect(buildOneSecSwapTrackingMetadata({ tx: txWithRefs({ refs: [] }) })).toEqual({
+				sourceToken: '',
+				destinationToken: '',
+				dApp: SwapProvider.ONE_SEC,
+				tokenAmount: '',
+				sourceNetwork: '',
+				destinationNetwork: ''
+			});
+		});
+
+		it('includes the error message verbatim when the row carries one', () => {
+			const tx = txWithRefs({ refs: [], overrides: { status: { Failed: null }, error: ['boom'] } });
+
+			expect(buildOneSecSwapTrackingMetadata({ tx }).error).toBe('boom');
+		});
+
+		it('omits the error field when the row has no error', () => {
+			expect(buildOneSecSwapTrackingMetadata({ tx: txWithRefs({ refs: [] }) })).not.toHaveProperty(
+				'error'
+			);
 		});
 	});
 });

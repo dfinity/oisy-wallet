@@ -7,6 +7,7 @@ import {
 	formatCurrency,
 	formatCurrencyAsNumber,
 	formatNanosecondsToDate,
+	formatNanosecondsToShortRelativeTime,
 	formatNanosecondsToTimestamp,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
@@ -633,6 +634,57 @@ describe('format.utils', () => {
 			const yesterdayTimestamp = yesterday.getTime();
 
 			expect(formatTimestampToDaysDifference({ timestamp: yesterdayTimestamp })).toBe('tomorrow');
+		});
+	});
+
+	describe('formatNanosecondsToShortRelativeTime', () => {
+		const NANO_PER_MS = 1_000_000n;
+		const currentDate = new Date('2026-01-01T12:00:00Z');
+		const at = (msAgo: number): bigint => BigInt(currentDate.getTime() - msAgo) * NANO_PER_MS;
+
+		it('returns seconds when under a minute', () => {
+			expect(
+				formatNanosecondsToShortRelativeTime({
+					nanoseconds: at(20_000),
+					currentDate
+				})
+			).toBe('20s ago');
+		});
+
+		it('returns minutes when under an hour', () => {
+			expect(
+				formatNanosecondsToShortRelativeTime({
+					nanoseconds: at(20 * 60_000),
+					currentDate
+				})
+			).toBe('20m ago');
+		});
+
+		it('returns hours when under a day', () => {
+			expect(
+				formatNanosecondsToShortRelativeTime({
+					nanoseconds: at(3 * 60 * 60_000),
+					currentDate
+				})
+			).toBe('3h ago');
+		});
+
+		it('returns days otherwise', () => {
+			expect(
+				formatNanosecondsToShortRelativeTime({
+					nanoseconds: at(5 * 24 * 60 * 60_000),
+					currentDate
+				})
+			).toBe('5d ago');
+		});
+
+		it('clamps future timestamps (clock skew) to "0s ago"', () => {
+			expect(
+				formatNanosecondsToShortRelativeTime({
+					nanoseconds: at(-60_000),
+					currentDate
+				})
+			).toBe('0s ago');
 		});
 	});
 
