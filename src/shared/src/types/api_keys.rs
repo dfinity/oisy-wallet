@@ -16,6 +16,11 @@ pub struct ApiKeys {
     /// issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
     /// `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
     pub exchange_rate_replicated: Option<bool>,
+    /// HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
+    /// provisioned/rotated via the dedicated `set_onramper_signing_secret` endpoint (which
+    /// preserves the other keys). When `None`, the signing endpoint reports the secret as
+    /// missing and the `OnRamper` widget cannot be loaded.
+    pub onramper_signing_secret: Option<String>,
 }
 
 impl Debug for ApiKeys {
@@ -29,6 +34,10 @@ impl Debug for ApiKeys {
             .field("coingecko_api_key", &redact(&self.coingecko_api_key))
             .field("exchange_rate_enabled", &self.exchange_rate_enabled)
             .field("exchange_rate_replicated", &self.exchange_rate_replicated)
+            .field(
+                "onramper_signing_secret",
+                &redact(&self.onramper_signing_secret),
+            )
             .finish()
     }
 }

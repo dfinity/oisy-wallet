@@ -27,6 +27,7 @@ use shared::{
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
+        onramper::SignOnramperWidgetUrlRequest,
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
@@ -34,10 +35,10 @@ use shared::{
             CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
             GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, UpdateContactResult,
-            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
-            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
-            UpdateUserNetworkSettingsResult,
+            SaveUserTransactionsResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -59,6 +60,7 @@ mod bitcoin;
 mod contacts;
 mod delegation;
 mod exchange;
+mod onramper;
 mod signer;
 mod state;
 mod status;
