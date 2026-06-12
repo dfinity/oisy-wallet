@@ -67,8 +67,9 @@ needs it re-provisioned.
 ## Manual fallback (no script)
 
 `set_onramper_signing_secret` is the safe path. **Avoid** raw `set_api_keys` for this — it
-overwrites the entire `ApiKeys` record and would wipe `coingecko_api_key` / `exchange_rate_enabled`.
-If you must use it, first read the current record with `get_api_keys` and merge.
+replaces the key fields and would wipe `coingecko_api_key` (only `exchange_rate_enabled` /
+`exchange_rate_replicated` are preserved when left unset). If you must use it, first read the
+current record with `get_api_keys` and merge.
 
 ```bash
 dfx canister call --network ic backend set_onramper_signing_secret '(opt "sk_...")'
