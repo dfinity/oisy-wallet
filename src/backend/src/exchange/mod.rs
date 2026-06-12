@@ -663,6 +663,12 @@ mod tests {
     }
 
     #[test]
+    fn icpswap_supplemental_provider_is_disabled() {
+        assert!(supplemental_price_providers(false).is_empty());
+        assert!(supplemental_price_providers(true).is_empty());
+    }
+
+    #[test]
     fn replicated_only_when_explicitly_opted_in() {
         // Replicated is opt-in: only an explicit `Some(true)` enables consensus outcalls.
         crate::state::write_api_keys(shared::types::api_keys::ApiKeys {
