@@ -35,6 +35,12 @@ thread_local! {
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
+
+    /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
+    /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
+    /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
+    pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
