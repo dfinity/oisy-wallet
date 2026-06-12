@@ -17,7 +17,8 @@ pub struct ApiKeys {
     /// `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
     pub exchange_rate_replicated: Option<bool>,
     /// HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
-    /// rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
+    /// provisioned/rotated via the dedicated `set_onramper_signing_secret` endpoint (which
+    /// preserves the other keys). When `None`, the signing endpoint reports the secret as
     /// missing and the `OnRamper` widget cannot be loaded.
     pub onramper_signing_secret: Option<String>,
 }

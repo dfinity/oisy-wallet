@@ -13,6 +13,7 @@ candid = { workspace = true }
 futures = { workspace = true }
 getrandom = { workspace = true }
 hex = { workspace = true }
+hmac = { workspace = true }
 ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-timers = { workspace = true }
