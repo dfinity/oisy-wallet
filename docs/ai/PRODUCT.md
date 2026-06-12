@@ -70,6 +70,8 @@ OISY prices tokens against USD (and, for non-USD display currencies, derives an 
 
 **Per-provider kill-switches exist in both layers.** Each price provider has a hardcoded enable flag, flipped by editing code rather than runtime config — a code-level kill-switch per provider. The backend exposes two Rust `const` flags (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`); the frontend exposes three `*_PROVIDER_ENABLED` consts in `src/frontend/src/env/rest/` (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`, `KONGSWAP_PROVIDER_ENABLED`). KongSwap is frontend-only. The fallback fill goes through the same flag-gated provider helpers, so a disabled frontend provider does not participate in the fill either.
 
+**Backend mode is environment-scoped.** Backend exchange mode is permitted only on LOCAL/STAGING builds (`BACKEND_EXCHANGE_ENABLED` in `src/frontend/src/env/exchange.env.ts`): there the frontend honours the canister's runtime `exchange_rate_enabled` flag and, when on, uses backend-primary sourcing with the frontend fill. On BETA/PROD builds the frontend never queries the canister flag and always takes the full frontend-provider path (CoinGecko primary with the ICPSwap fallback cascade), regardless of the backend's runtime state.
+
 ---
 
 ## User Preferences
