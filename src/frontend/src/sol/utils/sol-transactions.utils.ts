@@ -48,7 +48,8 @@ export const mapSolTransactionMessage = ({
 }: TransactionMessage): MappedSolTransaction =>
 	Array.from(instructions).reduce<MappedSolTransaction>(
 		(acc, instruction) => {
-			const { amount, source, destination, payer, tokenAddress } = mapSolInstruction(instruction);
+			const { amount, source, destination, payer, tokenAddress, isApproval } =
+				mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the
@@ -77,6 +78,7 @@ export const mapSolTransactionMessage = ({
 				...(nonNullish(destination) && { destination }),
 				...(nonNullish(payer) && { payer }),
 				...(nonNullish(tokenAddress) && { tokenAddress }),
+				...((isApproval ?? acc.isApproval) && { isApproval: true }),
 				...(ambiguous && { ambiguous })
 			};
 		},

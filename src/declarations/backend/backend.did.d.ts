@@ -216,6 +216,12 @@ export interface ApiKeys {
 	 */
 	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
+	/**
+	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
+	 * rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
+	 * missing and the `OnRamper` widget cannot be loaded.
+	 */
+	onramper_signing_secret: [] | [string];
 	infura_api_key: [] | [string];
 }
 export type ApproveError =

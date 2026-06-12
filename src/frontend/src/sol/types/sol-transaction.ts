@@ -76,6 +76,10 @@ export interface MappedSolTransaction {
 	// transfer. Lets the review screen show the correct token metadata instead of
 	// defaulting to native SOL.
 	tokenAddress?: SplTokenAddress;
+	// `true` when the transaction grants a spending allowance (`Approve`/`ApproveChecked`)
+	// rather than transferring funds. The `destination` then holds the delegate (spender),
+	// so the review must label it as an approval, not a send.
+	isApproval?: boolean;
 	// `true` when the message bundles instructions that disagree on source,
 	// destination or payer. The summary keeps a single value per field, so such
 	// a transaction cannot be faithfully represented on the review screen and

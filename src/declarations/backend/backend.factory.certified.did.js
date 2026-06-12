@@ -450,6 +450,7 @@ export const idlFactory = ({ IDL }) => {
 		etherscan_api_key: IDL.Opt(IDL.Text),
 		exchange_rate_replicated: IDL.Opt(IDL.Bool),
 		coingecko_api_key: IDL.Opt(IDL.Text),
+		onramper_signing_secret: IDL.Opt(IDL.Text),
 		infura_api_key: IDL.Opt(IDL.Text)
 	});
 	const CanisterStatusType = IDL.Variant({
