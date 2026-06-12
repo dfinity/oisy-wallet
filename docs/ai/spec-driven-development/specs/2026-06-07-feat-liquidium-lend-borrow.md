@@ -63,12 +63,14 @@ import { LiquidiumClient } from '@liquidium/client';
 
 const client = new LiquidiumClient({
 	identity, // oisy's signed-in IC identity (for client.lending canister calls)
-	evmRpcUrl: VITE_EVM_RPC_URL, // only needed for ETH/USDT(ERC) reads & external withdrawals
+	evmPublicClient, // reuse oisy's existing Alchemy-backed viem client (ETH/USDT ERC reads) — see Pending decisions
 	headers: { 'x-client-name': 'oisy' }
 });
 ```
 
 `environment` defaults to mainnet; `icHost`/`canisterIds` only need overriding for local/staging. The IC identity that oisy already manages for canister calls is passed as `identity` so Liquidium canister calls are signed as the same principal.
+
+> **Note:** the `WalletAdapter` is **not** a constructor option — it is passed **per write call** (`createProfile`, `supply`, `borrow`, `withdraw`). Only `identity` (and optional EVM read config) live on the client. See Open questions → "Identity / signing model".
 
 ### Core dependency — the `WalletAdapter` (oisy signer bridge)
 
@@ -89,16 +91,16 @@ Notes:
 
 ### SDK modules used
 
-| Module                               | Used for                                                                               |
-| ------------------------------------ | -------------------------------------------------------------------------------------- |
-| `client.accounts`                    | Create/reuse the Liquidium profile for the signed-in identity; linked-wallet lookup    |
-| `client.market`                      | `pools`, `prices`, pool rate lookups — drives the asset list, APYs, caps, availability |
-| `client.lending`                     | `supply(...)`, `borrow(...)`, `withdraw(...)`, repay, inflow reporting                 |
-| `client.positions`                   | Per-pool positions, health factor, aggregate stats — drives the dashboard + hero total |
-| `client.quote`                       | `calculateLtv(...)`, `getMinimumBorrowAmount(asset)` — pre-submit validation           |
-| `client.activities`/`client.history` | Optional: feed position/transaction history into oisy's Activity view (stretch)        |
+| Module                               | Used for                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `client.accounts`                    | Create/reuse the Liquidium profile for the signed-in identity; linked-wallet lookup         |
+| `client.market`                      | `pools`, `prices`, pool rate lookups — drives the asset list, APYs, caps, availability      |
+| `client.lending`                     | `supply(...)` (deposit **and** repayment), `borrow(...)`, `withdraw(...)`, inflow reporting |
+| `client.positions`                   | Per-pool positions, health factor, aggregate stats — drives the dashboard + hero total      |
+| `client.quote`                       | `calculateLtv(...)`, `getMinimumBorrowAmount(asset)` — pre-submit validation                |
+| `client.activities`/`client.history` | Optional: feed position/transaction history into oisy's Activity view (stretch)             |
 
-> **Repay method:** Liquidium's product surface lists Repay as a first-class action and the `client.lending` module is documented as "Supply, borrow, withdraw, and inflow reporting." The exact repay entry point (`client.lending.repay(...)` vs. a borrow-position settlement call) must be confirmed against the generated API reference before implementation. See Open questions.
+> **Repay method (confirmed):** There is **no `client.lending.repay(...)`**. Repaying an account-based position is an inflow on the supply path — `client.lending.supply({ ..., action: 'repayment' })` (`SupplyAction.repayment`). The full-debt amount for the "Max (full debt)" shortcut comes from `client.positions.getMaxRepayAmount(profileId, poolId, bufferBps?)` (principal + accrued interest + small buffer, default 10 bps).
 
 ### Key concepts (from Liquidium docs)
 
@@ -302,11 +304,11 @@ Entry points: a position row "Borrow" action; or "Borrow" from a market the user
 
 Entry point: position row "Repay" (only when that asset has debt).
 
-**Form** — asset pre-filled. Amount input with a "Max (full debt)" shortcut that fills the outstanding amount (principal + accrued interest, from `client.positions`). Shows current debt and the **projected health factor after repay** (improves). Wallet balance shown; if insufficient, surface the shortfall clearly. Transaction fee row.
+**Form** — asset pre-filled. Amount input with a "Max (full debt)" shortcut that fills the outstanding amount from `client.positions.getMaxRepayAmount(profileId, poolId)` (principal + accrued interest + small buffer). Shows current debt and the **projected health factor after repay** (improves). Wallet balance shown; if insufficient, surface the shortfall clearly. Transaction fee row.
 
 **Review** — title "Review repay". Hero: repay amount + fiat. Rows: remaining debt after repay, projected health factor. Back + "Repay".
 
-**Progress** — submits the repay call (see Repay-method open question). On success the debt decreases (or clears) and health factor improves.
+**Progress** — submits via `client.lending.supply({ ..., action: 'repayment' })`. On success the debt decreases (or clears) and health factor improves.
 
 ### Withdraw
 
@@ -436,17 +438,15 @@ Aspects this spec has not detailed yet — captured here as a reminder; each nee
 
 ## Open questions (facts to confirm)
 
-Things we still need to find out or verify — answers are not yet known.
+Verified against the installed SDK (`@liquidium/client` v0.3.0, `node_modules/@liquidium/client/dist/index.d.ts`) and the oisy codebase. Six of seven are resolved; #7 is the only one the SDK cannot answer.
 
-1. **Liquidium mainnet readiness per asset** — confirm which pools (BTC/ETH/USDC/USDT) are live on Liquidium mainnet now vs. "coming soon," so the Markets list reflects reality. Drive from `client.market`, but confirm the gating field.
-2. **Repay method** — confirm the exact SDK entry point for repaying an account-based borrow position (`client.lending.repay(...)` vs. a position-settlement call) against the generated API reference (`api-reference/generated/`).
-3. **Identity / signing model** — Liquidium write actions authorize via the `WalletAdapter` (`signMessage` + chain sends), keyed to wallet addresses — not the SDK `identity` config alone. Confirm whether the SDK `identity` (for canister calls) **and** the `WalletAdapter` (for address-scoped signatures) are both needed, and how oisy's signer satisfies each.
-4. **Token/price coverage** — verify oisy's token registry covers logos and USD price feeds for every Liquidium-listed asset (ckBTC/ckUSDC/ckUSDT are present; confirm ckETH/native ETH and the exact USDC/USDT ledgers Liquidium uses).
-5. **Asset & network representation (native vs ICP ck-assets) — and the rail per leg.** Liquidium markets its lending networks as **Bitcoin** and **Ethereum** (Solana "coming soon"); the Internet Computer is the execution layer and assets are held internally as chain-key tokens (ckBTC/ckETH/ckUSDT). The SDK returns a **transfer target** per deposit/repayment that is either an `icrcAccount` or a `nativeAddress` (see Transfer Targets). The unconfirmed fact that gates several downstream decisions:
-   - **Does the BTC pool's supply target expose an `icrcAccount` (ckBTC) or only a `nativeAddress`?** If `icrcAccount`, oisy can fund it with a near-instant ckBTC ICRC-1/2 transfer (it already holds ckBTC), bypassing Bitcoin confirmations; if `nativeAddress`, supply requires a native BTC send (multi-confirmation). Confirm for the BTC pool (and likewise ckETH/ckUSDT vs native ETH/USDT). Not confirmed whether the BTC pool accepts direct ckBTC deposits vs. expecting native BTC (possibly via the ckBTC minter).
-   - Dependent decisions once the above is known: how to label the **Networks** field per leg (economic asset vs. transport rail), and whether to let the user supply from ckBTC (instant) or native BTC (confirmation-bound). Note: ckBTC is the same BTC market via the ICRC rail, **not** a separate "ckBTC market" — present it as BTC.
-6. **`client.activities` contract** — confirm the exact `client.activities.list(...)` request/response shape (and `client.history`) against the generated API reference — specifically that returned activity records key cleanly to the `external_refs` oisy stores (loan ref / activity id / tx_hash) so the poller can correlate SDK activity → `ActiveUserTransaction`. See "Sources of truth & reconciliation".
-7. **Health-factor band thresholds** — confirm Liquidium's exact amber/red "at risk" / "critical" cut-offs so oisy's health colours match the protocol's own notion of risk.
+1. **Liquidium mainnet readiness per asset** — **Resolved (mechanism).** The `Pool` type exposes no "coming soon" field. Availability is derived at runtime: `client.market.listPools()` returns only pools that exist, each carrying `frozen: boolean` and optional `supplyCap`/`borrowCap`. **Gating rule:** a pool absent from `listPools()`, or with `frozen === true`, or at cap → render "Coming soon"/disabled; never hard-code the asset list. The live mainnet set is whatever `listPools()` returns at load time. (`Pool`, `MarketModule.listPools`, `getPoolRate`.)
+2. **Repay method** — **Resolved (corrects an earlier assumption).** There is **no `client.lending.repay(...)`**. For an account-based position, repayment is `client.lending.supply({ ..., action: 'repayment' })` (`SupplyAction.repayment`). `client.positions.getMaxRepayAmount(profileId, poolId, bufferBps?)` returns the full-debt figure (principal + accrued interest + small buffer, default 10 bps) backing the "Max (full debt)" shortcut. (`LendingModule.supply`, `SupplyAction`, `PositionsModule.getMaxRepayAmount`.)
+3. **Identity / signing model** — **Resolved.** Both are required and operate at different layers. `identity` is passed once at `new LiquidiumClient({ identity })` for signed IC canister calls. The `WalletAdapter` is passed **per write call** (not at construction) for address-scoped signatures: `createProfile({ account, chain, walletAdapter })`, `borrow`/`withdraw` take `{ signerChain, signerWalletAdapter }`, and `supply` takes `Pick<WalletAdapter, 'sendBtcTransaction' | 'sendEthTransaction'>`. All `WalletAdapter` methods are optional; the SDK invokes only the capability a given flow needs. (`LiquidiumClientConfig`, `WalletAdapter`, `WalletExecutionParams`.)
+4. **Token/price coverage** — **Resolved.** Every Liquidium asset is already in oisy's registry with matching contract addresses and USD price feeds: ckBTC, ckETH, ckUSDC (`xevnm-gaaaa-aaaar-qafnq-cai`), ckUSDT (`cngnf-vqaaa-aaaar-qag4q-cai`), native ETH, ERC-20 USDC (`0xA0b8…48`) and USDT (`0xdAC1…ec7`) — the last two exactly matching the SDK's `USDC_CONTRACT_ADDRESS`/`USDT_CONTRACT_ADDRESS`. Prices come from oisy's existing exchange services (CoinGecko, with IcpSwap/KongSwap fallbacks). **No registry additions needed.**
+5. **Asset & network representation / rail per leg** — **Resolved (mechanism).** The SDK returns the rail per leg as a discriminated `SupplyTarget = NativeAddressSupplyTarget | IcrcAccountSupplyTarget` (`type: 'nativeAddress' | 'icrcAccount'`) on the `SupplyFlow` from `client.lending.supply(...)`. oisy **does not hard-code the rail** — it inspects `flow.target.type` and routes: `icrcAccount` → oisy ICRC-1/2 ledger transfer (near-instant; e.g. ckBTC) then `flow.submit(...)`/`submitInflow`; `nativeAddress` → native send via the adapter (`sendBtcTransaction`/`sendEthTransaction`, confirmation-bound). The **Networks** field labels the economic asset (BTC/ETH); the rail is an execution detail, surfaced not chosen. The exact target a given pool returns is a runtime fact the SDK reports per call, so oisy handles both branches. ckBTC is the same BTC market via the ICRC rail, **not** a separate "ckBTC market" — present it as BTC. (`SupplyTarget`, `SupplyFlow`, `SupplyAction`.)
+6. **`client.activities` contract** — **Resolved.** `client.activities.list({ profileId | shortRef, filter })` returns `Activity[]` (`InflowActivity` {deposit|repayment} ∪ `OutflowActivity` {borrow|withdraw}); each record carries `id`, `poolId`, `asset`, `chain`, `amount`, `txid`, `txids[]`, `confirmations`, `requiredConfirmations`, `status`. `client.activities.getStatus({ … })` polls a single activity/receipt. These key cleanly to oisy's `external_refs` (activity `id` / `txid`), and `confirmations`/`requiredConfirmations` drive the native-BTC progress UI. `client.history.getUserTransactionHistory(user, …)` provides settled history (`type: supply|borrow|repay|withdraw`). (`ActivitiesModule`, `Activity`, `HistoryModule`.)
+7. **Health-factor band thresholds** — **Resolved (no protocol bands exist).** Liquidium publishes no discrete amber/red cut-offs; its docs describe health as a continuous gradient (100% = no debt, >0–99% = safe/"higher is safer", near 0% = at risk, 0% = partially liquidatable), and the SDK exposes only the raw value (`HealthFactor.healthFactor`, scaled by `RATE_SCALE`/`RATE_DECIMALS`) with no band constants. oisy therefore **chooses its own display bands**, anchored to those semantics: 🟢 Healthy ≥ 50%, 🟠 At risk 15–50%, 🔴 Critical < 15%. Defined once in a constant and reused by the Liabilities tag, the status dot, and the provider-page health display.
 
 ---
 
@@ -454,11 +454,11 @@ Things we still need to find out or verify — answers are not yet known.
 
 The facts are understood; these need a product/architecture call.
 
-1. **Profile ownership** — SDK contract is confirmed (`getProfileId(walletAddress)`, `createProfile({ account, chain, walletAdapter })`, `prepareCreateProfile({ account })`; a profile is owned by a wallet `account` on a `chain`, creation signature-gated via `walletAdapter.signMessage(...)`; silent bootstrap specified in "Profile bootstrapping"). **Decide:** which oisy-controlled address (BTC vs. ETH) owns the Liquidium profile, and whether one profile across the user's assets is right vs. multiple linked wallets (`listLinkedWallets`). Distinct from the rail question above (this is about account ownership, not the funds rail).
-2. **EVM RPC config** — ETH/USDT(ERC) reads need an EVM RPC (`evmRpcUrl`/viem). **Decide:** reuse an existing oisy RPC config or add a `VITE_EVM_RPC_URL`. If absent, ETH-side pools degrade to "temporarily unavailable."
-3. **Withdraw destinations** — v1 keeps borrows/withdrawals to oisy-controlled addresses. **Decide:** whether external-address withdrawal (CEX/Ledger) is a v1 inclusion or a fast follow.
-4. **Active liquidation alerting** — v1 always shows the in-app health status (Liabilities tab + provider page) — decided. **Decide:** whether to add _active_ alerting (push/email/in-wallet notification) as a fast-follow when health approaches the threshold.
-5. **Backend `ActiveUserTransactionData` variant** — the active-transactions mechanism requires the backend canister to add Liquidium variant(s) to the `ActiveUserTransactionData` Candid type (currently OneSec-only); this is a known prerequisite (Rust + `.did`) that must land before the FE wiring. **Decide:** the variant shape (per-action `LiquidiumSupply`/`Borrow`/`Repay`/`Withdraw` vs. one `Liquidium` variant with an action field). See "Asynchronous settlement & active transactions".
+1. **Profile ownership** — **Decided: ETH-owned, single profile.** oisy can `signMessage` only on the ETH key today (`eth_personal_sign`/EIP-191; the BTC signer signs transactions, not arbitrary messages — no BIP-322), and profile creation/borrow/withdraw are signature-gated via `walletAdapter.signMessage`. So the profile is owned by the user's **ETH address** (`createProfile({ account: <eth>, chain: 'ETH', walletAdapter })`; `borrow`/`withdraw` use `signerChain: 'ETH'`). A **single** profile is used (one cross-collateral pool, one health factor); other addresses can be associated later via `listLinkedWallets`. Profile ownership is independent of the funds rail — BTC/ckBTC collateral still enters via the transfer rail (`sendBtcTransaction`/ICRC + `submitInflow`), which needs no message signing. (A BTC-owned profile is a future option gated on adding BIP-322 signing to oisy.)
+2. **EVM RPC config** — **Decided: reuse oisy's existing Alchemy viem client; no new env var.** The SDK's `LiquidiumClientConfig` accepts `evmPublicClient?: EvmReadClient` (a viem public client), and oisy already builds one against Alchemy (`alchemy.providers.ts`, keyed by `VITE_ALCHEMY_API_KEY`). Pass that client as `evmPublicClient` rather than adding a `VITE_EVM_RPC_URL`/raw URL — no new secret, reuses oisy's provider config. If the Alchemy key is unset or Ethereum is disabled, ETH-side pools degrade to "temporarily unavailable" (see Error handling / Disabled networks).
+3. **Withdraw destinations** — **Decided: fast-follow, not v1.** v1 delivers all borrows/withdrawals to the user's own oisy-controlled address only. The SDK supports external receivers (`receiverAddress` on `borrow`/`withdraw`; `ExternalOutflowReceiver`), but external-address withdrawal (CEX/Ledger) adds per-chain address validation and wrong-address-loss safeguards that the core wizards don't otherwise need — deferred to a fast-follow once the core lend/borrow loop is proven. (Already reflected in Scope → "Not in v1".)
+4. **Active liquidation alerting** — **Decided: fast-follow.** v1 ships the always-visible in-app health status only (Liabilities tag, status dot, provider-page display). _Active_ alerting (push/email/in-wallet notification as health nears the threshold) is deferred — it requires a background health-watch trigger and a delivery channel beyond what the core wizards need. Revisit as a fast-follow once the in-app surfacing is validated.
+5. **Backend `ActiveUserTransactionData` variant** — **Decided: a single `Liquidium` variant with an action field.** Add one `Liquidium : LiquidiumData` variant to `ActiveUserTransactionData` (Rust + `.did`), where `LiquidiumData = { action: LiquidiumAction (Supply|Borrow|Repay|Withdraw), pool_id: text, token: TokenId, amount: nat }`. The four actions share this shape; dynamic/learned-mid-flow values (loan ref, activity id, tx_hash, receiver) ride in the existing `external_refs` — the type's intended escape hatch — rather than bespoke per-action fields. This keeps one Candid type and one validation arm, and a future action becomes a new enum value, not a new variant. (Contrast OneSec's per-direction variants, which exist because their payloads genuinely differ.) Prerequisite: lands before the FE wiring. See "Asynchronous settlement & active transactions".
 6. **[PARKED — revisit] Risk on the hero/overview** — since debt grows on its own, **decide** whether to surface a small health indicator near the net-worth total (visible whenever the user holds debt), so a user who never opens the Liabilities tab is still warned. Deferred by request.
 
 ---
