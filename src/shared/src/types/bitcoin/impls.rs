@@ -5,8 +5,8 @@ use ic_cdk::bitcoin_canister::Utxo;
 use serde::{de, Deserializer};
 
 use super::{
-    BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-    StoredPendingTransaction, MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+    BtcAddPendingTransactionRequest, PendingTransaction, StoredPendingTransaction, MAX_TXID_BYTES,
+    MAX_UTXOS_LEN,
 };
 use crate::validate::{validate_on_deserialize, Validate};
 
@@ -41,16 +41,6 @@ fn validate_txid_bytes(txid: &[u8]) -> Result<(), candid::Error> {
     }
     Ok(())
 }
-fn validate_address(address: &str) -> Result<(), candid::Error> {
-    let len = address.len();
-    if len > MAX_ADDRESS_LEN {
-        return Err(candid::Error::msg(format!(
-            "Bitcoin address too long: {len} > {MAX_ADDRESS_LEN}"
-        )));
-    }
-    Ok(())
-}
-
 impl Validate for BtcAddPendingTransactionRequest {
     fn validate(&self) -> Result<(), candid::Error> {
         validate_txid_bytes(&self.txid)?;
@@ -58,13 +48,6 @@ impl Validate for BtcAddPendingTransactionRequest {
     }
 }
 validate_on_deserialize!(BtcAddPendingTransactionRequest);
-
-impl Validate for BtcGetPendingTransactionsRequest {
-    fn validate(&self) -> Result<(), candid::Error> {
-        validate_address(&self.address)
-    }
-}
-validate_on_deserialize!(BtcGetPendingTransactionsRequest);
 
 impl Validate for PendingTransaction {
     fn validate(&self) -> Result<(), candid::Error> {

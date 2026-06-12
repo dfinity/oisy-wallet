@@ -21,6 +21,7 @@ use crate::types::{
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
+    onramper::SignOnramperWidgetUrlError,
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -443,6 +444,21 @@ impl From<Result<(), ActiveUserTransactionError>> for DeleteActiveUserTransactio
         match result {
             Ok(()) => DeleteActiveUserTransactionResult::Ok(()),
             Err(err) => DeleteActiveUserTransactionResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SignOnramperWidgetUrlResult {
+    /// Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+    Ok(String),
+    Err(SignOnramperWidgetUrlError),
+}
+impl From<Result<String, SignOnramperWidgetUrlError>> for SignOnramperWidgetUrlResult {
+    fn from(result: Result<String, SignOnramperWidgetUrlError>) -> Self {
+        match result {
+            Ok(signature) => SignOnramperWidgetUrlResult::Ok(signature),
+            Err(err) => SignOnramperWidgetUrlResult::Err(err),
         }
     }
 }

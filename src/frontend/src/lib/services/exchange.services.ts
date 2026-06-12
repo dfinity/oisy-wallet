@@ -189,18 +189,19 @@ const icrcFallbackProviders = [
 	}
 ];
 
-export const exchangeRateICRCToUsd = async (
-	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	if (ledgerCanisterIds.length === 0) {
-		return {};
-	}
-
-	const coingeckoPrices = COINGECKO_PROVIDER_ENABLED
-		? await fetchIcrcPricesFromCoingecko(ledgerCanisterIds)
-		: {};
-
-	return icrcFallbackProviders.reduce<Promise<CoingeckoSimpleTokenPriceResponse>>(
+/**
+ * Cascades through the flag-gated ICPSwap/Kong fallback providers, filling only
+ * the requested ledger canister ids still missing from `initialPrices`. Exported
+ * as the CoinGecko-free entry point used by the backend-mode price fill.
+ */
+export const fillIcrcPricesFromFallbackProviders = ({
+	ledgerCanisterIds,
+	initialPrices = {}
+}: {
+	ledgerCanisterIds: LedgerCanisterIdText[];
+	initialPrices?: CoingeckoSimpleTokenPriceResponse;
+}): Promise<CoingeckoSimpleTokenPriceResponse> =>
+	icrcFallbackProviders.reduce<Promise<CoingeckoSimpleTokenPriceResponse>>(
 		async (pricesPromise, { enabled, fetchPrices }) => {
 			const prices = await pricesPromise;
 
@@ -224,8 +225,21 @@ export const exchangeRateICRCToUsd = async (
 				...providerPrices
 			};
 		},
-		Promise.resolve(coingeckoPrices)
+		Promise.resolve(initialPrices)
 	);
+
+export const exchangeRateICRCToUsd = async (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	if (ledgerCanisterIds.length === 0) {
+		return {};
+	}
+
+	const coingeckoPrices = COINGECKO_PROVIDER_ENABLED
+		? await fetchIcrcPricesFromCoingecko(ledgerCanisterIds)
+		: {};
+
+	return fillIcrcPricesFromFallbackProviders({ ledgerCanisterIds, initialPrices: coingeckoPrices });
 };
 
 export const exchangeRateSPLToUsd = async (

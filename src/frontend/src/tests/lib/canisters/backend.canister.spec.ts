@@ -22,7 +22,6 @@ import {
 	mockCreateActiveUserTransactionParams,
 	mockUpdateActiveUserTransactionParams
 } from '$tests/mocks/active-user-transactions.mock';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
@@ -77,7 +76,6 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
-		address: mockBtcAddress,
 		utxos: [
 			{
 				height: 1000,
@@ -93,20 +91,17 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionEndpointParams = {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		utxos: btcAddPendingTransactionParams.utxos,
 		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		iiDelegationChain: mockIIDelegationChain
 	};
 
 	const btcGetPendingTransactionEndpointParams = {
 		network: btcGetPendingTransactionParams.network,
-		address: btcGetPendingTransactionParams.address,
 		ii_delegation_chain: btcGetPendingTransactionParams.iiDelegationChain
 	};
 

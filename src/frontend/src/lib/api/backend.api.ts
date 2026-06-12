@@ -32,6 +32,7 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings,
@@ -117,6 +118,15 @@ export const exchangeRateEnabled = async ({
 	return exchangeRateEnabled({ certified });
 };
 
+export const onramperEnabled = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
+	const { onramperEnabled } = await backendCanister({ identity });
+
+	return onramperEnabled({ certified });
+};
+
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
@@ -159,6 +169,15 @@ export const allowSigning = async ({
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
+};
+
+export const signOnramperWidgetUrl = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<string> => {
+	const { signOnramperWidgetUrl } = await backendCanister({ identity });
+
+	return signOnramperWidgetUrl(params);
 };
 
 export const addUserHiddenDappId = async ({
