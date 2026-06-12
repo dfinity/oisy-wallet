@@ -62,6 +62,10 @@ export const mapSolTransactionMessage = ({
 			const mixesTokenWithNonToken =
 				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
 				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
+			const mixesApprovalWithTransfer =
+				nonNullish(acc.amount) &&
+				nonNullish(amount) &&
+				(acc.isApproval ?? false) !== (isApproval ?? false);
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
@@ -69,7 +73,8 @@ export const mapSolTransactionMessage = ({
 				conflicts({ current: acc.destination, next: destination }) ||
 				conflicts({ current: acc.payer, next: payer }) ||
 				conflicts({ current: acc.tokenAddress, next: tokenAddress }) ||
-				mixesTokenWithNonToken;
+				mixesTokenWithNonToken ||
+				mixesApprovalWithTransfer;
 
 			return {
 				...acc,
