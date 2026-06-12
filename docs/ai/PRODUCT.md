@@ -68,7 +68,11 @@ OISY prices tokens against USD (and, for non-USD display currencies, derives an 
 
 **The frontend fills the gaps.** Rather than showing no price for those tokens, the worker then runs its own providers, but **only for the tokens the backend returned without a price** — the missing ERC-20 / SPL / ICRC tokens and any unpriced native singles. It fetches just that missing subset (skipping any category that has nothing missing, and skipping the provider step entirely when the backend priced everything), then merges the provider results into the backend response with **the backend winning on every collision**. The derived ERC-4626 prices are recomputed from the merged ERC-20 prices. When backend rates are disabled, the frontend takes the unchanged full-provider path.
 
+**The fill excludes CoinGecko by default.** `COINGECKO_FALLBACK_PROVIDER_ENABLED` (in `src/frontend/src/env/rest/coingecko.env.ts`, default `false`) governs CoinGecko's participation in the backend-mode fill only: the CoinGecko-only categories (natives, ERC-20, SPL) are skipped entirely and the ICRC gaps are filled via the ICPSwap/Kong cascade alone. The flag is separate from `COINGECKO_PROVIDER_ENABLED` (which stays on and governs the backend-disabled full-provider path), and the BTC-cross FX rate for non-USD display currencies keeps using CoinGecko in both modes — the backend provides no FX substitute.
+
 **Per-provider kill-switches exist in both layers.** Each price provider has a hardcoded enable flag, flipped by editing code rather than runtime config — a code-level kill-switch per provider. The backend exposes two Rust `const` flags (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`); the frontend exposes three `*_PROVIDER_ENABLED` consts in `src/frontend/src/env/rest/` (`COINGECKO_PROVIDER_ENABLED`, `ICPSWAP_PROVIDER_ENABLED`, `KONGSWAP_PROVIDER_ENABLED`). KongSwap is frontend-only. The fallback fill goes through the same flag-gated provider helpers, so a disabled frontend provider does not participate in the fill either.
+
+**Backend mode is environment-scoped.** Backend exchange mode is permitted only on LOCAL/STAGING builds (`BACKEND_EXCHANGE_ENABLED` in `src/frontend/src/env/exchange.env.ts`): there the frontend honours the canister's runtime `exchange_rate_enabled` flag and, when on, uses backend-primary sourcing with the frontend fill. On BETA/PROD builds the frontend never queries the canister flag and always takes the full frontend-provider path (CoinGecko primary with the ICPSwap fallback cascade), regardless of the backend's runtime state.
 
 ---
 
@@ -92,3 +96,13 @@ The user-menu popover (the `IconUser` button) carries a **Language** selector fo
 The user menu also carries the **theme/appearance** selector when signed in (unchanged).
 
 The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.
+
+---
+
+## Bitcoin
+
+### Pending-transaction reservation
+
+While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
+
+The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.

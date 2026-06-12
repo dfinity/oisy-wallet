@@ -8,6 +8,7 @@ import {
 	exchangeRateICRCToUsd,
 	exchangeRateUsdToCurrency,
 	fetchExchangeRatesFromBackend,
+	fillIcrcPricesFromFallbackProviders,
 	syncExchange
 } from '$lib/services/exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -259,6 +260,98 @@ describe('exchange.services', () => {
 			expect(formatIcpSwapToCoingeckoPrices).not.toHaveBeenCalled();
 			expect(formatKongSwapToCoingeckoPrices).not.toHaveBeenCalled();
 			expect(result).toEqual(coingeckoResponse);
+		});
+	});
+
+	describe('fillIcrcPricesFromFallbackProviders', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('starts the cascade from an empty map and never calls CoinGecko', async () => {
+			const icpSwapFallback: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1
+			};
+
+			vi.mocked(findMissingLedgerCanisterIds)
+				.mockReturnValueOnce([MOCK_CANISTER_ID_1])
+				.mockReturnValueOnce([]);
+			vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue(['mockRawToken' as never]);
+			vi.mocked(formatIcpSwapToCoingeckoPrices).mockReturnValue(icpSwapFallback);
+
+			const result = await fillIcrcPricesFromFallbackProviders({
+				ledgerCanisterIds: [MOCK_CANISTER_ID_1]
+			});
+
+			expect(simpleTokenPrice).not.toHaveBeenCalled();
+			expect(findMissingLedgerCanisterIds).toHaveBeenCalledWith({
+				allLedgerCanisterIds: [MOCK_CANISTER_ID_1],
+				coingeckoResponse: {}
+			});
+			expect(fetchBatchIcpSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_1]);
+			expect(result).toEqual(icpSwapFallback);
+		});
+
+		it('fills only the ids missing from the provided initial prices', async () => {
+			const initialPrices: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1
+			};
+			const icpSwapFallback: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_2.toLowerCase()]: mockPrice2
+			};
+
+			vi.mocked(findMissingLedgerCanisterIds)
+				.mockReturnValueOnce([MOCK_CANISTER_ID_2])
+				.mockReturnValueOnce([]);
+			vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue(['mockRawToken' as never]);
+			vi.mocked(formatIcpSwapToCoingeckoPrices).mockReturnValue(icpSwapFallback);
+
+			const result = await fillIcrcPricesFromFallbackProviders({
+				ledgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
+				initialPrices
+			});
+
+			expect(simpleTokenPrice).not.toHaveBeenCalled();
+			expect(fetchBatchIcpSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_2]);
+			expect(result).toEqual({ ...initialPrices, ...icpSwapFallback });
+		});
+
+		it('falls back to KongSwap for ids still missing after ICPSwap', async () => {
+			const kongSwapFallback: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1
+			};
+
+			vi.mocked(findMissingLedgerCanisterIds)
+				.mockReturnValueOnce([MOCK_CANISTER_ID_1])
+				.mockReturnValueOnce([MOCK_CANISTER_ID_1]);
+			vi.mocked(fetchBatchIcpSwapPrices).mockResolvedValue([]);
+			vi.mocked(formatIcpSwapToCoingeckoPrices).mockReturnValue({});
+			vi.mocked(fetchBatchKongSwapPrices).mockResolvedValue(['mockRawToken' as never]);
+			vi.mocked(formatKongSwapToCoingeckoPrices).mockReturnValue(kongSwapFallback);
+
+			const result = await fillIcrcPricesFromFallbackProviders({
+				ledgerCanisterIds: [MOCK_CANISTER_ID_1]
+			});
+
+			expect(fetchBatchKongSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_1]);
+			expect(result).toEqual(kongSwapFallback);
+		});
+
+		it('returns the initial prices untouched when nothing is missing', async () => {
+			const initialPrices: CoingeckoSimpleTokenPriceResponse = {
+				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1
+			};
+
+			vi.mocked(findMissingLedgerCanisterIds).mockReturnValue([]);
+
+			const result = await fillIcrcPricesFromFallbackProviders({
+				ledgerCanisterIds: [MOCK_CANISTER_ID_1],
+				initialPrices
+			});
+
+			expect(fetchBatchIcpSwapPrices).not.toHaveBeenCalled();
+			expect(fetchBatchKongSwapPrices).not.toHaveBeenCalled();
+			expect(result).toEqual(initialPrices);
 		});
 	});
 

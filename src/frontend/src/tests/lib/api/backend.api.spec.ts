@@ -328,7 +328,6 @@ describe('backend.api', () => {
 			txId: new Uint8Array([1, 2, 3]),
 			utxos: [mockUtxo],
 			network: { mainnet: null },
-			address: 'address',
 			iiDelegationChain: mockIIDelegationChain
 		};
 
@@ -346,7 +345,6 @@ describe('backend.api', () => {
 				txId: new Uint8Array([1, 2, 3]),
 				utxos: [mockUtxo],
 				network: { mainnet: null },
-				address: 'address',
 				iiDelegationChain: mockIIDelegationChain
 			});
 		});
@@ -370,7 +368,6 @@ describe('backend.api', () => {
 		const mockParams: CanisterApiFunctionParams<BtcGetPendingTransactionParams> = {
 			...baseParams,
 			network: { mainnet: null },
-			address: 'address',
 			iiDelegationChain: mockIIDelegationChain
 		};
 
@@ -391,7 +388,6 @@ describe('backend.api', () => {
 			expect(result).toEqual({ response: mockResponse });
 			expect(backendCanisterMock.btcGetPendingTransactions).toHaveBeenCalledExactlyOnceWith({
 				network: { mainnet: null },
-				address: 'address',
 				iiDelegationChain: mockIIDelegationChain
 			});
 		});
