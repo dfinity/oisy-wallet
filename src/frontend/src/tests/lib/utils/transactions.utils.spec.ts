@@ -1730,9 +1730,9 @@ describe('transactions.utils', () => {
 		);
 
 		const mockTransactions: (IcTransactionUi | SolTransactionUi)[] = [
-			...icTransactions,
-			...solTransactions
-		].sort(() => Math.random() - 0.5);
+			...[...solTransactions].reverse(),
+			...[...icTransactions].reverse()
+		];
 
 		const [expectedOldestTransaction] = icTransactions;
 
@@ -1740,18 +1740,20 @@ describe('transactions.utils', () => {
 			expect(findOldestTransaction([])).toBeUndefined();
 		});
 
-		it('should return the oldest transaction', () => {
+		it('should return the last transaction in the newest-first list', () => {
 			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
 		});
 
-		it('should return the first transaction in the list if they have the same timestamp', () => {
-			const newTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
+		it('should return the last transaction in the list if oldest timestamps are tied', () => {
+			const tiedOldestTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
 				...transaction,
-				id: `${transaction.id}-new`
+				id: `${transaction.id}-new`,
+				timestamp: expectedOldestTransaction.timestamp
 			}));
+			const expectedCursor = tiedOldestTransactions[tiedOldestTransactions.length - 1];
 
-			expect(findOldestTransaction([...mockTransactions, ...newTransactions])).toStrictEqual(
-				expectedOldestTransaction
+			expect(findOldestTransaction([...mockTransactions, ...tiedOldestTransactions])).toStrictEqual(
+				expectedCursor
 			);
 		});
 
@@ -1769,7 +1771,7 @@ describe('transactions.utils', () => {
 				})
 			);
 
-			const [expectedTransaction] = transactionsWithNumber;
+			const expectedTransaction = transactionsWitUndefined[transactionsWitUndefined.length - 1];
 
 			expect(
 				findOldestTransaction([

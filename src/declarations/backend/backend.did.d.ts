@@ -218,7 +218,8 @@ export interface ApiKeys {
 	coingecko_api_key: [] | [string];
 	/**
 	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
-	 * rotated via `set_api_keys`. When `None`, the signing endpoint reports the secret as
+	 * provisioned/rotated via the dedicated `set_onramper_signing_secret` endpoint (which
+	 * preserves the other keys). When `None`, the signing endpoint reports the secret as
 	 * missing and the `OnRamper` widget cannot be loaded.
 	 */
 	onramper_signing_secret: [] | [string];
@@ -2035,6 +2036,10 @@ export interface _SERVICE {
 	save_user_transactions: ActorMethod<[SaveUserTransactionsRequest], SaveUserTransactionsResult>;
 	/**
 	 * Overwrites the stored API keys.
+	 *
+	 * If `exchange_rate_enabled` or `exchange_rate_replicated` is omitted, the existing toggle is
+	 * preserved so that routine key rotation does not accidentally pause exchange-rate refreshes or
+	 * change their outcall replication mode.
 	 *
 	 * Restricted to canister controllers only.
 	 */

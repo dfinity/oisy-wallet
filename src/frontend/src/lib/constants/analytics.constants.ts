@@ -70,6 +70,7 @@ export const TRACK_COUNT_CAROUSEL_CLOSE = 'carousel_close';
 export const TRACK_COUNT_CAROUSEL_OPEN = 'carousel_open';
 
 // Swap
+export const TRACK_COUNT_SWAP_SUBMITTED = 'swap_submitted';
 export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success';
 export const TRACK_COUNT_SWAP_ERROR = 'swap_error';
 
