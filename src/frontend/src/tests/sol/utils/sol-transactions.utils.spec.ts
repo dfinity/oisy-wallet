@@ -80,6 +80,74 @@ describe('sol-transactions.utils', () => {
 			expect(spyMapSolInstruction).toHaveBeenNthCalledWith(3, instruction3);
 		});
 
+		it('should propagate the tokenAddress of an SPL token instruction', () => {
+			spyMapSolInstruction.mockReturnValueOnce({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSolAddress3
+			});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1]
+				})
+			).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSolAddress3
+			});
+		});
+
+		it('should propagate the isApproval flag of an approval instruction', () => {
+			spyMapSolInstruction.mockReturnValueOnce({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1]
+				})
+			).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			});
+		});
+
+		it('should flag a transaction as ambiguous when it bundles different SPL mints', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 1n, tokenAddress: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 2n, tokenAddress: mockSolAddress3 });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+		});
+
+		it('should flag a transaction as ambiguous when it mixes an SPL token with a native movement', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 5n, tokenAddress: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 10n });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+		});
+
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })

@@ -447,6 +447,7 @@ export const idlFactory = ({ IDL }) => {
 		exchange_rate_enabled: IDL.Opt(IDL.Bool),
 		alchemy_api_key: IDL.Opt(IDL.Text),
 		etherscan_api_key: IDL.Opt(IDL.Text),
+		exchange_rate_replicated: IDL.Opt(IDL.Bool),
 		coingecko_api_key: IDL.Opt(IDL.Text),
 		infura_api_key: IDL.Opt(IDL.Text)
 	});
@@ -787,6 +788,7 @@ export const idlFactory = ({ IDL }) => {
 		set_api_keys: IDL.Func([ApiKeys], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_exchange_rate_enabled: IDL.Func([IDL.Bool], [], []),
+		set_exchange_rate_replicated: IDL.Func([IDL.Bool], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),

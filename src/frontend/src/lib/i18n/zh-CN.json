@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "扫描二维码",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "正在执行交易...",
 			"initializing": "正在初始化交易...",
 			"swapping": "正在兑换...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
 			"swap_provider_website": "官网",
@@ -1177,7 +1193,6 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多 2 分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

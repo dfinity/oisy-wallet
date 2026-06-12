@@ -7,3 +7,5 @@ export const COINGECKO_API_URL = safeParse({
 });
 
 export const COINGECKO_API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
+
+export const COINGECKO_PROVIDER_ENABLED = true;

@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Escanear código QR",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "Ejecutando transacción...",
 			"initializing": "Inicializando transacción...",
 			"swapping": "Intercambiando...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
@@ -1177,7 +1193,6 @@
 			"select_token": "Seleccionar token",
 			"select_network_filter": "Seleccionar red",
 			"withdrawing": "Retirando...",
-			"bridging": "Realizando el bridge... (Por favor, ten paciencia, esto puede tardar hasta 2 minutos.)",
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "El intercambio se completó, pero tus tokens no pudieron ser retirados automáticamente. Haz clic en el botón de Retirar a continuación para retirarlos manualmente.<br> O sigue",
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {

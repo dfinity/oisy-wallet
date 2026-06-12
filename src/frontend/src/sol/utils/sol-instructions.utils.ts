@@ -447,7 +447,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -456,14 +457,16 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -472,14 +475,17 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress,
+			isApproval: true
 		};
 	}
 
@@ -519,7 +525,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -528,14 +535,16 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -544,14 +553,17 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress,
+			isApproval: true
 		};
 	}
 

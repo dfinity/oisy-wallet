@@ -1,11 +1,23 @@
-import type { CoingeckoSimpleTokenPriceResponse } from '$lib/types/coingecko';
+import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
+import { Currency } from '$lib/enums/currency';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPrice,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import {
+	buildErc20PriceParams,
 	exchangesDataEqual,
+	findMissingErc20ContractAddresses,
 	findMissingLedgerCanisterIds,
+	findMissingSplTokenAddresses,
 	formatIcpSwapToCoingeckoPrices,
-	formatKongSwapToCoingeckoPrices
+	formatKongSwapToCoingeckoPrices,
+	mergeExchangePrices,
+	type ProviderFallbackPrices
 } from '$lib/utils/exchange.utils';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockIcpSwapToken } from '$tests/mocks/icpswap.mock';
@@ -390,6 +402,292 @@ describe('exchange.utils', () => {
 			} as ExchangesData;
 
 			expect(exchangesDataEqual(a, b)).toBeFalsy();
+		});
+	});
+
+	describe('findMissingErc20ContractAddresses', () => {
+		const erc20 = (address: string): Erc20ContractAddressWithNetwork => ({
+			address,
+			coingeckoId: 'ethereum',
+			chainId: 1n
+		});
+
+		it('returns addresses absent from the response (case-insensitive on keys)', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				'0xaaa': { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = findMissingErc20ContractAddresses({
+				allErc20ContractAddresses: [erc20('0xAAA'), erc20('0xBBB')],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([erc20('0xBBB')]);
+		});
+
+		it('treats mixed-case response keys as priced', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				'0xAbCd': { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = findMissingErc20ContractAddresses({
+				allErc20ContractAddresses: [erc20('0xabcd'), erc20('0xBBB')],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual([erc20('0xBBB')]);
+		});
+
+		it('returns all addresses when response is empty', () => {
+			const result = findMissingErc20ContractAddresses({
+				allErc20ContractAddresses: [erc20('0xAAA'), erc20('0xBBB')],
+				coingeckoResponse: {}
+			});
+
+			expect(result).toEqual([erc20('0xAAA'), erc20('0xBBB')]);
+		});
+
+		it('returns empty array when nothing requested', () => {
+			const result = findMissingErc20ContractAddresses({
+				allErc20ContractAddresses: [],
+				coingeckoResponse: {}
+			});
+
+			expect(result).toEqual([]);
+		});
+	});
+
+	describe('findMissingSplTokenAddresses', () => {
+		it('returns addresses absent from the response', () => {
+			const response: CoingeckoSimpleTokenPriceResponse = {
+				spl1: { usd: 1, usd_market_cap: 0 }
+			};
+
+			const result = findMissingSplTokenAddresses({
+				allSplTokenAddresses: ['spl1', 'spl2'],
+				coingeckoResponse: response
+			});
+
+			expect(result).toEqual(['spl2']);
+		});
+
+		it('returns all addresses when response is empty', () => {
+			const result = findMissingSplTokenAddresses({
+				allSplTokenAddresses: ['spl1', 'spl2'],
+				coingeckoResponse: {}
+			});
+
+			expect(result).toEqual(['spl1', 'spl2']);
+		});
+	});
+
+	describe('buildErc20PriceParams', () => {
+		it('groups addresses by coingecko platform id', () => {
+			const result = buildErc20PriceParams([
+				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0xabc', coingeckoId: 'ethereum', chainId: 1n },
+				{ address: '0x456', coingeckoId: 'base', chainId: 8453n }
+			]);
+
+			expect(result).toEqual([
+				{
+					coingeckoPlatformId: 'ethereum',
+					contractAddresses: [
+						{ address: '0x123', coingeckoId: 'ethereum' },
+						{ address: '0xabc', coingeckoId: 'ethereum' }
+					]
+				},
+				{
+					coingeckoPlatformId: 'base',
+					contractAddresses: [{ address: '0x456', coingeckoId: 'base' }]
+				}
+			]);
+		});
+
+		it('drops addresses with an unsupported coingecko platform id', () => {
+			const result = buildErc20PriceParams([
+				{ address: '0x123', coingeckoId: 'ethereum', chainId: 1n },
+				{
+					address: '0xunknown',
+					coingeckoId: 'unsupported' as Erc20ContractAddressWithNetwork['coingeckoId'],
+					chainId: 1n
+				}
+			]);
+
+			expect(result).toEqual([
+				{
+					coingeckoPlatformId: 'ethereum',
+					contractAddresses: [{ address: '0x123', coingeckoId: 'ethereum' }]
+				}
+			]);
+		});
+
+		it('returns an empty array when given no addresses', () => {
+			expect(buildErc20PriceParams([])).toEqual([]);
+		});
+	});
+
+	describe('mergeExchangePrices', () => {
+		const tokenPrice = (usd: number): CoingeckoSimpleTokenPrice => ({ usd, usd_market_cap: 0 });
+		const nativePrice = ({
+			key,
+			usd
+		}: {
+			key: string;
+			usd: number;
+		}): CoingeckoSimplePriceResponse => ({
+			[key]: { usd }
+		});
+
+		const baseBackendData = (): PostMessageDataResponseExchange => ({
+			currentExchangeRate: {
+				exchangeRateToUsd: 1,
+				exchangeRate24hChangeMultiplier: 1,
+				currency: Currency.USD
+			},
+			currentEthPrice: undefined,
+			currentBtcPrice: undefined,
+			currentErc20Prices: {},
+			currentIcpPrice: undefined,
+			currentIcrcPrices: {},
+			currentSolPrice: undefined,
+			currentSplPrices: {},
+			currentErc4626Prices: {},
+			currentBnbPrice: undefined,
+			currentPolPrice: undefined,
+			currentArbitrumEthPrice: undefined,
+			currentBaseEthPrice: undefined
+		});
+
+		const identityErc4626 = (prices: CoingeckoSimpleTokenPriceResponse) => Promise.resolve(prices);
+
+		it('fills only the keys the backend left empty and lets the backend win on collisions', async () => {
+			const backendData: PostMessageDataResponseExchange = {
+				...baseBackendData(),
+				currentErc20Prices: { '0xbackend': tokenPrice(100) }
+			};
+
+			const providerPrices: ProviderFallbackPrices = {
+				erc20Prices: { '0xbackend': tokenPrice(999), '0xprovider': tokenPrice(5) }
+			};
+
+			const merged = await mergeExchangePrices({
+				backendData,
+				providerPrices,
+				erc4626Prices: identityErc4626
+			});
+
+			expect(merged.currentErc20Prices).toEqual({
+				'0xbackend': tokenPrice(100),
+				'0xprovider': tokenPrice(5)
+			});
+		});
+
+		it('fills each token-map category from the providers', async () => {
+			const providerPrices: ProviderFallbackPrices = {
+				erc20Prices: { '0xprovider': tokenPrice(1) },
+				icrcPrices: { icrc1: tokenPrice(2) },
+				splPrices: { spl1: tokenPrice(3) }
+			};
+
+			const merged = await mergeExchangePrices({
+				backendData: baseBackendData(),
+				providerPrices,
+				erc4626Prices: identityErc4626
+			});
+
+			expect(merged.currentErc20Prices).toEqual({ '0xprovider': tokenPrice(1) });
+			expect(merged.currentIcrcPrices).toEqual({ icrc1: tokenPrice(2) });
+			expect(merged.currentSplPrices).toEqual({ spl1: tokenPrice(3) });
+		});
+
+		it('fills missing native prices but keeps backend native prices on collisions', async () => {
+			const backendData: PostMessageDataResponseExchange = {
+				...baseBackendData(),
+				currentBtcPrice: nativePrice({ key: 'bitcoin', usd: 42000 })
+			};
+
+			const providerPrices: ProviderFallbackPrices = {
+				ethPrice: nativePrice({ key: 'ethereum', usd: 2000 }),
+				btcPrice: nativePrice({ key: 'bitcoin', usd: 1 }),
+				arbitrumEthPrice: nativePrice({ key: 'ethereum', usd: 2000 }),
+				baseEthPrice: nativePrice({ key: 'ethereum', usd: 2000 })
+			};
+
+			const merged = await mergeExchangePrices({
+				backendData,
+				providerPrices,
+				erc4626Prices: identityErc4626
+			});
+
+			expect(merged.currentEthPrice).toEqual(nativePrice({ key: 'ethereum', usd: 2000 }));
+			expect(merged.currentArbitrumEthPrice).toEqual(nativePrice({ key: 'ethereum', usd: 2000 }));
+			expect(merged.currentBaseEthPrice).toEqual(nativePrice({ key: 'ethereum', usd: 2000 }));
+			// backend wins
+			expect(merged.currentBtcPrice).toEqual(nativePrice({ key: 'bitcoin', usd: 42000 }));
+		});
+
+		it('recomputes erc4626 prices from the merged erc20 prices', async () => {
+			const backendData: PostMessageDataResponseExchange = {
+				...baseBackendData(),
+				currentErc20Prices: { '0xbackend': tokenPrice(100) }
+			};
+
+			const providerPrices: ProviderFallbackPrices = {
+				erc20Prices: { '0xprovider': tokenPrice(5) }
+			};
+
+			const erc4626Spy = vi.fn(
+				(prices: CoingeckoSimpleTokenPriceResponse): Promise<CoingeckoSimpleTokenPriceResponse> =>
+					Promise.resolve({ '0xvault': tokenPrice(7), ...prices })
+			);
+
+			const merged = await mergeExchangePrices({
+				backendData,
+				providerPrices,
+				erc4626Prices: erc4626Spy
+			});
+
+			expect(erc4626Spy).toHaveBeenCalledExactlyOnceWith({
+				'0xbackend': tokenPrice(100),
+				'0xprovider': tokenPrice(5)
+			});
+			expect(merged.currentErc4626Prices).toEqual({
+				'0xvault': tokenPrice(7),
+				'0xbackend': tokenPrice(100),
+				'0xprovider': tokenPrice(5)
+			});
+		});
+
+		it('keeps the backend erc4626 prices when the fallback filled no erc20 prices', async () => {
+			const backendErc4626 = { '0xvault': tokenPrice(7) };
+			const backendData: PostMessageDataResponseExchange = {
+				...baseBackendData(),
+				currentErc20Prices: { '0xbackend': tokenPrice(100) },
+				currentErc4626Prices: backendErc4626
+			};
+
+			const erc4626Spy = vi.fn(
+				(prices: CoingeckoSimpleTokenPriceResponse): Promise<CoingeckoSimpleTokenPriceResponse> =>
+					Promise.resolve(prices)
+			);
+
+			// Fallback filled other categories only — erc20Prices absent and empty respectively.
+			for (const providerPrices of [
+				{ icrcPrices: { icrc1: tokenPrice(2) } },
+				{ erc20Prices: {}, icrcPrices: { icrc1: tokenPrice(2) } }
+			] satisfies ProviderFallbackPrices[]) {
+				const merged = await mergeExchangePrices({
+					backendData,
+					providerPrices,
+					erc4626Prices: erc4626Spy
+				});
+
+				expect(merged.currentErc4626Prices).toEqual(backendErc4626);
+				expect(merged.currentErc20Prices).toEqual({ '0xbackend': tokenPrice(100) });
+			}
+
+			expect(erc4626Spy).not.toHaveBeenCalled();
 		});
 	});
 });
