@@ -594,6 +594,13 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	// Compute budget instructions only tune fees and limits and can never move funds,
+	// so they are ignored wholesale before parsing — a malformed or not-yet-supported
+	// variant would make the parser throw and crash the signing guard.
+	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+		return ignoredInstruction();
+	}
+
 	const parsedInstruction = parseSolInstruction(instruction);
 
 	if (!('instructionType' in parsedInstruction)) {
@@ -601,10 +608,6 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 	}
 
 	const { programAddress } = parsedInstruction;
-
-	if (programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
-		return ignoredInstruction();
-	}
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction(parsedInstruction);

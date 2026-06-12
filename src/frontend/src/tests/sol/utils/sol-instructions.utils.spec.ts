@@ -9,7 +9,7 @@ import {
 } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolInstruction, SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import * as solInstructionsAtaUtils from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
@@ -880,7 +880,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
 		});
 
-		it('should map a valid Compute Budget instruction', () => {
+		it('should ignore a Compute Budget instruction without parsing it', () => {
 			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
 				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
 			);
@@ -893,9 +893,19 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
 			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
 
-			expect(parseSolComputeBudgetInstruction).toHaveBeenCalledTimes(2);
-			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
-			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a malformed Compute Budget instruction instead of throwing', () => {
+			const malformedInstruction: SolInstruction = {
+				programAddress: address(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+			};
+
+			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
