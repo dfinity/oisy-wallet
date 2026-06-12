@@ -6,6 +6,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	SignOnramperWidgetUrlRequest,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -16,7 +17,8 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
@@ -39,6 +41,7 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -130,6 +133,12 @@ export class BackendCanister extends Canister<BackendService> {
 		const { exchange_rate_enabled } = this.caller({ certified });
 
 		return exchange_rate_enabled();
+	};
+
+	onramperEnabled = ({ certified }: QueryParams): Promise<boolean> => {
+		const { onramper_enabled } = this.caller({ certified });
+
+		return onramper_enabled();
 	};
 
 	btcAddPendingTransaction = async ({
@@ -227,6 +236,34 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapGetAllowedCyclesError(response.Err);
+	};
+
+	signOnramperWidgetUrl = async ({
+		wallets,
+		networkWallets,
+		walletAddressTags
+	}: SignOnramperWidgetUrlParams): Promise<string> => {
+		const { sign_onramper_widget_url } = this.caller({ certified: true });
+
+		const request: SignOnramperWidgetUrlRequest = {
+			wallets: wallets.map(({ cryptoId, wallet }) => ({ key: cryptoId, value: wallet })),
+			network_wallets: networkWallets.map(({ networkId, wallet }) => ({
+				key: networkId,
+				value: wallet
+			})),
+			wallet_address_tags: (walletAddressTags ?? []).map(({ cryptoId, tag }) => ({
+				key: cryptoId,
+				value: tag
+			}))
+		};
+
+		const response = await sign_onramper_widget_url(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapSignOnramperWidgetUrlError(response.Err);
 	};
 
 	allowSigning = async ({
