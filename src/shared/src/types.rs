@@ -19,6 +19,7 @@ pub mod experimental_feature;
 pub mod network;
 pub mod notification;
 pub mod number;
+pub mod onramper;
 pub mod pow;
 pub mod result_types;
 pub mod settings;
