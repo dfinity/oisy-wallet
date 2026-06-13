@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { onDestroy, untrack } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -21,6 +21,7 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { NetworkId } from '$lib/types/network';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
@@ -74,29 +75,49 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	let decodeReady = $state(false);
 
-	const updateData = async () => {
-		({ amount, destination, tokenAddress, isApproval } = await decodeService({
+	let decodeRequestId = 0;
+
+	const updateData = async ({ data, networkId }: { data: string; networkId: NetworkId }) => {
+		const requestId = ++decodeRequestId;
+
+		decodeReady = false;
+		amount = undefined;
+		destination = undefined;
+		tokenAddress = undefined;
+		isApproval = undefined;
+
+		const decoded = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
-		}));
+		});
+
+		if (requestId !== decodeRequestId) {
+			return;
+		}
+
+		({ amount, destination, tokenAddress, isApproval } = decoded);
+		decodeReady = true;
 	};
 
 	// When the transaction moves an SPL token we know, review it with that token's
 	// metadata; otherwise fall back to the network's native SOL token. The same mint
 	// can exist on several clusters, so we match the current network too.
-	let reviewToken = $derived(
+	let splReviewToken = $derived(
 		nonNullish(tokenAddress)
-			? ($enabledSplTokens.find(
+			? $enabledSplTokens.find(
 					({ address, network: { id } }) => address === tokenAddress && id === networkId
-				) ?? token)
-			: token
+				)
+			: undefined
 	);
 
-	$effect(() => {
-		[data, networkId];
+	let reviewToken = $derived(nonNullish(tokenAddress) ? (splReviewToken ?? token) : token);
 
-		untrack(() => updateData());
+	let approve = $derived(decodeReady && (isNullish(tokenAddress) || nonNullish(splReviewToken)));
+
+	$effect(() => {
+		void updateData({ data, networkId });
 	});
 
 	/**
@@ -181,6 +202,7 @@
 			<SolWalletConnectSignReview
 				{amount}
 				{application}
+				{approve}
 				{data}
 				destination={destination ?? ''}
 				isApproval={isApproval ?? false}
