@@ -40,5 +40,32 @@ describe('backend-exchange-enabled.services', () => {
 			expect(result).toBe(BACKEND_EXCHANGE_ENABLED);
 			expect(consoleUtils.consoleError).toHaveBeenCalledOnce();
 		});
+
+		describe('with backend exchange mode disallowed by the build environment', () => {
+			beforeEach(() => {
+				vi.resetModules();
+
+				vi.doMock('$env/exchange.env', () => ({
+					BACKEND_EXCHANGE_ENABLED: false,
+					EXCHANGE_DISABLED: false
+				}));
+			});
+
+			afterEach(() => {
+				vi.doUnmock('$env/exchange.env');
+			});
+
+			it('returns false without querying the backend', async () => {
+				const services = await import('$lib/services/backend-exchange-enabled.services');
+				const api = await import('$lib/api/backend.api');
+
+				const spy = vi.spyOn(api, 'exchangeRateEnabled').mockResolvedValue(true);
+
+				const result = await services.loadBackendExchangeEnabled();
+
+				expect(result).toBeFalsy();
+				expect(spy).not.toHaveBeenCalled();
+			});
+		});
 	});
 });

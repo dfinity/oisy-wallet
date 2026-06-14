@@ -166,8 +166,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const BtcGetPendingTransactionsRequest = IDL.Record({
 		ii_delegation_chain: IDL.Opt(IIDelegationChain),
-		network: Network,
-		address: IDL.Text
+		network: Network
 	});
 	const PendingTransaction = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),

@@ -7,8 +7,7 @@ mod bitcoin {
 
     use crate::{
         types::bitcoin::{
-            BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-            MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -85,30 +84,6 @@ mod bitcoin {
                         };
                         MAX_UTXOS_LEN + 1
                     ],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    test_validate_on_deserialize!(
-        BtcGetPendingTransactionsRequest,
-        [
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with max length address",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN),
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with address too long",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN + 1),
                     network: BitcoinNetwork::Mainnet,
                     ii_delegation_chain: None,
                 },

@@ -232,7 +232,7 @@ export const signBtc = async ({
 export const sendBtc = async ({
 	utxosFee,
 	network,
-	source,
+	source: _source,
 	identity,
 	onProgress,
 	...rest
@@ -242,7 +242,6 @@ export const sendBtc = async ({
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
-		address: source,
 		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos,
 		iiDelegationChain: extractIIDelegationChain(identity)

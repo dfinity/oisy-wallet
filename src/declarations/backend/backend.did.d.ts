@@ -475,7 +475,6 @@ export interface BtcGetPendingTransactionsReponse {
 export interface BtcGetPendingTransactionsRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
-	address: string;
 }
 export type BtcGetPendingTransactionsResult =
 	| {
