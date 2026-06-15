@@ -74,49 +74,8 @@ This split is the Solana mirror of how the EVM side mixes providers — see the 
 in `networks.sol.env.ts` to collapse to a single service once Alchemy supports
 Solana WebSockets.
 
-## Future work — consolidate QuickNode into Alchemy
-
-> Status: not started. The integration is intentionally left as-is for now; this
-> section is the entry point for a future task to pick it up.
-
-Both reasons we use QuickNode were re-checked on **2026-06-15** against Alchemy's
-current docs, and **both no longer hold** — Alchemy has since added Solana support
-for each. The opportunity is therefore to drop QuickNode entirely and serve both
-use cases from the existing Alchemy key, removing the second Solana provider (and
-`VITE_QUICKNODE_API_KEY`).
-
-### Item 1 — move Solana WS subscriptions to Alchemy (low risk)
-
-- Alchemy now offers Solana WebSocket subscriptions as a GA feature, including the
-  exact methods this code relies on: `signatureSubscribe` (signature confirmation)
-  and `slotSubscribe` (block-height / expiry tracking).
-- Change: point `SOLANA_RPC_WS_URL_MAINNET` (`src/frontend/src/env/networks/networks.sol.env.ts`)
-  at the Alchemy Solana WSS endpoint (`wss://solana-mainnet.g.alchemy.com/v2/<ALCHEMY_API_KEY>`)
-  instead of QuickNode. Devnet/local are unaffected (already non-QuickNode).
-- Verify: `sendSol` confirmation flow in `src/frontend/src/sol/services/sol-send.services.ts`
-  (`confirmSignedTransaction` → `waitForRecentTransactionConfirmation`) still
-  confirms transactions on mainnet.
-- Remove the "Last time checked Alchemy: 2025-01-22" TODO in `networks.sol.env.ts`.
-- Docs: <https://www.alchemy.com/docs/reference/solana-subscription-api-endpoints>
-
-### Item 2 — move SPL token metadata to Alchemy DAS `getAsset` (needs validation)
-
-- Alchemy now exposes a Solana DAS API with `getAsset` covering fungible tokens —
-  the same call shape as QuickNode's. **Caveat: it is in Beta** ("CU values may
-  change"), and field parity was not confirmable from the overview docs alone.
-- Before switching, validate that Alchemy's `getAsset` returns the fields
-  `splMetadata` maps (`src/frontend/src/sol/rest/quicknode.rest.ts`): token
-  `name`, `symbol`, and icon (`links.image`) for real mainnet **and** devnet SPL
-  mints.
-- Change (if validated): repoint `splMetadata` / `getSplMetadata`
-  (`src/frontend/src/sol/services/spl.services.ts`) at the Alchemy DAS endpoint and
-  drop `src/frontend/src/env/rest/quicknode.env.ts`.
-- Docs: <https://www.alchemy.com/docs/reference/alchemy-das-apis-for-solana/solana-das-api-endpoints/get-asset>
-
-### Cleanup once both items land
-
-- Remove `VITE_QUICKNODE_API_KEY` from `.env.example` / `.env.test` and any deploy
-  secrets, delete `src/frontend/src/env/rest/quicknode.env.ts` and
-  `src/frontend/src/sol/rest/quicknode.rest.ts`, and remove this provider's row
-  from the integrations index (`README.md`) — or repurpose this doc as a historical
-  note.
+> As of 2026-06-15 that gap has closed — Alchemy now supports both of QuickNode's
+> Solana roles — which turns this split into a deliberate choice rather than a
+> constraint. That cross-provider decision (consolidate vs. keep both for
+> resilience) is tracked in the index's [Future work](./README.md#future-work),
+> not here.
