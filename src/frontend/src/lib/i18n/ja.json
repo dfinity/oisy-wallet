@@ -1579,6 +1579,7 @@
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
+			"signing_address": "",
 			"connected_apps": "接続済みアプリ",
 			"no_connected_apps": "現在接続されているアプリはありません。",
 			"wallet_connect": ""

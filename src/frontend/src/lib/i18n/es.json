@@ -1579,6 +1579,7 @@
 			"hex_data": "Datos HEX",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
+			"signing_address": "",
 			"connected_apps": "Aplicaciones conectadas",
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"wallet_connect": ""

@@ -1579,6 +1579,7 @@
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"signing_address": "",
 			"connected_apps": "जुड़े हुए ऐप्स",
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
 			"wallet_connect": ""

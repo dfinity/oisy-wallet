@@ -1579,6 +1579,7 @@
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
+			"signing_address": "",
 			"connected_apps": "已连接的应用",
 			"no_connected_apps": "当前没有已连接的应用。",
 			"wallet_connect": ""
