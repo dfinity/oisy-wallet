@@ -1,10 +1,10 @@
 const ONRAMPER_DEV_API_KEY = 'onramper-dev-api-key';
 const ONRAMPER_PROD_API_KEY = 'onramper-prod-api-key';
 
-type AppEnvironment = {
+interface AppEnvironment {
 	local: boolean;
 	staging: boolean;
-};
+}
 
 const loadOnramperEnv = async ({ local, staging }: AppEnvironment) => {
 	vi.resetModules();
