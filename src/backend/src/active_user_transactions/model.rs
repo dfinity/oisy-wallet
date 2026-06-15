@@ -288,8 +288,9 @@ mod tests {
     use shared::types::{
         active_user_transaction::{
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-            ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, OneSecEvmToIcpData,
+            OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
         },
         token_id::TokenId,
     };
@@ -395,6 +396,21 @@ mod tests {
             amount: Nat::from(1u32),
             recipient_evm_address: "not-an-address".to_string(),
         });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn evm_to_icp_rejects_anonymous_recipient() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = ActiveUserTransactionData::OneSecEvmToIcp(OneSecEvmToIcpData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::IcpNative,
+            amount: Nat::from(1u32),
+            recipient_principal: Principal::anonymous(),
+        });
+
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }

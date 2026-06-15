@@ -4,9 +4,9 @@ use candid::{Nat, Principal};
 use pretty_assertions::assert_eq;
 use shared::types::{
     active_user_transaction::{
-        ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-        ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, OneSecIcpToEvmData,
-        UpdateActiveUserTransactionRequest,
+        ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
+        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
     },
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
@@ -49,6 +49,19 @@ fn create_req(id: &str) -> CreateActiveUserTransactionRequest {
     }
 }
 
+fn update_status_req(
+    id: &str,
+    status: ActiveUserTransactionStatus,
+) -> UpdateActiveUserTransactionRequest {
+    UpdateActiveUserTransactionRequest {
+        id: id.to_string(),
+        status: Some(status),
+        progress_step: None,
+        external_refs: None,
+        error: None,
+    }
+}
+
 fn create_active(pic: &PicBackend, user: Principal, id: &str) -> ActiveUserTransactionResult {
     pic.ensure_user_profile(user);
     pic.update::<ActiveUserTransactionResult>(
@@ -57,6 +70,26 @@ fn create_active(pic: &PicBackend, user: Principal, id: &str) -> ActiveUserTrans
         create_req(id),
     )
     .expect("create_active_user_transaction call should succeed")
+}
+
+fn list_active(pic: &PicBackend, user: Principal) -> Vec<ActiveUserTransaction> {
+    match pic
+        .query::<GetActiveUserTransactionsResult>(user, "get_active_user_transactions", ())
+        .expect("query should succeed")
+    {
+        GetActiveUserTransactionsResult::Ok(response) => response.transactions,
+        GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+fn assert_rejection<T>(result: Result<T, String>, expected: &str) {
+    match result {
+        Err(err) => assert!(
+            err.contains(expected),
+            "expected rejection containing {expected:?}, got {err:?}"
+        ),
+        Ok(_) => panic!("expected call rejection containing {expected:?}"),
+    }
 }
 
 #[test]
@@ -72,6 +105,52 @@ fn create_requires_registered_user() {
         res.is_err(),
         "anonymous caller must be rejected by the guard"
     );
+}
+
+#[test]
+fn mutations_reject_authenticated_caller_without_profile() {
+    let pic = setup();
+    let user = caller();
+
+    assert_rejection(
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            create_req(TX_ID),
+        ),
+        "Caller has no user profile",
+    );
+
+    assert_rejection(
+        pic.update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        ),
+        "Caller has no user profile",
+    );
+
+    assert_rejection(
+        pic.update::<DeleteActiveUserTransactionResult>(
+            user,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        ),
+        "Caller has no user profile",
+    );
+}
+
+#[test]
+fn get_rejects_anonymous_caller() {
+    let pic = setup();
+
+    let res = pic.query::<GetActiveUserTransactionsResult>(
+        Principal::anonymous(),
+        "get_active_user_transactions",
+        (),
+    );
+
+    assert_rejection(res, "Anonymous caller not authorized");
 }
 
 #[test]
@@ -157,6 +236,77 @@ fn update_transitions_and_terminal_visible() {
         }
         GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
+}
+
+#[test]
+fn update_and_delete_are_principal_scoped() {
+    let pic = setup();
+    let user = caller();
+    let other = other_caller();
+
+    create_active(&pic, user, TX_ID);
+    pic.ensure_user_profile(other);
+
+    let update = pic
+        .update::<ActiveUserTransactionResult>(
+            other,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert_eq!(
+        update,
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::NotFound)
+    );
+
+    let delete = pic
+        .update::<DeleteActiveUserTransactionResult>(
+            other,
+            "delete_active_user_transaction",
+            TX_ID.to_string(),
+        )
+        .expect("delete call should succeed");
+    assert!(matches!(delete, DeleteActiveUserTransactionResult::Ok(())));
+
+    let transactions = list_active(&pic, user);
+    assert_eq!(transactions.len(), 1);
+    assert_eq!(transactions[0].id, TX_ID);
+    assert_eq!(transactions[0].status, ActiveUserTransactionStatus::Pending);
+}
+
+#[test]
+fn illegal_status_transition_surfaces_from_endpoint() {
+    let pic = setup();
+    let user = caller();
+    create_active(&pic, user, TX_ID);
+
+    let succeeded = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Succeeded),
+        )
+        .expect("update call should succeed");
+    assert!(matches!(succeeded, ActiveUserTransactionResult::Ok(_)));
+
+    let regressed = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "update_active_user_transaction",
+            update_status_req(TX_ID, ActiveUserTransactionStatus::Executing),
+        )
+        .expect("update call should succeed");
+    assert_eq!(
+        regressed,
+        ActiveUserTransactionResult::Err(ActiveUserTransactionError::IllegalStatusTransition)
+    );
+
+    let transactions = list_active(&pic, user);
+    assert_eq!(transactions.len(), 1);
+    assert_eq!(
+        transactions[0].status,
+        ActiveUserTransactionStatus::Succeeded
+    );
 }
 
 #[test]
