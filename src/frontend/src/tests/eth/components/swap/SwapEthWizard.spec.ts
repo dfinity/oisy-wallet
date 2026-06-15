@@ -176,7 +176,7 @@ describe('SwapEthWizard', () => {
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
 			expect(getByText(en.tokens.text.source_token_title)).toBeInTheDocument();
-			expect(getByText('You receive')).toBeInTheDocument();
+			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
 			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
 			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 		});

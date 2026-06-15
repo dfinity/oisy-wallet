@@ -182,6 +182,8 @@ describe('SwapFormEth', () => {
 		});
 
 		expect(container.querySelector('[data-tid="swap-fee-info"]')).toBeInTheDocument();
-		expect(getByText(/Fee will be paid in ETH/)).toBeInTheDocument();
+		expect(
+			getByText(new RegExp(`${get(i18n).send.info.fee_info.split('$feeSymbol')[0]}ETH`))
+		).toBeInTheDocument();
 	});
 });

@@ -53,7 +53,7 @@ describe('SwapProviderListModal', () => {
 		});
 
 		expect(getByText(get(i18n).swap.text.swap_provider)).toBeInTheDocument();
-		expect(getByText('You receive')).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.you_receive)).toBeInTheDocument();
 	});
 
 	it('renders all provider rows with USD values', () => {
