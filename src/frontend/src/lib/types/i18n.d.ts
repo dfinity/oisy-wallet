@@ -1252,6 +1252,7 @@ interface I18nWallet_connect {
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
+		signing_address: string;
 		connected_apps: string;
 		no_connected_apps: string;
 		wallet_connect: string;
