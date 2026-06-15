@@ -20,10 +20,9 @@ export const mockIcTokenFeeContextEntry = (
 	store: IcTokenFeeStore = icTokenFeeStore
 ): MockContextEntry => [IC_TOKEN_FEE_CONTEXT_KEY, { store }];
 
-export const mockEthFeeContextEntry = (context: EthFeeContext): MockContextEntry => [
-	ETH_FEE_CONTEXT_KEY,
-	context
-];
+export const mockEthFeeContextEntry = (
+	context: Partial<EthFeeContext> & Pick<EthFeeContext, 'feeStore'>
+): MockContextEntry => [ETH_FEE_CONTEXT_KEY, context];
 
 export const mockSolFeeContextEntry = (context: SolFeeContext): MockContextEntry => [
 	SOL_FEE_CONTEXT_KEY,

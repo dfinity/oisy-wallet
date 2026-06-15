@@ -9,7 +9,7 @@
  * composes contexts in one expression instead of hand-rolling a `Map`.
  */
 
-export type MockContextEntry = [symbol, unknown];
+export type MockContextEntry = [symbol | string, unknown];
 
-export const mockContextMap = (entries: MockContextEntry[]): Map<symbol, unknown> =>
+export const mockContextMap = (entries: MockContextEntry[]): Map<symbol | string, unknown> =>
 	new Map(entries);
