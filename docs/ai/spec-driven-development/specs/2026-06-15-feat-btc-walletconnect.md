@@ -2,7 +2,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Spec — BTC support in WalletConnect (bip122)
 
-- **Jira:** [OISY-2700](https://dfinity.atlassian.net/browse/OISY-2700) — "BTC support in WalletConnect" (Story under Epic [OISY-2696](https://dfinity.atlassian.net/browse/OISY-2696) "Liquidium")
+- **Jira:** [OISY-2700](https://dfinity.atlassian.net/browse/OISY-2700) — "ANALYSIS: BTC support in WalletConnect" (Task under Epic [OISY-2989](https://dfinity.atlassian.net/browse/OISY-2989) "BTC WalletConnect")
 - **Reference:** Reown Bitcoin RPC — https://docs.reown.com/advanced/multichain/rpc-reference/bitcoin-rpc
 - **Status:** Draft for implementation in Claude Code
 
