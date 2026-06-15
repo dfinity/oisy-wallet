@@ -6,11 +6,11 @@ import {
 import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 import type { MockContextEntry } from '$tests/utils/context.test-utils';
 
-export const mockSwapContext = (params: Parameters<typeof initSwapContext>[0]): SwapContext =>
+export const mockSwapContext = (params?: Parameters<typeof initSwapContext>[0]): SwapContext =>
 	initSwapContext(params);
 
 export const mockSwapContextEntry = (
-	params: Parameters<typeof initSwapContext>[0]
+	params?: Parameters<typeof initSwapContext>[0]
 ): MockContextEntry => [SWAP_CONTEXT_KEY, mockSwapContext(params)];
 
 export const mockSwapAmountsContextEntry = (
