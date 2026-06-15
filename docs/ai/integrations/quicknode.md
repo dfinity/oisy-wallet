@@ -5,8 +5,8 @@ purposes that we deliberately do not route through the primary Solana provider,
  ([Alchemy](./alchemy.md), HTTP RPC), because it was not supported at implementation time:
 
 1. **Solana WebSocket subscriptions** (mainnet only) — for transaction
-   confirmation, because Alchemy did not support Solana WebSockets as of the last
-   check (2025-01-22). See the TODO in
+   confirmation. This was originally because Alchemy did not support Solana WebSockets as
+   of the last check (2025-01-22). See the TODO in
    `src/frontend/src/env/networks/networks.sol.env.ts`.
 2. **SPL token metadata** (mainnet + devnet) — via QuickNode's `getAsset` REST
    add-on.
