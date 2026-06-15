@@ -7,7 +7,7 @@ import {
 	mockConvertContextEntry,
 	mockTokenActionValidationErrorsContextEntry
 } from '$tests/utils/convert.context.test-utils';
-import { get } from 'svelte/store';
+import { get, type Readable } from 'svelte/store';
 
 describe('convert.context.test-utils', () => {
 	const convertData = { sourceToken: ICP_TOKEN, destinationToken: ETHEREUM_TOKEN };
@@ -26,7 +26,7 @@ describe('convert.context.test-utils', () => {
 			const [key, value] = mockConvertContextEntry(convertData);
 
 			expect(key).toBe(CONVERT_CONTEXT_KEY);
-			expect(get((value as { sourceToken: { subscribe: unknown } }).sourceToken)).toStrictEqual(
+			expect(get((value as { sourceToken: Readable<unknown> }).sourceToken)).toStrictEqual(
 				ICP_TOKEN
 			);
 		});
@@ -38,7 +38,7 @@ describe('convert.context.test-utils', () => {
 
 			expect(key).toBe(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 			expect(
-				get((value as { insufficientFunds: { subscribe: unknown } }).insufficientFunds)
+				get((value as { insufficientFunds: Readable<unknown> }).insufficientFunds)
 			).toBeFalsy();
 		});
 	});

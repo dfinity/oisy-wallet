@@ -12,7 +12,7 @@ import {
 	mockPayContextEntry,
 	mockRewardEligibilityContextEntry
 } from '$tests/utils/misc.context.test-utils';
-import { get } from 'svelte/store';
+import { get, type Readable } from 'svelte/store';
 
 describe('misc.context.test-utils', () => {
 	describe('mockPayContextEntry', () => {
@@ -20,7 +20,7 @@ describe('misc.context.test-utils', () => {
 			const [key, value] = mockPayContextEntry();
 
 			expect(key).toBe(PAY_CONTEXT_KEY);
-			expect(get((value as { data: { subscribe: unknown } }).data)).toBeUndefined();
+			expect(get((value as { data: Readable<unknown> }).data)).toBeUndefined();
 		});
 	});
 
@@ -29,7 +29,7 @@ describe('misc.context.test-utils', () => {
 			const [key, value] = mockHeroContextEntry();
 
 			expect(key).toBe(HERO_CONTEXT_KEY);
-			expect(get((value as { loading: { subscribe: unknown } }).loading)).toBeTruthy();
+			expect(get((value as { loading: Readable<unknown> }).loading)).toBeTruthy();
 		});
 	});
 
@@ -49,9 +49,9 @@ describe('misc.context.test-utils', () => {
 			const [key, value] = mockModalTokensListContextEntry({ tokens: mockTokens });
 
 			expect(key).toBe(MODAL_TOKENS_LIST_CONTEXT_KEY);
-			expect(
-				get((value as { filteredTokens: { subscribe: unknown } }).filteredTokens)
-			).toHaveLength(mockTokens.length);
+			expect(get((value as { filteredTokens: Readable<unknown> }).filteredTokens)).toHaveLength(
+				mockTokens.length
+			);
 		});
 	});
 
@@ -61,7 +61,7 @@ describe('misc.context.test-utils', () => {
 
 			expect(key).toBe(MODAL_NETWORKS_LIST_CONTEXT_KEY);
 			expect(
-				get((value as { filteredNetworks: { subscribe: unknown } }).filteredNetworks)
+				get((value as { filteredNetworks: Readable<unknown> }).filteredNetworks)
 			).toStrictEqual([ICP_NETWORK]);
 		});
 	});
