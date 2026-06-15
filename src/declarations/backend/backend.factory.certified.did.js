@@ -228,9 +228,22 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const LiquidiumAction = IDL.Variant({
+		Withdraw: IDL.Null,
+		Repay: IDL.Null,
+		Borrow: IDL.Null,
+		Supply: IDL.Null
+	});
+	const LiquidiumData = IDL.Record({
+		token: TokenId,
+		action: LiquidiumAction,
+		pool_id: IDL.Text,
+		amount: IDL.Nat
+	});
 	const ActiveUserTransactionData = IDL.Variant({
 		OneSecEvmToIcp: OneSecEvmToIcpData,
-		OneSecIcpToEvm: OneSecIcpToEvmData
+		OneSecIcpToEvm: OneSecIcpToEvmData,
+		Liquidium: LiquidiumData
 	});
 	const CreateActiveUserTransactionRequest = IDL.Record({
 		id: IDL.Text,
