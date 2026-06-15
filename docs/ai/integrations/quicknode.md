@@ -70,9 +70,9 @@ The endpoint hostnames are hardcoded; only the key comes from the environment.
 | Role      | Solana WS subscriptions (mainnet) + SPL `getAsset` metadata | Solana HTTP RPC (mainnet + devnet) |
 | Why split | Alchemy lacked Solana WS support (checked 2025-01-22)       | Primary Solana HTTP RPC backend    |
 
-This split is the Solana mirror of how the EVM side mixes providers — see the TODO
-in `networks.sol.env.ts` to collapse to a single service once Alchemy supports
-Solana WebSockets.
+This split is the Solana mirror of how the EVM side mixes providers — see the
+[TODO in `networks.sol.env.ts`](https://github.com/dfinity/oisy-wallet/blob/8728252ac98399b52f50537df39d6f7922fdef4d/src/frontend/src/env/networks/networks.sol.env.ts#L25-L27)
+to collapse to a single service once Alchemy supports Solana WebSockets.
 
 > As of 2026-06-15 that gap has closed — Alchemy now supports both of QuickNode's
 > Solana roles — which turns this split into a deliberate choice rather than a
