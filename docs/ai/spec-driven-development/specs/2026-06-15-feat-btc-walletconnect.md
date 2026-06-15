@@ -2,7 +2,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 # Spec — BTC support in WalletConnect (bip122)
 
-- **Jira:** [OISY-2700](https://dfinity.atlassian.net/browse/OISY-2700) — "ANALYSIS: BTC support in WalletConnect" (Task under Epic [OISY-2989](https://dfinity.atlassian.net/browse/OISY-2989) "BTC WalletConnect")
+- **Feature:** BTC support in WalletConnect — analysis task under the "BTC WalletConnect" epic
 - **Reference:** Reown Bitcoin RPC — https://docs.reown.com/advanced/multichain/rpc-reference/bitcoin-rpc
 - **Status:** Draft for implementation in Claude Code
 
@@ -19,7 +19,7 @@ namespace.
 ## 2. Scope
 
 Add the `bip122` namespace to the WalletConnect integration with the three
-methods Liquidium requires (per OISY-2700):
+methods Liquidium requires:
 
 | Method                | Purpose                                                  |
 | --------------------- | -------------------------------------------------------- |
@@ -42,7 +42,7 @@ CAIP-2 chain IDs (genesis block hashes):
 ### Out of scope
 
 - `sendTransfer` (Reown's broadcast-on-approve transfer method). Not required by
-  Liquidium and not listed in OISY-2700. **Deferred to a follow-up** — and
+  Liquidium and not part of the core requirement. **Deferred to a follow-up** — and
   deliberately so: see the risk rationale in §7.1. Briefly, with `sendTransfer`
   the _wallet_ builds, signs, and broadcasts the transaction, so a retry after a
   lost WalletConnect response can construct a _different_ transaction (different
