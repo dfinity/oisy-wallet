@@ -24,7 +24,10 @@ type ActiveUserTransaction = record {
 // every new provider integration.
 type ActiveUserTransactionData = variant {
 	OneSecEvmToIcp : OneSecEvmToIcpData;
-	OneSecIcpToEvm : OneSecIcpToEvmData
+	OneSecIcpToEvm : OneSecIcpToEvmData;
+	// Liquidium lend/borrow flow. A single variant covers all four actions
+	// (supply, borrow, repay, withdraw).
+	Liquidium : LiquidiumData
 };
 type ActiveUserTransactionError = variant {
 	InvalidId;
@@ -707,6 +710,17 @@ type InitArg = record {
 	// `None` is treated as "allowed" (the default), ensuring backward compatibility with
 	// deployments that pre-date this field.
 	new_user_signups_allowed : opt bool
+};
+// Which Liquidium lend/borrow action an active transaction tracks.
+type LiquidiumAction = variant { Withdraw; Repay; Borrow; Supply };
+type LiquidiumData = record {
+	// The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+	token : TokenId;
+	action : LiquidiumAction;
+	// Liquidium pool canister id (principal text), treated as an opaque key.
+	pool_id : text;
+	// Amount in the token's base units.
+	amount : nat
 };
 // Bitcoin Network.
 type Network = variant {
