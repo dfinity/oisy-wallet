@@ -1,5 +1,5 @@
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import {
@@ -7,7 +7,7 @@ import {
 	mockSwapContext,
 	mockSwapContextEntry
 } from '$tests/utils/swap.context.test-utils';
-import { get } from 'svelte/store';
+import { get, type Readable } from 'svelte/store';
 
 describe('swap.context.test-utils', () => {
 	describe('mockContextMap', () => {
@@ -36,7 +36,10 @@ describe('swap.context.test-utils', () => {
 			const [key, value] = mockSwapContextEntry({ sourceToken: mockValidIcToken });
 
 			expect(key).toBe(SWAP_CONTEXT_KEY);
-			expect(get((value as { sourceToken: unknown }).sourceToken)).toStrictEqual(mockValidIcToken);
+
+			const { sourceToken } = value as SwapContext;
+
+			expect(get(sourceToken)).toStrictEqual(mockValidIcToken);
 		});
 	});
 
@@ -45,7 +48,10 @@ describe('swap.context.test-utils', () => {
 			const [key, value] = mockSwapAmountsContextEntry();
 
 			expect(key).toBe(SWAP_AMOUNTS_CONTEXT_KEY);
-			expect(get((value as { store: { subscribe: unknown } }).store)).toBeUndefined();
+
+			const { store } = value as { store: Readable<unknown> };
+
+			expect(get(store)).toBeUndefined();
 		});
 	});
 });
