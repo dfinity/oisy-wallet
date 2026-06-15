@@ -9,7 +9,7 @@ provider gets its own file so the docs scale as more integrations are added.
 | [Alchemy](./alchemy.md)     | viem `PublicClient` + NFT API v3 + WS | EVM + Solana | NFT indexing, real-time tx subscriptions, Solana HTTP RPC                          |
 | [Infura](./infura.md)       | ethers.js `InfuraProvider` + Gas REST | EVM          | Primary EVM JSON-RPC: balances, fees/gas, contract reads, tx broadcast, ckETH logs |
 | [Etherscan](./etherscan.md) | ethers.js `EtherscanProvider` (REST)  | EVM          | EVM transaction history (native, internal, ERC-20/721/1155 transfers)              |
-| [QuickNode](./quicknode.md) | `@solana/kit` WSS + HTTP JSON-RPC       | Solana       | Solana WS tx confirmation (mainnet) + SPL token metadata (`getAsset`)              |
+| [QuickNode](./quicknode.md) | `@solana/kit` WSS + HTTP JSON-RPC     | Solana       | Solana WS tx confirmation (mainnet) + SPL token metadata (`getAsset`)              |
 | [OnRamper](./onramper.md)   | Backend HMAC signing                  | —            | Buy-widget URL signing (backend runbook)                                           |
 
 ## Future work
