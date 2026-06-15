@@ -1,9 +1,6 @@
 # QuickNode API
 
 OISY uses [QuickNode](https://www.quicknode.com/) for two narrow **Solana**
-purposes that the primary Solana provider ([Alchemy](./alchemy.md), HTTP RPC)
-doesn't cover:
-
 purposes that we deliberately do not route through the primary Solana provider,
  ([Alchemy](./alchemy.md), HTTP RPC), because it was not supported at implementation time:
 
