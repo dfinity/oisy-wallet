@@ -1,4 +1,4 @@
-import { UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
+import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { mockContextMap } from '$tests/utils/context.test-utils';
@@ -34,7 +34,10 @@ describe('context.test-utils', () => {
 			const [key, value] = mockUtxosFeeContextEntry();
 
 			expect(key).toBe(UTXOS_FEE_CONTEXT_KEY);
-			expect(get((value as { store: { subscribe: unknown } }).store)).toBeUndefined();
+
+			const { store } = value as { store: UtxosFeeStore };
+
+			expect(get(store)).toBeUndefined();
 		});
 	});
 });
