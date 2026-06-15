@@ -4,6 +4,9 @@ OISY uses [QuickNode](https://www.quicknode.com/) for two narrow **Solana**
 purposes that the primary Solana provider ([Alchemy](./alchemy.md), HTTP RPC)
 doesn't cover:
 
+purposes that we deliberately do not route through the primary Solana provider,
+ ([Alchemy](./alchemy.md), HTTP RPC), because it was not supported at implementation time:
+
 1. **Solana WebSocket subscriptions** (mainnet only) — for transaction
    confirmation, because Alchemy did not support Solana WebSockets as of the last
    check (2025-01-22). See the TODO in
