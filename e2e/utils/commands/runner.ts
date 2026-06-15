@@ -31,9 +31,9 @@ export class LocalCommandRunner implements CommandRunner {
 			return stdout;
 		} catch (err: unknown) {
 			if (err instanceof Error) {
-				throw new Error(`Error executing command: ${err.message}`);
+				throw new Error(`Error executing command: ${err.message}`, { cause: err });
 			}
-			throw new Error(`Error executing command: ${JSON.stringify(err)}`);
+			throw new Error(`Error executing command: ${JSON.stringify(err)}`, { cause: err });
 		}
 	}
 }
