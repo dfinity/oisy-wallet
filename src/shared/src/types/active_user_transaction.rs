@@ -29,6 +29,10 @@ pub const MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN: usize = 256;
 /// Maximum length of a recipient EVM address (`0x` + 40 hex characters).
 pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 
+/// Maximum length of a Liquidium `pool_id`. A canister principal in text form
+/// is at most 63 characters, so anything longer can never be a valid pool id.
+pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
+
 /// Learned-mid-flow `(key, value)` reference attached to an active transaction,
 /// e.g. `{ key: "tx_hash", value: "0x…" }`. Modelled as a named record (not a
 /// tuple) so the generated TS bindings expose `.key` / `.value` instead of
@@ -70,6 +74,9 @@ impl ActiveUserTransactionStatus {
 pub enum ActiveUserTransactionData {
     OneSecIcpToEvm(OneSecIcpToEvmData),
     OneSecEvmToIcp(OneSecEvmToIcpData),
+    /// Liquidium lend/borrow flow. A single variant covers all four actions
+    /// (supply, borrow, repay, withdraw).
+    Liquidium(LiquidiumData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -86,6 +93,26 @@ pub struct OneSecEvmToIcpData {
     pub dest_token: TokenId,
     pub amount: Nat,
     pub recipient_principal: Principal,
+}
+
+/// Which Liquidium lend/borrow action an active transaction tracks.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum LiquidiumAction {
+    Supply,
+    Borrow,
+    Repay,
+    Withdraw,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct LiquidiumData {
+    pub action: LiquidiumAction,
+    /// Liquidium pool canister id (principal text), treated as an opaque key.
+    pub pool_id: String,
+    /// The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+    pub token: TokenId,
+    /// Amount in the token's base units.
+    pub amount: Nat,
 }
 
 /// In-flight high-level user operation, persisted so the FE can resume polling
@@ -154,8 +181,8 @@ mod tests {
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
-        GetActiveUserTransactionsResponse, OneSecEvmToIcpData, OneSecIcpToEvmData,
-        UpdateActiveUserTransactionRequest,
+        GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, OneSecEvmToIcpData,
+        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
     };
     use crate::types::token_id::TokenId;
 
@@ -204,6 +231,17 @@ mod tests {
                 "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe",
             )
             .unwrap(),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn liquidium_variant_roundtrips() {
+        let original = ActiveUserTransactionData::Liquidium(LiquidiumData {
+            action: LiquidiumAction::Borrow,
+            pool_id: "mxzaz-hqaaa-aaaar-qaada-cai".to_string(),
+            token: TokenId::Icrc(Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").unwrap()),
+            amount: Nat::from(5_100u64),
         });
         assert_eq!(roundtrip(&original), original);
     }
