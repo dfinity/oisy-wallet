@@ -39,7 +39,9 @@
 			{#each decoded.inputs as input, index (index)}
 				<li class="mb-1 break-all">
 					<output>{input.address ?? $i18n.wallet_connect.text.psbt_unknown_address}</output>
-					— {formatBtc(input.value)}
+					— {nonNullish(input.value)
+						? formatBtc(input.value)
+						: $i18n.wallet_connect.text.psbt_unknown_value}
 					{#if input.signedByWallet}
 						<span class="font-bold">({$i18n.wallet_connect.text.psbt_signed_by_wallet})</span>
 					{/if}
@@ -57,8 +59,8 @@
 			{/each}
 		</ul>
 
-		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.psbt_total_spend}</p>
-		<p class="mb-4 font-normal">{formatBtc(decoded.totalSpend)}</p>
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.psbt_total_signed_inputs}</p>
+		<p class="mb-4 font-normal">{formatBtc(decoded.totalSignedInputs)}</p>
 
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.fee}</p>
 		<p class="mb-4 font-normal">
@@ -73,9 +75,19 @@
 				? $i18n.wallet_connect.text.psbt_broadcast_enabled
 				: $i18n.wallet_connect.text.psbt_broadcast_disabled}
 		</p>
+
+		{#if decoded.broadcast}
+			<p class="mb-4 font-normal text-error-primary">
+				{$i18n.wallet_connect.text.psbt_broadcast_unsupported_note}
+			</p>
+		{/if}
 	{/if}
 
 	{#snippet toolbar()}
-		<WalletConnectActions approve={!decodeError && nonNullish(decoded)} {onApprove} {onReject} />
+		<WalletConnectActions
+			approve={!decodeError && nonNullish(decoded) && !decoded.broadcast}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

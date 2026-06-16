@@ -68,7 +68,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.outputs[0].value).toBe(70_000n);
 		expect(decoded.outputs[1].value).toBe(28_000n);
 
-		expect(decoded.totalSpend).toBe(100_000n);
+		expect(decoded.totalSignedInputs).toBe(100_000n);
 		// 100_000 - (70_000 + 28_000)
 		expect(decoded.fee).toBe(2_000n);
 		expect(decoded.broadcast).toBeFalsy();
@@ -80,7 +80,35 @@ describe('btc wallet-connect.services', () => {
 		const decoded = decodePsbt({ request, address: 'tb1qsomeoneelseaddressxxxxxxxxxxxxxxxxxxxx' });
 
 		expect(decoded.inputs[0].signedByWallet).toBeFalsy();
-		expect(decoded.totalSpend).toBe(ZERO);
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+	});
+
+	it('represents an input without witnessUtxo as an unknown value (not zero)', () => {
+		// A legacy (non-SegWit) input carries a full previous transaction instead of a `witnessUtxo`,
+		// so the decoder cannot read its value and must surface it as unknown.
+		const prevTx = new Psbt({ network });
+		prevTx.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000002',
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 50_000 }
+		});
+		prevTx.addOutput({ script: walletScript as Buffer, value: 50_000 });
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000002',
+			index: 0,
+			nonWitnessUtxo: Buffer.from(prevTx.data.globalMap.unsignedTx.toBuffer())
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 40_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
 	});
 
 	it('reports the broadcast flag and defaults it to false', () => {

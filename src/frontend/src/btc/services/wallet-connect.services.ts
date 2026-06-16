@@ -187,9 +187,9 @@ const safeOutputAddress = ({
 /**
  * Decode a Reown bitcoin `signPsbt` request for the review screen.
  *
- * Parses the base64 PSBT with bitcoinjs-lib and surfaces the inputs, outputs, the wallet's own
- * spend, the fee and the `broadcast` flag, so the user never blind-signs. Throws if the PSBT is
- * missing or cannot be parsed.
+ * Parses the base64 PSBT with bitcoinjs-lib and surfaces the inputs, outputs, the total value of the
+ * wallet-owned inputs being signed, the fee and the `broadcast` flag, so the user never blind-signs.
+ * Throws if the PSBT is missing or cannot be parsed.
  */
 export const decodePsbt = ({
 	request,
@@ -215,7 +215,7 @@ export const decodePsbt = ({
 
 		return {
 			address: inputAddress,
-			value: nonNullish(witnessUtxo) ? BigInt(witnessUtxo.value) : ZERO,
+			value: nonNullish(witnessUtxo) ? BigInt(witnessUtxo.value) : undefined,
 			signedByWallet: nonNullish(address) && inputAddress === address
 		};
 	});
@@ -227,22 +227,22 @@ export const decodePsbt = ({
 		})
 	);
 
-	const totalSpend = inputs.reduce(
-		(acc, { value, signedByWallet }) => (signedByWallet ? acc + value : acc),
+	const totalSignedInputs = inputs.reduce(
+		(acc, { value, signedByWallet }) => (signedByWallet && nonNullish(value) ? acc + value : acc),
 		ZERO
 	);
 
 	// Fee is only knowable when every input carries its UTXO value (P2WPKH inputs always do).
-	const allInputsHaveValue = parsed.data.inputs.every(({ witnessUtxo }) => nonNullish(witnessUtxo));
+	const allInputsHaveValue = inputs.every(({ value }) => nonNullish(value));
 	const fee = allInputsHaveValue
-		? inputs.reduce((acc, { value }) => acc + value, ZERO) -
+		? inputs.reduce((acc, { value }) => acc + (value ?? ZERO), ZERO) -
 			outputs.reduce((acc, { value }) => acc + value, ZERO)
 		: undefined;
 
 	return {
 		inputs,
 		outputs,
-		totalSpend,
+		totalSignedInputs,
 		fee,
 		broadcast: broadcast ?? false
 	};
@@ -352,9 +352,11 @@ export const signPsbt = ({
 					const input = parsed.data.inputs[index];
 
 					if (isNullish(input?.witnessUtxo)) {
-						throw new Error(
-							`Input ${index} is not a SegWit (P2WPKH) input and cannot be signed by OISY.`
-						);
+						toastsError({
+							msg: { text: get(i18n).wallet_connect.error.btc_psbt_input_not_segwit }
+						});
+						await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+						return { success: false };
 					}
 
 					if (
@@ -364,9 +366,11 @@ export const signPsbt = ({
 							Buffer.from(walletWitnessScript)
 						) !== 0
 					) {
-						throw new Error(
-							`Input ${index} does not belong to the wallet's P2WPKH address and cannot be signed.`
-						);
+						toastsError({
+							msg: { text: get(i18n).wallet_connect.error.btc_psbt_input_not_owned }
+						});
+						await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+						return { success: false };
 					}
 
 					await parsed.signInputAsync(index, signer);
