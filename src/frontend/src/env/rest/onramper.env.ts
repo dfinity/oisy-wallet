@@ -1,8 +1,8 @@
-import { BETA, LOCAL, STAGING } from '$lib/constants/app.constants';
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
-// Feature flag: the OnRamper buy widget is enabled only on local, staging and beta — not on
+// Feature flag: the OnRamper buy widget is enabled only on local and staging — not on beta nor
 // production (ic). `STAGING` already covers the test_fe / audit / e2e environments.
-export const ONRAMPER_ENABLED = LOCAL || STAGING || BETA;
+export const ONRAMPER_ENABLED = LOCAL || STAGING;
 
 // Optimistic fallback for the runtime `onramper_enabled` backend query: assume the widget is
 // available when the query cannot be reached, since the widget self-disables on a missing secret.

@@ -50,7 +50,14 @@ export type ActiveUserTransactionData =
 	| {
 			OneSecEvmToIcp: OneSecEvmToIcpData;
 	  }
-	| { OneSecIcpToEvm: OneSecIcpToEvmData };
+	| { OneSecIcpToEvm: OneSecIcpToEvmData }
+	| {
+			/**
+			 * Liquidium lend/borrow flow. A single variant covers all four actions
+			 * (supply, borrow, repay, withdraw).
+			 */
+			Liquidium: LiquidiumData;
+	  };
 export type ActiveUserTransactionError =
 	| { InvalidId: null }
 	| { NotFound: null }
@@ -1055,6 +1062,29 @@ export interface InitArg {
 	 * deployments that pre-date this field.
 	 */
 	new_user_signups_allowed: [] | [boolean];
+}
+/**
+ * Which Liquidium lend/borrow action an active transaction tracks.
+ */
+export type LiquidiumAction =
+	| { Withdraw: null }
+	| { Repay: null }
+	| { Borrow: null }
+	| { Supply: null };
+export interface LiquidiumData {
+	/**
+	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+	 */
+	token: TokenId;
+	action: LiquidiumAction;
+	/**
+	 * Liquidium pool canister id (principal text), treated as an opaque key.
+	 */
+	pool_id: string;
+	/**
+	 * Amount in the token's base units.
+	 */
+	amount: bigint;
 }
 /**
  * Bitcoin Network.
