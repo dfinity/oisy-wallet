@@ -1252,7 +1252,19 @@ interface I18nWallet_connect {
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
+		sign_psbt: string;
 		signing_address: string;
+		fee: string;
+		btc_symbol: string;
+		psbt_inputs: string;
+		psbt_outputs: string;
+		psbt_total_spend: string;
+		psbt_unknown_address: string;
+		psbt_fee_unknown: string;
+		psbt_signed_by_wallet: string;
+		psbt_broadcast: string;
+		psbt_broadcast_enabled: string;
+		psbt_broadcast_disabled: string;
 		connected_apps: string;
 		no_connected_apps: string;
 		wallet_connect: string;
@@ -1291,6 +1303,8 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_broadcast_not_supported: string;
+		btc_psbt_decode: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;

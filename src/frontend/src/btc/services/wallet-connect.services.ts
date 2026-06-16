@@ -3,12 +3,20 @@ import {
 	BTC_ECDSA_KEY_ID
 } from '$btc/constants/wallet-connect.constants';
 import type { OptionBtcAddress } from '$btc/types/address';
+import type {
+	WalletConnectBtcDecodedPsbt,
+	WalletConnectBtcDecodedPsbtInput,
+	WalletConnectBtcDecodedPsbtOutput
+} from '$btc/types/wallet-connect';
 import {
 	bitcoinSignedMessageHash,
 	deriveBtcPublicKey,
 	encodeRecoverableSignature
 } from '$btc/utils/wallet-connect.utils';
+import { BIP122_CHAINS } from '$env/bip122-chains.env';
+import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { genericSignWithEcdsa } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSign } from '$lib/enums/progress-steps';
 import {
@@ -22,8 +30,9 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { WalletKitTypes } from '@reown/walletkit';
+import { address as btcAddressLib, networks, payments, Psbt, type Network } from 'bitcoinjs-lib';
 import { get } from 'svelte/store';
 
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
@@ -121,6 +130,254 @@ export const sign = ({
 					id,
 					topic,
 					message: { signature, address }
+				});
+
+				progress(ProgressStepsSign.DONE);
+
+				return { success: true };
+			} catch (err: unknown) {
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				throw err;
+			}
+		},
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
+			$method: params.request.params.request.method
+		})
+	});
+
+// Reown bitcoin `signPsbt` request parameters —
+// https://docs.reown.com/advanced/multichain/rpc-reference/bitcoin-rpc
+interface WalletConnectSignPsbtRequestParams {
+	psbt?: string;
+	signInputs?: { address?: string; index?: number; sighashTypes?: number[] }[];
+	broadcast?: boolean;
+}
+
+const bitcoinJsNetwork = (chainId: string | undefined): Network => {
+	const networkId = nonNullish(chainId) ? BIP122_CHAINS[chainId]?.networkId : undefined;
+
+	if (networkId === BTC_MAINNET_NETWORK_ID) {
+		return networks.bitcoin;
+	}
+
+	if (networkId === BTC_TESTNET_NETWORK_ID) {
+		return networks.testnet;
+	}
+
+	// Regtest (local-only) shares testnet address parameters; default to it for non-mainnet chains.
+	return networks.regtest;
+};
+
+const safeOutputAddress = ({
+	script,
+	network
+}: {
+	script: Uint8Array;
+	network: Network;
+}): string | undefined => {
+	try {
+		return btcAddressLib.fromOutputScript(Buffer.from(script), network);
+	} catch (_: unknown) {
+		// Non-standard / unparsable scripts (e.g. OP_RETURN) have no address representation.
+		return undefined;
+	}
+};
+
+/**
+ * Decode a Reown bitcoin `signPsbt` request for the review screen.
+ *
+ * Parses the base64 PSBT with bitcoinjs-lib and surfaces the inputs, outputs, the wallet's own
+ * spend, the fee and the `broadcast` flag, so the user never blind-signs. Throws if the PSBT is
+ * missing or cannot be parsed.
+ */
+export const decodePsbt = ({
+	request,
+	address
+}: {
+	request: WalletKitTypes.SessionRequest;
+	address: OptionBtcAddress;
+}): WalletConnectBtcDecodedPsbt => {
+	const { psbt, broadcast } = request.params.request.params as WalletConnectSignPsbtRequestParams;
+
+	if (isNullish(psbt)) {
+		throw new Error('Missing PSBT in the WalletConnect signPsbt request.');
+	}
+
+	const network = bitcoinJsNetwork(request.params.chainId);
+	const parsed = Psbt.fromBase64(psbt, { network });
+
+	const inputs: WalletConnectBtcDecodedPsbtInput[] = parsed.data.inputs.map((input) => {
+		const { witnessUtxo } = input;
+		const inputAddress = nonNullish(witnessUtxo)
+			? safeOutputAddress({ script: witnessUtxo.script, network })
+			: undefined;
+
+		return {
+			address: inputAddress,
+			value: nonNullish(witnessUtxo) ? BigInt(witnessUtxo.value) : ZERO,
+			signedByWallet: nonNullish(address) && inputAddress === address
+		};
+	});
+
+	const outputs: WalletConnectBtcDecodedPsbtOutput[] = parsed.txOutputs.map(
+		({ value, address: outputAddress, script }) => ({
+			address: outputAddress ?? safeOutputAddress({ script, network }),
+			value: BigInt(value)
+		})
+	);
+
+	const totalSpend = inputs.reduce(
+		(acc, { value, signedByWallet }) => (signedByWallet ? acc + value : acc),
+		ZERO
+	);
+
+	// Fee is only knowable when every input carries its UTXO value (P2WPKH inputs always do).
+	const allInputsHaveValue = parsed.data.inputs.every(({ witnessUtxo }) => nonNullish(witnessUtxo));
+	const fee = allInputsHaveValue
+		? inputs.reduce((acc, { value }) => acc + value, ZERO) -
+			outputs.reduce((acc, { value }) => acc + value, ZERO)
+		: undefined;
+
+	return {
+		inputs,
+		outputs,
+		totalSpend,
+		fee,
+		broadcast: broadcast ?? false
+	};
+};
+
+type WalletConnectSignPsbtParams = WalletConnectExecuteParams & {
+	listener: OptionWalletConnectListener;
+	address: OptionBtcAddress;
+	modalNext: () => void;
+	progress: (step: ProgressStepsSign) => void;
+	identity: NullishIdentity;
+};
+
+/**
+ * Sign a Reown bitcoin `signPsbt` request (sign-only, `broadcast: false`).
+ *
+ * Only the wallet's own P2WPKH inputs listed in `signInputs` are signed. bitcoinjs-lib computes the
+ * BIP-143 sighash (SIGHASH_ALL) internally and we delegate the raw secp256k1 signature to
+ * `generic_sign_with_ecdsa` via a custom async signer whose public key is the caller's derived
+ * P2WPKH key. We attach the partial signatures and return the updated PSBT WITHOUT finalizing or
+ * broadcasting — the dApp finalizes/broadcasts. `broadcast: true` is rejected (deferred work) and
+ * non-P2WPKH inputs (e.g. Taproot/ordinals) are out of scope and rejected.
+ */
+export const signPsbt = ({
+	address,
+	modalNext,
+	progress,
+	identity,
+	...params
+}: WalletConnectSignPsbtParams): Promise<ResultSuccess> =>
+	execute({
+		params,
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
+			const { id, topic } = request;
+
+			const {
+				psbt,
+				signInputs,
+				broadcast = false
+			} = request.params.request.params as WalletConnectSignPsbtRequestParams;
+
+			if (isNullish(address)) {
+				toastsError({ msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized } });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
+			if (isNullish(psbt)) {
+				toastsError({ msg: { text: get(i18n).wallet_connect.error.unknown_parameter } });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
+			if (isNullish(identity)) {
+				toastsError({ msg: { text: get(i18n).auth.error.no_internet_identity } });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
+			if (broadcast) {
+				toastsError({ msg: { text: get(i18n).wallet_connect.error.btc_broadcast_not_supported } });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
+			const network = bitcoinJsNetwork(request.params.chainId);
+
+			modalNext();
+
+			try {
+				progress(ProgressStepsSign.SIGN);
+
+				const parsed = Psbt.fromBase64(psbt, { network });
+
+				const publicKey = Buffer.from(deriveBtcPublicKey({ principal: identity.getPrincipal() }));
+
+				// Expected P2WPKH script for the wallet's own key — used to confirm an input is ours and
+				// of the only address type we can sign (the signer manages a single P2WPKH key).
+				const walletWitnessScript = payments.p2wpkh({ pubkey: publicKey, network }).output;
+
+				const signer = {
+					publicKey,
+					sign: async (hash: Buffer): Promise<Buffer> => {
+						const rawSignature = await genericSignWithEcdsa({
+							identity,
+							derivationPath: BTC_ECDSA_DERIVATION_PATH,
+							keyId: BTC_ECDSA_KEY_ID,
+							messageHash: Uint8Array.from(hash)
+						});
+
+						return Buffer.from(rawSignature);
+					}
+				};
+
+				// Reown's `signInputs` selects which inputs to sign; if absent, sign every input that is
+				// ours. Each must be a P2WPKH input owned by this wallet — anything else is rejected.
+				const indicesToSign = nonNullish(signInputs)
+					? signInputs
+							.map(({ index }) => index)
+							.filter((index): index is number => nonNullish(index))
+					: parsed.data.inputs.map((_, index) => index);
+
+				for (const index of indicesToSign) {
+					const input = parsed.data.inputs[index];
+
+					if (isNullish(input?.witnessUtxo)) {
+						throw new Error(
+							`Input ${index} is not a SegWit (P2WPKH) input and cannot be signed by OISY.`
+						);
+					}
+
+					if (
+						isNullish(walletWitnessScript) ||
+						Buffer.compare(
+							Buffer.from(input.witnessUtxo.script),
+							Buffer.from(walletWitnessScript)
+						) !== 0
+					) {
+						throw new Error(
+							`Input ${index} does not belong to the wallet's P2WPKH address and cannot be signed.`
+						);
+					}
+
+					await parsed.signInputAsync(index, signer);
+				}
+
+				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
+
+				await listener.approveRequest({
+					id,
+					topic,
+					message: { psbt: parsed.toBase64() }
 				});
 
 				progress(ProgressStepsSign.DONE);
