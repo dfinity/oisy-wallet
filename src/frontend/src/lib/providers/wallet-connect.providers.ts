@@ -1,4 +1,15 @@
 import {
+	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+	SESSION_REQUEST_BTC_SIGN_MESSAGE,
+	SESSION_REQUEST_BTC_SIGN_PSBT
+} from '$btc/constants/wallet-connect.constants';
+import type { OptionBtcAddress } from '$btc/types/address';
+import {
+	BIP122_MAINNET_CHAINS_KEYS,
+	BIP122_REGTEST_CHAINS_KEYS,
+	BIP122_TESTNET_CHAINS_KEYS
+} from '$env/bip122-chains.env';
+import {
 	CAIP10_DEVNET_CHAINS_KEYS,
 	CAIP10_MAINNET_CHAINS_KEYS,
 	LEGACY_SOLANA_DEVNET_NAMESPACE,
@@ -62,6 +73,9 @@ export class WalletConnectClient extends WalletConnectListener {
 	readonly #ethAddress: OptionEthAddress;
 	readonly #solAddressMainnet: OptionSolAddress;
 	readonly #solAddressDevnet: OptionSolAddress;
+	readonly #btcAddressMainnet: OptionBtcAddress;
+	readonly #btcAddressTestnet: OptionBtcAddress;
+	readonly #btcAddressRegtest: OptionBtcAddress;
 
 	#onSessionProposalCallback: ((proposal: WalletKitTypes.SessionProposal) => void) | null = null;
 	#onSessionDeleteCallback: (() => void) | null = null;
@@ -72,12 +86,18 @@ export class WalletConnectClient extends WalletConnectListener {
 		walletKit,
 		ethAddress,
 		solAddressMainnet,
-		solAddressDevnet
+		solAddressDevnet,
+		btcAddressMainnet,
+		btcAddressTestnet,
+		btcAddressRegtest
 	}: {
 		walletKit: Awaited<ReturnType<typeof WalletKit.init>>;
 		ethAddress: OptionEthAddress;
 		solAddressMainnet: OptionSolAddress;
 		solAddressDevnet: OptionSolAddress;
+		btcAddressMainnet: OptionBtcAddress;
+		btcAddressTestnet: OptionBtcAddress;
+		btcAddressRegtest: OptionBtcAddress;
 	}) {
 		super();
 
@@ -85,6 +105,9 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#ethAddress = ethAddress;
 		this.#solAddressMainnet = solAddressMainnet;
 		this.#solAddressDevnet = solAddressDevnet;
+		this.#btcAddressMainnet = btcAddressMainnet;
+		this.#btcAddressTestnet = btcAddressTestnet;
+		this.#btcAddressRegtest = btcAddressRegtest;
 	}
 
 	static init = async ({
@@ -94,6 +117,9 @@ export class WalletConnectClient extends WalletConnectListener {
 		ethAddress: OptionEthAddress;
 		solAddressMainnet: OptionSolAddress;
 		solAddressDevnet: OptionSolAddress;
+		btcAddressMainnet: OptionBtcAddress;
+		btcAddressTestnet: OptionBtcAddress;
+		btcAddressRegtest: OptionBtcAddress;
 		cleanSlate?: boolean;
 	}): Promise<WalletConnectClient> => {
 		const clearLocalStorage = () => {
@@ -251,6 +277,42 @@ export class WalletConnectClient extends WalletConnectListener {
 												`solana:${SOLANA_DEVNET_NETWORK.chainId}:${this.#solAddressDevnet}`,
 												`${LEGACY_SOLANA_DEVNET_NAMESPACE}:${this.#solAddressDevnet}`
 											]
+										: [])
+								]
+							}
+						}
+					: {}),
+				...(nonNullish(this.#btcAddressMainnet) ||
+				nonNullish(this.#btcAddressTestnet) ||
+				nonNullish(this.#btcAddressRegtest)
+					? {
+							bip122: {
+								chains: [
+									...(nonNullish(this.#btcAddressMainnet) ? BIP122_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(this.#btcAddressTestnet) ? BIP122_TESTNET_CHAINS_KEYS : []),
+									...(nonNullish(this.#btcAddressRegtest) ? BIP122_REGTEST_CHAINS_KEYS : [])
+								],
+								methods: [
+									SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+									SESSION_REQUEST_BTC_SIGN_MESSAGE,
+									SESSION_REQUEST_BTC_SIGN_PSBT
+								],
+								events: ['bip122_addressesChanged'],
+								accounts: [
+									...(nonNullish(this.#btcAddressMainnet)
+										? BIP122_MAINNET_CHAINS_KEYS.map(
+												(chain) => `${chain}:${this.#btcAddressMainnet}`
+											)
+										: []),
+									...(nonNullish(this.#btcAddressTestnet)
+										? BIP122_TESTNET_CHAINS_KEYS.map(
+												(chain) => `${chain}:${this.#btcAddressTestnet}`
+											)
+										: []),
+									...(nonNullish(this.#btcAddressRegtest)
+										? BIP122_REGTEST_CHAINS_KEYS.map(
+												(chain) => `${chain}:${this.#btcAddressRegtest}`
+											)
 										: [])
 								]
 							}

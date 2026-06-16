@@ -48,12 +48,13 @@ export const mapSolTransactionMessage = ({
 }: TransactionMessage): MappedSolTransaction =>
 	Array.from(instructions).reduce<MappedSolTransaction>(
 		(acc, instruction) => {
-			const { amount, source, destination, payer, tokenAddress, isApproval } =
+			const { amount, source, destination, payer, tokenAddress, isApproval, unreviewed } =
 				mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the
-			// review screen. We flag it instead, leaving it to the signing flow to refuse a
+			// review screen. Likewise, an unreviewed instruction may hide arbitrary side
+			// effects. We flag either case, leaving it to the signing flow to refuse a
 			// transaction it cannot display faithfully.
 			//
 			// The same applies to the token: the summary shows a single token's metadata and
@@ -69,6 +70,7 @@ export const mapSolTransactionMessage = ({
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
+				(unreviewed ?? false) ||
 				conflicts({ current: acc.source, next: source }) ||
 				conflicts({ current: acc.destination, next: destination }) ||
 				conflicts({ current: acc.payer, next: payer }) ||
