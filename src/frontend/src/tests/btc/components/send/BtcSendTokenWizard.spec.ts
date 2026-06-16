@@ -5,12 +5,8 @@ import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import type { UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
-import {
-	UTXOS_FEE_CONTEXT_KEY,
-	type UtxosFeeContext,
-	type UtxosFeeStore
-} from '$btc/stores/utxos-fee.store';
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -21,7 +17,6 @@ import * as signerApi from '$lib/api/signer.api';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
-import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { AddPendingTransactionOutcome } from '$lib/types/api';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
@@ -30,6 +25,9 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -46,10 +44,7 @@ describe('BtcSendTokenWizard', () => {
 		token?: Token;
 		mockUtxosFeeStore: UtxosFeeStore;
 	}) =>
-		new Map<symbol, SendContext | UtxosFeeContext>([
-			[UTXOS_FEE_CONTEXT_KEY, { store: mockUtxosFeeStore }],
-			[SEND_CONTEXT_KEY, initSendContext({ token })]
-		]);
+		mockContextMap([mockUtxosFeeContextEntry(mockUtxosFeeStore), mockSendContextEntry({ token })]);
 
 	const onBack = vi.fn();
 	const onClose = vi.fn();
