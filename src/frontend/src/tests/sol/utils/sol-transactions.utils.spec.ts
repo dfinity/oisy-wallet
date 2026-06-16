@@ -123,6 +123,37 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		it('should flag a transaction as ambiguous when it bundles a transfer and an approval', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({
+					amount: 100n,
+					source: mockSolAddress,
+					destination: mockSolAddress2,
+					tokenAddress: mockSolAddress3
+				})
+				.mockReturnValueOnce({
+					amount: ZERO,
+					source: mockSolAddress,
+					destination: mockSolAddress2,
+					tokenAddress: mockSolAddress3,
+					isApproval: true
+				});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				tokenAddress: mockSolAddress3,
+				isApproval: true,
+				ambiguous: true
+			});
+		});
+
 		it('should flag a transaction as ambiguous when it bundles different SPL mints', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: 1n, tokenAddress: mockSolAddress2 })
