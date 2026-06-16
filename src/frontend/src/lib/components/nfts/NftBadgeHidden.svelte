@@ -6,7 +6,7 @@
 </script>
 
 <DelayedTooltip delay={300} text={$i18n.nfts.text.hidden}>
-	<span class="flex items-center text-tertiary" data-tid={NFT_HIDDEN_BADGE}>
+	<span class="text-tertiary flex items-center" data-tid={NFT_HIDDEN_BADGE}>
 		<IconEyeOff size="24" />
 	</span>
 </DelayedTooltip>

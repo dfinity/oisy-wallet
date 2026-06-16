@@ -46,13 +46,13 @@
 
 		{#snippet content()}
 			{#if nonNullish(text)}
-				<p class="mb-1.5 py-2 break-normal text-tertiary">
+				<p class="text-tertiary mb-1.5 py-2 break-normal">
 					{@render text?.()}
 				</p>
 			{/if}
 
 			<div
-				class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2"
+				class="bg-brand-subtle-20 flex items-center justify-between gap-4 rounded-lg px-3 py-2"
 				class:mt-1.5={isNullish(text)}
 				data-tid={testId}
 			>

@@ -243,7 +243,7 @@
 	</div>
 
 	{#if notEmptyString(amountErrorMessage) || invalidDestination}
-		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
+		<p class="text-error-primary mb-2 text-center text-sm" transition:slide={SLIDE_DURATION}>
 			{notEmptyString(amountErrorMessage)
 				? amountErrorMessage
 				: $i18n.send.assertion.invalid_destination_address}
@@ -262,7 +262,7 @@
 	</Button>
 {:else}
 	<p
-		class="text-center text-sm text-success-primary"
+		class="text-success-primary text-center text-sm"
 		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
 	>
 		{$i18n.ai_assistant.text.send_token_succeeded}

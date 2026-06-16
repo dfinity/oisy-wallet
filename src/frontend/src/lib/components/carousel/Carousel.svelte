@@ -285,7 +285,7 @@
 <svelte:window onresize={onResize} />
 
 <div
-	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pt-3 pb-10 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} bg-primary relative overflow-hidden rounded-3xl px-3 pt-3 pb-10 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
 	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}

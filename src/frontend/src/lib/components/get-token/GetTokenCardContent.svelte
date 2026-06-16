@@ -40,7 +40,7 @@
 </div>
 
 <div>
-	<div class="text-sm text-tertiary">
+	<div class="text-tertiary text-sm">
 		{@render label()}
 	</div>
 
@@ -68,7 +68,7 @@
 </div>
 
 <div>
-	<div class="text-sm text-tertiary">
+	<div class="text-tertiary text-sm">
 		{$i18n.stake.text.earning_potential}:
 	</div>
 

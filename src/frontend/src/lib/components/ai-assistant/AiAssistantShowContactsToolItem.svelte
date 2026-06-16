@@ -86,7 +86,7 @@
 {/snippet}
 
 <div
-	class="flex w-full flex-col rounded-xl bg-brand-subtle-10 p-2 hover:bg-brand-subtle-20"
+	class="bg-brand-subtle-10 hover:bg-brand-subtle-20 flex w-full flex-col rounded-xl p-2"
 	class:bg-brand-subtle-20={expanded}
 >
 	{#if !singleAddress}

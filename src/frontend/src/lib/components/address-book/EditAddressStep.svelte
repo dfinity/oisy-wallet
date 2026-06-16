@@ -92,11 +92,11 @@
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<Avatar name={contact.name} image={contact.image} variant="xl" />
 
-		<div class="text-2xl font-bold text-primary md:text-3xl">
+		<div class="text-primary text-2xl font-bold md:text-3xl">
 			{contact.name}
 		</div>
 
-		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
+		<div class="bg-brand-subtle-10 mt-2 w-full rounded-lg px-3 py-4 text-sm md:px-5 md:text-base">
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
 			<InputAddressAlias

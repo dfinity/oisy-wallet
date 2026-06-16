@@ -39,7 +39,7 @@
 		class:to-sol-100={isNetworkIdSolana(tokenNetworkId)}
 	>
 		{@render tokenInput?.()}
-		<div class="absolute inset-0.5 left-1.5 -z-1 rounded-xl bg-secondary"></div>
+		<div class="bg-secondary absolute inset-0.5 left-1.5 -z-1 rounded-xl"></div>
 	</div>
 {:else}
 	<div class="mb-2">

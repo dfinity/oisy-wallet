@@ -14,7 +14,7 @@
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<span class="flex text-tertiary">
+				<span class="text-tertiary flex">
 					<IconWorld size="20" />
 				</span>
 				{$i18n.core.text.language}
@@ -26,7 +26,7 @@
 	<SettingsCardItem>
 		{#snippet key()}
 			<span class="flex items-center gap-2">
-				<span class="flex text-tertiary">
+				<span class="text-tertiary flex">
 					<IconDollarSign size="20" />
 				</span>
 				{$i18n.core.text.currency}

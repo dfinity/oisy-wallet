@@ -19,7 +19,7 @@
 
 	{#if retryable && isLastItem}
 		<button
-			class="mt-1 flex items-center text-brand-primary hover:text-primary"
+			class="text-brand-primary hover:text-primary mt-1 flex items-center"
 			aria-label={$i18n.core.text.retry}
 			onclick={onRetry}
 			transition:fade

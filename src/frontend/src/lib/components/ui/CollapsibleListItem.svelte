@@ -13,7 +13,7 @@
 	const { icon, title, description, noBorder = false }: Props = $props();
 </script>
 
-<div class="flex border-secondary py-3" class:border-b-1={!noBorder} transition:slide>
+<div class="border-secondary flex py-3" class:border-b-1={!noBorder} transition:slide>
 	{@render icon?.()}
 
 	<div class="ml-3 w-full text-sm">
@@ -22,7 +22,7 @@
 		</div>
 
 		{#if nonNullish(description)}
-			<div class="mt-1 text-tertiary">
+			<div class="text-tertiary mt-1">
 				{@render description()}
 			</div>
 		{/if}

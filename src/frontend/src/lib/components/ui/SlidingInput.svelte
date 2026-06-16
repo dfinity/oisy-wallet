@@ -113,7 +113,7 @@
 					bind:value={inputValue}
 				/>
 				{#if inputValue !== ''}
-					<div class="absolute top-[11px] right-12 bg-primary" transition:fade>
+					<div class="bg-primary absolute top-[11px] right-12" transition:fade>
 						<ButtonIcon
 							ariaLabel={$i18n.core.text.clear_filter}
 							colorStyle="muted"

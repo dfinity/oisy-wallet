@@ -48,7 +48,7 @@
 		<Avatar {name} {image} styleClass="mt-[-50%] border-3 border-primary-inverted" variant="xl"
 		></Avatar>
 	</div>
-	<div class="pt-5 text-2xl font-bold text-primary md:text-3xl">
+	<div class="text-primary pt-5 text-2xl font-bold md:text-3xl">
 		{name}
 	</div>
 </div>

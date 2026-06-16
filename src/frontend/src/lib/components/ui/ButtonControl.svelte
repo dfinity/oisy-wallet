@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class={`${styleClass ?? ''} h-7 w-7 rounded-md bg-primary p-1 transition-colors duration-700 hover:text-brand-primary active:text-brand-primary`}
+	class={`${styleClass ?? ''} bg-primary hover:text-brand-primary active:text-brand-primary h-7 w-7 rounded-md p-1 transition-colors duration-700`}
 	aria-label={ariaLabel}
 	{onclick}
 >

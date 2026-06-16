@@ -125,7 +125,7 @@
 					{#each rows as { step: rowStep, label, count } (rowStep)}
 						<li>
 							<button
-								class="flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition hover:bg-brand-subtle-10"
+								class="hover:bg-brand-subtle-10 flex w-full items-center justify-between rounded-md px-3 py-3 text-left transition"
 								onclick={() => enterStep(rowStep)}
 								type="button"
 							>

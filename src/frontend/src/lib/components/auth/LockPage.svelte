@@ -44,8 +44,8 @@
 	};
 </script>
 
-<div class="fixed inset-0 z-4 flex h-full w-full flex-col bg-page" data-app-view>
-	<div class="fixed inset-0 -z-10 bg-overlay-page-30 backdrop-blur-xs">
+<div class="bg-page fixed inset-0 z-4 flex h-full w-full flex-col" data-app-view>
+	<div class="bg-overlay-page-30 fixed inset-0 -z-10 backdrop-blur-xs">
 		<Responsive up="xl">
 			{#await import(`$lib/assets/lockpage-assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
 				<Img alt={ariaLabel} src={src1440} styleClass={imgStyleClass} />
@@ -67,13 +67,13 @@
 
 	<div class="flex h-screen flex-col items-center justify-center px-4">
 		<div
-			class="flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-4xl bg-surface p-6 text-center text-primary shadow-lg transition-all duration-500 ease-in-out sm:p-8"
+			class="bg-surface text-primary flex w-full max-w-md flex-col content-center items-center justify-center gap-5 rounded-4xl p-6 text-center shadow-lg transition-all duration-500 ease-in-out sm:p-8"
 		>
 			<OisyWalletLogoLink />
 
 			<div class="my-6">
 				<h2 class="mb-2 text-2xl font-semibold">{$i18n.lock.text.title_part_1}</h2>
-				<span class="text-gray-600 mb-6">{$i18n.lock.text.title_part_2}</span>
+				<span class="mb-6 text-gray-600">{$i18n.lock.text.title_part_2}</span>
 			</div>
 
 			<div class="w-full">

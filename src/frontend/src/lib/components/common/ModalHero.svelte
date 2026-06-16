@@ -41,7 +41,7 @@
 	{/if}
 
 	{#if nonNullish(description)}
-		<div class="text-sm text-tertiary">
+		<div class="text-tertiary text-sm">
 			{@render description()}
 		</div>
 	{/if}

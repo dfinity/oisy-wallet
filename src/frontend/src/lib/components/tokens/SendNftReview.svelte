@@ -13,14 +13,14 @@
 	const nftDisplayName = $derived(getNftDisplayName(nft));
 </script>
 
-<div class="mb-5 flex rounded-lg border-1 border-brand-subtle-20 bg-brand-subtle-10 p-3">
+<div class="border-brand-subtle-20 bg-brand-subtle-10 mb-5 flex rounded-lg border-1 p-3">
 	<div class="flex items-center">
 		<span class="flex">
 			<NftLogo badge={{ type: 'network' }} {nft} />
 		</span>
 		<div class="ml-4 flex flex-col">
 			<span class="flex font-bold">{$i18n.send.text.send}: {nftDisplayName}</span>
-			<span class="flex text-tertiary">{nft.collection.network.name}</span>
+			<span class="text-tertiary flex">{nft.collection.network.name}</span>
 		</div>
 	</div>
 </div>

@@ -49,7 +49,7 @@
 {:else}
 	<div
 		style={`max-height: ${logoSizes[size]}`}
-		class="rounded-full bg-primary ring ring-disabled"
+		class="bg-primary ring-disabled rounded-full ring"
 		data-tid={`${testId}-light-container`}
 	>
 		<span

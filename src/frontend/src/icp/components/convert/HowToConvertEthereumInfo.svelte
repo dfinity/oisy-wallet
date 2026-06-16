@@ -51,7 +51,7 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mt-2 mb-4 rounded-lg bg-brand-subtle-20 p-4">
+		<div class="bg-brand-subtle-20 mt-2 mb-4 rounded-lg p-4">
 			<p class="font-bold break-normal">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
@@ -79,11 +79,11 @@
 	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
+				class="text-tertiary inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>1</span
 			>
 
-			<div class="h-full w-[1.5px] bg-tertiary"></div>
+			<div class="bg-tertiary h-full w-[1.5px]"></div>
 		</div>
 
 		<ReceiveAddress
@@ -106,11 +106,11 @@
 
 		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
+				class="text-tertiary inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>2</span
 			>
 
-			<div class="h-full w-[1.5px] bg-tertiary"></div>
+			<div class="bg-tertiary h-full w-[1.5px]"></div>
 		</div>
 
 		<div>
@@ -136,7 +136,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-tertiary"
+				class="text-tertiary inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold"
 				>3</span
 			>
 		</div>

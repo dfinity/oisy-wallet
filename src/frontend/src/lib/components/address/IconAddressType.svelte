@@ -29,7 +29,7 @@
 {#if transparent}
 	{@render icon()}
 {:else}
-	<div class="box-content rounded-full border-1 border-primary bg-primary">
+	<div class="border-primary bg-primary box-content rounded-full border-1">
 		{@render icon()}
 	</div>
 {/if}

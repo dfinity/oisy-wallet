@@ -84,14 +84,14 @@
 							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
 							transparent
 						>
-							<span class="w-[20px] pt-0.75 text-brand-primary">
+							<span class="text-brand-primary w-[20px] pt-0.75">
 								{#if $currentCurrency === currency}
 									<IconCheck size="20" />
 								{/if}
 							</span>
 							<div class="flex w-full flex-row justify-between gap-5">
 								<span class="first-letter:uppercase">{name}</span>
-								<span class="text-right text-tertiary">{symbol}</span>
+								<span class="text-tertiary text-right">{symbol}</span>
 							</div>
 						</Button>
 					</ListItem>

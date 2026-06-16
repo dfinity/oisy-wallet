@@ -81,7 +81,7 @@
 	onclick={onClick}
 >
 	<span
-		class="relative block aspect-square h-full w-full overflow-hidden rounded-xl bg-secondary-alt"
+		class="bg-secondary-alt relative block aspect-square h-full w-full overflow-hidden rounded-xl"
 		class:opacity-50={disabled}
 	>
 		<NftDisplayGuard
@@ -113,7 +113,7 @@
 		{/if}
 
 		{#if isSpam}
-			<div class="absolute top-2 left-2 text-warning-primary">
+			<div class="text-warning-primary absolute top-2 left-2">
 				<IconAlertOctagon size="24" />
 			</div>
 		{/if}

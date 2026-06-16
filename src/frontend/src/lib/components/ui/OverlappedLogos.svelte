@@ -21,7 +21,7 @@
 		{#each icons as icon, i (icon)}
 			<div
 				style={`max-height: ${logoSizes[size]}; ${i < icons.length - 1 ? `margin-right: calc(-${logoSizes[size]} / 3);` : ''} z-index: ${i + 1};`}
-				class="relative rounded-full bg-primary ring ring-disabled"
+				class="bg-primary ring-disabled relative rounded-full ring"
 				in:fade
 			>
 				<span class="inline-flex" class:invert-on-dark-theme={invertColor}>

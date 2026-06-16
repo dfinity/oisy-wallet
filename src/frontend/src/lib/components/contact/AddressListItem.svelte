@@ -33,15 +33,15 @@
 </script>
 
 <button
-	class={`flex w-full items-center gap-3 rounded-xl bg-primary p-2 text-left hover:bg-brand-subtle-10 ${styleClass}`}
+	class={`bg-primary hover:bg-brand-subtle-10 flex w-full items-center gap-3 rounded-xl p-2 text-left ${styleClass}`}
 	data-tid={ADDRESS_LIST_ITEM_BUTTON}
 	onclick={() => onClick?.()}
 >
 	<IconAddressType addressType={address.addressType} size="32" />
 
 	<div class="text-xs md:text-sm">
-		<div class="flex items-center gap-1 text-tertiary">
-			<span class="pr-1 text-sm font-bold text-primary md:text-base">
+		<div class="text-tertiary flex items-center gap-1">
+			<span class="text-primary pr-1 text-sm font-bold md:text-base">
 				{$i18n.address.types[address.addressType]}
 			</span>
 		</div>

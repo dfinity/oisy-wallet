@@ -57,7 +57,7 @@
 				{@render content()}
 			</div>
 			{#if nonNullish(footer)}
-				<div class="overflow-hidden border-t-1 border-primary p-4">
+				<div class="border-primary overflow-hidden border-t-1 p-4">
 					{@render footer()}
 				</div>
 			{/if}

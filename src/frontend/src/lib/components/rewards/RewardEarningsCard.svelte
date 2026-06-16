@@ -40,7 +40,7 @@
 
 {#if nonNullish(token)}
 	<div
-		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
+		class={`text-primary-inverted relative w-1/3 rounded-xl p-2 text-center text-sm md:text-base ${amount > ZERO ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
 		class:animate-pulse={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}

@@ -5,7 +5,7 @@
 
 <div aria-hidden="true">
 	<div
-		class="h-4 w-full rounded-md bg-disabled-alt"
+		class="bg-disabled-alt h-4 w-full rounded-md"
 		class:animate-pulse={!isIOS()}
 		data-tid={TOKEN_SKELETON_TEXT}
 	></div>

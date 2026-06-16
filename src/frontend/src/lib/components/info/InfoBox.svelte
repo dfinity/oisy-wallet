@@ -16,11 +16,11 @@
 
 {#if !hideInfo}
 	<div
-		class="relative mb-12 rounded-lg bg-primary px-6 py-4 text-primary"
+		class="bg-primary text-primary relative mb-12 rounded-lg px-6 py-4"
 		transition:slide={SLIDE_EASING}
 	>
 		<button
-			class="absolute top-2 right-2 text-tertiary"
+			class="text-tertiary absolute top-2 right-2"
 			aria-label={$i18n.core.text.close}
 			onclick={onClick}><IconClose /></button
 		>

@@ -51,7 +51,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-4 rounded-lg bg-brand-subtle-20 p-4">
+	<div class="bg-brand-subtle-20 mb-4 rounded-lg p-4">
 		{#if isNullish(metadata)}
 			<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 		{:else}

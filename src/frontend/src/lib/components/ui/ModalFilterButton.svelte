@@ -16,7 +16,7 @@
 
 <button
 	bind:this={button}
-	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
+	class="dropdown-button border-primary h-[2.2rem] rounded-lg border border-solid"
 	class:hover:border-brand-primary={!disabled}
 	aria-label={ariaLabel}
 	{disabled}

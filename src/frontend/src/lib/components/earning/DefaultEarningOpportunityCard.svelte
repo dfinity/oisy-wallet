@@ -28,7 +28,7 @@
 	{/snippet}
 	{#snippet badge()}
 		{$i18n.stake.text.max_apy_label}
-		<span class="ml-1 font-bold text-success-primary">{formattedApy}</span>
+		<span class="text-success-primary ml-1 font-bold">{formattedApy}</span>
 	{/snippet}
 	{#snippet description()}
 		<p>{resolveText({ i18n: $i18n, path: cardData.description })}</p>

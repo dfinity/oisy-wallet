@@ -31,7 +31,7 @@
 		<!-- Display a fallback message if no address is available. 
 		   TODO: Styling is minimal and could be enhanced. -->
 		<div class="flex items-center justify-center py-4" data-testid={ADDRESS_BOOK_FALLBACK_MESSAGE}>
-			<p class="text-center text-sm font-medium text-brand-primary"
+			<p class="text-brand-primary text-center text-sm font-medium"
 				>{$i18n.address_book.text.no_address_found}</p
 			>
 		</div>

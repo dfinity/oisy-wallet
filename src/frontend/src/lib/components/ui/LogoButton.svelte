@@ -72,7 +72,7 @@
 		>
 			<span class="flex min-w-0 items-center">
 				{#if selectable}
-					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
+					<span class="text-brand-primary mr-2 flex min-w-4" in:fade>
 						{#if selected}
 							<IconCheck size="16px" />
 						{/if}
@@ -85,7 +85,7 @@
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
 							<span
-								class={`text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
+								class={`text-primary text-lg font-bold text-nowrap ${titleStyleClass}`}
 								class:min-w-0={isNullish(subtitle)}
 								class:truncate={isNullish(subtitle)}
 							>
@@ -96,13 +96,13 @@
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class={`truncate text-base text-nowrap text-tertiary ${subtitleStyleClass}`}>
+							<span class={`text-tertiary truncate text-base text-nowrap ${subtitleStyleClass}`}>
 								{@render subtitle()}
 							</span>
 						{/if}
 					</span>
 					{#if nonNullish(description)}
-						<span class="truncate text-sm text-tertiary">
+						<span class="text-tertiary truncate text-sm">
 							{@render description()}
 						</span>
 					{/if}
@@ -117,14 +117,14 @@
 						</span>
 					{/if}
 					{#if nonNullish(descriptionEnd)}
-						<span class="text-sm text-nowrap text-tertiary">
+						<span class="text-tertiary text-sm text-nowrap">
 							{@render descriptionEnd()}
 						</span>
 					{/if}
 				</span>
 
 				{#if nonNullish(action)}
-					<span class="ml-2 flex text-brand-primary" in:fade>{@render action()}</span>
+					<span class="text-brand-primary ml-2 flex" in:fade>{@render action()}</span>
 				{/if}
 			</span>
 		</span>

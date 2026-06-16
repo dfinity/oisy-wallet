@@ -71,7 +71,7 @@
 				<div class="pb-2 text-lg font-bold"
 					>{$i18n.address_book.show_contact.show_address_text}
 				</div>
-				<div class="text-sm text-tertiary"
+				<div class="text-tertiary text-sm"
 					>{replacePlaceholders($i18n.address_book.show_contact.add_first_address, {
 						contactName: contact.name
 					})}</div

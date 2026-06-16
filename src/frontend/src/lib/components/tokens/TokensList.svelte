@@ -165,7 +165,7 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-						<div class="transition-colors duration-300 hover:bg-primary">
+						<div class="hover:bg-primary transition-colors duration-300">
 							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
@@ -222,7 +222,7 @@
 
 					{#each enableMoreTokensWithKey as { tokenOrGroup, key } (key)}
 						<div class="overflow-hidden rounded-xl">
-							<div class="transition-colors duration-300 hover:bg-primary">
+							<div class="hover:bg-primary transition-colors duration-300">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />
 								{/if}

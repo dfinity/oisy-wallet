@@ -13,7 +13,7 @@
 </script>
 
 <div
-	class="absolute top-0 right-0 bottom-0 left-0 z-1 m-auto h-9 w-9 rounded-lg bg-surface shadow-sm"
+	class="bg-surface absolute top-0 right-0 bottom-0 left-0 z-1 m-auto h-9 w-9 rounded-lg shadow-sm"
 >
 	<Button
 		ariaLabel={$i18n.swap.text.switch_tokens_button}

@@ -59,7 +59,7 @@
 
 <button
 	bind:this={button}
-	class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary hover:border-brand-primary"
+	class="dropdown-button border-primary hover:border-brand-primary h-[2.2rem] rounded-lg border border-solid"
 	class:opened={visible}
 	aria-label={ariaLabel}
 	data-tid={testId}
@@ -67,7 +67,7 @@
 	type="button"
 >
 	{#if nonNullish(triggerIcon)}
-		<span class="flex items-center text-secondary">
+		<span class="text-secondary flex items-center">
 			{@render triggerIcon()}
 		</span>
 	{/if}

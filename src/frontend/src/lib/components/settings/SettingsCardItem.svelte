@@ -26,7 +26,7 @@
 		<span class="flex">{@render key()}</span>
 		{#if hasInfoSlot && !permanentInfo}
 			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
+				class="text-tertiary ml-1 flex p-0.5 align-top"
 				onclick={() => (infoExpanded = !infoExpanded)}
 			>
 				<IconHelp size="18" />
@@ -38,5 +38,5 @@
 </div>
 
 {#if infoExpanded && hasInfoSlot}
-	<span class="mt-1 flex w-full text-sm text-tertiary" transition:slide>{@render info?.()}</span>
+	<span class="text-tertiary mt-1 flex w-full text-sm" transition:slide>{@render info?.()}</span>
 {/if}

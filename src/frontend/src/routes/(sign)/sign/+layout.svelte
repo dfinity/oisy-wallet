@@ -12,7 +12,7 @@
 </script>
 
 <main class="mx-auto flex w-full max-w-[576px] flex-col gap-y-6 px-5 pt-10">
-	<div class="hidden justify-center 1.5xs:flex"><OisyWalletLogoLink /></div>
+	<div class="1.5xs:flex hidden justify-center"><OisyWalletLogoLink /></div>
 
 	{@render children()}
 </main>

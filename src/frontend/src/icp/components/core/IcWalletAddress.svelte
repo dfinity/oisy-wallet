@@ -14,7 +14,7 @@
 		>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
 	><Copy inline text={$i18n.wallet.text.address_copied} value={$icrcAccountIdentifierText ?? ''} />
 
-	<p class="pt-2 break-normal text-tertiary">
+	<p class="text-tertiary pt-2 break-normal">
 		{$i18n.wallet.text.icp_deposits}
 	</p>
 </div>

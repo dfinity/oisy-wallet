@@ -10,7 +10,7 @@
 
 <div aria-hidden="true">
 	<div
-		class="aspect-square rounded-full bg-disabled-alt"
+		class="bg-disabled-alt aspect-square rounded-full"
 		class:animate-pulse={!isIOS()}
 		class:w-[52px]={size === 'small'}
 		class:w-[64px]={size === 'big'}

@@ -31,7 +31,7 @@
 
 <StakeContentSection>
 	{#snippet title()}
-		<div class="flex w-full items-center gap-3 border-b border-secondary pb-4">
+		<div class="border-secondary flex w-full items-center gap-3 border-b pb-4">
 			<h4 class="flex flex-1">{$i18n.stake.text.vault_info}</h4>
 
 			<ExternalLink
@@ -47,7 +47,7 @@
 	{/snippet}
 
 	{#snippet content()}
-		<p class="mb mt-4 text-sm text-secondary">
+		<p class="mb text-secondary mt-4 text-sm">
 			{replacePlaceholders($i18n.stake.text.vault_description, {
 				$asset_symbol: vault.token.assetSymbol
 			})}
@@ -55,7 +55,7 @@
 
 		<List>
 			<ListItem>
-				<span class="text-sm text-secondary">
+				<span class="text-secondary text-sm">
 					{$i18n.networks.network}
 				</span>
 
@@ -65,7 +65,7 @@
 			</ListItem>
 
 			<ListItem>
-				<span class="text-sm text-secondary">
+				<span class="text-secondary text-sm">
 					{$i18n.core.text.asset}
 				</span>
 
@@ -81,7 +81,7 @@
 			</ListItem>
 
 			<ListItem>
-				<span class="text-sm text-secondary">
+				<span class="text-secondary text-sm">
 					{$i18n.stake.text.vault_address}
 				</span>
 
@@ -100,7 +100,7 @@
 			</ListItem>
 
 			<ListItem>
-				<span class="text-sm text-secondary">
+				<span class="text-secondary text-sm">
 					{$i18n.stake.text.protocol}
 				</span>
 
@@ -111,7 +111,7 @@
 
 			{#if nonNullish(vault.totalValueLocked)}
 				<ListItem>
-					<span class="text-sm text-secondary">
+					<span class="text-secondary text-sm">
 						{$i18n.stake.text.total_value_locked}
 					</span>
 

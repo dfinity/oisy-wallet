@@ -86,7 +86,7 @@
 
 		{#if nonNullish(nft) && nonNullish(nftDisplayImageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
-				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
+				<div class="border-off-white relative flex h-[90%] overflow-hidden rounded-xl border-2">
 					<NftDisplayGuard
 						location={{
 							source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
@@ -117,7 +117,7 @@
 	<div class="bg-primary p-4">
 		<div class="flex items-center gap-2">
 			<button
-				class="pointer-events-auto flex text-brand-primary"
+				class="text-brand-primary pointer-events-auto flex"
 				aria-label={$i18n.core.alt.up_one_level}
 				onclick={() => goto(parentUrl)}
 			>

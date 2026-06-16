@@ -234,7 +234,7 @@
 										>{$i18n.swap.text.swap_is_not_offered}</div
 									>
 								{:else}
-									<div class="flex gap-3 text-tertiary">
+									<div class="text-tertiary flex gap-3">
 										<TokenInputAmountExchange
 											amount={swapAmountsLoading ? 0 : receiveAmount}
 											exchangeRate={$destinationTokenExchangeRate}

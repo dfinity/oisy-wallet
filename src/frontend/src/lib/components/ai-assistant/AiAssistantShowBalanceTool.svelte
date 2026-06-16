@@ -42,7 +42,7 @@
 	);
 </script>
 
-<div class="flex w-full flex-col rounded-lg border-brand-subtle-20 bg-brand-subtle-10">
+<div class="border-brand-subtle-20 bg-brand-subtle-10 flex w-full flex-col rounded-lg">
 	<AiAssistantShowBalanceToolCard
 		{...mainCard}
 		{...nonNullish(secondaryCards) &&

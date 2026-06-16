@@ -85,7 +85,7 @@
 			type="card"
 		>
 			<div
-				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
+				class="border-brand-subtle-20 bg-brand-subtle-10 relative grid aspect-square gap-2 overflow-hidden rounded-xl border p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}
 				class:grid-cols-2={collection.nfts.length > 1}
 				class:opacity-50={disabled}
@@ -94,13 +94,13 @@
 					class="-from-100% absolute z-1 m-[1px] h-full w-full bg-linear-to-tl from-[#382792A6] to-[#00000000] to-45% opacity-20"
 				>
 				</span>
-				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
+				<span class="bg-secondary-alt absolute z-0 h-full w-full"></span>
 
 				{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 					{@const nftDisplayImageUrl = getNftDisplayImageUrl(nft)}
 
 					{#if index < 4 && nonNullish(nftDisplayImageUrl)}
-						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
+						<div class="bg-secondary-alt relative aspect-square overflow-hidden rounded-lg">
 							<BgImg
 								imageUrl={nftDisplayImageUrl}
 								shadow="inset"
@@ -130,7 +130,7 @@
 		{/if}
 
 		{#if isSpam}
-			<div class="absolute top-2 left-2 text-warning-primary">
+			<div class="text-warning-primary absolute top-2 left-2">
 				<IconAlertOctagon size="24" />
 			</div>
 		{/if}

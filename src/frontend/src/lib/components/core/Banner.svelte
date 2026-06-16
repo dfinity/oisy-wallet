@@ -11,7 +11,7 @@
 
 {#if STAGING && envBannerVisible}
 	<div
-		class="test-banner fixed top-0 left-1/2 flex max-w-screen-md -translate-x-1/2 justify-between gap-4 border-4 border-solid border-black bg-error-primary"
+		class="test-banner bg-error-primary fixed top-0 left-1/2 flex max-w-screen-md -translate-x-1/2 justify-between gap-4 border-4 border-solid border-black"
 	>
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
@@ -21,7 +21,7 @@
 	</div>
 {:else if BETA && envBannerVisible}
 	<div
-		class="fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		class="bg-primary fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>

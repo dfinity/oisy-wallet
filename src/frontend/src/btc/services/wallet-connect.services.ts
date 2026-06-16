@@ -180,7 +180,6 @@ const safeOutputAddress = ({
 		return btcAddressLib.fromOutputScript(Buffer.from(script), network);
 	} catch (_: unknown) {
 		// Non-standard / unparsable scripts (e.g. OP_RETURN) have no address representation.
-		return undefined;
 	}
 };
 

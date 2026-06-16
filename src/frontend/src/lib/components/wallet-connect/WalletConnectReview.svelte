@@ -151,7 +151,7 @@
 					})}:
 				</p>
 
-				<article class="mt-4 rounded-xs bg-disabled p-4">
+				<article class="bg-disabled mt-4 rounded-xs p-4">
 					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>

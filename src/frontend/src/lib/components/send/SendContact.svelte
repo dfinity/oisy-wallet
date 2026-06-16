@@ -37,7 +37,7 @@
 	{/snippet}
 
 	{#snippet descriptionEnd()}
-		<div class="hidden text-brand-primary group-hover:block">
+		<div class="text-brand-primary hidden group-hover:block">
 			{$i18n.send.text.send}
 		</div>
 	{/snippet}

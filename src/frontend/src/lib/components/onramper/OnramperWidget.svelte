@@ -158,7 +158,7 @@
 	<BuyUnavailableNotice />
 {:else}
 	<div
-		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
+		class="bg-surface text-brand-primary absolute top-0 right-0 bottom-0 left-0 transition-all duration-500 ease-in-out"
 		class:invisible={themeLoaded && nonNullish(src)}
 		class:opacity-0={themeLoaded && nonNullish(src)}
 		class:opacity-100={!themeLoaded || !nonNullish(src)}

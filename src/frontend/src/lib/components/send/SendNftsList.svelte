@@ -59,7 +59,7 @@
 
 	<div class="flex items-center">
 		<button
-			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
+			class="dropdown-button border-primary h-[2.2rem] rounded-lg border border-solid"
 			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			onclick={onSelectNetwork}
 		>

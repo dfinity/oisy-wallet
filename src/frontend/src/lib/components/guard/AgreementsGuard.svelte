@@ -69,7 +69,7 @@
 
 {#if Object.keys(initialAgreementsToAccept).length > 0}
 	<div
-		class="fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		class="bg-primary fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg"
 	>
 		<AgreementsBanner agreementsToAccept={initialAgreementsToAccept} />
 	</div>

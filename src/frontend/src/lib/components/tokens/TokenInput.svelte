@@ -109,7 +109,7 @@
 	<div class="space-between mb-2 flex justify-between text-sm font-bold">
 		{@render title?.()}
 		{#if showTokenNetwork && nonNullish(token)}
-			<div class="flex text-xs font-normal text-tertiary">
+			<div class="text-tertiary flex text-xs font-normal">
 				<span class="mr-1 text-sm">On {token.network.name}</span>
 				<NetworkLogo network={token.network} />
 			</div>
@@ -160,7 +160,7 @@
 			{/if}
 		</div>
 
-		<div class="h-3/4 w-[1px] bg-disabled"></div>
+		<div class="bg-disabled h-3/4 w-[1px]"></div>
 
 		<button class="flex h-full gap-1 px-3" disabled={!isSelectable} onclick={onClick}>
 			{#if token}
@@ -169,7 +169,7 @@
 			{:else}
 				<span
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
-					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
+					class="bg-brand-primary text-primary-inverted flex items-center justify-center rounded-full"
 				>
 					<IconPlus />
 				</span>
@@ -189,5 +189,5 @@
 </div>
 
 {#if nonNullish(error)}
-	<p class="pb-2 text-error-primary" transition:slide={SLIDE_DURATION}>{error.message}</p>
+	<p class="text-error-primary pb-2" transition:slide={SLIDE_DURATION}>{error.message}</p>
 {/if}

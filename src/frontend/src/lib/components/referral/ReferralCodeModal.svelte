@@ -53,7 +53,7 @@
 			{#if nonNullish(referralCode)}
 				<QRCode value={referralUrl}>
 					{#snippet logo()}
-						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
+						<div class="bg-primary flex items-center justify-center rounded-lg p-2">
 							<IconAstronautHelmet />
 						</div>
 					{/snippet}
@@ -64,7 +64,7 @@
 		</div>
 
 		{#if nonNullish(referralCode)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
+			<div class="bg-brand-subtle-20 flex items-center justify-between gap-4 rounded-lg px-3 py-2">
 				<output class="break-all">{referralUrl}</output>
 				<div class="flex gap-4">
 					<ShareButton shareAriaLabel={referralUrl} testId={REFERRAL_CODE_SHARE_BUTTON} />
@@ -76,7 +76,7 @@
 				</div>
 			</div>
 
-			<span class="mb-6 block w-full pt-3 text-center text-sm text-tertiary">
+			<span class="text-tertiary mb-6 block w-full pt-3 text-center text-sm">
 				{nonNullish(numberOfReferrals) && numberOfReferrals > 0
 					? replacePlaceholders($i18n.referral.invitation.text.referred_amount, {
 							$amount: numberOfReferrals.toString()

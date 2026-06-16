@@ -68,7 +68,7 @@
 	</div>
 
 	{#if nonNullish(remainingTimeMs)}
-		<span class="mt-2 block w-full text-center text-sm text-tertiary">
+		<span class="text-tertiary mt-2 block w-full text-center text-sm">
 			{$i18n.settings.text.session_expires_in}
 			{formatDuration(remainingTimeMs)}
 		</span>

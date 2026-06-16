@@ -108,7 +108,7 @@
 		<span class="inline-flex items-center">
 			{$i18n.settings.text.export_data}
 			<button
-				class="ml-1 flex p-0.5 align-top text-tertiary"
+				class="text-tertiary ml-1 flex p-0.5 align-top"
 				onclick={() => (helpExpanded = !helpExpanded)}
 			>
 				<IconHelp size="18" />
@@ -117,7 +117,7 @@
 	{/snippet}
 
 	{#if helpExpanded}
-		<span class="-mt-3 mb-3 flex w-full text-sm text-tertiary" transition:slide>
+		<span class="text-tertiary -mt-3 mb-3 flex w-full text-sm" transition:slide>
 			<span>
 				{$i18n.settings.text.export_data_description}
 
@@ -136,7 +136,7 @@
 		</span>
 	{/if}
 
-	<h5 class="text-xs font-semibold tracking-wide text-tertiary uppercase">
+	<h5 class="text-tertiary text-xs font-semibold tracking-wide uppercase">
 		{$i18n.settings.text.export_basic}
 	</h5>
 
@@ -171,7 +171,7 @@
 		{/snippet}
 	</SettingsCardItem>
 
-	<h5 class="mt-5 text-xs font-semibold tracking-wide text-tertiary uppercase">
+	<h5 class="text-tertiary mt-5 text-xs font-semibold tracking-wide uppercase">
 		{$i18n.settings.text.export_extended}
 	</h5>
 

@@ -59,7 +59,7 @@
 				/>
 
 				{#if type !== 'earnings-card'}
-					<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
+					<button class="text-tertiary p-0.5" onclick={() => (infoExpanded = !infoExpanded)}>
 						<IconHelp size="18" />
 					</button>
 				{/if}
@@ -67,7 +67,7 @@
 		</div>
 
 		{#if infoExpanded}
-			<span class="mt-1 w-full text-sm text-tertiary" transition:slide>
+			<span class="text-tertiary mt-1 w-full text-sm" transition:slide>
 				{$i18n.rewards.requirements.network_bonus_info}
 				<ExternalLink
 					ariaLabel={$i18n.rewards.text.learn_more}

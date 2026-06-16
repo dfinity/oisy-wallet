@@ -17,14 +17,14 @@
 </script>
 
 {#if addresses.length > 0}
-	<span class="absolute -right-1 -bottom-1 z-0 size-5 rounded-full bg-primary md:size-5.5">
+	<span class="bg-primary absolute -right-1 -bottom-1 z-0 size-5 rounded-full md:size-5.5">
 		{#if nonNullish(selectedAddress) && nonNullish(selectedAddressType)}
 			<IconAddressType addressType={selectedAddressType} />
 		{:else if addresses.length === 1}
 			<IconAddressType addressType={addresses[0].addressType} />
 		{:else}
 			<div
-				class="flex size-full items-center justify-center rounded-full border-1 border-secondary text-xs font-bold"
+				class="border-secondary flex size-full items-center justify-center rounded-full border-1 text-xs font-bold"
 				>{addresses.length}</div
 			>
 		{/if}

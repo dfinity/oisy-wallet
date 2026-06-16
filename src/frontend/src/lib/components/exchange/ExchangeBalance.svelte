@@ -85,7 +85,7 @@
 		{/if}
 	</output>
 	<span
-		class="flex cursor-pointer flex-col items-center gap-4 text-xl font-medium text-brand-secondary-alt"
+		class="text-brand-secondary-alt flex cursor-pointer flex-col items-center gap-4 text-xl font-medium"
 		ondblclick={() =>
 			setPrivacyMode({
 				enabled: !$isPrivacyMode,

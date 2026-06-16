@@ -140,7 +140,7 @@
 	</ul>
 
 	{#if isCapped}
-		<p class="text-xs text-tertiary">
+		<p class="text-tertiary text-xs">
 			{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 				$shown: `${VISIBLE_LIMIT}`,
 				$total: `${filteredTokens.length}`

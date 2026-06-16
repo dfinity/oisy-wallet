@@ -60,9 +60,9 @@
 </script>
 
 <div class=" mb-4 overflow-y-auto overscroll-contain" data-tid={SWAP_MODAL_SELECT_PROVIDER_STEP}>
-	<div class="flex w-full flex-row justify-between border-b border-solid border-primary pb-2">
-		<span class="text-sm text-tertiary">{$i18n.swap.text.swap_provider}</span>
-		<span class="text-sm text-tertiary">{$i18n.swap.text.you_receive}</span>
+	<div class="border-primary flex w-full flex-row justify-between border-b border-solid pb-2">
+		<span class="text-tertiary text-sm">{$i18n.swap.text.swap_provider}</span>
+		<span class="text-tertiary text-sm">{$i18n.swap.text.you_receive}</span>
 	</div>
 	<ul class="list-none">
 		{#each $swapAmountsStore?.swaps ?? [] as swap (swap.provider)}

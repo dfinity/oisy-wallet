@@ -11,7 +11,7 @@
 	let { content, title, action }: Props = $props();
 </script>
 
-<div class="flex flex-col rounded-xl bg-surface p-4" in:fade>
+<div class="bg-surface flex flex-col rounded-xl p-4" in:fade>
 	<div class="relative flex w-full items-center justify-between">
 		{@render title()}
 

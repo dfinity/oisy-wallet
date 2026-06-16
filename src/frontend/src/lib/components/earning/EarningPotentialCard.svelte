@@ -33,7 +33,7 @@
 		</div>
 
 		{#if infoExpanded}
-			<div class="w-full text-sm text-tertiary" transition:slide>
+			<div class="text-tertiary w-full text-sm" transition:slide>
 				{$i18n.stake.text.earning_potential_hint}
 			</div>
 		{/if}

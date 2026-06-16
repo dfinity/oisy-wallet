@@ -113,7 +113,7 @@
 
 		<ContentWithToolbar>
 			<div class="-mt-3 mb-5 flex flex-col items-center justify-center gap-6 text-center">
-				<span class="flex text-warning-primary">
+				<span class="text-warning-primary flex">
 					<IconImageDownload />
 				</span>
 				{#if nonNullish(shortCollectionName)}
@@ -141,7 +141,7 @@
 				>
 			</p>
 
-			<div class="flex flex-col gap-2 rounded-lg border border-tertiary bg-secondary p-3 text-sm">
+			<div class="border-tertiary bg-secondary flex flex-col gap-2 rounded-lg border p-3 text-sm">
 				<div class="flex items-center gap-2">
 					<NftBadge {token} />
 					<span class="text-lg font-bold" data-tid={`${testId}-collectionTitle`}
@@ -224,7 +224,7 @@
 							{#if nonNullish(nft?.imageUrl)}
 								<span class="flex w-full items-start justify-end md:items-center">
 									#{getNftDisplayId(nft)} &nbsp;
-									<output class="truncate text-tertiary"
+									<output class="text-tertiary truncate"
 										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 									>
 									<AddressActions

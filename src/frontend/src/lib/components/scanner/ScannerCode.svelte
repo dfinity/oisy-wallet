@@ -183,12 +183,12 @@
 	onDestroy(() => clearTimeout(mobileErrorTimeout));
 </script>
 
-<div class="relative flex w-full flex-col bg-tertiary">
+<div class="bg-tertiary relative flex w-full flex-col">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
 	{#if showMobileError}
 		<div
-			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			class="border-error-solid bg-error-subtle-10 text-error-primary absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border p-3 text-center text-sm font-bold"
 			transition:slide={SLIDE_DURATION}
 		>
 			{$i18n.scanner.error.code_link_is_not_valid}

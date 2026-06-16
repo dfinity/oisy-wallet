@@ -131,7 +131,7 @@
 			{#if nonNullish(code)}
 				<QRCode value={qrCodeUrl}>
 					{#snippet logo()}
-						<div class="flex items-center justify-center rounded-full bg-primary p-2">
+						<div class="bg-primary flex items-center justify-center rounded-full p-2">
 							{#if codeType === QrCodeType.VIP}
 								<IconAstronautHelmet testId={VIP_QR_CODE_ICON} />
 							{:else}
@@ -144,7 +144,7 @@
 		</div>
 
 		{#if nonNullish(code)}
-			<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-20 px-3 py-2">
+			<div class="bg-brand-subtle-20 flex items-center justify-between gap-4 rounded-lg px-3 py-2">
 				<output class="break-all">{qrCodeUrl}</output>
 				<ReceiveCopy
 					address={qrCodeUrl}
@@ -153,7 +153,7 @@
 				/>
 			</div>
 
-			<span class="mb-4 block w-full pt-3 text-center text-sm text-tertiary">
+			<span class="text-tertiary mb-4 block w-full pt-3 text-center text-sm">
 				{#if 0 >= counter}
 					<span class="animate-pulse">{$i18n.vip.invitation.text.generating_new_code}</span>
 				{:else}

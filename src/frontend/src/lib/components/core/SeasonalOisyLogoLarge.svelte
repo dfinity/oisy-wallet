@@ -13,12 +13,12 @@
 
 <SeasonalGuard>
 	{#snippet halloween()}
-		<div class="invert-on-dark-theme logo-container hidden w-24 cursor-pointer 1.5xs:block">
+		<div class="invert-on-dark-theme logo-container 1.5xs:block hidden w-24 cursor-pointer">
 			<OisyLogoLargeHalloween description={ariaLabel} />
 		</div>
 	{/snippet}
 
-	<picture class="invert-on-dark-theme hidden w-24 1.5xs:block" aria-label={ariaLabel}>
+	<picture class="invert-on-dark-theme 1.5xs:block hidden w-24" aria-label={ariaLabel}>
 		<source media="(max-width: 639px)" srcset={oisyLogoSmall} />
 		<Img alt={ariaLabel} src={oisyLogoLarge} />
 	</picture>
