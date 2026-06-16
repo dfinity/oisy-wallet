@@ -1579,6 +1579,7 @@
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",
+			"signing_address": "",
 			"connected_apps": "Verbundene Apps",
 			"no_connected_apps": "Derzeit sind keine Apps verbunden.",
 			"wallet_connect": ""

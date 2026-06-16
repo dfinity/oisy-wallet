@@ -1,5 +1,6 @@
 import Busy from '$lib/components/ui/Busy.svelte';
 import { busy } from '$lib/stores/busy.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -58,7 +59,7 @@ describe('Busy', () => {
 
 		const { queryByText } = render(Busy);
 
-		expect(queryByText('Cancel')).not.toBeInTheDocument();
+		expect(queryByText(get(i18n).core.text.cancel)).not.toBeInTheDocument();
 	});
 
 	it('should not add close class when close is false', () => {
