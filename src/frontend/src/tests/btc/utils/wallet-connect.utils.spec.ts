@@ -1,10 +1,14 @@
-import { BTC_WALLET_CONNECT_DERIVATION_PATH } from '$btc/constants/wallet-connect.constants';
 import {
 	bitcoinSignedMessageHash,
 	buildBtcAccountAddresses,
 	deriveBtcPublicKey,
 	encodeRecoverableSignature
 } from '$btc/utils/wallet-connect.utils';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import * as signerEnv from '$env/signer.env';
 import * as signerConstants from '$lib/constants/signer.constants';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
@@ -121,36 +125,61 @@ describe('btc wallet-connect.utils', () => {
 		});
 
 		it('returns an empty list when the address is nullish', () => {
-			expect(buildBtcAccountAddresses({ address: undefined, principal: mockPrincipal })).toEqual(
-				[]
-			);
-			expect(buildBtcAccountAddresses({ address: null, principal: mockPrincipal })).toEqual([]);
+			expect(
+				buildBtcAccountAddresses({
+					address: undefined,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
+			expect(
+				buildBtcAccountAddresses({
+					address: null,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
 		});
 
-		it('builds the Reown getAccountAddresses payload for a P2WPKH address', () => {
+		it('builds the Reown getAccountAddresses payload for a P2WPKH address with the mainnet path', () => {
 			const expectedPublicKey = Buffer.from(
 				deriveBtcPublicKey({ principal: mockPrincipal })
 			).toString('hex');
 
 			const result = buildBtcAccountAddresses({
 				address: mockBtcAddress,
-				principal: mockPrincipal
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
 			});
 
 			expect(result).toEqual([
 				{
 					address: mockBtcAddress,
 					publicKey: expectedPublicKey,
-					path: BTC_WALLET_CONNECT_DERIVATION_PATH,
+					path: "m/84'/0'/0'/0/0",
 					intention: 'payment'
 				}
 			]);
 		});
 
+		it.each([BTC_TESTNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID])(
+			'advertises the testnet coin type for test networks',
+			(networkId) => {
+				const [{ path }] = buildBtcAccountAddresses({
+					address: mockBtcAddress,
+					principal: mockPrincipal,
+					networkId
+				});
+
+				expect(path).toBe("m/84'/1'/0'/0/0");
+			}
+		);
+
 		it('derives a 33-byte compressed public key', () => {
 			const [{ publicKey }] = buildBtcAccountAddresses({
 				address: mockBtcAddress,
-				principal: mockPrincipal
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
 			});
 
 			// Compressed secp256k1 public key: 33 bytes => 66 hex chars, prefixed with 0x02 / 0x03.

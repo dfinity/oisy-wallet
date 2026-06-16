@@ -59,20 +59,28 @@ interface WalletConnectGetAccountAddressesParams {
 }
 
 /**
- * Resolve the BTC address the request targets from its CAIP-2 chain id (`bip122:<genesis>`).
+ * Resolve the BTC network and address the request targets from its CAIP-2 chain id
+ * (`bip122:<genesis>`).
  *
- * Falls back to `undefined` when the chain id is unknown or its address is not loaded; the caller
- * then rejects the request.
+ * Falls back to a nullish address when the chain id is unknown or its address is not loaded; the
+ * caller then rejects the request. The network id is surfaced so the advertised BIP-84 derivation
+ * path can be chosen per network (mainnet vs test networks).
  */
-const resolveRequestAddress = ({
+const resolveRequestTarget = ({
 	request,
 	addresses
-}: Pick<WalletConnectGetAccountAddressesParams, 'request' | 'addresses'>): OptionBtcAddress => {
+}: Pick<WalletConnectGetAccountAddressesParams, 'request' | 'addresses'>): {
+	networkId: NetworkId | undefined;
+	address: OptionBtcAddress;
+} => {
 	const { chainId } = request.params;
 
 	const networkId: NetworkId | undefined = BIP122_CHAINS[chainId]?.networkId;
 
-	return nonNullish(networkId) ? addresses.get(networkId) : undefined;
+	return {
+		networkId,
+		address: nonNullish(networkId) ? addresses.get(networkId) : undefined
+	};
 };
 
 /**
@@ -97,9 +105,9 @@ export const getAccountAddresses = ({
 		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
 			const { id, topic } = request;
 
-			const address = resolveRequestAddress({ request, addresses });
+			const { address, networkId } = resolveRequestTarget({ request, addresses });
 
-			if (isNullish(address)) {
+			if (isNullish(address) || isNullish(networkId)) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
 				});
@@ -122,7 +130,8 @@ export const getAccountAddresses = ({
 			try {
 				const message = buildBtcAccountAddresses({
 					address,
-					principal: identity.getPrincipal()
+					principal: identity.getPrincipal(),
+					networkId
 				});
 
 				await listener.approveRequest({ id, topic, message });

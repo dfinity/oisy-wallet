@@ -94,6 +94,38 @@ describe('btc wallet-connect.services', () => {
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 		});
 
+		it('advertises the testnet derivation path for a testnet chain request', async () => {
+			const result = await getAccountAddresses({
+				listener: mockListener,
+				request: {
+					...mockRequest,
+					params: {
+						...mockRequest.params,
+						chainId: 'bip122:000000000933ea01ad0ee984209779ba'
+					}
+				} as unknown as WalletKitTypes.SessionRequest,
+				identity: mockIdentity,
+				addresses: new Map<NetworkId, OptionBtcAddress>([[BTC_TESTNET_NETWORK_ID, mockBtcAddress]])
+			});
+
+			expect(result).toEqual({ success: true });
+
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: mockRequest.id,
+				topic: mockRequest.topic,
+				message: [
+					{
+						address: mockBtcAddress,
+						publicKey: expect.any(String),
+						path: "m/84'/1'/0'/0/0",
+						intention: 'payment'
+					}
+				]
+			});
+
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+		});
+
 		it('rejects when the requested chain has no loaded address', async () => {
 			const result = await getAccountAddresses({
 				listener: mockListener,

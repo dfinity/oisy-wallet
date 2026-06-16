@@ -8,8 +8,9 @@ export interface WalletConnectBtcApproveRequestMessage {
 export interface WalletConnectBtcAccountAddress {
 	address: string;
 	publicKey: string;
-	// BIP-44 path of the returned address. OISY exposes the first external Native SegWit (BIP84)
-	// address, hence a static `m/84'/0'/0'/0/0`.
+	// BIP-84 path of the returned address. OISY exposes the first external Native SegWit (P2WPKH)
+	// address; the coin type is network-aware (`m/84'/0'/0'/0/0` on mainnet, `m/84'/1'/0'/0/0` on
+	// test networks).
 	path: string;
 	// Reown's address intention. OISY exposes a single P2WPKH address used both to receive and to
 	// pay, so it is advertised with the `payment` intention.

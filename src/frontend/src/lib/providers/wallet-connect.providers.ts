@@ -18,6 +18,11 @@ import {
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -79,8 +84,9 @@ export class WalletConnectClient extends WalletConnectListener {
 	readonly #btcAddressMainnet: OptionBtcAddress;
 	readonly #btcAddressTestnet: OptionBtcAddress;
 	readonly #btcAddressRegtest: OptionBtcAddress;
-	// Caller principal, used to derive the BTC public key advertised in the `bip122` session
-	// properties on approval. Nullish when no BTC address is loaded.
+	// Caller principal from the current auth identity, used to derive the BTC public key advertised
+	// in the `bip122` session properties on approval. Nullish when there is no identity (e.g. not
+	// signed in) — independent of whether a BTC address has been loaded.
 	readonly #btcPrincipal: Principal | undefined;
 
 	#onSessionProposalCallback: ((proposal: WalletKitTypes.SessionProposal) => void) | null = null;
@@ -249,8 +255,12 @@ export class WalletConnectClient extends WalletConnectListener {
 
 		const principal = this.#btcPrincipal;
 
-		return [this.#btcAddressMainnet, this.#btcAddressTestnet, this.#btcAddressRegtest].flatMap(
-			(address) => buildBtcAccountAddresses({ address, principal })
+		return [
+			{ address: this.#btcAddressMainnet, networkId: BTC_MAINNET_NETWORK_ID },
+			{ address: this.#btcAddressTestnet, networkId: BTC_TESTNET_NETWORK_ID },
+			{ address: this.#btcAddressRegtest, networkId: BTC_REGTEST_NETWORK_ID }
+		].flatMap(({ address, networkId }) =>
+			buildBtcAccountAddresses({ address, principal, networkId })
 		);
 	};
 
@@ -364,9 +374,10 @@ export class WalletConnectClient extends WalletConnectListener {
 		await this.#emitInitialBtcAddresses(btcAccountAddresses);
 	};
 
-	// Emit the initial `bip122_addressesChanged` event for the freshly approved session so dApps that
-	// listen for it receive the address set immediately. Dynamic address rotation is out of scope —
-	// OISY uses a static first-external address — so this fires only once, on connection.
+	// Emit the `bip122_addressesChanged` event so dApps listening for it receive the address set.
+	// This iterates ALL currently active sessions, so it re-emits the set on every session approval,
+	// not only on the first connection. That is intentional and harmless: OISY advertises a static
+	// first-external address, so re-emitting the same set to already-connected sessions is idempotent.
 	#emitInitialBtcAddresses = async (btcAccountAddresses: WalletConnectBtcAccountAddresses) => {
 		if (btcAccountAddresses.length === 0) {
 			return;
