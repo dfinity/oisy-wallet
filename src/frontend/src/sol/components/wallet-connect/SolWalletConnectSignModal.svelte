@@ -74,9 +74,10 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	let unreviewed = $state<boolean | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress, isApproval } = await decodeService({
+		({ amount, destination, tokenAddress, isApproval, unreviewed } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
@@ -188,6 +189,7 @@
 				onReject={reject}
 				source={address ?? ''}
 				token={reviewToken}
+				unreviewed={unreviewed ?? false}
 			/>
 		{/if}
 	{/key}
