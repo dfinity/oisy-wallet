@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Repay flow — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--green: #15a35b;
+				--amber: #d8890a;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+			}
+			.note {
+				max-width: 460px;
+				margin: 14px auto 0;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.modal {
+				max-width: 460px;
+				margin: 14px auto;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				overflow: hidden;
+			}
+			.head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 14px 16px;
+				border-bottom: 1px solid var(--line);
+			}
+			.head h2 {
+				font-size: 16px;
+				margin: 0;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+			}
+			.dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--line);
+			}
+			.dot.on {
+				background: var(--accent);
+			}
+			.body {
+				padding: 16px;
+			}
+			.field {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				padding: 12px;
+				margin-bottom: 12px;
+			}
+			.field .top {
+				display: flex;
+				justify-content: space-between;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.field .mid {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			input[type='number'] {
+				background: transparent;
+				border: 0;
+				color: var(--txt);
+				font-size: 24px;
+				width: 60%;
+				outline: none;
+			}
+			.selpill {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				padding: 6px 12px;
+				font-weight: 600;
+			}
+			.coin {
+				width: 24px;
+				height: 24px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 11px;
+				background: #2775ca;
+				color: #fff;
+			}
+			.infoline {
+				display: flex;
+				justify-content: space-between;
+				font-size: 12.5px;
+				color: var(--muted);
+				padding: 6px 2px;
+			}
+			.infoline b {
+				color: var(--txt);
+			}
+			.max {
+				color: var(--accent);
+				cursor: pointer;
+			}
+			button {
+				font: inherit;
+				cursor: pointer;
+			}
+			.btn {
+				width: 100%;
+				background: var(--accent);
+				color: #fff;
+				border: 0;
+				border-radius: 11px;
+				padding: 13px;
+				font-weight: 600;
+				font-size: 15px;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+			}
+			.foot {
+				padding: 0 16px 16px;
+				display: flex;
+				gap: 10px;
+			}
+			.btn.ghost {
+				background: transparent;
+				border: 1px solid var(--line);
+				color: var(--txt);
+			}
+			.hero {
+				text-align: center;
+				padding: 8px 0 14px;
+			}
+			.hero .big {
+				font-size: 30px;
+				font-weight: 700;
+			}
+			.hide {
+				display: none;
+			}
+			.rr {
+				display: flex;
+				justify-content: space-between;
+				padding: 9px 0;
+				border-top: 1px solid var(--line);
+				font-size: 13.5px;
+			}
+			.rr:first-child {
+				border-top: 0;
+			}
+			.hfbar {
+				height: 8px;
+				border-radius: 6px;
+				background: linear-gradient(90deg, #ef5d5d, var(--amber) 45%, var(--green));
+				position: relative;
+				margin: 8px 0;
+			}
+			.hfbar .mark {
+				position: absolute;
+				top: -3px;
+				width: 3px;
+				height: 14px;
+				background: #fff;
+				border-radius: 2px;
+				transition: left 0.15s;
+			}
+			.spin {
+				width: 34px;
+				height: 34px;
+				border: 3px solid var(--line);
+				border-top-color: var(--accent);
+				border-radius: 50%;
+				margin: 18px auto;
+				animation: s 1s linear infinite;
+			}
+			@keyframes s {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="note">
+			Wireframe — Repay flow. Current debt: 35,000 USDC. "Max (full debt)" fills principal + accrued
+			interest. Repaying improves the projected health factor.
+		</div>
+		<div class="modal">
+			<div class="head">
+				<h2 id="title">Repay</h2>
+				<div class="steps">
+					<span class="dot on" id="d0"></span><span class="dot" id="d1"></span
+					><span class="dot" id="d2"></span>
+				</div>
+			</div>
+			<div id="form">
+				<div class="body">
+					<div class="field">
+						<div class="top">
+							<span>You repay</span><span class="max" id="max">Max (full debt) 35,000 USDC</span>
+						</div>
+						<div class="mid">
+							<input id="amt" type="number" value="15000" /><span class="selpill"
+								><span class="coin">U</span>USDC</span
+							>
+						</div>
+						<div class="infoline" style="padding-top: 8px">
+							<span id="fiat">$15,000.00</span><span>Wallet: 40,000 USDC</span>
+						</div>
+					</div>
+					<div class="infoline"><span>Current debt</span><b>35,000 USDC</b></div>
+					<div class="infoline"><span>Debt after repay</span><b id="after">20,000 USDC</b></div>
+					<div class="infoline">
+						<span>Projected health factor</span><b id="hf" style="color: var(--green)">82%</b>
+					</div>
+					<div class="hfbar"><div class="mark" id="mark" style="left: 82%"></div></div>
+				</div>
+				<div class="foot"><button class="btn" id="toReview">Review</button></div>
+			</div>
+			<div id="review" class="hide">
+				<div class="body">
+					<div class="hero">
+						<div class="muted">You repay</div>
+						<div class="big" id="rAmt">15,000 USDC</div>
+						<div class="muted" id="rFiat">$15,000.00</div>
+					</div>
+					<div class="rr">
+						<span class="muted">Remaining debt</span><b id="rAfter">20,000 USDC</b>
+					</div>
+					<div class="rr">
+						<span class="muted">Projected health factor</span
+						><b id="rHf" style="color: var(--green)">82%</b>
+					</div>
+					<div class="rr"><span class="muted">Provider</span><b>Liquidium</b></div>
+				</div>
+				<div class="foot">
+					<button class="btn ghost" id="back">Back</button
+					><button class="btn" id="go">Repay</button>
+				</div>
+			</div>
+			<div id="progress" class="hide">
+				<div class="body" style="text-align: center">
+					<div class="spin"></div>
+					<div id="ptext">Submitting repayment…</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const amt = document.getElementById('amt'),
+				DEBT = 35000,
+				COLLAT = 67170,
+				LIQ = 0.8;
+			function hfFor(remaining) {
+				const ltv = remaining / COLLAT;
+				return Math.max(0, Math.round((1 - ltv / LIQ) * 100));
+			}
+			function col(h) {
+				return h < 20 ? '#ef5d5d' : h < 45 ? 'var(--amber)' : 'var(--green)';
+			}
+			function upd() {
+				const v = Math.min(DEBT, +amt.value || 0);
+				const rem = DEBT - v;
+				document.getElementById('fiat').textContent =
+					'$' + v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+				document.getElementById('after').textContent = rem.toLocaleString('en-US') + ' USDC';
+				const h = hfFor(rem);
+				const hf = document.getElementById('hf');
+				hf.textContent = h + '%';
+				hf.style.color = col(h);
+				document.getElementById('mark').style.left = h + '%';
+			}
+			amt.addEventListener('input', upd);
+			document.getElementById('max').onclick = () => {
+				amt.value = DEBT;
+				upd();
+			};
+			function show(id) {
+				['form', 'review', 'progress'].forEach((s, i) => {
+					document.getElementById(s).classList.toggle('hide', s !== id);
+					document
+						.getElementById('d' + i)
+						.classList.toggle('on', ['form', 'review', 'progress'].indexOf(id) >= i);
+				});
+			}
+			document.getElementById('toReview').onclick = () => {
+				const v = Math.min(DEBT, +amt.value || 0),
+					rem = DEBT - v,
+					h = hfFor(rem);
+				document.getElementById('rAmt').textContent = v.toLocaleString('en-US') + ' USDC';
+				document.getElementById('rFiat').textContent =
+					'$' + v.toLocaleString('en-US', { minimumFractionDigits: 2 });
+				document.getElementById('rAfter').textContent = rem.toLocaleString('en-US') + ' USDC';
+				const rh = document.getElementById('rHf');
+				rh.textContent = h + '%';
+				rh.style.color = col(h);
+				document.getElementById('title').textContent = 'Review repay';
+				show('review');
+			};
+			document.getElementById('back').onclick = () => {
+				document.getElementById('title').textContent = 'Repay';
+				show('form');
+			};
+			document.getElementById('go').onclick = () => {
+				document.getElementById('title').textContent = 'Repaying';
+				show('progress');
+				setTimeout(() => {
+					document.getElementById('ptext').textContent =
+						'Done — debt reduced, health factor improved.';
+					document.querySelector('.spin').style.display = 'none';
+				}, 1500);
+			};
+			upd();
+		</script>
+	</body>
+</html>
