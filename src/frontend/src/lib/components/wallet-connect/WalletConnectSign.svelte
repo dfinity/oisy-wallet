@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import BtcWalletConnectSignModal from '$btc/components/wallet-connect/BtcWalletConnectSignModal.svelte';
+	import BtcWalletConnectSignPsbtModal from '$btc/components/wallet-connect/BtcWalletConnectSignPsbtModal.svelte';
+	import { SESSION_REQUEST_BTC_SIGN_PSBT } from '$btc/constants/wallet-connect.constants';
 	import { BIP122_CHAINS } from '$env/bip122-chains.env';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -62,7 +64,11 @@
 		{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
 			<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
 		{:else if nonNullish(btcChain)}
-			<BtcWalletConnectSignModal address={btcAddress} {listener} {request} />
+			{#if request.params.request.method === SESSION_REQUEST_BTC_SIGN_PSBT}
+				<BtcWalletConnectSignPsbtModal address={btcAddress} {listener} {request} />
+			{:else}
+				<BtcWalletConnectSignModal address={btcAddress} {listener} {request} />
+			{/if}
 		{/if}
 	{/key}
 {/if}
