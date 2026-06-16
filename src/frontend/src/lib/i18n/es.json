@@ -1577,6 +1577,7 @@
 			"network": "Red",
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"connected_apps": "Aplicaciones conectadas",
