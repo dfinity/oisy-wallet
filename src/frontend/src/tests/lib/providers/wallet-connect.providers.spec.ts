@@ -2,6 +2,7 @@ import { UNEXPECTED_ERROR, WALLET_CONNECT_METADATA } from '$lib/constants/wallet
 import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
@@ -28,7 +29,8 @@ describe('wallet-connect.providers', () => {
 			solAddressDevnet: mockSolAddress2,
 			btcAddressMainnet: mockBtcAddress,
 			btcAddressTestnet: undefined,
-			btcAddressRegtest: undefined
+			btcAddressRegtest: undefined,
+			btcPrincipal: mockPrincipal
 		};
 
 		const initParams = {

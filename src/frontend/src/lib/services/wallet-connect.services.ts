@@ -6,6 +6,7 @@ import {
 	solAddressDevnet,
 	solAddressMainnet
 } from '$lib/derived/address.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import {
 	onSessionDelete,
@@ -158,7 +159,8 @@ const initListener = async (): Promise<OptionWalletConnectListener> => {
 			solAddressDevnet: get(solAddressDevnet),
 			btcAddressMainnet: get(btcAddressMainnet),
 			btcAddressTestnet: get(btcAddressTestnet),
-			btcAddressRegtest: get(btcAddressRegtest)
+			btcAddressRegtest: get(btcAddressRegtest),
+			btcPrincipal: get(authIdentity)?.getPrincipal()
 		});
 
 		walletConnectListenerStore.set(newListener);

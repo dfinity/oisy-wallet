@@ -1,4 +1,13 @@
-import { SESSION_REQUEST_BTC_SIGN_MESSAGE } from '$btc/constants/wallet-connect.constants';
+import {
+	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+	SESSION_REQUEST_BTC_SIGN_MESSAGE
+} from '$btc/constants/wallet-connect.constants';
+import { getAccountAddresses } from '$btc/services/wallet-connect.services';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
@@ -6,6 +15,12 @@ import {
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
+import {
+	btcAddressMainnet,
+	btcAddressRegtest,
+	btcAddressTestnet
+} from '$lib/derived/address.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { modalUniversalScannerOpen, modalWalletConnect } from '$lib/derived/modal.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
@@ -86,6 +101,21 @@ export const onSessionRequest = async ({
 		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION:
 		case SESSION_REQUEST_BTC_SIGN_MESSAGE: {
 			modalStore.openWalletConnectSign({ id: Symbol(), data: sessionRequest });
+			return;
+		}
+		case SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES: {
+			// `getAccountAddresses` only returns already-public account data (address, public key,
+			// derivation path) with no signing or spend, so it is answered directly without a modal.
+			await getAccountAddresses({
+				listener,
+				request: sessionRequest,
+				identity: get(authIdentity),
+				addresses: new Map([
+					[BTC_MAINNET_NETWORK_ID, get(btcAddressMainnet)],
+					[BTC_TESTNET_NETWORK_ID, get(btcAddressTestnet)],
+					[BTC_REGTEST_NETWORK_ID, get(btcAddressRegtest)]
+				])
+			});
 			return;
 		}
 		case SESSION_REQUEST_ETH_SEND_TRANSACTION: {

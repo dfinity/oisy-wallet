@@ -18,3 +18,9 @@ export const BTC_ECDSA_KEY_ID: EcdsaKeyId = {
 // `encodeRecoverableSignature` is the guardrail: if this path is wrong the recovered public key
 // will not match and we throw instead of returning a bad signature.
 export const BTC_ECDSA_DERIVATION_PATH: string[] = ['\x00'];
+
+// BIP-44/BIP-84 path of the address OISY advertises to dApps via `getAccountAddresses`. OISY uses
+// the first external Native SegWit (P2WPKH) address; the actual key derivation on the signer uses
+// `BTC_ECDSA_DERIVATION_PATH` (the value here is the descriptor surfaced to the dApp, not the
+// signer input).
+export const BTC_WALLET_CONNECT_DERIVATION_PATH = "m/84'/0'/0'/0/0";
