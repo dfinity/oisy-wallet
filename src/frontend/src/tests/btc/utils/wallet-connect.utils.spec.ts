@@ -6,13 +6,22 @@ import { hmac } from '@noble/hashes/hmac';
 import { sha256 } from '@noble/hashes/sha2';
 import { etc, getPublicKey, sign } from '@noble/secp256k1';
 
-// `@noble/secp256k1` v2 needs an explicit sync HMAC implementation to sign. Only the tests sign
-// here (production only recovers public keys, which needs no HMAC), so we wire it in the spec.
-// eslint-disable-next-line local-rules/prefer-object-params -- external callback signature
-etc.hmacSha256Sync = (key: Uint8Array, ...messages: Uint8Array[]) =>
-	hmac(sha256, key, etc.concatBytes(...messages));
-
 describe('btc wallet-connect.utils', () => {
+	const previousHmacSha256Sync = etc.hmacSha256Sync;
+
+	beforeAll(() => {
+		// `@noble/secp256k1` v2 needs an explicit sync HMAC implementation to sign. Only the tests sign
+		// here (production only recovers public keys, which needs no HMAC), so we wire it for the suite
+		// and restore the previous value afterwards to avoid leaking state into other test files.
+		// eslint-disable-next-line local-rules/prefer-object-params -- external callback signature
+		etc.hmacSha256Sync = (key: Uint8Array, ...messages: Uint8Array[]) =>
+			hmac(sha256, key, etc.concatBytes(...messages));
+	});
+
+	afterAll(() => {
+		etc.hmacSha256Sync = previousHmacSha256Sync;
+	});
+
 	describe('bitcoinSignedMessageHash', () => {
 		it('produces the documented digest for a known message', () => {
 			// Reference vector for the standard Bitcoin signed-message hashing of "hello".

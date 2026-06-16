@@ -11,7 +11,7 @@ export const BTC_ECDSA_KEY_ID: EcdsaKeyId = {
 	name: SIGNER_ROOT_KEY_NAME
 };
 
-// REVIEW: derivation path passed to `generic_sign_with_ecdsa` to reproduce the key behind the
+// Note: derivation path passed to `generic_sign_with_ecdsa` to reproduce the key behind the
 // caller's P2WPKH address. OISY derives that address with the schema byte `0x00` (see
 // `deriveBtcAddress`), and chain-fusion-signer applies the caller principal context itself, so the
 // only application-level component we supply is that schema byte. The recovery step in

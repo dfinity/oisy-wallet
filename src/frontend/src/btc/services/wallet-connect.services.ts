@@ -67,6 +67,9 @@ export const sign = ({
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
 				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
 				return { success: false };
 			}
 
@@ -84,6 +87,9 @@ export const sign = ({
 				toastsError({
 					msg: { text: get(i18n).auth.error.no_internet_identity }
 				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
 				return { success: false };
 			}
 
