@@ -13,6 +13,7 @@ import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -94,7 +95,7 @@ describe('ExchangeBalance', () => {
 		it('should render "Your balance" label when balances are not all zero', () => {
 			const { getByText } = renderComponent();
 
-			expect(getByText('Your balance')).toBeInTheDocument();
+			expect(getByText(en.hero.text.available_balance)).toBeInTheDocument();
 		});
 
 		it('should render "Top up your wallet" label when all balances are zero', () => {
@@ -102,13 +103,13 @@ describe('ExchangeBalance', () => {
 
 			const { getByText } = renderComponent();
 
-			expect(getByText('Top up your wallet to start using it!')).toBeInTheDocument();
+			expect(getByText(en.hero.text.top_up)).toBeInTheDocument();
 		});
 
 		it('should render "hidden balance" message when hideBalance is true', () => {
 			const { getByText } = renderComponent({ hideBalance: true });
 
-			expect(getByText('Your balance is hidden')).toBeInTheDocument();
+			expect(getByText(en.hero.text.hidden_balance)).toBeInTheDocument();
 		});
 	});
 
