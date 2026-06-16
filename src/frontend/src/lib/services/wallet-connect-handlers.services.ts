@@ -1,6 +1,7 @@
 import {
 	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
-	SESSION_REQUEST_BTC_SIGN_MESSAGE
+	SESSION_REQUEST_BTC_SIGN_MESSAGE,
+	SESSION_REQUEST_BTC_SIGN_PSBT
 } from '$btc/constants/wallet-connect.constants';
 import { getAccountAddresses } from '$btc/services/wallet-connect.services';
 import {
@@ -99,7 +100,8 @@ export const onSessionRequest = async ({
 		case SESSION_REQUEST_PERSONAL_SIGN:
 		case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
 		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION:
-		case SESSION_REQUEST_BTC_SIGN_MESSAGE: {
+		case SESSION_REQUEST_BTC_SIGN_MESSAGE:
+		case SESSION_REQUEST_BTC_SIGN_PSBT: {
 			modalStore.openWalletConnectSign({ id: Symbol(), data: sessionRequest });
 			return;
 		}

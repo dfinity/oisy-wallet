@@ -1,6 +1,7 @@
 import type {
 	WalletConnectBtcAccountAddresses,
-	WalletConnectBtcApproveRequestMessage
+	WalletConnectBtcApproveRequestMessage,
+	WalletConnectBtcApproveSignPsbtMessage
 } from '$btc/types/wallet-connect';
 import type { WalletConnectEthApproveRequestMessage } from '$eth/types/wallet-connect';
 import type { WebSocketListener } from '$lib/types/listener';
@@ -13,6 +14,7 @@ import type { PairingTypes, SessionTypes } from '@walletconnect/types';
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectBtcApproveRequestMessage
 	| WalletConnectBtcAccountAddresses
+	| WalletConnectBtcApproveSignPsbtMessage
 	| WalletConnectEthApproveRequestMessage
 	| WalletConnectSolApproveRequestMessage;
 
