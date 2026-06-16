@@ -43,7 +43,7 @@
 				<CardAmount>{@render amount()}</CardAmount>
 			{/if}
 		</div>
-		<div class="text-tertiary flex gap-1" class:items-center={isNullish(description)}>
+		<div class="flex gap-1 text-tertiary" class:items-center={isNullish(description)}>
 			<span class="inline-flex items-center text-left">
 				{@render description?.()}
 			</span>

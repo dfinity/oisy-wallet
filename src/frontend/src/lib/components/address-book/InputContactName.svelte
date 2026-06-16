@@ -32,7 +32,7 @@
 
 <div style="--input-font-size: var(--text-base)" class="w-full">
 	<div
-		class="bg-brand-subtle-10 w-full rounded-lg p-4 pt-4 pb-6 text-sm md:p-6 md:text-base md:font-bold"
+		class="w-full rounded-lg bg-brand-subtle-10 p-4 pt-4 pb-6 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.contact.fields.name}
 		<InputText
@@ -45,7 +45,7 @@
 			bind:value={name}
 		/>
 		{#if isNameTooLong}
-			<p class="text-error-primary pt-2" transition:slide={SLIDE_DURATION}>
+			<p class="pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{replacePlaceholders($i18n.contact.error.name_too_long, {
 					$maxCharacters: `${CONTACT_MAX_NAME_LENGTH}`
 				})}</p

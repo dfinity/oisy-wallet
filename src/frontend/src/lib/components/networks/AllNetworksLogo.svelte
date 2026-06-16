@@ -18,7 +18,7 @@
 
 <div
 	style={`max-height: ${logoSizes[size]}`}
-	class="ring-disabled rounded-full ring"
+	class="rounded-full ring ring-disabled"
 	class:bg-primary={!transparent}
 >
 	<span class="invert-on-dark-theme inline-flex">

@@ -53,7 +53,7 @@
 </script>
 
 {#snippet shieldIcon()}
-	<div class="text-success-primary min-w-5 py-0 sm:py-0.5">
+	<div class="min-w-5 py-0 text-success-primary sm:py-0.5">
 		<IconShieldCheck size="20" />
 	</div>
 {/snippet}

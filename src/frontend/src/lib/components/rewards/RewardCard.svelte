@@ -62,7 +62,7 @@
 		</div>
 	</div>
 
-	<div class="bg-primary relative rounded-lg p-5">
+	<div class="relative rounded-lg bg-primary p-5">
 		<article class="flex h-full flex-col gap-3">
 			<section>
 				<div
@@ -82,14 +82,14 @@
 					</div>
 				</div>
 
-				<p class="text-tertiary m-0 mt-2 text-start text-xs">
+				<p class="m-0 mt-2 text-start text-xs text-tertiary">
 					<Html text={resolveText({ i18n: $i18n, path: reward.oneLiner })} />
 				</p>
 			</section>
 
 			<section class="mt-3 flex">
 				<div
-					class="bg-brand-primary text-primary-inverted rounded-xl px-3 py-2 font-semibold"
+					class="rounded-xl bg-brand-primary px-3 py-2 font-semibold text-primary-inverted"
 					data-tid={REWARDS_STATUS_BUTTON}
 					>{hasEnded ? $i18n.rewards.text.view_details : $i18n.rewards.text.check_status}
 				</div>

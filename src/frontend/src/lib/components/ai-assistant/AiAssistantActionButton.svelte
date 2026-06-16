@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class="bg-brand-subtle-10 hover:bg-brand-light mb-2 flex w-full items-start rounded-xl px-2 py-2 transition last:mb-0"
+	class="mb-2 flex w-full items-start rounded-xl bg-brand-subtle-10 px-2 py-2 transition last:mb-0 hover:bg-brand-light"
 	aria-label={title}
 	onclick={onClick}
 >
@@ -22,6 +22,6 @@
 
 	<span class="flex w-full flex-col text-left">
 		<span class="text-sm font-bold">{title}</span>
-		<span class="text-tertiary mt-0.5 block text-xs">{subtitle}</span>
+		<span class="mt-0.5 block text-xs text-tertiary">{subtitle}</span>
 	</span>
 </button>

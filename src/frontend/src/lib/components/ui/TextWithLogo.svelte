@@ -22,7 +22,7 @@
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>
 		{#if nonNullish(description)}
-			<span class="text-tertiary text-left text-xs leading-none">{description}</span>
+			<span class="text-left text-xs leading-none text-tertiary">{description}</span>
 		{/if}
 	</span>
 	{@render icon()}

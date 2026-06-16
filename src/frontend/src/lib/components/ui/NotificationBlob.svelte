@@ -12,7 +12,7 @@
 
 <div class="relative">
 	<div
-		class="shadow-primary bg-brand-primary absolute h-2 w-2 rounded-full shadow transition duration-250"
+		class="shadow-primary absolute h-2 w-2 rounded-full bg-brand-primary shadow transition duration-250"
 		class:-bottom-1={position.indexOf('bottom') >= 0}
 		class:-left-1={position.indexOf('left') >= 0}
 		class:-right-1={position.indexOf('right') >= 0}

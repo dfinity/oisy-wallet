@@ -78,7 +78,7 @@
 	<div class="bg-primary p-4">
 		<div class="flex items-center gap-2">
 			<button
-				class="text-brand-primary pointer-events-auto flex"
+				class="pointer-events-auto flex text-brand-primary"
 				aria-label={$i18n.core.alt.up_one_level}
 				onclick={() => goto(parentUrl)}
 			>

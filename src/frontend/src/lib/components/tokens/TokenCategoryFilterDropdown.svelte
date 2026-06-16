@@ -60,7 +60,7 @@
 				styleClass="py-1 rounded-md pl-0.5 min-w-28"
 				transparent
 			>
-				<span class="text-brand-primary w-[20px] pt-0.75">
+				<span class="w-[20px] pt-0.75 text-brand-primary">
 					{#if isNullish(activeCategory)}
 						<IconCheck size="20" />
 					{/if}
@@ -81,7 +81,7 @@
 					styleClass="py-1 rounded-md pl-0.5 min-w-28"
 					transparent
 				>
-					<span class="text-brand-primary w-[20px] pt-0.75">
+					<span class="w-[20px] pt-0.75 text-brand-primary">
 						{#if activeCategory === category}
 							<IconCheck size="20" />
 						{/if}

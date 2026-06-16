@@ -38,7 +38,7 @@
 		<InputTextWithAction {name} autofocus={isDesktop()} {placeholder} bind:value />
 
 		{#if isError}
-			<p class="text-md text-error-primary mb-0 pt-2" transition:slide={SLIDE_DURATION}>
+			<p class="text-md mb-0 pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{error}
 			</p>
 		{/if}

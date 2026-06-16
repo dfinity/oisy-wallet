@@ -94,7 +94,7 @@
 					<LogoButton hover={false} styleClass="bg-secondary rounded-xl border border-disabled">
 						{#snippet logo()}
 							<div
-								class="bg-tertiary mr-2 flex size-[40px] items-center justify-center rounded-full"
+								class="mr-2 flex size-[40px] items-center justify-center rounded-full bg-tertiary"
 							>
 								<IconWalletConnect size="24" />
 							</div>

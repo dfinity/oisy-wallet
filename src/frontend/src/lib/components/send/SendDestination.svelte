@@ -46,7 +46,7 @@
 			{:else}
 				<SendContactName address={destination} contact={selectedContact} />
 
-				<span class="text-tertiary text-sm">{addressToDisplay}</span>
+				<span class="text-sm text-tertiary">{addressToDisplay}</span>
 			{/if}
 		{/snippet}
 

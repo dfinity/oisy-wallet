@@ -17,7 +17,7 @@
 </script>
 
 <button
-	class="bg-primary relative flex-1 rounded-lg p-4 pt-12 shadow-sm"
+	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}
@@ -40,7 +40,7 @@
 				>{resolveText({ i18n: $i18n, path: dAppName })}</p
 			>
 			<p
-				class="text-tertiary m-0 mt-2 text-start text-xs"
+				class="m-0 mt-2 text-start text-xs text-tertiary"
 				title={resolveText({ i18n: $i18n, path: oneLiner })}
 			>
 				{resolveText({ i18n: $i18n, path: oneLiner })}

@@ -21,7 +21,7 @@
 </script>
 
 <div
-	class={`border-disabled bg-secondary flex rounded-lg border px-2 py-3 items-${items}`}
+	class={`flex rounded-lg border border-disabled bg-secondary px-2 py-3 items-${items}`}
 	class:bg-brand-subtle-10={variant === 'info'}
 	class:bg-secondary={variant === 'default'}
 	class:border-brand-subtle-10={variant === 'info'}

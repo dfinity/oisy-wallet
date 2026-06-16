@@ -96,7 +96,7 @@
 		</ul>
 
 		{#if isCapped}
-			<p class="text-tertiary text-xs">
+			<p class="text-xs text-tertiary">
 				{replacePlaceholders($i18n.transaction.filter.showing_partial, {
 					$shown: `${VISIBLE_LIMIT}`,
 					$total: `${filteredContacts.length}`

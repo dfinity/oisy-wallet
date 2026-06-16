@@ -75,7 +75,7 @@
 				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 			>
 				<IconPlus />
-				<span class="xs:block hidden whitespace-nowrap">{$i18n.address_book.text.add_contact}</span
+				<span class="hidden whitespace-nowrap xs:block">{$i18n.address_book.text.add_contact}</span
 				></Button
 			>
 		</div>

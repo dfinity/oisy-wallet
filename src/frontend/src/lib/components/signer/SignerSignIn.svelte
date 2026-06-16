@@ -28,7 +28,7 @@
 
 <p class="mb-12 text-center">
 	<strong
-		><span class="text-success-primary relative -top-px mr-1 inline-block align-middle"
+		><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 			><IconShieldCheck size="16" /></span
 		>{replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)}</strong
 	>

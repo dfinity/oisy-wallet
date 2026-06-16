@@ -16,7 +16,7 @@
 				? $i18n.transactions.text.minter_transaction_history
 				: $i18n.transactions.text.transaction_history}
 		</p>
-		<p class="text-tertiary m-0 text-center">
+		<p class="m-0 text-center text-tertiary">
 			{$isIcMintingAccount
 				? $i18n.transactions.text.mint_burn_transactions_unavailable
 				: $i18n.transactions.text.buy_or_receive}

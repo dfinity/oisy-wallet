@@ -126,7 +126,7 @@
 			bind:inputElement
 		>
 			{#snippet innerEnd()}
-				<span class="bg-primary flex gap-1">
+				<span class="flex gap-1 bg-primary">
 					{#if notEmptyString(destination)}
 						<ButtonReset
 							onclick={() => {
@@ -145,7 +145,7 @@
 		</InputTextWithAction>
 
 		{#if isErrorState}
-			<p class="text-error-primary mt-4 mb-0" transition:slide={SLIDE_DURATION}>
+			<p class="mt-4 mb-0 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>
 		{/if}

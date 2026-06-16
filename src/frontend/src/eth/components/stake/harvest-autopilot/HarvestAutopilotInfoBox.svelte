@@ -13,7 +13,7 @@
 
 <StakeContentSection>
 	{#snippet title()}
-		<div class="border-secondary flex w-full items-center gap-3 border-b pb-4">
+		<div class="flex w-full items-center gap-3 border-b border-secondary pb-4">
 			<Logo size="md" src={stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo} />
 
 			<h4 class="flex flex-1">{$i18n.stake.info.harvest_autopilot.title}</h4>
@@ -31,12 +31,12 @@
 	{/snippet}
 
 	{#snippet content()}
-		<p class="text-secondary mt-4 text-sm">{$i18n.stake.info.harvest_autopilot.description}</p>
+		<p class="mt-4 text-sm text-secondary">{$i18n.stake.info.harvest_autopilot.description}</p>
 
 		<div class="mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
 			<FactBox>
 				{#snippet icon()}
-					<span class="bg-warning-subtle-20 text-primary rounded-full p-4">
+					<span class="rounded-full bg-warning-subtle-20 p-4 text-primary">
 						<IconContainer size="24" />
 					</span>
 				{/snippet}
@@ -52,7 +52,7 @@
 
 			<FactBox>
 				{#snippet icon()}
-					<span class="bg-warning-subtle-20 text-primary rounded-full p-4">
+					<span class="rounded-full bg-warning-subtle-20 p-4 text-primary">
 						<IconClock size="24" />
 					</span>
 				{/snippet}
@@ -68,7 +68,7 @@
 
 			<FactBox>
 				{#snippet icon()}
-					<span class="bg-warning-subtle-20 text-primary rounded-full p-4">
+					<span class="rounded-full bg-warning-subtle-20 p-4 text-primary">
 						<IconLineChart size="24" />
 					</span>
 				{/snippet}

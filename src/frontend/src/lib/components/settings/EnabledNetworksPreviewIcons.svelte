@@ -36,7 +36,7 @@
 	{#if enabledList.length > numberOfIcons}
 		<div
 			style={`width: ${logoSizes.xxs}; height: ${logoSizes.xxs}`}
-			class="bg-primary ring-primary -ml-1 flex items-center justify-center overflow-hidden rounded-full text-center text-xs ring-1 transition-opacity duration-150"
+			class="-ml-1 flex items-center justify-center overflow-hidden rounded-full bg-primary text-center text-xs ring-1 ring-primary transition-opacity duration-150"
 		>
 			+{enabledList.length - numberOfIcons}
 		</div>

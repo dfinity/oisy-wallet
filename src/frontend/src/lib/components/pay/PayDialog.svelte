@@ -50,7 +50,7 @@
 <Responsive up="md">
 	<Modal onClose={close} testId={PAY_DIALOG}>
 		{#snippet title()}
-			<div class="text-primary flex items-center font-bold">
+			<div class="flex items-center font-bold text-primary">
 				{replaceOisyPlaceholders($i18n.pay.text.dialog_title)}
 			</div>
 		{/snippet}

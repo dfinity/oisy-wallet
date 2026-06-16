@@ -66,7 +66,7 @@
 </script>
 
 <button
-	class="text-brand-primary-alt font-semibold transition-all"
+	class="font-semibold text-brand-primary-alt transition-all"
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}

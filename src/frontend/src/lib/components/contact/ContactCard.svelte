@@ -111,7 +111,7 @@
 {/snippet}
 
 <div
-	class="hover:bg-brand-subtle-10 flex w-full flex-col rounded-xl p-2"
+	class="flex w-full flex-col rounded-xl p-2 hover:bg-brand-subtle-10"
 	class:bg-brand-subtle-10={expanded}
 	data-tid={CONTACT_CARD}
 >

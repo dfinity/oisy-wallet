@@ -29,12 +29,12 @@
 	]);
 </script>
 
-<div class="1.5md:grid-cols-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
+<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 1.5md:grid-cols-4">
 	{#each cards as { id, icon: IconCmp, label } (id)}
 		<div
-			class="feature-card border-brand-subtle-20 text-primary flex min-h-32 flex-col justify-between gap-4 rounded-xl border py-4 pr-12 pl-4 backdrop-blur-md sm:min-h-44 sm:rounded-3xl"
+			class="feature-card flex min-h-32 flex-col justify-between gap-4 rounded-xl border border-brand-subtle-20 py-4 pr-12 pl-4 text-primary backdrop-blur-md sm:min-h-44 sm:rounded-3xl"
 		>
-			<div class="text-brand-primary flex size-8 items-center justify-start sm:size-10">
+			<div class="flex size-8 items-center justify-start text-brand-primary sm:size-10">
 				<IconCmp size="32" />
 			</div>
 

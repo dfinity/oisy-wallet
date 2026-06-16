@@ -39,7 +39,7 @@
 	</p>
 </div>
 
-<div class="border-disabled bg-secondary mb-4 rounded-3xl border p-3 text-center">
+<div class="mb-4 rounded-3xl border border-disabled bg-secondary p-3 text-center">
 	{#if nonNullish($selectedToken)}
 		<LogoButton fullWidth hover={false} styleClass="mb-2">
 			{#snippet title()}

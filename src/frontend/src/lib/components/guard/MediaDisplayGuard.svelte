@@ -45,7 +45,7 @@
 	{/if}
 {:else}
 	<div
-		class="bg-brand-light-alt flex aspect-square h-full w-full flex-col items-center justify-center gap-2 text-center"
+		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-brand-light-alt text-center"
 		class:animate-pulse={loading}
 		class:bg-disabled-alt={loading}
 		class:rounded-t-xl={type === 'hero-banner'}
@@ -54,7 +54,7 @@
 		{#if showMessage && !loading}
 			<span class="text-tertiary"><IconShieldHalftone /></span>
 			{#if type !== 'nft-logo'}
-				<span class="text-tertiary max-w-40 text-sm"
+				<span class="max-w-40 text-sm text-tertiary"
 					>{isNullish(hasConsent)
 						? $i18n.nfts.text.img_consent_none
 						: $i18n.nfts.text.img_consent_disabled}</span

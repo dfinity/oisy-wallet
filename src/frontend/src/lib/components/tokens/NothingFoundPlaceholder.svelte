@@ -27,7 +27,7 @@
 			{title ?? $i18n.tokens.text.filter_nothing_found}
 		</p>
 		{#if notEmptyString(descriptionText)}
-			<p class="text-tertiary m-0 text-center">
+			<p class="m-0 text-center text-tertiary">
 				<Html text={descriptionText} />
 			</p>
 		{/if}

@@ -24,7 +24,7 @@
 	transparent
 >
 	{#if selectable}
-		<span class="text-brand-primary w-[20px] pt-0.75">
+		<span class="w-[20px] pt-0.75 text-brand-primary">
 			{#if selected}
 				<IconCheck size="20" />
 			{/if}

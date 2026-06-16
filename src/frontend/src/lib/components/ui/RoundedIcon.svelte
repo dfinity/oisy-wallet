@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class={`${positionClass} ${paddingClass} ${colorStyle} ${styleClass} ring-brand-subtle-20 flex items-center justify-center rounded-full ring-1`}
+	class={`${positionClass} ${paddingClass} ${colorStyle} ${styleClass} flex items-center justify-center rounded-full ring-1 ring-brand-subtle-20`}
 	aria-label={ariaLabel}
 	data-tid={testId}
 >

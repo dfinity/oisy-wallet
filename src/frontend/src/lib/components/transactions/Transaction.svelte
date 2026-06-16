@@ -129,7 +129,7 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} data-tid={testId} onclick={onClick}>
-	<span class="hover:bg-brand-subtle-10 block w-full rounded-xl px-2 py-2">
+	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
 				<span class="truncate" data-tid={TRANSACTION_CHILDREN_CONTAINER}>
@@ -198,7 +198,7 @@
 
 			{#snippet description()}
 				<span
-					class="text-primary flex min-w-0 flex-col items-center items-start text-xs sm:flex-row sm:text-sm"
+					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
 					<span class="inline-flex min-w-0 items-center gap-1">
 						{#if type === 'send' || type === 'deposit' || type === 'burn'}
@@ -211,7 +211,7 @@
 
 						<ContactOrToken identifier={address} showFallback />
 					</span>
-					<span class="text-tertiary truncate">
+					<span class="truncate text-tertiary">
 						<TransactionStatusComponent {status} />
 					</span>
 				</span>

@@ -92,14 +92,14 @@
 		/>
 	{:else}
 		<div
-			class="border-secondary flex w-[90%] items-center justify-center rounded-lg border border-dashed"
+			class="flex w-[90%] items-center justify-center rounded-lg border border-dashed border-secondary"
 			class:h-[60%]={universalScanner}
 			class:h-full={!universalScanner}
 			class:my-10={universalScanner}
 			class:sm:h-[calc(100%-280px)]={universalScanner}
 		>
 			{#if cameraPermissionDenied}
-				<div class="text-tertiary text-center text-sm">
+				<div class="text-center text-sm text-tertiary">
 					{$i18n.scanner.text.no_camera_permission}
 				</div>
 			{:else}

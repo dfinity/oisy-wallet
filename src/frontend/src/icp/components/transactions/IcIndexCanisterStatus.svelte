@@ -21,7 +21,7 @@
 <svelte:window onoisyIndexCanisterBalanceOutOfSync={onSyncPendingState} />
 
 {#if indexCanisterBalanceOutOfSync}
-	<div class="text-tertiary animate-pulse">
+	<div class="animate-pulse text-tertiary">
 		<span transition:blur>{$i18n.receive.icp.text.checking_index_canister_status}</span>
 	</div>
 {:else}

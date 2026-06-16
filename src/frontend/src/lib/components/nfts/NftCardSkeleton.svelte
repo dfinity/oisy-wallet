@@ -10,7 +10,7 @@
 
 {#each Array.from({ length: times }) as _, index (index)}
 	<div class="flex w-full flex-col">
-		<div class="bg-disabled-alt mb-2.5 flex aspect-square animate-pulse rounded-xl"></div>
+		<div class="mb-2.5 flex aspect-square animate-pulse rounded-xl bg-disabled-alt"></div>
 		<span class="mb-1"><SkeletonText /></span>
 		<span class="max-w-20"><SkeletonText /></span>
 	</div>

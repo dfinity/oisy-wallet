@@ -87,7 +87,7 @@
 	/>
 
 	{#if nonNullish(labelError)}
-		<p class="text-error-primary pt-2" transition:slide={SLIDE_DURATION}>
+		<p class="pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 			{replacePlaceholders($i18n.address.form.error.label_too_long, {
 				$maxCharacters: `${CONTACT_MAX_LABEL_LENGTH}`
 			})}

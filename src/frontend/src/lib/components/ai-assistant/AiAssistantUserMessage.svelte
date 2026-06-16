@@ -8,7 +8,7 @@
 
 <div class="mb-5 flex w-full justify-end text-sm">
 	<div
-		class="message bg-brand-primary text-primary-inverted flex w-[85%] flex-col justify-center rounded-xl rounded-tr-none px-3 py-4"
+		class="message flex w-[85%] flex-col justify-center rounded-xl rounded-tr-none bg-brand-primary px-3 py-4 text-primary-inverted"
 	>
 		{content}
 	</div>

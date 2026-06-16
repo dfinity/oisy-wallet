@@ -17,7 +17,7 @@
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="bg-brand-subtle-30 flex max-h-64 items-center justify-center">
+		<div class="flex max-h-64 items-center justify-center bg-brand-subtle-30">
 			<ImgBanner
 				alt={replacePlaceholders($i18n.dapps.alt.website, {
 					$dAppName: resolveText({ i18n: $i18n, path: dAppDescription.name })
@@ -38,7 +38,7 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<h6 class="text-brand-primary-alt text-sm font-bold">{$i18n.dapps.text.featured}</h6>
+				<h6 class="text-sm font-bold text-brand-primary-alt">{$i18n.dapps.text.featured}</h6>
 				<h4 class="text-primary-inverted"
 					>{resolveText({ i18n: $i18n, path: dAppDescription.name })}</h4
 				>

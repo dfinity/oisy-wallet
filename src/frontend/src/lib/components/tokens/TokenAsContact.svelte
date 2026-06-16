@@ -23,7 +23,7 @@
 		<span class="inline-block max-w-38 truncate">
 			{token.name}
 		</span>
-		<span class="text-tertiary inline-flex items-center">
+		<span class="inline-flex items-center text-tertiary">
 			<Divider />
 			<span class="inline-block max-w-20 truncate sm:max-w-29 lg:max-w-34">
 				{symbol}

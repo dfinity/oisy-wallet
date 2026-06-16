@@ -14,11 +14,11 @@
 		<span>{$i18n.info.bitcoin.title}</span>
 	</h4>
 
-	<p class="text-tertiary mt-3">
+	<p class="mt-3 text-tertiary">
 		{$i18n.info.bitcoin.description}
 	</p>
 
-	<p class="text-tertiary mt-3">
+	<p class="mt-3 text-tertiary">
 		{$i18n.info.bitcoin.note}
 	</p>
 

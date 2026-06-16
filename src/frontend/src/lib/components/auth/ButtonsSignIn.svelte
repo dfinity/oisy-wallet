@@ -45,7 +45,7 @@
 
 	{#if openIdEnabled}
 		<div
-			class="bg-brand-subtle-20 h-px w-[35px]"
+			class="h-px w-[35px] bg-brand-subtle-20"
 			class:md:h-[35px]={!fullWidth && rowBreakpoint === 'md'}
 			class:md:w-px={!fullWidth && rowBreakpoint === 'md'}
 			class:sm:h-[35px]={!fullWidth && rowBreakpoint === 'sm'}

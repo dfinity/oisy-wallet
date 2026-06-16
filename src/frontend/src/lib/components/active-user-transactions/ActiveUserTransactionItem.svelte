@@ -113,7 +113,7 @@
 				</div>
 
 				{#if isUnseen}
-					<span class="bg-brand-primary absolute top-0 left-0 h-2 w-2 rounded-full"></span>
+					<span class="absolute top-0 left-0 h-2 w-2 rounded-full bg-brand-primary"></span>
 				{/if}
 			</div>
 		{/snippet}

@@ -69,7 +69,7 @@
 	styleClass="text-sm text-primary"
 >
 	<ListItem>
-		<span class="text-tertiary flex whitespace-nowrap">{$i18n.networks.network}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.networks.network}</span>
 		{#if nonNullish(collection?.network)}
 			<NetworkWithLogo network={collection.network} />
 		{:else}
@@ -80,7 +80,7 @@
 	</ListItem>
 
 	<ListItem>
-		<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.collection_name}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
 			<span class="inline-flex min-w-0 items-center">
 				<span class="truncate">
@@ -100,7 +100,7 @@
 
 	{#if nonNullish(nft)}
 		<ListItem>
-			<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.token_id}</span>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_id}</span>
 			<span class="inline-flex min-w-0 items-center">
 				<span class="truncate">
 					{nft?.id}
@@ -111,7 +111,7 @@
 	{/if}
 
 	<ListItem>
-		<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.collection_address}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_address}</span>
 		{#if nonNullish(collection?.address) && nonNullish(collection?.network)}
 			<span class="flex items-center">
 				<output>{shortenWithMiddleEllipsis({ text: collection?.address })}</output>
@@ -135,7 +135,7 @@
 	</ListItem>
 
 	<ListItem>
-		<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.display_preference}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
 			<NftImageConsentPreference {collection} {source} />
 		{:else}
@@ -146,7 +146,7 @@
 	</ListItem>
 
 	<ListItem>
-		<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.token_standard}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
 			<span>
 				<span class="uppercase">{collection.standard.code}</span>
@@ -163,7 +163,7 @@
 
 	{#if nonNullish(nft)}
 		<ListItem>
-			<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.received_at}</span>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.received_at}</span>
 			{#if nonNullish(nft?.acquiredAt) && nft?.acquiredAt.getTime() > 0}
 				<output
 					>{formatSecondsToDate({
@@ -177,10 +177,10 @@
 		</ListItem>
 
 		<ListItem>
-			<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.media_url}</span>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.media_url}</span>
 			{#if nonNullish(nft?.imageUrl)}
 				<span class="inline-flex min-w-0 items-center">
-					<output class="text-tertiary truncate"
+					<output class="truncate text-tertiary"
 						>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 					>
 					<AddressActions
@@ -207,7 +207,7 @@
 					<div class="flex flex-col gap-1 text-sm">
 						{$i18n.nfts.text.media_stored_at_different_location}
 
-						<output class="text-tertiary truncate">
+						<output class="truncate text-tertiary">
 							{additionalMediaUrl}
 						</output>
 
@@ -231,7 +231,7 @@
 
 	{#if nonNullish(collection) && isCollectionErc1155(collection) && nonNullish(nft?.balance)}
 		<ListItem>
-			<span class="text-tertiary flex whitespace-nowrap">{$i18n.nfts.text.quantity}</span><span
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.quantity}</span><span
 				class="uppercase">{nft.balance}</span
 			>
 		</ListItem>
@@ -243,8 +243,8 @@
 			{#each sortedAttributes as trait, index (trait.traitType + index)}
 				<div class="flex">
 					<Badge variant="nft-trait"
-						><span class="text-tertiary font-normal">{trait.traitType}</span><br /><span
-							class="text-primary font-bold">{trait.value ?? ''}</span
+						><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span
+							class="font-bold text-primary">{trait.value ?? ''}</span
 						></Badge
 					>
 				</div>

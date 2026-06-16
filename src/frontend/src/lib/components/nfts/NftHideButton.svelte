@@ -111,7 +111,7 @@
 		>
 			<div class="flex w-full flex-col items-center text-center">
 				<span
-					class="bg-brand-primary mb-3 inline-flex aspect-square w-[56px] rounded-full p-3 text-white"
+					class="mb-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
 				>
 					<IconEyeOff size="32" />
 				</span>

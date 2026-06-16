@@ -20,7 +20,7 @@
 	let { provider, terms, showAllTerms = false }: Props = $props();
 </script>
 
-<div class="border-disabled bg-secondary my-4 rounded-lg border px-2 py-3">
+<div class="my-4 rounded-lg border border-disabled bg-secondary px-2 py-3">
 	<div class="flex justify-between">
 		<div class="flex items-center gap-3">
 			<Logo

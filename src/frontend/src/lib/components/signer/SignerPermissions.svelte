@@ -125,7 +125,7 @@
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="border-brand-subtle-10 bg-brand-subtle-20 mb-6 rounded-lg border p-6">
+		<div class="mb-6 rounded-lg border border-brand-subtle-10 bg-brand-subtle-20 p-6">
 			<p class="font-bold break-normal">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
@@ -141,7 +141,7 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="border-secondary-inverted bg-primary mb-10 flex gap-4 rounded-lg border p-4">
+			<div class="mb-10 flex gap-4 rounded-lg border border-secondary-inverted bg-primary p-4">
 				<IconAstronautHelmet />
 
 				<div>

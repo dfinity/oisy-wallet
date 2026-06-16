@@ -40,7 +40,7 @@
 			<QRCode value={address}>
 				{#snippet logo()}
 					{#if nonNullish(addressToken)}
-						<div class="bg-primary flex items-center justify-center rounded-lg p-2">
+						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 							<TokenLogo data={addressToken} />
 						</div>
 					{/if}

@@ -329,7 +329,7 @@
 					styleClass="rounded-full flex items-center justify-center"
 					variant="xs"
 				/>
-				<div class="text-primary text-center text-lg font-semibold">
+				<div class="text-center text-lg font-semibold text-primary">
 					{currentContact.name}
 				</div>
 			</div>

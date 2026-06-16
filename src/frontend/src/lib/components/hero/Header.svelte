@@ -56,7 +56,7 @@
 
 <header
 	style="view-transition-name: header"
-	class="max-w-screen-2.5xl pointer-events-none relative flex w-full items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
+	class="pointer-events-none relative flex w-full max-w-screen-2.5xl items-center justify-between gap-y-5 px-4 pt-6 md:px-8"
 	class:1.5xl:fixed={$authSignedIn}
 	class:1.5xl:inset-x-0={$authSignedIn}
 	class:1.5xl:top-0={$authSignedIn}

@@ -189,7 +189,7 @@
 					{$i18n.navigation.text.wallet_connect}
 
 					<span
-						class="text-tertiary-inverted group-hover:text-brand-primary-alt transition-colors duration-700"
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
 					>
 						<IconWalletConnect />
 					</span>
@@ -208,7 +208,7 @@
 					{replaceOisyPlaceholders($i18n.navigation.text.pay)}
 
 					<span
-						class="text-tertiary-inverted group-hover:text-brand-primary-alt transition-colors duration-700"
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
 					>
 						<IconPay />
 					</span>
@@ -241,7 +241,7 @@
 					{$i18n.navigation.text.support}
 
 					<span
-						class="text-tertiary-inverted group-hover:text-brand-primary-alt transition-colors duration-700"
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
 					>
 						<IconExternalLink size="16" />
 					</span>
@@ -299,7 +299,7 @@
 	<Hr />
 
 	<div
-		class="text-tertiary mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap"
+		class="mt-4 flex max-w-80 flex-wrap justify-center gap-x-2 gap-y-1 text-xs text-nowrap text-tertiary"
 	>
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />

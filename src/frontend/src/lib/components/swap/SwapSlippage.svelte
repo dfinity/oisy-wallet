@@ -54,10 +54,10 @@
 </script>
 
 <div class="mt-6 mb-2 flex items-center">
-	<span class="text-tertiary text-sm">{$i18n.swap.text.max_slippage}</span>
+	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
 
 	<button
-		class="hover:bg-brand-subtle-30 ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold"
+		class="ml-2 flex gap-1 rounded-md px-2 py-0.5 text-sm font-bold hover:bg-brand-subtle-30"
 		class:bg-brand-subtle-20={!slippageValueError && !slippageValueWarning}
 		class:bg-error-subtle-10={slippageValueError}
 		class:bg-warning-subtle-10={slippageValueWarning}
@@ -114,7 +114,7 @@
 			</div>
 
 			<div
-				class="text-tertiary mt-2 text-sm"
+				class="mt-2 text-sm text-tertiary"
 				class:text-error-primary={slippageValueError}
 				class:text-tertiary={!slippageValueError && !slippageValueWarning}
 				class:text-warning-primary={slippageValueWarning}

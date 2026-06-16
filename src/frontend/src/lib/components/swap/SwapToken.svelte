@@ -29,7 +29,7 @@
 	);
 </script>
 
-<div class="text-tertiary mb-1">
+<div class="mb-1 text-tertiary">
 	{@render title()}
 </div>
 
@@ -42,7 +42,7 @@
 				{formattedAmount}
 				{getTokenDisplaySymbol(token)}
 			</span>
-			<span class="text-tertiary text-sm">
+			<span class="text-sm text-tertiary">
 				<TokenInputAmountExchange {amount} disabled {exchangeRate} />
 			</span>
 		</div>

@@ -13,10 +13,10 @@
 	};
 </script>
 
-<div class="bg-secondary my-6 flex gap-4 rounded-xl p-2">
+<div class="my-6 flex gap-4 rounded-xl bg-secondary p-2">
 	<Checkbox inputId="harvest-stake-agreement" bind:checked on:nnsChange={handleCheckboxChange} />
 
-	<span class="text-tertiary text-sm">
+	<span class="text-sm text-tertiary">
 		<Html text={$i18n.stake.text.harvest_autopilot_stake_terms} />
 	</span>
 </div>

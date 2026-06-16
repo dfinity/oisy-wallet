@@ -12,7 +12,7 @@
 </script>
 
 <div
-	class="border-disabled flex w-full flex-col items-center justify-between rounded-xl border-solid p-4 sm:w-1/2"
+	class="flex w-full flex-col items-center justify-between rounded-xl border-solid border-disabled p-4 sm:w-1/2"
 	class:bg-brand-subtle-10={primaryStyle}
 	class:bg-secondary={!primaryStyle}
 	class:border={!primaryStyle}

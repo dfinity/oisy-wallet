@@ -55,7 +55,7 @@
 </script>
 
 <article
-	class="border-brand-subtle-20 bg-surface mb-2 flex min-h-96 flex-col rounded-lg border px-5 py-6"
+	class="mb-2 flex min-h-96 flex-col rounded-lg border border-brand-subtle-20 bg-surface px-5 py-6"
 >
 	{#if $authNotSignedIn}
 		<SignerSignIn />

@@ -56,11 +56,11 @@
 <form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSubmit}>
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
 		<Avatar name={editingContact?.name} variant="xl"></Avatar>
-		<div class="text-primary w-full text-2xl font-bold md:text-3xl">
+		<div class="w-full text-2xl font-bold text-primary md:text-3xl">
 			<InputContactName bind:contact={editingContact} bind:isValid={validName} />
 		</div>
 
-		<div class="bg-brand-subtle-10 mt-2 w-full rounded-lg px-3 py-4 text-sm md:px-5 md:text-base">
+		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<InputAddressAlias
 				disableAddressField={nonNullish(modalDataAddress)}
 				{disabled}

@@ -15,24 +15,24 @@
 
 <Value element="div" ref="address-info">
 	{#snippet label()}
-		<div class="text-primary mb-3 font-bold">
+		<div class="mb-3 font-bold text-primary">
 			{$i18n.address.types[address.addressType]}
 		</div>
 	{/snippet}
 
 	{#snippet content()}
-		<div class="bg-brand-subtle-10 flex items-center justify-between gap-4 rounded-lg px-3 py-3">
+		<div class="flex items-center justify-between gap-4 rounded-lg bg-brand-subtle-10 px-3 py-3">
 			<div class="h-8 w-8">
 				<IconAddressType addressType={address.addressType} size="32" />
 			</div>
 
 			<div class="flex-1 overflow-hidden px-2">
 				{#if notEmptyString(address.label)}
-					<div class="text-primary truncate text-sm font-bold">
+					<div class="truncate text-sm font-bold text-primary">
 						{address.label}
 					</div>
 				{/if}
-				<div class="text-primary text-sm break-all">
+				<div class="text-sm break-all text-primary">
 					{address.address}
 				</div>
 			</div>

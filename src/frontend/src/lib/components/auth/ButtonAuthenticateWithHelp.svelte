@@ -63,7 +63,7 @@
 	/>
 
 	<span
-		class="text-tertiary flex flex-col text-sm"
+		class="flex flex-col text-sm text-tertiary"
 		class:sm:w-85={!fullWidth}
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}

@@ -95,7 +95,7 @@
 	<div class="flex flex-1 flex-col justify-start">
 		<div class="mb-1">{resolveText({ i18n: $i18n, path: text })}</div>
 		<button
-			class="text-brand-primary-alt text-sm font-semibold"
+			class="text-sm font-semibold text-brand-primary-alt"
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 			})}
@@ -105,7 +105,7 @@
 		</button>
 	</div>
 	<div class="flex h-full items-start">
-		<button class="text-tertiary p-1" aria-label={$i18n.core.text.close} onclick={close}>
+		<button class="p-1 text-tertiary" aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose size="20" />
 		</button>
 	</div>

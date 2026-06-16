@@ -149,7 +149,7 @@
 
 {#if !sendCompleted}
 	{#if amountError || invalidDestination}
-		<p class="text-error-primary mb-2 text-center text-sm" transition:slide={SLIDE_DURATION}>
+		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 			{amountError
 				? $i18n.send.assertion.insufficient_funds
 				: $i18n.send.assertion.invalid_destination_address}
@@ -168,7 +168,7 @@
 	</Button>
 {:else}
 	<p
-		class="text-success-primary text-center text-sm"
+		class="text-center text-sm text-success-primary"
 		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
 	>
 		{$i18n.ai_assistant.text.send_token_succeeded}

@@ -18,15 +18,15 @@
 </script>
 
 <div class="flex flex-col items-center gap-3 px-2 py-4 text-center">
-	<div class="text-brand-primary w-16 [&_svg]:h-auto [&_svg]:w-full" aria-hidden="true">
+	<div class="w-16 text-brand-primary [&_svg]:h-auto [&_svg]:w-full" aria-hidden="true">
 		<IconAddressBook />
 	</div>
 
-	<p class="text-secondary text-sm">{$i18n.transaction.filter.contacts_empty_title}</p>
+	<p class="text-sm text-secondary">{$i18n.transaction.filter.contacts_empty_title}</p>
 
-	<p class="text-tertiary text-sm">
+	<p class="text-sm text-tertiary">
 		<strong
-			><span class="text-success-primary relative -top-px mr-1 inline-block align-middle"
+			><span class="relative -top-px mr-1 inline-block align-middle text-success-primary"
 				><IconShieldCheck size="16" /></span
 			>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
 		>{$i18n.transaction.filter.contacts_empty_description}<br />

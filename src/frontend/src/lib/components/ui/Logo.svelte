@@ -36,7 +36,7 @@
 
 <div
 	style={`width: ${sizePx}; height: ${sizePx};`}
-	class="ring-primary flex items-center justify-center overflow-hidden"
+	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
 	class:ease-in={!ios}

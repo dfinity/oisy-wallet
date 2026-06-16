@@ -30,7 +30,7 @@
 		<QRCode value={address.address}>
 			{#snippet logo()}
 				{#if nonNullish(address.addressType)}
-					<div class="bg-primary flex items-center justify-center rounded-lg p-2">
+					<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 						<IconAddressType addressType={address.addressType} size="48" />
 					</div>
 				{/if}

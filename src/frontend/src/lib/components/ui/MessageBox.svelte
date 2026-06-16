@@ -79,7 +79,7 @@
 		</div>
 		{#if closable}
 			<button
-				class="text-tertiary ml-auto p-0.5"
+				class="ml-auto p-0.5 text-tertiary"
 				aria-label={$i18n.core.text.close}
 				onclick={close}
 			>

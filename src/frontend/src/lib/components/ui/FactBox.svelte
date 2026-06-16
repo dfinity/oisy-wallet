@@ -21,6 +21,6 @@
 	{/if}
 
 	{#if nonNullish(description)}
-		<p class="text-tertiary text-xs">{@render description()}</p>
+		<p class="text-xs text-tertiary">{@render description()}</p>
 	{/if}
 </div>

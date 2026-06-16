@@ -13,7 +13,7 @@
 </script>
 
 <div>
-	<div class="text-primary flex items-center gap-3 font-bold">
+	<div class="flex items-center gap-3 font-bold text-primary">
 		<div class="text-primary">
 			{@render icon()}
 		</div>

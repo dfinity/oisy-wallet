@@ -12,10 +12,10 @@
 </script>
 
 <div
-	class="bg-primary pointer-events-auto fixed right-0 bottom-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl md:right-8 md:bottom-6 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
+	class="pointer-events-auto fixed right-0 bottom-0 flex h-full min-h-full w-full flex-col justify-between rounded-2xl bg-primary md:right-8 md:bottom-6 md:h-[calc(100vh-7.25rem)] md:min-h-[25rem] md:w-[22.5rem]"
 	transition:fade
 >
-	<div class="border-brand-subtle-10 flex items-center justify-between border-b-1 px-4 py-2">
+	<div class="flex items-center justify-between border-b-1 border-brand-subtle-10 px-4 py-2">
 		<IconAiAssistant />
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
@@ -25,7 +25,7 @@
 		</div>
 
 		<button
-			class="text-tertiary hover:text-primary transition-colors"
+			class="text-tertiary transition-colors hover:text-primary"
 			aria-label={$i18n.core.text.close}
 			onclick={aiAssistantStore.close}
 		>

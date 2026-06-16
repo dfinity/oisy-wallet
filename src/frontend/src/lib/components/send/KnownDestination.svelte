@@ -80,6 +80,6 @@
 			{/if}
 		</div>
 
-		<div class="text-brand-primary hidden group-hover:block">{$i18n.send.text.send_again}</div>
+		<div class="hidden text-brand-primary group-hover:block">{$i18n.send.text.send_again}</div>
 	{/snippet}
 </LogoButton>
