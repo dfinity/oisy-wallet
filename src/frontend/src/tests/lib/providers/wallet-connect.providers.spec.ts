@@ -1,3 +1,13 @@
+import {
+	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+	SESSION_REQUEST_BTC_SIGN_MESSAGE,
+	SESSION_REQUEST_BTC_SIGN_PSBT
+} from '$btc/constants/wallet-connect.constants';
+import {
+	BIP122_MAINNET_CHAINS_KEYS,
+	BIP122_REGTEST_CHAINS_KEYS,
+	BIP122_TESTNET_CHAINS_KEYS
+} from '$env/bip122-chains.env';
 import { UNEXPECTED_ERROR, WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
 import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -5,7 +15,17 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
-import { getSdkError } from '@walletconnect/utils';
+import type * as WalletConnectUtils from '@walletconnect/utils';
+import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
+
+vi.mock('@walletconnect/utils', async (importOriginal) => {
+	const actual = await importOriginal<typeof WalletConnectUtils>();
+
+	return {
+		...actual,
+		buildApprovedNamespaces: vi.fn()
+	};
+});
 
 describe('wallet-connect.providers', () => {
 	describe('WalletConnectClient', () => {
@@ -41,6 +61,7 @@ describe('wallet-connect.providers', () => {
 		const mockGetActiveSessions = vi.fn();
 		const mockDisconnectSession = vi.fn();
 		const mockRejectSession = vi.fn();
+		const mockApproveSession = vi.fn();
 		const mockRespondSessionRequest = vi.fn();
 		const mockPair = vi.fn();
 		const mockOn = vi.fn();
@@ -51,6 +72,7 @@ describe('wallet-connect.providers', () => {
 			getActiveSessions: mockGetActiveSessions,
 			disconnectSession: mockDisconnectSession,
 			rejectSession: mockRejectSession,
+			approveSession: mockApproveSession,
 			respondSessionRequest: mockRespondSessionRequest,
 			core: {
 				pairing: { pair: mockPair }
@@ -140,7 +162,84 @@ describe('wallet-connect.providers', () => {
 			});
 		});
 
-		describe.todo('approveSession', () => {});
+		describe('approveSession', () => {
+			const buildApprovedNamespacesMock = vi.mocked(buildApprovedNamespaces);
+
+			beforeEach(() => {
+				buildApprovedNamespacesMock.mockReturnValue({});
+			});
+
+			const approveAndGetSupportedNamespaces = async (
+				params: Parameters<typeof WalletConnectClient.init>[0]
+			) => {
+				const listener = await WalletConnectClient.init(params);
+
+				await listener.approveSession(mockProposal);
+
+				expect(buildApprovedNamespacesMock).toHaveBeenCalledOnce();
+
+				const [[{ supportedNamespaces }]] = buildApprovedNamespacesMock.mock.calls;
+
+				return supportedNamespaces;
+			};
+
+			it('should advertise a bip122 namespace when a BTC address is present', async () => {
+				const supportedNamespaces = await approveAndGetSupportedNamespaces(mockParams);
+
+				expect(supportedNamespaces.bip122).toEqual({
+					chains: BIP122_MAINNET_CHAINS_KEYS,
+					methods: [
+						SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
+						SESSION_REQUEST_BTC_SIGN_MESSAGE,
+						SESSION_REQUEST_BTC_SIGN_PSBT
+					],
+					events: ['bip122_addressesChanged'],
+					accounts: BIP122_MAINNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`)
+				});
+			});
+
+			it('should advertise the chains and accounts for every present BTC network', async () => {
+				const supportedNamespaces = await approveAndGetSupportedNamespaces({
+					...mockParams,
+					btcAddressTestnet: mockBtcAddress,
+					btcAddressRegtest: mockBtcAddress
+				});
+
+				expect(supportedNamespaces.bip122.chains).toEqual([
+					...BIP122_MAINNET_CHAINS_KEYS,
+					...BIP122_TESTNET_CHAINS_KEYS,
+					...BIP122_REGTEST_CHAINS_KEYS
+				]);
+
+				expect(supportedNamespaces.bip122.accounts).toEqual([
+					...BIP122_MAINNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`),
+					...BIP122_TESTNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`),
+					...BIP122_REGTEST_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`)
+				]);
+			});
+
+			it('should not advertise a bip122 namespace when no BTC address is present', async () => {
+				const supportedNamespaces = await approveAndGetSupportedNamespaces({
+					...mockParams,
+					btcAddressMainnet: undefined,
+					btcAddressTestnet: undefined,
+					btcAddressRegtest: undefined
+				});
+
+				expect(supportedNamespaces.bip122).toBeUndefined();
+			});
+
+			it('should approve the session with the built namespaces', async () => {
+				const listener = await WalletConnectClient.init(mockParams);
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockApproveSession).toHaveBeenCalledExactlyOnceWith({
+					id: mockProposal.id,
+					namespaces: {}
+				});
+			});
+		});
 
 		describe('rejectSession', () => {
 			it('should call rejectSession with the correct params', async () => {
