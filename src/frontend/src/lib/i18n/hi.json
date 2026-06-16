@@ -1577,6 +1577,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
+			"unreviewed_instructions": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"connected_apps": "जुड़े हुए ऐप्स",

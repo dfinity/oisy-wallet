@@ -1577,6 +1577,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dados HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"connected_apps": "Aplicativos conectados",

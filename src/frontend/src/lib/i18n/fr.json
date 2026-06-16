@@ -1577,6 +1577,7 @@
 			"network": "Réseau",
 			"amount": "Montant",
 			"hex_data": "Données HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
 			"sign_message": "Signer le message",
 			"connected_apps": "Applications connectées",

@@ -1577,6 +1577,7 @@
 			"network": "ネットワーク",
 			"amount": "数量",
 			"hex_data": "HEXデータ",
+			"unreviewed_instructions": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"connected_apps": "接続済みアプリ",
