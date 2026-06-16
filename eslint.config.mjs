@@ -23,6 +23,16 @@ export default [
 	},
 
 	{
+		// eslint 10's `no-useless-assignment` misreads Svelte 5 runes — e.g. `$bindable()`
+		// defaults in `$props()` destructuring and `$state` reassigned in an `$effect` — as
+		// dead assignments. Disable it for components; it still applies to plain .ts files.
+		files: ['**/*.svelte'],
+		rules: {
+			'no-useless-assignment': 'off'
+		}
+	},
+
+	{
 		files: ['src/frontend/src/**/*'],
 		rules: {
 			'local-rules/no-relative-imports': 'error'
