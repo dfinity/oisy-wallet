@@ -10,6 +10,7 @@ import type {
 } from '$btc/types/wallet-connect';
 import {
 	bitcoinSignedMessageHash,
+	buildBtcAccountAddresses,
 	deriveBtcPublicKey,
 	encodeRecoverableSignature
 } from '$btc/utils/wallet-connect.utils';
@@ -27,6 +28,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
+import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -54,6 +56,105 @@ export const decodeMessage = (request: WalletKitTypes.SessionRequest): string =>
 
 	return message ?? '';
 };
+
+interface WalletConnectGetAccountAddressesParams {
+	listener: OptionWalletConnectListener;
+	request: WalletKitTypes.SessionRequest;
+	identity: NullishIdentity;
+	// First-external P2WPKH address per BTC network. Keyed by network id so we can resolve the one
+	// matching the request's CAIP-2 chain id.
+	addresses: Map<NetworkId, OptionBtcAddress>;
+}
+
+/**
+ * Resolve the BTC network and address the request targets from its CAIP-2 chain id
+ * (`bip122:<genesis>`).
+ *
+ * Falls back to a nullish address when the chain id is unknown or its address is not loaded; the
+ * caller then rejects the request. The network id is surfaced so the advertised BIP-84 derivation
+ * path can be chosen per network (mainnet vs test networks).
+ */
+const resolveRequestTarget = ({
+	request,
+	addresses
+}: Pick<WalletConnectGetAccountAddressesParams, 'request' | 'addresses'>): {
+	networkId: NetworkId | undefined;
+	address: OptionBtcAddress;
+} => {
+	const { chainId } = request.params;
+
+	const networkId: NetworkId | undefined = BIP122_CHAINS[chainId]?.networkId;
+
+	return {
+		networkId,
+		address: nonNullish(networkId) ? addresses.get(networkId) : undefined
+	};
+};
+
+/**
+ * Respond to a Reown bitcoin `getAccountAddresses` request directly, without a user modal.
+ *
+ * The request only reveals the account's already-public BTC address, public key and derivation
+ * path — no signing and no spend — so it is answered automatically (mirroring how dApps also read
+ * it from `sessionProperties.bip122_getAccountAddresses` on approval). Rejects with the standard
+ * WalletConnect error when the targeted address or the identity is missing.
+ */
+export const getAccountAddresses = ({
+	listener,
+	request,
+	identity,
+	addresses
+}: WalletConnectGetAccountAddressesParams): Promise<ResultSuccess> =>
+	execute({
+		params: { request, listener },
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
+			const { id, topic } = request;
+
+			const { address, networkId } = resolveRequestTarget({ request, addresses });
+
+			if (isNullish(address) || isNullish(networkId)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			if (isNullish(identity)) {
+				toastsError({
+					msg: { text: get(i18n).auth.error.no_internet_identity }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			try {
+				const message = buildBtcAccountAddresses({
+					address,
+					principal: identity.getPrincipal(),
+					networkId
+				});
+
+				await listener.approveRequest({ id, topic, message });
+
+				return { success: true };
+			} catch (err: unknown) {
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				throw err;
+			}
+		},
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
+			$method: request.params.request.method
+		})
+	});
 
 export const sign = ({
 	address,

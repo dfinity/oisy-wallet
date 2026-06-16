@@ -4,6 +4,8 @@ import {
 	SESSION_REQUEST_BTC_SIGN_PSBT
 } from '$btc/constants/wallet-connect.constants';
 import type { OptionBtcAddress } from '$btc/types/address';
+import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
+import { buildBtcAccountAddresses } from '$btc/utils/wallet-connect.utils';
 import {
 	BIP122_MAINNET_CHAINS_KEYS,
 	BIP122_REGTEST_CHAINS_KEYS,
@@ -16,6 +18,11 @@ import {
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -37,6 +44,7 @@ import {
 } from '$sol/constants/wallet-connect.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
@@ -76,6 +84,10 @@ export class WalletConnectClient extends WalletConnectListener {
 	readonly #btcAddressMainnet: OptionBtcAddress;
 	readonly #btcAddressTestnet: OptionBtcAddress;
 	readonly #btcAddressRegtest: OptionBtcAddress;
+	// Caller principal from the current auth identity, used to derive the BTC public key advertised
+	// in the `bip122` session properties on approval. Nullish when there is no identity (e.g. not
+	// signed in) — independent of whether a BTC address has been loaded.
+	readonly #btcPrincipal: Principal | undefined;
 
 	#onSessionProposalCallback: ((proposal: WalletKitTypes.SessionProposal) => void) | null = null;
 	#onSessionDeleteCallback: (() => void) | null = null;
@@ -89,7 +101,8 @@ export class WalletConnectClient extends WalletConnectListener {
 		solAddressDevnet,
 		btcAddressMainnet,
 		btcAddressTestnet,
-		btcAddressRegtest
+		btcAddressRegtest,
+		btcPrincipal
 	}: {
 		walletKit: Awaited<ReturnType<typeof WalletKit.init>>;
 		ethAddress: OptionEthAddress;
@@ -98,6 +111,7 @@ export class WalletConnectClient extends WalletConnectListener {
 		btcAddressMainnet: OptionBtcAddress;
 		btcAddressTestnet: OptionBtcAddress;
 		btcAddressRegtest: OptionBtcAddress;
+		btcPrincipal: Principal | undefined;
 	}) {
 		super();
 
@@ -108,6 +122,7 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#btcAddressMainnet = btcAddressMainnet;
 		this.#btcAddressTestnet = btcAddressTestnet;
 		this.#btcAddressRegtest = btcAddressRegtest;
+		this.#btcPrincipal = btcPrincipal;
 	}
 
 	static init = async ({
@@ -120,6 +135,7 @@ export class WalletConnectClient extends WalletConnectListener {
 		btcAddressMainnet: OptionBtcAddress;
 		btcAddressTestnet: OptionBtcAddress;
 		btcAddressRegtest: OptionBtcAddress;
+		btcPrincipal: Principal | undefined;
 		cleanSlate?: boolean;
 	}): Promise<WalletConnectClient> => {
 		const clearLocalStorage = () => {
@@ -230,6 +246,24 @@ export class WalletConnectClient extends WalletConnectListener {
 
 	pair = (uri: string) => this.#walletKit.core.pairing.pair({ uri });
 
+	// Aggregate the loaded BTC account addresses (with public key + derivation path) across all
+	// present networks. Returns an empty list when no BTC address or no principal is available.
+	#btcAccountAddresses = (): WalletConnectBtcAccountAddresses => {
+		if (isNullish(this.#btcPrincipal)) {
+			return [];
+		}
+
+		const principal = this.#btcPrincipal;
+
+		return [
+			{ address: this.#btcAddressMainnet, networkId: BTC_MAINNET_NETWORK_ID },
+			{ address: this.#btcAddressTestnet, networkId: BTC_TESTNET_NETWORK_ID },
+			{ address: this.#btcAddressRegtest, networkId: BTC_REGTEST_NETWORK_ID }
+		].flatMap(({ address, networkId }) =>
+			buildBtcAccountAddresses({ address, principal, networkId })
+		);
+	};
+
 	approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
@@ -321,10 +355,50 @@ export class WalletConnectClient extends WalletConnectListener {
 			}
 		});
 
+		const btcAccountAddresses = this.#btcAccountAddresses();
+
 		await this.#walletKit.approveSession({
 			id: proposal.id,
-			namespaces
+			namespaces,
+			// Per the Reown bitcoin spec, expose the account addresses as a session property so dApps
+			// can consume them without a `getAccountAddresses` round-trip.
+			...(btcAccountAddresses.length > 0
+				? {
+						sessionProperties: {
+							bip122_getAccountAddresses: JSON.stringify(btcAccountAddresses)
+						}
+					}
+				: {})
 		});
+
+		await this.#emitInitialBtcAddresses(btcAccountAddresses);
+	};
+
+	// Emit the `bip122_addressesChanged` event so dApps listening for it receive the address set.
+	// This iterates ALL currently active sessions, so it re-emits the set on every session approval,
+	// not only on the first connection. That is intentional and harmless: OISY advertises a static
+	// first-external address, so re-emitting the same set to already-connected sessions is idempotent.
+	#emitInitialBtcAddresses = async (btcAccountAddresses: WalletConnectBtcAccountAddresses) => {
+		if (btcAccountAddresses.length === 0) {
+			return;
+		}
+
+		const sessions = Object.values(this.#walletKit.getActiveSessions());
+
+		await Promise.all(
+			sessions.flatMap((session) =>
+				(session.namespaces.bip122?.chains ?? []).map((chainId) =>
+					this.#walletKit.emitSessionEvent({
+						topic: session.topic,
+						chainId,
+						event: {
+							name: 'bip122_addressesChanged',
+							data: btcAccountAddresses
+						}
+					})
+				)
+			)
+		);
 	};
 
 	rejectSession = async (proposal: WalletKitTypes.SessionProposal) => {

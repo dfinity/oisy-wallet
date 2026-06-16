@@ -1,7 +1,11 @@
+import { btcWalletConnectDerivationPath } from '$btc/constants/wallet-connect.constants';
+import type { OptionBtcAddress } from '$btc/types/address';
+import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
+import type { NetworkId } from '$lib/types/network';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { Signature } from '@noble/secp256k1';
 import { crypto as btcCrypto } from 'bitcoinjs-lib';
@@ -40,6 +44,41 @@ export const deriveBtcPublicKey = ({ principal }: { principal: Principal }): Uin
 	});
 
 	return Uint8Array.from(masterKey.deriveSubkeyWithChainCode(derivationPath).public_key.toBuffer());
+};
+
+/**
+ * Build the Reown `getAccountAddresses` response payload for a single P2WPKH account.
+ *
+ * OISY exposes a single static first-external Native SegWit address per network. The compressed
+ * public key (hex) is derived from the caller principal and surfaced so the dApp can verify
+ * signatures without an extra round-trip. The advertised BIP-84 `path` is network-aware (mainnet
+ * coin type `0'`, test networks `1'`).
+ *
+ * Returns an empty list when the address is nullish so callers can advertise only loaded networks.
+ */
+export const buildBtcAccountAddresses = ({
+	address,
+	principal,
+	networkId
+}: {
+	address: OptionBtcAddress;
+	principal: Principal;
+	networkId: NetworkId;
+}): WalletConnectBtcAccountAddresses => {
+	if (isNullish(address)) {
+		return [];
+	}
+
+	const publicKey = Buffer.from(deriveBtcPublicKey({ principal })).toString('hex');
+
+	return [
+		{
+			address,
+			publicKey,
+			path: btcWalletConnectDerivationPath({ networkId }),
+			intention: 'payment'
+		}
+	];
 };
 
 /**

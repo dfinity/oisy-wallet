@@ -1,4 +1,5 @@
 import type {
+	WalletConnectBtcAccountAddresses,
 	WalletConnectBtcApproveRequestMessage,
 	WalletConnectBtcApproveSignPsbtMessage
 } from '$btc/types/wallet-connect';
@@ -12,6 +13,7 @@ import type { PairingTypes, SessionTypes } from '@walletconnect/types';
 
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectBtcApproveRequestMessage
+	| WalletConnectBtcAccountAddresses
 	| WalletConnectBtcApproveSignPsbtMessage
 	| WalletConnectEthApproveRequestMessage
 	| WalletConnectSolApproveRequestMessage;

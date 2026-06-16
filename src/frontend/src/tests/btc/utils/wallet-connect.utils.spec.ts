@@ -1,7 +1,19 @@
 import {
 	bitcoinSignedMessageHash,
+	buildBtcAccountAddresses,
+	deriveBtcPublicKey,
 	encodeRecoverableSignature
 } from '$btc/utils/wallet-connect.utils';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks/networks.btc.env';
+import * as signerEnv from '$env/signer.env';
+import * as signerConstants from '$lib/constants/signer.constants';
+import type { SignerMasterPubKeys } from '$lib/types/signer';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { hmac } from '@noble/hashes/hmac';
 import { sha256 } from '@noble/hashes/sha2';
 import { etc, getPublicKey, sign } from '@noble/secp256k1';
@@ -90,6 +102,89 @@ describe('btc wallet-connect.utils', () => {
 					publicKey: getPublicKey(privateKey, true)
 				})
 			).toThrow();
+		});
+	});
+
+	describe('buildBtcAccountAddresses', () => {
+		const mockMasterPubKey: NonNullable<SignerMasterPubKeys['key_1']> = {
+			ecdsa: {
+				secp256k1: {
+					pubkey: '02f9ac345f6be6db51e1c5612cddb59e72c3d0d493c994d12035cf13257e3b1fa7'
+				}
+			},
+			schnorr: {
+				ed25519: { pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f' }
+			}
+		};
+
+		beforeEach(() => {
+			vi.spyOn(signerConstants, 'SIGNER_MASTER_PUB_KEY', 'get').mockReturnValue(mockMasterPubKey);
+			vi.spyOn(signerEnv, 'SIGNER_CANISTER_DERIVATION_PATH', 'get').mockReturnValue([
+				0, 0, 0, 0, 0, 96, 0, 209, 1, 1
+			]);
+		});
+
+		it('returns an empty list when the address is nullish', () => {
+			expect(
+				buildBtcAccountAddresses({
+					address: undefined,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
+			expect(
+				buildBtcAccountAddresses({
+					address: null,
+					principal: mockPrincipal,
+					networkId: BTC_MAINNET_NETWORK_ID
+				})
+			).toEqual([]);
+		});
+
+		it('builds the Reown getAccountAddresses payload for a P2WPKH address with the mainnet path', () => {
+			const expectedPublicKey = Buffer.from(
+				deriveBtcPublicKey({ principal: mockPrincipal })
+			).toString('hex');
+
+			const result = buildBtcAccountAddresses({
+				address: mockBtcAddress,
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
+			});
+
+			expect(result).toEqual([
+				{
+					address: mockBtcAddress,
+					publicKey: expectedPublicKey,
+					path: "m/84'/0'/0'/0/0",
+					intention: 'payment'
+				}
+			]);
+		});
+
+		it.each([BTC_TESTNET_NETWORK_ID, BTC_REGTEST_NETWORK_ID])(
+			'advertises the testnet coin type for test networks',
+			(networkId) => {
+				const [{ path }] = buildBtcAccountAddresses({
+					address: mockBtcAddress,
+					principal: mockPrincipal,
+					networkId
+				});
+
+				expect(path).toBe("m/84'/1'/0'/0/0");
+			}
+		);
+
+		it('derives a 33-byte compressed public key', () => {
+			const [{ publicKey }] = buildBtcAccountAddresses({
+				address: mockBtcAddress,
+				principal: mockPrincipal,
+				networkId: BTC_MAINNET_NETWORK_ID
+			});
+
+			// Compressed secp256k1 public key: 33 bytes => 66 hex chars, prefixed with 0x02 / 0x03.
+			expect(publicKey).toHaveLength(66);
+			expect(['02', '03']).toContain(publicKey.slice(0, 2));
 		});
 	});
 });
