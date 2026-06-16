@@ -178,10 +178,7 @@ describe('btc wallet-connect.services', () => {
 			expect(params.modalNext).toHaveBeenCalledOnce();
 			expect(params.progress).toHaveBeenCalledTimes(3);
 			expect(params.progress).toHaveBeenNthCalledWith(1, ProgressStepsSign.SIGN);
-			expect(params.progress).toHaveBeenNthCalledWith(
-				2,
-				ProgressStepsSign.APPROVE_WALLET_CONNECT
-			);
+			expect(params.progress).toHaveBeenNthCalledWith(2, ProgressStepsSign.APPROVE_WALLET_CONNECT);
 			expect(params.progress).toHaveBeenNthCalledWith(3, ProgressStepsSign.DONE);
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
 				topic: params.request.topic,
