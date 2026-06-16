@@ -1,3 +1,4 @@
+import { SESSION_REQUEST_BTC_SIGN_MESSAGE } from '$btc/constants/wallet-connect.constants';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
@@ -82,7 +83,8 @@ export const onSessionRequest = async ({
 		case SESSION_REQUEST_ETH_SIGN:
 		case SESSION_REQUEST_PERSONAL_SIGN:
 		case SESSION_REQUEST_SOL_SIGN_TRANSACTION:
-		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION: {
+		case SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION:
+		case SESSION_REQUEST_BTC_SIGN_MESSAGE: {
 			modalStore.openWalletConnectSign({ id: Symbol(), data: sessionRequest });
 			return;
 		}

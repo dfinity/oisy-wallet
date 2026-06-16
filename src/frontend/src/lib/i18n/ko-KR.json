@@ -1579,6 +1579,7 @@
 			"hex_data": "HEX 데이터",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
+			"signing_address": "",
 			"connected_apps": "연결된 앱",
 			"no_connected_apps": "현재 연결된 앱이 없습니다.",
 			"wallet_connect": ""
