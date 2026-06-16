@@ -1,5 +1,6 @@
 import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 import * as ExchangeDerived from '$lib/derived/exchange.derived';
+import { i18n } from '$lib/stores/i18n.store';
 import { SWAP_AMOUNTS_CONTEXT_KEY } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -7,7 +8,7 @@ import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.moc
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { queryAllByTestId, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { derived, readable, writable } from 'svelte/store';
+import { derived, get, readable, writable } from 'svelte/store';
 
 vi.mock('$env/dapp-descriptions.env', () => ({
 	dAppDescriptions: [
@@ -51,8 +52,8 @@ describe('SwapProviderListModal', () => {
 			context: mockContext
 		});
 
-		expect(getByText('Swap provider')).toBeInTheDocument();
-		expect(getByText('You receive')).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.swap_provider)).toBeInTheDocument();
+		expect(getByText(get(i18n).swap.text.you_receive)).toBeInTheDocument();
 	});
 
 	it('renders all provider rows with USD values', () => {
