@@ -3,7 +3,7 @@ use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::types::personal_note::{
     DeletePersonalNoteRequest, PersonalNoteEntry, PersonalNoteError, SetPersonalNoteRequest,
-    MAX_PERSONAL_NOTES_PER_USER, MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
+    MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
 };
 
 use crate::utils::{
@@ -252,37 +252,10 @@ fn note_id_over_32_bytes_is_rejected() {
     );
 }
 
-#[test]
-fn new_note_at_capacity_is_rejected_but_edits_still_work() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    for i in 0..MAX_PERSONAL_NOTES_PER_USER {
-        set_note(&pic_setup, caller, &note_id(i), vec![1])
-            .expect("note within cap should be added");
-    }
-    assert_eq!(
-        count_notes(&pic_setup, caller),
-        u64::try_from(MAX_PERSONAL_NOTES_PER_USER).unwrap()
-    );
-
-    // A *new* note at the cap is refused — and nothing is evicted.
-    let over = set_note(
-        &pic_setup,
-        caller,
-        &note_id(MAX_PERSONAL_NOTES_PER_USER),
-        vec![1],
-    );
-    assert_eq!(over, Err(PersonalNoteError::TooManyNotes));
-    assert_eq!(
-        count_notes(&pic_setup, caller),
-        u64::try_from(MAX_PERSONAL_NOTES_PER_USER).unwrap()
-    );
-
-    // Editing an existing note at the cap is still allowed.
-    set_note(&pic_setup, caller, &note_id(0), vec![2, 2]).expect("edit at cap should succeed");
-}
+// The per-user cap (`TooManyNotes` on a new note at `MAX_PERSONAL_NOTES_PER_USER`,
+// while edits stay allowed) is covered by the `new_note_exceeds_cap` unit tests
+// in `personal_notes::service` — exercising it end-to-end here would mean 1,000
+// sequential update calls, which is too heavy/flaky for the pocket-ic CI runner.
 
 // -------------------------------------------------------------------------------------------------
 // - Rate limiting
