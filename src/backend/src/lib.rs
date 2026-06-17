@@ -6,6 +6,7 @@ use ic_cdk::{
     management_canister::{HttpRequestResult, TransformArgs},
     post_upgrade,
 };
+use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -28,14 +29,17 @@ use shared::{
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
         onramper::SignOnramperWidgetUrlRequest,
+        personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
             BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CreateContactResult,
             CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
-            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            DeletePersonalNoteResult, GetActiveUserTransactionsResult, GetAgreementHistoryResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetPersonalNotesCountResult, GetPersonalNotesResult, GetUserProfileResult,
+            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
+            SetPersonalNoteResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
             UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
             UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
             UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
@@ -61,6 +65,7 @@ mod contacts;
 mod delegation;
 mod exchange;
 mod onramper;
+mod personal_notes;
 mod signer;
 mod state;
 mod status;
@@ -79,6 +84,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Stand up the encrypted personal-notes store now that the vetKD key name
+    // (from config) is available.
+    state::init_personal_notes();
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
@@ -105,6 +114,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // Re-attach the encrypted personal-notes store to its stable memory.
+    state::init_personal_notes();
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

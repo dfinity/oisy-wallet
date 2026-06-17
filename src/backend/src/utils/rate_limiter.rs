@@ -41,6 +41,16 @@ thread_local! {
     /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
     pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `set_personal_note`: max 30 calls per caller per minute.
+    /// Generous — a single `set` covers both add and edit — while bounding write
+    /// abuse of the encrypted store.
+    pub(crate) static SET_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `delete_personal_note`: max 30 calls per caller per minute.
+    pub(crate) static DELETE_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
