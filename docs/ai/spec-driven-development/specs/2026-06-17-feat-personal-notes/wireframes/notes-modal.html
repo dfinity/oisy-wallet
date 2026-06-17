@@ -1011,7 +1011,11 @@
 					}
 					if (sbtn) {
 						// Acts as a clear button only when there's content; otherwise it's the search glyph.
-						sbtn.addEventListener('click', function () {
+						// stopPropagation: clearing rewrites this button's icon, detaching the clicked
+						// node — without this the click would bubble to the backdrop handler (whose
+						// "inside modal?" check then fails on the detached node) and close the modal.
+						sbtn.addEventListener('click', function (e) {
+							e.stopPropagation();
 							if (!state.search) return;
 							state.search = '';
 							if (s) {
