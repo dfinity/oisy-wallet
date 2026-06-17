@@ -1,9 +1,16 @@
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PersonalNoteEntryUi } from '$lib/types/personal-note';
 import {
 	comparePersonalNotesByUpdatedDesc,
+	formatPersonalNoteTimestamp,
 	generatePersonalNoteId,
-	personalNoteLength
+	neutralizePersonalNoteText,
+	personalNoteLength,
+	personalNotePreview
 } from '$lib/utils/personal-note.utils';
+
+const nsFrom = (date: Date): string =>
+	(BigInt(date.getTime()) * NANO_SECONDS_IN_MILLISECOND).toString();
 
 describe('personal-note.utils', () => {
 	describe('generatePersonalNoteId', () => {
@@ -30,6 +37,53 @@ describe('personal-note.utils', () => {
 			expect(personalNoteLength('😀')).toBe(1);
 			expect(personalNoteLength('a😀b')).toBe(3);
 			expect('😀').toHaveLength(2); // sanity: UTF-16 length would over-count
+		});
+	});
+
+	describe('neutralizePersonalNoteText', () => {
+		it('strips bidi/control formatting characters', () => {
+			// U+202E RLO + U+2066 LRI + U+200F RLM around otherwise plain text.
+			const spoofed = '\u202Eevil\u2066text\u200F';
+
+			const result = neutralizePersonalNoteText(spoofed);
+
+			expect(result).toBe('eviltext');
+			expect(result).not.toMatch(/[\u202A-\u202E\u2066-\u2069\u200E\u200F\u061C]/u);
+		});
+
+		it('leaves ordinary Unicode (including emoji / CJK) untouched', () => {
+			expect(neutralizePersonalNoteText('héllo 世界 😀')).toBe('héllo 世界 😀');
+		});
+	});
+
+	describe('personalNotePreview', () => {
+		it('collapses line breaks and whitespace runs to a single space', () => {
+			expect(personalNotePreview('line one\n\n  line\ttwo  ')).toBe('line one line two');
+		});
+
+		it('neutralizes bidi characters in the preview', () => {
+			expect(personalNotePreview('a\u202Eb')).toBe('ab');
+		});
+	});
+
+	describe('formatPersonalNoteTimestamp', () => {
+		const currentDate = new Date('2026-06-17T12:00:00Z');
+
+		it('renders a relative time for recent notes', () => {
+			const fiveMinutesAgo = new Date(currentDate.getTime() - 5 * 60 * 1000);
+
+			expect(formatPersonalNoteTimestamp({ ns: nsFrom(fiveMinutesAgo), currentDate })).toContain(
+				'ago'
+			);
+		});
+
+		it('renders an absolute date for older notes', () => {
+			const tenDaysAgo = new Date(currentDate.getTime() - 10 * 24 * 60 * 60 * 1000);
+
+			const result = formatPersonalNoteTimestamp({ ns: nsFrom(tenDaysAgo), currentDate });
+
+			expect(result).not.toContain('ago');
+			expect(result).toMatch(/\d/);
 		});
 	});
 
