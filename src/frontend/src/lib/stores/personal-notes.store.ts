@@ -1,5 +1,5 @@
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
-import type { PersonalNoteEntryUi } from '$lib/types/personal-note';
+import type { PersonalNoteEntryUi, PersonalNoteUi } from '$lib/types/personal-note';
 import { comparePersonalNotesByUpdatedDesc } from '$lib/utils/personal-note.utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
@@ -75,3 +75,12 @@ export const atPersonalNotesCapacity: Readable<boolean> = derived(
 	personalNotesStore,
 	({ count }) => count >= MAX_PERSONAL_NOTES_PER_USER
 );
+
+/**
+ * The note just deleted, kept for the Undo window. Holds the whole decrypted
+ * note (id + both timestamps, not just the body) so Undo re-saves the exact
+ * same envelope and the note returns to its original sort position. `undefined`
+ * when no undo snackbar is showing. Lives outside the notes cache because the
+ * snackbar renders at the app's toast position, not inside the (scrollable) list.
+ */
+export const personalNotesUndoStore: Writable<PersonalNoteUi | undefined> = writable(undefined);
