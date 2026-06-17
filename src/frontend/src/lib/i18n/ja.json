@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "QRコードをスキャン",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "トランザクションを実行中...",
 			"initializing": "トランザクションを初期化中...",
 			"swapping": "スワップ中...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
 			"swap_provider_website": "ウェブサイト",
@@ -1177,7 +1193,6 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
-			"bridging": "ブリッジ中... (しばらくお待ちください。最大2分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1563,6 +1579,21 @@
 			"hex_data": "HEXデータ",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "接続済みアプリ",
 			"no_connected_apps": "現在接続されているアプリはありません。",
 			"wallet_connect": ""
@@ -1603,6 +1634,10 @@
 			"request_rejected": "WalletConnectリクエストが拒否されました。",
 			"unknown_parameter": "不明なパラメータです。",
 			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。",
 			"unknown_destination": "不明な宛先アドレスです。",
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",

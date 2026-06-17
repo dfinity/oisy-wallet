@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Quét mã QR",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "Đang thực hiện giao dịch...",
 			"initializing": "Đang khởi tạo giao dịch...",
 			"swapping": "Đang hoán đổi...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
 			"swap_provider_website": "Trang web",
@@ -1177,7 +1193,6 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1563,6 +1579,21 @@
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Ứng dụng đã kết nối",
 			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
 			"wallet_connect": ""
@@ -1603,6 +1634,10 @@
 			"request_rejected": "Yêu cầu WalletConnect bị từ chối",
 			"unknown_parameter": "Tham số không xác định.",
 			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",

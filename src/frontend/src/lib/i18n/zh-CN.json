@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "扫描二维码",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "正在执行交易...",
 			"initializing": "正在初始化交易...",
 			"swapping": "正在兑换...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
 			"swap_provider_website": "官网",
@@ -1177,7 +1193,6 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多 2 分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1563,6 +1579,21 @@
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "已连接的应用",
 			"no_connected_apps": "当前没有已连接的应用。",
 			"wallet_connect": ""
@@ -1603,6 +1634,10 @@
 			"request_rejected": "WalletConnect 请求已被拒绝",
 			"unknown_parameter": "未知参数。",
 			"wallet_not_initialized": "意外错误：钱包地址尚未初始化。",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",

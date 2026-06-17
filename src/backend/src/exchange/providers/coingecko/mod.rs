@@ -20,9 +20,9 @@ pub struct CoinGeckoProvider {
 }
 
 impl CoinGeckoProvider {
-    pub fn new(api_key: String) -> Self {
+    pub fn new(api_key: String, replicated: bool) -> Self {
         Self {
-            client: CoinGeckoClient::new(api_key),
+            client: CoinGeckoClient::new(api_key, replicated),
         }
     }
 

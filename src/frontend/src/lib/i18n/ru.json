@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Сканировать QR-код",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
 			"swap_provider_website": "Веб-сайт",
@@ -1177,7 +1193,6 @@
 			"select_token": "Выбрать токен",
 			"select_network_filter": "Выбрать сеть",
 			"withdrawing": "Вывод",
-			"bridging": "Выполняется бридж... (Пожалуйста, подождите — это может занять до 2 минут.)",
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
 			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1563,6 +1579,21 @@
 			"hex_data": "HEX-данные",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Подключённые приложения",
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
 			"wallet_connect": ""
@@ -1603,6 +1634,10 @@
 			"request_rejected": "Запрос WalletConnect отклонен",
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",

@@ -25,8 +25,14 @@ import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
-import { TokenInstruction } from '@solana-program/token';
+import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
+
+const ignoredInstruction = (): MappedSolTransaction => ({ amount: undefined });
+const unreviewedInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	unreviewed: true
+});
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -413,7 +419,7 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 
 	consoleWarn(`Could not map Solana System instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };
 
 const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -447,7 +453,8 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -456,14 +463,16 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -472,20 +481,23 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress,
+			isApproval: true
 		};
 	}
 
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };
 
 const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -519,7 +531,8 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			isApproval: true
 		};
 	}
 
@@ -528,14 +541,16 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				destination: { address: destination }
+				destination: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress
 		};
 	}
 
@@ -544,27 +559,52 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			data: { amount },
 			accounts: {
 				source: { address: source },
-				delegate: { address: destination }
+				delegate: { address: destination },
+				mint: { address: tokenAddress }
 			}
 		} = instruction;
 
 		return {
 			amount,
 			source,
-			destination
+			destination,
+			tokenAddress,
+			isApproval: true
 		};
 	}
 
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
+};
+
+const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	if (
+		instructionType === AssociatedTokenInstruction.CreateAssociatedToken ||
+		instructionType === AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
+	) {
+		return ignoredInstruction();
+	}
+
+	consoleWarn(`Could not map Solana ATA instruction of type ${instructionType}`);
+
+	return unreviewedInstruction();
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	// Compute budget instructions only tune fees and limits and can never move funds,
+	// so they are ignored wholesale before parsing — a malformed or not-yet-supported
+	// variant would make the parser throw and crash the signing guard.
+	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
+		return ignoredInstruction();
+	}
+
 	const parsedInstruction = parseSolInstruction(instruction);
 
 	if (!('instructionType' in parsedInstruction)) {
-		return { amount: undefined };
+		return unreviewedInstruction();
 	}
 
 	const { programAddress } = parsedInstruction;
@@ -581,7 +621,11 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 		return mapSolToken2022Instruction(parsedInstruction);
 	}
 
+	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		return mapSolAtaInstruction(parsedInstruction);
+	}
+
 	consoleWarn(`Could not map Solana instruction for program ${programAddress}`);
 
-	return { amount: undefined };
+	return unreviewedInstruction();
 };

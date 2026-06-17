@@ -1045,6 +1045,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Escanear código QR",
@@ -1161,6 +1175,8 @@
 			"executing_transaction": "Ejecutando transacción...",
 			"initializing": "Inicializando transacción...",
 			"swapping": "Intercambiando...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
@@ -1177,7 +1193,6 @@
 			"select_token": "Seleccionar token",
 			"select_network_filter": "Seleccionar red",
 			"withdrawing": "Retirando...",
-			"bridging": "Realizando el bridge... (Por favor, ten paciencia, esto puede tardar hasta 2 minutos.)",
 			"network_cost": "Costo de red",
 			"gasless": "Sin gas",
 			"swap_fees": "Comisiones de Intercambio",
@@ -1207,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "El intercambio se completó, pero tus tokens no pudieron ser retirados automáticamente. Haz clic en el botón de Retirar a continuación para retirarlos manualmente.<br> O sigue",
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1563,6 +1579,21 @@
 			"hex_data": "Datos HEX",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Aplicaciones conectadas",
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"wallet_connect": ""
@@ -1603,6 +1634,10 @@
 			"request_rejected": "Solicitud de WalletConnect rechazada",
 			"unknown_parameter": "Parámetro desconocido.",
 			"wallet_not_initialized": "Error inesperado. La dirección de tu billetera no está inicializada.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "La dirección de origen solicitada para la transacción no es la dirección de esta billetera.",
 			"unknown_destination": "Dirección de destino desconocida.",
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
