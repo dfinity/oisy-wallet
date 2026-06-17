@@ -11,6 +11,13 @@ use crate::utils::{
     pocketic::{setup, PicBackend, PicCanisterTrait},
 };
 
+// These tests deliberately share a small number of `setup()` calls (each spins
+// up a full pocket-ic instance with the bitcoin + backend canisters). The
+// backend suite already stands up ~140 instances; keeping the per-feature count
+// low avoids tipping the pocket-ic server over. The per-user cap is covered by
+// the `new_note_exceeds_cap` unit tests in `personal_notes::service` rather than
+// a 1,000-insert loop here.
+
 // -------------------------------------------------------------------------------------------------
 // - Helpers
 // -------------------------------------------------------------------------------------------------
@@ -71,191 +78,132 @@ fn delete_note(
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn set_personal_note_rejects_anonymous_caller() {
+fn guards_reject_unauthorized_callers() {
     let pic_setup = setup();
-    let request = SetPersonalNoteRequest {
-        note_id: note_id(1),
-        encrypted_note: ByteBuf::from(vec![1, 2, 3]),
-    };
-    let result = pic_setup.update::<Result<(), PersonalNoteError>>(
+
+    // Anonymous write is rejected.
+    let set_anonymous = pic_setup.update::<Result<(), PersonalNoteError>>(
         Principal::anonymous(),
         "set_personal_note",
-        request,
+        SetPersonalNoteRequest {
+            note_id: note_id(1),
+            encrypted_note: ByteBuf::from(vec![1, 2, 3]),
+        },
     );
     assert!(
-        result
+        set_anonymous
             .unwrap_err()
             .contains("Anonymous caller not authorized"),
-        "anonymous callers must be rejected by the guard"
+        "anonymous writes must be rejected by the guard"
     );
-}
 
-#[test]
-fn set_personal_note_requires_registered_user() {
-    let pic_setup = setup();
-    // Non-anonymous caller, but no user profile created.
-    let caller = Principal::from_text(CALLER).unwrap();
-    let request = SetPersonalNoteRequest {
-        note_id: note_id(1),
-        encrypted_note: ByteBuf::from(vec![1, 2, 3]),
-    };
-    let result =
-        pic_setup.update::<Result<(), PersonalNoteError>>(caller, "set_personal_note", request);
-    assert!(
-        result.unwrap_err().contains("Caller has no user profile"),
-        "callers without a profile must be rejected by the guard"
-    );
-}
-
-#[test]
-fn get_personal_notes_rejects_anonymous_caller() {
-    let pic_setup = setup();
-    let result = pic_setup.query::<Result<Vec<PersonalNoteEntry>, PersonalNoteError>>(
+    // Anonymous read is rejected.
+    let get_anonymous = pic_setup.query::<Result<Vec<PersonalNoteEntry>, PersonalNoteError>>(
         Principal::anonymous(),
         "get_personal_notes",
         (),
     );
     assert!(
-        result
+        get_anonymous
             .unwrap_err()
             .contains("Anonymous caller not authorized"),
         "anonymous reads must be rejected"
     );
+
+    // Non-anonymous caller without a user profile is rejected by the guard.
+    let unregistered = Principal::from_text(CALLER).unwrap();
+    let set_unregistered = pic_setup.update::<Result<(), PersonalNoteError>>(
+        unregistered,
+        "set_personal_note",
+        SetPersonalNoteRequest {
+            note_id: note_id(1),
+            encrypted_note: ByteBuf::from(vec![1, 2, 3]),
+        },
+    );
+    assert!(
+        set_unregistered
+            .unwrap_err()
+            .contains("Caller has no user profile"),
+        "callers without a profile must be rejected by the guard"
+    );
 }
 
 // -------------------------------------------------------------------------------------------------
-// - CRUD
+// - CRUD, bounds, count, and per-caller isolation (one shared instance)
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn set_then_get_returns_the_encrypted_note() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    let id = note_id(1);
-    let ciphertext = vec![9, 8, 7, 6, 5];
-    set_note(&pic_setup, caller, &id, ciphertext.clone()).expect("set should succeed");
-
-    let notes = get_notes(&pic_setup, caller);
-    assert_eq!(notes.len(), 1);
-    assert_eq!(notes[0].note_id, id);
-    assert_eq!(notes[0].encrypted_note.as_ref(), ciphertext.as_slice());
-    assert_eq!(count_notes(&pic_setup, caller), 1);
-}
-
-#[test]
-fn editing_a_note_replaces_ciphertext_without_adding() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    let id = note_id(1);
-    set_note(&pic_setup, caller, &id, vec![1]).expect("add should succeed");
-    set_note(&pic_setup, caller, &id, vec![2, 2]).expect("edit should succeed");
-
-    let notes = get_notes(&pic_setup, caller);
-    assert_eq!(notes.len(), 1, "editing must not add a second entry");
-    assert_eq!(notes[0].encrypted_note.as_ref(), [2, 2].as_slice());
-    assert_eq!(count_notes(&pic_setup, caller), 1);
-}
-
-#[test]
-fn deleting_a_note_removes_it() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    let id = note_id(1);
-    set_note(&pic_setup, caller, &id, vec![1, 2, 3]).expect("add should succeed");
-    delete_note(&pic_setup, caller, &id).expect("delete should succeed");
-
-    assert!(get_notes(&pic_setup, caller).is_empty());
-    assert_eq!(count_notes(&pic_setup, caller), 0);
-}
-
-#[test]
-fn deleting_a_missing_note_is_idempotent() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    // Deleting a note that was never created returns Ok, not an error.
-    let result = delete_note(&pic_setup, caller, &note_id(42));
-    assert_eq!(result, Ok(()));
-}
-
-#[test]
-fn count_tracks_adds_and_deletes() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    for i in 0..3 {
-        set_note(&pic_setup, caller, &note_id(i), vec![1]).expect("add should succeed");
-    }
-    assert_eq!(count_notes(&pic_setup, caller), 3);
-
-    delete_note(&pic_setup, caller, &note_id(1)).expect("delete should succeed");
-    assert_eq!(count_notes(&pic_setup, caller), 2);
-}
-
-#[test]
-fn notes_are_isolated_per_caller() {
+fn crud_bounds_count_and_isolation() {
     let pic_setup = setup();
     let alice = Principal::from_text(CALLER).unwrap();
     let bob = Principal::from_slice(&[9; 29]);
     pic_setup.ensure_user_profile(alice);
     pic_setup.ensure_user_profile(bob);
 
-    set_note(&pic_setup, alice, &note_id(1), vec![1, 1, 1]).expect("alice add should succeed");
+    let first = note_id(1);
 
+    // set -> get returns the ciphertext verbatim.
+    let ciphertext = vec![9, 8, 7, 6, 5];
+    set_note(&pic_setup, alice, &first, ciphertext.clone()).expect("set should succeed");
+    let notes = get_notes(&pic_setup, alice);
+    assert_eq!(notes.len(), 1);
+    assert_eq!(notes[0].note_id, first);
+    assert_eq!(notes[0].encrypted_note.as_ref(), ciphertext.as_slice());
     assert_eq!(count_notes(&pic_setup, alice), 1);
+
+    // Editing the same id replaces the ciphertext without adding an entry.
+    set_note(&pic_setup, alice, &first, vec![2, 2]).expect("edit should succeed");
+    let notes = get_notes(&pic_setup, alice);
+    assert_eq!(notes.len(), 1, "editing must not add a second entry");
+    assert_eq!(notes[0].encrypted_note.as_ref(), [2, 2].as_slice());
+    assert_eq!(count_notes(&pic_setup, alice), 1);
+
+    // A second, distinct note bumps the count.
+    let second = note_id(2);
+    set_note(&pic_setup, alice, &second, vec![3]).expect("second add should succeed");
+    assert_eq!(count_notes(&pic_setup, alice), 2);
+
+    // Ciphertext over the byte bound is rejected and not stored.
+    let too_big = vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES + 1];
+    assert_eq!(
+        set_note(&pic_setup, alice, &note_id(3), too_big),
+        Err(PersonalNoteError::NoteCiphertextTooLarge)
+    );
+    assert_eq!(
+        count_notes(&pic_setup, alice),
+        2,
+        "an oversize note must not be stored"
+    );
+
+    // A note id longer than 32 bytes is rejected.
+    let long_id = pic_setup
+        .update::<Result<(), PersonalNoteError>>(
+            alice,
+            "set_personal_note",
+            SetPersonalNoteRequest {
+                note_id: "x".repeat(33),
+                encrypted_note: ByteBuf::from(vec![1, 2, 3]),
+            },
+        )
+        .expect("call should reach the handler");
+    assert_eq!(long_id, Err(PersonalNoteError::NoteIdTooLong));
+
+    // Delete removes the entry; deleting a missing note is idempotent.
+    delete_note(&pic_setup, alice, &first).expect("delete should succeed");
+    let notes = get_notes(&pic_setup, alice);
+    assert_eq!(notes.len(), 1);
+    assert_eq!(notes[0].note_id, second);
+    assert_eq!(count_notes(&pic_setup, alice), 1);
+    delete_note(&pic_setup, alice, &note_id(99)).expect("deleting a missing note returns Ok");
+    assert_eq!(count_notes(&pic_setup, alice), 1);
+
+    // A different caller cannot see alice's notes.
     assert!(
         get_notes(&pic_setup, bob).is_empty(),
         "bob must not see alice's notes"
     );
     assert_eq!(count_notes(&pic_setup, bob), 0);
 }
-
-// -------------------------------------------------------------------------------------------------
-// - Bounds
-// -------------------------------------------------------------------------------------------------
-
-#[test]
-fn ciphertext_over_the_byte_bound_is_rejected() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    let too_big = vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES + 1];
-    let result = set_note(&pic_setup, caller, &note_id(1), too_big);
-    assert_eq!(result, Err(PersonalNoteError::NoteCiphertextTooLarge));
-    assert_eq!(count_notes(&pic_setup, caller), 0);
-}
-
-#[test]
-fn note_id_over_32_bytes_is_rejected() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).unwrap();
-    pic_setup.ensure_user_profile(caller);
-
-    let request = SetPersonalNoteRequest {
-        note_id: "x".repeat(33),
-        encrypted_note: ByteBuf::from(vec![1, 2, 3]),
-    };
-    let result =
-        pic_setup.update::<Result<(), PersonalNoteError>>(caller, "set_personal_note", request);
-    assert_eq!(
-        result.expect("call should reach the handler"),
-        Err(PersonalNoteError::NoteIdTooLong)
-    );
-}
-
-// The per-user cap (`TooManyNotes` on a new note at `MAX_PERSONAL_NOTES_PER_USER`,
-// while edits stay allowed) is covered by the `new_note_exceeds_cap` unit tests
-// in `personal_notes::service` — exercising it end-to-end here would mean 1,000
-// sequential update calls, which is too heavy/flaky for the pocket-ic CI runner.
 
 // -------------------------------------------------------------------------------------------------
 // - Rate limiting
@@ -277,7 +225,7 @@ fn set_personal_note_rate_limits_repeated_callers() {
         );
     }
 
-    let limited = set_note(&pic_setup, caller, &note_id(1), vec![99]);
+    let limited = set_note(&pic_setup, caller, &note_id(1), vec![1]);
     assert!(
         matches!(limited, Err(PersonalNoteError::RateLimited(_))),
         "the write exceeding the limit should be rate limited; got {limited:?}"
