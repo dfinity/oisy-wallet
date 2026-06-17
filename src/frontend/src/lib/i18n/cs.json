@@ -1577,6 +1577,7 @@
 			"network": "Síť",
 			"amount": "Částka",
 			"hex_data": "HEX data",
+			"unreviewed_instructions": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",

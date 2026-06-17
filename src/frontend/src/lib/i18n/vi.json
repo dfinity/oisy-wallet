@@ -1577,6 +1577,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "",
