@@ -17,6 +17,7 @@
 		data?: string;
 		token: Token;
 		isApproval?: boolean;
+		approve?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -29,6 +30,7 @@
 		data,
 		token,
 		isApproval = false,
+		approve = true,
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -59,6 +61,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {onApprove} {onReject} />
+		<WalletConnectActions {approve} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>
