@@ -35,7 +35,7 @@ source "$SOURCE_DIR/clap.bash"
 clap.define short=n long=network desc="dfx network to use" variable=NETWORK default="local"
 clap.define short=s long=secret desc="OnRamper signing secret (prefer env var / prompt)" variable=SECRET default=""
 clap.define short=i long=identity desc="dfx identity to call with (must be a controller)" variable=IDENTITY default="default"
-clap.define short=c long=clear desc="Clear the secret instead of setting it" variable=CLEAR default="false"
+clap.define short=c long=clear desc="Clear the secret instead of setting it" variable=CLEAR default="false" nargs=0
 # Source the output file ----------------------------------------------------------
 source "$(clap.build)"
 
@@ -43,11 +43,14 @@ if [[ "$CLEAR" == "true" ]]; then
   echo "Clearing the OnRamper signing secret on network '$NETWORK'..."
   dfx canister call --identity "$IDENTITY" --network "$NETWORK" backend set_onramper_signing_secret '(null)'
 else
-  if [[ -z "$SECRET" ]]; then
+  # clap only initializes variables with a non-empty default, so under `set -u` an unset
+  # --secret leaves $SECRET unbound; guard the read so the env-var / prompt fallbacks work.
+  if [[ -z "${SECRET:-}" ]]; then
     SECRET="${ONRAMPER_SIGNING_SECRET:-}"
   fi
   if [[ -z "$SECRET" ]]; then
-    read -rs -p "OnRamper signing secret: " SECRET
+    # `|| true` so EOF (e.g. empty stdin) doesn't abort under `set -e` before the check below.
+    read -rs -p "OnRamper signing secret: " SECRET || true
     echo
   fi
   [[ -n "$SECRET" ]] || {
