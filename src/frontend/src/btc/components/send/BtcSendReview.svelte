@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -21,6 +22,10 @@
 </script>
 
 <SendReview {amount} {destination} {onBack} {onSend} {selectedContact}>
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice singleToken styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet network()}
 		<BtcReviewNetwork networkId={$sendTokenNetworkId} />
 	{/snippet}

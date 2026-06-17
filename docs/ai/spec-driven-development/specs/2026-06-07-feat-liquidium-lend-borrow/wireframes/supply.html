@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Supply flow — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--green: #15a35b;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+			}
+			.note {
+				max-width: 460px;
+				margin: 14px auto 0;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.modal {
+				max-width: 460px;
+				margin: 14px auto;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				overflow: hidden;
+			}
+			.head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 14px 16px;
+				border-bottom: 1px solid var(--line);
+			}
+			.head h2 {
+				font-size: 16px;
+				margin: 0;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+			}
+			.dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: var(--line);
+			}
+			.dot.on {
+				background: var(--accent);
+			}
+			.body {
+				padding: 16px;
+			}
+			.field {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				padding: 12px;
+				margin-bottom: 12px;
+			}
+			.field .top {
+				display: flex;
+				justify-content: space-between;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.field .mid {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			input[type='number'] {
+				background: transparent;
+				border: 0;
+				color: var(--txt);
+				font-size: 24px;
+				width: 60%;
+				outline: none;
+			}
+			.selpill {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				padding: 6px 12px;
+				font-weight: 600;
+			}
+			.coin {
+				width: 24px;
+				height: 24px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 11px;
+				background: #f7931a;
+				color: #0e1218;
+			}
+			.infoline {
+				display: flex;
+				justify-content: space-between;
+				font-size: 12.5px;
+				color: var(--muted);
+				padding: 6px 2px;
+			}
+			.infoline b {
+				color: var(--txt);
+			}
+			.max {
+				color: var(--accent);
+				cursor: pointer;
+			}
+			.fee {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				padding: 10px 12px;
+				margin: 10px 0;
+				font-size: 12.5px;
+			}
+			.fee summary {
+				cursor: pointer;
+				display: flex;
+				justify-content: space-between;
+				list-style: none;
+			}
+			.fee .ln {
+				display: flex;
+				justify-content: space-between;
+				color: var(--muted);
+				margin-top: 6px;
+			}
+			label.agree {
+				display: flex;
+				gap: 8px;
+				align-items: flex-start;
+				font-size: 12.5px;
+				color: var(--muted);
+				margin: 8px 2px;
+				cursor: pointer;
+			}
+			button {
+				font: inherit;
+				cursor: pointer;
+			}
+			.btn {
+				width: 100%;
+				background: var(--accent);
+				color: #fff;
+				border: 0;
+				border-radius: 11px;
+				padding: 13px;
+				font-weight: 600;
+				font-size: 15px;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			.foot {
+				padding: 0 16px 16px;
+				display: flex;
+				gap: 10px;
+			}
+			.btn.ghost {
+				background: transparent;
+				border: 1px solid var(--line);
+				color: var(--txt);
+			}
+			.hero {
+				text-align: center;
+				padding: 8px 0 14px;
+			}
+			.hero .big {
+				font-size: 30px;
+				font-weight: 700;
+			}
+			.hide {
+				display: none;
+			}
+			.rr {
+				display: flex;
+				justify-content: space-between;
+				padding: 9px 0;
+				border-top: 1px solid var(--line);
+				font-size: 13.5px;
+			}
+			.rr:first-child {
+				border-top: 0;
+			}
+			.spin {
+				width: 34px;
+				height: 34px;
+				border: 3px solid var(--line);
+				border-top-color: var(--accent);
+				border-radius: 50%;
+				margin: 18px auto;
+				animation: s 1s linear infinite;
+			}
+			@keyframes s {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			.apy {
+				color: var(--green);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="note">
+			Wireframe — Supply (lend) flow. Supplying earns yield and also becomes collateral. Form →
+			Review → Progress, mirroring oisy's swap wizard.
+		</div>
+		<div class="modal">
+			<div class="head">
+				<h2 id="title">Supply</h2>
+				<div class="steps">
+					<span class="dot on" id="d0"></span><span class="dot" id="d1"></span
+					><span class="dot" id="d2"></span>
+				</div>
+			</div>
+			<div id="form">
+				<div class="body">
+					<div class="field">
+						<div class="top">
+							<span>You supply</span><span>Wallet: <span class="max" id="max">1.5 BTC</span></span>
+						</div>
+						<div class="mid">
+							<input id="amt" type="number" value="1" step="0.01" /><span class="selpill"
+								><span class="coin">B</span>BTC</span
+							>
+						</div>
+						<div class="infoline" style="padding-top: 8px">
+							<span id="fiat">$67,170.00</span><span>Supply APY <b class="apy">1.94%</b></span>
+						</div>
+					</div>
+					<div class="infoline" style="color: var(--muted)">
+						Supplied BTC also serves as collateral you can borrow against.
+					</div>
+					<details class="fee">
+						<summary><span>Transaction fee</span><b>&lt;$0.01</b></summary>
+						<div class="ln"><span>Network / transfer fee</span><span>0.0000001 BTC</span></div>
+					</details>
+					<label class="agree"
+						><input type="checkbox" id="agree" /> I understand my assets will be supplied to the
+						Liquidium protocol and are subject to on-chain smart-contract risk.</label
+					>
+				</div>
+				<div class="foot"><button class="btn" id="toReview" disabled>Review</button></div>
+			</div>
+			<div id="review" class="hide">
+				<div class="body">
+					<div class="hero">
+						<div class="muted">You supply</div>
+						<div class="big" id="rAmt">1 BTC</div>
+						<div class="muted" id="rFiat">$67,170.00</div>
+					</div>
+					<div class="rr"><span class="muted">To</span><b>Liquidium</b></div>
+					<div class="rr"><span class="muted">Supply APY</span><b class="apy">1.94%</b></div>
+					<div class="rr"><span class="muted">Transaction fee</span><b>&lt;$0.01</b></div>
+				</div>
+				<div class="foot">
+					<button class="btn ghost" id="back">Back</button
+					><button class="btn" id="go">Supply</button>
+				</div>
+			</div>
+			<div id="progress" class="hide">
+				<div class="body" style="text-align: center">
+					<div class="spin"></div>
+					<div id="ptext">Supplying to Liquidium…</div>
+					<div class="muted" style="font-size: 12px; margin-top: 6px">
+						client.lending.supply(...)
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const amt = document.getElementById('amt'),
+				PR = 67170;
+			function fiat() {
+				document.getElementById('fiat').textContent =
+					'$' + ((+amt.value || 0) * PR).toLocaleString('en-US', { minimumFractionDigits: 2 });
+			}
+			amt.addEventListener('input', fiat);
+			document.getElementById('max').onclick = () => {
+				amt.value = 1.5;
+				fiat();
+			};
+			document
+				.getElementById('agree')
+				.addEventListener(
+					'change',
+					(e) => (document.getElementById('toReview').disabled = !e.target.checked)
+				);
+			function show(id) {
+				['form', 'review', 'progress'].forEach((s, i) => {
+					document.getElementById(s).classList.toggle('hide', s !== id);
+					document
+						.getElementById('d' + i)
+						.classList.toggle('on', ['form', 'review', 'progress'].indexOf(id) >= i);
+				});
+			}
+			document.getElementById('toReview').onclick = () => {
+				const v = +amt.value || 0;
+				document.getElementById('rAmt').textContent = v + ' BTC';
+				document.getElementById('rFiat').textContent =
+					'$' + (v * PR).toLocaleString('en-US', { minimumFractionDigits: 2 });
+				document.getElementById('title').textContent = 'Review supply';
+				show('review');
+			};
+			document.getElementById('back').onclick = () => {
+				document.getElementById('title').textContent = 'Supply';
+				show('form');
+			};
+			document.getElementById('go').onclick = () => {
+				document.getElementById('title').textContent = 'Supplying';
+				show('progress');
+				setTimeout(() => {
+					document.getElementById('ptext').textContent = 'Done — position updated.';
+					document.querySelector('.spin').style.display = 'none';
+				}, 1500);
+			};
+			fiat();
+		</script>
+	</body>
+</html>

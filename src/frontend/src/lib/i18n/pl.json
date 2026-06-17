@@ -29,6 +29,7 @@
 			"not_available": "niedostępne",
 			"new": "Nowy",
 			"edit": "Edytuj",
+			"download": "Pobierz",
 			"no_results": "Brak wyników",
 			"paste": "Wklej",
 			"to": "Do",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "Ustawienia",
 			"general": "",
+			"preferences": "Preferencje",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
 			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
 			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
-			"learn_more": ""
+			"export_data": "Eksportuj dane",
+			"export_data_description": "Pobierz swoje tokeny i transakcje w formacie CSV — Basic dla najważniejszych informacji, Extended dla dodatkowych atrybutów.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Eksportuj tokeny",
+			"export_transactions": "Eksportuj transakcje",
+			"export_tokens_success": "Pobrano plik CSV z tokenami.",
+			"export_transactions_success": "Pobrano plik CSV z transakcjami.",
+			"learn_more": "Dowiedz się więcej"
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -803,7 +813,9 @@
 			"appearance_system": "Włącza tryb kolorów systemu operacyjnego"
 		},
 		"error": {
-			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia."
+			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia.",
+			"export_exchange_rate_unavailable": "Kursy wymiany wciąż się ładują. Spróbuj ponownie za chwilę.",
+			"export_failed": "Nie udało się wygenerować eksportu. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "Możesz wysłać kolejną transakcję Bitcoin po zakończeniu oczekującej.",
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
 			"unknown_destination": "Nigdy wcześniej nie wchodziłeś w interakcję z tym adresem. Upewnij się, że znasz odbiorcę.",
-			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",
@@ -1029,6 +1043,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "Wykonywanie transakcji...",
 			"initializing": "Inicjowanie transakcji...",
 			"swapping": "Wymiana...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
 			"swap_provider_website": "Strona internetowa",
@@ -1163,7 +1193,6 @@
 			"select_token": "Wybierz token",
 			"select_network_filter": "Wybierz sieć",
 			"withdrawing": "Wypłacanie...",
-			"bridging": "Trwa bridging... (Prosimy o cierpliwość, może to potrwać do 2 minut.)",
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
 			"unexpected": "Coś poszło nie tak podczas wymiany tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji wymiany.",
+			"failed_unexpectedly": "Nie udało się zrealizować wymiany. Sprawdź saldo portfela i spróbuj ponownie lub wybierz innego dostawcę.",
 			"slippage_exceeded": "$oisy_short chroni Cię: Transakcja jest poza Twoją tolerancją poślizgu wynoszącą $maxSlippage%. Dostosuj maksymalny poślizg i spróbuj ponownie.",
 			"pool_not_found": "Wymiana nie powiodła się. Nie znaleziono puli.",
 			"deposit_error": "Wpłata środków na wymianę nie powiodła się. Spróbuj ponownie lub zmień dostawcę wymiany.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Wymiana została zakończona, ale Twoje tokeny nie mogły zostać automatycznie wypłacone. Kliknij przycisk Wypłać poniżej, aby wypłacić je ręcznie.<br> Lub postępuj zgodnie z",
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Połączone aplikacje",
 			"no_connected_apps": "Obecnie żadne aplikacje nie są połączone.",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "Żądanie WalletConnect odrzucone",
 			"unknown_parameter": "Nieznany parametr.",
 			"wallet_not_initialized": "Nieoczekiwany błąd. Twój adres portfela nie jest zainicjowany.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Adres nadawcy żądany dla transakcji nie jest adresem tego portfela.",
 			"unknown_destination": "Nieznany adres docelowy.",
+			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
 		}

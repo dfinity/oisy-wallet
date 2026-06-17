@@ -22,7 +22,6 @@ import {
 	mockCreateActiveUserTransactionParams,
 	mockUpdateActiveUserTransactionParams
 } from '$tests/mocks/active-user-transactions.mock';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
@@ -77,7 +76,6 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
-		address: mockBtcAddress,
 		utxos: [
 			{
 				height: 1000,
@@ -93,20 +91,17 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionEndpointParams = {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		utxos: btcAddPendingTransactionParams.utxos,
 		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		iiDelegationChain: mockIIDelegationChain
 	};
 
 	const btcGetPendingTransactionEndpointParams = {
 		network: btcGetPendingTransactionParams.network,
-		address: btcGetPendingTransactionParams.address,
 		ii_delegation_chain: btcGetPendingTransactionParams.iiDelegationChain
 	};
 
@@ -1707,7 +1702,7 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return a Map with fully unwrapped exchange rates', async () => {
+		it('should return the response paired with unwrapped rates', async () => {
 			const rawResponse = tokenIds.map(
 				(id) => [id, [mockCandidRate]] as [typeof id, [typeof mockCandidRate]]
 			);
@@ -1715,30 +1710,29 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result).toBeInstanceOf(Map);
-			expect(result.size).toBe(2);
-
-			for (const rate of result.values()) {
-				expect(rate).toEqual(expectedUnwrapped);
-			}
-
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], expectedUnwrapped]
+			]);
 			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('should omit entries with no rate from the Map', async () => {
-			const rawResponse = [
+		it('should map empty rates to undefined', async () => {
+			service.get_exchange_rates.mockResolvedValue([
 				[tokenIds[0], [mockCandidRate]],
 				[tokenIds[1], []]
-			] as Array<[(typeof tokenIds)[number], [] | [typeof mockCandidRate]]>;
-			service.get_exchange_rates.mockResolvedValue(rawResponse);
+			]);
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result.size).toBe(1);
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], undefined]
+			]);
 		});
 
 		it('should throw an error if the service throws', async () => {
@@ -1749,9 +1743,7 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			await expect(getExchangeRates({ token_ids: tokenIds, certified: false })).rejects.toThrow(
-				mockResponseError
-			);
+			await expect(getExchangeRates()).rejects.toThrow(mockResponseError);
 		});
 	});
 

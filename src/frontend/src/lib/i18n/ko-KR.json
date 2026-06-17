@@ -29,6 +29,7 @@
 			"not_available": "해당 없음",
 			"new": "새로 만들기",
 			"edit": "편집",
+			"download": "다운로드",
 			"no_results": "결과 없음",
 			"paste": "붙여넣기",
 			"to": "받는 사람",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "설정",
 			"general": "일반",
+			"preferences": "환경설정",
 			"principal": "내 프린시팔",
 			"principal_copied": "프린시팔이 클립보드에 복사되었습니다",
 			"principal_description": "$oisy_name의 내 ID. 인터넷 아이덴티티로 생성됩니다.",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
-			"learn_more": ""
+			"export_data": "데이터 내보내기",
+			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "토큰 내보내기",
+			"export_transactions": "거래 내보내기",
+			"export_tokens_success": "토큰 CSV가 다운로드되었습니다.",
+			"export_transactions_success": "거래 CSV가 다운로드되었습니다.",
+			"learn_more": "자세히 알아보기"
 		},
 		"alt": {
 			"testnets_toggle": "테스트넷 표시 또는 숨기기 토글",
@@ -803,7 +813,9 @@
 			"appearance_system": "운영 체제의 색상 모드 활성화"
 		},
 		"error": {
-			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
+			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
+			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
+			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션이 완료된 후 다른 트랜잭션을 보낼 수 있습니다.",
 			"no_available_utxos": "이 트랜잭션을 수행할 사용 가능한 UTXO가 없습니다.",
 			"unknown_destination": "이 주소와 이전에 거래한 적이 없습니다. 수신자를 확인해 주세요.",
-			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
+			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
 		},
 		"assertion": {
 			"invalid_destination_address": "유효하지 않은 수신 주소",
@@ -1029,6 +1043,20 @@
 			"burn": "소각",
 			"burning": "소각 중...",
 			"burn_review_subtitle": "소각 금액"
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
 			"swap_provider_website": "웹사이트",
@@ -1163,7 +1193,6 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
 			"unexpected": "토큰 스왑 중 문제가 발생했습니다.",
 			"unexpected_missing_data": "스왑 트랜잭션을 시작하는 중 문제가 발생했습니다.",
+			"failed_unexpectedly": "스왑을 완료하지 못했습니다. 지갑 잔액을 확인한 후 다시 시도하시거나 다른 제공자를 선택해 주세요.",
 			"slippage_exceeded": "$oisy_short이 보호합니다: 거래가 설정된 슬리피지 허용 범위 $maxSlippage%를 초과했습니다. 최대 슬리피지를 조정하고 다시 시도해 주세요.",
 			"pool_not_found": "스왑에 실패했습니다. 풀을 찾을 수 없습니다.",
 			"deposit_error": "스왑을 위한 자금 입금에 실패했습니다. 다시 시도하거나 스왑 제공자를 변경해 주세요.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "HEX 데이터",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "연결된 앱",
 			"no_connected_apps": "현재 연결된 앱이 없습니다.",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "WalletConnect 요청이 거부되었습니다",
 			"unknown_parameter": "알 수 없는 파라미터입니다.",
 			"wallet_not_initialized": "예기치 않은 오류. 지갑 주소가 초기화되지 않았습니다.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "트랜잭션에 요청된 발신 주소가 이 지갑의 주소가 아닙니다.",
 			"unknown_destination": "알 수 없는 수신 주소입니다.",
+			"ambiguous_transaction": "이 거래는 여러 주소 간에 자금을 이동하므로 검토를 위해 정확하게 표시할 수 없습니다. 보안을 위해 서명되지 않았습니다.",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
 		}

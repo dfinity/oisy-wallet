@@ -29,6 +29,7 @@
 			"not_available": "不可用",
 			"new": "新建",
 			"edit": "编辑",
+			"download": "下载",
 			"no_results": "无结果",
 			"paste": "粘贴",
 			"to": "至",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "设置",
 			"general": "通用",
+			"preferences": "偏好设置",
 			"principal": "你的 Principal",
 			"principal_copied": "Principal 已复制到剪贴板",
 			"principal_description": "你在 $oisy_name 中的身份标识，由 Internet Identity 创建。",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
-			"learn_more": ""
+			"export_data": "导出数据",
+			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "导出代币",
+			"export_transactions": "导出交易",
+			"export_tokens_success": "代币 CSV 已下载。",
+			"export_transactions_success": "交易 CSV 已下载。",
+			"learn_more": "了解更多"
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -803,7 +813,9 @@
 			"appearance_system": "启用操作系统的颜色模式"
 		},
 		"error": {
-			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。"
+			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
+			"export_exchange_rate_unavailable": "汇率仍在加载。请稍后重试。",
+			"export_failed": "无法生成您的导出文件。请重试。"
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "待处理的比特币交易完成后，你可以发送另一笔交易。",
 			"no_available_utxos": "你没有可用的 UTXO 来执行此交易。",
 			"unknown_destination": "你之前未与该地址交互，请确认你认识收款人。",
-			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "扫描的内容仅包含接收地址。请确保选择正确的代币、输入正确的金额，并仔细核对接收地址！",
+			"scanned_address_only_destination_single_token": "扫描的内容仅包含接收地址。请确保输入正确的金额，并仔细核对接收地址！"
 		},
 		"assertion": {
 			"invalid_destination_address": "目标地址无效",
@@ -1029,6 +1043,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "正在执行交易...",
 			"initializing": "正在初始化交易...",
 			"swapping": "正在兑换...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
 			"swap_provider_website": "官网",
@@ -1163,7 +1193,6 @@
 			"select_token": "选择代币",
 			"select_network_filter": "选择网络",
 			"withdrawing": "正在取款",
-			"bridging": "正在跨链桥接... (请耐心等待，这可能需要最多 2 分钟。)",
 			"network_cost": "网络成本",
 			"gasless": "无需气费",
 			"swap_fees": "交易费",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "当前没有可用的交易所可进行兑换，请稍后重试。",
 			"unexpected": "兑换代币时发生错误。",
 			"unexpected_missing_data": "初始化兑换交易时发生错误。",
+			"failed_unexpectedly": "无法完成兑换。请检查您的钱包余额后重试，或选择其他提供商。",
 			"slippage_exceeded": "$oisy_short 已保护你：本次交易超过了你设置的 $maxSlippage% 滑点容忍度。请调整最大滑点后再试。",
 			"pool_not_found": "兑换失败，未找到兑换池。",
 			"deposit_error": "存款错误",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "已连接的应用",
 			"no_connected_apps": "当前没有已连接的应用。",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "WalletConnect 请求已被拒绝",
 			"unknown_parameter": "未知参数。",
 			"wallet_not_initialized": "意外错误：钱包地址尚未初始化。",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
+			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
 		}

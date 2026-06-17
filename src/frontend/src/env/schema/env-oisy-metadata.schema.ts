@@ -28,5 +28,6 @@ export const OisyMetadataSchema = z.object({
 	OISY_CREATING_A_WALLET_URL: z.url(),
 	OISY_SCAN_URL: z.url(),
 	OISY_PAY_URL: z.url(),
-	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: z.url()
+	OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL: z.url(),
+	OISY_EXPORT_DATA_DOCS_URL: z.url()
 });

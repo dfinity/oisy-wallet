@@ -797,12 +797,35 @@ describe('sol-transactions.services', () => {
 		});
 
 		it('should handle errors and reset store', async () => {
+			const initialTransactions = createMockSolTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
 			const error = new Error('Failed to load transactions');
+
+			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
 			spyGetTransactions.mockRejectedValue(error);
 
 			await loadNextSolTransactions(mockParams);
 
 			expect(get(solTransactionsStore)?.[mockToken.id]).toBeNull();
+		});
+
+		it('should keep loaded transactions if loading the next page raises an error', async () => {
+			const initialTransactions = createMockSolTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
+			const before = mockSolSignature();
+			const error = new Error('Failed to load transactions');
+
+			solTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			spyGetTransactions.mockRejectedValue(error);
+
+			await loadNextSolTransactions({ ...mockParams, before });
+
+			expect(get(solTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+			expect(signalEnd).toHaveBeenCalledOnce();
 		});
 
 		it('should work with different networks', async () => {
@@ -1184,10 +1207,10 @@ describe('sol-transactions.services', () => {
 		const mockTransactions: SolTransactionUi[] = createMockSolTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: timestampBuffer + BigInt(index)
+				timestamp: timestampBuffer + BigInt(17 - index)
 			})
 		);
-		const [expectedOldestTransaction] = mockTransactions;
+		const expectedOldestTransaction = mockTransactions[mockTransactions.length - 1];
 		const { signature: mockLastSignature } = expectedOldestTransaction;
 
 		const mockParams = {
@@ -1249,7 +1272,27 @@ describe('sol-transactions.services', () => {
 					timestamp: undefined
 				})
 			);
-			const lastSignature = transactions[0].signature;
+			const lastSignature = transactions[transactions.length - 1].signature;
+
+			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
+
+			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				address: mockSolAddress,
+				network: SolanaNetworks.mainnet,
+				before: lastSignature
+			});
+		});
+
+		it('should use the last transaction cursor if oldest timestamps are tied', async () => {
+			const transactions = mockTransactions.map((transaction) => ({
+				...transaction,
+				timestamp: timestampBuffer
+			}));
+			const lastSignature = transactions[transactions.length - 1].signature;
 
 			const result = await loadNextSolTransactionsByOldest({ ...mockParams, transactions });
 

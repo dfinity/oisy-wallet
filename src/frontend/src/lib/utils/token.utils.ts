@@ -108,7 +108,8 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 			customToken?.enabled === true,
 		version: customToken?.version,
 		section: customToken?.section,
-		allowExternalContentSource: customToken?.allowExternalContentSource
+		allowExternalContentSource: customToken?.allowExternalContentSource,
+		allowedExternalContentSourceUrls: customToken?.allowedExternalContentSourceUrls
 	};
 };
 
@@ -295,3 +296,11 @@ export const getTokenDisplayName = (token: Token | CardData): string =>
  */
 export const filterEnabledToken = <T extends Token>(token: T): boolean =>
 	isTokenToggleable(token) ? token.enabled : true;
+
+/** UI-rendered token-standard label, lowercased and trimmed: `<code> <version>`
+ * (e.g. "ext v2", or just "erc20" when no version). Returns an empty string
+ * for a nullish standard. Shared by token and NFT filters so the filter input
+ * matches what users see on the details page.
+ */
+export const standardLabel = (standard: TokenStandard | undefined): string =>
+	nonNullish(standard) ? `${standard.code} ${standard.version ?? ''}`.trim().toLowerCase() : '';

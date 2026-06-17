@@ -6,6 +6,7 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	SignOnramperWidgetUrlRequest,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -16,7 +17,8 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
@@ -39,6 +41,7 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -48,7 +51,6 @@ import { SignupsClosedError } from '$lib/types/errors';
 import type { BackendExchangeRate } from '$lib/types/exchange';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
 import { mapBackendProviderAgreements } from '$lib/utils/provider-agreements.utils';
-import { tokenIdKey } from '$lib/utils/token-id.utils';
 import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import {
@@ -127,6 +129,18 @@ export class BackendCanister extends Canister<BackendService> {
 		return new_user_signups_allowed();
 	};
 
+	exchangeRateEnabled = ({ certified }: QueryParams): Promise<boolean> => {
+		const { exchange_rate_enabled } = this.caller({ certified });
+
+		return exchange_rate_enabled();
+	};
+
+	onramperEnabled = ({ certified }: QueryParams): Promise<boolean> => {
+		const { onramper_enabled } = this.caller({ certified });
+
+		return onramper_enabled();
+	};
+
 	btcAddPendingTransaction = async ({
 		txId,
 		iiDelegationChain,
@@ -161,14 +175,12 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address,
 		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address,
 			ii_delegation_chain: iiDelegationChain
 		});
 
@@ -222,6 +234,34 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapGetAllowedCyclesError(response.Err);
+	};
+
+	signOnramperWidgetUrl = async ({
+		wallets,
+		networkWallets,
+		walletAddressTags
+	}: SignOnramperWidgetUrlParams): Promise<string> => {
+		const { sign_onramper_widget_url } = this.caller({ certified: true });
+
+		const request: SignOnramperWidgetUrlRequest = {
+			wallets: wallets.map(({ cryptoId, wallet }) => ({ key: cryptoId, value: wallet })),
+			network_wallets: networkWallets.map(({ networkId, wallet }) => ({
+				key: networkId,
+				value: wallet
+			})),
+			wallet_address_tags: (walletAddressTags ?? []).map(({ cryptoId, tag }) => ({
+				key: cryptoId,
+				value: tag
+			}))
+		};
+
+		const response = await sign_onramper_widget_url(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapSignOnramperWidgetUrlError(response.Err);
 	};
 
 	allowSigning = async ({
@@ -430,24 +470,14 @@ export class BackendCanister extends Canister<BackendService> {
 		return this.mapExchangeRate(fromNullable(response));
 	};
 
-	getExchangeRates = async (
-		_params: { token_ids: TokenId[] } & QueryParams
-	): Promise<Map<string, BackendExchangeRate>> => {
+	getExchangeRates = async (): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
+		// `get_exchange_rates` is an update on the backend (mutates token_activity, may issue
+		// HTTP outcalls), so it always goes through the certified service.
 		const { get_exchange_rates } = this.caller({ certified: true });
 
 		const results = await get_exchange_rates();
 
-		return results.reduce<Map<string, BackendExchangeRate>>((acc, [id, rate]) => {
-			const unwrapped = this.mapExchangeRate(fromNullable(rate));
-
-			const key = tokenIdKey(id);
-
-			if (nonNullish(unwrapped) && nonNullish(key)) {
-				acc.set(key, unwrapped);
-			}
-
-			return acc;
-		}, new Map());
+		return results.map(([id, rate]) => [id, this.mapExchangeRate(fromNullable(rate))]);
 	};
 
 	getUserTransactions = async ({

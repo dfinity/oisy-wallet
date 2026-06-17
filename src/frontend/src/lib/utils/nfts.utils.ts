@@ -1,15 +1,20 @@
 import type { EthAddress } from '$eth/types/address';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { MediaType } from '$lib/enums/media-type';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
+import type { OptionString } from '$lib/types/string';
 import { areAddressesEqual } from '$lib/utils/address.utils';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
+import { standardLabel } from '$lib/utils/token.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { SvelteMap } from 'svelte/reactivity';
@@ -124,6 +129,9 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		...(notEmptyString(token.description) && { description: token.description }),
 		...(nonNullish(token.allowExternalContentSource) && {
 			allowExternalContentSource: token.allowExternalContentSource
+		}),
+		...(nonNullish(token.allowedExternalContentSourceUrls) && {
+			allowedExternalContentSourceUrls: token.allowedExternalContentSourceUrls
 		})
 	});
 
@@ -253,9 +261,12 @@ const matchesFilter = ({
 	const lower = filter.toLowerCase();
 
 	if (isCollectionUi(item)) {
-		// search by collection name
+		// search by collection name or standard
 		const collectionName = item.collection?.name?.toLowerCase() ?? '';
-		if (collectionName.includes(lower)) {
+		if (
+			collectionName.includes(lower) ||
+			standardLabel(item.collection?.standard).includes(lower)
+		) {
 			return true;
 		}
 		// search by collections nfts name or id
@@ -266,12 +277,13 @@ const matchesFilter = ({
 		);
 	}
 
-	// search nfts by id, name or collection name
+	// search nfts by id, name, collection name or collection standard
 	if (isNft(item)) {
 		return (
 			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
 			(item.name?.toLowerCase().includes(lower) ?? false) ||
-			(item.collection?.name?.toLowerCase().includes(lower) ?? false)
+			(item.collection?.name?.toLowerCase().includes(lower) ?? false) ||
+			standardLabel(item.collection?.standard).includes(lower)
 		);
 	}
 
@@ -305,6 +317,38 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 	return result;
 };
+
+export const getNftSendRedirectUrl = ({
+	sentNft,
+	collectionNfts
+}: {
+	sentNft: Nft;
+	collectionNfts: Nft[];
+}): string => {
+	const hasRemaining = collectionNfts.some(({ id }) => id !== sentNft.id);
+
+	return hasRemaining ? nftsUrl({ collection: sentNft.collection }) : AppPath.Nfts;
+};
+
+export const getNftSendCloseRedirectUrl = ({
+	isNftsPage,
+	routeNft,
+	sendProgressStep,
+	selectedNft,
+	collectionNfts
+}: {
+	isNftsPage: boolean;
+	routeNft: OptionString;
+	sendProgressStep: ProgressStepsSend;
+	selectedNft: Nft | undefined;
+	collectionNfts: Nft[];
+}): string | undefined =>
+	isNftsPage &&
+	notEmptyString(routeNft) &&
+	sendProgressStep === ProgressStepsSend.DONE &&
+	nonNullish(selectedNft)
+		? getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts })
+		: undefined;
 
 export const findNonFungibleToken = ({
 	tokens,

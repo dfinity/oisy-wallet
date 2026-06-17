@@ -1,9 +1,10 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { InfuraProvider, infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { InfuraProvider as InfuraProviderLib } from 'ethers/providers';
 
@@ -21,6 +22,73 @@ describe('infura.providers', () => {
 
 		networks.forEach(({ providers: { infura } }, index) => {
 			expect(InfuraProviderLib).toHaveBeenNthCalledWith(index + 1, infura, INFURA_API_KEY);
+		});
+	});
+
+	describe('InfuraProvider', () => {
+		const {
+			providers: { infura }
+		} = ETHEREUM_NETWORK;
+
+		const mockProvider = vi.mocked(InfuraProviderLib);
+		const mockGetTransactionCount = vi.fn();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockProvider.prototype.getTransactionCount = mockGetTransactionCount;
+		});
+
+		describe('getTransactionCountLatest', () => {
+			const mockCount = 7;
+
+			beforeEach(() => {
+				mockGetTransactionCount.mockResolvedValue(mockCount);
+			});
+
+			it('should call getTransactionCount with the latest tag', async () => {
+				const provider = new InfuraProvider(infura);
+
+				await expect(provider.getTransactionCountLatest(mockEthAddress)).resolves.toBe(mockCount);
+
+				expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'latest');
+			});
+
+			it('should propagate errors from the underlying provider', async () => {
+				const mockError = new Error('Mock error');
+				mockGetTransactionCount.mockRejectedValueOnce(mockError);
+
+				const provider = new InfuraProvider(infura);
+
+				await expect(provider.getTransactionCountLatest(mockEthAddress)).rejects.toThrow(mockError);
+			});
+		});
+
+		describe('getTransactionCountPending', () => {
+			const mockCount = 11;
+
+			beforeEach(() => {
+				mockGetTransactionCount.mockResolvedValue(mockCount);
+			});
+
+			it('should call getTransactionCount with the pending tag', async () => {
+				const provider = new InfuraProvider(infura);
+
+				await expect(provider.getTransactionCountPending(mockEthAddress)).resolves.toBe(mockCount);
+
+				expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'pending');
+			});
+
+			it('should propagate errors from the underlying provider', async () => {
+				const mockError = new Error('Mock error');
+				mockGetTransactionCount.mockRejectedValueOnce(mockError);
+
+				const provider = new InfuraProvider(infura);
+
+				await expect(provider.getTransactionCountPending(mockEthAddress)).rejects.toThrow(
+					mockError
+				);
+			});
 		});
 	});
 

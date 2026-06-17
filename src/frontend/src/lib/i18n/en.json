@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "New",
 			"edit": "Edit",
+			"download": "Download",
 			"no_results": "No results",
 			"paste": "Paste",
 			"to": "To",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "Settings",
 			"general": "General",
+			"preferences": "Preferences",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
@@ -793,6 +795,14 @@
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
+			"export_data": "Export data",
+			"export_data_description": "Download your tokens and transactions as CSV — Basic for the essentials, Extended for additional attributes.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Export tokens",
+			"export_transactions": "Export transactions",
+			"export_tokens_success": "Tokens CSV downloaded.",
+			"export_transactions_success": "Transactions CSV downloaded.",
 			"learn_more": "Learn more"
 		},
 		"alt": {
@@ -803,7 +813,9 @@
 			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
+			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
+			"export_failed": "We couldn't generate your export. Please try again."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
 			"no_available_utxos": "You won't have available utxos to perform this transaction.",
 			"unknown_destination": "You haven't interacted with this address before. Please ensure you know the recipient.",
-			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Fee will be paid in $feeSymbol. Available: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "The scanned code only contained a destination address. Make sure you select the correct token, enter the right amount, and review the destination address carefully!",
+			"scanned_address_only_destination_single_token": "The scanned code only contained a destination address. Make sure you enter the right amount and review the destination address carefully!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -1029,6 +1043,20 @@
 			"burn": "Burn",
 			"burning": "Burning...",
 			"burn_review_subtitle": "You burn"
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "Active transactions",
+			"open_aria_label": "Open active transactions",
+			"empty": "You have no active transactions.",
+			"section_in_progress": "In progress",
+			"section_failed": "Failed",
+			"section_previous": "Previous",
+			"dismiss_aria_label": "Dismiss this transaction"
+		},
+		"error": {
+			"dismiss_failed": "Could not dismiss the transaction."
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
+			"starting_to_swap": "Submitting your swap...",
+			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1163,7 +1193,6 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
 			"unexpected": "Something went wrong while swapping tokens.",
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
+			"failed_unexpectedly": "The swap could not be completed. Please check your wallet balance and try again, or choose a different provider.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
 			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
-			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again."
+			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
+			"swap_refunded": "The swap transaction was refunded."
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "HEX Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
+			"sign_psbt": "Sign Transaction",
+			"signing_address": "Signing address",
+			"fee": "Fee",
+			"btc_symbol": "BTC",
+			"psbt_inputs": "Inputs",
+			"psbt_outputs": "Outputs",
+			"psbt_total_signed_inputs": "Total signed input value",
+			"psbt_unknown_address": "Unknown address",
+			"psbt_unknown_value": "Unknown",
+			"psbt_fee_unknown": "Unknown",
+			"psbt_signed_by_wallet": "your address",
+			"psbt_broadcast": "Broadcast",
+			"psbt_broadcast_enabled": "Yes",
+			"psbt_broadcast_disabled": "No",
+			"psbt_broadcast_unsupported_note": "This request asks the wallet to broadcast the transaction, which is not supported. For your security, it cannot be approved. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
 			"connected_apps": "Connected Apps",
 			"no_connected_apps": "No apps are currently connected.",
 			"wallet_connect": "WalletConnect"
@@ -1588,8 +1634,13 @@
 			"request_rejected": "WalletConnect request rejected",
 			"unknown_parameter": "Unknown parameter.",
 			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
+			"btc_broadcast_not_supported": "Broadcasting the signed transaction is not supported yet. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
+			"btc_psbt_decode": "This transaction could not be decoded for review. For your security, it was not signed.",
+			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
+			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
+			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}

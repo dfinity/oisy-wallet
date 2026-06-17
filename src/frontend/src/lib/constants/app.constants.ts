@@ -173,6 +173,9 @@ export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
+// Active user transactions polling
+export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 seconds
+
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds
 

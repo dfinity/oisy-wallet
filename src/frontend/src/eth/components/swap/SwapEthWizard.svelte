@@ -25,6 +25,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -54,6 +55,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
@@ -357,7 +359,8 @@
 					userEthAddress: $ethAddress,
 					gas,
 					maxFeePerGas,
-					maxPriorityFeePerGas
+					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID()
 				});
 			} else {
 				toastsError({
@@ -372,8 +375,15 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// For OneSec swaps, the foreground completes once the user's funds have
+			// left their wallet; success/failure of the background phase is tracked
+			// separately via the AUT store. Other providers (Velora, Near) still
+			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name:
+					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+						? TRACK_COUNT_SWAP_SUBMITTED
+						: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -387,20 +397,32 @@
 				}
 			}, 750);
 		} catch (err: unknown) {
+			const errorDetail = errorDetailToString(err);
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetailToString(err) ?? ''
+					error: errorDetail ?? ''
 				}
 			});
 
-			failedSwapError.set(undefined);
-
-			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
-				err
-			});
+			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
+				});
+			} else {
+				failedSwapError.set({
+					message: $i18n.swap.error.failed_unexpectedly,
+					variant: 'error'
+				});
+			}
 
 			onBack();
 			onStartTriggerAmount();
@@ -460,7 +482,8 @@
 					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
+						SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

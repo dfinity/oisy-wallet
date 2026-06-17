@@ -1,4 +1,12 @@
-import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
+import {
+	btcAddressMainnet,
+	btcAddressRegtest,
+	btcAddressTestnet,
+	ethAddress,
+	solAddressDevnet,
+	solAddressMainnet
+} from '$lib/derived/address.derived';
+import { authIdentity } from '$lib/derived/auth.derived';
 import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import {
 	onSessionDelete,
@@ -132,7 +140,13 @@ const initListener = async (): Promise<OptionWalletConnectListener> => {
 
 	try {
 		// Connect and disconnect buttons are disabled until at least one of the address is loaded; therefore, this should never happen.
-		if (isNullish(get(ethAddress)) && isNullish(get(solAddressMainnet))) {
+		if (
+			isNullish(get(ethAddress)) &&
+			isNullish(get(solAddressMainnet)) &&
+			isNullish(get(btcAddressMainnet)) &&
+			isNullish(get(btcAddressTestnet)) &&
+			isNullish(get(btcAddressRegtest))
+		) {
 			toastsError({
 				msg: { text: get(i18n).send.assertion.address_unknown }
 			});
@@ -142,7 +156,11 @@ const initListener = async (): Promise<OptionWalletConnectListener> => {
 		const newListener = await WalletConnectClient.init({
 			ethAddress: get(ethAddress),
 			solAddressMainnet: get(solAddressMainnet),
-			solAddressDevnet: get(solAddressDevnet)
+			solAddressDevnet: get(solAddressDevnet),
+			btcAddressMainnet: get(btcAddressMainnet),
+			btcAddressTestnet: get(btcAddressTestnet),
+			btcAddressRegtest: get(btcAddressRegtest),
+			btcPrincipal: get(authIdentity)?.getPrincipal()
 		});
 
 		walletConnectListenerStore.set(newListener);

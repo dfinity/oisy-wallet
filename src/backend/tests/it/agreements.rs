@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, sync::LazyLock};
+use std::{collections::BTreeMap, sync::LazyLock, time::Duration};
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
@@ -188,6 +188,82 @@ fn test_update_user_agreements_merges_with_existing_settings() {
     assert!(a.license_agreement.last_accepted_at_ns.is_some());
     assert!(a.terms_of_use.last_accepted_at_ns.is_some());
     assert!(a.privacy_policy.last_accepted_at_ns.is_none());
+}
+
+#[test]
+fn test_update_user_agreements_preserves_untouched_acceptance_timestamp() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let profile = pic_setup
+        .update::<Result<UserProfile, CreateUserProfileError>>(caller, "create_user_profile", ())
+        .expect("Create call failed")
+        .expect("Signups should be open");
+
+    let arg1 = UpdateUserAgreementsRequest {
+        current_user_version: profile.version,
+        agreements: INITIAL_AGREEMENTS.clone(),
+    };
+    let resp1 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_user_agreements",
+        arg1,
+    );
+    assert_eq!(resp1, Ok(Ok(())));
+
+    let user_profile_after_license = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let license_accepted_at = user_profile_after_license
+        .agreements
+        .clone()
+        .unwrap()
+        .agreements
+        .license_agreement
+        .last_accepted_at_ns
+        .expect("license acceptance timestamp missing");
+
+    pic_setup.pic.advance_time(Duration::from_secs(1));
+    pic_setup.pic.tick();
+
+    let arg2 = UpdateUserAgreementsRequest {
+        current_user_version: user_profile_after_license.version,
+        agreements: UserAgreements {
+            terms_of_use: UserAgreement {
+                accepted: Some(true),
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+    };
+    let resp2 = pic_setup.update::<Result<(), UpdateAgreementsError>>(
+        caller,
+        "update_user_agreements",
+        arg2,
+    );
+    assert_eq!(resp2, Ok(Ok(())));
+
+    let user_profile_after_terms = pic_setup
+        .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
+        .unwrap()
+        .unwrap();
+
+    let agreements = user_profile_after_terms.agreements.unwrap().agreements;
+    let terms_accepted_at = agreements
+        .terms_of_use
+        .last_accepted_at_ns
+        .expect("terms acceptance timestamp missing");
+
+    assert_eq!(
+        agreements.license_agreement.last_accepted_at_ns,
+        Some(license_accepted_at)
+    );
+    assert!(
+        terms_accepted_at > license_accepted_at,
+        "terms timestamp should reflect the later update"
+    );
 }
 
 #[test]

@@ -7,14 +7,14 @@ use crate::{
     types::{StoredTokenId, VMem},
 };
 
-/// How long an inactive token's activity record is kept before housekeeping
-/// evicts it (24 hours).
+/// How old an inactive token's activity record must be before housekeeping
+/// may evict it (30 minutes).
 ///
-/// Generously larger than `PRICE_ACTIVITY_THRESHOLD_SEC` so any token that is
-/// still being refreshed is never accidentally removed; the goal here is just
-/// to bound the on-disk size of `token_activity` over time, not to gate
-/// refreshes.
-pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 24 * 60 * 60;
+/// Comfortably larger than `PRICE_ACTIVITY_THRESHOLD_SEC` (10 minutes) so any
+/// token that is still being refreshed is never accidentally removed; the
+/// goal here is just to bound the on-disk size of `token_activity` over
+/// time, not to gate refreshes.
+pub(crate) const TOKEN_ACTIVITY_RETENTION_SEC: u64 = 30 * 60;
 
 fn add_to_token_activity(
     token_id: StoredTokenId,

@@ -29,6 +29,7 @@
 			"not_available": "n/a",
 			"new": "Nový",
 			"edit": "Upravit",
+			"download": "Stáhnout",
 			"no_results": "Žádné výsledky",
 			"paste": "Vložit",
 			"to": "Do",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
-			"learn_more": ""
+			"export_data": "Exportovat data",
+			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportovat tokeny",
+			"export_transactions": "Exportovat transakce",
+			"export_tokens_success": "CSV s tokeny bylo staženo.",
+			"export_transactions_success": "CSV s transakcemi bylo staženo.",
+			"learn_more": "Zjistit více"
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -803,7 +813,9 @@
 			"appearance_system": "Povolí barevný režim vašeho operačního systému"
 		},
 		"error": {
-			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
+			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
+			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
-			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
+			"scanned_address_only_destination_single_token": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",
@@ -1029,6 +1043,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "Provádění transakce...",
 			"initializing": "Inicializace transakce...",
 			"swapping": "Výměna...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
 			"swap_provider_website": "Webové stránky",
@@ -1163,7 +1193,6 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
 			"unexpected": "Při výměně tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
+			"failed_unexpectedly": "Swap se nepodařilo dokončit. Zkontrolujte prosím zůstatek své peněženky a zkuste to znovu, nebo zvolte jiného poskytovatele.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
 			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "Požadavek WalletConnect byl zamítnut",
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
+			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
 		}

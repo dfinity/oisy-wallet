@@ -6,8 +6,15 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { walletConnectPaired, walletConnectReconnecting } from '$eth/stores/wallet-connect.store';
 	import { URI_PARAM } from '$lib/constants/routes.constants';
-	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress,
+		solAddressDevnet,
+		solAddressMainnet
+	} from '$lib/derived/address.derived';
+	import { authIdentity, authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import {
@@ -111,6 +118,10 @@
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
 				solAddressDevnet: $solAddressDevnet,
+				btcAddressMainnet: $btcAddressMainnet,
+				btcAddressTestnet: $btcAddressTestnet,
+				btcAddressRegtest: $btcAddressRegtest,
+				btcPrincipal: $authIdentity?.getPrincipal(),
 				cleanSlate: false
 			});
 

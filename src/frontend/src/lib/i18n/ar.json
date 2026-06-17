@@ -29,6 +29,7 @@
 			"not_available": "غير متاح",
 			"new": "جديد",
 			"edit": "تعديل",
+			"download": "تنزيل",
 			"no_results": "لا توجد نتائج",
 			"paste": "لصق",
 			"to": "إلى",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "الإعدادات",
 			"general": "",
+			"preferences": "التفضيلات",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
-			"learn_more": ""
+			"export_data": "تصدير البيانات",
+			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "تصدير الرموز",
+			"export_transactions": "تصدير المعاملات",
+			"export_tokens_success": "تم تنزيل ملف CSV للرموز.",
+			"export_transactions_success": "تم تنزيل ملف CSV للمعاملات.",
+			"learn_more": "اعرف المزيد"
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -803,7 +813,9 @@
 			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
 		},
 		"error": {
-			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة."
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
+			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
+			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
-			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
+			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",
@@ -1029,6 +1043,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "جاري تنفيذ المعاملة...",
 			"initializing": "جاري تهيئة المعاملة...",
 			"swapping": "جاري التبديل...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
 			"swap_provider_website": "الموقع الإلكتروني",
@@ -1163,7 +1193,6 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected": "حدث خطأ ما أثناء تبديل التوكنات.",
 			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تبديل.",
+			"failed_unexpectedly": "تعذر إكمال التبديل. يرجى التحقق من رصيد محفظتك والمحاولة مرة أخرى، أو اختيار مزود مختلف.",
 			"slippage_exceeded": "$oisy_short يحميك: التداول خارج نطاق تحمل الانزلاق الخاص بك بنسبة $maxSlippage%. يرجى ضبط الحد الأقصى للانزلاق والمحاولة مرة أخرى.",
 			"pool_not_found": "فشل التبديل. لم يتم العثور على المجمع.",
 			"deposit_error": "فشل إيداع الأموال لتبديلك. يرجى المحاولة مرة أخرى أو تغيير مزود التبديل.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "التطبيقات المتصلة",
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "تم رفض طلب WalletConnect",
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
 		}

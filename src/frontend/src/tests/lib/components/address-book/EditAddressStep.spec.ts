@@ -214,7 +214,7 @@ describe('EditAddressStep', () => {
 		});
 
 		const resetButtons = screen.getAllByRole('button', {
-			name: 'Reset input value'
+			name: en.convert.text.input_reset_button
 		});
 
 		expect(resetButtons).toHaveLength(2);

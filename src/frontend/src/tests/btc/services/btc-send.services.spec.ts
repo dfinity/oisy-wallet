@@ -1,5 +1,10 @@
 import * as btcPendingSentTransactionsServices from '$btc/services/btc-pending-sent-transactions.services';
-import { sendBtc, validateBtcSend, type SendBtcParams } from '$btc/services/btc-send.services';
+import {
+	handleBtcValidationError,
+	sendBtc,
+	validateBtcSend,
+	type SendBtcParams
+} from '$btc/services/btc-send.services';
 import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
@@ -8,11 +13,15 @@ import * as btcUtils from '$icp/utils/btc.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import type { CkBtcMinterDid } from '@icp-sdk/canisters/ckbtc';
+import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)
 vi.mock('$env/networks/networks.icrc.env', () => ({
@@ -36,6 +45,81 @@ describe('btc-send.services', () => {
 	const error = new Error('test error');
 
 	beforeEach(() => {});
+
+	describe('handleBtcValidationError', () => {
+		let spyToastsError: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError').mockReturnValue(Symbol('toast'));
+		});
+
+		it('should not toast for AuthenticationRequired', () => {
+			handleBtcValidationError({
+				err: new BtcValidationError(BtcSendValidationError.AuthenticationRequired)
+			});
+
+			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		it.each([
+			{ type: BtcSendValidationError.NoNetworkId, text: get(i18n).send.error.no_btc_network_id },
+			{
+				type: BtcSendValidationError.InvalidDestination,
+				text: get(i18n).send.assertion.destination_address_invalid
+			},
+			{ type: BtcSendValidationError.InvalidAmount, text: get(i18n).send.assertion.amount_invalid },
+			{
+				type: BtcSendValidationError.UtxoFeeMissing,
+				text: get(i18n).send.assertion.utxos_fee_missing
+			},
+			{
+				type: BtcSendValidationError.TokenUndefined,
+				text: get(i18n).tokens.error.unexpected_undefined
+			},
+			{
+				type: BtcSendValidationError.InsufficientBalance,
+				text: get(i18n).send.assertion.btc_insufficient_balance
+			},
+			{
+				type: BtcSendValidationError.InsufficientBalanceForFee,
+				text: get(i18n).send.assertion.btc_insufficient_balance_for_fee
+			},
+			{
+				type: BtcSendValidationError.InvalidUtxoData,
+				text: get(i18n).send.assertion.btc_invalid_utxo_data
+			},
+			{ type: BtcSendValidationError.UtxoLocked, text: get(i18n).send.assertion.btc_utxo_locked },
+			{
+				type: BtcSendValidationError.InvalidFeeCalculation,
+				text: get(i18n).send.assertion.btc_invalid_fee_calculation
+			},
+			{
+				type: BtcSendValidationError.MinimumBalance,
+				text: get(i18n).send.assertion.minimum_btc_amount
+			}
+		])('should toast the mapped message for $type', ({ type, text }) => {
+			handleBtcValidationError({ err: new BtcValidationError(type) });
+
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text }
+			});
+		});
+
+		it.each([
+			BtcSendValidationError.PendingTransactionsNotAvailable,
+			'unknown_error_type' as BtcSendValidationError
+		])('should toast the unexpected error with err for %s', (type) => {
+			const err = new BtcValidationError(type);
+
+			handleBtcValidationError({ err });
+
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: get(i18n).send.error.unexpected },
+				err
+			});
+		});
+	});
 
 	describe('sendBtc', () => {
 		it('should call all required functions', async () => {
@@ -72,7 +156,6 @@ describe('btc-send.services', () => {
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
-				address: defaultParams.source,
 				txId: new Uint8Array(),
 				utxos: defaultParams.utxosFee.utxos,
 				iiDelegationChain: []

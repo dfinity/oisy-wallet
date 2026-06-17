@@ -25,7 +25,7 @@ export interface ActiveUserTransaction {
 	 * `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
 	 * for the field layout exposed on the wire and in TS bindings.
 	 */
-	external_refs: Array<ActiveUserTransactionRef>;
+	external_refs: Array<OnramperSignedEntry>;
 	/**
 	 * Opaque to the backend; the FE writes a flow-specific step name here.
 	 */
@@ -50,7 +50,14 @@ export type ActiveUserTransactionData =
 	| {
 			OneSecEvmToIcp: OneSecEvmToIcpData;
 	  }
-	| { OneSecIcpToEvm: OneSecIcpToEvmData };
+	| { OneSecIcpToEvm: OneSecIcpToEvmData }
+	| {
+			/**
+			 * Liquidium lend/borrow flow. A single variant covers all four actions
+			 * (supply, borrow, repay, withdraw).
+			 */
+			Liquidium: LiquidiumData;
+	  };
 export type ActiveUserTransactionError =
 	| { InvalidId: null }
 	| { NotFound: null }
@@ -202,14 +209,27 @@ export type AllowSigningResult =
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
 	/**
-	 * When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-	 * `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-	 * (misconfiguration with no key does not run refresh).
+	 * Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+	 * `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+	 * both keep refresh disabled (and a missing key never runs refresh either).
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
+	/**
+	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 */
+	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
+	/**
+	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
+	 * provisioned/rotated via the dedicated `set_onramper_signing_secret` endpoint (which
+	 * preserves the other keys). When `None`, the signing endpoint reports the secret as
+	 * missing and the `OnRamper` widget cannot be loaded.
+	 */
+	onramper_signing_secret: [] | [string];
 	infura_api_key: [] | [string];
 }
 export type ApproveError =
@@ -462,7 +482,6 @@ export interface BtcGetPendingTransactionsReponse {
 export interface BtcGetPendingTransactionsRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
-	address: string;
 }
 export type BtcGetPendingTransactionsResult =
 	| {
@@ -635,6 +654,7 @@ export interface CustomToken {
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
+	allowed_external_content_source_urls: [] | [Array<string>];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
@@ -1044,6 +1064,29 @@ export interface InitArg {
 	new_user_signups_allowed: [] | [boolean];
 }
 /**
+ * Which Liquidium lend/borrow action an active transaction tracks.
+ */
+export type LiquidiumAction =
+	| { Withdraw: null }
+	| { Repay: null }
+	| { Borrow: null }
+	| { Supply: null };
+export interface LiquidiumData {
+	/**
+	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+	 */
+	token: TokenId;
+	action: LiquidiumAction;
+	/**
+	 * Liquidium pool canister id (principal text), treated as an opaque key.
+	 */
+	pool_id: string;
+	/**
+	 * Amount in the token's base units.
+	 */
+	amount: bigint;
+}
+/**
  * Bitcoin Network.
  */
 export type Network =
@@ -1116,6 +1159,15 @@ export interface OneSecIcpToEvmData {
 	source_token: TokenId;
 	amount: bigint;
 	dest_token: TokenId;
+}
+/**
+ * A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
+ * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
+ * `key` to lowercase before signing.
+ */
+export interface OnramperSignedEntry {
+	key: string;
+	value: string;
 }
 /**
  * Outpoint.
@@ -1212,6 +1264,52 @@ export interface Settings {
 	experimental_features: ExperimentalFeaturesSettings;
 	transactions: [] | [TransactionSettings];
 }
+/**
+ * Errors returned by `sign_onramper_widget_url`.
+ */
+export type SignOnramperWidgetUrlError =
+	| {
+			/**
+			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
+			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
+			 * signing oracle.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
+			 * frontend should treat this the same as a hard failure: the widget cannot be opened until
+			 * the secret is configured.
+			 */
+			SecretNotConfigured: null;
+	  };
+/**
+ * Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
+ * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
+ */
+export interface SignOnramperWidgetUrlRequest {
+	/**
+	 * `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
+	 */
+	network_wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
+	 */
+	wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
+	 */
+	wallet_address_tags: Array<OnramperSignedEntry>;
+}
+export type SignOnramperWidgetUrlResult =
+	| {
+			/**
+			 * Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+			 */
+			Ok: string;
+	  }
+	| { Err: SignOnramperWidgetUrlError };
 /**
  * A signed delegation from the delegation chain.
  */
@@ -1495,7 +1593,7 @@ export interface TransformArgs {
 export interface UpdateActiveUserTransactionRequest {
 	id: string;
 	status: [] | [ActiveUserTransactionStatus];
-	external_refs: [] | [Array<ActiveUserTransactionRef>];
+	external_refs: [] | [Array<OnramperSignedEntry>];
 	progress_step: [] | [string];
 	error: [] | [string];
 }
@@ -1779,6 +1877,16 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Returns whether the backend is currently fetching and caching exchange rates.
+	 *
+	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+	 * actual refresh predicate used by [`fetch_and_update_prices`].
+	 *
+	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
+	 * cached rates from the backend or fetch directly from public providers.
+	 */
+	exchange_rate_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
@@ -1840,14 +1948,24 @@ export interface _SERVICE {
 	 * (testnets, NFTs and ERC-4626 vaults are excluded).
 	 *
 	 * The endpoint also re-marks the returned tokens as active so the
-	 * background refresh timer keeps them warm. If any cached price is older
-	 * than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`] seconds or
-	 * missing, the endpoint awaits a one-shot fetch for that subset before
-	 * responding. Entries that remain stale or missing after that attempt are
-	 * returned as `None` so returned prices honour the freshness contract.
+	 * background refresh timer keeps them warm. If any cached price is
+	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
+	 * seconds, the endpoint kicks off a refresh for that subset **in the
+	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
+	 * snapshot immediately. Entries that are still missing or stale at the
+	 * moment of the call are returned as `None`; subsequent calls will pick up
+	 * the refreshed values once the spawned fetch lands.
 	 *
-	 * This is an `update` (rather than a `query`) because it mutates state
-	 * (`token_activity`) and may issue HTTP outcalls.
+	 * This trade-off (return fast, refresh async) is intentional: under the
+	 * previous "await-the-fetch" shape, a cold-cache caller could wait on the
+	 * full outcall fan-in before getting any response. The frontend already
+	 * tolerates `None` entries (renders no value rather than blocking), and
+	 * the background refresh + the 60s recurring timer together converge the
+	 * cache to fresh within ~one outcall round.
+	 *
+	 * This is still an `update` (rather than a `query`) because it mutates
+	 * state (`token_activity`) and may need an update context to schedule the
+	 * background fetch.
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
@@ -1927,6 +2045,14 @@ export interface _SERVICE {
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
+	 * Returns whether the `OnRamper` widget can be signed, i.e. whether controllers have provisioned
+	 * the signing secret via `set_api_keys`.
+	 *
+	 * Exposed as an unauthenticated query (mirroring `exchange_rate_enabled`) so the frontend can
+	 * disable the buy flow up front when the secret is missing, rather than failing on widget open.
+	 */
+	onramper_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
@@ -1940,6 +2066,10 @@ export interface _SERVICE {
 	/**
 	 * Overwrites the stored API keys.
 	 *
+	 * If `exchange_rate_enabled` or `exchange_rate_replicated` is omitted, the existing toggle is
+	 * preserved so that routine key rotation does not accidentally pause exchange-rate refreshes or
+	 * change their outcall replication mode.
+	 *
 	 * Restricted to canister controllers only.
 	 */
 	set_api_keys: ActorMethod<[ApiKeys], undefined>;
@@ -1947,6 +2077,28 @@ export interface _SERVICE {
 	 * Add or update custom token for the user.
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+	 *
+	 * Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+	 * keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+	 * them resume (still gated on a `CoinGecko` key being set, see
+	 * [`is_exchange_rate_refresh_enabled`]).
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+	 * keys.
+	 *
+	 * Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+	 * consensus (every replica issues the request); `false` sends them non-replicated (a single
+	 * replica). See [`crate::exchange::is_exchange_rate_replicated`].
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_replicated: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
@@ -1956,6 +2108,14 @@ export interface _SERVICE {
 	 * fields are preserved.
 	 */
 	set_new_user_signups_allowed: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets or clears the `OnRamper` signing secret used by [`sign_onramper_widget_url`].
+	 *
+	 * Restricted to canister controllers. Uses a single-field mutation, so it never overwrites the
+	 * other configured API keys the way a full `set_api_keys` call would — the safe way to provision
+	 * or rotate the secret per environment.
+	 */
+	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
@@ -1967,6 +2127,20 @@ export interface _SERVICE {
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
+	/**
+	 * Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
+	 *
+	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	 * Authenticated callers only: anonymous principals cannot extract signatures.
+	 *
+	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
+	 * can persist its sliding window — a query would discard the recorded call. The frontend already
+	 * invokes it as a certified (replicated) call, so there is no added latency.
+	 */
+	sign_onramper_widget_url: ActorMethod<
+		[SignOnramperWidgetUrlRequest],
+		SignOnramperWidgetUrlResult
+	>;
 	/**
 	 * Gets statistics about the canister.
 	 *

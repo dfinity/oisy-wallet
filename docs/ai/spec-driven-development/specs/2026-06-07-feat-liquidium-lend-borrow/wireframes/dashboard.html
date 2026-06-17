@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Liquidium dashboard — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--accent2: #9b6cff;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Helvetica,
+					Arial,
+					sans-serif;
+			}
+			.wrap {
+				max-width: 520px;
+				margin: 0 auto;
+				padding: 18px;
+			}
+			.wfbar {
+				max-width: 520px;
+				margin: 14px auto 8px;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #6b7787;
+				border: 1px solid #b9c4dd;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wfbar .ctrls {
+				display: flex;
+				gap: 6px;
+				align-items: center;
+				margin-top: 10px;
+				flex-wrap: wrap;
+				padding-top: 9px;
+				border-top: 1px solid #eef1f7;
+			}
+			.wfbar .ctrls button {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				color: var(--muted);
+				border-radius: 8px;
+				padding: 5px 10px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.wfbar .ctrls button.on {
+				color: var(--txt);
+				border-color: var(--accent);
+			}
+			h1 {
+				font-size: 18px;
+				margin: 0;
+			}
+			.crumbs {
+				color: var(--muted);
+				font-size: 12px;
+				margin-bottom: 12px;
+			}
+			.crumbs a {
+				color: var(--accent);
+				text-decoration: none;
+			}
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 14px;
+				padding: 16px;
+				margin-bottom: 14px;
+			}
+			.row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+			}
+			.muted {
+				color: var(--muted);
+			}
+			.small {
+				font-size: 12px;
+			}
+			.summary {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 10px;
+				margin-top: 12px;
+			}
+			.summary .box {
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				padding: 10px;
+			}
+			.summary .lbl {
+				font-size: 11px;
+				color: var(--muted);
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+			}
+			.summary .val {
+				font-size: 18px;
+				font-weight: 600;
+				margin-top: 2px;
+			}
+			.hf .val {
+				color: var(--green);
+			}
+			.sec-title {
+				font-weight: 600;
+				margin: 18px 0 8px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.asset {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.coin {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 12px;
+				color: #0e1218;
+			}
+			.btc {
+				background: #f7931a;
+			}
+			.eth {
+				background: #8a93b2;
+			}
+			.usdc {
+				background: #2775ca;
+				color: #fff;
+			}
+			.usdt {
+				background: #26a17b;
+				color: #fff;
+			}
+			.posrow {
+				padding: 12px 0;
+				border-top: 1px solid var(--line);
+			}
+			.posrow:first-of-type {
+				border-top: 0;
+			}
+			.legs {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				margin: 8px 0;
+			}
+			.leg {
+				background: var(--panel2);
+				border-radius: 8px;
+				padding: 8px 10px;
+			}
+			.leg .k {
+				font-size: 11px;
+				color: var(--muted);
+			}
+			.leg .v {
+				font-weight: 600;
+			}
+			.apy {
+				color: var(--green);
+				font-size: 12px;
+			}
+			.apy.borrow {
+				color: var(--amber);
+			}
+			.acts {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+			}
+			button {
+				font: inherit;
+				cursor: pointer;
+			}
+			.btn {
+				background: var(--accent);
+				color: #fff;
+				border: 0;
+				border-radius: 9px;
+				padding: 8px 14px;
+				font-weight: 600;
+			}
+			.btn.ghost {
+				background: transparent;
+				border: 1px solid var(--line);
+				color: var(--txt);
+			}
+			.btn.sm {
+				padding: 6px 11px;
+				font-size: 12.5px;
+			}
+			.btn:disabled {
+				opacity: 0.4;
+				cursor: not-allowed;
+			}
+			.pill {
+				font-size: 11px;
+				padding: 2px 8px;
+				border-radius: 999px;
+				background: var(--panel2);
+				border: 1px solid var(--line);
+				color: var(--muted);
+			}
+			.pill.soon {
+				color: var(--amber);
+				border-color: #ecd29a;
+			}
+			.mkrow {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 11px 0;
+				border-top: 1px solid var(--line);
+			}
+			.mkrow:first-of-type {
+				border-top: 0;
+			}
+			.hide {
+				display: none;
+			}
+			.learn {
+				color: var(--accent);
+				text-decoration: none;
+				font-size: 12px;
+			}
+			.toast {
+				position: fixed;
+				left: 50%;
+				bottom: 18px;
+				transform: translateX(-50%);
+				background: #1f2a44;
+				border: 1px solid #1f2a44;
+				color: #fff;
+				padding: 9px 14px;
+				border-radius: 9px;
+				font-size: 13px;
+				opacity: 0;
+				transition: 0.25s;
+			}
+			.toast.show {
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag">Wireframe — controls below are not part of the UI</span>
+			<div>
+				Interactive mock of the Liquidium dashboard (the <code>/earn/liquidium/</code> provider
+				page). Action buttons show toasts only — each opens its own flow wireframe.
+			</div>
+			<div class="ctrls">
+				<span>Demo · user state:</span>
+				<button data-state="new" class="on">New user</button>
+				<button data-state="supply">Supply, no borrow</button>
+				<button data-state="full">Supply + borrow</button>
+			</div>
+		</div>
+		<div class="wrap">
+			<div class="crumbs"><a href="#">Earn</a> › Liquidium</div>
+
+			<div class="card">
+				<div class="row">
+					<h1>Liquidium</h1>
+					<a class="learn" href="#">Learn more ↗</a>
+				</div>
+				<div class="muted small" style="margin-top: 4px">
+					Lend &amp; borrow native BTC, ETH, USDC and USDT. Lending logic runs on Liquidium's
+					canisters; oisy provides the UX.
+				</div>
+				<div class="summary">
+					<div class="box hf">
+						<div class="lbl">Health factor</div>
+						<div class="val" id="hf">100%</div>
+					</div>
+					<div class="box">
+						<div class="lbl">Net value</div>
+						<div class="val" id="nv">$0.00</div>
+					</div>
+					<div class="box">
+						<div class="lbl">Net APY</div>
+						<div class="val" id="napy">—</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="sec-title">My positions</div>
+			<div class="card" id="positions"><!-- filled by JS --></div>
+
+			<div class="sec-title">Markets</div>
+			<div class="card" id="markets"></div>
+		</div>
+		<div class="toast" id="toast"></div>
+
+		<script>
+			const pools = [
+				{ sym: 'BTC', cls: 'btc', supply: '1.94%', borrow: '3.10%', live: true },
+				{ sym: 'USDC', cls: 'usdc', supply: '5.20%', borrow: '7.40%', live: true },
+				{ sym: 'USDT', cls: 'usdt', supply: '5.05%', borrow: '7.25%', live: true },
+				{ sym: 'ETH', cls: 'eth', supply: '—', borrow: '—', live: false }
+			];
+			const states = {
+				new: { hf: '100%', hfcol: 'var(--green)', nv: '$0.00', napy: '—', positions: [] },
+				supply: {
+					hf: '100%',
+					hfcol: 'var(--green)',
+					nv: '$67,170',
+					napy: '+1.94%',
+					positions: [
+						{
+							sym: 'BTC',
+							cls: 'btc',
+							supplied: '1 BTC',
+							suppliedF: '$67,170',
+							sApy: '1.94%',
+							borrowed: null
+						}
+					]
+				},
+				full: {
+					hf: '68%',
+					hfcol: 'var(--green)',
+					nv: '$32,170',
+					napy: '-0.62%',
+					positions: [
+						{
+							sym: 'BTC',
+							cls: 'btc',
+							supplied: '1 BTC',
+							suppliedF: '$67,170',
+							sApy: '1.94%',
+							borrowed: null
+						},
+						{
+							sym: 'USDC',
+							cls: 'usdc',
+							supplied: null,
+							borrowed: '35,000 USDC',
+							borrowedF: '$35,000',
+							bApy: '7.40%'
+						}
+					]
+				}
+			};
+			function toast(m) {
+				const t = document.getElementById('toast');
+				t.textContent = m;
+				t.classList.add('show');
+				setTimeout(() => t.classList.remove('show'), 1600);
+			}
+
+			function render(stateKey) {
+				const s = states[stateKey];
+				document.getElementById('hf').textContent = s.hf;
+				document.getElementById('hf').style.color = s.hfcol;
+				document.getElementById('nv').textContent = s.nv;
+				const napy = document.getElementById('napy');
+				napy.textContent = s.napy;
+				napy.style.color = s.napy.startsWith('-')
+					? 'var(--red)'
+					: s.napy === '—'
+						? 'var(--muted)'
+						: 'var(--green)';
+
+				const pos = document.getElementById('positions');
+				if (!s.positions.length) {
+					pos.innerHTML = `<div class="muted" style="text-align:center;padding:14px 0">No positions yet. Supply an asset to start earning — it also becomes collateral you can borrow against.</div>
+      <div style="text-align:center"><button class="btn" onclick="toast('→ opens supply.html')">Supply an asset</button></div>`;
+				} else {
+					pos.innerHTML = s.positions
+						.map((p) => {
+							const hasBorrow = !!p.borrowed,
+								hasSupply = !!p.supplied;
+							return `<div class="posrow">
+          <div class="row"><div class="asset"><div class="coin ${p.cls}">${p.sym[0]}</div><div><div style="font-weight:600">${p.sym}</div></div></div></div>
+          <div class="legs">
+            <div class="leg"><div class="k">Supplied</div><div class="v">${hasSupply ? p.supplied : '—'}</div>${hasSupply ? `<div class="small muted">${p.suppliedF} · <span class="apy">${p.sApy} APY</span></div>` : ''}</div>
+            <div class="leg"><div class="k">Borrowed</div><div class="v">${hasBorrow ? p.borrowed : '—'}</div>${hasBorrow ? `<div class="small muted">${p.borrowedF} · <span class="apy borrow">${p.bApy} APY</span></div>` : ''}</div>
+          </div>
+          <div class="acts">
+            <button class="btn sm" onclick="toast('→ opens supply.html')">Supply</button>
+            <button class="btn sm ghost" ${stateKey === 'new' ? 'disabled' : ''} onclick="toast('→ opens borrow.html')">Borrow</button>
+            ${hasBorrow ? `<button class="btn sm ghost" onclick="toast('→ opens repay.html')">Repay</button>` : ''}
+            ${hasSupply ? `<button class="btn sm ghost" onclick="toast('→ opens withdraw.html')">Withdraw</button>` : ''}
+          </div>
+        </div>`;
+						})
+						.join('');
+				}
+
+				document.getElementById('markets').innerHTML = pools
+					.map(
+						(p) => `
+      <div class="mkrow">
+        <div class="asset"><div class="coin ${p.cls}">${p.sym[0]}</div>
+          <div><div style="font-weight:600">${p.sym} ${p.live ? '' : '<span class="pill soon">Coming soon</span>'}</div>
+          <div class="small muted">Supply <span class="apy">${p.supply}</span> · Borrow <span class="apy borrow">${p.borrow}</span></div></div></div>
+        <button class="btn sm ${p.live ? '' : 'ghost'}" ${p.live ? '' : 'disabled'} onclick="toast('→ opens supply.html')">Supply</button>
+      </div>`
+					)
+					.join('');
+			}
+			document.querySelectorAll('.ctrls button').forEach((b) =>
+				b.addEventListener('click', () => {
+					document.querySelectorAll('.ctrls button').forEach((x) => x.classList.remove('on'));
+					b.classList.add('on');
+					render(b.dataset.state);
+				})
+			);
+			render('new');
+		</script>
+	</body>
+</html>

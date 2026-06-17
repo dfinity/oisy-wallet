@@ -32,6 +32,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		download: string;
 		no_results: string;
 		paste: string;
 		to: string;
@@ -504,6 +505,7 @@ interface I18nSettings {
 	text: {
 		title: string;
 		general: string;
+		preferences: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -531,6 +533,14 @@ interface I18nSettings {
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
+		export_data: string;
+		export_data_description: string;
+		export_basic: string;
+		export_extended: string;
+		export_tokens: string;
+		export_transactions: string;
+		export_tokens_success: string;
+		export_transactions_success: string;
 		learn_more: string;
 	};
 	alt: {
@@ -540,7 +550,11 @@ interface I18nSettings {
 		appearance_dark: string;
 		appearance_system: string;
 	};
-	error: { loading_profile: string };
+	error: {
+		loading_profile: string;
+		export_exchange_rate_unavailable: string;
+		export_failed: string;
+	};
 }
 
 interface I18nShortcuts {
@@ -686,6 +700,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		unknown_destination: string;
 		fee_info: string;
+		scanned_address_only_destination: string;
+		scanned_address_only_destination_single_token: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -753,6 +769,19 @@ interface I18nMint {
 
 interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
+interface I18nActive_user_transactions {
+	text: {
+		button_label: string;
+		open_aria_label: string;
+		empty: string;
+		section_in_progress: string;
+		section_failed: string;
+		section_previous: string;
+		dismiss_aria_label: string;
+	};
+	error: { dismiss_failed: string };
 }
 
 interface I18nScanner {
@@ -862,6 +891,8 @@ interface I18nSwap {
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
+		starting_to_swap: string;
+		starting_to_bridge: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -878,7 +909,6 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
-		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
@@ -894,6 +924,7 @@ interface I18nSwap {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
+		failed_unexpectedly: string;
 		slippage_exceeded: string;
 		pool_not_found: string;
 		deposit_error: string;
@@ -908,6 +939,7 @@ interface I18nSwap {
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
+		swap_refunded: string;
 	};
 }
 
@@ -1220,6 +1252,21 @@ interface I18nWallet_connect {
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
+		sign_psbt: string;
+		signing_address: string;
+		fee: string;
+		btc_symbol: string;
+		psbt_inputs: string;
+		psbt_outputs: string;
+		psbt_total_signed_inputs: string;
+		psbt_unknown_address: string;
+		psbt_unknown_value: string;
+		psbt_fee_unknown: string;
+		psbt_signed_by_wallet: string;
+		psbt_broadcast: string;
+		psbt_broadcast_enabled: string;
+		psbt_broadcast_disabled: string;
+		psbt_broadcast_unsupported_note: string;
 		connected_apps: string;
 		no_connected_apps: string;
 		wallet_connect: string;
@@ -1258,8 +1305,13 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_broadcast_not_supported: string;
+		btc_psbt_decode: string;
+		btc_psbt_input_not_segwit: string;
+		btc_psbt_input_not_owned: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};
@@ -1778,6 +1830,7 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;

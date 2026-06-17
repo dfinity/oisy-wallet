@@ -87,7 +87,12 @@ const config: UserConfig = {
 			plugins: [
 				{
 					name: 'fix-node-globals-polyfill',
-					setup: (build) => {
+					setup: (build: {
+						onResolve: (
+							options: { filter: RegExp },
+							callback: (args: { path: string }) => { path: string }
+						) => void;
+					}) => {
 						build.onResolve({ filter: /_virtual-process-polyfill_\.js/ }, ({ path }) => ({ path }));
 					}
 				}

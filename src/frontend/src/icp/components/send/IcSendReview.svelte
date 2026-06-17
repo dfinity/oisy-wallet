@@ -5,6 +5,7 @@
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import ScannedPlainAddressNotice from '$lib/components/send/ScannedPlainAddressNotice.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -37,6 +38,10 @@
 </script>
 
 <SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
+	{#snippet topBanner()}
+		<ScannedPlainAddressNotice styleClass="mb-6!" />
+	{/snippet}
+
 	{#snippet fee()}
 		{#if !$isIcMintingAccount}
 			<IcTokenFee />

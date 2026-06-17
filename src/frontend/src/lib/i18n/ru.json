@@ -29,6 +29,7 @@
 			"not_available": "Недоступно",
 			"new": "New",
 			"edit": "Изменить",
+			"download": "Скачать",
 			"no_results": "Нет результатов",
 			"paste": "Вставить",
 			"to": "Кому",
@@ -766,6 +767,7 @@
 		"text": {
 			"title": "Настройки",
 			"general": "Общие",
+			"preferences": "Параметры",
 			"principal": "Ваш Principal",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",
@@ -793,7 +795,15 @@
 			"enable_hide_micro_transactions": "Включить скрытие транзакций с очень маленькими значениями",
 			"disable_hide_micro_transactions": "Отключить скрытие транзакций с очень маленькими значениями",
 			"save_spam_filter_success": "Настройки вашего спам-фильтра были обновлены.",
-			"learn_more": ""
+			"export_data": "Экспорт данных",
+			"export_data_description": "Скачивайте свои токены и транзакции в формате CSV — Basic для основной информации, Extended для дополнительных атрибутов.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Экспорт токенов",
+			"export_transactions": "Экспорт транзакций",
+			"export_tokens_success": "CSV с токенами загружен.",
+			"export_transactions_success": "CSV с транзакциями загружен.",
+			"learn_more": "Узнать больше"
 		},
 		"alt": {
 			"testnets_toggle": "Переключить, чтобы показать или скрыть тестовые сети",
@@ -803,7 +813,9 @@
 			"appearance_system": "Включает цветовой режим вашей операционной системы"
 		},
 		"error": {
-			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта."
+			"loading_profile": "Ошибка при загрузке профиля. Пожалуйста, обновите страницу для полного опыта.",
+			"export_exchange_rate_unavailable": "Курсы валют ещё загружаются. Попробуйте через мгновение.",
+			"export_failed": "Не удалось создать экспорт. Пожалуйста, попробуйте ещё раз."
 		}
 	},
 	"shortcuts": {
@@ -956,7 +968,9 @@
 			"pending_bitcoin_transaction": "Вы можете отправить еще одну транзакцию Биткойн после завершения текущей ожидающей.",
 			"no_available_utxos": "У вас не будет доступных UTXO для выполнения этой транзакции.",
 			"unknown_destination": "Вы не взаимодействовали с этим адресом раньше. Пожалуйста, убедитесь, что знаете получателя.",
-			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Отсканированный код содержал только адрес получателя. Убедитесь, что вы выбрали правильный токен, ввели нужную сумму и внимательно проверили адрес получателя!",
+			"scanned_address_only_destination_single_token": "Отсканированный код содержал только адрес получателя. Убедитесь, что вы ввели нужную сумму и внимательно проверили адрес получателя!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Недействительный адрес получателя",
@@ -1029,6 +1043,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1147,6 +1175,8 @@
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
 			"swap_provider_website": "Веб-сайт",
@@ -1163,7 +1193,6 @@
 			"select_token": "Выбрать токен",
 			"select_network_filter": "Выбрать сеть",
 			"withdrawing": "Вывод",
-			"bridging": "Выполняется бридж... (Пожалуйста, подождите — это может занять до 2 минут.)",
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
@@ -1179,6 +1208,7 @@
 			"kong_not_available": "Сейчас обмен недоступен. Попробуйте позже.",
 			"unexpected": "Произошла ошибка при обмене токенов.",
 			"unexpected_missing_data": "Не удалось подготовить транзакцию обмена.",
+			"failed_unexpectedly": "Не удалось завершить обмен. Проверьте баланс кошелька и попробуйте снова, либо выберите другого провайдера.",
 			"slippage_exceeded": "Цена изменилась больше чем на $maxSlippage%. Увеличьте допустимое проскальзывание и попробуйте снова.",
 			"pool_not_found": "Обмен не удался — пул не найден.",
 			"deposit_error": "Не удалось внести средства. Попробуйте еще раз или выберите другого провайдера.",
@@ -1192,7 +1222,8 @@
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
 			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1548,6 +1579,21 @@
 			"hex_data": "HEX-данные",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Подключённые приложения",
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
 			"wallet_connect": ""
@@ -1588,8 +1634,13 @@
 			"request_rejected": "Запрос WalletConnect отклонен",
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
+			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
 		}
