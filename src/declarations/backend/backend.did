@@ -830,6 +830,9 @@ type PersonalNoteError = variant {
 	// The message never contains note cleartext (the canister cannot read it).
 	InternalError : record { msg : text }
 };
+// Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+// vetKey and the store's public verification key). Both return opaque bytes on
+// success; the wire shape is identical, so one enum serves both.
 type PersonalNotesVetkeyResult = variant {
 	// vetKey bytes, opaque to the canister.
 	Ok : blob;
@@ -950,9 +953,10 @@ type Stats = record {
 	exchange_rates_count : nat64;
 	token_activity_count : nat64;
 	agreement_history_count : nat64;
+	// Total number of stored (encrypted) personal-note entries across all users.
+	personal_notes_count : nat64;
 	user_timestamps_count : nat64;
-	user_token_count : nat64;
-	personal_notes_count : nat64
+	user_token_count : nat64
 };
 type TestnetsSettings = record { show_testnets : bool };
 // A variant describing any token
@@ -1303,7 +1307,9 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// Errors are enumerated by `PersonalNoteError` (e.g. `RateLimited`).
-	delete_personal_note : (DeletePersonalNoteRequest) -> (DeletePersonalNoteResult);
+	delete_personal_note : (DeletePersonalNoteRequest) -> (
+		DeletePersonalNoteResult
+	);
 	// Returns whether the backend is currently fetching and caching exchange rates.
 	//
 	// Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
