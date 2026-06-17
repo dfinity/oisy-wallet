@@ -75,16 +75,6 @@ export const onSessionRequest = async ({
 		return;
 	}
 
-	// Another modal, like Send or Receive, is already in progress
-	if (nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen)) {
-		toastsError({
-			msg: {
-				text: get(i18n).wallet_connect.error.skipping_request
-			}
-		});
-		return;
-	}
-
 	const {
 		id,
 		topic,
@@ -92,6 +82,18 @@ export const onSessionRequest = async ({
 			request: { method }
 		}
 	} = sessionRequest;
+
+	// Another modal, like Send or Receive, is already in progress
+	if (nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen)) {
+		await listener.rejectRequest({ topic, id, error: getSdkError('USER_REJECTED') });
+
+		toastsError({
+			msg: {
+				text: get(i18n).wallet_connect.error.skipping_request
+			}
+		});
+		return;
+	}
 
 	switch (method) {
 		case SESSION_REQUEST_ETH_SIGN_LEGACY:
