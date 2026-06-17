@@ -392,8 +392,8 @@ describe('btc wallet-connect.services', () => {
 			disconnect: vi.fn()
 		} as WalletConnectListener;
 
-		let modalNext: MockInstance;
-		let progress: MockInstance;
+		let modalNext: () => void;
+		let progress: (step: ProgressStepsSign) => void;
 		let spyToastsError: MockInstance;
 
 		const sign = async ({
@@ -428,8 +428,8 @@ describe('btc wallet-connect.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			modalNext = vi.fn();
-			progress = vi.fn();
+			modalNext = vi.fn<() => void>();
+			progress = vi.fn<(step: ProgressStepsSign) => void>();
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			vi.mocked(walletConnectUtils.deriveBtcPublicKey).mockReturnValue(pubkey);
