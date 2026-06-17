@@ -192,7 +192,7 @@ fn count_tracks_adds_and_deletes() {
     pic_setup.ensure_user_profile(caller);
 
     for i in 0..3 {
-        set_note(&pic_setup, caller, &note_id(i), vec![i as u8]).expect("add should succeed");
+        set_note(&pic_setup, caller, &note_id(i), vec![1]).expect("add should succeed");
     }
     assert_eq!(count_notes(&pic_setup, caller), 3);
 
@@ -264,7 +264,7 @@ fn new_note_at_capacity_is_rejected_but_edits_still_work() {
     }
     assert_eq!(
         count_notes(&pic_setup, caller),
-        MAX_PERSONAL_NOTES_PER_USER as u64
+        u64::try_from(MAX_PERSONAL_NOTES_PER_USER).unwrap()
     );
 
     // A *new* note at the cap is refused — and nothing is evicted.
@@ -277,7 +277,7 @@ fn new_note_at_capacity_is_rejected_but_edits_still_work() {
     assert_eq!(over, Err(PersonalNoteError::TooManyNotes));
     assert_eq!(
         count_notes(&pic_setup, caller),
-        MAX_PERSONAL_NOTES_PER_USER as u64
+        u64::try_from(MAX_PERSONAL_NOTES_PER_USER).unwrap()
     );
 
     // Editing an existing note at the cap is still allowed.
@@ -297,7 +297,7 @@ fn set_personal_note_rate_limits_repeated_callers() {
     // The limiter allows 30 writes per caller per minute; the 31st within the
     // window is rejected. Editing the same note keeps the cap out of the picture.
     for i in 0..30 {
-        let result = set_note(&pic_setup, caller, &note_id(1), vec![i as u8]);
+        let result = set_note(&pic_setup, caller, &note_id(1), vec![1]);
         assert!(
             result.is_ok(),
             "write {i} within the limit should succeed: {result:?}"
