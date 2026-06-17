@@ -4,6 +4,7 @@ import {
 } from '$btc/constants/wallet-connect.constants';
 import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
+import type * as WalletConnectUtilsModule from '$btc/utils/wallet-connect.utils';
 import * as walletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -32,7 +33,7 @@ vi.mock('$lib/api/signer.api', () => ({
 }));
 
 vi.mock('$btc/utils/wallet-connect.utils', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('$btc/utils/wallet-connect.utils')>();
+	const actual = await importOriginal<typeof WalletConnectUtilsModule>();
 
 	return {
 		...actual,
@@ -421,10 +422,6 @@ describe('btc wallet-connect.services', () => {
 				hmac(sha256, key, etc.concatBytes(...messages));
 		});
 
-		afterAll(() => {
-			etc.hmacSha256Sync = previousHmacSha256Sync;
-		});
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -433,9 +430,13 @@ describe('btc wallet-connect.services', () => {
 			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			vi.mocked(walletConnectUtils.deriveBtcPublicKey).mockReturnValue(pubkey);
-			vi.mocked(genericSignWithEcdsa).mockImplementation(async ({ messageHash }) =>
-				signSecp256k1(messageHash, privateKey).toCompactRawBytes()
+			vi.mocked(genericSignWithEcdsa).mockImplementation(({ messageHash }) =>
+				Promise.resolve(signSecp256k1(messageHash, privateKey).toCompactRawBytes())
 			);
+		});
+
+		afterAll(() => {
+			etc.hmacSha256Sync = previousHmacSha256Sync;
 		});
 
 		it('signs only the selected wallet-owned PSBT input and approves the updated PSBT', async () => {
@@ -459,7 +460,9 @@ describe('btc wallet-connect.services', () => {
 				keyId: BTC_ECDSA_KEY_ID,
 				messageHash: expect.any(Uint8Array)
 			});
-			expect(vi.mocked(genericSignWithEcdsa).mock.calls[0][0].messageHash).toHaveLength(32);
+			const [[{ messageHash }]] = vi.mocked(genericSignWithEcdsa).mock.calls;
+
+			expect(messageHash).toHaveLength(32);
 
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
