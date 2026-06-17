@@ -867,7 +867,12 @@
 				var toastTimer = null;
 
 				function esc(s) {
-					return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+					return (s || '')
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/"/g, '&quot;')
+						.replace(/'/g, '&#39;');
 				}
 
 				// "OISY protects you!" privacy info box — shown in the editor and on the
