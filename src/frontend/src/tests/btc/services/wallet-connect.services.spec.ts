@@ -4,7 +4,6 @@ import {
 } from '$btc/constants/wallet-connect.constants';
 import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
-import type * as WalletConnectUtilsModule from '$btc/utils/wallet-connect.utils';
 import * as walletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -33,7 +32,7 @@ vi.mock('$lib/api/signer.api', () => ({
 }));
 
 vi.mock('$btc/utils/wallet-connect.utils', async (importOriginal) => {
-	const actual = await importOriginal<typeof WalletConnectUtilsModule>();
+	const actual = await importOriginal<typeof walletConnectUtils>();
 
 	return {
 		...actual,
@@ -460,6 +459,7 @@ describe('btc wallet-connect.services', () => {
 				keyId: BTC_ECDSA_KEY_ID,
 				messageHash: expect.any(Uint8Array)
 			});
+
 			const [[{ messageHash }]] = vi.mocked(genericSignWithEcdsa).mock.calls;
 
 			expect(messageHash).toHaveLength(32);
@@ -471,7 +471,7 @@ describe('btc wallet-connect.services', () => {
 				message: { psbt: expect.any(String) }
 			});
 
-			const [{ message }] = vi.mocked(mockListener.approveRequest).mock.calls[0];
+			const [[{ message }]] = vi.mocked(mockListener.approveRequest).mock.calls;
 			const signedPsbt = Psbt.fromBase64((message as { psbt: string }).psbt, { network });
 
 			expect(signedPsbt.data.inputs[0].partialSig).toEqual([
