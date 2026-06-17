@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use ic_cdk::management_canister::{VetKDCurve, VetKDKeyId};
+use ic_vetkeys::{encrypted_maps::EncryptedMaps, types::AccessRights};
 use shared::types::{
     api_keys::ApiKeys,
     backend_config::{Config, InitArg},
@@ -7,10 +9,13 @@ use shared::types::{
 };
 
 use crate::{
+    personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR,
     state::memory::{
         ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
         BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
+        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
         USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
         USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
@@ -49,6 +54,13 @@ pub(crate) struct State {
     /// Per-user in-flight high-level operations (swaps, converts, …). Survives
     /// canister upgrades; the FE polls and updates these records.
     pub(crate) active_user_transactions: ActiveUserTransactionsMap,
+    /// Per-user end-to-end-encrypted personal notes (vetKeys `EncryptedMaps`).
+    ///
+    /// `None` until [`init_personal_notes`] runs in `init` / `post_upgrade`: the
+    /// store needs the vetKD key name from `config`, which is only available once
+    /// the config has been set. The underlying data lives in stable memory
+    /// (ids 14–17) and so survives upgrades regardless of this field.
+    pub(crate) personal_notes: Option<EncryptedMaps<AccessRights>>,
 }
 
 impl From<&State> for Stats {
@@ -63,6 +75,10 @@ impl From<&State> for Stats {
             user_transactions_count: state.user_transactions.len(),
             agreement_history_count: state.agreement_history.len(),
             active_user_transactions_count: state.active_user_transactions.len(),
+            personal_notes_count: state
+                .personal_notes
+                .as_ref()
+                .map_or(0, |em| em.mapkey_vals.len()),
         }
     }
 }
@@ -86,8 +102,39 @@ thread_local! {
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
+            // Initialised lazily from `config` in `init_personal_notes`.
+            personal_notes: None,
         })
     );
+}
+
+/// Initialises the personal-notes [`EncryptedMaps`] store.
+///
+/// Called from `init` and `post_upgrade` once the config (and therefore the
+/// vetKD key name) is available. The vetKD key name reuses `config.ecdsa_key_name`
+/// — across every OISY environment the threshold-key names line up
+/// (`dfx_test_key` locally, `test_key_1` on staging, `key_1` on mainnet), so no
+/// separate config field or deployment change is needed. `EncryptedMaps::init`
+/// re-attaches to the existing stable memory on upgrade, so notes persist.
+pub(crate) fn init_personal_notes() {
+    let key_id = VetKDKeyId {
+        curve: VetKDCurve::Bls12_381_G2,
+        name: read_config(|c| c.ecdsa_key_name.clone()),
+    };
+
+    let encrypted_maps = MEMORY_MANAGER.with(|mm| {
+        let mm = mm.borrow();
+        EncryptedMaps::init(
+            PERSONAL_NOTES_DOMAIN_SEPARATOR,
+            key_id,
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID),
+        )
+    });
+
+    mutate_state(|s| s.personal_notes = Some(encrypted_maps));
 }
 
 pub(crate) fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
