@@ -14,7 +14,7 @@
 		solAddressDevnet,
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { authIdentity, authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 	import {
@@ -121,6 +121,7 @@
 				btcAddressMainnet: $btcAddressMainnet,
 				btcAddressTestnet: $btcAddressTestnet,
 				btcAddressRegtest: $btcAddressRegtest,
+				btcPrincipal: $authIdentity?.getPrincipal(),
 				cleanSlate: false
 			});
 
