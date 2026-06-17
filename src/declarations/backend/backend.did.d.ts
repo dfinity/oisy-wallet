@@ -1273,6 +1273,11 @@ export type PersonalNoteError =
 			 */
 			InternalError: { msg: string };
 	  };
+/**
+ * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+ * vetKey and the store's public verification key). Both return opaque bytes on
+ * success; the wire shape is identical, so one enum serves both.
+ */
 export type PersonalNotesVetkeyResult =
 	| {
 			/**
@@ -1457,6 +1462,9 @@ export interface Stats {
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
 	agreement_history_count: bigint;
+	/**
+	 * Total number of stored (encrypted) personal-note entries across all users.
+	 */
 	personal_notes_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
