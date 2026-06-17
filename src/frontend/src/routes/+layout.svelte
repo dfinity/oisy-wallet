@@ -5,6 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
+	import NoteDeletedSnackbar from '$lib/components/notes/NoteDeletedSnackbar.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
@@ -200,6 +201,7 @@
 
 <Banner />
 <Toasts maxVisible={3} />
+<NoteDeletedSnackbar />
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />
