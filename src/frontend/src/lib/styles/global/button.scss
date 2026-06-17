@@ -272,6 +272,14 @@ a.as-button {
 			@apply text-primary;
 			@apply bg-primary;
 		}
+
+		// Keep the active background while the linked popover is open, the way
+		// the network switcher dropdown does. Placed last so it also wins over
+		// the focus-visible reset when opened via keyboard.
+		&.opened {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-30;
+		}
 	}
 
 	&.tertiary-alt.disabled:not(.loading):not(.link),
