@@ -28,8 +28,8 @@ describe('ButtonIcon', () => {
 		expect(getByTestId(mockSnippetTestId).parentElement).toHaveClass('visually-hidden');
 	});
 
-	describe('when expanded', () => {
-		it('should not emit aria-expanded nor the opened class by default', () => {
+	describe('expanded prop', () => {
+		it('should not emit aria-expanded nor the opened class when expanded is undefined', () => {
 			const { getByRole } = render(ButtonIcon, { props });
 
 			const button = getByRole('button');
