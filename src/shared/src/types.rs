@@ -20,6 +20,7 @@ pub mod network;
 pub mod notification;
 pub mod number;
 pub mod onramper;
+pub mod personal_note;
 pub mod pow;
 pub mod result_types;
 pub mod settings;
@@ -64,4 +65,6 @@ pub struct Stats {
     pub user_transactions_count: u64,
     pub agreement_history_count: u64,
     pub active_user_transactions_count: u64,
+    /// Total number of stored (encrypted) personal-note entries across all users.
+    pub personal_notes_count: u64,
 }
