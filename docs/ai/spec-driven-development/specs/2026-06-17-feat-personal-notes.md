@@ -146,7 +146,7 @@ later work; it de-risks it.
    timezone-agnostic instants — matching IC time; the client sets them, see
    [Stored value](#stored-value)). **No title** (kept minimal).
    - **List row:** a note that has **never been edited** (`updated_at_ns ==
-     created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
+created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
      (Decision 7 sorts by `updated_at_ns`, so edited notes rise to the top).
    - **Edit view:** **always shows the created date** (and the updated time when the
      note has been edited).
@@ -299,7 +299,7 @@ A new `NotesModal.svelte` (new folder
     in the edit field / full view, per Decision 15.)
   - Clamp to a **maximum of 2 lines with a trailing ellipsis** when longer — via
     `display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
+overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
     still wraps and clamps rather than overflowing).
   - Escaping/safety still applies (Decision 15): the preview is auto-escaped plain
     text with bidi/control characters neutralized; collapsing whitespace is a
@@ -328,7 +328,7 @@ A new `NotesModal.svelte` (new folder
      "Created {date} · Updated {date}"), so the metadata sits close to the text it
      describes.
   3. **Delete** action (when editing an existing note).
-  4. **A separate "OISY protects you!" privacy info box** *after* the Note panel
+  4. **A separate "OISY protects you!" privacy info box** _after_ the Note panel
      (its own box, shield icon + bold lead + body + "Learn more" — see
      [UI copy](#ui-copy-i18n)) — not inline helper text.
 
@@ -337,6 +337,7 @@ A new `NotesModal.svelte` (new folder
   places the caret at the **end** of the existing text. (Use a non-scrolling focus,
   e.g. `focus({ preventScroll: true })`, so focusing never yanks the surrounding
   modal/list.)
+
 - **Loading:** while notes are being fetched/decrypted, show a small skeleton — no
   flash of the empty state.
 - **Failed to decrypt:** if a single note can't be decrypted, that row shows
@@ -373,6 +374,7 @@ modal layer over the already-full-page Notes modal (the HIG discourages deep mod
 stacking). A **full-page editor avoids all of this**: the field sits near the top and
 stays visible while typing, and the canvas above the keyboard is maximized.
 Requirements for the full-page editor on mobile:
+
 - The **textarea sits high** (just under the header) so it is always visible above
   the keyboard.
 - **Cancel / Save remain reachable while the keyboard is open** — place them so they
@@ -680,11 +682,11 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 
 ## Delivery plan (atomic PRs / waves)
 
-| Wave | PR                                                       | Layer    | Depends on  |
-| ---- | -------------------------------------------------------- | -------- | ----------- |
-| 1    | **PR-1** — backend encrypted storage (EncryptedMaps) + API | backend  | —           |
-| 2    | **PR-2** — frontend vetKeys crypto + service + store     | frontend | PR-1 (did)  |
-| 3    | **PR-3** — Notes menu item + modal (CRUD)                | frontend | PR-2        |
+| Wave | PR                                                         | Layer    | Depends on |
+| ---- | ---------------------------------------------------------- | -------- | ---------- |
+| 1    | **PR-1** — backend encrypted storage (EncryptedMaps) + API | backend  | —          |
+| 2    | **PR-2** — frontend vetKeys crypto + service + store       | frontend | PR-1 (did) |
+| 3    | **PR-3** — Notes menu item + modal (CRUD)                  | frontend | PR-2       |
 
 - This spec doc lands first (or alongside PR-1).
 - PR-2 needs the regenerated `backend.did` from PR-1.

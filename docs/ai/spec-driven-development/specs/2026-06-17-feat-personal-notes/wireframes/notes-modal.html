@@ -545,7 +545,9 @@
 			.toast-pinned .toast {
 				opacity: 0;
 				transform: translateY(10px);
-				transition: opacity 0.2s ease, transform 0.2s ease;
+				transition:
+					opacity 0.2s ease,
+					transform 0.2s ease;
 				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 				pointer-events: auto;
 			}
@@ -715,7 +717,11 @@
 					</button>
 				</div>
 				<label class="toggle"><input type="checkbox" id="cap" /> Simulate: at note cap</label>
-				<button class="seg" id="seed-test" style="padding: 8px 14px; font-size: 13px; cursor: pointer">
+				<button
+					class="seg"
+					id="seed-test"
+					style="padding: 8px 14px; font-size: 13px; cursor: pointer"
+				>
 					<i class="ti ti-flask" aria-hidden="true"></i>&nbsp; Load test notes
 				</button>
 				<button class="seg" id="reset" style="padding: 8px 14px; font-size: 13px; cursor: pointer">
@@ -727,36 +733,66 @@
 				<!-- dimmed app behind; click it to dismiss the menu/modal -->
 				<div class="appbg" id="appbg"></div>
 				<button class="avatar" data-action="toggle-menu" aria-label="User menu">
-					<i class="ti ti-user" style="font-size:24px"></i>
+					<i class="ti ti-user" style="font-size: 24px"></i>
 				</button>
 
 				<!-- user menu popover (start state) -->
 				<div class="menu" id="menu">
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-coins"></i></span> Your addresses</div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-users"></i></span> Contacts</div>
-					<div class="mi click notes" data-action="open-notes"><span class="mi-ic"><i class="ti ti-note"></i></span> Notes</div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-eye-off"></i></span> Hide balances <span class="mi-tag">P</span></div>
-					<div class="mi-sep"></div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-maximize"></i></span> WalletConnect <span class="mi-right"><i class="ti ti-wifi"></i></span></div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-maximize"></i></span> OISY PAY <span class="mi-right">PAY</span></div>
-					<div class="mi-sep"></div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-share"></i></span> Refer your friends</div>
-					<div class="mi click"><span class="mi-ic"><i class="ti ti-help-circle"></i></span> Support <span class="mi-right"><i class="ti ti-external-link"></i></span></div>
-					<div class="mi-sep"></div>
-					<div class="appearance"><span class="mi-ic"><i class="ti ti-sun-moon"></i></span> Appearance
-						<span class="seg3"><span class="on"><i class="ti ti-contrast"></i></span><span><i class="ti ti-moon"></i></span><span><i class="ti ti-sun"></i></span></span>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-coins"></i></span> Your addresses
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-users"></i></span> Contacts
+					</div>
+					<div class="mi click notes" data-action="open-notes">
+						<span class="mi-ic"><i class="ti ti-note"></i></span> Notes
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-eye-off"></i></span> Hide balances
+						<span class="mi-tag">P</span>
 					</div>
 					<div class="mi-sep"></div>
-					<div class="menu-actions"><span class="lock">Lock 🔒</span><span class="logout">Log out →</span></div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-maximize"></i></span> WalletConnect
+						<span class="mi-right"><i class="ti ti-wifi"></i></span>
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-maximize"></i></span> OISY PAY
+						<span class="mi-right">PAY</span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-share"></i></span> Refer your friends
+					</div>
+					<div class="mi click">
+						<span class="mi-ic"><i class="ti ti-help-circle"></i></span> Support
+						<span class="mi-right"><i class="ti ti-external-link"></i></span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="appearance">
+						<span class="mi-ic"><i class="ti ti-sun-moon"></i></span> Appearance
+						<span class="seg3"
+							><span class="on"><i class="ti ti-contrast"></i></span
+							><span><i class="ti ti-moon"></i></span><span><i class="ti ti-sun"></i></span
+						></span>
+					</div>
+					<div class="mi-sep"></div>
+					<div class="menu-actions">
+						<span class="lock">Lock 🔒</span><span class="logout">Log out →</span>
+					</div>
 					<div class="menu-expires">Expires in 59 minutes</div>
 					<div class="mi-sep"></div>
-					<div class="menu-foot"><u>Terms of Use</u><u>Privacy Policy</u><u>License Agreement</u></div>
+					<div class="menu-foot">
+						<u>Terms of Use</u><u>Privacy Policy</u><u>License Agreement</u>
+					</div>
 				</div>
 
 				<div class="modal" id="modal">
 					<div class="modal-head">
 						<span class="title" id="modal-title">Notes</span>
-						<button class="x" id="modal-x" data-action="close-modal" aria-label="Close"><i class="ti ti-x"></i></button>
+						<button class="x" id="modal-x" data-action="close-modal" aria-label="Close">
+							<i class="ti ti-x"></i>
+						</button>
 					</div>
 					<div class="modal-body" id="modal-body"></div>
 					<div class="modal-foot" id="modal-foot"></div>
@@ -771,14 +807,13 @@
 				click "Notes" (added right under "Contacts") to open the Notes modal. Close it with X, the
 				Close button, or by clicking the dimmed area (which returns to the menu); the editor step
 				has no X and ignores outside clicks. The avatar (top-right) reopens the menu. Each saved
-				note row then shows a pencil
-				(edit) and a trash (delete) action on the right. Deleting shows a pinned, auto-dismissing
-				"Note deleted / Undo" snackbar at the bottom (never lost to list scroll). The add/edit
-				editor is a **full-page step** inside the modal — a step in the floating card on desktop,
-				and full-screen on mobile (matching OISY Contacts) — which is more keyboard-robust than a
-				bottom sheet for text entry. Toggle "Simulate: at note cap" to see the disabled add + cap
-				banner (editing and deleting stay enabled). Demo character limit lowered to 100 to show
-				validation (real limit 2,000, error-only).
+				note row then shows a pencil (edit) and a trash (delete) action on the right. Deleting shows
+				a pinned, auto-dismissing "Note deleted / Undo" snackbar at the bottom (never lost to list
+				scroll). The add/edit editor is a **full-page step** inside the modal — a step in the
+				floating card on desktop, and full-screen on mobile (matching OISY Contacts) — which is more
+				keyboard-robust than a bottom sheet for text entry. Toggle "Simulate: at note cap" to see
+				the disabled add + cap banner (editing and deleting stay enabled). Demo character limit
+				lowered to 100 to show validation (real limit 2,000, error-only).
 			</p>
 		</div>
 
@@ -850,7 +885,9 @@
 				function filteredNotes() {
 					var q = state.search.trim().toLowerCase();
 					if (!q) return state.notes;
-					return state.notes.filter(function (n) { return n.text.toLowerCase().indexOf(q) !== -1; });
+					return state.notes.filter(function (n) {
+						return n.text.toLowerCase().indexOf(q) !== -1;
+					});
 				}
 
 				// A never-edited note shows its creation time; an edited note shows the
@@ -863,11 +900,19 @@
 					return (
 						'<div class="note-row">' +
 						'<div class="ava"><i class="ti ti-note" aria-hidden="true"></i></div>' +
-						'<div class="mid"><div class="body">' + esc(n.text) + '</div>' +
-						'<div class="time">' + esc(metaLine(n)) + '</div></div>' +
+						'<div class="mid"><div class="body">' +
+						esc(n.text) +
+						'</div>' +
+						'<div class="time">' +
+						esc(metaLine(n)) +
+						'</div></div>' +
 						'<div class="acts">' +
-						'<button class="iconbtn" data-action="edit" data-id="' + n.id + '" aria-label="Edit note"><i class="ti ti-pencil"></i></button>' +
-						'<button class="iconbtn danger" data-action="delete" data-id="' + n.id + '" aria-label="Delete note"><i class="ti ti-trash"></i></button>' +
+						'<button class="iconbtn" data-action="edit" data-id="' +
+						n.id +
+						'" aria-label="Edit note"><i class="ti ti-pencil"></i></button>' +
+						'<button class="iconbtn danger" data-action="delete" data-id="' +
+						n.id +
+						'" aria-label="Delete note"><i class="ti ti-trash"></i></button>' +
 						'</div></div>'
 					);
 				}
@@ -886,7 +931,8 @@
 						'</div>' +
 						privacyBox() +
 						'</div>';
-					footEl.innerHTML = '<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
+					footEl.innerHTML =
+						'<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
 				}
 
 				/* Pinned snackbar with Undo — fixed above the list/Close, auto-dismisses. */
@@ -919,15 +965,25 @@
 					var addDisabled = state.atCap;
 					var toolbar =
 						'<div class="list-toolbar">' +
-						'<div class="search"><input id="search" placeholder="Search note" value="' + esc(state.search) + '" />' +
-						'<button type="button" class="mag" id="searchbtn" aria-label="' + (state.search ? 'Clear search' : 'Search') + '">' +
-						'<i class="ti ' + (state.search ? 'ti-x' : 'ti-search') + '"></i></button></div>' +
-						'<button class="add-pill" data-action="add"' + (addDisabled ? ' disabled aria-disabled="true"' : '') + '>' +
+						'<div class="search"><input id="search" placeholder="Search note" value="' +
+						esc(state.search) +
+						'" />' +
+						'<button type="button" class="mag" id="searchbtn" aria-label="' +
+						(state.search ? 'Clear search' : 'Search') +
+						'">' +
+						'<i class="ti ' +
+						(state.search ? 'ti-x' : 'ti-search') +
+						'"></i></button></div>' +
+						'<button class="add-pill" data-action="add"' +
+						(addDisabled ? ' disabled aria-disabled="true"' : '') +
+						'>' +
 						'<i class="ti ti-plus"></i> Add note</button>' +
 						'</div>';
 
 					var cap = state.atCap
-						? '<div class="cap-banner"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>' + CAPMSG + '</span></div>'
+						? '<div class="cap-banner"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>' +
+							CAPMSG +
+							'</span></div>'
 						: '';
 
 					var rows = notes.length
@@ -935,7 +991,8 @@
 						: '<div style="text-align:center;color:var(--text-tertiary);padding:26px 0">No notes match your search.</div>';
 
 					bodyEl.innerHTML = toolbar + cap + rows;
-					footEl.innerHTML = '<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
+					footEl.innerHTML =
+						'<button class="btn btn-soft btn-block" data-action="close-screen">Close</button>';
 
 					var s = document.getElementById('search');
 					var sbtn = document.getElementById('searchbtn');
@@ -988,21 +1045,32 @@
 					var tooLong = state.draft.length > MAX;
 					var editing = !!state.editingId;
 					var current = editing
-						? state.notes.filter(function (x) { return x.id === state.editingId; })[0]
+						? state.notes.filter(function (x) {
+								return x.id === state.editingId;
+							})[0]
 						: null;
 					// Edit view always shows the creation date (local time); add updated if edited.
 					var meta = current
-						? '<div class="created-line">Created ' + esc(current.created) +
-						  (current.edited ? ' · Updated ' + esc(current.updated) : '') +
-						  '</div>'
+						? '<div class="created-line">Created ' +
+							esc(current.created) +
+							(current.edited ? ' · Updated ' + esc(current.updated) : '') +
+							'</div>'
 						: '';
 					return (
 						'<div class="panel">' +
 						'<div class="label">Note</div>' +
-						'<div class="field"><textarea id="note-input" placeholder="Write a note…">' + esc(state.draft) + '</textarea></div>' +
-						'<div class="err" id="note-error" style="' + (tooLong ? '' : 'display:none') + '">Note must be ' + MAX + ' characters or fewer.</div>' +
+						'<div class="field"><textarea id="note-input" placeholder="Write a note…">' +
+						esc(state.draft) +
+						'</textarea></div>' +
+						'<div class="err" id="note-error" style="' +
+						(tooLong ? '' : 'display:none') +
+						'">Note must be ' +
+						MAX +
+						' characters or fewer.</div>' +
 						meta +
-						(editing ? '<button class="form-delete" data-action="delete-current"><i class="ti ti-trash"></i> Delete</button>' : '') +
+						(editing
+							? '<button class="form-delete" data-action="delete-current"><i class="ti ti-trash"></i> Delete</button>'
+							: '') +
 						'</div>' +
 						privacyBox()
 					);
@@ -1080,8 +1148,7 @@
 					// No (X) in the editor step — the user must Cancel or Save, so an
 					// accidental close can't drop unsaved text. The (X) only shows on the
 					// list/empty state (which closes the whole Notes modal).
-					document.getElementById('modal-x').style.display =
-						state.screen === 'form' ? 'none' : '';
+					document.getElementById('modal-x').style.display = state.screen === 'form' ? 'none' : '';
 
 					// The add/edit editor is a full-page step inside the modal on both
 					// desktop (within the floating card) and mobile (full screen) — more
@@ -1101,12 +1168,24 @@
 					var v = ta.value.trim();
 					if (!v || v.length > MAX) return;
 					if (state.editingId) {
-						var n = state.notes.filter(function (x) { return x.id === state.editingId; })[0];
-						if (n) { n.text = v; n.edited = true; n.updated = 'just now'; }
+						var n = state.notes.filter(function (x) {
+							return x.id === state.editingId;
+						})[0];
+						if (n) {
+							n.text = v;
+							n.edited = true;
+							n.updated = 'just now';
+						}
 						// bump to top
-						state.notes = [n].concat(state.notes.filter(function (x) { return x.id !== state.editingId; }));
+						state.notes = [n].concat(
+							state.notes.filter(function (x) {
+								return x.id !== state.editingId;
+							})
+						);
 					} else {
-						state.notes = [cloneNote({ id: 'n' + Date.now(), text: v, created: 'just now', edited: false })].concat(state.notes);
+						state.notes = [
+							cloneNote({ id: 'n' + Date.now(), text: v, created: 'just now', edited: false })
+						].concat(state.notes);
 					}
 					state.justDeleted = null;
 					state.screen = 'list';
@@ -1188,37 +1267,61 @@
 				});
 				document.addEventListener('click', function (e) {
 					var dev = e.target.closest('[data-dev]');
-					if (dev) { state.device = dev.getAttribute('data-dev'); render(); return; }
+					if (dev) {
+						state.device = dev.getAttribute('data-dev');
+						render();
+						return;
+					}
 					var b = e.target.closest('[data-action]');
 					if (!b) return;
 					var a = b.getAttribute('data-action');
 					var id = b.getAttribute('data-id');
 					if (a === 'toggle-menu') {
 						if (state.modalOpen) return; // avatar inert while modal is open
-						state.menuOpen = !state.menuOpen; render();
+						state.menuOpen = !state.menuOpen;
+						render();
 					} else if (a === 'open-notes') {
 						openNotes();
 					} else if (a === 'close-modal' || a === 'close-screen') {
 						closeModal();
 					} else if (a === 'add') {
 						if (state.atCap) return;
-						state.editingId = null; state.draft = ''; state.originalDraft = ''; state.screen = 'form'; render();
+						state.editingId = null;
+						state.draft = '';
+						state.originalDraft = '';
+						state.screen = 'form';
+						render();
 					} else if (a === 'edit') {
-						var n = state.notes.filter(function (x) { return x.id === id; })[0];
-						state.editingId = id; state.draft = n ? n.text : ''; state.originalDraft = n ? n.text : ''; state.screen = 'form'; render();
+						var n = state.notes.filter(function (x) {
+							return x.id === id;
+						})[0];
+						state.editingId = id;
+						state.draft = n ? n.text : '';
+						state.originalDraft = n ? n.text : '';
+						state.screen = 'form';
+						render();
 					} else if (a === 'cancel') {
-						state.screen = 'list'; state.editingId = null; render();
+						state.screen = 'list';
+						state.editingId = null;
+						render();
 					} else if (a === 'save') {
 						commitSave();
 					} else if (a === 'delete' || a === 'delete-current') {
 						var delId = a === 'delete' ? id : state.editingId;
-						var idx = state.notes.findIndex(function (x) { return x.id === delId; });
+						var idx = state.notes.findIndex(function (x) {
+							return x.id === delId;
+						});
 						// Keep the whole note object (incl. created/updated/edited) and its
 						// position, so Undo restores it exactly — as if the delete never happened.
 						state.justDeleted = state.notes[idx];
 						state.justDeletedIndex = idx;
-						state.notes = state.notes.filter(function (x) { return x.id !== delId; });
-						if (a === 'delete-current') { state.screen = 'list'; state.editingId = null; }
+						state.notes = state.notes.filter(function (x) {
+							return x.id !== delId;
+						});
+						if (a === 'delete-current') {
+							state.screen = 'list';
+							state.editingId = null;
+						}
 						render();
 					} else if (a === 'undo') {
 						if (state.justDeleted) {
