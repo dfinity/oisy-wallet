@@ -37,6 +37,10 @@ clap.define short=s long=secret desc="OnRamper signing secret (prefer env var / 
 clap.define short=i long=identity desc="dfx identity to call with (must be a controller)" variable=IDENTITY default="default"
 clap.define short=c long=clear desc="Clear the secret instead of setting it" variable=CLEAR default="false" nargs=0
 # Source the output file ----------------------------------------------------------
+# `SECRET` is a common env-var name and clap only seeds variables with a non-empty default, so
+# without this an inherited/exported $SECRET would leak in and bypass the documented precedence
+# (--secret flag → ONRAMPER_SIGNING_SECRET → prompt). Unset it so only --secret can set it.
+unset SECRET
 source "$(clap.build)"
 
 if [[ "$CLEAR" == "true" ]]; then
