@@ -93,6 +93,7 @@
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
 			"address_book": "Contacts",
+			"notes": "Notes",
 			"hide_balances": "Hide balances",
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open contacts",
+			"notes": "Open notes",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "Scan QR code"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Notes",
+			"empty_title": "Your notes are empty",
+			"empty_subtitle": "Create a private, encrypted note to keep details safe alongside your wallet.",
+			"empty_add": "Add new note",
+			"add_note": "Add note",
+			"note_label": "Note",
+			"placeholder": "Write a note…",
+			"privacy_info": "Only you can see your notes, stored encrypted in $oisy_short.",
+			"created": "Created {$date}",
+			"updated": "Updated {$date}",
+			"created_updated": "Created {$created} · Updated {$updated}",
+			"too_long": "Note must be {$maxCharacters} characters or fewer.",
+			"cap_reached": "You've reached the maximum of {$max} saved notes. Delete one to add a new note.",
+			"deleted": "Note deleted",
+			"undo": "Undo",
+			"decryption_failed": "Couldn't decrypt this note"
+		},
+		"alt": {
+			"edit": "Edit note",
+			"delete": "Delete note"
+		},
+		"error": {
+			"load": "Couldn't load your notes. Please try again.",
+			"save": "Couldn't save your note. Please try again.",
+			"delete": "Couldn't delete your note. Please try again.",
+			"restore": "Couldn't restore your note. Please try again."
 		}
 	},
 	"signer": {

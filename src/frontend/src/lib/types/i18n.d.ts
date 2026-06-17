@@ -90,6 +90,7 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		notes: string;
 		hide_balances: string;
 		show_balances: string;
 		privacy_mode_enabled: string;
@@ -111,6 +112,7 @@ interface I18nNavigation {
 		binance_qr_code: string;
 		refer_a_friend: string;
 		address_book: string;
+		notes: string;
 		hide_balances: string;
 		show_balances: string;
 	};
@@ -1533,6 +1535,29 @@ interface I18nAddress {
 	qr: { title: string };
 }
 
+interface I18nNotes {
+	text: {
+		title: string;
+		empty_title: string;
+		empty_subtitle: string;
+		empty_add: string;
+		add_note: string;
+		note_label: string;
+		placeholder: string;
+		privacy_info: string;
+		created: string;
+		updated: string;
+		created_updated: string;
+		too_long: string;
+		cap_reached: string;
+		deleted: string;
+		undo: string;
+		decryption_failed: string;
+	};
+	alt: { edit: string; delete: string };
+	error: { load: string; save: string; delete: string; restore: string };
+}
+
 interface I18nSigner {
 	sign_in: {
 		text: {
@@ -1850,6 +1875,7 @@ interface I18n {
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;
+	notes: I18nNotes;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	agreements: I18nAgreements;

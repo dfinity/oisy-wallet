@@ -93,6 +93,7 @@
 			"binance_qr_code": "QR Binance Clubhouse",
 			"refer_a_friend": "Giới thiệu bạn bè của bạn",
 			"address_book": "Sổ địa chỉ",
+			"notes": "",
 			"hide_balances": "Ẩn số dư",
 			"show_balances": "Hiện số dư",
 			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
 			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
 			"address_book": "Mở sổ địa chỉ",
+			"notes": "",
 			"hide_balances": "Ẩn số dư hiển thị",
 			"show_balances": "Hiện số dư bị ẩn"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "Quét mã QR"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"deleted": "",
+			"undo": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": "",
+			"restore": ""
 		}
 	},
 	"signer": {

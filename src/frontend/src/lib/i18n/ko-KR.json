@@ -93,6 +93,7 @@
 			"binance_qr_code": "바이낸스 클럽하우스 QR",
 			"refer_a_friend": "친구 추천",
 			"address_book": "연락처",
+			"notes": "",
 			"hide_balances": "잔액 숨기기",
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
 			"refer_a_friend": "친구를 위한 추천 링크 생성",
 			"address_book": "연락처 열기",
+			"notes": "",
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "QR 코드 스캔"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"deleted": "",
+			"undo": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": "",
+			"restore": ""
 		}
 	},
 	"signer": {

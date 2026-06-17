@@ -93,6 +93,7 @@
 			"binance_qr_code": "QR-код Binance Clubhouse",
 			"refer_a_friend": "Пригласите друзей",
 			"address_book": "Контакты",
+			"notes": "",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "Создать ссылку на Binance",
 			"refer_a_friend": "Реферальная ссылка для друга",
 			"address_book": "Контакты",
+			"notes": "",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "Отсканировать QR-код"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"deleted": "",
+			"undo": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": "",
+			"restore": ""
 		}
 	},
 	"signer": {

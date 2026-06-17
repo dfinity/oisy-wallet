@@ -93,6 +93,7 @@
 			"binance_qr_code": "Binance Clubhouse-QR",
 			"refer_a_friend": "Freunde einladen",
 			"address_book": "Kontakte",
+			"notes": "",
 			"hide_balances": "Salden verbergen",
 			"show_balances": "Salden anzeigen",
 			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "Binance Clubhouse-Link generieren",
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
 			"address_book": "Kontakte öffnen",
+			"notes": "",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "QR-Code scannen"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"deleted": "",
+			"undo": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": "",
+			"restore": ""
 		}
 	},
 	"signer": {

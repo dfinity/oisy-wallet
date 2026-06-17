@@ -93,6 +93,7 @@
 			"binance_qr_code": "QR do Binance Clubhouse",
 			"refer_a_friend": "Referencie seus amigos",
 			"address_book": "Livro de endereços",
+			"notes": "",
 			"hide_balances": "Ocultar saldos",
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo privado ativado. Clique [P] para mostrar os seus saldos novamente.",
@@ -114,6 +115,7 @@
 			"binance_qr_code": "Gerar um link do Binance Clubhouse",
 			"refer_a_friend": "Gerar um link de referência para um amigo",
 			"address_book": "Abrir livro de endereços",
+			"notes": "",
 			"hide_balances": "Ocultar os saldos exibidos",
 			"show_balances": "Mostrar os saldos ocultos"
 		},
@@ -1926,6 +1928,36 @@
 		},
 		"qr": {
 			"title": "Scan do QR code"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"deleted": "",
+			"undo": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": "",
+			"restore": ""
 		}
 	},
 	"signer": {
