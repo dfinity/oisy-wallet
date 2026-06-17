@@ -45,6 +45,12 @@ fn note_id_to_map_key(note_id: &str) -> Result<Blob<32>, PersonalNoteError> {
     Blob::try_from(note_id.as_bytes()).map_err(|_| PersonalNoteError::NoteIdTooLong)
 }
 
+/// Whether adding a *new* note would exceed the per-user cap. Editing an
+/// existing note is always allowed, so this is only consulted for new ids.
+fn new_note_exceeds_cap(current_count: usize) -> bool {
+    current_count >= MAX_PERSONAL_NOTES_PER_USER
+}
+
 /// Upsert (add or edit) a note. A *new* `note_id` is rejected with `TooManyNotes`
 /// once the caller is at the per-user cap; editing an existing note is always
 /// allowed.
@@ -68,7 +74,7 @@ pub fn set_personal_note(request: SetPersonalNoteRequest) -> Result<(), Personal
                 .get_encrypted_values_for_map(caller, key_id)
                 .map_err(internal)?
                 .len();
-            if count >= MAX_PERSONAL_NOTES_PER_USER {
+            if new_note_exceeds_cap(count) {
                 return Err(PersonalNoteError::TooManyNotes);
             }
         }
@@ -197,5 +203,17 @@ mod tests {
             note_id_to_map_key(id),
             Err(PersonalNoteError::NoteIdTooLong)
         ));
+    }
+
+    #[test]
+    fn new_note_allowed_below_the_cap() {
+        assert!(!new_note_exceeds_cap(0));
+        assert!(!new_note_exceeds_cap(MAX_PERSONAL_NOTES_PER_USER - 1));
+    }
+
+    #[test]
+    fn new_note_rejected_at_and_above_the_cap() {
+        assert!(new_note_exceeds_cap(MAX_PERSONAL_NOTES_PER_USER));
+        assert!(new_note_exceeds_cap(MAX_PERSONAL_NOTES_PER_USER + 1));
     }
 }
