@@ -11,8 +11,9 @@ notes are:
 1. **Reached from a new "Notes" user-menu item**, placed directly **after the
    "Contacts" / Address book item** in the user menu
    ([`src/frontend/src/lib/components/core/Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte)).
-2. **Shown in a modal** that lists the user's notes (newest first) with add /
-   edit / delete.
+2. **Shown in a modal** that lists the user's notes (newest first) with view / add /
+   edit / delete; tapping a note opens a read-only view where **URLs are clickable
+   links**.
 3. **Stored per-user in the backend canister, end-to-end encrypted** via vetKeys,
    so the canister and node providers only ever see ciphertext.
 
@@ -30,9 +31,10 @@ threading, transaction-details surfaces, and network-scoped loading. That spec i
 
 Shipping standalone notes first delivers user value with a much smaller surface
 **and** stands up the entire encrypted-store foundation (vetKeys `EncryptedMaps`
-backend + `@dfinity/vetkeys` frontend crypto + IndexedDB key caching). A later
-iteration can specialise notes to transactions by reusing this same store and
-crypto, with only the keying and entry points changing.
+backend + `@dfinity/vetkeys` frontend crypto + IndexedDB key caching). A future
+transaction-notes feature, if revived, can reuse that **storage/crypto foundation**
+as a separate parallel store — but it would live on its own surfaces and is **not**
+shown in this Notes list (see [Relationship to PR #13128](#relationship-to-pr-13128)).
 
 ---
 
@@ -124,12 +126,17 @@ From [`docs/ai/backend/structure.md`](../../../../docs/ai/backend/structure.md) 
 
 The transaction-personal-note spec is **paused**. This spec supersedes it for now:
 it ships the simpler, standalone notes feature **and** the shared encrypted-store
-foundation (backend `EncryptedMaps`, frontend vetKeys crypto + key caching). When
-the team returns to per-transaction notes, that feature should be re-specced as a
-**specialisation of this store**: the same encryption and storage, with the entry
-key changed from an opaque `note_id` to `(TokenId, tx_id)` and the entry points
-moved into the send flow / transaction-details modals. Nothing here blocks that
-later work; it de-risks it.
+foundation (backend `EncryptedMaps`, frontend vetKeys crypto + key caching).
+
+**Transaction notes are out of scope for this list — permanently, not just for v1.**
+The Notes modal shows **only** standalone personal notes; it will **not** host
+transaction-linked notes. If the team later revives per-transaction notes, they live
+on their **own surfaces** (the send flow / transaction-details modals) and are **not**
+merged into this list. What such a feature can still reuse is this PR's **encrypted-
+store foundation** (vetKeys `EncryptedMaps` + the vetKD derivation endpoints +
+frontend crypto/key-caching) as a separate, parallel store keyed by `(TokenId, tx_id)`
+instead of an opaque `note_id`. So this work de-risks that later effort at the
+storage/crypto layer, but the two remain distinct features with distinct UIs.
 
 ---
 
@@ -138,9 +145,10 @@ later work; it de-risks it.
 1. **Standalone notes, not attached to anything.** A note is a free-standing
    personal memo. No transaction, address, token, or network association in v1.
 2. **Full CRUD from one modal.** A new "Notes" user-menu item opens a modal that
-   lists the user's notes and supports add / edit / delete. "Add" and "edit" are
-   the same `set_personal_note` upsert (keyed by a stable `note_id`); the backend
-   exposes set / get / delete (+ a count).
+   lists the user's notes and supports **view / add / edit / delete** (tapping a note
+   opens a read-only view — Decision 16 — from which Edit and Delete are reached).
+   "Add" and "edit" are the same `set_personal_note` upsert (keyed by a stable
+   `note_id`); the backend exposes set / get / delete (+ a count).
 3. **Note model = body + timestamps.** Each note is free text plus
    `created_at_ns` / `updated_at_ns`, both **UTC epoch nanoseconds** (absolute,
    timezone-agnostic instants — matching IC time; the client sets them, see
@@ -230,7 +238,22 @@ created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
     spoofing risk — isolate or strip them on display so a note cannot reorder or
     impersonate surrounding UI; **do not log** note cleartext; and **never** place
     note text into a URL, HTML attribute, or `innerHTML` without proper encoding.
-    No HTML, Markdown, or link auto-detection is rendered in v1 (plain text only).
+    No HTML or Markdown is rendered. **The one exception is URL auto-linking**
+    (Decision 16): `http`/`https` URLs in the read-only view become clickable links —
+    done by a **safe linkifier** that still escapes everything and only ever emits
+    anchors with a vetted scheme (never `{@html}` of raw input).
+16. **A read-only view mode, with clickable links.** Because notes are free text,
+    there is no proper place to show a note's **full** content with **clickable
+    URLs**: the list row is a truncated preview, and the editor is a plain `<textarea>`
+    (which can't render clickable links). So tapping a note opens a **read-only view**
+    (its own step, like Contacts' contact detail): the full note, line breaks
+    preserved, with `http`/`https` URLs rendered as **links that open in a new tab**,
+    plus **Edit** and **Delete**. Linking is done safely (Decision 15): escape all
+    text first, auto-link **only** `http`/`https` matches (never `javascript:` /
+    `data:` / others), build the `<a>` from escaped strings (no `{@html}` of raw
+    input), and open with `target="_blank" rel="noopener noreferrer"`. URLs are shown
+    as **plain text in the editor** (a textarea can't be rich) — only the view
+    linkifies. Navigation and button hierarchy are in [Design](#design).
 
 ---
 
@@ -243,7 +266,9 @@ OISY Contacts modal** (the surface this feature sits next to):
   on the **user menu** (with the new **"Notes"** item directly under "Contacts");
   clicking it opens the Notes modal, and **X / Close / clicking the dimmed backdrop**
   close it (returning to the menu), while the **editor step has no X and ignores
-  backdrop clicks**. Also covers list, empty state, and the add/edit form. Like the
+  backdrop clicks**. Also covers the list, empty state, the **read-only view**
+  (tap a row → full note with **clickable links**; "Load test notes" includes a
+  note with URLs), and the add/edit form. Like the
   transaction-note wireframes it has a **Desktop / Mobile toggle** and a **"Simulate:
   at note cap"** switch (disables "Add note" + shows the cap banner while edit/delete
   stay enabled). On desktop the modal is a centered floating card with the add/edit
@@ -281,29 +306,31 @@ A new `NotesModal.svelte` (new folder
   privacy info box** — so a first-time user sees that notes are private and encrypted
   **before** creating one. (Grouping all four with symmetric whitespace, rather than
   centering the illustration and pinning the box to the bottom, keeps it calm.)
-- **List:** notes newest-first (Decision 7). Each row (`NoteListItem.svelte`)
-  shows a **leading icon tile**, a **two-line body preview**, a relative "updated"
-  timestamp, and — on hover / always on mobile — an **edit pencil** (`IconPencil`) and
-  a **delete trash** (`IconTrash`). A header **"Add note"** button (disabled at the
-  cap, Decision 12) sits above the list. The leading icon is a **generic note glyph**
-  in v1 (decorative; it mirrors the avatar slot in contact rows and gives the row
-  structure). It is kept deliberately as a reserved slot: when transaction notes are
-  folded into this list later (see [Relationship to PR #13128](#relationship-to-pr-13128)),
-  the icon can **differentiate note types** — e.g. a note/book glyph for a standalone
-  note vs. a network/transaction glyph for a transaction-linked note — so both read at
-  a glance in one unified list, with no row-layout change needed then.
-  **Preview rendering (precise):**
-  - **Line breaks (and runs of whitespace) collapse to a single space** in the
-    preview, so a multi-line note reads as one flowing line rather than showing its
-    newlines. (This is the list preview only — the full note keeps its line breaks
-    in the edit field / full view, per Decision 15.)
-  - Clamp to a **maximum of 2 lines with a trailing ellipsis** when longer — via
-    `display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
-    still wraps and clamps rather than overflowing).
-  - Escaping/safety still applies (Decision 15): the preview is auto-escaped plain
-    text with bidi/control characters neutralized; collapsing whitespace is a
-    display choice and does not bypass escaping.
+- **List:** notes newest-first (Decision 7). Each row (`NoteListItem.svelte`) is
+  **tap-to-open** — tapping it opens the read-only **View** (below). The row shows a
+  **two-line text preview** and a relative timestamp on the left, and a **chevron**
+  affordance on the right; there are **no inline edit/delete icons** (edit and delete
+  live in the View). A header **"Add note"** button — the screen's **primary (filled)
+  action**, disabled at the cap (Decision 12) — sits above the list. **No per-row
+  icon:** notes have no per-item identity to show, so the row is text-only, giving the
+  preview the full row width. (Contacts warrant an avatar because each contact has a
+  distinct identity; notes do not.)
+  **Preview rendering (precise) — first line is the note's "title":**
+  - **Line 1 = the note's first line, shown as a bold title** (same size/weight as a
+    contact name), on **one line** with a trailing **ellipsis** if too long.
+  - **Line 2 = the remaining lines**, with **line breaks and whitespace runs collapsed
+    to single spaces**, shown **lighter** (smaller, regular weight, secondary color),
+    also **one line + ellipsis**. Omitted entirely when the note is a single line.
+  - Split on the **first** newline: text before it is the title; everything after,
+    whitespace-collapsed, is the second line. (If the note starts with blank lines,
+    fall back to the first non-empty content as the title.) Example — a note
+    `"This is my first line\nand\nhere\nsome more about this"` previews as title
+    "This is my first lin…" and second line "and here some more…".
+  - This collapsing is the **list preview only** — the full note keeps its line breaks
+    in the edit field / full view (per Decision 15).
+  - Escaping/safety still applies (Decision 15): both lines are auto-escaped plain
+    text with bidi/control characters neutralized; collapsing whitespace is a display
+    choice and does not bypass escaping.
   - **Timestamp** uses the **"Created …" vs "Updated …"** rule (Decision 3): show
     `created_at_ns` prefixed "Created" when the note was never edited, otherwise
     `updated_at_ns` prefixed "Updated". Format with OISY's existing relative/date
@@ -316,6 +343,16 @@ overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
   - The **edit view always shows the created date** (local time): **"Created {date}"**
     for a never-edited note, and **"Created {date} · Updated {date}"** once it has been
     edited (the `·` separator joins the two).
+- **View (read-only — Decision 16):** tapping a list row opens the note's **full
+  content** as its own step: the complete text with **line breaks preserved**
+  (`white-space: pre-wrap`) and **`http`/`https` URLs rendered as clickable links that
+  open in a new tab** (safe linkifier — Decision 15). Below the text, the
+  **created/updated** line ("Created {date}" / "Created {date} · Updated {date}").
+  Actions: **Edit** (secondary) and **Delete**. The **footer button is the primary
+  action**, labelled **"Back"** when the View was opened from the list, or **"OK"**
+  when it was reached by returning from the editor (after Save or Cancel of an edit) —
+  both return to the list. The header **(X)** closes the whole modal (read-only, so
+  there is no unsaved-data risk).
 - **Add / edit:** the body switches to (or a sub-step opens) an
   `InputPersonalNote` multi-line textarea, with **Cancel / Save**. **Save is
   disabled** while the trimmed content is **empty, too long, or unchanged since the
@@ -331,6 +368,12 @@ overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
   4. **A separate "OISY protects you!" privacy info box** _after_ the Note panel
      (its own box, shield icon + bold lead + body + "Learn more" — see
      [UI copy](#ui-copy-i18n)) — not inline helper text.
+
+  **After Save / Cancel (navigation):** a **new** note returns to the **list** on
+  **both Save and Cancel** (it never enters the View). **Editing an existing** note
+  returns to that note's **View** (whose footer now reads **"OK"**) on **both Save and
+  Cancel**. **Delete** (from the editor's Delete or the View's Delete) returns to the
+  **list** with the undo snackbar.
 
   **Focus on open:** the textarea is **auto-focused** the moment the editor opens so
   the user can type immediately — **add** opens empty with the caret ready; **edit**
@@ -349,6 +392,9 @@ overflow: hidden;` (with `overflow-wrap: anywhere` so a long unbroken string
 - **List / empty state:** shows the header **(X)** and is **dismissible** — the (X),
   the "Close" button, and a **backdrop/outside click** all close the whole Notes
   modal (standard modal behavior).
+- **View step (read-only):** shows the **(X)**; the (X) and a **backdrop/outside
+  click** close the whole modal, while the footer **Back/OK** returns to the list.
+  There is no unsaved data to protect.
 - **Add / edit step:** **no (X)** in the header, and a **backdrop/outside click does
   nothing** — the only ways out are **Cancel** (discard) or **Save**. This prevents
   an accidental tap from silently dropping unsaved text. (Escape may map to Cancel.)
@@ -454,6 +500,8 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
   "Created {$date}" or "Created {$created} · Updated {$updated}" (the `·` joins
   them). `{$date}` is the localized relative/absolute time.
 - **Buttons:** reuse core "Cancel" / "Save" / "Add note"; "Delete" action.
+- **View mode:** footer button **"Back"** (opened from the list) / **"OK"** (after an
+  edit); **"Edit note"** (secondary) and **"Delete"** actions.
 - **Too-long error:** "Note must be {$maxCharacters} characters or fewer."
 - **Cap reached:** "You've reached the maximum of {$max} saved notes. Delete one
   to add a new note."
@@ -612,7 +660,7 @@ Tests: crypto helper round-trip (`encrypt`→`decrypt`) with a mocked vetKey,
 service mappers + store sort, decryption-failure isolation, following existing
 `*.services.spec.ts` conventions.
 
-### PR-3 (frontend) — Notes menu item + modal (list / add / edit / delete)
+### PR-3 (frontend) — Notes menu item + modal (list / view / add / edit / delete)
 
 - **Menu item** in [`Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte)
   right after the Address-book `ButtonMenu` (see [Entry point](#entry-point)), with
@@ -622,9 +670,12 @@ service mappers + store sort, decryption-failure isolation, following existing
   [`modal.store.ts`](../../../../src/frontend/src/lib/stores/modal.store.ts), and
   the test id in [`test-ids.constants.ts`](../../../../src/frontend/src/lib/constants/test-ids.constants.ts).
 - **Modal + components** in new folder `src/frontend/src/lib/components/notes/`:
-  `NotesModal.svelte` (list / empty / add-edit states), `NoteListItem.svelte`,
-  `InputPersonalNote.svelte`. Mount `NotesModal` from the global modals host where
-  `AddressBookModal` is mounted, gated on `$modalNotes`.
+  `NotesModal.svelte` (list / empty / view / add-edit states), `NoteListItem.svelte`
+  (tap-to-open row, chevron, no inline icons), `NoteView.svelte` (read-only view with
+  clickable links + Edit/Delete), `InputPersonalNote.svelte`, and a small **safe
+  linkify helper** (or `NoteText` component) for URL auto-linking (Decisions 15–16).
+  Mount `NotesModal` from the global modals host where `AddressBookModal` is mounted,
+  gated on `$modalNotes`.
 - **Lazy load on open (Decision 13).** On mount/open, `NotesModal` calls
   `loadPersonalNotes()` + `getPersonalNotesCount()` **only if the store is not
   already `loaded`**, showing the loading state until the notes resolve; re-opens
@@ -637,6 +688,16 @@ service mappers + store sort, decryption-failure isolation, following existing
   preserve line breaks with `white-space: pre-wrap`. Apply bidi/control-character
   isolation on display everywhere (Decision 15). The textarea accepts any Unicode and
   the editor counts by code points (Decision 14).
+- **Read-only view + clickable links (Decisions 15–16).** Tapping a row opens
+  `NoteView`: full text with `white-space: pre-wrap`, and `http`/`https` URLs turned
+  into `target="_blank" rel="noopener noreferrer"` links. Implement linking by
+  **splitting the text into text / URL segments and rendering anchors as real Svelte
+  elements** — escape every segment, build the `href` only from `http`/`https`
+  matches (never `javascript:` / `data:`), and **never `{@html}` raw input**. Footer
+  button is **primary**, reading **"Back"** (opened from list) or **"OK"** (returned
+  from editor); **Edit is secondary**, **Delete** is the danger action. Navigation:
+  row tap → view; view Edit → editor; **existing-note Save/Cancel → its view ("OK");
+  new-note Save/Cancel → list; Delete → list**.
 - Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`, with
   optimistic store updates and rollback on rejection. **Delete is immediate — no
   confirmation dialog — but reversible via a pinned snackbar:** on delete, surface a
@@ -661,13 +722,17 @@ service mappers + store sort, decryption-failure isolation, following existing
   `npm run i18n:types`.
 - Update [`docs/ai/PRODUCT.md`](../../../../docs/ai/PRODUCT.md) in **this** PR to
   describe the personal-notes behaviour (a private list of free-text notes,
-  add/edit/delete from the user menu; **end-to-end encrypted via vetKeys** so the
-  canister and node providers never see cleartext; 2,000-char cap; 1,000-note cap).
+  view/add/edit/delete from the user menu, with clickable links in the read-only
+  view; **end-to-end encrypted via vetKeys** so the canister and node providers never
+  see cleartext; 2,000-char cap; 1,000-note cap).
 
-Tests: modal renders empty/list/editing states; add and delete call the service
-and update the store; cap gate disables "Add note"; **a note with HTML/script-like
-content and bidi-override characters renders inertly (no execution, no UI
-reordering)**; a multi-byte/emoji note is accepted and counted by code points.
+Tests: modal renders empty/list/view/editing states; tapping a row opens the view;
+add and delete call the service and update the store; cap gate disables "Add note";
+navigation (new-note Save/Cancel → list; existing-note Save/Cancel → its view);
+**the view linkifies only `http`/`https` URLs (as `target="_blank"` anchors) and a
+`javascript:`/`data:` URL is rendered inert, not as a link**; **a note with
+HTML/script-like content and bidi-override characters renders inertly (no execution,
+no UI reordering)**; a multi-byte/emoji note is accepted and counted by code points.
 
 ### Quality gates (every PR)
 
@@ -696,9 +761,13 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 
 ## Out of Scope
 
-1. Attaching a note to a transaction, address, token, or network (that is the
-   paused PR #13128 follow-up — see [Relationship to PR #13128](#relationship-to-pr-13128)).
-2. A note **title**, rich text, attachments, tags, or folders.
+1. Attaching a note to a transaction, address, token, or network, **and** showing
+   transaction-linked notes in this list — both are permanently out of scope here;
+   any future transaction-notes feature lives on its own surfaces (see
+   [Relationship to PR #13128](#relationship-to-pr-13128)).
+2. A **separate title field**, rich text, attachments, tags, or folders. (The list
+   preview shows the note's **first line as a de-facto title**, but the note is still
+   a single free-text body — there is no distinct stored title.)
 3. **Search / filtering** notes server-side (impossible anyway — the backend holds
    only ciphertext). Client-side filtering of the loaded list could be added later.
 4. **Sharing notes** between users (`EncryptedMaps` supports it; we use a per-user
@@ -731,9 +800,19 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 - [ ] **Empty / whitespace-only notes cannot be saved** (Save disabled, no backend
       write) in both add and edit; content is trimmed before measuring and storing.
 - [ ] The **list/empty state** shows an **(X)** and closes the modal via X, "Close",
-      or backdrop click. The **add/edit step has no (X)** and **ignores backdrop
-      clicks** — only Cancel or Save exits it, so unsaved text can't be lost to an
-      accidental dismissal.
+      or backdrop click; the **view step** also has the (X)/backdrop close. The
+      **add/edit step has no (X)** and **ignores backdrop clicks** — only Cancel or
+      Save exits it, so unsaved text can't be lost to an accidental dismissal.
+- [ ] **Tapping a list row opens a read-only view** of the full note (line breaks
+      preserved). In the view, **`http`/`https` URLs are clickable links that open a
+      new tab** (`rel="noopener noreferrer"`); other schemes (`javascript:`, `data:`,
+      …) are **not** linkified; links are built without `{@html}` of raw input. The
+      view's footer is the **primary** button reading **"Back"** (from list) or
+      **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is present.
+- [ ] **Navigation:** a **new** note returns to the **list** on both Save and Cancel;
+      **editing an existing** note returns to that note's **view** on both Save and
+      Cancel; **Delete** returns to the list. The list's **"Add note" is the primary
+      (filled) action**.
 - [ ] The editor **auto-focuses the textarea on open** (add: empty caret; edit: caret
       at end). On **mobile** the editor is a **full-page step** (not a bottom sheet);
       the textarea stays visible above the soft keyboard and **Cancel/Save remain
@@ -767,17 +846,21 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       shows **"Updated …"**. The edit view always shows the created date. All times
       are stored as **UTC** epoch-ns and **displayed in the user's local timezone**,
       using month-day for the current year and month-day-year otherwise.
-- [ ] The list row shows a **2-line preview** with **line breaks/whitespace
-      collapsed to a single space** and a trailing **ellipsis** when longer; the full
-      note (edit field / full view) preserves its line breaks.
+- [ ] The list row shows a **two-line preview**: line 1 is the note's **first line as
+      a bold title** (one line, ellipsis); line 2 is the **remaining lines collapsed
+      to single spaces**, lighter (one line, ellipsis), omitted for single-line notes.
+      The full note (edit field / full view) preserves its line breaks. **No per-row
+      icon.**
 - [ ] A note accepts **any language / script / emoji** (arbitrary Unicode, stored as
       UTF-8); the 2,000-char limit is enforced by **Unicode code point** count, not
       UTF-16 length.
-- [ ] Note text is **always rendered as plain text** (auto-escaped, never `{@html}`,
-      line breaks via CSS) everywhere it appears, with bidi/control characters
-      neutralized — verified by a test that a note containing HTML/script-like
-      content (e.g. `<img src=x onerror=...>`) and bidi-override characters renders
-      inertly and does not execute or reorder UI.
+- [ ] Note text is **always rendered as plain text** (auto-escaped, never `{@html}`
+      of raw input, line breaks via CSS) everywhere it appears, with bidi/control
+      characters neutralized — verified by a test that a note containing
+      HTML/script-like content (e.g. `<img src=x onerror=...>`) and bidi-override
+      characters renders inertly and does not execute or reorder UI. The **only**
+      enrichment is safe `http`/`https` URL auto-linking in the read-only view
+      (Decision 16).
 - [ ] `docs/ai/PRODUCT.md` describes the feature (landed in PR-3).
 - [ ] All quality gates pass for each PR.
 
