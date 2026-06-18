@@ -13,7 +13,7 @@ use shared::types::personal_note::{
 };
 
 use super::personal_notes_map_name;
-use crate::state::{mutate_state, read_state};
+use crate::state::{with_personal_notes, with_personal_notes_mut};
 
 /// `EncryptedMaps` identifies each map by `(owner, map_name)`. The owner is the
 /// caller, so a user is automatically the owner of (and can read/write) their
@@ -22,12 +22,6 @@ type KeyId = (Principal, Blob<32>);
 
 fn caller_key_id() -> KeyId {
     (msg_caller(), personal_notes_map_name())
-}
-
-fn store_uninitialized() -> PersonalNoteError {
-    PersonalNoteError::InternalError {
-        msg: "personal notes store is not initialized".to_string(),
-    }
 }
 
 /// Wraps an `EncryptedMaps` (`String`) error. The message never carries note
@@ -62,9 +56,7 @@ pub fn set_personal_note(request: SetPersonalNoteRequest) -> Result<(), Personal
     let key_id = caller_key_id();
     let caller = key_id.0;
 
-    mutate_state(|s| {
-        let encrypted_maps = s.personal_notes.as_mut().ok_or_else(store_uninitialized)?;
-
+    with_personal_notes_mut(|encrypted_maps| {
         let is_new_note = encrypted_maps
             .get_encrypted_value(caller, key_id, map_key)
             .map_err(internal)?
@@ -96,8 +88,7 @@ pub fn set_personal_note(request: SetPersonalNoteRequest) -> Result<(), Personal
 pub fn get_personal_notes() -> Result<Vec<PersonalNoteEntry>, PersonalNoteError> {
     let key_id = caller_key_id();
     let caller = key_id.0;
-    read_state(|s| {
-        let encrypted_maps = s.personal_notes.as_ref().ok_or_else(store_uninitialized)?;
+    with_personal_notes(|encrypted_maps| {
         let entries = encrypted_maps
             .get_encrypted_values_for_map(caller, key_id)
             .map_err(internal)?;
@@ -116,8 +107,7 @@ pub fn get_personal_notes() -> Result<Vec<PersonalNoteEntry>, PersonalNoteError>
 pub fn get_personal_notes_count() -> Result<u64, PersonalNoteError> {
     let key_id = caller_key_id();
     let caller = key_id.0;
-    read_state(|s| {
-        let encrypted_maps = s.personal_notes.as_ref().ok_or_else(store_uninitialized)?;
+    with_personal_notes(|encrypted_maps| {
         let count = encrypted_maps
             .get_encrypted_values_for_map(caller, key_id)
             .map_err(internal)?
@@ -132,8 +122,7 @@ pub fn delete_personal_note(request: DeletePersonalNoteRequest) -> Result<(), Pe
     let map_key = note_id_to_map_key(&note_id)?;
     let key_id = caller_key_id();
     let caller = key_id.0;
-    mutate_state(|s| {
-        let encrypted_maps = s.personal_notes.as_mut().ok_or_else(store_uninitialized)?;
+    with_personal_notes_mut(|encrypted_maps| {
         encrypted_maps
             .remove_encrypted_value(caller, key_id, map_key)
             .map_err(internal)?;
@@ -149,8 +138,7 @@ pub async fn get_encrypted_vetkey(transport_key: ByteBuf) -> Result<ByteBuf, Per
     let caller = key_id.0;
     // The future is `'static` (it clones what it needs), so it is awaited after
     // the state borrow is released.
-    let future = read_state(|s| {
-        let encrypted_maps = s.personal_notes.as_ref().ok_or_else(store_uninitialized)?;
+    let future = with_personal_notes(|encrypted_maps| {
         encrypted_maps
             .get_encrypted_vetkey(
                 caller,
@@ -166,8 +154,7 @@ pub async fn get_encrypted_vetkey(transport_key: ByteBuf) -> Result<ByteBuf, Per
 /// Returns the vetKey verification (public) key for the personal-notes store.
 /// The browser needs it to verify the derived vetKey. The same for every user.
 pub async fn get_vetkey_public_key() -> Result<ByteBuf, PersonalNoteError> {
-    let future = read_state(|s| {
-        let encrypted_maps = s.personal_notes.as_ref().ok_or_else(store_uninitialized)?;
+    let future = with_personal_notes(|encrypted_maps| {
         Ok(encrypted_maps.get_vetkey_verification_key())
     })?;
     let verification_key = future.await;

@@ -56,10 +56,14 @@ pub(crate) struct State {
     pub(crate) active_user_transactions: ActiveUserTransactionsMap,
     /// Per-user end-to-end-encrypted personal notes (vetKeys `EncryptedMaps`).
     ///
-    /// `None` until [`init_personal_notes`] runs in `init` / `post_upgrade`: the
-    /// store needs the vetKD key name from `config`, which is only available once
-    /// the config has been set. The underlying data lives in stable memory
-    /// (ids 14–17) and so survives upgrades regardless of this field.
+    /// `None` until the store is first accessed (see [`with_personal_notes`] /
+    /// [`with_personal_notes_mut`]): it needs the vetKD key name from `config`,
+    /// available only once the config has been set. Initialising it lazily —
+    /// rather than eagerly in `init` / `post_upgrade` — keeps canisters that never
+    /// touch notes (the vast majority of tests) from allocating its four
+    /// stable-memory regions. The underlying data lives in stable memory
+    /// (ids 14–17) and survives upgrades regardless of this field;
+    /// [`EncryptedMaps::init`] re-attaches to it on first access.
     pub(crate) personal_notes: Option<EncryptedMaps<AccessRights>>,
 }
 
@@ -102,7 +106,7 @@ thread_local! {
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
-            // Initialised lazily from `config` in `init_personal_notes`.
+            // Initialised lazily on first access (see `ensure_personal_notes`).
             personal_notes: None,
         })
     );
@@ -110,13 +114,14 @@ thread_local! {
 
 /// Initialises the personal-notes [`EncryptedMaps`] store.
 ///
-/// Called from `init` and `post_upgrade` once the config (and therefore the
-/// vetKD key name) is available. The vetKD key name reuses `config.ecdsa_key_name`
-/// — across every OISY environment the threshold-key names line up
-/// (`dfx_test_key` locally, `test_key_1` on staging, `key_1` on mainnet), so no
-/// separate config field or deployment change is needed. `EncryptedMaps::init`
-/// re-attaches to the existing stable memory on upgrade, so notes persist.
-pub(crate) fn init_personal_notes() {
+/// Called lazily on first access via [`ensure_personal_notes`], once the config
+/// (and therefore the vetKD key name) is available. The vetKD key name reuses
+/// `config.ecdsa_key_name` — across every OISY environment the threshold-key
+/// names line up (`dfx_test_key` locally, `test_key_1` on staging, `key_1` on
+/// mainnet), so no separate config field or deployment change is needed.
+/// `EncryptedMaps::init` re-attaches to the existing stable memory, so notes
+/// written before an upgrade are seen on the next access.
+fn init_personal_notes() {
     let key_id = VetKDKeyId {
         curve: VetKDCurve::Bls12_381_G2,
         name: read_config(|c| c.ecdsa_key_name.clone()),
@@ -135,6 +140,36 @@ pub(crate) fn init_personal_notes() {
     });
 
     mutate_state(|s| s.personal_notes = Some(encrypted_maps));
+}
+
+/// Ensures the personal-notes store is initialised, creating it on first use.
+fn ensure_personal_notes() {
+    if read_state(|s| s.personal_notes.is_none()) {
+        init_personal_notes();
+    }
+}
+
+/// Runs `f` against the personal-notes store, initialising it on first access.
+pub(crate) fn with_personal_notes<R>(f: impl FnOnce(&EncryptedMaps<AccessRights>) -> R) -> R {
+    ensure_personal_notes();
+    read_state(|s| {
+        f(s.personal_notes
+            .as_ref()
+            .expect("personal notes store initialised by ensure_personal_notes"))
+    })
+}
+
+/// Runs `f` against the mutable personal-notes store, initialising it on first
+/// access.
+pub(crate) fn with_personal_notes_mut<R>(
+    f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R,
+) -> R {
+    ensure_personal_notes();
+    mutate_state(|s| {
+        f(s.personal_notes
+            .as_mut()
+            .expect("personal notes store initialised by ensure_personal_notes"))
+    })
 }
 
 pub(crate) fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
