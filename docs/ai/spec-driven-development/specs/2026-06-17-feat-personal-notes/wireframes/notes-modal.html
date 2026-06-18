@@ -35,15 +35,24 @@
 			}
 			body {
 				margin: 0;
-				padding: 28px 16px 60px;
+				padding: 28px 16px 40px;
 				font-family: var(--font-sans);
 				background: #f3f4f6;
 				color: var(--text);
 				line-height: 1.5;
+				/* fixed to the viewport so the stage caps at the window (content scrolls inside) */
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
 			}
 			.wrap {
 				max-width: 720px;
+				width: 100%;
 				margin: 0 auto;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
 			}
 			h1.page {
 				font-size: 18px;
@@ -89,11 +98,12 @@
 				color: var(--text-secondary);
 				cursor: pointer;
 			}
-			/* stage */
+			/* stage — desktop: stretches to fill the remaining window height */
 			.stage {
 				position: relative;
 				overflow: hidden;
-				min-height: 800px;
+				flex: 1;
+				min-height: 0;
 				background: rgba(40, 44, 52, 0.55);
 				border-radius: 16px;
 				display: flex;
@@ -245,7 +255,13 @@
 			.modal {
 				width: 100%;
 				max-width: 480px;
-				height: 640px;
+				/* Size to content, but: at least a comfortable minimum (so short notes/lists
+				   aren't squat), and at most 75% of the window for big content (then the body
+				   scrolls inside). Both are clamped to the available space (100% of the stage),
+				   so on short screens the window/padding wins. */
+				height: auto;
+				min-height: min(560px, 100%);
+				max-height: min(75vh, 100%);
 				background: var(--surface);
 				border-radius: var(--radius-modal);
 				overflow: hidden;
@@ -260,14 +276,15 @@
 			}
 			.modal-body {
 				flex: 1;
+				min-height: 0;
 				overflow: auto;
 			}
-			/* Mobile: full-page modal (matches OISY Contacts on mobile) */
+			/* Mobile: fixed phone width, but dynamic height like desktop (fills the window,
+			   ends above the bottom); the full-page modal fills it and scrolls internally. */
 			.stage.mobile {
+				width: min(390px, 100%);
 				max-width: 390px;
 				margin: 0 auto;
-				height: 760px;
-				min-height: 760px;
 				padding: 0;
 				align-items: stretch;
 				justify-content: stretch;
@@ -276,6 +293,9 @@
 				max-width: none;
 				width: 100%;
 				height: 100%;
+				/* mobile fills the phone frame — ignore the desktop min/max caps */
+				min-height: 0;
+				max-height: none;
 				border-radius: 0;
 				box-shadow: none;
 				display: flex;
@@ -528,14 +548,44 @@
 				color: var(--danger);
 			}
 			/* read-only view mode */
-			.note-view {
-				font-size: 15px;
-				line-height: 1.6;
+			.view-wrap {
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+				min-height: 0;
+			}
+			/* in view mode, the body is a flex column so the note box scrolls (not the body) */
+			.modal.is-view .modal-body {
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+			.note-box {
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 16px 18px;
+				min-height: 124px; /* ~4 rows so the note area is always clear */
+				background: var(--surface);
+				flex: 1 1 auto;
+				overflow: auto;
+			}
+			.note-box .nv-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--navy);
+				line-height: 1.5;
 				white-space: pre-wrap;
 				word-break: break-word;
-				color: var(--text);
 			}
-			.note-view a {
+			.note-box .nv-body {
+				font-size: 15px;
+				line-height: 1.6;
+				color: var(--text);
+				white-space: pre-wrap;
+				word-break: break-word;
+				margin-top: 8px;
+			}
+			.note-box a {
 				color: var(--blue);
 				text-decoration: underline;
 				word-break: break-all;
@@ -832,23 +882,6 @@
 
 				<div class="toast-pinned" id="toast"></div>
 			</div>
-
-			<p class="foot-note" style="text-align: left">
-				Interaction wireframe, styled to the current OISY Contacts modal. Starts on the user menu —
-				click "Notes" (added right under "Contacts") to open the Notes modal. Close it with X, the
-				Close button, or by clicking the dimmed area (which returns to the menu); the editor step
-				has no X and ignores outside clicks. The avatar (top-right) reopens the menu. Each list row
-				shows the note's first line as a title + a lighter second line; tapping a row opens a
-				read-only view where URLs are clickable links (new tab) and Edit / Delete live. From the
-				list the view's footer says "Back"; after Save or Cancel of an edit it says "OK" (both
-				return to the list). Adding a new note returns to the list on Save and Cancel. Deleting
-				shows a pinned, auto-dismissing "Note deleted / Undo" snackbar. The add/edit editor is a
-				**full-page step** inside the modal — a step in the floating card on desktop, and
-				full-screen on mobile (matching OISY Contacts) — more keyboard-robust than a bottom sheet
-				for text entry. Toggle "Simulate: at note cap" to see the disabled add + cap banner. Demo
-				character limit lowered to 100 to show validation (real limit 2,000, error-only). Tip: "Load
-				test notes" includes a note with links.
-			</p>
 		</div>
 
 		<script>
@@ -1184,9 +1217,19 @@
 						return;
 					}
 					titleEl.textContent = 'Note';
+					// First line = bold title (like the list); remaining lines = body, with
+					// line breaks preserved. Both linkified. Wrapped in a bordered box so the
+					// note area is visually distinct.
+					var nl = (n.text || '').indexOf('\n');
+					var vTitle = nl === -1 ? n.text || '' : n.text.slice(0, nl);
+					var vBody = nl === -1 ? '' : n.text.slice(nl + 1);
 					bodyEl.innerHTML =
-						'<div class="note-view">' +
-						linkify(n.text) +
+						'<div class="view-wrap">' +
+						'<div class="note-box">' +
+						'<div class="nv-title">' +
+						linkify(vTitle) +
+						'</div>' +
+						(vBody ? '<div class="nv-body">' + linkify(vBody) + '</div>' : '') +
 						'</div>' +
 						'<div class="view-meta">' +
 						esc(fullMeta(n)) +
@@ -1198,6 +1241,7 @@
 						'<button class="form-delete" data-action="delete" data-id="' +
 						n.id +
 						'" style="align-self:center;margin-top:8px"><i class="ti ti-trash"></i> Delete</button>' +
+						'</div>' +
 						'</div>';
 					// "Back" when opened from the list; "OK" after returning from the editor.
 					// Primary action; Edit is secondary.
@@ -1260,6 +1304,7 @@
 					// Toggle the menu popover, the modal, and the avatar (hidden while the modal is open).
 					menuEl.style.display = state.menuOpen ? '' : 'none';
 					modal.style.display = state.modalOpen ? '' : 'none';
+					modal.classList.toggle('is-view', state.modalOpen && state.screen === 'view');
 					document.querySelector('.avatar').style.display = state.modalOpen ? 'none' : '';
 
 					if (!state.modalOpen) {

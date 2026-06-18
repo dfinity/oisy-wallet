@@ -344,14 +344,19 @@ A new `NotesModal.svelte` (new folder
     for a never-edited note, and **"Created {date} · Updated {date}"** once it has been
     edited (the `·` separator joins the two).
 - **View (read-only — Decision 16):** tapping a list row opens the note's **full
-  content** as its own step: the complete text with **line breaks preserved**
+  content** as its own step. The note text sits in a **bordered box** (a thin border
+  with a **minimum height of ~4 rows**) so the note area is clearly delineated — read
+  as a read-only field. Inside the box, the **first line is a bold title** (matching
+  the list) and the remaining lines are the body, with **line breaks preserved**
   (`white-space: pre-wrap`) and **`http`/`https` URLs rendered as clickable links that
-  open in a new tab** (safe linkifier — Decision 15). Below the text, the
-  **created/updated** line ("Created {date}" / "Created {date} · Updated {date}").
-  Actions: **Edit** (secondary) and **Delete**. The **footer button is the primary
-  action**, labelled **"Back"** when the View was opened from the list, or **"OK"**
-  when it was reached by returning from the editor (after Save or Cancel of an edit) —
-  both return to the list. The header **(X)** closes the whole modal (read-only, so
+  open in a new tab** (safe linkifier — Decision 15). **For long notes the box itself
+  scrolls** (its own scrollbar), while the **created/updated line and the Edit/Delete
+  actions stay pinned below it**. The created/updated line reads "Created {date}" /
+  "Created {date} · Updated {date}". Actions: **Edit** (secondary) and **Delete**. The
+  **footer button is the primary action**, labelled **"Back"** when the View was
+  opened from the list, or **"OK"** when it was reached by returning from the editor
+  (after Save or Cancel of an edit) — both return to the list. The header **(X)**
+  closes the whole modal (read-only, so
   there is no unsaved-data risk).
 - **Add / edit:** the body switches to (or a sub-step opens) an
   `InputPersonalNote` multi-line textarea, with **Cancel / Save**. **Save is
@@ -408,6 +413,14 @@ editor is a full-page step** within it (push/replace navigation within the modal
 like Contacts' "Add new contact"), **not a bottom sheet**. On desktop the modal is a
 centered floating card and the add/edit form is a step inside that card. The same
 full-page-step pattern is used for both, so there is a single editor layout.
+
+**Desktop modal sizing.** The desktop modal **sizes to its content** rather than a
+fixed height, with a **minimum** (so short notes/lists aren't squat) and a **maximum
+of ~75% of the viewport height**; beyond the max, the relevant region **scrolls
+internally** (the list, the editor, or the view's note box) while the header and
+footer stay pinned. Both bounds are **clamped to the available space**, so on short
+windows the window height wins and the modal never exceeds it (no page scroll). On
+**mobile** the modal is full-page and these desktop bounds do not apply.
 
 **Why a full-page step, not a bottom sheet (text entry + keyboard).** The editor
 auto-focuses (above), so the soft keyboard appears immediately. Apple's HIG supports
@@ -689,8 +702,12 @@ service mappers + store sort, decryption-failure isolation, following existing
   isolation on display everywhere (Decision 15). The textarea accepts any Unicode and
   the editor counts by code points (Decision 14).
 - **Read-only view + clickable links (Decisions 15–16).** Tapping a row opens
-  `NoteView`: full text with `white-space: pre-wrap`, and `http`/`https` URLs turned
-  into `target="_blank" rel="noopener noreferrer"` links. Implement linking by
+  `NoteView`: the note in a **bordered box** (min ~4 rows) with the **first line as a
+  bold title** and the rest as body, `white-space: pre-wrap`, and `http`/`https` URLs
+  turned into `target="_blank" rel="noopener noreferrer"` links. For long notes the
+  **box scrolls internally** while the created/updated line and Edit/Delete stay
+  pinned below it (use a flex column, not percentage heights, so it works with the
+  content-sized/`max-height`-capped modal). Implement linking by
   **splitting the text into text / URL segments and rendering anchors as real Svelte
   elements** — escape every segment, build the `href` only from `http`/`https`
   matches (never `javascript:` / `data:`), and **never `{@html}` raw input**. Footer
@@ -803,12 +820,18 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       or backdrop click; the **view step** also has the (X)/backdrop close. The
       **add/edit step has no (X)** and **ignores backdrop clicks** — only Cancel or
       Save exits it, so unsaved text can't be lost to an accidental dismissal.
-- [ ] **Tapping a list row opens a read-only view** of the full note (line breaks
-      preserved). In the view, **`http`/`https` URLs are clickable links that open a
-      new tab** (`rel="noopener noreferrer"`); other schemes (`javascript:`, `data:`,
-      …) are **not** linkified; links are built without `{@html}` of raw input. The
-      view's footer is the **primary** button reading **"Back"** (from list) or
-      **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is present.
+- [ ] **Tapping a list row opens a read-only view** of the full note in a **bordered
+      box** (min ~4 rows; first line bold, line breaks preserved). In the view,
+      **`http`/`https` URLs are clickable links that open a new tab**
+      (`rel="noopener noreferrer"`); other schemes (`javascript:`, `data:`, …) are
+      **not** linkified; links are built without `{@html}` of raw input. **A long note
+      scrolls inside the box** while the created/updated line and Edit/Delete stay
+      pinned. The view's footer is the **primary** button reading **"Back"** (from
+      list) or **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is
+      present.
+- [ ] The desktop modal **sizes to content** with a minimum height and a **max of
+      ~75vh** (clamped to the window); past the max the list / editor / view-box
+      scrolls internally with header + footer pinned. Mobile is full-page.
 - [ ] **Navigation:** a **new** note returns to the **list** on both Save and Cancel;
       **editing an existing** note returns to that note's **view** on both Save and
       Cancel; **Delete** returns to the list. The list's **"Add note" is the primary
