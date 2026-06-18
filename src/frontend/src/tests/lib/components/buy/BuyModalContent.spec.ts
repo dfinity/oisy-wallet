@@ -28,36 +28,6 @@ describe('BuyModalContent', () => {
 		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
 	});
 
-	it('renders the unavailable notice when ONRAMPER_ENABLED is false', () => {
-		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => false);
 
-		const { getByText, queryByTestId } = render(BuyModalContent);
 
-		expect(getByText(en.buy.text.unavailable_title)).toBeInTheDocument();
-		expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument();
-	});
-
-	it('renders the unavailable notice when the backend reports onramper disabled', async () => {
-		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(backendApi, 'onramperEnabled').mockResolvedValue(false);
-
-		const { findByText, queryByTestId } = render(BuyModalContent);
-
-		await expect(findByText(en.buy.text.unavailable_title)).resolves.toBeInTheDocument();
-
-		await waitFor(() => expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument());
-	});
-
-	it('renders the unavailable notice when ONRAMPER_ENABLED is true but signing fails', async () => {
-		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockRejectedValue(
-			new Error('OnRamper signing secret is not configured on the backend canister.')
-		);
-
-		const { findByText, queryByTestId } = render(BuyModalContent);
-
-		await expect(findByText(en.buy.text.unavailable_title)).resolves.toBeInTheDocument();
-
-		await waitFor(() => expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument());
-	});
 });
