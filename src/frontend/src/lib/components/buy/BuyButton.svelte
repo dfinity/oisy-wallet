@@ -11,26 +11,30 @@
 
 	interface Props {
 		onclick: () => void;
+		// DEMO BRANCH — NOT FOR MERGE: optional overrides so a second "signed" buy button can render
+		// alongside the default one with a distinct label and test id.
+		buttonLabel?: string;
+		testId?: string;
 	}
 
-	let { onclick }: Props = $props();
+	let { onclick, buttonLabel, testId = BUY_TOKENS_MODAL_OPEN_BUTTON }: Props = $props();
 
 	const { inflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <!-- API-key gate only matters while OnRamper is enabled; with the flag off, the modal shows the notice and doesn't need the key. -->
 <ButtonHero
-	ariaLabel={$i18n.buy.text.buy}
+	ariaLabel={buttonLabel ?? $i18n.buy.text.buy}
 	disabled={$isBusy ||
 		(ONRAMPER_ENABLED && isNullishOrEmpty(ONRAMPER_API_KEY)) ||
 		$inflowActionsDisabled}
 	{onclick}
-	testId={BUY_TOKENS_MODAL_OPEN_BUTTON}
+	{testId}
 >
 	{#snippet icon()}
 		<IconlyBuy size="24" />
 	{/snippet}
 	{#snippet label()}
-		{$i18n.buy.text.buy}
+		{buttonLabel ?? $i18n.buy.text.buy}
 	{/snippet}
 </ButtonHero>

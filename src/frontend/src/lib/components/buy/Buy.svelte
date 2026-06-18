@@ -13,10 +13,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	const modalId = Symbol();
-</script>
 
-<BuyButton
-	onclick={() => {
+	// DEMO BRANCH — NOT FOR MERGE: two buy buttons — the default one opens the widget with an
+	// unsigned URL, "Buy S" opens it with the production signed URL (resolved via the backend).
+	let signed = $state(false);
+
+	const openBuy = (isSigned: boolean) => {
+		signed = isSigned;
+
 		trackEvent({
 			name: TRACK_BUY_TOKEN,
 			metadata: nonNullish($pageToken)
@@ -29,9 +33,16 @@
 		});
 
 		modalStore.openBuy(modalId);
-	}}
+	};
+</script>
+
+<BuyButton onclick={() => openBuy(false)} />
+<BuyButton
+	buttonLabel="Buy S"
+	onclick={() => openBuy(true)}
+	testId="buy-tokens-modal-open-button-signed"
 />
 
 {#if $modalBuy && $modalStore?.id === modalId}
-	<BuyModal />
+	<BuyModal {signed} />
 {/if}

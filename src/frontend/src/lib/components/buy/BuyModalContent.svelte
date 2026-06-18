@@ -5,13 +5,14 @@
 
 	// DEMO BRANCH — NOT FOR MERGE: the runtime `onramper_enabled` backend check (which requires the
 	// signing secret to be provisioned) is intentionally dropped here so the widget opens on the
-	// build-time flag alone, without any backend dependency.
+	// build-time flag alone. `signed` selects between the production signed URL and the unsigned one.
+	let { signed = false }: { signed?: boolean } = $props();
 </script>
 
 {#if ONRAMPER_ENABLED}
 	<div class="stretch flex overflow-hidden">
 		<div class="w-full overflow-auto">
-			<OnramperWidget />
+			<OnramperWidget {signed} />
 		</div>
 	</div>
 {:else}
