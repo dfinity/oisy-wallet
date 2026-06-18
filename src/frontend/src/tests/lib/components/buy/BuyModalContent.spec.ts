@@ -3,8 +3,7 @@ import * as backendApi from '$lib/api/backend.api';
 import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import en from '$tests/mocks/i18n.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 
 describe('BuyModalContent', () => {
 	const mockSignature = 'a'.repeat(64);
@@ -27,7 +26,4 @@ describe('BuyModalContent', () => {
 		// The iframe is rendered only after the async signing call resolves.
 		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
 	});
-
-
-
 });
