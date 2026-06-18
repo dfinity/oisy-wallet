@@ -133,9 +133,10 @@
 			{ariaLabel}
 			colorStyle="muted"
 			{disabled}
+			expanded={visible}
 			link={false}
 			onclick={handleToggle}
-			styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
+			styleClass="absolute right-[5px]"
 			testId={`${testIdPrefix}-open-btn`}
 			bind:button
 		>
