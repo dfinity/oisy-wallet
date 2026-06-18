@@ -1577,6 +1577,7 @@
 			"network": "네트워크",
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
+			"unreviewed_instructions": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",

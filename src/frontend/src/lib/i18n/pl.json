@@ -1577,6 +1577,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dane HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "",

@@ -1250,6 +1250,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		unreviewed_instructions: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
