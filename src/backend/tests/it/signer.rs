@@ -334,13 +334,6 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
     );
 }
 
-/// Candid mirror of the cycles-ledger `Account` argument for `icrc1_balance_of`.
-#[derive(candid::CandidType)]
-struct CyclesLedgerAccount {
-    owner: Principal,
-    subaccount: Option<Vec<u8>>,
-}
-
 /// Regression test for the **automatic** (timer-driven) cycles-ledger top-up.
 ///
 /// The hourly housekeeping timer must actually *deposit* cycles into the
@@ -353,6 +346,7 @@ struct CyclesLedgerAccount {
 #[test]
 fn test_housekeeping_timer_deposits_into_cycles_ledger() {
     use candid::{decode_one, encode_one};
+    use ic_cycles_ledger_client::Account;
 
     let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
     let backend_id = pic_setup.canister_id;
@@ -361,7 +355,7 @@ fn test_housekeeping_timer_deposits_into_cycles_ledger() {
         Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").expect("cycles ledger id");
 
     let balance_of = || -> Nat {
-        let arg = encode_one(CyclesLedgerAccount {
+        let arg = encode_one(Account {
             owner: backend_id,
             subaccount: None,
         })
