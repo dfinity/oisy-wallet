@@ -92,17 +92,21 @@ fn sign_onramper_widget_url_returns_deterministic_signature_for_known_input() {
         .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
         .expect("call should succeed when secret is provisioned");
 
-    // Deterministic: same input + same secret → same signature.
+    // Deterministic: same input + same secret → same response.
     assert_eq!(first, second);
 
-    let signature = match first {
-        SignOnramperWidgetUrlResult::Ok(hex) => hex,
+    let response = match first {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
         SignOnramperWidgetUrlResult::Err(err) => {
-            panic!("expected Ok signature but got {err:?}")
+            panic!("expected Ok response but got {err:?}")
         }
     };
 
+    // The signed_query is the canonical fragment the backend HMAC'd for `sample_request()`.
+    assert_eq!(response.signed_query, "wallets=btc:1abc");
+
     // Sanity check: HMAC-SHA256 hex digest is 64 lowercase hex characters.
+    let signature = response.signature;
     assert_eq!(signature.len(), 64);
     assert!(
         signature
