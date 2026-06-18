@@ -135,12 +135,6 @@ export class BackendCanister extends Canister<BackendService> {
 		return exchange_rate_enabled();
 	};
 
-	onramperEnabled = ({ certified }: QueryParams): Promise<boolean> => {
-		const { onramper_enabled } = this.caller({ certified });
-
-		return onramper_enabled();
-	};
-
 	btcAddPendingTransaction = async ({
 		txId,
 		iiDelegationChain,

@@ -801,7 +801,6 @@ export const idlFactory = ({ IDL }) => {
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
-		onramper_enabled: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],

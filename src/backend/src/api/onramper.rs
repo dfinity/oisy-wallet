@@ -1,4 +1,4 @@
-use ic_cdk::{query, update};
+use ic_cdk::update;
 use shared::types::{
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest},
     result_types::SignOnramperWidgetUrlResult,
@@ -29,17 +29,6 @@ pub fn sign_onramper_widget_url(req: SignOnramperWidgetUrlRequest) -> SignOnramp
     }
 
     service::sign_onramper_widget_url(req).into()
-}
-
-/// Returns whether the `OnRamper` widget can be signed, i.e. whether controllers have provisioned
-/// the signing secret via `set_api_keys`.
-///
-/// Exposed as an unauthenticated query (mirroring `exchange_rate_enabled`) so the frontend can
-/// disable the buy flow up front when the secret is missing, rather than failing on widget open.
-#[query]
-#[must_use]
-pub fn onramper_enabled() -> bool {
-    service::onramper_enabled()
 }
 
 /// Sets or clears the `OnRamper` signing secret used by [`sign_onramper_widget_url`].

@@ -118,15 +118,6 @@ export const exchangeRateEnabled = async ({
 	return exchangeRateEnabled({ certified });
 };
 
-export const onramperEnabled = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
-	const { onramperEnabled } = await backendCanister({ identity });
-
-	return onramperEnabled({ certified });
-};
-
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params

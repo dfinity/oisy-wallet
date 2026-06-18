@@ -2045,14 +2045,6 @@ export interface _SERVICE {
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
-	 * Returns whether the `OnRamper` widget can be signed, i.e. whether controllers have provisioned
-	 * the signing secret via `set_api_keys`.
-	 *
-	 * Exposed as an unauthenticated query (mirroring `exchange_rate_enabled`) so the frontend can
-	 * disable the buy flow up front when the secret is missing, rather than failing on widget open.
-	 */
-	onramper_enabled: ActorMethod<[], boolean>;
-	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
