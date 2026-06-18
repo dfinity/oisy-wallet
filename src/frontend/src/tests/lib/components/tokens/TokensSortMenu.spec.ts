@@ -165,10 +165,10 @@ describe('TokensSortMenu', () => {
 
 		const button = container.querySelector('button');
 
+		assertNonNullish(button);
+
 		expect(button).not.toHaveClass('opened');
 		expect(button).toHaveAttribute('aria-expanded', 'false');
-
-		assertNonNullish(button);
 
 		await fireEvent.click(button);
 
