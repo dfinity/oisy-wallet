@@ -18,6 +18,7 @@ import type {
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
+import { simulateSignerFailureIfEnabled } from '$lib/utils/signer-failure-simulator.utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 const signerApi = new CanisterApi<SignerCanister>();
@@ -74,6 +75,8 @@ export const signTransaction = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_TRANSACTION,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { signTransaction } = await signerCanister({ identity });
 
 			return signTransaction({ transaction });
@@ -87,6 +90,8 @@ export const signBtc = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_SIGN,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { signBtc } = await signerCanister({ identity });
 
 			return signBtc(params);
@@ -100,6 +105,8 @@ export const signMessage = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_PERSONAL_SIGN,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { personalSign } = await signerCanister({ identity });
 
 			return personalSign({ message });
@@ -115,6 +122,8 @@ export const signPrehash = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_PREHASH,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { signPrehash } = await signerCanister({ identity });
 
 			return signPrehash({ hash });
@@ -128,6 +137,8 @@ export const sendBtc = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_SEND,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { sendBtc } = await signerCanister({ identity });
 
 			return sendBtc(params);
@@ -154,6 +165,8 @@ export const signWithSchnorr = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.SCHNORR_SIGN,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { signWithSchnorr } = await signerCanister({ identity });
 
 			return await signWithSchnorr(rest);
@@ -167,6 +180,8 @@ export const genericSignWithEcdsa = ({
 	withCfsSignTracking({
 		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.GENERIC_SIGN_WITH_ECDSA,
 		fn: async () => {
+			simulateSignerFailureIfEnabled();
+
 			const { genericSignWithEcdsa } = await signerCanister({ identity });
 
 			return await genericSignWithEcdsa(rest);
