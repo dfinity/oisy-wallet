@@ -19,12 +19,11 @@ describe('BuyModalContent', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('renders the Onramper iframe when ONRAMPER_ENABLED is true', async () => {
+	it('renders the Onramper iframe in unsigned mode (default) when ONRAMPER_ENABLED is true', async () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 
 		const { findByTestId } = render(BuyModalContent);
 
-		// The iframe is rendered only after the async signing call resolves.
 		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
 	});
 
@@ -37,24 +36,34 @@ describe('BuyModalContent', () => {
 		expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument();
 	});
 
-	it('renders the unavailable notice when the backend reports onramper disabled', async () => {
+	it('renders the unsigned iframe without calling the backend, even if signing would fail', async () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(backendApi, 'onramperEnabled').mockResolvedValue(false);
+		const signSpy = vi
+			.spyOn(backendApi, 'signOnramperWidgetUrl')
+			.mockRejectedValue(new Error('signing must not be invoked in unsigned mode'));
 
-		const { findByText, queryByTestId } = render(BuyModalContent);
+		const { findByTestId } = render(BuyModalContent);
 
-		await expect(findByText(en.buy.text.unavailable_title)).resolves.toBeInTheDocument();
-
-		await waitFor(() => expect(queryByTestId(BUY_MODAL_ONRAMPER_IFRAME)).not.toBeInTheDocument());
+		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
+		expect(signSpy).not.toHaveBeenCalled();
 	});
 
-	it('renders the unavailable notice when ONRAMPER_ENABLED is true but signing fails', async () => {
+	it('renders the signed iframe when ONRAMPER_ENABLED is true and signing succeeds', async () => {
+		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
+
+		const { findByTestId } = render(BuyModalContent, { props: { signed: true } });
+
+		// The iframe is rendered only after the async backend signing call resolves.
+		await expect(findByTestId(BUY_MODAL_ONRAMPER_IFRAME)).resolves.toBeInTheDocument();
+	});
+
+	it('renders the unavailable notice in signed mode when signing fails', async () => {
 		vi.spyOn(onramperEnv, 'ONRAMPER_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockRejectedValue(
 			new Error('OnRamper signing secret is not configured on the backend canister.')
 		);
 
-		const { findByText, queryByTestId } = render(BuyModalContent);
+		const { findByText, queryByTestId } = render(BuyModalContent, { props: { signed: true } });
 
 		await expect(findByText(en.buy.text.unavailable_title)).resolves.toBeInTheDocument();
 
