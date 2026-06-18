@@ -367,19 +367,24 @@ fn test_housekeeping_timer_deposits_into_cycles_ledger() {
         decode_one(&reply).expect("decode cycles-ledger balance")
     };
 
+    // Let the immediate (init) housekeeping top-up settle first, so `before`
+    // already reflects it. The assertion then isolates the *hourly* interval,
+    // rather than passing on the immediate run even if the interval is broken.
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
     let before = balance_of();
 
-    // Fire the hourly housekeeping timer and let the spawned top-up settle.
+    // Advancing past the hourly interval must trigger a further deposit.
     pic_setup.pic.advance_time(Duration::from_hours(1));
     for _ in 0..20 {
         pic_setup.pic.tick();
     }
-
     let after = balance_of();
 
     assert!(
         after > before,
-        "automatic housekeeping timer must top up the cycles-ledger account \
+        "hourly housekeeping timer must top up the cycles-ledger account \
          (before={before}, after={after})"
     );
 }
