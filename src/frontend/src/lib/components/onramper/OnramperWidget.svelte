@@ -12,7 +12,6 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { harvestAutopilots } from '$eth/derived/harvest-autopilots.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
-	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -71,25 +70,18 @@
 	);
 
 	let src = $state<string | undefined>(undefined);
-	let signingFailed = $state(false);
 
-	// Resolve the signed widget URL through the backend canister whenever the inputs change. Build
-	// the link asynchronously (the canister returns the HMAC over the sensitive parameters) and
-	// guard against late resolutions overwriting newer state via a cancellation token.
+	// DEMO BRANCH — NOT FOR MERGE: build the widget URL synchronously and unsigned. Production
+	// resolves a signed URL through the backend canister (see `buildOnramperLink`); here we skip
+	// the backend round-trip so the widget opens with the composed URL even without the signing
+	// secret. Still gate on an authenticated identity so the wallet addresses are available.
 	$effect(() => {
-		const currentIdentity = $authIdentity;
-		if (!nonNullish(currentIdentity)) {
+		if (!nonNullish($authIdentity)) {
 			src = undefined;
-			signingFailed = false;
 			return;
 		}
 
-		let cancelled = false;
-		src = undefined;
-		signingFailed = false;
-
-		buildOnramperLink({
-			identity: currentIdentity,
+		src = buildOnramperLink({
 			mode: 'buy',
 			defaultFiat: $currentCurrency,
 			defaultCrypto,
@@ -100,22 +92,7 @@
 			supportRecurringPayments: true,
 			enableCountrySelector: true,
 			themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?
-		})
-			.then((url) => {
-				if (!cancelled) {
-					src = url;
-				}
-			})
-			.catch((error: unknown) => {
-				if (!cancelled) {
-					consoleError('Could not sign OnRamper widget URL', error);
-					signingFailed = true;
-				}
-			});
-
-		return () => {
-			cancelled = true;
-		};
+		});
 	});
 
 	let themeLoaded = $state(false);
@@ -154,28 +131,24 @@
 <!-- When Onramper engineers were inquired about the reason, they answered: -->
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
 
-{#if signingFailed}
-	<BuyUnavailableNotice />
-{:else}
-	<div
-		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
-		class:invisible={themeLoaded && nonNullish(src)}
-		class:opacity-0={themeLoaded && nonNullish(src)}
-		class:opacity-100={!themeLoaded || !nonNullish(src)}
-	>
-		<Spinner inline />
-	</div>
+<div
+	class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
+	class:invisible={themeLoaded && nonNullish(src)}
+	class:opacity-0={themeLoaded && nonNullish(src)}
+	class:opacity-100={!themeLoaded || !nonNullish(src)}
+>
+	<Spinner inline />
+</div>
 
-	{#if nonNullish(src)}
-		<iframe
-			allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
-			data-tid={BUY_MODAL_ONRAMPER_IFRAME}
-			height="680px"
-			onload={changeThemeOnIframeLoad}
-			sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-			{src}
-			title={$i18n.buy.onramper.title}
-			width="100%"
-		></iframe>
-	{/if}
+{#if nonNullish(src)}
+	<iframe
+		allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+		data-tid={BUY_MODAL_ONRAMPER_IFRAME}
+		height="680px"
+		onload={changeThemeOnIframeLoad}
+		sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+		{src}
+		title={$i18n.buy.onramper.title}
+		width="100%"
+	></iframe>
 {/if}
