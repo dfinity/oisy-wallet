@@ -1929,6 +1929,11 @@
 			"title": "Scan do QR code"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

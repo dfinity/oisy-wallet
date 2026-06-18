@@ -1929,6 +1929,11 @@
 			"title": "QR कोड स्कैन करें"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

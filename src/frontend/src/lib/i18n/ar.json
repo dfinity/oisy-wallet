@@ -1929,6 +1929,11 @@
 			"title": "مسح رمز QR"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

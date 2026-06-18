@@ -1929,6 +1929,11 @@
 			"title": "扫描二维码"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

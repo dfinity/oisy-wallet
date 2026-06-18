@@ -1929,6 +1929,11 @@
 			"title": "QR-Code scannen"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

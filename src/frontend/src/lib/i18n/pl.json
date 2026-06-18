@@ -1929,6 +1929,11 @@
 			"title": "Zeskanuj kod QR"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

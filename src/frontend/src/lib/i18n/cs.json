@@ -1929,6 +1929,11 @@
 			"title": "Naskenovat QR kód"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

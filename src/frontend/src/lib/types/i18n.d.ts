@@ -1534,6 +1534,10 @@ interface I18nAddress {
 	qr: { title: string };
 }
 
+interface I18nSign {
+	error: { unavailable: string };
+}
+
 interface I18nSigner {
 	sign_in: {
 		text: {
@@ -1851,6 +1855,7 @@ interface I18n {
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;
+	sign: I18nSign;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	agreements: I18nAgreements;

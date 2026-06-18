@@ -1929,6 +1929,11 @@
 			"title": "QR 코드 스캔"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
