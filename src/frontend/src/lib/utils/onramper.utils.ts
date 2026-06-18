@@ -1,5 +1,4 @@
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/rest/onramper.env';
-import { signOnramperWidgetUrl } from '$lib/api/backend.api';
 import type { Network } from '$lib/types/network';
 import type {
 	OnramperCryptoWallet,
@@ -12,10 +11,8 @@ import type {
 } from '$lib/types/onramper';
 import { nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
-import type { Identity } from '@icp-sdk/core/agent';
 
 export interface BuildOnramperLinkParams {
-	identity: Identity;
 	mode: OnramperMode;
 	defaultFiat: OnramperFiatId;
 	defaultCrypto?: OnramperId;
@@ -36,9 +33,7 @@ const walletToParam = ({ wallet, ...rest }: OnramperCryptoWallet | OnramperNetwo
 const walletsToParam = (wallets: OnramperCryptoWallet[] | OnramperNetworkWallet[]) =>
 	arrayToParam(wallets.map(walletToParam));
 
-const toQueryString = (
-	params: Omit<BuildOnramperLinkParams, 'identity' | 'wallets' | 'networkWallets'>
-) =>
+const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets' | 'networkWallets'>) =>
 	Object.entries(params)
 		.reduce<string[]>(
 			(acc, [key, value]) =>
@@ -54,19 +49,19 @@ const toQueryString = (
 		.join('&');
 
 /**
- * Build a signed source link for the OnRamper widget, given a set of parameters.
+ * Build a source link for the OnRamper widget, given a set of parameters.
  *
- * OnRamper requires widget URLs to carry an HMAC-SHA256 signature over the three sensitive
- * parameters (`wallets`, `networkWallets`, `walletAddressTags`) since April 2025 — unsigned
- * requests are rejected with `Invalid Signature`. The signing secret is held by the backend
- * canister so it never reaches the frontend bundle; this function calls the canister to obtain
- * the signature and appends it as `&signature=<hex>` to the otherwise-unchanged URL.
+ * DEMO BRANCH — NOT FOR MERGE: OnRamper requires widget URLs to carry an HMAC-SHA256 signature
+ * over the sensitive parameters (`wallets`, `networkWallets`, `walletAddressTags`) since April
+ * 2025; production obtains that signature from the backend canister (which holds the secret) and
+ * appends it as `&signature=<hex>`. This variant skips the backend round-trip entirely and returns
+ * the composed URL unsigned, so the widget can be opened without provisioning the signing secret.
+ * OnRamper will likely reject the unsigned URL with `Invalid Signature` inside the iframe.
  *
  * The documentation for the OnRamper widget's parameters can be found here:
  * https://docs.onramper.com/docs/supported-widget-parameters
  *
  * @param params - The parameters to build the link with.
- * @param params.identity - The authenticated identity used to call the backend signing endpoint.
  * @param params.mode - The mode of the widget (buy or sell).
  * @param params.defaultFiat - The default fiat currency.
  * @param params.defaultCrypto - The optional default cryptocurrency.
@@ -76,26 +71,18 @@ const toQueryString = (
  * @param params.networkWallets - The list of combination of network and wallet addresses.
  * @param params.supportRecurringPayments - Whether to support recurring payments.
  * @param params.enableCountrySelector - Whether to enable the country selector.
- * @returns The signed OnRamper source link.
- * @throws If the backend signing call fails (e.g. the OnRamper signing secret is not configured).
+ * @returns The unsigned OnRamper source link.
  */
-export const buildOnramperLink = async ({
-	identity,
+export const buildOnramperLink = ({
 	wallets,
 	networkWallets,
 	...params
-}: BuildOnramperLinkParams): Promise<string> => {
-	const signature = await signOnramperWidgetUrl({
-		identity,
-		wallets,
-		networkWallets
-	});
-
+}: BuildOnramperLinkParams): string => {
 	const walletsParam = wallets.length > 0 ? `&wallets=${walletsToParam(wallets)}` : '';
 	const networkWalletsParam =
 		networkWallets.length > 0 ? `&networkWallets=${walletsToParam(networkWallets)}` : '';
 
-	return `${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}${walletsParam}${networkWalletsParam}&signature=${signature}`;
+	return `${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}${walletsParam}${networkWalletsParam}`;
 };
 
 /** Map a list of networks to a list of Onramper wallets.
