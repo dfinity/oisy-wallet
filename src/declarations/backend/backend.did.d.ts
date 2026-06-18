@@ -1302,12 +1302,29 @@ export interface SignOnramperWidgetUrlRequest {
 	 */
 	wallet_address_tags: Array<OnramperSignedEntry>;
 }
+/**
+ * Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
+ * canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
+ * re-deriving it (which risks diverging from what was HMAC'd and silently breaking the signature).
+ */
+export interface SignOnramperWidgetUrlResponse {
+	/**
+	 * Hex-encoded HMAC-SHA256 over `signed_query`, appended to the widget URL as `&signature=…`.
+	 */
+	signature: string;
+	/**
+	 * The canonical signed parameter string (e.g. `networkWallets=bitcoin:bc1…&wallets=btc:…`).
+	 * This is a valid un-encoded URL query fragment; the frontend appends it as `&<signed_query>`
+	 * when non-empty. Empty when no sensitive parameters were supplied.
+	 */
+	signed_query: string;
+}
 export type SignOnramperWidgetUrlResult =
 	| {
 			/**
-			 * Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+			 * The signature plus the exact canonical query fragment that was signed.
 			 */
-			Ok: string;
+			Ok: SignOnramperWidgetUrlResponse;
 	  }
 	| { Err: SignOnramperWidgetUrlError };
 /**

@@ -21,7 +21,7 @@ use crate::types::{
     contact::{Contact, ContactError},
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
-    onramper::SignOnramperWidgetUrlError,
+    onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -450,14 +450,16 @@ impl From<Result<(), ActiveUserTransactionError>> for DeleteActiveUserTransactio
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SignOnramperWidgetUrlResult {
-    /// Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
-    Ok(String),
+    /// The signature plus the exact canonical query fragment that was signed.
+    Ok(SignOnramperWidgetUrlResponse),
     Err(SignOnramperWidgetUrlError),
 }
-impl From<Result<String, SignOnramperWidgetUrlError>> for SignOnramperWidgetUrlResult {
-    fn from(result: Result<String, SignOnramperWidgetUrlError>) -> Self {
+impl From<Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>>
+    for SignOnramperWidgetUrlResult
+{
+    fn from(result: Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>) -> Self {
         match result {
-            Ok(signature) => SignOnramperWidgetUrlResult::Ok(signature),
+            Ok(response) => SignOnramperWidgetUrlResult::Ok(response),
             Err(err) => SignOnramperWidgetUrlResult::Err(err),
         }
     }
