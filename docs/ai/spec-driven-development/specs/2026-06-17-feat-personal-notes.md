@@ -415,12 +415,28 @@ centered floating card and the add/edit form is a step inside that card. The sam
 full-page-step pattern is used for both, so there is a single editor layout.
 
 **Desktop modal sizing.** The desktop modal **sizes to its content** rather than a
-fixed height, with a **minimum** (so short notes/lists aren't squat) and a **maximum
-of ~75% of the viewport height**; beyond the max, the relevant region **scrolls
-internally** (the list, the editor, or the view's note box) while the header and
-footer stay pinned. Both bounds are **clamped to the available space**, so on short
+fixed height, with:
+
+- a **minimum height of ~560px** (≈ the empty-state height) so short notes/lists
+  aren't squat, and
+- a **maximum of ~75% of the viewport height (`75vh`)**;
+
+beyond the max, the relevant region **scrolls internally** (the list, the editor, or
+the view's note box) while the header and footer stay pinned. **Both bounds are
+clamped to the available space** (`min(560px, 100%)` / `min(75vh, 100%)`), so on short
 windows the window height wins and the modal never exceeds it (no page scroll). On
-**mobile** the modal is full-page and these desktop bounds do not apply.
+**mobile** the modal is full-page (fills the screen) and these desktop bounds do not
+apply.
+
+**Padding / spacing.** Reuse OISY's **existing modal padding and spacing tokens** (the
+same the Address-book modal uses) for the header, body, footer, and the gap between
+elements — this spec introduces **no new spacing values**; the only sizing constants
+it adds are the modal min/max above and the view note-box min height (~4 rows).
+
+**List scroll detail.** When the list scrolls (more notes than fit), the **search +
+"Add note" toolbar scrolls with the rows** (it is part of the scrollable body); only
+the header and the "Close" footer stay pinned. (If product later prefers a sticky
+search bar, that is a small, additive change — out of scope here.)
 
 **Why a full-page step, not a bottom sheet (text entry + keyboard).** The editor
 auto-focuses (above), so the soft keyboard appears immediately. Apple's HIG supports
@@ -829,9 +845,11 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       pinned. The view's footer is the **primary** button reading **"Back"** (from
       list) or **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is
       present.
-- [ ] The desktop modal **sizes to content** with a minimum height and a **max of
-      ~75vh** (clamped to the window); past the max the list / editor / view-box
-      scrolls internally with header + footer pinned. Mobile is full-page.
+- [ ] The desktop modal **sizes to content** with a **minimum ~560px** and a **max of
+      ~75vh**, both `min(…, 100%)`-clamped to the window; past the max the list /
+      editor / view-box scrolls internally with header + footer pinned; the list
+      toolbar scrolls with the rows. Mobile is full-page. Spacing/padding reuses the
+      existing modal tokens (no new values).
 - [ ] **Navigation:** a **new** note returns to the **list** on both Save and Cancel;
       **editing an existing** note returns to that note's **view** on both Save and
       Cancel; **Delete** returns to the list. The list's **"Add note" is the primary
