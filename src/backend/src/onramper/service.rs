@@ -31,14 +31,6 @@ pub fn sign_onramper_widget_url(
     ))
 }
 
-/// Whether the `OnRamper` signing secret has been provisioned. When `false`,
-/// [`sign_onramper_widget_url`] would return [`SignOnramperWidgetUrlError::SecretNotConfigured`]
-/// and the widget cannot be loaded.
-#[must_use]
-pub fn onramper_enabled() -> bool {
-    with_api_keys(|keys| keys.onramper_signing_secret.is_some())
-}
-
 /// Sets (or clears, with `None`) the `OnRamper` signing secret without touching the other API keys.
 ///
 /// Mirrors `set_exchange_rate_enabled`: uses [`mutate_api_keys`] so provisioning the secret never
