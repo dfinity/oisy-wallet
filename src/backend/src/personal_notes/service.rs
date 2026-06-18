@@ -154,9 +154,8 @@ pub async fn get_encrypted_vetkey(transport_key: ByteBuf) -> Result<ByteBuf, Per
 /// Returns the vetKey verification (public) key for the personal-notes store.
 /// The browser needs it to verify the derived vetKey. The same for every user.
 pub async fn get_vetkey_public_key() -> Result<ByteBuf, PersonalNoteError> {
-    let future = with_personal_notes(|encrypted_maps| {
-        Ok(encrypted_maps.get_vetkey_verification_key())
-    })?;
+    let future =
+        with_personal_notes(|encrypted_maps| Ok(encrypted_maps.get_vetkey_verification_key()))?;
     let verification_key = future.await;
     Ok(ByteBuf::from(Vec::<u8>::from(verification_key)))
 }
