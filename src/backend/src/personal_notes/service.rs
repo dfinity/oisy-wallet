@@ -118,7 +118,7 @@ pub fn get_personal_notes_count() -> Result<u64, PersonalNoteError> {
     let key_id = caller_key_id();
     with_personal_notes(|encrypted_maps| {
         let count = count_notes_in_map(encrypted_maps, key_id);
-        Ok(u64::try_from(count).unwrap_or(u64::MAX))
+        Ok(count as u64)
     })
 }
 
