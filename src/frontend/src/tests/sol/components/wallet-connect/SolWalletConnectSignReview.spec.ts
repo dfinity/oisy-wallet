@@ -1,7 +1,7 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
