@@ -55,7 +55,9 @@ describe('signer-allowance.services', () => {
 
 			await replenishSignerAllowance();
 
-			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(mockRateLimitedOutcome.rateLimitInfo);
+			expect(trackRateLimited).toHaveBeenCalledExactlyOnceWith(
+				mockRateLimitedOutcome.rateLimitInfo
+			);
 		});
 
 		it('does not track when not rate limited', async () => {
