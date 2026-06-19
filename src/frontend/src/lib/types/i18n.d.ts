@@ -948,7 +948,8 @@ interface I18nBuy {
 		buy: string;
 		buy_dev: string;
 		unavailable_title: string;
-		unavailable_description: string;
+		unavailable_description_disabled: string;
+		unavailable_description_signing_failed: string;
 		unavailable_fallback_hint: string;
 	};
 	actions: { close: string };
