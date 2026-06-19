@@ -354,6 +354,68 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('trackOnramperOpen', () => {
+		it('emits a success event with selected token metadata', async () => {
+			const { trackOnramperOpen, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_RESULT_STATUSES } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackOnramperOpen({
+				status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				token: {
+					network: 'Ethereum',
+					symbol: 'ETH',
+					name: 'Ethereum',
+					address: '0x0000000000000000000000000000000000000000'
+				}
+			});
+
+			expect(trackMock).toHaveBeenCalledWith('onramper_open', {
+				props: {
+					token_network: 'Ethereum',
+					token_symbol: 'ETH',
+					token_name: 'Ethereum',
+					token_address: '0x0000000000000000000000000000000000000000',
+					result_status: 'success'
+				}
+			});
+		});
+
+		it('emits error classification while omitting token_address when unavailable', async () => {
+			const { trackOnramperOpen, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES, PLAUSIBLE_EVENT_RESULT_STATUSES } =
+				await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			trackOnramperOpen({
+				status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				errorType: PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES.RATE_LIMITED,
+				errorMessage: 'Rate limit exceeded',
+				token: {
+					network: 'ICP',
+					symbol: 'ICP',
+					name: 'Internet Computer'
+				}
+			});
+
+			expect(trackMock).toHaveBeenCalledWith('onramper_open', {
+				props: {
+					token_network: 'ICP',
+					token_symbol: 'ICP',
+					token_name: 'Internet Computer',
+					result_status: 'error',
+					result_error_severity: 'major',
+					result_error_type: 'rate_limited',
+					result_error_message: 'Rate limit exceeded'
+				}
+			});
+		});
+	});
+
 	describe('buildLearnMoreEvent', () => {
 		it('returns the open_documentation payload without source_sublocation when omitted', async () => {
 			const { buildLearnMoreEvent } = await import('$lib/services/analytics.services');
