@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="22" height="22" fill="none" role="img" aria-label="Network icon">
-  <g fill="#0D5E5D">
-    <circle cx="16" cy="6" r="2.4"/>
-    <circle cx="24.66" cy="11" r="2.4"/>
-    <circle cx="24.66" cy="21" r="2.4"/>
-    <circle cx="16" cy="26" r="2.4"/>
-    <circle cx="7.34" cy="21" r="2.4"/>
-    <circle cx="7.34" cy="11" r="2.4"/>
-    <circle cx="16" cy="16" r="2.8"/>
-  </g>
-  <g stroke="#0D5E5D" stroke-opacity="0.25" stroke-width="0.8">
-    <path d="M16 6 L16 16 M24.66 11 L16 16 M24.66 21 L16 16 M16 26 L16 16 M7.34 21 L16 16 M7.34 11 L16 16"/>
-  </g>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>cloud-engines-logo</title>
+    <g id="Dapps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="cloud-engines-logo">
+            <circle id="Oval" fill="#FAF9F5" cx="64" cy="64" r="64"></circle>
+            <g id="Group" transform="translate(20, 14)">
+                <g fill="#0D5E5D" id="Oval">
+                    <ellipse cx="44.3029126" cy="9.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="78.9921733" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="78.9921733" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="44.3029126" cy="89.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="9.61365193" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="9.61365193" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
+                    <ellipse cx="44.3029126" cy="49.6" rx="11.2159272" ry="11.2"></ellipse>
+                </g>
+                <g transform="translate(9.6137, 9.6)" id="Shape" stroke="#0D5E5D" stroke-opacity="0.25" stroke-width="0.55">
+                    <path d="M34.6892607,0 L34.6892607,40 M69.3785214,20 L34.6892607,40 M69.3785214,60 L34.6892607,40 M34.6892607,80 L34.6892607,40 M0,60 L34.6892607,40 M0,20 L34.6892607,40"></path>
+                </g>
+            </g>
+        </g>
+    </g>
 </svg>
