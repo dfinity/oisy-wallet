@@ -71,10 +71,19 @@ error leaks into the toast.
 ## Scope decisions (from PM)
 
 - **Toast scope:** the friendly message replaces the toast **only** for
-  `SignerCanisterPaymentError` (the cycles/payment outage). Genuine user errors —
+  `SignerCanisterPaymentError` (the signer cannot be paid for the call). Genuine user errors —
   invalid address, insufficient _token_ balance, gas issues — keep their existing,
   specific toasts. _(Default chosen during clarification; easy to widen to "any signer
   signing failure" later by broadening the guard.)_
+- **Two payment cases, two messages (added during build):** a `SignerCanisterPaymentError`
+  covers two distinct conditions, which get different messages:
+  - **wallet-wide outage** (e.g. the backend is out of cycles) → `sign.error.unavailable`;
+  - **per-user signing limit** — the caller's ICRC-2 allowance towards the signer is
+    exhausted (surfaces as a nested `InsufficientAllowance` in the ledger transfer/withdraw
+    error) → `sign.error.limit_reached`. _(PM decision: this is a per-user limit, not a global
+    outage, so the "we're working on a fix" wording would be wrong.)_ The distinction is
+    **frontend-only** — the variant is already present in the signer's candid, so no
+    chain-fusion-signer change is needed.
 - **Not send-specific:** the payment outage surfaces on every paid signer call, including
   message signing (`eth_personal_sign` / `eth_sign_prehash`), not just sends. So the
   message and i18n key are **generic** (not under `send.*`) and the toast helper is wired
@@ -90,21 +99,29 @@ error leaks into the toast.
 
 ---
 
-## Part A — Friendly toast for signer cycles outages
+## Part A — Friendly toast for signer payment failures (outage vs. per-user limit)
 
-### A1. Add a type guard for the payment error
+### A1. Add type guards for the payment error
 
 `SignerCanisterPaymentError` is already defined and exported in
-`src/frontend/src/lib/canisters/signer.errors.ts`. Add a guard there:
+`src/frontend/src/lib/canisters/signer.errors.ts`. Add a guard there, plus a second guard for
+the per-user allowance case. `SignerCanisterPaymentError` records whether the underlying ledger
+error was a nested `InsufficientAllowance` (`readonly insufficientAllowance`):
 
 ```ts
 export const isSignerCanisterPaymentError = (err: unknown): boolean =>
 	err instanceof SignerCanisterPaymentError;
+
+// A per-user signing limit: the caller's ICRC-2 allowance towards the signer is exhausted.
+export const isSignerCanisterAllowanceError = (err: unknown): boolean =>
+	err instanceof SignerCanisterPaymentError && err.insufficientAllowance;
 ```
 
-> Note: all four `PaymentError` variants (`UnsupportedPaymentType`, `LedgerWithdrawFromError`,
-> `LedgerTransferFromError`, `LedgerUnreachable`, `InsufficientFunds`) indicate OISY's
-> backend cannot pay for signing — all are treated as the signer-unavailable case.
+> Note: every `PaymentError` variant (`UnsupportedPaymentType`, `LedgerWithdrawFromError`,
+> `LedgerTransferFromError`, `LedgerUnreachable`, `InsufficientFunds`) means the signer cannot
+> be paid. Most are a wallet-wide outage; the exception is an exhausted allowance — a nested
+> `InsufficientAllowance` inside `LedgerWithdrawFromError` / `LedgerTransferFromError` — which is
+> a per-user limit and gets its own message (see A2/A3).
 
 ### A2. Add the i18n string
 
@@ -117,12 +134,14 @@ OISY-as-dApp-signer feature (`sign_in`, `permissions`, `consent_message`, …):
 ```json
 "sign": {
 	"error": {
-		"unavailable": "We're temporarily unable to sign Bitcoin, Ethereum and Solana transactions and messages. We're aware of the issue and working on a fix. Please try again soon."
+		"unavailable": "We're temporarily unable to sign Bitcoin, Ethereum and Solana transactions and messages. We're aware of the issue and working on a fix. Please try again soon.",
+		"limit_reached": "You've reached your current limit for signing transactions and messages. Please wait a little while and try again."
 	}
 }
 ```
 
-> Key: `sign.error.unavailable`. A new `sign` namespace is preferred over reusing
+> Keys: `sign.error.unavailable` (wallet-wide outage) and `sign.error.limit_reached`
+> (per-user allowance exhausted). A new `sign` namespace is preferred over reusing
 > `signer.*` to avoid conceptual collision with the dApp-signer feature (same reasoning as
 > the Plausible `cfs_sign` event name vs. the existing `signer` context).
 
@@ -145,7 +164,7 @@ add one helper next to the toast store (`src/frontend/src/lib/stores/toasts.stor
 or in a small util it imports:
 
 ```ts
-// Returns true if it handled the error by showing the friendly signer-unavailable toast.
+// Shows the calm payment-failure toast (allowance vs. outage), or defers to the caller.
 export const toastsSignerUnavailableOr = ({
 	err,
 	fallback
@@ -154,16 +173,22 @@ export const toastsSignerUnavailableOr = ({
 	fallback: () => void;
 }): void => {
 	if (isSignerCanisterPaymentError(err)) {
-		toastsError({ msg: { text: get(i18n).sign.error.unavailable } }); // no `err` → no raw ledger text
+		consoleError(err);
+		toastsError({
+			msg: {
+				text: isSignerCanisterAllowanceError(err)
+					? get(i18n).sign.error.limit_reached
+					: get(i18n).sign.error.unavailable
+			}
+		}); // no `err` → no raw ledger text
 		return;
 	}
 	fallback();
 };
 ```
 
-> Deliberately omit `err` from the friendly toast so the raw `Ledger error: …` text is
-> not appended. The error is still logged to the console via `toastsError`/`consoleError`
-> for debugging.
+> Deliberately omit `err` from the toast so the raw `Ledger error: …` text is not appended.
+> The error is still logged to the console (`consoleError`) for debugging.
 
 ### A4. Wire it into the signer-call catch sites
 
@@ -191,17 +216,36 @@ Sites to update (keep the existing per-flow fallback text — e.g. SOL keeps
 - `src/frontend/src/btc/components/send/BtcSendTokenWizard.svelte` (≈L190)
 - `src/frontend/src/sol/components/send/SolSendTokenWizard.svelte` (≈L224)
 
-**Message signing / other signer flows (same payment outage applies):**
+**Message signing / other signer flows (same payment failure applies) — as shipped:**
 
-- `src/frontend/src/eth/components/wallet-connect/EthWalletConnectSignModal.svelte` — WalletConnect `personal_sign` / `eth_sign` (`signMessage`/`signPrehash` via `eth/services/wallet-connect.services.ts`)
-- `src/frontend/src/eth/services/eip2612-permit.services.ts` (≈L120, `signPrehash`) — surface via the calling wizard's catch (e.g. swap/approve flows)
-- `src/frontend/src/lib/services/swap.services.ts` (≈L1201, `signPrehash`) and the swap wizards (`SwapEthWizard.svelte`, etc.)
-- WalletConnect review / OpenCryptoPay wizards that catch signer errors (`WalletConnectReview.svelte`, `OpenCryptoPayWizard.svelte`)
+- **WalletConnect signing (all chains) — one site:** the central `execute()` wrapper in
+  `src/frontend/src/lib/services/wallet-connect.services.ts`. Every chain's WC callback
+  (`personal_sign` / `eth_sign` / sends / `signPsbt`) throws up to this wrapper, so routing it
+  here covers ETH/BTC/SOL WalletConnect in one place.
+- **OpenCryptoPay** (`OpenCryptoPayWizard.svelte`) uses an inline `PAYMENT_FAILED` screen rather
+  than a toast, so the friendly/limit message is set on its existing `failedPaymentError` state.
 
-> Because the detection is centralised in `isSignerCanisterPaymentError` + the
-> `toastsSignerUnavailableOr` helper, each site is a one-line swap. Audit all `catch`
-> blocks that can receive a thrown `SignerCanisterPaymentError` (i.e. anything that
-> ultimately calls a `signer.api.ts` function) and route them through the helper.
+**Not wired (deliberate):**
+
+- **Swap wizards / EIP-2612 permits:** `SwapEthWizard` (and siblings) already show a generic
+  `swap.error.failed_unexpectedly` — the raw error only goes to tracking, never the UI — so there
+  is no raw-text leak to fix. Permits surface through these same swap/approve catches.
+- **`WalletConnectReview.svelte`:** its catch handles session approve/reject, which never calls a
+  signer method, so it cannot receive a `SignerCanisterPaymentError`.
+
+> Because detection is centralised in `isSignerCanisterPaymentError` /
+> `isSignerCanisterAllowanceError` + the `toastsSignerUnavailableOr` helper, each site is a
+> one-line swap.
+
+### A5. Map Schnorr signer errors (so SOL signing is covered)
+
+`getSchnorrPublicKey` / `signWithSchnorr` in `signer.canister.ts` previously threw the raw candid
+`Err` (a stale `TODO`), so a Schnorr `PaymentError` never became a `SignerCanisterPaymentError`
+and no message reached **SOL** signing. The signer returns `EthAddressError` for the Schnorr
+methods too, so route them through the existing `mapSignerCanisterGetEthAddressError` — the same
+mapper the ETH methods use. With this, all 11 paid signer calls in `signer.api.ts` map a
+`PaymentError` to `SignerCanisterPaymentError` (and the allowance sub-case is detected uniformly
+in its constructor), so there is no detection gap across signing operations.
 
 ---
 
@@ -368,18 +412,16 @@ export const signTransaction = async ({ transaction, identity }: …): Promise<s
 
 Frontend unit tests (Vitest) — follow `docs/ai/frontend/testing.md`. No new E2E (E2E is restricted).
 
-- **`signer.errors`**: `isSignerCanisterPaymentError` returns true for each `PaymentError`
-  variant and false for `InternalError` / `SigningError` / `BuildP2wpkhError` / generic errors.
-- **Toast (Part A)**: given a `SignerCanisterPaymentError`, `toastsSignerUnavailableOr`
-  shows the `send.error.signer_unavailable` text and does **not** append the raw ledger
-  string; given any other error it calls the fallback. Extend the existing
-  `src/frontend/src/tests/btc/services/btc-send.services.spec.ts` pattern.
-- **Send wizards**: simulate `executeSend`/`sendBtc`/`sendSol` rejecting with a
-  `SignerCanisterPaymentError` → assert the friendly toast; reject with a generic error →
-  assert the existing `send.error.unexpected` toast still shows.
-- **Message signing**: simulate `EthWalletConnectSignModal` `signMessage`/`signPrehash`
-  rejecting with a `SignerCanisterPaymentError` → assert the friendly `sign.error.unavailable`
-  toast (no raw ledger text), confirming the fix is not send-only.
+- **`signer.errors`** (`signer.errors.spec.ts`): `isSignerCanisterPaymentError` returns true for
+  each `PaymentError` variant and false for `InternalError` / `SigningError` / generic / nullish;
+  `isSignerCanisterAllowanceError` returns true only for `Ledger{Withdraw,Transfer}FromError →
+InsufficientAllowance` (and such an error is still an `isSignerCanisterPaymentError`).
+- **Toast (Part A)** (`toasts.store.spec.ts`): given a non-allowance `SignerCanisterPaymentError`,
+  `toastsSignerUnavailableOr` shows `sign.error.unavailable`; given an allowance error it shows
+  `sign.error.limit_reached`; neither appends the raw ledger string; any other error calls the
+  fallback.
+- **Schnorr mapping** (`signer.canister.spec.ts`): `getSchnorrPublicKey` / `signWithSchnorr` map a
+  returned `PaymentError` to a `SignerCanisterPaymentError`.
 - **Analytics (Part B)**: extend `src/frontend/src/tests/lib/services/analytics.service.spec.ts`:
   - success path emits `cfs_sign` with `result_status=success`, the right `event_subcontext`, and duration props;
   - error path emits `result_status=error`, `result_error*`, and `result_error_severity=blocker` for a payment error / `critical` otherwise;
@@ -425,8 +467,11 @@ PR 1 first means the next outage is already observable even before PR 2 ships.
 ## Acceptance criteria
 
 - [ ] When the backend is out of cycles, any signing operation — sending BTC/ETH/SOL,
-      WalletConnect personal_sign / eth_sign, EIP-2612 permits, swaps — shows the calm
+      WalletConnect personal_sign / eth_sign, OpenCryptoPay — shows the calm
       `sign.error.unavailable` toast with **no** raw `Ledger error: …` text appended.
+- [ ] When the caller's allowance is exhausted (`InsufficientAllowance`), the same flows show
+      the per-user `sign.error.limit_reached` toast instead — not the outage message.
+- [ ] SOL signing (Schnorr) surfaces these messages too (its errors are mapped, not thrown raw).
 - [ ] Genuine user errors (invalid address, insufficient token balance, gas) still show
       their existing specific toasts.
 - [ ] Every paid signer call in `signer.api.ts` emits a `cfs_sign` event on both success
