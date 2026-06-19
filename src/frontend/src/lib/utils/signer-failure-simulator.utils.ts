@@ -1,7 +1,9 @@
 import { browser } from '$app/environment';
+import type { PaymentError } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 
 /**
@@ -19,11 +21,16 @@ import { isNullish } from '@dfinity/utils';
  *   - or localStorage:  `localStorage.setItem('OISY_SIMULATE_SIGNER_FAILURE', 'payment')`
  *
  * The query param wins over localStorage. Set the value to `off` (or clear it) to disable.
+ *
+ * Modes: `payment` (backend out of cycles → "signer unavailable"), `allowance` (exhausted
+ * per-user allowance → "signing limit reached"), `internal` / `signing` (generic non-payment
+ * signer errors → fallback toast).
  */
-export type SimulatedSignerFailureMode = 'payment' | 'internal' | 'signing';
+export type SimulatedSignerFailureMode = 'payment' | 'allowance' | 'internal' | 'signing';
 
 const SIMULATED_SIGNER_FAILURE_MODES: SimulatedSignerFailureMode[] = [
 	'payment',
+	'allowance',
 	'internal',
 	'signing'
 ];
@@ -61,6 +68,16 @@ export const simulateSignerFailureIfEnabled = () => {
 		throw new SignerCanisterPaymentError({
 			InsufficientFunds: { needed: 100_000_000n, available: 45_738_950n }
 		});
+	}
+
+	if (mode === 'allowance') {
+		// Exhausted per-user ICRC-2 allowance → the "signing limit reached" toast.
+		throw new SignerCanisterPaymentError({
+			LedgerWithdrawFromError: {
+				error: { InsufficientAllowance: { allowance: 1_000n } },
+				ledger: Principal.anonymous()
+			}
+		} as unknown as PaymentError);
 	}
 
 	if (mode === 'signing') {
