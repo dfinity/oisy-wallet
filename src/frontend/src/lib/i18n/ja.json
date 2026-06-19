@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "署名は一時的にご利用いただけません。しばらくしてからもう一度お試しください。",
+			"limit_reached": "署名の上限に達しました。しばらくしてからもう一度お試しください。"
 		}
 	},
 	"signer": {

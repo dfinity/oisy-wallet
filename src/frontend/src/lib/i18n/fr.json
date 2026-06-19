@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "La signature est temporairement indisponible. Veuillez réessayer dans un instant.",
+			"limit_reached": "Vous avez atteint votre limite de signature. Veuillez réessayer dans un instant."
 		}
 	},
 	"signer": {

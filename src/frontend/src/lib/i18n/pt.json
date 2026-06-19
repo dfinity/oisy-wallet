@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "A assinatura está temporariamente indisponível. Tente novamente em instantes.",
+			"limit_reached": "Você atingiu seu limite de assinatura. Tente novamente em instantes."
 		}
 	},
 	"signer": {

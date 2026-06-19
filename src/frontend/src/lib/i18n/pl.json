@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "Podpisywanie jest tymczasowo niedostępne. Spróbuj ponownie za chwilę.",
+			"limit_reached": "Osiągnięto limit podpisywania. Spróbuj ponownie za chwilę."
 		}
 	},
 	"signer": {

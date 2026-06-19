@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "签名暂时不可用。请稍后重试。",
+			"limit_reached": "您已达到签名次数上限。请稍后重试。"
 		}
 	},
 	"signer": {
