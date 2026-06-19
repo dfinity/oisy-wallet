@@ -74,7 +74,12 @@ Every paid chain-fusion-signer call fires a `cfs_sign` Plausible event on **both
 
 The `blocker` severity makes the backend-out-of-cycles outage — which blocks signing for **every** user — visible on dashboards before support tickets arrive. Tracking is fire-and-forget: `withCfsSignTracking` always re-throws so it never swallows the underlying error or interrupts a send.
 
-**User-facing behavior during a signer outage.** When signing fails because OISY's backend is out of cycles (a `SignerCanisterPaymentError`), every affected flow — sending BTC/ETH/SOL, WalletConnect signing, and OpenCryptoPay payments — shows a calm, generic "we're temporarily unable to sign… working on a fix" message (`sign.error.unavailable`) instead of the raw `Ledger error: …` text. This is centralised in the `toastsSignerUnavailableOr` helper (`toasts.store.ts`), which the catch sites route through; genuine user errors (invalid address, insufficient token balance, gas) keep their existing specific messages. Swap flows already surface a generic failure message and so were left unchanged.
+**User-facing behavior when signing can't be paid for.** When a signing call fails because the chain-fusion signer can't be paid (a `SignerCanisterPaymentError`), every affected flow — sending BTC/ETH/SOL, WalletConnect signing, and OpenCryptoPay payments — shows a calm message instead of the raw `Ledger error: …` text, distinguishing two cases:
+
+- **Wallet-wide outage** (e.g. the backend is out of cycles): "we're temporarily unable to sign… working on a fix" (`sign.error.unavailable`).
+- **Per-user signing limit** (the caller's ICRC-2 allowance towards the signer is exhausted — `isSignerCanisterAllowanceError`, detected from a nested `InsufficientAllowance` in the ledger error): "you've reached your current signing limit… try again later" (`sign.error.limit_reached`).
+
+This is centralised in the `toastsSignerUnavailableOr` helper (`toasts.store.ts`), which the catch sites route through; genuine user errors (invalid address, insufficient token balance, gas) keep their existing specific messages. Swap flows already surface a generic failure message and so were left unchanged.
 
 ---
 
