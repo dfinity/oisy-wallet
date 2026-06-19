@@ -33,8 +33,19 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	EARN = 'earn',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
+	CFS = 'cfs',
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more'
+}
+
+// Self-describing `event_code` values: the full semantics of a tracked outcome in one token.
+// `success` is generic (any event can use it); the `cfs_*` codes are specific to chain-fusion
+// signer calls. The shared `cfs_payment_failed_` prefix groups all payment failures.
+export enum PLAUSIBLE_EVENT_CODES {
+	SUCCESS = 'success',
+	CFS_PAYMENT_FAILED_BACKEND_OUT_OF_CYCLES = 'cfs_payment_failed_backend_out_of_cycles',
+	CFS_PAYMENT_FAILED_USER_ALLOWANCE_EXHAUSTED = 'cfs_payment_failed_user_allowance_exhausted',
+	CFS_GENERIC_ERROR = 'cfs_generic_error'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
