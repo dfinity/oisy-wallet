@@ -800,6 +800,20 @@ describe('signer.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it('should map a returned PaymentError to a SignerCanisterPaymentError', async () => {
+			service.schnorr_public_key.mockResolvedValue(paymentErrorResponse);
+
+			const { getSchnorrPublicKey } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
+
+			await expect(res).rejects.toThrow(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
 	});
 
 	describe('signWithSchnorr', () => {
@@ -846,6 +860,24 @@ describe('signer.canister', () => {
 			});
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should map a returned PaymentError to a SignerCanisterPaymentError', async () => {
+			service.schnorr_sign.mockResolvedValue(paymentErrorResponse);
+
+			const { signWithSchnorr } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = signWithSchnorr({
+				message,
+				derivationPath: ['test'],
+				keyId: SOLANA_KEY_ID
+			});
+
+			await expect(res).rejects.toThrow(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
 		});
 	});
 });
