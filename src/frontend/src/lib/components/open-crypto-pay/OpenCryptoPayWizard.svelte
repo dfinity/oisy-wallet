@@ -17,6 +17,7 @@
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay as payApi } from '$lib/services/open-crypto-pay.services';
+	import { replenishSignerAllowance } from '$lib/services/signer-allowance.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
@@ -108,6 +109,11 @@
 					result_duration_in_seconds: `${durationInSeconds}`
 				}
 			});
+
+			if (isSignerCanisterAllowanceError(error)) {
+				// Fire-and-forget: re-grant the allowance in the background; ignored if rate-limited.
+				void replenishSignerAllowance();
+			}
 
 			failedPaymentError.set(
 				isSignerCanisterAllowanceError(error)

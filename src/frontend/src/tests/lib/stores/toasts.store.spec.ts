@@ -1,11 +1,16 @@
 import type { PaymentError } from '$declarations/signer/signer.did';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { replenishSignerAllowance } from '$lib/services/signer-allowance.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsSignerUnavailableOr } from '$lib/stores/toasts.store';
 import { toastsStore } from '@dfinity/gix-components';
 import { Principal } from '@dfinity/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/services/signer-allowance.services', () => ({
+	replenishSignerAllowance: vi.fn()
+}));
 
 describe('toasts.store', () => {
 	describe('toastsSignerUnavailableOr', () => {
@@ -33,6 +38,8 @@ describe('toasts.store', () => {
 			// The scary raw ledger detail must not leak into the toast.
 			expect(shown.text).not.toContain(err.message);
 			expect(shown.text).not.toContain('/');
+			// A wallet-wide outage is not the user's allowance — don't replenish.
+			expect(replenishSignerAllowance).not.toHaveBeenCalled();
 		});
 
 		it('shows the per-user limit toast for an exhausted-allowance payment error', () => {
@@ -53,6 +60,8 @@ describe('toasts.store', () => {
 
 			expect(shown.text).toBe(get(i18n).sign.error.limit_reached);
 			expect(shown.text).not.toBe(get(i18n).sign.error.unavailable);
+			// Best-effort background re-grant of the allowance so the next attempt can succeed.
+			expect(replenishSignerAllowance).toHaveBeenCalledOnce();
 		});
 
 		it('calls the fallback and shows no signer-unavailable toast for a non-payment error', () => {
