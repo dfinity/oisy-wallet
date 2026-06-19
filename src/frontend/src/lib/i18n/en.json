@@ -344,7 +344,7 @@
 			"caffeine": {
 				"name": "caffeine",
 				"one_liner": "Chat with AI on Caffeine to create apps and websites.",
-				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for "self-writing apps."",
+				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for \"self-writing apps.\"",
 				"carousel": {
 					"text": "AIware apps on-demand",
 					"call_to_action": "Learn more"
