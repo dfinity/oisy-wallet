@@ -2,7 +2,10 @@
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { isSignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+	import {
+		isSignerCanisterAllowanceError,
+		isSignerCanisterPaymentError
+	} from '$lib/canisters/signer.errors';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
@@ -107,7 +110,11 @@
 			});
 
 			failedPaymentError.set(
-				isSignerCanisterPaymentError(error) ? $i18n.sign.error.unavailable : errorMessage
+				isSignerCanisterAllowanceError(error)
+					? $i18n.sign.error.limit_reached
+					: isSignerCanisterPaymentError(error)
+						? $i18n.sign.error.unavailable
+						: errorMessage
 			);
 
 			goToStep(WizardStepsScanner.PAYMENT_FAILED);

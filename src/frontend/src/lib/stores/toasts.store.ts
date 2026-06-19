@@ -1,4 +1,7 @@
-import { isSignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import {
+	isSignerCanisterAllowanceError,
+	isSignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
@@ -26,12 +29,15 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 };
 
 /**
- * When the chain-fusion signer cannot sign because OISY's backend is out of cycles, every
- * signing flow fails wallet-wide. Show one calm, generic toast for that case instead of the
- * raw `Ledger error: …` text; otherwise defer to the caller's own error handling.
+ * When the chain-fusion signer cannot be paid for a signing call, show one calm, generic toast
+ * instead of the raw `Ledger error: …` text; otherwise defer to the caller's own error handling.
  *
- * The signer-unavailable toast deliberately omits `err` so the scary ledger detail is not
- * appended — the error is still logged to the console by the fallback / underlying caller.
+ * Two payment cases get distinct messages:
+ * - exhausted per-user allowance (`isSignerCanisterAllowanceError`) → a "signing limit reached" message;
+ * - any other payment failure (e.g. the backend out of cycles, a wallet-wide outage) → "temporarily unavailable".
+ *
+ * Both deliberately omit `err` so the scary ledger detail is not appended — the error is still
+ * logged to the console here (and by the underlying caller).
  */
 export const toastsSignerUnavailableOr = ({
 	err,
@@ -42,7 +48,13 @@ export const toastsSignerUnavailableOr = ({
 }): void => {
 	if (isSignerCanisterPaymentError(err)) {
 		consoleError(err);
-		toastsError({ msg: { text: get(i18n).sign.error.unavailable } });
+		toastsError({
+			msg: {
+				text: isSignerCanisterAllowanceError(err)
+					? get(i18n).sign.error.limit_reached
+					: get(i18n).sign.error.unavailable
+			}
+		});
 		return;
 	}
 
