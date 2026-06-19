@@ -1930,6 +1930,12 @@
 			"title": "Zeskanuj kod QR"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "Podpisywanie jest tymczasowo niedostępne. Spróbuj ponownie za chwilę.",
+			"limit_reached": "Osiągnięto limit podpisywania. Spróbuj ponownie za chwilę."
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

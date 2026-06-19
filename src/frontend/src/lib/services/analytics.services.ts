@@ -1,9 +1,13 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
-import { isSignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import {
+	isSignerCanisterAllowanceError,
+	isSignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
 import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
+	PLAUSIBLE_EVENT_CODES,
 	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
@@ -266,13 +270,36 @@ const cfsSignTokenNetwork = (method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS): string | u
 				? 'sol'
 				: undefined;
 
+// Classify a chain-fusion-signer error into its self-describing `event_code` and its alerting
+// `result_error_severity`. The two are orthogonal: the code carries the cause (and groups all
+// payment failures via the shared `cfs_payment_failed_` prefix), the severity drives alerting.
+const classifyCfsSignError = (
+	err: unknown
+): { code: PLAUSIBLE_EVENT_CODES; severity: PLAUSIBLE_EVENT_RESULT_SEVERITIES } =>
+	isSignerCanisterAllowanceError(err)
+		? {
+				// Per-user limit working as intended — not an incident; kept out of blocker/critical alerting.
+				code: PLAUSIBLE_EVENT_CODES.CFS_PAYMENT_FAILED_USER_ALLOWANCE_EXHAUSTED,
+				severity: PLAUSIBLE_EVENT_RESULT_SEVERITIES.MAJOR
+			}
+		: isSignerCanisterPaymentError(err)
+			? {
+					// Backend cannot pay the signer (e.g. out of cycles) — a wallet-wide outage.
+					code: PLAUSIBLE_EVENT_CODES.CFS_PAYMENT_FAILED_BACKEND_OUT_OF_CYCLES,
+					severity: PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
+				}
+			: {
+					code: PLAUSIBLE_EVENT_CODES.CFS_GENERIC_ERROR,
+					severity: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+				};
+
 /**
  * Emit a single `cfs_sign` event for a paid chain-fusion-signer call.
  *
- * Fires on both success and error. On error it carries the mapped message, the full
- * raw error text, and a severity: `blocker` when OISY's backend cannot pay the signer
- * (a {@link isSignerCanisterPaymentError} — the cycles-outage incident this event is
- * designed to surface), `critical` otherwise.
+ * Fires on both success and error. Every event carries a self-describing `event_code`
+ * (`success`, or a `cfs_*` failure code — see {@link classifyCfsSignError}). On error it also
+ * carries the mapped message, the raw error text, and a `result_error_severity` that is
+ * orthogonal to the code (the code is the cause, the severity is the alerting weight).
  */
 export const trackCfsSign = ({
 	method,
@@ -286,22 +313,22 @@ export const trackCfsSign = ({
 	err?: unknown;
 }) => {
 	const tokenNetwork = cfsSignTokenNetwork(method);
+	const errorClassification = nonNullish(err) ? classifyCfsSignError(err) : undefined;
 
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.CFS_SIGN,
 		metadata: {
-			event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.CFS,
 			event_subcontext: method,
+			event_code: errorClassification?.code ?? PLAUSIBLE_EVENT_CODES.SUCCESS,
 			result_status: status,
 			result_duration_in_seconds: durationSeconds.toString(),
 			result_duration_in_seconds_rounded: Math.round(durationSeconds).toString(),
 			...(nonNullish(tokenNetwork) && { token_network: tokenNetwork }),
-			...(nonNullish(err) && {
+			...(nonNullish(errorClassification) && {
 				result_error: (err as Error).message,
 				result_error_text: errorDetailToString(err) ?? '',
-				result_error_severity: isSignerCanisterPaymentError(err)
-					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
-					: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+				result_error_severity: errorClassification.severity
 			})
 		}
 	});

@@ -29,7 +29,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsSignerUnavailableOr } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -186,9 +186,9 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
+			toastsSignerUnavailableOr({
+				err,
+				fallback: () => toastsError({ msg: { text: $i18n.send.error.unexpected }, err })
 			});
 
 			onBack();

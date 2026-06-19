@@ -1930,6 +1930,12 @@
 			"title": "مسح رمز QR"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "",
+			"limit_reached": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

@@ -2,6 +2,10 @@
 	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import {
+		isSignerCanisterAllowanceError,
+		isSignerCanisterPaymentError
+	} from '$lib/canisters/signer.errors';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
 	import OpenCryptoPayProgress from '$lib/components/open-crypto-pay/OpenCryptoPayProgress.svelte';
 	import OpenCryptoPayTokensList from '$lib/components/open-crypto-pay/OpenCryptoPayTokensList.svelte';
@@ -13,6 +17,7 @@
 	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pay as payApi } from '$lib/services/open-crypto-pay.services';
+	import { replenishSignerAllowance } from '$lib/services/signer-allowance.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
@@ -105,7 +110,18 @@
 				}
 			});
 
-			failedPaymentError.set(errorMessage);
+			if (isSignerCanisterAllowanceError(error)) {
+				// Fire-and-forget: re-grant the allowance in the background; ignored if rate-limited.
+				void replenishSignerAllowance();
+			}
+
+			failedPaymentError.set(
+				isSignerCanisterAllowanceError(error)
+					? $i18n.sign.error.limit_reached
+					: isSignerCanisterPaymentError(error)
+						? $i18n.sign.error.unavailable
+						: errorMessage
+			);
 
 			goToStep(WizardStepsScanner.PAYMENT_FAILED);
 		}

@@ -1930,6 +1930,12 @@
 			"title": "QR-Code scannen"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "Das Signieren ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
+			"limit_reached": "Sie haben Ihr Signaturlimit erreicht. Bitte versuchen Sie es in Kürze erneut."
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

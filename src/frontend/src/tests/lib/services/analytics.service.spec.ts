@@ -1,3 +1,6 @@
+import type { PaymentError } from '$declarations/signer/signer.did';
+import { Principal } from '@dfinity/principal';
+
 const trackMock = vi.fn();
 const initMock = vi.fn();
 
@@ -524,8 +527,9 @@ describe('plausible analytics service', () => {
 			const props = lastCfsSignProps();
 
 			expect(props).toMatchObject({
-				event_context: 'signer',
+				event_context: 'cfs',
 				event_subcontext: 'eth_sign_transaction',
+				event_code: 'success',
 				result_status: 'success',
 				token_network: 'eth'
 			});
@@ -584,11 +588,42 @@ describe('plausible analytics service', () => {
 			const props = lastCfsSignProps();
 
 			expect(props).toMatchObject({
+				event_context: 'cfs',
 				event_subcontext: 'eth_sign_transaction',
+				event_code: 'cfs_payment_failed_backend_out_of_cycles',
 				result_status: 'error',
 				result_error: err.message,
 				result_error_text: err.message,
 				result_error_severity: 'blocker'
+			});
+		});
+
+		it('emits severity=major for an exhausted-allowance payment error', async () => {
+			const { withCfsSignTracking, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } = await import('$lib/enums/plausible');
+			const { SignerCanisterPaymentError } = await import('$lib/canisters/signer.errors');
+
+			await initPlausibleAnalytics();
+
+			const err = new SignerCanisterPaymentError({
+				LedgerWithdrawFromError: {
+					error: { InsufficientAllowance: { allowance: 1n } },
+					ledger: Principal.anonymous()
+				}
+			} as unknown as PaymentError);
+
+			await expect(
+				withCfsSignTracking({
+					method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.SCHNORR_SIGN,
+					fn: () => Promise.reject(err)
+				})
+			).rejects.toBe(err);
+
+			expect(lastCfsSignProps()).toMatchObject({
+				result_status: 'error',
+				event_code: 'cfs_payment_failed_user_allowance_exhausted',
+				result_error_severity: 'major'
 			});
 		});
 
@@ -608,6 +643,7 @@ describe('plausible analytics service', () => {
 
 			expect(lastCfsSignProps()).toMatchObject({
 				result_status: 'error',
+				event_code: 'cfs_generic_error',
 				result_error_severity: 'critical'
 			});
 		});

@@ -1930,6 +1930,12 @@
 			"title": "扫描二维码"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "签名暂时不可用。请稍后重试。",
+			"limit_reached": "您已达到签名次数上限。请稍后重试。"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

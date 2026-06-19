@@ -1930,6 +1930,12 @@
 			"title": "Escanear código QR"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "La firma no está disponible temporalmente. Vuelva a intentarlo en breve.",
+			"limit_reached": "Ha alcanzado su límite de firma. Vuelva a intentarlo en breve."
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

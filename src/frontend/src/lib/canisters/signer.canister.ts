@@ -253,8 +253,10 @@ export class SignerCanister extends Canister<SignerService> {
 			return public_key;
 		}
 
-		// TODO: map error like the other methods when SchnorrPublicKeyError is exposed in the Signer repo
-		throw response.Err;
+		// The signer returns `EthAddressError` for Schnorr methods too, so the same mapper applies —
+		// crucially it maps `PaymentError` to `SignerCanisterPaymentError` (incl. the per-user
+		// allowance case), so signer-payment failures surface consistently for SOL signing.
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	signWithSchnorr = async ({
@@ -280,8 +282,9 @@ export class SignerCanister extends Canister<SignerService> {
 			return signature;
 		}
 
-		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
-		throw response.Err;
+		// See `getSchnorrPublicKey`: Schnorr errors are `EthAddressError`, so the ETH mapper applies
+		// and a `PaymentError` becomes a `SignerCanisterPaymentError` (incl. the allowance case).
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	genericSignWithEcdsa = async ({

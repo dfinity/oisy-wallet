@@ -1930,6 +1930,12 @@
 			"title": "QR 코드 스캔"
 		}
 	},
+	"sign": {
+		"error": {
+			"unavailable": "서명을 일시적으로 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+			"limit_reached": "서명 한도에 도달했습니다. 잠시 후 다시 시도해 주세요."
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

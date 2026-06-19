@@ -1,8 +1,15 @@
+import {
+	isSignerCanisterAllowanceError,
+	isSignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
+import { replenishSignerAllowance } from '$lib/services/signer-allowance.services';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { toastsStore } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const toastsShow = (msg: ToastMsg): symbol => toastsStore.show(msg);
 
@@ -20,6 +27,47 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 		...rest,
 		level: 'error'
 	});
+};
+
+/**
+ * When the chain-fusion signer cannot be paid for a signing call, show one calm, generic toast
+ * instead of the raw `Ledger error: …` text; otherwise defer to the caller's own error handling.
+ *
+ * Two payment cases get distinct messages:
+ * - exhausted per-user allowance (`isSignerCanisterAllowanceError`) → a "signing limit reached"
+ *   message; we also kick off a best-effort {@link replenishSignerAllowance} so the next attempt
+ *   can succeed without a page reload (no auto-retry of the original operation);
+ * - any other payment failure (e.g. the backend out of cycles, a wallet-wide outage) → "temporarily unavailable".
+ *
+ * Both deliberately omit `err` so the scary ledger detail is not appended — the error is still
+ * logged to the console here (and by the underlying caller).
+ */
+export const toastsSignerUnavailableOr = ({
+	err,
+	fallback
+}: {
+	err: unknown;
+	fallback: () => void;
+}): void => {
+	if (isSignerCanisterPaymentError(err)) {
+		consoleError(err);
+
+		const allowanceError = isSignerCanisterAllowanceError(err);
+
+		if (allowanceError) {
+			// Fire-and-forget: re-grant the allowance in the background; ignored if rate-limited.
+			void replenishSignerAllowance();
+		}
+
+		toastsError({
+			msg: {
+				text: allowanceError ? get(i18n).sign.error.limit_reached : get(i18n).sign.error.unavailable
+			}
+		});
+		return;
+	}
+
+	fallback();
 };
 
 export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {

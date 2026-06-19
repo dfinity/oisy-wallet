@@ -16,7 +16,7 @@ import {
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
-import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow, toastsSignerUnavailableOr } from '$lib/stores/toasts.store';
 import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
 import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$lib/types/wallet-connect';
@@ -76,9 +76,9 @@ export const execute = async ({
 			duration: 2000
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: unexpected_processing_request },
-			err
+		toastsSignerUnavailableOr({
+			err,
+			fallback: () => toastsError({ msg: { text: unexpected_processing_request }, err })
 		});
 		return { success: false, err };
 	}

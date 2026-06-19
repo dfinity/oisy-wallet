@@ -7,7 +7,20 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { jsonReplacer } from '@dfinity/utils';
 
+// An exhausted ICRC-2 spender allowance surfaces nested inside the ledger transfer/withdraw
+// error. Unlike insufficient funds (a wallet-wide backend outage), this is a per-user signing
+// limit, so it warrants a distinct user message.
+const isInsufficientAllowancePaymentError = (err: PaymentError): boolean =>
+	('LedgerWithdrawFromError' in err &&
+		'InsufficientAllowance' in err.LedgerWithdrawFromError.error) ||
+	('LedgerTransferFromError' in err &&
+		'InsufficientAllowance' in err.LedgerTransferFromError.error);
+
 export class SignerCanisterPaymentError extends CanisterInternalError {
+	// `true` when the payment failed because the caller's ICRC-2 allowance is exhausted
+	// (a per-user signing limit) rather than the backend being unable to pay at all.
+	readonly insufficientAllowance: boolean;
+
 	constructor(err: PaymentError) {
 		if ('UnsupportedPaymentType' in err) {
 			super('Unsupported payment type');
@@ -24,14 +37,21 @@ export class SignerCanisterPaymentError extends CanisterInternalError {
 		} else {
 			super('Unknown PaymentError');
 		}
+
+		this.insufficientAllowance = isInsufficientAllowancePaymentError(err);
 	}
 }
 
-// A `SignerCanisterPaymentError` means OISY's backend cannot pay the chain-fusion
-// signer for the call (e.g. it is out of cycles on the cycles ledger) — every
-// `PaymentError` variant maps to "signer temporarily unavailable", not a user error.
+// A `SignerCanisterPaymentError` means the chain-fusion signer could not be paid for the call.
+// Most variants (e.g. the backend being out of cycles) are a wallet-wide outage; the allowance
+// case (see `isSignerCanisterAllowanceError`) is the per-user exception.
 export const isSignerCanisterPaymentError = (err: unknown): boolean =>
 	err instanceof SignerCanisterPaymentError;
+
+// A per-user signing limit: the caller's ICRC-2 allowance towards the signer is exhausted.
+// Funds may be available — this is not the wallet-wide cycles outage.
+export const isSignerCanisterAllowanceError = (err: unknown): boolean =>
+	err instanceof SignerCanisterPaymentError && err.insufficientAllowance;
 
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
 	if ('InternalError' in err) {
