@@ -1,6 +1,9 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
-import { isSignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import {
+	isSignerCanisterAllowanceError,
+	isSignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
 import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
@@ -226,10 +229,12 @@ const cfsSignTokenNetwork = (method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS): string | u
 /**
  * Emit a single `cfs_sign` event for a paid chain-fusion-signer call.
  *
- * Fires on both success and error. On error it carries the mapped message, the full
- * raw error text, and a severity: `blocker` when OISY's backend cannot pay the signer
- * (a {@link isSignerCanisterPaymentError} — the cycles-outage incident this event is
- * designed to surface), `critical` otherwise.
+ * Fires on both success and error. On error it carries the mapped message, the full raw
+ * error text, and a severity:
+ * - `blocker` — OISY's backend cannot pay the signer (e.g. out of cycles): a wallet-wide outage;
+ * - `major` — the caller's signing allowance is exhausted ({@link isSignerCanisterAllowanceError}):
+ *   a per-user limit working as intended, so not an incident — kept out of blocker/critical alerting;
+ * - `critical` — any other signer error.
  */
 export const trackCfsSign = ({
 	method,
@@ -256,9 +261,11 @@ export const trackCfsSign = ({
 			...(nonNullish(err) && {
 				result_error: (err as Error).message,
 				result_error_text: errorDetailToString(err) ?? '',
-				result_error_severity: isSignerCanisterPaymentError(err)
-					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
-					: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+				result_error_severity: isSignerCanisterAllowanceError(err)
+					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.MAJOR
+					: isSignerCanisterPaymentError(err)
+						? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
+						: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
 			})
 		}
 	});
