@@ -29,7 +29,7 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/cloud-engines-logo.svg",
-		"screenshots": ["/images/dapps/cloud-engines-screenshot.png"],
+		"screenshots": ["/images/dapps/cloud-engines-screenshot.webp"],
 		"featured": true,
 		"carousel": {
 			"text": "dapps.descriptions.cloud_engines.carousel.text",
