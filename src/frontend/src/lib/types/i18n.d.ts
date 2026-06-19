@@ -1535,7 +1535,7 @@ interface I18nAddress {
 }
 
 interface I18nSign {
-	error: { unavailable: string };
+	error: { unavailable: string; limit_reached: string };
 }
 
 interface I18nSigner {

@@ -1931,7 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "We're temporarily unable to sign Bitcoin, Ethereum and Solana transactions and messages. We're aware of the issue and working on a fix. Please try again soon."
+			"unavailable": "We're temporarily unable to sign Bitcoin, Ethereum and Solana transactions and messages. We're aware of the issue and working on a fix. Please try again soon.",
+			"limit_reached": "You've reached your current limit for signing transactions and messages. Please wait a little while and try again."
 		}
 	},
 	"signer": {

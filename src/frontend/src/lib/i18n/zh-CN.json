@@ -1931,7 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": ""
+			"unavailable": "",
+			"limit_reached": ""
 		}
 	},
 	"signer": {
