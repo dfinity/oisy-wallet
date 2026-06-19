@@ -6,16 +6,26 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 Two related improvements triggered by a support incident:
 
-1. **User-facing:** When the chain-fusion signer cannot sign because the OISY backend
-   is out of TCycles on the cycles ledger, users currently see a raw, scary toast.
+1. **User-facing:** When the chain-fusion signer cannot sign because the OISY backend's
+   account on the cycles ledger runs too low, users currently see a raw, scary toast.
    Replace it with a calm, generic message: we're temporarily unable to sign Bitcoin,
    Ethereum and Solana transactions and messages, we're aware of it, and a fix is coming.
    This affects **every** signing operation — sends, WalletConnect personal_sign / eth_sign,
    EIP-2612 permits, swaps — not just sends.
+
+   While building this we realised the payment failure has **two distinct causes that must
+   not share a message**:
+   - **"Our fault" — backend out of cycles:** a wallet-wide outage we need to fix. Show the
+     "we're working on a fix" message (`sign.error.unavailable`).
+   - **"As intended" — the user's signing allowance is exceeded:** a per-user limit working
+     exactly as designed; nothing is broken on our side. Show a different, calmer
+     "you've reached your limit, try again later" message (`sign.error.limit_reached`).
+
 2. **Observability:** Emit a `cfs_sign` Plausible event for **every paid chain-fusion-signer
-   call** (success and error), carrying the called signer method and — for the cycles
-   outage — `result_error_severity = blocker`, so this class of incident is visible on
-   dashboards before support tickets arrive.
+   call** (success and error), carrying the called signer method and an appropriate
+   `result_error_severity`, so a real cycles outage is visible on dashboards before support
+   tickets arrive (while the expected "allowance exceeded" case is not over-reported as an
+   incident).
 
 ---
 
@@ -94,8 +104,10 @@ error leaks into the toast.
   signing operations.
 - **Method name:** the called signer method is recorded as a property on every
   `cfs_sign` event (so dashboards can break the outage down by method).
-- **Severity:** `result_error_severity = blocker` for the cycles/payment error;
-  `critical` for any other signer error. _(Default chosen during clarification.)_
+- **Severity:** `result_error_severity = blocker` for a backend payment failure (e.g. out of
+  cycles — the wallet-wide outage); `major` for the per-user allowance-exceeded case (expected
+  behaviour, so deliberately kept out of blocker/critical alerting while still visible);
+  `critical` for any other signer error.
 
 ---
 
@@ -285,18 +297,18 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_CFS {
 
 ### B2. Event schema (per the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page)
 
-| Attribute                            | Value                                                                                                      |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| **Event**                            | `cfs_sign` (`PLAUSIBLE_EVENTS.CFS_SIGN`)                                                                   |
-| `event_context`                      | `signer` (`PLAUSIBLE_EVENT_CONTEXTS.SIGNER`)                                                               |
-| `event_subcontext`                   | the called signer method (`PLAUSIBLE_EVENT_SUBCONTEXT_CFS`, e.g. `eth_sign_transaction`) ← **method name** |
-| `result_status`                      | `success` / `error` (`PLAUSIBLE_EVENT_RESULT_STATUSES`)                                                    |
-| `result_duration_in_seconds`         | measured wall-clock duration of the call                                                                   |
-| `result_duration_in_seconds_rounded` | rounded duration                                                                                           |
-| `result_error`                       | mapped error message (`(err as Error).message`) — error only                                               |
-| `result_error_severity`              | `blocker` if `isSignerCanisterPaymentError(err)`, else `critical` — error only                             |
-| `result_error_text`                  | full raw error text — error only                                                                           |
-| `token_network`                      | optional: `eth` for `eth_*`, `btc` for `btc_*`, `sol` for `schnorr_*` where unambiguous                    |
+| Attribute                            | Value                                                                                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Event**                            | `cfs_sign` (`PLAUSIBLE_EVENTS.CFS_SIGN`)                                                                                              |
+| `event_context`                      | `signer` (`PLAUSIBLE_EVENT_CONTEXTS.SIGNER`)                                                                                          |
+| `event_subcontext`                   | the called signer method (`PLAUSIBLE_EVENT_SUBCONTEXT_CFS`, e.g. `eth_sign_transaction`) ← **method name**                            |
+| `result_status`                      | `success` / `error` (`PLAUSIBLE_EVENT_RESULT_STATUSES`)                                                                               |
+| `result_duration_in_seconds`         | measured wall-clock duration of the call                                                                                              |
+| `result_duration_in_seconds_rounded` | rounded duration                                                                                                                      |
+| `result_error`                       | mapped error message (`(err as Error).message`) — error only                                                                          |
+| `result_error_severity`              | `major` if `isSignerCanisterAllowanceError(err)`; else `blocker` if `isSignerCanisterPaymentError(err)`; else `critical` — error only |
+| `result_error_text`                  | full raw error text — error only                                                                                                      |
+| `token_network`                      | optional: `eth` for `eth_*`, `btc` for `btc_*`, `sol` for `schnorr_*` where unambiguous                                               |
 
 > All `metadata` values must be strings (`TrackEventParams.metadata` is
 > `Record<string,string>`); convert numbers with `.toString()`.
@@ -334,9 +346,11 @@ export const trackCfsSign = ({
 			...(nonNullish(err) && {
 				result_error: (err as Error).message,
 				result_error_text: errorDetailToString(err),
-				result_error_severity: isSignerCanisterPaymentError(err)
-					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
-					: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+				result_error_severity: isSignerCanisterAllowanceError(err)
+					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.MAJOR
+					: isSignerCanisterPaymentError(err)
+						? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
+						: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
 			})
 		}
 	});
@@ -424,7 +438,7 @@ InsufficientAllowance` (and such an error is still an `isSignerCanisterPaymentEr
   returned `PaymentError` to a `SignerCanisterPaymentError`.
 - **Analytics (Part B)**: extend `src/frontend/src/tests/lib/services/analytics.service.spec.ts`:
   - success path emits `cfs_sign` with `result_status=success`, the right `event_subcontext`, and duration props;
-  - error path emits `result_status=error`, `result_error*`, and `result_error_severity=blocker` for a payment error / `critical` otherwise;
+  - error path emits `result_status=error`, `result_error*`, and `result_error_severity`: `blocker` for a backend payment failure, `major` for an exhausted-allowance error, `critical` otherwise;
   - `withCfsSignTracking` re-throws on error.
 - **i18n**: `npm run i18n:types` and `npm run i18n:keys` run clean; `check.i18n` passes.
 
@@ -436,7 +450,8 @@ After merge, update `docs/ai/PRODUCT.md`:
 
 - Under **## Analytics**, add a short subsection describing the `cfs_sign` event
   (fires on every paid chain-fusion-signer call, carries the method in `event_subcontext`,
-  and sets `result_error_severity=blocker` when the backend is out of cycles).
+  and sets `result_error_severity=blocker` when the backend is out of cycles, `major` for an
+  exhausted-allowance per-user limit).
 - Note the signer-outage user behavior: when signing is unavailable due to the backend
   cycles balance, sends show a generic "issue signing BTC/ETH/SOL" toast rather than the
   raw ledger error.
@@ -477,7 +492,7 @@ PR 1 first means the next outage is already observable even before PR 2 ships.
 - [ ] Every paid signer call in `signer.api.ts` emits a `cfs_sign` event on both success
       and error, with the called method in `event_subcontext`.
 - [ ] On the cycles outage, `cfs_sign` error events carry `result_error_severity = blocker`;
-      other signer errors carry `critical`.
+      the per-user allowance-exceeded case carries `major`; other signer errors carry `critical`.
 - [ ] Analytics never interrupts a send; `withCfsSignTracking` re-throws.
 - [ ] `npm run i18n:types`, `npm run i18n:keys`, lint, and unit tests pass.
 - [ ] `docs/ai/PRODUCT.md` updated.
