@@ -527,8 +527,9 @@ describe('plausible analytics service', () => {
 			const props = lastCfsSignProps();
 
 			expect(props).toMatchObject({
-				event_context: 'signer',
+				event_context: 'cfs',
 				event_subcontext: 'eth_sign_transaction',
+				event_code: 'success',
 				result_status: 'success',
 				token_network: 'eth'
 			});
@@ -587,7 +588,9 @@ describe('plausible analytics service', () => {
 			const props = lastCfsSignProps();
 
 			expect(props).toMatchObject({
+				event_context: 'cfs',
 				event_subcontext: 'eth_sign_transaction',
+				event_code: 'cfs_payment_failed_backend_out_of_cycles',
 				result_status: 'error',
 				result_error: err.message,
 				result_error_text: err.message,
@@ -619,6 +622,7 @@ describe('plausible analytics service', () => {
 
 			expect(lastCfsSignProps()).toMatchObject({
 				result_status: 'error',
+				event_code: 'cfs_payment_failed_user_allowance_exhausted',
 				result_error_severity: 'major'
 			});
 		});
@@ -639,6 +643,7 @@ describe('plausible analytics service', () => {
 
 			expect(lastCfsSignProps()).toMatchObject({
 				result_status: 'error',
+				event_code: 'cfs_generic_error',
 				result_error_severity: 'critical'
 			});
 		});
