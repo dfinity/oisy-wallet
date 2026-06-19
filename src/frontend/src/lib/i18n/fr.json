@@ -1231,7 +1231,8 @@
 			"buy": "Acheter",
 			"buy_dev": "Acheter (Env. de Dév.)",
 			"unavailable_title": "L'achat de jetons est temporairement indisponible",
-			"unavailable_description": "L'achat de jetons est actuellement désactivé pendant que nous continuons à renforcer la sécurité de ce processus en introduisant la signature des URL. Il sera réactivé dès que les travaux seront terminés.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "En attendant, vous pouvez toujours recevoir des jetons en partageant l'adresse de votre portefeuille."
 		},
 		"actions": {
