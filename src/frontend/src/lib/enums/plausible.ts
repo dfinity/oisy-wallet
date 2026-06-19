@@ -20,7 +20,18 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
-	CFS_SIGN = 'cfs_sign'
+	CFS_SIGN = 'cfs_sign',
+	ONRAMPER_OPEN = 'onramper_open'
+}
+
+export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
+	MAJOR = 'major'
+}
+
+export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
+	SECRET_NOT_CONFIGURED = 'secret_not_configured',
+	RATE_LIMITED = 'rate_limited',
+	SIGNING_FAILED = 'signing_failed'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {

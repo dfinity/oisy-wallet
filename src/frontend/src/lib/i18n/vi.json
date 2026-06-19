@@ -1231,7 +1231,8 @@
 			"buy": "Mua",
 			"buy_dev": "Mua (Dev Environment)",
 			"unavailable_title": "Mua token tạm thời không khả dụng",
-			"unavailable_description": "Việc mua token hiện đang tắt trong khi chúng tôi tiếp tục cải thiện bảo mật cho quy trình này bằng cách giới thiệu ký URL. Nó sẽ được bật lại ngay khi công việc hoàn tất.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Trong thời gian chờ đợi, bạn vẫn có thể nhận token bằng cách chia sẻ địa chỉ ví của mình."
 		},
 		"actions": {

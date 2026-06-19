@@ -168,9 +168,6 @@ export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_fa
 export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
 export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
 
-// Buy
-export const TRACK_BUY_TOKEN = 'buy_token';
-
 // NFTs
 export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';

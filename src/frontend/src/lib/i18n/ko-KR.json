@@ -1231,7 +1231,8 @@
 			"buy": "구매",
 			"buy_dev": "구매 (개발 환경)",
 			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
-			"unavailable_description": "URL 서명을 도입하여 이 프로세스의 보안을 더욱 개선하는 동안 토큰 구매가 현재 꺼져 있습니다. 작업이 완료되는 즉시 다시 켜집니다.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "그동안에도 지갑 주소를 공유하여 토큰을 받을 수 있습니다."
 		},
 		"actions": {
