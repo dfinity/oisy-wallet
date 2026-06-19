@@ -676,12 +676,16 @@ export const idlFactory = ({ IDL }) => {
 		wallets: IDL.Vec(OnramperSignedEntry),
 		wallet_address_tags: IDL.Vec(OnramperSignedEntry)
 	});
+	const SignOnramperWidgetUrlResponse = IDL.Record({
+		signature: IDL.Text,
+		signed_query: IDL.Text
+	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
 		RateLimited: RateLimitError,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({
-		Ok: IDL.Text,
+		Ok: SignOnramperWidgetUrlResponse,
 		Err: SignOnramperWidgetUrlError
 	});
 	const Stats = IDL.Record({

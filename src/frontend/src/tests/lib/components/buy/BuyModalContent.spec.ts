@@ -17,7 +17,10 @@ describe('BuyModalContent', () => {
 
 	beforeEach(() => {
 		mockAuthStore();
-		vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockResolvedValue(mockSignature);
+		vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockResolvedValue({
+			signature: mockSignature,
+			signed_query: ''
+		});
 	});
 
 	afterEach(() => {
