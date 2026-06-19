@@ -343,11 +343,11 @@
 			},
 			"caffeine": {
 				"name": "caffeine",
-				"one_liner": "one-liner... tbd ...",
-				"description": "... description ... tbd ...",
+				"one_liner": "Chat with AI on Caffeine to create apps and websites.",
+				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for "self-writing apps."",
 				"carousel": {
-					"text": "tbd.",
-					"call_to_action": "tbd."
+					"text": "AIware apps on-demand",
+					"call_to_action": "Learn more"
 				}
 			},
 			"mobox": {
@@ -430,7 +430,7 @@
 				"description": "ICP Index is a fully on-chain analytics and trading dashboard built entirely on the Internet Computer. It's a comprehensive dashboard which helps you track everything related to the Internet Computer. Tokens, on-chain statistics, and much more to come!",
 				"carousel": {
 					"text": "Extensive token index and analytics on ICP",
-					"call_to_action": "Learn mode"
+					"call_to_action": "Learn more"
 				}
 			},
 			"icexplorer": {
@@ -456,11 +456,11 @@
 			},
 			"cloud_engines": {
 				"name": "Cloud Engines",
-				"one_liner": "one-liner... tbd ...",
-				"description": "... description ... tbd ...",
+				"one_liner": "Create frontier clouds and let your agents build",
+				"description": "Provision Internet Computer cloud engines: a new kind of fully sovereign serverless cloud platform, where tamperproof execution, safe upgrades, and horizontal auto-scaling come built-in, and agents create apps using frontier backend software that unifies logic and data. Cloud engines empower agents, helping them create more sophistication from fewer tokens, while removing most security and systems administration oversight needs.",
 				"carousel": {
-					"text": "tbd.",
-					"call_to_action": "tbd."
+					"text": "Create frontier clouds and let your agents build",
+					"call_to_action": "Learn more"
 				}
 			}
 		}
