@@ -8,18 +8,18 @@ Two related improvements triggered by a support incident:
 
 1. **User-facing:** When the chain-fusion signer cannot sign because the OISY backend's
    account on the cycles ledger runs too low, users currently see a raw, scary toast.
-   Replace it with a calm, generic message: we're temporarily unable to sign Bitcoin,
-   Ethereum and Solana transactions and messages, we're aware of it, and a fix is coming.
-   This affects **every** signing operation — sends, WalletConnect personal_sign / eth_sign,
-   EIP-2612 permits, swaps — not just sends.
+   Replace it with a calm, non-technical message that signing is temporarily unavailable and
+   to try again shortly — without naming the affected chains, and without sounding like an
+   incident on our side. This affects **every** signing operation — sends, WalletConnect
+   personal_sign / eth_sign, EIP-2612 permits, swaps — not just sends.
 
    While building this we realised the payment failure has **two distinct causes that must
    not share a message**:
-   - **"Our fault" — backend out of cycles:** a wallet-wide outage we need to fix. Show the
-     "we're working on a fix" message (`sign.error.unavailable`).
+   - **"Our fault" — backend out of cycles:** a wallet-wide outage. Show the neutral
+     "signing is temporarily unavailable" message (`sign.error.unavailable`).
    - **"As intended" — the user's signing allowance is exceeded:** a per-user limit working
-     exactly as designed; nothing is broken on our side. Show a different, calmer
-     "you've reached your limit, try again later" message (`sign.error.limit_reached`).
+     exactly as designed; nothing is broken on our side. Show a distinct
+     "you've reached your signing limit" message (`sign.error.limit_reached`).
 
 2. **Observability:** Emit a `cfs_sign` Plausible event for **every paid chain-fusion-signer
    call** (success and error), carrying the called signer method and an appropriate
@@ -91,7 +91,7 @@ error leaks into the toast.
   - **per-user signing limit** — the caller's ICRC-2 allowance towards the signer is
     exhausted (surfaces as a nested `InsufficientAllowance` in the ledger transfer/withdraw
     error) → `sign.error.limit_reached`. _(PM decision: this is a per-user limit, not a global
-    outage, so the "we're working on a fix" wording would be wrong.)_ The distinction is
+    outage, so outage-style "it's on us, we're fixing it" wording would be wrong.)_ The distinction is
     **frontend-only** — the variant is already present in the signer's candid, so no
     chain-fusion-signer change is needed.
 - **Not send-specific:** the payment outage surfaces on every paid signer call, including
@@ -146,8 +146,8 @@ OISY-as-dApp-signer feature (`sign_in`, `permissions`, `consent_message`, …):
 ```json
 "sign": {
 	"error": {
-		"unavailable": "We're temporarily unable to sign Bitcoin, Ethereum and Solana transactions and messages. We're aware of the issue and working on a fix. Please try again soon.",
-		"limit_reached": "You've reached your current limit for signing transactions and messages. Please wait a little while and try again."
+		"unavailable": "Signing is temporarily unavailable. Please try again shortly.",
+		"limit_reached": "You've reached your signing limit. Please try again shortly."
 	}
 }
 ```
