@@ -254,17 +254,6 @@
 					"call_to_action": "Show more"
 				}
 			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Unique Identity Verification for Trustworthy Digital Engagements.",
-				"call_to_action": "Open DecideID",
-				"stats": "50,000+ inference requests",
-				"description": "Decide ID is at the heart of the Decide AI system, ensuring trust and security through its unique Proof of Personhood (PoP) methodology. When you join, you'll go through a verification process where you provide multiple proofs and complete a special challenge to confirm your identity. This makes sure that every user is real, unique, and not a bot. Your Principal ID, a unique on-chain identifier, is created during this process. It can be used across various applications that require verified personhood, ensuring a secure and seamless integration into any app’s sign-up or login process. Plus, the use of Zero-Knowledge proofs means your private data, like biometric information, remains confidential and safe.<br/><br/>With Decide ID, enjoy a flexible, secure, and privacy-first way to verify and engage online.",
-				"carousel": {
-					"text": "Enjoy a privacy-first way to verify and engage online",
-					"call_to_action": "Interested?"
-				}
-			},
 			"icpswap": {
 				"name": "ICPSwap",
 				"one_liner": "ICPSwap is an AMM DEX built completely onchain that is the premier hub for full-stack financial and DAO services on ICP.",
@@ -313,16 +302,6 @@
 				"call_to_action": "Get warped",
 				"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
-				"call_to_action": "Open Sonic",
-				"description": "Sonic, a multichain decentralized exchange built on the Internet Computer Protocol (ICP), offers a wide range of DeFi services. Users can easily trade tokens and perpetuals, provide liquidity, and participate in the LBP token sale. Users can engage in DAO governance, stake for rewards, and vote on platform decisions.<br/><br/>Fully on-chain & open-source! Swap tokens like a pro, stack those fees as a liquidity provider, join the AMM vibe, and be an integral part of the Sonic DAO.",
-				"carousel": {
-					"text": "Unlock the full potential of Defi",
-					"call_to_action": "Open Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX and automated market maker built on the Solana blockchain, offering a central limit order book that enables fast trades.",
@@ -362,24 +341,13 @@
 				"description": "USD.AI is a synthetic dollar protocol backed by income-generating AI compute infrastructure, creating a decentralized stablecoin called USDai. Users can hold or stake USDai to earn sUSDai, a yield-bearing version that reflects protocol earnings. The system is designed to create a composable, productive, and decentralized alternative to fiat-backed stablecoins."
 			},
 			"caffeine": {
-				"name": "Caffeine",
-				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
-				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
+				"name": "caffeine",
+				"one_liner": "one-liner... tbd ...",
+				"description": "... description ... tbd ...",
 				"carousel": {
-					"text": "Chat to create!",
-					"call_to_action": "Learn more"
+					"text": "tbd.",
+					"call_to_action": "tbd."
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
-				"call_to_action": "Get involved",
-				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
-				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
 			},
 			"mobox": {
 				"name": "Mobox",
