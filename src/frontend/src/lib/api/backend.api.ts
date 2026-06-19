@@ -4,7 +4,6 @@ import type {
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
-	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
@@ -166,7 +165,7 @@ export const allowSigning = async ({
 export const signOnramperWidgetUrl = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<SignOnramperWidgetUrlResponse> => {
+}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<string> => {
 	const { signOnramperWidgetUrl } = await backendCanister({ identity });
 
 	return signOnramperWidgetUrl(params);

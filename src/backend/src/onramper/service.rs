@@ -1,23 +1,19 @@
 //! State-aware wiring for `OnRamper` widget URL signing. Reads the secret from the controller-
 //! managed `ApiKeys` cell and delegates the actual canonicalization + MAC to [`super::model`].
 
-use shared::types::onramper::{
-    SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest, SignOnramperWidgetUrlResponse,
-};
+use shared::types::onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest};
 
 use super::model::sign_widget_url;
 use crate::state::{mutate_api_keys, with_api_keys};
 
-/// Build and sign the `OnRamper` widget signed-content. Returns both the hex-encoded HMAC-SHA256
-/// and the exact canonical query fragment that was signed, so the frontend appends the latter
-/// verbatim instead of re-deriving it.
+/// Build and sign the `OnRamper` widget signed-content. Returns the hex-encoded HMAC-SHA256.
 ///
 /// Errors with [`SignOnramperWidgetUrlError::SecretNotConfigured`] when controllers have not yet
 /// set `onramper_signing_secret` on `ApiKeys`. The frontend surfaces this as a "widget
 /// unavailable" notice rather than loading an unsigned URL (which `OnRamper` would reject anyway).
 pub fn sign_onramper_widget_url(
     req: SignOnramperWidgetUrlRequest,
-) -> Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError> {
+) -> Result<String, SignOnramperWidgetUrlError> {
     let secret = with_api_keys(|keys| keys.onramper_signing_secret.clone())
         .ok_or(SignOnramperWidgetUrlError::SecretNotConfigured)?;
 

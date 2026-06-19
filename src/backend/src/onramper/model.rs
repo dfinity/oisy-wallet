@@ -11,7 +11,7 @@
 
 use hmac::{digest::KeyInit, Hmac, Mac};
 use sha2::Sha256;
-use shared::types::onramper::{OnramperSignedEntry, SignOnramperWidgetUrlResponse};
+use shared::types::onramper::OnramperSignedEntry;
 
 type HmacSha256 = Hmac<Sha256>;
 
@@ -79,22 +79,18 @@ pub(crate) fn build_sign_content(
         .join("&")
 }
 
-/// One-shot helper: build the canonical sign-content and HMAC-SHA256 it. Returns both the canonical
-/// signed-content string (`signed_query`) and the hex digest `OnRamper` expects as the `signature`
-/// query parameter, so the caller can hand the frontend the exact bytes that were signed.
+/// One-shot helper: build the canonical sign-content and HMAC-SHA256 it, returning the hex digest
+/// `OnRamper` expects as the `signature` query parameter.
 #[must_use]
 pub(crate) fn sign_widget_url(
     secret: &str,
     wallets: &[OnramperSignedEntry],
     network_wallets: &[OnramperSignedEntry],
     wallet_address_tags: &[OnramperSignedEntry],
-) -> SignOnramperWidgetUrlResponse {
-    let signed_query = build_sign_content(wallets, network_wallets, wallet_address_tags);
-    let mac = hmac_sha256(secret.as_bytes(), signed_query.as_bytes());
-    SignOnramperWidgetUrlResponse {
-        signature: hex::encode(mac),
-        signed_query,
-    }
+) -> String {
+    let content = build_sign_content(wallets, network_wallets, wallet_address_tags);
+    let mac = hmac_sha256(secret.as_bytes(), content.as_bytes());
+    hex::encode(mac)
 }
 
 #[cfg(test)]
@@ -215,13 +211,11 @@ mod tests {
         let wallets = vec![entry("btc", "1abc")];
         let empty: Vec<OnramperSignedEntry> = vec![];
 
-        let response = sign_widget_url("secret", &wallets, &empty, &empty);
+        let signature = sign_widget_url("secret", &wallets, &empty, &empty);
 
         // hmac_sha256 itself is proven against the RFC 4231 vectors above; this asserts the
         // wiring of build_sign_content → hmac_sha256 → hex::encode.
         let expected_mac = hmac_sha256(b"secret", b"wallets=btc:1abc");
-        assert_eq!(response.signature, hex::encode(expected_mac));
-        // The returned signed_query is exactly the canonical content that was HMAC'd.
-        assert_eq!(response.signed_query, "wallets=btc:1abc");
+        assert_eq!(signature, hex::encode(expected_mac));
     }
 }

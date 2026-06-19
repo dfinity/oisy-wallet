@@ -7,7 +7,6 @@ import type {
 	ExchangeRate,
 	GetAllowedCyclesResponse,
 	SignOnramperWidgetUrlRequest,
-	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -235,7 +234,7 @@ export class BackendCanister extends Canister<BackendService> {
 		wallets,
 		networkWallets,
 		walletAddressTags
-	}: SignOnramperWidgetUrlParams): Promise<SignOnramperWidgetUrlResponse> => {
+	}: SignOnramperWidgetUrlParams): Promise<string> => {
 		const { sign_onramper_widget_url } = this.caller({ certified: true });
 
 		const request: SignOnramperWidgetUrlRequest = {
