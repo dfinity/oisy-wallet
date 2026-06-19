@@ -259,6 +259,30 @@ mapper the ETH methods use. With this, all 11 paid signer calls in `signer.api.t
 `PaymentError` to `SignerCanisterPaymentError` (and the allowance sub-case is detected uniformly
 in its constructor), so there is no detection gap across signing operations.
 
+### A6. Auto-replenish the allowance on the per-user limit
+
+When the allowance is exhausted, a page reload would fix it — the boot loader's
+`initSignerAllowance` calls `allow_signing`, which re-approves a fresh per-user budget when the
+current allowance is below threshold. Rather than make the user reload, do it in the background:
+on an `isSignerCanisterAllowanceError`, fire a best-effort `replenishSignerAllowance()` so the
+**next** attempt can succeed. We deliberately **do not auto-retry** the original signing operation
+(the user retries it), and we keep showing the `sign.error.limit_reached` message either way.
+
+`replenishSignerAllowance` (new `src/frontend/src/lib/services/signer-allowance.services.ts`):
+
+- calls the same `allow_signing` API as `initSignerAllowance`, but is **non-fatal** — it must never
+  sign the user out on failure (unlike `initSignerAllowance`, whose `catch` does `errorSignOut`);
+- is **single-flight** (a module-level guard) so concurrent signer errors don't fan out into
+  multiple `allow_signing` calls;
+- reuses `trackRateLimited` for the returned `rateLimitInfo`.
+
+This does not undermine the per-user limit: the real cap is the **`allow_signing` rate limiter**
+(`ALLOW_SIGNING_RATE_LIMITER` / `ALLOW_SIGNING_GUARD_LIMITER` → `AllowSigningError::RateLimited`).
+When the user has genuinely hit that quota, the replenish fails quietly and they keep seeing
+"limit reached". The trigger is wired where the allowance error is already detected — the
+`toastsSignerUnavailableOr` helper (sends + WalletConnect) and the OpenCryptoPay catch — never in
+the toast store's pure path for non-allowance errors.
+
 ---
 
 ## Part B — `cfs_sign` Plausible event for all paid signer calls
@@ -433,7 +457,10 @@ InsufficientAllowance` (and such an error is still an `isSignerCanisterPaymentEr
 - **Toast (Part A)** (`toasts.store.spec.ts`): given a non-allowance `SignerCanisterPaymentError`,
   `toastsSignerUnavailableOr` shows `sign.error.unavailable`; given an allowance error it shows
   `sign.error.limit_reached`; neither appends the raw ledger string; any other error calls the
-  fallback.
+  fallback. It also fires `replenishSignerAllowance` for the allowance case only (mocked).
+- **Allowance replenish** (`signer-allowance.services.spec.ts`): `replenishSignerAllowance` calls
+  `allow_signing` for the identity, tracks `rateLimitInfo` when present, swallows errors without
+  throwing (no sign-out), and is single-flight (concurrent calls → one `allow_signing`).
 - **Schnorr mapping** (`signer.canister.spec.ts`): `getSchnorrPublicKey` / `signWithSchnorr` map a
   returned `PaymentError` to a `SignerCanisterPaymentError`.
 - **Analytics (Part B)**: extend `src/frontend/src/tests/lib/services/analytics.service.spec.ts`:
@@ -485,7 +512,10 @@ PR 1 first means the next outage is already observable even before PR 2 ships.
       WalletConnect personal_sign / eth_sign, OpenCryptoPay — shows the calm
       `sign.error.unavailable` toast with **no** raw `Ledger error: …` text appended.
 - [ ] When the caller's allowance is exhausted (`InsufficientAllowance`), the same flows show
-      the per-user `sign.error.limit_reached` toast instead — not the outage message.
+      the per-user `sign.error.limit_reached` toast instead — not the outage message — and a
+      best-effort `allow_signing` re-grant runs in the background (no auto-retry, no sign-out);
+      the next attempt can then succeed without a page reload, unless the user has hit the
+      `allow_signing` rate limit.
 - [ ] SOL signing (Schnorr) surfaces these messages too (its errors are mapped, not thrown raw).
 - [ ] Genuine user errors (invalid address, insufficient token balance, gas) still show
       their existing specific toasts.
