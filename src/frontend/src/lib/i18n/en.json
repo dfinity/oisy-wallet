@@ -343,8 +343,8 @@
 			},
 			"caffeine": {
 				"name": "caffeine",
-				"one_liner": "Chat with AI on Caffeine to create apps and websites.",
-				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for \"self-writing apps.\"",
+				"one_liner": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss.",
+				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for \"self-writing apps\".<br><br>The platform unlocks a future where a large portion of the world's apps, websites and even enterprise systems, are eventually self-writing.",
 				"carousel": {
 					"text": "AIware apps on-demand",
 					"call_to_action": "Learn more"
@@ -456,8 +456,8 @@
 			},
 			"cloud_engines": {
 				"name": "Cloud Engines",
-				"one_liner": "Create frontier clouds and let your agents build",
-				"description": "Provision Internet Computer cloud engines: a new kind of fully sovereign serverless cloud platform, where tamperproof execution, safe upgrades, and horizontal auto-scaling come built-in, and agents create apps using frontier backend software that unifies logic and data. Cloud engines empower agents, helping them create more sophistication from fewer tokens, while removing most security and systems administration oversight needs.",
+				"one_liner": "Open Cloud is a portal built on top of the Internet Computer Protocol. It lets you compose independent compute nodes into a sovereign cloud platform tailored to your requirements, and then manage it, without a systems team.",
+				"description": "Provision Internet Computer cloud engines: a new kind of fully sovereign serverless cloud platform, where tamperproof execution, safe upgrades, and horizontal auto-scaling come built-in, and agents create apps using frontier backend software that unifies logic and data. Cloud engines empower agents, helping them create more sophistication from fewer tokens, while removing most security and systems administration oversight needs.<br><br>One protocol. One portal. Infrastructure you finally own.",
 				"carousel": {
 					"text": "Create frontier clouds and let your agents build",
 					"call_to_action": "Learn more"
