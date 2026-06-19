@@ -295,12 +295,24 @@ In `src/frontend/src/lib/enums/plausible.ts`:
 // add to PLAUSIBLE_EVENTS
 CFS_SIGN = 'cfs_sign',
 
+// add to PLAUSIBLE_EVENT_CONTEXTS — a dedicated context, NOT the dApp-signer's `signer`
+CFS = 'cfs',
+
 // new enum — error severity per the Confluence schema
 export enum PLAUSIBLE_EVENT_RESULT_SEVERITIES {
 	BLOCKER = 'blocker',
 	CRITICAL = 'critical',
 	MAJOR = 'major',
 	MINOR = 'minor'
+}
+
+// new enum — self-describing `event_code` outcome (present on every event). `success` is generic;
+// the `cfs_*` codes are CFS-specific and the shared `cfs_payment_failed_` prefix groups all payment failures.
+export enum PLAUSIBLE_EVENT_CODES {
+	SUCCESS = 'success',
+	CFS_PAYMENT_FAILED_BACKEND_OUT_OF_CYCLES = 'cfs_payment_failed_backend_out_of_cycles',
+	CFS_PAYMENT_FAILED_USER_ALLOWANCE_EXHAUSTED = 'cfs_payment_failed_user_allowance_exhausted',
+	CFS_GENERIC_ERROR = 'cfs_generic_error'
 }
 
 // new enum — the chain-fusion-signer method name carried on each event
@@ -321,26 +333,32 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_CFS {
 
 ### B2. Event schema (per the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page)
 
-| Attribute                            | Value                                                                                                                                 |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Event**                            | `cfs_sign` (`PLAUSIBLE_EVENTS.CFS_SIGN`)                                                                                              |
-| `event_context`                      | `signer` (`PLAUSIBLE_EVENT_CONTEXTS.SIGNER`)                                                                                          |
-| `event_subcontext`                   | the called signer method (`PLAUSIBLE_EVENT_SUBCONTEXT_CFS`, e.g. `eth_sign_transaction`) ← **method name**                            |
-| `result_status`                      | `success` / `error` (`PLAUSIBLE_EVENT_RESULT_STATUSES`)                                                                               |
-| `result_duration_in_seconds`         | measured wall-clock duration of the call                                                                                              |
-| `result_duration_in_seconds_rounded` | rounded duration                                                                                                                      |
-| `result_error`                       | mapped error message (`(err as Error).message`) — error only                                                                          |
-| `result_error_severity`              | `major` if `isSignerCanisterAllowanceError(err)`; else `blocker` if `isSignerCanisterPaymentError(err)`; else `critical` — error only |
-| `result_error_text`                  | full raw error text — error only                                                                                                      |
-| `token_network`                      | optional: `eth` for `eth_*`, `btc` for `btc_*`, `sol` for `schnorr_*` where unambiguous                                               |
+| Attribute                            | Value                                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Event**                            | `cfs_sign` (`PLAUSIBLE_EVENTS.CFS_SIGN`)                                                                                                               |
+| `event_context`                      | `cfs` (`PLAUSIBLE_EVENT_CONTEXTS.CFS`) — dedicated context, not the dApp-signer's `signer`                                                             |
+| `event_subcontext`                   | the called signer method (`PLAUSIBLE_EVENT_SUBCONTEXT_CFS`, e.g. `eth_sign_transaction`) ← **method name**                                             |
+| `event_code`                         | self-describing outcome (`PLAUSIBLE_EVENT_CODES`), present on **every** event ← **filter "all payment failures" via the `cfs_payment_failed_` prefix** |
+| `result_status`                      | `success` / `error` (`PLAUSIBLE_EVENT_RESULT_STATUSES`)                                                                                                |
+| `result_duration_in_seconds`         | measured wall-clock duration of the call                                                                                                               |
+| `result_duration_in_seconds_rounded` | rounded duration                                                                                                                                       |
+| `result_error`                       | mapped error message (`(err as Error).message`) — error only                                                                                           |
+| `result_error_severity`              | `major` if `isSignerCanisterAllowanceError(err)`; else `blocker` if `isSignerCanisterPaymentError(err)`; else `critical` — error only                  |
+| `result_error_text`                  | full raw error text — error only                                                                                                                       |
+| `token_network`                      | optional: `eth` for `eth_*`, `btc` for `btc_*`, `sol` for `schnorr_*` where unambiguous                                                                |
 
 > All `metadata` values must be strings (`TrackEventParams.metadata` is
 > `Record<string,string>`); convert numbers with `.toString()`.
 >
-> `event_context = signer` reuses the existing enum value. Note there is a pre-existing
-> dApp-signer feature using `signer` context (`SIGNER_PAGE_VISIT`, `SIGNER_INTERACTION`);
-> the distinct `cfs_sign` event name keeps the two separable on dashboards. If clearer
-> separation is wanted, introduce a dedicated `chain_fusion_signer` context instead.
+> `event_context = cfs` is a **dedicated** context, distinct from the pre-existing dApp-signer
+> feature that uses `signer` (`SIGNER_PAGE_VISIT`, `SIGNER_INTERACTION`). This keeps the two
+> cleanly separable on dashboards (no reliance on the event name alone).
+>
+> `event_code` is present on every event (`success` on the happy path) and is the single
+> dimension for filtering by outcome. The two payment failures share a `cfs_payment_failed_`
+> prefix, so "all payment errors" is `event_code` contains `cfs_payment_failed` (or "is any of"
+> the two). It is **orthogonal to `result_error_severity`**: the code is the cause, the severity
+> is the alerting weight.
 
 ### B3. Add a tracking helper in `analytics.services.ts`
 
@@ -359,22 +377,25 @@ export const trackCfsSign = ({
 	durationSeconds: number;
 	err?: unknown;
 }) => {
+	// classifyCfsSignError(err) → { code, severity } from the same check, so event_code and
+	// result_error_severity never disagree (allowance → cfs_payment_failed_user_allowance_exhausted
+	// + major; payment → cfs_payment_failed_backend_out_of_cycles + blocker; else → cfs_generic_error
+	// + critical).
+	const errorClassification = nonNullish(err) ? classifyCfsSignError(err) : undefined;
+
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.CFS_SIGN,
 		metadata: {
-			event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.CFS,
 			event_subcontext: method,
+			event_code: errorClassification?.code ?? PLAUSIBLE_EVENT_CODES.SUCCESS,
 			result_status: status,
 			result_duration_in_seconds: durationSeconds.toString(),
 			result_duration_in_seconds_rounded: Math.round(durationSeconds).toString(),
-			...(nonNullish(err) && {
+			...(nonNullish(errorClassification) && {
 				result_error: (err as Error).message,
 				result_error_text: errorDetailToString(err),
-				result_error_severity: isSignerCanisterAllowanceError(err)
-					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.MAJOR
-					: isSignerCanisterPaymentError(err)
-						? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
-						: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+				result_error_severity: errorClassification.severity
 			})
 		}
 	});
@@ -464,8 +485,8 @@ InsufficientAllowance` (and such an error is still an `isSignerCanisterPaymentEr
 - **Schnorr mapping** (`signer.canister.spec.ts`): `getSchnorrPublicKey` / `signWithSchnorr` map a
   returned `PaymentError` to a `SignerCanisterPaymentError`.
 - **Analytics (Part B)**: extend `src/frontend/src/tests/lib/services/analytics.service.spec.ts`:
-  - success path emits `cfs_sign` with `result_status=success`, the right `event_subcontext`, and duration props;
-  - error path emits `result_status=error`, `result_error*`, and `result_error_severity`: `blocker` for a backend payment failure, `major` for an exhausted-allowance error, `critical` otherwise;
+  - success path emits `cfs_sign` with `event_context=cfs`, `event_code=success`, `result_status=success`, the right `event_subcontext`, and duration props;
+  - error path emits `result_status=error`, `result_error*`, and a matching `event_code` + `result_error_severity`: `cfs_payment_failed_backend_out_of_cycles`/`blocker`, `cfs_payment_failed_user_allowance_exhausted`/`major`, or `cfs_generic_error`/`critical`;
   - `withCfsSignTracking` re-throws on error.
 - **i18n**: `npm run i18n:types` and `npm run i18n:keys` run clean; `check.i18n` passes.
 
@@ -502,7 +523,7 @@ PR 1 first means the next outage is already observable even before PR 2 ships.
   root-cause prevention) — separate backend work.
 - Broadening the toast to non-payment signer errors (signing/internal/network). The guard
   makes this a one-line change if desired later.
-- A dedicated `chain_fusion_signer` Plausible context (currently reusing `signer`).
+- ~~A dedicated Plausible context~~ — done: `cfs_sign` uses a dedicated `cfs` context (`PLAUSIBLE_EVENT_CONTEXTS.CFS`), not the dApp-signer's `signer`.
 
 ---
 
@@ -519,8 +540,10 @@ PR 1 first means the next outage is already observable even before PR 2 ships.
 - [ ] SOL signing (Schnorr) surfaces these messages too (its errors are mapped, not thrown raw).
 - [ ] Genuine user errors (invalid address, insufficient token balance, gas) still show
       their existing specific toasts.
-- [ ] Every paid signer call in `signer.api.ts` emits a `cfs_sign` event on both success
-      and error, with the called method in `event_subcontext`.
+- [ ] Every paid signer call in `signer.api.ts` emits a `cfs_sign` event (`event_context=cfs`)
+      on both success and error, with the called method in `event_subcontext` and a
+      self-describing `event_code` (`success` / `cfs_payment_failed_*` / `cfs_generic_error`).
+- [ ] "All payment errors" are filterable from `event_code` alone (the `cfs_payment_failed_` prefix).
 - [ ] On the cycles outage, `cfs_sign` error events carry `result_error_severity = blocker`;
       the per-user allowance-exceeded case carries `major`; other signer errors carry `critical`.
 - [ ] Analytics never interrupts a send; `withCfsSignTracking` re-throws.
