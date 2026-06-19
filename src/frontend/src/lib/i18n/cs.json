@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "Podepisování je dočasně nedostupné. Zkuste to prosím za chvíli znovu.",
+			"limit_reached": "Dosáhli jste svého limitu pro podepisování. Zkuste to prosím za chvíli znovu."
 		}
 	},
 	"signer": {

@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "La firma no está disponible temporalmente. Vuelva a intentarlo en breve.",
+			"limit_reached": "Ha alcanzado su límite de firma. Vuelva a intentarlo en breve."
 		}
 	},
 	"signer": {

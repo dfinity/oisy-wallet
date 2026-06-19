@@ -1931,8 +1931,8 @@
 	},
 	"sign": {
 		"error": {
-			"unavailable": "",
-			"limit_reached": ""
+			"unavailable": "Tính năng ký tạm thời không khả dụng. Vui lòng thử lại sau giây lát.",
+			"limit_reached": "Bạn đã đạt đến giới hạn ký. Vui lòng thử lại sau giây lát."
 		}
 	},
 	"signer": {
