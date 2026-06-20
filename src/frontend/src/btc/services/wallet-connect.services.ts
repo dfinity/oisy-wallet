@@ -411,6 +411,16 @@ export const signPsbt = ({
 				return { success: false };
 			}
 
+			const indicesToSign = nonNullish(signInputs)
+				? signInputs.map(({ index }) => index).filter((index): index is number => nonNullish(index))
+				: undefined;
+
+			if (nonNullish(indicesToSign) && indicesToSign.length === 0) {
+				toastsError({ msg: { text: get(i18n).wallet_connect.error.unknown_parameter } });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
 			const network = bitcoinJsNetwork(request.params.chainId);
 
 			modalNext();
@@ -442,13 +452,9 @@ export const signPsbt = ({
 
 				// Reown's `signInputs` selects which inputs to sign; if absent, sign every input that is
 				// ours. Each must be a P2WPKH input owned by this wallet — anything else is rejected.
-				const indicesToSign = nonNullish(signInputs)
-					? signInputs
-							.map(({ index }) => index)
-							.filter((index): index is number => nonNullish(index))
-					: parsed.data.inputs.map((_, index) => index);
+				const inputIndicesToSign = indicesToSign ?? parsed.data.inputs.map((_, index) => index);
 
-				for (const index of indicesToSign) {
+				for (const index of inputIndicesToSign) {
 					const input = parsed.data.inputs[index];
 
 					if (isNullish(input?.witnessUtxo)) {
