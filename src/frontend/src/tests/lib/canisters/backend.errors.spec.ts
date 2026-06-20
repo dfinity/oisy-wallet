@@ -267,7 +267,9 @@ describe('backend.errors', () => {
 			});
 
 			expect(err).toBeInstanceOf(OnramperRateLimitedError);
-			expect(err.message).toBe('Rate limit exceeded. Maximum of 3 calls allowed every 120 seconds.');
+			expect(err.message).toBe(
+				'Rate limit exceeded. Maximum of 3 calls allowed every 120 seconds.'
+			);
 		});
 
 		it('should return unknown error for unrecognized variant', () => {
