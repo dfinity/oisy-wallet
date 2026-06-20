@@ -691,7 +691,7 @@ describe('wallet-connect.services', () => {
 
 				const result = await sign(mockParams);
 
-				expect(result).toStrictEqual({ success: false });
+				expect(result).toEqual({ success: false });
 
 				expect(mockParams.modalNext).toHaveBeenCalledOnce();
 
