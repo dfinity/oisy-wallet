@@ -1,14 +1,24 @@
 import {
+	disconnectSession,
 	execute,
 	reject,
+	resetListener,
+	resetListenerIfNoSessions,
+	syncSessions,
 	type WalletConnectExecuteParams
 } from '$lib/services/wallet-connect.services';
 import { busy } from '$lib/stores/busy.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import {
+	walletConnectListenerStore,
+	walletConnectSessionsStore
+} from '$lib/stores/wallet-connect.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
+import type { SessionTypes } from '@walletconnect/types';
 import { getSdkError } from '@walletconnect/utils';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('wallet-connect.services', () => {
@@ -21,6 +31,7 @@ describe('wallet-connect.services', () => {
 		rejectRequest: vi.fn(),
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
+		disconnectSession: vi.fn(),
 		disconnect: vi.fn()
 	} as WalletConnectListener;
 	const mockRequest = {} as WalletKitTypes.SessionRequest;
@@ -204,6 +215,130 @@ describe('wallet-connect.services', () => {
 			await expect(reject(mockParams)).resolves.toEqual({ success: false, err: mockError });
 
 			expect(spyBusyStop).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
+	describe('session lifecycle helpers', () => {
+		const sessionA = { topic: 'topic-a' } as unknown as SessionTypes.Struct;
+		const sessionB = { topic: 'topic-b' } as unknown as SessionTypes.Struct;
+
+		const setListener = (overrides: Partial<WalletConnectListener>) =>
+			walletConnectListenerStore.set({
+				...mockListener,
+				...overrides
+			} as unknown as WalletConnectListener);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			walletConnectListenerStore.reset();
+			walletConnectSessionsStore.reset();
+		});
+
+		describe('syncSessions', () => {
+			it('should return an empty array and clear the store when no listener is set', () => {
+				walletConnectSessionsStore.set([sessionA]);
+
+				expect(syncSessions()).toEqual([]);
+				expect(get(walletConnectSessionsStore)).toEqual([]);
+			});
+
+			it('should mirror the active sessions into the store', () => {
+				setListener({
+					getActiveSessions: vi.fn().mockReturnValue({ a: sessionA, b: sessionB })
+				});
+
+				expect(syncSessions()).toEqual([sessionA, sessionB]);
+				expect(get(walletConnectSessionsStore)).toEqual([sessionA, sessionB]);
+			});
+		});
+
+		describe('resetListener', () => {
+			it('should clear both the listener and the sessions store', () => {
+				setListener({});
+				walletConnectSessionsStore.set([sessionA]);
+
+				resetListener();
+
+				expect(get(walletConnectListenerStore)).toBeUndefined();
+				expect(get(walletConnectSessionsStore)).toEqual([]);
+			});
+		});
+
+		describe('resetListenerIfNoSessions', () => {
+			it('should keep the listener when sessions remain', () => {
+				const detachHandlers = vi.fn();
+
+				setListener({
+					detachHandlers,
+					getActiveSessions: vi.fn().mockReturnValue({ a: sessionA })
+				});
+
+				expect(resetListenerIfNoSessions()).toEqual([sessionA]);
+				expect(detachHandlers).not.toHaveBeenCalled();
+				expect(get(walletConnectListenerStore)).not.toBeUndefined();
+			});
+
+			it('should detach handlers and reset when no sessions remain', () => {
+				const detachHandlers = vi.fn();
+
+				setListener({
+					detachHandlers,
+					getActiveSessions: vi.fn().mockReturnValue({})
+				});
+
+				expect(resetListenerIfNoSessions()).toEqual([]);
+				expect(detachHandlers).toHaveBeenCalledOnce();
+				expect(get(walletConnectListenerStore)).toBeUndefined();
+				expect(get(walletConnectSessionsStore)).toEqual([]);
+			});
+		});
+
+		describe('disconnectSession', () => {
+			it('should do nothing when no listener is set', async () => {
+				const spy = vi.spyOn(mockListener, 'disconnectSession');
+
+				await disconnectSession('topic-a');
+
+				expect(spy).not.toHaveBeenCalled();
+			});
+
+			it('should disconnect only the given topic and keep the listener when others remain', async () => {
+				const disconnectSessionSpy = vi.fn();
+				const disconnectSpy = vi.fn();
+
+				setListener({
+					disconnectSession: disconnectSessionSpy,
+					disconnect: disconnectSpy,
+					getActiveSessions: vi.fn().mockReturnValue({ b: sessionB })
+				});
+
+				await disconnectSession('topic-a');
+
+				expect(disconnectSessionSpy).toHaveBeenCalledExactlyOnceWith('topic-a');
+				expect(get(walletConnectSessionsStore)).toEqual([sessionB]);
+				expect(disconnectSpy).not.toHaveBeenCalled();
+				expect(get(walletConnectListenerStore)).not.toBeUndefined();
+			});
+
+			it('should fall through to a full teardown when the last session is removed', async () => {
+				const disconnectSessionSpy = vi.fn();
+				const disconnectSpy = vi.fn();
+				const detachHandlers = vi.fn();
+
+				setListener({
+					disconnectSession: disconnectSessionSpy,
+					disconnect: disconnectSpy,
+					detachHandlers,
+					getActiveSessions: vi.fn().mockReturnValue({})
+				});
+
+				await disconnectSession('topic-a');
+
+				expect(disconnectSessionSpy).toHaveBeenCalledExactlyOnceWith('topic-a');
+				expect(disconnectSpy).toHaveBeenCalledOnce();
+				expect(get(walletConnectListenerStore)).toBeUndefined();
+				expect(get(walletConnectSessionsStore)).toEqual([]);
+			});
 		});
 	});
 });
