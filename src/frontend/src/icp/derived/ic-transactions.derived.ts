@@ -13,6 +13,7 @@ import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
 import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
+import { MEMORY_FIX_IC_TRANSACTIONS_DERIVED } from '$lib/utils/memory-flags.utils';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -27,6 +28,10 @@ const icExtendedTransactions: Readable<NonNullable<IcTransactionsData>> = derive
 		})
 );
 
+let icTransactionsMemo:
+	| { inputs: readonly unknown[]; result: NonNullable<IcTransactionsData> }
+	| undefined;
+
 export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived(
 	[
 		tokenWithFallback,
@@ -39,18 +44,29 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 		icPendingTransactionsStore,
 		icTransactionsStore
 	],
-	([
-		$token,
-		$ckBtcPendingUtxoTransactions,
-		$ckEthPendingTransactions,
-		$icExtendedTransactions,
-		$btcStatusesStore,
-		$ckBtcMinterInfoStore,
-		$ckBtcPendingUtxosStore,
-		$icPendingTransactionsStore,
-		$icTransactionsStore
-	]) =>
-		getAllIcTransactions({
+	($values) => {
+		if (
+			MEMORY_FIX_IC_TRANSACTIONS_DERIVED &&
+			icTransactionsMemo !== undefined &&
+			icTransactionsMemo.inputs.length === $values.length &&
+			icTransactionsMemo.inputs.every((v, i) => v === $values[i])
+		) {
+			return icTransactionsMemo.result;
+		}
+
+		const [
+			$token,
+			$ckBtcPendingUtxoTransactions,
+			$ckEthPendingTransactions,
+			$icExtendedTransactions,
+			$btcStatusesStore,
+			$ckBtcMinterInfoStore,
+			$ckBtcPendingUtxosStore,
+			$icPendingTransactionsStore,
+			$icTransactionsStore
+		] = $values;
+
+		const result = getAllIcTransactions({
 			token: $token,
 			ckBtcPendingUtxoTransactions: $ckBtcPendingUtxoTransactions,
 			ckBtcPendingUtxosStore: $ckBtcPendingUtxosStore,
@@ -60,7 +76,14 @@ export const icTransactions: Readable<NonNullable<IcTransactionsData>> = derived
 			icPendingTransactionsStore: $icPendingTransactionsStore,
 			icExtendedTransactions: $icExtendedTransactions,
 			icTransactionsStore: $icTransactionsStore
-		})
+		});
+
+		if (MEMORY_FIX_IC_TRANSACTIONS_DERIVED) {
+			icTransactionsMemo = { inputs: [...$values], result };
+		}
+
+		return result;
+	}
 );
 
 export const icKnownDestinations: Readable<KnownDestinations> = derived(

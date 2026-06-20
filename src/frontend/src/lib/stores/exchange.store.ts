@@ -1,4 +1,5 @@
 import type { CoingeckoPriceResponse } from '$lib/types/coingecko';
+import { MEMORY_FIX_EXCHANGE_STORE } from '$lib/utils/memory-flags.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
@@ -15,16 +16,28 @@ const initExchangeStore = (): ExchangeStore => {
 
 	return {
 		set: (tokensPrice: CoingeckoPriceResponse[]) =>
-			update((state) => ({
-				...(nonNullish(state) && state),
-				...tokensPrice.reduce(
-					(acc, price) => ({
-						...acc,
-						...price
-					}),
-					{}
-				)
-			})),
+			update((state) => {
+				if (MEMORY_FIX_EXCHANGE_STORE) {
+					const next: NonNullable<CoingeckoPriceResponse> = {};
+					if (nonNullish(state)) {
+						Object.assign(next, state);
+					}
+					for (const price of tokensPrice) {
+						Object.assign(next, price);
+					}
+					return next;
+				}
+				return {
+					...(nonNullish(state) && state),
+					...tokensPrice.reduce(
+						(acc, price) => ({
+							...acc,
+							...price
+						}),
+						{}
+					)
+				};
+			}),
 		reset: () => set(null),
 		subscribe
 	};
