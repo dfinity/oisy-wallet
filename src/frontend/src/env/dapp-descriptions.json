@@ -167,6 +167,21 @@
 		"screenshots": ["/images/dapps/jupiter.webp"]
 	},
 	{
+		"id": "pacifica",
+		"name": "dapps.descriptions.pacifica.name",
+		"oneLiner": "dapps.descriptions.pacifica.one_liner",
+		"website": "https://www.pacifica.fi/",
+		"twitter": "https://x.com/pacifica_fi",
+		"discord": "https://discord.gg/pacifica",
+		"tags": ["dapps.categories.dex"],
+		"description": "dapps.descriptions.pacifica.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/pacifica-logo.svg",
+		"screenshots": ["/images/dapps/pacifica-screenshot.webp"]
+	},
+	{
 		"id": "kongswap",
 		"name": "dapps.descriptions.kongswap.name",
 		"oneLiner": "dapps.descriptions.kongswap.one_liner",
@@ -443,21 +458,6 @@
 		"stats": "",
 		"logo": "/images/dapps/mobox-logo.webp",
 		"screenshots": ["/images/dapps/mobox-screenshot.webp"]
-	},
-	{
-		"id": "pacifica",
-		"name": "dapps.descriptions.pacifica.name",
-		"oneLiner": "dapps.descriptions.pacifica.one_liner",
-		"website": "https://www.pacifica.fi/",
-		"twitter": "https://x.com/pacifica_fi",
-		"discord": "https://discord.gg/pacifica",
-		"tags": ["dapps.categories.dex"],
-		"description": "dapps.descriptions.pacifica.description",
-		"usesInternetIdentity": false,
-		"display": "Large",
-		"stats": "",
-		"logo": "/images/dapps/pacifica-logo.svg",
-		"screenshots": ["/images/dapps/pacifica-screenshot.webp"]
 	},
 	{
 		"id": "magic-eden",
