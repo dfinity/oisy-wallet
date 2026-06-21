@@ -1,9 +1,9 @@
-type AppEnvironment = {
+interface AppEnvironment {
 	local: boolean;
 	staging: boolean;
 	beta?: boolean;
 	prod?: boolean;
-};
+}
 
 const loadExchangeEnv = async ({ local, staging, beta = false, prod = false }: AppEnvironment) => {
 	vi.resetModules();
