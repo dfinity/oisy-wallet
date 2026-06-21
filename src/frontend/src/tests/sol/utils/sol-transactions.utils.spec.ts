@@ -32,6 +32,7 @@ describe('sol-transactions.utils', () => {
 		it('should map a sol transaction message', () => {
 			expect(mapSolTransactionMessage(mockSolParsedTransactionMessage)).toStrictEqual({
 				amount: 2044380n,
+				ambiguous: true,
 				unreviewed: true,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
@@ -202,7 +203,7 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
-		it('should surface an unreviewed instruction as a warning, not reject it', () => {
+		it('should flag a transaction as ambiguous when it mixes reviewed and unreviewed instructions', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({
 					amount: 1n,
@@ -220,7 +221,31 @@ describe('sol-transactions.utils', () => {
 				amount: 1n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				unreviewed: true
+				unreviewed: true,
+				ambiguous: true
+			});
+		});
+
+		it('should flag a transaction as ambiguous when it mixes unreviewed and reviewed instructions', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, unreviewed: true })
+				.mockReturnValueOnce({
+					amount: 1n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				unreviewed: true,
+				ambiguous: true
 			});
 		});
 

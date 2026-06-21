@@ -43,6 +43,21 @@ const conflicts = ({
 	next: OptionSolAddress;
 }): boolean => nonNullish(current) && nonNullish(next) && current !== next;
 
+const hasReviewedFields = ({
+	amount,
+	source,
+	destination,
+	payer,
+	tokenAddress,
+	isApproval
+}: MappedSolTransaction): boolean =>
+	nonNullish(amount) ||
+	nonNullish(source) ||
+	nonNullish(destination) ||
+	nonNullish(payer) ||
+	nonNullish(tokenAddress) ||
+	(isApproval ?? false);
+
 export const mapSolTransactionMessage = ({
 	instructions
 }: TransactionMessage): MappedSolTransaction =>
@@ -60,11 +75,9 @@ export const mapSolTransactionMessage = ({
 			// sums every amount into one figure. Bundling movements of different mints — or
 			// mixing a known SPL token with a native/unknown one — cannot be shown faithfully.
 			//
-			// An unreviewed instruction is different: it does not corrupt the summary, it
-			// simply has effects we cannot describe. Rejecting every such transaction would
-			// break most real dApp interactions (swaps, staking, NFT mints all carry
-			// instructions we don't decode). We surface it as a warning instead, so the user
-			// is told the review is incomplete and can decide.
+			// Unreviewed-only transactions surface the existing warning. Mixing them with a
+			// reviewed movement is different: the concrete summary can make the request look
+			// safer than the full message, so the signing flow must reject it as ambiguous.
 			const mixesTokenWithNonToken =
 				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
 				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
@@ -72,6 +85,11 @@ export const mapSolTransactionMessage = ({
 				nonNullish(acc.amount) &&
 				nonNullish(amount) &&
 				(acc.isApproval ?? false) !== (isApproval ?? false);
+			const mixesReviewedWithUnreviewed =
+				(unreviewed ?? false)
+					? hasReviewedFields(acc)
+					: (acc.unreviewed ?? false) &&
+						hasReviewedFields({ amount, source, destination, payer, tokenAddress, isApproval });
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
@@ -80,7 +98,8 @@ export const mapSolTransactionMessage = ({
 				conflicts({ current: acc.payer, next: payer }) ||
 				conflicts({ current: acc.tokenAddress, next: tokenAddress }) ||
 				mixesTokenWithNonToken ||
-				mixesApprovalWithTransfer;
+				mixesApprovalWithTransfer ||
+				mixesReviewedWithUnreviewed;
 
 			return {
 				...acc,
