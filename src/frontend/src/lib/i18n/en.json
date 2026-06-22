@@ -462,6 +462,11 @@
 					"text": "Create frontier clouds and let your agents build",
 					"call_to_action": "Learn more"
 				}
+			},
+			"hyperliquid": {
+				"name": "Hyperliquid",
+				"one_liner": "Hyperliquid is the top perps DEX, giving traders centralized-exchange speed and tools (50x leverage, full order book, advanced order types) while keeping self-custody of funds.",
+				"description": "Hyperliquid is the leading decentralized perpetual-futures exchange, offering traders centralized-exchange-level speed and a fully on-chain order book with up to 50x leverage. It supports the advanced tooling active traders expect — limit orders, stop-loss and take-profit, plus cross-margin and isolated-margin modes for flexible risk management — all collateralized in USDC. Crucially, traders execute directly from their own wallets without KYC and never give up custody of their funds, combining CEX performance with the self-custody and transparency of DeFi."
 			}
 		}
 	},
