@@ -274,3 +274,29 @@ export const buildAssetsTabViewEvent = ({
 		event_trigger: trigger
 	}
 });
+
+/**
+ * Build a generic `ui_click` payload for a navigation interaction.
+ *
+ * Returns the params so callers can hand it to an element's click-tracking prop
+ * (e.g. `NavigationItem.trackEvent`) rather than firing directly. One generic event
+ * with a `source_location` ladder — rather than per-surface event names — keeps every
+ * navigation surface comparable in a single Plausible breakdown. Uses the standard
+ * `source_location` key (not the legacy `location_source`).
+ */
+export const buildUiClickEvent = ({
+	sourceLocation,
+	sourceSublocation,
+	eventValue
+}: {
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	eventValue?: string;
+}): TrackEventParams => ({
+	name: PLAUSIBLE_EVENTS.UI_CLICK,
+	metadata: {
+		source_location: sourceLocation,
+		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
+		...(nonNullish(eventValue) && { event_value: eventValue })
+	}
+});

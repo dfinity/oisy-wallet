@@ -20,7 +20,8 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
-	ONRAMPER_OPEN = 'onramper_open'
+	ONRAMPER_OPEN = 'onramper_open',
+	UI_CLICK = 'ui_click'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -123,7 +124,8 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	EARN = 'earn',
 	SIGNER = 'signer',
 	REWARDS = 'rewards',
-	TRANSACTIONS = 'transactions'
+	TRANSACTIONS = 'transactions',
+	NAVIGATION = 'navigation'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
