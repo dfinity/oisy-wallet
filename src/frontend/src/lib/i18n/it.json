@@ -1599,6 +1599,7 @@
 			"connected_apps": "App connesse",
 			"no_connected_apps": "Attualmente non ci sono app connesse.",
 			"disconnect_all": "Disconnetti tutte",
+			"disconnect_app": "Disconnetti $name",
 			"wallet_connect": ""
 		},
 		"alt": {

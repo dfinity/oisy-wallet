@@ -1599,6 +1599,7 @@
 			"connected_apps": "연결된 앱",
 			"no_connected_apps": "현재 연결된 앱이 없습니다.",
 			"disconnect_all": "모두 연결 해제",
+			"disconnect_app": "$name 연결 해제",
 			"wallet_connect": ""
 		},
 		"alt": {

@@ -25,6 +25,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { walletConnectSessionsStore } from '$lib/stores/wallet-connect.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { SolanaNetworks } from '$sol/types/network';
 
 	const chainIconMap: Record<string, string> = {
@@ -136,6 +137,9 @@
 
 						{#snippet action()}
 							<Button
+								ariaLabel={replacePlaceholders($i18n.wallet_connect.text.disconnect_app, {
+									$name: name
+								})}
 								colorStyle="error"
 								onclick={() => disconnectOne(session.topic)}
 								paddingSmall

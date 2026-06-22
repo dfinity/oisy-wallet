@@ -1599,6 +1599,7 @@
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"disconnect_all": "Odpojit vše",
+			"disconnect_app": "Odpojit $name",
 			"wallet_connect": ""
 		},
 		"alt": {

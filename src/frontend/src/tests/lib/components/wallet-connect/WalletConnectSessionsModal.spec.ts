@@ -203,6 +203,30 @@ describe('WalletConnectSessionsModal', () => {
 		expect(spy).toHaveBeenCalledExactlyOnceWith('topic-2');
 	});
 
+	it('should give each per-session disconnect button an accessible name with the dApp name', () => {
+		setSessions({
+			'topic-1': {
+				...mockSession({
+					accounts: ['eip155:1:0xAbCdEf1234567890AbCdEf1234567890AbCdEf12'],
+					name: 'dApp One'
+				}),
+				topic: 'topic-1'
+			},
+			'topic-2': {
+				...mockSession({
+					accounts: ['eip155:1:0xBbBbBb1234567890AbCdEf1234567890AbCdEf12'],
+					name: 'dApp Two'
+				}),
+				topic: 'topic-2'
+			}
+		});
+
+		const { getByLabelText } = render(WalletConnectSessionsModal);
+
+		expect(getByLabelText('Disconnect dApp One')).toBeInTheDocument();
+		expect(getByLabelText('Disconnect dApp Two')).toBeInTheDocument();
+	});
+
 	it('should not show the disconnected toast when the per-session disconnect fails', async () => {
 		vi.spyOn(walletConnectServices, 'disconnectSession').mockResolvedValue({ success: false });
 		const toastSpy = vi.spyOn(toastsStore, 'toastsShow');

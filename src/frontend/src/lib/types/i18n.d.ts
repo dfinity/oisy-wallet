@@ -1272,6 +1272,7 @@ interface I18nWallet_connect {
 		connected_apps: string;
 		no_connected_apps: string;
 		disconnect_all: string;
+		disconnect_app: string;
 		wallet_connect: string;
 	};
 	alt: { connect_input: string };
