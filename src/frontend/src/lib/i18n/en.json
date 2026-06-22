@@ -456,8 +456,8 @@
 			},
 			"cloud_engines": {
 				"name": "Cloud Engines",
-				"one_liner": "Open Cloud is a portal built on top of the Internet Computer Protocol. It lets you compose independent compute nodes into a sovereign cloud platform tailored to your needs.",
-				"description": "Provision Internet Computer cloud engines: a new kind of fully sovereign serverless cloud platform, where tamperproof execution, safe upgrades, and horizontal auto-scaling come built-in, and agents create apps using frontier backend software that unifies logic and data. Cloud engines empower agents, helping them create more sophistication from fewer tokens, while removing most security and systems administration oversight needs.<br><br>One protocol. One portal. Infrastructure you finally own.",
+				"one_liner": "Provision your own sovereign cloud. Deploy applications without managing servers, choose your infrastructure, and enable teams and AI agents to build securely.",
+				"description": "Provision Cloud Engines: a frontier cloud platform on the Internet Computer built for AI agents and humans. Tamperproof execution, safe upgrades, and horizontal auto-scaling provide the foundation for agents to create, operate, and evolve enterprise-grade applications on sovereign infrastructure.",
 				"carousel": {
 					"text": "Create frontier clouds and let your agents build",
 					"call_to_action": "Learn more"
