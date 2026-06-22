@@ -8,12 +8,6 @@
 	cursor: initial;
 }
 
-@mixin disabled {
-	cursor: not-allowed;
-	touch-action: none;
-	pointer-events: none;
-}
-
 @mixin none {
 	cursor: inherit;
 	pointer-events: none;
