@@ -25,7 +25,7 @@ export interface ActiveUserTransaction {
 	 * `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
 	 * for the field layout exposed on the wire and in TS bindings.
 	 */
-	external_refs: Array<OnramperSignedEntry>;
+	external_refs: Array<ActiveUserTransactionRef>;
 	/**
 	 * Opaque to the backend; the FE writes a flow-specific step name here.
 	 */
@@ -1161,15 +1161,6 @@ export interface OneSecIcpToEvmData {
 	dest_token: TokenId;
 }
 /**
- * A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
- * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
- * `key` to lowercase before signing.
- */
-export interface OnramperSignedEntry {
-	key: string;
-	value: string;
-}
-/**
  * Outpoint.
  */
 export interface Outpoint {
@@ -1270,11 +1261,19 @@ export interface Settings {
 export type SignOnramperWidgetUrlError =
 	| {
 			/**
-			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
-			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
-			 * signing oracle.
+			 * The caller exceeded the per-principal rate limit for signing requests. The limit bounds how
+			 * often a principal can trigger the address derivation (management-canister public-key reads)
+			 * behind this endpoint.
 			 */
 			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * None of the caller's wallet addresses could be derived (e.g. the signer public-key reads all
+			 * failed). The frontend treats this as a hard "widget unavailable" failure: there is nothing
+			 * safe to sign without at least one of the caller's own addresses.
+			 */
+			AddressDerivationFailed: null;
 	  }
 	| {
 			/**
@@ -1284,24 +1283,6 @@ export type SignOnramperWidgetUrlError =
 			 */
 			SecretNotConfigured: null;
 	  };
-/**
- * Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
- * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
- */
-export interface SignOnramperWidgetUrlRequest {
-	/**
-	 * `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
-	 */
-	network_wallets: Array<OnramperSignedEntry>;
-	/**
-	 * `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
-	 */
-	wallets: Array<OnramperSignedEntry>;
-	/**
-	 * `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
-	 */
-	wallet_address_tags: Array<OnramperSignedEntry>;
-}
 /**
  * Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
  * canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
@@ -1610,7 +1591,7 @@ export interface TransformArgs {
 export interface UpdateActiveUserTransactionRequest {
 	id: string;
 	status: [] | [ActiveUserTransactionStatus];
-	external_refs: [] | [Array<OnramperSignedEntry>];
+	external_refs: [] | [Array<ActiveUserTransactionRef>];
 	progress_step: [] | [string];
 	error: [] | [string];
 }
@@ -2137,19 +2118,20 @@ export interface _SERVICE {
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	/**
-	 * Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
+	 * Sign the caller's own wallet addresses into an `OnRamper` widget URL with the controller-managed
+	 * HMAC secret.
 	 *
-	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
-	 * Authenticated callers only: anonymous principals cannot extract signatures.
+	 * Takes no arguments: the signed `networkWallets` are the caller's BTC/ETH/ICP/SOL receiving
+	 * addresses, derived server-side from `msg_caller()`. A caller can therefore only ever obtain a
+	 * signature over addresses they own — the HMAC binds the URL to the authenticated user rather than
+	 * to arbitrary client input. Authenticated callers only: anonymous principals cannot extract
+	 * signatures.
 	 *
 	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
-	 * can persist its sliding window — a query would discard the recorded call. The frontend already
-	 * invokes it as a certified (replicated) call, so there is no added latency.
+	 * can persist its sliding window, and because address derivation makes inter-canister
+	 * (management-canister public-key) calls. The frontend already invokes it as a certified call.
 	 */
-	sign_onramper_widget_url: ActorMethod<
-		[SignOnramperWidgetUrlRequest],
-		SignOnramperWidgetUrlResult
-	>;
+	sign_onramper_widget_url: ActorMethod<[], SignOnramperWidgetUrlResult>;
 	/**
 	 * Gets statistics about the canister.
 	 *

@@ -118,3 +118,13 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
+
+---
+
+## Buy (OnRamper)
+
+Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
+
+The signed destination addresses are **always the authenticated caller's own**, derived server-side from their principal (BTC, ETH, ICP, and SOL). The frontend does **not** send wallet addresses to the signing endpoint, and there is no API surface through which a caller could have the backend sign an address they do not own. A signed OISY widget URL can therefore only ever route a purchase to the signed-in user's own wallet — never to an attacker-chosen address. The addresses are derived via threshold public-key reads (the same keys the wallet shows the user), not by trusting client input.
+
+If the signing secret is not configured, or none of the caller's addresses can be derived, the widget is shown as unavailable rather than loaded with an unsigned or partial URL.

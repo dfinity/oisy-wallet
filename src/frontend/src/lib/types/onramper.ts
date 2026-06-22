@@ -1,5 +1,3 @@
-import type { BtcAddress } from '$btc/types/address';
-import type { EthAddress } from '$eth/types/address';
 import type { Currency } from '$lib/enums/currency';
 import type { OnramperIdSchema, OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
 import type * as z from 'zod';
@@ -14,16 +12,3 @@ export type OnramperId = z.infer<typeof OnramperIdSchema>;
 export type OnramperFiatId = Currency;
 
 export type OnramperMode = 'buy';
-
-// TODO: refine the type for IC/ICRC address to be more clear
-export type OnramperWalletAddress = BtcAddress | EthAddress | string;
-
-export interface OnramperCryptoWallet {
-	cryptoId: OnramperId;
-	wallet: OnramperWalletAddress;
-}
-
-export interface OnramperNetworkWallet {
-	networkId: OnramperNetworkId;
-	wallet: OnramperWalletAddress;
-}

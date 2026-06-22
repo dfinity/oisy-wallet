@@ -18,18 +18,6 @@ pub struct OnramperSignedEntry {
     pub value: String,
 }
 
-/// Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
-/// signed query parameters. Empty fields are omitted from the canonicalized sign-content.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
-pub struct SignOnramperWidgetUrlRequest {
-    /// `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
-    pub wallets: Vec<OnramperSignedEntry>,
-    /// `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
-    pub network_wallets: Vec<OnramperSignedEntry>,
-    /// `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
-    pub wallet_address_tags: Vec<OnramperSignedEntry>,
-}
-
 /// Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
 /// canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
 /// re-deriving it (which risks diverging from what was HMAC'd and silently breaking the signature).
@@ -50,8 +38,12 @@ pub enum SignOnramperWidgetUrlError {
     /// frontend should treat this the same as a hard failure: the widget cannot be opened until
     /// the secret is configured.
     SecretNotConfigured,
-    /// The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
-    /// arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
-    /// signing oracle.
+    /// The caller exceeded the per-principal rate limit for signing requests. The limit bounds how
+    /// often a principal can trigger the address derivation (management-canister public-key reads)
+    /// behind this endpoint.
     RateLimited(RateLimitError),
+    /// None of the caller's wallet addresses could be derived (e.g. the signer public-key reads
+    /// all failed). The frontend treats this as a hard "widget unavailable" failure: there is
+    /// nothing safe to sign without at least one of the caller's own addresses.
+    AddressDerivationFailed,
 }

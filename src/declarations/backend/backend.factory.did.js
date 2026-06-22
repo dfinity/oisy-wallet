@@ -257,14 +257,10 @@ export const idlFactory = ({ IDL }) => {
 		Succeeded: IDL.Null,
 		Pending: IDL.Null
 	});
-	const OnramperSignedEntry = IDL.Record({
-		key: IDL.Text,
-		value: IDL.Text
-	});
 	const ActiveUserTransaction = IDL.Record({
 		id: IDL.Text,
 		status: ActiveUserTransactionStatus,
-		external_refs: IDL.Vec(OnramperSignedEntry),
+		external_refs: IDL.Vec(ActiveUserTransactionRef),
 		progress_step: IDL.Opt(IDL.Text),
 		data: ActiveUserTransactionData,
 		updated_at_ns: IDL.Nat64,
@@ -671,17 +667,13 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: UpdateAgreementsError
 	});
-	const SignOnramperWidgetUrlRequest = IDL.Record({
-		network_wallets: IDL.Vec(OnramperSignedEntry),
-		wallets: IDL.Vec(OnramperSignedEntry),
-		wallet_address_tags: IDL.Vec(OnramperSignedEntry)
-	});
 	const SignOnramperWidgetUrlResponse = IDL.Record({
 		signature: IDL.Text,
 		signed_query: IDL.Text
 	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
 		RateLimited: RateLimitError,
+		AddressDerivationFailed: IDL.Null,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({
@@ -728,7 +720,7 @@ export const idlFactory = ({ IDL }) => {
 	const UpdateActiveUserTransactionRequest = IDL.Record({
 		id: IDL.Text,
 		status: IDL.Opt(ActiveUserTransactionStatus),
-		external_refs: IDL.Opt(IDL.Vec(OnramperSignedEntry)),
+		external_refs: IDL.Opt(IDL.Vec(ActiveUserTransactionRef)),
 		progress_step: IDL.Opt(IDL.Text),
 		error: IDL.Opt(IDL.Text)
 	});
@@ -828,11 +820,7 @@ export const idlFactory = ({ IDL }) => {
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
-		sign_onramper_widget_url: IDL.Func(
-			[SignOnramperWidgetUrlRequest],
-			[SignOnramperWidgetUrlResult],
-			[]
-		),
+		sign_onramper_widget_url: IDL.Func([], [SignOnramperWidgetUrlResult], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		top_up_cycles_ledger: IDL.Func(
 			[IDL.Opt(TopUpCyclesLedgerRequest)],

@@ -1,24 +1,18 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { harvestAutopilots } from '$eth/derived/harvest-autopilots.derived';
-	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		OnramperRateLimitedError,
 		OnramperSecretNotConfiguredError
 	} from '$lib/canisters/errors';
 	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { routeAutopilotVault } from '$lib/derived/nav.derived';
@@ -34,7 +28,7 @@
 	import { token } from '$lib/stores/token.store';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
-	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
+	import { buildOnramperLink } from '$lib/utils/onramper.utils';
 
 	let vault = $derived(
 		$harvestAutopilots.find(({ token: { address } }) => address === $routeAutopilotVault)
@@ -66,18 +60,6 @@
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
 	let onlyCryptoNetworks = $derived(
 		$networks.map((network) => network.buy?.onramperId).filter(nonNullish)
-	);
-
-	let networkWallets = $derived(
-		mapOnramperNetworkWallets({
-			networks: $networks,
-			walletMap: new Map([
-				[BTC_MAINNET_NETWORK_ID, $btcAddressMainnet],
-				[ETHEREUM_NETWORK_ID, $ethAddress],
-				[ICP_NETWORK_ID, $icpAccountIdentifierText],
-				[SOLANA_MAINNET_NETWORK_ID, $solAddressMainnet]
-			])
-		})
 	);
 
 	let src = $state<string | undefined>(undefined);
@@ -123,8 +105,6 @@
 			defaultCrypto,
 			onlyCryptos,
 			onlyCryptoNetworks,
-			wallets: [],
-			networkWallets,
 			supportRecurringPayments: true,
 			enableCountrySelector: true,
 			themeName: 'dark' // we always pass dark, as some card elements aren't styled correctly (white text on white background) in light theme / onramper bug?

@@ -1,15 +1,21 @@
 //! Integration tests for `sign_onramper_widget_url`.
 //!
 //! The unit tests in `backend::onramper::model::tests` cover the canonicalization rules and the
-//! HMAC primitive. Here we exercise the canister boundary: the `caller_is_not_anonymous` guard,
-//! the `SecretNotConfigured` error path, the per-caller rate limit, and the happy-path round-trip
-//! via `set_api_keys`.
+//! HMAC primitive, and `backend::signer::service::tests` cover the address encoders. Here we
+//! exercise the canister boundary: the `caller_is_not_anonymous` guard, the `SecretNotConfigured`
+//! error path, the per-caller rate limit, and — crucially — that the endpoint signs the *caller's
+//! own* derived addresses rather than any client-supplied input.
+//!
+//! The endpoint takes no arguments: the wallet addresses are derived server-side from the caller
+//! principal, so there is no way for a caller to ask for a signature over an address they do not
+//! own. The ICP account identifier is pure local computation (it never needs the signer), so a
+//! successful call always carries at least `networkWallets=icp:<account-id>`; BTC/ETH/SOL are added
+//! when the threshold public-key reads succeed.
 
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
-    api_keys::ApiKeys,
-    onramper::{OnramperSignedEntry, SignOnramperWidgetUrlError, SignOnramperWidgetUrlRequest},
+    api_keys::ApiKeys, onramper::SignOnramperWidgetUrlError,
     result_types::SignOnramperWidgetUrlResult,
 };
 
@@ -19,17 +25,6 @@ use crate::utils::{
 };
 
 const TEST_SIGNING_SECRET: &str = "test-onramper-signing-secret";
-
-fn sample_request() -> SignOnramperWidgetUrlRequest {
-    SignOnramperWidgetUrlRequest {
-        wallets: vec![OnramperSignedEntry {
-            key: "btc".to_string(),
-            value: "1abc".to_string(),
-        }],
-        network_wallets: vec![],
-        wallet_address_tags: vec![],
-    }
-}
 
 fn provision_signing_secret(pic_setup: &PicBackend, secret: &str) {
     let api_keys = ApiKeys {
@@ -41,6 +36,19 @@ fn provision_signing_secret(pic_setup: &PicBackend, secret: &str) {
         .expect("controller should be allowed to call set_api_keys");
 }
 
+fn sign(pic_setup: &PicBackend, caller: Principal) -> SignOnramperWidgetUrlResult {
+    pic_setup
+        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", ())
+        .expect("call should reach the handler")
+}
+
+fn signed_query(result: SignOnramperWidgetUrlResult) -> String {
+    match result {
+        SignOnramperWidgetUrlResult::Ok(response) => response.signed_query,
+        SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+    }
+}
+
 #[test]
 fn sign_onramper_widget_url_rejects_anonymous_caller() {
     let pic_setup = setup();
@@ -49,7 +57,7 @@ fn sign_onramper_widget_url_rejects_anonymous_caller() {
     let result = pic_setup.update::<SignOnramperWidgetUrlResult>(
         Principal::anonymous(),
         "sign_onramper_widget_url",
-        sample_request(),
+        (),
     );
 
     assert!(
@@ -69,73 +77,56 @@ fn sign_onramper_widget_url_returns_error_when_secret_not_configured() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).expect("valid caller principal");
 
-    let result = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
-        .expect("call should reach the handler when caller is non-anonymous");
-
+    // Resolves before any address derivation, so it does not depend on the signer.
     assert_eq!(
-        result,
+        sign(&pic_setup, caller),
         SignOnramperWidgetUrlResult::Err(SignOnramperWidgetUrlError::SecretNotConfigured)
     );
 }
 
 #[test]
-fn sign_onramper_widget_url_returns_deterministic_signature_for_known_input() {
+fn sign_onramper_widget_url_signs_the_callers_own_derived_addresses() {
     let pic_setup = setup();
     provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
     let caller = Principal::from_text(CALLER).expect("valid caller principal");
 
-    let first = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
-        .expect("call should succeed when secret is provisioned");
-    let second = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
-        .expect("call should succeed when secret is provisioned");
+    let first = signed_query(sign(&pic_setup, caller));
+    let second = signed_query(sign(&pic_setup, caller));
 
-    // Deterministic: same input + same secret → same response.
+    // Deterministic: the caller's addresses derive to the same canonical string every time.
     assert_eq!(first, second);
 
-    let response = match first {
-        SignOnramperWidgetUrlResult::Ok(response) => response,
-        SignOnramperWidgetUrlResult::Err(err) => {
-            panic!("expected Ok response but got {err:?}")
-        }
-    };
-
-    // The signed_query is the canonical fragment the backend HMAC'd for `sample_request()`.
-    assert_eq!(response.signed_query, "wallets=btc:1abc");
-
-    // Sanity check: HMAC-SHA256 hex digest is 64 lowercase hex characters.
-    let signature = response.signature;
-    assert_eq!(signature.len(), 64);
+    // Only the three signed parameters are ever emitted, in canonical (alphabetical) order; the
+    // caller supplies none of them.
     assert!(
-        signature
-            .chars()
-            .all(|c| c.is_ascii_hexdigit() && !c.is_ascii_uppercase()),
-        "signature should be lowercase hex; got {signature}"
+        first.starts_with("networkWallets="),
+        "signed query should be the derived networkWallets; got {first}"
+    );
+    // The ICP account identifier is always derivable (pure local compute), so it is always present.
+    assert!(
+        first.contains("icp:"),
+        "signed query should contain the caller's ICP account identifier; got {first}"
     );
 }
 
 #[test]
-fn sign_onramper_widget_url_changes_when_inputs_change() {
+fn sign_onramper_widget_url_binds_the_signature_to_the_caller() {
     let pic_setup = setup();
     provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
-    let caller = Principal::from_text(CALLER).expect("valid caller principal");
 
-    let base = sample_request();
-    let mut changed = sample_request();
-    changed.wallets[0].value = "1xyz".to_string();
+    // Two distinct non-anonymous principals derive distinct addresses, so the signed content (and
+    // therefore the signature) differs. A caller can only ever get a URL bound to their own wallet
+    // — there is no input through which one user could obtain a signature over another's
+    // address.
+    let caller_a = Principal::from_text(CALLER).expect("valid caller principal");
+    let caller_b = controller();
 
-    let base_sig = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", base)
-        .expect("call should succeed");
-    let changed_sig = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", changed)
-        .expect("call should succeed");
+    let query_a = signed_query(sign(&pic_setup, caller_a));
+    let query_b = signed_query(sign(&pic_setup, caller_b));
 
     assert_ne!(
-        base_sig, changed_sig,
-        "different inputs must produce different signatures"
+        query_a, query_b,
+        "different callers must get signatures over their own (different) addresses"
     );
 }
 
@@ -147,23 +138,13 @@ fn sign_onramper_widget_url_rate_limits_repeated_callers() {
 
     // The limiter allows 30 calls per caller per minute; the 31st within the window is rejected.
     for _ in 0..30 {
-        let result = pic_setup
-            .update::<SignOnramperWidgetUrlResult>(
-                caller,
-                "sign_onramper_widget_url",
-                sample_request(),
-            )
-            .expect("call should reach the handler");
         assert!(
-            matches!(result, SignOnramperWidgetUrlResult::Ok(_)),
+            matches!(sign(&pic_setup, caller), SignOnramperWidgetUrlResult::Ok(_)),
             "calls within the limit should succeed"
         );
     }
 
-    let limited = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
-        .expect("call should reach the handler");
-
+    let limited = sign(&pic_setup, caller);
     assert!(
         matches!(
             limited,
@@ -212,12 +193,9 @@ fn set_onramper_signing_secret_enables_without_clobbering_other_keys() {
         .expect("controller should be allowed to set the signing secret");
 
     let caller = Principal::from_text(CALLER).expect("valid caller principal");
-    let signed = pic_setup
-        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
-        .expect("call should reach the handler");
     assert!(
-        matches!(signed, SignOnramperWidgetUrlResult::Ok(_)),
-        "signing should succeed once the secret is set; got {signed:?}"
+        matches!(sign(&pic_setup, caller), SignOnramperWidgetUrlResult::Ok(_)),
+        "signing should succeed once the secret is set"
     );
 
     let keys = pic_setup

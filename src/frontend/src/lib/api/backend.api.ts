@@ -33,7 +33,6 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
-	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings,
@@ -164,12 +163,11 @@ export const allowSigning = async ({
 };
 
 export const signOnramperWidgetUrl = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<SignOnramperWidgetUrlResponse> => {
+	identity
+}: CanisterApiFunctionParams): Promise<SignOnramperWidgetUrlResponse> => {
 	const { signOnramperWidgetUrl } = await backendCanister({ identity });
 
-	return signOnramperWidgetUrl(params);
+	return signOnramperWidgetUrl();
 };
 
 export const addUserHiddenDappId = async ({

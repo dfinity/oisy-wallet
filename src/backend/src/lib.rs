@@ -27,7 +27,6 @@ use shared::{
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
-        onramper::SignOnramperWidgetUrlRequest,
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,

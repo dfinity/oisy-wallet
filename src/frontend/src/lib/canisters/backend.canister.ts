@@ -6,7 +6,6 @@ import type {
 	CustomToken,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
-	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
@@ -42,7 +41,6 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
-	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -231,26 +229,13 @@ export class BackendCanister extends Canister<BackendService> {
 		throw mapGetAllowedCyclesError(response.Err);
 	};
 
-	signOnramperWidgetUrl = async ({
-		wallets,
-		networkWallets,
-		walletAddressTags
-	}: SignOnramperWidgetUrlParams): Promise<SignOnramperWidgetUrlResponse> => {
+	signOnramperWidgetUrl = async (): Promise<SignOnramperWidgetUrlResponse> => {
 		const { sign_onramper_widget_url } = this.caller({ certified: true });
 
-		const request: SignOnramperWidgetUrlRequest = {
-			wallets: wallets.map(({ cryptoId, wallet }) => ({ key: cryptoId, value: wallet })),
-			network_wallets: networkWallets.map(({ networkId, wallet }) => ({
-				key: networkId,
-				value: wallet
-			})),
-			wallet_address_tags: (walletAddressTags ?? []).map(({ cryptoId, tag }) => ({
-				key: cryptoId,
-				value: tag
-			}))
-		};
-
-		const response = await sign_onramper_widget_url(request);
+		// No arguments: the backend derives the caller's own BTC/ETH/ICP/SOL receiving addresses
+		// from their principal and signs only those. The frontend never supplies wallet addresses,
+		// so a caller can only ever obtain a signature bound to their own wallet.
+		const response = await sign_onramper_widget_url();
 
 		if ('Ok' in response) {
 			return response.Ok;
