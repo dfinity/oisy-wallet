@@ -17,7 +17,7 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '@dfinity/gix-components';
+import { isIOS } from '$lib/utils/device.utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
