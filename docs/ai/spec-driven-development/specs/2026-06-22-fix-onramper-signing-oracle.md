@@ -60,15 +60,16 @@ parameters with a shared secret, so the limit bounds its use as a signing oracle
 - `networkWallets` — built by `mapOnramperNetworkWallets` (`src/frontend/src/lib/utils/onramper.utils.ts`)
   from a fixed map of four networks to the caller's own derived addresses:
 
-  | OnRamper network id | Address store (frontend) | Notes |
-  | ------------------- | ------------------------ | ----- |
-  | `bitcoin` | `$btcAddressMainnet` | BTC mainnet P2WPKH |
-  | `ethereum` | `$ethAddress` | ETH address |
-  | `icp` | `$icpAccountIdentifierText` | ICP **account identifier** (hex), default subaccount |
-  | `solana` | `$solAddressMainnet` | SOL mainnet address (base58) |
+  | OnRamper network id | Address store (frontend)    | Notes                                                |
+  | ------------------- | --------------------------- | ---------------------------------------------------- |
+  | `bitcoin`           | `$btcAddressMainnet`        | BTC mainnet P2WPKH                                   |
+  | `ethereum`          | `$ethAddress`               | ETH address                                          |
+  | `icp`               | `$icpAccountIdentifierText` | ICP **account identifier** (hex), default subaccount |
+  | `solana`            | `$solAddressMainnet`        | SOL mainnet address (base58)                         |
 
   (A network is only included when both its `buy.onramperId` and the caller's address are present —
   see `mapOnramperNetworkWallets`.)
+
 - `wallet_address_tags` — never sent.
 
 All four addresses are the caller's own, derived from the **chain-fusion signer** (the address
@@ -85,12 +86,12 @@ Derivation parity is the single most important correctness property of this chan
 
 ### What the backend can derive today vs. what is net-new
 
-| Network | OnRamper id | Backend capability today | Net-new work |
-| ------- | ----------- | ------------------------ | ------------ |
-| BTC mainnet | `bitcoin` | ✅ `signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, &principal)` (`src/backend/src/signer/service.rs:229`) | none — reuse |
-| ICP | `icp` | ✅ `signer::principal2account(&principal)` → hex (`src/backend/src/signer/service.rs:174`) | confirm hex/format parity with `$icpAccountIdentifierText` |
-| ETH | `ethereum` | ⚠️ partial — ECDSA pubkey machinery exists (`cfs_ecdsa_pubkey_of`, private, `src/backend/src/signer/service.rs:191`) but it hardcodes the **BTC** derivation schema (`vec![0u8]`); ETH uses schema `1` per the CFS comment, plus a keccak-256 → last-20-bytes step | derive ETH address (schema 1 + keccak), 0x-hex encode |
-| SOL mainnet | `solana` | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58 | derive via CFS Schnorr Ed25519 pubkey with path `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]` + `SOLANA_KEY_ID`, base58-encode |
+| Network     | OnRamper id | Backend capability today                                                                                                                                                                                                                                           | Net-new work                                                                                                                  |
+| ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| BTC mainnet | `bitcoin`   | ✅ `signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, &principal)` (`src/backend/src/signer/service.rs:229`)                                                                                                                                        | none — reuse                                                                                                                  |
+| ICP         | `icp`       | ✅ `signer::principal2account(&principal)` → hex (`src/backend/src/signer/service.rs:174`)                                                                                                                                                                         | confirm hex/format parity with `$icpAccountIdentifierText`                                                                    |
+| ETH         | `ethereum`  | ⚠️ partial — ECDSA pubkey machinery exists (`cfs_ecdsa_pubkey_of`, private, `src/backend/src/signer/service.rs:191`) but it hardcodes the **BTC** derivation schema (`vec![0u8]`); ETH uses schema `1` per the CFS comment, plus a keccak-256 → last-20-bytes step | derive ETH address (schema 1 + keccak), 0x-hex encode                                                                         |
+| SOL mainnet | `solana`    | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58                                                                                                                                                                                                           | derive via CFS Schnorr Ed25519 pubkey with path `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]` + `SOLANA_KEY_ID`, base58-encode |
 
 The frontend SOL derivation is the reference: `src/frontend/src/sol/services/sol-address.services.ts`
 (`getSolanaPublicKey` → Schnorr Ed25519 pubkey on path `[SOLANA_DERIVATION_PATH_PREFIX, network]`,
@@ -124,7 +125,7 @@ in `OnramperWidget.svelte`, and the buy flow is currently gated to staging. The 
 **mainnet** addresses to match. Whether staging/local builds need testnet/devnet derivation is an
 [open question](#open-questions-facts-to-confirm) — if so, the request keeps a single non-address
 field (e.g. an enum of which BTC/SOL network to derive) rather than free-form addresses; this still
-closes the oracle because the caller chooses a *network*, never an *address*.
+closes the oracle because the caller chooses a _network_, never an _address_.
 
 ---
 
@@ -331,7 +332,7 @@ field/Tailwind-level detail.
 1. **Partial-derivation policy.** If one chain's derivation fails, omit that `networkWallets` entry
    (frontend already tolerates missing networks) **or** fail the whole call? Recommendation: omit, so a
    transient single-chain signer hiccup doesn't block buying on the others — but never silently omit
-   *all* (empty `signed_query` would sign nothing). Decide and pin in a test.
+   _all_ (empty `signed_query` would sign nothing). Decide and pin in a test.
 2. **On-demand CFS calls vs. cached/offline derivation.** Derive live via signer pubkey calls (simplest,
    matches `btc_principal_to_p2wpkh_address`) vs. derive offline from a cached master pubkey like the
    frontend's `ic-pub-key` path (faster, more code). Recommendation: live calls for v1 (smallest correct
@@ -355,7 +356,7 @@ field/Tailwind-level detail.
       address they do not own (now a compile-time guarantee — no address field exists).
 - [ ] Frontend no longer derives or sends wallet addresses to the endpoint; `buildOnramperLink` and
       `OnramperWidget.svelte` drop the address stores/maps; FE typechecks (`tsc --project
-      tsconfig.spec.json`) and tests pass.
+    tsconfig.spec.json`) and tests pass.
 - [ ] `SecretNotConfigured` and `RateLimited` error paths keep their existing semantics.
 - [ ] `docs/ai/PRODUCT.md` gains a `## Buy (OnRamper)` section in this PR, including the explicit
       negative guarantee (signed addresses are always the authenticated caller's own).
