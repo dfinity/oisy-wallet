@@ -135,21 +135,49 @@ closes the oracle because the caller chooses a _network_, never an _address_.
 
 **1. Address derivation — `src/backend/src/signer/service.rs`**
 
-- Generalize ECDSA pubkey derivation so it can produce the **ETH** address, not just BTC. Either
-  parameterize `cfs_ecdsa_pubkey_of` by derivation schema (`0` BTC / `1` ETH) or add a sibling. Add an
-  `eth_principal_to_address(&principal) -> Result<String, String>` that computes the Ethereum address
-  (keccak-256 of the uncompressed pubkey, last 20 bytes, `0x`-hex, EIP-55 checksum if the frontend
-  uses it — confirm). Reuse the existing `read_config(ecdsa_key_name, cfs_canister_id)` wiring.
-- Add Schnorr Ed25519 pubkey retrieval + **SOL** address derivation:
-  `sol_principal_to_address(&principal) -> Result<String, String>` that calls the CFS Schnorr
-  `schnorr_public_key` (Ed25519, key id matching the frontend's `SOLANA_KEY_ID`) on the derivation
-  path matching the frontend's `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]`, then base58-encodes the
-  32-byte pubkey. Confirm clippy allows `schnorr_public_key` (only `sign_with_schnorr` /
-  `sign_with_ecdsa` are disallowed — pubkey reads should be fine; verify against
-  `docs/ai/backend/patterns.md` and `clippy.toml`).
-- BTC + ICP: reuse `btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, …)` and
-  `principal2account` (hex-encode to match `$icpAccountIdentifierText`).
+**Mechanism (mandatory — do not deviate without a cost review).** Derive every address from the
+**IC management canister threshold _public-key_ APIs** (`management_canister::ecdsa_public_key` and
+`management_canister::schnorr_public_key`), called with `canister_id = Some(cfs_canister_id)` and the
+**chain-fusion-signer derivation path** `[<schema_byte>, principal.as_slice()]`. This is exactly the
+pattern the existing `cfs_ecdsa_pubkey_of` / `btc_principal_to_p2wpkh_address` already use
+(`src/backend/src/signer/service.rs:191`, `:229`). Deriving _as_ the signer (same `canister_id` +
+path + key id) yields the same key material the signer (and the frontend's offline `ic-pub-key`
+derivation) produces, so address parity holds by construction.
+
+> **Cost guardrail — read before implementing.** These are public-key **reads**, which cost only the
+> management-canister query fee. They are **not** threshold signing and must **not** go through the
+> chain-fusion signer's signing path:
+>
+> - **Do NOT** call the chain-fusion **signer canister** to obtain addresses, and do **not** invoke
+>   `allow_signing` / `approve_signing` / any allowance or cycles-ledger top-up flow. A signing
+>   operation carries `SIGNER_FEE` (~80T cycles, `src/backend/src/signer/service.rs:36`) plus the
+>   ledger-approval dance — orders of magnitude more expensive than a pubkey read, and entirely
+>   unnecessary here. We only need the **public key**, never a signature.
+> - **Do NOT** use `sign_with_ecdsa` / `sign_with_schnorr` (also clippy-disallowed). Pubkey reads
+>   (`ecdsa_public_key` / `schnorr_public_key`) are allowed — verify against `clippy.toml` and
+>   `docs/ai/backend/patterns.md` before relying on it.
+> - **ICP costs zero calls** — it is pure local computation, so always derive it; never reach for a
+>   canister call to produce the ICP account identifier.
+
+Concretely, per chain:
+
+- **ETH** — generalize ECDSA pubkey derivation so it produces ETH too. Either parameterize
+  `cfs_ecdsa_pubkey_of` by schema byte (`0` BTC / `1` ETH — confirm `1`) or add a sibling, then add
+  `eth_principal_to_address(&principal) -> Result<String, String>`: keccak-256 of the uncompressed
+  pubkey, last 20 bytes, `0x`-hex (EIP-55 checksum if the frontend uses it — confirm). Reuse the
+  existing `read_config(ecdsa_key_name, cfs_canister_id)` wiring and the **same** `ecdsa_public_key`
+  call — only the schema byte changes vs. BTC.
+- **SOL** — add `sol_principal_to_address(&principal) -> Result<String, String>` calling
+  `management_canister::schnorr_public_key` (Ed25519, key id matching the frontend's `SOLANA_KEY_ID`)
+  with `canister_id = Some(cfs_canister_id)` and the path matching the frontend's
+  `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]`, then base58-encode the 32-byte pubkey.
+- **BTC + ICP** — reuse `btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, …)` (one
+  `ecdsa_public_key` read) and `principal2account` (zero calls; hex-encode to match
+  `$icpAccountIdentifierText`).
 - No `unwrap()` / `expect()` outside tests; explicit error types (`docs/ai/backend/patterns.md`).
+
+Net cost per widget-open: **three** management-canister pubkey reads (BTC, ETH, SOL) + zero-cost ICP
+— no signing fees, no allowance flow. The per-principal rate limiter still bounds even that.
 
 **2. `src/backend/src/onramper/service.rs` — `sign_onramper_widget_url`**
 
@@ -323,9 +351,10 @@ field/Tailwind-level detail.
 4. **Network scope on staging/local.** The widget is staging-gated and uses mainnet ids. Confirm whether
    staging/local must derive testnet/devnet addresses; if yes, introduce a single network-selection
    request field (an enum, never an address) instead of an argument-less endpoint.
-5. **Signer cost/allowance.** Deriving four addresses means up to four signer pubkey calls per widget
-   open. Confirm this needs no `allow_signing`/cycles-allowance dance (pubkey reads are typically free,
-   unlike signing) and fits the existing rate limit.
+5. _(Resolved — see [Address derivation](#changes) mechanism.)_ Cost is bounded: three
+   management-canister pubkey **reads** (BTC/ETH/SOL) + zero-cost ICP per widget-open, no signing fee
+   and no `allow_signing`/cycles-allowance flow. Implementation must hold to that; flag in review if any
+   path reaches for the signer's signing API.
 
 ## Pending decisions (facts clear — decide)
 
@@ -333,10 +362,12 @@ field/Tailwind-level detail.
    (frontend already tolerates missing networks) **or** fail the whole call? Recommendation: omit, so a
    transient single-chain signer hiccup doesn't block buying on the others — but never silently omit
    _all_ (empty `signed_query` would sign nothing). Decide and pin in a test.
-2. **On-demand CFS calls vs. cached/offline derivation.** Derive live via signer pubkey calls (simplest,
-   matches `btc_principal_to_p2wpkh_address`) vs. derive offline from a cached master pubkey like the
-   frontend's `ic-pub-key` path (faster, more code). Recommendation: live calls for v1 (smallest correct
-   change); revisit if latency matters.
+2. **_(Decided)_ Live management-canister pubkey reads.** Derive via `management_canister::
+   ecdsa_public_key` / `schnorr_public_key` with `canister_id = cfs_canister_id` (matches
+   `btc_principal_to_p2wpkh_address`) — the cheap, proven path. The offline alternative (deriving from a
+   cached master pubkey via `ic-pub-key`, as the frontend can) avoids the calls but adds code and a
+   master-key-caching concern; defer to a later optimization only if pubkey-read latency/cost ever
+   measures as a problem. Either way, **never** the signer's signing path.
 3. **Endpoint argument shape.** Argument-less endpoint vs. a minimal request carrying only a network
    selector (depends on open question 4). Recommendation: argument-less if mainnet-only suffices.
 
@@ -354,6 +385,10 @@ field/Tailwind-level detail.
       pinned to known vectors.
 - [ ] A regression test asserts the oracle is closed: an attacker cannot obtain a signature over an
       address they do not own (now a compile-time guarantee — no address field exists).
+- [ ] Addresses are derived only via management-canister pubkey **reads** (`ecdsa_public_key` /
+      `schnorr_public_key` with `canister_id = cfs_canister_id`) plus local ICP compute. No call to the
+      chain-fusion signer canister, no `allow_signing`/`approve_signing`/cycles-allowance flow, and no
+      `sign_with_ecdsa`/`sign_with_schnorr`. Reviewer confirms no ~80T `SIGNER_FEE` signing path is hit.
 - [ ] Frontend no longer derives or sends wallet addresses to the endpoint; `buildOnramperLink` and
       `OnramperWidget.svelte` drop the address stores/maps; FE typechecks (`tsc --project
     tsconfig.spec.json`) and tests pass.
