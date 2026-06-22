@@ -343,7 +343,7 @@
 			},
 			"caffeine": {
 				"name": "caffeine",
-				"one_liner": "Chat with AI on Caffeine to create apps and websites.<br>Our AI builds on a new open tech stack designed to power apps that are self-writing.",
+				"one_liner": "Chat with AI on Caffeine to create apps and websites.Our AI builds on a new open tech stack designed to power apps that are self-writing.",
 				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for \"self-writing apps\".<br>The platform unlocks a future where a large portion of the world's apps, websites and even enterprise systems, are eventually self-writing.",
 				"carousel": {
 					"text": "AIware apps on-demand",
