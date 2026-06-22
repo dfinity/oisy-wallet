@@ -250,9 +250,9 @@ fn keccak256(data: &[u8]) -> [u8; 32] {
     output
 }
 
-/// Encodes 20 address bytes as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex letter
-/// is uppercased when the corresponding nibble of the Keccak-256 of the lowercase hex is `>= 8`.
-/// See <https://eips.ethereum.org/EIPS/eip-55>.
+/// Encodes 20 address bytes as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex
+/// letter is uppercased when the corresponding nibble of the Keccak-256 of the lowercase hex is `>=
+/// 8`. See <https://eips.ethereum.org/EIPS/eip-55>.
 fn to_eip55_checksum(address: &[u8]) -> String {
     let hex_addr = hex::encode(address);
     let hash = keccak256(hex_addr.as_bytes());
