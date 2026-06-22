@@ -61,15 +61,13 @@ describe('Tabs', () => {
 		expect(goto).toHaveBeenNthCalledWith(2, 'test2');
 	});
 
-	it('should track event when navigating to a path with trackEventName set', async () => {
+	it('should fire a view_open with event_trigger=click when navigating to a path with trackEventName set', async () => {
 		const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
-
-		const trackEventName = 'test_event';
 
 		const { getByText } = render(Tabs, {
 			props: {
 				...props,
-				trackEventName,
+				trackEventName: 'test_event',
 				tabs: props.tabs.map((t) => ({ ...t, path: t.id })) as NonEmptyArray<{
 					label: string;
 					id: string;
@@ -80,12 +78,16 @@ describe('Tabs', () => {
 
 		await fireEvent.click(getByText(props.tabs[0].label));
 
-		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: trackEventName,
+		// The shared helper hardcodes the view_open name and adds the click trigger; the entry
+		// guard in Assets.svelte suppresses the landing fire on the resulting remount, so a click
+		// stays a single `click` event.
+		expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+			name: 'view_open',
 			metadata: {
 				event_context: 'assets_tab',
 				event_value: 'test1',
-				location_source: 'assets_page'
+				location_source: 'assets_page',
+				event_trigger: 'click'
 			}
 		});
 

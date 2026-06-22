@@ -455,6 +455,48 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('buildAssetsTabViewEvent', () => {
+		it('builds the assets-tab view_open payload for a deliberate tab click', async () => {
+			const { buildAssetsTabViewEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_TRIGGERS } = await import('$lib/enums/plausible');
+
+			const result = buildAssetsTabViewEvent({
+				tabId: 'nfts',
+				trigger: PLAUSIBLE_EVENT_TRIGGERS.CLICK
+			});
+
+			expect(result).toEqual({
+				name: 'view_open',
+				metadata: {
+					event_context: 'assets_tab',
+					event_value: 'nfts',
+					location_source: 'assets_page',
+					event_trigger: 'click'
+				}
+			});
+		});
+
+		it('builds the assets-tab view_open payload for the auto landing impression', async () => {
+			const { buildAssetsTabViewEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_TRIGGERS } = await import('$lib/enums/plausible');
+
+			const result = buildAssetsTabViewEvent({
+				tabId: 'tokens',
+				trigger: PLAUSIBLE_EVENT_TRIGGERS.AUTO
+			});
+
+			expect(result).toEqual({
+				name: 'view_open',
+				metadata: {
+					event_context: 'assets_tab',
+					event_value: 'tokens',
+					location_source: 'assets_page',
+					event_trigger: 'auto'
+				}
+			});
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 
