@@ -10,7 +10,8 @@ import type {
 	WizardStepsSwap
 } from '$lib/enums/wizard-steps';
 import type { WizardStepsGetTokenType } from '$lib/types/get-token';
-import type { WizardModal, WizardSteps } from '@dfinity/gix-components';
+import type { WizardSteps } from '$lib/types/wizard';
+import type { WizardModal } from '@dfinity/gix-components';
 
 type StepName =
 	| WizardStepsSend

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { getUnstakeWizardComponent } from '$lib/config/stake.config';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Vault } from '$lib/types/vaults';
+	import type { WizardStep } from '$lib/types/wizard';
 
 	interface Props {
 		amount: OptionAmount;
