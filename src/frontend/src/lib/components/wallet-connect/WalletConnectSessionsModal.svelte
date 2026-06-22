@@ -54,10 +54,13 @@
 		});
 
 	// Disconnect a single dApp by topic; the list updates in place and the other dApps stay connected.
+	// The service catches its own errors, so only surface the success toast when it actually succeeded.
 	const disconnectOne = async (topic: string) => {
-		await disconnectSession(topic);
+		const { success } = await disconnectSession(topic);
 
-		showDisconnectedToast();
+		if (success) {
+			showDisconnectedToast();
+		}
 	};
 
 	// Tear down every connection at once, preserving the previous one-tap teardown behaviour.

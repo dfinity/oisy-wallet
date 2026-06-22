@@ -294,10 +294,10 @@ describe('wallet-connect.services', () => {
 		});
 
 		describe('disconnectSession', () => {
-			it('should do nothing when no listener is set', async () => {
+			it('should do nothing and report failure when no listener is set', async () => {
 				const spy = vi.spyOn(mockListener, 'disconnectSession');
 
-				await disconnectSession('topic-a');
+				await expect(disconnectSession('topic-a')).resolves.toEqual({ success: false });
 
 				expect(spy).not.toHaveBeenCalled();
 			});
@@ -312,7 +312,7 @@ describe('wallet-connect.services', () => {
 					getActiveSessions: vi.fn().mockReturnValue({ b: sessionB })
 				});
 
-				await disconnectSession('topic-a');
+				await expect(disconnectSession('topic-a')).resolves.toEqual({ success: true });
 
 				expect(disconnectSessionSpy).toHaveBeenCalledExactlyOnceWith('topic-a');
 				expect(get(walletConnectSessionsStore)).toEqual([sessionB]);
@@ -332,12 +332,28 @@ describe('wallet-connect.services', () => {
 					getActiveSessions: vi.fn().mockReturnValue({})
 				});
 
-				await disconnectSession('topic-a');
+				await expect(disconnectSession('topic-a')).resolves.toEqual({ success: true });
 
 				expect(disconnectSessionSpy).toHaveBeenCalledExactlyOnceWith('topic-a');
 				expect(disconnectSpy).toHaveBeenCalledOnce();
 				expect(get(walletConnectListenerStore)).toBeUndefined();
 				expect(get(walletConnectSessionsStore)).toEqual([]);
+			});
+
+			it('should report failure and not tear down when the listener throws', async () => {
+				const disconnectSessionSpy = vi.fn().mockRejectedValue(new Error('disconnect failed'));
+				const disconnectSpy = vi.fn();
+
+				setListener({
+					disconnectSession: disconnectSessionSpy,
+					disconnect: disconnectSpy,
+					getActiveSessions: vi.fn().mockReturnValue({ a: sessionA })
+				});
+
+				await expect(disconnectSession('topic-a')).resolves.toEqual({ success: false });
+
+				expect(disconnectSpy).not.toHaveBeenCalled();
+				expect(get(walletConnectListenerStore)).not.toBeUndefined();
 			});
 		});
 	});

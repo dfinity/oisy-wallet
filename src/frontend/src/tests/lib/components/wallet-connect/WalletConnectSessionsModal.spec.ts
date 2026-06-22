@@ -1,5 +1,6 @@
 import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
 import * as walletConnectServices from '$lib/services/wallet-connect.services';
+import * as toastsStore from '$lib/stores/toasts.store';
 import {
 	walletConnectListenerStore,
 	walletConnectSessionsStore
@@ -177,7 +178,9 @@ describe('WalletConnectSessionsModal', () => {
 	});
 
 	it('should disconnect only the clicked session by topic', async () => {
-		const spy = vi.spyOn(walletConnectServices, 'disconnectSession').mockResolvedValue(undefined);
+		const spy = vi
+			.spyOn(walletConnectServices, 'disconnectSession')
+			.mockResolvedValue({ success: true });
 
 		const session1 = mockSession({
 			accounts: ['eip155:1:0xAbCdEf1234567890AbCdEf1234567890AbCdEf12'],
@@ -198,6 +201,24 @@ describe('WalletConnectSessionsModal', () => {
 		await fireEvent.click(getByTestId('wallet-connect-disconnect-session-topic-2'));
 
 		expect(spy).toHaveBeenCalledExactlyOnceWith('topic-2');
+	});
+
+	it('should not show the disconnected toast when the per-session disconnect fails', async () => {
+		vi.spyOn(walletConnectServices, 'disconnectSession').mockResolvedValue({ success: false });
+		const toastSpy = vi.spyOn(toastsStore, 'toastsShow');
+
+		setSessions({
+			'topic-1': {
+				...mockSession({ accounts: ['eip155:1:0xAbCdEf1234567890AbCdEf1234567890AbCdEf12'] }),
+				topic: 'topic-1'
+			}
+		});
+
+		const { getByTestId } = render(WalletConnectSessionsModal);
+
+		await fireEvent.click(getByTestId('wallet-connect-disconnect-session-topic-1'));
+
+		expect(toastSpy).not.toHaveBeenCalled();
 	});
 
 	it('should not show a Disconnect all button when no app is connected', () => {

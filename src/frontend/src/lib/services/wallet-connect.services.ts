@@ -220,11 +220,11 @@ const initListener = async (): Promise<OptionWalletConnectListener> => {
 
 // Disconnect a single connected dApp by topic, leaving the others connected. When the last app is
 // removed, fall through to a full teardown so the subsystem is reset cleanly (no leftover pairings).
-export const disconnectSession = async (topic: string) => {
+export const disconnectSession = async (topic: string): Promise<ResultSuccess> => {
 	const listener = get(walletConnectListenerStore);
 
 	if (isNullish(listener)) {
-		return;
+		return { success: false };
 	}
 
 	try {
@@ -234,11 +234,15 @@ export const disconnectSession = async (topic: string) => {
 			msg: { text: get(i18n).wallet_connect.error.disconnect },
 			err
 		});
+
+		return { success: false };
 	}
 
 	if (syncSessions().length === 0) {
 		await disconnectListener();
 	}
+
+	return { success: true };
 };
 
 export const connectListener = async ({
