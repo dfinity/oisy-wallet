@@ -12,6 +12,7 @@ import {
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	type PLAUSIBLE_EVENT_TRIGGERS,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
 import en from '$lib/i18n/en.json';
@@ -249,3 +250,27 @@ export const buildLearnMoreEvent = ({
 		}
 	};
 };
+
+/**
+ * Build a `view_open` payload for an Assets sub-tab impression (Tokens / NFTs / Earning).
+ *
+ * Returns the params rather than firing so the two call sites stay byte-identical:
+ * a deliberate tab click in `Tabs.handleClick` (`trigger = click`) and the landing-tab
+ * impression fired on entering the Assets section (`trigger = auto`). The only fields
+ * that vary between them are `event_value` (the tab id) and `event_trigger`.
+ */
+export const buildAssetsTabViewEvent = ({
+	tabId,
+	trigger
+}: {
+	tabId: string;
+	trigger: PLAUSIBLE_EVENT_TRIGGERS;
+}): TrackEventParams => ({
+	name: PLAUSIBLE_EVENTS.VIEW_OPEN,
+	metadata: {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
+		event_value: tabId,
+		location_source: PLAUSIBLE_EVENT_SOURCES.ASSETS_PAGE,
+		event_trigger: trigger
+	}
+});
