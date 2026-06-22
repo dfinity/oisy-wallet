@@ -296,6 +296,7 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		hyperliquid: { name: string; one_liner: string; description: string };
 	};
 }
 
