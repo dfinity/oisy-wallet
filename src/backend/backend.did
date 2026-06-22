@@ -850,9 +850,9 @@ type SignOnramperWidgetUrlError = variant {
 	// often a principal can trigger the address derivation (management-canister public-key reads)
 	// behind this endpoint.
 	RateLimited : RateLimitError;
-	// None of the caller's wallet addresses could be derived (e.g. the signer public-key reads all
-	// failed). The frontend treats this as a hard "widget unavailable" failure: there is nothing
-	// safe to sign without at least one of the caller's own addresses.
+	// None of the caller's wallet addresses could be derived (e.g. the signer public-key reads
+	// all failed). The frontend treats this as a hard "widget unavailable" failure: there is
+	// nothing safe to sign without at least one of the caller's own addresses.
 	AddressDerivationFailed;
 	// Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
 	// frontend should treat this the same as a hard failure: the widget cannot be opened until

@@ -1269,9 +1269,9 @@ export type SignOnramperWidgetUrlError =
 	  }
 	| {
 			/**
-			 * None of the caller's wallet addresses could be derived (e.g. the signer public-key reads all
-			 * failed). The frontend treats this as a hard "widget unavailable" failure: there is nothing
-			 * safe to sign without at least one of the caller's own addresses.
+			 * None of the caller's wallet addresses could be derived (e.g. the signer public-key reads
+			 * all failed). The frontend treats this as a hard "widget unavailable" failure: there is
+			 * nothing safe to sign without at least one of the caller's own addresses.
 			 */
 			AddressDerivationFailed: null;
 	  }
