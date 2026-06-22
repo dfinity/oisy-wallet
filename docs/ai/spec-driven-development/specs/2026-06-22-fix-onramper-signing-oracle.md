@@ -13,9 +13,8 @@ principal and sign only those**, ignoring (and removing) the client-supplied add
 turns "the backend signs whatever you send" into "the backend signs your own addresses," which is
 what the HMAC was always meant to guarantee.
 
-Source: HackenProof report **ICPBB-221** (verdict Valid; tentative-Medium, Impact Major /
-Likelihood Possible). Same vulnerability class as **ICPBB-120**
-(`2026-06-09-fix-btc-pending-tx-prune-bypass.md`): a caller-supplied address that must instead be
+This is the same vulnerability class as the fix in
+`2026-06-09-fix-btc-pending-tx-prune-bypass.md`: a caller-supplied address that must instead be
 derived from the principal.
 
 ---
@@ -44,9 +43,9 @@ Ok(sign_widget_url(&secret, &wallets, &network_wallets, &wallet_address_tags))
 
 The only guards are `caller_is_not_anonymous` and a 30-calls/min per-principal rate limiter
 (`src/backend/src/api/onramper.rs`, line ~23). Nothing binds the signed addresses to the caller.
-An authenticated attacker (Internet Identity is free) requests a signature for **their own** BTC/ETH
-address, then builds a fully-valid `buy.onramper.com` URL — branded as an OISY integration — that
-routes a phishing victim's fiat purchase to the attacker's wallet. The HMAC is OnRamper's sole
+An authenticated attacker (Internet Identity is free) could request a signature for **their own**
+BTC/ETH address, then build a fully-valid `buy.onramper.com` URL — branded as an OISY integration —
+that routes a phishing victim's fiat purchase to the attacker's wallet. The HMAC is OnRamper's sole
 documented URL-integrity check, so a valid signature is treated as OISY authorization. The existing
 shared-type doc comment already names the hazard ("the endpoint signs arbitrary caller-supplied
 parameters with a shared secret, so the limit bounds its use as a signing oracle",
@@ -102,7 +101,7 @@ signer directly. **The backend addresses must match the signer's, byte-for-byte.
 
 ## Approach
 
-Server-side derive-and-replace (the requester's choice; the report's recommended mitigation):
+Server-side derive-and-replace (the requester's choice; the recommended mitigation):
 
 1. The endpoint no longer accepts `wallets`, `network_wallets`, or `wallet_address_tags`. It derives
    the caller's four receiving addresses from `msg_caller()` and signs only those as `networkWallets`
@@ -237,17 +236,13 @@ real) signer, comparing `sign_onramper_widget_url`'s `signed_query` against inde
 expected addresses. At minimum, unit-test the new ETH (keccak) and SOL (base58) encoders against known
 pubkey→address vectors so the encoding step is pinned even if the live signer call is mocked.
 
-**Backend — oracle is closed (primary regression test).** Replace the report's PoC intent: the
-endpoint no longer accepts addresses, so the attacker has no lever. Add/adapt a test in
-`src/backend/tests/it/onramper.rs` proving:
+**Backend — oracle is closed (primary regression test).** Once the endpoint no longer accepts
+addresses, the attacker has no lever. Add a test in `src/backend/tests/it/onramper.rs` proving:
 
 - the endpoint signature takes no caller-supplied wallet fields (compile-time guarantee — note this as
-  the structural replacement for a runtime check, as ICPBB-120 did);
+  the structural replacement for a runtime check, as the BTC pending-tx fix did);
 - the `signed_query` for a caller contains that caller's derived addresses and **not** an
-  attacker-chosen string. The report's existing PoC tests
-  (`test_sign_onramper_widget_url_signing_oracle_vulnerability`,
-  `test_sign_with_invalid_btc_address`) should be rewritten to assert the new behavior (they document
-  the old hole; flip them to pin the fix).
+  attacker-chosen string.
 
 **Backend — secret-not-configured + rate-limit** paths still return their existing errors (unchanged
 semantics).
@@ -293,9 +288,9 @@ field/Tailwind-level detail.
 - **Title (breaking):** `fix(backend)!: derive OnRamper signed wallet addresses from caller principal`
 - **Body:** `# Motivation`, `# Changes`, `# Tests`, and a `BREAKING CHANGE:` line describing removal of
   `wallets` / `network_wallets` / `wallet_address_tags` from `SignOnramperWidgetUrlRequest` (FE binding
-  regenerated in this PR; the endpoint now derives addresses and is `async`). Reference report
-  **ICPBB-221** in prose. **No Jira / Atlassian links** — CI rejects them; ICPBB is a HackenProof report
-  id, referenced in prose only (consistent with the ICPBB-120 spec).
+  regenerated in this PR; the endpoint now derives addresses and is `async`). Describe the
+  vulnerability in prose (open signing oracle) without external tracker references. **No Jira /
+  Atlassian links** — CI rejects them.
 - Keep BE + FE in one PR (declarations regenerated here). Do not bump versions or hand-edit
   `signer-versions.json`.
 
@@ -356,8 +351,8 @@ field/Tailwind-level detail.
 - [ ] Each derived address is proven equal to the chain-fusion signer / frontend address for a fixed
       principal (BTC, ETH, ICP, SOL), with encoder unit tests (keccak/EIP-55 for ETH, base58 for SOL)
       pinned to known vectors.
-- [ ] The report's PoC tests are flipped to assert the oracle is closed: an attacker cannot obtain a
-      signature over an address they do not own (now a compile-time guarantee — no address field exists).
+- [ ] A regression test asserts the oracle is closed: an attacker cannot obtain a signature over an
+      address they do not own (now a compile-time guarantee — no address field exists).
 - [ ] Frontend no longer derives or sends wallet addresses to the endpoint; `buildOnramperLink` and
       `OnramperWidget.svelte` drop the address stores/maps; FE typechecks (`tsc --project
       tsconfig.spec.json`) and tests pass.
