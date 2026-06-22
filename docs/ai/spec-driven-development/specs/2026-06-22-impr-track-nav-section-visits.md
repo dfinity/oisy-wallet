@@ -116,6 +116,29 @@ All five section visits reuse the existing `PLAUSIBLE_EVENTS.PAGE_OPEN` event; t
 
 Per-tab view counts = count of `view_open` grouped by `event_value`. Split by `event_trigger` to separate deliberate switches from default landings. No PII is included; all values are static enum members.
 
+### Navigation clicks (`ui_click`)
+
+`page_open` deliberately counts a visit _however_ it is reached, so it carries no source. To capture the complementary signal — _how_ users navigate, i.e. which navigation controls they actually click — we add a generic **`ui_click`** event. It is intentionally generic (not `navigation_click` or per-surface names): Plausible is analysed by _event name → breakdown by property_, so one event with a `source_location` ladder keeps every navigation surface comparable in a single breakdown and scales to future surfaces with no new event names. This matches OISY's existing schema (generic verbs like `view_open` / `open_modal` parameterised by properties).
+
+| Field                | Value                                                             |
+| -------------------- | ----------------------------------------------------------------- |
+| **Event**            | `ui_click`                                                        |
+| `source_location`    | `navigation` (the standard key per the common-properties table)   |
+| `source_sublocation` | `main_menu` (main nav menu) \| `assets_tabs` (Assets sub-tab bar) |
+| `event_value`        | the click target — section id (`assets` …) or tab id (`tokens` …) |
+
+Scope for this change: the **main navigation menu** and the **Assets sub-tab bar**. (Other navigation surfaces — user menu, back buttons, dApp cards, settings sub-nav — can adopt the same event later by adding `source_location` / `source_sublocation` values; out of scope here.)
+
+This uses the standard **`source_location`** key (not the legacy reversed `location_source` that `view_open` / `NftCard` currently use). Unifying the legacy key is deliberately left as separate, step-by-step cleanup and is out of scope here.
+
+#### Relationship to `page_open` / `view_open`
+
+`ui_click` is **orthogonal** to the appearance events, not a replacement:
+
+- A **main-nav click** to Assets produces three events: `ui_click` (`source_sublocation = main_menu`, `event_value = assets`), `page_open` (`assets-page`), and the landing `view_open` (`event_trigger = auto`, the active tab).
+- A **direct URL / back-forward / redirect** entry produces no `ui_click` — only `page_open` + the `auto` `view_open`. So `page_open` stays the complete "visits however reached" metric.
+- An **Assets sub-tab click** produces `ui_click` (`source_sublocation = assets_tabs`, `event_value` = tab) **and** the existing `view_open` (`event_trigger = click`). The two are kept (UI-interaction signal vs appearance signal); `event_trigger` on `view_open` is **not** removed.
+
 ---
 
 ## Implementation
@@ -277,6 +300,39 @@ In **`src/frontend/src/lib/components/rewards/Rewards.svelte`**, add the same `o
 
 `earning/Earning.svelte` already fires `PAGE_OPEN` with `EARN` / `EARN_PAGE`. Do not duplicate or modify it.
 
+### 9. Add the `ui_click` event, helper, and `navigation` source
+
+In `src/frontend/src/lib/enums/plausible.ts`, add `UI_CLICK = 'ui_click'` to `PLAUSIBLE_EVENTS` and `NAVIGATION = 'navigation'` to `PLAUSIBLE_EVENT_SOURCE_LOCATIONS` (the standard `source_location` enum).
+
+Add a factory in `analytics.services.ts`, mirroring `buildLearnMoreEvent` (returns params; `source_sublocation` / `event_value` are optional and omitted when nullish):
+
+```ts
+export const buildUiClickEvent = ({
+	sourceLocation,
+	sourceSublocation,
+	eventValue
+}: {
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	eventValue?: string;
+}): TrackEventParams => ({
+	name: PLAUSIBLE_EVENTS.UI_CLICK,
+	metadata: {
+		source_location: sourceLocation,
+		...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
+		...(nonNullish(eventValue) && { event_value: eventValue })
+	}
+});
+```
+
+### 10. Fire `ui_click` from the main nav menu and the Assets tab bar
+
+Add an optional `trackEvent?: TrackEventParams` prop to **`NavigationItem.svelte`** and fire it from the link's `onclick`, exactly mirroring `ExternalLink.svelte` (`isNullish(trackEvent)` → return; else `trackEventServices(trackEvent)`). `NavigationItem` is consumed only by `NavigationMenuMainItems`, so this stays scoped to the main menu.
+
+In **`NavigationMenuMainItems.svelte`**, pass a `ui_click` event to each item via the helper (`source_location = navigation`, `source_sublocation = main_menu`, `event_value` = the section id: `assets` / `activity` / `earn` / `explore` / `rewards` / `settings`).
+
+In **`Tabs.svelte`**, in the same `nonNullish(trackEventName)` block that fires the `view_open`, additionally fire a `ui_click` (`source_sublocation = assets_tabs`, `event_value = id`). Keep the `view_open` (with `event_trigger = click`) as-is — the two events are complementary.
+
 ---
 
 ## Tests
@@ -289,8 +345,9 @@ Follow the existing `PAGE_OPEN` test precedent in `src/frontend/src/tests/lib/co
   - Navigating in from an Assets route (Tokens↔NFTs↔Earning sub-tab switch) fires **neither** — no `page_open`, no `auto` `view_open`.
   - The `auto` `view_open`'s `event_value` matches the tab actually shown (parametrise over `tokens` / `nfts` / `earning`).
   - Drive `afterNavigate` via the SvelteKit navigation mocks already used in the suite.
-- **`Tabs`** (`src/frontend/src/tests/lib/components/ui/Tabs.spec.ts`): clicking a tab fires one `view_open` with `event_trigger = click` and the clicked tab's `event_value`. Confirms the click path is not double-counted by the entry guard.
-- **`analytics.services` / helper:** unit-test `buildAssetsTabViewEvent` for both `auto` and `click`, asserting the full payload (`assets_tab` / tab id / `assets_page` / trigger) — mirrors the `buildLearnMoreEvent` tests in `analytics.service.spec.ts`.
+- **`Tabs`** (`src/frontend/src/tests/lib/components/ui/Tabs.spec.ts`): clicking a tab fires the `view_open` (`event_trigger = click`, clicked tab's `event_value`) **and** the `ui_click` (`source_location = navigation`, `source_sublocation = assets_tabs`, `event_value` = tab). Confirms the click path is not double-counted by the entry guard.
+- **`analytics.services` / helpers:** unit-test `buildAssetsTabViewEvent` for both `auto` and `click`, and `buildUiClickEvent` (with and without `source_sublocation` / `event_value`) — asserting full payloads, mirroring the `buildLearnMoreEvent` tests in `analytics.service.spec.ts`.
+- **`NavigationItem`** (`src/frontend/src/tests/lib/components/navigation/NavigationItem.spec.ts`, new): clicking the item fires the provided `trackEvent`; no event when the prop is absent (mirrors the `ExternalLink` click-tracking test).
 - **`nav.utils.spec.ts`:** add cases for `isAssetsRouteId` (true for tokens/nfts/earning ids, false for activity/explore/settings/earn/rewards/`null`).
 - Do not add assertions to the Earn / NFT / Harvest tests — they are unchanged.
 
@@ -299,7 +356,9 @@ Follow the existing `PAGE_OPEN` test precedent in `src/frontend/src/tests/lib/co
 ## Out of Scope
 
 - The existing `PAGE_OPEN` on Earn, NFT, and Harvest pages — unchanged.
-- Tracking nav-menu _clicks_ specifically (the chosen approach counts section visits however reached; a click-only metric was considered and rejected because it misses direct URLs, back/forward, and redirects).
+- Replacing `page_open` with click tracking: `page_open` remains the complete "visits however reached" metric (it must catch direct URLs, back/forward, redirects). The `ui_click` event is an _additional, orthogonal_ signal for how users navigate, not a substitute — and it deliberately does **not** add `event_trigger` to `page_open`.
+- `ui_click` on navigation surfaces beyond the main nav menu and the Assets tab bar (user menu, back buttons, dApp cards, settings sub-nav, …) — same event, added later via new `source_location` / `source_sublocation` values.
+- Migrating the legacy `location_source` key to the standard `source_location` — done step by step, separately.
 - Generalising the `Tabs` `view_open` payload for non-Assets consumers (none exist today).
 - Sub-navigation within Settings, Explore, or Activity (e.g. individual settings panels, dApp detail opens, transaction filters) — those have or can get their own events separately.
 - Any dashboard/Confluence changes — the new values appear automatically once events flow.
@@ -322,8 +381,12 @@ Back/forward navigation _between_ Assets sub-tabs (e.g. NFTs → Tokens → back
 - [ ] Visiting **Rewards** (Earn slot when `EARNING_ENABLED` is off) fires `page_open` with `event_context = rewards`, `event_value = rewards-page`.
 - [ ] **Earn** continues to fire its existing `page_open` (`earn-page`) with no change.
 - [ ] Each `page_open` fires on _any_ entry to the section (nav click, direct URL, back/forward, redirect), not only on nav-menu clicks.
+- [ ] Clicking a **main nav menu** item fires `ui_click` with `source_location = navigation`, `source_sublocation = main_menu`, and `event_value` = the section id; `page_open` stays trigger-less.
+- [ ] Clicking an **Assets sub-tab** fires both `ui_click` (`source_location = navigation`, `source_sublocation = assets_tabs`, `event_value` = tab) and the existing `view_open` (`event_trigger = click`); `view_open`'s `event_trigger` is retained.
+- [ ] `ui_click` uses the standard `source_location` key; the legacy `location_source` on `view_open` is left unchanged.
+- [ ] `UI_CLICK` and `PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION` members added; `ui_click` payloads are produced by the shared `buildUiClickEvent` helper.
 - [ ] New `PLAUSIBLE_EVENT_VALUES`, `PLAUSIBLE_EVENT_CONTEXTS`, and `PLAUSIBLE_EVENT_TRIGGERS` members added; no new path constants introduced; `isAssetsRouteId` reuses existing path predicates.
 - [ ] Unit tests cover the four newly instrumented sections, the Assets entry-vs-sub-tab guard (page_open + auto view_open), the `click` trigger via `Tabs`, the `buildAssetsTabViewEvent` helper, and `isAssetsRouteId`.
 - [ ] Analytics never throws — tracking failures are swallowed and never affect the user flow (guaranteed by `trackEvent`).
 - [ ] Quality gates pass: `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`, `npm run test`.
-- [ ] After merge, `docs/ai/PRODUCT.md` is updated to note that the five main navigation sections emit section-visit analytics and the Assets sub-tabs emit `auto`/`click` view analytics.
+- [ ] In this PR, `docs/ai/PRODUCT.md` is updated to note that the five main navigation sections emit section-visit analytics, the Assets sub-tabs emit `auto`/`click` view analytics, and the main nav menu / Assets tab bar emit `ui_click` navigation analytics.
