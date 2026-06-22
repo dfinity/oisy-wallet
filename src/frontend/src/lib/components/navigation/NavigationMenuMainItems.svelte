@@ -19,7 +19,9 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
+	import { buildUiClickEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
@@ -44,6 +46,13 @@
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
+
+	const navClick = (target: string) =>
+		buildUiClickEvent({
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+			sourceSublocation: 'main_menu',
+			eventValue: target
+		});
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
@@ -86,6 +95,7 @@
 	})}
 	selected={assetsSelected}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
+	trackEvent={navClick('assets')}
 >
 	{#snippet icon()}
 		<IconWallet />
@@ -105,6 +115,7 @@
 	})}
 	selected={isRouteActivity(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
+	trackEvent={navClick('activity')}
 >
 	{#snippet icon()}
 		<IconActivity />
@@ -129,6 +140,7 @@
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+		trackEvent={navClick('earn')}
 	>
 		{#snippet icon()}
 			<IconPlant />
@@ -149,6 +161,7 @@
 	})}
 	selected={isRouteDappExplorer(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
+	trackEvent={navClick('explore')}
 >
 	{#snippet icon()}
 		<AnimatedIconUfo />
@@ -172,6 +185,7 @@
 		tag={$i18n.core.text.new}
 		tagVariant="emphasis"
 		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+		trackEvent={navClick('rewards')}
 	>
 		{#snippet icon()}
 			<IconGift />
@@ -192,6 +206,7 @@
 	})}
 	selected={isRouteSettings(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
+	trackEvent={navClick('settings')}
 >
 	{#snippet icon()}
 		<IconlySettings />
