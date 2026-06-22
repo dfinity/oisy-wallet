@@ -1,0 +1,13 @@
+@mixin space-between {
+	display: inline-flex;
+	justify-content: space-between;
+
+	width: 100%;
+}
+
+@mixin inset() {
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
