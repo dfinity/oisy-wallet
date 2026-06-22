@@ -373,7 +373,7 @@ field/Tailwind-level detail.
    transient single-chain signer hiccup doesn't block buying on the others — but never silently omit
    _all_ (empty `signed_query` would sign nothing). Decide and pin in a test.
 2. **_(Decided)_ Live management-canister pubkey reads.** Derive via `management_canister::
-   ecdsa_public_key` / `schnorr_public_key` with `canister_id = cfs_canister_id` (matches
+ecdsa_public_key` / `schnorr_public_key` with `canister_id = cfs_canister_id` (matches
    `btc_principal_to_p2wpkh_address`) — the cheap, proven path. The offline alternative (deriving from a
    cached master pubkey via `ic-pub-key`, as the frontend can) avoids the calls but adds code and a
    master-key-caching concern; defer to a later optimization only if pubkey-read latency/cost ever
