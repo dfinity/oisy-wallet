@@ -8,6 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bitcoin = { workspace = true }
+bs58 = { workspace = true }
 canbench-rs = { workspace = true, optional = true }
 candid = { workspace = true }
 futures = { workspace = true }
@@ -28,6 +29,7 @@ serde_bytes = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 shared = { path = "../shared" }
+tiny-keccak = { workspace = true }
 
 [dev-dependencies]
 candid_parser = { workspace = true }
