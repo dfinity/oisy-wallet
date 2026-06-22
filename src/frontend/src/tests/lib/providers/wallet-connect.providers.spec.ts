@@ -289,6 +289,7 @@ describe('wallet-connect.providers', () => {
 				await listener.approveSession(mockProposal);
 
 				expect(mockEmitSessionEvent).toHaveBeenCalledTimes(BIP122_MAINNET_CHAINS_KEYS.length);
+
 				for (const chainId of BIP122_MAINNET_CHAINS_KEYS) {
 					expect(mockEmitSessionEvent).toHaveBeenCalledWith({
 						topic: 'btc-topic',
