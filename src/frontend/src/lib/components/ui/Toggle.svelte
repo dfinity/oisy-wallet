@@ -25,10 +25,10 @@
 	<input
 		{id}
 		aria-label={ariaLabel}
+		{checked}
 		{disabled}
 		oninput={({ currentTarget }) => onToggle?.(currentTarget.checked)}
 		type="checkbox"
-		bind:checked
 	/>
 	<label for={id}></label>
 </div>
@@ -77,12 +77,15 @@
 			}
 		}
 
-		@media (width < theme(--breakpoint-lg)) {
+		// Tailwind's `--breakpoint-lg` (1024px) / `--breakpoint-sm` (640px).
+		// The `theme()` function is only resolved in Tailwind-processed global
+		// styles, not in a component's scoped style, so the values are inlined.
+		@media (width < 1024px) {
 			scale: 1.6;
 			margin-inline: var(--padding);
 		}
 
-		@media (width < theme(--breakpoint-sm)) {
+		@media (width < 640px) {
 			scale: 1.8;
 			margin-inline: var(--padding-2x);
 		}
