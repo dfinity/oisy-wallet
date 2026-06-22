@@ -1,4 +1,6 @@
+import { WalletConnectClient } from '$lib/providers/wallet-connect.providers';
 import {
+	connectListener,
 	disconnectSession,
 	execute,
 	reject,
@@ -355,6 +357,40 @@ describe('wallet-connect.services', () => {
 				expect(disconnectSpy).not.toHaveBeenCalled();
 				expect(get(walletConnectListenerStore)).not.toBeUndefined();
 			});
+		});
+	});
+
+	describe('connectListener', () => {
+		const mockUri = 'wc:existing-pairing@2?relay-protocol=irn&symKey=abc';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			walletConnectListenerStore.reset();
+			walletConnectSessionsStore.reset();
+		});
+
+		// Acceptance criterion 1: connecting a new dApp must not drop already-connected dApps.
+		it('should reuse the existing listener without tearing down the current connection', async () => {
+			const initSpy = vi.spyOn(WalletConnectClient, 'init');
+
+			const existingListener = {
+				...mockListener,
+				pair: vi.fn().mockResolvedValue(undefined),
+				attachHandlers: vi.fn(),
+				disconnect: vi.fn(),
+				getActiveSessions: vi.fn().mockReturnValue({ 'topic-1': { topic: 'topic-1' } })
+			} as unknown as WalletConnectListener;
+
+			walletConnectListenerStore.set(existingListener);
+
+			const { result } = await connectListener({ uri: mockUri });
+
+			expect(result).toBe('success');
+			expect(initSpy).not.toHaveBeenCalled();
+			expect(existingListener.disconnect).not.toHaveBeenCalled();
+			expect(existingListener.pair).toHaveBeenCalledExactlyOnceWith(mockUri);
+			expect(existingListener.attachHandlers).toHaveBeenCalledOnce();
+			expect(get(walletConnectListenerStore)).toBe(existingListener);
 		});
 	});
 });
