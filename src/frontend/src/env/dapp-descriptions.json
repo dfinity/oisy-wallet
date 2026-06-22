@@ -141,7 +141,6 @@
 		"id": "hyperliquid",
 		"name": "dapps.descriptions.hyperliquid.name",
 		"oneLiner": "dapps.descriptions.hyperliquid.one_liner",
-		"callToAction": "dapps.descriptions.hyperliquid.call_to_action",
 		"website": "https://app.hyperliquid.xyz/",
 		"twitter": "https://x.com/HyperliquidX",
 		"tags": ["dapps.categories.defi", "dapps.categories.walletconnect"],
