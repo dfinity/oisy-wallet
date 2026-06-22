@@ -4,38 +4,8 @@
 	}
 }
 
-@mixin h1($bold: true) {
-	font-size: var(--font-size-h1);
-	line-height: var(--line-height-h1);
-	@include bold($bold);
-}
-
-@mixin h2($bold: true) {
-	font-size: var(--font-size-h2);
-	line-height: var(--line-height-h2);
-	@include bold($bold);
-}
-
-@mixin h3($bold: true) {
-	font-size: var(--font-size-h3);
-	line-height: var(--line-height-h3);
-	@include bold($bold);
-}
-
-@mixin h4($bold: true) {
-	font-size: var(--font-size-h4);
-	line-height: var(--line-height-h4);
-	@include bold($bold);
-}
-
-@mixin h5($bold: true) {
-	font-size: var(--font-size-h5);
-	line-height: var(--line-height-h5);
-	@include bold($bold);
-}
-
 @mixin standard($bold: false) {
-	font-size: var(--font-size-standard);
+	font-size: var(--font-size-standard, 1rem);
 	line-height: var(--line-height-standard);
 	@include bold($bold);
 }
