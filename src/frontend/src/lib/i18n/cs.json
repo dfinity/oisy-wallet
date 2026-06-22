@@ -1598,7 +1598,7 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
-			"disconnect_all": "",
+			"disconnect_all": "Odpojit vše",
 			"wallet_connect": ""
 		},
 		"alt": {

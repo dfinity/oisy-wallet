@@ -1598,7 +1598,7 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "जुड़े हुए ऐप्स",
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
-			"disconnect_all": "",
+			"disconnect_all": "सभी डिस्कनेक्ट करें",
 			"wallet_connect": ""
 		},
 		"alt": {

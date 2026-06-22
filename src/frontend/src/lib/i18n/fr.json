@@ -1598,7 +1598,7 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Applications connectées",
 			"no_connected_apps": "Aucune application n'est actuellement connectée.",
-			"disconnect_all": "",
+			"disconnect_all": "Tout déconnecter",
 			"wallet_connect": ""
 		},
 		"alt": {
