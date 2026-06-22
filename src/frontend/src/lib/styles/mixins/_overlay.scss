@@ -5,6 +5,6 @@
 }
 
 @mixin toast-inverted {
-	background: var(--toast-inverted-background);
-	color: var(--toast-inverted-background-contrast);
+	background: var(--toast-inverted-background, var(--color-foreground-primary));
+	color: var(--toast-inverted-background-contrast, var(--color-foreground-primary-inverted));
 }
