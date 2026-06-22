@@ -19,9 +19,9 @@ export const stopPropagation =
 	<E extends Event = Event, T extends EventTarget = EventTarget>(
 		fn: OptionalOnEventCallback<E, T>
 	): EventHandler<E, T> =>
-	async ($event: OnEventParam<E, T>) => {
+	($event: OnEventParam<E, T>) => {
 		$event?.stopPropagation();
-		await fn?.($event);
+		return fn?.($event);
 	};
 
 /**
@@ -35,7 +35,7 @@ export const preventDefault =
 	<E extends Event = Event, T extends EventTarget = EventTarget>(
 		fn: OptionalOnEventCallback<E, T>
 	): EventHandler<E, T> =>
-	async ($event: OnEventParam<E, T>) => {
+	($event: OnEventParam<E, T>) => {
 		$event?.preventDefault();
-		await fn?.($event);
+		return fn?.($event);
 	};
