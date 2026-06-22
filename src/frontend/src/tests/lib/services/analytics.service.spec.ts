@@ -497,6 +497,44 @@ describe('plausible analytics service', () => {
 		});
 	});
 
+	describe('buildUiClickEvent', () => {
+		it('builds the ui_click payload with source_location, source_sublocation and event_value', async () => {
+			const { buildUiClickEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildUiClickEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION,
+				sourceSublocation: 'main_menu',
+				eventValue: 'assets'
+			});
+
+			expect(result).toEqual({
+				name: 'ui_click',
+				metadata: {
+					source_location: 'navigation',
+					source_sublocation: 'main_menu',
+					event_value: 'assets'
+				}
+			});
+		});
+
+		it('omits source_sublocation and event_value when not provided', async () => {
+			const { buildUiClickEvent } = await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } = await import('$lib/enums/plausible');
+
+			const result = buildUiClickEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NAVIGATION
+			});
+
+			expect(result).toEqual({
+				name: 'ui_click',
+				metadata: {
+					source_location: 'navigation'
+				}
+			});
+		});
+	});
+
 	it('should console.debug the error in STAGING when tracker.track throws', async () => {
 		mockStaging = true;
 
