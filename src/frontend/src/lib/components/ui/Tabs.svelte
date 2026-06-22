@@ -2,8 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import { PLAUSIBLE_EVENT_TRIGGERS } from '$lib/enums/plausible';
+	import { buildAssetsTabViewEvent, trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
@@ -30,14 +30,7 @@
 			activeTab = id;
 		} else {
 			if (nonNullish(trackEventName)) {
-				trackEvent({
-					name: trackEventName,
-					metadata: {
-						event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
-						event_value: id,
-						location_source: PLAUSIBLE_EVENT_SOURCES.ASSETS_PAGE
-					}
-				});
+				trackEvent(buildAssetsTabViewEvent({ tabId: id, trigger: PLAUSIBLE_EVENT_TRIGGERS.CLICK }));
 			}
 
 			goto(path);
