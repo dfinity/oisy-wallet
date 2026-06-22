@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -11,7 +12,13 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
@@ -126,6 +133,16 @@
 			!btcBannerDismissed ||
 			$hiddenMicroTransactionsBannerVisible
 	);
+
+	onMount(() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.ACTIVITY,
+				event_value: PLAUSIBLE_EVENT_VALUES.ACTIVITY_PAGE
+			}
+		});
+	});
 </script>
 
 <div class="flex flex-col gap-5">

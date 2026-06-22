@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
@@ -11,6 +12,12 @@
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { networkUrl } from '$lib/utils/nav.utils';
 
@@ -18,6 +25,16 @@
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
+	});
+
+	onMount(() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.REWARDS,
+				event_value: PLAUSIBLE_EVENT_VALUES.REWARDS_PAGE
+			}
+		});
 	});
 </script>
 
