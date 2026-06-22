@@ -138,6 +138,20 @@
 		"screenshots": ["/images/dapps/1-inch.webp"]
 	},
 	{
+		"id": "hyperliquid",
+		"name": "dapps.descriptions.hyperliquid.name",
+		"oneLiner": "dapps.descriptions.hyperliquid.one_liner",
+		"callToAction": "dapps.descriptions.hyperliquid.call_to_action",
+		"website": "https://app.hyperliquid.xyz/",
+		"twitter": "https://x.com/HyperliquidX",
+		"tags": ["dapps.categories.defi", "dapps.categories.walletconnect"],
+		"stats": "",
+		"usesInternetIdentity": false,
+		"description": "dapps.descriptions.hyperliquid.description",
+		"logo": "/images/dapps/hyperliquid-logo.svg",
+		"screenshots": ["/images/dapps/hyperliquid.webp"]
+	},
+	{
 		"id": "raydium",
 		"name": "dapps.descriptions.raydium.name",
 		"oneLiner": "dapps.descriptions.raydium.one_liner",
