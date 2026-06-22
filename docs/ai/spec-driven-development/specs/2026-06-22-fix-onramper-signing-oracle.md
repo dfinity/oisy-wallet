@@ -391,7 +391,7 @@ field/Tailwind-level detail.
       `sign_with_ecdsa`/`sign_with_schnorr`. Reviewer confirms no ~80T `SIGNER_FEE` signing path is hit.
 - [ ] Frontend no longer derives or sends wallet addresses to the endpoint; `buildOnramperLink` and
       `OnramperWidget.svelte` drop the address stores/maps; FE typechecks (`tsc --project
-    tsconfig.spec.json`) and tests pass.
+tsconfig.spec.json`) and tests pass.
 - [ ] `SecretNotConfigured` and `RateLimited` error paths keep their existing semantics.
 - [ ] `docs/ai/PRODUCT.md` gains a `## Buy (OnRamper)` section in this PR, including the explicit
       negative guarantee (signed addresses are always the authenticated caller's own).
