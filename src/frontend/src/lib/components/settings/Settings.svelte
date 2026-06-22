@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Toggle } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import { updateUserTransactionFilterSettings } from '$lib/api/backend.api';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';

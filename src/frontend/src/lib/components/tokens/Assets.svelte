@@ -76,7 +76,9 @@
 
 		// Landing-tab impression — completes per-tab view counts (the clicked path is
 		// covered by Tabs). Tagged `auto` to distinguish it from a deliberate tab click.
-		trackEvent(buildAssetsTabViewEvent({ tabId: activeTab, trigger: PLAUSIBLE_EVENT_TRIGGERS.AUTO }));
+		trackEvent(
+			buildAssetsTabViewEvent({ tabId: activeTab, trigger: PLAUSIBLE_EVENT_TRIGGERS.AUTO })
+		);
 	});
 </script>
 

@@ -6,9 +6,9 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 
 Track how often users visit each of the five main navigation sections — **Assets**, **Activity**, **Earn**, **Explore**, and **Settings** — in Plausible, so we can see which sections users actually use and how usage shifts over time.
 
-A "visit" means *entering the section*, regardless of how the user got there (clicking the nav item, a direct URL, the browser back/forward button, or an in-app redirect). This mirrors the visit-counting semantics OISY already uses for the Earn page.
+A "visit" means _entering the section_, regardless of how the user got there (clicking the nav item, a direct URL, the browser back/forward button, or an in-app redirect). This mirrors the visit-counting semantics OISY already uses for the Earn page.
 
-This spec also completes the **Assets sub-tab view counts** (Tokens / NFTs / Earning). Today a `view_open` fires only when a sub-tab is clicked, so the tab the user *lands on* is never counted. We add a landing `view_open` and an `event_trigger` property so every sub-view appearance is counted and the cause (auto vs. click) is preserved.
+This spec also completes the **Assets sub-tab view counts** (Tokens / NFTs / Earning). Today a `view_open` fires only when a sub-tab is clicked, so the tab the user _lands on_ is never counted. We add a landing `view_open` and an `event_trigger` property so every sub-view appearance is counted and the cause (auto vs. click) is preserved.
 
 ---
 
@@ -36,14 +36,14 @@ The same `PAGE_OPEN` pattern is already used by the NFT pages (`NftCard.svelte`,
 
 ### Current state per section
 
-| Nav item     | Route (`AppPath`)             | Renders                                              | `PAGE_OPEN` today?                |
-| ------------ | ----------------------------- | ---------------------------------------------------- | --------------------------------- |
-| **Assets**   | `Tokens` / `Nfts` / `Earning` | `tokens/Assets.svelte`                               | ❌ none                            |
-| **Activity** | `Activity`                    | `transactions/AllTransactions.svelte`                | ❌ none                            |
-| **Earn**     | `Earn`                        | `earning/Earning.svelte`                             | ✅ `earn-page` — **leave as is**   |
-| **Explore**  | `Explore`                     | `dapps/DappsExplorer.svelte`                         | ❌ none                            |
-| **Settings** | `Settings`                    | `settings/Settings.svelte`                           | ❌ none                            |
-| Rewards*     | `Rewards`                     | `rewards/Rewards.svelte`                             | ❌ none                            |
+| Nav item     | Route (`AppPath`)             | Renders                               | `PAGE_OPEN` today?               |
+| ------------ | ----------------------------- | ------------------------------------- | -------------------------------- |
+| **Assets**   | `Tokens` / `Nfts` / `Earning` | `tokens/Assets.svelte`                | ❌ none                          |
+| **Activity** | `Activity`                    | `transactions/AllTransactions.svelte` | ❌ none                          |
+| **Earn**     | `Earn`                        | `earning/Earning.svelte`              | ✅ `earn-page` — **leave as is** |
+| **Explore**  | `Explore`                     | `dapps/DappsExplorer.svelte`          | ❌ none                          |
+| **Settings** | `Settings`                    | `settings/Settings.svelte`            | ❌ none                          |
+| Rewards\*    | `Rewards`                     | `rewards/Rewards.svelte`              | ❌ none                          |
 
 \* The Earn nav slot is feature-flagged by `EARNING_ENABLED` (`$env/earning`): it shows **Earn** (→ `AppPath.Earn`) when enabled and **Rewards** (→ `AppPath.Rewards`) when not. Both occupy the same nav slot. We track them as **separate** sections (`earn-page` vs `rewards-page`) so usage of each is independently visible during the rollout. This is a cheap default to reverse later if you'd rather fold them into one value.
 
@@ -59,7 +59,7 @@ trackEvent({
 	name: trackEventName, // PLAUSIBLE_EVENTS.VIEW_OPEN
 	metadata: {
 		event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
-		event_value: id,                                  // tokens | nfts | earning
+		event_value: id, // tokens | nfts | earning
 		location_source: PLAUSIBLE_EVENT_SOURCES.ASSETS_PAGE
 	}
 });
@@ -67,16 +67,16 @@ trackEvent({
 
 The model, confirmed with the PM, is:
 
-- **Assets section** → one `page_open` (`assets-page`) when the user *enters* the Assets section.
+- **Assets section** → one `page_open` (`assets-page`) when the user _enters_ the Assets section.
 - **Tokens / NFTs / Earning sub-views** → one `view_open` **per appearance**, whether the view was reached by a tab click or shown automatically as the landing tab. An `event_trigger` property records which.
 
 ### Why a landing `view_open` is needed
 
-Because `view_open` previously fired only on a tab *click*, the tab the user lands on (driven by the sticky `activeAssetsTabStore`) was never counted — an uneven, default-tab-biased blind spot. We close it by firing a `view_open` for the landing tab when the user enters the Assets section, tagged `event_trigger = auto`.
+Because `view_open` previously fired only on a tab _click_, the tab the user lands on (driven by the sticky `activeAssetsTabStore`) was never counted — an uneven, default-tab-biased blind spot. We close it by firing a `view_open` for the landing tab when the user enters the Assets section, tagged `event_trigger = auto`.
 
 ### Why the landing fire must be entry-guarded
 
-Each Assets sub-route mounts a fresh `Assets.svelte` instance, so a naive per-mount fire would double-count: clicking a sub-tab already fires `view_open` in `Tabs.handleClick` **and then** navigates/remounts. To avoid this, the landing `view_open` (and the section `page_open`) fire only when the *previous* route was not itself an Assets route. Use `afterNavigate` with a guard (Implementation §4).
+Each Assets sub-route mounts a fresh `Assets.svelte` instance, so a naive per-mount fire would double-count: clicking a sub-tab already fires `view_open` in `Tabs.handleClick` **and then** navigates/remounts. To avoid this, the landing `view_open` (and the section `page_open`) fire only when the _previous_ route was not itself an Assets route. Use `afterNavigate` with a guard (Implementation §4).
 
 Net effect — a sub-tab **click** produces exactly one `view_open` (`trigger = click`, from `Tabs`); the remount's landing fire is suppressed by the guard. "Click then land" collapses to a single `click` event.
 
@@ -85,7 +85,7 @@ Net effect — a sub-tab **click** produces exactly one `view_open` (`trigger = 
 - `click` — the user clicked the tab in the `Tabs` component.
 - `auto` — the view was shown without a tab click: the landing/default tab on section entry, a direct URL to a sub-route, or back/forward landing on a sub-route.
 
-We use `auto` rather than `land` deliberately: a click also "lands" on a tab, so `land` would be ambiguous. `auto` names the *cause* (the view was selected automatically by app state, not by a deliberate tab click).
+We use `auto` rather than `land` deliberately: a click also "lands" on a tab, so `land` would be ambiguous. `auto` names the _cause_ (the view was selected automatically by app state, not by a deliberate tab click).
 
 ---
 
@@ -96,23 +96,23 @@ We use `auto` rather than `land` deliberately: a click also "lands" on a tab, so
 All five section visits reuse the existing `PLAUSIBLE_EVENTS.PAGE_OPEN` event; the discriminator dashboards group by is **`event_value`**. Schema follows the [Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events) Confluence page.
 
 | Section  | **Event**   | `event_context` | `event_value`   |
-| -------- | ----------- | --------------- | --------------- |
+| -------- | ----------- | --------------- | --------------- | ------------------------------- |
 | Assets   | `page_open` | `assets`        | `assets-page`   |
 | Activity | `page_open` | `activity`      | `activity-page` |
-| Earn     | `page_open` | `earn`          | `earn-page`     | *(already emitted — no change)* |
+| Earn     | `page_open` | `earn`          | `earn-page`     | _(already emitted — no change)_ |
 | Explore  | `page_open` | `explore`       | `explore-page`  |
 | Settings | `page_open` | `settings`      | `settings-page` |
 | Rewards  | `page_open` | `rewards`       | `rewards-page`  |
 
 ### Assets sub-tab views (`view_open`)
 
-| Field             | Value                                          |
-| ----------------- | ---------------------------------------------- |
-| **Event**         | `view_open`                                    |
-| `event_context`   | `assets_tab`                                   |
-| `event_value`     | `tokens` \| `nfts` \| `earning` (the tab id)   |
-| `location_source` | `assets_page`                                  |
-| `event_trigger`   | `auto` (landing tab) \| `click` (tab clicked)  |
+| Field             | Value                                         |
+| ----------------- | --------------------------------------------- |
+| **Event**         | `view_open`                                   |
+| `event_context`   | `assets_tab`                                  |
+| `event_value`     | `tokens` \| `nfts` \| `earning` (the tab id)  |
+| `location_source` | `assets_page`                                 |
+| `event_trigger`   | `auto` (landing tab) \| `click` (tab clicked) |
 
 Per-tab view counts = count of `view_open` grouped by `event_value`. Split by `event_trigger` to separate deliberate switches from default landings. No PII is included; all values are static enum members.
 
@@ -163,7 +163,11 @@ These are single routes with no shared-component nuance, so mirror the Earn patt
 
 ```ts
 import { onMount } from 'svelte';
-import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_VALUES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_VALUES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 
 onMount(() => {
@@ -224,7 +228,12 @@ import { afterNavigate } from '$app/navigation';
 import type { AfterNavigate } from '@sveltejs/kit';
 import { nonNullish } from '@dfinity/utils';
 import { isAssetsRouteId } from '$lib/utils/nav.utils';
-import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_TRIGGERS, PLAUSIBLE_EVENT_VALUES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_TRIGGERS,
+	PLAUSIBLE_EVENT_VALUES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import { buildAssetsTabViewEvent, trackEvent } from '$lib/services/analytics.services';
 
 afterNavigate(({ from }: AfterNavigate) => {
@@ -290,14 +299,14 @@ Follow the existing `PAGE_OPEN` test precedent in `src/frontend/src/tests/lib/co
 ## Out of Scope
 
 - The existing `PAGE_OPEN` on Earn, NFT, and Harvest pages — unchanged.
-- Tracking nav-menu *clicks* specifically (the chosen approach counts section visits however reached; a click-only metric was considered and rejected because it misses direct URLs, back/forward, and redirects).
+- Tracking nav-menu _clicks_ specifically (the chosen approach counts section visits however reached; a click-only metric was considered and rejected because it misses direct URLs, back/forward, and redirects).
 - Generalising the `Tabs` `view_open` payload for non-Assets consumers (none exist today).
 - Sub-navigation within Settings, Explore, or Activity (e.g. individual settings panels, dApp detail opens, transaction filters) — those have or can get their own events separately.
 - Any dashboard/Confluence changes — the new values appear automatically once events flow.
 
 ### Known minor gap
 
-Back/forward navigation *between* Assets sub-tabs (e.g. NFTs → Tokens → back to NFTs) does not emit a `view_open`, because the entry guard treats it as intra-Assets navigation. Tab clicks (the primary path) and section entry are both counted; this edge case is accepted. Revisit only if back/forward sub-tab counts prove necessary.
+Back/forward navigation _between_ Assets sub-tabs (e.g. NFTs → Tokens → back to NFTs) does not emit a `view_open`, because the entry guard treats it as intra-Assets navigation. Tab clicks (the primary path) and section entry are both counted; this edge case is accepted. Revisit only if back/forward sub-tab counts prove necessary.
 
 ---
 
@@ -312,7 +321,7 @@ Back/forward navigation *between* Assets sub-tabs (e.g. NFTs → Tokens → back
 - [ ] Visiting **Settings** fires `page_open` with `event_context = settings`, `event_value = settings-page`.
 - [ ] Visiting **Rewards** (Earn slot when `EARNING_ENABLED` is off) fires `page_open` with `event_context = rewards`, `event_value = rewards-page`.
 - [ ] **Earn** continues to fire its existing `page_open` (`earn-page`) with no change.
-- [ ] Each `page_open` fires on *any* entry to the section (nav click, direct URL, back/forward, redirect), not only on nav-menu clicks.
+- [ ] Each `page_open` fires on _any_ entry to the section (nav click, direct URL, back/forward, redirect), not only on nav-menu clicks.
 - [ ] New `PLAUSIBLE_EVENT_VALUES`, `PLAUSIBLE_EVENT_CONTEXTS`, and `PLAUSIBLE_EVENT_TRIGGERS` members added; no new path constants introduced; `isAssetsRouteId` reuses existing path predicates.
 - [ ] Unit tests cover the four newly instrumented sections, the Assets entry-vs-sub-tab guard (page_open + auto view_open), the `click` trigger via `Tabs`, the `buildAssetsTabViewEvent` helper, and `isAssetsRouteId`.
 - [ ] Analytics never throws — tracking failures are swallowed and never affect the user flow (guaranteed by `trackEvent`).
