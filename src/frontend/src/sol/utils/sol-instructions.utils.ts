@@ -391,13 +391,15 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		const {
 			data: { lamports },
 			accounts: {
-				payer: { address: payer }
+				payer: { address: payer },
+				newAccount: { address: destination }
 			}
 		} = instruction;
 
 		return {
 			amount: lamports,
-			payer
+			payer,
+			destination
 		};
 	}
 

@@ -374,6 +374,25 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
+		it('should flag account creation hidden behind a benign trailing transfer as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 9n, payer: mockSolAddress, destination: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 1n, source: mockSolAddress, destination: mockAtaAddress });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 10n,
+				source: mockSolAddress,
+				destination: mockAtaAddress,
+				payer: mockSolAddress,
+				ambiguous: true
+			});
+		});
+
 		it('should not flag repeated transfers to the same destination as ambiguous', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: 9n, source: mockSolAddress, destination: mockSolAddress2 })
