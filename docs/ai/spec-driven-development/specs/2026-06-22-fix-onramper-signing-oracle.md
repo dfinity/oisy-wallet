@@ -72,10 +72,13 @@ parameters with a shared secret, so the limit bounds its use as a signing oracle
 
 - `wallet_address_tags` — never sent.
 
-All four addresses are the caller's own, derived from the **chain-fusion signer** (the address
-authority): `getBtcAddress` / `getEthAddress` / `getSchnorrPublicKey` in
+All four addresses are the caller's own. The **frontend** obtains them by calling the chain-fusion
+signer canister (`getBtcAddress` / `getEthAddress` / `getSchnorrPublicKey` in
 `src/frontend/src/lib/api/signer.api.ts`, surfaced through
-`src/frontend/src/lib/derived/address.derived.ts`. The non-signed widget params (`defaultCrypto`,
+`src/frontend/src/lib/derived/address.derived.ts`) or by deriving them offline from a cached master
+pubkey. Both resolve to the same underlying **threshold key**. The backend reproduces that same key
+**without** calling the signer canister — see the [derivation mechanism](#changes). The non-signed
+widget params (`defaultCrypto`,
 `onlyCryptos`, `onlyCryptoNetworks`, `mode`, `defaultFiat`, theme, …) only filter the UI and cannot
 redirect funds — they stay frontend-supplied and out of scope.
 
@@ -91,12 +94,13 @@ Derivation parity is the single most important correctness property of this chan
 | BTC mainnet | `bitcoin`   | ✅ `signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, &principal)` (`src/backend/src/signer/service.rs:229`)                                                                                                                                        | none — reuse                                                                                                                  |
 | ICP         | `icp`       | ✅ `signer::principal2account(&principal)` → hex (`src/backend/src/signer/service.rs:174`)                                                                                                                                                                         | confirm hex/format parity with `$icpAccountIdentifierText`                                                                    |
 | ETH         | `ethereum`  | ⚠️ partial — ECDSA pubkey machinery exists (`cfs_ecdsa_pubkey_of`, private, `src/backend/src/signer/service.rs:191`) but it hardcodes the **BTC** derivation schema (`vec![0u8]`); ETH uses schema `1` per the CFS comment, plus a keccak-256 → last-20-bytes step | derive ETH address (schema 1 + keccak), 0x-hex encode                                                                         |
-| SOL mainnet | `solana`    | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58                                                                                                                                                                                                           | derive via CFS Schnorr Ed25519 pubkey with path `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]` + `SOLANA_KEY_ID`, base58-encode |
+| SOL mainnet | `solana`    | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58                                                                                                                                                                                                           | derive via management-canister `schnorr_public_key` (Ed25519) in the signer's derivation namespace, path `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]` + `SOLANA_KEY_ID`, base58-encode |
 
-The frontend SOL derivation is the reference: `src/frontend/src/sol/services/sol-address.services.ts`
-(`getSolanaPublicKey` → Schnorr Ed25519 pubkey on path `[SOLANA_DERIVATION_PATH_PREFIX, network]`,
-then base58 via `@solana/kit`'s address decoder). The frontend ETH/BTC derivations go through the
-signer directly. **The backend addresses must match the signer's, byte-for-byte.**
+The frontend SOL derivation is the reference for the derivation namespace (key id + path):
+`src/frontend/src/sol/services/sol-address.services.ts` (`getSolanaPublicKey` → Schnorr Ed25519 pubkey
+on path `[SOLANA_DERIVATION_PATH_PREFIX, network]`, then base58 via `@solana/kit`'s address decoder).
+**The backend must derive the same threshold-key addresses, byte-for-byte** — by reproducing that
+namespace through the management canister, not by calling the signer (see mechanism below).
 
 ---
 
@@ -108,7 +112,9 @@ Server-side derive-and-replace (the requester's choice; the recommended mitigati
    the caller's four receiving addresses from `msg_caller()` and signs only those as `networkWallets`
    (matching today's `wallets: []`, four-network shape).
 2. `wallets` and `wallet_address_tags` are signed as empty (today's behavior).
-3. The endpoint becomes `async` (derivation requires inter-canister calls to the chain-fusion signer).
+3. The endpoint becomes `async` (the pubkey reads are inter-canister calls to the **IC management
+   canister** — see the [derivation mechanism](#changes); they are **not** calls to the chain-fusion
+   signer canister).
 4. The request type loses its three fields; this is a **breaking Candid change** — follow
    `docs/ai/backend/workflows/breaking-interface.md` and regenerate via `npm run generate`.
 5. The frontend stops building/sending addresses; it calls the endpoint and appends the returned
@@ -140,9 +146,12 @@ closes the oracle because the caller chooses a _network_, never an _address_.
 `management_canister::schnorr_public_key`), called with `canister_id = Some(cfs_canister_id)` and the
 **chain-fusion-signer derivation path** `[<schema_byte>, principal.as_slice()]`. This is exactly the
 pattern the existing `cfs_ecdsa_pubkey_of` / `btc_principal_to_p2wpkh_address` already use
-(`src/backend/src/signer/service.rs:191`, `:229`). Deriving _as_ the signer (same `canister_id` +
-path + key id) yields the same key material the signer (and the frontend's offline `ic-pub-key`
-derivation) produces, so address parity holds by construction.
+(`src/backend/src/signer/service.rs:191`, `:229`). Note the naming trap: the module is
+`signer/service.rs` and the helper is `cfs_*`, but the actual call is to the **management canister** —
+`canister_id = Some(cfs_canister_id)` is just an _argument_ naming whose derivation namespace to use,
+**not** an inter-canister call to the signer. Reading the pubkey in the signer's namespace (same
+`canister_id` + path + key id) yields the same threshold key the signer (and the frontend's offline
+`ic-pub-key` derivation) produces, so address parity holds by construction.
 
 > **Cost guardrail — read before implementing.** These are public-key **reads**, which cost only the
 > management-canister query fee. They are **not** threshold signing and must **not** go through the
@@ -338,14 +347,15 @@ field/Tailwind-level detail.
 
 ## Open questions (facts to confirm)
 
-1. **ETH derivation parity.** Confirm the exact CFS ECDSA derivation schema/path and key id the signer
-   uses for the ETH address (the backend `cfs_ecdsa_pubkey_of` hardcodes BTC schema `0`; the CFS comment
-   says ETH is `1`). Confirm whether the frontend ETH address is EIP-55 checksummed and whether OnRamper
-   cares — the signed string must match the frontend's prior `$ethAddress` exactly.
+1. **ETH derivation parity.** Confirm the exact derivation namespace (schema byte / path / key id) the
+   signer uses for the ETH address, so the management-canister read reproduces it (the backend
+   `cfs_ecdsa_pubkey_of` hardcodes BTC schema `0`; the in-code comment citing the CFS source says ETH is
+   `1`). Confirm whether the frontend ETH address is EIP-55 checksummed and whether OnRamper cares — the
+   signed string must match the frontend's prior `$ethAddress` exactly.
 2. **SOL derivation parity.** Confirm `SOLANA_KEY_ID`, `SOLANA_DERIVATION_PATH_PREFIX`, and the
-   `[prefix, "mainnet"]` path the backend must use, and that CFS exposes a Schnorr Ed25519
-   `schnorr_public_key` the backend may call (clippy-allowed). Verify base58 of the 32-byte pubkey
-   equals `$solAddressMainnet`.
+   `[prefix, "mainnet"]` path the backend must use, and that the **management canister** exposes
+   `schnorr_public_key` for the Ed25519 curve (clippy-allowed pubkey read — not the signer canister).
+   Verify base58 of the 32-byte pubkey equals `$solAddressMainnet`.
 3. **ICP format parity.** Confirm `hex(principal2account(caller))` equals `$icpAccountIdentifierText`
    (default subaccount, lowercase hex, no prefix).
 4. **Network scope on staging/local.** The widget is staging-gated and uses mainnet ids. Confirm whether
