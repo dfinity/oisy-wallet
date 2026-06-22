@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		type ProgressStep,
-		WizardModal,
-		type WizardStep,
-		type WizardSteps
-	} from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
@@ -18,7 +13,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { ProgressStep } from '$lib/types/progress-step';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	interface Props {

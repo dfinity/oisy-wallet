@@ -22,10 +22,11 @@ import {
 	type SwapAmountsStoreData
 } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import type { WizardStep } from '$lib/types/wizard';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSwapProviders } from '$tests/mocks/swap.mocks';
-import type { WizardModal, WizardStep } from '@dfinity/gix-components';
+import type { WizardModal } from '@dfinity/gix-components';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
