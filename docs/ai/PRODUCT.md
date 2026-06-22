@@ -68,6 +68,10 @@ The Earn nav slot shows **Rewards** instead of Earn when `EARNING_ENABLED` is of
 
 Within Assets, the Tokens / NFTs / Earning sub-tabs each emit a `view_open` event (`event_context = assets_tab`, `event_value` = the tab id, `location_source = assets_page`) **per appearance**, with an `event_trigger` property recording the cause: `click` when the user clicked the tab, `auto` when the view was shown without a click (the landing tab on section entry, a direct URL to a sub-route, or a back/forward landing). The landing fire is entry-guarded so a sub-tab click — which already emits one `click` event and then remounts the page — is not double-counted by an additional `auto` fire. Both the click and the landing payloads are produced by the shared `buildAssetsTabViewEvent()` helper so they stay identical apart from `event_value` and `event_trigger`. (Known gap: back/forward navigation _between_ Assets sub-tabs does not emit a `view_open`, as the guard treats it as intra-section.)
 
+### Navigation clicks
+
+Clicking a navigation control fires a generic `ui_click` event — a complementary "how users navigate" signal, distinct from the "which sections get visited" `page_open` count. It carries `source_location = navigation`, a `source_sublocation` for the surface (`main_menu` for the main navigation menu, `assets_tabs` for the Assets sub-tab bar), and `event_value` for the specific target (the section id for the menu, the tab id for the tabs). A single generic event with these properties — rather than per-surface event names — keeps every navigation surface comparable in one Plausible breakdown and lets new surfaces adopt it by adding property values, not events. Payloads are built by the shared `buildUiClickEvent()` helper. `ui_click` is orthogonal to the appearance events: a main-nav click to Assets emits `ui_click` **and** `page_open` **and** the landing `view_open`, while a direct-URL/back-forward entry emits only the latter two — so `page_open` remains the complete visit metric. `ui_click` uses the standard `source_location` key; the older `location_source` on `view_open` is legacy and migrated separately.
+
 ---
 
 ## Exchange-rate sourcing
