@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import {
@@ -117,8 +117,8 @@
 					<Checkbox
 						checked={selectedSet.has(key)}
 						inputId={tokenInputId(token)}
+						onChange={() => onToggleToken({ token, key })}
 						text="inline"
-						on:nnsChange={() => onToggleToken({ token, key })}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">
