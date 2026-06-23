@@ -1,5 +1,7 @@
 # Spec: Limit Orders via dfinity/dex
 
+This spec follows the workflow defined in [`docs/ai/spec-driven-development/workflow.md`](../workflow.md).
+
 ## What we're building
 
 Let users place and manage limit orders on the `dfinity/dex` on-chain order book DEX, directly from the oisy wallet. This is an integration — order matching runs inside the DEX canister. Oisy provides the UX.
@@ -504,11 +506,16 @@ Shows all Pending/Open orders for the connected user. Each row: pair, direction 
 
 ## Open questions
 
-0. **⚠ Form design — Option A (Intent-based) vs Option B (Fixed sell-buy) — DECIDE BEFORE IMPLEMENTATION.** Both options are fully specified above. Pick one; the unchosen "Order placement form" subsection and its acceptance criteria are then removed in a follow-up commit.
-   - _Option A — Intent-based_ — removes direction ambiguity and the reciprocal/lock controls, reads as a sentence ("Sell ICP for ckUSDC"), handles quote-only tokens; but diverges from the existing Swap form and is net-new UI.
-   - _Option B — Fixed sell-buy_ — matches the current Swap UX and is already prototyped; but keeps the ambiguity and the reciprocal/lock complexity Option A set out to remove.
 1. **Mainnet canister ID** — fill in once deployed.
 2. **Token logos** — confirm the oisy registry covers all DEX-listed tokens, or add a fallback.
 3. **USD price feeds** — confirm all DEX-listed tokens have USD price data (needed for the hero total and current-value anchor).
 4. **Fee rates in `TradingPairInfo`** — request the DEX team add `maker_fee_bps` / `taker_fee_bps`; until then show a static fee notice.
 5. **Aggregate liquidity source** — confirm how cross-venue best price / depth is computed once more than one venue exists (v1 has a single venue, so "aggregate" = that venue).
+
+---
+
+## Pending decisions
+
+1. **⚠ Form design — Option A (Intent-based) vs Option B (Fixed sell-buy) — DECIDE BEFORE IMPLEMENTATION.** Both options are fully specified above. Pick one; the unchosen "Order placement form" subsection and its acceptance criteria are then removed in a follow-up commit.
+   - _Option A — Intent-based_ — removes direction ambiguity and the reciprocal/lock controls, reads as a sentence ("Sell ICP for ckUSDC"), handles quote-only tokens; but diverges from the existing Swap form and is net-new UI.
+   - _Option B — Fixed sell-buy_ — matches the current Swap UX and is already prototyped; but keeps the ambiguity and the reciprocal/lock complexity Option A set out to remove.
