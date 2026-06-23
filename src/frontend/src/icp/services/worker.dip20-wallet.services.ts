@@ -16,7 +16,7 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '@dfinity/gix-components';
+import { isIOS } from '$lib/utils/device.utils';
 
 export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { isIcMintingAccount } from '$icp/stores/ic-minting-account.store';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -8,6 +7,7 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
