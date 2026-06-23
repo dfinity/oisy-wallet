@@ -46,7 +46,7 @@ export const sanitize = (text: string): string => {
 		if (isNullish(domPurify)) {
 			domPurify = DOMPurify;
 
-			// Preserve target="blank" workaround
+			// Preserve target="_blank" (flagged via data-target) across sanitization
 			domPurify.addHook('beforeSanitizeAttributes', flagTargetAttributeHook);
 			domPurify.addHook('afterSanitizeAttributes', restoreTargetAttributeHook);
 		}
