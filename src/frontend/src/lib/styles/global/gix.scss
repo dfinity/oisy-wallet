@@ -64,9 +64,6 @@
 	// Segment
 	--segment-selected-background: var(--color-base-black);
 
-	// Checkbox
-	--checkbox-padding: 0;
-
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
@@ -311,42 +308,6 @@ div.step {
 	&.next {
 		.text {
 			color: var(--color-foreground-primary);
-		}
-	}
-}
-
-div.checkbox,
-div.radio {
-	&:hover input {
-		--secondary: var(--color-background-brand-secondary) !important;
-		--input-custom-border-color: var(--color-background-brand-secondary);
-		--focus-background: var(--color-background-brand-secondary);
-		--input-background: var(--color-background-brand-secondary);
-	}
-
-	input[type='checkbox'],
-	input[type='radio'] {
-		--focus-background: var(--color-background-primary);
-
-		&:focus {
-			--focus-background: var(--color-background-primary);
-		}
-
-		&:checked {
-			--focus-background: var(--color-background-brand-primary-alt);
-			--input-custom-border-color: var(--color-background-brand-primary-alt);
-			--input-background: var(--color-background-brand-primary-alt);
-
-			&:hover:not(:active),
-			&:focus:not(:active) {
-				--secondary: var(--color-background-brand-secondary);
-				--focus-background: var(--color-background-brand-secondary);
-				--input-custom-border-color: var(--color-background-brand-secondary);
-			}
-		}
-
-		&:checked:after {
-			--background-contrast: var(--color-foreground-primary-inverted);
 		}
 	}
 }
