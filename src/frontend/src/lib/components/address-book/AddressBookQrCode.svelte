@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { QRCode } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
+	import QRCode from '$lib/components/ui/QRCode.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
 	interface Props {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, QRCode } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
@@ -9,6 +9,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import QRCode from '$lib/components/ui/QRCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { CODE_REGENERATE_INTERVAL_IN_SECONDS } from '$lib/constants/app.constants';
 	import {
