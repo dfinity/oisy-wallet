@@ -12,7 +12,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { resetListener } from '$lib/services/wallet-connect.services';
+	import { resetListenerIfNoSessions, syncSessions } from '$lib/services/wallet-connect.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -49,7 +49,8 @@
 	const close = () => modalStore.close();
 
 	const resetAndClose = () => {
-		resetListener();
+		// Rejecting a proposal must not drop dApps already connected — keep the listener if any remain.
+		resetListenerIfNoSessions();
 		close();
 	};
 
@@ -83,6 +84,9 @@
 		try {
 			await callback(proposal);
 
+			// Reflect the newly approved (or removed) session in the reactive sessions store.
+			syncSessions();
+
 			toast?.();
 		} catch (err: unknown) {
 			toastsError({
@@ -90,7 +94,7 @@
 				err
 			});
 
-			resetListener();
+			resetListenerIfNoSessions();
 		}
 
 		busy.stop();

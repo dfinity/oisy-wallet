@@ -1598,6 +1598,8 @@
 			"psbt_broadcast_unsupported_note": "This request asks the wallet to broadcast the transaction, which is not supported. For your security, it cannot be approved. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
 			"connected_apps": "Connected Apps",
 			"no_connected_apps": "No apps are currently connected.",
+			"disconnect_all": "Disconnect all",
+			"disconnect_app": "Disconnect $name",
 			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
