@@ -53,7 +53,7 @@
 		}
 	};
 	// Avoid to show scroll if not necessary
-	const overflyYStyle = (height: number | undefined): string =>
+	const overflowYStyle = (height: number | undefined): string =>
 		isNullish(height) || isNullish(maxContentHeight)
 			? 'overflow-y: hidden;'
 			: height < maxContentHeight
@@ -95,7 +95,7 @@
 		{/if}
 	</div>
 	<div
-		style={`${maxHeightStyle(maxHeight)}${overflyYStyle(maxHeight)}`}
+		style={`${maxHeightStyle(maxHeight)}${overflowYStyle(maxHeight)}`}
 		class="wrapper"
 		class:expanded
 		data-tid="collapsible-content"
