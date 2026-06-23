@@ -191,8 +191,8 @@ pub fn principal2account(principal: &Principal) -> ByteBuf {
 }
 
 /// The caller's default-subaccount ICP account identifier as a lowercase hex string — the form
-/// `OnRamper` expects and the one the frontend shows as `$icpAccountIdentifierText`. Returns the hex
-/// directly, avoiding the hex → bytes → hex round-trip (and its panic surface) of
+/// `OnRamper` expects and the one the frontend shows as `$icpAccountIdentifierText`. Returns the
+/// hex directly, avoiding the hex → bytes → hex round-trip (and its panic surface) of
 /// [`principal2account`].
 pub fn principal_to_account_identifier_hex(principal: &Principal) -> String {
     ic_ledger_types::AccountIdentifier::new(principal, &SUB_ACCOUNT_ZERO).to_hex()

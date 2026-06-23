@@ -5,9 +5,9 @@
 //!
 //! The frontend supplies the addresses it derived, but the backend signs only after confirming each
 //! one equals the address it independently derives for the caller — and it signs its *own* derived
-//! value. So a caller can only ever obtain a signature over addresses they provably own (closing the
-//! signing oracle), and a frontend/backend derivation mismatch fails loudly instead of producing a
-//! URL that pays an unspendable address.
+//! value. So a caller can only ever obtain a signature over addresses they provably own (closing
+//! the signing oracle), and a frontend/backend derivation mismatch fails loudly instead of
+//! producing a URL that pays an unspendable address.
 
 use candid::Principal;
 use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
@@ -29,19 +29,19 @@ const ONRAMPER_NETWORK_ETHEREUM: &str = "ethereum";
 const ONRAMPER_NETWORK_ICP: &str = "icp";
 const ONRAMPER_NETWORK_SOLANA: &str = "solana";
 
-/// Verify the caller-supplied `networkWallets` against the caller's own derived addresses, then sign
-/// the verified (backend-derived) values. Returns the hex HMAC-SHA256 and the exact canonical query
-/// fragment that was signed, so the frontend appends the latter verbatim.
+/// Verify the caller-supplied `networkWallets` against the caller's own derived addresses, then
+/// sign the verified (backend-derived) values. Returns the hex HMAC-SHA256 and the exact canonical
+/// query fragment that was signed, so the frontend appends the latter verbatim.
 ///
 /// Errors:
 /// - [`SignOnramperWidgetUrlError::SecretNotConfigured`] — controllers have not set the secret.
-/// - [`SignOnramperWidgetUrlError::AddressMismatch`] — a supplied address did not match the caller's
-///   derived address for that network.
+/// - [`SignOnramperWidgetUrlError::AddressMismatch`] — a supplied address did not match the
+///   caller's derived address for that network.
 /// - [`SignOnramperWidgetUrlError::AddressDerivationFailed`] — the backend could not derive an
 ///   address (unknown network or signer read failure), so the supplied one could not be verified.
 ///
-/// `wallets` and `wallet_address_tags` are never signed: the frontend leaves them empty, and signing
-/// unverified client-supplied values would reopen the signing oracle.
+/// `wallets` and `wallet_address_tags` are never signed: the frontend leaves them empty, and
+/// signing unverified client-supplied values would reopen the signing oracle.
 pub async fn sign_onramper_widget_url(
     principal: Principal,
     req: SignOnramperWidgetUrlRequest,
@@ -78,8 +78,8 @@ async fn verify_caller_network_wallets(
     Ok(verified)
 }
 
-/// Derives the caller's own address for a given `OnRamper` network id, or `None` when the network is
-/// unknown or its derivation failed (both treated as "cannot verify").
+/// Derives the caller's own address for a given `OnRamper` network id, or `None` when the network
+/// is unknown or its derivation failed (both treated as "cannot verify").
 async fn derive_network_address(network_id: &str, principal: &Principal) -> Option<String> {
     let id = network_id.to_lowercase();
     if id == ONRAMPER_NETWORK_BITCOIN {
