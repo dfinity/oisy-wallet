@@ -16,6 +16,7 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { routeToken } from '$lib/derived/nav.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
@@ -187,7 +188,14 @@
 	// which is only updated through explicit user actions.
 	// We initialise the store from the URL on first load to preserve navigation
 	// context without promoting the route to the source of truth.
+	// The token view carries a network purely to identify the token, not as a
+	// filter choice, so we skip it there to avoid leaking that network into the
+	// asset list filter after a reload.
 	onMount(() => {
+		if (nonNullish($routeToken)) {
+			return;
+		}
+
 		userSelectedNetworkStore.set($networkId);
 	});
 </script>
