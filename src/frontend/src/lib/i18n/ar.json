@@ -1600,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "التطبيقات المتصلة",
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
+			"disconnect_all": "قطع اتصال الكل",
+			"disconnect_app": "قطع الاتصال بـ $name",
 			"wallet_connect": ""
 		},
 		"alt": {

@@ -1600,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Ứng dụng đã kết nối",
 			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
+			"disconnect_all": "Ngắt kết nối tất cả",
+			"disconnect_app": "Ngắt kết nối $name",
 			"wallet_connect": ""
 		},
 		"alt": {

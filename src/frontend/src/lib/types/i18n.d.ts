@@ -1273,6 +1273,8 @@ interface I18nWallet_connect {
 		psbt_broadcast_unsupported_note: string;
 		connected_apps: string;
 		no_connected_apps: string;
+		disconnect_all: string;
+		disconnect_app: string;
 		wallet_connect: string;
 	};
 	alt: { connect_input: string };
