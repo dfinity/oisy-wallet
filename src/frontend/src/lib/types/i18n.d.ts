@@ -72,6 +72,12 @@ interface I18nCore {
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
+interface I18nProgress {
+	completed: string;
+	in_progress: string;
+	failed: string;
+}
+
 interface I18nNavigation {
 	text: {
 		tokens: string;
@@ -1853,6 +1859,7 @@ interface I18nAi_assistant {
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
+	progress: I18nProgress;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;
