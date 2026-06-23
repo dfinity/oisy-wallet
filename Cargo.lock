@@ -76,6 +76,7 @@ name = "backend"
 version = "0.0.3"
 dependencies = [
  "bitcoin",
+ "bs58",
  "canbench-rs",
  "candid",
  "candid_parser",
@@ -98,6 +99,7 @@ dependencies = [
  "serde_json",
  "sha2 0.11.0",
  "shared",
+ "tiny-keccak",
 ]
 
 [[package]]
@@ -280,9 +282,9 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "canbench-rs"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e576c38b15af6ff612e1cff2361a8989035c6bcd135baae76619b51edd4df5a5"
+checksum = "11eef0544778ff515f65fbe5427807009a9cf44eb898404380f6f13c9af20025"
 dependencies = [
  "canbench-rs-macros",
  "candid",
@@ -292,9 +294,9 @@ dependencies = [
 
 [[package]]
 name = "canbench-rs-macros"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a8494cc1c374975166cba496868eeb5a5bd88a86beaa75fd866a89d956c702c"
+checksum = "94a1c524c43e000e22c24816ead2fcf79d57aca4bae6747835dc088d57682f11"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -303,9 +305,9 @@ dependencies = [
 
 [[package]]
 name = "candid"
-version = "0.10.27"
+version = "0.10.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ba5b4833b63bf7b785fecdd2cc918ed90d988fd974825d5c48e7b407c39ef38"
+checksum = "f8f781afa4a1303e3eab4ada0720a874942bcfa936ce01b816ac6378945c43a9"
 dependencies = [
  "anyhow",
  "binread",
@@ -326,9 +328,9 @@ dependencies = [
 
 [[package]]
 name = "candid_derive"
-version = "0.10.27"
+version = "0.10.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b60664b6324832dfb4863f3b19eb4d58819cd38fba6d3941b101213cea0d9ec"
+checksum = "ad6ae8e7944dd0035651bc0e7b3a3e4cb16f5fc43f8ae4fd76b36ff2cd52759f"
 dependencies = [
  "lazy_static",
  "proc-macro2",
@@ -338,9 +340,9 @@ dependencies = [
 
 [[package]]
 name = "candid_parser"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "50e7b872ea5d7b8b445b7b15134ccb7d71e53882c4b5db62e706f9f8a8637c50"
+checksum = "470a4cf0c110e217e54ab3d21c4a9c290736c4a70ab6263d65155522d4b93fb6"
 dependencies = [
  "anyhow",
  "candid",
@@ -721,7 +723,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -1757,7 +1759,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2311,7 +2313,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2536,9 +2538,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.149"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
+checksum = "e8014e44b4736ed0538adeecded0fce2a272f22dc9578a7eb6b2d9993c74cfb9"
 dependencies = [
  "itoa",
  "memchr",
@@ -2817,7 +2819,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -3424,7 +3426,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
