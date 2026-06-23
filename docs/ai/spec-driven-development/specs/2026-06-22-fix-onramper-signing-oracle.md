@@ -8,14 +8,29 @@ Close an open signing-oracle flaw in the backend's `sign_onramper_widget_url` en
 endpoint HMAC-signs the `wallets` / `network_wallets` / `wallet_address_tags` parameters **exactly
 as supplied by the caller**, without checking that the addresses belong to `msg_caller()`. Because
 OISY is network-custodial — the backend can derive every one of the caller's receiving addresses
-from their principal — the fix is to **derive the signed addresses server-side from the caller
-principal and sign only those**, ignoring (and removing) the client-supplied address fields. This
-turns "the backend signs whatever you send" into "the backend signs your own addresses," which is
-what the HMAC was always meant to guarantee.
+from their principal — the fix is **validate-ownership**: the frontend keeps sending the addresses
+it derived, the backend **re-derives each one from the caller's principal and signs only its own
+derived value once it confirms a match**, and rejects the whole request on any mismatch or any
+address it cannot derive. This turns "the backend signs whatever you send" into "the backend signs
+your own addresses," which is what the HMAC was always meant to guarantee — and, by keeping the
+caller-supplied addresses as a cross-check rather than discarding them, a frontend/backend
+derivation-parity bug fails **loudly** (rejected) instead of silently producing a URL that pays an
+unspendable address.
+
+> **Approach note (updated):** an earlier draft of this spec proposed deriving the addresses
+> server-side and **removing** the client-supplied fields (an argument-less, breaking endpoint). We
+> switched to validate-ownership: it is **non-breaking** (the request shape is unchanged; the
+> frontend already sends `networkWallets`) and the kept-addresses cross-check is a deliberate safety
+> net for derivation parity. The signing-oracle outcome is identical (the backend only ever signs
+> `msg_caller()`-derived addresses).
 
 This is the same vulnerability class as the fix in
 `2026-06-09-fix-btc-pending-tx-prune-bypass.md`: a caller-supplied address that must instead be
-derived from the principal.
+verified against (and replaced by) the one derived from the principal.
+
+> **Delivery:** shipped as a small stack — `feat(shared)` error variants + bindings + FE mapping
+> (parallel), and `fix(backend)` derivation helpers + endpoint validation + tests + this doc
+> (stacked on it). The pure pubkey→address encoders landed earlier in their own PR.
 
 ---
 
@@ -111,23 +126,25 @@ mechanism below).
 
 ## Approach
 
-Server-side derive-and-replace (the requester's choice; the recommended mitigation):
+Validate-ownership (non-breaking):
 
-1. The endpoint no longer accepts `wallets`, `network_wallets`, or `wallet_address_tags`. It derives
-   the caller's four receiving addresses from `msg_caller()` and signs only those as `networkWallets`
-   (matching today's `wallets: []`, four-network shape).
-2. `wallets` and `wallet_address_tags` are signed as empty (today's behavior).
-3. The endpoint becomes `async` (the pubkey reads are inter-canister calls to the **IC management
-   canister** — see the [derivation mechanism](#changes); they are **not** calls to the chain-fusion
-   signer canister).
-4. The request type loses its three fields; this is a **breaking Candid change** — follow
-   `docs/ai/backend/workflows/breaking-interface.md` and regenerate via `npm run generate`.
-5. The frontend stops building/sending addresses; it calls the endpoint and appends the returned
-   `signed_query` + `signature` verbatim (the `signed_query` round-trip already exists, so the
-   frontend need not know which addresses were signed).
+1. The endpoint keeps its `SignOnramperWidgetUrlRequest` shape; the frontend keeps sending the
+   `networkWallets` it derived (it already does; `wallets` / `wallet_address_tags` stay empty).
+2. For each supplied `networkWallets` entry the backend re-derives the caller's address for that
+   network from `msg_caller()` and requires an **exact match**; it then signs its own derived value
+   (not the supplied string).
+3. Any **mismatch** rejects the whole request with `AddressMismatch`; any address the backend
+   **cannot derive** (unknown network or a signer/pubkey read failure) rejects with
+   `AddressDerivationFailed`. `wallets` / `wallet_address_tags` are never signed — signing
+   unverified client input would reopen the oracle.
+4. The endpoint becomes `async` (the pubkey reads are inter-canister calls to the **IC management
+   canister** — see the [derivation mechanism](#changes); **not** calls to the chain-fusion signer
+   canister). This does not change the Candid signature; only the additive error variants do.
+5. The frontend is unchanged except for mapping the two new error variants — no interface change, no
+   address-sending change.
 
-This is one PR covering all four chains (the requester's scope choice): the oracle is fully closed on
-merge, with no chain left signing client input.
+Delivered as a small stack: error variants + bindings + FE mapping (parallel), then derivation
+helpers + endpoint validation + tests + docs (stacked). The pure encoders landed earlier separately.
 
 ### Network selection (mainnet vs testnet)
 
@@ -397,26 +414,27 @@ ecdsa_public_key` / `schnorr_public_key` with `canister_id = cfs_canister_id` (m
 
 ## Acceptance criteria
 
-- [ ] `sign_onramper_widget_url` derives the caller's BTC/ETH/ICP/SOL addresses from `msg_caller()`
-      server-side and signs only those as `networkWallets`; no caller-supplied address reaches the HMAC.
-- [ ] The endpoint is `async`; `wallets` / `network_wallets` / `wallet_address_tags` are removed from
-      `SignOnramperWidgetUrlRequest`; `backend.did` + `src/declarations/backend/` regenerated via
-      `npm run generate` (not hand-edited); PR marked breaking (`!` + `BREAKING CHANGE:`).
-- [ ] Each derived address is proven equal to the chain-fusion signer / frontend address for a fixed
-      principal (BTC, ETH, ICP, SOL), with encoder unit tests (keccak/EIP-55 for ETH, base58 for SOL)
-      pinned to known vectors.
-- [ ] A regression test asserts the oracle is closed: an attacker cannot obtain a signature over an
-      address they do not own (now a compile-time guarantee — no address field exists).
+- [ ] `sign_onramper_widget_url` re-derives the caller's address for each supplied `networkWallets`
+      entry from `msg_caller()`, requires an exact match, and signs only its own derived value; no
+      caller-supplied address string reaches the HMAC unverified.
+- [ ] The endpoint is `async`; the request shape is **unchanged** (non-breaking). `AddressMismatch` and
+      `AddressDerivationFailed` are added to the error enum (additive); `backend.did` +
+      `src/declarations/backend/` regenerated via `npm run generate` (not hand-edited).
+- [ ] A mismatch (supplied ≠ derived) rejects with `AddressMismatch`; an unknown network or a
+      derivation failure rejects with `AddressDerivationFailed`. Both reject the **whole** request.
+- [ ] Each derived address is proven equal to the frontend/signer address for a fixed principal, with
+      encoder unit tests (keccak/EIP-55 for ETH, base58 for SOL) pinned to known vectors; the ICP path
+      is proven end-to-end in an integration test (the caller's own account id is accepted and signed).
+- [ ] Integration tests assert the oracle is closed: an address the caller does **not** own is rejected
+      (`AddressMismatch`), and the happy path signs the caller's own derived value.
 - [ ] Addresses are derived only via management-canister pubkey **reads** (`ecdsa_public_key` /
       `schnorr_public_key` with `canister_id = cfs_canister_id`) plus local ICP compute. No call to the
       chain-fusion signer canister, no `allow_signing`/`approve_signing`/cycles-allowance flow, and no
       `sign_with_ecdsa`/`sign_with_schnorr`. Reviewer confirms no ~80T `SIGNER_FEE` signing path is hit.
-- [ ] Frontend no longer derives or sends wallet addresses to the endpoint; `buildOnramperLink` and
-      `OnramperWidget.svelte` drop the address stores/maps; FE typechecks (`tsc --project
-tsconfig.spec.json`) and tests pass.
+- [ ] Frontend is unchanged except mapping the two new error variants; FE typechecks and tests pass.
 - [ ] `SecretNotConfigured` and `RateLimited` error paths keep their existing semantics.
-- [ ] `docs/ai/PRODUCT.md` gains a `## Buy (OnRamper)` section in this PR, including the explicit
-      negative guarantee (signed addresses are always the authenticated caller's own).
+- [ ] `docs/ai/PRODUCT.md` gains a `## Buy (OnRamper)` section, including the explicit guarantee
+      (signed addresses are always the authenticated caller's own).
 - [ ] All local gates pass (backend format/lint/lint.did/test; frontend format/lint/check/test;
       `npm run generate`).
 
