@@ -95,6 +95,24 @@ describe('Menu', () => {
 			return element;
 		});
 
+	it('keeps the menu button highlighted while the popover is open', async () => {
+		({ container } = render(Menu));
+
+		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
+
+		assertNonNullish(menuButton);
+
+		expect(menuButton).not.toHaveClass('opened');
+		expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+
+		menuButton.click();
+
+		await waitFor(() => {
+			expect(menuButton).toHaveClass('opened');
+			expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+		});
+	});
+
 	it('renders the privacy mode menu item', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemPrivacyModeButtonSelector });

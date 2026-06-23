@@ -948,7 +948,8 @@ interface I18nBuy {
 		buy: string;
 		buy_dev: string;
 		unavailable_title: string;
-		unavailable_description: string;
+		unavailable_description_disabled: string;
+		unavailable_description_signing_failed: string;
 		unavailable_fallback_hint: string;
 	};
 	actions: { close: string };
@@ -1250,6 +1251,7 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		unreviewed_instructions: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;

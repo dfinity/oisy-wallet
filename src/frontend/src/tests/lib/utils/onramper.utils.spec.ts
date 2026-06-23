@@ -23,15 +23,25 @@ describe('onramper.utils', () => {
 	describe('buildOnramperLink', () => {
 		const mockSignature = 'a'.repeat(64);
 
-		beforeEach(() => {
-			vi.spyOn(backendApi, 'signOnramperWidgetUrl').mockResolvedValue(mockSignature);
-		});
+		// The backend is now the single authority for the signed params: it returns both the
+		// signature and the exact canonical query fragment (`signed_query`) it HMAC'd. buildOnramperLink
+		// appends `signed_query` verbatim, so these specs assert that fragment flows through unchanged
+		// rather than being re-derived from `wallets`/`networkWallets` on the frontend.
+		const mockSignOnramperWidgetUrl = (signedQuery: string) =>
+			vi
+				.spyOn(backendApi, 'signOnramperWidgetUrl')
+				.mockResolvedValue({ signature: mockSignature, signed_query: signedQuery });
 
 		afterEach(() => {
 			vi.restoreAllMocks();
 		});
 
 		it('should build the correct URL with all parameters', async () => {
+			const signedQuery =
+				`networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
+				`&wallets=btc:${mockBtcAddress},icp:${mockAccountIdentifierText}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -58,8 +68,7 @@ describe('onramper.utils', () => {
 				`&onlyCryptos=btc,eth,icp&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=true&enableCountrySelector=false` +
 				`&themeName=dark` +
-				`&wallets=btc:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
-				`&networkWallets=bitcoin:${mockBtcAddress},icp:${mockAccountIdentifierText}` +
+				`&${signedQuery}` +
 				`&signature=${mockSignature}`;
 
 			const result = await buildOnramperLink(params);
@@ -73,6 +82,9 @@ describe('onramper.utils', () => {
 		});
 
 		it('should build the correct URL with only required parameters', async () => {
+			const signedQuery = `networkWallets=bitcoin:${mockBtcAddress}&wallets=btc:${mockBtcAddress}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -92,8 +104,7 @@ describe('onramper.utils', () => {
 				`&onlyCryptos=btc&onlyCryptoNetworks=bitcoin` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
 				`&themeName=dark` +
-				`&wallets=btc:${mockBtcAddress}` +
-				`&networkWallets=bitcoin:${mockBtcAddress}` +
+				`&${signedQuery}` +
 				`&signature=${mockSignature}`;
 
 			const result = await buildOnramperLink(params);
@@ -102,6 +113,8 @@ describe('onramper.utils', () => {
 		});
 
 		it('should handle empty wallets array', async () => {
+			mockSignOnramperWidgetUrl('');
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -129,6 +142,9 @@ describe('onramper.utils', () => {
 		});
 
 		it('should handle only crypto wallets array', async () => {
+			const signedQuery = `wallets=btc:${mockBtcAddress}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -148,7 +164,7 @@ describe('onramper.utils', () => {
 				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
 				`&themeName=dark` +
-				`&wallets=btc:${mockBtcAddress}` +
+				`&${signedQuery}` +
 				`&signature=${mockSignature}`;
 
 			const result = await buildOnramperLink(params);
@@ -157,6 +173,9 @@ describe('onramper.utils', () => {
 		});
 
 		it('should handle only network wallets array', async () => {
+			const signedQuery = `networkWallets=bitcoin:${mockBtcAddress}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -176,7 +195,7 @@ describe('onramper.utils', () => {
 				`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
 				`&themeName=dark` +
-				`&networkWallets=bitcoin:${mockBtcAddress}` +
+				`&${signedQuery}` +
 				`&signature=${mockSignature}`;
 
 			const result = await buildOnramperLink(params);
@@ -185,6 +204,9 @@ describe('onramper.utils', () => {
 		});
 
 		it('should handle empty onlyCryptos and onlyCryptoNetworks arrays', async () => {
+			const signedQuery = `networkWallets=bitcoin:${mockBtcAddress}&wallets=btc:${mockBtcAddress}`;
+			mockSignOnramperWidgetUrl(signedQuery);
+
 			const params: BuildOnramperLinkParams = {
 				identity: mockIdentity,
 				mode: 'buy',
@@ -203,7 +225,7 @@ describe('onramper.utils', () => {
 				`&mode=buy&defaultFiat=usd` +
 				`&supportRecurringPayments=false&enableCountrySelector=true` +
 				`&themeName=dark` +
-				`&wallets=btc:${mockBtcAddress}&networkWallets=bitcoin:${mockBtcAddress}` +
+				`&${signedQuery}` +
 				`&signature=${mockSignature}`;
 
 			const result = await buildOnramperLink(params);

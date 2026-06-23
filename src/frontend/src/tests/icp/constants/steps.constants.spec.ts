@@ -3,8 +3,8 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { sendSteps } from '$icp/constants/steps.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+import type { ProgressStep } from '$lib/types/progress-step';
 import en from '$tests/mocks/i18n.mock';
-import type { ProgressStep } from '@dfinity/gix-components';
 
 describe('steps.constants', () => {
 	describe('sendSteps', () => {

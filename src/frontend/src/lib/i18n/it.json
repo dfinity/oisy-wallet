@@ -1231,7 +1231,8 @@
 			"buy": "Acquista",
 			"buy_dev": "Acquista (Ambiente di sviluppo)",
 			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
-			"unavailable_description": "L'acquisto di token è attualmente disattivato mentre continuiamo a migliorare la sicurezza di questo processo introducendo la firma degli URL. Verrà riattivato non appena il lavoro sarà completato.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Nel frattempo, puoi comunque ricevere token condividendo l'indirizzo del tuo portafoglio."
 		},
 		"actions": {
@@ -1577,6 +1578,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dati HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",
 			"sign_psbt": "",

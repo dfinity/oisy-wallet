@@ -1,4 +1,4 @@
-//! Integration tests for `sign_onramper_widget_url` and `onramper_enabled`.
+//! Integration tests for `sign_onramper_widget_url`.
 //!
 //! The unit tests in `backend::onramper::model::tests` cover the canonicalization rules and the
 //! HMAC primitive. Here we exercise the canister boundary: the `caller_is_not_anonymous` guard,
@@ -92,17 +92,21 @@ fn sign_onramper_widget_url_returns_deterministic_signature_for_known_input() {
         .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
         .expect("call should succeed when secret is provisioned");
 
-    // Deterministic: same input + same secret → same signature.
+    // Deterministic: same input + same secret → same response.
     assert_eq!(first, second);
 
-    let signature = match first {
-        SignOnramperWidgetUrlResult::Ok(hex) => hex,
+    let response = match first {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
         SignOnramperWidgetUrlResult::Err(err) => {
-            panic!("expected Ok signature but got {err:?}")
+            panic!("expected Ok response but got {err:?}")
         }
     };
 
+    // The signed_query is the canonical fragment the backend HMAC'd for `sample_request()`.
+    assert_eq!(response.signed_query, "wallets=btc:1abc");
+
     // Sanity check: HMAC-SHA256 hex digest is 64 lowercase hex characters.
+    let signature = response.signature;
     assert_eq!(signature.len(), 64);
     assert!(
         signature
@@ -208,12 +212,12 @@ fn set_onramper_signing_secret_enables_without_clobbering_other_keys() {
         .expect("controller should be allowed to set the signing secret");
 
     let caller = Principal::from_text(CALLER).expect("valid caller principal");
-    let enabled = pic_setup
-        .query::<bool>(caller, "onramper_enabled", ())
-        .expect("query should reach the handler");
+    let signed = pic_setup
+        .update::<SignOnramperWidgetUrlResult>(caller, "sign_onramper_widget_url", sample_request())
+        .expect("call should reach the handler");
     assert!(
-        enabled,
-        "onramper should be enabled after the secret is set"
+        matches!(signed, SignOnramperWidgetUrlResult::Ok(_)),
+        "signing should succeed once the secret is set; got {signed:?}"
     );
 
     let keys = pic_setup
@@ -228,25 +232,4 @@ fn set_onramper_signing_secret_enables_without_clobbering_other_keys() {
         keys.onramper_signing_secret,
         Some(TEST_SIGNING_SECRET.to_string())
     );
-}
-
-#[test]
-fn onramper_enabled_reflects_secret_configuration() {
-    let pic_setup = setup();
-    let caller = Principal::from_text(CALLER).expect("valid caller principal");
-
-    let before = pic_setup
-        .query::<bool>(caller, "onramper_enabled", ())
-        .expect("query should reach the handler");
-    assert!(
-        !before,
-        "onramper should be disabled before the secret is set"
-    );
-
-    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
-
-    let after = pic_setup
-        .query::<bool>(caller, "onramper_enabled", ())
-        .expect("query should reach the handler");
-    assert!(after, "onramper should be enabled once the secret is set");
 }

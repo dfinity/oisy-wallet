@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
@@ -57,6 +57,7 @@
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import {
 		isNetworkIdBTCMainnet,

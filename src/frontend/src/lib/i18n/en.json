@@ -1231,7 +1231,8 @@
 			"buy": "Buy",
 			"buy_dev": "Buy (Dev Environment)",
 			"unavailable_title": "Buying tokens is temporarily unavailable",
-			"unavailable_description": "Buying tokens is currently turned off while we further improve the security of this process by introducing URL signing. It will be turned back on as soon as the work is complete.",
+			"unavailable_description_disabled": "We are currently doing maintenance work on our Onramper integration, and will turn it back on very soon.",
+			"unavailable_description_signing_failed": "There seems to be a technical issue with our Onramper integration. We are currently investigating it, and will turn it back on very soon.",
 			"unavailable_fallback_hint": "In the meantime, you can still receive tokens by sharing your wallet address."
 		},
 		"actions": {
@@ -1577,6 +1578,7 @@
 			"network": "Network",
 			"amount": "Amount",
 			"hex_data": "HEX Data",
+			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",

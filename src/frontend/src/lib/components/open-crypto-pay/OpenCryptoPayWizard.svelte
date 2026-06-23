@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import type { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import OpenCryptoPay from '$lib/components/open-crypto-pay/OpenCryptoPay.svelte';
@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { parseToken } from '$lib/utils/parse.utils';

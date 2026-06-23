@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, onDestroy, setContext } from 'svelte';
@@ -41,6 +41,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {

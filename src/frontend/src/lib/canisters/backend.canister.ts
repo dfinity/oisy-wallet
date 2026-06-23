@@ -7,6 +7,7 @@ import type {
 	ExchangeRate,
 	GetAllowedCyclesResponse,
 	SignOnramperWidgetUrlRequest,
+	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -135,12 +136,6 @@ export class BackendCanister extends Canister<BackendService> {
 		return exchange_rate_enabled();
 	};
 
-	onramperEnabled = ({ certified }: QueryParams): Promise<boolean> => {
-		const { onramper_enabled } = this.caller({ certified });
-
-		return onramper_enabled();
-	};
-
 	btcAddPendingTransaction = async ({
 		txId,
 		iiDelegationChain,
@@ -240,7 +235,7 @@ export class BackendCanister extends Canister<BackendService> {
 		wallets,
 		networkWallets,
 		walletAddressTags
-	}: SignOnramperWidgetUrlParams): Promise<string> => {
+	}: SignOnramperWidgetUrlParams): Promise<SignOnramperWidgetUrlResponse> => {
 		const { sign_onramper_widget_url } = this.caller({ certified: true });
 
 		const request: SignOnramperWidgetUrlRequest = {

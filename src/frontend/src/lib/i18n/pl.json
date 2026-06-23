@@ -1231,7 +1231,8 @@
 			"buy": "Kup",
 			"buy_dev": "Kup (środowisko deweloperskie)",
 			"unavailable_title": "Kupowanie tokenów jest tymczasowo niedostępne",
-			"unavailable_description": "Kupowanie tokenów jest obecnie wyłączone, podczas gdy nadal ulepszamy bezpieczeństwo tego procesu poprzez wprowadzenie podpisywania URL. Zostanie ponownie włączone, gdy tylko praca zostanie zakończona.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "W międzyczasie nadal możesz otrzymywać tokeny, udostępniając adres swojego portfela."
 		},
 		"actions": {
@@ -1577,6 +1578,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dane HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "",
