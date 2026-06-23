@@ -310,6 +310,12 @@ export class AlchemyProvider {
 		this.nftBaseUrl = `${new URL(this.alchemyJsonRpcUrl).origin}/nft/v3/${ALCHEMY_API_KEY}`;
 	}
 
+	// Exposes the viem read client for callers that need raw `readContract` access
+	// (e.g. the Liquidium SDK's `evmPublicClient`) while keeping the full provider private.
+	get readContractClient(): Pick<PublicClient, 'readContract'> {
+		return this.provider;
+	}
+
 	private fetchNftApi = async <T>({
 		path,
 		params

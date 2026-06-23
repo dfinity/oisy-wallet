@@ -132,7 +132,9 @@ describe('btc-send.services', () => {
 				.mockReturnValue(new Uint8Array());
 			const onProgressSpy = vi.spyOn(defaultParams, 'onProgress');
 
-			await sendBtc(defaultParams);
+			const result = await sendBtc(defaultParams);
+
+			expect(result).toBe(txid);
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
