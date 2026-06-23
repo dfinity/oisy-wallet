@@ -7,7 +7,8 @@
 	 */
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
-	import type { QrCreateClass } from '$lib/types/qr-creator';
+	import { TEST } from '$lib/constants/app.constants';
+	import type { QrCreatorClass } from '$lib/types/qr-creator';
 
 	interface Props {
 		ariaLabel?: string;
@@ -54,7 +55,7 @@
 
 	const isBrowser = typeof window !== 'undefined';
 
-	let QrCreator = $state<QrCreateClass>();
+	let QrCreator = $state<QrCreatorClass>();
 	onMount(async () => {
 		// The qr-creator library is not compatible with NodeJS environment
 		if (!isBrowser) {
@@ -64,9 +65,7 @@
 		// The library leads to issues (es modules import error, segmentation fault, blocking tests etc.) in tests.
 		// Therefore, the simplest way to avoid these problems is to skip it globally in tests.
 		// It remains tested in e2e tests.
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		if (process.env.NODE_ENV === 'test') {
+		if (TEST) {
 			return;
 		}
 
