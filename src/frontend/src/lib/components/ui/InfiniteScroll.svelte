@@ -4,7 +4,6 @@
 
 	interface Props {
 		onIntersect: () => Promise<void>;
-		layout?: 'list' | 'grid';
 		disabled?: boolean;
 		testId?: string;
 		options?: IntersectionObserverInit;
@@ -13,7 +12,6 @@
 
 	let {
 		onIntersect,
-		layout = 'list',
 		disabled = false,
 		testId,
 		options = {
@@ -37,7 +35,7 @@
 		await onIntersect();
 	};
 
-	// svelte-ignore state_referenced_locally -- the observer is created once with the initial options
+	// svelte-ignore state_referenced_locally
 	const observer: IntersectionObserver = new IntersectionObserver(onIntersection, options);
 
 	// Svelte workaround: beforeUpdate is called twice when bindings are used -> https://github.com/sveltejs/svelte/issues/6016
@@ -71,7 +69,7 @@
 	onDestroy(() => observer.disconnect());
 </script>
 
-<ul class:card-grid={layout === 'grid'} data-tid={testId}>
+<ul data-tid={testId}>
 	{@render children()}
 </ul>
 
