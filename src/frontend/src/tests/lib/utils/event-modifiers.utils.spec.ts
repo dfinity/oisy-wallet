@@ -12,8 +12,12 @@ describe('event-modifiers.utils', () => {
 			const calls: string[] = [];
 			const stopPropagationSpy = vi
 				.spyOn(event, 'stopPropagation')
-				.mockImplementation(() => calls.push('stopPropagation'));
-			const callback = vi.fn(() => calls.push('callback'));
+				.mockImplementation(() => {
+					calls.push('stopPropagation');
+				});
+			const callback = vi.fn(() => {
+				calls.push('callback');
+			});
 
 			stopPropagation(callback)(event);
 
@@ -39,8 +43,12 @@ describe('event-modifiers.utils', () => {
 			const calls: string[] = [];
 			const preventDefaultSpy = vi
 				.spyOn(event, 'preventDefault')
-				.mockImplementation(() => calls.push('preventDefault'));
-			const callback = vi.fn(() => calls.push('callback'));
+				.mockImplementation(() => {
+					calls.push('preventDefault');
+				});
+			const callback = vi.fn(() => {
+				calls.push('callback');
+			});
 
 			preventDefault(callback)(event);
 
