@@ -38,6 +38,7 @@ lazy_static = "1.5"
 pocket-ic = "13.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
+tiny-keccak = { version = "2.0", features = ["keccak"] }
 paste = "1.0"
 # Used for `futures::future::join_all` to run independent HTTP outcalls in
 # parallel (e.g. exchange price providers). Already a transitive dep via the

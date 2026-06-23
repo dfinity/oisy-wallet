@@ -76,6 +76,7 @@ name = "backend"
 version = "0.0.3"
 dependencies = [
  "bitcoin",
+ "bs58",
  "canbench-rs",
  "candid",
  "candid_parser",
@@ -98,6 +99,7 @@ dependencies = [
  "serde_json",
  "sha2 0.11.0",
  "shared",
+ "tiny-keccak",
 ]
 
 [[package]]
