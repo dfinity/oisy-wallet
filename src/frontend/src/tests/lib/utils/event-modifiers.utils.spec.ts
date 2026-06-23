@@ -1,5 +1,5 @@
-import { preventDefault, stopPropagation } from '$lib/utils/event-modifiers.utils';
 import type { OnEventParam } from '$lib/types/event-modifiers';
+import { preventDefault, stopPropagation } from '$lib/utils/event-modifiers.utils';
 
 type TestEvent = OnEventParam<MouseEvent, HTMLButtonElement>;
 
@@ -10,11 +10,9 @@ describe('event-modifiers.utils', () => {
 		it('should stop propagation before calling the callback with the event', () => {
 			const event = createEvent();
 			const calls: string[] = [];
-			const stopPropagationSpy = vi
-				.spyOn(event, 'stopPropagation')
-				.mockImplementation(() => {
-					calls.push('stopPropagation');
-				});
+			const stopPropagationSpy = vi.spyOn(event, 'stopPropagation').mockImplementation(() => {
+				calls.push('stopPropagation');
+			});
 			const callback = vi.fn(() => {
 				calls.push('callback');
 			});
@@ -41,11 +39,9 @@ describe('event-modifiers.utils', () => {
 		it('should prevent default before calling the callback with the event', () => {
 			const event = createEvent();
 			const calls: string[] = [];
-			const preventDefaultSpy = vi
-				.spyOn(event, 'preventDefault')
-				.mockImplementation(() => {
-					calls.push('preventDefault');
-				});
+			const preventDefaultSpy = vi.spyOn(event, 'preventDefault').mockImplementation(() => {
+				calls.push('preventDefault');
+			});
 			const callback = vi.fn(() => {
 				calls.push('callback');
 			});
