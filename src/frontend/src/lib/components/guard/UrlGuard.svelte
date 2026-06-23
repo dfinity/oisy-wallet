@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
+	import GiftCodeRedeemResultModal from '$lib/components/gift-code/GiftCodeRedeemResultModal.svelte';
 	import VipRewardStateModal from '$lib/components/vip/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalVipRewardState, modalVipRewardStateData } from '$lib/derived/modal.derived';
+	import {
+		modalGiftCodeRedeemResult,
+		modalGiftCodeRedeemResultData,
+		modalVipRewardState,
+		modalVipRewardStateData
+	} from '$lib/derived/modal.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
+	import { getGiftCodeInfo, redeemGiftCode } from '$lib/services/gift-code.services';
 	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -12,6 +19,7 @@
 	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	const modalId = Symbol();
+	const giftModalId = Symbol();
 
 	$effect(() => {
 		const handleSearchParams = async () => {
@@ -28,6 +36,25 @@
 						data: {
 							success: result.success,
 							codeType: result.campaignId ?? QrCodeType.VIP
+						}
+					});
+				}
+			}
+
+			if (!$initialLoading && page.url.searchParams.has('gift') && nonNullish($authIdentity)) {
+				const giftCode = page.url.searchParams.get('gift');
+				if (nonNullish(giftCode)) {
+					const info = await getGiftCodeInfo({ identity: $authIdentity, code: giftCode });
+					const result = await redeemGiftCode({ identity: $authIdentity, code: giftCode });
+
+					removeSearchParam({ url: page.url, searchParam: 'gift' });
+					modalStore.openGiftCodeRedeemResult({
+						id: giftModalId,
+						data: {
+							success: result.success,
+							code: giftCode,
+							tokens: info?.tokens,
+							error: result.error
 						}
 					});
 				}
@@ -54,4 +81,6 @@
 		codeType={$modalVipRewardStateData.codeType}
 		isSuccessful={$modalVipRewardStateData.success}
 	/>
+{:else if $modalGiftCodeRedeemResult && nonNullish($modalGiftCodeRedeemResultData)}
+	<GiftCodeRedeemResultModal data={$modalGiftCodeRedeemResultData} />
 {/if}
