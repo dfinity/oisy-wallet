@@ -12,7 +12,7 @@ resolver = "2"
 bs58 = "0.5"
 ic-cdk = "0.19.0"
 ic-cdk-timers = "1.0.0"
-canbench-rs = { version = "0.5.0" }
+canbench-rs = { version = "0.6.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
@@ -38,9 +38,6 @@ lazy_static = "1.5"
 pocket-ic = "13.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
-# Keccak-256 (Ethereum's hash, distinct from NIST SHA-3) for deriving Ethereum
-# addresses from a public key. Already a transitive dep in the lockfile; this
-# declaration makes it directly available to the backend crate.
 tiny-keccak = { version = "2.0", features = ["keccak"] }
 paste = "1.0"
 # Used for `futures::future::join_all` to run independent HTTP outcalls in

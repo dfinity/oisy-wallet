@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { WizardModal, WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import type { WizardModal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { get } from 'svelte/store';
@@ -31,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { networksWithSupport } from '$lib/utils/swap-tokens-filter.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
