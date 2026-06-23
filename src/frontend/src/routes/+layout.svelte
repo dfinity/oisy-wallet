@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
+	import { SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import {
@@ -193,7 +194,7 @@
 
 {#await init()}
 	<div class="text-brand-primary" in:fade>
-		<Spinner />
+		<LoaderSpinner />
 	</div>
 {:then _}
 	{@render children()}

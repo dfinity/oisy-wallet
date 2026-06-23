@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, onMount } from 'svelte';
@@ -9,6 +8,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -178,7 +178,7 @@
 		<div class="stretch">
 			<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
 				<div>
-					<Spinner inline />
+					<LoaderSpinner inline />
 				</div>
 				<p>{$i18n.wallet_connect.text.connecting}</p>
 			</div>
