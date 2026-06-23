@@ -19,6 +19,7 @@ use shared::types::signer::{
     },
     AllowSigningError, GetAllowedCyclesError,
 };
+use tiny_keccak::{Hasher, Keccak};
 
 use super::canister_ids::{CYCLES_LEDGER, SIGNER};
 use crate::state::read_config;
@@ -238,6 +239,86 @@ pub async fn btc_principal_to_p2wpkh_address(
     }
 }
 
+/// Keccak-256 of `data`. This is Ethereum's hash function — the original Keccak, **not** the
+/// NIST-standardized SHA-3 (they differ in padding). Used for both the address derivation and the
+/// EIP-55 checksum below.
+fn keccak256(data: &[u8]) -> [u8; 32] {
+    let mut hasher = Keccak::v256();
+    let mut output = [0u8; 32];
+    hasher.update(data);
+    hasher.finalize(&mut output);
+    output
+}
+
+/// Encodes a 20-byte address as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex
+/// letter is uppercased when the corresponding nibble of the Keccak-256 of the lowercase hex is `>=
+/// 8`. See <https://eips.ethereum.org/EIPS/eip-55>. Takes a fixed `[u8; 20]` so the `hash[i / 2]`
+/// indexing below can never run past the 32-byte Keccak output (40 hex chars → max index 19).
+fn to_eip55_checksum(address: &[u8; 20]) -> String {
+    let hex_addr = hex::encode(address);
+    let hash = keccak256(hex_addr.as_bytes());
+    let mut out = String::with_capacity(2 + hex_addr.len());
+    out.push_str("0x");
+    for (i, c) in hex_addr.char_indices() {
+        let nibble = if i % 2 == 0 {
+            hash[i / 2] >> 4
+        } else {
+            hash[i / 2] & 0x0f
+        };
+        if c.is_ascii_alphabetic() && nibble >= 8 {
+            out.push(c.to_ascii_uppercase());
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
+
+/// Derives the EIP-55-checksummed Ethereum address from a SEC1 secp256k1 public key (compressed or
+/// uncompressed). The address is the last 20 bytes of the Keccak-256 of the 64-byte uncompressed
+/// public key, excluding the leading `0x04` SEC1 tag.
+///
+/// # Errors
+/// - The bytes are not a valid secp256k1 public key.
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "wired into sign_onramper_widget_url in the stacked follow-up PR"
+    )
+)]
+pub(crate) fn eth_address_from_ecdsa_pubkey(pubkey: &[u8]) -> Result<String, String> {
+    let public_key = bitcoin::secp256k1::PublicKey::from_slice(pubkey)
+        .map_err(|e| format!("Invalid secp256k1 public key: {e}"))?;
+    let uncompressed = public_key.serialize_uncompressed();
+    let hash = keccak256(&uncompressed[1..]);
+    let mut address = [0u8; 20];
+    address.copy_from_slice(&hash[12..]);
+    Ok(to_eip55_checksum(&address))
+}
+
+/// Derives the Solana address — base58 of the 32-byte Ed25519 public key — from a raw Ed25519
+/// public key.
+///
+/// # Errors
+/// - The public key is not exactly 32 bytes.
+#[cfg_attr(
+    not(test),
+    expect(
+        dead_code,
+        reason = "wired into sign_onramper_widget_url in the stacked follow-up PR"
+    )
+)]
+pub(crate) fn sol_address_from_ed25519_pubkey(pubkey: &[u8]) -> Result<String, String> {
+    if pubkey.len() != 32 {
+        return Err(format!(
+            "Invalid Ed25519 public key length: expected 32, got {}",
+            pubkey.len()
+        ));
+    }
+    Ok(bs58::encode(pubkey).into_string())
+}
+
 /// Tops up the backend canister account on the cycles ledger.
 ///
 /// # Context
@@ -335,5 +416,71 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             topped_up: Nat::from(0u32),
         })
         .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use pretty_assertions::assert_eq;
+
+    use super::{eth_address_from_ecdsa_pubkey, sol_address_from_ed25519_pubkey};
+
+    // secp256k1 private key `1` — a canonical known-answer vector. Its public key derives the
+    // Ethereum address 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf (widely published).
+    const PRIV_KEY_ONE_COMPRESSED_PUBKEY: &str =
+        "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+    const PRIV_KEY_ONE_UNCOMPRESSED_PUBKEY: &str = "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8";
+    const PRIV_KEY_ONE_ETH_ADDRESS: &str = "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf";
+
+    fn hex_to_bytes(s: &str) -> Vec<u8> {
+        hex::decode(s).expect("valid hex test vector")
+    }
+
+    #[test]
+    fn eth_address_from_compressed_pubkey_matches_known_vector() {
+        let address =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_COMPRESSED_PUBKEY)).unwrap();
+
+        // The address is correctly derived AND EIP-55 checksummed (mixed case).
+        assert_eq!(address, PRIV_KEY_ONE_ETH_ADDRESS);
+    }
+
+    #[test]
+    fn eth_address_is_independent_of_pubkey_sec1_encoding() {
+        let from_compressed =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_COMPRESSED_PUBKEY)).unwrap();
+        let from_uncompressed =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_UNCOMPRESSED_PUBKEY)).unwrap();
+
+        assert_eq!(from_compressed, from_uncompressed);
+    }
+
+    #[test]
+    fn eth_address_rejects_invalid_pubkey() {
+        assert!(eth_address_from_ecdsa_pubkey(&[0x00, 0x01, 0x02]).is_err());
+    }
+
+    #[test]
+    fn sol_address_of_zero_pubkey_is_the_known_base58_string() {
+        // base58 of 32 zero bytes is 32 '1's — the Solana System Program id.
+        let address = sol_address_from_ed25519_pubkey(&[0u8; 32]).unwrap();
+
+        assert_eq!(address, "1".repeat(32));
+    }
+
+    #[test]
+    fn sol_address_base58_round_trips_to_the_pubkey() {
+        let pubkey: [u8; 32] = core::array::from_fn(|i| u8::try_from(i).unwrap());
+
+        let address = sol_address_from_ed25519_pubkey(&pubkey).unwrap();
+        let decoded = bs58::decode(&address).into_vec().unwrap();
+
+        assert_eq!(decoded, pubkey);
+    }
+
+    #[test]
+    fn sol_address_rejects_wrong_length_pubkey() {
+        assert!(sol_address_from_ed25519_pubkey(&[0u8; 31]).is_err());
+        assert!(sol_address_from_ed25519_pubkey(&[0u8; 33]).is_err());
     }
 }
