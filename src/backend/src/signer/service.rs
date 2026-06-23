@@ -303,10 +303,11 @@ fn keccak256(data: &[u8]) -> [u8; 32] {
     output
 }
 
-/// Encodes 20 address bytes as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex
+/// Encodes a 20-byte address as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex
 /// letter is uppercased when the corresponding nibble of the Keccak-256 of the lowercase hex is `>=
-/// 8`. See <https://eips.ethereum.org/EIPS/eip-55>.
-fn to_eip55_checksum(address: &[u8]) -> String {
+/// 8`. See <https://eips.ethereum.org/EIPS/eip-55>. Takes a fixed `[u8; 20]` so the `hash[i / 2]`
+/// indexing below can never run past the 32-byte Keccak output (40 hex chars → max index 19).
+fn to_eip55_checksum(address: &[u8; 20]) -> String {
     let hex_addr = hex::encode(address);
     let hash = keccak256(hex_addr.as_bytes());
     let mut out = String::with_capacity(2 + hex_addr.len());
@@ -337,7 +338,9 @@ pub(crate) fn eth_address_from_ecdsa_pubkey(pubkey: &[u8]) -> Result<String, Str
         .map_err(|e| format!("Invalid secp256k1 public key: {e}"))?;
     let uncompressed = public_key.serialize_uncompressed();
     let hash = keccak256(&uncompressed[1..]);
-    Ok(to_eip55_checksum(&hash[12..]))
+    let mut address = [0u8; 20];
+    address.copy_from_slice(&hash[12..]);
+    Ok(to_eip55_checksum(&address))
 }
 
 /// Derives the Solana address — base58 of the 32-byte Ed25519 public key — from a raw Ed25519
