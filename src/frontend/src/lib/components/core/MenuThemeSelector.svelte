@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Theme, themeStore, type ThemeStoreData } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import ThemeSelectorButton from '$lib/components/core/ThemeSelectorButton.svelte';
 	import IconDuoTone from '$lib/components/icons/IconDuoTone.svelte';
@@ -8,6 +7,8 @@
 	import IconSunMoon from '$lib/components/icons/IconSunMoon.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { themeStore, type ThemeStoreData } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
 
 	const THEME_VALUES = [...Object.values(Theme)];
 
