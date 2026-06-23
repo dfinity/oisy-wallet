@@ -1598,6 +1598,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Połączone aplikacje",
 			"no_connected_apps": "Obecnie żadne aplikacje nie są połączone.",
+			"disconnect_all": "Rozłącz wszystkie",
+			"disconnect_app": "Rozłącz $name",
 			"wallet_connect": ""
 		},
 		"alt": {

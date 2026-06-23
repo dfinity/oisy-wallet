@@ -448,6 +448,15 @@ export class WalletConnectClient extends WalletConnectListener {
 	getActiveSessions = (): Record<string, SessionTypes.Struct> =>
 		this.#walletKit.getActiveSessions();
 
+	// Disconnect a single session by topic. Unlike `disconnect`, this leaves other active sessions
+	// and all pairings untouched, so the remaining connected dApps keep working.
+	disconnectSession = async (topic: string): Promise<void> => {
+		await this.#walletKit.disconnectSession({
+			topic,
+			reason: getSdkError('USER_DISCONNECTED')
+		});
+	};
+
 	disconnect = async () => {
 		const disconnectPairings = async () => {
 			const pairings = this.#walletKit.engine.signClient.core.pairing.pairings.values;
