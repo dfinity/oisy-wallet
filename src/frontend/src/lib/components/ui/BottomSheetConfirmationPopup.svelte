@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Backdrop, BottomSheet } from '@dfinity/gix-components';
+	import { BottomSheet } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -37,5 +38,5 @@
 		</div>
 	</BottomSheet>
 
-	<Backdrop on:nnsClose={onCancel} />
+	<Backdrop onClose={onCancel} />
 </div>

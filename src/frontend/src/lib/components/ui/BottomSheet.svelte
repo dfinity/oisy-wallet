@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { BottomSheet, Backdrop } from '@dfinity/gix-components';
+	import { BottomSheet } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
@@ -62,6 +63,6 @@
 				</div>
 			{/if}
 		</BottomSheet>
-		<Backdrop on:nnsClose={handleClose} />
+		<Backdrop onClose={handleClose} />
 	</div>
 {/if}
