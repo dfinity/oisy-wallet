@@ -2,7 +2,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import QRCode from '$lib/components/ui/QRCode.svelte';
+	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -37,7 +37,7 @@
 				$token: symbol ?? ''
 			})}
 		>
-			<QRCode value={address}>
+			<QrCode value={address}>
 				{#snippet logo()}
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
@@ -45,7 +45,7 @@
 						</div>
 					{/if}
 				{/snippet}
-			</QRCode>
+			</QrCode>
 		</article>
 	{/if}
 </div>
