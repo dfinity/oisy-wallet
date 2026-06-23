@@ -2087,6 +2087,11 @@
 				"title": "",
 				"description": "",
 				"action": ""
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2105,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": ""
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

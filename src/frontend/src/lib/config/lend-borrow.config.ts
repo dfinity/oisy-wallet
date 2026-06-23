@@ -1,0 +1,32 @@
+import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
+import { LendBorrowProvider, type LendBorrowProviderConfig } from '$lib/types/lend-borrow';
+import type { WizardStepsParams } from '$lib/types/steps';
+import type { WizardSteps } from '@dfinity/gix-components';
+
+// Lend & borrow providers (mirrors `stakeProvidersConfig`): source of truth for
+// each provider's name/logo/url/description. Liquidium only for now.
+export const lendBorrowProvidersConfig: Record<LendBorrowProvider, LendBorrowProviderConfig> = {
+	[LendBorrowProvider.LIQUIDIUM]: {
+		name: 'Liquidium',
+		descriptionKey: 'liquidium.text.description',
+		logo: '/images/dapps/liquidium-logo.webp',
+		url: 'https://liquidium.fi/docs/quick-start/core-concepts'
+	}
+};
+
+export const liquidiumSupplyWizardSteps = ({
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsLiquidiumSupply> => [
+	{
+		name: WizardStepsLiquidiumSupply.SUPPLY,
+		title: i18n.liquidium.text.action_supply
+	},
+	{
+		name: WizardStepsLiquidiumSupply.REVIEW,
+		title: i18n.liquidium.text.supply_review
+	},
+	{
+		name: WizardStepsLiquidiumSupply.SUPPLYING,
+		title: i18n.liquidium.text.supplying
+	}
+];
