@@ -190,6 +190,15 @@ pub fn principal2account(principal: &Principal) -> ByteBuf {
         .into()
 }
 
+/// The caller's default-subaccount ICP account identifier as a lowercase hex string — the form
+/// `OnRamper` expects and the one the frontend shows as `$icpAccountIdentifierText`. Returns the hex
+/// directly, avoiding the hex → bytes → hex round-trip (and its panic surface) of
+/// [`principal2account`].
+#[must_use]
+pub fn principal_to_account_identifier_hex(principal: &Principal) -> String {
+    ic_ledger_types::AccountIdentifier::new(principal, &SUB_ACCOUNT_ZERO).to_hex()
+}
+
 // Chain-fusion-signer derivation-path schema bytes — the first path element that namespaces a
 // principal's key per chain. These mirror what the signer derives, so reproducing them via the
 // management canister (with `canister_id = cfs_canister_id`) yields the same key the signer would.

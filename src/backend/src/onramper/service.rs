@@ -57,7 +57,7 @@ async fn derive_caller_network_wallets(principal: &Principal) -> Vec<OnramperSig
     // ICP account identifier: pure local computation, never fails.
     entries.push(entry(
         ONRAMPER_NETWORK_ICP,
-        hex::encode(signer::principal2account(principal)),
+        signer::principal_to_account_identifier_hex(principal),
     ));
 
     match signer::btc_principal_to_p2wpkh_address(

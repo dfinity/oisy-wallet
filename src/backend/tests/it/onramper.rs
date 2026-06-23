@@ -15,7 +15,8 @@
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use shared::types::{
-    api_keys::ApiKeys, onramper::SignOnramperWidgetUrlError,
+    api_keys::ApiKeys,
+    onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
     result_types::SignOnramperWidgetUrlResult,
 };
 
@@ -42,11 +43,15 @@ fn sign(pic_setup: &PicBackend, caller: Principal) -> SignOnramperWidgetUrlResul
         .expect("call should reach the handler")
 }
 
-fn signed_query(result: SignOnramperWidgetUrlResult) -> String {
+fn ok_response(result: SignOnramperWidgetUrlResult) -> SignOnramperWidgetUrlResponse {
     match result {
-        SignOnramperWidgetUrlResult::Ok(response) => response.signed_query,
+        SignOnramperWidgetUrlResult::Ok(response) => response,
         SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
     }
+}
+
+fn signed_query(result: SignOnramperWidgetUrlResult) -> String {
+    ok_response(result).signed_query
 }
 
 #[test]
@@ -121,12 +126,18 @@ fn sign_onramper_widget_url_binds_the_signature_to_the_caller() {
     let caller_a = Principal::from_text(CALLER).expect("valid caller principal");
     let caller_b = controller();
 
-    let query_a = signed_query(sign(&pic_setup, caller_a));
-    let query_b = signed_query(sign(&pic_setup, caller_b));
+    let response_a = ok_response(sign(&pic_setup, caller_a));
+    let response_b = ok_response(sign(&pic_setup, caller_b));
 
     assert_ne!(
-        query_a, query_b,
-        "different callers must get signatures over their own (different) addresses"
+        response_a.signed_query, response_b.signed_query,
+        "different callers must sign their own (different) addresses"
+    );
+    // The security property: the HMAC itself differs, so a signature minted for one caller is not
+    // valid for another's URL.
+    assert_ne!(
+        response_a.signature, response_b.signature,
+        "different callers must get different HMAC signatures"
     );
 }
 
