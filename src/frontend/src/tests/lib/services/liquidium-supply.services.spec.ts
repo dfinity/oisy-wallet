@@ -129,6 +129,24 @@ describe('liquidium-supply.services', () => {
 		expect(broadcast).toHaveBeenCalledOnce();
 	});
 
+	it('still registers the AUT row when flow.submit fails (independent best-effort steps)', async () => {
+		supply.mockResolvedValue(buildFlow(nativeTarget));
+		broadcast.mockResolvedValue('0xhash');
+		// The SDK submit (a txid indexing hint) fails after funds were broadcast.
+		submit.mockRejectedValueOnce(new Error('rpc hiccup'));
+
+		await expect(run()).resolves.toBeUndefined();
+
+		// The AUT row must still be created so the poller/analytics can correlate by txid.
+		expect(createActiveUserTransaction).toHaveBeenCalledOnce();
+
+		const [[{ externalRefs }]] = createActiveUserTransaction.mock.calls;
+
+		expect(externalRefs).toEqual(
+			expect.arrayContaining([{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }])
+		);
+	});
+
 	it('rejects an icrcAccount target and registers nothing', async () => {
 		supply.mockResolvedValue(
 			buildFlow({

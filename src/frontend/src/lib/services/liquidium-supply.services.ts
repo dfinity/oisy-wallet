@@ -31,12 +31,12 @@ export const estimateLiquidiumInflowFee = async ({
 	chain
 }: {
 	identity: Identity;
-	asset: string;
-	chain: string;
+	asset: Asset;
+	chain: Chain;
 }): Promise<bigint> => {
 	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
-		asset: asset as Asset,
-		chain: chain as Chain
+		asset,
+		chain
 	});
 
 	return totalFee;
@@ -122,12 +122,19 @@ export const executeLiquidiumSupply = async ({
 
 	progress?.(ProgressStepsLiquidiumSupply.REGISTER);
 
-	// Point of no return: submit (txid indexing hint) + AUT row are best-effort.
-	// The protocol detects the inflow on-chain regardless and positions self-heal,
-	// so a failure here must not fail the supply (mirrors the OneSec swap flow).
+	// Point of no return: the SDK submit (a txid indexing hint) and the AUT row are
+	// both best-effort and independent. Each gets its own try/catch so a failure in
+	// one never skips the other — in particular a failed `flow.submit` must still
+	// leave an AUT row for the poller/analytics to correlate by txid. Neither fails
+	// the supply: the protocol detects the inflow on-chain regardless and positions
+	// self-heal from `client.positions` (mirrors the OneSec swap flow).
 	try {
 		await flow.submit({ txid });
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
+	try {
 		await createActiveUserTransaction({
 			identity,
 			id: crypto.randomUUID(),
