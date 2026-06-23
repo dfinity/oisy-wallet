@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
@@ -23,6 +23,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';

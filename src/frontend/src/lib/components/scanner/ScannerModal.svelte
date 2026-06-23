@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -25,6 +25,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { ScannerResults } from '$lib/types/scanner';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
