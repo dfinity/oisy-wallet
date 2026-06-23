@@ -89,18 +89,23 @@ Derivation parity is the single most important correctness property of this chan
 
 ### What the backend can derive today vs. what is net-new
 
-| Network     | OnRamper id | Backend capability today                                                                                                                                                                                                                                           | Net-new work                                                                                                                                                                           |
-| ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BTC mainnet | `bitcoin`   | ✅ `signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, &principal)` (`src/backend/src/signer/service.rs:229`)                                                                                                                                        | none — reuse                                                                                                                                                                           |
-| ICP         | `icp`       | ✅ `signer::principal2account(&principal)` → hex (`src/backend/src/signer/service.rs:174`)                                                                                                                                                                         | confirm hex/format parity with `$icpAccountIdentifierText`                                                                                                                             |
-| ETH         | `ethereum`  | ⚠️ partial — ECDSA pubkey machinery exists (`cfs_ecdsa_pubkey_of`, private, `src/backend/src/signer/service.rs:191`) but it hardcodes the **BTC** derivation schema (`vec![0u8]`); ETH uses schema `1` per the CFS comment, plus a keccak-256 → last-20-bytes step | derive ETH address (schema 1 + keccak), 0x-hex encode                                                                                                                                  |
-| SOL mainnet | `solana`    | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58                                                                                                                                                                                                           | derive via management-canister `schnorr_public_key` (Ed25519) in the signer's derivation namespace, path `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]` + `SOLANA_KEY_ID`, base58-encode |
+| Network     | OnRamper id | Backend capability today                                                                                                                                                                                                                                           | Net-new work                                                                                                                                                                                                                                                             |
+| ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BTC mainnet | `bitcoin`   | ✅ `signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, &principal)` (`src/backend/src/signer/service.rs:229`)                                                                                                                                        | none — reuse                                                                                                                                                                                                                                                             |
+| ICP         | `icp`       | ✅ `signer::principal2account(&principal)` returns the account-id **bytes** (`ByteBuf`, `src/backend/src/signer/service.rs:174`)                                                                                                                                   | `hex::encode` the bytes (lowercase, no prefix) to match the FE `AccountIdentifier.toHex()` (`$icpAccountIdentifierText`)                                                                                                                                                 |
+| ETH         | `ethereum`  | ⚠️ partial — ECDSA pubkey machinery exists (`cfs_ecdsa_pubkey_of`, private, `src/backend/src/signer/service.rs:191`) but it hardcodes the **BTC** derivation schema (`vec![0u8]`); ETH uses schema `1` per the CFS comment, plus a keccak-256 → last-20-bytes step | derive ETH address (schema 1 + keccak), 0x-hex encode                                                                                                                                                                                                                    |
+| SOL mainnet | `solana`    | ❌ none — no Schnorr/Ed25519 pubkey retrieval, no base58                                                                                                                                                                                                           | derive via management-canister `schnorr_public_key` (Ed25519) in the signer's derivation namespace, full path `[[0xfe], principal, "SOL", "mainnet"]` (schema byte + caller principal + the `mapDerivationPath` string segments) with key `SOLANA_KEY_ID`, base58-encode |
 
-The frontend SOL derivation is the reference for the derivation namespace (key id + path):
-`src/frontend/src/sol/services/sol-address.services.ts` (`getSolanaPublicKey` → Schnorr Ed25519 pubkey
-on path `[SOLANA_DERIVATION_PATH_PREFIX, network]`, then base58 via `@solana/kit`'s address decoder).
-**The backend must derive the same threshold-key addresses, byte-for-byte** — by reproducing that
-namespace through the management canister, not by calling the signer (see mechanism below).
+The frontend's **offline** SOL derivation is the authoritative reference for the full path:
+`src/frontend/src/lib/ic-pub-key/src/cli.ts` (`deriveSolAddress`) derives on
+`[<signer-namespace>, 0xfe, principal, "SOL", "mainnet"]` — schema byte `0xfe`, then the caller
+principal, then the `mapDerivationPath(["SOL", "mainnet"])` string segments — and base58-encodes the
+32-byte Ed25519 pubkey. (The live path, `getSchnorrPublicKey` in
+`src/frontend/src/sol/services/sol-address.services.ts`, passes only `["SOL", "mainnet"]`; the signer
+prepends the schema byte + principal internally, which the offline reference makes explicit.) **The
+backend must reproduce that same namespace byte-for-byte** through the management canister (with
+`canister_id = cfs_canister_id` standing in for `<signer-namespace>`), not by calling the signer (see
+mechanism below).
 
 ---
 
@@ -144,9 +149,12 @@ closes the oracle because the caller chooses a _network_, never an _address_.
 **Mechanism (mandatory — do not deviate without a cost review).** Derive every address from the
 **IC management canister threshold _public-key_ APIs** (`management_canister::ecdsa_public_key` and
 `management_canister::schnorr_public_key`), called with `canister_id = Some(cfs_canister_id)` and the
-**chain-fusion-signer derivation path** `[<schema_byte>, principal.as_slice()]`. This is exactly the
-pattern the existing `cfs_ecdsa_pubkey_of` / `btc_principal_to_p2wpkh_address` already use
-(`src/backend/src/signer/service.rs:191`, `:229`). Note the naming trap: the module is
+**chain-fusion-signer derivation path**. For the **ECDSA** chains (BTC/ETH) that path is
+`[<schema_byte>, principal.as_slice()]` — exactly the pattern the existing `cfs_ecdsa_pubkey_of` /
+`btc_principal_to_p2wpkh_address` already use (`src/backend/src/signer/service.rs:191`, `:229`), with
+only the schema byte differing (`0x00` BTC, `0x01` ETH). The **Schnorr/Ed25519** chain (SOL) appends
+further segments after the schema + principal — `[[0xfe], principal, "SOL", "mainnet"]` — so the path
+is **not** universal across curves; see the SOL bullet below. Note the naming trap: the module is
 `signer/service.rs` and the helper is `cfs_*`, but the actual call is to the **management canister** —
 `canister_id = Some(cfs_canister_id)` is just an _argument_ naming whose derivation namespace to use,
 **not** an inter-canister call to the signer. Reading the pubkey in the signer's namespace (same
@@ -178,8 +186,10 @@ Concretely, per chain:
   call — only the schema byte changes vs. BTC.
 - **SOL** — add `sol_principal_to_address(&principal) -> Result<String, String>` calling
   `management_canister::schnorr_public_key` (Ed25519, key id matching the frontend's `SOLANA_KEY_ID`)
-  with `canister_id = Some(cfs_canister_id)` and the path matching the frontend's
-  `[SOLANA_DERIVATION_PATH_PREFIX, "mainnet"]`, then base58-encode the 32-byte pubkey.
+  with `canister_id = Some(cfs_canister_id)` and the **full** path `[[0xfe], principal.as_slice(),
+b"SOL", b"mainnet"]` (schema byte `0xfe` + caller principal + the `mapDerivationPath` string
+  segments — mirroring `deriveSolAddress`, **not** just `["SOL", "mainnet"]`), then base58-encode the
+  32-byte pubkey.
 - **BTC + ICP** — reuse `btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, …)` (one
   `ecdsa_public_key` read) and `principal2account` (zero calls; hex-encode to match
   `$icpAccountIdentifierText`).
@@ -312,7 +322,9 @@ Plus `npm run generate` for the regenerated `.did` / declarations, and
 ## PRODUCT.md
 
 `docs/ai/PRODUCT.md` has no Buy/OnRamper section today (it has `## Analytics`, `## Bitcoin`, …). Per the
-workflow, add a concise, product-altitude `## Buy (OnRamper)` section **in this PR**: users can buy
+workflow, `PRODUCT.md` is updated in the same PR as the **behaviour change** — i.e. the follow-up
+implementation PR, **not** this spec-only PR. In that implementation PR, add a concise,
+product-altitude `## Buy (OnRamper)` section: users can buy
 crypto via the embedded OnRamper widget; the destination wallet addresses are signed by the backend so
 OnRamper rejects tampered URLs; and the explicit negative guarantee — **the addresses are always
 derived from the authenticated principal server-side; a caller cannot have the backend sign an address
