@@ -10,6 +10,8 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		collapse: string;
+		expand: string;
 		change: string;
 		continue: string;
 		apply: string;
