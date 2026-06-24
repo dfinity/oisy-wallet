@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
@@ -18,6 +18,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 
 	interface Props {
 		listener: OptionWalletConnectListener;

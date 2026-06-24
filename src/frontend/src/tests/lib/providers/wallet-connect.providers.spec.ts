@@ -480,6 +480,27 @@ describe('wallet-connect.providers', () => {
 			});
 		});
 
+		describe('disconnectSession', () => {
+			it('should disconnect only the provided topic', async () => {
+				mockGetActiveSessions.mockReturnValue({
+					session1: { topic: 'topic1' },
+					session2: { topic: 'topic2' }
+				});
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				// Clear the disconnect calls triggered by the default cleanSlate teardown on init.
+				mockDisconnectSession.mockClear();
+
+				await listener.disconnectSession('topic1');
+
+				expect(mockDisconnectSession).toHaveBeenCalledExactlyOnceWith({
+					topic: 'topic1',
+					reason: getSdkError('USER_DISCONNECTED')
+				});
+			});
+		});
+
 		describe.todo('disconnect', () => {});
 	});
 });

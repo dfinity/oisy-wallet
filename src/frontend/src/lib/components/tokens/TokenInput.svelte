@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';

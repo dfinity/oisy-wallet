@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
@@ -7,6 +7,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {

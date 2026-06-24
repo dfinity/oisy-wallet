@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { stopPropagation } from '@dfinity/gix-components';
 	import Self from '$lib/components/ui/Json.svelte';
+	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { isHash, stringifyJson, isPrincipal } from '$lib/utils/json.utils';
 
 	interface Props {

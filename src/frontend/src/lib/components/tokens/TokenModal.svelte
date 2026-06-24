@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
@@ -46,6 +46,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
