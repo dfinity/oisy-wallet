@@ -69,9 +69,9 @@
 </script>
 
 {#if currentStep?.name === WizardStepsTradingWithdraw.REVIEW}
-	<WithdrawReview {amount} {transferFee} {onBack} onConfirm={withdraw} />
+	<WithdrawReview {amount} {onBack} onConfirm={withdraw} {transferFee} />
 {:else if currentStep?.name === WizardStepsTradingWithdraw.WITHDRAWING}
 	<WithdrawProgress symbol={token.symbol} {withdrawProgressStep} />
 {:else}
-	<WithdrawForm {reserved} {transferFee} {onClose} {onNext} bind:amount bind:amountSetToMax />
+	<WithdrawForm {onClose} {onNext} {reserved} {transferFee} bind:amount bind:amountSetToMax />
 {/if}

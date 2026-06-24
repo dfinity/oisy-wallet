@@ -2,10 +2,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import {
 		OISY_TRADE_LEARN_MORE_URL,
 		OISY_TRADE_POLL_INTERVAL_MILLIS

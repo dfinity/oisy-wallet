@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Amount from '$lib/components/ui/Amount.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 
 	interface Props {
