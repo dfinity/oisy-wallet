@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Markdown } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -8,6 +7,7 @@
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Markdown from '$lib/components/ui/Markdown.svelte';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
