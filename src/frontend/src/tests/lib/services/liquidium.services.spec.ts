@@ -4,7 +4,8 @@ import { getOrCreateLiquidiumProfile, loadLiquidium } from '$lib/services/liquid
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
 import * as liquidiumUtils from '$lib/utils/liquidium.utils';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/liquidium.api', () => ({
@@ -19,6 +20,19 @@ vi.mock('$lib/utils/liquidium.utils', () => ({
 describe('liquidium.services', () => {
 	const ethAddress = '0x1111111111111111111111111111111111111111' as EthAddress;
 	const profileId = 'profile-principal-text';
+	const mockIdentity2 = {
+		...mockIdentity,
+		getPrincipal: () => mockPrincipal2
+	} as unknown as Identity;
+
+	const deferred = <T>() => {
+		let resolve!: (value: T) => void;
+		const promise = new Promise<T>((res) => {
+			resolve = res;
+		});
+
+		return { promise, resolve };
+	};
 
 	const getProfileId = vi.fn();
 	const createProfile = vi.fn();
@@ -113,6 +127,45 @@ describe('liquidium.services', () => {
 
 			expect(getUserReserves).toHaveBeenCalledExactlyOnceWith(profileId);
 			expect(getUserPositionSummary).toHaveBeenCalledExactlyOnceWith(profileId);
+			expect(get(liquidiumStore)).toEqual({ markets: [market], portfolio });
+		});
+
+		it('drops a late load result after the store resets', async () => {
+			const pools = deferred<[{ id: string }]>();
+			listPools.mockReturnValue(pools.promise);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+
+			const loading = loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			liquidiumStore.reset();
+			pools.resolve([{ id: 'pool-btc' }]);
+
+			await loading;
+
+			expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+		});
+
+		it('drops a late load result from a previous principal', async () => {
+			const firstPools = deferred<[{ id: string }]>();
+			const secondPools = deferred<[{ id: string }]>();
+			listPools.mockReturnValueOnce(firstPools.promise).mockReturnValueOnce(secondPools.promise);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+
+			const firstLoad = loadLiquidium({ identity: mockIdentity, ethAddress });
+			const secondLoad = loadLiquidium({ identity: mockIdentity2, ethAddress });
+
+			firstPools.resolve([{ id: 'pool-btc' }]);
+			await firstLoad;
+
+			expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+
+			secondPools.resolve([{ id: 'pool-btc' }]);
+			await secondLoad;
+
 			expect(get(liquidiumStore)).toEqual({ markets: [market], portfolio });
 		});
 
