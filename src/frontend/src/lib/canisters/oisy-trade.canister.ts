@@ -2,7 +2,9 @@ import type {
 	_SERVICE as OisyTradeService,
 	Token,
 	TradingPairInfo,
-	UserTokenBalance
+	UserTokenBalance,
+	WithdrawRequest,
+	WithdrawResponse
 } from '$declarations/oisy_trade/oisy_trade.did';
 import { idlFactory as idlCertifiedFactoryOisyTrade } from '$declarations/oisy_trade/oisy_trade.factory.certified.did';
 import { idlFactory as idlFactoryOisyTrade } from '$declarations/oisy_trade/oisy_trade.factory.did';
@@ -51,5 +53,18 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		}
 
 		throw new Error(Object.keys(response.Err)[0]);
+	};
+
+	withdraw = async (request: WithdrawRequest): Promise<WithdrawResponse> => {
+		const { withdraw } = this.caller({ certified: true });
+
+		const response = await withdraw(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const [message] = response.Err.message;
+		throw new Error(message ?? Object.keys(response.Err.kind)[0]);
 	};
 }

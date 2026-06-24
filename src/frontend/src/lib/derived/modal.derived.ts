@@ -4,6 +4,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -70,6 +71,17 @@ export const modalHarvestUnstake: Readable<boolean> = derived(
 export const modalLiquidiumSupply: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'liquidium-supply'
+);
+export const modalOisyTradeWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'oisy-trade-withdraw'
+);
+export const modalOisyTradeWithdrawData: Readable<OisyTradeWithdrawToken | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'oisy-trade-withdraw'
+			? ($modalStore?.data as OisyTradeWithdrawToken)
+			: undefined
 );
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,

@@ -1,7 +1,9 @@
 import type {
 	Token,
 	TradingPairInfo,
-	UserTokenBalance
+	UserTokenBalance,
+	WithdrawRequest,
+	WithdrawResponse
 } from '$declarations/oisy_trade/oisy_trade.did';
 import { CanisterApi } from '$lib/api/canister.api';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
@@ -51,6 +53,21 @@ export const getBalances = async ({
 	});
 
 	return getBalances();
+};
+
+export const withdraw = async ({
+	request,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams<{ request: WithdrawRequest }>): Promise<WithdrawResponse> => {
+	const { withdraw } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return withdraw(request);
 };
 
 const oisyTradeCanister = async ({
