@@ -420,9 +420,13 @@
 	<body>
 		<div class="state-toggle">
 			<button class="toggle-btn active" id="t-open" onclick="setStatus('open', this)">Open</button>
-			<button class="toggle-btn" id="t-pending" onclick="setStatus('pending', this)">Pending</button>
+			<button class="toggle-btn" id="t-pending" onclick="setStatus('pending', this)">
+				Pending
+			</button>
 			<button class="toggle-btn" id="t-filled" onclick="setStatus('filled', this)">Filled</button>
-			<button class="toggle-btn" id="t-cancelled" onclick="setStatus('cancelled', this)">Cancelled</button>
+			<button class="toggle-btn" id="t-cancelled" onclick="setStatus('cancelled', this)">
+				Cancelled
+			</button>
 		</div>
 		<div class="state-toggle">
 			<button class="toggle-btn active" id="d-desktop" onclick="setDevice('desktop', this)">
@@ -479,7 +483,8 @@
 						</div>
 						<div class="price-sub">
 							<div class="price-sub-row">
-								<span class="k">Current value</span><span class="v">2.69 ckUSDC / ICP (oisy feed)</span>
+								<span class="k">Current value</span
+								><span class="v">2.69 ckUSDC / ICP (oisy feed)</span>
 							</div>
 							<div class="price-sub-row">
 								<span class="k">Value difference</span><span class="diff">+2.23%</span>
@@ -523,9 +528,15 @@
 						The reserved funds return to your free balance. This can't be undone — you can place a
 						new order anytime.
 						<div class="confirm-facts">
-							<div class="price-sub-row"><span class="k">Order</span><span class="v">Sell ICP for ckUSDC</span></div>
-							<div class="price-sub-row"><span class="k">Price</span><span class="v">2.75 ckUSDC / ICP</span></div>
-							<div class="price-sub-row"><span class="k">Returns to free</span><span class="v">100 ICP</span></div>
+							<div class="price-sub-row">
+								<span class="k">Order</span><span class="v">Sell ICP for ckUSDC</span>
+							</div>
+							<div class="price-sub-row">
+								<span class="k">Price</span><span class="v">2.75 ckUSDC / ICP</span>
+							</div>
+							<div class="price-sub-row">
+								<span class="k">Returns to free</span><span class="v">100 ICP</span>
+							</div>
 						</div>
 					</div>
 					<div class="confirm-btns">
@@ -538,15 +549,25 @@
 
 		<div class="note">
 			Demo — toggle the order status (top) and the confirmation device (below). Tapping an order row
-			in the Trading tab opens this detail modal; only <strong>Pending / Open</strong> orders show the
-			<strong>Cancel order</strong> action, which opens the confirmation.
+			in the Trading tab opens this detail modal; only <strong>Pending / Open</strong> orders show
+			the <strong>Cancel order</strong> action, which opens the confirmation.
 		</div>
 
 		<script>
 			let device = 'desktop';
 			function setStatus(s, el) {
-				const map = { open: 'Open', pending: 'Pending', filled: '<i class="ti ti-check"></i> Filled', cancelled: '<i class="ti ti-x"></i> Cancelled' };
-				const cls = { open: 's-open', pending: 's-pending', filled: 's-filled', cancelled: 's-cancelled' };
+				const map = {
+					open: 'Open',
+					pending: 'Pending',
+					filled: '<i class="ti ti-check"></i> Filled',
+					cancelled: '<i class="ti ti-x"></i> Cancelled'
+				};
+				const cls = {
+					open: 's-open',
+					pending: 's-pending',
+					filled: 's-filled',
+					cancelled: 's-cancelled'
+				};
 				const pill = document.getElementById('status-pill');
 				pill.innerHTML = map[s];
 				pill.className = 'status-pill ' + cls[s];
@@ -555,7 +576,10 @@
 				document.getElementById('cancel-action').style.display = active ? 'flex' : 'none';
 				// queue position shown for active orders (Pending = projected, Open = live); hidden once terminal
 				document.getElementById('queue-row').style.display = active ? 'flex' : 'none';
-				document.querySelectorAll('.state-toggle')[0].querySelectorAll('.toggle-btn').forEach((b) => b.classList.remove('active'));
+				document
+					.querySelectorAll('.state-toggle')[0]
+					.querySelectorAll('.toggle-btn')
+					.forEach((b) => b.classList.remove('active'));
 				el.classList.add('active');
 				closeConfirm();
 			}
