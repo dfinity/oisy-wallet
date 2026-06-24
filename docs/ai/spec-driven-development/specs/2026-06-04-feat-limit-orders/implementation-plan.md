@@ -31,17 +31,22 @@ Companion to the spec [`2026-06-04-feat-limit-orders.md`](../2026-06-04-feat-lim
 
 ### PR 4a — Place a limit order
 
-- The **limit-order modal** (intent form): base/quote selection + pairing rules, price section + presets, value-difference, lot/tick inline validation, Review (intent hero + price section), Progress; `add_limit_order`.
+- The **limit-order modal** (intent form): base/quote selection + pairing rules, price section + presets, value-difference, inline validation (`lot_size` / `tick_size` multiples + `min_notional` / `max_notional` order-value bounds), Review (intent hero + price section), Progress; `add_limit_order`.
 - Routing element (Lowest ask / Highest bid / Spread) from `get_order_book_ticker`.
+- **Fill or kill (FOK)** order type: the FOK control (with the (?) explanation expander), the price-only gate, a submit-time re-check, and the taker-only fee row in the Review. _(Requires the `add_limit_order` time-in-force parameter on `dfinity/oisy-trade` — see the spec dependency.)_
+- **Queue position** (form hint + Review row) from `get_order_book_depth`: share of same-side volume priced strictly better — "15% are ahead" / "Front of book". Hidden when the price crosses the book.
+- **Live maker/taker fee rates** from `get_trading_pairs` (`maker_fee_bps` / `taker_fee_bps`): show the real per-pair rates in the Review fee row (no static notice).
 
 ### PR 4b — Active orders list
 
 - Render the **Active** orders list; persist each returned `OrderId` locally and poll `get_order_status` (Pending → Open → Filled / Canceled); rows are not yet tappable.
 - Row presentation: single-line **order row format** (natural-language intent, side word color-coded Sell-red / Buy-green, blue `OISY TRADE` tag); **status pills** with distinct color + icon (Pending amber, Open green); mask order amount under privacy mode.
+- **Queue position** as plain right-aligned text on active rows (Pending + Open) from `get_order_book_depth`.
 
 ### PR 5 — Order detail + cancel
 
 - The **order-detail modal** (review-styled, serves **all** states), introduced here and reused later. Make Active rows **tappable** to open it.
+- **Queue position** row in the detail modal for active (Pending/Open) orders, from `get_order_book_depth`.
 - **Cancel** for active (Pending/Open) orders only: destructive in-modal action → **confirmation** (centered dialog on desktop, bottom sheet on mobile); `cancel_limit_order` → reserved returns to free → order moves to History.
 
 ### PR 6 — Order history
@@ -49,18 +54,16 @@ Companion to the spec [`2026-06-04-feat-limit-orders.md`](../2026-06-04-feat-lim
 - **History** tab (Filled / Cancelled) via `get_my_orders`; tapping a history row opens the **same detail modal**, read-only.
 - Terminal status pills: **Filled** green with a check (success), **Cancelled** neutral gray with an ✕ (not red — cancelling is a normal action).
 
-## Enhancements (after PR 4, off the critical path, each gated by its dependency)
+## Cleanup (after the feature ships)
 
-- **Fill or kill** — depends on the `add_limit_order` time-in-force parameter landing on `dfinity/oisy-trade` (spec Open question 6). Adds the FOK control, price-only gate, submit-time re-check, and the taker-only fee row.
-- **Queue position** — uses `get_order_book_depth` (spec Open question 7): form hint + Review/detail row + plain-text on active rows (shown for both **Pending and Open**; hidden once terminal or when crossing).
-- **Live maker/taker fee rates** — when `maker_fee_bps` / `taker_fee_bps` are exposed (spec Open question 4); static notice until then.
-- **Flag removal** — delete the `Trading` feature flag once the feature ships to production.
+- **Flag removal** — delete the `Trading` feature flag once the feature ships to production (OISY-3025). The per-provider `oisyTrade` flag stays as a permanent kill-switch.
+
+_All previously-deferred items (FOK, queue position, live fee rates) are now folded into v1 — their canister dependencies are live on staging._
 
 ## Sequencing
 
 ```
 PR1 → PR2 → (PR3 ∥ PR4a → PR4b) → PR5 → PR6
-                              ↘ enhancements (FOK, queue position, fees) layer on after PR4
 ```
 
 ## Notes
