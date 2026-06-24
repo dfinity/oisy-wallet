@@ -1184,7 +1184,9 @@
 			</div>
 			<div class="sim-row">
 				<button class="sim-btn" onclick="simulateMove()">↻ Simulate market move</button>
-				<span class="sim-hint">demo: ticks the book against your order (shows the FOK submit re-check)</span>
+				<span class="sim-hint"
+					>demo: ticks the book against your order (shows the FOK submit re-check)</span
+				>
 			</div>
 			<div class="steps">
 				<div class="step-dot active" id="d1"></div>
@@ -1220,19 +1222,34 @@
 								<div class="amt-side">
 									<div class="seg-head">
 										<span class="taf-label" id="base-lbl">You sell</span>
-										<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
+										<span class="seg-net"
+											>On Internet Computer<span class="net-ico"
+												><i class="ti ti-infinity"></i></span
+										></span>
 									</div>
 									<div class="seg-field">
-										<input class="amt-input" id="ib" type="text" value="" placeholder="Amount" oninput="onBase()" />
+										<input
+											class="amt-input"
+											id="ib"
+											type="text"
+											value=""
+											placeholder="Amount"
+											oninput="onBase()"
+										/>
 										<div class="tok-pill empty" id="base-pill" onclick="openPickerFromForm('base')">
 											<div class="tok-dot" id="base-dot" style="display: none"></div>
 											<span class="tok-sym" id="base-sym">Select</span>
-											<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+											<i
+												class="ti ti-chevron-down"
+												style="font-size: 11px; color: var(--color-text-tertiary)"
+											></i>
 										</div>
 									</div>
 									<div class="round-dec" id="base-dec"></div>
 									<div class="sub-row">
-										<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="fb"></span></span><span class="bal" id="base-bal"></span>
+										<span class="amt-fiat"
+											><i class="ti ti-arrows-up-down sw-ico"></i> <span id="fb"></span></span
+										><span class="bal" id="base-bal"></span>
 									</div>
 								</div>
 							</div>
@@ -1243,18 +1260,30 @@
 								<div class="amt-side">
 									<div class="seg-head">
 										<span class="taf-label" id="quote-row-lbl">You get at least</span>
-										<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
+										<span class="seg-net"
+											>On Internet Computer<span class="net-ico"
+												><i class="ti ti-infinity"></i></span
+										></span>
 									</div>
 									<div class="seg-field">
 										<div class="derived-val" id="q-amt">—</div>
-										<div class="tok-pill empty disabled" id="quote-pill" onclick="openPickerFromForm('quote')">
+										<div
+											class="tok-pill empty disabled"
+											id="quote-pill"
+											onclick="openPickerFromForm('quote')"
+										>
 											<div class="tok-dot tok-dot-u" id="quote-dot" style="display: none"></div>
 											<span class="tok-sym" id="quote-sym">Select</span>
-											<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+											<i
+												class="ti ti-chevron-down"
+												style="font-size: 11px; color: var(--color-text-tertiary)"
+											></i>
 										</div>
 									</div>
 									<div class="sub-row">
-										<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="q-sub"></span></span><span class="bal" id="quote-bal"></span>
+										<span class="amt-fiat"
+											><i class="ti ti-arrows-up-down sw-ico"></i> <span id="q-sub"></span></span
+										><span class="bal" id="quote-bal"></span>
 									</div>
 								</div>
 							</div>
@@ -1311,8 +1340,8 @@
 							</div>
 							<div class="fok-hint" id="fok-hint" style="display: none">
 								Fill the whole order now at your price or better, or cancel it — nothing rests. The
-								price must cross the order book for the order to fill, and the order always executes as
-								a taker (taker fee applies).
+								price must cross the order book for the order to fill, and the order always executes
+								as a taker (taker fee applies).
 							</div>
 						</div>
 
@@ -1342,12 +1371,8 @@
 								<div class="route-line bid-line">
 									<span>Highest bid</span><span id="pbid">2.685 ckUSDC</span>
 								</div>
-								<div class="route-line">
-									<span>Spread</span><span id="pspread">0.6%</span>
-								</div>
-								<div class="route-line">
-									<span>Maker fee</span><span>No fee</span>
-								</div>
+								<div class="route-line"><span>Spread</span><span id="pspread">0.6%</span></div>
+								<div class="route-line"><span>Maker fee</span><span>No fee</span></div>
 								<div class="route-line"><span>Taker fee</span><span>0.20% (20 bps)</span></div>
 							</div>
 						</div>
@@ -1400,48 +1425,59 @@
 						<i class="ti ti-x modal-x"></i>
 					</div>
 					<div class="body">
-							<div class="hero-box">
-								<div class="hero-seg">
-									<div class="hero-lbl" id="rl1">You <strong>SELL</strong></div>
-									<div class="hero-line">
-										<div class="tok-dot" id="r-bdot">ICP</div>
-										<div>
-											<div class="hero-amount" id="rba">15.25 ICP</div>
-											<div class="hero-fiat-sm" id="rbf">$41.02</div>
-										</div>
+						<div class="hero-box">
+							<div class="hero-seg">
+								<div class="hero-lbl" id="rl1">You <strong>SELL</strong></div>
+								<div class="hero-line">
+									<div class="tok-dot" id="r-bdot">ICP</div>
+									<div>
+										<div class="hero-amount" id="rba">15.25 ICP</div>
+										<div class="hero-fiat-sm" id="rbf">$41.02</div>
 									</div>
 								</div>
-								<div class="hero-seg hero-seg-2">
-									<div class="hero-lbl" id="rl2">You get at least</div>
-									<div class="hero-line">
-										<div class="tok-dot tok-dot-u" id="r-qdot">USD</div>
-										<div>
-											<div class="hero-amount" id="rqa">41.02 ckUSDC</div>
-											<div class="hero-fiat-sm" id="rqf">$41.02</div>
-										</div>
-									</div>
-								</div>
-								<div class="hero-arrow" id="r-arrow"><i class="ti ti-arrow-down"></i></div>
 							</div>
+							<div class="hero-seg hero-seg-2">
+								<div class="hero-lbl" id="rl2">You get at least</div>
+								<div class="hero-line">
+									<div class="tok-dot tok-dot-u" id="r-qdot">USD</div>
+									<div>
+										<div class="hero-amount" id="rqa">41.02 ckUSDC</div>
+										<div class="hero-fiat-sm" id="rqf">$41.02</div>
+									</div>
+								</div>
+							</div>
+							<div class="hero-arrow" id="r-arrow"><i class="ti ti-arrow-down"></i></div>
+						</div>
 						<div class="price-card">
 							<div class="price-head">
 								<span class="price-head-lbl">Limit price</span>
 								<span class="price-head-val" id="rpr">2.69 ckUSDC / ICP</span>
 							</div>
 							<div class="price-sub">
-								<div class="price-sub-row"><span class="k">Current value</span><span class="v" id="rmkt">2.69 ckUSDC / ICP (oisy feed)</span></div>
-								<div class="price-sub-row"><span class="k">Value difference</span><span class="diff diff-neutral" id="rdf">+0.00%</span></div>
-								<div class="price-sub-row" id="r-book-row" style="display: none"><span class="k">Queue position</span><span class="v" id="rbook">Front of book</span></div>
+								<div class="price-sub-row">
+									<span class="k">Current value</span
+									><span class="v" id="rmkt">2.69 ckUSDC / ICP (oisy feed)</span>
+								</div>
+								<div class="price-sub-row">
+									<span class="k">Value difference</span
+									><span class="diff diff-neutral" id="rdf">+0.00%</span>
+								</div>
+								<div class="price-sub-row" id="r-book-row" style="display: none">
+									<span class="k">Queue position</span
+									><span class="v" id="rbook">Front of book</span>
+								</div>
 							</div>
 						</div>
 						<div class="mv">
 							<span class="mv-lbl">DEX</span><span class="mv-val">OISY TRADE</span>
 						</div>
 						<div class="mv">
-							<span class="mv-lbl">Order type</span><span class="mv-val" id="r-type-val">Good until canceled</span>
+							<span class="mv-lbl">Order type</span
+							><span class="mv-val" id="r-type-val">Good until canceled</span>
 						</div>
 						<div class="mv nb">
-							<span class="mv-lbl" id="r-fee-lbl">Fee (maker / taker)</span><span class="mv-val" id="r-fee-val">0% / 0.20%</span>
+							<span class="mv-lbl" id="r-fee-lbl">Fee (maker / taker)</span
+							><span class="mv-val" id="r-fee-val">0% / 0.20%</span>
 						</div>
 						<div class="confirm-box amber" id="rbox">
 							<div id="rboxtext"></div>
@@ -1460,9 +1496,7 @@
 							<button class="btn" onclick="goStep('form')">
 								<i class="ti ti-arrow-left"></i> Back
 							</button>
-							<button class="btn btn-primary" id="rconf" onclick="placeOrder()">
-								Place order
-							</button>
+							<button class="btn btn-primary" id="rconf" onclick="placeOrder()">Place order</button>
 						</div>
 					</div>
 				</div>
@@ -1680,18 +1714,34 @@
 				return (
 					'<span class="maxlink' +
 					(enabled ? '" onclick="maxSpend()"' : ' disabled" title="Set a price first"') +
-					'>Max: ' + fmt(FREE[tok], 4) + ' ' + tok + '</span>'
+					'>Max: ' +
+					fmt(FREE[tok], 4) +
+					' ' +
+					tok +
+					'</span>'
 				);
 			}
 			function balText(tok) {
-				return '<span class="wbal"><i class="ti ti-wallet bal-ico"></i> ' + fmt(FREE[tok], 4) + ' ' + tok + '</span>';
+				return (
+					'<span class="wbal"><i class="ti ti-wallet bal-ico"></i> ' +
+					fmt(FREE[tok], 4) +
+					' ' +
+					tok +
+					'</span>'
+				);
 			}
 			function renderBalances() {
 				// base row: Max on a Sell (spend); wallet balance on a Buy (receive)
-				g('base-bal').innerHTML = base ? (side === 'sell' ? maxLink(base, true) : balText(base)) : '';
+				g('base-bal').innerHTML = base
+					? side === 'sell'
+						? maxLink(base, true)
+						: balText(base)
+					: '';
 				// quote row: Max on a Buy (spend, needs a price); wallet balance on a Sell (receive)
 				g('quote-bal').innerHTML = quote
-					? (side === 'buy' ? maxLink(quote, ready() && rawVal('ipr') > 0) : balText(quote))
+					? side === 'buy'
+						? maxLink(quote, ready() && rawVal('ipr') > 0)
+						: balText(quote)
 					: '';
 			}
 			function maxSpend() {
@@ -1752,7 +1802,9 @@
 			// it is neutral (plain text, no icon, no background box) regardless of how far from market it sits.
 			function setDiff(el, vd, immediate) {
 				const txt = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
-				el.className = !immediate ? 'diff diff-neutral' : 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+				el.className = !immediate
+					? 'diff diff-neutral'
+					: 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
 				el.innerHTML = (immediate ? '<i class="ti ti-alert-triangle"></i>' : '') + txt;
 			}
 
@@ -1765,7 +1817,9 @@
 					baseOk = bRaw > 0;
 				// on a Buy the base is the token you receive (fee taken from it), so it's gross → ", before fees"
 				g('fb').textContent =
-					base && baseOk ? '$' + fmt(bRaw * USD[base], 2) + (side === 'buy' ? ', before fees' : '') : '';
+					base && baseOk
+						? '$' + fmt(bRaw * USD[base], 2) + (side === 'buy' ? ', before fees' : '')
+						: '';
 
 				if (!ready()) {
 					// tokens not fully chosen yet
@@ -1804,7 +1858,8 @@
 				// derived amount: just the number (token shown in the pill); "at least"/"at most" lives in the label
 				g('q-amt').textContent = fmt(q, pdec());
 				// sub-line: the quote's $ value; on a Sell the quote received is gross, so ", before fees"
-				g('q-sub').textContent = '$' + fmt(q * USD[quote], 2) + (side === 'sell' ? ', before fees' : '');
+				g('q-sub').textContent =
+					'$' + fmt(q * USD[quote], 2) + (side === 'sell' ? ', before fees' : '');
 
 				// inline step validation (multiple-of-lot / multiple-of-tick); decimals are hard-limited on input
 				const lot = lotOf();
@@ -1829,9 +1884,19 @@
 						'Amount must be a multiple of ' + lot + ' ' + base
 					);
 				} else if (price > 0 && bAmt * price < minNotionalOf() - 1e-9) {
-					validateField('ib', 'base-dec', false, 'Order value must be at least ' + fmt(minNotionalOf(), pdec()) + ' ' + quote);
+					validateField(
+						'ib',
+						'base-dec',
+						false,
+						'Order value must be at least ' + fmt(minNotionalOf(), pdec()) + ' ' + quote
+					);
 				} else if (price > 0 && maxNotionalOf() !== null && bAmt * price > maxNotionalOf() + 1e-9) {
-					validateField('ib', 'base-dec', false, "Order value can't exceed " + fmt(maxNotionalOf(), pdec()) + ' ' + quote);
+					validateField(
+						'ib',
+						'base-dec',
+						false,
+						"Order value can't exceed " + fmt(maxNotionalOf(), pdec()) + ' ' + quote
+					);
 				} else {
 					validateField('ib', 'base-dec', true);
 				}
@@ -1918,7 +1983,10 @@
 
 				// Fill-or-kill that can't cross the book right now → it would be canceled (blocked by inputsValid)
 				if (fok && !immediate) {
-					lbl.innerHTML = 'Fill in full now, at 1 <strong>' + base + (side === 'sell' ? '</strong> &ge;' : '</strong> &le;');
+					lbl.innerHTML =
+						'Fill in full now, at 1 <strong>' +
+						base +
+						(side === 'sell' ? '</strong> &ge;' : '</strong> &le;');
 					wb.style.display = 'flex';
 					wb.className = 'warn-box red';
 					wt.innerHTML =
@@ -2413,11 +2481,13 @@
 				// Base box: "You SELL/BUY" (action emphasized). Quote box: the derived bound.
 				g('r-bdot').textContent = bt.dot;
 				g('r-bdot').className = 'tok-dot ' + bt.cls;
-				g('rl1').innerHTML = side === 'sell' ? 'You <strong>SELL</strong>' : 'You <strong>BUY</strong>';
+				g('rl1').innerHTML =
+					side === 'sell' ? 'You <strong>SELL</strong>' : 'You <strong>BUY</strong>';
 				g('rba').textContent = fmt(bAmt, DEC[base]) + ' ' + base;
 				g('rbf').textContent = '$' + fmt(bAmt * USD[base], 2);
 				// arrow points to the token you end up with: ↓ to quote on a sell, ↑ to base on a buy
-				g('r-arrow').innerHTML = '<i class="ti ti-arrow-' + (side === 'sell' ? 'down' : 'up') + '"></i>';
+				g('r-arrow').innerHTML =
+					'<i class="ti ti-arrow-' + (side === 'sell' ? 'down' : 'up') + '"></i>';
 				g('r-qdot').textContent = qt.dot;
 				g('r-qdot').className = 'tok-dot ' + qt.cls;
 				g('rl2').textContent = side === 'sell' ? 'You get at least' : 'You pay at most';
