@@ -46,7 +46,7 @@ The full Candid interface is at `canister/dex.did` in the `dfinity/oisy-trade` r
 
 **Live market data.** Best bid/ask (`get_order_book_ticker`), order-book depth (`get_order_book_depth`, where used), and the oisy price feed move continuously. While the order form is open with a pair selected, oisy **refreshes them on a short interval** and re-evaluates the derived state — value-difference, the immediate-fill / crossing warning, the routing best bid/ask, the queue-position figure, and (for a fill-or-kill order) whether it can fill — so a price that can't cross right now becomes proceedable as the book moves, and vice versa. Refreshes update only computed state, never the user's typed amount/price. A fill is **never guaranteed**: the DEX decides at execution, so even a FOK the UI shows as fillable can be killed if the book moves before the matching tick processes it.
 
-**Fee rates.** `get_trading_pairs` exposes per-pair `maker_fee_bps` / `taker_fee_bps` (nat16) — live on staging (currently maker 0, taker 20) — so the real rates are shown directly; no static notice.
+**Fee rates.** `get_trading_pairs` exposes per-pair `maker_fee_bps` / `taker_fee_bps` (nat16) — live on staging (currently maker 0, taker 20) — so the real rates are shown directly; no static notice. The API value is in **basis points**, but oisy always **displays a percentage**, never bps: the rate is converted (`bps ÷ 100`) and shown as e.g. **"0.20%"** (not "20 bps"), since a percentage is the format users read fees in everywhere else in the app.
 
 ### Relevant canister methods
 
@@ -410,7 +410,7 @@ Shows all Pending/Open orders for the connected user. Each row uses the single-l
 - [ ] A **Fill or kill** checkbox (default off) is available below the price section: off = resting (good until canceled); on = fill in full immediately or cancel.
 - [ ] With FOK **on**, the value-difference is shown as a realized give-up (coloured, not neutral); if the price can't cross the book a red "would be canceled" warning shows and **Review is disabled**. The review step reflects the FOK order type.
 - [ ] With FOK **on**, the Review fee row shows the **taker fee only** ("Fee (taker)"); with FOK **off** it shows the "Fee (maker / taker)" pair.
-- [ ] Fee rates shown are the **live** per-pair values from `get_trading_pairs` (`maker_fee_bps` / `taker_fee_bps`), not hardcoded.
+- [ ] Fee rates shown are the **live** per-pair values from `get_trading_pairs` (`maker_fee_bps` / `taker_fee_bps`), not hardcoded, and are **displayed as a percentage** (`bps ÷ 100`, e.g. "0.20%"), never as bps.
 - [ ] The dynamic label reflects crossing: "reaches" / "drops to" (resting) vs "Sell now, while ≥" / "Buy now, while ≤" (crossing).
 - [ ] **Empty amount or price is not treated as zero**: the field shows a placeholder, the derived amount shows "—", and **Review is disabled**; a typed 0 is also invalid.
 - [ ] Review enables only when both inputs are positive **and** both satisfy their step constraint (multiple of lot_size / tick_size).
