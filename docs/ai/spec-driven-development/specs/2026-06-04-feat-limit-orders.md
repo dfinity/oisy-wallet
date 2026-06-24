@@ -368,7 +368,7 @@ _(Queue position in the detail uses `get_order_book_depth`, live on staging.)_
 
 ## Active orders
 
-Shows all Pending/Open orders for the connected user. Each row uses the single-line **order row format** (natural-language intent + outlined provider tag; see _Order row format_), plus a status pill (Pending with spinner, or Open) and the queue position as plain text (shown for both Pending and Open). **Tapping a row opens the order-detail modal** (see _Order detail & cancel_) — there is no inline Cancel button; cancellation happens from inside the detail modal. Status refreshes by polling while the Trading tab is visible; on transition to Filled/Canceled the order moves to History.
+Shows all Pending/Open orders for the connected user. Each row uses the single-line **order row format** (natural-language intent + outlined provider tag; see _Order row format_), plus a status pill (Pending with spinner, or Open) and the queue position as plain text (shown for both Pending and Open). **Tapping a row opens the order-detail modal** (see _Order detail & cancel_) — there is no inline Cancel button; cancellation happens from inside the detail modal. Status refreshes by polling while the Trading tab is visible; on transition to Filled/Cancelled the order moves to History.
 
 ---
 
