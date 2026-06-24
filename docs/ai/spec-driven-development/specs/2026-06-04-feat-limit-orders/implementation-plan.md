@@ -1,6 +1,6 @@
 # Implementation plan — Limit Orders (OISY TRADE)
 
-Companion to the spec [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limit-orders.md). Breaks the feature into PRs that can each merge to `main` and stay deployable.
+Companion to the spec [`2026-06-04-feat-limit-orders.md`](../2026-06-04-feat-limit-orders.md). Breaks the feature into PRs that can each merge to `main` and stay deployable.
 
 ## Principles
 
