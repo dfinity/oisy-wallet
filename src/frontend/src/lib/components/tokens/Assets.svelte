@@ -6,7 +6,6 @@
 	import { TRADING_ENABLED } from '$env/trading';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
-	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
@@ -19,6 +18,7 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
+	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
