@@ -310,11 +310,12 @@
 			.venue-tag {
 				display: inline-block;
 				font-size: 10px;
-				font-weight: 500;
+				font-weight: 400;
 				padding: 1px 7px;
-				border-radius: 10px;
-				background: var(--color-background-info);
-				color: var(--color-text-info);
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				color: var(--color-text-secondary);
 				margin-left: 6px;
 				vertical-align: 1px;
 				white-space: nowrap;
@@ -399,96 +400,22 @@
 				text-align: center;
 			}
 			.ob-mark {
-				width: 44px;
-				height: 44px;
-				border-radius: 50%;
-				background: var(--color-background-info);
-				color: var(--color-text-info);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 20px;
-				margin: 0 auto 12px;
+				width: 44px; height: 44px; border-radius: 50%;
+				background: var(--color-background-info); color: var(--color-text-info);
+				display: flex; align-items: center; justify-content: center;
+				font-size: 20px; margin: 0 auto 12px;
 			}
-			.ob-title {
-				font-size: 16px;
-				font-weight: 600;
-				color: var(--color-text-primary);
-				margin-bottom: 6px;
-			}
-			.ob-text {
-				font-size: 13px;
-				color: var(--color-text-secondary);
-				line-height: 1.5;
-				max-width: 340px;
-				margin: 0 auto 16px;
-			}
-			.ob-steps {
-				display: flex;
-				flex-direction: column;
-				gap: 10px;
-				text-align: left;
-				max-width: 280px;
-				margin: 0 auto 16px;
-			}
-			.ob-step {
-				display: flex;
-				align-items: center;
-				gap: 10px;
-				font-size: 13px;
-				color: var(--color-text-primary);
-			}
-			.ob-num {
-				width: 22px;
-				height: 22px;
-				border-radius: 50%;
-				background: var(--color-background-tertiary);
-				color: var(--color-text-secondary);
-				font-size: 12px;
-				font-weight: 600;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				flex-shrink: 0;
-			}
-			.ob-tokens-label {
-				font-size: 11px;
-				color: var(--color-text-tertiary);
-				margin-bottom: 8px;
-			}
-			.ob-tokens {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 6px;
-				justify-content: center;
-				margin-bottom: 16px;
-			}
-			.ob-chip {
-				display: flex;
-				align-items: center;
-				gap: 5px;
-				padding: 3px 10px 3px 5px;
-				border: 0.5px solid var(--color-border-tertiary);
-				border-radius: 20px;
-				background: var(--color-background-secondary);
-				font-size: 12px;
-				font-weight: 500;
-				color: var(--color-text-primary);
-			}
-			.ob-chip-dot {
-				width: 14px;
-				height: 14px;
-				border-radius: 50%;
-				background: var(--color-background-info);
-				flex-shrink: 0;
-			}
-			.ob-cta {
-				margin-bottom: 10px;
-				padding: 9px 20px;
-			}
-			.toggle-spacer {
-				flex: 1;
-			}
+			.ob-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 6px; }
+			.ob-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; max-width: 340px; margin: 0 auto 16px; }
+			.ob-steps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 280px; margin: 0 auto 16px; }
+			.ob-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-text-primary); }
+			.ob-num { width: 22px; height: 22px; border-radius: 50%; background: var(--color-background-tertiary); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			.ob-tokens-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 8px; }
+			.ob-tokens { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
+			.ob-chip { display: flex; align-items: center; gap: 5px; padding: 3px 10px 3px 5px; border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; background: var(--color-background-secondary); font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+			.ob-chip-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--color-background-info); flex-shrink: 0; }
+			.ob-cta { margin-bottom: 10px; padding: 9px 20px; }
+			.toggle-spacer { flex: 1; }
 			.priv-btn {
 				font-size: 12px;
 				padding: 5px 12px;
@@ -532,15 +459,11 @@
 			<button class="toggle-btn" onclick="showState('full', this)">Assets & orders</button>
 			<button class="toggle-btn" onclick="showState('noprovider', this)">OISY TRADE off</button>
 			<span class="toggle-spacer"></span>
-			<button class="priv-btn" onclick="togglePrivacy()">
-				<i class="ti ti-eye-off"></i> Privacy mode
-			</button>
+			<button class="priv-btn" onclick="togglePrivacy()"><i class="ti ti-eye-off"></i> Privacy mode</button>
 		</div>
 		<div class="page">
 			<div class="hero">
-				<button class="eye-btn" onclick="togglePrivacy()" title="Toggle privacy mode">
-					<i class="ti ti-eye" id="eye-ic"></i>
-				</button>
+				<button class="eye-btn" onclick="togglePrivacy()" title="Toggle privacy mode"><i class="ti ti-eye" id="eye-ic"></i></button>
 				<div class="hero-balance pval">$1,234.56</div>
 				<div class="hero-fiat">Total balance</div>
 				<div class="hero-actions">
@@ -585,13 +508,11 @@
 					<div class="ob-mark"><i class="ti ti-arrows-exchange"></i></div>
 					<div class="ob-title">Trade on-chain with OISY TRADE</div>
 					<div class="ob-text">
-						OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet
-						— your funds stay in smart contracts you control, never with a central party.
+						OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet —
+						your funds stay in smart contracts you control, never with a central party.
 					</div>
 					<div class="ob-steps">
-						<div class="ob-step">
-							<span class="ob-num">1</span><span>Deposit a supported token</span>
-						</div>
+						<div class="ob-step"><span class="ob-num">1</span><span>Deposit a supported token</span></div>
 						<div class="ob-step"><span class="ob-num">2</span><span>Place a limit order</span></div>
 						<div class="ob-step"><span class="ob-num">3</span><span>Withdraw anytime</span></div>
 					</div>
@@ -615,8 +536,8 @@
 						<div class="row">
 							<div class="tok-dot">ICP</div>
 							<div class="row-info">
-								<div class="row-name">ICP</div>
-								<div class="row-sub">OISY TRADE</div>
+								<div class="row-name">ICP <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">Internet Computer</div>
 							</div>
 							<div class="row-right">
 								<div class="row-main pval">250 ICP</div>
@@ -628,8 +549,8 @@
 						<div class="row">
 							<div class="tok-dot tok-dot-u">USD</div>
 							<div class="row-info">
-								<div class="row-name">ckUSDC</div>
-								<div class="row-sub">OISY TRADE</div>
+								<div class="row-name">ckUSDC <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">USD Coin on Internet Computer</div>
 							</div>
 							<div class="row-right">
 								<div class="row-main pval">150.00 ckUSDC</div>
@@ -661,10 +582,7 @@
 								<div class="row">
 									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 									<div class="row-info">
-										<div class="ord-main">
-											<span class="side side-sell">Sell</span> <span class="pval">100 ICP</span> for
-											ckUSDC at 2.75<span class="venue-tag">OISY TRADE</span>
-										</div>
+										<div class="ord-main"><span class="side side-sell">Sell</span> <span class="pval">100 ICP</span> for ckUSDC at 2.75<span class="venue-tag">OISY TRADE</span></div>
 									</div>
 									<div class="row-right-meta">
 										<span class="status-pill s-open">Open</span>
@@ -674,12 +592,7 @@
 								<div class="row">
 									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 									<div class="row-info">
-										<div class="ord-main">
-											<span class="side side-buy">Buy</span> ICP with
-											<span class="pval">300 ckUSDC</span> at 2.60<span class="venue-tag"
-												>OISY TRADE</span
-											>
-										</div>
+										<div class="ord-main"><span class="side side-buy">Buy</span> ICP with <span class="pval">300 ckUSDC</span> at 2.60<span class="venue-tag">OISY TRADE</span></div>
 									</div>
 									<div class="row-right-meta">
 										<span class="status-pill s-pending">Pending</span>
@@ -692,22 +605,14 @@
 							<div class="row">
 								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 								<div class="row-info">
-									<div class="ord-main">
-										<span class="side side-sell">Sell</span> <span class="pval">200 ICP</span> for
-										ckUSDC at 2.60<span class="venue-tag">OISY TRADE</span>
-									</div>
+									<div class="ord-main"><span class="side side-sell">Sell</span> <span class="pval">200 ICP</span> for ckUSDC at 2.60<span class="venue-tag">OISY TRADE</span></div>
 								</div>
 								<span class="status-pill s-filled"><i class="ti ti-check"></i> Filled</span>
 							</div>
 							<div class="row">
 								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 								<div class="row-info">
-									<div class="ord-main">
-										<span class="side side-buy">Buy</span> ICP with
-										<span class="pval">150 ckUSDC</span> at 2.40<span class="venue-tag"
-											>OISY TRADE</span
-										>
-									</div>
+									<div class="ord-main"><span class="side side-buy">Buy</span> ICP with <span class="pval">150 ckUSDC</span> at 2.40<span class="venue-tag">OISY TRADE</span></div>
 								</div>
 								<span class="status-pill s-cancelled"><i class="ti ti-x"></i> Cancelled</span>
 							</div>
@@ -752,12 +657,7 @@
 				el.classList.add('active');
 			}
 			// supported tokens = distinct union of base + quote across pairs (dynamic), shown in the onboarding card
-			const TB_PAIRS = [
-				['ICP', 'ckUSDC'],
-				['ICP', 'ckUSDT'],
-				['ICP', 'ckBTC'],
-				['ckBTC', 'ckUSDC']
-			];
+			const TB_PAIRS = [['ICP','ckUSDC'],['ICP','ckUSDT'],['ICP','ckBTC'],['ckBTC','ckUSDC']];
 			const TB_SUPPORTED = [...new Set(TB_PAIRS.flat())];
 			document.getElementById('ob-tokens').innerHTML = TB_SUPPORTED.map(
 				(t) => '<span class="ob-chip"><span class="ob-chip-dot"></span>' + t + '</span>'
