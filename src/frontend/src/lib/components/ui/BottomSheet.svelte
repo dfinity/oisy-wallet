@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { BottomSheet } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
@@ -39,7 +39,7 @@
 
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheet transition>
+		<BottomSheetContainer transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon
@@ -62,7 +62,7 @@
 					{@render footer()}
 				</div>
 			{/if}
-		</BottomSheet>
+		</BottomSheetContainer>
 		<Backdrop onClose={handleClose} />
 	</div>
 {/if}
