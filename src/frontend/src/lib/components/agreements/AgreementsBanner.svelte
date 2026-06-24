@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Html, IconClose } from '@dfinity/gix-components';
+	import { IconClose } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
+	import Html from '$lib/components/ui/Html.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import {
 		AGREEMENTS_WARNING_BANNER,

@@ -7,6 +7,8 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"collapse": "Collapse",
+			"expand": "Expand",
 			"change": "Change",
 			"continue": "Continue",
 			"apply": "Apply",
@@ -2085,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
 				"action": "Check status"
+			},
+			"liquidium": {
+				"title": "Liquidium",
+				"description": "Lend your assets to earn yield, or borrow against them.",
+				"action": "Lend & Borrow"
 			}
 		},
 		"card_fields": {
@@ -2103,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Earn with Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Lend & borrow native BTC, ETH, USDC and USDT. Lending logic runs on Liquidium's canisters; $oisy_short provides the UX.",
+			"health_factor": "Health factor",
+			"net_value": "Net value",
+			"net_apy": "Net APY",
+			"my_positions": "My positions",
+			"markets": "Markets",
+			"supplied": "Supplied",
+			"borrowed": "Borrowed",
+			"apy_suffix": "APY",
+			"supply_label": "Supply",
+			"borrow_label": "Borrow",
+			"coming_soon": "Coming soon",
+			"action_supply": "Supply",
+			"action_borrow": "Borrow",
+			"action_repay": "Repay",
+			"action_withdraw": "Withdraw",
+			"transaction_failed": "Transaction failed",
+			"supply_review": "Review supply",
+			"supply_review_subtitle": "You supply",
+			"supplying": "Supplying",
+			"starting_to_supply": "Submitting your position...",
+			"supply_started": "The position is now being activated.",
+			"supply_apy": "Supply APY",
+			"supply_collateral_info": "Supplied assets also serve as collateral you can borrow against.",
+			"supply_agreement": "I understand my assets will be supplied to the Liquidium protocol and are subject to on-chain smart-contract risk.",
+			"provider_fee": "Provider fee",
+			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the provider fee."
 		}
 	},
 	"vaults": {
