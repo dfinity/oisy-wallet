@@ -21,8 +21,9 @@ Companion to the spec [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limi
 ### PR 2 — New-user onboarding + Deposit
 
 - New-user **onboarding card** (what OISY TRADE is + 3-step how-it-works + supported-token chips + Deposit CTA).
-- **My assets** section from `get_balances`; include DEX balances (`free + reserved`) in the hero net-worth total.
+- **My assets** section from `get_balances`; include DEX balances (`free + reserved`) in the hero net-worth total. Each row shows total deposited + an **"Available: X"** line (free balance; shown only when something is reserved).
 - **Deposit flow** (Form → Review → Progress): `icrc2_approve` + `deposit`; Max = wallet balance − expected fees (clamped to 0); dust / "nothing to deposit" empty states; consent box + OISY TRADE info box.
+- **Privacy mode**: honor the wallet's existing global hide-balances toggle on the new surfaces — mask My-assets amounts (total + available) and fiat with the standard dot mask.
 
 ### PR 3 — Withdraw
 
@@ -36,6 +37,7 @@ Companion to the spec [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limi
 ### PR 4b — Active orders list
 
 - Render the **Active** orders list; persist each returned `OrderId` locally and poll `get_order_status` (Pending → Open → Filled / Canceled); rows are not yet tappable.
+- Row presentation: single-line **order row format** (natural-language intent, side word color-coded Sell-red / Buy-green, blue `OISY TRADE` tag); **status pills** with distinct color + icon (Pending amber, Open green); mask order amount under privacy mode.
 
 ### PR 5 — Order detail + cancel
 
@@ -45,11 +47,12 @@ Companion to the spec [`2026-06-04-feat-limit-orders.md`](./2026-06-04-feat-limi
 ### PR 6 — Order history
 
 - **History** tab (Filled / Cancelled) via `get_my_orders`; tapping a history row opens the **same detail modal**, read-only.
+- Terminal status pills: **Filled** green with a check (success), **Cancelled** neutral gray with an ✕ (not red — cancelling is a normal action).
 
 ## Enhancements (after PR 4, off the critical path, each gated by its dependency)
 
 - **Fill or kill** — depends on the `add_limit_order` time-in-force parameter landing on `dfinity/oisy-trade` (spec Open question 6). Adds the FOK control, price-only gate, submit-time re-check, and the taker-only fee row.
-- **Queue position** — uses `get_order_book_depth` (spec Open question 7): form hint + Review/detail row + Active chip.
+- **Queue position** — uses `get_order_book_depth` (spec Open question 7): form hint + Review/detail row + plain-text on active rows (shown for both **Pending and Open**; hidden once terminal or when crossing).
 - **Live maker/taker fee rates** — when `maker_fee_bps` / `taker_fee_bps` are exposed (spec Open question 4); static notice until then.
 - **Flag removal** — delete the `Trading` feature flag once the feature ships to production.
 
