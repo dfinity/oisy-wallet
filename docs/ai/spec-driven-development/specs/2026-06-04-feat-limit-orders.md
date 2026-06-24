@@ -211,11 +211,11 @@ The user defines the order entirely from market data — value (feed) and aggreg
 
 With side declared and base fixed, the label and warning depend on whether the price **crosses the order book**; the give-up is stated versus **current value**.
 
-| Side | Limit vs book     | Label                        | Warning                                                                                                        |
-| ---- | ----------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                           |
+| Side | Limit vs book     | Label                        | Warning                                                                                                      |
+| ---- | ----------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                         |
 | Sell | at/below best bid | "Sell now, while 1 [base] ≥" | "This price crosses the order book — your order will fill almost immediately, about $X below current value." |
-| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                           |
+| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                         |
 | Buy  | at/above best ask | "Buy now, while 1 [base] ≤"  | "This price crosses the order book — your order will fill almost immediately, about $X above current value." |
 
 While the order **rests**, the value-difference is neutral regardless of sign — informational, not realized. It turns **amber** (give-up 0 to 5%) or **red** (beyond 5%) with the warning box only when the price crosses the book. On the review step a confirmation checkbox is required before "Place order" when the give-up exceeds 5%.
@@ -291,7 +291,7 @@ Then the remaining rows: **DEX** (routing); **order type** — **always shown**:
 
 Unlike the form, **Review is a stable confirmation surface — it does not live-re-gate** as the book moves (no button flipping under the user). Instead a **final freshness re-check runs at "Place order"**:
 
-- **FOK:** re-checks the price against the **latest** book. It differs from the form only if the book actually moved since Review; if the order would now be killed (no longer crosses), submission is **interrupted** — a "market moved" notice with the updated best bid/ask, and the user goes back to adjust. (In the wireframe a "Simulate market move" control ticks the book so this is demonstrable — set the price to Bid, go to Review, simulate a move, then Place order is interrupted.) 
+- **FOK:** re-checks the price against the **latest** book. It differs from the form only if the book actually moved since Review; if the order would now be killed (no longer crosses), submission is **interrupted** — a "market moved" notice with the updated best bid/ask, and the user goes back to adjust. (In the wireframe a "Simulate market move" control ticks the book so this is demonstrable — set the price to Bid, go to Review, simulate a move, then Place order is interrupted.)
 - **GTC:** a resting order is unaffected by a move (it just rests until reached), so there is no block — the re-check is informational only.
 - The **>5% give-up** threshold is re-evaluated at submit too, so a market move that pushes it past 5% still requires the confirmation.
 
@@ -433,7 +433,6 @@ Shows all Pending/Open orders for the connected user. Each row uses the single-l
 - [ ] Sell Max fills free base floored to lot_size; Buy Max converts free quote → base via the price (floored to lot_size) and is disabled until a price is set.
 - [ ] Insufficient balance (spend > free: base on Sell, quote on Buy) is **soft-validated** — inline message under the amount field + Review disabled; the **balance error takes precedence over the lot error**. (Inline deposit deferred.)
 - [ ] Form opens **empty** from the single entry (Trading tab Orders "+ Limit order"); no token pre-fill. Asset rows expose only **Withdraw** (no per-row "Limit order" or "Deposit").
-
 
 ---
 
