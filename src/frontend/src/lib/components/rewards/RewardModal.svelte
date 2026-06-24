@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, onMount } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
@@ -10,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import {
 		TRACK_REWARD_CAMPAIGN_LEARN_MORE,

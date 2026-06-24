@@ -7,6 +7,8 @@
 			"back": "뒤로",
 			"done": "완료",
 			"close": "닫기",
+			"collapse": "접기",
+			"expand": "펼치기",
 			"change": "변경",
 			"continue": "계속",
 			"apply": "적용",
@@ -1581,6 +1583,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "연결된 앱",
 			"no_connected_apps": "현재 연결된 앱이 없습니다.",
+			"disconnect_all": "모두 연결 해제",
+			"disconnect_app": "$name 연결 해제",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2066,6 +2070,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISY를 사용하고 수익을 창출하세요! 에피소드 6 공개 중 🎉",
 				"action": "상태 확인"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2084,6 +2093,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAO로 수익 창출"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

@@ -7,6 +7,8 @@
 			"back": "Назад",
 			"done": "Готово",
 			"close": "Закрыть",
+			"collapse": "Свернуть",
+			"expand": "Развернуть",
 			"change": "Изменить",
 			"continue": "Продолжить",
 			"apply": "Применить",
@@ -1581,6 +1583,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Подключённые приложения",
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
+			"disconnect_all": "Отключить все",
+			"disconnect_app": "Отключить $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2066,6 +2070,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод 6 уже в эфире 🎉",
 				"action": "Проверить статус"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2084,6 +2093,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Зарабатывайте с Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

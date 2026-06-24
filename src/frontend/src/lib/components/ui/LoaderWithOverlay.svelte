@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 
 	interface Props {
 		testId?: string;
@@ -16,7 +16,7 @@
 	data-tid={testId}
 	role="status"
 >
-	<Spinner />
+	<LoaderSpinner />
 </div>
 
 <style lang="scss">
