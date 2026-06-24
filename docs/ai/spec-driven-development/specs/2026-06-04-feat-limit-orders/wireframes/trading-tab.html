@@ -68,6 +68,7 @@
 				font-family: var(--font-sans);
 			}
 			.hero {
+				position: relative;
 				background: var(--color-background-secondary);
 				border-radius: var(--border-radius-lg);
 				padding: 1.25rem 1rem;
@@ -290,12 +291,54 @@
 				color: var(--color-text-warning);
 			}
 			.s-filled {
-				background: var(--color-background-secondary);
-				color: var(--color-text-secondary);
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.status-pill i {
+				font-size: 12px;
+				vertical-align: -1px;
 			}
 			.s-cancelled {
 				background: var(--color-background-secondary);
 				color: var(--color-text-tertiary);
+			}
+			.ord-main {
+				font-size: 13px;
+				color: var(--color-text-primary);
+				line-height: 1.4;
+			}
+			.venue-tag {
+				display: inline-block;
+				font-size: 10px;
+				font-weight: 500;
+				padding: 1px 7px;
+				border-radius: 10px;
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				margin-left: 6px;
+				vertical-align: 1px;
+				white-space: nowrap;
+			}
+			.row-right-meta {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 3px;
+				flex-shrink: 0;
+			}
+			.queue-text {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+				white-space: nowrap;
+			}
+			.side {
+				font-weight: 600;
+			}
+			.side-sell {
+				color: var(--color-text-danger);
+			}
+			.side-buy {
+				color: var(--color-text-success);
 			}
 			.orders-wrap {
 				border: 0.5px solid var(--color-border-tertiary);
@@ -356,92 +399,55 @@
 				text-align: center;
 			}
 			.ob-mark {
-				width: 44px;
-				height: 44px;
-				border-radius: 50%;
-				background: var(--color-background-info);
-				color: var(--color-text-info);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 20px;
-				margin: 0 auto 12px;
+				width: 44px; height: 44px; border-radius: 50%;
+				background: var(--color-background-info); color: var(--color-text-info);
+				display: flex; align-items: center; justify-content: center;
+				font-size: 20px; margin: 0 auto 12px;
 			}
-			.ob-title {
-				font-size: 16px;
-				font-weight: 600;
-				color: var(--color-text-primary);
-				margin-bottom: 6px;
-			}
-			.ob-text {
-				font-size: 13px;
-				color: var(--color-text-secondary);
-				line-height: 1.5;
-				max-width: 340px;
-				margin: 0 auto 16px;
-			}
-			.ob-steps {
-				display: flex;
-				flex-direction: column;
-				gap: 10px;
-				text-align: left;
-				max-width: 280px;
-				margin: 0 auto 16px;
-			}
-			.ob-step {
-				display: flex;
-				align-items: center;
-				gap: 10px;
-				font-size: 13px;
-				color: var(--color-text-primary);
-			}
-			.ob-num {
-				width: 22px;
-				height: 22px;
-				border-radius: 50%;
-				background: var(--color-background-tertiary);
-				color: var(--color-text-secondary);
+			.ob-title { font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin-bottom: 6px; }
+			.ob-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; max-width: 340px; margin: 0 auto 16px; }
+			.ob-steps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 280px; margin: 0 auto 16px; }
+			.ob-step { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-text-primary); }
+			.ob-num { width: 22px; height: 22px; border-radius: 50%; background: var(--color-background-tertiary); color: var(--color-text-secondary); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+			.ob-tokens-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 8px; }
+			.ob-tokens { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
+			.ob-chip { display: flex; align-items: center; gap: 5px; padding: 3px 10px 3px 5px; border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; background: var(--color-background-secondary); font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+			.ob-chip-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--color-background-info); flex-shrink: 0; }
+			.ob-cta { margin-bottom: 10px; padding: 9px 20px; }
+			.toggle-spacer { flex: 1; }
+			.priv-btn {
 				font-size: 12px;
-				font-weight: 600;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				flex-shrink: 0;
-			}
-			.ob-tokens-label {
-				font-size: 11px;
-				color: var(--color-text-tertiary);
-				margin-bottom: 8px;
-			}
-			.ob-tokens {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 6px;
-				justify-content: center;
-				margin-bottom: 16px;
-			}
-			.ob-chip {
-				display: flex;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+				display: inline-flex;
 				align-items: center;
 				gap: 5px;
-				padding: 3px 10px 3px 5px;
-				border: 0.5px solid var(--color-border-tertiary);
-				border-radius: 20px;
-				background: var(--color-background-secondary);
-				font-size: 12px;
-				font-weight: 500;
-				color: var(--color-text-primary);
 			}
-			.ob-chip-dot {
-				width: 14px;
-				height: 14px;
-				border-radius: 50%;
-				background: var(--color-background-info);
-				flex-shrink: 0;
+			.priv-btn.active {
+				background: var(--color-text-info);
+				color: var(--color-background-primary);
+				border-color: transparent;
 			}
-			.ob-cta {
-				margin-bottom: 10px;
-				padding: 9px 20px;
+			.eye-btn {
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: var(--color-text-tertiary);
+				font-size: 16px;
+				line-height: 1;
+				padding: 4px;
+			}
+			.dotmask {
+				letter-spacing: 0.12em;
+				font-weight: 700;
 			}
 		</style>
 	</head>
@@ -451,10 +457,13 @@
 			<button class="toggle-btn" onclick="showState('assets', this)">Assets, no orders</button>
 			<button class="toggle-btn" onclick="showState('full', this)">Assets & orders</button>
 			<button class="toggle-btn" onclick="showState('noprovider', this)">OISY TRADE off</button>
+			<span class="toggle-spacer"></span>
+			<button class="priv-btn" onclick="togglePrivacy()"><i class="ti ti-eye-off"></i> Privacy mode</button>
 		</div>
 		<div class="page">
 			<div class="hero">
-				<div class="hero-balance">$1,234.56</div>
+				<button class="eye-btn" onclick="togglePrivacy()" title="Toggle privacy mode"><i class="ti ti-eye" id="eye-ic"></i></button>
+				<div class="hero-balance pval">$1,234.56</div>
 				<div class="hero-fiat">Total balance</div>
 				<div class="hero-actions">
 					<div class="hero-btn">
@@ -498,13 +507,11 @@
 					<div class="ob-mark"><i class="ti ti-arrows-exchange"></i></div>
 					<div class="ob-title">Trade on-chain with OISY TRADE</div>
 					<div class="ob-text">
-						OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet
-						— your funds stay in smart contracts you control, never with a central party.
+						OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet —
+						your funds stay in smart contracts you control, never with a central party.
 					</div>
 					<div class="ob-steps">
-						<div class="ob-step">
-							<span class="ob-num">1</span><span>Deposit a supported token</span>
-						</div>
+						<div class="ob-step"><span class="ob-num">1</span><span>Deposit a supported token</span></div>
 						<div class="ob-step"><span class="ob-num">2</span><span>Place a limit order</span></div>
 						<div class="ob-step"><span class="ob-num">3</span><span>Withdraw anytime</span></div>
 					</div>
@@ -532,9 +539,9 @@
 								<div class="row-sub">OISY TRADE</div>
 							</div>
 							<div class="row-right">
-								<div class="row-main">250 ICP</div>
-								<div class="row-secondary">100 ICP reserved</div>
-								<div class="row-fiat">$672.50</div>
+								<div class="row-main pval">250 ICP</div>
+								<div class="row-secondary">Available: <span class="pval">150 ICP</span></div>
+								<div class="row-fiat pval">$672.50</div>
 							</div>
 							<span class="row-action">Withdraw</span>
 						</div>
@@ -545,8 +552,8 @@
 								<div class="row-sub">OISY TRADE</div>
 							</div>
 							<div class="row-right">
-								<div class="row-main">150.00 ckUSDC</div>
-								<div class="row-fiat">$150.00</div>
+								<div class="row-main pval">150.00 ckUSDC</div>
+								<div class="row-fiat pval">$150.00</div>
 							</div>
 							<span class="row-action">Withdraw</span>
 						</div>
@@ -574,19 +581,22 @@
 								<div class="row">
 									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 									<div class="row-info">
-										<div class="row-name">ICP → ckUSDC</div>
-										<div class="row-sub">OISY TRADE · @ 2.75 · 100 ICP</div>
+										<div class="ord-main"><span class="side side-sell">Sell</span> <span class="pval">100 ICP</span> for ckUSDC at 2.75<span class="venue-tag">OISY TRADE</span></div>
 									</div>
-									<span class="book-chip">10% are ahead</span>
-									<span class="status-pill s-open">Open</span>
+									<div class="row-right-meta">
+										<span class="status-pill s-open">Open</span>
+										<span class="queue-text">10% are ahead</span>
+									</div>
 								</div>
 								<div class="row">
 									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 									<div class="row-info">
-										<div class="row-name">ICP → ckUSDC</div>
-										<div class="row-sub">OISY TRADE · @ 2.90 · 50 ICP</div>
+										<div class="ord-main"><span class="side side-buy">Buy</span> ICP with <span class="pval">300 ckUSDC</span> at 2.60<span class="venue-tag">OISY TRADE</span></div>
 									</div>
-									<span class="status-pill s-pending">Pending</span>
+									<div class="row-right-meta">
+										<span class="status-pill s-pending">Pending</span>
+										<span class="queue-text">30% are ahead</span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -594,18 +604,16 @@
 							<div class="row">
 								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 								<div class="row-info">
-									<div class="row-name">ICP → ckUSDC</div>
-									<div class="row-sub">OISY TRADE · @ 2.60 · 200 ICP</div>
+									<div class="ord-main"><span class="side side-sell">Sell</span> <span class="pval">200 ICP</span> for ckUSDC at 2.60<span class="venue-tag">OISY TRADE</span></div>
 								</div>
-								<span class="status-pill s-filled">Filled</span>
+								<span class="status-pill s-filled"><i class="ti ti-check"></i> Filled</span>
 							</div>
 							<div class="row">
 								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
 								<div class="row-info">
-									<div class="row-name">ICP → ckUSDC</div>
-									<div class="row-sub">OISY TRADE · @ 3.10 · 75 ICP</div>
+									<div class="ord-main"><span class="side side-buy">Buy</span> ICP with <span class="pval">150 ckUSDC</span> at 2.40<span class="venue-tag">OISY TRADE</span></div>
 								</div>
-								<span class="status-pill s-cancelled">Cancelled</span>
+								<span class="status-pill s-cancelled"><i class="ti ti-x"></i> Cancelled</span>
 							</div>
 						</div>
 					</div>
@@ -648,16 +656,35 @@
 				el.classList.add('active');
 			}
 			// supported tokens = distinct union of base + quote across pairs (dynamic), shown in the onboarding card
-			const TB_PAIRS = [
-				['ICP', 'ckUSDC'],
-				['ICP', 'ckUSDT'],
-				['ICP', 'ckBTC'],
-				['ckBTC', 'ckUSDC']
-			];
+			const TB_PAIRS = [['ICP','ckUSDC'],['ICP','ckUSDT'],['ICP','ckBTC'],['ckBTC','ckUSDC']];
 			const TB_SUPPORTED = [...new Set(TB_PAIRS.flat())];
 			document.getElementById('ob-tokens').innerHTML = TB_SUPPORTED.map(
 				(t) => '<span class="ob-chip"><span class="ob-chip-dot"></span>' + t + '</span>'
 			).join('');
+			// Privacy mode: hide deposited balances, fiat values and order amounts behind a dot mask.
+			// Honors OISY's existing global privacy toggle; market price and order pair stay visible.
+			let privacy = false;
+			function applyPrivacy() {
+				document.querySelectorAll('.pval').forEach((el) => {
+					if (el.dataset.v === undefined) el.dataset.v = el.textContent;
+					if (privacy) {
+						el.textContent = '•••••';
+						el.classList.add('dotmask');
+					} else {
+						el.textContent = el.dataset.v;
+						el.classList.remove('dotmask');
+					}
+				});
+				document
+					.querySelectorAll('.priv-btn')
+					.forEach((b) => b.classList.toggle('active', privacy));
+				const eye = document.getElementById('eye-ic');
+				if (eye) eye.className = 'ti ' + (privacy ? 'ti-eye-off' : 'ti-eye');
+			}
+			function togglePrivacy() {
+				privacy = !privacy;
+				applyPrivacy();
+			}
 			showState('new', document.querySelector('.toggle-btn'));
 		</script>
 	</body>

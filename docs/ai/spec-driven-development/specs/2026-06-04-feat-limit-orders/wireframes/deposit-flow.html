@@ -547,13 +547,9 @@
 	</head>
 	<body>
 		<div class="state-toggle">
-			<button class="toggle-btn active" id="tb-normal" onclick="setMode('normal')">
-				Has tokens
-			</button>
+			<button class="toggle-btn active" id="tb-normal" onclick="setMode('normal')">Has tokens</button>
 			<button class="toggle-btn" id="tb-dust" onclick="setMode('dust')">Low balance (≤ fee)</button>
-			<button class="toggle-btn" id="tb-empty" onclick="setMode('empty')">
-				Nothing to deposit
-			</button>
+			<button class="toggle-btn" id="tb-empty" onclick="setMode('empty')">Nothing to deposit</button>
 		</div>
 		<div class="scene">
 			<div class="steps">
@@ -569,32 +565,23 @@
 						<i class="ti ti-x modal-x"></i>
 					</div>
 					<div class="field" id="dep-field">
-						<div class="seg-head">
-							<span class="field-label">You deposit</span>
-							<span class="seg-net"
-								>On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
-							></span>
-						</div>
-						<div class="field-main">
-							<input class="amt-input" id="dep-amt" type="text" value="100" oninput="onDepAmt()" />
-							<div class="tok-pill">
-								<div class="tok-dot">ICP</div>
-								<span class="tok-sym">ICP</span
-								><i
-									class="ti ti-chevron-down"
-									style="font-size: 12px; color: var(--color-text-tertiary)"
-								></i>
+							<div class="seg-head">
+								<span class="field-label">You deposit</span>
+								<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
+							</div>
+							<div class="field-main">
+								<input class="amt-input" id="dep-amt" type="text" value="100" oninput="onDepAmt()" />
+								<div class="tok-pill">
+									<div class="tok-dot">ICP</div>
+									<span class="tok-sym">ICP</span><i class="ti ti-chevron-down" style="font-size: 12px; color: var(--color-text-tertiary)"></i>
+								</div>
+							</div>
+							<div class="dep-err" id="dep-err"></div>
+							<div class="sub-row">
+								<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="dep-fiat">$269.00</span></span>
+								<span class="maxlink" id="dep-max" onclick="maxDeposit()">Max: 499.9998 ICP</span>
 							</div>
 						</div>
-						<div class="dep-err" id="dep-err"></div>
-						<div class="sub-row">
-							<span class="amt-fiat"
-								><i class="ti ti-arrows-up-down sw-ico"></i>
-								<span id="dep-fiat">$269.00</span></span
-							>
-							<span class="maxlink" id="dep-max" onclick="maxDeposit()">Max: 499.9998 ICP</span>
-						</div>
-					</div>
 					<div class="modal-value">
 						<span class="mv-label">To</span><span class="mv-value">OISY TRADE</span>
 					</div>
@@ -626,9 +613,7 @@
 					</div>
 					<div class="info-card">
 						<div class="info-head">
-							<span class="info-title"
-								><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span
-							>
+							<span class="info-title"><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span>
 							<span class="info-link">Learn more <i class="ti ti-external-link"></i></span>
 						</div>
 						<div class="info-body">
@@ -657,10 +642,7 @@
 						<div class="hero-fiat" id="r-dep-fiat">$269.00</div>
 					</div>
 					<div class="modal-value">
-						<span class="mv-label">Network</span
-						><span class="mv-value" style="display: inline-flex; align-items: center; gap: 6px"
-							>Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
-						></span>
+						<span class="mv-label">Network</span><span class="mv-value" style="display: inline-flex; align-items: center; gap: 6px">Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
 					</div>
 					<div class="modal-value">
 						<span class="mv-label">To</span><span class="mv-value">OISY TRADE</span>
@@ -686,9 +668,7 @@
 					</div>
 					<div class="info-card">
 						<div class="info-head">
-							<span class="info-title"
-								><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span
-							>
+							<span class="info-title"><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span>
 							<span class="info-link">Learn more <i class="ti ti-external-link"></i></span>
 						</div>
 						<div class="info-body">
@@ -745,10 +725,7 @@
 					</div>
 					<div class="empty-wrap">
 						<div class="empty-title">Nothing to deposit yet</div>
-						<div class="empty-body">
-							OISY TRADE lets you create orders for these tokens. Add any of them to your wallet,
-							then deposit it here to start trading.
-						</div>
+						<div class="empty-body">OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.</div>
 						<div class="empty-tokens" id="empty-tokens"></div>
 					</div>
 					<div class="btn-group"><button class="btn">Close</button></div>
@@ -824,20 +801,15 @@
 				DEP_BAL = mode === 'dust' ? 0.0001 : 500;
 				document.getElementById('dep-amt').value = mode === 'dust' ? '' : '100';
 				refreshDeposit();
-				document.getElementById('tb-normal').className =
-					'toggle-btn' + (mode === 'normal' ? ' active' : '');
-				document.getElementById('tb-dust').className =
-					'toggle-btn' + (mode === 'dust' ? ' active' : '');
-				document.getElementById('tb-empty').className =
-					'toggle-btn' + (mode === 'empty' ? ' active' : '');
+				document.getElementById('tb-normal').className = 'toggle-btn' + (mode === 'normal' ? ' active' : '');
+				document.getElementById('tb-dust').className = 'toggle-btn' + (mode === 'dust' ? ' active' : '');
+				document.getElementById('tb-empty').className = 'toggle-btn' + (mode === 'empty' ? ' active' : '');
 			}
 			renderSupported();
 
 			// deposit demo model — Max is wallet balance minus the expected ledger fees (approval + transfer),
 			// since deposit fees sit on top of the entered amount.
-			var DEP_PRICE = 2.69,
-				DEP_FEE = 0.0002,
-				DEP_BAL = 500;
+			var DEP_PRICE = 2.69, DEP_FEE = 0.0002, DEP_BAL = 500;
 			function depMax() {
 				return Math.max(0, DEP_BAL - DEP_FEE);
 			}
