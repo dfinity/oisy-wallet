@@ -330,6 +330,125 @@
 					transform: rotate(360deg);
 				}
 			}
+			:root {
+				--accent: #0b57f5;
+				--accent-soft: #e9efff;
+			}
+			.amt-input {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 6px;
+				padding: 4px 8px;
+				min-width: 0;
+			}
+			.amt-input:focus {
+				border-color: var(--color-text-primary);
+			}
+			.btn {
+				padding: 13px;
+				border-radius: var(--border-radius-lg);
+				font-size: 15px;
+				font-weight: 600;
+				border: none;
+				background: var(--accent-soft);
+				color: var(--accent);
+			}
+			.btn-primary {
+				background: var(--accent);
+				color: #ffffff;
+			}
+			.btn-primary:disabled {
+				background: var(--color-background-tertiary);
+				color: var(--color-text-tertiary);
+			}
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: -1.25rem -1.25rem 1.25rem;
+				padding: 14px 16px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.modal-head-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--color-text-primary);
+			}
+			.modal-x {
+				position: absolute;
+				right: 16px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 16px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.seg-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.seg-net {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+			}
+			.net-ico {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-tertiary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.sub-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			.amt-fiat {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				margin-top: 0;
+			}
+			.sw-ico {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.maxlink {
+				font-size: 11px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				cursor: pointer;
+			}
+			.wd-reserved {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 6px;
+			}
+			.hero-card {
+				background: var(--color-background-info);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem 1rem;
+				text-align: center;
+				margin-bottom: 1rem;
+			}
+			.hero-label {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin: 8px 0 2px;
+			}
 		</style>
 	</head>
 	<body>
@@ -342,27 +461,30 @@
 			</div>
 			<div id="screen-form">
 				<div class="modal">
-					<div class="modal-title">Withdraw from OISY DEX</div>
+					<div class="modal-head">
+						<span class="modal-head-title">Withdraw</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
 					<div class="field">
-						<div class="field-label">Amount</div>
-						<div class="field-main">
-							<input class="amt-input" type="text" value="150" id="amt" />
-							<div class="tok-locked">
-								<div class="tok-dot">ICP</div>
-								<span class="tok-sym">ICP</span>
+							<div class="seg-head">
+								<span class="field-label">You withdraw</span>
+								<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
 							</div>
+							<div class="field-main">
+								<input class="amt-input" type="text" value="150" id="amt" oninput="onAmt()" />
+								<div class="tok-locked">
+									<div class="tok-dot">ICP</div>
+									<span class="tok-sym">ICP</span>
+								</div>
+							</div>
+							<div class="sub-row">
+								<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="wd-fiat">$403.50</span></span>
+								<span class="maxlink" id="wd-max" onclick="maxWithdraw()">Max: 250 ICP</span>
+							</div>
+							<div class="wd-reserved">100 ICP reserved · locked by open orders</div>
 						</div>
-						<div class="amt-fiat">≈ $403.50</div>
-						<div class="bal-row">
-							<span class="bal-free" onclick="document.getElementById('amt').value = '250'"
-								>Free: 250 ICP</span
-							>
-							<span
-								class="bal-reserved"
-								title="Locked by open orders — cancel orders to free this balance"
-								>100 ICP reserved</span
-							>
-						</div>
+					<div class="modal-value">
+						<span class="mv-label">From</span><span class="mv-value">OISY TRADE</span>
 					</div>
 					<div class="expandable">
 						<div class="expandable-header" onclick="toggleFees('f')">
@@ -379,6 +501,13 @@
 							</div>
 						</div>
 					</div>
+					<div class="modal-value no-border">
+						<span class="mv-label">You receive</span>
+						<div>
+							<div class="mv-value" id="wd-recv">149.9999 ICP</div>
+							<div class="mv-sub" id="wd-recv-fiat">$403.50</div>
+						</div>
+					</div>
 					<div class="btn-group">
 						<button class="btn">Cancel</button
 						><button class="btn btn-primary" onclick="showStep('review')">Review</button>
@@ -387,14 +516,21 @@
 			</div>
 			<div id="screen-review" style="display: none">
 				<div class="modal">
-					<div class="modal-title">Review withdrawal</div>
-					<div class="hero-token">
+					<div class="modal-head">
+						<span class="modal-head-title">Review withdrawal</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="hero-card">
 						<div class="hero-dot">ICP</div>
-						<div class="hero-amount">150 ICP</div>
-						<div class="hero-fiat">≈ $403.50</div>
+						<div class="hero-label">You withdraw</div>
+						<div class="hero-amount" id="r-amt">150 ICP</div>
+						<div class="hero-fiat" id="r-fiat">$403.50</div>
 					</div>
 					<div class="modal-value">
-						<span class="mv-label">From</span><span class="mv-value">OISY DEX</span>
+						<span class="mv-label">Network</span><span class="mv-value" style="display: inline-flex; align-items: center; gap: 6px">Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">From</span><span class="mv-value">OISY TRADE</span>
 					</div>
 					<div class="expandable">
 						<div class="expandable-header" onclick="toggleFees('r')">
@@ -414,8 +550,8 @@
 					<div class="modal-value no-border">
 						<span class="mv-label">You receive</span>
 						<div>
-							<div class="mv-value">149.9999 ICP</div>
-							<div class="mv-sub">≈ $403.50</div>
+							<div class="mv-value" id="r-recv">149.9999 ICP</div>
+							<div class="mv-sub" id="r-recv-fiat">$403.50</div>
 						</div>
 					</div>
 					<div class="btn-group">
@@ -427,7 +563,10 @@
 			</div>
 			<div id="screen-progress" style="display: none">
 				<div class="modal">
-					<div class="modal-title" id="prog-title">Withdrawing</div>
+					<div class="modal-head">
+						<span class="modal-head-title" id="prog-title">Withdrawing</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
 					<div class="progress-steps">
 						<div class="prog-step">
 							<div class="prog-dot active" id="p1">
@@ -472,6 +611,14 @@
 					(s) => (document.getElementById('screen-' + s).style.display = 'none')
 				);
 				document.getElementById('screen-' + step).style.display = 'block';
+				if (step === 'review') {
+					var rv = parseFloat(document.getElementById('amt').value) || 0;
+					var rr = Math.max(0, rv - WD_FEE);
+					document.getElementById('r-amt').textContent = wdFmt(rv) + ' ICP';
+					document.getElementById('r-fiat').textContent = '$' + (rv * WD_PRICE).toFixed(2);
+					document.getElementById('r-recv').textContent = wdFmt(rr) + ' ICP';
+					document.getElementById('r-recv-fiat').textContent = '$' + (rr * WD_PRICE).toFixed(2);
+				}
 				const nums = { form: 1, review: 2, progress: 3 },
 					labels = { form: 'Form', review: 'Review', progress: 'Withdrawing' };
 				document.getElementById('step-label').textContent = labels[step];
@@ -489,6 +636,25 @@
 						document.getElementById('prog-title').textContent = 'Withdrawn';
 					}, 2000);
 			}
+			// withdraw is gross: Max is the full free balance; you receive amount − transfer fee
+			var WD_PRICE = 2.69,
+				WD_FEE = 0.0001,
+				WD_FREE = 250;
+			function wdFmt(v) {
+				return (Math.round(v * 1e6) / 1e6).toString();
+			}
+			function onAmt() {
+				var v = parseFloat(document.getElementById('amt').value) || 0;
+				document.getElementById('wd-fiat').textContent = '$' + (v * WD_PRICE).toFixed(2);
+				var recv = Math.max(0, v - WD_FEE);
+				document.getElementById('wd-recv').textContent = wdFmt(recv) + ' ICP';
+				document.getElementById('wd-recv-fiat').textContent = '$' + (recv * WD_PRICE).toFixed(2);
+			}
+			function maxWithdraw() {
+				document.getElementById('amt').value = WD_FREE;
+				onAmt();
+			}
+			onAmt();
 		</script>
 	</body>
 </html>

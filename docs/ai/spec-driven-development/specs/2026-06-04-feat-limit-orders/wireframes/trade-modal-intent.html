@@ -20,16 +20,18 @@
 				--color-text-primary: #1a1a18;
 				--color-text-secondary: #5f5e5a;
 				--color-text-tertiary: #888780;
-				--color-text-info: #185fa5;
+				--color-text-info: #0b57f5;
 				--color-text-success: #3b6d11;
 				--color-text-warning: #854f0b;
 				--color-text-danger: #a32d2d;
 				--color-border-tertiary: rgba(0, 0, 0, 0.12);
 				--color-border-secondary: rgba(0, 0, 0, 0.25);
-				--color-border-info: #185fa5;
+				--color-border-info: #0b57f5;
 				--color-border-success: #3b6d11;
 				--color-border-warning: #854f0b;
 				--color-border-danger: #a32d2d;
+				--accent: #0b57f5;
+				--accent-soft: #e9efff;
 				--border-radius-md: 8px;
 				--border-radius-lg: 12px;
 				--font-sans: system-ui, -apple-system, sans-serif;
@@ -65,6 +67,30 @@
 				margin-bottom: 1.25rem;
 				align-items: center;
 			}
+			/* demo-only control (not part of the product UI) */
+			.sim-row {
+				max-width: 380px;
+				margin: 0 auto 1rem;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.sim-btn {
+				font-size: 11px;
+				font-family: var(--font-sans);
+				color: var(--color-text-secondary);
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 6px;
+				padding: 4px 8px;
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+			.sim-hint {
+				font-size: 10px;
+				color: var(--color-text-tertiary);
+				line-height: 1.3;
+			}
 			.step-dot {
 				width: 8px;
 				height: 8px;
@@ -91,32 +117,27 @@
 				margin: 0 auto;
 				overflow: hidden;
 			}
-			.modal-tabs {
+			.modal-head {
+				position: relative;
 				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 14px 16px;
 				border-bottom: 0.5px solid var(--color-border-tertiary);
 			}
-			.modal-tab {
-				flex: 1;
-				padding: 12px 14px;
-				cursor: pointer;
-				border-bottom: 2px solid transparent;
-				margin-bottom: -0.5px;
-			}
-			.modal-tab.active {
-				border-bottom-color: var(--color-text-primary);
-			}
-			.tab-name {
-				font-size: 14px;
-				font-weight: 500;
-				color: var(--color-text-secondary);
-			}
-			.modal-tab.active .tab-name {
+			.modal-head-title {
+				font-size: 16px;
+				font-weight: 700;
 				color: var(--color-text-primary);
 			}
-			.tab-sub {
-				font-size: 11px;
-				color: var(--color-text-tertiary);
-				margin-top: 1px;
+			.modal-x {
+				position: absolute;
+				right: 16px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 16px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
 			}
 			.body {
 				padding: 1.25rem;
@@ -362,25 +383,26 @@
 			}
 			.diff {
 				font-size: 13px;
-				font-weight: 500;
-				padding: 2px 8px;
-				border-radius: 4px;
+				font-weight: 600;
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+			}
+			.diff i {
+				font-size: 13px;
 			}
 			.diff-pos {
-				background: var(--color-background-success);
 				color: var(--color-text-success);
 			}
 			.diff-neg {
-				background: var(--color-background-warning);
 				color: var(--color-text-warning);
 			}
 			.diff-danger {
-				background: var(--color-background-danger);
 				color: var(--color-text-danger);
 			}
 			.diff-neutral {
-				background: var(--color-background-tertiary);
-				color: var(--color-text-secondary);
+				color: var(--color-text-primary);
+				font-weight: 400;
 			}
 			.price-ctx {
 				font-size: 11px;
@@ -481,6 +503,12 @@
 			.route-line:last-child {
 				border-bottom: none;
 			}
+			.route-line.ask-line {
+				color: var(--color-text-danger);
+			}
+			.route-line.bid-line {
+				color: var(--color-text-success);
+			}
 			/* merged trade-pair box */
 			.trade {
 				border: 0.5px solid var(--color-border-tertiary);
@@ -495,11 +523,62 @@
 				padding: 8px 0;
 				cursor: default;
 			}
+			/* base row — swap "You pay" structure: network header, field, switcher+value / Max */
+			.seg-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			.seg-net {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+			}
+			.net-ico {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-tertiary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.seg-field {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-top: 6px;
+			}
+			.seg-field .amt-input {
+				flex: 1;
+				width: auto;
+			}
+			.sw-ico {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
 			.connector {
 				display: flex;
 				align-items: center;
 				gap: 8px;
 				height: 0;
+				margin: 10px 0;
+			}
+			.wbal {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				color: var(--color-text-secondary);
+				font-weight: 500;
+			}
+			.bal-ico {
+				font-size: 13px;
+				color: var(--color-text-tertiary);
 			}
 			.connector::before,
 			.connector::after {
@@ -514,11 +593,14 @@
 				background: var(--color-background-secondary);
 				padding: 0 8px;
 			}
-			/* derived (read-only) value, deliberately styled as plain text, not an input */
+			/* derived (read-only) value — occupies the field's space but plain (no border), to read as non-editable */
 			.derived-val {
-				font-size: 16px;
+				font-size: 20px;
 				font-weight: 500;
 				color: var(--color-text-secondary);
+			}
+			.seg-field .derived-val {
+				flex: 1;
 			}
 			/* sub-line under each field: fiat/note on the left, balance (+ Max) on the right */
 			.sub-row {
@@ -625,28 +707,30 @@
 
 			.btn-group {
 				display: flex;
-				gap: 8px;
-				margin-top: 12px;
+				gap: 10px;
+				margin-top: 16px;
+				padding-top: 16px;
+				border-top: 0.5px solid var(--color-border-tertiary);
 			}
 			.btn {
 				flex: 1;
-				padding: 10px;
-				border-radius: var(--border-radius-md);
-				font-size: 14px;
-				font-weight: 500;
+				padding: 13px;
+				border-radius: var(--border-radius-lg);
+				font-size: 15px;
+				font-weight: 600;
 				cursor: pointer;
 				font-family: var(--font-sans);
-				border: 0.5px solid var(--color-border-secondary);
-				background: var(--color-background-primary);
-				color: var(--color-text-primary);
+				border: none;
+				background: var(--accent-soft);
+				color: var(--accent);
 			}
 			.btn-primary {
-				background: var(--color-text-primary);
-				color: var(--color-background-primary);
-				border-color: transparent;
+				background: var(--accent);
+				color: #ffffff;
 			}
 			.btn-primary:disabled {
-				opacity: 0.35;
+				background: var(--color-background-tertiary);
+				color: var(--color-text-tertiary);
 				cursor: default;
 			}
 
@@ -737,6 +821,47 @@
 				padding: 7px 10px;
 				margin-bottom: 10px;
 			}
+			/* fill-or-kill flag */
+			.fok-row {
+				display: flex;
+				flex-direction: column;
+				margin-top: 8px;
+				padding: 8px 10px;
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				background: var(--color-background-secondary);
+			}
+			.fok-row.on {
+				border-color: var(--color-border-secondary);
+			}
+			.fok-head {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.fok-toggle {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				cursor: pointer;
+			}
+			.fok-title {
+				font-size: 12px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+			}
+			.fok-q {
+				font-size: 15px;
+				color: var(--color-text-tertiary);
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+			.fok-hint {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				line-height: 1.4;
+				margin-top: 8px;
+			}
 			.picker-sub {
 				font-size: 11px;
 				color: var(--color-text-tertiary);
@@ -822,7 +947,7 @@
 				color: var(--color-text-primary);
 			}
 			.hero-amount {
-				font-size: 15px;
+				font-size: 20px;
 				font-weight: 500;
 				color: var(--color-text-primary);
 			}
@@ -836,6 +961,93 @@
 				justify-content: center;
 				font-size: 14px;
 				color: var(--color-text-tertiary);
+			}
+			.hero-box {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				position: relative;
+				margin-bottom: 1rem;
+			}
+			.hero-seg {
+				padding: 12px 14px;
+			}
+			.hero-seg-2 {
+				border-top: 0.5px solid var(--color-border-tertiary);
+			}
+			.hero-lbl {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				margin-bottom: 8px;
+			}
+			.hero-lbl strong {
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				color: var(--color-text-primary);
+			}
+			.hero-line {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.hero-line .hero-fiat-sm {
+				text-align: left;
+			}
+			.hero-arrow {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			.price-card {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 12px 14px;
+				margin-bottom: 4px;
+			}
+			.price-head {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+			.price-head-lbl {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+			}
+			.price-head-val {
+				font-size: 18px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+			}
+			.price-sub {
+				margin-top: 10px;
+				padding-top: 10px;
+				border-top: 0.5px solid var(--color-border-tertiary);
+				display: flex;
+				flex-direction: column;
+				gap: 7px;
+			}
+			.price-sub-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 12px;
+			}
+			.price-sub-row .k {
+				color: var(--color-text-tertiary);
+			}
+			.price-sub-row .v {
+				color: var(--color-text-secondary);
+				font-weight: 500;
 			}
 			.mv {
 				display: flex;
@@ -970,6 +1182,10 @@
 				<strong>"for"</strong> on a sell, <strong>"with"</strong> on a buy. Review stays disabled
 				until both tokens and both values are set.
 			</div>
+			<div class="sim-row">
+				<button class="sim-btn" onclick="simulateMove()">↻ Simulate market move</button>
+				<span class="sim-hint">demo: ticks the book against your order (shows the FOK submit re-check)</span>
+			</div>
 			<div class="steps">
 				<div class="step-dot active" id="d1"></div>
 				<div class="step-dot" id="d2"></div>
@@ -979,15 +1195,9 @@
 
 			<div id="s-form">
 				<div class="modal">
-					<div class="modal-tabs">
-						<div class="modal-tab" id="t-swap">
-							<div class="tab-name">Swap</div>
-							<div class="tab-sub">Executes now at market price</div>
-						</div>
-						<div class="modal-tab active" id="t-lo">
-							<div class="tab-name">Limit order</div>
-							<div class="tab-sub">Executes at your target price</div>
-						</div>
+					<div class="modal-head">
+						<span class="modal-head-title">Limit order</span>
+						<i class="ti ti-x modal-x"></i>
 					</div>
 					<div class="body">
 						<!-- Buy / Sell segmented control -->
@@ -1005,55 +1215,47 @@
 
 						<!-- Merged trade-pair box: base + quote in one container, linked by a direction word -->
 						<div class="trade">
-							<!-- base row -->
-							<div class="trade-row">
+							<!-- base row — structured like the swap "You pay" field -->
+							<div class="trade-row trade-row-base">
 								<div class="amt-side">
-									<span class="taf-label" id="base-lbl">You sell</span>
-									<input
-										class="amt-input"
-										id="ib"
-										type="text"
-										value=""
-										placeholder="Amount"
-										oninput="onBase()"
-									/>
-									<div class="sub-row">
-										<span class="amt-fiat" id="fb"></span><span class="bal" id="base-bal"></span>
+									<div class="seg-head">
+										<span class="taf-label" id="base-lbl">You sell</span>
+										<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
+									</div>
+									<div class="seg-field">
+										<input class="amt-input" id="ib" type="text" value="" placeholder="Amount" oninput="onBase()" />
+										<div class="tok-pill empty" id="base-pill" onclick="openPickerFromForm('base')">
+											<div class="tok-dot" id="base-dot" style="display: none"></div>
+											<span class="tok-sym" id="base-sym">Select</span>
+											<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+										</div>
 									</div>
 									<div class="round-dec" id="base-dec"></div>
-								</div>
-								<div class="tok-pill empty" id="base-pill" onclick="openPickerFromForm('base')">
-									<div class="tok-dot" id="base-dot" style="display: none"></div>
-									<span class="tok-sym" id="base-sym">Select</span>
-									<i
-										class="ti ti-chevron-down"
-										style="font-size: 11px; color: var(--color-text-tertiary)"
-									></i>
+									<div class="sub-row">
+										<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="fb"></span></span><span class="bal" id="base-bal"></span>
+									</div>
 								</div>
 							</div>
 							<!-- direction connector: "for" (sell) / "with" (buy) -->
 							<div class="connector"><span class="conn-word" id="conn">for</span></div>
-							<!-- quote row: token + the derived amount shown as plain text (clearly not an input) -->
-							<div class="trade-row">
+							<!-- quote row — mirrors the base field: header + network, derived (read-only) value in field space, sub-line -->
+							<div class="trade-row trade-row-quote">
 								<div class="amt-side">
-									<span class="taf-label" id="quote-row-lbl">You get</span>
-									<div class="derived-val" id="q-amt">—</div>
-									<div class="sub-row">
-										<span class="amt-fiat" id="q-sub"></span
-										><span class="bal" id="quote-bal"></span>
+									<div class="seg-head">
+										<span class="taf-label" id="quote-row-lbl">You get at least</span>
+										<span class="seg-net">On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span></span>
 									</div>
-								</div>
-								<div
-									class="tok-pill empty disabled"
-									id="quote-pill"
-									onclick="openPickerFromForm('quote')"
-								>
-									<div class="tok-dot tok-dot-u" id="quote-dot" style="display: none"></div>
-									<span class="tok-sym" id="quote-sym">Select</span>
-									<i
-										class="ti ti-chevron-down"
-										style="font-size: 11px; color: var(--color-text-tertiary)"
-									></i>
+									<div class="seg-field">
+										<div class="derived-val" id="q-amt">—</div>
+										<div class="tok-pill empty disabled" id="quote-pill" onclick="openPickerFromForm('quote')">
+											<div class="tok-dot tok-dot-u" id="quote-dot" style="display: none"></div>
+											<span class="tok-sym" id="quote-sym">Select</span>
+											<i class="ti ti-chevron-down" style="font-size: 11px; color: var(--color-text-tertiary)"></i>
+										</div>
+									</div>
+									<div class="sub-row">
+										<span class="amt-fiat"><i class="ti ti-arrows-up-down sw-ico"></i> <span id="q-sub"></span></span><span class="bal" id="quote-bal"></span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -1063,6 +1265,8 @@
 							<div class="price-header">
 								<span class="price-lbl" id="plbl">When 1 <strong>ICP</strong> reaches</span>
 								<div class="price-controls">
+									<span class="preset-link" id="pbook" onclick="setP('book')">Bid</span>
+									<span class="preset-sep">·</span>
 									<span class="preset-link" id="ps" onclick="setP('market')">0%</span>
 									<span class="preset-sep">·</span>
 									<span class="preset-link" id="p1" onclick="setP(1)">+1%</span>
@@ -1080,12 +1284,13 @@
 										placeholder="Price"
 										oninput="onPrice()"
 									/>
-									<span class="price-unit" id="punit">ckUSDC / ICP</span>
+									<span class="price-unit" id="punit">ckUSDC</span>
 								</div>
 								<span class="diff diff-neutral" id="dbadge">+1.00%</span>
 							</div>
 							<div class="round-dec" id="price-dec"></div>
-							<div class="price-ctx" id="pctx">current value 2.69 ckUSDC / ICP (oisy feed)</div>
+							<div class="price-ctx" id="pctx"></div>
+							<div class="price-ctx" id="bookpos" style="display: none"></div>
 							<div class="warn-box amber" id="wbox">
 								<i
 									class="ti ti-alert-triangle"
@@ -1095,11 +1300,27 @@
 							</div>
 						</div>
 
+						<!-- Fill-or-kill flag — description is collapsed; the (?) expands it (Active-networks pattern) -->
+						<div class="fok-row" id="fok-row">
+							<div class="fok-head">
+								<div class="fok-toggle" onclick="toggleFok()">
+									<div class="checkbox" id="fok-box"></div>
+									<span class="fok-title">Fill or kill</span>
+								</div>
+								<i class="ti ti-help fok-q" id="fok-q" onclick="toggleFokHelp()"></i>
+							</div>
+							<div class="fok-hint" id="fok-hint" style="display: none">
+								Fill the whole order now at your price or better, or cancel it — nothing rests. The
+								price must cross the order book for the order to fill, and the order always executes as
+								a taker (taker fee applies).
+							</div>
+						</div>
+
 						<!-- Routing — quiet element; venue selection becomes a real choice once multiple DEXes exist -->
 						<div class="route" id="route">
 							<div class="route-head" onclick="toggleProvFees()">
 								<div class="route-mark"></div>
-								<span class="route-name">Routed via <strong>OISY DEX</strong></span>
+								<span class="route-name">Routed via <strong>OISY TRADE</strong></span>
 								<span class="route-tag">best execution</span>
 								<i
 									class="ti ti-chevron-down"
@@ -1115,14 +1336,19 @@
 								id="prov-fees"
 								style="display: none; border-top: 0.5px solid var(--color-border-tertiary)"
 							>
-								<div class="route-line">
-									<span id="pdet-lbl">OISY DEX best bid</span
-									><span id="pdet">2.68 ckUSDC / ICP</span>
+								<div class="route-line ask-line">
+									<span>Lowest ask</span><span id="pask">2.700 ckUSDC</span>
+								</div>
+								<div class="route-line bid-line">
+									<span>Highest bid</span><span id="pbid">2.685 ckUSDC</span>
 								</div>
 								<div class="route-line">
-									<span>Maker fee</span><span style="color: var(--color-text-success)">No fee</span>
+									<span>Spread</span><span id="pspread">0.6%</span>
 								</div>
-								<div class="route-line"><span>Taker fee</span><span>0.05% (5 bps)</span></div>
+								<div class="route-line">
+									<span>Maker fee</span><span>No fee</span>
+								</div>
+								<div class="route-line"><span>Taker fee</span><span>0.20% (20 bps)</span></div>
 							</div>
 						</div>
 
@@ -1169,53 +1395,53 @@
 			<!-- Review -->
 			<div id="s-review" style="display: none">
 				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Review limit order</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
 					<div class="body">
-						<div class="modal-title">Review limit order</div>
-						<div class="hero-rows">
-							<div class="hero-row">
-								<div class="hero-token">
-									<div class="tok-dot" id="r-bdot">ICP</div>
-									<span class="hero-sym" id="r-bsym">ICP</span>
-								</div>
-								<div style="text-align: right">
-									<div style="font-size: 11px; color: var(--color-text-tertiary)" id="rl1">
-										You sell
+							<div class="hero-box">
+								<div class="hero-seg">
+									<div class="hero-lbl" id="rl1">You <strong>SELL</strong></div>
+									<div class="hero-line">
+										<div class="tok-dot" id="r-bdot">ICP</div>
+										<div>
+											<div class="hero-amount" id="rba">15.25 ICP</div>
+											<div class="hero-fiat-sm" id="rbf">$41.02</div>
+										</div>
 									</div>
-									<div class="hero-amount" id="rba">100 ICP</div>
-									<div class="hero-fiat-sm" id="rbf">$269.00</div>
 								</div>
-							</div>
-							<div class="arrow-row"><i class="ti ti-arrow-down"></i></div>
-							<div class="hero-row">
-								<div class="hero-token">
-									<div class="tok-dot tok-dot-u" id="r-qdot">USD</div>
-									<span class="hero-sym" id="rqsym">ckUSDC</span>
-								</div>
-								<div style="text-align: right">
-									<div style="font-size: 11px; color: var(--color-text-tertiary)" id="rl2">
-										You buy
+								<div class="hero-seg hero-seg-2">
+									<div class="hero-lbl" id="rl2">You get at least</div>
+									<div class="hero-line">
+										<div class="tok-dot tok-dot-u" id="r-qdot">USD</div>
+										<div>
+											<div class="hero-amount" id="rqa">41.02 ckUSDC</div>
+											<div class="hero-fiat-sm" id="rqf">$41.02</div>
+										</div>
 									</div>
-									<div class="hero-amount" id="rqa">275.00 ckUSDC</div>
-									<div class="hero-fiat-sm" id="rqf">$275.00</div>
 								</div>
+								<div class="hero-arrow" id="r-arrow"><i class="ti ti-arrow-down"></i></div>
+							</div>
+						<div class="price-card">
+							<div class="price-head">
+								<span class="price-head-lbl">Limit price</span>
+								<span class="price-head-val" id="rpr">2.69 ckUSDC / ICP</span>
+							</div>
+							<div class="price-sub">
+								<div class="price-sub-row"><span class="k">Current value</span><span class="v" id="rmkt">2.69 ckUSDC / ICP (oisy feed)</span></div>
+								<div class="price-sub-row"><span class="k">Value difference</span><span class="diff diff-neutral" id="rdf">+0.00%</span></div>
+								<div class="price-sub-row" id="r-book-row" style="display: none"><span class="k">Queue position</span><span class="v" id="rbook">Front of book</span></div>
 							</div>
 						</div>
 						<div class="mv">
-							<span class="mv-lbl">Limit price</span>
-							<div>
-								<div class="mv-val" id="rpr">2.75 ckUSDC / ICP</div>
-								<div class="mv-sub" id="rmkt">current value 2.69 (oisy feed)</div>
-							</div>
+							<span class="mv-lbl">DEX</span><span class="mv-val">OISY TRADE</span>
 						</div>
 						<div class="mv">
-							<span class="mv-lbl">Value difference</span
-							><span class="diff diff-neutral" id="rdf">+1.00%</span>
-						</div>
-						<div class="mv">
-							<span class="mv-lbl">DEX</span><span class="mv-val">OISY DEX</span>
+							<span class="mv-lbl">Order type</span><span class="mv-val" id="r-type-val">Good until canceled</span>
 						</div>
 						<div class="mv nb">
-							<span class="mv-lbl">Fee (maker / taker)</span><span class="mv-val">0% / 0.05%</span>
+							<span class="mv-lbl" id="r-fee-lbl">Fee (maker / taker)</span><span class="mv-val" id="r-fee-val">0% / 0.20%</span>
 						</div>
 						<div class="confirm-box amber" id="rbox">
 							<div id="rboxtext"></div>
@@ -1226,11 +1452,15 @@
 								>
 							</div>
 						</div>
+						<!-- submit-time freshness re-check (FOK): shown when the book moved since Review -->
+						<div class="confirm-box red" id="submit-moved" style="display: none">
+							<div id="submit-moved-text"></div>
+						</div>
 						<div class="btn-group">
 							<button class="btn" onclick="goStep('form')">
 								<i class="ti ti-arrow-left"></i> Back
 							</button>
-							<button class="btn btn-primary" id="rconf" onclick="goStep('progress')">
+							<button class="btn btn-primary" id="rconf" onclick="placeOrder()">
 								Place order
 							</button>
 						</div>
@@ -1241,8 +1471,10 @@
 			<!-- Progress -->
 			<div id="s-progress" style="display: none">
 				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title" id="ptitle">Placing order</span>
+					</div>
 					<div class="body">
-						<div class="modal-title" id="ptitle">Placing order</div>
 						<div class="prog-steps">
 							<div class="prog-step">
 								<div class="prog-dot active" id="pp1">
@@ -1250,7 +1482,7 @@
 								</div>
 								<div>
 									<div class="prog-lbl">Submitting order</div>
-									<div class="prog-sub">Sending limit order to OISY DEX</div>
+									<div class="prog-sub">Sending limit order to OISY TRADE</div>
 								</div>
 							</div>
 							<div class="prog-step">
@@ -1285,9 +1517,9 @@
 					base: 'ICP',
 					quote: 'ckUSDC',
 					market: 2.69,
-					bid: 2.68,
+					bid: 2.685,
 					ask: 2.7,
-					tick: 0.000001,
+					tick: 0.0005,
 					venues: 3,
 					liq: 'deep'
 				},
@@ -1332,6 +1564,7 @@
 			let chaining = false; // true while in the base→quote "both tokens" flow
 			let quoteFirst = false; // true while in the quote-first (quote-only token) flow
 			let snapshot = null; // committed state captured when a picker gesture opens (for ✕ = no change)
+			let fok = false; // fill-or-kill: order must fill in full immediately or be canceled
 
 			const g = (id) => document.getElementById(id);
 			const num = (v) => parseFloat(String(v).replace(/[^0-9.]/g, '')) || 0;
@@ -1396,7 +1629,14 @@
 				if (!(isMultipleOf(b, lotOf()) && isMultipleOf(p, tickOf()))) return false;
 				const need = side === 'sell' ? b : b * p; // spend-side amount
 				const free = side === 'sell' ? FREE[base] : FREE[quote];
-				return need <= free + 1e-9; // must not exceed free balance
+				if (need > free + 1e-9) return false; // must not exceed free balance
+				if (fok) {
+					// fill-or-kill must cross the book to execute in full now, else it would be canceled
+					const pr = pair();
+					const crosses = side === 'sell' ? p <= pr.bid : p >= pr.ask;
+					if (!crosses) return false;
+				}
+				return true;
 			};
 			function updateReview() {
 				g('reviewbtn').disabled = !inputsValid();
@@ -1419,12 +1659,23 @@
 						'>Max</span>';
 				return s;
 			}
+			// spend side shows "Max: <amount>"; receive (non-spend) side shows its wallet balance (like Swap).
+			function maxLink(tok, enabled) {
+				return (
+					'<span class="maxlink' +
+					(enabled ? '" onclick="maxSpend()"' : ' disabled" title="Set a price first"') +
+					'>Max: ' + fmt(FREE[tok], 4) + ' ' + tok + '</span>'
+				);
+			}
+			function balText(tok) {
+				return '<span class="wbal"><i class="ti ti-wallet bal-ico"></i> ' + fmt(FREE[tok], 4) + ' ' + tok + '</span>';
+			}
 			function renderBalances() {
-				// base row: spend side on a Sell
-				g('base-bal').innerHTML = base ? balLine(base, side === 'sell', true) : '';
-				// quote row: spend side on a Buy (Max needs a price to convert quote → base)
+				// base row: Max on a Sell (spend); wallet balance on a Buy (receive)
+				g('base-bal').innerHTML = base ? (side === 'sell' ? maxLink(base, true) : balText(base)) : '';
+				// quote row: Max on a Buy (spend, needs a price); wallet balance on a Sell (receive)
 				g('quote-bal').innerHTML = quote
-					? balLine(quote, side === 'buy', ready() && rawVal('ipr') > 0)
+					? (side === 'buy' ? maxLink(quote, ready() && rawVal('ipr') > 0) : balText(quote))
 					: '';
 			}
 			function maxSpend() {
@@ -1441,17 +1692,64 @@
 			}
 
 			// --- core recompute ---------------------------------------------
+			// --- order-book depth (mock) -------------------------------------
+			// get_order_book_depth returns aggregated PriceLevels per side. We synthesize a small
+			// ladder from each pair's spread so the book-position figure is demoable; it regenerates
+			// from the live bid/ask, so "Simulate market move" shifts it too.
+			function depthLadder(pr) {
+				const step = Math.max(pr.ask - pr.bid, pr.tick);
+				const qty = [40, 32, 24, 16, 8];
+				return {
+					asks: qty.map((q, i) => ({ price: pr.ask + i * step, qty: q })),
+					bids: qty.map((q, i) => ({ price: pr.bid - i * step, qty: q }))
+				};
+			}
+			// Share of same-side base volume priced strictly BETTER than `price` (asks below a sell,
+			// bids above a buy). Framed on price, not queue — the aggregated endpoint can't reveal
+			// FIFO position within a single price level.
+			function bookPosFrac(pr, price, sd) {
+				if (!(price > 0)) return null;
+				const { asks, bids } = depthLadder(pr);
+				const eps = pr.tick / 2;
+				const arr = sd === 'sell' ? asks : bids;
+				const total = arr.reduce((s, l) => s + l.qty, 0);
+				if (total <= 0) return null;
+				const ahead = arr
+					.filter((l) => (sd === 'sell' ? l.price < price - eps : l.price > price + eps))
+					.reduce((s, l) => s + l.qty, 0);
+				return ahead / total;
+			}
+			// Queue-position phrase. < 10% uses 1 decimal and always rounds UP (so any volume ahead reads
+			// ≥ 0.1%, never a misleading 0%); ≥ 10% is a whole number. withLabel adds the "Queue position: " prefix.
+			function bookPosText(frac, withLabel) {
+				if (frac === null) return null;
+				const pct = frac * 100;
+				let pos;
+				if (pct <= 0) pos = 'Front of book';
+				else if (pct < 10) pos = (Math.ceil(pct * 10) / 10).toFixed(1) + '% are ahead';
+				else pos = Math.round(pct) + '% are ahead';
+				return withLabel ? 'Queue position: ' + pos : pos;
+			}
+
+			// Value-difference rendering. A crossing order is a realized give-up: orange (<5%) or red (≥5%)
+			// text with a warning icon — matching the swap review. A resting order is informational only, so
+			// it is neutral (plain text, no icon, no background box) regardless of how far from market it sits.
+			function setDiff(el, vd, immediate) {
+				const txt = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
+				el.className = !immediate ? 'diff diff-neutral' : 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+				el.innerHTML = (immediate ? '<i class="ti ti-alert-triangle"></i>' : '') + txt;
+			}
+
 			function recompute() {
-				g('punit').textContent = base && quote ? quote + ' / ' + base : '';
+				g('punit').textContent = base && quote ? quote : '';
 				renderBalances();
+				highlightPresets(); // re-derive preset selection from the live price (deselect if the book moved)
+				g('bookpos').style.display = 'none'; // hidden until we have a valid resting price
 				const bRaw = rawVal('ib'),
 					baseOk = bRaw > 0;
+				// on a Buy the base is the token you receive (fee taken from it), so it's gross → ", before fees"
 				g('fb').textContent =
-					base && baseOk
-						? '≈ $' +
-							fmt(bRaw * USD[base], 2) +
-							(side === 'buy' ? ' · you keep slightly less, before fees' : '')
-						: '';
+					base && baseOk ? '$' + fmt(bRaw * USD[base], 2) + (side === 'buy' ? ', before fees' : '') : '';
 
 				if (!ready()) {
 					// tokens not fully chosen yet
@@ -1475,7 +1773,7 @@
 				const pRaw = rawVal('ipr'),
 					priceOk = pRaw > 0;
 				if (!(baseOk && priceOk)) {
-					blankDerived('current value ' + fmt(m, td) + ' ' + quote + ' / ' + base + ' (oisy feed)');
+					blankDerived('');
 					g('plbl').innerHTML =
 						side === 'sell'
 							? 'When 1 <strong>' + base + '</strong> reaches'
@@ -1487,8 +1785,10 @@
 				const bAmt = bRaw,
 					price = pRaw,
 					q = bAmt * price;
-				g('q-amt').textContent = (side === 'sell' ? 'at least ' : 'at most ') + fmt(q, pdec());
-				g('q-sub').textContent = side === 'sell' ? 'gross, before fees' : 'max at your limit price';
+				// derived amount: just the number (token shown in the pill); "at least"/"at most" lives in the label
+				g('q-amt').textContent = fmt(q, pdec());
+				// sub-line: the quote's $ value; on a Sell the quote received is gross, so ", before fees"
+				g('q-sub').textContent = '$' + fmt(q * USD[quote], 2) + (side === 'sell' ? ', before fees' : '');
 
 				// inline step validation (multiple-of-lot / multiple-of-tick); decimals are hard-limited on input
 				const lot = lotOf();
@@ -1510,12 +1810,7 @@
 						'ib',
 						'base-dec',
 						false,
-						'Enter a multiple of ' +
-							lot +
-							' ' +
-							base +
-							' — e.g. ' +
-							fmt(nearestValid(bAmt, lot) || lot, decimalsOf(lot))
+						'Amount must be a multiple of ' + lot + ' ' + base
 					);
 				} else {
 					validateField('ib', 'base-dec', true);
@@ -1524,7 +1819,7 @@
 					'ipr',
 					'price-dec',
 					isMultipleOf(price, tickOf()),
-					'Enter a multiple of ' + tickOf()
+					'Price must be a multiple of ' + tickOf()
 				);
 
 				const pr = pair(),
@@ -1532,16 +1827,31 @@
 					ask = pr.ask;
 				const immediate = side === 'sell' ? price <= bid : price >= ask;
 				const vd = side === 'sell' ? (price / m - 1) * 100 : ((m - price) / m) * 100;
-				const db = g('dbadge');
-				db.textContent = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
-				db.className = !immediate
-					? 'diff diff-neutral'
-					: 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+				setDiff(g('dbadge'), vd, immediate);
 
-				updateLabelAndWarning(price, bAmt, vd, immediate);
-				g('pctx').textContent =
-					'current value ' + fmt(m, td) + ' ' + quote + ' / ' + base + ' (oisy feed)';
+				updateLabelAndWarning(price, bAmt, vd, immediate, fok);
+				// the verbose "current value …" line is intentionally omitted — the 0% preset reveals the spot
+				g('pctx').textContent = '';
+				g('pctx').style.display = 'none';
+				// book-position hint — resting orders only; the warning box covers the crossing case
+				const bpTxt = immediate ? null : bookPosText(bookPosFrac(pr, price, side), true);
+				if (bpTxt) {
+					g('bookpos').textContent = bpTxt;
+					g('bookpos').style.display = 'block';
+				}
 				updateReview();
+			}
+
+			function toggleFok() {
+				fok = !fok;
+				g('fok-box').textContent = fok ? '✓' : '';
+				g('fok-row').className = 'fok-row' + (fok ? ' on' : '');
+				recompute();
+			}
+			// (?) expands/collapses the FOK description (Active-networks pattern); independent of the checkbox
+			function toggleFokHelp() {
+				const h = g('fok-hint');
+				h.style.display = h.style.display === 'none' ? 'block' : 'none';
 			}
 
 			// show/hide an inline field-validation message and red border
@@ -1552,7 +1862,7 @@
 					e.style.display = 'none';
 					inp.className = inp.className.replace(' invalid', '');
 				} else {
-					e.textContent = '→ ' + msg;
+					e.textContent = msg;
 					e.className = 'round-dec err';
 					e.style.display = 'block';
 					if (!inp.className.includes('invalid')) inp.className += ' invalid';
@@ -1575,7 +1885,7 @@
 			}
 
 			// Value/presets anchor to the oisy feed (m); immediate-fill is decided by the book (bid/ask).
-			function updateLabelAndWarning(price, bAmt, vd, immediate) {
+			function updateLabelAndWarning(price, bAmt, vd, immediate, fok) {
 				const m = mkt(),
 					pr = pair(),
 					bid = pr.bid,
@@ -1585,6 +1895,22 @@
 					wb = g('wbox'),
 					wt = g('wtext'),
 					ps = g('psec');
+
+				// Fill-or-kill that can't cross the book right now → it would be canceled (blocked by inputsValid)
+				if (fok && !immediate) {
+					lbl.innerHTML = 'Fill in full now, at 1 <strong>' + base + (side === 'sell' ? '</strong> &ge;' : '</strong> &le;');
+					wb.style.display = 'flex';
+					wb.className = 'warn-box red';
+					wt.innerHTML =
+						"A fill-or-kill order can't execute at this price right now — it would be canceled. " +
+						(side === 'sell'
+							? 'Lower the price to cross the book (best bid ' + fmt(bid, td) + ').'
+							: 'Raise the price to cross the book (best ask ' + fmt(ask, td) + ').');
+					g('pctx').style.display = 'none';
+					ps.style.borderColor = 'var(--color-border-danger)';
+					return;
+				}
+
 				let text = '';
 				if (side === 'sell') {
 					if (!immediate) {
@@ -1592,9 +1918,12 @@
 					} else {
 						lbl.innerHTML = 'Sell now, while 1 <strong>' + base + '</strong> &ge;';
 						text =
-							'This price crosses the order book (best bid ' +
-							fmt(bid, td) +
-							') — your order will fill almost immediately, about <strong>$' +
+							(fok
+								? 'Fill-or-kill: fills in full now'
+								: 'This price crosses the order book (best bid ' +
+									fmt(bid, td) +
+									') — your order will fill almost immediately') +
+							', about <strong>$' +
 							fmt(bAmt * (m - price) * USD[quote], 2) +
 							'</strong> below current value.';
 					}
@@ -1604,9 +1933,12 @@
 					} else {
 						lbl.innerHTML = 'Buy now, while 1 <strong>' + base + '</strong> &le;';
 						text =
-							'This price crosses the order book (best ask ' +
-							fmt(ask, td) +
-							') — your order will fill almost immediately, about <strong>$' +
+							(fok
+								? 'Fill-or-kill: fills in full now'
+								: 'This price crosses the order book (best ask ' +
+									fmt(ask, td) +
+									') — your order will fill almost immediately') +
+							', about <strong>$' +
 							fmt(bAmt * (price - m) * USD[quote], 2) +
 							'</strong> above current value.';
 					}
@@ -1632,7 +1964,7 @@
 				g('opt-buy').className = 'side-opt buy' + (side === 'buy' ? ' active' : '');
 				g('base-lbl').textContent = side === 'sell' ? 'You sell' : 'You buy';
 				g('conn').textContent = side === 'sell' ? 'for' : 'with';
-				g('quote-row-lbl').textContent = side === 'sell' ? 'You get' : 'You pay';
+				g('quote-row-lbl').textContent = side === 'sell' ? 'You get at least' : 'You pay at most';
 				renderPresets();
 			}
 			function setSide(s) {
@@ -1644,18 +1976,23 @@
 			}
 			function updateRouting() {
 				if (!ready()) {
-					g('pdet-lbl').textContent = 'OISY DEX';
-					g('pdet').textContent = '—';
+					g('pask').textContent = '—';
+					g('pbid').textContent = '—';
+					g('pspread').textContent = '—';
 					return;
 				}
 				const pr = pair(),
 					td = tickDecimals(tickOf());
-				g('pdet-lbl').textContent = 'OISY DEX best ' + (side === 'sell' ? 'bid' : 'ask');
-				g('pdet').textContent =
-					fmt(side === 'sell' ? pr.bid : pr.ask, td) + ' ' + quote + ' / ' + base;
+				// always show both sides — lowest ask (top) and highest bid (below)
+				g('pask').textContent = fmt(pr.ask, td) + ' ' + quote;
+				g('pbid').textContent = fmt(pr.bid, td) + ' ' + quote;
+				// spread as % of the mid-price ((ask - bid) / ((ask + bid) / 2))
+				const spreadPct = ((pr.ask - pr.bid) / ((pr.ask + pr.bid) / 2)) * 100;
+				g('pspread').textContent = spreadPct.toFixed(1) + '%';
 			}
 
 			function renderPresets() {
+				g('pbook').textContent = side === 'sell' ? 'Bid' : 'Ask'; // best book price you'd cross into
 				if (side === 'sell') {
 					g('p1').textContent = '+1%';
 					g('p5').textContent = '+5%';
@@ -1679,6 +2016,8 @@
 					tick = tickOf();
 				let price;
 				if (v === 'market') price = m;
+				else if (v === 'book')
+					price = side === 'sell' ? pair().bid : pair().ask; // best book price (crosses)
 				else {
 					const sign = side === 'sell' ? 1 : -1;
 					price = m * (1 + (sign * v) / 100);
@@ -1688,10 +2027,32 @@
 				highlightPresets();
 				recompute();
 			}
+			// the price a given preset would set right now (book-anchored or feed-anchored), snapped to tick
+			function presetTarget(p) {
+				if (!ready()) return null;
+				const tick = tickOf(),
+					m = mkt(),
+					pr = pair();
+				let raw;
+				if (p === 'book') raw = side === 'sell' ? pr.bid : pr.ask;
+				else if (p === 'market') raw = m;
+				else {
+					const sign = side === 'sell' ? 1 : -1;
+					raw = m * (1 + (sign * p) / 100);
+				}
+				return Math.round(raw / tick) * tick;
+			}
 			function highlightPresets() {
-				['ps', 'p1', 'p5'].forEach((id) => (g(id).className = 'preset-link'));
-				const map = { market: 'ps', 1: 'p1', 5: 'p5' };
-				if (map[preset]) g(map[preset]).className += ' ap';
+				// a preset stays "selected" only while the price still equals it; a market/feed move (or manual
+				// edit) that changes the price away from the target deselects it (renders as not set)
+				if (preset !== null && ready()) {
+					const price = rawVal('ipr'),
+						tgt = presetTarget(preset);
+					if (!(price > 0) || tgt === null || Math.abs(price - tgt) > tickOf() / 2) preset = null;
+				}
+				['pbook', 'ps', 'p1', 'p5'].forEach((id) => (g(id).className = 'preset-link'));
+				const map = { book: 'pbook', market: 'ps', 1: 'p1', 5: 'p5' };
+				if (preset !== null && map[preset]) g(map[preset]).className += ' ap';
 			}
 
 			// --- input handlers: hard-limit decimals to the lot/tick precision, then validate live ---
@@ -2027,27 +2388,44 @@
 				const vd = side === 'sell' ? (price / m - 1) * 100 : ((m - price) / m) * 100;
 				const bt = TOKENS[base],
 					qt = TOKENS[quote];
-				g('rl1').textContent = side === 'sell' ? 'You sell' : 'You buy';
-				g('rl2').textContent = side === 'sell' ? 'You get (at least)' : 'You pay (at most)';
+				g('submit-moved').style.display = 'none'; // reset the submit-time interruption
+				// two-box hero (swap-style) — base token always on top, side-aware labels.
+				// Base box: "You SELL/BUY" (action emphasized). Quote box: the derived bound.
 				g('r-bdot').textContent = bt.dot;
 				g('r-bdot').className = 'tok-dot ' + bt.cls;
-				g('r-bsym').textContent = base;
+				g('rl1').innerHTML = side === 'sell' ? 'You <strong>SELL</strong>' : 'You <strong>BUY</strong>';
 				g('rba').textContent = fmt(bAmt, DEC[base]) + ' ' + base;
 				g('rbf').textContent = '$' + fmt(bAmt * USD[base], 2);
+				// arrow points to the token you end up with: ↓ to quote on a sell, ↑ to base on a buy
+				g('r-arrow').innerHTML = '<i class="ti ti-arrow-' + (side === 'sell' ? 'down' : 'up') + '"></i>';
 				g('r-qdot').textContent = qt.dot;
 				g('r-qdot').className = 'tok-dot ' + qt.cls;
-				g('rqsym').textContent = quote;
-				g('rqa').textContent = (side === 'sell' ? '≥ ' : '≤ ') + fmt(q, DEC[quote]) + ' ' + quote;
+				g('rl2').textContent = side === 'sell' ? 'You get at least' : 'You pay at most';
+				g('rqa').textContent = fmt(q, DEC[quote]) + ' ' + quote;
 				g('rqf').textContent = '$' + fmt(q * USD[quote], 2);
+				g('r-type-val').textContent = fok ? 'Fill or kill' : 'Good until canceled';
+				// FOK always crosses → always a taker, so show the taker fee only; a resting order's
+				// maker-vs-taker isn't known at placement, so it shows both rates.
+				if (fok) {
+					g('r-fee-lbl').textContent = 'Fee (taker)';
+					g('r-fee-val').textContent = '0.20%';
+				} else {
+					g('r-fee-lbl').textContent = 'Fee (maker / taker)';
+					g('r-fee-val').textContent = '0% / 0.20%';
+				}
 				g('rpr').textContent = fmt(price, td) + ' ' + quote + ' / ' + base;
-				g('rmkt').textContent = 'current value ' + fmt(m, td) + ' (oisy feed)';
+				g('rmkt').textContent = fmt(m, td) + ' ' + quote + ' / ' + base + ' (oisy feed)';
 				// immediate-fill decided by the book; value-difference is a realized give-up only when crossing
 				const immediate = side === 'sell' ? price <= pr.bid : price >= pr.ask;
-				const rd = g('rdf');
-				rd.textContent = (vd >= 0 ? '+' : '') + vd.toFixed(2) + '%';
-				rd.className = !immediate
-					? 'diff diff-neutral'
-					: 'diff ' + (vd >= -5 ? 'diff-neg' : 'diff-danger');
+				// book-position row — resting orders only (crossing fills now, so it's moot)
+				const rbookTxt = immediate ? null : bookPosText(bookPosFrac(pr, price, side), false);
+				if (rbookTxt) {
+					g('rbook').textContent = rbookTxt;
+					g('r-book-row').style.display = 'flex';
+				} else {
+					g('r-book-row').style.display = 'none';
+				}
+				setDiff(g('rdf'), vd, immediate);
 				const box = g('rbox');
 				if (immediate) {
 					box.style.display = 'block';
@@ -2076,6 +2454,47 @@
 				chk = !chk;
 				g('rchk').textContent = chk ? '✓' : '';
 				g('rconf').disabled = !chk;
+			}
+
+			// FOK-only submit-time freshness re-check (price-only). A FOK sitting exactly at the top of
+			// book is the first lost when the book ticks, so it must keep a cushion to survive to execution.
+			// (Demo: sell at the best bid 2.685 passes the form but fails here; 2.68 keeps a cushion and passes.)
+			function placeOrder() {
+				if (fok) {
+					// re-check the FOK against the LATEST book (price-only). Differs from the form only if the
+					// book moved since Review — use the "Simulate market move" control to demo it.
+					const pr = pair(),
+						price = num(g('ipr').value),
+						td = tickDecimals(tickOf());
+					const crosses = side === 'sell' ? price <= pr.bid : price >= pr.ask;
+					if (!crosses) {
+						g('submit-moved-text').innerHTML =
+							'Market moved — best ' +
+							(side === 'sell' ? 'bid' : 'ask') +
+							' is now <strong>' +
+							fmt(side === 'sell' ? pr.bid : pr.ask, td) +
+							'</strong>. At ' +
+							fmt(price, td) +
+							' this fill-or-kill order would be canceled. Go back and ' +
+							(side === 'sell' ? 'lower' : 'raise') +
+							' your price.';
+						g('submit-moved').style.display = 'block';
+						g('rconf').disabled = true;
+						return;
+					}
+				}
+				goStep('progress');
+			}
+
+			// demo-only: tick the book against a crossing order so the FOK submit re-check can be shown
+			function simulateMove() {
+				if (!ready()) return;
+				const pr = pair(),
+					tick = tickOf();
+				pr.bid = parseFloat((Math.round((pr.bid * 0.998) / tick) * tick).toFixed(10));
+				pr.ask = parseFloat((Math.round((pr.ask * 1.002) / tick) * tick).toFixed(10));
+				updateRouting();
+				recompute(); // form re-gates live; Review stays as-is, but placeOrder() will see the moved book
 			}
 
 			function goStep(s) {
