@@ -88,17 +88,38 @@ _Wireframe: [trading-tab.html](./2026-06-04-feat-limit-orders/wireframes/trading
 
 A new **Trading** tab on the Assets view, alongside Tokens, NFTs, and Earning. Gated by the **`Trading` feature flag** (see _Feature & provider flags_), disabled in production until ready. It begins with a one-line description and a "Learn more" link, and contains two sections:
 
-**My assets** — tokens deposited on trading providers, with free balance, reserved balance, and fiat equivalent per row; provider name as subtitle. A "+ Deposit" link in the section header opens the Deposit flow; each row has a "Withdraw" inline link.
+**My assets** — tokens deposited on trading providers; provider name as subtitle. Each row shows the **total deposited** amount on the right, an **"Available: X"** line beneath it, and the fiat equivalent. "Available" is the **free** balance (total minus amounts reserved by open orders) — it answers the only question the user actually has here: _how much can I use right now_, e.g. to place a new order or withdraw. We show available rather than "reserved" because it's the directly actionable number. The "Available" line appears only when some balance is reserved (available < total); when nothing is reserved the row's total already _is_ the available amount, so the extra line is omitted. A "+ Deposit" link in the section header opens the Deposit flow; each row has a "Withdraw" inline link.
 
-**Orders** — tabbed **Active** (Pending + Open) and **History** (Filled + Cancelled). Each row shows pair, provider, price, amount, and status. An **Open** order may also carry a compact **queue-position chip** — **"15% are ahead"** (share of same-side volume priced better), or **"Front of book"** — that updates as the book moves, giving an at-a-glance sense of how soon it might fill. A "+ Limit order" link in the header opens the Limit-order modal. _(Chip is the same `get_order_book_depth` enhancement; hidden if unavailable, and not shown for Pending/Filled/Cancelled rows.)_
+**Orders** — tabbed **Active** (Pending + Open) and **History** (Filled + Cancelled). Each row is a **single natural-language line** with a blue provider tag (see _Order row format_ below). **Active** orders (Pending and Open) also show a **queue position** as plain right-aligned muted text — **"15% are ahead"** (share of same-side volume priced better), or **"Front of book"** — that updates as the book moves, giving an at-a-glance sense of how soon it might fill. A "+ Limit order" link in the header opens the Limit-order modal. _(Queue position is the same `get_order_book_depth` enhancement; hidden if unavailable, and not shown for Filled/Cancelled rows or crossing orders.)_
 
 **Three states:** _new user_ (an **onboarding card** replaces the empty sections — see below); _has assets, no orders_ ("+ Limit order" active; "No active orders" with a Limit order button); _has assets and orders_ (asset rows with Withdraw; order rows with status pills; History tab).
 
 **New-user onboarding.** For a brand-new user (no deposits, no orders), the intro line and the empty My-assets/Orders sections are replaced by a single **onboarding card** that explains the venue and the getting-started flow: a short "what it is" line (OISY TRADE is an **on-chain order-book exchange**; place limit orders from the wallet; funds stay in **smart contracts you control**, not with a central party), a **3-step "how it works"** — **1) Deposit a supported token · 2) Place a limit order · 3) Withdraw anytime** — a **dynamic list of supported tokens** (distinct base+quote union: ICP, ckBTC, ckUSDC, ckUSDT) as chips, a primary **Deposit** CTA, and a **Learn more** link. The word "swap" is deliberately avoided here (swaps are the separate Swap hero) — the Trading tab onboarding talks only about **limit orders**. Once the user has any deposit or order, the card collapses and the normal sections show.
 
+### Order row format
+
+Order rows (Active and History) are a **single natural-language line** — it scans better than prose-plus-code and holds the whole transaction without redundancy. The sentence is built around the side word, which is **color-coded like the order form** (**Sell** in red, **Buy** in green), and carries the single most relevant amount — what you commit:
+
+- Sell: **`Sell 100 ICP for ckUSDC at 2.75`** (base amount sold)
+- Buy: **`Buy ICP with 300 ckUSDC at 2.60`** (quote amount spent)
+
+The price (the `at X` figure) is in quote per base (e.g. ckUSDC per ICP); the preceding token implies the unit. The **provider follows as a small blue tag** (`OISY TRADE`) at the end of the line — kept compact and out of the sentence so the figures stay scannable.
+
+On the **right side** of the row: the **status pill** and, for **active** orders (**Pending and Open**), the **queue position** as **plain right-aligned text** in muted dark gray (e.g. "10% are ahead" or "Front of book") — no pill or chip, so it reads as supplementary info rather than a status. It's shown for Pending too: it's the same projection we already surface **before** placement (where the order would land once it rests), so there's no reason to hide it in the brief Pending window — it just becomes live once the order is Open. Hidden once the order is **terminal** (Filled/Cancelled), and not shown for a **crossing** order that fills immediately rather than resting. _(Under privacy mode the amount is masked; the side word, pair, price, venue tag, status, and queue position stay visible.)_
+
+**Status-pill colors.** Each status carries a distinct color + icon so it reads at a glance, including in grayscale: **Pending** amber (with spinner), **Open** green, **Filled** green with a check (the success outcome), **Cancelled** neutral gray with an ✕. Cancelled is deliberately neutral, not red — cancelling is a normal user action, not an error. (Previously Filled and Cancelled were both gray, which forced reading the label to tell two opposite outcomes apart.)
+
 ### Hero net-worth total
 
 DEX balances (`free + reserved`) are included in the hero net-worth total. DEX-deposited tokens do **not** appear in the Tokens tab list — only in the Trading tab. The hero shows the total figure only — no breakdown label.
+
+### Privacy mode
+
+The Trading tab honors OISY's existing **global privacy mode** (the wallet-wide hide-balances toggle); there is no separate trading-specific control. When privacy mode is on, the tab follows the **standard pattern** used elsewhere in the wallet — sensitive figures are replaced by a dot mask (e.g. `•••••`) rather than removed, so layout is unchanged.
+
+What is masked on the Trading tab: **My assets** token amounts (total and available) and their fiat equivalents, and **order amounts** in the Active/History rows (and in the order-detail modal). What stays visible: the **pair** (e.g. ICP → ckUSDC), **provider**, **order status**, and **limit/market prices** — prices are public market parameters, not holdings, and the amount is already masked. The hero net-worth total is governed by the same global toggle as the rest of the wallet.
+
+_Wireframe: [trading-tab.html](./2026-06-04-feat-limit-orders/wireframes/trading-tab.html) has a "Privacy mode" toggle (and an eye control in the hero) demonstrating the dot mask._
 
 ---
 
@@ -161,7 +182,7 @@ The two things the user actively sets — **base amount** and **price** — are 
 
 3. **Price section** — active once a quote token is chosen.
    - **Dynamic label** (see Price label logic).
-   - **Quick-set links.** A leftmost **Bid / Ask** option — labelled by side (_Bid_ on a sell, _Ask_ on a buy) — sets the price to the **best book price** (best bid / best ask): the canonical crossing price, and what a user wants for a FOK filling at the top of book. It is **book-anchored** (from `get_order_book_ticker`). The rest are **value-anchored** to the oisy feed: **Sell** `0% · +1% · +5%`, **Buy** `0% · −1% · −5%`, baseline **"0%"** (the no-offset rung; deliberately not "Spot", which would imply immediate execution — a 0% limit still rests). Setting Bid/Ask positions the price at the top of book; pairing it with **Fill or kill** (below) is how a user fills immediately — there is no separate "fill now" button. A preset shows **selected only while the price still equals it**: a live market/feed move (or a manual edit) that shifts the price off the target **deselects** it — it reads as "not set", like a manually entered value — so a highlighted Bid always means the price _is_ the current best bid (re-click to re-snap after a move).
+   - **Quick-set links.** A leftmost **Bid / Ask** option — labelled by side (_Bid_ on a sell, _Ask_ on a buy) — sets the price to the **best book price** (best bid / best ask): the canonical crossing price, and what a user wants for a FOK filling at the top of book. It is **book-anchored** (from `get_order_book_ticker`). The rest are **value-anchored** to the oisy feed: **Sell** `0% · +1% · +5%`, **Buy** `0% · −1% · −5%`, baseline **"0%"** (the no-offset rung; deliberately not "Spot", which would imply immediate execution — a 0% limit still rests). Setting Bid/Ask positions the price at the top of book; pairing it with **Fill or kill** (below) is how a user fills immediately — there is no separate "fill now" button. A preset shows **selected only while the price still equals it**: a live market/feed move (or a manual edit) that shifts the price off the target **deselects** it — it reads as "not set", like a manually entered value — so a highlighted Bid always means the price *is* the current best bid (re-click to re-snap after a move).
    - **Price input** — a **white editable field**, quoted **quote-per-base**. The unit after the number is **just the quote symbol** (e.g. "3 ckUSDC"), not "ckUSDC / ICP": the label already reads "When 1 [base] reaches…", so the "/ [base]" is redundant. No reciprocal toggle. Editing recomputes the quote and keeps the base amount fixed.
    - **Value difference** — signed % of the limit price vs **current value**, inline by the price. Unlike a swap (where a positive figure is a realized surplus), a limit order trades **at** its target, so while it **rests** this figure is **informational only**, shown **neutral** regardless of sign. It turns **amber/red** only when the price **crosses the order book** (immediate fill) — the only case where value is actually given up. Colour follows _crossing_, not the sign. **Rendering (matching the swap review): plain coloured text, no background pill.** Neutral = primary-colour text, **not bold, no icon** (purely informational while resting); crossing with give-up 0–5% = **amber + warning icon, bold**; crossing beyond 5% = **red + warning icon, bold**. The gray-vs-coloured split is **crossing**, not a magnitude threshold — a resting order stays neutral however far below market it sits. Same rendering on the form and the Review. _(Swap colours by magnitude with a small fixed orange threshold; the LO instead uses the crossing gate, which is the only point at which the figure is a real loss.)_
    - **No current-value reference line.** The verbose "current value 2.69 … (oisy feed)" line is **omitted** to keep the section clean; a user who wants the spot taps **0%** (which sets the price to current value). The immediate-fill warning still appears when the price crosses the book.
@@ -190,11 +211,11 @@ The user defines the order entirely from market data — value (feed) and aggreg
 
 With side declared and base fixed, the label and warning depend on whether the price **crosses the order book**; the give-up is stated versus **current value**.
 
-| Side | Limit vs book     | Label                        | Warning                                                                                                      |
-| ---- | ----------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                         |
+| Side | Limit vs book     | Label                        | Warning                                                                                                        |
+| ---- | ----------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Sell | above best bid    | "When 1 [base] reaches"      | none                                                                                                           |
 | Sell | at/below best bid | "Sell now, while 1 [base] ≥" | "This price crosses the order book — your order will fill almost immediately, about $X below current value." |
-| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                         |
+| Buy  | below best ask    | "When 1 [base] drops to"     | none                                                                                                           |
 | Buy  | at/above best ask | "Buy now, while 1 [base] ≤"  | "This price crosses the order book — your order will fill almost immediately, about $X above current value." |
 
 While the order **rests**, the value-difference is neutral regardless of sign — informational, not realized. It turns **amber** (give-up 0 to 5%) or **red** (beyond 5%) with the warning box only when the price crosses the book. On the review step a confirmation checkbox is required before "Place order" when the give-up exceeds 5%.
@@ -266,7 +287,7 @@ Then the remaining rows: **DEX** (routing); **order type** — **always shown**:
 
 Unlike the form, **Review is a stable confirmation surface — it does not live-re-gate** as the book moves (no button flipping under the user). Instead a **final freshness re-check runs at "Place order"**:
 
-- **FOK:** re-checks the price against the **latest** book. It differs from the form only if the book actually moved since Review; if the order would now be killed (no longer crosses), submission is **interrupted** — a "market moved" notice with the updated best bid/ask, and the user goes back to adjust. (In the wireframe a "Simulate market move" control ticks the book so this is demonstrable — set the price to Bid, go to Review, simulate a move, then Place order is interrupted.)
+- **FOK:** re-checks the price against the **latest** book. It differs from the form only if the book actually moved since Review; if the order would now be killed (no longer crosses), submission is **interrupted** — a "market moved" notice with the updated best bid/ask, and the user goes back to adjust. (In the wireframe a "Simulate market move" control ticks the book so this is demonstrable — set the price to Bid, go to Review, simulate a move, then Place order is interrupted.) 
 - **GTC:** a resting order is unaffected by a move (it just rests until reached), so there is no block — the re-check is informational only.
 - The **>5% give-up** threshold is re-evaluated at submit too, so a market move that pushes it past 5% still requires the confirmation.
 
@@ -343,7 +364,7 @@ _(Queue position in the detail depends on `get_order_book_depth` — the enhance
 
 ## Active orders
 
-Shows all Pending/Open orders for the connected user. Each row: pair, direction (You sell → You get / You buy → You pay), price, amount, status (Pending with spinner, or Open), and the live queue-position chip (enhancement). **Tapping a row opens the order-detail modal** (see _Order detail & cancel_) — there is no inline Cancel button; cancellation happens from inside the detail modal. Status refreshes by polling while the Trading tab is visible; on transition to Filled/Canceled the order moves to History.
+Shows all Pending/Open orders for the connected user. Each row uses the single-line **order row format** (natural-language intent + blue provider tag; see _Order row format_), plus a status pill (Pending with spinner, or Open) and the queue position as plain text (enhancement; shown for both Pending and Open). **Tapping a row opens the order-detail modal** (see _Order detail & cancel_) — there is no inline Cancel button; cancellation happens from inside the detail modal. Status refreshes by polling while the Trading tab is visible; on transition to Filled/Canceled the order moves to History.
 
 ---
 
@@ -390,9 +411,9 @@ Shows all Pending/Open orders for the connected user. Each row: pair, direction 
 - [ ] Amount/price fields **hard-limit decimals** to the lot_size/tick_size precision as the user types (extra digits rejected).
 - [ ] For a non-power-of-ten step, a value with legal decimals but not a valid multiple shows a **declarative inline validation message** ("Amount/Price must be a multiple of …", no "→" prefix) and disables Review; no apply box, no silent rounding.
 - [ ] Quote token picker shows current price, venue count, and an aggregate **Deep/Moderate/Thin** liquidity chip (backed by `get_order_book_depth`) — no per-book bid/ask before routing.
-- [ ] _(Enhancement — `get_order_book_depth`)_ A **queue-position** figure appears on the **form** ("Queue position: 15% are ahead" / "Queue position: Front of book"), the **Review** "Queue position" row, and **Open** Active-order rows (compact "15% are ahead" chip).
+- [ ] _(Enhancement — `get_order_book_depth`)_ A **queue-position** figure appears on the **form** ("Queue position: 15% are ahead" / "Queue position: Front of book"), the **Review** "Queue position" row, and **active** (Pending + Open) Active-order rows (compact "15% are ahead" plain text).
 - [ ] Formatting: **< 10% shows one decimal and always rounds up** (smallest non-zero value 0.1%); **≥ 10% is a whole number**; zero reads **"Front of book"**.
-- [ ] The figure is the share of **same-side base volume at a strictly better price** (asks below a sell / bids above a buy) — an **approximation of FIFO queue position** (the aggregated endpoint can't see intra-level order). It refreshes with the live book on the form and Active rows; it is **omitted entirely if the endpoint is unavailable**, **hidden when the price crosses the book** (immediate fill — no resting position), and never shown for Pending/Filled/Cancelled orders.
+- [ ] The figure is the share of **same-side base volume at a strictly better price** (asks below a sell / bids above a buy) — an **approximation of FIFO queue position** (the aggregated endpoint can't see intra-level order). It refreshes with the live book on the form and Active rows; it is **omitted entirely if the endpoint is unavailable**, **hidden when the price crosses the book** (immediate fill — no resting position), and never shown for terminal (Filled/Cancelled) orders.
 - [ ] The modal opens **empty** (no tokens, blank values, Review disabled, "Pick a token to begin").
 - [ ] The **quote selector is inactive until a base is chosen**; once chosen it lists the valid quotes for that base.
 - [ ] Picking a base while the quote is empty **chains into the quote picker**, and returning **focuses the amount field**; re-picking a base when a quote is already set does not re-open the quote picker.
@@ -404,6 +425,7 @@ Shows all Pending/Open orders for the connected user. Each row: pair, direction 
 - [ ] Sell Max fills free base floored to lot_size; Buy Max converts free quote → base via the price (floored to lot_size) and is disabled until a price is set.
 - [ ] Insufficient balance (spend > free: base on Sell, quote on Buy) is **soft-validated** — inline message under the amount field + Review disabled; the **balance error takes precedence over the lot error**. (Inline deposit deferred.)
 - [ ] Form opens **empty** from the single entry (Trading tab Orders "+ Limit order"); no token pre-fill. Asset rows expose only **Withdraw** (no per-row "Limit order" or "Deposit").
+
 
 ---
 
