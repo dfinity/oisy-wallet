@@ -1,6 +1,12 @@
 import type {
+	GetOrderBookDepthRequest,
+	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
+	OrderBookDepth,
+	OrderBookTicker,
+	OrderId,
 	Token,
+	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
@@ -51,5 +57,42 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		}
 
 		throw new Error(Object.keys(response.Err)[0]);
+	};
+
+	getOrderBookTicker = async (pair: TradingPair): Promise<OrderBookTicker> => {
+		const { get_order_book_ticker } = this.caller({ certified: false });
+
+		const response = await get_order_book_ticker(pair);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw new Error(Object.keys(response.Err.kind)[0]);
+	};
+
+	getOrderBookDepth = async (request: GetOrderBookDepthRequest): Promise<OrderBookDepth> => {
+		const { get_order_book_depth } = this.caller({ certified: false });
+
+		const response = await get_order_book_depth(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw new Error(Object.keys(response.Err.kind)[0]);
+	};
+
+	addLimitOrder = async (request: LimitOrderRequest): Promise<OrderId> => {
+		// `add_limit_order` mutates the order book, so it must run on the certified service.
+		const { add_limit_order } = this.caller({ certified: true });
+
+		const response = await add_limit_order(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw new Error(Object.keys(response.Err.kind)[0]);
 	};
 }
