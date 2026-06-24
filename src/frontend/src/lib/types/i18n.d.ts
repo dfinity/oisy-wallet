@@ -10,6 +10,8 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		collapse: string;
+		expand: string;
 		change: string;
 		continue: string;
 		apply: string;
@@ -1271,6 +1273,8 @@ interface I18nWallet_connect {
 		psbt_broadcast_unsupported_note: string;
 		connected_apps: string;
 		no_connected_apps: string;
+		disconnect_all: string;
+		disconnect_app: string;
 		wallet_connect: string;
 	};
 	alt: { connect_input: string };
@@ -1630,6 +1634,7 @@ interface I18nEarning {
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
+		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {
 		apy: string;
@@ -1642,6 +1647,38 @@ interface I18nEarning {
 	};
 	terms: { flexible: string };
 	providers: { goldDaoStaking: { cardTitle: string } };
+}
+
+interface I18nLiquidium {
+	text: {
+		description: string;
+		health_factor: string;
+		net_value: string;
+		net_apy: string;
+		my_positions: string;
+		markets: string;
+		supplied: string;
+		borrowed: string;
+		apy_suffix: string;
+		supply_label: string;
+		borrow_label: string;
+		coming_soon: string;
+		action_supply: string;
+		action_borrow: string;
+		action_repay: string;
+		action_withdraw: string;
+		transaction_failed: string;
+		supply_review: string;
+		supply_review_subtitle: string;
+		supplying: string;
+		starting_to_supply: string;
+		supply_started: string;
+		supply_apy: string;
+		supply_collateral_info: string;
+		supply_agreement: string;
+		provider_fee: string;
+		insufficient_funds_for_fee: string;
+	};
 }
 
 interface I18nVaults {
@@ -1860,6 +1897,7 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	liquidium: I18nLiquidium;
 	vaults: I18nVaults;
 	stake: I18nStake;
 	get_token: I18nGet_token;

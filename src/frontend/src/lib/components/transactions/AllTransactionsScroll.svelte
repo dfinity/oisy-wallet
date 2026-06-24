@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { InfiniteScroll } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';

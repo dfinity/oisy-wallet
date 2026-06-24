@@ -7,6 +7,8 @@
 			"back": "Zpět",
 			"done": "Hotovo",
 			"close": "Zavřít",
+			"collapse": "Sbalit",
+			"expand": "Rozbalit",
 			"change": "Změnit",
 			"continue": "Pokračovat",
 			"apply": "Použít",
@@ -1598,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
+			"disconnect_all": "Odpojit vše",
+			"disconnect_app": "Odpojit $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2083,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
 				"action": "Zkontrolovat stav"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2101,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Vydělávejte s Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

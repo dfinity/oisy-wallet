@@ -7,6 +7,8 @@
 			"back": "Atrás",
 			"done": "Hecho",
 			"close": "Cerrar",
+			"collapse": "Contraer",
+			"expand": "Expandir",
 			"change": "Cambiar",
 			"continue": "Continuar",
 			"apply": "Aplicar",
@@ -1598,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Aplicaciones conectadas",
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
+			"disconnect_all": "Desconectar todas",
+			"disconnect_app": "Desconectar $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2083,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo 🎉",
 				"action": "Ver estado"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2101,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gana con Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

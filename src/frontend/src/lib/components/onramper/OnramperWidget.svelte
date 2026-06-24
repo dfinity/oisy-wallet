@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
@@ -17,6 +16,7 @@
 		OnramperSecretNotConfiguredError
 	} from '$lib/canisters/errors';
 	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -203,7 +203,7 @@
 		class:opacity-0={themeLoaded && nonNullish(src)}
 		class:opacity-100={!themeLoaded || !nonNullish(src)}
 	>
-		<Spinner inline />
+		<LoaderSpinner inline />
 	</div>
 
 	{#if nonNullish(src)}

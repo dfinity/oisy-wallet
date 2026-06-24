@@ -41,6 +41,7 @@ describe('btc wallet-connect.services', () => {
 			rejectRequest: vi.fn(),
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
 			disconnect: vi.fn()
 		} as WalletConnectListener;
 
