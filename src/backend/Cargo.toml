@@ -33,7 +33,6 @@ tiny-keccak = { workspace = true }
 
 [dev-dependencies]
 candid_parser = { workspace = true }
-ic-ledger-types = { workspace = true }
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
 
