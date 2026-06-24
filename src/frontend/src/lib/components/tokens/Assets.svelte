@@ -3,8 +3,10 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { TRADING_ENABLED } from '$env/trading';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
+	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
@@ -83,6 +85,15 @@
 														path: `${AppPath.Earning}${page.url.search}`
 													}
 												]
+											: []),
+										...(TRADING_ENABLED
+											? [
+													{
+														label: $i18n.trading.text.tab_title,
+														id: TokenTypes.TRADING,
+														path: `${AppPath.Trading}${page.url.search}`
+													}
+												]
 											: [])
 									]}
 									trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
@@ -118,6 +129,8 @@
 				<NftsList />
 			{:else if activeTab === TokenTypes.EARNING}
 				<EarningsList />
+			{:else if activeTab === TokenTypes.TRADING}
+				<TradingList />
 			{/if}
 		</StickyHeader>
 
