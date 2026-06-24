@@ -138,11 +138,11 @@
 			{onBaseInput}
 			{onMax}
 			{onSelectBase}
+			{onSelectQuote}
 			{pairView}
 			{price}
 			{quoteSymbol}
 			{side}
-			{onSelectQuote}
 		/>
 
 		<LimitOrderPriceSection
