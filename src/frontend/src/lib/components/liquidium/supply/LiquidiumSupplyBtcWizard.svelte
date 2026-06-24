@@ -62,6 +62,16 @@
 			: undefined
 	);
 
+	// UTXO selection and the network fee must cover the gross transfer that is actually
+	// broadcast (net supply + Liquidium inflow fee), not just the net amount the user typed.
+	// Selecting UTXOs for the net amount alone under-funds the transaction, so the signer
+	// rejects it with NotEnoughFunds once the inflow fee is added on broadcast.
+	let feeEstimationAmount = $derived(
+		nonNullish(parsedAmount) && nonNullish(inflowFee)
+			? convertSatoshisToBtc(parsedAmount + inflowFee)
+			: amount
+	);
+
 	const { store: utxosFeeStore } = setContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY, {
 		store: initUtxosFeeStore()
 	});
@@ -145,7 +155,7 @@
 	</BtcUtxosFeeDisplay>
 {/snippet}
 
-<UtxosFeeLoader {amount} {networkId} source={$btcAddressMainnet ?? ''}>
+<UtxosFeeLoader amount={feeEstimationAmount} {networkId} source={$btcAddressMainnet ?? ''}>
 	{#if currentStep?.name === WizardStepsLiquidiumSupply.REVIEW}
 		<LiquidiumSupplyReview {amount} {feeDisplay} {inflowFee} {market} {onBack} onConfirm={supply} />
 	{:else if currentStep?.name === WizardStepsLiquidiumSupply.SUPPLYING}
