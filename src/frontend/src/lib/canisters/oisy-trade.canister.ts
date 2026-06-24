@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	_SERVICE as OisyTradeService,
 	Token,
 	TradingPairInfo,
@@ -51,5 +53,17 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		}
 
 		throw new Error(Object.keys(response.Err)[0]);
+	};
+
+	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
+		const { deposit } = this.caller({ certified: true });
+
+		const response = await deposit(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw new Error(Object.keys(response.Err.kind)[0]);
 	};
 }
