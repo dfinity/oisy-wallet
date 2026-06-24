@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';

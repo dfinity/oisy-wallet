@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
@@ -14,6 +13,7 @@
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
