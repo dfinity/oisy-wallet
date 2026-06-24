@@ -176,5 +176,17 @@ export const mapSignOnramperWidgetUrlError = (
 		);
 	}
 
+	if ('AddressMismatch' in err) {
+		return new CanisterInternalError(
+			'A wallet address did not match the one derived for the caller on the backend.'
+		);
+	}
+
+	if ('AddressDerivationFailed' in err) {
+		return new CanisterInternalError(
+			'Could not derive the wallet addresses to verify the OnRamper widget URL.'
+		);
+	}
+
 	return assertNeverOr(err, new CanisterInternalError('Unknown SignOnramperWidgetUrlError'));
 };
