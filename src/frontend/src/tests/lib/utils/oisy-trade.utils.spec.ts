@@ -9,8 +9,8 @@ import {
 	oisyTradeSupportedTokenSymbols,
 	sumOisyTradeAssetsUsd
 } from '$lib/utils/oisy-trade.utils';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
 
 const mockLedgerId = mockValidIcToken.ledgerCanisterId;
@@ -21,13 +21,7 @@ const buildPair = (base: string, quote: string): TradingPairInfo =>
 		quote: { metadata: { symbol: quote } }
 	}) as unknown as TradingPairInfo;
 
-const buildBalance = ({
-	free,
-	reserved
-}: {
-	free: bigint;
-	reserved: bigint;
-}): UserTokenBalance =>
+const buildBalance = ({ free, reserved }: { free: bigint; reserved: bigint }): UserTokenBalance =>
 	({
 		token: { id: { ledger_id: Principal.fromText(mockLedgerId) } },
 		balance: { free, reserved }
@@ -116,9 +110,9 @@ describe('oisy-trade.utils', () => {
 	describe('oisyTradeAssetHasReserved', () => {
 		it('is true only when some balance is reserved', () => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect(oisyTradeAssetHasReserved({ reserved: 1n } as any)).toBe(true);
+			expect(oisyTradeAssetHasReserved({ reserved: 1n } as any)).toBeTruthy();
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect(oisyTradeAssetHasReserved({ reserved: ZERO } as any)).toBe(false);
+			expect(oisyTradeAssetHasReserved({ reserved: ZERO } as any)).toBeFalsy();
 		});
 	});
 

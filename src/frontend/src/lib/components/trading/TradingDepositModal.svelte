@@ -2,24 +2,24 @@
 	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
 	import TradingDepositProgress from '$lib/components/trading/TradingDepositProgress.svelte';
 	import TradingDepositReview from '$lib/components/trading/TradingDepositReview.svelte';
 	import TradingDepositTokensList from '$lib/components/trading/TradingDepositTokensList.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { tradingDepositWizardSteps } from '$lib/config/trading.config';
-	import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
-	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { oisyTradeDepositableTokens } from '$lib/derived/oisy-trade.derived';
+	import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
+	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
 	import { depositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	let modal: WizardModal<WizardStepsTradingDeposit> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsTradingDeposit> | undefined = $state();
