@@ -552,9 +552,10 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
 - **Timestamps:** list row "Created {$date}" / "Updated {$date}"; edit view
   "Created {$date}" or "Created {$created} · Updated {$updated}" (the `·` joins
   them). `{$date}` is the localized relative/absolute time.
-- **Buttons:** reuse core "Cancel" / "Save" / "Add note"; "Delete" action.
+- **Buttons:** reuse core "Cancel" / "Save" / "Add note"; **"Delete note"** action
+  (red text + trash, mirroring Contacts' "Delete contact").
 - **View mode:** footer button **"Back"**; **"Edit note"** (secondary) and
-  **"Delete"** actions.
+  **"Delete note"** actions.
 - **Too-long error:** "Note must be {$maxCharacters} characters or fewer."
 - **Cap reached:** "You've reached the maximum of {$max} saved notes. Delete one
   to add a new note."
