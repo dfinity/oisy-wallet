@@ -21,9 +21,11 @@ describe('BTC Pending Sent Transactions Services', () => {
 
 	describe('loadBtcPendingSentTransactions', () => {
 		it('should store the pending transactions', async () => {
-			vi.spyOn(backendAPI, 'getPendingBtcTransactions').mockResolvedValue({
-				response: [mockPendingTransaction]
-			});
+			const getPendingBtcTransactionsSpy = vi
+				.spyOn(backendAPI, 'getPendingBtcTransactions')
+				.mockResolvedValue({
+					response: [mockPendingTransaction]
+				});
 
 			const result = await loadBtcPendingSentTransactions({
 				address,
@@ -32,6 +34,11 @@ describe('BTC Pending Sent Transactions Services', () => {
 			});
 
 			expect(result).toEqual({ success: true });
+			expect(getPendingBtcTransactionsSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				network: { mainnet: null },
+				iiDelegationChain: []
+			});
 			expect(get(btcPendingSentTransactionsStore)[address].data).toEqual([mockPendingTransaction]);
 		});
 
@@ -57,6 +64,23 @@ describe('BTC Pending Sent Transactions Services', () => {
 				success: false,
 				err: new Error('Current network (Symbol(ETH)) is not a Bitcoin network.')
 			});
+			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
+		});
+
+		it('should not call the backend if the network is undefined', async () => {
+			const getPendingBtcTransactionsSpy = vi.spyOn(backendAPI, 'getPendingBtcTransactions');
+
+			const result = await loadBtcPendingSentTransactions({
+				address,
+				identity: mockIdentity,
+				networkId: undefined
+			});
+
+			expect(result).toEqual({
+				success: false,
+				err: new Error('Current network (undefined) is not a Bitcoin network.')
+			});
+			expect(getPendingBtcTransactionsSpy).not.toHaveBeenCalled();
 			expect(get(btcPendingSentTransactionsStore)[address]).toBeUndefined();
 		});
 
