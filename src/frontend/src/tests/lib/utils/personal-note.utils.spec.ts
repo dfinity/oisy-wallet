@@ -6,7 +6,7 @@ import {
 	generatePersonalNoteId,
 	neutralizePersonalNoteText,
 	personalNoteLength,
-	personalNotePreview
+	personalNotePreviewParts
 } from '$lib/utils/personal-note.utils';
 
 const nsFrom = (date: Date): string =>
@@ -56,13 +56,30 @@ describe('personal-note.utils', () => {
 		});
 	});
 
-	describe('personalNotePreview', () => {
-		it('collapses line breaks and whitespace runs to a single space', () => {
-			expect(personalNotePreview('line one\n\n  line\ttwo  ')).toBe('line one line two');
+	describe('personalNotePreviewParts', () => {
+		it('uses the first line as the title and collapses the rest into the body', () => {
+			expect(personalNotePreviewParts('This is a title\nAnd here\nthe content')).toEqual({
+				title: 'This is a title',
+				body: 'And here the content'
+			});
 		});
 
-		it('neutralizes bidi characters in the preview', () => {
-			expect(personalNotePreview('a\u202Eb')).toBe('ab');
+		it('returns an empty body for a single-line note', () => {
+			expect(personalNotePreviewParts('just one line')).toEqual({
+				title: 'just one line',
+				body: ''
+			});
+		});
+
+		it('falls back to the first non-empty content when the note starts with blank lines', () => {
+			expect(personalNotePreviewParts('\n\n  real title  ')).toEqual({
+				title: 'real title',
+				body: ''
+			});
+		});
+
+		it('neutralizes bidi characters', () => {
+			expect(personalNotePreviewParts('a\u202Eb')).toEqual({ title: 'ab', body: '' });
 		});
 	});
 

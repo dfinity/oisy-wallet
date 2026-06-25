@@ -2,10 +2,12 @@ import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
 	NOTES_ADD_BUTTON,
-	NOTES_DELETE_BUTTON,
+	NOTES_EDITOR_DELETE_BUTTON,
 	NOTES_INPUT,
 	NOTES_LIST_ITEM,
-	NOTES_SAVE_BUTTON
+	NOTES_NO_RESULTS,
+	NOTES_SAVE_BUTTON,
+	NOTES_SEARCH_INPUT
 } from '$lib/constants/test-ids.constants';
 import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore, personalNotesUndoStore } from '$lib/stores/personal-notes.store';
@@ -77,13 +79,32 @@ describe('NotesModal', () => {
 		);
 	});
 
-	it('deletes a note and keeps it for Undo', async () => {
+	it('filters the list with the search field', async () => {
+		personalNotesStore.setLoaded({ entries: [note('apple'), note('banana')], count: 2 });
+
+		const { getByTestId, getAllByTestId, queryByTestId } = render(NotesModal);
+
+		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(2);
+
+		await fireEvent.input(getByTestId(NOTES_SEARCH_INPUT), { target: { value: 'apple' } });
+
+		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(1);
+
+		await fireEvent.input(getByTestId(NOTES_SEARCH_INPUT), { target: { value: 'zzz' } });
+
+		expect(queryByTestId(NOTES_LIST_ITEM)).toBeNull();
+		expect(getByTestId(NOTES_NO_RESULTS)).toBeInTheDocument();
+	});
+
+	it('deletes a note from the editor and keeps it for Undo', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
 		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
 
-		const { getByTestId } = render(NotesModal);
+		const { getByTestId, getByText } = render(NotesModal);
 
-		await fireEvent.click(getByTestId(NOTES_DELETE_BUTTON));
+		// Open the note (row → editor), where Delete lives.
+		await fireEvent.click(getByText('note a'));
+		await fireEvent.click(getByTestId(NOTES_EDITOR_DELETE_BUTTON));
 
 		await waitFor(() =>
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
