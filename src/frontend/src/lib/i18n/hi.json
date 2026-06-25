@@ -7,6 +7,8 @@
 			"back": "वापस",
 			"done": "हो गया",
 			"close": "बंद करें",
+			"collapse": "संक्षिप्त करें",
+			"expand": "विस्तृत करें",
 			"change": "बदलें",
 			"continue": "",
 			"apply": "लागू करें",
@@ -1598,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "जुड़े हुए ऐप्स",
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
+			"disconnect_all": "सभी डिस्कनेक्ट करें",
+			"disconnect_app": "$name को डिस्कनेक्ट करें",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2083,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
 				"action": "स्थिति जांचें"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2101,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAO के साथ कमाएं"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {
