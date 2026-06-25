@@ -14,8 +14,9 @@
 {/snippet}
 
 <!-- A neutral-grey box (the modal surface is white, so the plain level's white
-	background would be invisible — override to grey per the spec). -->
-<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-secondary!">
+	background would be invisible). Grey, not a blue tint, since there's already
+	blue above (the Note panel) and below (Cancel/Save). -->
+<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary!">
 	<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
 	>{replaceOisyPlaceholders($i18n.notes.text.privacy_info)}
 	<ExternalLink
