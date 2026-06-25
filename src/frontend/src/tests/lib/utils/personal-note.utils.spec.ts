@@ -4,6 +4,7 @@ import {
 	comparePersonalNotesByUpdatedDesc,
 	formatPersonalNoteTimestamp,
 	generatePersonalNoteId,
+	linkifyPersonalNote,
 	neutralizePersonalNoteText,
 	personalNoteLength,
 	personalNotePreviewParts
@@ -80,6 +81,31 @@ describe('personal-note.utils', () => {
 
 		it('neutralizes bidi characters', () => {
 			expect(personalNotePreviewParts('a\u202Eb')).toEqual({ title: 'ab', body: '' });
+		});
+	});
+
+	describe('linkifyPersonalNote', () => {
+		it('splits http(s) URLs into link segments and leaves the rest as text', () => {
+			expect(linkifyPersonalNote('see https://example.com/x now')).toEqual([
+				{ text: 'see ' },
+				{ text: 'https://example.com/x', href: 'https://example.com/x' },
+				{ text: ' now' }
+			]);
+		});
+
+		it('does not linkify javascript: or data: schemes', () => {
+			const segments = linkifyPersonalNote('javascript:alert(1) and data:text/html,x');
+
+			expect(segments.every(({ href }) => href === undefined)).toBeTruthy();
+		});
+
+		it('keeps trailing punctuation out of the link', () => {
+			const segments = linkifyPersonalNote('go to https://example.com.');
+
+			expect(segments.find(({ href }) => href !== undefined)).toEqual({
+				text: 'https://example.com',
+				href: 'https://example.com'
+			});
 		});
 	});
 

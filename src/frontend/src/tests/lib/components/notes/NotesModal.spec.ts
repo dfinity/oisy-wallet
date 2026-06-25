@@ -2,12 +2,14 @@ import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
 	NOTES_ADD_BUTTON,
-	NOTES_EDITOR_DELETE_BUTTON,
 	NOTES_INPUT,
 	NOTES_LIST_ITEM,
 	NOTES_NO_RESULTS,
 	NOTES_SAVE_BUTTON,
-	NOTES_SEARCH_INPUT
+	NOTES_SEARCH_INPUT,
+	NOTES_VIEW,
+	NOTES_VIEW_DELETE_BUTTON,
+	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore, personalNotesUndoStore } from '$lib/stores/personal-notes.store';
@@ -96,15 +98,29 @@ describe('NotesModal', () => {
 		expect(getByTestId(NOTES_NO_RESULTS)).toBeInTheDocument();
 	});
 
-	it('deletes a note from the editor and keeps it for Undo', async () => {
+	it('opens the read-only view on row click and reaches the editor via Edit', async () => {
+		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
+
+		const { getByTestId, getByText } = render(NotesModal);
+
+		await fireEvent.click(getByText('note a'));
+
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+
+		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));
+
+		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
+	});
+
+	it('deletes a note from the view and keeps it for Undo', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
 		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
 
 		const { getByTestId, getByText } = render(NotesModal);
 
-		// Open the note (row → editor), where Delete lives.
+		// Open the note (row → view), where Delete lives.
 		await fireEvent.click(getByText('note a'));
-		await fireEvent.click(getByTestId(NOTES_EDITOR_DELETE_BUTTON));
+		await fireEvent.click(getByTestId(NOTES_VIEW_DELETE_BUTTON));
 
 		await waitFor(() =>
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
