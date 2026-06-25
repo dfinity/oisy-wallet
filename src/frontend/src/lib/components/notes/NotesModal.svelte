@@ -236,7 +236,11 @@
 	};
 </script>
 
-<div class:notes-editing={step === 'editor'}>
+<!-- Notes leads a capped, centered modal on desktop: it grows with content from a
+	comfortable minimum up to ~80% of the viewport, then the list scrolls internally
+	(below) rather than the whole modal reaching the screen edges. Mobile stays
+	full-page (the global modal default). -->
+<div class="sm:[--dialog-max-height:80dvh]" class:notes-editing={step === 'editor'}>
 	<Modal disablePointerEvents={busy} {onClose} testId={NOTES_MODAL}>
 		{#snippet title()}{#if step === 'view'}{$i18n.notes.text
 					.note}{:else if step === 'editor'}{nonNullish(editingNote)
@@ -299,13 +303,13 @@
 				onEdit={() => nonNullish(viewNote) && openEditor({ id: viewNote.id, fromView: true })}
 			/>
 		{:else}
-			<ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
+			<ContentWithToolbar styleClass="mx-2 flex min-h-0 flex-col items-stretch">
 				{#if showSkeleton}
 					<SkeletonCards rows={3} />
 				{:else if isEmpty}
 					<EmptyNotes onAddNote={() => openEditor()} />
 				{:else}
-					<div class="flex w-full items-end gap-2">
+					<div class="flex w-full shrink-0 items-end gap-2">
 						<InputSearch
 							autofocus={isDesktop()}
 							placeholder={$i18n.notes.text.search_placeholder}
@@ -326,28 +330,32 @@
 					</div>
 
 					{#if $atPersonalNotesCapacity}
-						<p class="pt-3 text-sm text-tertiary">
+						<p class="shrink-0 pt-3 text-sm text-tertiary">
 							{replacePlaceholders($i18n.notes.text.cap_reached, {
 								$max: `${MAX_PERSONAL_NOTES_PER_USER}`
 							})}
 						</p>
 					{/if}
 
-					<List noPadding styleClass="py-2" testId={NOTES_LIST}>
-						{#if filteredNotes.length === 0}
-							<ListItem>
-								<span class="text-secondary" data-tid={NOTES_NO_RESULTS}>
-									{$i18n.notes.text.no_results}
-								</span>
-							</ListItem>
-						{:else}
-							{#each filteredNotes as note (note.id)}
+					<!-- Only the list scrolls, so the scrollbar stays out of the search header
+						and the pinned footer. -->
+					<div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
+						<List noPadding styleClass="py-2" testId={NOTES_LIST}>
+							{#if filteredNotes.length === 0}
 								<ListItem>
-									<NoteListItem {note} onRetry={load} onSelect={openView} />
+									<span class="text-secondary" data-tid={NOTES_NO_RESULTS}>
+										{$i18n.notes.text.no_results}
+									</span>
 								</ListItem>
-							{/each}
-						{/if}
-					</List>
+							{:else}
+								{#each filteredNotes as note (note.id)}
+									<ListItem>
+										<NoteListItem {note} onRetry={load} onSelect={openView} />
+									</ListItem>
+								{/each}
+							{/if}
+						</List>
+					</div>
 				{/if}
 
 				{#snippet toolbar()}
