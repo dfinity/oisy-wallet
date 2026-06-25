@@ -58,7 +58,7 @@
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-4" testId={NOTES_VIEW}>
 	<!-- Long notes scroll inside the box; the metadata and actions stay pinned below. -->
 	<div
-		class="flex max-h-[40vh] min-h-32 flex-col gap-2 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
+		class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
 	>
 		<p style="overflow-wrap: anywhere;" class="font-bold text-primary">
 			{#each titleSegments as segment, index (index)}{#if segment.href}<a
@@ -82,10 +82,13 @@
 
 	<span class="text-xs text-tertiary">{metaLine}</span>
 
-	<Button colorStyle="secondary-light" fullWidth onclick={onEdit} testId={NOTES_VIEW_EDIT_BUTTON}>
-		<IconPencil size="20" />
-		{$i18n.notes.text.edit_note}
-	</Button>
+	<!-- Wrap so the button's own flex-1 can't stretch it vertically in this column. -->
+	<div>
+		<Button colorStyle="secondary-light" fullWidth onclick={onEdit} testId={NOTES_VIEW_EDIT_BUTTON}>
+			<IconPencil size="20" />
+			{$i18n.notes.text.edit_note}
+		</Button>
+	</div>
 
 	<div class="flex justify-center">
 		<Button
