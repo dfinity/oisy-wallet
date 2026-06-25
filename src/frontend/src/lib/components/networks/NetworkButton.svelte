@@ -21,6 +21,7 @@
 		isTestnet?: boolean;
 		testId?: string;
 		labelsSize?: LabelSize;
+		allNetworksLabel?: string;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
@@ -31,6 +32,7 @@
 		isTestnet = false,
 		testId,
 		labelsSize = 'md',
+		allNetworksLabel,
 		onSelected
 	}: Props = $props();
 
@@ -57,7 +59,7 @@ TODO: Find a way to have the "All networks" not be a fallback for undefined netw
 			class:text-base={labelsSize === 'lg'}
 			class:text-sm={labelsSize === 'md'}
 		>
-			{network?.name ?? $i18n.networks.chain_fusion}
+			{network?.name ?? allNetworksLabel ?? $i18n.networks.chain_fusion}
 		</span>
 	{/snippet}
 

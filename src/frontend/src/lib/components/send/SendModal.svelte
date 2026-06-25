@@ -82,9 +82,11 @@
 	let { isTransactionsPage, isNftsPage }: Props = $props();
 
 	const initialModalData = $modalSendData;
-	const lockedNetworkId = initialModalData?.lockedNetworkId;
+	const lockedNetworkIds = initialModalData?.lockedNetworkIds;
 	let lockedNetwork = $derived(
-		nonNullish(lockedNetworkId) ? $networks.find(({ id }) => id === lockedNetworkId) : undefined
+		nonNullish(lockedNetworkIds) && lockedNetworkIds.length === 1
+			? $networks.find(({ id }) => id === lockedNetworkIds[0])
+			: undefined
 	);
 
 	let destination = $state(initialModalData?.destination ?? '');
@@ -296,7 +298,7 @@
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 				<SendTokensList
-					{lockedNetwork}
+					{lockedNetworkIds}
 					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 					{onSendToken}
 				/>
