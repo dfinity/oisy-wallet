@@ -80,7 +80,7 @@ export const modalOisyTradeWithdrawData: Readable<OisyTradeWithdrawToken | undef
 	modalStore,
 	($modalStore) =>
 		$modalStore?.type === 'oisy-trade-withdraw'
-			? ($modalStore?.data as OisyTradeWithdrawToken)
+			? ($modalStore?.data as OisyTradeWithdrawToken | undefined)
 			: undefined
 );
 export const modalSwap: Readable<boolean> = derived(

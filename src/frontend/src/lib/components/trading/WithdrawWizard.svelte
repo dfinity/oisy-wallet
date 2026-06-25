@@ -41,7 +41,12 @@
 	let transferFee = $derived(token.fee);
 
 	const withdraw = async () => {
-		if (isNullish($authIdentity) || isNullish(amount)) {
+		if (isNullish($authIdentity)) {
+			toastsError({ msg: { text: $i18n.auth.error.no_internet_identity } });
+			return;
+		}
+
+		if (isNullish(amount)) {
 			toastsError({ msg: { text: $i18n.send.assertion.amount_invalid } });
 			return;
 		}
