@@ -4,11 +4,14 @@
 	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
+	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
 	import TradingDepositProgress from '$lib/components/trading/TradingDepositProgress.svelte';
 	import TradingDepositReview from '$lib/components/trading/TradingDepositReview.svelte';
-	import TradingDepositTokensList from '$lib/components/trading/TradingDepositTokensList.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { tradingDepositWizardSteps } from '$lib/config/trading.config';
@@ -159,11 +162,24 @@
 			{/snippet}
 		</ContentWithToolbar>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
-		<TradingDepositTokensList
-			onBack={closeTokensList}
-			onSelect={onSelectToken}
+		<ModalTokensList
 			onSelectNetworkFilter={() => goToStep(WizardStepsTradingDeposit.FILTER_NETWORKS)}
-		/>
+			onTokenButtonClick={onSelectToken}
+		>
+			{#snippet tokenListItem(token, onClick)}
+				<ModalTokensListItem {onClick} {token} />
+			{/snippet}
+			{#snippet noResults()}
+				<p class="text-primary">
+					{$i18n.tokens.manage.text.all_tokens_zero_balance}
+				</p>
+			{/snippet}
+			{#snippet toolbar()}
+				<ButtonGroup>
+					<ButtonBack onclick={closeTokensList} />
+				</ButtonGroup>
+			{/snippet}
+		</ModalTokensList>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
 		<ModalNetworksFilter
 			onNetworkFilter={() => goToStep(WizardStepsTradingDeposit.TOKENS_LIST)}
