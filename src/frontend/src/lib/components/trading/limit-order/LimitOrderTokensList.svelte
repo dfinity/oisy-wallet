@@ -1,82 +1,81 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		mode: 'base' | 'quote';
-		side: LimitOrderSide;
 		baseSymbol?: string;
 		onSelect: (symbol: string) => void;
 		onCancel: () => void;
 	}
 
-	let { mode, side, baseSymbol, onSelect, onCancel }: Props = $props();
+	let { mode, baseSymbol, onSelect, onCancel }: Props = $props();
+
+	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	const pairs = $derived($oisyTradePairs);
 
-	// Base list: distinct base symbols, with how many quotes pair with each.
-	// Quote list: distinct quote symbols that pair with the chosen base.
-	const items = $derived.by((): { symbol: string; subtitle: string }[] => {
-		if (mode === 'base') {
-			const bases = [...new Set(pairs.map((p) => p.base.metadata.symbol))];
-			return bases.map((symbol) => {
-				const count = pairs.filter((p) => p.base.metadata.symbol === symbol).length;
-				return {
-					symbol,
-					subtitle: `${count} ${count === 1 ? 'market' : 'markets'}`
-				};
-			});
-		}
-		const quotes = pairs
-			.filter((p) => p.base.metadata.symbol === baseSymbol)
-			.map((p) => p.quote.metadata.symbol);
-		return [...new Set(quotes)].map((symbol) => ({ symbol, subtitle: '' }));
+	// The OISY TRADE tokens eligible for this step, deduped by symbol:
+	//  - base: every distinct base symbol that has at least one market;
+	//  - quote: the quotes paired with the chosen base.
+	// Each is resolved to the matching app token (by ledger canister id) so the
+	// shared picker renders the real logo, name, network and balance — the same
+	// UX as the swap token list. Trade tokens without a matching app token are
+	// dropped (they can't be displayed by the shared item).
+	const tokens: Token[] = $derived.by(() => {
+		const byLedger: Record<string, Token> = $allIcrcTokens.reduce<Record<string, Token>>(
+			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
+			{}
+		);
+
+		const tradeTokens =
+			mode === 'base'
+				? pairs.map((p) => p.base)
+				: pairs.filter((p) => p.base.metadata.symbol === baseSymbol).map((p) => p.quote);
+
+		// Resolve each eligible trade token to its app token (by ledger id), drop
+		// the ones with no match, then dedupe by symbol (a symbol can recur across
+		// several markets) keeping the first occurrence.
+		return tradeTokens
+			.map((tradeToken) => byLedger[tradeToken.id.ledger_id.toText()])
+			.filter(nonNullish)
+			.filter(
+				(token, index, all) => all.findIndex(({ symbol }) => symbol === token.symbol) === index
+			);
 	});
 
-	const title = $derived.by((): string => {
-		const t = $i18n.trading.limit_order;
-		if (mode === 'base') {
-			return side === 'sell' ? t.select_base_token_sell : t.select_base_token_buy;
-		}
-		return t.select_quote_token;
+	$effect(() => {
+		setTokens(tokens);
 	});
 
-	const subtitle = $derived(
-		mode === 'base'
-			? $i18n.trading.limit_order.base_picker_subtitle
-			: replacePlaceholders($i18n.trading.limit_order.quote_picker_subtitle, {
-					$base: baseSymbol ?? ''
-				})
-	);
+	// OISY TRADE lists ICP-network tokens only, so the network filter stays
+	// view-only — the shared picker still renders search and category filters.
+	const onSelectNetworkFilter = () => {};
 </script>
 
-<ContentWithToolbar>
-	<div class="flex flex-col gap-1">
-		<p class="text-sm font-semibold text-primary">{title}</p>
-		<p class="mb-2 text-xs text-tertiary">{subtitle}</p>
-		{#each items as item (item.symbol)}
-			<button
-				class="flex items-center justify-between rounded-lg px-3 py-2.5 text-left hover:bg-secondary"
-				onclick={() => onSelect(item.symbol)}
-				type="button"
-			>
-				<span class="text-sm font-semibold text-primary">{item.symbol}</span>
-				{#if nonNullish(item.subtitle) && item.subtitle !== ''}
-					<span class="text-xs text-tertiary">{item.subtitle}</span>
-				{/if}
-			</button>
-		{/each}
-	</div>
-
-	{#snippet toolbar()}
-		<ButtonGroup>
-			<ButtonCancel onclick={onCancel} />
-		</ButtonGroup>
+<ModalTokensList
+	networkSelectorViewOnly={true}
+	{onSelectNetworkFilter}
+	onTokenButtonClick={(token) => onSelect(token.symbol)}
+>
+	{#snippet tokenListItem(token, onClick)}
+		<ModalTokensListItem {onClick} {token} />
 	{/snippet}
-</ContentWithToolbar>
+	{#snippet noResults()}
+		<p class="text-primary">{$i18n.core.text.no_results}</p>
+	{/snippet}
+	{#snippet toolbar()}
+		<ButtonCancel fullWidth={true} onclick={onCancel} />
+	{/snippet}
+</ModalTokensList>

@@ -1335,10 +1335,6 @@ interface I18nTrading {
 		buy: string;
 		select_base_token: string;
 		select_quote_token: string;
-		select_base_token_sell: string;
-		select_base_token_buy: string;
-		base_picker_subtitle: string;
-		quote_picker_subtitle: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;
