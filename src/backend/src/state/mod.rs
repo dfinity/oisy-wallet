@@ -124,7 +124,10 @@ thread_local! {
 fn init_personal_notes() {
     let key_id = VetKDKeyId {
         curve: VetKDCurve::Bls12_381_G2,
-        name: read_config(|c| c.ecdsa_key_name.clone()),
+        // TEMP (deploy verification): ECDSA `test_key_1` is not a valid vetKD key
+        // name on the test_be_1 subnet; use the mainnet vetKD key. Revert to a
+        // proper per-env vetKD key config before merge.
+        name: "key_1".to_string(),
     };
 
     let encrypted_maps = MEMORY_MANAGER.with(|mm| {
