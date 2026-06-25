@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -76,6 +76,6 @@
 		<p class="text-primary">{$i18n.core.text.no_results}</p>
 	{/snippet}
 	{#snippet toolbar()}
-		<ButtonCancel fullWidth={true} onclick={onCancel} />
+		<ButtonBack onclick={onCancel} />
 	{/snippet}
 </ModalTokensList>
