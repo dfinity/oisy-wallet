@@ -3,6 +3,8 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EmptyNotes from '$lib/components/notes/EmptyNotes.svelte';
 	import InputPersonalNote from '$lib/components/notes/InputPersonalNote.svelte';
@@ -283,17 +285,21 @@
 						</p>
 					{/if}
 
-					{#if filteredNotes.length === 0}
-						<p class="py-6 text-tertiary" data-tid={NOTES_NO_RESULTS}>
-							{$i18n.notes.text.no_results}
-						</p>
-					{:else}
-						<ul class="py-2" data-tid={NOTES_LIST}>
+					<List noPadding styleClass="py-2" testId={NOTES_LIST}>
+						{#if filteredNotes.length === 0}
+							<ListItem>
+								<span class="text-secondary" data-tid={NOTES_NO_RESULTS}>
+									{$i18n.notes.text.no_results}
+								</span>
+							</ListItem>
+						{:else}
 							{#each filteredNotes as note (note.id)}
-								<NoteListItem {note} onRetry={load} onSelect={openEditor} />
+								<ListItem>
+									<NoteListItem {note} onRetry={load} onSelect={openEditor} />
+								</ListItem>
 							{/each}
-						</ul>
-					{/if}
+						{/if}
+					</List>
 				{/if}
 
 				{#snippet toolbar()}

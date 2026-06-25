@@ -47,10 +47,7 @@
 </script>
 
 {#if isPersonalNoteDecryptionFailure(note)}
-	<li
-		class="flex items-center gap-3 border-b border-brand-subtle-10 py-4 last-of-type:border-b-0"
-		data-tid={NOTES_LIST_ITEM}
-	>
+	<div class="flex w-full items-center gap-3 py-3" data-tid={NOTES_LIST_ITEM}>
 		<span class="min-w-0 flex-1 text-error-primary">{$i18n.notes.text.decryption_failed}</span>
 		<Button
 			ariaLabel={$i18n.core.text.retry}
@@ -61,28 +58,27 @@
 		>
 			{$i18n.core.text.retry}
 		</Button>
-	</li>
+	</div>
 {:else}
-	<li class="border-b border-brand-subtle-10 last-of-type:border-b-0" data-tid={NOTES_LIST_ITEM}>
-		<button
-			class="flex w-full items-center gap-3 py-4 text-left"
-			onclick={() => onSelect(note.id)}
-			type="button"
-		>
-			<span class="flex min-w-0 flex-1 flex-col gap-1">
-				<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
-					{parts.title}
+	<button
+		class="flex w-full items-center gap-3 py-3 text-left"
+		data-tid={NOTES_LIST_ITEM}
+		onclick={() => onSelect(note.id)}
+		type="button"
+	>
+		<span class="flex min-w-0 flex-1 flex-col gap-1">
+			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+				{parts.title}
+			</span>
+			{#if parts.body !== ''}
+				<span style="overflow-wrap: anywhere;" class="truncate text-tertiary">
+					{parts.body}
 				</span>
-				{#if parts.body !== ''}
-					<span style="overflow-wrap: anywhere;" class="truncate text-tertiary">
-						{parts.body}
-					</span>
-				{/if}
-				<span class="text-xs text-tertiary">{timestamp}</span>
-			</span>
-			<span class="shrink-0 text-tertiary">
-				<IconChevronRight />
-			</span>
-		</button>
-	</li>
+			{/if}
+			<span class="text-xs text-tertiary">{timestamp}</span>
+		</span>
+		<span class="shrink-0 text-tertiary">
+			<IconChevronRight />
+		</span>
+	</button>
 {/if}
