@@ -1943,6 +1943,7 @@
 			"add_title": "Add new note",
 			"edit_note": "Edit note",
 			"delete_note": "Delete note",
+			"delete_confirm_text": "This will delete the note '$note'. This action cannot be undone.",
 			"back": "Back",
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create a private, encrypted note to keep details safe alongside your wallet.",
@@ -1958,8 +1959,6 @@
 			"created_updated": "Created $created · Updated $updated",
 			"too_long": "Note must be $maxCharacters characters or fewer.",
 			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
-			"deleted": "Note deleted",
-			"undo": "Undo",
 			"decryption_failed": "Couldn't decrypt this note"
 		},
 		"alt": {
@@ -1969,8 +1968,7 @@
 		"error": {
 			"load": "Couldn't load your notes. Please try again.",
 			"save": "Couldn't save your note. Please try again.",
-			"delete": "Couldn't delete your note. Please try again.",
-			"restore": "Couldn't restore your note. Please try again."
+			"delete": "Couldn't delete your note. Please try again."
 		}
 	},
 	"signer": {

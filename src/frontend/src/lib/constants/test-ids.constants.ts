@@ -285,6 +285,7 @@ export const NOTES_INPUT = 'notes-input';
 export const NOTES_SAVE_BUTTON = 'notes-save-button';
 export const NOTES_CANCEL_BUTTON = 'notes-cancel-button';
 export const NOTES_EDITOR_DELETE_BUTTON = 'notes-editor-delete-button';
+export const NOTES_DELETE_CONFIRM_BUTTON = 'notes-delete-confirm-button';
 export const NOTES_UNDO_BUTTON = 'notes-undo-button';
 export const NOTES_DELETED_SNACKBAR = 'notes-deleted-snackbar';
 

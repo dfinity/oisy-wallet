@@ -40,6 +40,23 @@ export const neutralizePersonalNoteText = (value: string): string =>
 	value.replace(BIDI_CONTROL_CHARACTERS, '');
 
 /**
+ * A short single-line snippet of a note for the delete-confirmation prompt:
+ * bidi-neutralized, whitespace-collapsed, and truncated to `max` Unicode code
+ * points with an ellipsis (so the user can recognise which note they're deleting).
+ */
+export const personalNoteSnippet = ({
+	value,
+	max = 15
+}: {
+	value: string;
+	max?: number;
+}): string => {
+	const text = neutralizePersonalNoteText(value).replace(/\s+/gu, ' ').trim();
+	const codePoints = [...text];
+	return codePoints.length > max ? `${codePoints.slice(0, max).join('')}…` : text;
+};
+
+/**
  * The list-row preview, split for display: the note's **first line** is the
  * de-facto `title` (shown bold), the **remaining lines** become the `body`
  * (whitespace-collapsed to a single line). Both are bidi-neutralized. A note

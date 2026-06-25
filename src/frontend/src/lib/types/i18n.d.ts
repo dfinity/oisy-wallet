@@ -1548,6 +1548,7 @@ interface I18nNotes {
 		add_title: string;
 		edit_note: string;
 		delete_note: string;
+		delete_confirm_text: string;
 		back: string;
 		empty_title: string;
 		empty_subtitle: string;
@@ -1563,12 +1564,10 @@ interface I18nNotes {
 		created_updated: string;
 		too_long: string;
 		cap_reached: string;
-		deleted: string;
-		undo: string;
 		decryption_failed: string;
 	};
 	alt: { edit: string; delete: string };
-	error: { load: string; save: string; delete: string; restore: string };
+	error: { load: string; save: string; delete: string };
 }
 
 interface I18nSigner {

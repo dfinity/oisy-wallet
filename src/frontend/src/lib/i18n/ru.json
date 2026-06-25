@@ -1943,6 +1943,7 @@
 			"add_title": "",
 			"edit_note": "",
 			"delete_note": "",
+			"delete_confirm_text": "",
 			"back": "",
 			"empty_title": "",
 			"empty_subtitle": "",
@@ -1958,8 +1959,6 @@
 			"created_updated": "",
 			"too_long": "",
 			"cap_reached": "",
-			"deleted": "",
-			"undo": "",
 			"decryption_failed": ""
 		},
 		"alt": {
@@ -1969,8 +1968,7 @@
 		"error": {
 			"load": "",
 			"save": "",
-			"delete": "",
-			"restore": ""
+			"delete": ""
 		}
 	},
 	"signer": {
