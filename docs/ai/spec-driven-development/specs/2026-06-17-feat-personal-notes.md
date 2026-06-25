@@ -365,9 +365,9 @@ A new `NotesModal.svelte` (new folder
   scrolls** (its own scrollbar), while the **created/updated line and the Edit/Delete
   actions stay pinned below it**. The created/updated line reads "Created {date}" /
   "Created {date} · Updated {date}". Actions: **Edit** (secondary) and **Delete**. The
-  **footer button is the primary action**, labelled **"Back"** when the View was
-  opened from the list, or **"OK"** when it was reached by returning from the editor
-  (after Save or Cancel of an edit) — both return to the list. The header **(X)**
+  **footer button is the primary action**, always labelled **"Back"** (whether the
+  View was opened from the list or reached by returning from the editor), and returns
+  to the list. The header **(X)**
   closes the whole modal (read-only, so
   there is no unsaved-data risk).
 - **Add / edit:** the body switches to (or a sub-step opens) an
@@ -388,8 +388,7 @@ A new `NotesModal.svelte` (new folder
 
   **After Save / Cancel (navigation):** a **new** note returns to the **list** on
   **both Save and Cancel** (it never enters the View). **Editing an existing** note
-  returns to that note's **View** (whose footer now reads **"OK"**) on **both Save and
-  Cancel**. **Delete** (from the editor's Delete or the View's Delete) returns to the
+  returns to that note's **View** on **both Save and Cancel**. **Delete** (from the editor's Delete or the View's Delete) returns to the
   **list** with the undo snackbar.
 
   **Focus on open:** the textarea is **auto-focused** the moment the editor opens so
@@ -554,8 +553,8 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
   "Created {$date}" or "Created {$created} · Updated {$updated}" (the `·` joins
   them). `{$date}` is the localized relative/absolute time.
 - **Buttons:** reuse core "Cancel" / "Save" / "Add note"; "Delete" action.
-- **View mode:** footer button **"Back"** (opened from the list) / **"OK"** (after an
-  edit); **"Edit note"** (secondary) and **"Delete"** actions.
+- **View mode:** footer button **"Back"**; **"Edit note"** (secondary) and
+  **"Delete"** actions.
 - **Too-long error:** "Note must be {$maxCharacters} characters or fewer."
 - **Cap reached:** "You've reached the maximum of {$max} saved notes. Delete one
   to add a new note."
@@ -756,9 +755,9 @@ service mappers + store sort, decryption-failure isolation, following existing
   **splitting the text into text / URL segments and rendering anchors as real Svelte
   elements** — escape every segment, build the `href` only from `http`/`https`
   matches (never `javascript:` / `data:`), and **never `{@html}` raw input**. Footer
-  button is **primary**, reading **"Back"** (opened from list) or **"OK"** (returned
-  from editor); **Edit is secondary**, **Delete** is the danger action. Navigation:
-  row tap → view; view Edit → editor; **existing-note Save/Cancel → its view ("OK");
+  button is **primary**, always reading **"Back"**; **Edit is secondary**, **Delete**
+  is the danger action. Navigation:
+  row tap → view; view Edit → editor; **existing-note Save/Cancel → its view;
   new-note Save/Cancel → list; Delete → list**.
 - **Client-side search.** A "Search note" field filters the store's decrypted notes
   by case-insensitive substring over the full text (a derived/filtered list — no
@@ -877,9 +876,8 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       (`rel="noopener noreferrer"`); other schemes (`javascript:`, `data:`, …) are
       **not** linkified; links are built without `{@html}` of raw input. **A long note
       scrolls inside the box** while the created/updated line and Edit/Delete stay
-      pinned. The view's footer is the **primary** button reading **"Back"** (from
-      list) or **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is
-      present.
+      pinned. The view's footer is the **primary** button always reading **"Back"**;
+      **Edit** is secondary, **Delete** is present.
 - [ ] The desktop modal **sizes to content** with a **minimum ~560px** and a **max of
       ~75vh**, both `min(…, 100%)`-clamped to the window; past the max the list /
       editor / view-box scrolls internally with header + footer pinned; the list
