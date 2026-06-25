@@ -6,6 +6,7 @@ import type {
 	DeletePersonalNoteRequest,
 	GetAllowedCyclesResponse,
 	PersonalNoteEntry,
+	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
@@ -120,15 +121,6 @@ export const exchangeRateEnabled = async ({
 	return exchangeRateEnabled({ certified });
 };
 
-export const onramperEnabled = async ({
-	identity,
-	certified
-}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
-	const { onramperEnabled } = await backendCanister({ identity });
-
-	return onramperEnabled({ certified });
-};
-
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
@@ -176,7 +168,7 @@ export const allowSigning = async ({
 export const signOnramperWidgetUrl = async ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<string> => {
+}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<SignOnramperWidgetUrlResponse> => {
 	const { signOnramperWidgetUrl } = await backendCanister({ identity });
 
 	return signOnramperWidgetUrl(params);

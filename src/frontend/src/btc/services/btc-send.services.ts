@@ -236,7 +236,7 @@ export const sendBtc = async ({
 	identity,
 	onProgress,
 	...rest
-}: SendBtcParams): Promise<void> => {
+}: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
 	await addPendingBtcTransaction({
@@ -250,6 +250,8 @@ export const sendBtc = async ({
 	onProgress?.();
 
 	await waitAndTriggerWallet();
+
+	return txid;
 };
 
 const send = async ({

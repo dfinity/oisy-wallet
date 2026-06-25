@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Theme, themeStore } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -48,6 +47,8 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
+	import { themeStore } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';

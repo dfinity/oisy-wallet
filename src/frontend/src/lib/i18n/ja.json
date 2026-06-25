@@ -7,6 +7,8 @@
 			"back": "戻る",
 			"done": "完了",
 			"close": "閉じる",
+			"collapse": "折りたたむ",
+			"expand": "展開",
 			"change": "変更",
 			"continue": "続行",
 			"apply": "適用",
@@ -1231,7 +1233,8 @@
 			"buy": "購入",
 			"buy_dev": "購入（開発環境）",
 			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
-			"unavailable_description": "URL署名の導入により、このプロセスのセキュリティをさらに強化しているため、現在トークンの購入はオフになっています。作業が完了次第、再び有効になります。",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
 		},
 		"actions": {
@@ -1577,6 +1580,7 @@
 			"network": "ネットワーク",
 			"amount": "数量",
 			"hex_data": "HEXデータ",
+			"unreviewed_instructions": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "",
@@ -1596,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "接続済みアプリ",
 			"no_connected_apps": "現在接続されているアプリはありません。",
+			"disconnect_all": "すべて切断",
+			"disconnect_app": "$name を切断",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2081,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
 				"action": "ステータスを確認"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2099,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAOで稼ぐ"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

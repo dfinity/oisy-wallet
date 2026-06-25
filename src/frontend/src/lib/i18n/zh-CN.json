@@ -7,6 +7,8 @@
 			"back": "返回",
 			"done": "完成",
 			"close": "关闭",
+			"collapse": "收起",
+			"expand": "展开",
 			"change": "更改",
 			"continue": "继续",
 			"apply": "应用",
@@ -1231,7 +1233,8 @@
 			"buy": "购买",
 			"buy_dev": "购买（开发环境）",
 			"unavailable_title": "购买代币暂时不可用",
-			"unavailable_description": "购买代币目前已关闭，我们正在通过引入 URL 签名进一步增强此流程的安全性。工作完成后将立即重新开启。",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "在此期间，您仍然可以通过分享您的钱包地址来接收代币。"
 		},
 		"actions": {
@@ -1577,6 +1580,7 @@
 			"network": "网络",
 			"amount": "金额",
 			"hex_data": "HEX 数据",
+			"unreviewed_instructions": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "",
@@ -1596,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "已连接的应用",
 			"no_connected_apps": "当前没有已连接的应用。",
+			"disconnect_all": "断开所有连接",
+			"disconnect_app": "断开与 $name 的连接",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2081,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "使用OISY并赚取！第6集已上线 🎉",
 				"action": "查看状态"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2099,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "通过Gold DAO赚取"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

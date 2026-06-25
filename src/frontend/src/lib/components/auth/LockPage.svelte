@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { themeStore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import ButtonsSignIn from '$lib/components/auth/ButtonsSignIn.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
@@ -14,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { themeStore } from '$lib/stores/theme.store';
 	import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 

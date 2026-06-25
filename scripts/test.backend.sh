@@ -73,5 +73,16 @@ export POCKET_IC_MUTE_SERVER=1
 
 # Run tests
 
+# Each integration test spins up a PocketIC instance holding several canisters,
+# so peak memory scales with test parallelism. On CI's 4-vCPU / 16 GB runners,
+# parallelism can exhaust memory and crash the PocketIC server mid-run
+# (connection reset -> SIGABRT). With the larger ic-vetkeys backend wasm, even
+# 2 threads crashed near the end of the run (~instance 191 of ~194), so run the
+# CI suite single-threaded — overridable via RUST_TEST_THREADS — while leaving
+# local runs at full speed.
+if [ -n "${CI:-}" ]; then
+  export RUST_TEST_THREADS="${RUST_TEST_THREADS:-1}"
+fi
+
 echo "Running backend integration tests."
 cargo test -p backend "${@}"

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';

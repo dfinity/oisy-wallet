@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 
 	interface Props {
 		ariaLabel: string;

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
@@ -18,6 +17,7 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isIOS } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';

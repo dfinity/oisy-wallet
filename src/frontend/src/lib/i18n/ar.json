@@ -7,6 +7,8 @@
 			"back": "رجوع",
 			"done": "تم",
 			"close": "إغلاق",
+			"collapse": "طي",
+			"expand": "توسيع",
 			"change": "تغيير",
 			"continue": "",
 			"apply": "تنفيذ",
@@ -1231,7 +1233,8 @@
 			"buy": "شراء",
 			"buy_dev": "شراء (بيئة تطوير)",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
-			"unavailable_description": "شراء الرموز معطل حاليًا بينما نواصل تحسين أمان هذه العملية من خلال إضافة توقيع عناوين URL. ستتم إعادة تفعيله بمجرد اكتمال العمل.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
 		},
 		"actions": {
@@ -1577,6 +1580,7 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",
@@ -1596,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "التطبيقات المتصلة",
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
+			"disconnect_all": "قطع اتصال الكل",
+			"disconnect_app": "قطع الاتصال بـ $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2081,6 +2087,11 @@
 				"title": "",
 				"description": "",
 				"action": ""
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2099,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": ""
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

@@ -7,6 +7,8 @@
 			"back": "Atrás",
 			"done": "Hecho",
 			"close": "Cerrar",
+			"collapse": "Contraer",
+			"expand": "Expandir",
 			"change": "Cambiar",
 			"continue": "Continuar",
 			"apply": "Aplicar",
@@ -1231,7 +1233,8 @@
 			"buy": "Comprar",
 			"buy_dev": "Comprar (Entorno de Desarrollo)",
 			"unavailable_title": "La compra de tokens no está disponible temporalmente",
-			"unavailable_description": "La compra de tokens está desactivada actualmente mientras seguimos mejorando la seguridad de este proceso mediante la introducción de la firma de URL. Se reactivará en cuanto se complete el trabajo.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Mientras tanto, aún puedes recibir tokens compartiendo la dirección de tu billetera."
 		},
 		"actions": {
@@ -1577,6 +1580,7 @@
 			"network": "Red",
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "",
@@ -1596,6 +1600,8 @@
 			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Aplicaciones conectadas",
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
+			"disconnect_all": "Desconectar todas",
+			"disconnect_app": "Desconectar $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -2081,6 +2087,11 @@
 				"title": "OISY Sprinkles",
 				"description": "¡Usa OISY y GANA! El episodio 6 está en vivo 🎉",
 				"action": "Ver estado"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2099,6 +2110,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gana con Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

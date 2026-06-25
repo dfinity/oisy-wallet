@@ -35,15 +35,24 @@
 			}
 			body {
 				margin: 0;
-				padding: 28px 16px 60px;
+				padding: 28px 16px 40px;
 				font-family: var(--font-sans);
 				background: #f3f4f6;
 				color: var(--text);
 				line-height: 1.5;
+				/* fixed to the viewport so the stage caps at the window (content scrolls inside) */
+				height: 100vh;
+				display: flex;
+				flex-direction: column;
 			}
 			.wrap {
 				max-width: 720px;
+				width: 100%;
 				margin: 0 auto;
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				min-height: 0;
 			}
 			h1.page {
 				font-size: 18px;
@@ -89,11 +98,12 @@
 				color: var(--text-secondary);
 				cursor: pointer;
 			}
-			/* stage */
+			/* stage — desktop: stretches to fill the remaining window height */
 			.stage {
 				position: relative;
 				overflow: hidden;
-				min-height: 800px;
+				flex: 1;
+				min-height: 0;
 				background: rgba(40, 44, 52, 0.55);
 				border-radius: 16px;
 				display: flex;
@@ -245,7 +255,13 @@
 			.modal {
 				width: 100%;
 				max-width: 480px;
-				height: 640px;
+				/* Size to content, but: at least a comfortable minimum (so short notes/lists
+				   aren't squat), and at most 75% of the window for big content (then the body
+				   scrolls inside). Both are clamped to the available space (100% of the stage),
+				   so on short screens the window/padding wins. */
+				height: auto;
+				min-height: min(560px, 100%);
+				max-height: min(75vh, 100%);
 				background: var(--surface);
 				border-radius: var(--radius-modal);
 				overflow: hidden;
@@ -260,14 +276,15 @@
 			}
 			.modal-body {
 				flex: 1;
+				min-height: 0;
 				overflow: auto;
 			}
-			/* Mobile: full-page modal (matches OISY Contacts on mobile) */
+			/* Mobile: fixed phone width, but dynamic height like desktop (fills the window,
+			   ends above the bottom); the full-page modal fills it and scrolls internally. */
 			.stage.mobile {
+				width: min(390px, 100%);
 				max-width: 390px;
 				margin: 0 auto;
-				height: 760px;
-				min-height: 760px;
 				padding: 0;
 				align-items: stretch;
 				justify-content: stretch;
@@ -276,6 +293,9 @@
 				max-width: none;
 				width: 100%;
 				height: 100%;
+				/* mobile fills the phone frame — ignore the desktop min/max caps */
+				min-height: 0;
+				max-height: none;
 				border-radius: 0;
 				box-shadow: none;
 				display: flex;
@@ -450,8 +470,8 @@
 			}
 			.add-pill {
 				flex: none;
-				background: var(--blue-soft);
-				color: var(--blue);
+				background: var(--blue);
+				color: #fff;
 				border: none;
 				border-radius: var(--radius-input);
 				padding: 0 18px;
@@ -470,33 +490,40 @@
 			}
 			.note-row {
 				display: flex;
-				align-items: flex-start;
-				gap: 14px;
-				padding: 12px 4px;
+				align-items: center;
+				gap: 12px;
+				padding: 12px 8px;
+				border-radius: 12px;
+				cursor: pointer;
 			}
-			.note-row .ava {
-				width: 48px;
-				height: 48px;
-				border-radius: 50%;
-				background: var(--blue-soft);
-				color: var(--blue);
-				display: grid;
-				place-items: center;
-				font-size: 22px;
-				flex: none;
+			.note-row:hover {
+				background: var(--grey-soft);
 			}
 			.note-row .mid {
 				flex: 1;
 				min-width: 0;
 			}
+			.note-row .chev {
+				flex: none;
+				color: var(--text-tertiary);
+				font-size: 18px;
+			}
 			.note-row .body {
 				font-size: 16px;
 				font-weight: 600;
 				color: var(--text);
-				display: -webkit-box;
-				-webkit-line-clamp: 2;
-				-webkit-box-orient: vertical;
+				white-space: nowrap;
 				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.note-row .sub {
+				font-size: 14px;
+				font-weight: 400;
+				color: var(--text-secondary);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				margin-top: 2px;
 			}
 			.note-row .time {
 				font-size: 13px;
@@ -519,6 +546,60 @@
 			}
 			.iconbtn.danger {
 				color: var(--danger);
+			}
+			/* read-only view mode */
+			.view-wrap {
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+				min-height: 0;
+			}
+			/* in view mode, the body is a flex column so the note box scrolls (not the body) */
+			.modal.is-view .modal-body {
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+			.note-box {
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				padding: 16px 18px;
+				min-height: 124px; /* ~4 rows so the note area is always clear */
+				background: var(--surface);
+				flex: 1 1 auto;
+				overflow: auto;
+			}
+			.note-box .nv-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--navy);
+				line-height: 1.5;
+				white-space: pre-wrap;
+				word-break: break-word;
+			}
+			.note-box .nv-body {
+				font-size: 15px;
+				line-height: 1.6;
+				color: var(--text);
+				white-space: pre-wrap;
+				word-break: break-word;
+				margin-top: 8px;
+			}
+			.note-box a {
+				color: var(--blue);
+				text-decoration: underline;
+				word-break: break-all;
+			}
+			.view-meta {
+				font-size: 13px;
+				color: var(--text-tertiary);
+				margin-top: 18px;
+			}
+			.view-actions {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				margin-top: 24px;
 			}
 			.cap-banner {
 				display: flex;
@@ -801,20 +882,6 @@
 
 				<div class="toast-pinned" id="toast"></div>
 			</div>
-
-			<p class="foot-note" style="text-align: left">
-				Interaction wireframe, styled to the current OISY Contacts modal. Starts on the user menu —
-				click "Notes" (added right under "Contacts") to open the Notes modal. Close it with X, the
-				Close button, or by clicking the dimmed area (which returns to the menu); the editor step
-				has no X and ignores outside clicks. The avatar (top-right) reopens the menu. Each saved
-				note row then shows a pencil (edit) and a trash (delete) action on the right. Deleting shows
-				a pinned, auto-dismissing "Note deleted / Undo" snackbar at the bottom (never lost to list
-				scroll). The add/edit editor is a **full-page step** inside the modal — a step in the
-				floating card on desktop, and full-screen on mobile (matching OISY Contacts) — which is more
-				keyboard-robust than a bottom sheet for text entry. Toggle "Simulate: at note cap" to see
-				the disabled add + cap banner (editing and deleting stay enabled). Demo character limit
-				lowered to 100 to show validation (real limit 2,000, error-only).
-			</p>
 		</div>
 
 		<script>
@@ -900,25 +967,70 @@
 				function metaLine(n) {
 					return n.edited ? 'Updated ' + n.updated : 'Created ' + n.created;
 				}
+				// View shows the created date, plus the updated time once edited.
+				function fullMeta(n) {
+					return 'Created ' + n.created + (n.edited ? ' · Updated ' + n.updated : '');
+				}
+
+				// Safe linkify: escape everything, then turn only http(s) URLs into links
+				// that open a new tab. Anchors are built from escaped text, never {@html}
+				// of raw input; this is wireframe-only — the real app does this in Svelte.
+				function linkify(text) {
+					var t = text || '';
+					var re = /(https?:\/\/[^\s]+)/g;
+					var out = '';
+					var last = 0;
+					var m;
+					while ((m = re.exec(t)) !== null) {
+						out += esc(t.slice(last, m.index));
+						// trim trailing sentence punctuation off the URL
+						var url = m[0].replace(/[.,;:!?)\]}'"]+$/, '');
+						out +=
+							'<a href="' +
+							esc(url) +
+							'" target="_blank" rel="noopener noreferrer">' +
+							esc(url) +
+							'</a>';
+						out += esc(m[0].slice(url.length));
+						last = m.index + m[0].length;
+					}
+					out += esc(t.slice(last));
+					return out;
+				}
+
+				// Preview = first line as a bold title (1 line, ellipsis); the remaining
+				// lines collapse (newlines/whitespace → single space) into a lighter 2nd
+				// line (1 line, ellipsis).
+				function notePreview(text) {
+					var t = text || '';
+					var nl = t.indexOf('\n');
+					var title = (nl === -1 ? t : t.slice(0, nl)).trim();
+					var rest = (nl === -1 ? '' : t.slice(nl + 1)).replace(/\s+/g, ' ').trim();
+					// If the note starts with blank line(s), fall back to the first non-empty content as title.
+					if (!title && rest) {
+						title = rest;
+						rest = '';
+					}
+					return { title: title, rest: rest };
+				}
 
 				function rowHtml(n) {
+					var p = notePreview(n.text);
+					// The whole row opens the read-only view (edit/delete live there).
 					return (
-						'<div class="note-row">' +
-						'<div class="ava"><i class="ti ti-note" aria-hidden="true"></i></div>' +
-						'<div class="mid"><div class="body">' +
-						esc(n.text) +
+						'<div class="note-row" data-action="view" data-id="' +
+						n.id +
+						'" role="button" tabindex="0">' +
+						'<div class="mid">' +
+						'<div class="body">' +
+						esc(p.title) +
 						'</div>' +
+						(p.rest ? '<div class="sub">' + esc(p.rest) + '</div>' : '') +
 						'<div class="time">' +
 						esc(metaLine(n)) +
 						'</div></div>' +
-						'<div class="acts">' +
-						'<button class="iconbtn" data-action="edit" data-id="' +
-						n.id +
-						'" aria-label="Edit note"><i class="ti ti-pencil"></i></button>' +
-						'<button class="iconbtn danger" data-action="delete" data-id="' +
-						n.id +
-						'" aria-label="Delete note"><i class="ti ti-trash"></i></button>' +
-						'</div></div>'
+						'<i class="ti ti-chevron-right chev" aria-hidden="true"></i>' +
+						'</div>'
 					);
 				}
 
@@ -1094,6 +1206,51 @@
 					bindInput();
 				}
 
+				/* ---------- read-only view (clickable links) ---------- */
+				function renderView() {
+					var n = state.notes.filter(function (x) {
+						return x.id === state.viewNoteId;
+					})[0];
+					if (!n) {
+						state.screen = 'list';
+						render();
+						return;
+					}
+					titleEl.textContent = 'Note';
+					// First line = bold title (like the list); remaining lines = body, with
+					// line breaks preserved. Both linkified. Wrapped in a bordered box so the
+					// note area is visually distinct.
+					var nl = (n.text || '').indexOf('\n');
+					var vTitle = nl === -1 ? n.text || '' : n.text.slice(0, nl);
+					var vBody = nl === -1 ? '' : n.text.slice(nl + 1);
+					bodyEl.innerHTML =
+						'<div class="view-wrap">' +
+						'<div class="note-box">' +
+						'<div class="nv-title">' +
+						linkify(vTitle) +
+						'</div>' +
+						(vBody ? '<div class="nv-body">' + linkify(vBody) + '</div>' : '') +
+						'</div>' +
+						'<div class="view-meta">' +
+						esc(fullMeta(n)) +
+						'</div>' +
+						'<div class="view-actions">' +
+						'<button class="btn btn-soft btn-block" data-action="edit" data-id="' +
+						n.id +
+						'"><i class="ti ti-pencil"></i> Edit note</button>' +
+						'<button class="form-delete" data-action="delete" data-id="' +
+						n.id +
+						'" style="align-self:center;margin-top:8px"><i class="ti ti-trash"></i> Delete</button>' +
+						'</div>' +
+						'</div>';
+					// "Back" when opened from the list; "OK" after returning from the editor.
+					// Primary action; Edit is secondary.
+					footEl.innerHTML =
+						'<button class="btn btn-primary btn-block" data-action="view-exit">' +
+						(state.viewLabel === 'OK' ? 'OK' : 'Back') +
+						'</button>';
+				}
+
 				function bindInput() {
 					var ta = document.getElementById('note-input');
 					if (!ta) return;
@@ -1147,6 +1304,7 @@
 					// Toggle the menu popover, the modal, and the avatar (hidden while the modal is open).
 					menuEl.style.display = state.menuOpen ? '' : 'none';
 					modal.style.display = state.modalOpen ? '' : 'none';
+					modal.classList.toggle('is-view', state.modalOpen && state.screen === 'view');
 					document.querySelector('.avatar').style.display = state.modalOpen ? 'none' : '';
 
 					if (!state.modalOpen) {
@@ -1166,6 +1324,10 @@
 						renderForm();
 						return;
 					}
+					if (state.screen === 'view') {
+						renderView();
+						return;
+					}
 					if (state.notes.length === 0) renderEmpty();
 					else renderList();
 					showToast();
@@ -1176,7 +1338,8 @@
 					if (!ta) return;
 					var v = ta.value.trim();
 					if (!v || v.length > MAX) return;
-					if (state.editingId) {
+					var isNew = !state.editingId;
+					if (!isNew) {
 						var n = state.notes.filter(function (x) {
 							return x.id === state.editingId;
 						})[0];
@@ -1197,9 +1360,17 @@
 						].concat(state.notes);
 					}
 					state.justDeleted = null;
-					state.screen = 'list';
-					state.editingId = null;
 					state.draft = '';
+					// New note → back to the list. Edited existing → its view (button becomes "OK").
+					if (isNew) {
+						state.screen = 'list';
+						state.editingId = null;
+					} else {
+						state.viewNoteId = state.editingId;
+						state.viewLabel = 'OK';
+						state.screen = 'view';
+						state.editingId = null;
+					}
 					render();
 				}
 
@@ -1220,6 +1391,12 @@
 				// collapsed line breaks, both Created/Updated rows, and a spread of
 				// timestamp formats (relative + current-year date + prior-year date).
 				var testNotes = [
+					{
+						id: 't0',
+						text: 'Useful links\nDocs: https://internetcomputer.org\nWallet: https://oisy.com — open a note to click these.',
+						created: 'just now',
+						edited: false
+					},
 					{
 						id: 't1',
 						text: '巴秋子面發世步但讀老下刃吧的，在色像月馬：故乙師司功，尺西玩冬你人，何空昌内交，西去吃飛羽虫，要北水見巴。日月明王主，因назад привет, мир — 多語言測試。',
@@ -1293,6 +1470,17 @@
 						openNotes();
 					} else if (a === 'close-modal' || a === 'close-screen') {
 						closeModal();
+					} else if (a === 'view') {
+						// Open the read-only view from the list (footer button = "Back").
+						state.viewNoteId = id;
+						state.viewLabel = 'Back';
+						state.screen = 'view';
+						render();
+					} else if (a === 'view-exit') {
+						// "Back" / "OK" → return to the list.
+						state.screen = 'list';
+						state.viewNoteId = null;
+						render();
 					} else if (a === 'add') {
 						if (state.atCap) return;
 						state.editingId = null;
@@ -1310,8 +1498,15 @@
 						state.screen = 'form';
 						render();
 					} else if (a === 'cancel') {
-						state.screen = 'list';
-						state.editingId = null;
+						// New note → list. Editing existing → back to its view (button "OK").
+						if (state.editingId) {
+							state.viewNoteId = state.editingId;
+							state.viewLabel = 'OK';
+							state.screen = 'view';
+							state.editingId = null;
+						} else {
+							state.screen = 'list';
+						}
 						render();
 					} else if (a === 'save') {
 						commitSave();
@@ -1327,10 +1522,10 @@
 						state.notes = state.notes.filter(function (x) {
 							return x.id !== delId;
 						});
-						if (a === 'delete-current') {
-							state.screen = 'list';
-							state.editingId = null;
-						}
+						// Delete (from view or the edit form) returns to the list with the undo toast.
+						state.screen = 'list';
+						state.editingId = null;
+						state.viewNoteId = null;
 						render();
 					} else if (a === 'undo') {
 						if (state.justDeleted) {
