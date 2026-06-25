@@ -1325,6 +1325,11 @@ interface I18nWallet_connect {
 	};
 }
 
+interface I18nTrading {
+	text: { tab_title: string; intro: string; learn_more: string };
+	provider_unavailable: { title: string; description: string };
+}
+
 interface I18nTransaction {
 	text: {
 		details: string;
@@ -1912,6 +1917,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;

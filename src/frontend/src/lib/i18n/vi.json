@@ -1653,6 +1653,17 @@
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "Chi tiết giao dịch",
