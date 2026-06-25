@@ -59,8 +59,7 @@
 			"specified_id": "proc5-daaaa-aaaar-qb5va-cai",
 			"remote": {
 				"id": {
-					"ic": "proc5-daaaa-aaaar-qb5va-cai",
-					"beta": "proc5-daaaa-aaaar-qb5va-cai",
+					"__default": "2vxsx-fae",
 					"test_be_1": "proc5-daaaa-aaaar-qb5va-cai",
 					"test_fe_1": "proc5-daaaa-aaaar-qb5va-cai",
 					"test_fe_2": "proc5-daaaa-aaaar-qb5va-cai",
