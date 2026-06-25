@@ -22,7 +22,12 @@
 		onSessionProposal,
 		onSessionRequest
 	} from '$lib/services/wallet-connect-handlers.services';
-	import { disconnectListener, resetListener } from '$lib/services/wallet-connect.services';
+	import {
+		disconnectListener,
+		resetListener,
+		resetListenerIfNoSessions,
+		syncSessions
+	} from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -134,7 +139,8 @@
 					onSessionDelete({
 						listener: newListener,
 						callback: () => {
-							resetListener();
+							// Only one session ended — keep the listener alive if other dApps remain connected.
+							resetListenerIfNoSessions();
 						}
 					}),
 				onSessionRequest: (sessionRequest: WalletKitTypes.SessionRequest) =>
@@ -147,6 +153,9 @@
 			// We have no active sessions, we can disconnect the listener.
 			if (Object.keys(sessions).length === 0) {
 				await disconnectListener();
+			} else {
+				// Seed the reactive sessions store with the restored sessions.
+				syncSessions();
 			}
 		} catch (err: unknown) {
 			toastsError({

@@ -492,37 +492,42 @@ export const idlFactory = ({ IDL }) => {
 
 	return IDL.Service({
 		add_liquidity: IDL.Func([AddLiquidityArgs], [AddLiquidityResult], []),
-		add_liquidity_amounts: IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [AddLiquiditAmountsResult]),
+		add_liquidity_amounts: IDL.Func(
+			[IDL.Text, IDL.Nat, IDL.Text],
+			[AddLiquiditAmountsResult],
+			
+		),
 		add_liquidity_async: IDL.Func([AddLiquidityArgs], [AddLiquidityAsyncResult], []),
 		add_pool: IDL.Func([AddPoolArgs], [AddPoolResult], []),
 		add_token: IDL.Func([AddTokenArgs], [AddTokenResult], []),
 		check_pools: IDL.Func([], [CheckPoolsResult], []),
 		claim: IDL.Func([IDL.Nat64], [ClaimResult], []),
-		claims: IDL.Func([IDL.Text], [ClaimsResult]),
-		get_user: IDL.Func([], [UserResult]),
-		icrc10_supported_standards: IDL.Func([], [IDL.Vec(Icrc10SupportedStandards)]),
-		icrc1_name: IDL.Func([], [IDL.Text]),
+		claims: IDL.Func([IDL.Text], [ClaimsResult], ),
+		get_user: IDL.Func([], [UserResult], ),
+		icrc10_supported_standards: IDL.Func([], [IDL.Vec(Icrc10SupportedStandards)], ),
+		icrc1_name: IDL.Func([], [IDL.Text], ),
 		icrc21_canister_call_consent_message: IDL.Func(
 			[icrc21_consent_message_request],
 			[icrc21_consent_message_response],
 			[]
 		),
 		icrc28_trusted_origins: IDL.Func([], [Icrc28TrustedOriginsResponse], []),
-		pools: IDL.Func([IDL.Opt(IDL.Text)], [PoolsResult]),
+		pools: IDL.Func([IDL.Opt(IDL.Text)], [PoolsResult], ),
 		remove_liquidity: IDL.Func([RemoveLiquidityArgs], [RemoveLiquidityResult], []),
 		remove_liquidity_amounts: IDL.Func(
 			[IDL.Text, IDL.Text, IDL.Nat],
-			[RemoveLiquidityAmountsResult]
+			[RemoveLiquidityAmountsResult],
+			
 		),
 		remove_liquidity_async: IDL.Func([RemoveLiquidityArgs], [RemoveLiquidityAsyncResult], []),
-		requests: IDL.Func([IDL.Opt(IDL.Nat64)], [RequestsResult]),
+		requests: IDL.Func([IDL.Opt(IDL.Nat64)], [RequestsResult], ),
 		send: IDL.Func([SendArgs], [SendResult], []),
 		swap: IDL.Func([SwapArgs], [SwapResult], []),
-		swap_amounts: IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [SwapAmountsResult]),
+		swap_amounts: IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [SwapAmountsResult], ),
 		swap_async: IDL.Func([SwapArgs], [SwapAsyncResult], []),
-		tokens: IDL.Func([IDL.Opt(IDL.Text)], [TokensResult]),
+		tokens: IDL.Func([IDL.Opt(IDL.Text)], [TokensResult], ),
 		update_token: IDL.Func([UpdateTokenArgs], [UpdateTokenResult], []),
-		user_balances: IDL.Func([IDL.Text], [UserBalancesResult]),
+		user_balances: IDL.Func([IDL.Text], [UserBalancesResult], ),
 		validate_add_liquidity: IDL.Func([], [ValidateAddLiquidityResult], []),
 		validate_remove_liquidity: IDL.Func([], [ValidateRemoveLiquidityResult], [])
 	});

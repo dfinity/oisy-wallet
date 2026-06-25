@@ -129,30 +129,31 @@ export const idlFactory = ({ IDL }) => {
 	const ResultSend = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 
 	return IDL.Service({
-		allowance: IDL.Func([IDL.Principal, IDL.Principal], [IDL.Nat]),
+		allowance: IDL.Func([IDL.Principal, IDL.Principal], [IDL.Nat], ),
 		approve: IDL.Func([IDL.Principal, IDL.Nat], [TxReceipt], []),
 		balance: IDL.Func([IDL.Opt(IDL.Principal)], [IDL.Nat64], []),
-		balanceOf: IDL.Func([IDL.Principal], [IDL.Nat]),
+		balanceOf: IDL.Func([IDL.Principal], [IDL.Nat], ),
 		burn: IDL.Func(
 			[IDL.Record({ canister_id: IDL.Principal, amount: IDL.Nat64 })],
 			[BurnResult],
 			[]
 		),
-		decimals: IDL.Func([], [IDL.Nat8]),
+		decimals: IDL.Func([], [IDL.Nat8], ),
 		events: IDL.Func(
 			[IDL.Record({ offset: IDL.Opt(IDL.Nat64), limit: IDL.Nat16 })],
-			[EventsConnection]
+			[EventsConnection],
+			
 		),
-		getBlockUsed: IDL.Func([], [IDL.Vec(IDL.Nat64)]),
-		getMetadata: IDL.Func([], [Metadata]),
+		getBlockUsed: IDL.Func([], [IDL.Vec(IDL.Nat64)], ),
+		getMetadata: IDL.Func([], [Metadata], ),
 		getTransaction: IDL.Func([IDL.Nat], [TxRecord], []),
 		getTransactions: IDL.Func([IDL.Nat, IDL.Nat], [IDL.Vec(TxRecord)], []),
-		get_map_block_used: IDL.Func([IDL.Nat64], [IDL.Opt(IDL.Nat64)]),
+		get_map_block_used: IDL.Func([IDL.Nat64], [IDL.Opt(IDL.Nat64)], ),
 		get_transaction: IDL.Func([TransactionId], [IDL.Opt(Event)], []),
 		halt: IDL.Func([], [], []),
-		historySize: IDL.Func([], [IDL.Nat]),
-		isBlockUsed: IDL.Func([IDL.Nat64], [IDL.Bool]),
-		logo: IDL.Func([], [IDL.Text]),
+		historySize: IDL.Func([], [IDL.Nat], ),
+		isBlockUsed: IDL.Func([IDL.Nat64], [IDL.Bool], ),
+		logo: IDL.Func([], [IDL.Text], ),
 		mint: IDL.Func([IDL.Principal, IDL.Nat], [MintResult], []),
 		mint_by_icp: IDL.Func([IDL.Opt(IDL.Vec(IDL.Nat8)), IDL.Nat64], [TxReceipt], []),
 		mint_by_icp_recover: IDL.Func(
@@ -160,15 +161,15 @@ export const idlFactory = ({ IDL }) => {
 			[TxReceipt],
 			[]
 		),
-		name: IDL.Func([], [IDL.Text]),
-		nameErc20: IDL.Func([], [IDL.Text]),
-		stats: IDL.Func([], [Stats]),
-		symbol: IDL.Func([], [IDL.Text]),
-		totalSupply: IDL.Func([], [IDL.Nat]),
+		name: IDL.Func([], [IDL.Text], ),
+		nameErc20: IDL.Func([], [IDL.Text], ),
+		stats: IDL.Func([], [Stats], ),
+		symbol: IDL.Func([], [IDL.Text], ),
+		totalSupply: IDL.Func([], [IDL.Nat], ),
 		transfer: IDL.Func([IDL.Principal, IDL.Nat], [TxReceipt], []),
 		transferErc20: IDL.Func([IDL.Principal, IDL.Nat], [TxReceiptLegacy], []),
 		transferFrom: IDL.Func([IDL.Principal, IDL.Principal, IDL.Nat], [TxReceipt], []),
-		wallet_balance: IDL.Func([], [IDL.Record({ amount: IDL.Nat64 })]),
+		wallet_balance: IDL.Func([], [IDL.Record({ amount: IDL.Nat64 })], ),
 		wallet_call: IDL.Func(
 			[
 				IDL.Record({

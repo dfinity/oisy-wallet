@@ -80,14 +80,14 @@ export interface MappedSolTransaction {
 	// rather than transferring funds. The `destination` then holds the delegate (spender),
 	// so the review must label it as an approval, not a send.
 	isApproval?: boolean;
-	// `true` when an instruction was parsed enough to know that the current
-	// review screen does not display its effects.
+	// `true` when the message contains at least one instruction whose effects the
+	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
+	// it surfaces a warning so the user knows the review is incomplete and can decide.
 	unreviewed?: boolean;
 	// `true` when the message bundles instructions that disagree on source,
-	// destination, payer or action type, or includes an unreviewed instruction. The
-	// summary keeps a single value per field, so such a transaction cannot be
-	// faithfully represented on the review screen and must not be signed without the
-	// user seeing every fund movement.
+	// destination, payer or action type. The summary keeps a single value per field,
+	// so such a transaction cannot be faithfully represented on the review screen and
+	// must not be signed without the user seeing every fund movement.
 	ambiguous?: boolean;
 }
 

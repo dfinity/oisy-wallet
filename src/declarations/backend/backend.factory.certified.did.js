@@ -708,12 +708,18 @@ export const idlFactory = ({ IDL }) => {
 		wallets: IDL.Vec(OnramperSignedEntry),
 		wallet_address_tags: IDL.Vec(OnramperSignedEntry)
 	});
+	const SignOnramperWidgetUrlResponse = IDL.Record({
+		signature: IDL.Text,
+		signed_query: IDL.Text
+	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
+		AddressMismatch: IDL.Null,
 		RateLimited: RateLimitError,
+		AddressDerivationFailed: IDL.Null,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({
-		Ok: IDL.Text,
+		Ok: SignOnramperWidgetUrlResponse,
 		Err: SignOnramperWidgetUrlError
 	});
 	const Stats = IDL.Record({
@@ -843,7 +849,6 @@ export const idlFactory = ({ IDL }) => {
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool]),
-		onramper_enabled: IDL.Func([], [IDL.Bool]),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],

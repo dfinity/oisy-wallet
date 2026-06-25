@@ -46,6 +46,7 @@
 		<ButtonIcon
 			ariaLabel={$i18n.active_user_transactions.text.open_aria_label}
 			colorStyle="tertiary-alt"
+			expanded={visible}
 			link={false}
 			onclick={() => (visible = true)}
 			bind:button

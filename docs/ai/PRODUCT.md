@@ -101,13 +101,19 @@ The **currency** selector does **not** appear in the user menu — it is always 
 
 ## WalletConnect
 
-OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dApp proposes a session, OISY advertises one namespace per chain family for which the signed-in user has a loaded address, so a single connection can span Ethereum, Solana, and Bitcoin at once.
+OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dApp proposes a session, OISY advertises one namespace per chain family for which the signed-in user has a loaded address, so each connection can span Ethereum, Solana, and Bitcoin at once. Multiple dApp connections can be open simultaneously (see [Multiple simultaneous connections](#multiple-simultaneous-connections)).
 
 - **Ethereum (`eip155`)** — supports `eth_sendTransaction`, `eth_sign`, `personal_sign`, `eth_signTypedData_v4`, and `eth_signTypedData` (legacy).
 - **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility).
 - **Bitcoin (`bip122`)** — supports `getAccountAddresses`, `signMessage`, and `signPsbt`. The namespace is advertised whenever any BTC address (mainnet, testnet, or regtest) is loaded, with one `bip122:<genesis>` chain and matching `bip122:<genesis>:<address>` account per present network, and the `bip122_addressesChanged` event.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
+
+### Multiple simultaneous connections
+
+OISY supports **several dApp connections at once**, each independently manageable. Connecting a new dApp leaves the already-connected ones in place, and the "Connected Apps" list shows every live session. Each row's close button disconnects only that dApp; a "Disconnect all" control tears every connection down in one tap. When a dApp ends its own session, only that entry is removed and the others keep working. Incoming sign/send requests route to the correct session by topic across all open connections. Previously connected sessions are restored after a page refresh.
+
+Requests are still handled **one at a time**: while a request from one dApp is under review, a request arriving from another is rejected with a "request skipped" notice. Session proposals are likewise reviewed one at a time — the user adds connections sequentially (scan/paste → review → approve, then repeat).
 
 ---
 
@@ -118,3 +124,11 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
+
+---
+
+## Buy (OnRamper)
+
+Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.
+
+The frontend supplies the wallet addresses it derived, but the backend signs them only after **re-deriving each one from the authenticated caller's principal and confirming it matches** — and it signs its own derived value, not the supplied string. So a caller can only ever obtain a signature over addresses they provably own (a signed OISY widget URL can only route a purchase to the signed-in user), and a frontend/backend derivation discrepancy fails the request loudly rather than signing an address the user may not control. If a supplied address does not match, cannot be derived, or the signing secret is not configured, the widget is shown as unavailable rather than loaded with an unverified URL.

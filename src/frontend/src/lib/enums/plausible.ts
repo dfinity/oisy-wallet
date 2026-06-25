@@ -19,7 +19,18 @@ export enum PLAUSIBLE_EVENTS {
 	NETWORK_MANAGE = 'network_manage',
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
-	EXPORT_DATA = 'export_data'
+	EXPORT_DATA = 'export_data',
+	ONRAMPER_OPEN = 'onramper_open'
+}
+
+export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
+	MAJOR = 'major'
+}
+
+export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
+	SECRET_NOT_CONFIGURED = 'secret_not_configured',
+	RATE_LIMITED = 'rate_limited',
+	SIGNING_FAILED = 'signing_failed'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {

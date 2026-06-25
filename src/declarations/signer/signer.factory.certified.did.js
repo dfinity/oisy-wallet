@@ -296,7 +296,7 @@ export const idlFactory = ({ IDL }) => {
 		btc_caller_balance: IDL.Func([GetBalanceRequest, IDL.Opt(PaymentType)], [Result_1], []),
 		btc_caller_send: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_2], []),
 		btc_caller_sign: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_3], []),
-		config: IDL.Func([], [Config]),
+		config: IDL.Func([], [Config], ),
 		eth_address: IDL.Func([EthAddressRequest, IDL.Opt(PaymentType)], [Result_4], []),
 		eth_address_of_caller: IDL.Func([IDL.Opt(PaymentType)], [Result_4], []),
 		eth_personal_sign: IDL.Func([EthPersonalSignRequest, IDL.Opt(PaymentType)], [Result_5], []),
@@ -317,7 +317,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		http_request: IDL.Func([HttpRequest], [HttpResponse]),
+		http_request: IDL.Func([HttpRequest], [HttpResponse], ),
 		schnorr_public_key: IDL.Func([SchnorrPublicKeyArgument, IDL.Opt(PaymentType)], [Result_9], []),
 		schnorr_sign: IDL.Func([SignWithSchnorrArgument, IDL.Opt(PaymentType)], [Result_10], [])
 	});

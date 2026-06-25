@@ -2,18 +2,27 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import {
+		TRACK_COUNT_LIQUIDIUM_ERROR,
+		TRACK_COUNT_LIQUIDIUM_SUCCESS,
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { activeUserTransactionsPending } from '$lib/derived/active-user-transactions.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
+	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
 	import { consoleError } from '$lib/utils/console.utils';
+	import {
+		buildLiquidiumTrackingMetadata,
+		isLiquidiumActiveUserTransaction
+	} from '$lib/utils/liquidium-active-tx.utils';
 	import {
 		buildOneSecSwapTrackingMetadata,
 		isOneSecActiveUserTransaction
@@ -49,6 +58,12 @@
 
 			if (oneSec.length > 0) {
 				await pollOneSecActiveUserTransactions({ identity, transactions: oneSec });
+			}
+
+			const liquidium = $activeUserTransactionsPending.filter(isLiquidiumActiveUserTransaction);
+
+			if (liquidium.length > 0) {
+				await pollLiquidiumActiveUserTransactions({ identity, transactions: liquidium });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -95,18 +110,19 @@
 
 		const newlyAppliedIds: string[] = [];
 		let shouldRefresh = false;
+		let shouldRefreshLiquidium = false;
 
 		for (const tx of Object.values($activeUserTransactionsStore.data)) {
 			const alreadyApplied =
 				$activeUserTransactionsStore.terminalSideEffectsApplied[tx.id] === true;
+
+			const isSucceeded = 'Succeeded' in tx.status;
 
 			if (
 				isTerminalActiveUserTransaction(tx) &&
 				!alreadyApplied &&
 				isOneSecActiveUserTransaction(tx)
 			) {
-				const isSucceeded = 'Succeeded' in tx.status;
-
 				newlyAppliedIds.push(tx.id);
 
 				trackEvent({
@@ -117,6 +133,22 @@
 				if (isSucceeded) {
 					shouldRefresh = true;
 				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isLiquidiumActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_LIQUIDIUM_SUCCESS : TRACK_COUNT_LIQUIDIUM_ERROR,
+					metadata: buildLiquidiumTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+					shouldRefreshLiquidium = true;
+				}
 			}
 		}
 
@@ -126,6 +158,11 @@
 
 		if (shouldRefresh) {
 			waitAndTriggerWallet().catch(consoleError);
+		}
+
+		// Refresh Liquidium positions/health once when a Liquidium action settles.
+		if (shouldRefreshLiquidium) {
+			loadLiquidium({ identity: $authIdentity, ethAddress: $ethAddress }).catch(consoleError);
 		}
 	});
 </script>
