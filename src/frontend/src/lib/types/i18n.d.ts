@@ -1550,6 +1550,8 @@ interface I18nNotes {
 		add_note: string;
 		note_label: string;
 		placeholder: string;
+		search_placeholder: string;
+		no_results: string;
 		privacy_info: string;
 		created: string;
 		updated: string;

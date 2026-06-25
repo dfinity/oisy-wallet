@@ -1945,6 +1945,8 @@
 			"add_note": "",
 			"note_label": "",
 			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
 			"privacy_info": "",
 			"created": "",
 			"updated": "",
