@@ -426,6 +426,19 @@ like Contacts' "Add new contact"), **not a bottom sheet**. On desktop the modal 
 centered floating card and the add/edit form is a step inside that card. The same
 full-page-step pattern is used for both, so there is a single editor layout.
 
+**Modal sizing & scroll (Notes leads this).** On **desktop** the card grows with its
+content from a comfortable **minimum height** up to **~80% of the viewport height**,
+and only then does the **list scroll inside its own region** — the search header and
+the pinned footer stay put, and the scrollbar is confined to the list (it does **not**
+run the full height of the modal). The card never reaches the screen edges (it keeps a
+margin all round). On **mobile** the modal stays **full-page** (the global modal
+default), with the list scrolling between the flush header and the bottom-pinned
+"Close". Note: OISY's shared modal currently does **not** cap desktop height or confine
+the scroll (a long dialog grows to the viewport edges and the whole body scrolls);
+Notes deliberately **pioneers** the capped, content-scrolled behaviour here (via the
+modal's `--dialog-max-height` and a dedicated list scroll region), so the shared modal
+component can be aligned to it later.
+
 **Desktop modal sizing.** The desktop modal **sizes to its content** rather than a
 fixed height, with:
 
