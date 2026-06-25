@@ -6,6 +6,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import EmptyNotes from '$lib/components/notes/EmptyNotes.svelte';
 	import InputPersonalNote from '$lib/components/notes/InputPersonalNote.svelte';
 	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
@@ -260,9 +261,10 @@
 							colorStyle="error"
 							disabled={busy}
 							onclick={() => nonNullish(editingNote) && handleDelete(editingNote.id)}
-							paddingSmall
 							testId={NOTES_EDITOR_DELETE_BUTTON}
+							transparent
 						>
+							<IconTrash />
 							{$i18n.core.text.delete}
 						</Button>
 					</div>
