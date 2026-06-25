@@ -1651,6 +1651,17 @@
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "लेनदेन विवरण",
