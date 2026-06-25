@@ -60,6 +60,50 @@ export const personalNotePreviewParts = (value: string): { title: string; body: 
 	return { title, body };
 };
 
+/** A run of a note for display: plain `text`, or a link when `href` is set. */
+export interface PersonalNoteTextSegment {
+	text: string;
+	href?: string;
+}
+
+// Only `http`/`https` URLs are auto-linked — never `javascript:` / `data:` / other
+// schemes. The `href` therefore always comes from a matched http(s) URL.
+const HTTP_URL_REGEX = /https?:\/\/[^\s]+/gu;
+
+/**
+ * Splits note text into plain-text and link segments for the read-only view
+ * (Decision 16). The text is bidi-neutralized; only `http`/`https` URLs become
+ * links, and each segment's `text` is rendered with Svelte's auto-escaping (never
+ * `{@html}`), so the href is always a vetted scheme and nothing is injected.
+ */
+export const linkifyPersonalNote = (value: string): PersonalNoteTextSegment[] => {
+	const text = neutralizePersonalNoteText(value);
+	const segments: PersonalNoteTextSegment[] = [];
+	let last = 0;
+
+	for (const match of text.matchAll(HTTP_URL_REGEX)) {
+		const start = match.index ?? 0;
+		const [raw] = match;
+		// Keep trailing sentence punctuation out of the link.
+		const url = raw.replace(/[.,;:!?)\]}'"]+$/u, '');
+
+		if (start > last) {
+			segments.push({ text: text.slice(last, start) });
+		}
+		segments.push({ text: url, href: url });
+		if (url.length < raw.length) {
+			segments.push({ text: raw.slice(url.length) });
+		}
+		last = start + raw.length;
+	}
+
+	if (last < text.length) {
+		segments.push({ text: text.slice(last) });
+	}
+
+	return segments;
+};
+
 /**
  * Formats a note's UTC epoch-nanoseconds timestamp (a decimal string) for
  * display in the user's local timezone, reusing OISY's date helpers: a short

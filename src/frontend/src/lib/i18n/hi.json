@@ -1939,6 +1939,11 @@
 	"notes": {
 		"text": {
 			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"back": "",
+			"ok": "",
 			"empty_title": "",
 			"empty_subtitle": "",
 			"empty_add": "",

@@ -1544,6 +1544,11 @@ interface I18nAddress {
 interface I18nNotes {
 	text: {
 		title: string;
+		note: string;
+		add_title: string;
+		edit_note: string;
+		back: string;
+		ok: string;
 		empty_title: string;
 		empty_subtitle: string;
 		empty_add: string;

@@ -1939,6 +1939,11 @@
 	"notes": {
 		"text": {
 			"title": "Notes",
+			"note": "Note",
+			"add_title": "Add new note",
+			"edit_note": "Edit note",
+			"back": "Back",
+			"ok": "OK",
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create a private, encrypted note to keep details safe alongside your wallet.",
 			"empty_add": "Add new note",
