@@ -9,6 +9,7 @@
 	import EmptyNotes from '$lib/components/notes/EmptyNotes.svelte';
 	import InputPersonalNote from '$lib/components/notes/InputPersonalNote.svelte';
 	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
+	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -50,9 +51,15 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatPersonalNoteTimestamp } from '$lib/utils/personal-note.utils';
 
-	type Step = 'list' | 'editor';
+	type Step = 'list' | 'view' | 'editor';
 
 	let step = $state<Step>('list');
+	let viewNoteId = $state<string | undefined>();
+	// True when the View was reached by returning from the editor (footer reads "OK"
+	// instead of "Back"); also drives where the editor returns to on Save/Cancel.
+	let editorFromView = $state(false);
+	let viewFromEditor = $state(false);
+
 	let editingNote = $state<PersonalNoteUi | undefined>();
 	// Bumped on every editor open so the input remounts and re-applies auto-focus.
 	let editorInstance = $state(0);
@@ -81,6 +88,16 @@
 		return all.filter(
 			(note) => !isPersonalNoteDecryptionFailure(note) && note.note.toLowerCase().includes(term)
 		);
+	});
+
+	// The note currently shown in the read-only view (reactive, so an edit reflects
+	// immediately); `undefined` if it was deleted/undone while open.
+	const viewNote = $derived.by(() => {
+		if (isNullish(viewNoteId)) {
+			return undefined;
+		}
+		const entry = (notes ?? []).find(({ id }) => id === viewNoteId);
+		return nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
 	});
 
 	// Edit Save stays disabled until the trimmed content actually changes, so a
@@ -130,23 +147,42 @@
 		}
 	});
 
-	const openEditor = (id?: string) => {
+	const openView = (id: string) => {
+		viewNoteId = id;
+		viewFromEditor = false;
+		step = 'view';
+	};
+
+	const openEditor = ({ id, fromView = false }: { id?: string; fromView?: boolean } = {}) => {
 		const entry = nonNullish(id) ? get(personalNotesStore).entries?.[id] : undefined;
 		editingNote = nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
+		editorFromView = fromView;
 		noteText = editingNote?.note ?? '';
 		isValid = false;
 		editorInstance += 1;
 		step = 'editor';
 	};
 
-	const closeEditor = () => {
-		step = 'list';
+	// Save/Cancel of an edit opened from a note's View returns to that View (footer
+	// now reads "OK"); a new note (opened from the list) returns to the list.
+	const leaveEditor = () => {
 		editingNote = undefined;
 		noteText = '';
+		if (editorFromView && nonNullish(viewNoteId)) {
+			viewFromEditor = true;
+			step = 'view';
+		} else {
+			step = 'list';
+		}
 	};
 
-	// List/empty state is dismissible; the editor step ignores backdrop/Escape (and
-	// hides the header X via CSS) so unsaved text can't be lost to an accidental tap.
+	const backToList = () => {
+		viewNoteId = undefined;
+		step = 'list';
+	};
+
+	// List/empty/view states are dismissible; the editor step ignores backdrop/Escape
+	// (and hides the header X via CSS) so unsaved text can't be lost to an accidental tap.
 	const onClose = () => {
 		if (step === 'editor') {
 			return;
@@ -165,7 +201,7 @@
 				id: editingNote?.id,
 				note: noteText.trim()
 			});
-			closeEditor();
+			leaveEditor();
 		} catch (err: unknown) {
 			toastsError({ msg: { text: $i18n.notes.error.save }, err });
 		} finally {
@@ -188,9 +224,10 @@
 			if (nonNullish(deleted)) {
 				personalNotesUndoStore.set(deleted);
 			}
-			if (step === 'editor' && editingNote?.id === id) {
-				closeEditor();
-			}
+			// Delete (from the View or the editor) always returns to the list.
+			editingNote = undefined;
+			noteText = '';
+			backToList();
 		} catch (err: unknown) {
 			toastsError({ msg: { text: $i18n.notes.error.delete }, err });
 		} finally {
@@ -201,7 +238,10 @@
 
 <div class:notes-editing={step === 'editor'}>
 	<Modal disablePointerEvents={busy} {onClose} testId={NOTES_MODAL}>
-		{#snippet title()}{$i18n.notes.text.title}{/snippet}
+		{#snippet title()}{#if step === 'view'}{$i18n.notes.text
+					.note}{:else if step === 'editor'}{nonNullish(editingNote)
+					? $i18n.notes.text.edit_note
+					: $i18n.notes.text.add_title}{:else}{$i18n.notes.text.title}{/if}{/snippet}
 
 		{#if step === 'editor'}
 			<ContentWithToolbar styleClass="flex flex-col gap-4 items-stretch">
@@ -234,7 +274,7 @@
 						<ButtonCancel
 							disabled={busy}
 							fullWidth
-							onclick={closeEditor}
+							onclick={leaveEditor}
 							testId={NOTES_CANCEL_BUTTON}
 						/>
 						<Button
@@ -250,6 +290,14 @@
 					</ButtonGroup>
 				{/snippet}
 			</ContentWithToolbar>
+		{:else if step === 'view' && nonNullish(viewNote)}
+			<NoteView
+				fromEditor={viewFromEditor}
+				note={viewNote}
+				onBack={backToList}
+				onDelete={handleDelete}
+				onEdit={() => nonNullish(viewNote) && openEditor({ id: viewNote.id, fromView: true })}
+			/>
 		{:else}
 			<ContentWithToolbar styleClass="mx-2 flex flex-col items-stretch">
 				{#if showSkeleton}
@@ -295,7 +343,7 @@
 						{:else}
 							{#each filteredNotes as note (note.id)}
 								<ListItem>
-									<NoteListItem {note} onRetry={load} onSelect={openEditor} />
+									<NoteListItem {note} onRetry={load} onSelect={openView} />
 								</ListItem>
 							{/each}
 						{/if}
