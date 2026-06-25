@@ -1942,6 +1942,7 @@
 			"note": "Note",
 			"add_title": "Add new note",
 			"edit_note": "Edit note",
+			"delete_note": "Delete note",
 			"back": "Back",
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create a private, encrypted note to keep details safe alongside your wallet.",

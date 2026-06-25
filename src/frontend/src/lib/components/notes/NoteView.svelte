@@ -95,7 +95,7 @@
 			transparent
 		>
 			<IconTrash />
-			{$i18n.core.text.delete}
+			{$i18n.notes.text.delete_note}
 		</Button>
 	</div>
 
