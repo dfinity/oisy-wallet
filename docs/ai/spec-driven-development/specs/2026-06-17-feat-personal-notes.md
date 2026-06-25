@@ -388,8 +388,10 @@ A new `NotesModal.svelte` (new folder
 
   **After Save / Cancel (navigation):** a **new** note returns to the **list** on
   **both Save and Cancel** (it never enters the View). **Editing an existing** note
-  returns to that note's **View** on **both Save and Cancel**. **Delete** (from the editor's Delete or the View's Delete) returns to the
-  **list** with the undo snackbar.
+  returns to that note's **View** on **both Save and Cancel**. **Delete** (from the
+  editor's Delete or the View's Delete) first asks for **confirmation** (below); on
+  confirm the note is deleted and the modal returns to the **list**, on cancel it
+  stays where it was.
 
   **Focus on open:** the textarea is **auto-focused** the moment the editor opens so
   the user can type immediately — **add** opens empty with the caret ready; **edit**
@@ -559,7 +561,10 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
 - **Too-long error:** "Note must be {$maxCharacters} characters or fewer."
 - **Cap reached:** "You've reached the maximum of {$max} saved notes. Delete one
   to add a new note."
-- **After delete (undo):** "Note deleted" + an "Undo" action.
+- **Delete confirmation:** title "Delete note"; body "This will delete the note
+  '$note'. This action cannot be undone." where `$note` is a short snippet (the
+  first ~15 characters of the note, rendered **bold**); buttons "Cancel" / "Delete
+  note". Mirrors the contact-delete confirmation's wording.
 - **Decryption failure:** "Couldn't decrypt this note" + a "Retry" action.
 - **Search:** placeholder **"Search note"**; no-match message **"No notes match your
   search."**
@@ -764,22 +769,20 @@ service mappers + store sort, decryption-failure isolation, following existing
   by case-insensitive substring over the full text (a derived/filtered list — no
   backend call); the trailing icon toggles magnifier ↔ clear ✕; empty result shows
   the no-match message. (Mirror the address-book search input's behaviour.)
-- Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`, with
-  optimistic store updates and rollback on rejection. **Delete is immediate — no
-  confirmation dialog — but reversible via a pinned snackbar:** on delete, surface a
-  **"Note deleted" + "Undo"** toast through OISY's existing toast system
-  ([`toastsStore`](../../../../src/frontend/src/lib/stores/toasts.store.ts) / gix
-  `Toasts`), **not** an element appended inside the (scrollable) notes list — so it
-  is never pushed off-screen when the list is long. The toast is pinned at the app's
-  standard toast position, **auto-dismisses after a few seconds**, and its **Undo**
-  re-saves the removed note into the now-freed slot. **Undo restores the note
-  exactly, as if the delete never happened:** the client keeps the **whole decrypted
-  note** (the `note_id` plus the `created_at_ns` and `updated_at_ns`, not just the
-  body text) in memory during the undo window, and on Undo re-encrypts that **same
-  envelope** and re-saves it **under the same `note_id`** — it does **not** mint a new
-  id or bump `updated_at_ns`. Because both timestamps are preserved, the note returns
-  to its **original sort position** (Decision 7), not the top of the list. (Avoid
-  inline-in-list undo precisely because a long list scrolls it out of view.)
+- Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`. **Delete
+  requires a confirmation step — the same pattern as deleting a contact** (there is
+  **no** undo): clicking Delete (in the View or the editor) opens a confirmation
+  asking **"Delete note"** with the body **"This will delete the note '<snippet>'.
+  This action cannot be undone."** (the snippet is the note's first ~15 characters,
+  rendered **bold** as escaped plain text — never `{@html}`, per Decision 15) and
+  **Cancel / Delete note** buttons. On **desktop** the confirmation replaces the
+  modal content (like Contacts' delete-contact step); on **mobile** it is a
+  **bottom sheet** (reuse `BottomSheetConfirmationPopup`, like
+  `DeleteContactConfirmBottomSheet`), with left/right padding on the sheet content.
+  Confirming deletes the note and returns to the list; cancelling dismisses the
+  confirmation and leaves the note untouched. Build it from a shared
+  `DeleteNoteConfirmContent` used by both the desktop step and the bottom sheet,
+  switched with `Responsive` (mirroring the contacts components).
 - **Cap gate (Decision 12):** when `atNotesCapacity`, the **"Add note" button is
   disabled** with the shared cap message shown as inline text; editing and
   deleting stay enabled.
@@ -906,11 +909,11 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       editing and deleting remain enabled. The gate is driven by
       `get_personal_notes_count` and stays correct after add/delete.
 - [ ] The modal lists notes **newest-first** by `updated_at_ns`; add, edit, and
-      delete update the store; delete is immediate and **undoable via a pinned,
-      auto-dismissing snackbar** (using OISY's toast system) that is never lost to
-      list scroll. **Undo restores the note exactly** — same `note_id`,
-      `created_at_ns`, and `updated_at_ns` — so it returns to its original sort
-      position with no bumped timestamp, as if the delete never happened.
+      delete update the store. **Delete requires a confirmation step** (no undo) — the
+      same pattern as deleting a contact: a "Delete note" prompt naming the note
+      (first ~15 characters, bold) with "This action cannot be undone.", a desktop
+      dialog and a **mobile bottom sheet**, and Cancel / Delete note buttons.
+      Confirming deletes; cancelling leaves the note untouched.
 - [ ] The list has a **"Search note"** field that filters the loaded, decrypted notes
       **client-side** (case-insensitive substring over the full note text, **no
       backend call**); the trailing icon is a magnifier when empty and a **clear ✕**
