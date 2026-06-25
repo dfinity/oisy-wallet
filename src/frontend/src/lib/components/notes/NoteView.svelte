@@ -22,14 +22,12 @@
 
 	interface Props {
 		note: PersonalNoteUi;
-		// "Back" when opened from the list, "OK" when returning from the editor.
-		fromEditor: boolean;
 		onBack: () => void;
 		onEdit: () => void;
 		onDelete: (id: string) => void;
 	}
 
-	let { note, fromEditor, onBack, onEdit, onDelete }: Props = $props();
+	let { note, onBack, onEdit, onDelete }: Props = $props();
 
 	// First line is the bold title (matching the list); the rest is the body with
 	// line breaks preserved. URLs in both become safe links (Decision 16).
@@ -104,7 +102,7 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			<Button colorStyle="primary" fullWidth onclick={onBack} testId={NOTES_BACK_BUTTON}>
-				{fromEditor ? $i18n.notes.text.ok : $i18n.notes.text.back}
+				{$i18n.notes.text.back}
 			</Button>
 		</ButtonGroup>
 	{/snippet}

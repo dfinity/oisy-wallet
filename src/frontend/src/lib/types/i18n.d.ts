@@ -1548,7 +1548,6 @@ interface I18nNotes {
 		add_title: string;
 		edit_note: string;
 		back: string;
-		ok: string;
 		empty_title: string;
 		empty_subtitle: string;
 		empty_add: string;

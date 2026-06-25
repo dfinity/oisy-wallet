@@ -20,7 +20,7 @@ describe('NoteView', () => {
 
 	it('renders the title and body and turns an http(s) URL into a safe new-tab link', () => {
 		const { container } = render(NoteView, {
-			props: { note, fromEditor: false, ...baseProps() }
+			props: { note, ...baseProps() }
 		});
 
 		expect(container).toHaveTextContent('This is a title');
@@ -37,7 +37,6 @@ describe('NoteView', () => {
 		const { container } = render(NoteView, {
 			props: {
 				note: { ...note, note: 'click javascript:alert(1)' },
-				fromEditor: false,
 				...baseProps()
 			}
 		});
@@ -45,20 +44,16 @@ describe('NoteView', () => {
 		expect(container.querySelector('a')).toBeNull();
 	});
 
-	it('labels the footer "Back" from the list and "OK" when returning from the editor', () => {
-		const { getByTestId, rerender } = render(NoteView, {
-			props: { note, fromEditor: false, ...baseProps() }
+	it('always labels the footer "Back"', () => {
+		const { getByTestId } = render(NoteView, {
+			props: { note, ...baseProps() }
 		});
 
 		expect(getByTestId(NOTES_BACK_BUTTON)).toHaveTextContent(en.notes.text.back);
-
-		rerender({ note, fromEditor: true, ...baseProps() });
-
-		expect(getByTestId(NOTES_BACK_BUTTON)).toHaveTextContent(en.notes.text.ok);
 	});
 
 	it('calls the edit / delete / back callbacks', async () => {
-		const props = { note, fromEditor: false, ...baseProps() };
+		const props = { note, ...baseProps() };
 		const { getByTestId } = render(NoteView, { props });
 
 		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));

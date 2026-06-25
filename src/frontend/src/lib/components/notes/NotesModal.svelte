@@ -55,10 +55,9 @@
 
 	let step = $state<Step>('list');
 	let viewNoteId = $state<string | undefined>();
-	// True when the View was reached by returning from the editor (footer reads "OK"
-	// instead of "Back"); also drives where the editor returns to on Save/Cancel.
+	// Whether the editor was opened from a note's View — drives where Save/Cancel
+	// returns (back to that View vs. the list).
 	let editorFromView = $state(false);
-	let viewFromEditor = $state(false);
 
 	let editingNote = $state<PersonalNoteUi | undefined>();
 	// Bumped on every editor open so the input remounts and re-applies auto-focus.
@@ -149,7 +148,6 @@
 
 	const openView = (id: string) => {
 		viewNoteId = id;
-		viewFromEditor = false;
 		step = 'view';
 	};
 
@@ -169,7 +167,6 @@
 		editingNote = undefined;
 		noteText = '';
 		if (editorFromView && nonNullish(viewNoteId)) {
-			viewFromEditor = true;
 			step = 'view';
 		} else {
 			step = 'list';
@@ -296,7 +293,6 @@
 			</ContentWithToolbar>
 		{:else if step === 'view' && nonNullish(viewNote)}
 			<NoteView
-				fromEditor={viewFromEditor}
 				note={viewNote}
 				onBack={backToList}
 				onDelete={handleDelete}
