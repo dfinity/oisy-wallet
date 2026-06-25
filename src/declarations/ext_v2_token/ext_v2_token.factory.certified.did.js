@@ -215,7 +215,7 @@ export const idlFactory = ({ IDL }) => {
 	const HttpStreamingStrategy = IDL.Variant({
 		Callback: IDL.Record({
 			token: HttpStreamingCallbackToken,
-			callback: IDL.Func([HttpStreamingCallbackToken], [HttpStreamingCallbackResponse], )
+			callback: IDL.Func([HttpStreamingCallbackToken], [HttpStreamingCallbackResponse])
 		})
 	});
 	const HttpResponse = IDL.Record({
@@ -265,30 +265,25 @@ export const idlFactory = ({ IDL }) => {
 						})
 					)
 				)
-			],
-			
+			]
 		),
-		availableCycles: IDL.Func([], [IDL.Nat], ),
-		balance: IDL.Func([BalanceRequest], [BalanceResponse], ),
-		bearer: IDL.Func([TokenIdentifier__1], [Result_7], ),
-		details: IDL.Func([TokenIdentifier__1], [Result_10], ),
+		availableCycles: IDL.Func([], [IDL.Nat]),
+		balance: IDL.Func([BalanceRequest], [BalanceResponse]),
+		bearer: IDL.Func([TokenIdentifier__1], [Result_7]),
+		details: IDL.Func([TokenIdentifier__1], [Result_10]),
 		ext_addAssetCanister: IDL.Func([], [], []),
-		ext_admin: IDL.Func([], [IDL.Principal], ),
+		ext_admin: IDL.Func([], [IDL.Principal]),
 		ext_assetAdd: IDL.Func([AssetHandle, IDL.Text, IDL.Text, AssetType, IDL.Nat], [], []),
-		ext_assetExists: IDL.Func([AssetHandle], [IDL.Bool], ),
-		ext_assetFits: IDL.Func([IDL.Bool, IDL.Nat], [IDL.Bool], ),
+		ext_assetExists: IDL.Func([AssetHandle], [IDL.Bool]),
+		ext_assetFits: IDL.Func([IDL.Bool, IDL.Nat], [IDL.Bool]),
 		ext_assetStream: IDL.Func([AssetHandle, IDL.Vec(IDL.Nat8), IDL.Bool], [IDL.Bool], []),
-		ext_balance: IDL.Func([BalanceRequest], [BalanceResponse], ),
-		ext_bearer: IDL.Func([TokenIdentifier__1], [Result_7], ),
+		ext_balance: IDL.Func([BalanceRequest], [BalanceResponse]),
+		ext_bearer: IDL.Func([TokenIdentifier__1], [Result_7]),
 		ext_capInit: IDL.Func([], [], []),
-		ext_expired: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, SubAccount__1))], ),
-		ext_extensions: IDL.Func([], [IDL.Vec(Extension)], ),
+		ext_expired: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, SubAccount__1))]),
+		ext_extensions: IDL.Func([], [IDL.Vec(Extension)]),
 		ext_marketplaceList: IDL.Func([ListRequest], [Result_3], []),
-		ext_marketplaceListings: IDL.Func(
-			[],
-			[IDL.Vec(IDL.Tuple(TokenIndex, Listing, Metadata))],
-			
-		),
+		ext_marketplaceListings: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, Listing, Metadata))]),
 		ext_marketplacePurchase: IDL.Func(
 			[TokenIdentifier__1, IDL.Nat64, AccountIdentifier__1],
 			[Result_9],
@@ -297,20 +292,19 @@ export const idlFactory = ({ IDL }) => {
 		ext_marketplaceSettle: IDL.Func([AccountIdentifier__1], [Result_3], []),
 		ext_marketplaceStats: IDL.Func(
 			[],
-			[IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
-			
+			[IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat]
 		),
-		ext_marketplaceTransactions: IDL.Func([], [IDL.Vec(Transaction)], ),
-		ext_metadata: IDL.Func([TokenIdentifier__1], [Result_8], ),
+		ext_marketplaceTransactions: IDL.Func([], [IDL.Vec(Transaction)]),
+		ext_metadata: IDL.Func([TokenIdentifier__1], [Result_8]),
 		ext_mint: IDL.Func(
 			[IDL.Vec(IDL.Tuple(AccountIdentifier__1, Metadata))],
 			[IDL.Vec(TokenIndex)],
 			[]
 		),
-		ext_payments: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, Payment))], ),
+		ext_payments: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, Payment))]),
 		ext_removeAdmin: IDL.Func([], [], []),
 		ext_saleClose: IDL.Func([], [IDL.Bool], []),
-		ext_saleCurrent: IDL.Func([], [IDL.Opt(Sale)], ),
+		ext_saleCurrent: IDL.Func([], [IDL.Opt(Sale)]),
 		ext_saleEnd: IDL.Func([], [IDL.Bool], []),
 		ext_saleOpen: IDL.Func(
 			[IDL.Vec(SalePricingGroup), SaleRemaining, IDL.Vec(AccountIdentifier__1)],
@@ -324,9 +318,9 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		ext_saleResume: IDL.Func([], [IDL.Bool], []),
-		ext_saleSettings: IDL.Func([AccountIdentifier__1], [IDL.Opt(SaleDetails)], ),
+		ext_saleSettings: IDL.Func([AccountIdentifier__1], [IDL.Opt(SaleDetails)]),
 		ext_saleSettle: IDL.Func([AccountIdentifier__1], [Result_4], []),
-		ext_saleTransactions: IDL.Func([], [IDL.Vec(SaleTransaction)], ),
+		ext_saleTransactions: IDL.Func([], [IDL.Vec(SaleTransaction)]),
 		ext_saleUpdate: IDL.Func(
 			[
 				IDL.Opt(IDL.Vec(SalePricingGroup)),
@@ -343,58 +337,49 @@ export const idlFactory = ({ IDL }) => {
 		ext_setRoyalty: IDL.Func([IDL.Vec(IDL.Tuple(AccountIdentifier__1, IDL.Nat64))], [], []),
 		ext_setSaleRoyalty: IDL.Func([AccountIdentifier__1], [], ['oneway']),
 		ext_transfer: IDL.Func([TransferRequest], [TransferResponse], []),
-		extdata_supply: IDL.Func([TokenIdentifier__1], [Result_2], ),
-		extensions: IDL.Func([], [IDL.Vec(Extension)], ),
-		failedSales: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, SubAccount__1))], ),
-		getMetadata: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, MetadataLegacy))], ),
-		getMinter: IDL.Func([], [IDL.Principal], ),
-		getRegistry: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier__1))], ),
-		getTokens: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, MetadataLegacy))], ),
+		extdata_supply: IDL.Func([TokenIdentifier__1], [Result_2]),
+		extensions: IDL.Func([], [IDL.Vec(Extension)]),
+		failedSales: IDL.Func([], [IDL.Vec(IDL.Tuple(AccountIdentifier__1, SubAccount__1))]),
+		getMetadata: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, MetadataLegacy))]),
+		getMinter: IDL.Func([], [IDL.Principal]),
+		getRegistry: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier__1))]),
+		getTokens: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, MetadataLegacy))]),
 		heartbeat_assetCanisters: IDL.Func([], [], []),
 		heartbeat_capEvents: IDL.Func([], [], []),
 		heartbeat_disbursements: IDL.Func([], [], []),
 		heartbeat_external: IDL.Func([], [], []),
-		heartbeat_isRunning: IDL.Func([], [IDL.Bool], ),
+		heartbeat_isRunning: IDL.Func([], [IDL.Bool]),
 		heartbeat_paymentSettlements: IDL.Func([], [], []),
-		heartbeat_pending: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))], ),
+		heartbeat_pending: IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Nat))]),
 		heartbeat_start: IDL.Func([], [], []),
 		heartbeat_stop: IDL.Func([], [], []),
-		http_request: IDL.Func([HttpRequest], [HttpResponse], ),
+		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		http_request_streaming_callback: IDL.Func(
 			[HttpStreamingCallbackToken],
-			[HttpStreamingCallbackResponse],
-			
+			[HttpStreamingCallbackResponse]
 		),
 		http_request_update: IDL.Func([HttpRequest], [HttpResponse], []),
-		isHeartbeatRunning: IDL.Func([], [IDL.Bool], ),
+		isHeartbeatRunning: IDL.Func([], [IDL.Bool]),
 		list: IDL.Func([ListRequest], [Result_3], []),
-		listings: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, Listing, MetadataLegacy))], ),
+		listings: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, Listing, MetadataLegacy))]),
 		lock: IDL.Func(
 			[TokenIdentifier__1, IDL.Nat64, AccountIdentifier__1, SubAccount__1],
 			[Result_7],
 			[]
 		),
-		metadata: IDL.Func([TokenIdentifier__1], [Result_6], ),
+		metadata: IDL.Func([TokenIdentifier__1], [Result_6]),
 		reserve: IDL.Func([IDL.Nat64, IDL.Nat64, AccountIdentifier__1, SubAccount__1], [Result_5], []),
 		retreive: IDL.Func([AccountIdentifier__1], [Result_4], []),
-		saleTransactions: IDL.Func([], [IDL.Vec(SaleTransaction)], ),
-		salesSettings: IDL.Func([AccountIdentifier__1], [SaleSettings], ),
+		saleTransactions: IDL.Func([], [IDL.Vec(SaleTransaction)]),
+		salesSettings: IDL.Func([AccountIdentifier__1], [SaleSettings]),
 		setMinter: IDL.Func([IDL.Principal], [], []),
 		settle: IDL.Func([TokenIdentifier__1], [Result_3], []),
-		settlements: IDL.Func(
-			[],
-			[IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier__1, IDL.Nat64))],
-			
-		),
-		stats: IDL.Func(
-			[],
-			[IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
-			
-		),
-		supply: IDL.Func([TokenIdentifier__1], [Result_2], ),
-		tokens: IDL.Func([AccountIdentifier__1], [Result_1], ),
-		tokens_ext: IDL.Func([AccountIdentifier__1], [Result], ),
-		transactions: IDL.Func([], [IDL.Vec(Transaction)], ),
+		settlements: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier__1, IDL.Nat64))]),
+		stats: IDL.Func([], [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat]),
+		supply: IDL.Func([TokenIdentifier__1], [Result_2]),
+		tokens: IDL.Func([AccountIdentifier__1], [Result_1]),
+		tokens_ext: IDL.Func([AccountIdentifier__1], [Result]),
+		transactions: IDL.Func([], [IDL.Vec(Transaction)]),
 		transfer: IDL.Func([TransferRequest], [TransferResponse], [])
 	});
 

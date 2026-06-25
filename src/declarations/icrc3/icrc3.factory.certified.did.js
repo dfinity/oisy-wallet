@@ -35,7 +35,7 @@ export const idlFactory = ({ IDL }) => {
 			archived_blocks: IDL.Vec(
 				IDL.Record({
 					args: GetBlocksArgs,
-					callback: IDL.Func([GetBlocksArgs], [GetBlocksResult], )
+					callback: IDL.Func([GetBlocksArgs], [GetBlocksResult])
 				})
 			)
 		})
@@ -46,13 +46,12 @@ export const idlFactory = ({ IDL }) => {
 	});
 
 	return IDL.Service({
-		icrc3_get_archives: IDL.Func([GetArchivesArgs], [GetArchivesResult], ),
-		icrc3_get_blocks: IDL.Func([GetBlocksArgs], [GetBlocksResult], ),
-		icrc3_get_tip_certificate: IDL.Func([], [IDL.Opt(DataCertificate)], ),
+		icrc3_get_archives: IDL.Func([GetArchivesArgs], [GetArchivesResult]),
+		icrc3_get_blocks: IDL.Func([GetBlocksArgs], [GetBlocksResult]),
+		icrc3_get_tip_certificate: IDL.Func([], [IDL.Opt(DataCertificate)]),
 		icrc3_supported_block_types: IDL.Func(
 			[],
-			[IDL.Vec(IDL.Record({ url: IDL.Text, block_type: IDL.Text }))],
-			
+			[IDL.Vec(IDL.Record({ url: IDL.Text, block_type: IDL.Text }))]
 		)
 	});
 };

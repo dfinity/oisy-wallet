@@ -524,8 +524,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getAccountInfoCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetAccountInfoParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getBalance: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetBalanceParams],
@@ -534,16 +533,14 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getBalanceCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetBalanceParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getBlock: IDL.Func([RpcSources, IDL.Opt(RpcConfig), GetBlockParams], [MultiGetBlockResult], []),
 		getBlockCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetBlockParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
-		getProviders: IDL.Func([], [IDL.Vec(IDL.Tuple(SupportedProvider, RpcProvider))], ),
+		getProviders: IDL.Func([], [IDL.Vec(IDL.Tuple(SupportedProvider, RpcProvider))]),
 		getRecentPrioritizationFees: IDL.Func(
 			[
 				RpcSources,
@@ -559,8 +556,7 @@ export const idlFactory = ({ IDL }) => {
 				IDL.Opt(GetRecentPrioritizationFeesRpcConfig),
 				IDL.Opt(GetRecentPrioritizationFeesParams)
 			],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getSignatureStatuses: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetSignatureStatusesParams],
@@ -569,8 +565,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getSignatureStatusesCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetSignatureStatusesParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getSignaturesForAddress: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetSignaturesForAddressParams],
@@ -579,8 +574,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getSignaturesForAddressCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetSignaturesForAddressParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getSlot: IDL.Func(
 			[RpcSources, IDL.Opt(GetSlotRpcConfig), IDL.Opt(GetSlotParams)],
@@ -589,8 +583,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getSlotCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(GetSlotRpcConfig), IDL.Opt(GetSlotParams)],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getTokenAccountBalance: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetTokenAccountBalanceParams],
@@ -599,8 +592,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getTokenAccountBalanceCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetTokenAccountBalanceParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		getTransaction: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetTransactionParams],
@@ -609,14 +601,12 @@ export const idlFactory = ({ IDL }) => {
 		),
 		getTransactionCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), GetTransactionParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		jsonRequest: IDL.Func([RpcSources, IDL.Opt(RpcConfig), IDL.Text], [MultiRequestResult], []),
 		jsonRequestCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), IDL.Text],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		sendTransaction: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), SendTransactionParams],
@@ -625,8 +615,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		sendTransactionCyclesCost: IDL.Func(
 			[RpcSources, IDL.Opt(RpcConfig), SendTransactionParams],
-			[RequestCostResult],
-			
+			[RequestCostResult]
 		),
 		updateApiKeys: IDL.Func([IDL.Vec(IDL.Tuple(SupportedProvider, IDL.Opt(IDL.Text)))], [], [])
 	});

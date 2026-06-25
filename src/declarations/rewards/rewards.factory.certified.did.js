@@ -344,44 +344,38 @@ export const idlFactory = ({ IDL }) => {
 			[ClaimVipRewardResponse, IDL.Opt(ClaimedVipReward)],
 			[]
 		),
-		config: IDL.Func([], [Config], ),
+		config: IDL.Func([], [Config]),
 		configure_referral: IDL.Func([S1E4ReferralConfig], [], []),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
 		configure_vips: IDL.Func([IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))], [], []),
-		eligible: IDL.Func([IDL.Opt(IDL.Principal)], [EligibilityResponse], ),
+		eligible: IDL.Func([IDL.Opt(IDL.Principal)], [EligibilityResponse]),
 		grant_usage_award: IDL.Func([UsageAwardEvent, IDL.Opt(IDL.Principal)], [], []),
-		holdings_popcontest: IDL.Func(
-			[HoldingsPopcontestRequest],
-			[HoldingsPopcontestResponse],
-			
-		),
+		holdings_popcontest: IDL.Func([HoldingsPopcontestRequest], [HoldingsPopcontestResponse]),
 		last_activity_histogram: IDL.Func(
 			[LastActivityHistogramRequest],
-			[LastActivityHistogramResponse],
-			
+			[LastActivityHistogramResponse]
 		),
 		new_vip_reward: IDL.Func([IDL.Opt(ClaimedVipReward)], [NewVipRewardResponse], []),
 		referrer_info: IDL.Func([], [ReferrerInfo], []),
-		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)], ),
+		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
 		s1e4_eligible_referrers: IDL.Func(
 			[],
-			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Principal)))],
-			
+			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Principal)))]
 		),
 		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
-		stats_by: IDL.Func([StatsKeyType], [StatsResponse], ),
-		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats], ),
+		stats_by: IDL.Func([StatsKeyType], [StatsResponse]),
+		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats]),
 		trigger_s1e4_referrer_award_event: IDL.Func([], [], []),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
-		usage_stats: IDL.Func([], [UsageAwardStats], ),
-		usage_winners: IDL.Func([IDL.Opt(UsageWinnersRequest)], [UsageWinnersResponse], ),
-		user_info: IDL.Func([], [UserData], ),
-		user_info_for: IDL.Func([IDL.Principal], [UserData], ),
-		user_stats: IDL.Func([IDL.Principal], [UsageAwardState], ),
-		vip_stats: IDL.Func([IDL.Opt(IDL.Text)], [VipStats], )
+		usage_stats: IDL.Func([], [UsageAwardStats]),
+		usage_winners: IDL.Func([IDL.Opt(UsageWinnersRequest)], [UsageWinnersResponse]),
+		user_info: IDL.Func([], [UserData]),
+		user_info_for: IDL.Func([IDL.Principal], [UserData]),
+		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
+		vip_stats: IDL.Func([IDL.Opt(IDL.Text)], [VipStats])
 	});
 };
 
