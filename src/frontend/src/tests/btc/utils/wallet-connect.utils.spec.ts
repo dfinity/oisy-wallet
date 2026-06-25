@@ -54,7 +54,7 @@ describe('btc wallet-connect.utils', () => {
 			Buffer.from('0000000000000000000000000000000000000000000000000000000000000001', 'hex')
 		);
 
-		it('recovers the recovery id and produces a 65-byte base64 signature', () => {
+		it('recovers the recovery id and produces a 65-byte hex signature', () => {
 			const messageHash = bitcoinSignedMessageHash('hello');
 			const publicKey = getPublicKey(privateKey, true);
 
@@ -67,7 +67,10 @@ describe('btc wallet-connect.utils', () => {
 				publicKey
 			});
 
-			const decoded = Buffer.from(encoded, 'base64');
+			expect(encoded).toHaveLength(130);
+			expect(encoded).toMatch(/^[0-9a-f]+$/);
+
+			const decoded = Buffer.from(encoded, 'hex');
 
 			expect(decoded).toHaveLength(65);
 			// Header byte for a compressed key: 27 + recId + 4.

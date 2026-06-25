@@ -124,8 +124,8 @@ const compressedPublicKeysMatch = ({ a, b }: { a: Uint8Array; b: Uint8Array }): 
 	a.length === b.length && a.every((byte, index) => byte === b[index]);
 
 /**
- * Encode a 64-byte raw `r || s` ECDSA signature as the 65-byte recoverable, base64-encoded
- * signature expected by the standard Bitcoin `signMessage` response.
+ * Encode a 64-byte raw `r || s` ECDSA signature as the 65-byte recoverable, hex-encoded
+ * signature expected by Reown's Bitcoin `signMessage` response.
  *
  * The signer (`generic_sign_with_ecdsa`) returns only `r || s` with no recovery id, so we recover
  * it by trying every candidate id (0..3) and keeping the one whose recovered compressed public key
@@ -157,7 +157,7 @@ export const encodeRecoverableSignature = ({
 				const header = 27 + recId + 4;
 				const recoverable = Buffer.concat([Buffer.from([header]), Buffer.from(signature)]);
 
-				return recoverable.toString('base64');
+				return recoverable.toString('hex');
 			}
 		} catch (_: unknown) {
 			// Some recovery ids do not yield a valid point; ignore and try the next one.
