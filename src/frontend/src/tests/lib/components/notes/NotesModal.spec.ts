@@ -2,6 +2,7 @@ import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
 	NOTES_ADD_BUTTON,
+	NOTES_DELETE_CONFIRM_BUTTON,
 	NOTES_INPUT,
 	NOTES_LIST_ITEM,
 	NOTES_NO_RESULTS,
@@ -12,14 +13,13 @@ import {
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as notesServices from '$lib/services/personal-notes.services';
-import { personalNotesStore, personalNotesUndoStore } from '$lib/stores/personal-notes.store';
+import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { get } from 'svelte/store';
 
 const note = (id: string): PersonalNoteUi => ({
 	id,
@@ -33,7 +33,6 @@ describe('NotesModal', () => {
 		vi.restoreAllMocks();
 		mockAuthStore();
 		personalNotesStore.reset();
-		personalNotesUndoStore.set(undefined);
 	});
 
 	it('renders the empty state when there are no notes', () => {
@@ -112,20 +111,23 @@ describe('NotesModal', () => {
 		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
 	});
 
-	it('deletes a note from the view and keeps it for Undo', async () => {
+	it('deletes a note only after the confirmation step', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
 		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
 
 		const { getByTestId, getByText } = render(NotesModal);
 
-		// Open the note (row → view), where Delete lives.
+		// Open the note (row → view), where Delete lives, then request deletion.
 		await fireEvent.click(getByText('note a'));
 		await fireEvent.click(getByTestId(NOTES_VIEW_DELETE_BUTTON));
+
+		// The confirmation is shown; nothing is deleted yet.
+		expect(deleteSpy).not.toHaveBeenCalled();
+
+		await fireEvent.click(getByTestId(NOTES_DELETE_CONFIRM_BUTTON));
 
 		await waitFor(() =>
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
 		);
-
-		expect(get(personalNotesUndoStore)?.id).toBe('a');
 	});
 });

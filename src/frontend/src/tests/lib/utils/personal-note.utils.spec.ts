@@ -7,7 +7,8 @@ import {
 	linkifyPersonalNote,
 	neutralizePersonalNoteText,
 	personalNoteLength,
-	personalNotePreviewParts
+	personalNotePreviewParts,
+	personalNoteSnippet
 } from '$lib/utils/personal-note.utils';
 
 const nsFrom = (date: Date): string =>
@@ -81,6 +82,22 @@ describe('personal-note.utils', () => {
 
 		it('neutralizes bidi characters', () => {
 			expect(personalNotePreviewParts('a\u202Eb')).toEqual({ title: 'ab', body: '' });
+		});
+	});
+
+	describe('personalNoteSnippet', () => {
+		it('returns the whole note when within the limit', () => {
+			expect(personalNoteSnippet({ value: 'short note' })).toBe('short note');
+		});
+
+		it('truncates to the limit (code points) with an ellipsis', () => {
+			expect(personalNoteSnippet({ value: 'And here come the rest', max: 15 })).toBe(
+				'And here come t…'
+			);
+		});
+
+		it('collapses whitespace and neutralizes bidi before truncating', () => {
+			expect(personalNoteSnippet({ value: 'a\u202Eb\n\n  c' })).toBe('ab c');
 		});
 	});
 
