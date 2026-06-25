@@ -1,11 +1,18 @@
-import { decodePsbt, getAccountAddresses } from '$btc/services/wallet-connect.services';
+import {
+	BTC_ECDSA_DERIVATION_PATH,
+	BTC_ECDSA_KEY_ID
+} from '$btc/constants/wallet-connect.constants';
+import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
+import * as walletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as signerEnv from '$env/signer.env';
+import { genericSignWithEcdsa } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import * as signerConstants from '$lib/constants/signer.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { ProgressStepsSign } from '$lib/enums/progress-steps';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
@@ -13,9 +20,25 @@ import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { hmac } from '@noble/hashes/hmac';
+import { sha256 } from '@noble/hashes/sha2';
+import { etc, sign as signSecp256k1 } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { networks, payments, Psbt } from 'bitcoinjs-lib';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/api/signer.api', () => ({
+	genericSignWithEcdsa: vi.fn()
+}));
+
+vi.mock('$btc/utils/wallet-connect.utils', async (importOriginal) => {
+	const actual = await importOriginal<typeof walletConnectUtils>();
+
+	return {
+		...actual,
+		deriveBtcPublicKey: vi.fn(actual.deriveBtcPublicKey)
+	};
+});
 
 const BIP122_MAINNET_CHAIN_ID = 'bip122:000000000019d6689c085ae165831e93';
 
@@ -223,8 +246,48 @@ describe('btc wallet-connect.services', () => {
 		return psbt.toBase64();
 	};
 
+	const buildTwoInputPsbt = (): string => {
+		const psbt = new Psbt({ network });
+
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000001',
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+		});
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000002',
+			index: 0,
+			witnessUtxo: { script: externalScript as Buffer, value: 50_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 148_000 });
+
+		return psbt.toBase64();
+	};
+
+	const buildNonSegwitPsbt = (): string => {
+		const prevTx = new Psbt({ network });
+		prevTx.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000003',
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 50_000 }
+		});
+		prevTx.addOutput({ script: walletScript as Buffer, value: 50_000 });
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: '0000000000000000000000000000000000000000000000000000000000000003',
+			index: 0,
+			nonWitnessUtxo: Buffer.from(prevTx.data.globalMap.unsignedTx.toBuffer())
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 40_000 });
+
+		return psbt.toBase64();
+	};
+
 	const buildRequest = (params: Record<string, unknown>): WalletKitTypes.SessionRequest =>
 		({
+			id: 123,
+			topic: 'test-topic',
 			params: {
 				chainId: testnetChainId,
 				request: { method: 'signPsbt', params }
@@ -310,5 +373,172 @@ describe('btc wallet-connect.services', () => {
 		const request = buildRequest({ psbt: 'not-a-valid-psbt', broadcast: false });
 
 		expect(() => decodePsbt({ request, address: walletAddress })).toThrow();
+	});
+
+	describe('signPsbt', () => {
+		const privateKey = Uint8Array.from(
+			Buffer.from('0000000000000000000000000000000000000000000000000000000000000001', 'hex')
+		);
+		const previousHmacSha256Sync = etc.hmacSha256Sync;
+
+		const mockListener = {
+			pair: vi.fn(),
+			approveSession: vi.fn(),
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn(),
+			approveRequest: vi.fn(),
+			disconnect: vi.fn()
+		} as WalletConnectListener;
+
+		let modalNext: () => void;
+		let progress: (step: ProgressStepsSign) => void;
+		let spyToastsError: MockInstance;
+
+		const sign = async ({
+			request = buildRequest({ psbt: buildPsbt(), broadcast: false }),
+			address = walletAddress,
+			identity = mockIdentity
+		}: {
+			request?: WalletKitTypes.SessionRequest;
+			address?: OptionBtcAddress;
+			identity?: typeof mockIdentity | null;
+		} = {}) =>
+			await signPsbt({
+				listener: mockListener,
+				request,
+				address,
+				modalNext,
+				progress,
+				identity
+			});
+
+		beforeAll(() => {
+			// `@noble/secp256k1` v2 needs an explicit sync HMAC implementation to sign.
+			// eslint-disable-next-line local-rules/prefer-object-params -- external callback signature
+			etc.hmacSha256Sync = (key: Uint8Array, ...messages: Uint8Array[]) =>
+				hmac(sha256, key, etc.concatBytes(...messages));
+		});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			modalNext = vi.fn<() => void>();
+			progress = vi.fn<(step: ProgressStepsSign) => void>();
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			vi.mocked(walletConnectUtils.deriveBtcPublicKey).mockReturnValue(pubkey);
+			vi.mocked(genericSignWithEcdsa).mockImplementation(({ messageHash }) =>
+				Promise.resolve(signSecp256k1(messageHash, privateKey).toCompactRawBytes())
+			);
+		});
+
+		afterAll(() => {
+			etc.hmacSha256Sync = previousHmacSha256Sync;
+		});
+
+		it('signs only the selected wallet-owned PSBT input and approves the updated PSBT', async () => {
+			const request = buildRequest({
+				psbt: buildTwoInputPsbt(),
+				signInputs: [{ address: walletAddress, index: 0 }],
+				broadcast: false
+			});
+
+			const result = await sign({ request });
+
+			expect(result).toEqual({ success: true });
+			expect(modalNext).toHaveBeenCalledOnce();
+			expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsSign.SIGN);
+			expect(progress).toHaveBeenNthCalledWith(2, ProgressStepsSign.APPROVE_WALLET_CONNECT);
+			expect(progress).toHaveBeenNthCalledWith(3, ProgressStepsSign.DONE);
+
+			expect(genericSignWithEcdsa).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				derivationPath: BTC_ECDSA_DERIVATION_PATH,
+				keyId: BTC_ECDSA_KEY_ID,
+				messageHash: expect.any(Uint8Array)
+			});
+
+			const [[{ messageHash }]] = vi.mocked(genericSignWithEcdsa).mock.calls;
+
+			expect(messageHash).toHaveLength(32);
+
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: request.id,
+				topic: request.topic,
+				message: { psbt: expect.any(String) }
+			});
+
+			const [[{ message }]] = vi.mocked(mockListener.approveRequest).mock.calls;
+			const signedPsbt = Psbt.fromBase64((message as { psbt: string }).psbt, { network });
+
+			expect(signedPsbt.data.inputs[0].partialSig).toEqual([
+				{ pubkey, signature: expect.any(Buffer) }
+			]);
+			expect(signedPsbt.data.inputs[1].partialSig).toBeUndefined();
+		});
+
+		it('rejects PSBT broadcast requests without signing', async () => {
+			const request = buildRequest({ psbt: buildPsbt(), broadcast: true });
+
+			const result = await sign({ request });
+
+			expect(result).toEqual({ success: false });
+			expect(modalNext).not.toHaveBeenCalled();
+			expect(progress).not.toHaveBeenCalled();
+			expect(genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: request.id,
+				topic: request.topic,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_broadcast_not_supported }
+			});
+		});
+
+		it('rejects non-owned PSBT inputs without signing', async () => {
+			const request = buildRequest({
+				psbt: buildTwoInputPsbt(),
+				signInputs: [{ address: walletAddress, index: 1 }],
+				broadcast: false
+			});
+
+			const result = await sign({ request });
+
+			expect(result).toEqual({ success: false });
+			expect(genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: request.id,
+				topic: request.topic,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_not_owned }
+			});
+		});
+
+		it('rejects non-SegWit PSBT inputs without signing', async () => {
+			const request = buildRequest({ psbt: buildNonSegwitPsbt(), broadcast: false });
+
+			const result = await sign({ request });
+
+			expect(result).toEqual({ success: false });
+			expect(genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: request.id,
+				topic: request.topic,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_not_segwit }
+			});
+		});
 	});
 });
