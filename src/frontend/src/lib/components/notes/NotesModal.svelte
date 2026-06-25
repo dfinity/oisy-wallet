@@ -299,7 +299,10 @@
 				onEdit={() => nonNullish(viewNote) && openEditor({ id: viewNote.id, fromView: true })}
 			/>
 		{:else}
-			<ContentWithToolbar styleClass="mx-2 flex min-h-0 flex-col items-stretch">
+			<!-- gap-6 gives a comfortable space between the pinned search and the list;
+				pb-0! drops the shared modal's large bottom padding so the list sits a
+				little above the footer divider (the ~16px content gap remains). -->
+			<ContentWithToolbar styleClass="mx-2 flex min-h-0 flex-col items-stretch gap-6 pb-0!">
 				{#if showSkeleton}
 					<SkeletonCards rows={3} />
 				{:else if isEmpty}
@@ -336,7 +339,7 @@
 					<!-- Only the list scrolls, so the scrollbar stays out of the search header
 						and the pinned footer. -->
 					<div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
-						<List noPadding styleClass="py-2" testId={NOTES_LIST}>
+						<List noPadding testId={NOTES_LIST}>
 							{#if filteredNotes.length === 0}
 								<ListItem>
 									<span class="text-secondary" data-tid={NOTES_NO_RESULTS}>
