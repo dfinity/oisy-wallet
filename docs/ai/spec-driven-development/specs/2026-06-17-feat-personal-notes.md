@@ -152,7 +152,11 @@ storage/crypto layer, but the two remain distinct features with distinct UIs.
 3. **Note model = body + timestamps.** Each note is free text plus
    `created_at_ns` / `updated_at_ns`, both **UTC epoch nanoseconds** (absolute,
    timezone-agnostic instants — matching IC time; the client sets them, see
-   [Stored value](#stored-value)). **No title** (kept minimal).
+   [Stored value](#stored-value)). **No separate title field** — a note is a single
+   free-text body; there is no distinct stored title. However, the **first line is
+   shown as a de-facto title** (bold) in the list preview and the read-only view
+   (display convention only — nothing extra is stored). See
+   [Design → List](#design) and Out of Scope 2.
    - **List row:** a note that has **never been edited** (`updated_at_ns ==
 created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
      (Decision 7 sorts by `updated_at_ns`, so edited notes rise to the top).
@@ -230,9 +234,10 @@ created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
     text-interpolation auto-escaping ({`text`}), **never `{@html}`**, with line
     breaks handled by **CSS** (not by injecting `<br>` or any markup) — in the
     **full/edit view** preserve them with `white-space: pre-wrap`, while the
-    **list-row preview collapses them to a space** and clamps to 2 lines (see
-    [Design → List](#design)). The plain-text + escaping rule applies anywhere a note
-    is shown (list rows, edit field, search results, toasts). Additionally: treat
+    **list-row preview** shows the first line as a one-line title and the rest
+    collapsed to a single line (see [Design → List](#design)). The plain-text +
+    escaping rule applies anywhere a note is shown (list rows, view, edit field,
+    search results, toasts). Additionally: treat
     **Unicode bidi / control
     characters** (e.g. U+202A–202E, U+2066–2069, other Cf/control code points) as a
     spoofing risk — isolate or strip them on display so a note cannot reorder or
@@ -310,11 +315,18 @@ A new `NotesModal.svelte` (new folder
   **tap-to-open** — tapping it opens the read-only **View** (below). The row shows a
   **two-line text preview** and a relative timestamp on the left, and a **chevron**
   affordance on the right; there are **no inline edit/delete icons** (edit and delete
-  live in the View). A header **"Add note"** button — the screen's **primary (filled)
-  action**, disabled at the cap (Decision 12) — sits above the list. **No per-row
-  icon:** notes have no per-item identity to show, so the row is text-only, giving the
-  preview the full row width. (Contacts warrant an avatar because each contact has a
-  distinct identity; notes do not.)
+  live in the View). Above the list sits a toolbar with a **"Search note" field** and
+  the **"Add note"** button (the screen's **primary, filled action**, disabled at the
+  cap — Decision 12). **No per-row icon:** notes have no per-item identity to show, so
+  the row is text-only, giving the preview the full row width. (Contacts warrant an
+  avatar because each contact has a distinct identity; notes do not.)
+- **Search (client-side, in v1):** the **"Search note"** field filters the **already
+  loaded + decrypted** notes in memory by a case-insensitive **substring match over
+  the full note text** — no backend call (the backend only holds ciphertext, so
+  server-side search is impossible; Out of Scope 3). The field's trailing affordance
+  is a **magnifier when empty** and a **clear ✕ when it has content** (matching the
+  contact-search input); clearing restores the full list. A no-match query shows a
+  simple "No notes match your search." message.
   **Preview rendering (precise) — first line is the note's "title":**
   - **Line 1 = the note's first line, shown as a bold title** (same size/weight as a
     contact name), on **one line** with a trailing **ellipsis** if too long.
@@ -536,6 +548,8 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
   to add a new note."
 - **After delete (undo):** "Note deleted" + an "Undo" action.
 - **Decryption failure:** "Couldn't decrypt this note" + a "Retry" action.
+- **Search:** placeholder **"Search note"**; no-match message **"No notes match your
+  search."**
 
 ---
 
@@ -711,10 +725,12 @@ service mappers + store sort, decryption-failure isolation, following existing
   render instantly from the cached store. Do **not** load on wallet init.
 - **Safe rendering (Decisions 14–15).** Render note text **as plain text only** —
   rely on Svelte's default `{text}` auto-escaping, **never `{@html}`** — with line
-  breaks handled by CSS, never injected markup. **List-row preview:** collapse line
-  breaks / whitespace runs to a single space and clamp to **2 lines + ellipsis**
-  (`-webkit-line-clamp: 2`, `overflow-wrap: anywhere`). **Edit field / full view:**
-  preserve line breaks with `white-space: pre-wrap`. Apply bidi/control-character
+  breaks handled by CSS, never injected markup. **List-row preview:** **line 1 = the
+  note's first line as a bold title** (one line, `text-overflow: ellipsis`); **line 2
+  = the remaining lines, whitespace-collapsed to single spaces**, lighter (one line,
+  ellipsis), omitted for single-line notes (`overflow-wrap: anywhere`). **Edit field /
+  full view:** preserve line breaks with `white-space: pre-wrap`. Apply
+  bidi/control-character
   isolation on display everywhere (Decision 15). The textarea accepts any Unicode and
   the editor counts by code points (Decision 14).
 - **Read-only view + clickable links (Decisions 15–16).** Tapping a row opens
@@ -731,6 +747,10 @@ service mappers + store sort, decryption-failure isolation, following existing
   from editor); **Edit is secondary**, **Delete** is the danger action. Navigation:
   row tap → view; view Edit → editor; **existing-note Save/Cancel → its view ("OK");
   new-note Save/Cancel → list; Delete → list**.
+- **Client-side search.** A "Search note" field filters the store's decrypted notes
+  by case-insensitive substring over the full text (a derived/filtered list — no
+  backend call); the trailing icon toggles magnifier ↔ clear ✕; empty result shows
+  the no-match message. (Mirror the address-book search input's behaviour.)
 - Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`, with
   optimistic store updates and rollback on rejection. **Delete is immediate — no
   confirmation dialog — but reversible via a pinned snackbar:** on delete, surface a
@@ -801,8 +821,10 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 2. A **separate title field**, rich text, attachments, tags, or folders. (The list
    preview shows the note's **first line as a de-facto title**, but the note is still
    a single free-text body — there is no distinct stored title.)
-3. **Search / filtering** notes server-side (impossible anyway — the backend holds
-   only ciphertext). Client-side filtering of the loaded list could be added later.
+3. **Server-side search / filtering** (impossible anyway — the backend holds only
+   ciphertext). **Client-side** search over the loaded, decrypted notes **is in v1**
+   (the "Search note" field — see [Design → List](#design)); only server-side search
+   is out of scope.
 4. **Sharing notes** between users (`EncryptedMaps` supports it; we use a per-user
    key and do not expose sharing) and exporting notes.
 5. **Manual reordering / pinning** (sort is fixed newest-first, Decision 7).
@@ -877,6 +899,10 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       list scroll. **Undo restores the note exactly** — same `note_id`,
       `created_at_ns`, and `updated_at_ns` — so it returns to its original sort
       position with no bumped timestamp, as if the delete never happened.
+- [ ] The list has a **"Search note"** field that filters the loaded, decrypted notes
+      **client-side** (case-insensitive substring over the full note text, **no
+      backend call**); the trailing icon is a magnifier when empty and a **clear ✕**
+      when it has content; a no-match query shows "No notes match your search."
 - [ ] A single note that fails to decrypt shows an error + Retry in its row without
       affecting other notes.
 - [ ] Notes (and the per-user vetKey) load **lazily on first open** of the Notes
