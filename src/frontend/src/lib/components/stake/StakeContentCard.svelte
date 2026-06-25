@@ -6,13 +6,16 @@
 		content: Snippet;
 		buttons?: Snippet;
 		primaryStyle?: boolean;
+		// Responsive width of the card within its flex row. Defaults to half-width
+		// (two cards per row); pass e.g. `sm:w-1/3` for a three-up layout.
+		widthClass?: string;
 	}
 
-	let { content, buttons, primaryStyle = false }: Props = $props();
+	let { content, buttons, primaryStyle = false, widthClass = 'sm:w-1/2' }: Props = $props();
 </script>
 
 <div
-	class="flex w-full flex-col items-center justify-between rounded-xl border-solid border-disabled p-4 sm:w-1/2"
+	class={`flex w-full flex-col items-center justify-between rounded-xl border-solid border-disabled p-4 ${widthClass}`}
 	class:bg-brand-subtle-10={primaryStyle}
 	class:bg-secondary={!primaryStyle}
 	class:border={!primaryStyle}

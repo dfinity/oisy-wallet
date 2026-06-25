@@ -104,6 +104,7 @@
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="tertiary-alt"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
 	testId={NAVIGATION_MENU_BUTTON}

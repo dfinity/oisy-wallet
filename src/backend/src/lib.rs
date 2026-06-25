@@ -85,10 +85,6 @@ pub fn init(arg: Arg) {
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 
-    // Stand up the encrypted personal-notes store now that the vetKD key name
-    // (from config) is available.
-    state::init_personal_notes();
-
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();
 
@@ -114,9 +110,6 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
-
-    // Re-attach the encrypted personal-notes store to its stable memory.
-    state::init_personal_notes();
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

@@ -71,6 +71,7 @@ export interface Modal<T> {
 		| 'get-token'
 		| 'harvest-stake'
 		| 'harvest-unstake'
+		| 'liquidium-supply'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -143,6 +144,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openHarvestStake: (id: symbol) => void;
 	openHarvestUnstake: (id: symbol) => void;
+	openLiquidiumSupply: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -253,6 +255,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHarvestStake: setType('harvest-stake'),
 		openHarvestUnstake: setType('harvest-unstake'),
+		openLiquidiumSupply: setType('liquidium-supply'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),

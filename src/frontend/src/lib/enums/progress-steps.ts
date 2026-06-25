@@ -119,6 +119,13 @@ export enum ProgressStepsUnstake {
 	DONE = 'done'
 }
 
+export enum ProgressStepsLiquidiumSupply {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
 export enum ProgressStepsClaimStakingReward {
 	INITIALIZATION = 'initialization',
 	CLAIM = 'claim',
