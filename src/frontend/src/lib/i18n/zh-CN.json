@@ -1651,6 +1651,17 @@
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "交易详情",

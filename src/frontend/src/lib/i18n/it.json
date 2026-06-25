@@ -1651,6 +1651,17 @@
 			"unexpected_processing_request": "Errore inaspettato durante l'elaborazione della richiesta con WalletConnect."
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "Dettagli transazione",

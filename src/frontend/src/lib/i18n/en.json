@@ -1651,6 +1651,17 @@
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "Trading",
+			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
+			"learn_more": "Learn more"
+		},
+		"provider_unavailable": {
+			"title": "Trading is temporarily unavailable",
+			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "Transaction details",
