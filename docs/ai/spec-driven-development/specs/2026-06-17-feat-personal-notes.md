@@ -152,7 +152,11 @@ storage/crypto layer, but the two remain distinct features with distinct UIs.
 3. **Note model = body + timestamps.** Each note is free text plus
    `created_at_ns` / `updated_at_ns`, both **UTC epoch nanoseconds** (absolute,
    timezone-agnostic instants — matching IC time; the client sets them, see
-   [Stored value](#stored-value)). **No title** (kept minimal).
+   [Stored value](#stored-value)). **No separate title field** — a note is a single
+   free-text body; there is no distinct stored title. However, the **first line is
+   shown as a de-facto title** (bold) in the list preview and the read-only view
+   (display convention only — nothing extra is stored). See
+   [Design → List](#design) and Out of Scope 2.
    - **List row:** a note that has **never been edited** (`updated_at_ns ==
 created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
      (Decision 7 sorts by `updated_at_ns`, so edited notes rise to the top).
@@ -230,9 +234,10 @@ created_at_ns`) shows **"Created …"**; once edited it shows **"Updated …"**
     text-interpolation auto-escaping ({`text`}), **never `{@html}`**, with line
     breaks handled by **CSS** (not by injecting `<br>` or any markup) — in the
     **full/edit view** preserve them with `white-space: pre-wrap`, while the
-    **list-row preview collapses them to a space** and clamps to 2 lines (see
-    [Design → List](#design)). The plain-text + escaping rule applies anywhere a note
-    is shown (list rows, edit field, search results, toasts). Additionally: treat
+    **list-row preview** shows the first line as a one-line title and the rest
+    collapsed to a single line (see [Design → List](#design)). The plain-text +
+    escaping rule applies anywhere a note is shown (list rows, view, edit field,
+    search results, toasts). Additionally: treat
     **Unicode bidi / control
     characters** (e.g. U+202A–202E, U+2066–2069, other Cf/control code points) as a
     spoofing risk — isolate or strip them on display so a note cannot reorder or
@@ -310,11 +315,18 @@ A new `NotesModal.svelte` (new folder
   **tap-to-open** — tapping it opens the read-only **View** (below). The row shows a
   **two-line text preview** and a relative timestamp on the left, and a **chevron**
   affordance on the right; there are **no inline edit/delete icons** (edit and delete
-  live in the View). A header **"Add note"** button — the screen's **primary (filled)
-  action**, disabled at the cap (Decision 12) — sits above the list. **No per-row
-  icon:** notes have no per-item identity to show, so the row is text-only, giving the
-  preview the full row width. (Contacts warrant an avatar because each contact has a
-  distinct identity; notes do not.)
+  live in the View). Above the list sits a toolbar with a **"Search note" field** and
+  the **"Add note"** button (the screen's **primary, filled action**, disabled at the
+  cap — Decision 12). **No per-row icon:** notes have no per-item identity to show, so
+  the row is text-only, giving the preview the full row width. (Contacts warrant an
+  avatar because each contact has a distinct identity; notes do not.)
+- **Search (client-side, in v1):** the **"Search note"** field filters the **already
+  loaded + decrypted** notes in memory by a case-insensitive **substring match over
+  the full note text** — no backend call (the backend only holds ciphertext, so
+  server-side search is impossible; Out of Scope 3). The field's trailing affordance
+  is a **magnifier when empty** and a **clear ✕ when it has content** (matching the
+  contact-search input); clearing restores the full list. A no-match query shows a
+  simple "No notes match your search." message.
   **Preview rendering (precise) — first line is the note's "title":**
   - **Line 1 = the note's first line, shown as a bold title** (same size/weight as a
     contact name), on **one line** with a trailing **ellipsis** if too long.
@@ -353,9 +365,9 @@ A new `NotesModal.svelte` (new folder
   scrolls** (its own scrollbar), while the **created/updated line and the Edit/Delete
   actions stay pinned below it**. The created/updated line reads "Created {date}" /
   "Created {date} · Updated {date}". Actions: **Edit** (secondary) and **Delete**. The
-  **footer button is the primary action**, labelled **"Back"** when the View was
-  opened from the list, or **"OK"** when it was reached by returning from the editor
-  (after Save or Cancel of an edit) — both return to the list. The header **(X)**
+  **footer button is the primary action**, always labelled **"Back"** (whether the
+  View was opened from the list or reached by returning from the editor), and returns
+  to the list. The header **(X)**
   closes the whole modal (read-only, so
   there is no unsaved-data risk).
 - **Add / edit:** the body switches to (or a sub-step opens) an
@@ -376,9 +388,10 @@ A new `NotesModal.svelte` (new folder
 
   **After Save / Cancel (navigation):** a **new** note returns to the **list** on
   **both Save and Cancel** (it never enters the View). **Editing an existing** note
-  returns to that note's **View** (whose footer now reads **"OK"**) on **both Save and
-  Cancel**. **Delete** (from the editor's Delete or the View's Delete) returns to the
-  **list** with the undo snackbar.
+  returns to that note's **View** on **both Save and Cancel**. **Delete** (from the
+  editor's Delete or the View's Delete) first asks for **confirmation** (below); on
+  confirm the note is deleted and the modal returns to the **list**, on cancel it
+  stays where it was.
 
   **Focus on open:** the textarea is **auto-focused** the moment the editor opens so
   the user can type immediately — **add** opens empty with the caret ready; **edit**
@@ -413,6 +426,19 @@ editor is a full-page step** within it (push/replace navigation within the modal
 like Contacts' "Add new contact"), **not a bottom sheet**. On desktop the modal is a
 centered floating card and the add/edit form is a step inside that card. The same
 full-page-step pattern is used for both, so there is a single editor layout.
+
+**Modal sizing & scroll (Notes leads this).** On **desktop** the card grows with its
+content from a comfortable **minimum height** up to **~80% of the viewport height**,
+and only then does the **list scroll inside its own region** — the search header and
+the pinned footer stay put, and the scrollbar is confined to the list (it does **not**
+run the full height of the modal). The card never reaches the screen edges (it keeps a
+margin all round). On **mobile** the modal stays **full-page** (the global modal
+default), with the list scrolling between the flush header and the bottom-pinned
+"Close". Note: OISY's shared modal currently does **not** cap desktop height or confine
+the scroll (a long dialog grows to the viewport edges and the whole body scrolls);
+Notes deliberately **pioneers** the capped, content-scrolled behaviour here (via the
+modal's `--dialog-max-height` and a dedicated list scroll region), so the shared modal
+component can be aligned to it later.
 
 **Desktop modal sizing.** The desktop modal **sizes to its content** rather than a
 fixed height, with:
@@ -528,14 +554,20 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
 - **Timestamps:** list row "Created {$date}" / "Updated {$date}"; edit view
   "Created {$date}" or "Created {$created} · Updated {$updated}" (the `·` joins
   them). `{$date}` is the localized relative/absolute time.
-- **Buttons:** reuse core "Cancel" / "Save" / "Add note"; "Delete" action.
-- **View mode:** footer button **"Back"** (opened from the list) / **"OK"** (after an
-  edit); **"Edit note"** (secondary) and **"Delete"** actions.
+- **Buttons:** reuse core "Cancel" / "Save" / "Add note"; **"Delete note"** action
+  (red text + trash, mirroring Contacts' "Delete contact").
+- **View mode:** footer button **"Back"**; **"Edit note"** (secondary) and
+  **"Delete note"** actions.
 - **Too-long error:** "Note must be {$maxCharacters} characters or fewer."
 - **Cap reached:** "You've reached the maximum of {$max} saved notes. Delete one
   to add a new note."
-- **After delete (undo):** "Note deleted" + an "Undo" action.
+- **Delete confirmation:** title "Delete note"; body "This will delete the note
+  '$note'. This action cannot be undone." where `$note` is a short snippet (the
+  first ~15 characters of the note, rendered **bold**); buttons "Cancel" / "Delete
+  note". Mirrors the contact-delete confirmation's wording.
 - **Decryption failure:** "Couldn't decrypt this note" + a "Retry" action.
+- **Search:** placeholder **"Search note"**; no-match message **"No notes match your
+  search."**
 
 ---
 
@@ -711,10 +743,12 @@ service mappers + store sort, decryption-failure isolation, following existing
   render instantly from the cached store. Do **not** load on wallet init.
 - **Safe rendering (Decisions 14–15).** Render note text **as plain text only** —
   rely on Svelte's default `{text}` auto-escaping, **never `{@html}`** — with line
-  breaks handled by CSS, never injected markup. **List-row preview:** collapse line
-  breaks / whitespace runs to a single space and clamp to **2 lines + ellipsis**
-  (`-webkit-line-clamp: 2`, `overflow-wrap: anywhere`). **Edit field / full view:**
-  preserve line breaks with `white-space: pre-wrap`. Apply bidi/control-character
+  breaks handled by CSS, never injected markup. **List-row preview:** **line 1 = the
+  note's first line as a bold title** (one line, `text-overflow: ellipsis`); **line 2
+  = the remaining lines, whitespace-collapsed to single spaces**, lighter (one line,
+  ellipsis), omitted for single-line notes (`overflow-wrap: anywhere`). **Edit field /
+  full view:** preserve line breaks with `white-space: pre-wrap`. Apply
+  bidi/control-character
   isolation on display everywhere (Decision 15). The textarea accepts any Unicode and
   the editor counts by code points (Decision 14).
 - **Read-only view + clickable links (Decisions 15–16).** Tapping a row opens
@@ -727,26 +761,28 @@ service mappers + store sort, decryption-failure isolation, following existing
   **splitting the text into text / URL segments and rendering anchors as real Svelte
   elements** — escape every segment, build the `href` only from `http`/`https`
   matches (never `javascript:` / `data:`), and **never `{@html}` raw input**. Footer
-  button is **primary**, reading **"Back"** (opened from list) or **"OK"** (returned
-  from editor); **Edit is secondary**, **Delete** is the danger action. Navigation:
-  row tap → view; view Edit → editor; **existing-note Save/Cancel → its view ("OK");
+  button is **primary**, always reading **"Back"**; **Edit is secondary**, **Delete**
+  is the danger action. Navigation:
+  row tap → view; view Edit → editor; **existing-note Save/Cancel → its view;
   new-note Save/Cancel → list; Delete → list**.
-- Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`, with
-  optimistic store updates and rollback on rejection. **Delete is immediate — no
-  confirmation dialog — but reversible via a pinned snackbar:** on delete, surface a
-  **"Note deleted" + "Undo"** toast through OISY's existing toast system
-  ([`toastsStore`](../../../../src/frontend/src/lib/stores/toasts.store.ts) / gix
-  `Toasts`), **not** an element appended inside the (scrollable) notes list — so it
-  is never pushed off-screen when the list is long. The toast is pinned at the app's
-  standard toast position, **auto-dismisses after a few seconds**, and its **Undo**
-  re-saves the removed note into the now-freed slot. **Undo restores the note
-  exactly, as if the delete never happened:** the client keeps the **whole decrypted
-  note** (the `note_id` plus the `created_at_ns` and `updated_at_ns`, not just the
-  body text) in memory during the undo window, and on Undo re-encrypts that **same
-  envelope** and re-saves it **under the same `note_id`** — it does **not** mint a new
-  id or bump `updated_at_ns`. Because both timestamps are preserved, the note returns
-  to its **original sort position** (Decision 7), not the top of the list. (Avoid
-  inline-in-list undo precisely because a long list scrolls it out of view.)
+- **Client-side search.** A "Search note" field filters the store's decrypted notes
+  by case-insensitive substring over the full text (a derived/filtered list — no
+  backend call); the trailing icon toggles magnifier ↔ clear ✕; empty result shows
+  the no-match message. (Mirror the address-book search input's behaviour.)
+- Wire add/edit → `savePersonalNote`, delete → `deletePersonalNote`. **Delete
+  requires a confirmation step — the same pattern as deleting a contact** (there is
+  **no** undo): clicking Delete (in the View or the editor) opens a confirmation
+  asking **"Delete note"** with the body **"This will delete the note '<snippet>'.
+  This action cannot be undone."** (the snippet is the note's first ~15 characters,
+  rendered **bold** as escaped plain text — never `{@html}`, per Decision 15) and
+  **Cancel / Delete note** buttons. On **desktop** the confirmation replaces the
+  modal content (like Contacts' delete-contact step); on **mobile** it is a
+  **bottom sheet** (reuse `BottomSheetConfirmationPopup`, like
+  `DeleteContactConfirmBottomSheet`), with left/right padding on the sheet content.
+  Confirming deletes the note and returns to the list; cancelling dismisses the
+  confirmation and leaves the note untouched. Build it from a shared
+  `DeleteNoteConfirmContent` used by both the desktop step and the bottom sheet,
+  switched with `Responsive` (mirroring the contacts components).
 - **Cap gate (Decision 12):** when `atNotesCapacity`, the **"Add note" button is
   disabled** with the shared cap message shown as inline text; editing and
   deleting stay enabled.
@@ -801,8 +837,10 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
 2. A **separate title field**, rich text, attachments, tags, or folders. (The list
    preview shows the note's **first line as a de-facto title**, but the note is still
    a single free-text body — there is no distinct stored title.)
-3. **Search / filtering** notes server-side (impossible anyway — the backend holds
-   only ciphertext). Client-side filtering of the loaded list could be added later.
+3. **Server-side search / filtering** (impossible anyway — the backend holds only
+   ciphertext). **Client-side** search over the loaded, decrypted notes **is in v1**
+   (the "Search note" field — see [Design → List](#design)); only server-side search
+   is out of scope.
 4. **Sharing notes** between users (`EncryptedMaps` supports it; we use a per-user
    key and do not expose sharing) and exporting notes.
 5. **Manual reordering / pinning** (sort is fixed newest-first, Decision 7).
@@ -842,9 +880,8 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       (`rel="noopener noreferrer"`); other schemes (`javascript:`, `data:`, …) are
       **not** linkified; links are built without `{@html}` of raw input. **A long note
       scrolls inside the box** while the created/updated line and Edit/Delete stay
-      pinned. The view's footer is the **primary** button reading **"Back"** (from
-      list) or **"OK"** (returning from an edit); **Edit** is secondary, **Delete** is
-      present.
+      pinned. The view's footer is the **primary** button always reading **"Back"**;
+      **Edit** is secondary, **Delete** is present.
 - [ ] The desktop modal **sizes to content** with a **minimum ~560px** and a **max of
       ~75vh**, both `min(…, 100%)`-clamped to the window; past the max the list /
       editor / view-box scrolls internally with header + footer pinned; the list
@@ -872,11 +909,15 @@ npm run format && npm run lint -- --max-warnings 0 && npm run check && npm run t
       editing and deleting remain enabled. The gate is driven by
       `get_personal_notes_count` and stays correct after add/delete.
 - [ ] The modal lists notes **newest-first** by `updated_at_ns`; add, edit, and
-      delete update the store; delete is immediate and **undoable via a pinned,
-      auto-dismissing snackbar** (using OISY's toast system) that is never lost to
-      list scroll. **Undo restores the note exactly** — same `note_id`,
-      `created_at_ns`, and `updated_at_ns` — so it returns to its original sort
-      position with no bumped timestamp, as if the delete never happened.
+      delete update the store. **Delete requires a confirmation step** (no undo) — the
+      same pattern as deleting a contact: a "Delete note" prompt naming the note
+      (first ~15 characters, bold) with "This action cannot be undone.", a desktop
+      dialog and a **mobile bottom sheet**, and Cancel / Delete note buttons.
+      Confirming deletes; cancelling leaves the note untouched.
+- [ ] The list has a **"Search note"** field that filters the loaded, decrypted notes
+      **client-side** (case-insensitive substring over the full note text, **no
+      backend call**); the trailing icon is a magnifier when empty and a **clear ✕**
+      when it has content; a no-match query shows "No notes match your search."
 - [ ] A single note that fails to decrypt shows an error + Retry in its row without
       affecting other notes.
 - [ ] Notes (and the per-user vetKey) load **lazily on first open** of the Notes

@@ -1651,6 +1651,17 @@
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
 		}
 	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		}
+	},
 	"transaction": {
 		"text": {
 			"details": "트랜잭션 상세 정보",
