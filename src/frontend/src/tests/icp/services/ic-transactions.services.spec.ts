@@ -1,3 +1,4 @@
+import type { Value } from '$declarations/icrc3/icrc3.did';
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -10,6 +11,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import { loadIcrc3BlockLog, type Icrc3Block } from '$icp/services/icrc3.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -25,7 +27,8 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockValidIcrc7Token } from '$tests/mocks/icrc7-tokens.mock';
+import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 import { get } from 'svelte/store';
@@ -37,6 +40,10 @@ vi.mock('$icp/api/icp-index.api', () => ({
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getTransactions: vi.fn()
+}));
+
+vi.mock('$icp/services/icrc3.services', () => ({
+	loadIcrc3BlockLog: vi.fn()
 }));
 
 describe('ic-transactions.services', () => {
@@ -174,12 +181,36 @@ describe('ic-transactions.services', () => {
 			certified: false
 		}));
 
+		const accountValue = (principal: typeof mockPrincipal): Value => ({
+			Map: [['owner', { Text: principal.toText() }]]
+		});
+
+		const icrc7Block = ({
+			id,
+			btype,
+			tx
+		}: {
+			id: bigint;
+			btype: '7mint' | '7burn' | '7xfer';
+			tx: Array<[string, Value]>;
+		}): Icrc3Block => ({
+			id,
+			block: {
+				Map: [
+					['btype', { Text: btype }],
+					['ts', { Nat: 1_700_000_000_000_000_000n }],
+					['tx', { Map: [['tid', { Nat: 50n }] as [string, Value], ...tx] }]
+				]
+			}
+		});
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
 
 			icTransactionsStore.reset(mockToken.id);
+			icTransactionsStore.reset(mockValidIcrc7Token.id);
 
 			vi.spyOn(icpIndexApi, 'getTransactions').mockResolvedValue({
 				transactions: mockTransactions.map(
@@ -239,6 +270,67 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).not.toHaveBeenCalled();
 			expect(getTransactionsIcrc).not.toHaveBeenCalled();
+		});
+
+		it('should load transactions from ICRC-3 blocks for ICRC-7 tokens', async () => {
+			const blocks = [
+				icrc7Block({
+					id: 1n,
+					btype: '7mint',
+					tx: [['to', accountValue(mockPrincipal2)]]
+				}),
+				icrc7Block({
+					id: 2n,
+					btype: '7xfer',
+					tx: [
+						['from', accountValue(mockPrincipal2)],
+						['to', accountValue(mockPrincipal)]
+					]
+				})
+			];
+
+			vi.mocked(loadIcrc3BlockLog)
+				.mockResolvedValueOnce({ logLength: 3n, blocks: [] })
+				.mockResolvedValueOnce({ logLength: 3n, blocks })
+				.mockResolvedValueOnce({ logLength: 3n, blocks: [] })
+				.mockResolvedValueOnce({ logLength: 3n, blocks });
+
+			icTransactionsStore.reset(mockValidIcrc7Token.id);
+
+			await loadNextIcTransactions({
+				...mockParams,
+				lastId: undefined,
+				token: mockValidIcrc7Token
+			});
+
+			expect(getTransactionsIcp).not.toHaveBeenCalled();
+			expect(getTransactionsIcrc).not.toHaveBeenCalled();
+			expect(loadIcrc3BlockLog).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				canisterId: mockValidIcrc7Token.canisterId,
+				start: ZERO,
+				length: ZERO,
+				certified: expect.any(Boolean)
+			});
+			expect(loadIcrc3BlockLog).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				canisterId: mockValidIcrc7Token.canisterId,
+				start: ZERO,
+				length: 3n,
+				certified: expect.any(Boolean)
+			});
+
+			expect(get(icTransactionsStore)?.[mockValidIcrc7Token.id]).toEqual([
+				{
+					data: expect.objectContaining({
+						id: '2',
+						type: 'receive',
+						incoming: true,
+						tokenId: 50n
+					}),
+					certified: true
+				}
+			]);
 		});
 
 		it('should load transactions with the correct parameters for ICP token', async () => {
@@ -365,19 +457,55 @@ describe('ic-transactions.services', () => {
 			expect(signalEnd).toHaveBeenCalledTimes(2);
 		});
 
-		it('should reset the store if loading transactions raises an error', async () => {
+		it('should keep loaded transactions and balance if loading the next ICP page raises an error', async () => {
 			const initialTransactions = createMockIcTransactionsUi(11).map((transaction) => ({
 				data: transaction,
 				certified: false
 			}));
 			icTransactionsStore.append({ tokenId: mockToken.id, transactions: initialTransactions });
+			balancesStore.set({ id: mockToken.id, data: { data: bn1Bi, certified: false } });
 
 			const mockError = new Error('Test error');
 			vi.spyOn(icpIndexApi, 'getTransactions').mockRejectedValue(mockError);
 
 			await loadNextIcTransactions(mockParams);
 
-			expect(get(icTransactionsStore)?.[mockToken.id]).toBeNull();
+			expect(get(icTransactionsStore)?.[mockToken.id]).toStrictEqual(initialTransactions);
+			expect(get(balancesStore)?.[mockToken.id]).toStrictEqual({
+				data: bn1Bi,
+				certified: false
+			});
+
+			expect(signalEnd).toHaveBeenCalledOnce();
+		});
+
+		it('should keep loaded transactions and balance if loading the next ICRC-7 page raises an error', async () => {
+			const initialTransactions = createMockIcTransactionsUi(11).map((transaction) => ({
+				data: transaction,
+				certified: false
+			}));
+			icTransactionsStore.append({
+				tokenId: mockValidIcrc7Token.id,
+				transactions: initialTransactions
+			});
+			balancesStore.set({
+				id: mockValidIcrc7Token.id,
+				data: { data: bn1Bi, certified: false }
+			});
+
+			vi.mocked(loadIcrc3BlockLog).mockRejectedValue(new Error('Test error'));
+
+			await loadNextIcTransactions({
+				...mockParams,
+				lastId: undefined,
+				token: mockValidIcrc7Token
+			});
+
+			expect(get(icTransactionsStore)?.[mockValidIcrc7Token.id]).toStrictEqual(initialTransactions);
+			expect(get(balancesStore)?.[mockValidIcrc7Token.id]).toStrictEqual({
+				data: bn1Bi,
+				certified: false
+			});
 
 			expect(signalEnd).toHaveBeenCalledOnce();
 		});
@@ -394,10 +522,10 @@ describe('ic-transactions.services', () => {
 		const mockTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: timestampBuffer + BigInt(index)
+				timestamp: timestampBuffer + BigInt(17 - index)
 			})
 		);
-		const [expectedOldestTransaction] = mockTransactions;
+		const expectedOldestTransaction = mockTransactions[mockTransactions.length - 1];
 		const { id: mockLastId } = expectedOldestTransaction;
 
 		const mockParams = {
@@ -466,7 +594,37 @@ describe('ic-transactions.services', () => {
 				...transaction,
 				timestamp: undefined
 			}));
-			const lastId = transactions[0].id;
+			const lastId = transactions[transactions.length - 1].id;
+
+			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
+				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
+				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+		});
+
+		it('should use the last transaction cursor if oldest timestamps are tied', async () => {
+			const transactions = mockTransactions.map((transaction) => ({
+				...transaction,
+				timestamp: timestampBuffer
+			}));
+			const lastId = transactions[transactions.length - 1].id;
 
 			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
 

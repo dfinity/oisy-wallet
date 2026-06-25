@@ -1,12 +1,17 @@
 import type {
 	AllowSigningError,
 	BtcAddPendingTransactionError,
+	BtcGetFeePercentilesError,
 	BtcGetPendingTransactionsError,
 	GetAllowedCyclesError,
 	RateLimitError,
-	SelectedUtxosFeeError
+	SignOnramperWidgetUrlError
 } from '$declarations/backend/backend.did';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	CanisterInternalError,
+	OnramperRateLimitedError,
+	OnramperSecretNotConfiguredError
+} from '$lib/canisters/errors';
 import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import { assertNever } from '@dfinity/utils';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
@@ -89,30 +94,14 @@ export const mapBtcGetPendingTransactionsError = (
 	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetPendingTransactionsError'));
 };
 
-export const mapBtcSelectUserUtxosFeeError = (
-	err: SelectedUtxosFeeError
+export const mapBtcGetFeePercentilesError = (
+	err: BtcGetFeePercentilesError
 ): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	if ('PendingTransactions' in err) {
-		return new CanisterInternalError(
-			'Selecting utxos fee is not possible - pending transactions found.'
-		);
-	}
-
-	if ('RateLimited' in err) {
-		return mapRateLimitError(err.RateLimited);
-	}
-
-	if ('InvalidDelegationChain' in err) {
-		return new CanisterInternalError(
-			`II delegation chain verification failed: ${err.InvalidDelegationChain.msg}`
-		);
-	}
-
-	return assertNeverOr(err, new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError'));
+	return assertNeverOr(err, new CanisterInternalError('Unknown BtcGetFeePercentilesError'));
 };
 
 export const mapGetAllowedCyclesError = (err: GetAllowedCyclesError): CanisterInternalError => {
@@ -167,4 +156,37 @@ export const mapAllowSigningError = (
 	}
 
 	return assertNeverOr(err, new CanisterInternalError('Unknown AllowSigningError'));
+};
+
+export const mapSignOnramperWidgetUrlError = (
+	err: SignOnramperWidgetUrlError
+): CanisterInternalError => {
+	if ('SecretNotConfigured' in err) {
+		return new OnramperSecretNotConfiguredError(
+			'OnRamper signing secret is not configured on the backend canister.'
+		);
+	}
+
+	if ('RateLimited' in err) {
+		const { max_calls: maxCalls, window_ns: windowNs } = err.RateLimited;
+		const windowSeconds = windowNs / NANO_SECONDS_IN_SECOND;
+
+		return new OnramperRateLimitedError(
+			`Rate limit exceeded. Maximum of ${maxCalls} calls allowed every ${windowSeconds} seconds.`
+		);
+	}
+
+	if ('AddressMismatch' in err) {
+		return new CanisterInternalError(
+			'A wallet address did not match the one derived for the caller on the backend.'
+		);
+	}
+
+	if ('AddressDerivationFailed' in err) {
+		return new CanisterInternalError(
+			'Could not derive the wallet addresses to verify the OnRamper widget URL.'
+		);
+	}
+
+	return assertNeverOr(err, new CanisterInternalError('Unknown SignOnramperWidgetUrlError'));
 };

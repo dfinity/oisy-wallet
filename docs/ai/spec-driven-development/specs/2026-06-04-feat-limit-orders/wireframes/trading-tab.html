@@ -1,0 +1,793 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Trading Tab — Three States</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-primary: rgba(0, 0, 0, 0.35);
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: #f0efeb;
+				padding: 1.5rem;
+			}
+			.state-toggle {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 1.5rem;
+				flex-wrap: wrap;
+			}
+			.toggle-btn {
+				font-size: 12px;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+			}
+			.toggle-btn.active {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.page {
+				max-width: 600px;
+				margin: 0 auto;
+				font-family: var(--font-sans);
+			}
+			.hero {
+				position: relative;
+				background: var(--color-background-secondary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem 1rem;
+				text-align: center;
+				margin-bottom: 1rem;
+			}
+			.hero-balance {
+				font-size: 28px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-top: 2px;
+				margin-bottom: 1rem;
+			}
+			.hero-actions {
+				display: flex;
+				justify-content: center;
+				gap: 16px;
+			}
+			.hero-btn {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 5px;
+			}
+			.hero-btn-circle {
+				width: 42px;
+				height: 42px;
+				border-radius: 50%;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 17px;
+				color: var(--color-text-secondary);
+			}
+			.hero-btn-label {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.tabs {
+				display: flex;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				padding: 0 1rem;
+				margin-bottom: 1rem;
+			}
+			.tab {
+				font-size: 13px;
+				padding: 8px 12px;
+				color: var(--color-text-secondary);
+				border-bottom: 2px solid transparent;
+				margin-bottom: -0.5px;
+				white-space: nowrap;
+			}
+			.tab.active {
+				color: var(--color-text-primary);
+				font-weight: 500;
+				border-bottom-color: var(--color-text-primary);
+			}
+			.content {
+				padding: 0 1rem;
+			}
+			.intro {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-bottom: 1.25rem;
+				line-height: 1.5;
+			}
+			.learn-more {
+				color: var(--color-text-info);
+				text-decoration: underline;
+				text-underline-offset: 2px;
+				cursor: pointer;
+			}
+			.section {
+				margin-bottom: 1.5rem;
+			}
+			.section-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.section-title {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.section-action {
+				font-size: 12px;
+				color: var(--color-text-info);
+				cursor: pointer;
+				text-decoration: underline;
+				text-underline-offset: 2px;
+			}
+			.section-action.disabled {
+				color: var(--color-text-tertiary);
+				text-decoration: none;
+				cursor: default;
+			}
+			.list {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+				background: var(--color-border-tertiary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				overflow: hidden;
+			}
+			.row {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 10px 14px;
+				background: var(--color-background-primary);
+			}
+			.tok-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				flex-shrink: 0;
+			}
+			.tok-dot-u {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.row-info {
+				flex: 1;
+			}
+			.row-name {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.row-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 1px;
+			}
+			.row-right {
+				text-align: right;
+			}
+			.row-main {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.row-secondary {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.row-fiat {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.row-action {
+				font-size: 11px;
+				color: var(--color-text-info);
+				text-decoration: underline;
+				cursor: pointer;
+				margin-left: 8px;
+				flex-shrink: 0;
+			}
+			.empty-row {
+				padding: 1.25rem 14px;
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			.empty-text {
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			.empty-cta {
+				font-size: 13px;
+				font-weight: 500;
+				padding: 7px 16px;
+				border-radius: var(--border-radius-md);
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				cursor: pointer;
+				border: none;
+				font-family: var(--font-sans);
+			}
+			.status-pill {
+				font-size: 11px;
+				padding: 2px 7px;
+				border-radius: 10px;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+			.book-chip {
+				font-size: 10px;
+				color: var(--color-text-tertiary);
+				background: var(--color-background-secondary);
+				padding: 2px 7px;
+				border-radius: 10px;
+				white-space: nowrap;
+				flex-shrink: 0;
+				margin-right: 6px;
+			}
+			.s-open {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.s-pending {
+				background: var(--color-background-warning);
+				color: var(--color-text-warning);
+			}
+			.s-filled {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.status-pill i {
+				font-size: 12px;
+				vertical-align: -1px;
+			}
+			.s-cancelled {
+				background: var(--color-background-secondary);
+				color: var(--color-text-tertiary);
+			}
+			.ord-main {
+				font-size: 13px;
+				color: var(--color-text-primary);
+				line-height: 1.4;
+			}
+			.venue-tag {
+				display: inline-block;
+				font-size: 10px;
+				font-weight: 400;
+				padding: 1px 7px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				color: var(--color-text-secondary);
+				margin-left: 6px;
+				vertical-align: 1px;
+				white-space: nowrap;
+			}
+			.row-right-meta {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+				gap: 3px;
+				flex-shrink: 0;
+			}
+			.queue-text {
+				font-size: 11px;
+				color: var(--color-text-secondary);
+				white-space: nowrap;
+			}
+			.side {
+				font-weight: 600;
+			}
+			.side-sell {
+				color: var(--color-text-danger);
+			}
+			.side-buy {
+				color: var(--color-text-success);
+			}
+			.orders-wrap {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				overflow: hidden;
+			}
+			.orders-tabs {
+				display: flex;
+				background: var(--color-background-primary);
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.orders-tab {
+				font-size: 13px;
+				padding: 8px 14px;
+				cursor: pointer;
+				color: var(--color-text-secondary);
+				border-bottom: 2px solid transparent;
+				margin-bottom: -0.5px;
+			}
+			.orders-tab.active {
+				color: var(--color-text-primary);
+				font-weight: 500;
+				border-bottom-color: var(--color-text-primary);
+			}
+			.orders-body {
+				display: flex;
+				flex-direction: column;
+				gap: 1px;
+				background: var(--color-border-tertiary);
+			}
+			.empty-orders {
+				padding: 12px 14px;
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+			.empty-orders-text {
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			.empty-orders-btn {
+				font-size: 12px;
+				font-weight: 500;
+				padding: 6px 14px;
+				border-radius: var(--border-radius-md);
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				cursor: pointer;
+				border: none;
+				font-family: var(--font-sans);
+			}
+			.onboarding {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem 1.25rem;
+				text-align: center;
+			}
+			.ob-mark {
+				width: 44px;
+				height: 44px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 20px;
+				margin: 0 auto 12px;
+			}
+			.ob-title {
+				font-size: 16px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+				margin-bottom: 6px;
+			}
+			.ob-text {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				line-height: 1.5;
+				max-width: 340px;
+				margin: 0 auto 16px;
+			}
+			.ob-steps {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				text-align: left;
+				max-width: 280px;
+				margin: 0 auto 16px;
+			}
+			.ob-step {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 13px;
+				color: var(--color-text-primary);
+			}
+			.ob-num {
+				width: 22px;
+				height: 22px;
+				border-radius: 50%;
+				background: var(--color-background-tertiary);
+				color: var(--color-text-secondary);
+				font-size: 12px;
+				font-weight: 600;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+			}
+			.ob-tokens-label {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-bottom: 8px;
+			}
+			.ob-tokens {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+				justify-content: center;
+				margin-bottom: 16px;
+			}
+			.ob-chip {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				padding: 3px 10px 3px 5px;
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: 20px;
+				background: var(--color-background-secondary);
+				font-size: 12px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.ob-chip-dot {
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				flex-shrink: 0;
+			}
+			.ob-cta {
+				margin-bottom: 10px;
+				padding: 9px 20px;
+			}
+			.toggle-spacer {
+				flex: 1;
+			}
+			.priv-btn {
+				font-size: 12px;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+			}
+			.priv-btn.active {
+				background: var(--color-text-info);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.eye-btn {
+				position: absolute;
+				top: 12px;
+				right: 12px;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: var(--color-text-tertiary);
+				font-size: 16px;
+				line-height: 1;
+				padding: 4px;
+			}
+			.dotmask {
+				letter-spacing: 0.12em;
+				font-weight: 700;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="state-toggle">
+			<button class="toggle-btn active" onclick="showState('new', this)">New user</button>
+			<button class="toggle-btn" onclick="showState('assets', this)">Assets, no orders</button>
+			<button class="toggle-btn" onclick="showState('full', this)">Assets & orders</button>
+			<button class="toggle-btn" onclick="showState('noprovider', this)">OISY TRADE off</button>
+			<span class="toggle-spacer"></span>
+			<button class="priv-btn" onclick="togglePrivacy()">
+				<i class="ti ti-eye-off"></i> Privacy mode
+			</button>
+		</div>
+		<div class="page">
+			<div class="hero">
+				<button class="eye-btn" onclick="togglePrivacy()" title="Toggle privacy mode">
+					<i class="ti ti-eye" id="eye-ic"></i>
+				</button>
+				<div class="hero-balance pval">$1,234.56</div>
+				<div class="hero-fiat">Total balance</div>
+				<div class="hero-actions">
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrow-up"></i></div>
+						<span class="hero-btn-label">Send</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrow-down"></i></div>
+						<span class="hero-btn-label">Receive</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-credit-card"></i></div>
+						<span class="hero-btn-label">Buy</span>
+					</div>
+					<div class="hero-btn">
+						<div class="hero-btn-circle"><i class="ti ti-arrows-right-left"></i></div>
+						<span class="hero-btn-label">Swap</span>
+					</div>
+				</div>
+			</div>
+			<div class="tabs">
+				<div class="tab">Tokens</div>
+				<div class="tab">NFTs</div>
+				<div class="tab">Earning</div>
+				<div class="tab active">Trading</div>
+			</div>
+			<div class="content">
+				<div class="onboarding" id="provider-off" style="display: none">
+					<div class="ob-mark"><i class="ti ti-plug-connected-x"></i></div>
+					<div class="ob-title">Trading is temporarily unavailable</div>
+					<div class="ob-text">
+						No trading provider is available right now. Please check back later — your deposited
+						funds remain safe and will be accessible again once a provider is back online.
+					</div>
+				</div>
+				<div class="intro" id="intro">
+					Place limit orders on fully on-chain exchanges.
+					<span class="learn-more">Learn more ↗</span>
+				</div>
+				<div class="onboarding" id="onboarding">
+					<div class="ob-mark"><i class="ti ti-arrows-exchange"></i></div>
+					<div class="ob-title">Trade on-chain with OISY TRADE</div>
+					<div class="ob-text">
+						OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet
+						— your funds stay in smart contracts you control, never with a central party.
+					</div>
+					<div class="ob-steps">
+						<div class="ob-step">
+							<span class="ob-num">1</span><span>Deposit a supported token</span>
+						</div>
+						<div class="ob-step"><span class="ob-num">2</span><span>Place a limit order</span></div>
+						<div class="ob-step"><span class="ob-num">3</span><span>Withdraw anytime</span></div>
+					</div>
+					<div class="ob-tokens-label">Supported tokens</div>
+					<div class="ob-tokens" id="ob-tokens"></div>
+					<button class="empty-cta ob-cta">Deposit</button>
+					<div><span class="learn-more">Learn more ↗</span></div>
+				</div>
+				<div class="section" id="sec-assets">
+					<div class="section-header">
+						<div class="section-title">My assets</div>
+						<span class="section-action">+ Deposit</span>
+					</div>
+					<div id="assets-empty" class="list">
+						<div class="empty-row">
+							<span class="empty-text">No assets deposited yet</span
+							><button class="empty-cta">Deposit</button>
+						</div>
+					</div>
+					<div id="assets-list" class="list" style="display: none">
+						<div class="row">
+							<div class="tok-dot">ICP</div>
+							<div class="row-info">
+								<div class="row-name">ICP <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">Internet Computer</div>
+							</div>
+							<div class="row-right">
+								<div class="row-main pval">250 ICP</div>
+								<div class="row-secondary">Available: <span class="pval">150 ICP</span></div>
+								<div class="row-fiat pval">$672.50</div>
+							</div>
+							<span class="row-action">Withdraw</span>
+						</div>
+						<div class="row">
+							<div class="tok-dot tok-dot-u">USD</div>
+							<div class="row-info">
+								<div class="row-name">ckUSDC <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">USD Coin on Internet Computer</div>
+							</div>
+							<div class="row-right">
+								<div class="row-main pval">150.00 ckUSDC</div>
+								<div class="row-fiat pval">$150.00</div>
+							</div>
+							<span class="row-action">Withdraw</span>
+						</div>
+					</div>
+				</div>
+				<div class="section" id="sec-orders">
+					<div class="section-header">
+						<div class="section-title">Orders</div>
+						<span class="section-action" id="order-action">+ Limit order</span>
+					</div>
+					<div class="orders-wrap">
+						<div class="orders-tabs">
+							<div class="orders-tab active" onclick="switchOrderTab('active', this)">Active</div>
+							<div class="orders-tab" onclick="switchOrderTab('history', this)">History</div>
+						</div>
+						<div id="orders-active-pane">
+							<div id="orders-no-assets" class="empty-orders">
+								<span class="empty-orders-text">No active orders</span>
+							</div>
+							<div id="orders-has-assets" class="empty-orders" style="display: none">
+								<span class="empty-orders-text">No active orders</span
+								><button class="empty-orders-btn">Limit order</button>
+							</div>
+							<div id="orders-list" class="orders-body" style="display: none">
+								<div class="row">
+									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+									<div class="row-info">
+										<div class="ord-main">
+											<span class="side side-sell">Sell</span> <span class="pval">100 ICP</span> for
+											ckUSDC at 2.75<span class="venue-tag">OISY TRADE</span>
+										</div>
+									</div>
+									<div class="row-right-meta">
+										<span class="status-pill s-open">Open</span>
+										<span class="queue-text">10% are ahead</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+									<div class="row-info">
+										<div class="ord-main">
+											<span class="side side-buy">Buy</span> ICP with
+											<span class="pval">300 ckUSDC</span> at 2.60<span class="venue-tag"
+												>OISY TRADE</span
+											>
+										</div>
+									</div>
+									<div class="row-right-meta">
+										<span class="status-pill s-pending">Pending</span>
+										<span class="queue-text">30% are ahead</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="orders-history-pane" style="display: none" class="orders-body">
+							<div class="row">
+								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+								<div class="row-info">
+									<div class="ord-main">
+										<span class="side side-sell">Sell</span> <span class="pval">200 ICP</span> for
+										ckUSDC at 2.60<span class="venue-tag">OISY TRADE</span>
+									</div>
+								</div>
+								<span class="status-pill s-filled"><i class="ti ti-check"></i> Filled</span>
+							</div>
+							<div class="row">
+								<div class="tok-dot" style="width: 24px; height: 24px; font-size: 8px">ICP</div>
+								<div class="row-info">
+									<div class="ord-main">
+										<span class="side side-buy">Buy</span> ICP with
+										<span class="pval">150 ckUSDC</span> at 2.40<span class="venue-tag"
+											>OISY TRADE</span
+										>
+									</div>
+								</div>
+								<span class="status-pill s-cancelled"><i class="ti ti-x"></i> Cancelled</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			function showState(state, el) {
+				const hasAssets = state !== 'new',
+					hasOrders = state === 'full';
+				const isNew = state === 'new';
+				const off = state === 'noprovider';
+				document.getElementById('provider-off').style.display = off ? 'block' : 'none';
+				document.getElementById('onboarding').style.display = isNew && !off ? 'block' : 'none';
+				document.getElementById('intro').style.display = !isNew && !off ? 'block' : 'none';
+				document.getElementById('sec-assets').style.display = !isNew && !off ? 'block' : 'none';
+				document.getElementById('sec-orders').style.display = !isNew && !off ? 'block' : 'none';
+				document.getElementById('assets-empty').style.display = hasAssets ? 'none' : 'flex';
+				document.getElementById('assets-empty').style.flexDirection = 'column';
+				document.getElementById('assets-list').style.display = hasAssets ? 'flex' : 'none';
+				document.getElementById('assets-list').style.flexDirection = 'column';
+				document.getElementById('orders-no-assets').style.display = !hasAssets ? 'flex' : 'none';
+				document.getElementById('orders-has-assets').style.display =
+					hasAssets && !hasOrders ? 'flex' : 'none';
+				document.getElementById('orders-list').style.display = hasOrders ? 'flex' : 'none';
+				document.getElementById('orders-list').style.flexDirection = 'column';
+				document.getElementById('order-action').className =
+					'section-action' + (hasAssets ? '' : ' disabled');
+				document.querySelectorAll('.toggle-btn').forEach((b) => b.classList.remove('active'));
+				el.classList.add('active');
+			}
+			function switchOrderTab(tab, el) {
+				document.getElementById('orders-active-pane').style.display =
+					tab === 'active' ? 'block' : 'none';
+				document.getElementById('orders-history-pane').style.display =
+					tab === 'history' ? 'flex' : 'none';
+				if (tab === 'history')
+					document.getElementById('orders-history-pane').style.flexDirection = 'column';
+				document.querySelectorAll('.orders-tab').forEach((t) => t.classList.remove('active'));
+				el.classList.add('active');
+			}
+			// supported tokens = distinct union of base + quote across pairs (dynamic), shown in the onboarding card
+			const TB_PAIRS = [
+				['ICP', 'ckUSDC'],
+				['ICP', 'ckUSDT'],
+				['ICP', 'ckBTC'],
+				['ckBTC', 'ckUSDC']
+			];
+			const TB_SUPPORTED = [...new Set(TB_PAIRS.flat())];
+			document.getElementById('ob-tokens').innerHTML = TB_SUPPORTED.map(
+				(t) => '<span class="ob-chip"><span class="ob-chip-dot"></span>' + t + '</span>'
+			).join('');
+			// Privacy mode: hide deposited balances, fiat values and order amounts behind a dot mask.
+			// Honors OISY's existing global privacy toggle; market price and order pair stay visible.
+			let privacy = false;
+			function applyPrivacy() {
+				document.querySelectorAll('.pval').forEach((el) => {
+					if (el.dataset.v === undefined) el.dataset.v = el.textContent;
+					if (privacy) {
+						el.textContent = '•••••';
+						el.classList.add('dotmask');
+					} else {
+						el.textContent = el.dataset.v;
+						el.classList.remove('dotmask');
+					}
+				});
+				document
+					.querySelectorAll('.priv-btn')
+					.forEach((b) => b.classList.toggle('active', privacy));
+				const eye = document.getElementById('eye-ic');
+				if (eye) eye.className = 'ti ' + (privacy ? 'ti-eye-off' : 'ti-eye');
+			}
+			function togglePrivacy() {
+				privacy = !privacy;
+				applyPrivacy();
+			}
+			showState('new', document.querySelector('.toggle-btn'));
+		</script>
+	</body>
+</html>

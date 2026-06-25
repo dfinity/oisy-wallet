@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { InfiniteScroll } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 
 	interface Props {
@@ -13,6 +14,14 @@
 	let { sortedTransactions, transactionsToDisplay = $bindable([]), children }: Props = $props();
 
 	let pages = $state(1);
+
+	// Reset pagination on filter change so the re-keyed `InfiniteScroll`
+	// below mounts with a fresh observer and `pages = 1`.
+	$effect.pre(() => {
+		[$transactionsFilterStore];
+
+		pages = 1;
+	});
 
 	let disableInfiniteScroll = $derived(transactionsToDisplay.length >= sortedTransactions.length);
 
@@ -30,6 +39,8 @@
 	});
 </script>
 
-<InfiniteScroll disabled={disableInfiniteScroll} {onIntersect}>
-	{@render children()}
-</InfiniteScroll>
+{#key $transactionsFilterStore}
+	<InfiniteScroll disabled={disableInfiniteScroll} {onIntersect}>
+		{@render children()}
+	</InfiniteScroll>
+{/key}

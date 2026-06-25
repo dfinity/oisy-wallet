@@ -7,6 +7,8 @@
 			"back": "رجوع",
 			"done": "تم",
 			"close": "إغلاق",
+			"collapse": "طي",
+			"expand": "توسيع",
 			"change": "تغيير",
 			"continue": "",
 			"apply": "تنفيذ",
@@ -29,6 +31,7 @@
 			"not_available": "غير متاح",
 			"new": "جديد",
 			"edit": "تعديل",
+			"download": "تنزيل",
 			"no_results": "لا توجد نتائج",
 			"paste": "لصق",
 			"to": "إلى",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short يحميك!"
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "خطأ أثناء تحميل التوكن المخصص ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "تتطلب محفظتك بعض البيانات الأولية التي لم يتم تحميلها بعد. يرجى المحاولة مرة أخرى.",
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "الإعدادات",
 			"general": "",
+			"preferences": "التفضيلات",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
-			"learn_more": ""
+			"export_data": "تصدير البيانات",
+			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "تصدير الرموز",
+			"export_transactions": "تصدير المعاملات",
+			"export_tokens_success": "تم تنزيل ملف CSV للرموز.",
+			"export_transactions_success": "تم تنزيل ملف CSV للمعاملات.",
+			"learn_more": "اعرف المزيد"
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -796,7 +815,9 @@
 			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
 		},
 		"error": {
-			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة."
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
+			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
+			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "يمكنك إرسال معاملة بيتكوين أخرى بمجرد اكتمال المعاملة المعلقة.",
 			"no_available_utxos": "لن يكون لديك UTXOs متاحة لإجراء هذه المعاملة.",
 			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
-			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
+			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "جاري تنفيذ المعاملة...",
 			"initializing": "جاري تهيئة المعاملة...",
 			"swapping": "جاري التبديل...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
 			"swap_provider_website": "الموقع الإلكتروني",
@@ -1156,7 +1195,6 @@
 			"select_token": "حدد التوكن",
 			"select_network_filter": "حدد الشبكة",
 			"withdrawing": "",
-			"bridging": "جارٍ التجسير... (يُرجى التحلي بالصبر، قد يستغرق هذا ما يصل إلى دقيقتين.)",
 			"network_cost": "",
 			"gasless": "",
 			"swap_fees": "",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
 		},
 		"error": {
 			"kong_not_available": "لا يوجد حاليًا أي تبادل متاح لتبديل التوكنات. يرجى المحاولة مرة أخرى لاحقًا.",
 			"unexpected": "حدث خطأ ما أثناء تبديل التوكنات.",
 			"unexpected_missing_data": "حدث خطأ ما أثناء بدء معاملة تبديل.",
+			"failed_unexpectedly": "تعذر إكمال التبديل. يرجى التحقق من رصيد محفظتك والمحاولة مرة أخرى، أو اختيار مزود مختلف.",
 			"slippage_exceeded": "$oisy_short يحميك: التداول خارج نطاق تحمل الانزلاق الخاص بك بنسبة $maxSlippage%. يرجى ضبط الحد الأقصى للانزلاق والمحاولة مرة أخرى.",
 			"pool_not_found": "فشل التبديل. لم يتم العثور على المجمع.",
 			"deposit_error": "فشل إيداع الأموال لتبديلك. يرجى المحاولة مرة أخرى أو تغيير مزود التبديل.",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "",
 			"swap_sucess_manually_withdraw_success": "",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)"
+			"buy_dev": "شراء (بيئة تطوير)",
+			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
+		},
+		"actions": {
+			"close": "حسنًا"
 		},
 		"onramper": {
 			"title": "شراء عبر Onramper"
@@ -1532,10 +1580,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "التطبيقات المتصلة",
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
+			"disconnect_all": "قطع اتصال الكل",
+			"disconnect_app": "قطع الاتصال بـ $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "تم رفض طلب WalletConnect",
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
+			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "لم تضف أي جهات اتصال بعد",
+			"contacts_empty_description": "احفظ العناوين المعروفة في جهات الاتصال وقلّل من خطر استخدام عنوان خاطئ عن طريق الخطأ.",
+			"contacts_empty_cta": "أضف أول جهة اتصال لك"
 		},
 		"label": {
 			"reimbursement": "تعويض",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "افتح أو أنشئ محفظتك للتفاعل بأمان مع التطبيق.",
 				"connect_your_wallet": "اتصل بمحفظة $oisy_name الخاصة بك",
-				"oisy_protects_you": "OISY يحميك!",
 				"oisy_protects_you_description": "لا يمكن للتطبيقات الوصول المباشر إلى أموالك، ويجب عليك تأكيد كل معاملة."
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "يتم الحصول على معلومات معاملة BTC من أطراف ثالثة مركزية ويجب التحقق منها بشكل مستقل.",
-			"hidden_micro_transactions": "<strong>OISY يحميك!</strong> المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
+			"hidden_micro_transactions": "المعاملات ذات قيم الرموز الصغيرة جدًا مخفية حاليًا. لإظهارها، انتقل إلى <a href=\"/settings/\">الإعدادات</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">معرفة المزيد</a>"
 		},
 		"warning": {
 			"no_index_canister": "لا يمكن عرض معاملات $token_list. لا يتوفر حاوية فهرس.",
@@ -2014,6 +2098,11 @@
 				"title": "",
 				"description": "",
 				"action": ""
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": ""
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

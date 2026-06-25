@@ -1,5 +1,10 @@
 import TransactionsFilterContactsPanel from '$lib/components/transactions/filter/TransactionsFilterContactsPanel.svelte';
 import * as contactsDerived from '$lib/derived/contacts.derived';
+import {
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENT_FILTER_MODIFIERS
+} from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 import type { ContactUi } from '$lib/types/contact';
@@ -8,8 +13,8 @@ import { getMockContactsUi, mockContactEthAddressUi } from '$tests/mocks/contact
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const mockAllContacts = (contacts: ContactUi[]) => {
-	vi.spyOn(contactsDerived.allContacts, 'subscribe').mockImplementation((fn) => {
+const mockContacts = (contacts: ContactUi[]) => {
+	vi.spyOn(contactsDerived.contacts, 'subscribe').mockImplementation((fn) => {
 		fn(contacts);
 		return () => {};
 	});
@@ -34,7 +39,7 @@ describe('TransactionsFilterContactsPanel', () => {
 		vi.restoreAllMocks();
 		localStorage.clear();
 		transactionsFilterStore.clear();
-		mockAllContacts([bob, alice]);
+		mockContacts([bob, alice]);
 	});
 
 	it('renders one row per contact, alphabetically sorted by name', () => {
@@ -103,6 +108,42 @@ describe('TransactionsFilterContactsPanel', () => {
 		expect(names).toEqual(['Alice']);
 	});
 
+	it('does not render built-in / minter contacts (only user-managed ones)', () => {
+		// Even if the user has no contacts of their own, built-in minter
+		// contacts (which live in `allContacts` but not in `contacts`) must
+		// not pollute the activity contact filter dropdown.
+		mockContacts([]);
+
+		const { container } = render(TransactionsFilterContactsPanel);
+
+		expect(container.querySelectorAll('li')).toHaveLength(0);
+	});
+
+	describe('when the user has no contacts', () => {
+		beforeEach(() => {
+			mockContacts([]);
+		});
+
+		it('does not render the search input', () => {
+			const { queryByPlaceholderText } = render(TransactionsFilterContactsPanel);
+
+			expect(
+				queryByPlaceholderText(get(i18n).transaction.filter.search_contacts_placeholder)
+			).toBeNull();
+		});
+
+		// The contents of the empty state itself (icon, OISY lockup, Learn
+		// more link, CTA, etc.) are covered by
+		// `TransactionsFilterContactsEmptyState.spec.ts`. The panel spec just
+		// asserts the branching: an empty contact list switches the panel
+		// from the list view to the empty-state component.
+		it('renders the empty-state component', () => {
+			const { getByText } = render(TransactionsFilterContactsPanel);
+
+			expect(getByText(get(i18n).transaction.filter.contacts_empty_title)).toBeInTheDocument();
+		});
+	});
+
 	it('caps the visible list to 50 rows when over the limit and renders the showing-partial hint', () => {
 		const contacts: ContactUi[] = Array.from({ length: 60 }, (_, i) => ({
 			id: BigInt(i + 1),
@@ -111,7 +152,7 @@ describe('TransactionsFilterContactsPanel', () => {
 			image: undefined,
 			addresses: []
 		}));
-		mockAllContacts(contacts);
+		mockContacts(contacts);
 
 		const { container, getByText } = render(TransactionsFilterContactsPanel);
 
@@ -123,5 +164,45 @@ describe('TransactionsFilterContactsPanel', () => {
 		});
 
 		expect(getByText(hint)).toBeInTheDocument();
+	});
+
+	it('tracks a transaction_filter event with modifier=set and no value when a contact is selected', async () => {
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackTransactionFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterContactsPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			'input[id="transactions-filter-contact-1"]'
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT
+		});
+	});
+
+	it('tracks a transaction_filter event with modifier=unset when a contact is unselected', async () => {
+		transactionsFilterStore.toggleContactId('1');
+
+		const trackSpy = vi
+			.spyOn(analyticsServices, 'trackTransactionFilter')
+			.mockImplementation(() => {});
+
+		const { container } = render(TransactionsFilterContactsPanel);
+
+		const input = container.querySelector<HTMLInputElement>(
+			'input[id="transactions-filter-contact-1"]'
+		);
+
+		await fireEvent.click(input as HTMLInputElement);
+
+		expect(trackSpy).toHaveBeenCalledWith({
+			modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.CONTACT
+		});
 	});
 });

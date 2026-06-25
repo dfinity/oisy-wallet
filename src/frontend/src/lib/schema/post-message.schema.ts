@@ -68,7 +68,11 @@ export const PostMessageDataRequestExchangeTimerSchema = z.object({
 	erc20Addresses: z.array(z.custom<Erc20ContractAddressWithNetwork>()),
 	icrcCanisterIds: z.array(CanisterIdTextSchema),
 	splAddresses: z.array(z.custom<SplTokenAddress>()),
-	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>())
+	erc4626TokensExchangeData: z.array(z.custom<Erc4626TokensExchangeData>()),
+	// Effective backend `exchange_rate_enabled` flag, resolved at runtime via the backend
+	// `exchange_rate_enabled` query. Optional for backwards compatibility — when absent,
+	// the worker falls back to the build-time `BACKEND_EXCHANGE_ENABLED` env constant.
+	backendExchangeEnabled: z.boolean().optional()
 });
 
 export const PostMessageDataRequestIcrcSchema = z.object({
@@ -170,8 +174,8 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
-	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
-	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
+	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
+	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentPolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentArbitrumEthPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
@@ -195,7 +199,7 @@ export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema
 });
 
 export const PostMessageDataResponseErrorSchema = PostMessageDataResponseSchema.extend({
-	error: z.unknown()
+	error: z.unknown().optional()
 });
 
 export const PostMessageDataErrorSchema = z.object({
@@ -234,7 +238,7 @@ const buildPostMessageResponseSchema = <T extends z.ZodTypeAny>({
 			.object({
 				...PostMessageCommonSchema.shape,
 				msg: PostMessageResponseSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		z
@@ -250,7 +254,7 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		z
 			.object({
 				msg: PostMessageRequestSchema,
-				data: z.strictObject(dataSchema).shape.optional()
+				data: dataSchema.optional()
 			})
 			.strict(),
 		buildPostMessageResponseSchema({ dataSchema })

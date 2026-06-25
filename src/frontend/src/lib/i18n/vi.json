@@ -7,6 +7,8 @@
 			"back": "Quay lại",
 			"done": "Hoàn thành",
 			"close": "Đóng",
+			"collapse": "Thu gọn",
+			"expand": "Mở rộng",
 			"change": "Thay đổi",
 			"continue": "",
 			"apply": "Áp dụng",
@@ -29,6 +31,7 @@
 			"not_available": "Không có",
 			"new": "Mới",
 			"edit": "Chỉnh sửa",
+			"download": "Tải xuống",
 			"no_results": "Không có kết quả",
 			"paste": "Dán",
 			"to": "Đến",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short bảo vệ bạn!"
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "Cài đặt",
 			"general": "Chung",
+			"preferences": "Tuỳ chọn",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
-			"learn_more": ""
+			"export_data": "Xuất dữ liệu",
+			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Xuất token",
+			"export_transactions": "Xuất giao dịch",
+			"export_tokens_success": "Đã tải xuống CSV token.",
+			"export_transactions_success": "Đã tải xuống CSV giao dịch.",
+			"learn_more": "Tìm hiểu thêm"
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -796,7 +815,9 @@
 			"appearance_system": "Bật chế độ màu theo hệ điều hành của bạn"
 		},
 		"error": {
-			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ."
+			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
+			"export_exchange_rate_unavailable": "Tỷ giá hối đoái vẫn đang được tải. Vui lòng thử lại sau ít phút.",
+			"export_failed": "Chúng tôi không thể tạo bản xuất của bạn. Vui lòng thử lại."
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "Bạn có thể gửi một giao dịch Bitcoin khác sau khi giao dịch đang chờ xử lý hoàn tất.",
 			"no_available_utxos": "Bạn sẽ không có UTXO khả dụng để thực hiện giao dịch này.",
 			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
-			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
+			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "Đang thực hiện giao dịch...",
 			"initializing": "Đang khởi tạo giao dịch...",
 			"swapping": "Đang hoán đổi...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
 			"swap_provider_website": "Trang web",
@@ -1156,7 +1195,6 @@
 			"select_token": "Chọn token",
 			"select_network_filter": "Chọn mạng",
 			"withdrawing": "Đang rút...",
-			"bridging": "Đang bridge... (Vui lòng kiên nhẫn, quá trình này có thể mất đến 2 phút.)",
 			"network_cost": "Phí mặng lưới",
 			"gasless": "Không phí gas",
 			"swap_fees": "Phí giao dịch",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
 			"unexpected": "Đã xảy ra lỗi trong khi hoán đổi token.",
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
+			"failed_unexpectedly": "Không thể hoàn tất giao dịch hoán đổi. Vui lòng kiểm tra số dư ví của bạn và thử lại, hoặc chọn nhà cung cấp khác.",
 			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
 			"deposit_error": "Nạp tiền cho giao dịch hoán đổi (swap) của bạn không thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "Mua",
-			"buy_dev": "Mua (Dev Environment)"
+			"buy_dev": "Mua (Dev Environment)",
+			"unavailable_title": "Mua token tạm thời không khả dụng",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "Trong thời gian chờ đợi, bạn vẫn có thể nhận token bằng cách chia sẻ địa chỉ ví của mình."
+		},
+		"actions": {
+			"close": "Đã hiểu"
 		},
 		"onramper": {
 			"title": "Mua qua Onramper"
@@ -1532,10 +1580,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Ứng dụng đã kết nối",
 			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
+			"disconnect_all": "Ngắt kết nối tất cả",
+			"disconnect_app": "Ngắt kết nối $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "Yêu cầu WalletConnect bị từ chối",
 			"unknown_parameter": "Tham số không xác định.",
 			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
+			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Bạn chưa thêm liên hệ nào",
+			"contacts_empty_description": "Lưu các địa chỉ đã biết vào Danh bạ để giảm rủi ro vô tình dùng nhầm địa chỉ.",
+			"contacts_empty_cta": "Thêm liên hệ đầu tiên"
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "Mở hoặc tạo ví của bạn để tương tác an toàn với ứng dụng.",
 				"connect_your_wallet": "Kết nối ví $oisy_name của bạn",
-				"oisy_protects_you": "OISY bảo vệ bạn!",
 				"oisy_protects_you_description": "Các ứng dụng không thể trực tiếp truy cập vào quỹ của bạn, và mỗi giao dịch phải được bạn xác nhận."
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "Thông tin giao dịch BTC được lấy từ các bên thứ ba tập trung và cần được xác minh độc lập.",
-			"hidden_micro_transactions": "<strong>OISY bảo vệ bạn!</strong> Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
+			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
 			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Dùng OISY và KIẾM TIỀN! Tập 6 đã ra mắt 🎉",
 				"action": "Kiểm tra trạng thái"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Kiếm tiền với Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

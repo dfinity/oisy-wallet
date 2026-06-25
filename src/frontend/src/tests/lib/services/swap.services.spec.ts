@@ -154,7 +154,7 @@ vi.mock('$eth/utils/eip712.utils', () => ({
 }));
 
 vi.mock('$eth/utils/eth.utils', () => ({
-	isDefaultEthereumToken: vi.fn(() => false)
+	isNotDefaultEthereumToken: vi.fn(() => true)
 }));
 
 vi.mock('$lib/api/signer.api', () => ({
@@ -1132,7 +1132,7 @@ describe('swap.services', () => {
 		});
 
 		it('should execute market swap successfully with default Ethereum token', async () => {
-			vi.mocked(ethUtils.isDefaultEthereumToken).mockReturnValue(true);
+			vi.mocked(ethUtils.isNotDefaultEthereumToken).mockReturnValue(false);
 
 			await fetchVeloraMarketSwap({
 				identity: mockIdentity,
@@ -2266,12 +2266,13 @@ describe('swap.services', () => {
 			progress: mockProgress,
 			sourceToken,
 			swapAmount: '1',
-			userEthAddress: mockEthAddress
+			userEthAddress: mockEthAddress,
+			swapId: 'test-icp-to-evm-swap-id'
 		};
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			vi.mocked(oneSecSwapServices.executeOneSecIcpToEvmBridge).mockResolvedValue(undefined);
+			vi.mocked(oneSecSwapServices.executeOneSecIcpToEvmBridge).mockResolvedValue();
 		});
 
 		it('should call executeOneSecIcpToEvmBridge with the provided params', async () => {
@@ -2290,15 +2291,7 @@ describe('swap.services', () => {
 			);
 		});
 
-		it('should call progress with UPDATE_UI after the bridge executes', async () => {
-			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
-
-			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
-
-			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-		});
-
-		it('should call setCustomToken and loadCustomErc20Tokens when ERC20 destination is disabled', async () => {
+		it('enables a disabled ERC20 destination token at submit time', async () => {
 			const destinationToken = { ...mockValidErc20Token, enabled: false } as Erc20Token;
 
 			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
@@ -2307,10 +2300,28 @@ describe('swap.services', () => {
 			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
 
-		it('should not call setCustomToken when ERC20 destination is already enabled', async () => {
+		it('skips enabling an already-enabled ERC20 destination token', async () => {
 			const destinationToken = { ...mockValidErc20Token, enabled: true } as Erc20Token;
 
 			await fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken });
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
+		});
+
+		it('does not enable the destination token when the bridge foreground rejects', async () => {
+			// Enable now runs AFTER the bridge resolves — a foreground failure
+			// (user cancelled, fee check rejected, etc.) means no funds moved
+			// and no AUT row exists, so we don't enable a token the user never
+			// actually committed to.
+			const destinationToken = { ...mockValidErc20Token, enabled: false } as Erc20Token;
+			vi.mocked(oneSecSwapServices.executeOneSecIcpToEvmBridge).mockRejectedValue(
+				new Error('Bridge failed')
+			);
+
+			await expect(fetchOneSecIcpToEvmSwap({ ...baseParams, destinationToken })).rejects.toThrow(
+				'Bridge failed'
+			);
 
 			expect(setCustomToken).not.toHaveBeenCalled();
 			expect(loadCustomErc20Tokens).not.toHaveBeenCalled();
@@ -2342,12 +2353,13 @@ describe('swap.services', () => {
 			userEthAddress: mockEthAddress,
 			gas: 21000n,
 			maxFeePerGas: 20000000000n,
-			maxPriorityFeePerGas: 2000000000n
+			maxPriorityFeePerGas: 2000000000n,
+			swapId: 'test-evm-to-icp-swap-id'
 		};
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			vi.mocked(oneSecSwapServices.executeOneSecEvmToIcpBridge).mockResolvedValue(undefined);
+			vi.mocked(oneSecSwapServices.executeOneSecEvmToIcpBridge).mockResolvedValue();
 		});
 
 		it('should call executeOneSecEvmToIcpBridge with the provided params', async () => {
@@ -2362,12 +2374,6 @@ describe('swap.services', () => {
 					userEthAddress: mockEthAddress
 				})
 			);
-		});
-
-		it('should call progress with UPDATE_UI after the bridge executes', async () => {
-			await fetchOneSecEvmToIcpSwap(baseParams);
-
-			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 		});
 
 		it('should not call setCustomToken for an ICP destination token', async () => {

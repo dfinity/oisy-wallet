@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		triggerLabel: string;
@@ -16,6 +17,8 @@
 		testId?: string;
 		triggerIcon?: Snippet;
 		panel: Snippet;
+		panelWidthClass?: string;
+		onToggle?: (visible: boolean) => void;
 	}
 
 	let {
@@ -27,7 +30,9 @@
 		searchValue = $bindable(''),
 		testId,
 		triggerIcon,
-		panel
+		panel,
+		panelWidthClass,
+		onToggle
 	}: Props = $props();
 
 	let visible = $state(false);
@@ -36,6 +41,20 @@
 	const onTriggerClick = () => {
 		visible = !visible;
 	};
+
+	let initialised = false;
+
+	$effect(() => {
+		const next = visible;
+
+		if (!initialised) {
+			initialised = true;
+
+			return;
+		}
+
+		untrack(() => onToggle?.(next));
+	});
 </script>
 
 <button
@@ -62,9 +81,12 @@
 	<IconExpandMore size="20" />
 </button>
 
-<ResponsivePopover {button} bind:visible>
+<ResponsivePopover {button} direction="ltr" bind:visible>
 	{#snippet content()}
-		<div class="flex w-full min-w-60 flex-col gap-2 p-1">
+		<div
+			class="flex flex-col gap-2 p-1 {panelWidthClass ?? 'w-full min-w-60'}"
+			data-tid={MULTI_SELECT_DROPDOWN_PANEL_SHELL}
+		>
 			{#if searchable}
 				<InputSearch
 					autofocus

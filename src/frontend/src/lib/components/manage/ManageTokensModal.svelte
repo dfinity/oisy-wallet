@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
@@ -11,22 +12,39 @@
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+	} from '$lib/enums/plausible';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardStepsManageTokens } from '$lib/enums/wizard-steps';
+	import { trackTokenManage } from '$lib/services/token-manage-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		initialSearch?: string;
+		initialNetwork?: Network;
+		initialTokenData?: Partial<AddTokenData>;
+		initialStep?: WizardStepsManageTokens;
 		onClose?: () => void;
 		infoElement?: Snippet;
 	}
 
-	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+	let {
+		initialSearch,
+		initialNetwork,
+		initialTokenData,
+		initialStep,
+		onClose = () => {},
+		infoElement
+	}: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -53,6 +71,7 @@
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
+	let initializedInitialStep = false;
 
 	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
@@ -68,15 +87,69 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
+	const trackImportCancel = () => {
+		if (
+			currentStep?.name !== WizardStepsManageTokens.IMPORT &&
+			currentStep?.name !== WizardStepsManageTokens.REVIEW
+		) {
+			return;
+		}
+
+		const address =
+			tokenData.ledgerCanisterId ??
+			tokenData.extCanisterId ??
+			tokenData.dip721CanisterId ??
+			tokenData.icPunksCanisterId ??
+			tokenData.icrc7CanisterId ??
+			tokenData.ethContractAddress ??
+			tokenData.splTokenAddress;
+
+		const tokenNetwork = network?.id.description;
+
+		if (isNullishOrEmpty(address) || isNullish(tokenNetwork)) {
+			return;
+		}
+
+		trackTokenManage({
+			modifier: 'import',
+			token: {
+				network: tokenNetwork,
+				address
+			},
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+		});
+	};
+
 	const close = () => {
+		trackImportCancel();
+
 		modalStore.close();
 
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 		onClose();
 	};
 
-	let network: Network | undefined = $state($selectedNetwork);
-	let tokenData: Partial<AddTokenData> = $state({});
+	const initialModalNetwork = (): Network | undefined => initialNetwork ?? $selectedNetwork;
+
+	const initialModalTokenData = (): Partial<AddTokenData> => initialTokenData ?? {};
+
+	let network: Network | undefined = $state(initialModalNetwork());
+	let tokenData: Partial<AddTokenData> = $state(initialModalTokenData());
+
+	$effect(() => {
+		if (initializedInitialStep || isNullish(initialStep) || isNullish(modal)) {
+			return;
+		}
+
+		initializedInitialStep = true;
+
+		const stepIndex = steps.findIndex(({ name }) => name === initialStep);
+
+		if (stepIndex >= 0) {
+			modal.set(stepIndex);
+		}
+	});
 </script>
 
 <WizardModal

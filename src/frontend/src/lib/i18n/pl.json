@@ -7,6 +7,8 @@
 			"back": "Wstecz",
 			"done": "Gotowe",
 			"close": "Zamknij",
+			"collapse": "Zwiń",
+			"expand": "Rozwiń",
 			"change": "Zmień",
 			"continue": "",
 			"apply": "Zastosuj",
@@ -29,6 +31,7 @@
 			"not_available": "niedostępne",
 			"new": "Nowy",
 			"edit": "Edytuj",
+			"download": "Pobierz",
 			"no_results": "Brak wyników",
 			"paste": "Wklej",
 			"to": "Do",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short chroni Cię!"
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "Błąd podczas ładowania niestandardowego tokena ICRC.",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Twój portfel wymaga danych początkowych, które nie zostały jeszcze załadowane. Spróbuj ponownie.",
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "Ustawienia",
 			"general": "",
+			"preferences": "Preferencje",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "Włącz ukrywanie transakcji o bardzo małych wartościach",
 			"disable_hide_micro_transactions": "Wyłącz ukrywanie transakcji o bardzo małych wartościach",
 			"save_spam_filter_success": "Ustawienia filtra spamu zostały zaktualizowane.",
-			"learn_more": ""
+			"export_data": "Eksportuj dane",
+			"export_data_description": "Pobierz swoje tokeny i transakcje w formacie CSV — Basic dla najważniejszych informacji, Extended dla dodatkowych atrybutów.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Eksportuj tokeny",
+			"export_transactions": "Eksportuj transakcje",
+			"export_tokens_success": "Pobrano plik CSV z tokenami.",
+			"export_transactions_success": "Pobrano plik CSV z transakcjami.",
+			"learn_more": "Dowiedz się więcej"
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -796,7 +815,9 @@
 			"appearance_system": "Włącza tryb kolorów systemu operacyjnego"
 		},
 		"error": {
-			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia."
+			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia.",
+			"export_exchange_rate_unavailable": "Kursy wymiany wciąż się ładują. Spróbuj ponownie za chwilę.",
+			"export_failed": "Nie udało się wygenerować eksportu. Spróbuj ponownie."
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "Możesz wysłać kolejną transakcję Bitcoin po zakończeniu oczekującej.",
 			"no_available_utxos": "Nie będziesz mieć dostępnych UTXO do wykonania tej transakcji.",
 			"unknown_destination": "Nigdy wcześniej nie wchodziłeś w interakcję z tym adresem. Upewnij się, że znasz odbiorcę.",
-			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "Wykonywanie transakcji...",
 			"initializing": "Inicjowanie transakcji...",
 			"swapping": "Wymiana...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
 			"swap_provider_website": "Strona internetowa",
@@ -1156,7 +1195,6 @@
 			"select_token": "Wybierz token",
 			"select_network_filter": "Wybierz sieć",
 			"withdrawing": "Wypłacanie...",
-			"bridging": "Trwa bridging... (Prosimy o cierpliwość, może to potrwać do 2 minut.)",
 			"network_cost": "Koszt sieci",
 			"gasless": "Bez gazu",
 			"swap_fees": "Opłaty za wymianę",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Nie udało się pobrać ceny przynajmniej jednego z tokenów. <strong>Zweryfikuj niezależnie</strong>, czy ta oferta wymiany jest uczciwa.<br>Pamiętaj, że ustawienie poślizgu (slippage) <strong>nie</strong> chroni Cię przed ofertą z dużo niższą wartością otrzymywaną!"
 		},
 		"error": {
 			"kong_not_available": "Obecnie nie ma dostępnej giełdy do wymiany tokenów. Spróbuj ponownie później.",
 			"unexpected": "Coś poszło nie tak podczas wymiany tokenów.",
 			"unexpected_missing_data": "Coś poszło nie tak podczas inicjowania transakcji wymiany.",
+			"failed_unexpectedly": "Nie udało się zrealizować wymiany. Sprawdź saldo portfela i spróbuj ponownie lub wybierz innego dostawcę.",
 			"slippage_exceeded": "$oisy_short chroni Cię: Transakcja jest poza Twoją tolerancją poślizgu wynoszącą $maxSlippage%. Dostosuj maksymalny poślizg i spróbuj ponownie.",
 			"pool_not_found": "Wymiana nie powiodła się. Nie znaleziono puli.",
 			"deposit_error": "Wpłata środków na wymianę nie powiodła się. Spróbuj ponownie lub zmień dostawcę wymiany.",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "Wymiana została zakończona, ale Twoje tokeny nie mogły zostać automatycznie wypłacone. Kliknij przycisk Wypłać poniżej, aby wypłacić je ręcznie.<br> Lub postępuj zgodnie z",
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "Kup",
-			"buy_dev": "Kup (środowisko deweloperskie)"
+			"buy_dev": "Kup (środowisko deweloperskie)",
+			"unavailable_title": "Kupowanie tokenów jest tymczasowo niedostępne",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "W międzyczasie nadal możesz otrzymywać tokeny, udostępniając adres swojego portfela."
+		},
+		"actions": {
+			"close": "Rozumiem"
 		},
 		"onramper": {
 			"title": "Kup przez Onramper"
@@ -1532,10 +1580,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dane HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Połączone aplikacje",
 			"no_connected_apps": "Obecnie żadne aplikacje nie są połączone.",
+			"disconnect_all": "Rozłącz wszystkie",
+			"disconnect_app": "Rozłącz $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "Żądanie WalletConnect odrzucone",
 			"unknown_parameter": "Nieznany parametr.",
 			"wallet_not_initialized": "Nieoczekiwany błąd. Twój adres portfela nie jest zainicjowany.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Adres nadawcy żądany dla transakcji nie jest adresem tego portfela.",
 			"unknown_destination": "Nieznany adres docelowy.",
+			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Nie dodałeś jeszcze żadnych kontaktów",
+			"contacts_empty_description": "Zapisuj znane adresy w Kontaktach i zmniejsz ryzyko przypadkowego użycia niewłaściwego adresu.",
+			"contacts_empty_cta": "Dodaj pierwszy kontakt"
 		},
 		"label": {
 			"reimbursement": "Zwrot kosztów",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "Otwórz lub utwórz swój portfel, aby bezpiecznie korzystać z aplikacji.",
 				"connect_your_wallet": "Połącz swój $oisy_name",
-				"oisy_protects_you": "OISY cię chroni!",
 				"oisy_protects_you_description": "Aplikacje nie mogą bezpośrednio uzyskać dostępu do Twoich środków, a każda transakcja musi zostać przez Ciebie zatwierdzona."
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informacje o transakcjach BTC są uzyskiwane od centralnych stron trzecich i powinny być niezależnie weryfikowane.",
-			"hidden_micro_transactions": "<strong>OISY chroni Cię!</strong> Transakcje o bardzo małych wartościach tokenów są obecnie ukryte. Aby je wyświetlić, przejdź do <a href=\"/settings/\">Ustawień</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Dowiedz się więcej</a>"
+			"hidden_micro_transactions": "Transakcje o bardzo małych wartościach tokenów są obecnie ukryte. Aby je wyświetlić, przejdź do <a href=\"/settings/\">Ustawień</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Dowiedz się więcej</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transakcje dla $token_list nie mogą być wyświetlane. Brak dostępnego kanistra indeksu.",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Używaj OISY i ZARABIAJ! Odcinek 6 jest już dostępny 🎉",
 				"action": "Sprawdź status"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Zarabiaj z Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

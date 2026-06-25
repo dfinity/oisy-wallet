@@ -31,6 +31,7 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
+import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -409,20 +410,11 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction by timestamp in a list of transactions.
+ * Finds the oldest transaction in a newest-first transaction store.
  *
  * @param transactions - The list of transactions to search through.
  * @returns The last transaction or undefined if no transactions are provided.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined =>
-	transactions.length >= 0
-		? transactions.reduce<T>(
-				(min, transaction) =>
-					(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
-						? transaction
-						: min,
-				transactions[0]
-			)
-		: undefined;
+): T | undefined => last(transactions);

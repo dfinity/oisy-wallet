@@ -1,13 +1,20 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import {
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENT_FILTER_MODIFIERS
+	} from '$lib/enums/plausible';
+	import { trackTransactionFilter } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { transactionsFilterStore } from '$lib/stores/transactions-filter.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
+	import { transactionsFilterTokenKey } from '$lib/utils/transactions-filter.utils';
 
 	interface Props {
 		// When the panel is rendered inside a desktop dropdown popover the
@@ -30,24 +37,25 @@
 
 	let selectedSet = $derived(new Set<string>($transactionsFilterStore.tokenIds));
 
-	const tokenFilterKey = (token: Token): string | undefined => token.id.description;
-
-	const tokenRenderKey = (token: Token): string =>
-		`${token.id.description}-${token.network.id.description}`;
+	const tokenRenderKey = (token: Token): string | undefined => transactionsFilterTokenKey(token);
 
 	const tokenInputId = (token: Token): string =>
-		`transactions-filter-token-${tokenRenderKey(token).replace(/[^A-Za-z0-9_-]/g, '-')}`;
+		`transactions-filter-token-${(tokenRenderKey(token) ?? '').replace(/[^A-Za-z0-9_-]/g, '-')}`;
 
 	let sortedTokens = $derived(
 		[
 			...new Map(
-				[...$enabledFungibleNetworkTokens].map((token) => [tokenRenderKey(token), token])
+				[...$enabledFungibleNetworkTokens]
+					.map((token) => [tokenRenderKey(token), token] as const)
+					.filter((entry): entry is [string, Token] => nonNullish(entry[0]))
 			).values()
-		].sort((a, b) =>
-			(a.name ?? a.symbol).localeCompare(b.name ?? b.symbol, undefined, {
-				sensitivity: 'base'
-			})
-		)
+		].sort((a, b) => {
+			const bySymbol = a.symbol.localeCompare(b.symbol, undefined, { sensitivity: 'base' });
+
+			return bySymbol !== 0
+				? bySymbol
+				: a.network.name.localeCompare(b.network.name, undefined, { sensitivity: 'base' });
+		})
 	);
 
 	let filteredTokens = $derived(
@@ -64,6 +72,25 @@
 	);
 
 	let isCapped = $derived(searchValue.length === 0 && filteredTokens.length > VISIBLE_LIMIT);
+
+	const onToggleToken = ({ token, key }: { token: Token; key: string }) => {
+		trackTransactionFilter({
+			modifier: selectedSet.has(key)
+				? PLAUSIBLE_EVENT_FILTER_MODIFIERS.UNSET
+				: PLAUSIBLE_EVENT_FILTER_MODIFIERS.SET,
+			key: PLAUSIBLE_EVENT_EVENTS_KEYS.TOKEN,
+			token: {
+				// Native tokens have no on-chain identifier; ship empty string
+				// so the column stays present and is groupable in dashboards.
+				network: token.network.id.description ?? '',
+				address: getTokenIdentifier(token) ?? '',
+				symbol: token.symbol,
+				name: token.name
+			}
+		});
+
+		transactionsFilterStore.toggleTokenId(key);
+	};
 </script>
 
 <div class="flex flex-col gap-3">
@@ -83,15 +110,15 @@
 
 	<ul class="m-0 flex max-h-80 list-none flex-col gap-0.5 overflow-y-auto p-0">
 		{#each visibleTokens as token (tokenRenderKey(token))}
-			{@const key = tokenFilterKey(token)}
+			{@const key = tokenRenderKey(token)}
 
 			{#if nonNullish(key)}
 				<li>
 					<Checkbox
 						checked={selectedSet.has(key)}
 						inputId={tokenInputId(token)}
+						onChange={() => onToggleToken({ token, key })}
 						text="inline"
-						on:nnsChange={() => transactionsFilterStore.toggleTokenId(key)}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">
@@ -123,6 +150,8 @@
 </div>
 
 <style lang="scss">
+	@use '../../../styles/mixins/media';
+
 	li :global(.checkbox) {
 		--checkbox-label-order: 1;
 		--checkbox-padding: 6px 8px;
@@ -142,5 +171,13 @@
 		flex: initial;
 		display: inline-flex;
 		align-items: center;
+	}
+
+	// On mobile, give each row a comfortable touch target so checkboxes
+	// are easier to tap. The desktop dropdown keeps its denser layout.
+	@media (max-width: #{media.$breakpoint-medium - 1px}) {
+		li :global(.checkbox) {
+			--checkbox-padding: 12px;
+		}
 	}
 </style>

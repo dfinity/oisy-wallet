@@ -7,6 +7,8 @@
 			"back": "戻る",
 			"done": "完了",
 			"close": "閉じる",
+			"collapse": "折りたたむ",
+			"expand": "展開",
 			"change": "変更",
 			"continue": "続行",
 			"apply": "適用",
@@ -29,6 +31,7 @@
 			"not_available": "該当なし",
 			"new": "New",
 			"edit": "編集",
+			"download": "ダウンロード",
 			"no_results": "一致する結果はありません。",
 			"paste": "貼り付け",
 			"to": "宛先",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_shortはあなたを守ります！"
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "ICRCカスタムトークンの読み込み中にエラーが発生しました。",
 			"ext_custom_tokens": "EXTカスタムトークンの読み込み中にエラーが発生しました。",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "ウォレットにはまだロードされていない初期データが必要です。もう一度お試しください。",
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "設定",
 			"general": "一般",
+			"preferences": "環境設定",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました。",
 			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます。",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
-			"learn_more": ""
+			"export_data": "データをエクスポート",
+			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "トークンをエクスポート",
+			"export_transactions": "取引をエクスポート",
+			"export_tokens_success": "トークンCSVをダウンロードしました。",
+			"export_transactions_success": "取引CSVをダウンロードしました。",
+			"learn_more": "詳細を見る"
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -796,7 +815,9 @@
 			"appearance_system": "OSのテーマ設定に従う"
 		},
 		"error": {
-			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。"
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
+			"export_exchange_rate_unavailable": "為替レートを読み込み中です。しばらくしてから再度お試しください。",
+			"export_failed": "エクスポートを作成できませんでした。もう一度お試しください。"
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "現在のBTCトランザクションが完了するまで、新たな送信はできません。",
 			"no_available_utxos": "このトランザクションを行うための利用可能なUTXOが不足しています。",
 			"unknown_destination": "このアドレスとやり取りは初めてです。送信先を確認してください。",
-			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "手数料は$feeSymbolで支払われます。利用可能残高: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "スキャンしたコードには宛先アドレスのみが含まれていました。正しいトークンを選択し、正しい数量を入力し、宛先アドレスを慎重に確認してください！",
+			"scanned_address_only_destination_single_token": "スキャンしたコードには宛先アドレスのみが含まれていました。正しい数量を入力し、宛先アドレスを慎重に確認してください！"
 		},
 		"assertion": {
 			"invalid_destination_address": "送信先アドレスが無効です",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "トランザクションを実行中...",
 			"initializing": "トランザクションを初期化中...",
 			"swapping": "スワップ中...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
 			"swap_provider_website": "ウェブサイト",
@@ -1156,7 +1195,6 @@
 			"select_token": "トークンを選択",
 			"select_network_filter": "ネットワークを選択",
 			"withdrawing": "出金中...",
-			"bridging": "ブリッジ中... (しばらくお待ちください。最大2分かかる場合があります。)",
 			"network_cost": "ネットワークコスト",
 			"gasless": "ガスレス",
 			"swap_fees": "スワップ手数料",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
 		"error": {
 			"kong_not_available": "現在、トークンスワップ用の取引所が利用できません。後ほど再試行してください。",
 			"unexpected": "トークンをスワップ中に問題が発生しました。",
 			"unexpected_missing_data": "スワップトランザクションの開始中に予期しない問題が発生しました。",
+			"failed_unexpectedly": "スワップを完了できませんでした。ウォレットの残高をご確認のうえ、再度お試しいただくか、別のプロバイダーをお選びください。",
 			"slippage_exceeded": "$oisy_short が保護しています：取引がスリッページ許容範囲の $maxSlippage% を超えています。最大スリッページを調整して再試行してください。",
 			"pool_not_found": "スワップ失敗。プールが見つかりません。",
 			"deposit_error": "スワップの資金を入金できませんでした。再度お試しいただくか、スワッププロバイダーを変更してください。",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください。",
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "購入",
-			"buy_dev": "購入（開発環境）"
+			"buy_dev": "購入（開発環境）",
+			"unavailable_title": "トークンの購入は一時的にご利用いただけません",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "それまでの間も、ウォレットアドレスを共有することでトークンを受け取ることができます。"
+		},
+		"actions": {
+			"close": "了解"
 		},
 		"onramper": {
 			"title": "Onramper経由で購入"
@@ -1532,10 +1580,28 @@
 			"network": "ネットワーク",
 			"amount": "数量",
 			"hex_data": "HEXデータ",
+			"unreviewed_instructions": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "接続済みアプリ",
 			"no_connected_apps": "現在接続されているアプリはありません。",
+			"disconnect_all": "すべて切断",
+			"disconnect_app": "$name を切断",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "WalletConnectリクエストが拒否されました。",
 			"unknown_parameter": "不明なパラメータです。",
 			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。",
 			"unknown_destination": "不明な宛先アドレスです。",
+			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "まだ連絡先を追加していません",
+			"contacts_empty_description": "よく使うアドレスを連絡先に保存して、誤ったアドレスをうっかり使ってしまうリスクを減らしましょう。",
+			"contacts_empty_cta": "最初の連絡先を追加"
 		},
 		"label": {
 			"reimbursement": "払い戻し",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "アプリケーションと安全にやり取りするために、ウォレットを開くか作成してください。",
 				"connect_your_wallet": "あなたの$oisy_nameに接続する",
-				"oisy_protects_you": "OISYがあなたを守ります！",
 				"oisy_protects_you_description": "アプリケーションはあなたの資金に直接アクセスできず、すべてのトランザクションはあなたの確認が必要です。"
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTCトランザクション情報は中央集権型の第三者から取得されており、独自に検証する必要があります。",
-			"hidden_micro_transactions": "<strong>OISYはあなたを守ります！</strong>非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
+			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
 				"action": "ステータスを確認"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAOで稼ぐ"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

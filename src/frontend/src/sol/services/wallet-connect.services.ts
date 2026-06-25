@@ -19,6 +19,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -31,6 +32,7 @@ import {
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';
 import {
@@ -74,7 +76,50 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	return mapSolTransactionMessage(parsedTransactionMessage);
+	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
+
+	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
+	// not surfaced by the mapper. Recover it from the source token account (the account
+	// being debited) so the review can still show the correct token instead of native
+	// SOL. We deliberately do not look at the destination: a native SOL transfer *to* a
+	// token account would otherwise be misread as an SPL transfer.
+	if (nonNullish(mapped.tokenAddress)) {
+		return mapped;
+	}
+
+	const tokenAddress = await resolveSplTokenAddress({
+		address: mapped.source,
+		network: solNetwork
+	});
+
+	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+};
+
+const resolveSplTokenAddress = async ({
+	address,
+	network
+}: {
+	address: OptionSolAddress;
+	network: SolanaNetworkType;
+}): Promise<SplTokenAddress | undefined> => {
+	if (isNullish(address)) {
+		return undefined;
+	}
+
+	try {
+		const { value } = await getAccountInfo({ address, network });
+
+		if (nonNullish(value) && 'parsed' in value.data) {
+			const { mint } = value.data.parsed.info as { mint?: SplTokenAddress };
+
+			return mint;
+		}
+	} catch (_: unknown) {
+		// Best-effort: a failed lookup must not break the review, which simply falls
+		// back to the native SOL token.
+	}
+
+	return undefined;
 };
 
 const getSignatureWithoutSending = async ({
@@ -230,7 +275,21 @@ export const sign = ({
 				rpc: solanaHttpRpc(solNetwork)
 			});
 
-			const { amount, destination } = mapSolTransactionMessage(parsedTransactionMessage);
+			const { amount, destination, ambiguous } = mapSolTransactionMessage(parsedTransactionMessage);
+
+			// The review screen collapses the transaction to a single source/destination/amount.
+			// When the message bundles instructions that disagree on those fields, that summary
+			// would hide part of the fund flow (e.g. a transfer to an attacker alongside a benign
+			// one). Refuse to sign anything we cannot display faithfully.
+			if (ambiguous) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.ambiguous_transaction }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
 
 			// TODO: add assertions checks about amount, payer, source and destination when we will able to properly parse them for ALL the transactions
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { EarningCardFields, type EarningCards } from '$env/types/env.earning-cards';
+	import { EarningCardFields } from '$env/types/env.earning-cards';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
@@ -9,13 +9,12 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { EarningProviderCardConfig, EarningProviderData } from '$lib/types/earning-provider';
 	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		cardData: EarningCards;
-		cardFields: { [key in EarningCardFields]?: string | number | string[] } & {
-			action: () => Promise<void>;
-		};
+		cardData: EarningProviderCardConfig;
+		cardFields: EarningProviderData;
 	}
 
 	let { cardData, cardFields }: Props = $props();

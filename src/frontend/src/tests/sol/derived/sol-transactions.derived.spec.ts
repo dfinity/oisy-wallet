@@ -57,6 +57,36 @@ describe('sol-transactions.derived', () => {
 
 			expect(result).toEqual(transactions.map(({ data }) => data));
 		});
+
+		it('should return transactions sorted by newest timestamp first', () => {
+			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+
+			const oldestTransaction = {
+				data: { ...createMockSolTransactionUi('oldest'), timestamp: 1_707_004_800n },
+				certified: false
+			};
+			const newestTransaction = {
+				data: { ...createMockSolTransactionUi('newest'), timestamp: 1_709_596_800n },
+				certified: false
+			};
+			const middleTransaction = {
+				data: { ...createMockSolTransactionUi('middle'), timestamp: 1_708_300_800n },
+				certified: false
+			};
+
+			solTransactionsStore.append({
+				tokenId: SOLANA_TOKEN_ID,
+				transactions: [oldestTransaction, newestTransaction, middleTransaction]
+			});
+
+			const result = get(solTransactions);
+
+			expect(result).toEqual([
+				newestTransaction.data,
+				middleTransaction.data,
+				oldestTransaction.data
+			]);
+		});
 	});
 
 	describe('solTransactionsInitialized', () => {

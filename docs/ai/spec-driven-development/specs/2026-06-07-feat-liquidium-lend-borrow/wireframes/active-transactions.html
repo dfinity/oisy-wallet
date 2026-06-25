@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Active transactions — Liquidium (wireframe)</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--card: #ffffff;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #737e91;
+				--blue: #2f6df6;
+				--blue-sub: #dce6fd;
+				--green: #15a35b;
+				--green-sub: #e6f7ee;
+				--red: #df4a3c;
+				--red-sub: #fce8e6;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+				min-height: 100vh;
+			}
+			svg {
+				display: block;
+			}
+			.wfbar {
+				max-width: 430px;
+				margin: 16px auto 0;
+				background: #fff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #8a94a8;
+				border: 1px solid #c9d2e6;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wfbar .ctrls {
+				display: flex;
+				gap: 6px;
+				align-items: center;
+				margin-top: 10px;
+				flex-wrap: wrap;
+				padding-top: 9px;
+				border-top: 1px solid #eef1f7;
+			}
+			.wfbar .ctrls button {
+				background: #f4f6fb;
+				border: 1px solid var(--line);
+				color: var(--txt);
+				border-radius: 8px;
+				padding: 5px 10px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+
+			/* popover panel (opened from the Active-transactions button) */
+			.panel {
+				max-width: 430px;
+				margin: 14px auto;
+				background: var(--card);
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				box-shadow: 0 8px 30px rgba(20, 30, 60, 0.12);
+				overflow: hidden;
+			}
+			.phead {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 14px 16px;
+				border-bottom: 1px solid var(--line);
+			}
+			.phead .t {
+				font-weight: 700;
+			}
+			.phead .bell {
+				position: relative;
+				width: 34px;
+				height: 34px;
+				border-radius: 10px;
+				border: 1px solid var(--line);
+				display: grid;
+				place-items: center;
+			}
+			.phead .bell svg {
+				width: 18px;
+				height: 18px;
+				stroke: #16203a;
+				fill: none;
+				stroke-width: 1.8;
+			}
+			.phead .bell .b {
+				position: absolute;
+				top: -4px;
+				right: -4px;
+				min-width: 16px;
+				height: 16px;
+				border-radius: 9px;
+				background: var(--blue);
+				color: #fff;
+				font-size: 10px;
+				font-weight: 700;
+				display: grid;
+				place-items: center;
+				padding: 0 4px;
+			}
+			.body {
+				padding: 12px 14px;
+			}
+			.sec {
+				margin-bottom: 16px;
+			}
+			.sec:last-child {
+				margin-bottom: 0;
+			}
+			.sec .h {
+				font-size: 13px;
+				font-weight: 700;
+				margin-bottom: 8px;
+			}
+			ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.item {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 9px 6px;
+				border-radius: 10px;
+			}
+			.item:hover {
+				background: #f7f9fc;
+			}
+			.circle {
+				position: relative;
+				flex: 0 0 40px;
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+			}
+			.circle svg {
+				width: 20px;
+				height: 20px;
+				fill: none;
+				stroke-width: 1.9;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+			.c-pending {
+				background: var(--blue-sub);
+				color: var(--blue);
+			}
+			.c-pending svg {
+				stroke: var(--blue);
+			}
+			.c-ok {
+				background: var(--green-sub);
+				color: var(--green);
+			}
+			.c-ok svg {
+				stroke: var(--green);
+			}
+			.c-fail {
+				background: var(--red-sub);
+				color: var(--red);
+			}
+			.c-fail svg {
+				stroke: var(--red);
+			}
+			.unseen {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 9px;
+				height: 9px;
+				border-radius: 50%;
+				background: var(--blue);
+				box-shadow: 0 0 0 2px #fff;
+			}
+			.mid {
+				flex: 1;
+				min-width: 0;
+			}
+			.title {
+				font-size: 14px;
+				font-weight: 600;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.sub {
+				font-size: 12px;
+				color: var(--muted);
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.dot {
+				width: 3px;
+				height: 3px;
+				border-radius: 50%;
+				background: #c2cad8;
+			}
+			.end {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.x {
+				width: 24px;
+				height: 24px;
+				border-radius: 7px;
+				border: 0;
+				background: transparent;
+				color: #9aa4b5;
+				display: grid;
+				place-items: center;
+				cursor: pointer;
+			}
+			.x:hover {
+				background: #eef1f7;
+			}
+			.x svg {
+				width: 15px;
+				height: 15px;
+				stroke: currentColor;
+				fill: none;
+				stroke-width: 2;
+			}
+			.empty {
+				text-align: center;
+				opacity: 0.6;
+				padding: 18px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag">Wireframe — controls below are not part of the UI</span>
+			<div>
+				The <b>Active transactions</b> panel (opened from the header button), reusing the OneSec
+				<code>ActiveUserTransactionItem</code> layout. Liquidium renders a
+				<b>deposit (Supply)</b> and a <b>loan (Borrow)</b> as items here — status circle, title,
+				"Liquidium · step" subtitle, relative time, dismiss when terminal. A OneSec swap is shown in
+				"Previous" for parity. Native-BTC supply shows confirmation progress.
+			</div>
+			<div class="ctrls">
+				<span>Demo:</span><button id="advance">Advance BTC supply confirmations</button>
+			</div>
+		</div>
+
+		<div class="panel">
+			<div class="phead">
+				<span class="t">Active transactions</span>
+				<span class="bell"
+					><svg viewBox="0 0 24 24">
+						<path d="M6 9a6 6 0 0 1 12 0c0 4.5 2 5.5 2 5.5H4S6 13.5 6 9z" />
+						<path d="M10 19a2 2 0 0 0 4 0" /></svg
+					><span class="b" id="badge">2</span></span
+				>
+			</div>
+			<div class="body" id="body"></div>
+		</div>
+
+		<script>
+			const convertIcon =
+				'<svg viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 13-3l3 3"/><path d="M20 5v4h-4"/><path d="M20 15a8 8 0 0 1-13 3l-3-3"/><path d="M4 19v-4h4"/></svg>';
+			const alertIcon =
+				'<svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>';
+			const xIcon = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+			let txs = [
+				{
+					id: 'a',
+					title: 'Supply 0.25 BTC',
+					provider: 'Liquidium',
+					step: '2 of 6 confirmations',
+					status: 'pending',
+					time: '1m',
+					unseen: true,
+					conf: { n: 2, t: 6 }
+				},
+				{
+					id: 'b',
+					title: 'Borrow 20,000 USDC',
+					provider: 'Liquidium',
+					step: 'Processing',
+					status: 'pending',
+					time: '30s',
+					unseen: true
+				},
+				{
+					id: 'c',
+					title: 'Supply 12,000 USDC',
+					provider: 'Liquidium',
+					step: 'Supplied',
+					status: 'ok',
+					time: '2h',
+					unseen: false
+				},
+				{
+					id: 'd',
+					title: 'Swap 0.5 ETH → ckETH',
+					provider: 'OneSec',
+					step: 'Ethereum → Internet Computer',
+					status: 'ok',
+					time: '1d',
+					unseen: false,
+					swap: true
+				}
+			];
+
+			function itemHtml(tx) {
+				const cls = tx.status === 'ok' ? 'c-ok' : tx.status === 'fail' ? 'c-fail' : 'c-pending';
+				const icon = tx.status === 'fail' ? alertIcon : convertIcon;
+				const terminal = tx.status === 'ok' || tx.status === 'fail';
+				// OneSec swap keeps "network → network · provider"; Liquidium uses "provider · step"
+				const sub = tx.swap
+					? `<span>${tx.step}</span><span class="dot"></span><span>${tx.provider}</span>`
+					: `<span>${tx.provider}</span><span class="dot"></span><span>${tx.step}</span>`;
+				return `<li class="item">
+      <div class="circle ${cls}">${icon}${tx.unseen ? '<span class="unseen"></span>' : ''}</div>
+      <div class="mid"><div class="title">${tx.title}</div><div class="sub">${sub}</div></div>
+      <div class="end"><span>${tx.time}</span>${terminal ? `<button class="x" title="Dismiss">${xIcon}</button>` : ''}</div>
+    </li>`;
+			}
+			function render() {
+				const groups = [
+					{ h: 'In progress', list: txs.filter((t) => t.status === 'pending') },
+					{ h: 'Failed', list: txs.filter((t) => t.status === 'fail') },
+					{ h: 'Previous', list: txs.filter((t) => t.status === 'ok') }
+				];
+				const body = document.getElementById('body');
+				if (txs.length === 0) {
+					body.innerHTML = '<p class="empty">You have no active transactions.</p>';
+					return;
+				}
+				body.innerHTML = groups
+					.filter((g) => g.list.length)
+					.map(
+						(g) =>
+							`<div class="sec"><div class="h">${g.h}</div><ul>${g.list.map(itemHtml).join('')}</ul></div>`
+					)
+					.join('');
+				document.getElementById('badge').textContent = txs.filter((t) => t.unseen).length;
+				body.querySelectorAll('.x').forEach((b, i) => {});
+			}
+			document.getElementById('advance').addEventListener('click', () => {
+				const tx = txs.find((t) => t.id === 'a');
+				if (!tx) return;
+				if (tx.status !== 'pending') return;
+				tx.conf.n = Math.min(tx.conf.t, tx.conf.n + 2);
+				if (tx.conf.n >= tx.conf.t) {
+					tx.status = 'ok';
+					tx.step = 'Supplied';
+					tx.unseen = true;
+				} else {
+					tx.step = `${tx.conf.n} of ${tx.conf.t} confirmations`;
+				}
+				render();
+			});
+			render();
+		</script>
+	</body>
+</html>

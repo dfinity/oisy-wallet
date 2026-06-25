@@ -24,7 +24,6 @@ import {
 	mapTokenToPayableToken,
 	prepareBasePayableTokens
 } from '$lib/utils/open-crypto-pay.utils';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
 
 describe('open-crypto-pay.utils', () => {
 	describe('decodeLNURL', () => {
@@ -899,8 +898,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [],
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result).toEqual([]);
@@ -910,8 +908,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: [],
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result).toEqual([]);
@@ -921,8 +918,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: [],
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: []
 			});
 
 			expect(result).toEqual([]);
@@ -932,8 +928,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [],
 				networks: [],
-				availableTokens: [],
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: []
 			});
 
 			expect(result).toEqual([]);
@@ -943,8 +938,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result).toHaveLength(4);
@@ -1005,8 +999,7 @@ describe('open-crypto-pay.utils', () => {
 						pay: { openCryptoPay: 'Solana' }
 					} as unknown as Network
 				],
-				availableTokens: tokensWithUnsupported,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: tokensWithUnsupported
 			});
 
 			expect(result).toHaveLength(4);
@@ -1029,8 +1022,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: tokensWithMissingAsset,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: tokensWithMissingAsset
 			});
 
 			expect(result).toHaveLength(4);
@@ -1041,8 +1033,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: [mockAvailableTokens[0]],
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: [mockAvailableTokens[0]]
 			});
 
 			expect(result).toHaveLength(1);
@@ -1053,8 +1044,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: [mockTransferAmounts[0]],
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result).toHaveLength(2);
@@ -1076,8 +1066,7 @@ describe('open-crypto-pay.utils', () => {
 			const result = prepareBasePayableTokens({
 				transferAmounts: transferWithUnavailable,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result).toHaveLength(4);
@@ -1087,15 +1076,13 @@ describe('open-crypto-pay.utils', () => {
 			const result1 = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			const result2 = prepareBasePayableTokens({
 				transferAmounts: mockTransferAmounts,
 				networks: mockNetworks,
-				availableTokens: mockAvailableTokens,
-				btcAddressMainnet: mockBtcAddress
+				availableTokens: mockAvailableTokens
 			});
 
 			expect(result1).not.toBe(result2);

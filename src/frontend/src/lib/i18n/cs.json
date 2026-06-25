@@ -7,6 +7,8 @@
 			"back": "Zpět",
 			"done": "Hotovo",
 			"close": "Zavřít",
+			"collapse": "Sbalit",
+			"expand": "Rozbalit",
 			"change": "Změnit",
 			"continue": "Pokračovat",
 			"apply": "Použít",
@@ -29,6 +31,7 @@
 			"not_available": "n/a",
 			"new": "Nový",
 			"edit": "Upravit",
+			"download": "Stáhnout",
 			"no_results": "Žádné výsledky",
 			"paste": "Vložit",
 			"to": "Do",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short vás chrání!"
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"ext_custom_tokens": "Chyba při načítání vlastních EXT tokenů.",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
-			"learn_more": ""
+			"export_data": "Exportovat data",
+			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "Exportovat tokeny",
+			"export_transactions": "Exportovat transakce",
+			"export_tokens_success": "CSV s tokeny bylo staženo.",
+			"export_transactions_success": "CSV s transakcemi bylo staženo.",
+			"learn_more": "Zjistit více"
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -796,7 +815,9 @@
 			"appearance_system": "Povolí barevný režim vašeho operačního systému"
 		},
 		"error": {
-			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku.",
+			"export_exchange_rate_unavailable": "Směnné kurzy se stále načítají. Zkuste to za chvíli znovu.",
+			"export_failed": "Nepodařilo se nám vygenerovat váš export. Zkuste to prosím znovu."
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
 			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
 			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
-			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že vyberete správný token, zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!",
+			"scanned_address_only_destination_single_token": "Naskenovaný kód obsahoval pouze cílovou adresu. Ujistěte se, že zadáte správnou částku a pečlivě zkontrolujete cílovou adresu!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Neplatná cílová adresa",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "Provádění transakce...",
 			"initializing": "Inicializace transakce...",
 			"swapping": "Výměna...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
 			"swap_provider_website": "Webové stránky",
@@ -1156,7 +1195,6 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
 		"error": {
 			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
 			"unexpected": "Při výměně tokenů se něco pokazilo.",
 			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
+			"failed_unexpectedly": "Swap se nepodařilo dokončit. Zkontrolujte prosím zůstatek své peněženky a zkuste to znovu, nebo zvolte jiného poskytovatele.",
 			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
 			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
 			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "Koupit",
-			"buy_dev": "Koupit (vývojové prostředí)"
+			"buy_dev": "Koupit (vývojové prostředí)",
+			"unavailable_title": "Nákup tokenů je dočasně nedostupný",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "Mezitím můžete stále přijímat tokeny sdílením adresy své peněženky."
+		},
+		"actions": {
+			"close": "Rozumím"
 		},
 		"onramper": {
 			"title": "Koupit přes Onramper"
@@ -1532,10 +1580,28 @@
 			"network": "Síť",
 			"amount": "Částka",
 			"hex_data": "HEX data",
+			"unreviewed_instructions": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
+			"disconnect_all": "Odpojit vše",
+			"disconnect_app": "Odpojit $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "Požadavek WalletConnect byl zamítnut",
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
+			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "Zatím jste nepřidali žádné kontakty",
+			"contacts_empty_description": "Ukládejte si známé adresy do Kontaktů a snižte riziko, že omylem použijete nesprávnou adresu.",
+			"contacts_empty_cta": "Přidat první kontakt"
 		},
 		"label": {
 			"reimbursement": "Náhrada",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "Otevřete nebo vytvořte svou peněženku pro bezpečnou interakci s aplikací.",
 				"connect_your_wallet": "Připojte svou peněženku $oisy_name",
-				"oisy_protects_you": "OISY vás chrání!",
 				"oisy_protects_you_description": "Aplikace nemohou přímo přistupovat k vašim prostředkům, a každá transakce musí být potvrzena vámi."
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
-			"hidden_micro_transactions": "<strong>OISY vás chrání!</strong> Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
+			"hidden_micro_transactions": "Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
 		},
 		"warning": {
 			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
 				"action": "Zkontrolovat stav"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Vydělávejte s Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

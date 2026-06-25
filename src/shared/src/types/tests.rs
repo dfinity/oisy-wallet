@@ -7,8 +7,7 @@ mod bitcoin {
 
     use crate::{
         types::bitcoin::{
-            BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,
-            MAX_ADDRESS_LEN, MAX_TXID_BYTES, MAX_UTXOS_LEN,
+            BtcAddPendingTransactionRequest, PendingTransaction, MAX_TXID_BYTES, MAX_UTXOS_LEN,
         },
         validate::{test_validate_on_deserialize, TestVector, Validate},
     };
@@ -85,30 +84,6 @@ mod bitcoin {
                         };
                         MAX_UTXOS_LEN + 1
                     ],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
-            }
-        ]
-    );
-
-    test_validate_on_deserialize!(
-        BtcGetPendingTransactionsRequest,
-        [
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with max length address",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN),
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: true,
-            },
-            TestVector {
-                description: "BtcGetPendingTransactionsRequest with address too long",
-                input: BtcGetPendingTransactionsRequest {
-                    address: "1".repeat(MAX_ADDRESS_LEN + 1),
                     network: BitcoinNetwork::Mainnet,
                     ii_delegation_chain: None,
                 },
@@ -618,6 +593,58 @@ mod contact_image {
                     },
                     valid: false,
                     description: "IcPunksToken with user or network principal as canister_id",
+                }
+            ]
+        );
+    }
+
+    mod icrc7 {
+        //! Tests for the icrc7 module.
+        use candid::{Decode, Encode, Principal};
+
+        use crate::{
+            types::custom_token::Icrc7Token,
+            validate::{test_validate_on_deserialize, TestVector, Validate},
+        };
+
+        fn canister_id1() -> Principal {
+            Principal::from_text("xea2t-daaaa-aaaaj-qnp2a-cai").unwrap()
+        }
+        fn user_id() -> Principal {
+            Principal::from_text("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe")
+                .unwrap()
+        }
+
+        test_validate_on_deserialize!(
+            Icrc7Token,
+            [
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: canister_id1(),
+                    },
+                    valid: true,
+                    description: "Icrc7Token with valid canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: Principal::anonymous(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with anonymous canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: Principal::management_canister(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with the management canister as canister_id",
+                },
+                TestVector {
+                    input: Icrc7Token {
+                        canister_id: user_id(),
+                    },
+                    valid: false,
+                    description: "Icrc7Token with user or network principal as canister_id",
                 }
             ]
         );

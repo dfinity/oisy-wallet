@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { themeStore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import ButtonsSignIn from '$lib/components/auth/ButtonsSignIn.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
@@ -8,16 +7,20 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { signOut, signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { themeStore } from '$lib/stores/theme.store';
 	import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 	const modalId = Symbol();
 	const imgStyleClass = 'h-full object-contain mx-auto object-top';
+	const learnMoreUrl = 'https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out';
 
 	const handleUnlock = async ({ openIdProvider }: { openIdProvider?: OpenIdProvider } = {}) => {
 		const { success } = await signIn({
@@ -97,9 +100,14 @@
 
 		<ExternalLink
 			ariaLabel={$i18n.lock.text.learn_more}
-			href="https://docs.oisy.com/using-oisy-wallet/how-tos/locking-and-logging-out"
+			href={learnMoreUrl}
 			iconAsLast
 			styleClass="mt-4"
+			trackEvent={buildLearnMoreEvent({
+				sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LOCK,
+				labelKey: 'lock.text.learn_more',
+				url: learnMoreUrl
+			})}
 		>
 			{$i18n.lock.text.learn_more}
 		</ExternalLink>

@@ -7,7 +7,7 @@ import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
-import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -814,26 +814,35 @@ export const fetchNearIntentsSolSwap = async ({
 	});
 };
 
+/**
+ * Auto-enables the destination token once the bridge foreground has resolved
+ * (i.e. funds have left the user's wallet and an AUT row exists). Running
+ * this AFTER the bridge — not before — avoids enabling a token for a swap
+ * the user ended up cancelling on the Review step or that failed in the
+ * foreground. The post-success wallet balance refresh is wired off the AUT
+ * store, not from here, so this only takes care of visibility.
+ */
+const enableOneSecDestinationToken = async (
+	params: OneSecEvmToIcpParams | OneSecIcpToEvmParams
+): Promise<void> => {
+	try {
+		await enableSwapDestinationToken({
+			destinationToken: params.destinationToken,
+			identity: params.identity
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
 export const fetchOneSecEvmToIcpSwap = async (params: OneSecEvmToIcpParams): Promise<void> => {
 	await executeOneSecEvmToIcpBridge(params);
-	params.progress(ProgressStepsSwap.UPDATE_UI);
-
-	await enableSwapDestinationToken({
-		destinationToken: params.destinationToken,
-		identity: params.identity
-	});
-	await waitAndTriggerWallet();
+	await enableOneSecDestinationToken(params);
 };
 
 export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Promise<void> => {
 	await executeOneSecIcpToEvmBridge(params);
-	params.progress(ProgressStepsSwap.UPDATE_UI);
-
-	await enableSwapDestinationToken({
-		destinationToken: params.destinationToken,
-		identity: params.identity
-	});
-	await waitAndTriggerWallet();
+	await enableOneSecDestinationToken(params);
 };
 
 export const swapService = {
@@ -1280,7 +1289,7 @@ export const fetchVeloraMarketSwap = async ({
 
 	const TokenTransferProxy = await sdk.swap.getSpender();
 
-	if (!isDefaultEthereumToken(sourceToken)) {
+	if (isNotDefaultEthereumToken(sourceToken)) {
 		await approveToken({
 			token: sourceToken,
 			from: userAddress,

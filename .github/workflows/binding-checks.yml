@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: app-token
         continue-on-error: true
         with:
@@ -65,12 +65,8 @@ jobs:
               - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
                 '**/Cargo*'
               - '**/*rust*'
-              - # Scripts that download external Candid files, with false positives.
-                'scripts/build.*.sh'
-              - # Scripts that generate the declarations.
-                'scripts/generate.sh'
-              - # Scripts that download the candid files.
-                'scripts/did.sh'
+              - # The binding-gen scripts and the helpers they call.
+                'scripts/**'
               - # This workflow
                 '.github/workflows/binding-checks.yml'
 

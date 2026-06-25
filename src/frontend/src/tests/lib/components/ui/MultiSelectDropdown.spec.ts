@@ -1,3 +1,4 @@
+import { MULTI_SELECT_DROPDOWN_PANEL_SHELL } from '$lib/constants/test-ids.constants';
 import { screensStore } from '$lib/stores/screens.store';
 import MultiSelectDropdownTest from '$tests/lib/components/ui/MultiSelectDropdownTest.svelte';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -61,5 +62,62 @@ describe('MultiSelectDropdown', () => {
 		await waitFor(() => {
 			expect(queryByPlaceholderText('Search items')).not.toBeInTheDocument();
 		});
+	});
+
+	it('uses default panel width classes when panelWidthClass is omitted', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest);
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			const shell = getByTestId(MULTI_SELECT_DROPDOWN_PANEL_SHELL);
+
+			expect(shell.className).toContain('w-full');
+			expect(shell.className).toContain('min-w-60');
+		});
+	});
+
+	it('applies panelWidthClass instead of default width classes when provided', async () => {
+		const { getByTestId } = render(MultiSelectDropdownTest, {
+			props: { panelWidthClass: 'w-full sm:w-80' }
+		});
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			const shell = getByTestId(MULTI_SELECT_DROPDOWN_PANEL_SHELL);
+
+			expect(shell.className).toContain('w-full');
+			expect(shell.className).toContain('sm:w-80');
+			expect(shell.className).not.toContain('min-w-60');
+		});
+	});
+
+	it('does not invoke onToggle on initial mount', () => {
+		const onToggle = vi.fn();
+
+		render(MultiSelectDropdownTest, { props: { onToggle } });
+
+		expect(onToggle).not.toHaveBeenCalled();
+	});
+
+	it('invokes onToggle(true) when the panel opens and onToggle(false) when it closes', async () => {
+		const onToggle = vi.fn();
+
+		const { getByTestId } = render(MultiSelectDropdownTest, { props: { onToggle } });
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(onToggle).toHaveBeenLastCalledWith(true);
+		});
+
+		await fireEvent.click(getByTestId('multi-select-dropdown'));
+
+		await waitFor(() => {
+			expect(onToggle).toHaveBeenLastCalledWith(false);
+		});
+
+		expect(onToggle).toHaveBeenCalledTimes(2);
 	});
 });

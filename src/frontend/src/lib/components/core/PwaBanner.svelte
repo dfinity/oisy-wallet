@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Html, IconClose } from '@dfinity/gix-components';
+	import { IconClose } from '@dfinity/gix-components';
+	import Html from '$lib/components/ui/Html.svelte';
 	import InfoBanner from '$lib/components/ui/InfoBanner.svelte';
 	import {
 		PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID,

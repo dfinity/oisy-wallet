@@ -10,6 +10,8 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		collapse: string;
+		expand: string;
 		change: string;
 		continue: string;
 		apply: string;
@@ -32,6 +34,7 @@ interface I18nCore {
 		not_available: string;
 		new: string;
 		edit: string;
+		download: string;
 		no_results: string;
 		paste: string;
 		to: string;
@@ -50,6 +53,7 @@ interface I18nCore {
 		info: string;
 		asset: string;
 		got_it: string;
+		oisy_protects_you: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -303,6 +307,7 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
+		icp_flags: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -476,6 +481,7 @@ interface I18nInit {
 		icrc_custom_token: string;
 		ext_custom_tokens: string;
 		icpunks_custom_tokens: string;
+		icrc7_custom_tokens: string;
 		custom_tokens: string;
 		loading_wallet_timeout: string;
 		allow_signing: string;
@@ -501,6 +507,7 @@ interface I18nSettings {
 	text: {
 		title: string;
 		general: string;
+		preferences: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -528,6 +535,14 @@ interface I18nSettings {
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
 		save_spam_filter_success: string;
+		export_data: string;
+		export_data_description: string;
+		export_basic: string;
+		export_extended: string;
+		export_tokens: string;
+		export_transactions: string;
+		export_tokens_success: string;
+		export_transactions_success: string;
 		learn_more: string;
 	};
 	alt: {
@@ -537,7 +552,11 @@ interface I18nSettings {
 		appearance_dark: string;
 		appearance_system: string;
 	};
-	error: { loading_profile: string };
+	error: {
+		loading_profile: string;
+		export_exchange_rate_unavailable: string;
+		export_failed: string;
+	};
 }
 
 interface I18nShortcuts {
@@ -683,6 +702,8 @@ interface I18nSend {
 		no_available_utxos: string;
 		unknown_destination: string;
 		fee_info: string;
+		scanned_address_only_destination: string;
+		scanned_address_only_destination_single_token: string;
 	};
 	assertion: {
 		invalid_destination_address: string;
@@ -750,6 +771,19 @@ interface I18nMint {
 
 interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
+}
+
+interface I18nActive_user_transactions {
+	text: {
+		button_label: string;
+		open_aria_label: string;
+		empty: string;
+		section_in_progress: string;
+		section_failed: string;
+		section_previous: string;
+		dismiss_aria_label: string;
+	};
+	error: { dismiss_failed: string };
 }
 
 interface I18nScanner {
@@ -859,6 +893,8 @@ interface I18nSwap {
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
+		starting_to_swap: string;
+		starting_to_bridge: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -875,7 +911,6 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
-		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
@@ -885,11 +920,13 @@ interface I18nSwap {
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
 		value_difference_error_confirmation: string;
+		value_difference_missing_price_confirmation: string;
 	};
 	error: {
 		kong_not_available: string;
 		unexpected: string;
 		unexpected_missing_data: string;
+		failed_unexpectedly: string;
 		slippage_exceeded: string;
 		pool_not_found: string;
 		deposit_error: string;
@@ -904,11 +941,20 @@ interface I18nSwap {
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
+		swap_refunded: string;
 	};
 }
 
 interface I18nBuy {
-	text: { buy: string; buy_dev: string };
+	text: {
+		buy: string;
+		buy_dev: string;
+		unavailable_title: string;
+		unavailable_description_disabled: string;
+		unavailable_description_signing_failed: string;
+		unavailable_fallback_hint: string;
+	};
+	actions: { close: string };
 	onramper: { title: string };
 }
 
@@ -1207,10 +1253,28 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		unreviewed_instructions: string;
 		raw_copied: string;
 		sign_message: string;
+		sign_psbt: string;
+		signing_address: string;
+		fee: string;
+		btc_symbol: string;
+		psbt_inputs: string;
+		psbt_outputs: string;
+		psbt_total_signed_inputs: string;
+		psbt_unknown_address: string;
+		psbt_unknown_value: string;
+		psbt_fee_unknown: string;
+		psbt_signed_by_wallet: string;
+		psbt_broadcast: string;
+		psbt_broadcast_enabled: string;
+		psbt_broadcast_disabled: string;
+		psbt_broadcast_unsupported_note: string;
 		connected_apps: string;
 		no_connected_apps: string;
+		disconnect_all: string;
+		disconnect_app: string;
 		wallet_connect: string;
 	};
 	alt: { connect_input: string };
@@ -1247,11 +1311,21 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_broadcast_not_supported: string;
+		btc_psbt_decode: string;
+		btc_psbt_input_not_segwit: string;
+		btc_psbt_input_not_owned: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
+		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};
+}
+
+interface I18nTrading {
+	text: { tab_title: string; intro: string; learn_more: string };
+	provider_unavailable: { title: string; description: string };
 }
 
 interface I18nTransaction {
@@ -1314,6 +1388,9 @@ interface I18nTransaction {
 		sheet_title: string;
 		open_filters_aria_label: string;
 		showing_partial: string;
+		contacts_empty_title: string;
+		contacts_empty_description: string;
+		contacts_empty_cta: string;
 	};
 	label: {
 		reimbursement: string;
@@ -1472,7 +1549,6 @@ interface I18nSigner {
 		text: {
 			open_or_create: string;
 			connect_your_wallet: string;
-			oisy_protects_you: string;
 			oisy_protects_you_description: string;
 		};
 	};
@@ -1563,6 +1639,7 @@ interface I18nEarning {
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
+		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {
 		apy: string;
@@ -1575,6 +1652,38 @@ interface I18nEarning {
 	};
 	terms: { flexible: string };
 	providers: { goldDaoStaking: { cardTitle: string } };
+}
+
+interface I18nLiquidium {
+	text: {
+		description: string;
+		health_factor: string;
+		net_value: string;
+		net_apy: string;
+		my_positions: string;
+		markets: string;
+		supplied: string;
+		borrowed: string;
+		apy_suffix: string;
+		supply_label: string;
+		borrow_label: string;
+		coming_soon: string;
+		action_supply: string;
+		action_borrow: string;
+		action_repay: string;
+		action_withdraw: string;
+		transaction_failed: string;
+		supply_review: string;
+		supply_review_subtitle: string;
+		supplying: string;
+		starting_to_supply: string;
+		supply_started: string;
+		supply_apy: string;
+		supply_collateral_info: string;
+		supply_agreement: string;
+		provider_fee: string;
+		insufficient_funds_for_fee: string;
+	};
 }
 
 interface I18nVaults {
@@ -1765,6 +1874,7 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;
@@ -1776,6 +1886,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
@@ -1792,6 +1903,7 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	liquidium: I18nLiquidium;
 	vaults: I18nVaults;
 	stake: I18nStake;
 	get_token: I18nGet_token;

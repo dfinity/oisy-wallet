@@ -10,6 +10,7 @@ import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
+import type { SendModalData } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
@@ -69,6 +70,7 @@ export interface Modal<T> {
 		| 'get-token'
 		| 'harvest-stake'
 		| 'harvest-unstake'
+		| 'liquidium-supply'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -101,7 +103,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcReceive: (id: symbol) => void;
 	openSolReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
-	openSend: (id: symbol) => void;
+	openSend: (params: SetWithOptionalDataParams<SendModalData>) => void;
 	openBuy: (id: symbol) => void;
 	openSwap: (id: symbol) => void;
 	openConvertCkBTCToBTC: (id: symbol) => void;
@@ -140,6 +142,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openHarvestStake: (id: symbol) => void;
 	openHarvestUnstake: (id: symbol) => void;
+	openLiquidiumSupply: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -166,7 +169,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openBtcReceive: setType('btc-receive'),
 		openSolReceive: setType('sol-receive'),
 		openReceive: setType('receive'),
-		openSend: setType('send'),
+		openSend: <(params: SetWithOptionalDataParams<SendModalData>) => void>setTypeWithData('send'),
 		openBuy: setType('buy'),
 		openSwap: setType('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),
@@ -249,6 +252,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHarvestStake: setType('harvest-stake'),
 		openHarvestUnstake: setType('harvest-unstake'),
+		openLiquidiumSupply: setType('liquidium-supply'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),

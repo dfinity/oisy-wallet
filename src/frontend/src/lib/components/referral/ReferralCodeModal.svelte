@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, QRCode } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
@@ -10,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import SkeletonQrCode from '$lib/components/ui/SkeletonQrCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { OISY_REFERRAL_URL } from '$lib/constants/oisy.constants';
@@ -19,6 +20,8 @@
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -49,13 +52,13 @@
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
 			{#if nonNullish(referralCode)}
-				<QRCode value={referralUrl}>
+				<QrCode value={referralUrl}>
 					{#snippet logo()}
 						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 							<IconAstronautHelmet />
 						</div>
 					{/snippet}
-				</QRCode>
+				</QrCode>
 			{:else}
 				<SkeletonQrCode />
 			{/if}
@@ -100,6 +103,11 @@
 					iconAsLast
 					styleClass="font-semibold min-w-30"
 					testId={REFERRAL_CODE_LEARN_MORE}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.REFERRAL,
+						labelKey: 'referral.invitation.text.learn_more',
+						url: OISY_REFERRAL_URL
+					})}
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>

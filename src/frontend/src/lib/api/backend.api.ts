@@ -1,8 +1,10 @@
 import type {
+	ActiveUserTransaction,
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
 	GetAllowedCyclesResponse,
+	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { CanisterApi } from '$lib/api/canister.api';
@@ -17,7 +19,7 @@ import type {
 	BtcAddPendingTransactionParams,
 	BtcGetFeePercentilesParams,
 	BtcGetPendingTransactionParams,
-	BtcSelectUserUtxosFeeParams,
+	CreateActiveUserTransactionParams,
 	CreateContactParams,
 	CreateUserProfileResponse,
 	DeleteContactParams,
@@ -30,8 +32,9 @@ import type {
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
-	SelectedUtxosFeeOutcome,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
+	UpdateActiveUserTransactionParams,
 	UpdateContactParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -107,6 +110,15 @@ export const newUserSignupsAllowed = async ({
 	return newUserSignupsAllowed({ certified });
 };
 
+export const exchangeRateEnabled = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<boolean> => {
+	const { exchangeRateEnabled } = await backendCanister({ identity });
+
+	return exchangeRateEnabled({ certified });
+};
+
 export const addPendingBtcTransaction = async ({
 	identity,
 	...params
@@ -123,15 +135,6 @@ export const getPendingBtcTransactions = async ({
 	const { btcGetPendingTransactions } = await backendCanister({ identity });
 
 	return btcGetPendingTransactions(params);
-};
-
-export const selectUserUtxosFee = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<BtcSelectUserUtxosFeeParams>): Promise<SelectedUtxosFeeOutcome> => {
-	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
-
-	return btcSelectUserUtxosFee(params);
 };
 
 export const getCurrentBtcFeePercentiles = async ({
@@ -158,6 +161,15 @@ export const allowSigning = async ({
 	const { allowSigning } = await backendCanister({ identity });
 
 	return allowSigning(params);
+};
+
+export const signOnramperWidgetUrl = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SignOnramperWidgetUrlParams>): Promise<SignOnramperWidgetUrlResponse> => {
+	const { signOnramperWidgetUrl } = await backendCanister({ identity });
+
+	return signOnramperWidgetUrl(params);
 };
 
 export const addUserHiddenDappId = async ({
@@ -284,15 +296,11 @@ export const getExchangeRate = async ({
 };
 
 export const getExchangeRates = async ({
-	identity,
-	...params
-}: CanisterApiFunctionParams<{
-	token_ids: TokenId[];
-	certified: boolean;
-}>): Promise<Map<string, BackendExchangeRate>> => {
+	identity
+}: CanisterApiFunctionParams): Promise<Array<[TokenId, BackendExchangeRate | undefined]>> => {
 	const { getExchangeRates } = await backendCanister({ identity });
 
-	return getExchangeRates(params);
+	return getExchangeRates();
 };
 
 export const getUserTransactions = async ({
@@ -311,6 +319,41 @@ export const saveUserTransactions = async ({
 	const { saveUserTransactions } = await backendCanister({ identity });
 
 	return saveUserTransactions(params);
+};
+
+export const createActiveUserTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<CreateActiveUserTransactionParams>): Promise<ActiveUserTransaction> => {
+	const { createActiveUserTransaction } = await backendCanister({ identity });
+
+	return createActiveUserTransaction(params);
+};
+
+export const updateActiveUserTransaction = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateActiveUserTransactionParams>): Promise<ActiveUserTransaction> => {
+	const { updateActiveUserTransaction } = await backendCanister({ identity });
+
+	return updateActiveUserTransaction(params);
+};
+
+export const deleteActiveUserTransaction = async ({
+	identity,
+	id
+}: CanisterApiFunctionParams<{ id: string }>): Promise<void> => {
+	const { deleteActiveUserTransaction } = await backendCanister({ identity });
+
+	return deleteActiveUserTransaction(id);
+};
+
+export const getActiveUserTransactions = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<ActiveUserTransaction[]> => {
+	const { getActiveUserTransactions } = await backendCanister({ identity });
+
+	return getActiveUserTransactions();
 };
 
 const backendCanister = async ({

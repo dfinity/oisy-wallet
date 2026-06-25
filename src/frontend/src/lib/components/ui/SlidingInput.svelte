@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Backdrop } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import InputTextWithAction from '$lib/components/ui/InputTextWithAction.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
@@ -80,7 +80,7 @@
 <div class="relative flex w-full">
 	{#if visible && inputValue === ''}
 		<div class="fixed top-0 right-0 bottom-0 left-0 z-2">
-			<Backdrop invisible on:nnsClose={handleClose} />
+			<Backdrop invisible onClose={handleClose} />
 		</div>
 	{/if}
 
@@ -133,9 +133,10 @@
 			{ariaLabel}
 			colorStyle="muted"
 			{disabled}
+			expanded={visible}
 			link={false}
 			onclick={handleToggle}
-			styleClass={`absolute right-[5px] ${visible ? 'active' : ''}`}
+			styleClass="absolute right-[5px]"
 			testId={`${testIdPrefix}-open-btn`}
 			bind:button
 		>

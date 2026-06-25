@@ -17,6 +17,8 @@ starting point. Read it once per session.
       with no `any`).
 - [ ] No hard-coded user-visible strings; a11y attributes set —
       [`i18n-and-a11y.md`](./i18n-and-a11y.md).
+- [ ] User-visible copy, colours, and icons follow brand rules —
+      [`brand-and-copy.md`](./brand-and-copy.md).
 - [ ] I have or extended tests where the [`testing.md`](./testing.md) policy
       requires.
 - [ ] No `console.error` / `console.warn` / `0n` / relative imports in
@@ -29,27 +31,27 @@ starting point. Read it once per session.
 
 ## Stack at a glance
 
-- **SvelteKit 2 + Svelte 5**, TypeScript everywhere. The codebase is
-  mid-migration: new code uses runes, but Svelte stores
-  (`writable` / `readable` / `derived` from `svelte/store`) remain the
-  primary cross-route reactive primitive. Both are first-class.
-- **Tailwind v4** (`@tailwindcss/postcss`).
-- **`@dfinity/gix-components`** for many UI primitives.
-- **`@icp-sdk/{auth,canisters,core}`**, **`@dfinity/utils`**,
-  **`@dfinity/zod-schemas`**, **`@dfinity/oisy-wallet-signer`** for IC plumbing.
-- **EVM:** `ethers`, `viem`. **Solana:** `@solana/kit`,
-  `@solana-program/*`. **Bitcoin:** `bitcoinjs-lib`. **WalletConnect:**
-  `@reown/walletkit`.
-- **i18n:** typed keys generated from `src/frontend/src/lib/i18n/en.json`
-  via `npm run i18n`. Other locales auto-translated by the
-  `auto-update-i18n` workflow — never hand-edit them.
-- **Testing:** Vitest 4 + `@testing-library/svelte` + `jsdom` (sharded 20×
-  in CI). Playwright for e2e under `e2e/`.
+Framework, UI lib, chain SDKs, and dev tooling are discoverable from
+[`package.json`](../../../package.json). The non-obvious bits:
+
+- **Svelte 5 mid-migration.** New code uses runes; existing Svelte stores
+  stay in place — do not migrate them in unrelated PRs. See
+  [`stack-and-patterns.md`](./stack-and-patterns.md).
+- **i18n** keys are generated from `src/frontend/src/lib/i18n/en.json` via
+  `npm run i18n`. The `auto-update-i18n` workflow only structurally syncs
+  non-`en` locales (missing keys → empty string, extra keys dropped,
+  existing values preserved) — it does **not** translate. Don't author
+  non-`en` translations unless the developer explicitly asks. See
+  [`i18n-and-a11y.md`](./i18n-and-a11y.md#i18n).
+- **Testing.** Vitest 4 + `@testing-library/svelte` + `jsdom`, sharded 20×
+  in CI. Specs live under `src/frontend/src/tests/` mirroring source
+  (never co-located). Playwright (`e2e/`) is maintenance-only.
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and
   [`vitest.config.ts`](../../../vitest.config.ts)): `$lib`, `$routes`,
   `$btc`, `$eth`, `$evm`, `$icp`, `$sol`, `$icp-eth`, `$env`,
-  `$declarations`, `$tests`.
+  `$declarations`, `$tests`. Relative imports under `src/frontend/src/`
+  are an ESLint error.
 
 ## Where things go (one-liner)
 

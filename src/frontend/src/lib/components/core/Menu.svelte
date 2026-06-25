@@ -9,8 +9,8 @@
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
-	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -101,6 +101,7 @@
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="tertiary-alt"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
 	testId={NAVIGATION_MENU_BUTTON}
@@ -232,10 +233,20 @@
 				asMenuItemCondensed
 				href={OISY_SUPPORT_URL}
 				iconVisible={false}
+				styleClass="group"
 				testId={NAVIGATION_MENU_SUPPORT_BUTTON}
 			>
 				<IconHelpCircle />
-				{$i18n.navigation.text.support}
+
+				<span class="flex w-full items-center justify-between">
+					{$i18n.navigation.text.support}
+
+					<span
+						class="text-tertiary-inverted transition-colors duration-700 group-hover:text-brand-primary-alt"
+					>
+						<IconExternalLink size="16" />
+					</span>
+				</span>
 			</ExternalLink>
 
 			<Hr />
@@ -269,11 +280,11 @@
 	</div>
 
 	<div class="flex max-w-80 flex-col gap-5 py-5">
-		<MenuLanguageSelector />
+		{#if $authNotSignedIn}
+			<MenuLanguageSelector />
+		{/if}
 
 		{#if $authSignedIn}
-			<MenuCurrencySelector />
-
 			<MenuThemeSelector />
 		{/if}
 	</div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -23,8 +22,10 @@
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -52,8 +53,10 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkEthereum } from '$lib/utils/network.utils';
 
 	interface Props {
@@ -187,6 +190,12 @@
 	const isApproveNeeded = $derived(
 		!isNearIntentsProvider &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
+			isNotDefaultEthereumToken($sourceToken)
+	);
+
+	const swapEmitsApprovalSteps = $derived(
+		!isNearIntentsProvider &&
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
@@ -351,7 +360,8 @@
 					userEthAddress: $ethAddress,
 					gas,
 					maxFeePerGas,
-					maxPriorityFeePerGas
+					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID()
 				});
 			} else {
 				toastsError({
@@ -366,8 +376,15 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// For OneSec swaps, the foreground completes once the user's funds have
+			// left their wallet; success/failure of the background phase is tracked
+			// separately via the AUT store. Other providers (Velora, Near) still
+			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name:
+					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+						? TRACK_COUNT_SWAP_SUBMITTED
+						: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -381,20 +398,32 @@
 				}
 			}, 750);
 		} catch (err: unknown) {
+			const errorDetail = errorDetailToString(err);
+
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					...swapTrackingMetadata,
-					error: errorDetailToString(err) ?? ''
+					error: errorDetail ?? ''
 				}
 			});
 
-			failedSwapError.set(undefined);
-
-			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
-				err
-			});
+			if (nonNullish(errorDetail) && errorDetail.startsWith('Slippage exceeded.')) {
+				failedSwapError.set({
+					message: replacePlaceholders(
+						replaceOisyPlaceholders($i18n.swap.error.slippage_exceeded),
+						{
+							$maxSlippage: slippageValue.toString()
+						}
+					),
+					variant: 'info'
+				});
+			} else {
+				failedSwapError.set({
+					message: $i18n.swap.error.failed_unexpectedly,
+					variant: 'error'
+				});
+			}
 
 			onBack();
 			onStartTriggerAmount();
@@ -451,10 +480,11 @@
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress
-					sendWithApproval={isApproveNeeded}
+					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
+						SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

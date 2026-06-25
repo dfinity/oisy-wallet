@@ -25,6 +25,7 @@ static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
     token: Token::Icrc(IcrcToken {
@@ -35,6 +36,7 @@ static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken 
     version: None,
     section: None,
     allow_external_content_source: None,
+    allowed_external_content_source_urls: None,
 });
 
 #[test]
@@ -62,6 +64,7 @@ fn stats_returns_correct_number_of_users() {
         exchange_rates_count: 0,
         user_transactions_count: 0,
         agreement_history_count: 0,
+        active_user_transactions_count: 0,
     };
 
     let caller = controller();

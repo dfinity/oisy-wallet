@@ -4,7 +4,6 @@ import type {
 	_SERVICE as BackendService,
 	BtcAddPendingTransactionResult,
 	BtcGetPendingTransactionsResult,
-	BtcSelectUserUtxosFeeResult,
 	CustomToken,
 	IcrcToken,
 	UserProfile
@@ -12,9 +11,17 @@ import type {
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddPendingTransactionParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
+import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import {
+	mockActiveUserTransaction,
+	mockActiveUserTransactionData,
+	mockActiveUserTransactionErrorNotFound,
+	mockActiveUserTransactionId,
+	mockActiveUserTransactionRef,
+	mockCreateActiveUserTransactionParams,
+	mockUpdateActiveUserTransactionParams
+} from '$tests/mocks/active-user-transactions.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockIIDelegationChain } from '$tests/mocks/ii-delegation.mock';
@@ -69,7 +76,6 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionParams: BtcAddPendingTransactionParams = {
 		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
-		address: mockBtcAddress,
 		utxos: [
 			{
 				height: 1000,
@@ -85,34 +91,18 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionEndpointParams = {
 		txid: btcAddPendingTransactionParams.txId,
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		utxos: btcAddPendingTransactionParams.utxos,
 		ii_delegation_chain: btcAddPendingTransactionParams.iiDelegationChain
 	};
 
 	const btcGetPendingTransactionParams = {
 		network: btcAddPendingTransactionParams.network,
-		address: btcAddPendingTransactionParams.address,
 		iiDelegationChain: mockIIDelegationChain
 	};
 
 	const btcGetPendingTransactionEndpointParams = {
 		network: btcGetPendingTransactionParams.network,
-		address: btcGetPendingTransactionParams.address,
 		ii_delegation_chain: btcGetPendingTransactionParams.iiDelegationChain
-	};
-
-	const btcSelectUserUtxosFeeParams = {
-		network: btcAddPendingTransactionParams.network,
-		minConfirmations: [100],
-		amountSatoshis: 100n,
-		iiDelegationChain: mockIIDelegationChain
-	} as BtcSelectUserUtxosFeeParams;
-	const btcSelectUserUtxosFeeEndpointParams = {
-		network: btcSelectUserUtxosFeeParams.network,
-		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
-		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis,
-		ii_delegation_chain: btcSelectUserUtxosFeeParams.iiDelegationChain
 	};
 
 	const mockedUserProfile = {
@@ -531,151 +521,6 @@ describe('backend.canister', () => {
 
 			await expect(btcGetPendingTransactions(btcGetPendingTransactionParams)).rejects.toThrow(
 				new CanisterInternalError('II delegation chain verification failed: chain expired')
-			);
-		});
-	});
-
-	describe('btc_select_user_utxos_fee', () => {
-		it('should return user utxos fee with success response', async () => {
-			const response = {
-				Ok: {
-					fee_satoshis: 1n,
-					utxos: btcAddPendingTransactionParams.utxos
-				}
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(response);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
-				btcSelectUserUtxosFeeEndpointParams
-			);
-			expect(res).toEqual({ response: response.Ok });
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
-			service.btc_select_user_utxos_fee.mockResolvedValue(errorResponse);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(errorResponse.Err.InternalError.msg)
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns a pending-transactions error', async () => {
-			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { PendingTransactions: null } });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(
-					'Selecting utxos fee is not possible - pending transactions found.'
-				)
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns a generic canister error', async () => {
-			// @ts-expect-error we test this in purposes
-			service.btc_select_user_utxos_fee.mockResolvedValue({ Err: { CanisterError: null } });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
-			);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee throws', async () => {
-			service.btc_select_user_utxos_fee.mockImplementation(async () => {
-				await Promise.resolve();
-				throw mockResponseError;
-			});
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow(mockResponseError);
-		});
-
-		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
-			// @ts-expect-error we test this in purposes
-			service.btc_select_user_utxos_fee.mockResolvedValue({ test: 'unexpected' });
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			await expect(res).rejects.toThrow();
-		});
-
-		it('should return rateLimitInfo if RateLimited error is returned', async () => {
-			const response = {
-				Err: { RateLimited: { max_calls: 5, window_ns: 60_000_000_000n, caller: mockPrincipal } }
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
-			);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
-
-			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
-				btcSelectUserUtxosFeeEndpointParams
-			);
-			expect(res).toStrictEqual({
-				response: {
-					fee_satoshis: ZERO,
-					utxos: []
-				},
-				rateLimitInfo: {
-					endpoint: 'btc_select_user_utxos_fee',
-					limiter: 'BTC_SELECT_UTXOS_FEE_RATE_LIMITER'
-				}
-			});
-		});
-
-		it('should throw a CanisterInternalError if InvalidDelegationChain error is returned', async () => {
-			const response = {
-				Err: { InvalidDelegationChain: { msg: 'unknown canister' } }
-			};
-
-			service.btc_select_user_utxos_fee.mockResolvedValue(
-				response as unknown as BtcSelectUserUtxosFeeResult
-			);
-
-			const { btcSelectUserUtxosFee } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			await expect(btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams)).rejects.toThrow(
-				new CanisterInternalError('II delegation chain verification failed: unknown canister')
 			);
 		});
 	});
@@ -1591,24 +1436,6 @@ describe('backend.canister', () => {
 			);
 		});
 
-		it('should throw an error if btc_get_current_fee_percentiles returns a pending-transactions error', async () => {
-			service.btc_get_current_fee_percentiles.mockResolvedValue({
-				Err: { PendingTransactions: null }
-			});
-
-			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
-				serviceOverride: service
-			});
-
-			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
-
-			await expect(res).rejects.toThrow(
-				new CanisterInternalError(
-					'Selecting utxos fee is not possible - pending transactions found.'
-				)
-			);
-		});
-
 		it('should throw an error if btc_get_current_fee_percentiles returns a generic canister error', async () => {
 			// @ts-expect-error we test this in purposes
 			service.btc_get_current_fee_percentiles.mockResolvedValue({ Err: { CanisterError: null } });
@@ -1620,7 +1447,7 @@ describe('backend.canister', () => {
 			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
 			await expect(res).rejects.toThrow(
-				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+				new CanisterInternalError('Unknown BtcGetFeePercentilesError')
 			);
 		});
 
@@ -1875,7 +1702,7 @@ describe('backend.canister', () => {
 			}
 		};
 
-		it('should return a Map with fully unwrapped exchange rates', async () => {
+		it('should return the response paired with unwrapped rates', async () => {
 			const rawResponse = tokenIds.map(
 				(id) => [id, [mockCandidRate]] as [typeof id, [typeof mockCandidRate]]
 			);
@@ -1883,30 +1710,29 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result).toBeInstanceOf(Map);
-			expect(result.size).toBe(2);
-
-			for (const rate of result.values()) {
-				expect(rate).toEqual(expectedUnwrapped);
-			}
-
-			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith(tokenIds);
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], expectedUnwrapped]
+			]);
+			expect(service.get_exchange_rates).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('should omit entries with no rate from the Map', async () => {
-			const rawResponse = [
+		it('should map empty rates to undefined', async () => {
+			service.get_exchange_rates.mockResolvedValue([
 				[tokenIds[0], [mockCandidRate]],
 				[tokenIds[1], []]
-			] as Array<[(typeof tokenIds)[number], [] | [typeof mockCandidRate]]>;
-			service.get_exchange_rates.mockResolvedValue(rawResponse);
+			]);
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			const result = await getExchangeRates({ token_ids: tokenIds, certified: false });
+			const result = await getExchangeRates();
 
-			expect(result.size).toBe(1);
+			expect(result).toEqual([
+				[tokenIds[0], expectedUnwrapped],
+				[tokenIds[1], undefined]
+			]);
 		});
 
 		it('should throw an error if the service throws', async () => {
@@ -1917,9 +1743,212 @@ describe('backend.canister', () => {
 
 			const { getExchangeRates } = await createBackendCanister({ serviceOverride: service });
 
-			await expect(getExchangeRates({ token_ids: tokenIds, certified: false })).rejects.toThrow(
-				mockResponseError
+			await expect(getExchangeRates()).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('createActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should create the record and return the unwrapped value', async () => {
+			service.create_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await createActiveUserTransaction(mockCreateActiveUserTransactionParams);
+
+			expect(service.create_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				progress_step: ['submitting'],
+				external_refs: []
+			});
+			expect(res).toEqual(mockActiveUserTransaction);
+		});
+
+		it('should pass empty array for progress_step when undefined', async () => {
+			service.create_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await createActiveUserTransaction({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				externalRefs: []
+			});
+
+			expect(service.create_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				data: mockActiveUserTransactionData,
+				progress_step: [],
+				external_refs: []
+			});
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.create_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				createActiveUserTransaction(mockCreateActiveUserTransactionParams)
+			).rejects.toEqual(errorResponse.Err);
+		});
+
+		it('should rethrow if the canister call throws', async () => {
+			service.create_active_user_transaction.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { createActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				createActiveUserTransaction(mockCreateActiveUserTransactionParams)
+			).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('updateActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should pass populated optionals through to the canister', async () => {
+			service.update_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateActiveUserTransaction(mockUpdateActiveUserTransactionParams);
+
+			expect(service.update_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				status: [{ Executing: null }],
+				progress_step: ['settling'],
+				external_refs: [[mockActiveUserTransactionRef]],
+				error: []
+			});
+			expect(res).toEqual(mockActiveUserTransaction);
+		});
+
+		it('should pass empty arrays for all unset partial fields', async () => {
+			service.update_active_user_transaction.mockResolvedValue({
+				Ok: mockActiveUserTransaction
+			});
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await updateActiveUserTransaction({ id: mockActiveUserTransactionId });
+
+			expect(service.update_active_user_transaction).toHaveBeenCalledExactlyOnceWith({
+				id: mockActiveUserTransactionId,
+				status: [],
+				progress_step: [],
+				external_refs: [],
+				error: []
+			});
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.update_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { updateActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(
+				updateActiveUserTransaction(mockUpdateActiveUserTransactionParams)
+			).rejects.toEqual(errorResponse.Err);
+		});
+	});
+
+	describe('deleteActiveUserTransaction', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should resolve to void on Ok', async () => {
+			service.delete_active_user_transaction.mockResolvedValue({ Ok: null });
+
+			const { deleteActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await deleteActiveUserTransaction(mockActiveUserTransactionId);
+
+			expect(service.delete_active_user_transaction).toHaveBeenCalledExactlyOnceWith(
+				mockActiveUserTransactionId
 			);
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.delete_active_user_transaction.mockResolvedValue(errorResponse);
+
+			const { deleteActiveUserTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(deleteActiveUserTransaction(mockActiveUserTransactionId)).rejects.toEqual(
+				errorResponse.Err
+			);
+		});
+	});
+
+	describe('getActiveUserTransactions', () => {
+		const errorResponse = { Err: mockActiveUserTransactionErrorNotFound };
+
+		it('should return the unwrapped list of transactions', async () => {
+			service.get_active_user_transactions.mockResolvedValue({
+				Ok: { transactions: [mockActiveUserTransaction] }
+			});
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions();
+
+			expect(service.get_active_user_transactions).toHaveBeenCalledExactlyOnceWith();
+			expect(res).toEqual([mockActiveUserTransaction]);
+		});
+
+		it('should return an empty array when the user has no records', async () => {
+			service.get_active_user_transactions.mockResolvedValue({
+				Ok: { transactions: [] }
+			});
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await getActiveUserTransactions();
+
+			expect(res).toEqual([]);
+		});
+
+		it('should throw if the canister returns Err', async () => {
+			service.get_active_user_transactions.mockResolvedValue(errorResponse);
+
+			const { getActiveUserTransactions } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(getActiveUserTransactions()).rejects.toEqual(errorResponse.Err);
 		});
 	});
 });

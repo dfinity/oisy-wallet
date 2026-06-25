@@ -62,10 +62,20 @@ Tiny but easy to get wrong. Follow these steps in order.
    **Never** dynamically construct the key path (`$i18n[someVar]`) — it
    defeats type safety.
 
-8. **Don't touch other locales.** Files like `de.json`, `fr.json`,
-   `ja.json`, `zh-CN.json`, etc. are **machine-translated** by the
-   `auto-update-i18n` workflow from `en.json`. Any manual edit will be
-   overwritten on the next run.
+8. **Other locale files sync structurally, not via translation.** The
+   `auto-update-i18n` workflow runs `npm run i18n` whenever a PR
+   touches `src/frontend/src/lib/i18n/*` or
+   `src/frontend/src/lib/types/i18n.d.ts`. That script rewrites each
+   non-en locale file to match `en.json`'s key structure — missing
+   keys are added with empty-string placeholders, and any extra keys
+   not in `en.json` are dropped. **It does not translate** — existing
+   non-empty values for keys that still exist in `en.json` are
+   preserved (see
+   [`scripts/i18n.generate.keys.ts`](../../../../scripts/i18n.generate.keys.ts)).
+   Default behaviour: leave new keys blank and let a native-quality
+   translation path fill them in later. An agent (or a human) **may**
+   author translations for non-en locales when the developer explicitly
+   asks for it in that PR — never unprompted, and never as a guess.
 
 9. **Run the gates**:
 
@@ -106,6 +116,8 @@ The setup is **string + placeholder**, no ICU. For pluralisation, either:
 
 - Hard-code English in a component "just for now".
 - Edit the generated `i18n.d.ts` by hand.
-- Edit any locale file other than `en.json`.
+- Edit a non-en locale unprompted. Only do it when the developer
+  explicitly asks for translations in that PR, and only at native
+  quality (see step 8).
 - Construct keys dynamically.
 - Leave old keys around "in case".

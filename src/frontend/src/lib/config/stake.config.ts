@@ -1,14 +1,18 @@
 import { goto } from '$app/navigation';
+import HarvestStakeWizard from '$eth/components/stake/harvest-autopilot/HarvestStakeWizard.svelte';
+import HarvestUnstakeWizard from '$eth/components/stake/harvest-autopilot/HarvestUnstakeWizard.svelte';
 import { HARVEST_AUTOPILOT_URL } from '$eth/constants/harvest-autopilots.constants';
+import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
 	WizardStepsClaimStakingReward,
 	WizardStepsStake,
 	WizardStepsUnstake
 } from '$lib/enums/wizard-steps';
-import { StakeProvider, type StakeProviderConfig } from '$lib/types/stake';
+import { StakeProvider, type StakeProviderConfig, type StakeWizardEntry } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { Token } from '$lib/types/token';
+import type { WizardSteps } from '$lib/types/wizard';
 
 export const stakeWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<WizardStepsStake> => [
 	{
@@ -67,3 +71,21 @@ export const stakeProvidersConfig: Record<StakeProvider, StakeProviderConfig> = 
 		}
 	}
 };
+
+const stakeWizardRegistry: StakeWizardEntry[] = [
+	{
+		matches: isTokenHarvestAutopilot,
+		stakeComponent: HarvestStakeWizard,
+		unstakeComponent: HarvestUnstakeWizard
+	}
+];
+
+export const getStakeWizardComponent = (
+	token: Token
+): StakeWizardEntry['stakeComponent'] | undefined =>
+	stakeWizardRegistry.find(({ matches }) => matches(token))?.stakeComponent;
+
+export const getUnstakeWizardComponent = (
+	token: Token
+): StakeWizardEntry['unstakeComponent'] | undefined =>
+	stakeWizardRegistry.find(({ matches }) => matches(token))?.unstakeComponent;

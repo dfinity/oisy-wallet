@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
+	import ActiveUserTransactionsButton from '$lib/components/active-user-transactions/ActiveUserTransactionsButton.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
@@ -25,6 +26,7 @@
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340).
 	let networkSwitcherOpen = $state(false);
 	let menuOpen = $state(false);
+	let activeUserTransactionsOpen = $state(false);
 
 	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
@@ -33,15 +35,15 @@
 	);
 
 	// Header-anchored popovers (user menu, network switcher) need the
-	// Header's stacking context to outrank the activity filter toolbar's
-	// `StickyHeader` (`z-10`, see `AllTransactionsList`). We do NOT bump
-	// for modals — gix modals/bottom sheets already paint above the
-	// default Header at `z-14`, and bumping here would hide them behind
-	// the Header and capture pointer events on top of the modal backdrop.
-	// Likewise we do NOT raise the `1.5xl` signed-in default — banners
-	// (`Banner`, `PwaBanner`, `AgreementsGuard`) and `FullscreenMediaModal`
-	// all sit at `z-10` and would render behind the Header otherwise.
-	let popoverOpen = $derived(menuOpen || networkSwitcherOpen);
+	// Header's stacking context to outrank sibling `z-10` elements
+	// (banners: `Banner`, `PwaBanner`, `AgreementsGuard`, plus
+	// `FullscreenMediaModal`). We do NOT bump for modals — gix modals /
+	// bottom sheets already paint above the default Header at `z-14`,
+	// and bumping here would hide them behind the Header and capture
+	// pointer events on top of the modal backdrop. We also keep the
+	// `1.5xl` signed-in default at `z-10` so those banners render at
+	// the same level as the Header instead of behind it.
+	let popoverOpen = $derived(menuOpen || networkSwitcherOpen || activeUserTransactionsOpen);
 
 	let biggerOverlay = $derived(popoverOpen || modalsOpen);
 
@@ -89,6 +91,8 @@
 			{#if nonNullish($walletConnectListenerStore)}
 				<WalletConnect />
 			{/if}
+
+			<ActiveUserTransactionsButton bind:visible={activeUserTransactionsOpen} />
 
 			<Scanner />
 		{/if}

@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+	import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 	import OpenCryptoPayWizard from '$lib/components/open-crypto-pay/OpenCryptoPayWizard.svelte';
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
@@ -22,6 +25,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { ScannerResults } from '$lib/types/scanner';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -97,6 +101,54 @@
 			}
 
 			await startWalletConnect(code);
+
+			return;
+		}
+
+		if (results === ScannerResults.SOL_SEND) {
+			if (isNullish(code)) {
+				return;
+			}
+
+			modalStore.openSend({
+				id: Symbol(),
+				data: {
+					destination: code,
+					lockedNetworkId: SOLANA_MAINNET_NETWORK_ID
+				}
+			});
+
+			return;
+		}
+
+		if (results === ScannerResults.BTC_SEND) {
+			if (isNullish(code)) {
+				return;
+			}
+
+			modalStore.openSend({
+				id: Symbol(),
+				data: {
+					destination: code,
+					lockedNetworkId: BTC_MAINNET_NETWORK_ID
+				}
+			});
+
+			return;
+		}
+
+		if (results === ScannerResults.IC_SEND) {
+			if (isNullish(code)) {
+				return;
+			}
+
+			modalStore.openSend({
+				id: Symbol(),
+				data: {
+					destination: code,
+					lockedNetworkId: ICP_NETWORK_ID
+				}
+			});
 
 			return;
 		}

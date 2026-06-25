@@ -6,17 +6,28 @@ code wins (truth hierarchy in [governance.md](../governance.md)). Update
 this page in the same PR — that's the
 [meta-update rule](../governance.md#meta-update-rule).
 
-## Svelte — runes preferred for new code, stores still pervasive
+## Chain transaction loads — redundant external calls
 
-The repo is **Svelte 5** but uses both reactive primitives:
+### Native ETH (Etherscan / Infura)
 
-- **Runes** (`$state`, `$derived`, `$effect`, `$props`, `$bindable`) — new
-  components and component-local state.
-- **Svelte stores** (`writable`, `readable`, `derived` from
-  `svelte/store`) — cross-component / cross-route reactive state. There is
-  a large existing graph in `$lib/derived/`, `$lib/stores/`, and the
-  per-chain `*/derived/` and `*/stores/` folders. Keep adding to it where
-  it fits an existing shape.
+Incremental `startBlock` comes from backend `newestBlockIndex + 1` when user-transaction persistence is enabled, otherwise from the maximum `blockNumber` already in `ethTransactionsStore` so refresh does not always reset to `startBlock: 0`. When `startBlock > 0`, the client compares Infura’s latest block to that cursor; if the chain tip is still before the next block to fetch, the Etherscan history request is skipped.
+
+### Solana (RPC signatures and details)
+
+`getSolTransactions` may receive `exitIfFirstSignatureMatches`. After `fetchSignatures`, if the newest RPC signature matches the newest backend-stored signature (non-pagination loads only), per-signature transaction detail fetching is skipped.
+
+## Svelte — runes for new code
+
+The repo is **Svelte 5**. For new code, default to runes (`$state`,
+`$derived`, `$effect`, `$props`, `$bindable`).
+
+A large existing Svelte-store graph lives in `$lib/derived/`,
+`$lib/stores/`, and per-chain `*/derived/` and `*/stores/` folders. It
+predates the runes migration. **Read from it freely; do not migrate it
+in unrelated PRs.** Author new reactive state as runes; only fall back to
+`writable` / `readable` / `derived` from `svelte/store` when extending an
+existing store graph in place (see [Svelte stores — when to reuse them](#svelte-stores--when-to-reuse-them)
+below).
 
 Inside a component, prefer the rune syntax for new code:
 
@@ -77,9 +88,10 @@ runes` and contain no behaviour change.
   When you suspect a runaway, use `__oisyReactivityDebug.printTop()` in
   the browser console.
 
-### Svelte stores — when to use them
+### Svelte stores — when to reuse them
 
-Many cross-route values are still expressed as Svelte stores. Use them for:
+The following cross-route values are already expressed as Svelte stores.
+**Consume the existing store; do not re-implement these as runes:**
 
 - Auth / identity state (`$lib/stores/auth.store`,
   `$lib/derived/auth.derived`).
@@ -87,10 +99,11 @@ Many cross-route values are still expressed as Svelte stores. Use them for:
 - Toasts, modals, busy-state (`$lib/stores/toasts.store`,
   `modal.store`, `busy.store`).
 - Per-chain enabled tokens / networks (`$<chain>/derived/...`).
-- Anything composed via `derived([a, b], ([$a, $b]) => …)` from existing
-  stores.
 
-When unsure, look at the closest neighbour and follow the same shape.
+When extending an existing store graph (e.g. a new `derived([a, b], …)`
+composed from those stores), match the surrounding shape. For brand-new
+cross-route state with no neighbour to follow, prefer a rune-based module
+(`*.svelte.ts`).
 
 ## TypeScript
 
@@ -159,14 +172,14 @@ export const exchangeRateUsdToCurrency = async (
 
 ## Stores, derived, runes — when to use which
 
-| Need                                           | Use                                                                             | Where it lives                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Component-local mutable value                  | `$state`                                                                        | Inside the component                                                   |
-| Component-local computed value                 | `$derived` / `$derived.by`                                                      | Inside the component                                                   |
-| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                    | Inside the component                                                   |
-| Value shared by 2+ components in the same page | Pass via props / snippets                                                       | —                                                                      |
-| Value shared across routes                     | A Svelte `writable` / `readable` store **or** a `*.svelte.ts` rune-state module | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
-| Cached server data                             | The matching `*.services.ts` owns the cache                                     | —                                                                      |
+| Need                                           | Use                                                                                                                                                | Where it lives                                                         |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Component-local mutable value                  | `$state`                                                                                                                                           | Inside the component                                                   |
+| Component-local computed value                 | `$derived` / `$derived.by`                                                                                                                         | Inside the component                                                   |
+| Side effect (DOM, network, subscription)       | `$effect` (or `onMount` for true mount work)                                                                                                       | Inside the component                                                   |
+| Value shared by 2+ components in the same page | Pass via props / snippets                                                                                                                          | —                                                                      |
+| Value shared across routes                     | `*.svelte.ts` rune-state module by default; [reuse the existing store graph](#svelte-stores--when-to-reuse-them) when one already covers the value | `$lib/stores/`, `<chain>/stores/`, `$lib/derived/`, `<chain>/derived/` |
+| Cached server data                             | The matching `*.services.ts` owns the cache                                                                                                        | —                                                                      |
 
 Avoid duplicating server state into a local store — fetch via the service
 layer and let the service own caching.

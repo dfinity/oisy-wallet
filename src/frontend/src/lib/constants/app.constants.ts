@@ -66,6 +66,14 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
 
+export const OISY_TRADE_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_OISY_TRADE_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_OISY_TRADE_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_OISY_TRADE_CANISTER_ID
+			: import.meta.env.VITE_IC_OISY_TRADE_CANISTER_ID;
+
 export const ICP_SWAP_FACTORY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_ICP_SWAP_FACTORY_CANISTER_ID
 	: STAGING
@@ -172,6 +180,9 @@ export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 
 
 // Code generation
 export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+
+// Active user transactions polling
+export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 seconds
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds

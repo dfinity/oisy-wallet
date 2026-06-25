@@ -4,19 +4,14 @@
 > for every AI coding agent in this repository (Copilot included). The rest
 > of this file is a thin Copilot-specific layer that never contradicts it.
 
-## TL;DR for Copilot
+## Pointers for Copilot
 
-- This is a multi-stack repo: **SvelteKit + Svelte 5 + TS + Tailwind v4**
-  frontend (`src/frontend/`) and a **Rust IC canister** backend
-  (`src/backend/`, with shared crate `src/shared/`).
-- For the chain-specific frontend layout (`$btc`, `$eth`, `$evm`, `$icp`,
-  `$sol`, `$icp-eth`, `$lib`, `$env`, `$routes`), see
+- Frontend structure (path aliases, file suffixes, decision tree):
   [`docs/ai/frontend/structure.md`](../docs/ai/frontend/structure.md).
-- For the Rust canister layout (`api/`, `state/`, `types/`, `utils/`,
-  `signer/`, …) and the shared types crate, see
+- Backend / Rust canister structure:
   [`docs/ai/backend/structure.md`](../docs/ai/backend/structure.md).
-- PR title is enforced by CI: `verb(scope): description`. Body must include
-  `# Motivation`, `# Changes`, `# Tests`. Full rules:
+- PR title is enforced by CI: `verb(scope): description`. Body must
+  include `# Motivation`, `# Changes`, `# Tests`. Full rules:
   [`docs/ai/pr-and-ci.md`](../docs/ai/pr-and-ci.md).
 
 ## Non-negotiables on every suggestion

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { WizardModal } from '@dfinity/gix-components';
+	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -29,14 +29,26 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { TOKEN_MODAL_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS
+	} from '$lib/enums/plausible';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		trackTokenManage,
+		type TokenManageEventKey,
+		type TokenManageEventModifier,
+		type TokenManageEventToken
+	} from '$lib/services/token-manage-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionToken, Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { toCustomToken } from '$lib/utils/custom-token.utils';
+	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import { isNetworkIdSOLDevnet } from '$lib/utils/network.utils';
@@ -110,6 +122,66 @@
 		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot();
 	};
 
+	const mapTokenManageToken = (token: Token): TokenManageEventToken => {
+		const tokenAddress = 'address' in token ? (token.address as string | undefined) : undefined;
+		const network = token.network.id.description;
+		const address =
+			tokenAddress ?? (isTokenIcrc(token) ? token.ledgerCanisterId : token.id.description);
+
+		assertNonNullish(network);
+		assertNonNullish(address);
+
+		return {
+			network,
+			address,
+			...(nonNullish(token.symbol) && { symbol: token.symbol }),
+			...(nonNullish(token.name) && { name: token.name })
+		};
+	};
+
+	const trackTokenManageDetails = ({
+		modifier,
+		token,
+		resultStatus,
+		key,
+		value,
+		error
+	}: {
+		modifier: TokenManageEventModifier;
+		token: Token;
+		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
+		key?: TokenManageEventKey;
+		value?: string;
+		error?: string;
+	}) =>
+		trackTokenManage({
+			modifier,
+			token: mapTokenManageToken(token),
+			sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS,
+			resultStatus,
+			...(nonNullish(key) && { key }),
+			...(notEmptyString(value) && { value }),
+			...(nonNullish(error) && { error })
+		});
+
+	const trackTokenManageEdit = ({
+		tokenToEdit,
+		resultStatus,
+		error
+	}: {
+		tokenToEdit: Token;
+		resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
+		error?: string;
+	}) =>
+		trackTokenManageDetails({
+			modifier: 'edit',
+			token: tokenToEdit,
+			resultStatus,
+			key: 'index_canister',
+			value: icrcTokenIndexCanisterId,
+			...(nonNullish(error) && { error })
+		});
+
 	const onTokenDeleteSuccess = async (deletedToken: Token) => {
 		loading = false;
 
@@ -125,6 +197,12 @@
 				...(nonNullish(address) && { address: `${address}` }),
 				networkId: `${deletedToken.network.id.description}`
 			}
+		});
+
+		trackTokenManageDetails({
+			modifier: 'delete',
+			token: deletedToken,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 		});
 
 		toastsShow({
@@ -206,6 +284,13 @@
 				await onTokenDeleteSuccess(tokenToDelete);
 			}
 		} catch (err: unknown) {
+			trackTokenManageDetails({
+				modifier: 'delete',
+				token: tokenToDelete,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				error: errorDetailToString(err)
+			});
+
 			toastsError({
 				msg: { text: $i18n.tokens.error.unexpected_error_on_token_delete },
 				err
@@ -215,6 +300,19 @@
 			showBottomSheetDeleteConfirmation = false;
 			loading = false;
 		}
+	};
+
+	const onTokenDeleteCancel = (tokenToDelete: OptionToken) => {
+		if (nonNullish(tokenToDelete)) {
+			trackTokenManageDetails({
+				modifier: 'delete',
+				token: tokenToDelete,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+			});
+		}
+
+		showBottomSheetDeleteConfirmation = false;
+		gotoStep(TokenModalSteps.CONTENT);
 	};
 
 	const onTokenEdit = async (tokenToEdit: OptionToken) => {
@@ -241,6 +339,11 @@
 					: { valid: true };
 
 				if (!valid) {
+					trackTokenManageEdit({
+						tokenToEdit,
+						resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+					});
+
 					loading = false;
 					icrcTokenIndexCanisterId = tokenToEdit.indexCanisterId ?? '';
 					progress(ProgressStepsAddToken.INITIALIZATION);
@@ -287,6 +390,11 @@
 							}
 						});
 
+						trackTokenManageEdit({
+							tokenToEdit,
+							resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+						});
+
 						toastsShow({
 							text: replacePlaceholders($i18n.tokens.details.update_confirmation, {
 								$token: getTokenDisplaySymbol(tokenToEdit)
@@ -297,7 +405,13 @@
 					}
 				});
 			}
-		} catch (err) {
+		} catch (err: unknown) {
+			trackTokenManageEdit({
+				tokenToEdit,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				error: errorDetailToString(err)
+			});
+
 			toastsError({
 				msg: { text: $i18n.tokens.error.unexpected_error_on_token_update },
 				err
@@ -310,6 +424,15 @@
 			progress(ProgressStepsAddToken.INITIALIZATION);
 			gotoStep(TokenModalSteps.CONTENT);
 		}
+	};
+
+	const onTokenEditCancel = (tokenToEdit: Token) => {
+		trackTokenManageEdit({
+			tokenToEdit,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.CANCEL
+		});
+
+		gotoStep(TokenModalSteps.CONTENT);
 	};
 </script>
 
@@ -349,7 +472,7 @@
 		{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
 			<TokenModalDeleteConfirmation
 				{loading}
-				onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
+				onCancel={() => onTokenDeleteCancel(token)}
 				onConfirm={() => onTokenDelete(token)}
 				{token}
 			/>
@@ -369,7 +492,7 @@
 
 				{#snippet toolbar()}
 					<ButtonGroup>
-						<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
+						<ButtonBack onclick={() => onTokenEditCancel(token)} />
 
 						<Button
 							disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
@@ -388,10 +511,7 @@
 </WizardModal>
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
-	<BottomSheetConfirmationPopup
-		disabled={loading}
-		onCancel={() => (showBottomSheetDeleteConfirmation = false)}
-	>
+	<BottomSheetConfirmationPopup disabled={loading} onCancel={() => onTokenDeleteCancel(token)}>
 		{#snippet title()}
 			{$i18n.tokens.text.delete_token}
 		{/snippet}
@@ -399,7 +519,7 @@
 		{#snippet content()}
 			<TokenModalDeleteConfirmation
 				{loading}
-				onCancel={() => (showBottomSheetDeleteConfirmation = false)}
+				onCancel={() => onTokenDeleteCancel(token)}
 				onConfirm={() => onTokenDelete(token)}
 				{token}
 			/>

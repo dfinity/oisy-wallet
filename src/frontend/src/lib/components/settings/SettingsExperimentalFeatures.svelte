@@ -1,14 +1,16 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { updateUserExperimentalFeatureSettings } from '$lib/api/backend.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { OISY_AI_ASSISTANT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import type {
@@ -71,7 +73,7 @@
 						: $i18n.settings.text.enable_beta_feature}
 					checked={$userExperimentalFeatures?.[feature].enabled ?? false}
 					disabled={loading}
-					on:nnsToggle={async () => {
+					onToggle={async () => {
 						await save({
 							[feature]: {
 								...$userExperimentalFeatures?.[feature],
@@ -90,7 +92,13 @@
 						<ExternalLink
 							ariaLabel={$i18n.rewards.text.learn_more}
 							href={labelsByFeatureId[feature].learnMore}
-							iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+							iconVisible={false}
+							trackEvent={buildLearnMoreEvent({
+								sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.SETTINGS_PAGE,
+								sourceSublocation: 'experimental_features',
+								labelKey: 'rewards.text.learn_more',
+								url: labelsByFeatureId[feature].learnMore
+							})}>{$i18n.rewards.text.learn_more}</ExternalLink
 						>
 					{/if}
 				</span>

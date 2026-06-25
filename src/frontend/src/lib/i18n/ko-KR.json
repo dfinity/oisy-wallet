@@ -7,6 +7,8 @@
 			"back": "뒤로",
 			"done": "완료",
 			"close": "닫기",
+			"collapse": "접기",
+			"expand": "펼치기",
 			"change": "변경",
 			"continue": "계속",
 			"apply": "적용",
@@ -29,6 +31,7 @@
 			"not_available": "해당 없음",
 			"new": "새로 만들기",
 			"edit": "편집",
+			"download": "다운로드",
 			"no_results": "결과 없음",
 			"paste": "붙여넣기",
 			"to": "받는 사람",
@@ -46,7 +49,8 @@
 			"unlimited": "무제한 $items",
 			"info": "정보",
 			"asset": "자산",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short가 당신을 보호합니다!"
 		},
 		"info": {
 			"test_banner": "테스트 목적으로만 사용하세요!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "ICRC 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"ext_custom_tokens": "EXT 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
 			"icpunks_custom_tokens": "ICPunks 커스텀 토큰을 불러오는 중 오류가 발생했습니다.",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "지갑에 필요한 초기 데이터가 아직 로드되지 않았습니다. 다시 시도해 주세요.",
 			"allow_signing": "서명을 위한 지갑 설정 중 문제가 발생하여 로그아웃되었습니다. 문제가 지속되면 지원팀에 문의하세요.",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "설정",
 			"general": "일반",
+			"preferences": "환경설정",
 			"principal": "내 프린시팔",
 			"principal_copied": "프린시팔이 클립보드에 복사되었습니다",
 			"principal_description": "$oisy_name의 내 ID. 인터넷 아이덴티티로 생성됩니다.",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 활성화",
 			"disable_hide_micro_transactions": "매우 작은 가치의 거래 숨기기 비활성화",
 			"save_spam_filter_success": "스팸 필터 설정이 업데이트되었습니다.",
-			"learn_more": ""
+			"export_data": "데이터 내보내기",
+			"export_data_description": "토큰과 거래를 CSV로 다운로드하세요 — 기본 항목은 Basic, 추가 속성은 Extended로 확인할 수 있습니다.",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "토큰 내보내기",
+			"export_transactions": "거래 내보내기",
+			"export_tokens_success": "토큰 CSV가 다운로드되었습니다.",
+			"export_transactions_success": "거래 CSV가 다운로드되었습니다.",
+			"learn_more": "자세히 알아보기"
 		},
 		"alt": {
 			"testnets_toggle": "테스트넷 표시 또는 숨기기 토글",
@@ -796,7 +815,9 @@
 			"appearance_system": "운영 체제의 색상 모드 활성화"
 		},
 		"error": {
-			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요."
+			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
+			"export_exchange_rate_unavailable": "환율을 아직 불러오는 중입니다. 잠시 후 다시 시도해 주세요.",
+			"export_failed": "내보내기를 생성하지 못했습니다. 다시 시도해 주세요."
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "대기 중인 비트코인 트랜잭션이 완료된 후 다른 트랜잭션을 보낼 수 있습니다.",
 			"no_available_utxos": "이 트랜잭션을 수행할 사용 가능한 UTXO가 없습니다.",
 			"unknown_destination": "이 주소와 이전에 거래한 적이 없습니다. 수신자를 확인해 주세요.",
-			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
+			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
 		},
 		"assertion": {
 			"invalid_destination_address": "유효하지 않은 수신 주소",
@@ -1022,6 +1045,20 @@
 			"burn": "소각",
 			"burning": "소각 중...",
 			"burn_review_subtitle": "소각 금액"
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "트랜잭션 실행 중...",
 			"initializing": "트랜잭션 초기화 중...",
 			"swapping": "스왑 중...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
 			"swap_provider_website": "웹사이트",
@@ -1156,7 +1195,6 @@
 			"select_token": "토큰 선택",
 			"select_network_filter": "네트워크 선택",
 			"withdrawing": "출금 중...",
-			"bridging": "브리징 중... (잠시 기다려 주세요. 최대 2분 정도 소요될 수 있습니다.)",
 			"network_cost": "네트워크 비용",
 			"gasless": "가스 없음",
 			"swap_fees": "스왑 수수료",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "토큰 중 하나 이상의 가격을 가져올 수 없습니다. 이 스왑 제안이 공정한 거래인지 <strong>독립적으로 확인</strong>해 주세요.<br>슬리피지 설정은 받는 가치가 훨씬 낮은 제안으로부터 사용자를 보호하지 <strong>않습니다</strong>!"
 		},
 		"error": {
 			"kong_not_available": "현재 토큰을 스왑할 수 있는 거래소가 없습니다. 나중에 다시 시도해 주세요.",
 			"unexpected": "토큰 스왑 중 문제가 발생했습니다.",
 			"unexpected_missing_data": "스왑 트랜잭션을 시작하는 중 문제가 발생했습니다.",
+			"failed_unexpectedly": "스왑을 완료하지 못했습니다. 지갑 잔액을 확인한 후 다시 시도하시거나 다른 제공자를 선택해 주세요.",
 			"slippage_exceeded": "$oisy_short이 보호합니다: 거래가 설정된 슬리피지 허용 범위 $maxSlippage%를 초과했습니다. 최대 슬리피지를 조정하고 다시 시도해 주세요.",
 			"pool_not_found": "스왑에 실패했습니다. 풀을 찾을 수 없습니다.",
 			"deposit_error": "스왑을 위한 자금 입금에 실패했습니다. 다시 시도하거나 스왑 제공자를 변경해 주세요.",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "스왑은 완료되었으나 토큰을 자동으로 출금할 수 없습니다. 아래 출금 버튼을 클릭하여 수동으로 출금하세요.<br> 또는 다음을 따르세요",
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "구매",
-			"buy_dev": "구매 (개발 환경)"
+			"buy_dev": "구매 (개발 환경)",
+			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "그동안에도 지갑 주소를 공유하여 토큰을 받을 수 있습니다."
+		},
+		"actions": {
+			"close": "확인"
 		},
 		"onramper": {
 			"title": "Onramper를 통해 구매"
@@ -1532,10 +1580,28 @@
 			"network": "네트워크",
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
+			"unreviewed_instructions": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "연결된 앱",
 			"no_connected_apps": "현재 연결된 앱이 없습니다.",
+			"disconnect_all": "모두 연결 해제",
+			"disconnect_app": "$name 연결 해제",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "WalletConnect 요청이 거부되었습니다",
 			"unknown_parameter": "알 수 없는 파라미터입니다.",
 			"wallet_not_initialized": "예기치 않은 오류. 지갑 주소가 초기화되지 않았습니다.",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "트랜잭션에 요청된 발신 주소가 이 지갑의 주소가 아닙니다.",
 			"unknown_destination": "알 수 없는 수신 주소입니다.",
+			"ambiguous_transaction": "이 거래는 여러 주소 간에 자금을 이동하므로 검토를 위해 정확하게 표시할 수 없습니다. 보안을 위해 서명되지 않았습니다.",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "아직 연락처를 추가하지 않으셨습니다",
+			"contacts_empty_description": "알고 있는 주소를 연락처에 저장하여 실수로 잘못된 주소를 사용할 위험을 줄이세요.",
+			"contacts_empty_cta": "첫 연락처 추가"
 		},
 		"label": {
 			"reimbursement": "환불",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "애플리케이션과 안전하게 상호작용하려면 지갑을 열거나 생성하세요.",
 				"connect_your_wallet": "$oisy_name에 연결",
-				"oisy_protects_you": "OISY가 당신을 보호합니다!",
 				"oisy_protects_you_description": "애플리케이션은 귀하의 자금에 직접 접근할 수 없으며, 모든 거래는 귀하의 확인이 필요합니다!"
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC 거래 정보는 중앙 집중식 제3자로부터 제공되므로 독립적으로 검증해야 합니다.",
-			"hidden_micro_transactions": "<strong>OISY가 당신을 보호합니다!</strong> 매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
+			"hidden_micro_transactions": "매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISY를 사용하고 수익을 창출하세요! 에피소드 6 공개 중 🎉",
 				"action": "상태 확인"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAO로 수익 창출"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

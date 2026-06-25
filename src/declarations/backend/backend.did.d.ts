@@ -10,6 +10,93 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+/**
+ * In-flight high-level user operation, persisted so the FE can resume polling
+ * across logout / tab close.
+ */
+export interface ActiveUserTransaction {
+	/**
+	 * Frontend-generated identifier (`UUIDv4`). Unique per user.
+	 */
+	id: string;
+	status: ActiveUserTransactionStatus;
+	/**
+	 * Learned-mid-flow named references, e.g.
+	 * `{ key: "tx_hash", value: "0x…" }`. See [`ActiveUserTransactionRef`]
+	 * for the field layout exposed on the wire and in TS bindings.
+	 */
+	external_refs: Array<OnramperSignedEntry>;
+	/**
+	 * Opaque to the backend; the FE writes a flow-specific step name here.
+	 */
+	progress_step: [] | [string];
+	data: ActiveUserTransactionData;
+	updated_at_ns: bigint;
+	/**
+	 * Populated when `status = Failed`.
+	 */
+	error: [] | [string];
+	created_at_ns: bigint;
+}
+/**
+ * Flow-specific payload, captured once at creation and immutable thereafter.
+ *
+ * Variants are append-only (Candid evolution rule). Learned-mid-flow values
+ * (tx hashes, forwarding addresses, provider request ids, …) go in
+ * `ActiveUserTransaction::external_refs` so we don't need to bump candid for
+ * every new provider integration.
+ */
+export type ActiveUserTransactionData =
+	| {
+			OneSecEvmToIcp: OneSecEvmToIcpData;
+	  }
+	| { OneSecIcpToEvm: OneSecIcpToEvmData }
+	| {
+			/**
+			 * Liquidium lend/borrow flow. A single variant covers all four actions
+			 * (supply, borrow, repay, withdraw).
+			 */
+			Liquidium: LiquidiumData;
+	  };
+export type ActiveUserTransactionError =
+	| { InvalidId: null }
+	| { NotFound: null }
+	| { TooManyActiveTransactions: null }
+	| { InvalidData: string }
+	| { AlreadyExists: null }
+	| { IllegalStatusTransition: null };
+/**
+ * Learned-mid-flow `(key, value)` reference attached to an active transaction,
+ * e.g. `{ key: "tx_hash", value: "0x…" }`. Modelled as a named record (not a
+ * tuple) so the generated TS bindings expose `.key` / `.value` instead of
+ * positional `[string, string]` access.
+ */
+export interface ActiveUserTransactionRef {
+	key: string;
+	value: string;
+}
+/**
+ * Shared result for endpoints that return a single `ActiveUserTransaction`
+ * (both `create_active_user_transaction` and `update_active_user_transaction`).
+ * One type because the wire shape is identical — the candid extractor would
+ * dedupe twin variants anyway.
+ */
+export type ActiveUserTransactionResult =
+	| { Ok: ActiveUserTransaction }
+	| { Err: ActiveUserTransactionError };
+/**
+ * Lifecycle status of an active user transaction.
+ *
+ * Allowed transitions are enforced by the backend:
+ * `Pending` → `Pending | Executing | Succeeded | Failed`,
+ * `Executing` → `Executing | Succeeded | Failed`,
+ * terminal states are immutable (idempotent no-op).
+ */
+export type ActiveUserTransactionStatus =
+	| { Failed: null }
+	| { Executing: null }
+	| { Succeeded: null }
+	| { Pending: null };
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -122,14 +209,27 @@ export type AllowSigningResult =
 export type AllowSigningStatus = { Skipped: null } | { Failed: null } | { Executed: null };
 export interface ApiKeys {
 	/**
-	 * When `Some(false)`, periodic exchange-rate HTTP outcalls are disabled (even with a
-	 * `CoinGecko` key). When `None` or `Some(true)`, outcalls run iff `coingecko_api_key` is set
-	 * (misconfiguration with no key does not run refresh).
+	 * Periodic exchange-rate HTTP outcalls are opt-in: they run only when this is
+	 * `Some(true)` and a `CoinGecko` key is set. `None` (the default) and `Some(false)`
+	 * both keep refresh disabled (and a missing key never runs refresh either).
 	 */
 	exchange_rate_enabled: [] | [boolean];
 	alchemy_api_key: [] | [string];
 	etherscan_api_key: [] | [string];
+	/**
+	 * Whether exchange-rate HTTP outcalls are sent *replicated* (through consensus, every replica
+	 * issues the request) or *non-replicated* (a single replica). Replicated only when explicitly
+	 * `Some(true)`; `None` (the default) and `Some(false)` both mean non-replicated.
+	 */
+	exchange_rate_replicated: [] | [boolean];
 	coingecko_api_key: [] | [string];
+	/**
+	 * HMAC-SHA256 secret used to sign `OnRamper` widget URLs. Provided by `OnRamper` support and
+	 * provisioned/rotated via the dedicated `set_onramper_signing_secret` endpoint (which
+	 * preserves the other keys). When `None`, the signing endpoint reports the secret as
+	 * missing and the `OnRamper` widget cannot be loaded.
+	 */
+	onramper_signing_secret: [] | [string];
 	infura_api_key: [] | [string];
 }
 export type ApproveError =
@@ -340,6 +440,9 @@ export type BtcAddress =
 			 */
 			P2TR: string;
 	  };
+export type BtcGetFeePercentilesError = {
+	InternalError: { msg: string };
+};
 export interface BtcGetFeePercentilesRequest {
 	network: Network;
 }
@@ -357,7 +460,7 @@ export type BtcGetFeePercentilesResult =
 			/**
 			 * The fee was not selected due to an error.
 			 */
-			Err: SelectedUtxosFeeError;
+			Err: BtcGetFeePercentilesError;
 	  };
 export type BtcGetPendingTransactionsError =
 	| {
@@ -379,7 +482,6 @@ export interface BtcGetPendingTransactionsReponse {
 export interface BtcGetPendingTransactionsRequest {
 	ii_delegation_chain: [] | [IIDelegationChain];
 	network: Network;
-	address: string;
 }
 export type BtcGetPendingTransactionsResult =
 	| {
@@ -393,19 +495,6 @@ export type BtcGetPendingTransactionsResult =
 			 * The pending transactions were not retrieved due to an error.
 			 */
 			Err: BtcGetPendingTransactionsError;
-	  };
-export type BtcSelectUserUtxosFeeResult =
-	| {
-			/**
-			 * The fee was selected successfully.
-			 */
-			Ok: SelectedUtxosFeeResponse;
-	  }
-	| {
-			/**
-			 * The fee was not selected due to an error.
-			 */
-			Err: SelectedUtxosFeeError;
 	  };
 /**
  * Bitcoin transaction data.
@@ -466,7 +555,7 @@ export interface Config {
 	ecdsa_key_name: string;
 	/**
 	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	 * `btc_select_user_utxos_fee`
+	 * `btc_add_pending_transaction`.
 	 */
 	cfs_canister_id: [] | [Principal];
 	/**
@@ -511,6 +600,12 @@ export type ContactError =
 export interface ContactImage {
 	data: Uint8Array;
 	mime_type: ImageMimeType;
+}
+export interface CreateActiveUserTransactionRequest {
+	id: string;
+	external_refs: Array<ActiveUserTransactionRef>;
+	progress_step: [] | [string];
+	data: ActiveUserTransactionData;
 }
 export interface CreateContactRequest {
 	name: string;
@@ -559,6 +654,7 @@ export interface CustomToken {
 	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
+	allowed_external_content_source_urls: [] | [Array<string>];
 }
 export interface DappCarouselSettings {
 	hidden_dapp_ids: Array<string>;
@@ -584,6 +680,7 @@ export interface Delegation {
 	targets: [] | [Array<Principal>];
 	expiration: bigint;
 }
+export type DeleteActiveUserTransactionResult = { Ok: null } | { Err: ActiveUserTransactionError };
 export type DeleteContactResult =
 	| {
 			/**
@@ -670,6 +767,14 @@ export interface ExperimentalFeaturesSettings {
 export interface ExtV2Token {
 	canister_id: Principal;
 }
+export interface GetActiveUserTransactionsResponse {
+	transactions: Array<ActiveUserTransaction>;
+}
+export type GetActiveUserTransactionsResult =
+	| {
+			Ok: GetActiveUserTransactionsResponse;
+	  }
+	| { Err: ActiveUserTransactionError };
 export type GetAgreementHistoryError = { UserNotFound: null };
 export type GetAgreementHistoryResult =
 	| {
@@ -935,7 +1040,7 @@ export interface InitArg {
 	ecdsa_key_name: string;
 	/**
 	 * Chain Fusion Signer canister id. Used to derive the bitcoin address in
-	 * `btc_select_user_utxos_fee`
+	 * `btc_add_pending_transaction`.
 	 */
 	cfs_canister_id: [] | [Principal];
 	/**
@@ -957,6 +1062,29 @@ export interface InitArg {
 	 * deployments that pre-date this field.
 	 */
 	new_user_signups_allowed: [] | [boolean];
+}
+/**
+ * Which Liquidium lend/borrow action an active transaction tracks.
+ */
+export type LiquidiumAction =
+	| { Withdraw: null }
+	| { Repay: null }
+	| { Borrow: null }
+	| { Supply: null };
+export interface LiquidiumData {
+	/**
+	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+	 */
+	token: TokenId;
+	action: LiquidiumAction;
+	/**
+	 * Liquidium pool canister id (principal text), treated as an opaque key.
+	 */
+	pool_id: string;
+	/**
+	 * Amount in the token's base units.
+	 */
+	amount: bigint;
 }
 /**
  * Bitcoin Network.
@@ -1019,6 +1147,27 @@ export interface NetworksSettings {
 }
 export interface NotificationSettings {
 	dismissed_notifications: Array<DismissedNotification>;
+}
+export interface OneSecEvmToIcpData {
+	recipient_principal: Principal;
+	source_token: TokenId;
+	amount: bigint;
+	dest_token: TokenId;
+}
+export interface OneSecIcpToEvmData {
+	recipient_evm_address: string;
+	source_token: TokenId;
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * A `(key, value)` entry of an `OnRamper` signed parameter — e.g. `(btc, <address>)` inside
+ * `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
+ * `key` to lowercase before signing.
+ */
+export interface OnramperSignedEntry {
+	key: string;
+	value: string;
 }
 /**
  * Outpoint.
@@ -1090,31 +1239,6 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
-export type SelectedUtxosFeeError =
-	| { PendingTransactions: null }
-	| {
-			/**
-			 * The provided II delegation chain is missing or failed verification.
-			 */
-			InvalidDelegationChain: { msg: string };
-	  }
-	| {
-			/**
-			 * The caller has exceeded the call rate limit.
-			 */
-			RateLimited: RateLimitError;
-	  }
-	| { InternalError: { msg: string } };
-export interface SelectedUtxosFeeRequest {
-	ii_delegation_chain: [] | [IIDelegationChain];
-	network: Network;
-	amount_satoshis: bigint;
-	min_confirmations: [] | [number];
-}
-export interface SelectedUtxosFeeResponse {
-	fee_satoshis: bigint;
-	utxos: Array<Utxo>;
-}
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
@@ -1140,6 +1264,86 @@ export interface Settings {
 	experimental_features: ExperimentalFeaturesSettings;
 	transactions: [] | [TransactionSettings];
 }
+/**
+ * Errors returned by `sign_onramper_widget_url`.
+ */
+export type SignOnramperWidgetUrlError =
+	| {
+			/**
+			 * A wallet address supplied by the caller did not match the address the backend derives for
+			 * that network from the caller's principal. The backend signs only addresses the caller
+			 * provably owns, so a mismatch (a derivation-parity bug or a tampering attempt) fails the
+			 * whole request rather than signing an address the caller may not control.
+			 */
+			AddressMismatch: null;
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
+			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
+			 * signing oracle.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The backend could not derive one of the caller's addresses (e.g. a threshold public-key
+			 * read failed), so the supplied address could not be verified. The request is rejected
+			 * rather than signing an unverified address.
+			 */
+			AddressDerivationFailed: null;
+	  }
+	| {
+			/**
+			 * Controllers have not yet provisioned the `OnRamper` signing secret via `set_api_keys`. The
+			 * frontend should treat this the same as a hard failure: the widget cannot be opened until
+			 * the secret is configured.
+			 */
+			SecretNotConfigured: null;
+	  };
+/**
+ * Request body for `sign_onramper_widget_url`. Each field maps directly to one of `OnRamper`'s
+ * signed query parameters. Empty fields are omitted from the canonicalized sign-content.
+ */
+export interface SignOnramperWidgetUrlRequest {
+	/**
+	 * `<networkId>:<address>` pairs that map to the `networkWallets=` query parameter.
+	 */
+	network_wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<address>` pairs that map to the `wallets=` query parameter.
+	 */
+	wallets: Array<OnramperSignedEntry>;
+	/**
+	 * `<cryptoId>:<tag>` pairs that map to the `walletAddressTags=` query parameter.
+	 */
+	wallet_address_tags: Array<OnramperSignedEntry>;
+}
+/**
+ * Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
+ * canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
+ * re-deriving it (which risks diverging from what was HMAC'd and silently breaking the signature).
+ */
+export interface SignOnramperWidgetUrlResponse {
+	/**
+	 * Hex-encoded HMAC-SHA256 over `signed_query`, appended to the widget URL as `&signature=…`.
+	 */
+	signature: string;
+	/**
+	 * The canonical signed parameter string (e.g. `networkWallets=bitcoin:bc1…&wallets=btc:…`).
+	 * This is a valid un-encoded URL query fragment; the frontend appends it as `&<signed_query>`
+	 * when non-empty. Empty when no sensitive parameters were supplied.
+	 */
+	signed_query: string;
+}
+export type SignOnramperWidgetUrlResult =
+	| {
+			/**
+			 * The signature plus the exact canonical query fragment that was signed.
+			 */
+			Ok: SignOnramperWidgetUrlResponse;
+	  }
+	| { Err: SignOnramperWidgetUrlError };
 /**
  * A signed delegation from the delegation chain.
  */
@@ -1171,6 +1375,7 @@ export interface SplToken {
 	symbol: [] | [string];
 }
 export interface Stats {
+	active_user_transactions_count: bigint;
 	user_profile_count: bigint;
 	user_transactions_count: bigint;
 	custom_token_count: bigint;
@@ -1190,6 +1395,7 @@ export type Token =
 	| { Erc20: ErcToken }
 	| { ExtV2: ExtV2Token }
 	| { Icrc: IcrcToken }
+	| { Icrc7: ExtV2Token }
 	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
 	| { SplMainnet: SplToken }
@@ -1239,6 +1445,12 @@ export type TokenId =
 			 * Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 			 */
 			EvmNative: bigint;
+	  }
+	| {
+			/**
+			 * ICRC-7 NFT collection on the Internet Computer
+			 */
+			Icrc7: Principal;
 	  }
 	| {
 			/**
@@ -1403,6 +1615,21 @@ export interface TransformArgs {
 	 * Raw response from remote service, to be transformed
 	 */
 	response: HttpRequestResult;
+}
+/**
+ * Partial update. `None` means "leave untouched"; `Some(value)` overwrites
+ * the stored value. There is no encoding for "clear back to `None`" — this
+ * is intentional: `error` is only ever set on the `Failed` terminal state
+ * (immutable by lifecycle), and `progress_step` is forward-only.
+ * `external_refs`, when provided, **replaces** the stored list in full —
+ * the FE always knows the complete set after each poll.
+ */
+export interface UpdateActiveUserTransactionRequest {
+	id: string;
+	status: [] | [ActiveUserTransactionStatus];
+	external_refs: [] | [Array<OnramperSignedEntry>];
+	progress_step: [] | [string];
+	error: [] | [string];
 }
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
 export interface UpdateExperimentalFeaturesSettingsRequest {
@@ -1631,19 +1858,19 @@ export interface _SERVICE {
 		BtcGetPendingTransactionsResult
 	>;
 	/**
-	 * Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
-	 *
-	 * Requires a valid II delegation chain to verify the caller authenticated
-	 * through Internet Identity. Controllers bypass this check.
-	 *
-	 * # Errors
-	 * Errors are enumerated by: `SelectedUtxosFeeError`.
-	 */
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], BtcSelectUserUtxosFeeResult>;
-	/**
 	 * Gets the canister configuration.
 	 */
 	config: ActorMethod<[], Config>;
+	/**
+	 * Creates a new active user transaction record for the caller.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	create_active_user_transaction: ActorMethod<
+		[CreateActiveUserTransactionRequest],
+		ActiveUserTransactionResult
+	>;
 	/**
 	 * Creates a new contact for the caller.
 	 *
@@ -1665,6 +1892,15 @@ export interface _SERVICE {
 	 */
 	create_user_profile: ActorMethod<[], CreateUserProfileResult>;
 	/**
+	 * Deletes one of the caller's active user transactions. Idempotent: returns
+	 * `Ok(())` whether or not the record existed. This is the only path that
+	 * removes records — there is no automatic pruning.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	delete_active_user_transaction: ActorMethod<[string], DeleteActiveUserTransactionResult>;
+	/**
 	 * Deletes a contact for the caller.
 	 *
 	 * # Errors
@@ -1675,9 +1911,25 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Returns whether the backend is currently fetching and caching exchange rates.
+	 *
+	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
+	 * actual refresh predicate used by [`fetch_and_update_prices`].
+	 *
+	 * Exposed as an unauthenticated query so the frontend worker can decide whether to read
+	 * cached rates from the backend or fetch directly from public providers.
+	 */
+	exchange_rate_enabled: ActorMethod<[], boolean>;
+	/**
 	 * Gets account creation timestamps.
 	 */
 	get_account_creation_timestamps: ActorMethod<[], Array<[Principal, bigint]>>;
+	/**
+	 * Returns all of the caller's active user transactions (Pending, Executing,
+	 * Succeeded, Failed). Records are retained until the FE deletes them on user
+	 * acknowledgement, so terminal entries remain in the list until dismissed.
+	 */
+	get_active_user_transactions: ActorMethod<[], GetActiveUserTransactionsResult>;
 	/**
 	 * Retrieves the amount of cycles that the signer canister is allowed to spend
 	 * on behalf of the current user.
@@ -1721,7 +1973,35 @@ export interface _SERVICE {
 	 */
 	get_contacts: ActorMethod<[], GetContactsResult>;
 	get_exchange_rate: ActorMethod<[TokenId], [] | [ExchangeRate]>;
-	get_exchange_rates: ActorMethod<[Array<TokenId>], Array<[TokenId, [] | [ExchangeRate]]>>;
+	/**
+	 * Returns the latest USD prices for the caller's priceable tokens.
+	 *
+	 * "Priceable" means the union of:
+	 * - the always-on native tokens (BTC, ICP, SOL, ETH on the supported EVM mainnets), and
+	 * - the caller's custom tokens, filtered to variants the configured providers can actually price
+	 * (testnets, NFTs and ERC-4626 vaults are excluded).
+	 *
+	 * The endpoint also re-marks the returned tokens as active so the
+	 * background refresh timer keeps them warm. If any cached price is
+	 * missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
+	 * seconds, the endpoint kicks off a refresh for that subset **in the
+	 * background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
+	 * snapshot immediately. Entries that are still missing or stale at the
+	 * moment of the call are returned as `None`; subsequent calls will pick up
+	 * the refreshed values once the spawned fetch lands.
+	 *
+	 * This trade-off (return fast, refresh async) is intentional: under the
+	 * previous "await-the-fetch" shape, a cold-cache caller could wait on the
+	 * full outcall fan-in before getting any response. The frontend already
+	 * tolerates `None` entries (renders no value rather than blocking), and
+	 * the background refresh + the 60s recurring timer together converge the
+	 * cache to fresh within ~one outcall round.
+	 *
+	 * This is still an `update` (rather than a `query`) because it mutates
+	 * state (`token_activity`) and may need an update context to schedule the
+	 * background fetch.
+	 */
+	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
@@ -1812,6 +2092,10 @@ export interface _SERVICE {
 	/**
 	 * Overwrites the stored API keys.
 	 *
+	 * If `exchange_rate_enabled` or `exchange_rate_replicated` is omitted, the existing toggle is
+	 * preserved so that routine key rotation does not accidentally pause exchange-rate refreshes or
+	 * change their outcall replication mode.
+	 *
 	 * Restricted to canister controllers only.
 	 */
 	set_api_keys: ActorMethod<[ApiKeys], undefined>;
@@ -1819,6 +2103,28 @@ export interface _SERVICE {
 	 * Add or update custom token for the user.
 	 */
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	/**
+	 * Enables or disables periodic exchange-rate refresh without touching the stored API keys.
+	 *
+	 * Sets `exchange_rate_enabled` to `Some(enabled)`, leaving the configured `CoinGecko` (and other)
+	 * keys intact. Disabling stops the refresh outcalls even while a key is configured; enabling lets
+	 * them resume (still gated on a `CoinGecko` key being set, see
+	 * [`is_exchange_rate_refresh_enabled`]).
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_enabled: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+	 * keys.
+	 *
+	 * Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+	 * consensus (every replica issues the request); `false` sends them non-replicated (a single
+	 * replica). See [`crate::exchange::is_exchange_rate_replicated`].
+	 *
+	 * Restricted to canister controllers only.
+	 */
+	set_exchange_rate_replicated: ActorMethod<[boolean], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	/**
 	 * Toggles whether sign-ups of new users are allowed. Restricted to canister controllers.
@@ -1828,6 +2134,14 @@ export interface _SERVICE {
 	 * fields are preserved.
 	 */
 	set_new_user_signups_allowed: ActorMethod<[boolean], undefined>;
+	/**
+	 * Sets or clears the `OnRamper` signing secret used by [`sign_onramper_widget_url`].
+	 *
+	 * Restricted to canister controllers. Uses a single-field mutation, so it never overwrites the
+	 * other configured API keys the way a full `set_api_keys` call would — the safe way to provision
+	 * or rotate the secret per environment.
+	 */
+	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
@@ -1839,6 +2153,23 @@ export interface _SERVICE {
 	 * - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
+	/**
+	 * Sign the `OnRamper` widget's `networkWallets` with the controller-managed HMAC secret, after
+	 * verifying each supplied address matches the one the backend derives for the caller.
+	 *
+	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	 * The signed addresses are the backend-derived ones, and signing only happens when the caller's
+	 * supplied addresses match — so a caller can only ever obtain a signature over addresses they own.
+	 * Authenticated callers only: anonymous principals cannot extract signatures.
+	 *
+	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
+	 * can persist its sliding window, and because address derivation makes inter-canister
+	 * (management-canister public-key) calls. The frontend already invokes it as a certified call.
+	 */
+	sign_onramper_widget_url: ActorMethod<
+		[SignOnramperWidgetUrlRequest],
+		SignOnramperWidgetUrlResult
+	>;
 	/**
 	 * Gets statistics about the canister.
 	 *
@@ -1853,6 +2184,16 @@ export interface _SERVICE {
 	 * Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	 */
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
+	/**
+	 * Applies a partial update to one of the caller's active user transactions.
+	 *
+	 * # Errors
+	 * Errors are enumerated by: `ActiveUserTransactionError`.
+	 */
+	update_active_user_transaction: ActorMethod<
+		[UpdateActiveUserTransactionRequest],
+		ActiveUserTransactionResult
+	>;
 	/**
 	 * Updates an existing contact for the caller.
 	 *

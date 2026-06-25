@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Collapsible, IconInfo } from '@dfinity/gix-components';
+	import { IconInfo } from '@dfinity/gix-components';
+	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
@@ -13,7 +14,7 @@
 	let isNetworkMainnet = $derived(isNetworkIdBTCMainnet($networkId));
 </script>
 
-<div class="mb-6">
+<div class="mb-4">
 	<div class="flex items-center">
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 

@@ -1,16 +1,25 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
+	type PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES,
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
+import en from '$lib/i18n/en.json';
 import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
@@ -95,4 +104,148 @@ export const trackRateLimited = ({ endpoint, limiter }: RateLimitInfo) => {
 			limiter
 		}
 	});
+};
+
+/**
+ * Track a single transaction-filter change emitted from the activity page.
+ *
+ * Centralises the payload so the type / token / contact toggles and the
+ * "clear" action all show up under one Plausible event with the same shape:
+ *
+ * - `event_modifier`: `set` / `unset` for toggles, `clear` for the bulk reset.
+ * - `event_key`: `transaction_type` / `token` / `contact`. Omitted for `clear`.
+ * - For transaction types: `event_value` carries the type (e.g. `send`).
+ * - For tokens: instead of `event_value` we emit dedicated `token_*` props
+ *   (network / address / symbol / name) so dashboards can group cleanly.
+ * - For contacts we deliberately ship no value to avoid leaking PII (custom
+ *   names / ids) to analytics; `event_modifier` already tells us whether the
+ *   user added or removed a contact filter.
+ */
+export const trackTransactionFilter = ({
+	modifier,
+	key,
+	value,
+	token
+}: {
+	modifier: PLAUSIBLE_EVENT_FILTER_MODIFIERS;
+	key?: PLAUSIBLE_EVENT_EVENTS_KEYS;
+	value?: string;
+	token?: { network: string; address: string; symbol: string; name: string };
+}) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.TRANSACTION_FILTER,
+		metadata: {
+			event_modifier: modifier,
+			...(nonNullish(key) && { event_key: key }),
+			...(nonNullish(value) && { event_value: value }),
+			...(nonNullish(token) && {
+				token_network: token.network,
+				token_address: token.address,
+				token_symbol: token.symbol,
+				token_name: token.name
+			}),
+			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.ACTIVITY_PAGE,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		}
+	});
+};
+
+/**
+ * Track the outcome of opening the Onramper buy widget.
+ *
+ * Fired once the open outcome is known: `success` when the signed widget URL
+ * resolves, `error` when signing fails. Replaces the former buy-token event.
+ *
+ * Mirrors {@link trackTransactionFilter}: the selected token is emitted via the
+ * dedicated `token_*` props (network / symbol / name / address) so dashboards
+ * can group cleanly. On failure we additionally carry the error severity, the
+ * failure category (`result_error_type`) and the underlying message, if any.
+ */
+export const trackOnramperOpen = ({
+	token,
+	status,
+	errorType,
+	errorMessage
+}: {
+	token?: { network: string; symbol: string; name: string; address?: string };
+	status: PLAUSIBLE_EVENT_RESULT_STATUSES;
+	errorType?: PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES;
+	errorMessage?: string;
+}) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.ONRAMPER_OPEN,
+		metadata: {
+			...(nonNullish(token) && {
+				token_network: token.network,
+				token_symbol: token.symbol,
+				token_name: token.name,
+				...(nonNullish(token.address) && { token_address: token.address })
+			}),
+			result_status: status,
+			...(status === PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR && {
+				result_error_severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
+				...(nonNullish(errorType) && { result_error_type: errorType }),
+				...(nonNullish(errorMessage) && { result_error_message: errorMessage })
+			})
+		}
+	});
+};
+
+/**
+ * Resolve a dot-path i18n key against the bundled English locale and expand
+ * OISY placeholders (e.g. `$oisy_short` → `OISY`). Always English, regardless
+ * of the user's locale, so analytics dashboards stay consistent. Returns
+ * `undefined` if the key cannot be resolved or does not point at a string.
+ */
+const resolveEnglishLabel = (key: string): string | undefined => {
+	const value = key
+		.split('.')
+		.reduce<unknown>(
+			(acc, segment) =>
+				typeof acc === 'object' && nonNullish(acc)
+					? (acc as Record<string, unknown>)[segment]
+					: undefined,
+			en
+		);
+
+	return typeof value === 'string' ? replaceOisyPlaceholders(value) : undefined;
+};
+
+/**
+ * Build a `TrackEventParams` payload for a "Learn more" documentation link click.
+ *
+ * Returns the params object rather than firing the event so callers can pass it
+ * straight to `ExternalLink.trackEvent`, which fires on click. Centralising the
+ * payload keeps the thirteen UI usage sites in sync with the schema.
+ *
+ * Emits a derived `source_path` field — a slash-joined identity
+ * (`<source_location> / <source_sublocation?> / <English label>`) intended
+ * for at-a-glance dashboard scanning. Filtering and grouping should still
+ * use the discrete `source_location` / `source_sublocation` fields.
+ */
+export const buildLearnMoreEvent = ({
+	sourceLocation,
+	sourceSublocation,
+	labelKey,
+	url
+}: {
+	sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS;
+	sourceSublocation?: string;
+	labelKey: string;
+	url: string;
+}): TrackEventParams => {
+	const label = resolveEnglishLabel(labelKey);
+	const source_path = [sourceLocation, sourceSublocation, label].filter(nonNullish).join(' / ');
+
+	return {
+		name: TRACK_OPEN_DOCUMENTATION,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.LEARN_MORE,
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.LINK,
+			event_value: url,
+			source_location: sourceLocation,
+			...(nonNullish(sourceSublocation) && { source_sublocation: sourceSublocation }),
+			source_path
+		}
+	};
 };

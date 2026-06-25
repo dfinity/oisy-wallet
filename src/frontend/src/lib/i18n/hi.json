@@ -7,6 +7,8 @@
 			"back": "वापस",
 			"done": "हो गया",
 			"close": "बंद करें",
+			"collapse": "संक्षिप्त करें",
+			"expand": "विस्तृत करें",
 			"change": "बदलें",
 			"continue": "",
 			"apply": "लागू करें",
@@ -29,6 +31,7 @@
 			"not_available": "उपलब्ध नहीं है",
 			"new": "नया",
 			"edit": "संपादित करें",
+			"download": "डाउनलोड",
 			"no_results": "कोई परिणाम नहीं",
 			"paste": "चिपकाएँ",
 			"to": "को",
@@ -46,7 +49,8 @@
 			"unlimited": "",
 			"info": "",
 			"asset": "",
-			"got_it": ""
+			"got_it": "",
+			"oisy_protects_you": "$oisy_short आपकी सुरक्षा करता है!"
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -477,6 +481,11 @@
 				"one_liner": "",
 				"call_to_action": "",
 				"description": ""
+			},
+			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -734,6 +743,7 @@
 			"icrc_custom_token": "ICRC कस्टम टोकन लोड करते समय त्रुटि।",
 			"ext_custom_tokens": "",
 			"icpunks_custom_tokens": "",
+			"icrc7_custom_tokens": "",
 			"custom_tokens": "",
 			"loading_wallet_timeout": "आपके वॉलेट को कुछ प्रारंभिक डेटा की आवश्यकता है जो अभी तक लोड नहीं हुआ है। कृपया पुनः प्रयास करें।",
 			"allow_signing": "आपके वॉलेट को साइन करने के लिए सेट करते समय एक समस्या हुई। आपको साइन आउट कर दिया गया है। यदि समस्या बनी रहती है, तो सहायता से संपर्क करें।",
@@ -759,6 +769,7 @@
 		"text": {
 			"title": "सेटिंग्स",
 			"general": "",
+			"preferences": "प्राथमिकताएँ",
 			"principal": "आपका प्रिंसिपल",
 			"principal_copied": "प्रिंसिपल क्लिपबोर्ड पर कॉपी किया गया",
 			"principal_description": "$oisy_name के लिए आपकी आईडी। आपकी इंटरनेट आइडेंटिटी द्वारा बनाया गया।",
@@ -786,7 +797,15 @@
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
-			"learn_more": ""
+			"export_data": "डेटा निर्यात करें",
+			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
+			"export_basic": "Basic",
+			"export_extended": "Extended",
+			"export_tokens": "टोकन निर्यात करें",
+			"export_transactions": "लेन-देन निर्यात करें",
+			"export_tokens_success": "टोकन CSV डाउनलोड हो गया।",
+			"export_transactions_success": "लेन-देन CSV डाउनलोड हो गया।",
+			"learn_more": "और जानें"
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -796,7 +815,9 @@
 			"appearance_system": "आपके ऑपरेटिंग सिस्टम के रंग मोड को सक्षम करता है"
 		},
 		"error": {
-			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।"
+			"loading_profile": "प्रोफाइल लोड करते समय त्रुटि। कृपया पूर्ण अनुभव प्राप्त करने के लिए पृष्ठ को रीफ्रेश करें।",
+			"export_exchange_rate_unavailable": "विनिमय दरें अभी भी लोड हो रही हैं। कृपया कुछ देर बाद पुनः प्रयास करें।",
+			"export_failed": "हम आपका निर्यात नहीं बना सके। कृपया पुनः प्रयास करें।"
 		}
 	},
 	"shortcuts": {
@@ -949,7 +970,9 @@
 			"pending_bitcoin_transaction": "आप लंबित बिटकॉइन लेनदेन पूरा होने के बाद एक और बिटकॉइन लेनदेन भेज सकते हैं।",
 			"no_available_utxos": "आपके पास इस लेनदेन को करने के लिए कोई उपलब्ध utxos नहीं होगा।",
 			"unknown_destination": "आपने पहले इस पते के साथ इंटरैक्ट नहीं किया है। कृपया सुनिश्चित करें कि आप प्राप्तकर्ता को जानते हैं।",
-			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>"
+			"fee_info": "शुल्क का भुगतान $feeSymbol में किया जाएगा। उपलब्ध: <strong>$feeBalance $feeSymbol</strong>",
+			"scanned_address_only_destination": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही टोकन चुनें, सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!",
+			"scanned_address_only_destination_single_token": "स्कैन किए गए कोड में केवल एक गंतव्य पता था। कृपया सुनिश्चित करें कि आप सही राशि दर्ज करें, और गंतव्य पते की सावधानीपूर्वक समीक्षा करें!"
 		},
 		"assertion": {
 			"invalid_destination_address": "अमान्य गंतव्य पता",
@@ -1022,6 +1045,20 @@
 			"burn": "",
 			"burning": "",
 			"burn_review_subtitle": ""
+		}
+	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
 		}
 	},
 	"scanner": {
@@ -1140,6 +1177,8 @@
 			"executing_transaction": "लेनदेन निष्पादित हो रहा है...",
 			"initializing": "लेनदेन प्रारंभ कर रहा है...",
 			"swapping": "स्वैप कर रहा है...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1156,7 +1195,6 @@
 			"select_token": "टोकन चुनें",
 			"select_network_filter": "नेटवर्क चुनें",
 			"withdrawing": "निकासी कर रहा है...",
-			"bridging": "ब्रिजिंग हो रही है... (कृपया धैर्य रखें, इसमें 2 मिनट तक का समय लग सकता है।)",
 			"network_cost": "नेटवर्क लागत",
 			"gasless": "गैस रहित",
 			"swap_fees": "स्वैप शुल्क",
@@ -1165,12 +1203,14 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
-			"value_difference_error_confirmation": ""
+			"value_difference_error_confirmation": "",
+			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
 		"error": {
 			"kong_not_available": "टोकन स्वैप करने के लिए वर्तमान में कोई एक्सचेंज उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
 			"unexpected": "टोकन बदलते समय कुछ गलत हो गया।",
 			"unexpected_missing_data": "एक स्वैप लेनदेन शुरू करते समय कुछ गलत हो गया।",
+			"failed_unexpectedly": "स्वैप पूरा नहीं हो सका। कृपया अपना वॉलेट बैलेंस जांचें और पुनः प्रयास करें, या कोई अन्य प्रदाता चुनें।",
 			"slippage_exceeded": "$oisy_short आपको बचाता है: व्यापार आपके $maxSlippage% स्लिपेज सहिष्णुता से बाहर है। कृपया अधिकतम स्लिपेज समायोजित करें और पुनः प्रयास करें।",
 			"pool_not_found": "स्वैप विफल। पूल नहीं मिला।",
 			"deposit_error": "आपके स्वैप के लिए धन जमा करना विफल रहा। कृपया पुनः प्रयास करें या स्वैप प्रदाता बदलें।",
@@ -1184,13 +1224,21 @@
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
 		"text": {
 			"buy": "खरीदें",
-			"buy_dev": "खरीदें (Dev एनवायरनमेंट)"
+			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
+			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
+			"unavailable_fallback_hint": "इस बीच, आप अभी भी अपने वॉलेट का पता साझा करके टोकन प्राप्त कर सकते हैं।"
+		},
+		"actions": {
+			"close": "समझ गया"
 		},
 		"onramper": {
 			"title": "ऑनराम्पर के माध्यम से खरीदें"
@@ -1532,10 +1580,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
+			"unreviewed_instructions": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "जुड़े हुए ऐप्स",
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
+			"disconnect_all": "सभी डिस्कनेक्ट करें",
+			"disconnect_app": "$name को डिस्कनेक्ट करें",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1574,10 +1640,26 @@
 			"request_rejected": "वॉलेटकनेक्ट अनुरोध अस्वीकृत",
 			"unknown_parameter": "अज्ञात पैरामीटर।",
 			"wallet_not_initialized": "अप्रत्याशित त्रुटि। आपका वॉलेट पता प्रारंभ नहीं हुआ है।",
+			"btc_broadcast_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
+			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {
@@ -1639,7 +1721,10 @@
 			"clear": "",
 			"sheet_title": "",
 			"open_filters_aria_label": "",
-			"showing_partial": ""
+			"showing_partial": "",
+			"contacts_empty_title": "आपने अभी तक कोई संपर्क नहीं जोड़ा है",
+			"contacts_empty_description": "जाने-पहचाने पते संपर्क में सहेजें और गलती से गलत पते का उपयोग करने का जोखिम कम करें।",
+			"contacts_empty_cta": "अपना पहला संपर्क जोड़ें"
 		},
 		"label": {
 			"reimbursement": "प्रतिपूर्ति",
@@ -1865,7 +1950,6 @@
 			"text": {
 				"open_or_create": "एप्लिकेशन के साथ सुरक्षित रूप से इंटरैक्ट करने के लिए अपना वॉलेट खोलें या बनाएं।",
 				"connect_your_wallet": "अपने $oisy_name से कनेक्ट करें",
-				"oisy_protects_you": "OISY आपकी सुरक्षा करता है!",
 				"oisy_protects_you_description": "एप्लिकेशन आपके फंड तक सीधे नहीं पहुंच सकते, और हर लेनदेन आपके द्वारा पुष्टि की जानी चाहिए."
 			}
 		},
@@ -1988,7 +2072,7 @@
 		},
 		"info": {
 			"btc_transactions": "BTC लेनदेन की जानकारी केंद्रीय तीसरे पक्ष से प्राप्त की जाती है और इसे स्वतंत्र रूप से सत्यापित किया जाना चाहिए।",
-			"hidden_micro_transactions": "<strong>OISY आपकी रक्षा करता है!</strong> बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
+			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
 			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
@@ -2014,6 +2098,11 @@
 				"title": "OISY Sprinkles",
 				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
 				"action": "स्थिति जांचें"
+			},
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2032,6 +2121,37 @@
 			"goldDaoStaking": {
 				"cardTitle": "Gold DAO के साथ कमाएं"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"net_value": "",
+			"net_apy": "",
+			"my_positions": "",
+			"markets": "",
+			"supplied": "",
+			"borrowed": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"insufficient_funds_for_fee": ""
 		}
 	},
 	"vaults": {

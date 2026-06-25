@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, Html } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import episodeFour from '$lib/assets/oisy-episode-four.svg';
@@ -7,6 +7,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { OISY_REWARDS_URL, OISY_WELCOME_TWITTER_URL } from '$lib/constants/oisy.constants';
@@ -15,6 +16,8 @@
 		WELCOME_MODAL_LEARN_MORE_ANCHOR,
 		WELCOME_MODAL_SHARE_ANCHOR
 	} from '$lib/constants/test-ids.constants';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
@@ -75,6 +78,11 @@
 					iconVisible={false}
 					styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
 					testId={WELCOME_MODAL_LEARN_MORE_ANCHOR}
+					trackEvent={buildLearnMoreEvent({
+						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.WELCOME,
+						labelKey: 'rewards.text.learn_more',
+						url: OISY_REWARDS_URL
+					})}
 				>
 					{$i18n.rewards.text.learn_more}
 				</ExternalLink>

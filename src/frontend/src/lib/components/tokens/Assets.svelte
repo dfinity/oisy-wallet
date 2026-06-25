@@ -3,6 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { TRADING_ENABLED } from '$env/trading';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -17,6 +18,7 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
+	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
@@ -27,6 +29,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
+	import type { ManageTokensData } from '$lib/types/manage-tokens';
 
 	interface Props {
 		tab: TokenTypes;
@@ -39,10 +42,8 @@
 	// svelte-ignore state_referenced_locally -- we want to get only the initial value
 	let activeTab = $state(tab);
 
-	let { initialSearch, message } = $derived(
-		nonNullish($modalManageTokensData)
-			? $modalManageTokensData
-			: { initialSearch: undefined, message: undefined }
+	let { initialSearch, message, initialNetwork, initialTokenData, initialStep } = $derived(
+		nonNullish($modalManageTokensData) ? $modalManageTokensData : ({} as ManageTokensData)
 	);
 
 	$effect(() => {
@@ -84,6 +85,15 @@
 														path: `${AppPath.Earning}${page.url.search}`
 													}
 												]
+											: []),
+										...(TRADING_ENABLED
+											? [
+													{
+														label: $i18n.trading.text.tab_title,
+														id: TokenTypes.TRADING,
+														path: `${AppPath.Trading}${page.url.search}`
+													}
+												]
 											: [])
 									]}
 									trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
@@ -119,6 +129,8 @@
 				<NftsList />
 			{:else if activeTab === TokenTypes.EARNING}
 				<EarningsList />
+			{:else if activeTab === TokenTypes.TRADING}
+				<TradingList />
 			{/if}
 		</StickyHeader>
 
@@ -138,16 +150,16 @@
 			{/if}
 		</div>
 	</div>
+{/if}
 
-	{#if $modalManageTokens}
-		<ManageTokensModal {initialSearch}>
-			{#snippet infoElement()}
-				{#if nonNullish(message)}
-					<MessageBox level="info">
-						{message}
-					</MessageBox>
-				{/if}
-			{/snippet}
-		</ManageTokensModal>
-	{/if}
+{#if $modalManageTokens}
+	<ManageTokensModal {initialNetwork} {initialSearch} {initialStep} {initialTokenData}>
+		{#snippet infoElement()}
+			{#if nonNullish(message)}
+				<MessageBox level="info">
+					{message}
+				</MessageBox>
+			{/if}
+		{/snippet}
+	</ManageTokensModal>
 {/if}

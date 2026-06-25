@@ -28,10 +28,6 @@ thread_local! {
     pub(crate) static TOP_UP_CYCLES_LEDGER_RATE_LIMITER: RateLimiter =
         RateLimiter::new(5, 60 * 1_000_000_000);
 
-    /// Rate-limits `btc_select_user_utxos_fee`: max 10 calls per caller per minute.
-    pub(crate) static BTC_SELECT_UTXOS_FEE_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(10, 60 * 1_000_000_000);
-
     /// Rate-limits `btc_add_pending_transaction`: max 10 calls per caller per minute.
     pub(crate) static BTC_ADD_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(10, 60 * 1_000_000_000);
@@ -39,6 +35,12 @@ thread_local! {
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
+
+    /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
+    /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
+    /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
+    pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -134,9 +136,7 @@ mod tests {
     use candid::Principal;
     use pretty_assertions::assert_eq;
     use shared::types::{
-        bitcoin::{
-            BtcAddPendingTransactionError, BtcGetPendingTransactionsError, SelectedUtxosFeeError,
-        },
+        bitcoin::{BtcAddPendingTransactionError, BtcGetPendingTransactionsError},
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
@@ -324,27 +324,6 @@ mod tests {
 
         match res.unwrap_err() {
             TopUpCyclesLedgerError::RateLimited(e) => {
-                assert_eq!(e.max_calls, 1);
-                assert_eq!(e.window_ns, 60 * ONE_SEC);
-                assert_eq!(e.caller, caller);
-            }
-            other => panic!("expected RateLimited, got {other:?}"),
-        }
-    }
-
-    #[test]
-    fn selected_utxos_fee_error_carries_rate_limit_details() {
-        let rl = RateLimiter::new(1, 60 * ONE_SEC);
-        let caller = test_principal(42);
-
-        rl.check_at(caller, ONE_SEC).unwrap();
-
-        let res: Result<(), SelectedUtxosFeeError> = rl
-            .check_at(caller, 2 * ONE_SEC)
-            .map_err(SelectedUtxosFeeError::RateLimited);
-
-        match res.unwrap_err() {
-            SelectedUtxosFeeError::RateLimited(e) => {
                 assert_eq!(e.max_calls, 1);
                 assert_eq!(e.window_ns, 60 * ONE_SEC);
                 assert_eq!(e.caller, caller);
