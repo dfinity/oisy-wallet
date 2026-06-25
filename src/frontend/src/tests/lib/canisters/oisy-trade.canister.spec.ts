@@ -14,7 +14,10 @@ import { mock } from 'vitest-mock-extended';
 describe('oisy-trade.canister', () => {
 	const createOisyTradeCanister = ({
 		serviceOverride
-	}: Pick<CreateCanisterOptions<OisyTradeService>, 'serviceOverride'>): Promise<OisyTradeCanister> =>
+	}: Pick<
+		CreateCanisterOptions<OisyTradeService>,
+		'serviceOverride'
+	>): Promise<OisyTradeCanister> =>
 		OisyTradeCanister.create({
 			canisterId: Principal.fromText('proc5-daaaa-aaaar-qb5va-cai'),
 			identity: mockIdentity,
