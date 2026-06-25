@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -13,6 +13,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
@@ -21,7 +22,9 @@
 		NOTES_EDITOR_DELETE_BUTTON,
 		NOTES_LIST,
 		NOTES_MODAL,
-		NOTES_SAVE_BUTTON
+		NOTES_NO_RESULTS,
+		NOTES_SAVE_BUTTON,
+		NOTES_SEARCH_INPUT
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -41,6 +44,7 @@
 	} from '$lib/stores/personal-notes.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isPersonalNoteDecryptionFailure, type PersonalNoteUi } from '$lib/types/personal-note';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatPersonalNoteTimestamp } from '$lib/utils/personal-note.utils';
 
@@ -57,9 +61,25 @@
 	let loading = $state(false);
 	let busy = $state(false);
 
+	let searchTerm = $state('');
+
 	const notes = $derived($personalNotesList);
 	const showSkeleton = $derived(loading || isNullish(notes));
 	const isEmpty = $derived(!showSkeleton && (notes?.length ?? 0) === 0);
+
+	// Client-side search: case-insensitive substring over the full (decrypted) note
+	// text — no backend call (the canister only holds ciphertext). Failed-to-decrypt
+	// entries have no text, so a non-empty query hides them.
+	const filteredNotes = $derived.by(() => {
+		const all = notes ?? [];
+		const term = searchTerm.trim().toLowerCase();
+		if (term === '') {
+			return all;
+		}
+		return all.filter(
+			(note) => !isPersonalNoteDecryptionFailure(note) && note.note.toLowerCase().includes(term)
+		);
+	});
 
 	// Edit Save stays disabled until the trimmed content actually changes, so a
 	// no-op edit issues no write and does not bump `updated_at_ns`.
@@ -235,10 +255,16 @@
 				{:else if isEmpty}
 					<EmptyNotes onAddNote={() => openEditor()} />
 				{:else}
-					<div class="flex w-full justify-end">
+					<div class="flex w-full items-end gap-2">
+						<InputSearch
+							autofocus={isDesktop()}
+							placeholder={$i18n.notes.text.search_placeholder}
+							showResetButton={notEmptyString(searchTerm)}
+							testId={NOTES_SEARCH_INPUT}
+							bind:filter={searchTerm}
+						/>
 						<Button
 							ariaLabel={$i18n.notes.text.add_note}
-							colorStyle="secondary-light"
 							disabled={$atPersonalNotesCapacity}
 							onclick={() => openEditor()}
 							styleClass="rounded-xl"
@@ -257,11 +283,17 @@
 						</p>
 					{/if}
 
-					<ul class="py-4" data-tid={NOTES_LIST}>
-						{#each notes ?? [] as note (note.id)}
-							<NoteListItem {note} onDelete={handleDelete} onEdit={openEditor} onRetry={load} />
-						{/each}
-					</ul>
+					{#if filteredNotes.length === 0}
+						<p class="py-6 text-tertiary" data-tid={NOTES_NO_RESULTS}>
+							{$i18n.notes.text.no_results}
+						</p>
+					{:else}
+						<ul class="py-2" data-tid={NOTES_LIST}>
+							{#each filteredNotes as note (note.id)}
+								<NoteListItem {note} onRetry={load} onSelect={openEditor} />
+							{/each}
+						</ul>
+					{/if}
 				{/if}
 
 				{#snippet toolbar()}

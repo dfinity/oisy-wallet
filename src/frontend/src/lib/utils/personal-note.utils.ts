@@ -40,12 +40,25 @@ export const neutralizePersonalNoteText = (value: string): string =>
 	value.replace(BIDI_CONTROL_CHARACTERS, '');
 
 /**
- * The list-row preview: bidi-neutralized, with line breaks and whitespace runs
- * collapsed to a single space so a multi-line note reads as one flowing line
- * (the full note keeps its line breaks in the editor / full view).
+ * The list-row preview, split for display: the note's **first line** is the
+ * de-facto `title` (shown bold), the **remaining lines** become the `body`
+ * (whitespace-collapsed to a single line). Both are bidi-neutralized. A note
+ * with no leading line (only blank lines) falls back to its first non-empty
+ * content as the title. There is no stored title — this is display only.
  */
-export const personalNotePreview = (value: string): string =>
-	neutralizePersonalNoteText(value).replace(/\s+/gu, ' ').trim();
+export const personalNotePreviewParts = (value: string): { title: string; body: string } => {
+	const text = neutralizePersonalNoteText(value);
+	const newline = text.indexOf('\n');
+	let title = (newline === -1 ? text : text.slice(0, newline)).trim();
+	let body = (newline === -1 ? '' : text.slice(newline + 1)).replace(/\s+/gu, ' ').trim();
+
+	if (title === '' && body !== '') {
+		title = body;
+		body = '';
+	}
+
+	return { title, body };
+};
 
 /**
  * Formats a note's UTC epoch-nanoseconds timestamp (a decimal string) for

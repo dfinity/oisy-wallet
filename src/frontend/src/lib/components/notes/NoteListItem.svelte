@@ -1,14 +1,7 @@
 <script lang="ts">
-	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
-	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
-	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
+	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import {
-		NOTES_DELETE_BUTTON,
-		NOTES_EDIT_BUTTON,
-		NOTES_LIST_ITEM,
-		NOTES_RETRY_DECRYPT_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import { NOTES_LIST_ITEM, NOTES_RETRY_DECRYPT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -16,18 +9,18 @@
 		type PersonalNoteEntryUi
 	} from '$lib/types/personal-note';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { formatPersonalNoteTimestamp, personalNotePreview } from '$lib/utils/personal-note.utils';
+	import {
+		formatPersonalNoteTimestamp,
+		personalNotePreviewParts
+	} from '$lib/utils/personal-note.utils';
 
 	interface Props {
 		note: PersonalNoteEntryUi;
-		onEdit: (id: string) => void;
-		onDelete: (id: string) => void;
+		onSelect: (id: string) => void;
 		onRetry: () => void;
 	}
 
-	let { note, onEdit, onDelete, onRetry }: Props = $props();
-
-	const failed = $derived(isPersonalNoteDecryptionFailure(note));
+	let { note, onSelect, onRetry }: Props = $props();
 
 	// Never-edited notes read "Created …"; edited notes "Updated …" (and sort to the
 	// top). All times render in the user's local timezone.
@@ -44,27 +37,21 @@
 		});
 	});
 
-	// Plain-text preview: bidi-neutralized, whitespace collapsed to a single line,
-	// then clamped to 2 lines via CSS (escaping still applies — Svelte auto-escapes).
-	const preview = $derived(
-		isPersonalNoteDecryptionFailure(note) ? '' : personalNotePreview(note.note)
+	// Plain-text preview: first line as a bold title, the rest collapsed to one
+	// lighter line. Both are auto-escaped by Svelte and bidi-neutralized.
+	const parts = $derived(
+		isPersonalNoteDecryptionFailure(note)
+			? { title: '', body: '' }
+			: personalNotePreviewParts(note.note)
 	);
 </script>
 
-<li
-	class="group flex items-center gap-3 border-b border-brand-subtle-10 py-3 last-of-type:border-b-0"
-	data-tid={NOTES_LIST_ITEM}
->
-	<div
-		class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-subtle-10 text-tertiary"
+{#if isPersonalNoteDecryptionFailure(note)}
+	<li
+		class="flex items-center gap-3 border-b border-brand-subtle-10 py-4 last-of-type:border-b-0"
+		data-tid={NOTES_LIST_ITEM}
 	>
-		<IconNotebook size="20" />
-	</div>
-
-	{#if failed}
-		<div class="flex min-w-0 flex-1 flex-col">
-			<span class="text-error-primary">{$i18n.notes.text.decryption_failed}</span>
-		</div>
+		<span class="min-w-0 flex-1 text-error-primary">{$i18n.notes.text.decryption_failed}</span>
 		<Button
 			ariaLabel={$i18n.core.text.retry}
 			colorStyle="secondary-light"
@@ -74,42 +61,28 @@
 		>
 			{$i18n.core.text.retry}
 		</Button>
-	{:else}
+	</li>
+{:else}
+	<li class="border-b border-brand-subtle-10 last-of-type:border-b-0" data-tid={NOTES_LIST_ITEM}>
 		<button
-			class="flex min-w-0 flex-1 flex-col gap-1 text-left"
-			onclick={() => onEdit(note.id)}
+			class="flex w-full items-center gap-3 py-4 text-left"
+			onclick={() => onSelect(note.id)}
 			type="button"
 		>
-			<span
-				style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere;"
-				class="text-primary"
-			>
-				{preview}
+			<span class="flex min-w-0 flex-1 flex-col gap-1">
+				<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+					{parts.title}
+				</span>
+				{#if parts.body !== ''}
+					<span style="overflow-wrap: anywhere;" class="truncate text-tertiary">
+						{parts.body}
+					</span>
+				{/if}
+				<span class="text-xs text-tertiary">{timestamp}</span>
 			</span>
-			<span class="text-xs text-tertiary">{timestamp}</span>
+			<span class="shrink-0 text-tertiary">
+				<IconChevronRight />
+			</span>
 		</button>
-
-		<div
-			class="flex shrink-0 items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-focus-within:opacity-100 md:group-hover:opacity-100"
-		>
-			<button
-				class="p-2 text-tertiary hover:text-primary"
-				aria-label={$i18n.notes.alt.edit}
-				data-tid={NOTES_EDIT_BUTTON}
-				onclick={() => onEdit(note.id)}
-				type="button"
-			>
-				<IconPencil size="20" />
-			</button>
-			<button
-				class="p-2 text-tertiary hover:text-error-primary"
-				aria-label={$i18n.notes.alt.delete}
-				data-tid={NOTES_DELETE_BUTTON}
-				onclick={() => onDelete(note.id)}
-				type="button"
-			>
-				<IconTrash />
-			</button>
-		</div>
-	{/if}
-</li>
+	</li>
+{/if}
