@@ -7,6 +7,7 @@ import {
 	privacyModeStore,
 	showHiddenStore,
 	showSpamStore,
+	showTokenStandardFilterStore,
 	tokenCategoryFilterStore,
 	tokensSortStore,
 	type NftSortOrder,
@@ -73,4 +74,9 @@ export const showTokenCategoryFilter: Readable<boolean> = derived(
 export const tokenCategoryFilter: Readable<TokenCategoryTagValue | undefined> = derived(
 	[tokenCategoryFilterStore],
 	([$store]) => $store.value
+);
+
+export const showTokenStandardFilter: Readable<boolean> = derived(
+	[showTokenStandardFilterStore],
+	([$store]) => $store.enabled
 );

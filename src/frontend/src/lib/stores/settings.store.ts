@@ -49,6 +49,11 @@ export const tokenCategoryFilterStore = initStorageStore<TokenCategoryFilterData
 	defaultValue: { value: undefined }
 });
 
+export const showTokenStandardFilterStore = initStorageStore<SettingsData>({
+	key: 'show-token-standard-filter',
+	defaultValue: { enabled: false }
+});
+
 export type NftSortOrder = 'asc' | 'desc';
 export type NftSortType = 'collection-name' | 'date';
 

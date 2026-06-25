@@ -294,6 +294,15 @@ export const getTokenDisplayName = (token: Token | CardData): string =>
  * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.
  * This is useful for native tokens that will never have the `enabled` prop.
  */
+export const tokenStandardKey = ({ code, version }: TokenStandard): string =>
+	`${code}|${version ?? ''}`;
+
+export const tokenStandardsEqual = ({ a, b }: { a: TokenStandard; b: TokenStandard }): boolean =>
+	tokenStandardKey(a) === tokenStandardKey(b);
+
+export const tokenStandardLabel = ({ code, version }: TokenStandard): string =>
+	nonNullish(version) ? `${code.toUpperCase()} ${version}` : code.toUpperCase();
+
 export const filterEnabledToken = <T extends Token>(token: T): boolean =>
 	isTokenToggleable(token) ? token.enabled : true;
 
