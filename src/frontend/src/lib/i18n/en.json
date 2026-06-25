@@ -1692,7 +1692,6 @@
 			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
 			"info_title": "OISY TRADE: on-chain order book",
 			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
-			"select_token": "Select a token to deposit",
 			"empty_title": "Nothing to deposit yet",
 			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
 			"approving": "Approving",

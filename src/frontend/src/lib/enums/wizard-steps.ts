@@ -100,6 +100,8 @@ export enum WizardStepsClaimStakingReward {
 
 export enum WizardStepsTradingDeposit {
 	DEPOSIT = 'Deposit',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
 	REVIEW = 'Review',
 	DEPOSITING = 'Depositing'
 }

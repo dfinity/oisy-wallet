@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { WizardModal } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
+	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
 	import TradingDepositProgress from '$lib/components/trading/TradingDepositProgress.svelte';
 	import TradingDepositReview from '$lib/components/trading/TradingDepositReview.svelte';
@@ -16,10 +18,17 @@
 	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
 	import { depositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		initModalTokensListContext,
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let modal: WizardModal<WizardStepsTradingDeposit> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsTradingDeposit> | undefined = $state();
@@ -29,8 +38,6 @@
 	let amount = $state<OptionAmount>();
 	let amountSetToMax = $state(false);
 	let consent = $state(false);
-	// True while the in-step token picker is shown (inside the DEPOSIT step).
-	let pickingToken = $state(false);
 
 	const steps: WizardSteps<WizardStepsTradingDeposit> = $derived(
 		tradingDepositWizardSteps({ i18n: $i18n })
@@ -39,30 +46,72 @@
 	// A brand-new (or fully-deposited) wallet has no supported token to deposit.
 	let isEmpty = $derived($oisyTradeDepositableTokens.length === 0);
 
+	// Reuse the shared token-picker pipeline (search box + network/type filters) the
+	// swap and send modals use, seeded with the DEX-depositable tokens.
+	const tokensListContext = initModalTokensListContext({
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- the context is initialized once at mount; the reactive token list is kept in sync below via `setTokens`.
+		tokens: $oisyTradeDepositableTokens
+	});
+	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
+
+	$effect(() => {
+		tokensListContext.setTokens($oisyTradeDepositableTokens);
+	});
+
 	const reset = () => {
 		token = undefined;
 		amount = undefined;
 		amountSetToMax = false;
 		consent = false;
-		pickingToken = false;
 		depositProgressStep = ProgressStepsTradingDeposit.INITIALIZATION;
 		currentStep = undefined;
+		tokensListContext.resetFilters();
 	};
 
 	const close = () => closeModal(reset);
 
-	const onSelectToken = (selected: IcToken) => {
-		if (token?.id !== selected.id) {
+	const goToStep = (stepName: WizardStepsTradingDeposit) => {
+		if (isNullish(modal)) {
+			return;
+		}
+
+		goToWizardStep({ modal, steps, stepName });
+	};
+
+	const showTokensList = () => {
+		tokensListContext.setFilterQuery('');
+
+		goToStep(WizardStepsTradingDeposit.TOKENS_LIST);
+	};
+
+	const closeTokensList = () => {
+		tokensListContext.setFilterQuery('');
+
+		goToStep(WizardStepsTradingDeposit.DEPOSIT);
+	};
+
+	// The picker only ever lists DEX-depositable tokens; resolve the selection back
+	// to the matching `IcToken` the deposit flow needs.
+	const onSelectToken = (selected: Token) => {
+		const matched = $oisyTradeDepositableTokens.find(({ id }) => id === selected.id);
+
+		if (isNullish(matched)) {
+			return;
+		}
+
+		if (token?.id !== matched.id) {
 			amount = undefined;
 			amountSetToMax = false;
 		}
-		token = selected;
-		pickingToken = false;
+		token = matched;
+
+		closeTokensList();
 	};
 
 	const deposit = async () => {
 		if (nonNullish(token) && nonNullish(amount)) {
-			modal?.next();
+			goToStep(WizardStepsTradingDeposit.DEPOSITING);
 
 			await depositOisyTrade({
 				identity: $authIdentity,
@@ -74,7 +123,7 @@
 			if (depositProgressStep === ProgressStepsTradingDeposit.DONE) {
 				close();
 			} else {
-				modal?.back();
+				goToStep(WizardStepsTradingDeposit.REVIEW);
 			}
 		}
 	};
@@ -82,7 +131,8 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING}
+	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING ||
+		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
 	onClose={close}
 	{steps}
 	bind:currentStep
@@ -108,23 +158,35 @@
 				<Button onclick={close}>{$i18n.core.text.close}</Button>
 			{/snippet}
 		</ContentWithToolbar>
-	{:else if currentStep?.name === WizardStepsTradingDeposit.DEPOSIT}
-		{#if pickingToken}
-			<TradingDepositTokensList onClose={() => (pickingToken = false)} onSelect={onSelectToken} />
-		{:else}
-			<TradingDepositForm
-				onClose={close}
-				onNext={() => modal?.next()}
-				onSelectToken={() => (pickingToken = true)}
-				{token}
-				bind:amount
-				bind:amountSetToMax
-				bind:consent
-			/>
-		{/if}
+	{:else if currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
+		<TradingDepositTokensList
+			onBack={closeTokensList}
+			onSelect={onSelectToken}
+			onSelectNetworkFilter={() => goToStep(WizardStepsTradingDeposit.FILTER_NETWORKS)}
+		/>
+	{:else if currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
+		<ModalNetworksFilter
+			onNetworkFilter={() => goToStep(WizardStepsTradingDeposit.TOKENS_LIST)}
+			showStakeBalance={false}
+		/>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.REVIEW && nonNullish(token)}
-		<TradingDepositReview {amount} onBack={() => modal?.back()} onConfirm={deposit} {token} />
+		<TradingDepositReview
+			{amount}
+			onBack={() => goToStep(WizardStepsTradingDeposit.DEPOSIT)}
+			onConfirm={deposit}
+			{token}
+		/>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.DEPOSITING}
 		<TradingDepositProgress {depositProgressStep} />
+	{:else}
+		<TradingDepositForm
+			onClose={close}
+			onNext={() => goToStep(WizardStepsTradingDeposit.REVIEW)}
+			onSelectToken={showTokensList}
+			{token}
+			bind:amount
+			bind:amountSetToMax
+			bind:consent
+		/>
 	{/if}
 </WizardModal>

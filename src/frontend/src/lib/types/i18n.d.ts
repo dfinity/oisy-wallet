@@ -1356,7 +1356,6 @@ interface I18nTrading {
 		consent: string;
 		info_title: string;
 		info_description: string;
-		select_token: string;
 		empty_title: string;
 		empty_description: string;
 		approving: string;

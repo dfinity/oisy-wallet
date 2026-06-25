@@ -15,7 +15,7 @@ import { Principal } from '@icp-sdk/core/principal';
 
 const mockLedgerId = mockValidIcToken.ledgerCanisterId;
 
-const buildPair = (base: string, quote: string): TradingPairInfo =>
+const buildPair = ({ base, quote }: { base: string; quote: string }): TradingPairInfo =>
 	({
 		base: { metadata: { symbol: base } },
 		quote: { metadata: { symbol: quote } }
@@ -32,9 +32,9 @@ describe('oisy-trade.utils', () => {
 		it('returns the distinct union of base and quote symbols', () => {
 			expect(
 				oisyTradeSupportedTokenSymbols([
-					buildPair('ICP', 'ckUSDC'),
-					buildPair('ICP', 'ckBTC'),
-					buildPair('ckBTC', 'ckUSDC')
+					buildPair({ base: 'ICP', quote: 'ckUSDC' }),
+					buildPair({ base: 'ICP', quote: 'ckBTC' }),
+					buildPair({ base: 'ckBTC', quote: 'ckUSDC' })
 				])
 			).toEqual(['ICP', 'ckUSDC', 'ckBTC']);
 		});

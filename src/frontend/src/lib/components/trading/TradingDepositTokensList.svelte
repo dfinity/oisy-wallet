@@ -1,53 +1,32 @@
 <script lang="ts">
-	import type { IcToken } from '$icp/types/ic-token';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { oisyTradeDepositableTokens } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { CardData } from '$lib/types/token-card';
-	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
-		onSelect: (token: IcToken) => void;
-		onClose: () => void;
+		onSelect: (token: Token) => void;
+		onSelectNetworkFilter: () => void;
+		onBack: () => void;
 	}
 
-	let { onSelect, onClose }: Props = $props();
+	let { onSelect, onSelectNetworkFilter, onBack }: Props = $props();
 </script>
 
-<ContentWithToolbar>
-	<p class="mb-4 text-tertiary">{$i18n.trading.deposit.select_token}</p>
-
-	<List noPadding>
-		{#each $oisyTradeDepositableTokens as token (token.id)}
-			{@const data = token as CardData}
-			<ListItem styleClass="first-of-type:border-t-1">
-				<LogoButton onClick={() => onSelect(token)}>
-					{#snippet logo()}
-						<span class="flex">
-							<TokenLogo badge={{ type: 'network' }} color="white" {data} logoSize="lg" />
-						</span>
-					{/snippet}
-
-					{#snippet title()}{getTokenDisplaySymbol(token)}{/snippet}
-
-					{#snippet description()}
-						<TokenNameAndNetwork {data} />
-					{/snippet}
-				</LogoButton>
-			</ListItem>
-		{/each}
-	</List>
-
+<ModalTokensList {onSelectNetworkFilter} onTokenButtonClick={onSelect}>
+	{#snippet tokenListItem(token, onClick)}
+		<ModalTokensListItem {onClick} {token} />
+	{/snippet}
+	{#snippet noResults()}
+		<p class="text-primary">
+			{$i18n.tokens.manage.text.all_tokens_zero_balance}
+		</p>
+	{/snippet}
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={onClose} />
+			<ButtonBack onclick={onBack} />
 		</ButtonGroup>
 	{/snippet}
-</ContentWithToolbar>
+</ModalTokensList>
