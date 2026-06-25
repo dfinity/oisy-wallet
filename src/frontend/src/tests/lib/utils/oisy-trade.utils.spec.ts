@@ -6,11 +6,15 @@ import { Principal } from '@icp-sdk/core/principal';
 
 describe('oisy-trade.utils', () => {
 	describe('toOisyTradeWithdrawTokens', () => {
-		const dexBalance = (
-			ledgerCanisterId: string,
-			free: bigint,
-			reserved: bigint
-		): UserTokenBalance =>
+		const dexBalance = ({
+			ledgerCanisterId,
+			free,
+			reserved
+		}: {
+			ledgerCanisterId: string;
+			free: bigint;
+			reserved: bigint;
+		}): UserTokenBalance =>
 			({
 				token: { id: { ledger_id: Principal.fromText(ledgerCanisterId) } },
 				balance: { free, reserved }
@@ -18,7 +22,13 @@ describe('oisy-trade.utils', () => {
 
 		it('pairs a DEX balance with the matching OISY token by ledger canister id', () => {
 			const result = toOisyTradeWithdrawTokens({
-				balances: [dexBalance(mockValidIcToken.ledgerCanisterId, 10n, 3n)],
+				balances: [
+					dexBalance({
+						ledgerCanisterId: mockValidIcToken.ledgerCanisterId,
+						free: 10n,
+						reserved: 3n
+					})
+				],
 				icrcTokens: [mockValidIcToken]
 			});
 
@@ -27,7 +37,9 @@ describe('oisy-trade.utils', () => {
 
 		it('drops balances whose ledger is unknown to the wallet', () => {
 			const result = toOisyTradeWithdrawTokens({
-				balances: [dexBalance('ryjl3-tyaaa-aaaaa-aaaba-cai', 10n, ZERO)],
+				balances: [
+					dexBalance({ ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai', free: 10n, reserved: ZERO })
+				],
 				icrcTokens: [mockValidIcToken]
 			});
 

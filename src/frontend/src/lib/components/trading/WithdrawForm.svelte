@@ -2,10 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
-	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import TradingAmount from '$lib/components/trading/TradingAmount.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -59,12 +58,6 @@
 
 	let receiveBaseUnits = $derived(
 		grossBaseUnits > transferFee ? grossBaseUnits - transferFee : ZERO
-	);
-
-	let receiveDisplayAmount = $derived(
-		receiveBaseUnits > ZERO
-			? Number(formatToken({ value: receiveBaseUnits, unitName: $sendToken.decimals }))
-			: undefined
 	);
 
 	let invalid = $derived(invalidAmount(amount) || Number(amount) === 0);
@@ -121,35 +114,24 @@
 		{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
 	</ModalValue>
 
-	<ModalValue>
+	<FeeDisplay
+		decimals={$sendToken.decimals}
+		displayExchangeRate={false}
+		feeAmount={transferFee}
+		symbol={$sendToken.symbol}
+	>
 		{#snippet label()}{$i18n.trading.withdraw.transfer_fee}{/snippet}
-		{#snippet mainValue()}
-			<TradingAmount
-				amount={transferFee}
-				decimals={$sendToken.decimals}
-				symbol={$sendToken.symbol}
-			/>
-		{/snippet}
-	</ModalValue>
+	</FeeDisplay>
 
-	<ModalValue>
+	<FeeDisplay
+		decimals={$sendToken.decimals}
+		displayExchangeRate={!$isPrivacyMode}
+		exchangeRate={$sendTokenExchangeRate}
+		feeAmount={receiveBaseUnits}
+		symbol={$sendToken.symbol}
+	>
 		{#snippet label()}{$i18n.trading.withdraw.you_receive}{/snippet}
-		{#snippet mainValue()}
-			<TradingAmount
-				amount={receiveBaseUnits}
-				decimals={$sendToken.decimals}
-				symbol={$sendToken.symbol}
-			/>
-		{/snippet}
-		{#snippet secondaryValue()}
-			{#if !$isPrivacyMode}
-				<ConvertAmountExchange
-					amount={receiveDisplayAmount}
-					exchangeRate={$sendTokenExchangeRate}
-				/>
-			{/if}
-		{/snippet}
-	</ModalValue>
+	</FeeDisplay>
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">
