@@ -16,6 +16,7 @@ import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { signAsync as signSecp256k1Async } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { networks, payments, Psbt } from 'bitcoinjs-lib';
@@ -209,6 +210,8 @@ describe('btc wallet-connect.services', () => {
 	const testnetChainId = Object.keys(BIP122_CHAINS).find(
 		(key) => BIP122_CHAINS[key].networkId === BTC_TESTNET_NETWORK_ID
 	);
+	// Fail loudly here rather than silently testing the "missing chainId" path if BIP122_CHAINS changes.
+	assertNonNullish(testnetChainId);
 
 	const buildPsbt = (): string => {
 		const psbt = new Psbt({ network });
@@ -331,6 +334,9 @@ describe('btc wallet-connect.services', () => {
 		const testnetSignChainId = Object.keys(BIP122_CHAINS).find(
 			(key) => BIP122_CHAINS[key].networkId === BTC_TESTNET_NETWORK_ID
 		);
+		// Fail loudly here rather than silently testing the "missing chainId" path if BIP122_CHAINS changes.
+		assertNonNullish(mainnetChainId);
+		assertNonNullish(testnetSignChainId);
 
 		const buildSignRequest = ({
 			chainId,
