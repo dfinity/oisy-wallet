@@ -64,7 +64,7 @@
 		{$i18n.notes.text.note_label}
 		<textarea
 			bind:this={textarea}
-			class="min-h-0 w-full flex-auto resize-none overflow-y-auto rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
+			class="min-h-32 w-full flex-auto resize-none overflow-y-auto rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
 			data-tid={NOTES_INPUT}
 			{disabled}
 			placeholder={$i18n.notes.text.placeholder}
