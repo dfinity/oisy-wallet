@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { IcToken } from '$icp/types/ic-token';
+	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
+	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import LimitOrderTokenPill from '$lib/components/trading/limit-order/LimitOrderTokenPill.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
+	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		deriveQuoteAmount,
@@ -14,6 +20,8 @@
 		side: LimitOrderSide;
 		baseSymbol?: string;
 		quoteSymbol?: string;
+		baseToken?: IcToken;
+		baseExchangeRate?: number;
 		baseAmount: string;
 		price: string;
 		pairView?: LimitOrderPairView;
@@ -29,6 +37,8 @@
 		side,
 		baseSymbol,
 		quoteSymbol,
+		baseToken,
+		baseExchangeRate,
 		baseAmount,
 		price,
 		pairView,
@@ -39,6 +49,15 @@
 		onBaseInput,
 		onMax
 	}: Props = $props();
+
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
+
+	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
+	// `baseAmount` (a string), re-normalizing every edit to the pair's lot precision
+	// through the limit-order rule the parent applies in `onBaseInput`.
+	const getAmount = (): OptionAmount => baseAmount;
+	const setAmount = (value: OptionAmount) => onBaseInput(nonNullish(value) ? `${value}` : '');
 
 	const baseNum = $derived(parseFloat(baseAmount));
 	const priceNum = $derived(parseFloat(price));
@@ -63,19 +82,29 @@
 	// Buy Max needs a positive price; disabled otherwise.
 	const maxEnabled = $derived(side === 'sell' || priceNum > 0);
 
-	const amountError = $derived.by((): string | undefined => {
+	const amountErrorKind = $derived.by((): string | undefined => {
 		if (!nonNullish(pairView) || !(baseNum > 0)) {
 			return undefined;
 		}
-		const { errorKind } = validateAmount({
+		return validateAmount({
 			side,
 			baseAmount: baseNum,
 			price: priceNum,
 			freeBalance: freeSpend,
 			pair: pairView
-		});
+		}).errorKind;
+	});
+
+	// The limit order reports rich, pair-aware error kinds; map any of them onto a
+	// single `errorType` so the shared input shows its red highlight, and render the
+	// full pair-aware message below. Routed through `TokenInput`'s `onCustomValidate`
+	// so the component owns (and does not clobber) its own `errorType` state.
+	const onCustomValidate = (): TokenActionErrorType =>
+		nonNullish(amountErrorKind) ? 'insufficient-funds' : undefined;
+
+	const amountError = $derived.by((): string | undefined => {
 		const t = $i18n.trading.limit_order;
-		switch (errorKind) {
+		switch (amountErrorKind) {
 			case 'balance':
 				return side === 'sell'
 					? replacePlaceholders(t.error_balance_sell, {
@@ -89,17 +118,17 @@
 						});
 			case 'lot':
 				return replacePlaceholders(t.error_lot_multiple, {
-					$step: pairView.lotSize.toString(),
+					$step: pairView?.lotSize.toString() ?? '',
 					$symbol: baseSymbol ?? ''
 				});
 			case 'min_notional':
 				return replacePlaceholders(t.error_min_notional, {
-					$amount: pairView.minNotional.toString(),
+					$amount: pairView?.minNotional.toString() ?? '',
 					$symbol: quoteSymbol ?? ''
 				});
 			case 'max_notional':
 				return replacePlaceholders(t.error_max_notional, {
-					$amount: (pairView.maxNotional ?? 0).toString(),
+					$amount: (pairView?.maxNotional ?? 0).toString(),
 					$symbol: quoteSymbol ?? ''
 				});
 			default:
@@ -109,50 +138,61 @@
 </script>
 
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
-	<!-- Base row -->
+	<!-- Base row: shared amount input + token selector -->
 	<div class="py-2">
-		<div class="flex items-center justify-between text-xs text-tertiary">
-			<span>{baseLabel}</span>
-			<span>{$i18n.trading.limit_order.network}</span>
-		</div>
-		<div class="mt-1.5 flex items-center gap-2">
-			<input
-				class="w-full rounded-md border border-secondary bg-primary px-2 py-1 text-xl text-primary outline-none focus:border-brand-primary"
-				class:border-error-primary={nonNullish(amountError)}
-				oninput={(e) => onBaseInput(e.currentTarget.value)}
-				placeholder={$i18n.trading.limit_order.amount_placeholder}
-				type="text"
-				value={baseAmount}
-			/>
-			<LimitOrderTokenPill onclick={onSelectBase} symbol={baseSymbol} />
-		</div>
+		<TokenInput
+			displayUnit={inputUnit}
+			exchangeRate={baseExchangeRate}
+			isSelectable
+			onClick={onSelectBase}
+			{onCustomValidate}
+			showTokenNetwork
+			token={baseToken}
+			bind:amount={getAmount, setAmount}
+		>
+			{#snippet title()}{baseLabel}{/snippet}
+
+			{#snippet amountInfo()}
+				<div class="text-tertiary">
+					{#if nonNullish(baseToken)}
+						<TokenInputAmountExchange
+							amount={baseAmount}
+							exchangeRate={baseExchangeRate}
+							token={baseToken}
+							bind:displayUnit={exchangeValueUnit}
+						/>
+					{/if}
+				</div>
+			{/snippet}
+
+			{#snippet balance()}
+				{#if nonNullish(baseSymbol)}
+					{#if side === 'sell'}
+						<button
+							class="font-semibold text-brand-primary-alt"
+							disabled={!maxEnabled}
+							onclick={onMax}
+							type="button"
+						>
+							{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
+								$amount: freeBase.toString(),
+								$symbol: baseSymbol
+							})}
+						</button>
+					{:else}
+						<span class="text-tertiary">
+							{replacePlaceholders($i18n.trading.limit_order.balance, {
+								$amount: freeBase.toString(),
+								$symbol: baseSymbol
+							})}
+						</span>
+					{/if}
+				{/if}
+			{/snippet}
+		</TokenInput>
 		{#if nonNullish(amountError)}
 			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
 		{/if}
-		<div class="mt-1 flex items-center justify-end text-xs">
-			{#if nonNullish(baseSymbol)}
-				{#if side === 'sell'}
-					<button
-						class="font-medium text-brand-primary"
-						disabled={!maxEnabled}
-						onclick={onMax}
-						type="button"
-					>
-						{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-							$amount: freeBase.toString(),
-							$symbol: baseSymbol
-						})}
-					</button>
-				{:else}
-					<span class="text-tertiary">
-						{replacePlaceholders($i18n.trading.limit_order.balance, {
-							$amount: freeBase.toString(),
-							$symbol: baseSymbol
-						})}
-					</span>
-				{/if}
-			{/if}
-		</div>
 	</div>
 
 	<!-- Connector -->
@@ -162,7 +202,7 @@
 		<span class="h-px flex-1 bg-disabled"></span>
 	</div>
 
-	<!-- Quote row -->
+	<!-- Quote row: read-only derived readout (not an input) -->
 	<div class="py-2">
 		<div class="flex items-center justify-between text-xs text-tertiary">
 			<span>{quoteLabel}</span>

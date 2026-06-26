@@ -10,7 +10,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { oisyTradeFreeBalanceBySymbol } from '$lib/derived/oisy-trade.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import {
+		oisyTradeFreeBalanceBySymbol,
+		oisyTradeIcTokenBySymbol
+	} from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		decimalsOfStep,
@@ -70,6 +74,13 @@
 	);
 	const freeQuote = $derived(
 		nonNullish(quoteSymbol) ? ($oisyTradeFreeBalanceBySymbol[quoteSymbol] ?? 0) : 0
+	);
+
+	const baseToken = $derived(
+		nonNullish(baseSymbol) ? $oisyTradeIcTokenBySymbol[baseSymbol] : undefined
+	);
+	const baseExchangeRate = $derived(
+		nonNullish(baseToken) ? $exchanges?.[baseToken.id]?.usd : undefined
 	);
 
 	const baseNum = $derived(parseFloat(baseAmount));
@@ -132,7 +143,9 @@
 
 		<LimitOrderTradePairBox
 			{baseAmount}
+			{baseExchangeRate}
 			{baseSymbol}
+			{baseToken}
 			{freeBase}
 			{freeQuote}
 			{onBaseInput}
