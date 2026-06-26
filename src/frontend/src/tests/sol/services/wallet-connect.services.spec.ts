@@ -312,6 +312,12 @@ describe('wallet-connect.services', () => {
 				expect(spyToastsError).toHaveBeenCalledWith({
 					msg: { text: en.wallet_connect.error.wallet_not_initialized }
 				});
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
 			});
 
 			it('should return success with amount and destination when signing is successful', async () => {
@@ -438,6 +444,12 @@ describe('wallet-connect.services', () => {
 
 				expect(spyToastsError).toHaveBeenCalledWith({
 					msg: { text: en.wallet_connect.error.wallet_not_initialized }
+				});
+
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
 				});
 			});
 
@@ -674,6 +686,29 @@ describe('wallet-connect.services', () => {
 
 				expect(console.warn).not.toHaveBeenCalled();
 			});
+
+			it('should reject the request when sending cannot produce a signature', async () => {
+				vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValueOnce(false);
+
+				const result = await sign(mockParams);
+
+				expect(result).toEqual({ success: false });
+
+				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+
+				expect(mockParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSendSol.SIGN);
+
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockRequest.topic,
+					id: mockRequest.id,
+					error: UNEXPECTED_ERROR
+				});
+
+				expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+					'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
+				);
+			});
 		});
 
 		describe('with other WalletConnect methods', () => {
@@ -704,7 +739,11 @@ describe('wallet-connect.services', () => {
 
 				expect(mockListener.approveRequest).not.toHaveBeenCalled();
 
-				expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+				expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+					topic: mockParamsOther.request.topic,
+					id: mockParamsOther.request.id,
+					error: UNEXPECTED_ERROR
+				});
 
 				expect(spyToastsShow).not.toHaveBeenCalled();
 				expect(spyToastsError).not.toHaveBeenCalled();

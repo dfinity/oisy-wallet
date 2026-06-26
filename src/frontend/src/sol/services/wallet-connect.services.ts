@@ -265,6 +265,7 @@ export const sign = ({
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
 				});
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 				return { success: false };
 			}
 
@@ -317,6 +318,7 @@ export const sign = ({
 							: undefined;
 
 				if (isNullish(signature)) {
+					await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 					return { success: false };
 				}
 

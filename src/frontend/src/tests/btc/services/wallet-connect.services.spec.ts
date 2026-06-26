@@ -1,4 +1,4 @@
-import { decodePsbt, getAccountAddresses } from '$btc/services/wallet-connect.services';
+import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -225,6 +225,8 @@ describe('btc wallet-connect.services', () => {
 
 	const buildRequest = (params: Record<string, unknown>): WalletKitTypes.SessionRequest =>
 		({
+			id: 123,
+			topic: 'test-topic',
 			params: {
 				chainId: testnetChainId,
 				request: { method: 'signPsbt', params }
@@ -310,5 +312,58 @@ describe('btc wallet-connect.services', () => {
 		const request = buildRequest({ psbt: 'not-a-valid-psbt', broadcast: false });
 
 		expect(() => decodePsbt({ request, address: walletAddress })).toThrow();
+	});
+
+	describe('signPsbt', () => {
+		const mockListener = {
+			pair: vi.fn(),
+			approveSession: vi.fn(),
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn(),
+			approveRequest: vi.fn(),
+			disconnect: vi.fn()
+		} as WalletConnectListener;
+
+		let spyToastsError: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+		});
+
+		it('rejects when signInputs selects no inputs', async () => {
+			const request = buildRequest({ psbt: buildPsbt(), signInputs: [] });
+			const modalNext = vi.fn();
+			const progress = vi.fn();
+
+			const result = await signPsbt({
+				address: walletAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity,
+				request,
+				listener: mockListener
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: request.id,
+				topic: request.topic,
+				error: UNEXPECTED_ERROR
+			});
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+
+			expect(modalNext).not.toHaveBeenCalled();
+			expect(progress).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.unknown_parameter }
+			});
+		});
 	});
 });
