@@ -41,8 +41,11 @@
 		element.focus({ preventScroll: true });
 	});
 
-	// Auto-resize the textarea to its content so the modal grows naturally
-	// (matching view-mode height) rather than staying at a fixed row count.
+	// A textarea reports no content height to flex layout, so on its own it can't
+	// drive the modal's height the way the read-only view's rendered text does.
+	// Setting an explicit height = scrollHeight gives `flex-auto` a real basis: the
+	// modal then grows with the note (matching view mode) up to its max-height, past
+	// which flex shrinks the textarea and it scrolls internally with actions pinned.
 	$effect(() => {
 		const element = textarea;
 		if (element === undefined) {
@@ -54,14 +57,14 @@
 	});
 </script>
 
-<div style="--input-font-size: var(--text-base)" class="w-full">
+<div style="--input-font-size: var(--text-base)" class="flex min-h-0 w-full flex-1 flex-col">
 	<label
-		class="flex w-full flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
+		class="flex min-h-0 w-full flex-1 flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.notes.text.note_label}
 		<textarea
 			bind:this={textarea}
-			class="min-h-32 w-full resize-none rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
+			class="min-h-0 w-full flex-auto resize-none overflow-y-auto rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
 			data-tid={NOTES_INPUT}
 			{disabled}
 			placeholder={$i18n.notes.text.placeholder}

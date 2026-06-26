@@ -255,7 +255,7 @@
 
 {#snippet notesBody()}
 	{#if step === 'editor'}
-		<ContentWithToolbar styleClass="flex flex-col gap-4 items-stretch">
+		<ContentWithToolbar styleClass="flex min-h-0 flex-col gap-4 items-stretch">
 			{#key editorInstance}
 				<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
 			{/key}
