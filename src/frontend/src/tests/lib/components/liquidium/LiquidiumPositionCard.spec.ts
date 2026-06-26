@@ -25,7 +25,7 @@ describe('LiquidiumPositionCard', () => {
 	it('renders the supplied asset, APY and amount', () => {
 		const { container } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
-		expect(container).toHaveTextContent(en.liquidium.text.supplied);
+		// The "Supplied" label lives on the section header now, not the card.
 		expect(container).toHaveTextContent('BTC');
 		expect(container).toHaveTextContent(en.liquidium.text.apy_suffix);
 		expect(container).toHaveTextContent(`${formatStakeApyNumber(5)}%`);
