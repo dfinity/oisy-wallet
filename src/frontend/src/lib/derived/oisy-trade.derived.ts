@@ -3,11 +3,10 @@ import type {
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
-import { SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
-import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import type { OisyTradeAsset } from '$lib/types/oisy-trade';
@@ -43,11 +42,11 @@ export const oisyTradeSupportedTokenSymbols: Readable<string[]> = derived(
 
 // DEX balances resolved to OISY tokens, enriched with totals and fiat values.
 export const oisyTradeAssets: Readable<OisyTradeAsset[]> = derived(
-	[oisyTradeBalances, allIcrcTokens, exchanges],
-	([$balances, $allIcrcTokens, $exchanges]) =>
+	[oisyTradeBalances, enabledIcTokens, exchanges],
+	([$balances, $enabledIcTokens, $exchanges]) =>
 		mapOisyTradeAssets({
 			balances: $balances,
-			tokens: [...SUPPORTED_ICP_TOKENS, ...$allIcrcTokens],
+			tokens: $enabledIcTokens,
 			exchanges: $exchanges
 		})
 );
@@ -65,16 +64,17 @@ export const oisyTradeHasAssets: Readable<boolean> = derived(
 	($assets) => $assets.length > 0
 );
 
-// The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
-// that the user holds in their wallet. Used by the deposit token picker. Tokens
-// whose balance can't cover the ledger fee still appear (Max clamps to 0), but a
-// token with no balance at all is dropped.
+// The OISY tokens the user can deposit: DEX-supported tokens (matched by ledger
+// canister id) that the user holds. Resolved against `enabledIcTokens` — the
+// user's enabled IC tokens including testnets — so a testnet DEX (e.g. staging,
+// which trades TESTICP / ckSepolia*) surfaces the right tokens, not just mainnet.
+// Tokens whose balance can't cover the ledger fee still appear (Max clamps to 0).
 export const oisyTradeDepositableTokens: Readable<IcToken[]> = derived(
-	[oisyTradeSupportedTokens, allIcrcTokens, balancesStore],
-	([$supportedTokens, $allIcrcTokens, $balances]) =>
+	[oisyTradeSupportedTokens, enabledIcTokens, balancesStore],
+	([$supportedTokens, $enabledIcTokens, $balances]) =>
 		mapDepositableTokens({
 			supportedTokens: $supportedTokens,
-			tokens: [...SUPPORTED_ICP_TOKENS, ...$allIcrcTokens],
+			tokens: $enabledIcTokens,
 			hasBalance: (token) => ($balances?.[token.id]?.data ?? ZERO) > ZERO
 		})
 );
