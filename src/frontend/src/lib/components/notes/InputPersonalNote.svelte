@@ -43,9 +43,10 @@
 
 	// A textarea reports no content height to flex layout, so on its own it can't
 	// drive the modal's height the way the read-only view's rendered text does.
-	// Setting an explicit height = scrollHeight gives `flex-auto` a real basis: the
-	// modal then grows with the note (matching view mode) up to its max-height, past
-	// which flex shrinks the textarea and it scrolls internally with actions pinned.
+	// Setting an explicit height = scrollHeight gives `flex-auto` a real basis so the
+	// modal grows with the note (matching view mode). The `max-h` below caps that
+	// growth to the space the capped modal leaves, so a long note scrolls inside the
+	// textarea (like the view box) rather than letting the box grow without bound.
 	$effect(() => {
 		const element = textarea;
 		if (element === undefined) {
@@ -64,7 +65,7 @@
 		{$i18n.notes.text.note_label}
 		<textarea
 			bind:this={textarea}
-			class="min-h-32 w-full flex-auto resize-none overflow-y-auto rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
+			class="min-h-32 w-full flex-auto resize-none overflow-y-auto rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary sm:max-h-[calc(80dvh_-_28rem)]"
 			data-tid={NOTES_INPUT}
 			{disabled}
 			placeholder={$i18n.notes.text.placeholder}
