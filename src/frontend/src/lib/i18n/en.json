@@ -1641,6 +1641,7 @@
 			"unknown_parameter": "Unknown parameter.",
 			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
 			"btc_broadcast_not_supported": "Broadcasting the signed transaction is not supported yet. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
+			"btc_non_mainnet_sign_not_supported": "Signing Bitcoin transactions is only supported on mainnet. For your security, this request was not signed.",
 			"btc_psbt_decode": "This transaction could not be decoded for review. For your security, it was not signed.",
 			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
 			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",

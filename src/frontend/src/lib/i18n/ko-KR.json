@@ -1641,6 +1641,7 @@
 			"unknown_parameter": "알 수 없는 파라미터입니다.",
 			"wallet_not_initialized": "예기치 않은 오류. 지갑 주소가 초기화되지 않았습니다.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
