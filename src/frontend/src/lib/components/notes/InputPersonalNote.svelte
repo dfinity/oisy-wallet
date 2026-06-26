@@ -42,14 +42,14 @@
 	});
 </script>
 
-<div style="--input-font-size: var(--text-base)" class="flex min-h-0 flex-1 flex-col w-full">
+<div style="--input-font-size: var(--text-base)" class="flex flex-1 flex-col w-full">
 	<label
-		class="flex min-h-0 flex-1 w-full flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
+		class="flex flex-1 w-full flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.notes.text.note_label}
 		<textarea
 			bind:this={textarea}
-			class="min-h-32 flex-1 w-full resize-none rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
+			class="min-h-0 flex-1 w-full resize-none rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
 			data-tid={NOTES_INPUT}
 			{disabled}
 			placeholder={$i18n.notes.text.placeholder}
