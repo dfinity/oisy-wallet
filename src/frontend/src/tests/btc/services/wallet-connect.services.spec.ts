@@ -1,11 +1,14 @@
-import { decodePsbt, getAccountAddresses } from '$btc/services/wallet-connect.services';
+import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
+import * as btcWalletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as signerEnv from '$env/signer.env';
+import * as signerApi from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import * as signerConstants from '$lib/constants/signer.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
+import { ProgressStepsSign } from '$lib/enums/progress-steps';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
@@ -13,6 +16,8 @@ import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { signAsync as signSecp256k1Async } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { networks, payments, Psbt } from 'bitcoinjs-lib';
 import type { MockInstance } from 'vitest';
@@ -205,6 +210,8 @@ describe('btc wallet-connect.services', () => {
 	const testnetChainId = Object.keys(BIP122_CHAINS).find(
 		(key) => BIP122_CHAINS[key].networkId === BTC_TESTNET_NETWORK_ID
 	);
+	// Fail loudly here rather than silently testing the "missing chainId" path if BIP122_CHAINS changes.
+	assertNonNullish(testnetChainId);
 
 	const buildPsbt = (): string => {
 		const psbt = new Psbt({ network });
@@ -310,5 +317,153 @@ describe('btc wallet-connect.services', () => {
 		const request = buildRequest({ psbt: 'not-a-valid-psbt', broadcast: false });
 
 		expect(() => decodePsbt({ request, address: walletAddress })).toThrow();
+	});
+
+	describe('signPsbt', () => {
+		// Private key 1 — its compressed public key is the secp256k1 generator point G. Using a known
+		// private key lets the signer mock produce a real signature bitcoinjs-lib can validate.
+		const privateKey = Uint8Array.from([...Array(31).fill(0), 1]);
+		const signerPubkey = Buffer.from(
+			'0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+			'hex'
+		);
+
+		const mainnetChainId = Object.keys(BIP122_CHAINS).find(
+			(key) => BIP122_CHAINS[key].networkId === BTC_MAINNET_NETWORK_ID
+		);
+		const testnetSignChainId = Object.keys(BIP122_CHAINS).find(
+			(key) => BIP122_CHAINS[key].networkId === BTC_TESTNET_NETWORK_ID
+		);
+		// Fail loudly here rather than silently testing the "missing chainId" path if BIP122_CHAINS changes.
+		assertNonNullish(mainnetChainId);
+		assertNonNullish(testnetSignChainId);
+
+		const buildSignRequest = ({
+			chainId,
+			params
+		}: {
+			chainId: string | undefined;
+			params: Record<string, unknown>;
+		}): WalletKitTypes.SessionRequest =>
+			({
+				id: 456,
+				topic: 'sign-topic',
+				params: {
+					chainId,
+					request: { method: 'signPsbt', params }
+				}
+			}) as unknown as WalletKitTypes.SessionRequest;
+
+		const buildOwnedPsbt = (psbtNetwork: typeof networks.bitcoin): string => {
+			const { output: ownScript } = payments.p2wpkh({ pubkey: signerPubkey, network: psbtNetwork });
+
+			const psbt = new Psbt({ network: psbtNetwork });
+			psbt.addInput({
+				hash: '0000000000000000000000000000000000000000000000000000000000000001',
+				index: 0,
+				witnessUtxo: { script: ownScript as Buffer, value: 100_000 }
+			});
+			psbt.addOutput({ script: ownScript as Buffer, value: 90_000 });
+
+			return psbt.toBase64();
+		};
+
+		const mockListener = {
+			pair: vi.fn(),
+			approveSession: vi.fn(),
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn(),
+			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
+			disconnect: vi.fn()
+		} as WalletConnectListener;
+
+		const modalNext = vi.fn();
+		const progress = vi.fn();
+
+		let spyToastsError: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+
+			vi.spyOn(btcWalletConnectUtils, 'deriveBtcPublicKey').mockReturnValue(
+				Uint8Array.from(signerPubkey)
+			);
+
+			vi.spyOn(signerApi, 'genericSignWithEcdsa').mockImplementation(async ({ messageHash }) =>
+				(await signSecp256k1Async(Uint8Array.from(messageHash), privateKey)).toCompactRawBytes()
+			);
+		});
+
+		it('rejects a signPsbt request on a non-mainnet (testnet) chain without signing', async () => {
+			const { address: testnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.testnet
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: testnetSignChainId,
+					params: { psbt: buildOwnedPsbt(networks.testnet), broadcast: false }
+				}),
+				address: testnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(modalNext).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_non_mainnet_sign_not_supported }
+			});
+		});
+
+		it('signs and approves an owned-input request on BTC mainnet', async () => {
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: { psbt: buildOwnedPsbt(networks.bitcoin), broadcast: false }
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: true });
+
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				message: { psbt: expect.any(String) }
+			});
+
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(signerApi.genericSignWithEcdsa).toHaveBeenCalledOnce();
+			expect(progress).toHaveBeenCalledWith(ProgressStepsSign.DONE);
+		});
 	});
 });
