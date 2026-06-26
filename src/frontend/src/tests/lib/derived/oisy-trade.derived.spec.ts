@@ -95,10 +95,16 @@ describe('oisy-trade.derived', () => {
 		it('resolves trade tokens to enabled IC tokens by ledger id', () => {
 			oisyTradeStore.set({
 				pairs: undefined,
-				supportedTokens: [tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }), tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })],
+				supportedTokens: [
+					tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+					tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
+				],
 				balances: undefined
 			});
-			mockEnabledIcTokens.set([icToken({ symbol: 'ICP', ledgerId: icpLedgerId }), icToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })]);
+			mockEnabledIcTokens.set([
+				icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+				icToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
+			]);
 
 			const resolved = get(oisyTradeIcTokenBySymbol);
 
@@ -110,7 +116,10 @@ describe('oisy-trade.derived', () => {
 		it('skips trade tokens with no matching enabled IC token', () => {
 			oisyTradeStore.set({
 				pairs: undefined,
-				supportedTokens: [tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }), tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })],
+				supportedTokens: [
+					tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+					tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
+				],
 				balances: undefined
 			});
 			// Only ICP is enabled.
@@ -126,10 +135,16 @@ describe('oisy-trade.derived', () => {
 			const otherLedgerId = 'mxzaz-hqaaa-aaaar-qaada-cai';
 			oisyTradeStore.set({
 				pairs: undefined,
-				supportedTokens: [tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }), tradeToken({ symbol: 'ICP', ledgerId: otherLedgerId })],
+				supportedTokens: [
+					tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+					tradeToken({ symbol: 'ICP', ledgerId: otherLedgerId })
+				],
 				balances: undefined
 			});
-			mockEnabledIcTokens.set([icToken({ symbol: 'ICP', ledgerId: icpLedgerId }), icToken({ symbol: 'ICP', ledgerId: otherLedgerId })]);
+			mockEnabledIcTokens.set([
+				icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+				icToken({ symbol: 'ICP', ledgerId: otherLedgerId })
+			]);
 
 			const resolved = get(oisyTradeIcTokenBySymbol);
 
