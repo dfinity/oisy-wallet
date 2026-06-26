@@ -268,10 +268,29 @@ describe('wallet-connect.providers', () => {
 				expect(id).toBe(mockProposal.id);
 				expect(namespaces).toEqual({});
 
-				// A BTC address is present, so the account addresses are exposed as a session property.
+				// A BTC mainnet address is present, so the account addresses are exposed as a session property.
 				expect(JSON.parse(sessionProperties.bip122_getAccountAddresses)).toEqual([
 					expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })
 				]);
+			});
+
+			it('should not expose bip122_getAccountAddresses when only testnet/regtest addresses are present', async () => {
+				const listener = await WalletConnectClient.init({
+					...mockParams,
+					btcAddressMainnet: undefined,
+					btcAddressTestnet: mockBtcAddress,
+					btcAddressRegtest: mockBtcAddress
+				});
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockApproveSession).toHaveBeenCalledOnce();
+
+				const [[{ sessionProperties }]] = mockApproveSession.mock.calls;
+
+				// Mainnet-only: with no mainnet address the account addresses are empty, so the session
+				// property is omitted entirely.
+				expect(sessionProperties?.bip122_getAccountAddresses).toBeUndefined();
 			});
 		});
 
