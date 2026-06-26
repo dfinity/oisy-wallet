@@ -1312,6 +1312,7 @@ interface I18nWallet_connect {
 		unknown_parameter: string;
 		wallet_not_initialized: string;
 		btc_broadcast_not_supported: string;
+		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
