@@ -229,9 +229,10 @@
 			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "게임",
+			"lending": "",
 			"nft": "NFT",
 			"rwa": "RWA",
-			"social_media": "소셜 미디어",
+			"social": "",
 			"staking": "스테이킹",
 			"tools": "도구",
 			"walletconnect": "WalletConnect"

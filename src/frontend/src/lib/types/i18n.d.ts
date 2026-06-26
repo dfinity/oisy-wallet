@@ -215,9 +215,10 @@ interface I18nDapps {
 		defi: string;
 		dex: string;
 		game: string;
+		lending: string;
 		nft: string;
 		rwa: string;
-		social_media: string;
+		social: string;
 		staking: string;
 		tools: string;
 		walletconnect: string;

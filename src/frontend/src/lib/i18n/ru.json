@@ -229,9 +229,10 @@
 			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "Игра",
+			"lending": "",
 			"nft": "NFT",
 			"rwa": "",
-			"social_media": "Социальные сети",
+			"social": "",
 			"staking": "Стейкинг",
 			"tools": "Инструменты",
 			"walletconnect": "WalletConnect"
