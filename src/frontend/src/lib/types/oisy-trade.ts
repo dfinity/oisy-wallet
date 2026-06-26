@@ -13,6 +13,22 @@ export interface OisyTradeStoreData {
 	balances: UserTokenBalance[] | undefined;
 }
 
+// A DEX balance entry resolved to the matching OISY token, ready for display in
+// the Trading tab "My assets" section.
+export interface OisyTradeAsset {
+	token: IcToken;
+	// Funds available for new orders or withdrawal.
+	free: bigint;
+	// Funds locked by open orders.
+	reserved: bigint;
+	// `free + reserved` — the total deposited on the DEX.
+	total: bigint;
+	// Fiat value of `total`, or undefined when no exchange rate is available.
+	totalUsd: number | undefined;
+	// Fiat value of `free`, or undefined when no exchange rate is available.
+	freeUsd: number | undefined;
+}
+
 // A DEX balance entry paired with the resolved OISY token (for the logo,
 // network, decimals and exchange rate the wallet already knows about). Used to
 // open the Withdraw flow with the token pre-selected.

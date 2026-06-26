@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	_SERVICE as OisyTradeService,
 	Token,
 	TradingPairInfo,
@@ -58,6 +60,21 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
 	};
 
+	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
+		const { deposit } = this.caller({ certified: true });
+
+		const response = await deposit(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		// `Err` is `{ kind, message }`; prefer the canister's message, else the
+		// single `kind` discriminant (a variant, so exactly one key — deterministic).
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
 	withdraw = async (request: WithdrawRequest): Promise<WithdrawResponse> => {
 		const { withdraw } = this.caller({ certified: true });
 
@@ -67,8 +84,6 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		// `Err` is `{ kind, message }`; prefer the canister's message, else the
-		// single `kind` discriminant (a variant, so exactly one key — deterministic).
 		const { kind, message } = response.Err;
 		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
 	};

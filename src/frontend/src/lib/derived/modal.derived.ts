@@ -72,6 +72,10 @@ export const modalLiquidiumSupply: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'liquidium-supply'
 );
+export const modalTradingDeposit: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'trading-deposit'
+);
 export const modalOisyTradeWithdraw: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'oisy-trade-withdraw'

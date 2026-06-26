@@ -345,6 +345,12 @@ export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
 // Trading
+export const TRADING_ASSETS_DEPOSIT_BUTTON = 'trading-assets-deposit-button';
+export const TRADING_ASSET_WITHDRAW_BUTTON = 'trading-asset-withdraw-button';
+export const TRADING_ONBOARDING_DEPOSIT_BUTTON = 'trading-onboarding-deposit-button';
+export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
+export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
+export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbox';
 export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';

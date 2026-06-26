@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	Token,
 	TradingPairInfo,
 	UserTokenBalance,
@@ -6,13 +8,13 @@ import type {
 	WithdrawResponse
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
+	deposit,
 	getBalances,
 	getTradingPairs,
 	listSupportedTokens,
 	withdraw
 } from '$lib/api/oisy-trade.api';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
-import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -24,80 +26,120 @@ describe('oisy-trade.api', () => {
 
 	const tokenId = { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
 
+	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
+	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
+	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
+
+	const request: DepositRequest = {
+		token_id: tokenId,
+		amount: 100n
+	};
+	const depositResponse: DepositResponse = { block_index: 7n };
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+
 		// eslint-disable-next-line require-await
 		vi.spyOn(OisyTradeCanister, 'create').mockImplementation(async () => oisyTradeCanisterMock);
-		vi.spyOn(appConstants, 'OISY_TRADE_CANISTER_ID', 'get').mockImplementation(
-			() => mockLedgerCanisterId
-		);
 	});
 
 	describe('getTradingPairs', () => {
-		it('delegates to the canister', async () => {
-			const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
+		it('delegates to the canister and returns its result', async () => {
 			oisyTradeCanisterMock.getTradingPairs.mockResolvedValue(pairs);
 
-			const result = await getTradingPairs({ identity: mockIdentity });
+			const result = await getTradingPairs({
+				identity: mockIdentity,
+				canisterId: mockLedgerCanisterId
+			});
 
 			expect(result).toEqual(pairs);
 			expect(oisyTradeCanisterMock.getTradingPairs).toHaveBeenCalledOnce();
 		});
 
-		it('throws without an identity', async () => {
+		it('throws when the identity is nullish', async () => {
 			await expect(getTradingPairs({ identity: null })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.getTradingPairs).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('listSupportedTokens', () => {
-		it('delegates to the canister', async () => {
-			const tokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
-			oisyTradeCanisterMock.listSupportedTokens.mockResolvedValue(tokens);
+		it('delegates to the canister and returns its result', async () => {
+			oisyTradeCanisterMock.listSupportedTokens.mockResolvedValue(supportedTokens);
 
-			const result = await listSupportedTokens({ identity: mockIdentity });
+			const result = await listSupportedTokens({
+				identity: mockIdentity,
+				canisterId: mockLedgerCanisterId
+			});
 
-			expect(result).toEqual(tokens);
+			expect(result).toEqual(supportedTokens);
 			expect(oisyTradeCanisterMock.listSupportedTokens).toHaveBeenCalledOnce();
 		});
 
-		it('throws without an identity', async () => {
+		it('throws when the identity is nullish', async () => {
 			await expect(listSupportedTokens({ identity: null })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.listSupportedTokens).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('getBalances', () => {
-		it('delegates to the canister', async () => {
-			const balances = [
-				{ token: { id: tokenId }, balance: { free: 10n, reserved: ZERO } }
-			] as unknown as UserTokenBalance[];
+		it('delegates to the canister and returns its result', async () => {
 			oisyTradeCanisterMock.getBalances.mockResolvedValue(balances);
 
-			const result = await getBalances({ identity: mockIdentity });
+			const result = await getBalances({
+				identity: mockIdentity,
+				canisterId: mockLedgerCanisterId
+			});
 
 			expect(result).toEqual(balances);
 			expect(oisyTradeCanisterMock.getBalances).toHaveBeenCalledOnce();
 		});
 
-		it('throws without an identity', async () => {
+		it('throws when the identity is nullish', async () => {
 			await expect(getBalances({ identity: null })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.getBalances).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('deposit', () => {
+		it('forwards the request to the canister and returns its result', async () => {
+			oisyTradeCanisterMock.deposit.mockResolvedValue(depositResponse);
+
+			const result = await deposit({
+				identity: mockIdentity,
+				request,
+				canisterId: mockLedgerCanisterId
+			});
+
+			expect(result).toEqual(depositResponse);
+			expect(oisyTradeCanisterMock.deposit).toHaveBeenCalledWith(request);
+		});
+
+		it('throws when the identity is nullish', async () => {
+			await expect(deposit({ identity: null, request })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.deposit).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('withdraw', () => {
-		const request: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
+		const withdrawRequest: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
 		const response: WithdrawResponse = { block_index: 42n };
 
 		it('delegates to the canister with the request', async () => {
 			oisyTradeCanisterMock.withdraw.mockResolvedValue(response);
 
-			const result = await withdraw({ identity: mockIdentity, request });
+			const result = await withdraw({
+				identity: mockIdentity,
+				request: withdrawRequest,
+				canisterId: mockLedgerCanisterId
+			});
 
 			expect(result).toEqual(response);
-			expect(oisyTradeCanisterMock.withdraw).toHaveBeenCalledExactlyOnceWith(request);
+			expect(oisyTradeCanisterMock.withdraw).toHaveBeenCalledExactlyOnceWith(withdrawRequest);
 		});
 
-		it('throws without an identity', async () => {
-			await expect(withdraw({ identity: null, request })).rejects.toThrow();
+		it('throws when the identity is nullish', async () => {
+			await expect(withdraw({ identity: null, request: withdrawRequest })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.withdraw).not.toHaveBeenCalled();
 		});
 	});
 });

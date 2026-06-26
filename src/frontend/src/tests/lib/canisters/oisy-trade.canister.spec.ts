@@ -1,4 +1,7 @@
 import type {
+	DepositRequest,
+	DepositResponse,
+	GetBalancesResult,
 	_SERVICE as OisyTradeService,
 	Token,
 	TradingPairInfo,
@@ -10,6 +13,7 @@ import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -22,33 +26,44 @@ describe('oisy-trade.canister', () => {
 		'serviceOverride'
 	>): Promise<OisyTradeCanister> =>
 		OisyTradeCanister.create({
-			canisterId: Principal.fromText('vi6cu-aiaaa-aaaad-aad7q-cai'),
+			canisterId: Principal.fromText('4mmnk-kiaaa-aaaag-qbllq-cai'),
 			identity: mockIdentity,
-			certifiedServiceOverride: serviceOverride,
-			serviceOverride
+			serviceOverride,
+			certifiedServiceOverride: serviceOverride
 		});
 
 	const service = mock<ActorSubclass<OisyTradeService>>();
-	const mockResponseError = new Error('Test response error');
+	const mockResponseError = new Error('OISY TRADE error');
 
 	const tokenId = { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+
+	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
+	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
+	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
+
+	const request: DepositRequest = {
+		token_id: tokenId,
+		amount: 100n
+	};
+	const depositResponse: DepositResponse = { block_index: 7n };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
 	describe('getTradingPairs', () => {
-		it('returns the trading pairs', async () => {
-			const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
+		it('returns the trading pairs from the uncertified service', async () => {
 			service.get_trading_pairs.mockResolvedValue(pairs);
 
 			const { getTradingPairs } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getTradingPairs()).resolves.toEqual(pairs);
+			const result = await getTradingPairs();
+
+			expect(result).toEqual(pairs);
 			expect(service.get_trading_pairs).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('throws when get_trading_pairs throws', async () => {
+		it('throws when the service rejects', async () => {
 			service.get_trading_pairs.mockRejectedValue(mockResponseError);
 
 			const { getTradingPairs } = await createOisyTradeCanister({ serviceOverride: service });
@@ -58,17 +73,18 @@ describe('oisy-trade.canister', () => {
 	});
 
 	describe('listSupportedTokens', () => {
-		it('returns the supported tokens', async () => {
-			const tokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
-			service.list_supported_tokens.mockResolvedValue(tokens);
+		it('returns the supported tokens from the uncertified service', async () => {
+			service.list_supported_tokens.mockResolvedValue(supportedTokens);
 
 			const { listSupportedTokens } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(listSupportedTokens()).resolves.toEqual(tokens);
+			const result = await listSupportedTokens();
+
+			expect(result).toEqual(supportedTokens);
 			expect(service.list_supported_tokens).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		it('throws when list_supported_tokens throws', async () => {
+		it('throws when the service rejects', async () => {
 			service.list_supported_tokens.mockRejectedValue(mockResponseError);
 
 			const { listSupportedTokens } = await createOisyTradeCanister({ serviceOverride: service });
@@ -78,40 +94,41 @@ describe('oisy-trade.canister', () => {
 	});
 
 	describe('getBalances', () => {
-		const balances = [
-			{ token: { id: tokenId }, balance: { free: 10n, reserved: ZERO } }
-		] as unknown as UserTokenBalance[];
-
-		it('returns the balances on Ok and passes an empty filter', async () => {
-			service.get_balances.mockResolvedValue({ Ok: balances });
+		it('passes an empty filter and unwraps the Ok variant', async () => {
+			const okResult: GetBalancesResult = { Ok: balances };
+			service.get_balances.mockResolvedValue(okResult);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getBalances()).resolves.toEqual(balances);
-			expect(service.get_balances).toHaveBeenCalledExactlyOnceWith([]);
+			const result = await getBalances();
+
+			expect(result).toEqual(balances);
+			expect(service.get_balances).toHaveBeenCalledWith([]);
 		});
 
-		it('throws the canister message when present on Err', async () => {
-			service.get_balances.mockResolvedValue({
-				Err: { kind: { InternalError: [] }, message: ['boom'] }
-			});
+		it('throws the canister message when the Err variant carries one', async () => {
+			const errResult = {
+				Err: { kind: { TemporaryError: [] }, message: toNullable('balances unavailable') }
+			} as unknown as GetBalancesResult;
+			service.get_balances.mockResolvedValue(errResult);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getBalances()).rejects.toThrow('boom');
+			await expect(getBalances()).rejects.toThrow('balances unavailable');
 		});
 
 		it('falls back to the kind discriminant when the Err message is empty', async () => {
-			service.get_balances.mockResolvedValue({
-				Err: { kind: { TemporaryError: [] }, message: [] }
-			});
+			const errResult = {
+				Err: { kind: { TemporaryError: [] }, message: toNullable<string>(undefined) }
+			} as unknown as GetBalancesResult;
+			service.get_balances.mockResolvedValue(errResult);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
 			await expect(getBalances()).rejects.toThrow('TemporaryError');
 		});
 
-		it('throws when get_balances throws', async () => {
+		it('throws when the service rejects', async () => {
 			service.get_balances.mockRejectedValue(mockResponseError);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
@@ -120,8 +137,49 @@ describe('oisy-trade.canister', () => {
 		});
 	});
 
+	describe('deposit', () => {
+		it('forwards the request to the certified service and unwraps the Ok variant', async () => {
+			service.deposit.mockResolvedValue({ Ok: depositResponse });
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			const result = await deposit(request);
+
+			expect(result).toEqual(depositResponse);
+			expect(service.deposit).toHaveBeenCalledWith(request);
+		});
+
+		it('throws the canister message when the Err variant carries one', async () => {
+			service.deposit.mockResolvedValue({
+				Err: { kind: { InvalidRequest: [] }, message: toNullable('amount too small') }
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(request)).rejects.toThrow('amount too small');
+		});
+
+		it('falls back to the kind discriminant when the Err message is empty', async () => {
+			service.deposit.mockResolvedValue({
+				Err: { kind: { InvalidRequest: [] }, message: toNullable<string>(undefined) }
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(request)).rejects.toThrow('InvalidRequest');
+		});
+
+		it('throws when the service rejects', async () => {
+			service.deposit.mockRejectedValue(mockResponseError);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(request)).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('withdraw', () => {
-		const request: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
+		const withdrawRequest: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
 		const response: WithdrawResponse = { block_index: 42n };
 
 		it('returns the response on Ok and forwards the request', async () => {
@@ -129,8 +187,8 @@ describe('oisy-trade.canister', () => {
 
 			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(withdraw(request)).resolves.toEqual(response);
-			expect(service.withdraw).toHaveBeenCalledExactlyOnceWith(request);
+			await expect(withdraw(withdrawRequest)).resolves.toEqual(response);
+			expect(service.withdraw).toHaveBeenCalledExactlyOnceWith(withdrawRequest);
 		});
 
 		it('throws the canister message when present on Err', async () => {
@@ -143,7 +201,7 @@ describe('oisy-trade.canister', () => {
 
 			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(withdraw(request)).rejects.toThrow('no funds');
+			await expect(withdraw(withdrawRequest)).rejects.toThrow('no funds');
 		});
 
 		it('falls back to the kind discriminant when the Err message is empty', async () => {
@@ -153,7 +211,7 @@ describe('oisy-trade.canister', () => {
 
 			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(withdraw(request)).rejects.toThrow('RequestError');
+			await expect(withdraw(withdrawRequest)).rejects.toThrow('RequestError');
 		});
 
 		it('throws when withdraw throws', async () => {
@@ -161,7 +219,7 @@ describe('oisy-trade.canister', () => {
 
 			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(withdraw(request)).rejects.toThrow(mockResponseError);
+			await expect(withdraw(withdrawRequest)).rejects.toThrow(mockResponseError);
 		});
 	});
 });

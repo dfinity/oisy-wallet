@@ -104,6 +104,14 @@ export enum WizardStepsClaimStakingReward {
 	CLAIMING = 'Claiming'
 }
 
+export enum WizardStepsTradingDeposit {
+	DEPOSIT = 'Deposit',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
+	REVIEW = 'Review',
+	DEPOSITING = 'Depositing'
+}
+
 export const WizardStepsGetToken = {
 	GET_TOKEN: 'Get Token',
 	RECEIVE: 'Receive',
