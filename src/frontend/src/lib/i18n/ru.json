@@ -353,6 +353,15 @@
 					"call_to_action": "Попробовать KongSwap"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "Платформа GameFi на BNB Chain, сочетающая Free-to-Play игры, доходное фермерство в DeFi и механики NFT — с поддержкой play-to-earn и управлением сообществом.",

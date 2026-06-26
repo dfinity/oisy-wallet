@@ -264,6 +264,12 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		caffeine2: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };

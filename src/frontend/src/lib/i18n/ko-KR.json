@@ -353,6 +353,15 @@
 					"call_to_action": "더 알아보기"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "플레이 투 언과 커뮤니티 거버넌스를 기반으로 무료 플레이 게임, DeFi 수익 파밍, NFT 메커니즘을 결합한 BNB 체인의 GameFi 플랫폼.",

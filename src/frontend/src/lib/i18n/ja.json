@@ -353,6 +353,15 @@
 					"call_to_action": "詳細を見る"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "BNBチェーン上のGameFiプラットフォーム - Free-to-Playゲーム、DeFi収益農業、NFTメカニクスを統合",

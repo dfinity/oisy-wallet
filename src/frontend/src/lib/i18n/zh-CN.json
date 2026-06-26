@@ -353,6 +353,15 @@
 					"call_to_action": "了解更多"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "一个基于 BNB Chain 的 GameFi 平台，融合了免费游玩（Free-to-Play）游戏、DeFi 收益挖矿和 NFT 机制——由边玩边赚和社区治理驱动。",

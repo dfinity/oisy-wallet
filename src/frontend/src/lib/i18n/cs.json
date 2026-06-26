@@ -353,6 +353,15 @@
 					"call_to_action": "Zjistit více"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "GameFi platforma na síti BNB Chain, která propojuje free-to-play hry, DeFi výnosy a NFT mechaniky.",

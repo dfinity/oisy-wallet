@@ -353,6 +353,15 @@
 					"call_to_action": "En savoir plus"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "Une plateforme GameFi sur la BNB Chain qui fusionne le jeu Free-to-Play, le yield farming DeFi et les mécaniques NFT — propulsée par le play-to-earn et la gouvernance communautaire.",

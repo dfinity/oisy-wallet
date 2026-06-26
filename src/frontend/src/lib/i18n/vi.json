@@ -353,6 +353,15 @@
 					"call_to_action": "Tìm hiểu thêm"
 				}
 			},
+			"caffeine2": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
 			"mobox": {
 				"name": "",
 				"one_liner": "",
