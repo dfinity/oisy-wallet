@@ -129,10 +129,19 @@ describe('liquidium.utils', () => {
 			).toBe(100);
 		});
 
-		it('is 100 when there are no positions (zero threshold)', () => {
+		it('is 100 when there are no positions (zero debt and zero threshold)', () => {
 			expect(
 				liquidiumHealthFactorPercent({ currentLtvBps: ZERO, weightedLiquidationThresholdBps: ZERO })
 			).toBe(100);
+		});
+
+		it('is 0 when there is debt but no threshold (bad/edge payload)', () => {
+			expect(
+				liquidiumHealthFactorPercent({
+					currentLtvBps: 4_000n,
+					weightedLiquidationThresholdBps: ZERO
+				})
+			).toBe(0);
 		});
 
 		it('clamps to 0 at/above the liquidation threshold', () => {

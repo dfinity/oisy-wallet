@@ -1,4 +1,5 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
 	LIQUIDIUM_HEALTH_AT_RISK_PERCENT,
@@ -38,7 +39,10 @@ export const liquidiumHealthFactorPercent = ({
 	const threshold = Number(weightedLiquidationThresholdBps);
 
 	if (threshold <= 0) {
-		return 100;
+		// No threshold to compute against: healthy only when there's also no debt. Debt with a
+		// missing/zero threshold is a bad/edge payload — surface it as fully at-risk rather than
+		// masking it as a healthy 100%.
+		return currentLtvBps > ZERO ? 0 : 100;
 	}
 
 	return Math.min(100, Math.max(0, (1 - Number(currentLtvBps) / threshold) * 100));
