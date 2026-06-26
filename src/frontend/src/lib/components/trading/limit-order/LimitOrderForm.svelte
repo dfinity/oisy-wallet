@@ -103,12 +103,14 @@
 
 	const onBaseInput = (value: string) => {
 		baseAmount = nonNullish(pairView)
-			? limitDecimals(value, decimalsOfStep(pairView.lotSize))
+			? limitDecimals({ raw: value, maxDecimals: decimalsOfStep(pairView.lotSize) })
 			: value;
 	};
 
 	const onPriceInput = (value: string) => {
-		price = nonNullish(pairView) ? limitDecimals(value, decimalsOfStep(pairView.tickSize)) : value;
+		price = nonNullish(pairView)
+			? limitDecimals({ raw: value, maxDecimals: decimalsOfStep(pairView.tickSize) })
+			: value;
 		// A manual edit clears any preset highlight; LimitOrderPriceSection re-derives it.
 		activePreset = null;
 	};

@@ -61,7 +61,7 @@ export const decimalsOfStep = (step: number): number => {
 
 // True when `value` is a positive integer multiple of `step` (with a small
 // tolerance for float drift). Zero/negative are not valid multiples here.
-export const isMultipleOfStep = (value: number, step: number): boolean => {
+export const isMultipleOfStep = ({ value, step }: { value: number; step: number }): boolean => {
 	if (!(value > 0) || !(step > 0)) {
 		return false;
 	}
@@ -70,7 +70,7 @@ export const isMultipleOfStep = (value: number, step: number): boolean => {
 };
 
 // Largest valid `step` multiple ≤ value (used by the Max links).
-export const floorToStep = (value: number, step: number): number => {
+export const floorToStep = ({ value, step }: { value: number; step: number }): number => {
 	if (!(value > 0) || !(step > 0)) {
 		return 0;
 	}
@@ -80,7 +80,13 @@ export const floorToStep = (value: number, step: number): number => {
 
 // Trim a typed string to at most `maxDecimals` fractional digits, dropping any
 // non-numeric characters. Mirrors the keystroke-level decimal cap on the field.
-export const limitDecimals = (raw: string, maxDecimals: number): string => {
+export const limitDecimals = ({
+	raw,
+	maxDecimals
+}: {
+	raw: string;
+	maxDecimals: number;
+}): string => {
 	const cleaned = raw.replace(/[^0-9.]/g, '');
 	const dotIndex = cleaned.indexOf('.');
 	if (dotIndex < 0) {
@@ -217,7 +223,7 @@ export const validateAmount = ({
 		return { ok: false, errorKind: 'balance' };
 	}
 
-	if (!isMultipleOfStep(baseAmount, pair.lotSize)) {
+	if (!isMultipleOfStep({ value: baseAmount, step: pair.lotSize })) {
 		return { ok: false, errorKind: 'lot' };
 	}
 
@@ -241,7 +247,7 @@ export const validatePrice = ({
 }: {
 	price: number;
 	pair: LimitOrderPairView;
-}): boolean => isMultipleOfStep(price, pair.tickSize);
+}): boolean => isMultipleOfStep({ value: price, step: pair.tickSize });
 
 // Whole-form gate: both fields positive + on their grid + notional in bounds +
 // affordable, and — when FOK is on — the price must cross the book (else it
@@ -296,12 +302,12 @@ export const maxSpendBaseAmount = ({
 	pair: LimitOrderPairView;
 }): number | null => {
 	if (side === 'sell') {
-		return floorToStep(freeBase, pair.lotSize);
+		return floorToStep({ value: freeBase, step: pair.lotSize });
 	}
 	if (!(price > 0)) {
 		return null;
 	}
-	return floorToStep(freeQuote / price, pair.lotSize);
+	return floorToStep({ value: freeQuote / price, step: pair.lotSize });
 };
 
 // ---------------------------------------------------------------------------
@@ -311,7 +317,7 @@ export const maxSpendBaseAmount = ({
 
 export type PricePreset = 'book' | 0 | 1 | 5;
 
-const snapToTick = (price: number, tickSize: number): number =>
+const snapToTick = ({ price, tickSize }: { price: number; tickSize: number }): number =>
 	parseFloat((Math.round(price / tickSize) * tickSize).toFixed(decimalsOfStep(tickSize)));
 
 // The price a preset would set right now, snapped to the tick. Returns null
@@ -349,7 +355,7 @@ export const presetTargetPrice = ({
 	if (raw === null || !(raw > 0)) {
 		return null;
 	}
-	return snapToTick(raw, tickSize);
+	return snapToTick({ price: raw, tickSize });
 };
 
 // A preset reads "selected" only while the price still equals its target; a
