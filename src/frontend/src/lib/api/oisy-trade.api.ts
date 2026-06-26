@@ -1,6 +1,7 @@
 import type {
 	DepositRequest,
 	DepositResponse,
+	GetMyOrdersArgs,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	OrderBookDepth,
@@ -9,6 +10,7 @@ import type {
 	Token,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance,
 	WithdrawRequest,
 	WithdrawResponse
@@ -121,6 +123,21 @@ export const getOrderBookDepth = async ({
 	});
 
 	return getOrderBookDepth(request);
+};
+
+export const getMyOrders = async ({
+	args,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { args: GetMyOrdersArgs }): Promise<UserOrder[]> => {
+	const { getMyOrders } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getMyOrders(args);
 };
 
 export const addLimitOrder = async ({

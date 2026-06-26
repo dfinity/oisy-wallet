@@ -1725,7 +1725,20 @@
 		},
 		"orders": {
 			"title": "Orders",
-			"add_limit_order": "+ Limit order"
+			"add_limit_order": "+ Limit order",
+			"tab_active": "Active",
+			"tab_history": "History",
+			"empty_active": "No active orders",
+			"empty_history": "No past orders",
+			"side_sell": "Sell",
+			"side_buy": "Buy",
+			"row_sell": "$quantity $base for $quote at $price",
+			"row_buy": "$base with $quote_amount $quote at $price",
+			"status_open": "Open",
+			"status_pending": "Pending",
+			"status_filled": "Filled",
+			"status_canceled": "Canceled",
+			"status_expired": "Expired"
 		},
 		"limit_order": {
 			"title": "Limit order",

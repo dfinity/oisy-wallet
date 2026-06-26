@@ -1,6 +1,7 @@
 import type {
 	DepositRequest,
 	DepositResponse,
+	GetMyOrdersArgs,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
@@ -10,6 +11,7 @@ import type {
 	Token,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance,
 	WithdrawRequest,
 	WithdrawResponse
@@ -109,6 +111,19 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		const { get_order_book_depth } = this.caller({ certified: false });
 
 		const response = await get_order_book_depth(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	getMyOrders = async (args: GetMyOrdersArgs): Promise<UserOrder[]> => {
+		const { get_my_orders } = this.caller({ certified: false });
+
+		const response = await get_my_orders([args]);
 
 		if ('Ok' in response) {
 			return response.Ok;

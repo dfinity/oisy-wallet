@@ -3,6 +3,7 @@ import type {
 	OrderBookTicker,
 	Token,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
@@ -13,7 +14,27 @@ export interface OisyTradeStoreData {
 	pairs: TradingPairInfo[] | undefined;
 	supportedTokens: Token[] | undefined;
 	balances: UserTokenBalance[] | undefined;
+	orders: UserOrder[] | undefined;
 }
+
+// One of the caller's orders resolved to OISY tokens, with amounts in human
+// units, ready to render in the Orders Active/History list.
+export interface OisyTradeOrderView {
+	id: string;
+	side: 'buy' | 'sell';
+	base: IcToken;
+	quote: IcToken;
+	// Order quantity in whole base tokens.
+	quantity: number;
+	// Limit price in whole quote tokens per one whole base token.
+	price: number;
+	// Cumulative filled quantity in whole base tokens.
+	filledQuantity: number;
+	status: OisyTradeOrderStatus;
+}
+
+// The five candid `OrderStatus` discriminants, flattened to a string union.
+export type OisyTradeOrderStatus = 'Pending' | 'Open' | 'Filled' | 'Canceled' | 'Expired';
 
 // A DEX balance entry resolved to the matching OISY token, ready for display in
 // the Trading tab "My assets" section.

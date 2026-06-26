@@ -1,17 +1,25 @@
 import type {
 	Token as OisyTradeToken,
+	OrderStatus,
 	PriceLevel,
 	Side,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type {
+	OisyTradeAsset,
+	OisyTradeOrderStatus,
+	OisyTradeOrderView,
+	OisyTradeWithdrawToken
+} from '$lib/types/oisy-trade';
+import type { BadgeVariant } from '$lib/types/style';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
 // The distinct union of every base and quote token symbol across the trading
 // pairs — the set of tokens OISY TRADE supports. Used for the onboarding chips
@@ -605,6 +613,81 @@ export const toPriceUnits = ({
 // Candid `Side` from the form side.
 export const toCandidSide = (side: LimitOrderSide): Side =>
 	side === 'sell' ? { Sell: null } : { Buy: null };
+
+// ---------------------------------------------------------------------------
+// Orders — read-side view models for the Active/History list.
+// ---------------------------------------------------------------------------
+
+// The candid `OrderStatus` variant flattened to its single discriminant.
+const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
+	Object.keys(status)[0] as OisyTradeOrderStatus;
+
+// Resolve a `UserOrder` to OISY tokens (by ledger canister id, like the rest of
+// the Trading tab) and scale amounts to human units. Orders whose base or quote
+// ledger the wallet doesn't know are dropped — nothing to render them with.
+export const mapOisyTradeOrder = ({
+	order: { id, pair, order },
+	tokens
+}: {
+	order: UserOrder;
+	tokens: IcToken[];
+}): OisyTradeOrderView | undefined => {
+	const byLedger = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+
+	const base = byLedger.get(pair.base.toText());
+	const quote = byLedger.get(pair.quote.toText());
+
+	if (isNullish(base) || isNullish(quote)) {
+		return undefined;
+	}
+
+	const { side, price, quantity, filled_quantity, status } = order;
+
+	return {
+		id,
+		side: 'Sell' in side ? 'sell' : 'buy',
+		base,
+		quote,
+		// quantity / filled_quantity are base smallest units; price is quote
+		// smallest units per WHOLE base token.
+		quantity: Number(quantity) / 10 ** base.decimals,
+		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
+		price: Number(price) / 10 ** quote.decimals,
+		status: orderStatusKey(status)
+	};
+};
+
+// Map a list of `UserOrder`s to view models, dropping any whose tokens can't be
+// resolved (preserving the canister's newest-first order).
+export const mapOisyTradeOrders = ({
+	orders,
+	tokens
+}: {
+	orders: UserOrder[];
+	tokens: IcToken[];
+}): OisyTradeOrderView[] =>
+	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+
+// Status → display: the i18n label key (under `trading.orders.status`) and the
+// `Badge` pill variant. Open/Pending read as neutral-info, Filled as success,
+// Canceled as a muted default, and Expired as a distinct amber/warning pill.
+export const orderStatusView = (
+	status: OisyTradeOrderStatus
+): { labelKey: OisyTradeOrderStatus; pillVariant: BadgeVariant } => {
+	const pillVariant: Record<OisyTradeOrderStatus, BadgeVariant> = {
+		Open: 'info',
+		Pending: 'info',
+		Filled: 'success',
+		Canceled: 'default',
+		Expired: 'warning'
+	};
+
+	return { labelKey: status, pillVariant: pillVariant[status] };
+};
+
+// True when the order is still working (Active tab): Pending or Open.
+export const isOisyTradeOrderActive = ({ status }: OisyTradeOrderView): boolean =>
+	status === 'Pending' || status === 'Open';
 
 // A `PriceLevel` price scaled to human quote-per-base.
 export const priceLevelToHuman = ({

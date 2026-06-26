@@ -2,6 +2,7 @@ import type {
 	Token,
 	TokenId,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
@@ -17,6 +18,7 @@ vi.mock('$lib/api/oisy-trade.api', () => ({
 	getTradingPairs: vi.fn(),
 	listSupportedTokens: vi.fn(),
 	getBalances: vi.fn(),
+	getMyOrders: vi.fn(),
 	withdraw: vi.fn()
 }));
 
@@ -24,6 +26,7 @@ describe('oisy-trade.services', () => {
 	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
 	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
 	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
+	const orders = [{ id: 'order-1' }] as unknown as UserOrder[];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -31,27 +34,39 @@ describe('oisy-trade.services', () => {
 		vi.mocked(oisyTradeApi.getTradingPairs).mockResolvedValue(pairs);
 		vi.mocked(oisyTradeApi.listSupportedTokens).mockResolvedValue(supportedTokens);
 		vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(balances);
+		vi.mocked(oisyTradeApi.getMyOrders).mockResolvedValue(orders);
 		vi.mocked(oisyTradeApi.withdraw).mockResolvedValue({ block_index: 1n });
 	});
 
 	describe('loadOisyTrade', () => {
 		it('resets the store and does not call the canister when there is no identity', async () => {
-			oisyTradeStore.set({ pairs, supportedTokens, balances });
+			oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
 
 			await loadOisyTrade({ identity: null });
 
 			expect(get(oisyTradeStore)).toEqual({
 				pairs: undefined,
 				supportedTokens: undefined,
-				balances: undefined
+				balances: undefined,
+				orders: undefined
 			});
 			expect(oisyTradeApi.getTradingPairs).not.toHaveBeenCalled();
 		});
 
-		it('loads pairs, supported tokens and balances into the store', async () => {
+		it('loads pairs, supported tokens, balances and orders into the store', async () => {
 			await loadOisyTrade({ identity: mockIdentity });
 
-			expect(get(oisyTradeStore)).toEqual({ pairs, supportedTokens, balances });
+			expect(get(oisyTradeStore)).toEqual({ pairs, supportedTokens, balances, orders });
+		});
+
+		it('requests the newest orders page (no cursor, length 100)', async () => {
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(oisyTradeApi.getMyOrders).toHaveBeenCalledWith(
+				expect.objectContaining({
+					args: { filter: { ByPage: { after: [], length: 100 } } }
+				})
+			);
 		});
 
 		it('swallows canister errors and leaves the store unchanged', async () => {
@@ -62,7 +77,8 @@ describe('oisy-trade.services', () => {
 			expect(get(oisyTradeStore)).toEqual({
 				pairs: undefined,
 				supportedTokens: undefined,
-				balances: undefined
+				balances: undefined,
+				orders: undefined
 			});
 		});
 	});

@@ -1725,7 +1725,20 @@
 		},
 		"orders": {
 			"title": "",
-			"add_limit_order": ""
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "",
+			"empty_history": "",
+			"side_sell": "",
+			"side_buy": "",
+			"row_sell": "",
+			"row_buy": "",
+			"status_open": "",
+			"status_pending": "",
+			"status_filled": "",
+			"status_canceled": "",
+			"status_expired": ""
 		},
 		"limit_order": {
 			"title": "",

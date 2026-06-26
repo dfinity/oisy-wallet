@@ -1,6 +1,7 @@
 import type {
 	Token,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
@@ -9,10 +10,16 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type {
+	OisyTradeAsset,
+	OisyTradeOrderView,
+	OisyTradeWithdrawToken
+} from '$lib/types/oisy-trade';
 import {
+	isOisyTradeOrderActive,
 	oisyTradeDepositableTokens as mapDepositableTokens,
 	mapOisyTradeAssets,
+	mapOisyTradeOrders,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
 	sumOisyTradeAssetsUsd,
 	toOisyTradeWithdrawTokens
@@ -33,6 +40,30 @@ export const oisyTradeSupportedTokens: Readable<Token[]> = derived(
 export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 	oisyTradeStore,
 	({ balances }) => balances ?? []
+);
+
+const oisyTradeRawOrders: Readable<UserOrder[]> = derived(
+	oisyTradeStore,
+	({ orders }) => orders ?? []
+);
+
+// The caller's orders resolved to OISY tokens, newest first. Orders whose
+// base/quote ledger the wallet doesn't know are dropped.
+export const oisyTradeOrders: Readable<OisyTradeOrderView[]> = derived(
+	[oisyTradeRawOrders, enabledIcTokens],
+	([$orders, $enabledIcTokens]) => mapOisyTradeOrders({ orders: $orders, tokens: $enabledIcTokens })
+);
+
+// Working orders (Active tab): status Pending or Open.
+export const oisyTradeActiveOrders: Readable<OisyTradeOrderView[]> = derived(
+	oisyTradeOrders,
+	($orders) => $orders.filter(isOisyTradeOrderActive)
+);
+
+// Terminal orders (History tab): status Filled, Canceled or Expired.
+export const oisyTradeHistoryOrders: Readable<OisyTradeOrderView[]> = derived(
+	oisyTradeOrders,
+	($orders) => $orders.filter((order) => !isOisyTradeOrderActive(order))
 );
 
 // The distinct union of base + quote token symbols across all trading pairs —

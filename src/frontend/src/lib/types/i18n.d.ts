@@ -1384,7 +1384,23 @@ interface I18nTrading {
 		progress_done: string;
 		error: string;
 	};
-	orders: { title: string; add_limit_order: string };
+	orders: {
+		title: string;
+		add_limit_order: string;
+		tab_active: string;
+		tab_history: string;
+		empty_active: string;
+		empty_history: string;
+		side_sell: string;
+		side_buy: string;
+		row_sell: string;
+		row_buy: string;
+		status_open: string;
+		status_pending: string;
+		status_filled: string;
+		status_canceled: string;
+		status_expired: string;
+	};
 	limit_order: {
 		title: string;
 		review_title: string;

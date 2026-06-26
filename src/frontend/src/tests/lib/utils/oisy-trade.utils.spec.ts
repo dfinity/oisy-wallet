@@ -1,11 +1,13 @@
 import type {
 	Token as OisyTradeToken,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { OisyTradeOrderStatus } from '$lib/types/oisy-trade';
 import {
 	type LimitOrderPairView,
 	crossesBook,
@@ -15,14 +17,18 @@ import {
 	feeBpsToPercent,
 	floorToStep,
 	isMultipleOfStep,
+	isOisyTradeOrderActive,
 	isOrderValid,
 	isPresetSelected,
 	limitDecimals,
 	mapOisyTradeAssets,
+	mapOisyTradeOrder,
+	mapOisyTradeOrders,
 	maxSpendBaseAmount,
 	oisyTradeAssetHasReserved,
 	oisyTradeDepositableTokens,
 	oisyTradeSupportedTokenSymbols,
+	orderStatusView,
 	presetTargetPrice,
 	queuePositionDisplay,
 	queuePositionFraction,
@@ -38,6 +44,7 @@ import {
 } from '$lib/utils/oisy-trade.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 const mockLedgerId = mockValidIcToken.ledgerCanisterId;
@@ -579,6 +586,191 @@ describe('oisy-trade.utils — limit order', () => {
 		it('toQuantity / toPriceUnits scale to smallest units', () => {
 			expect(toQuantity({ baseAmount: 0.25, baseDecimals: 8 })).toBe(25_000_000n);
 			expect(toPriceUnits({ price: 2.69, quoteDecimals: 6 })).toBe(2_690_000n);
+		});
+	});
+});
+
+describe('oisy-trade.utils — orders', () => {
+	const baseLedgerId = mockValidIcToken.ledgerCanisterId;
+	const quoteLedgerId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
+	const baseToken: IcToken = {
+		...mockValidIcToken,
+		symbol: 'ICP',
+		decimals: 8,
+		ledgerCanisterId: baseLedgerId
+	};
+	const quoteToken: IcToken = {
+		...mockValidIcToken,
+		id: parseTokenId('QuoteTokenId'),
+		symbol: 'ckUSDC',
+		decimals: 6,
+		ledgerCanisterId: quoteLedgerId
+	};
+
+	const tokens = [baseToken, quoteToken];
+
+	const buildOrder = ({
+		id = 'order-1',
+		side,
+		price,
+		quantity,
+		filledQuantity = ZERO,
+		status,
+		base = baseLedgerId,
+		quote = quoteLedgerId
+	}: {
+		id?: string;
+		side: 'Buy' | 'Sell';
+		price: bigint;
+		quantity: bigint;
+		filledQuantity?: bigint;
+		status: OisyTradeOrderStatus;
+		base?: string;
+		quote?: string;
+	}): UserOrder =>
+		({
+			id,
+			pair: { base: Principal.fromText(base), quote: Principal.fromText(quote) },
+			order: {
+				side: { [side]: null },
+				price,
+				quantity,
+				filled_quantity: filledQuantity,
+				status: { [status]: null }
+			}
+		}) as unknown as UserOrder;
+
+	describe('mapOisyTradeOrder', () => {
+		it('maps a sell order, scaling amounts to human units by ledger', () => {
+			// 100 ICP at 2.75 ckUSDC/ICP. quantity in base (8 dp); price in quote (6 dp).
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Sell',
+					quantity: 100n * 100_000_000n,
+					price: 2_750_000n,
+					filledQuantity: 25n * 100_000_000n,
+					status: 'Open'
+				}),
+				tokens
+			});
+
+			expect(view).toEqual({
+				id: 'order-1',
+				side: 'sell',
+				base: baseToken,
+				quote: quoteToken,
+				quantity: 100,
+				price: 2.75,
+				filledQuantity: 25,
+				status: 'Open'
+			});
+		});
+
+		it('maps a buy order', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Buy',
+					quantity: 50n * 100_000_000n,
+					price: 2_600_000n,
+					status: 'Pending'
+				}),
+				tokens
+			});
+
+			expect(view?.side).toBe('buy');
+			expect(view?.quantity).toBe(50);
+			expect(view?.price).toBe(2.6);
+			expect(view?.status).toBe('Pending');
+		});
+
+		it('drops an order whose base ledger cannot be resolved', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Sell',
+					quantity: 100n,
+					price: 1n,
+					status: 'Open',
+					base: 'aaaaa-aa'
+				}),
+				tokens
+			});
+
+			expect(view).toBeUndefined();
+		});
+
+		it('drops an order whose quote ledger cannot be resolved', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Buy',
+					quantity: 100n,
+					price: 1n,
+					status: 'Open',
+					quote: 'aaaaa-aa'
+				}),
+				tokens
+			});
+
+			expect(view).toBeUndefined();
+		});
+	});
+
+	describe('mapOisyTradeOrders', () => {
+		it('maps resolvable orders and drops unresolvable ones, preserving order', () => {
+			const orders = [
+				buildOrder({ id: 'a', side: 'Sell', quantity: 100n, price: 1n, status: 'Open' }),
+				buildOrder({
+					id: 'b',
+					side: 'Buy',
+					quantity: 100n,
+					price: 1n,
+					status: 'Filled',
+					base: 'aaaaa-aa'
+				}),
+				buildOrder({ id: 'c', side: 'Buy', quantity: 100n, price: 1n, status: 'Pending' })
+			];
+
+			const views = mapOisyTradeOrders({ orders, tokens });
+
+			expect(views.map(({ id }) => id)).toEqual(['a', 'c']);
+		});
+	});
+
+	describe('orderStatusView', () => {
+		it('maps every status to its label key and pill variant', () => {
+			expect(orderStatusView('Open')).toEqual({ labelKey: 'Open', pillVariant: 'info' });
+			expect(orderStatusView('Pending')).toEqual({ labelKey: 'Pending', pillVariant: 'info' });
+			expect(orderStatusView('Filled')).toEqual({ labelKey: 'Filled', pillVariant: 'success' });
+			expect(orderStatusView('Canceled')).toEqual({
+				labelKey: 'Canceled',
+				pillVariant: 'default'
+			});
+			// Expired is a distinct amber/warning pill.
+			expect(orderStatusView('Expired')).toEqual({
+				labelKey: 'Expired',
+				pillVariant: 'warning'
+			});
+		});
+	});
+
+	describe('isOisyTradeOrderActive', () => {
+		const activeFor = (status: OisyTradeOrderStatus): boolean => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({ side: 'Sell', quantity: 100n, price: 1n, status }),
+				tokens
+			});
+
+			expect(view).toBeDefined();
+
+			return nonNullish(view) && isOisyTradeOrderActive(view);
+		};
+
+		it('treats Pending and Open as active, everything else as not', () => {
+			expect(activeFor('Pending')).toBeTruthy();
+			expect(activeFor('Open')).toBeTruthy();
+			expect(activeFor('Filled')).toBeFalsy();
+			expect(activeFor('Canceled')).toBeFalsy();
+			expect(activeFor('Expired')).toBeFalsy();
 		});
 	});
 });
