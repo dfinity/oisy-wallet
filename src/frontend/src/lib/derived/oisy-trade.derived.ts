@@ -42,6 +42,13 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 	({ balances }) => balances ?? []
 );
 
+// True once the first load has resolved (balances populated). Distinguishes the
+// initial loading state from a genuinely empty wallet, so the Trading tab can show
+// skeletons first instead of flashing the onboarding placeholder.
+export const oisyTradeLoaded: Readable<boolean> = derived(oisyTradeStore, ({ balances }) =>
+	nonNullish(balances)
+);
+
 const oisyTradeRawOrders: Readable<UserOrder[]> = derived(
 	oisyTradeStore,
 	({ orders }) => orders ?? []
