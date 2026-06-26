@@ -25,13 +25,13 @@ mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
 ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
 case "$DFX_NETWORK" in
-"staging")
+"staging" | "test_be_1")
   ECDSA_KEY_NAME="test_key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
   DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
-"ic" | "beta" | "test_be_1")
+"ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
