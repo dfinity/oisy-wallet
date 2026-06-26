@@ -1,10 +1,10 @@
 import type {
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
+	TokenId as OisyTradeTokenId,
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
-	TokenId as OisyTradeTokenId,
 	TradingPair
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
