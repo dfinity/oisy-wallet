@@ -19,6 +19,25 @@
 		}
 	},
 	{
+		"id": "caffeine2",
+		"name": "dapps.descriptions.caffeine2.name",
+		"oneLiner": "dapps.descriptions.caffeine2.one_liner",
+		"website": "https://caffeine.ai/",
+		"twitter": "https://x.com/caffeineai",
+		"tags": ["dapps.categories.ai", "dapps.categories.ab_icp"],
+		"description": "dapps.descriptions.caffeine2.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/caffeine-logo.webp",
+		"screenshots": ["/images/dapps/caffeine-screenshot.webp"],
+		"featured": true,
+		"carousel": {
+			"text": "dapps.descriptions.caffeine2.carousel.text",
+			"callToAction": "dapps.descriptions.caffeine2.carousel.call_to_action"
+		}
+	},
+	{
 		"id": "cloud-engines",
 		"name": "dapps.descriptions.cloud_engines.name",
 		"oneLiner": "dapps.descriptions.cloud_engines.one_liner",
