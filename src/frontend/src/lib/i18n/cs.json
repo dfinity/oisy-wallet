@@ -1641,6 +1641,7 @@
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",

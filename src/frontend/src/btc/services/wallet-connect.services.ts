@@ -411,6 +411,25 @@ export const signPsbt = ({
 				return { success: false };
 			}
 
+			// TODO(security): temporary workaround — restrict signPsbt to BTC mainnet.
+			// OISY derives a single ECDSA key for all BTC networks, so the P2WPKH script and the
+			// BIP-143 sighash are identical across mainnet/testnet/regtest; a signature obtained via a
+			// non-mainnet request is therefore valid for a mainnet spend of the same key. Until BTC keys
+			// are network-segregated (or the UTXO's network can be cryptographically proven), reject
+			// non-mainnet signPsbt. This guard is independent of the approved WC namespaces because
+			// incoming session_request chainIds are NOT validated against them.
+			const networkId = nonNullish(request.params.chainId)
+				? BIP122_CHAINS[request.params.chainId]?.networkId
+				: undefined;
+
+			if (networkId !== BTC_MAINNET_NETWORK_ID) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.btc_non_mainnet_sign_not_supported }
+				});
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+				return { success: false };
+			}
+
 			const network = bitcoinJsNetwork(request.params.chainId);
 
 			modalNext();
