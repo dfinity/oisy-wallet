@@ -1661,10 +1661,10 @@ interface I18nLiquidium {
 		health_factor: string;
 		net_value: string;
 		net_apy: string;
-		my_positions: string;
 		markets: string;
 		supplied: string;
 		borrowed: string;
+		borrow_rate: string;
 		apy_suffix: string;
 		supply_label: string;
 		borrow_label: string;
@@ -1684,6 +1684,26 @@ interface I18nLiquidium {
 		supply_agreement: string;
 		provider_fee: string;
 		insufficient_funds_for_fee: string;
+		borrow_review: string;
+		borrow_review_subtitle: string;
+		borrowing: string;
+		borrow_apy: string;
+		resulting_ltv: string;
+		projected_health_factor: string;
+		borrowing_power: string;
+		collateral: string;
+		minimum_borrow: string;
+		provider: string;
+		funds_delivered_to: string;
+		your_oisy_address: string;
+		borrow_risk_info: string;
+		borrow_at_risk_warning: string;
+		borrow_exceeds_power: string;
+		borrow_below_minimum: string;
+		borrow_high_risk_warning: string;
+		borrow_risk_confirm: string;
+		starting_to_borrow: string;
+		borrow_started: string;
 	};
 }
 
