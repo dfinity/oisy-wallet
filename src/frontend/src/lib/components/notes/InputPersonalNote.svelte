@@ -57,9 +57,9 @@
 	});
 </script>
 
-<div style="--input-font-size: var(--text-base)" class="flex min-h-0 w-full flex-1 flex-col">
+<div style="--input-font-size: var(--text-base)" class="flex w-full flex-1 flex-col">
 	<label
-		class="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-hidden rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
+		class="flex w-full flex-1 flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.notes.text.note_label}
 		<textarea
