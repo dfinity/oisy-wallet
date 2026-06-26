@@ -1338,9 +1338,21 @@ interface I18nTrading {
 	};
 	deposit: {
 		title: string;
+		review_title: string;
+		progress_title: string;
+		you_deposit: string;
 		to: string;
 		network: string;
+		transaction_fee: string;
+		approval_fee: string;
+		transfer_fee: string;
+		consent: string;
+		info_title: string;
+		info_description: string;
+		empty_title: string;
+		empty_description: string;
 		approving: string;
+		depositing: string;
 		done: string;
 		error: { unknown_fee: string; deposit_failed: string };
 	};
