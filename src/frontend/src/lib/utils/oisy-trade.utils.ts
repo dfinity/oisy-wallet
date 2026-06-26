@@ -2,8 +2,9 @@ import type { TradingPairInfo, UserTokenBalance } from '$declarations/oisy_trade
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { OisyTradeAsset } from '$lib/types/oisy-trade';
+import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 
 // The distinct union of every base and quote token symbol across the trading
 // pairs — the set of tokens OISY TRADE supports. Used for the onboarding chips
@@ -83,3 +84,25 @@ export const oisyTradeDepositableTokens = ({
 // True when at least one balance is reserved by an open order, i.e. the
 // "Available" line should be shown (available < total).
 export const oisyTradeAssetHasReserved = ({ reserved }: OisyTradeAsset): boolean => reserved > ZERO;
+
+// Pairs each DEX balance with the OISY token sharing its ledger canister id, so
+// the wallet's logo, network, decimals and exchange rate can be reused. Entries
+// whose ledger is unknown to the wallet are dropped (nothing to display them
+// with). Used to drive the Trading-tab "Withdraw" entry points.
+export const toOisyTradeWithdrawTokens = ({
+	balances,
+	icrcTokens
+}: {
+	balances: UserTokenBalance[];
+	icrcTokens: IcToken[];
+}): OisyTradeWithdrawToken[] => {
+	const tokenByLedgerCanisterId = new Map(icrcTokens.map((token) => [token.ledgerCanisterId, token]));
+
+	return balances
+		.map(({ token: { id }, balance: { free, reserved } }) => {
+			const token = tokenByLedgerCanisterId.get(id.ledger_id.toText());
+
+			return nonNullish(token) ? { token, free, reserved } : undefined;
+		})
+		.filter(nonNullish);
+};

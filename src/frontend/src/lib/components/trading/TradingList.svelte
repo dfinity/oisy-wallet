@@ -1,26 +1,41 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingAssets from '$lib/components/trading/TradingAssets.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
 	import TradingOnboarding from '$lib/components/trading/TradingOnboarding.svelte';
+	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import {
 		OISY_TRADE_LEARN_MORE_URL,
 		OISY_TRADE_POLL_INTERVAL_MILLIS
 	} from '$lib/constants/oisy-trade.constants';
+	import { TRADING_WITHDRAW_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalTradingDeposit } from '$lib/derived/modal.derived';
-	import { oisyTradeHasAssets } from '$lib/derived/oisy-trade.derived';
+	import {
+		modalOisyTradeWithdraw,
+		modalOisyTradeWithdrawData,
+		modalTradingDeposit
+	} from '$lib/derived/modal.derived';
+	import { oisyTradeHasAssets, oisyTradeWithdrawTokens } from '$lib/derived/oisy-trade.derived';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 
 	const load = (): Promise<void> => loadOisyTrade({ identity: $authIdentity });
 
 	const modalId = Symbol();
 	const openDeposit = () => modalStore.openTradingDeposit(modalId);
+
+	// Opens the Withdraw flow with its token pre-selected. The polished "My assets"
+	// rows that will carry this link live in TradingAssets; the inline list below is
+	// the reachable trigger until that wiring lands.
+	const openWithdraw = (withdrawToken: OisyTradeWithdrawToken) =>
+		modalStore.openOisyTradeWithdraw({ id: Symbol(), data: withdrawToken });
 </script>
 
 {#if OISY_TRADE_ENABLED}
@@ -43,6 +58,23 @@
 
 			<TradingAssets onDeposit={openDeposit} />
 
+			<!-- Temporary reachable Withdraw triggers until the My-assets rows carry the link. -->
+			{#each $oisyTradeWithdrawTokens as withdrawToken (withdrawToken.token.id)}
+				<div class="flex items-center justify-between">
+					<span class="flex items-center gap-2 text-sm font-semibold">
+						<TokenLogo data={withdrawToken.token} logoSize="xs" />
+						{withdrawToken.token.symbol}
+					</span>
+					<button
+						class="text-sm font-semibold text-brand-primary"
+						data-tid={TRADING_WITHDRAW_OPEN_BUTTON}
+						onclick={() => openWithdraw(withdrawToken)}
+					>
+						{$i18n.trading.withdraw.open}
+					</button>
+				</div>
+			{/each}
+
 			<!-- Orders section renders here once built (PR4b). -->
 		</div>
 	{:else}
@@ -51,6 +83,10 @@
 
 	{#if $modalTradingDeposit && $modalStore?.id === modalId}
 		<TradingDepositModal />
+	{/if}
+
+	{#if $modalOisyTradeWithdraw && nonNullish($modalOisyTradeWithdrawData)}
+		<WithdrawModal withdrawToken={$modalOisyTradeWithdrawData} />
 	{/if}
 {:else}
 	<EmptyState
