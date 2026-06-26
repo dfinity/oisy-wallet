@@ -356,7 +356,11 @@
 		"website": "https://aave.com/",
 		"twitter": "https://x.com/aave",
 		"github": "https://github.com/aave",
-		"tags": ["dapps.categories.lending", "dapps.categories.staking", "dapps.categories.walletconnect"],
+		"tags": [
+			"dapps.categories.lending",
+			"dapps.categories.staking",
+			"dapps.categories.walletconnect"
+		],
 		"stats": "",
 		"usesInternetIdentity": true,
 		"description": "dapps.descriptions.aave.description",
