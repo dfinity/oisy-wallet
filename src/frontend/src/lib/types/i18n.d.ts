@@ -1327,6 +1327,16 @@ interface I18nWallet_connect {
 interface I18nTrading {
 	text: { tab_title: string; intro: string; learn_more: string };
 	provider_unavailable: { title: string; description: string };
+	onboarding: { title: string; description: string; deposit: string };
+	assets: { title: string; deposit: string; withdraw: string; available: string };
+	deposit: {
+		title: string;
+		to: string;
+		network: string;
+		approving: string;
+		done: string;
+		error: { unknown_fee: string; deposit_failed: string };
+	};
 }
 
 interface I18nTransaction {

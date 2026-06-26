@@ -1661,6 +1661,28 @@
 		"provider_unavailable": {
 			"title": "",
 			"description": ""
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": ""
+		},
+		"deposit": {
+			"title": "",
+			"to": "",
+			"network": "",
+			"approving": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
 		}
 	},
 	"transaction": {
