@@ -6,6 +6,7 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 import {
 	mapOisyTradeAssets,
 	oisyTradeAssetHasReserved,
@@ -30,6 +31,16 @@ const buildBalance = ({ free, reserved }: { free: bigint; reserved: bigint }): U
 		token: { id: { ledger_id: Principal.fromText(mockLedgerId) } },
 		balance: { free, reserved }
 	}) as unknown as UserTokenBalance;
+
+const buildAsset = (over: Partial<OisyTradeAsset>): OisyTradeAsset => ({
+	token: mockValidIcToken,
+	free: ZERO,
+	reserved: ZERO,
+	total: ZERO,
+	totalUsd: undefined,
+	freeUsd: undefined,
+	...over
+});
 
 describe('oisy-trade.utils', () => {
 	describe('oisyTradeSupportedTokenSymbols', () => {
@@ -102,21 +113,18 @@ describe('oisy-trade.utils', () => {
 		it('sums the total fiat value, treating undefined as zero', () => {
 			expect(
 				sumOisyTradeAssetsUsd([
-					{ totalUsd: 10 },
-					{ totalUsd: undefined },
-					{ totalUsd: 5 }
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				] as any)
+					buildAsset({ totalUsd: 10 }),
+					buildAsset({ totalUsd: undefined }),
+					buildAsset({ totalUsd: 5 })
+				])
 			).toBe(15);
 		});
 	});
 
 	describe('oisyTradeAssetHasReserved', () => {
 		it('is true only when some balance is reserved', () => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect(oisyTradeAssetHasReserved({ reserved: 1n } as any)).toBeTruthy();
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			expect(oisyTradeAssetHasReserved({ reserved: ZERO } as any)).toBeFalsy();
+			expect(oisyTradeAssetHasReserved(buildAsset({ reserved: 1n }))).toBeTruthy();
+			expect(oisyTradeAssetHasReserved(buildAsset({ reserved: ZERO }))).toBeFalsy();
 		});
 	});
 

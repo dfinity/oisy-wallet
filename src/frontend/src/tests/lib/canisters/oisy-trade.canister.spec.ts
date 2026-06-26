@@ -148,8 +148,7 @@ describe('oisy-trade.canister', () => {
 		it('throws the canister message when the Err variant carries one', async () => {
 			service.deposit.mockResolvedValue({
 				Err: { kind: { InvalidRequest: [] }, message: toNullable('amount too small') }
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			} as any);
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
@@ -159,8 +158,7 @@ describe('oisy-trade.canister', () => {
 		it('falls back to the kind discriminant when the Err message is empty', async () => {
 			service.deposit.mockResolvedValue({
 				Err: { kind: { InvalidRequest: [] }, message: toNullable<string>(undefined) }
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			} as any);
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
