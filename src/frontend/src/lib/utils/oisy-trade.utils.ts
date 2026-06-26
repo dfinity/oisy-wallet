@@ -59,9 +59,9 @@ export const mapOisyTradeAssets = ({
 export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
 	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
 
-// The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
-// that the user holds in their wallet. The first token per symbol wins (the
-// combined list is ordered ICP → ICRC default → custom).
+// The OISY tokens the user can deposit: DEX-supported tokens (matched by ledger
+// canister id) that the user holds in their wallet. The first token per ledger id
+// wins (the combined list is ordered ICP → ICRC default → custom).
 export const oisyTradeDepositableTokens = ({
 	supportedTokens,
 	tokens,

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>cloud-engines-logo</title>
+    <g id="Dapps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Cloud-Engines" transform="translate(-684, -82)">
+            <g id="cloud-engines-logo" transform="translate(684, 82)">
+                <circle id="Oval" fill="#FAF9F5" cx="64" cy="64" r="64"></circle>
+                <g id="Group" transform="translate(20, 14)">
+                    <g fill="#0D5E5D" id="Oval">
+                        <ellipse cx="44.3029126" cy="9.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="78.9921733" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="78.9921733" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="44.3029126" cy="89.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="9.61365193" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="9.61365193" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
+                        <ellipse cx="44.3029126" cy="49.6" rx="11.2159272" ry="11.2"></ellipse>
+                    </g>
+                    <g transform="translate(9.6137, 9.6)" id="Shape" stroke="#0D5E5D" stroke-opacity="0.25" stroke-width="3.968">
+                        <path d="M34.6892607,0 L34.6892607,40 M69.3785214,20 L34.6892607,40 M69.3785214,60 L34.6892607,40 M34.6892607,80 L34.6892607,40 M0,60 L34.6892607,40 M0,20 L34.6892607,40"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
