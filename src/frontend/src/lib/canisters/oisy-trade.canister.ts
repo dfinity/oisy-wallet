@@ -19,7 +19,7 @@ import { idlFactory as idlFactoryOisyTrade } from '$declarations/oisy_trade/oisy
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapOisyTradeError } from '$lib/canisters/oisy-trade.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, fromNullable } from '@dfinity/utils';
 
 export class OisyTradeCanister extends Canister<OisyTradeService> {
 	static async create({
