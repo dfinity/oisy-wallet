@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -12,10 +12,13 @@
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON } from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -31,8 +34,29 @@
 
 	let ledgerFee = $derived(getTokenFee(token));
 
-	const formatFee = (value: bigint): string =>
+	const formatFeeToken = (value: bigint): string =>
 		`${formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })} ${getTokenDisplaySymbol(token)}`;
+
+	// Fees are shown in fiat to match the rest of the app (hero, My-assets, the
+	// canonical `TokenFeeValue`). Falls back to the token amount when the token has
+	// no exchange rate, so the breakdown is never blank.
+	const formatFee = (value: bigint): string => {
+		if (isNullish(exchangeRate)) {
+			return formatFeeToken(value);
+		}
+
+		const feeUsd = (Number(value) / 10 ** token.decimals) * exchangeRate;
+
+		return (
+			formatCurrency({
+				value: feeUsd,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage,
+				notBelowThreshold: true
+			}) ?? formatFeeToken(value)
+		);
+	};
 </script>
 
 <ContentWithToolbar>
