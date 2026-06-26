@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

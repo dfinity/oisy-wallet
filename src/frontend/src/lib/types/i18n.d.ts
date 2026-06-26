@@ -1304,6 +1304,7 @@ interface I18nWallet_connect {
 		unknown_parameter: string;
 		wallet_not_initialized: string;
 		btc_broadcast_not_supported: string;
+		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
@@ -1313,6 +1314,11 @@ interface I18nWallet_connect {
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};
+}
+
+interface I18nTrading {
+	text: { tab_title: string; intro: string; learn_more: string };
+	provider_unavailable: { title: string; description: string };
 }
 
 interface I18nTransaction {
@@ -1873,6 +1879,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;

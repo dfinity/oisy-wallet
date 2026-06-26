@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "Parámetro desconocido.",
 			"wallet_not_initialized": "Error inesperado. La dirección de tu billetera no está inicializada.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

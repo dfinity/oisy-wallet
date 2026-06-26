@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

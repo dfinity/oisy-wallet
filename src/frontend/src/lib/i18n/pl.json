@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "Nieznany parametr.",
 			"wallet_not_initialized": "Nieoczekiwany błąd. Twój adres portfela nie jest zainicjowany.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "Ta transakcja przenosi środki między kilkoma adresami i nie może zostać dokładnie wyświetlona do weryfikacji. Dla Twojego bezpieczeństwa nie została podpisana.",
 			"request_not_defined": "Nieoczekiwany błąd: Żądanie nie jest zdefiniowane, dlatego nie można go przetworzyć.",
 			"unexpected_processing_request": "Nieoczekiwany błąd podczas przetwarzania żądania za pomocą WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

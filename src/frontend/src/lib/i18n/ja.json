@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "不明なパラメータです。",
 			"wallet_not_initialized": "予期しないエラー。ウォレットアドレスが初期化されていません。",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

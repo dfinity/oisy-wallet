@@ -1625,6 +1625,7 @@
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1633,6 +1634,17 @@
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
 		}
 	},
 	"transaction": {

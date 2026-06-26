@@ -1634,6 +1634,7 @@
 			"unknown_parameter": "Unknown parameter.",
 			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
 			"btc_broadcast_not_supported": "Broadcasting the signed transaction is not supported yet. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
+			"btc_non_mainnet_sign_not_supported": "Signing Bitcoin transactions is only supported on mainnet. For your security, this request was not signed.",
 			"btc_psbt_decode": "This transaction could not be decoded for review. For your security, it was not signed.",
 			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
 			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",
@@ -1642,6 +1643,17 @@
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Trading",
+			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
+			"learn_more": "Learn more"
+		},
+		"provider_unavailable": {
+			"title": "Trading is temporarily unavailable",
+			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
 		}
 	},
 	"transaction": {
