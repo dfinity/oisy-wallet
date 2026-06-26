@@ -40,6 +40,7 @@ describe('liquidiumEarningData', () => {
 		totalBorrowedUsd: 0,
 		netValueUsd: 1000,
 		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
 		healthFactorPercent: 100
 	};
 
@@ -102,6 +103,7 @@ describe('liquidium derived stores', () => {
 		totalBorrowedUsd: 200,
 		netValueUsd: 1000,
 		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
 		healthFactorPercent: 73
 	};
 

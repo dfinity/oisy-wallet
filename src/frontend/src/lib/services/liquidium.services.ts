@@ -51,7 +51,8 @@ export const loadLiquidium = async ({
 	try {
 		const { market, accounts, positions } = liquidiumClient({ identity });
 
-		const pools = await market.listPools();
+		// Prices retained for the borrow form's USD math; `markets` is the mapped projection.
+		const [pools, assetPrices] = await Promise.all([market.listPools(), market.getAssetPrices()]);
 		const markets = pools.map(mapLiquidiumMarket);
 
 		const profileId = nonNullish(ethAddress) ? await accounts.getProfileId(ethAddress) : null;
@@ -63,7 +64,7 @@ export const loadLiquidium = async ({
 				})
 			: null;
 
-		liquidiumStore.set({ markets, portfolio });
+		liquidiumStore.set({ markets, portfolio, assetPrices });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
