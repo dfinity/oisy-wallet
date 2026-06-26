@@ -1661,6 +1661,28 @@
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
+		},
+		"onboarding": {
+			"title": "Trade on-chain with OISY TRADE",
+			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"deposit": "Deposit"
+		},
+		"assets": {
+			"title": "My assets",
+			"deposit": "+ Deposit",
+			"withdraw": "Withdraw",
+			"available": "Available: $amount"
+		},
+		"deposit": {
+			"title": "Deposit",
+			"to": "To",
+			"network": "Network",
+			"approving": "Approving",
+			"done": "Done",
+			"error": {
+				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
+				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
+			}
 		}
 	},
 	"transaction": {

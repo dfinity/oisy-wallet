@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	Token,
 	TradingPairInfo,
 	UserTokenBalance
@@ -51,6 +53,21 @@ export const getBalances = async ({
 	});
 
 	return getBalances();
+};
+
+export const deposit = async ({
+	request,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams<{ request: DepositRequest }>): Promise<DepositResponse> => {
+	const { deposit } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return deposit(request);
 };
 
 const oisyTradeCanister = async ({
