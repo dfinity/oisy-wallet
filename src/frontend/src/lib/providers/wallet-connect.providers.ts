@@ -6,11 +6,7 @@ import {
 import type { OptionBtcAddress } from '$btc/types/address';
 import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
 import { buildBtcAccountAddresses } from '$btc/utils/wallet-connect.utils';
-import {
-	BIP122_MAINNET_CHAINS_KEYS,
-	BIP122_REGTEST_CHAINS_KEYS,
-	BIP122_TESTNET_CHAINS_KEYS
-} from '$env/bip122-chains.env';
+import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
 import {
 	CAIP10_DEVNET_CHAINS_KEYS,
 	CAIP10_MAINNET_CHAINS_KEYS,
@@ -18,11 +14,7 @@ import {
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID
-} from '$env/networks/networks.btc.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
@@ -82,8 +74,6 @@ export class WalletConnectClient extends WalletConnectListener {
 	readonly #solAddressMainnet: OptionSolAddress;
 	readonly #solAddressDevnet: OptionSolAddress;
 	readonly #btcAddressMainnet: OptionBtcAddress;
-	readonly #btcAddressTestnet: OptionBtcAddress;
-	readonly #btcAddressRegtest: OptionBtcAddress;
 	// Caller principal from the current auth identity, used to derive the BTC public key advertised
 	// in the `bip122` session properties on approval. Nullish when there is no identity (e.g. not
 	// signed in) — independent of whether a BTC address has been loaded.
@@ -100,8 +90,6 @@ export class WalletConnectClient extends WalletConnectListener {
 		solAddressMainnet,
 		solAddressDevnet,
 		btcAddressMainnet,
-		btcAddressTestnet,
-		btcAddressRegtest,
 		btcPrincipal
 	}: {
 		walletKit: Awaited<ReturnType<typeof WalletKit.init>>;
@@ -109,6 +97,8 @@ export class WalletConnectClient extends WalletConnectListener {
 		solAddressMainnet: OptionSolAddress;
 		solAddressDevnet: OptionSolAddress;
 		btcAddressMainnet: OptionBtcAddress;
+		// Accepted for a uniform `init` payload but intentionally not stored: only the BTC mainnet
+		// address is advertised over WalletConnect (see the TODO(security) above approveSession).
 		btcAddressTestnet: OptionBtcAddress;
 		btcAddressRegtest: OptionBtcAddress;
 		btcPrincipal: Principal | undefined;
@@ -120,8 +110,6 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#solAddressMainnet = solAddressMainnet;
 		this.#solAddressDevnet = solAddressDevnet;
 		this.#btcAddressMainnet = btcAddressMainnet;
-		this.#btcAddressTestnet = btcAddressTestnet;
-		this.#btcAddressRegtest = btcAddressRegtest;
 		this.#btcPrincipal = btcPrincipal;
 	}
 
@@ -246,22 +234,21 @@ export class WalletConnectClient extends WalletConnectListener {
 
 	pair = (uri: string) => this.#walletKit.core.pairing.pair({ uri });
 
-	// Aggregate the loaded BTC account addresses (with public key + derivation path) across all
-	// present networks. Returns an empty list when no BTC address or no principal is available.
+	// Build the loaded BTC mainnet account address (with public key + derivation path). Returns an
+	// empty list when no BTC mainnet address or no principal is available.
 	#btcAccountAddresses = (): WalletConnectBtcAccountAddresses => {
 		if (isNullish(this.#btcPrincipal)) {
 			return [];
 		}
 
-		const principal = this.#btcPrincipal;
-
-		return [
-			{ address: this.#btcAddressMainnet, networkId: BTC_MAINNET_NETWORK_ID },
-			{ address: this.#btcAddressTestnet, networkId: BTC_TESTNET_NETWORK_ID },
-			{ address: this.#btcAddressRegtest, networkId: BTC_REGTEST_NETWORK_ID }
-		].flatMap(({ address, networkId }) =>
-			buildBtcAccountAddresses({ address, principal, networkId })
-		);
+		// Mainnet-only: advertising testnet/regtest addresses here (via the bip122_getAccountAddresses
+		// session property and the bip122_addressesChanged event) would contradict the mainnet-only
+		// WalletConnect bip122 namespace. See the TODO(security) above approveSession.
+		return buildBtcAccountAddresses({
+			address: this.#btcAddressMainnet,
+			principal: this.#btcPrincipal,
+			networkId: BTC_MAINNET_NETWORK_ID
+		});
 	};
 
 	approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
@@ -316,15 +303,19 @@ export class WalletConnectClient extends WalletConnectListener {
 							}
 						}
 					: {}),
-				...(nonNullish(this.#btcAddressMainnet) ||
-				nonNullish(this.#btcAddressTestnet) ||
-				nonNullish(this.#btcAddressRegtest)
+				// TODO(security): temporary workaround — only advertise BTC mainnet over WalletConnect.
+				// OISY derives a single ECDSA key for all BTC networks, so a signature obtained on a
+				// testnet/regtest request is valid to spend the same key's mainnet UTXOs (identical P2WPKH
+				// script + network-agnostic BIP-143 sighash). Re-enable non-mainnet chains only once BTC
+				// keys are network-segregated. NOTE: this is hygiene, NOT the load-bearing guard — incoming
+				// session_request chainIds are not validated against the approved namespace, so non-mainnet
+				// rejection must ALSO be enforced at the signing path (signPsbt service). That guard is a
+				// companion change and is required for this workaround to be effective.
+				...(nonNullish(this.#btcAddressMainnet)
 					? {
 							bip122: {
 								chains: [
-									...(nonNullish(this.#btcAddressMainnet) ? BIP122_MAINNET_CHAINS_KEYS : []),
-									...(nonNullish(this.#btcAddressTestnet) ? BIP122_TESTNET_CHAINS_KEYS : []),
-									...(nonNullish(this.#btcAddressRegtest) ? BIP122_REGTEST_CHAINS_KEYS : [])
+									...(nonNullish(this.#btcAddressMainnet) ? BIP122_MAINNET_CHAINS_KEYS : [])
 								],
 								methods: [
 									SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
@@ -336,16 +327,6 @@ export class WalletConnectClient extends WalletConnectListener {
 									...(nonNullish(this.#btcAddressMainnet)
 										? BIP122_MAINNET_CHAINS_KEYS.map(
 												(chain) => `${chain}:${this.#btcAddressMainnet}`
-											)
-										: []),
-									...(nonNullish(this.#btcAddressTestnet)
-										? BIP122_TESTNET_CHAINS_KEYS.map(
-												(chain) => `${chain}:${this.#btcAddressTestnet}`
-											)
-										: []),
-									...(nonNullish(this.#btcAddressRegtest)
-										? BIP122_REGTEST_CHAINS_KEYS.map(
-												(chain) => `${chain}:${this.#btcAddressRegtest}`
 											)
 										: [])
 								]
