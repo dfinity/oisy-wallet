@@ -515,7 +515,8 @@ mod tests {
     #[test]
     fn principal_to_account_identifier_hex_uses_the_default_subaccount() {
         let principal =
-            Principal::from_text("ddia5-oyaaa-aaaag-qckta-cai").expect("valid principal");
+            Principal::from_text("xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae")
+                .expect("valid principal");
 
         let account_id = principal_to_account_identifier_hex(&principal);
 
