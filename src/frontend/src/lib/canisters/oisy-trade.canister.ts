@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
@@ -93,6 +95,19 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		const { add_limit_order } = this.caller({ certified: true });
 
 		const response = await add_limit_order(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
+		const { deposit } = this.caller({ certified: true });
+
+		const response = await deposit(request);
 
 		if ('Ok' in response) {
 			return response.Ok;

@@ -23,6 +23,7 @@ describe('liquidium.services', () => {
 	const getProfileId = vi.fn();
 	const createProfile = vi.fn();
 	const listPools = vi.fn();
+	const getAssetPrices = vi.fn();
 	const getUserReserves = vi.fn();
 	const getUserPositionSummary = vi.fn();
 
@@ -42,11 +43,12 @@ describe('liquidium.services', () => {
 		liquidiumStore.reset();
 		vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
 			accounts: { getProfileId, createProfile },
-			market: { listPools },
+			market: { listPools, getAssetPrices },
 			positions: { getUserReserves, getUserPositionSummary }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 		vi.mocked(liquidiumUtils.mapLiquidiumMarket).mockReturnValue(market);
 		vi.mocked(liquidiumUtils.mapLiquidiumPortfolio).mockReturnValue(portfolio);
+		getAssetPrices.mockResolvedValue({});
 	});
 
 	describe('getOrCreateLiquidiumProfile', () => {
@@ -75,11 +77,15 @@ describe('liquidium.services', () => {
 
 	describe('loadLiquidium', () => {
 		it('resets the store and does not call the SDK when there is no identity', async () => {
-			liquidiumStore.set({ markets: [market], portfolio });
+			liquidiumStore.set({ markets: [market], portfolio, assetPrices: {} });
 
 			await loadLiquidium({ identity: null, ethAddress });
 
-			expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+			expect(get(liquidiumStore)).toEqual({
+				markets: [],
+				portfolio: null,
+				assetPrices: {}
+			});
 			expect(liquidiumApi.liquidiumClient).not.toHaveBeenCalled();
 		});
 
@@ -89,7 +95,11 @@ describe('liquidium.services', () => {
 
 			await loadLiquidium({ identity: mockIdentity, ethAddress });
 
-			expect(get(liquidiumStore)).toEqual({ markets: [market], portfolio: null });
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio: null,
+				assetPrices: {}
+			});
 			expect(getUserReserves).not.toHaveBeenCalled();
 			expect(getUserPositionSummary).not.toHaveBeenCalled();
 		});
@@ -113,7 +123,27 @@ describe('liquidium.services', () => {
 
 			expect(getUserReserves).toHaveBeenCalledExactlyOnceWith(profileId);
 			expect(getUserPositionSummary).toHaveBeenCalledExactlyOnceWith(profileId);
-			expect(get(liquidiumStore)).toEqual({ markets: [market], portfolio });
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio,
+				assetPrices: {}
+			});
+		});
+
+		it('still refreshes markets/portfolio when only the asset-prices call fails', async () => {
+			listPools.mockResolvedValue([{ id: 'pool-btc' }]);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+			getAssetPrices.mockRejectedValue(new Error('prices down'));
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio,
+				assetPrices: {}
+			});
 		});
 
 		it('swallows SDK errors and leaves the store unchanged', async () => {
@@ -121,7 +151,11 @@ describe('liquidium.services', () => {
 
 			await expect(loadLiquidium({ identity: mockIdentity, ethAddress })).resolves.toBeUndefined();
 
-			expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+			expect(get(liquidiumStore)).toEqual({
+				markets: [],
+				portfolio: null,
+				assetPrices: {}
+			});
 		});
 	});
 });

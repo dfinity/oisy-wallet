@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
@@ -13,6 +15,7 @@ import type {
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -20,7 +23,10 @@ import { mock } from 'vitest-mock-extended';
 describe('oisy-trade.canister', () => {
 	const createOisyTradeCanister = ({
 		serviceOverride
-	}: Pick<CreateCanisterOptions<OisyTradeService>, 'serviceOverride'>) =>
+	}: Pick<
+		CreateCanisterOptions<OisyTradeService>,
+		'serviceOverride'
+	>): Promise<OisyTradeCanister> =>
 		OisyTradeCanister.create({
 			canisterId: Principal.fromText('4mmnk-kiaaa-aaaag-qbllq-cai'),
 			identity: mockIdentity,
@@ -34,6 +40,14 @@ describe('oisy-trade.canister', () => {
 		base: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
 		quote: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai')
 	};
+
+	const mockResponseError = new Error('OISY TRADE error');
+
+	const depositRequest: DepositRequest = {
+		token_id: { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+		amount: 100n
+	};
+	const depositResponse: DepositResponse = { block_index: 7n };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -179,6 +193,47 @@ describe('oisy-trade.canister', () => {
 			const { addLimitOrder } = await createOisyTradeCanister({ serviceOverride: service });
 
 			await expect(addLimitOrder(request)).rejects.toThrow('InvalidOrder');
+		});
+	});
+
+	describe('deposit', () => {
+		it('forwards the request to the certified service and unwraps the Ok variant', async () => {
+			service.deposit.mockResolvedValue({ Ok: depositResponse });
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			const result = await deposit(depositRequest);
+
+			expect(result).toEqual(depositResponse);
+			expect(service.deposit).toHaveBeenCalledWith(depositRequest);
+		});
+
+		it('throws the canister message when the Err variant carries one', async () => {
+			service.deposit.mockResolvedValue({
+				Err: { kind: { InvalidRequest: [] }, message: toNullable('amount too small') }
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(depositRequest)).rejects.toThrow('amount too small');
+		});
+
+		it('falls back to the kind discriminant when the Err message is empty', async () => {
+			service.deposit.mockResolvedValue({
+				Err: { kind: { InvalidRequest: [] }, message: toNullable<string>(undefined) }
+			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(depositRequest)).rejects.toThrow('InvalidRequest');
+		});
+
+		it('throws when the service rejects', async () => {
+			service.deposit.mockRejectedValue(mockResponseError);
+
+			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(deposit(depositRequest)).rejects.toThrow(mockResponseError);
 		});
 	});
 });

@@ -8,7 +8,8 @@ import type {
 	WizardStepsReceive,
 	WizardStepsScanner,
 	WizardStepsSend,
-	WizardStepsSwap
+	WizardStepsSwap,
+	WizardStepsTradingDeposit
 } from '$lib/enums/wizard-steps';
 import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 import type { WizardSteps } from '$lib/types/wizard';
@@ -25,6 +26,7 @@ type StepName =
 	| TokenModalSteps
 	| WizardStepsGetTokenType
 	| WizardStepsScanner
+	| WizardStepsTradingDeposit
 	| WizardStepsLimitOrder;
 
 export const goToWizardStep = <T extends StepName>({

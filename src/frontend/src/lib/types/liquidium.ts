@@ -1,6 +1,8 @@
 // oisy-side Liquidium model: SDK scaled bigints mapped to display numbers at the
 // service boundary; base-unit amounts stay bigint for the action wizards.
 
+import type { AssetPrices } from '@liquidium/client';
+
 // Protocol asset symbol (BTC, ETH, USDC, USDT).
 export type LiquidiumAsset = string;
 
@@ -31,10 +33,12 @@ export interface LiquidiumReserve {
 
 export interface LiquidiumPortfolio {
 	reserves: LiquidiumReserve[];
-	totalSuppliedUsd: number;
-	totalBorrowedUsd: number;
+	totalSuppliedUsd: number; // = aggregate collateral USD
+	totalBorrowedUsd: number; // = aggregate debt USD
 	netValueUsd: number; // collateral − debt (may be negative)
-	availableBorrowsUsd: number;
+	availableBorrowsUsd: number; // aggregate borrowing power left (maxBorrowable − debt)
+	// Weighted liquidation threshold (bps) — for the projected health factor.
+	weightedLiquidationThresholdBps: number;
 	// 100% = no debt; near 0% = at risk.
 	healthFactorPercent: number;
 }
@@ -43,4 +47,6 @@ export interface LiquidiumStoreData {
 	markets: LiquidiumMarket[];
 	// null when the user has no profile / no positions yet.
 	portfolio: LiquidiumPortfolio | null;
+	// SDK USD prices for the borrow form's USD math. Empty until loaded.
+	assetPrices: AssetPrices;
 }

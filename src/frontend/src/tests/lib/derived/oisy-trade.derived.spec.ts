@@ -1,41 +1,87 @@
 import type {
-	Token,
+	Token as OisyTradeToken,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	oisyTradeBalances,
-	oisyTradeFreeBalanceBySymbol,
-	oisyTradeIcTokenBySymbol,
-	oisyTradePairs,
-	oisyTradeSupportedTokens
-} from '$lib/derived/oisy-trade.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
-const { mockEnabledIcTokens } = vi.hoisted(() => {
-	// eslint-disable-next-line @typescript-eslint/no-require-imports
-	const { writable: hoistedWritable } = require('svelte/store');
-	return { mockEnabledIcTokens: hoistedWritable([]) };
-});
+const enabledIcTokensMock = writable<IcToken[]>([]);
+const exchangesMock = writable<Record<string, { usd: number } | undefined>>({});
 
 vi.mock('$lib/derived/tokens.derived', () => ({
-	enabledIcTokens: mockEnabledIcTokens
+	get enabledIcTokens() {
+		return enabledIcTokensMock;
+	}
 }));
+
+vi.mock('$lib/derived/exchange.derived', () => ({
+	get exchanges() {
+		return exchangesMock;
+	}
+}));
+
+const {
+	oisyTradePairs,
+	oisyTradeSupportedTokens,
+	oisyTradeBalances,
+	oisyTradeSupportedTokenSymbols,
+	oisyTradeIcTokenBySymbol,
+	oisyTradeFreeBalanceBySymbol,
+	oisyTradeAssets,
+	oisyTradeUsdValue,
+	oisyTradeHasAssets,
+	oisyTradeDepositableTokens
+} = await import('$lib/derived/oisy-trade.derived');
+
+const LEDGER_ICP = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
+const buildPair = ({ base, quote }: { base: string; quote: string }): TradingPairInfo =>
+	({
+		base: { metadata: { symbol: base } },
+		quote: { metadata: { symbol: quote } }
+	}) as unknown as TradingPairInfo;
+
+const supportedToken = (ledgerId: string): OisyTradeToken =>
+	({
+		id: { ledger_id: Principal.fromText(ledgerId) },
+		metadata: { symbol: 'X', decimals: 8 }
+	}) as unknown as OisyTradeToken;
+
+const buildBalance = ({
+	ledgerId,
+	free,
+	reserved
+}: {
+	ledgerId: string;
+	free: bigint;
+	reserved: bigint;
+}): UserTokenBalance =>
+	({
+		token: { id: { ledger_id: Principal.fromText(ledgerId) } },
+		balance: { free, reserved }
+	}) as unknown as UserTokenBalance;
 
 describe('oisy-trade.derived', () => {
 	const icpLedgerId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 	const ckusdcLedgerId = 'xevnm-gaaaa-aaaar-qafnq-cai';
 
-	const tradeToken = ({ symbol, ledgerId }: { symbol: string; ledgerId: string }): Token =>
+	const tradeToken = ({
+		symbol,
+		ledgerId
+	}: {
+		symbol: string;
+		ledgerId: string;
+	}): OisyTradeToken =>
 		({
 			id: { ledger_id: Principal.fromText(ledgerId) },
 			metadata: { symbol, decimals: 8 }
-		}) as unknown as Token;
+		}) as unknown as OisyTradeToken;
 
 	const icToken = ({ symbol, ledgerId }: { symbol: string; ledgerId: string }): IcToken => ({
 		...mockValidIcToken,
@@ -45,7 +91,8 @@ describe('oisy-trade.derived', () => {
 
 	beforeEach(() => {
 		oisyTradeStore.reset();
-		mockEnabledIcTokens.set([]);
+		enabledIcTokensMock.set([]);
+		exchangesMock.set({});
 	});
 
 	describe('oisyTradePairs', () => {
@@ -87,6 +134,25 @@ describe('oisy-trade.derived', () => {
 		});
 	});
 
+	describe('oisyTradeSupportedTokenSymbols', () => {
+		it('returns the distinct union of base and quote symbols', () => {
+			oisyTradeStore.set({
+				pairs: [
+					buildPair({ base: 'ICP', quote: 'ckUSDC' }),
+					buildPair({ base: 'ICP', quote: 'ckBTC' })
+				],
+				supportedTokens: undefined,
+				balances: undefined
+			});
+
+			expect(get(oisyTradeSupportedTokenSymbols)).toEqual(['ICP', 'ckUSDC', 'ckBTC']);
+		});
+
+		it('is empty when there are no pairs', () => {
+			expect(get(oisyTradeSupportedTokenSymbols)).toEqual([]);
+		});
+	});
+
 	describe('oisyTradeIcTokenBySymbol', () => {
 		it('is empty without supported tokens', () => {
 			expect(get(oisyTradeIcTokenBySymbol)).toEqual({});
@@ -101,7 +167,7 @@ describe('oisy-trade.derived', () => {
 				],
 				balances: undefined
 			});
-			mockEnabledIcTokens.set([
+			enabledIcTokensMock.set([
 				icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
 				icToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
 			]);
@@ -123,7 +189,7 @@ describe('oisy-trade.derived', () => {
 				balances: undefined
 			});
 			// Only ICP is enabled.
-			mockEnabledIcTokens.set([icToken({ symbol: 'ICP', ledgerId: icpLedgerId })]);
+			enabledIcTokensMock.set([icToken({ symbol: 'ICP', ledgerId: icpLedgerId })]);
 
 			const resolved = get(oisyTradeIcTokenBySymbol);
 
@@ -141,7 +207,7 @@ describe('oisy-trade.derived', () => {
 				],
 				balances: undefined
 			});
-			mockEnabledIcTokens.set([
+			enabledIcTokensMock.set([
 				icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
 				icToken({ symbol: 'ICP', ledgerId: otherLedgerId })
 			]);
@@ -166,6 +232,64 @@ describe('oisy-trade.derived', () => {
 			oisyTradeStore.set({ pairs: undefined, supportedTokens: undefined, balances });
 
 			expect(get(oisyTradeFreeBalanceBySymbol)).toEqual({ ICP: 2.5, ckUSDC: 5 });
+		});
+	});
+
+	describe('oisyTradeAssets / oisyTradeUsdValue / oisyTradeHasAssets', () => {
+		const icp: IcToken = { ...mockValidIcToken, ledgerCanisterId: LEDGER_ICP, symbol: 'ICP' };
+
+		it('resolve DEX balances to enabled tokens enriched with fiat values', () => {
+			enabledIcTokensMock.set([icp]);
+			exchangesMock.set({ [icp.id]: { usd: 2 } });
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: undefined,
+				balances: [buildBalance({ ledgerId: LEDGER_ICP, free: 100n, reserved: 50n })]
+			});
+
+			const assets = get(oisyTradeAssets);
+
+			expect(assets).toHaveLength(1);
+			expect(assets[0].token).toBe(icp);
+			expect(assets[0].total).toBe(150n);
+			expect(get(oisyTradeUsdValue)).toBeGreaterThan(0);
+			expect(get(oisyTradeHasAssets)).toBeTruthy();
+		});
+
+		it('are empty and zero-valued when there are no balances', () => {
+			enabledIcTokensMock.set([icp]);
+
+			expect(get(oisyTradeAssets)).toEqual([]);
+			expect(get(oisyTradeUsdValue)).toBe(0);
+			expect(get(oisyTradeHasAssets)).toBeFalsy();
+		});
+	});
+
+	describe('oisyTradeDepositableTokens', () => {
+		const icp: IcToken = { ...mockValidIcToken, ledgerCanisterId: LEDGER_ICP, symbol: 'ICP' };
+
+		it('returns supported tokens the user holds a balance for', () => {
+			enabledIcTokensMock.set([icp]);
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: [supportedToken(LEDGER_ICP)],
+				balances: undefined
+			});
+			balancesStore.set({ id: icp.id, data: { data: 5n, certified: true } });
+
+			expect(get(oisyTradeDepositableTokens)).toEqual([icp]);
+		});
+
+		it('drops tokens with no wallet balance', () => {
+			enabledIcTokensMock.set([icp]);
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: [supportedToken(LEDGER_ICP)],
+				balances: undefined
+			});
+			balancesStore.set({ id: icp.id, data: { data: ZERO, certified: true } });
+
+			expect(get(oisyTradeDepositableTokens)).toEqual([]);
 		});
 	});
 });

@@ -1,4 +1,6 @@
 import type {
+	DepositRequest,
+	DepositResponse,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	OrderBookDepth,
@@ -11,6 +13,7 @@ import type {
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
 	addLimitOrder,
+	deposit,
 	getBalances,
 	getOrderBookDepth,
 	getOrderBookTicker,
@@ -31,6 +34,12 @@ describe('oisy-trade.api', () => {
 		base: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
 		quote: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai')
 	};
+
+	const depositRequest: DepositRequest = {
+		token_id: { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
+		amount: 100n
+	};
+	const depositResponse: DepositResponse = { block_index: 7n };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -144,6 +153,26 @@ describe('oisy-trade.api', () => {
 
 		it('throws without an identity', async () => {
 			await expect(addLimitOrder({ identity: null, request })).rejects.toThrow();
+		});
+	});
+
+	describe('deposit', () => {
+		it('forwards the request to the canister and returns its result', async () => {
+			oisyTradeCanisterMock.deposit.mockResolvedValue(depositResponse);
+
+			const result = await deposit({
+				identity: mockIdentity,
+				request: depositRequest,
+				canisterId: mockLedgerCanisterId
+			});
+
+			expect(result).toEqual(depositResponse);
+			expect(oisyTradeCanisterMock.deposit).toHaveBeenCalledWith(depositRequest);
+		});
+
+		it('throws when the identity is nullish', async () => {
+			await expect(deposit({ identity: null, request: depositRequest })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.deposit).not.toHaveBeenCalled();
 		});
 	});
 });
