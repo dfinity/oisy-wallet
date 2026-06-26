@@ -421,4 +421,9 @@
 	.notes-editing :global(button[data-tid='close-modal']) {
 		display: none;
 	}
+
+	/* Force the modal to the same height as view mode on desktop. */
+	.notes-editing :global(div.container) {
+		height: var(--dialog-max-height);
+	}
 </style>
