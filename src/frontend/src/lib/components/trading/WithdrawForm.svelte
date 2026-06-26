@@ -51,7 +51,10 @@
 	// receives gross minus the ledger transfer fee. Shown live so the net is
 	// never a surprise (the inverse of the usual fee-on-top convention).
 	let grossBaseUnits = $derived(
-		nonNullish(amount) && !invalidAmount(amount) && Number(amount) > 0
+		nonNullish(amount) &&
+			!invalidAmount(amount) &&
+			Number.isFinite(Number(amount)) &&
+			Number(amount) > 0
 			? parseToken({ value: `${amount}`, unitName: $sendToken.decimals })
 			: ZERO
 	);
@@ -60,7 +63,11 @@
 		grossBaseUnits > transferFee ? grossBaseUnits - transferFee : ZERO
 	);
 
-	let invalid = $derived(invalidAmount(amount) || Number(amount) === 0);
+	// Block the gross-equals-or-below-fee case: the net transfer would be <= 0,
+	// which the ledger rejects, so the withdraw is guaranteed to fail.
+	let invalid = $derived(
+		invalidAmount(amount) || Number(amount) === 0 || grossBaseUnits <= transferFee
+	);
 </script>
 
 <ContentWithToolbar>
