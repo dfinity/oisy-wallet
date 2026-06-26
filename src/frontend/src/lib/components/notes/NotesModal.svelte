@@ -255,12 +255,10 @@
 
 {#snippet notesBody()}
 	{#if step === 'editor'}
-		<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4">
-			<div class="flex min-h-32 flex-1 flex-col overflow-hidden">
-				{#key editorInstance}
-					<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
-				{/key}
-			</div>
+		<ContentWithToolbar styleClass="flex flex-col gap-4 items-stretch">
+			{#key editorInstance}
+				<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
+			{/key}
 
 			{#if nonNullish(editorMetadata)}
 				<span class="text-xs text-tertiary">{editorMetadata}</span>
@@ -420,12 +418,5 @@
 	/* The editor step has no (X): the only ways out are Cancel or Save. */
 	.notes-editing :global(button[data-tid='close-modal']) {
 		display: none;
-	}
-
-	/* Force the modal to the same height as view mode on desktop. */
-	@media (min-width: 768px) {
-		.notes-editing :global(div.wrapper.dialog) {
-			height: var(--dialog-max-height, 100%);
-		}
 	}
 </style>

@@ -40,20 +40,31 @@
 		element.setSelectionRange(end, end);
 		element.focus({ preventScroll: true });
 	});
+
+	// Auto-resize the textarea to its content so the modal grows naturally
+	// (matching view-mode height) rather than staying at a fixed row count.
+	$effect(() => {
+		const element = textarea;
+		if (element === undefined) {
+			return;
+		}
+		value; // track value changes
+		element.style.height = 'auto';
+		element.style.height = `${element.scrollHeight}px`;
+	});
 </script>
 
-<div style="--input-font-size: var(--text-base)" class="flex flex-1 flex-col w-full">
+<div style="--input-font-size: var(--text-base)" class="w-full">
 	<label
-		class="flex flex-1 w-full flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
+		class="flex w-full flex-col gap-2 rounded-lg bg-brand-subtle-10 p-4 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.notes.text.note_label}
 		<textarea
 			bind:this={textarea}
-			class="min-h-0 flex-1 w-full resize-none rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
+			class="min-h-32 w-full resize-none rounded-md bg-primary p-3 text-base font-normal text-primary outline-none placeholder:text-tertiary"
 			data-tid={NOTES_INPUT}
 			{disabled}
 			placeholder={$i18n.notes.text.placeholder}
-			rows="6"
 			bind:value></textarea>
 		{#if isTooLong}
 			<p class="text-error-primary" transition:slide={SLIDE_DURATION}>
