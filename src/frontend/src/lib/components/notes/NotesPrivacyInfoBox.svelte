@@ -16,7 +16,7 @@
 <!-- A neutral-grey box (the modal surface is white, so the plain level's white
 	background would be invisible). Grey, not a blue tint, since there's already
 	blue above (the Note panel) and below (Cancel/Save). -->
-<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary!">
+<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary! text-left">
 	<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
 	>{replaceOisyPlaceholders($i18n.notes.text.privacy_info)}
 	<ExternalLink
@@ -24,7 +24,6 @@
 		color="blue"
 		href={OISY_DOCS_URL}
 		iconVisible={false}
-		inline
 	>
 		{$i18n.core.text.learn_more}
 	</ExternalLink>
