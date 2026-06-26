@@ -226,7 +226,6 @@
 			"aa_new": "Recently added",
 			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "Game",
 			"lending": "Lending",
@@ -234,8 +233,7 @@
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
-			"tools": "Tools",
-			"walletconnect": "WalletConnect"
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -345,17 +343,8 @@
 				"description": "USD.AI is a synthetic dollar protocol backed by income-generating AI compute infrastructure, creating a decentralized stablecoin called USDai. Users can hold or stake USDai to earn sUSDai, a yield-bearing version that reflects protocol earnings. The system is designed to create a composable, productive, and decentralized alternative to fiat-backed stablecoins."
 			},
 			"caffeine": {
-				"name": "caffeine",
-				"one_liner": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing.",
-				"description": "Caffeine is an online platform that makes it possible to create and maintain successful apps and websites, simply by chatting with AI. Because only chat is required, Caffeine is a platform for \"self-writing apps\".<br>The platform unlocks a future where a large portion of the world's apps, websites and even enterprise systems, are eventually self-writing.",
-				"carousel": {
-					"text": "AIware apps on-demand",
-					"call_to_action": "Learn more"
-				}
-			},
-			"caffeine2": {
 				"name": "Caffeine",
-				"one_liner": "AIware apps on-demand. Caffeine is an AI-powered platform that lets you build fully functional web applications just by describing what you want. No coding experience needed, simply chat with Caffeine and watch your ideas come to life.",
+				"one_liner": "Caffeine is an AI-powered platform that lets you build fully functional web applications just by describing what you want. No coding experience needed, simply chat with Caffeine and watch your ideas come to life.",
 				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
 					"text": "AIware apps on-demand",
@@ -411,11 +400,6 @@
 				"name": "Sanctum",
 				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
 				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
-			},
-			"sphere_finance": {
-				"name": "Sphere Finance",
-				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
-				"description": "Sphere Finance is a DeFi meta-governance protocol that acquires governance tokens and builds tools to maximize protocol revenue around its native token, $SPHERE. It automates capital allocation across partner protocols and uses its treasury to generate yield. Governance is earned through veTETU-style staking, aligning incentives with long-term protocol health."
 			},
 			"binaryx": {
 				"name": "BinaryX",
