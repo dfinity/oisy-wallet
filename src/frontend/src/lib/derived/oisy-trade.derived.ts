@@ -3,9 +3,8 @@ import type {
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
-import { SUPPORTED_ICP_TOKENS } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
-import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
+import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -27,14 +26,14 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 
 // The supported trade tokens resolved to their matching app `IcToken` (by ledger
 // canister id), keyed by symbol. The trade canister exposes only symbol/decimals,
-// so the form joins against `allIcrcTokens` (+ the built-in ICP tokens, which are
-// not part of `allIcrcTokens`) to recover the logo, name, network and standard the
+// so the form joins against the enabled IC tokens (which include testnets when a
+// testnet network is on) to recover the logo, name, network and standard the
 // shared `TokenInput` needs. This is the same resolution inlined in
 // `LimitOrderTokensList`, surfaced here so the form can thread the real token.
 export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = derived(
-	[oisyTradeSupportedTokens, allIcrcTokens],
-	([$supportedTokens, $allIcrcTokens]) => {
-		const byLedger = [...$allIcrcTokens, ...SUPPORTED_ICP_TOKENS].reduce<Record<string, IcToken>>(
+	[oisyTradeSupportedTokens, enabledIcTokens],
+	([$supportedTokens, $enabledIcTokens]) => {
+		const byLedger = $enabledIcTokens.reduce<Record<string, IcToken>>(
 			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
 			{}
 		);
