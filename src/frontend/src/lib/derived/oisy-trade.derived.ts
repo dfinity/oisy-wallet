@@ -73,10 +73,10 @@ export const oisyTradeHasAssets: Readable<boolean> = derived(
 // whose balance can't cover the ledger fee still appear (Max clamps to 0), but a
 // token with no balance at all is dropped.
 export const oisyTradeDepositableTokens: Readable<IcToken[]> = derived(
-	[oisyTradeSupportedTokenSymbols, allIcrcTokens, balancesStore],
-	([$symbols, $allIcrcTokens, $balances]) =>
+	[oisyTradeSupportedTokens, allIcrcTokens, balancesStore],
+	([$supportedTokens, $allIcrcTokens, $balances]) =>
 		mapDepositableTokens({
-			symbols: $symbols,
+			supportedTokens: $supportedTokens,
 			tokens: [...SUPPORTED_ICP_TOKENS, ...$allIcrcTokens],
 			hasBalance: (token) => ($balances?.[token.id]?.data ?? ZERO) > ZERO
 		})

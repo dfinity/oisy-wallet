@@ -1,6 +1,7 @@
 import type {
 	PriceLevel,
 	Side,
+	Token as OisyTradeToken,
 	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
@@ -65,26 +66,30 @@ export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
 // that the user holds in their wallet. The first token per symbol wins (the
 // combined list is ordered ICP → ICRC default → custom).
 export const oisyTradeDepositableTokens = ({
-	symbols,
+	supportedTokens,
 	tokens,
 	hasBalance
 }: {
-	symbols: string[];
+	supportedTokens: OisyTradeToken[];
 	tokens: IcToken[];
 	hasBalance: (token: IcToken) => boolean;
 }): IcToken[] => {
-	const supported = new Set(symbols);
+	// Resolve by ledger canister id (like Send and the order form), NOT by symbol,
+	// so a token's exact network/identity is preserved (e.g. a staging/testnet
+	// ledger isn't collapsed onto its mainnet namesake). Deduped by ledger id.
+	const byLedgerId = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
 	const seen = new Set<string>();
 
-	return tokens.filter((token) => {
-		if (!supported.has(token.symbol) || seen.has(token.symbol) || !hasBalance(token)) {
-			return false;
+	return supportedTokens.reduce<IcToken[]>((acc, { id: { ledger_id } }) => {
+		const token = byLedgerId.get(ledger_id.toText());
+
+		if (nonNullish(token) && !seen.has(token.ledgerCanisterId) && hasBalance(token)) {
+			seen.add(token.ledgerCanisterId);
+			acc.push(token);
 		}
 
-		seen.add(token.symbol);
-
-		return true;
-	});
+		return acc;
+	}, []);
 };
 
 // True when at least one balance is reserved by an open order, i.e. the

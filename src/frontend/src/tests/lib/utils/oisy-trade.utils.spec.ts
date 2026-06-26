@@ -1,4 +1,8 @@
-import type { TradingPairInfo, UserTokenBalance } from '$declarations/oisy_trade/oisy_trade.did';
+import type {
+	Token as OisyTradeToken,
+	TradingPairInfo,
+	UserTokenBalance
+} from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -140,23 +144,33 @@ describe('oisy-trade.utils — balances & deposit', () => {
 	});
 
 	describe('oisyTradeDepositableTokens', () => {
-		it('keeps only supported, held tokens, first symbol wins', () => {
-			const icp: IcToken = { ...mockValidIcToken, id: parseTokenId('ICP'), symbol: 'ICP' };
-			const icpDuplicate: IcToken = {
+		const LEDGER_ICP = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+		const LEDGER_CKBTC = 'mxzaz-hqaaa-aaaar-qaada-cai';
+		const LEDGER_OTHER = 'mc6ru-gyaaa-aaaar-qaaaq-cai';
+
+		const supported = (ledgerId: string): OisyTradeToken => ({
+			id: { ledger_id: Principal.fromText(ledgerId) },
+			metadata: { symbol: 'X', decimals: 8 }
+		});
+
+		it('resolves supported tokens by ledger id (not symbol) and keeps only held ones', () => {
+			const icp: IcToken = { ...mockValidIcToken, ledgerCanisterId: LEDGER_ICP, symbol: 'ICP' };
+			const ckBtc: IcToken = {
 				...mockValidIcToken,
-				id: parseTokenId('ICP2'),
-				symbol: 'ICP'
+				ledgerCanisterId: LEDGER_CKBTC,
+				symbol: 'ckBTC'
 			};
-			const ckBtc: IcToken = { ...mockValidIcToken, id: parseTokenId('ckBTC'), symbol: 'ckBTC' };
-			const unsupported: IcToken = {
+			// Same symbol as ICP but a different ledger (e.g. a testnet/staging
+			// variant): must NOT be collapsed onto the supported mainnet ICP.
+			const otherIcp: IcToken = {
 				...mockValidIcToken,
-				id: parseTokenId('FOO'),
-				symbol: 'FOO'
+				ledgerCanisterId: LEDGER_OTHER,
+				symbol: 'ICP'
 			};
 
 			const result = oisyTradeDepositableTokens({
-				symbols: ['ICP', 'ckBTC'],
-				tokens: [icp, icpDuplicate, ckBtc, unsupported],
+				supportedTokens: [supported(LEDGER_ICP), supported(LEDGER_CKBTC)],
+				tokens: [icp, ckBtc, otherIcp],
 				hasBalance: () => true
 			});
 
@@ -164,11 +178,11 @@ describe('oisy-trade.utils — balances & deposit', () => {
 		});
 
 		it('drops tokens with no wallet balance', () => {
-			const icp: IcToken = { ...mockValidIcToken, id: parseTokenId('ICP'), symbol: 'ICP' };
+			const icp: IcToken = { ...mockValidIcToken, ledgerCanisterId: LEDGER_ICP, symbol: 'ICP' };
 
 			expect(
 				oisyTradeDepositableTokens({
-					symbols: ['ICP'],
+					supportedTokens: [supported(LEDGER_ICP)],
 					tokens: [icp],
 					hasBalance: () => false
 				})
