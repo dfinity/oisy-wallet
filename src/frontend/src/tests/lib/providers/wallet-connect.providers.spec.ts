@@ -72,6 +72,7 @@ describe('wallet-connect.providers', () => {
 		const mockOn = vi.fn();
 		const mockOff = vi.fn();
 		const mockRemoveListener = vi.fn();
+		const mockEmitSessionEvent = vi.fn();
 
 		const walletKitSpy: Awaited<ReturnType<typeof WalletKit.init>> = {
 			getActiveSessions: mockGetActiveSessions,
@@ -79,6 +80,7 @@ describe('wallet-connect.providers', () => {
 			rejectSession: mockRejectSession,
 			approveSession: mockApproveSession,
 			respondSessionRequest: mockRespondSessionRequest,
+			emitSessionEvent: mockEmitSessionEvent,
 			core: {
 				pairing: { pair: mockPair }
 			},
@@ -268,6 +270,60 @@ describe('wallet-connect.providers', () => {
 				expect(JSON.parse(sessionProperties.bip122_getAccountAddresses)).toEqual([
 					expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })
 				]);
+			});
+
+			it('should emit the initial BTC addressesChanged event for active bip122 sessions', async () => {
+				mockGetActiveSessions.mockReturnValue({
+					session1: {
+						topic: 'btc-topic',
+						namespaces: { bip122: { chains: BIP122_MAINNET_CHAINS_KEYS } }
+					},
+					session2: {
+						topic: 'eth-topic',
+						namespaces: {}
+					}
+				});
+
+				const listener = await WalletConnectClient.init({ ...mockParams, cleanSlate: false });
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockEmitSessionEvent).toHaveBeenCalledTimes(BIP122_MAINNET_CHAINS_KEYS.length);
+
+				for (const chainId of BIP122_MAINNET_CHAINS_KEYS) {
+					expect(mockEmitSessionEvent).toHaveBeenCalledWith({
+						topic: 'btc-topic',
+						chainId,
+						event: {
+							name: 'bip122_addressesChanged',
+							data: [expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })]
+						}
+					});
+				}
+			});
+
+			it('should not emit initial BTC addresses when the BTC principal is unavailable', async () => {
+				mockGetActiveSessions.mockReturnValue({
+					session1: {
+						topic: 'btc-topic',
+						namespaces: { bip122: { chains: BIP122_MAINNET_CHAINS_KEYS } }
+					}
+				});
+
+				const listener = await WalletConnectClient.init({
+					...mockParams,
+					btcPrincipal: undefined,
+					cleanSlate: false
+				});
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockEmitSessionEvent).not.toHaveBeenCalled();
+				expect(mockApproveSession).toHaveBeenCalledOnce();
+
+				const [[{ sessionProperties }]] = mockApproveSession.mock.calls;
+
+				expect(sessionProperties).toBeUndefined();
 			});
 		});
 
