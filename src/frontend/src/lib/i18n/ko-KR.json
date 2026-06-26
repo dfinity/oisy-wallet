@@ -1656,7 +1656,8 @@
 		"text": {
 			"tab_title": "",
 			"intro": "",
-			"learn_more": ""
+			"learn_more": "",
+			"provider_name": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1675,9 +1676,21 @@
 		},
 		"deposit": {
 			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
 			"to": "",
 			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"consent": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
 			"approving": "",
+			"depositing": "",
 			"done": "",
 			"error": {
 				"unknown_fee": "",
