@@ -1,7 +1,7 @@
 import type {
+	Token as OisyTradeToken,
 	PriceLevel,
 	Side,
-	Token as OisyTradeToken,
 	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
