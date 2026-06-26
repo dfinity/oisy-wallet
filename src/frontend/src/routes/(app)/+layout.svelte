@@ -30,6 +30,7 @@
 		isRouteEarning,
 		isRouteNfts,
 		isRouteTokens,
+		isRouteTrading,
 		isRouteTransactions
 	} from '$lib/utils/nav.utils';
 
@@ -46,7 +47,9 @@
 
 	let earningRoute = $derived(isRouteEarning(page));
 
-	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+	let tradingRoute = $derived(isRouteTrading(page));
+
+	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute || tradingRoute);
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
