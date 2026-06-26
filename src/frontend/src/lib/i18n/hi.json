@@ -1641,6 +1641,7 @@
 			"unknown_parameter": "अज्ञात पैरामीटर।",
 			"wallet_not_initialized": "अप्रत्याशित त्रुटि। आपका वॉलेट पता प्रारंभ नहीं हुआ है।",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
