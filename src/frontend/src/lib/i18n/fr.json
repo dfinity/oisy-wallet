@@ -226,14 +226,14 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "IA",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Jeu",
+			"lending": "",
 			"nft": "NFT",
 			"rwa": "",
-			"social_media": "Réseaux sociaux",
+			"social": "",
 			"staking": "Staking",
-			"tools": "Outils",
-			"walletconnect": "WalletConnect"
+			"tools": "Outils"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +254,6 @@
 				"carousel": {
 					"text": "OpenChat - messagerie privée",
 					"call_to_action": "Afficher plus"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Vérification d'identité unique pour des engagements numériques dignes de confiance.",
-				"call_to_action": "Ouvrir DecideID",
-				"stats": "Plus de 50 000 requêtes d'inférence",
-				"description": "Decide ID est au cœur du système Decide AI, garantissant confiance et sécurité grâce à sa méthodologie unique de Preuve de Personnalité (PoP). Lorsque vous vous inscrivez, vous passez par un processus de vérification où vous fournissez plusieurs preuves et complétez un défi spécial pour confirmer votre identité. Cela garantit que chaque utilisateur est réel, unique et non un bot. Votre ID Principal, un identifiant unique sur la chaîne, est créé au cours de ce processus. Il peut être utilisé dans diverses applications qui nécessitent une personnalité vérifiée, garantissant une intégration sécurisée et transparente dans le processus d'inscription ou de connexion de n'importe quelle application. De plus, l'utilisation de preuves à divulgation nulle de connaissance signifie que vos données privées, comme les informations biométriques, restent confidentielles et sécurisées.<br/><br/>Avec Decide ID, profitez d'un moyen flexible, sécurisé et axé sur la confidentialité pour vérifier et vous engager en ligne.",
-				"carousel": {
-					"text": "Profitez d'un moyen axé sur la confidentialité pour vérifier et vous engager en ligne",
-					"call_to_action": "Intéressé ?"
 				}
 			},
 			"icpswap": {
@@ -315,16 +304,6 @@
 				"call_to_action": "Soyez déformé",
 				"description": "Curve Finance est un principal échange décentralisé, fournisseur de stablecoins et plateforme de prêt sur Ethereum et les chaînes compatibles EVM. Il est connu pour ses market makers automatisés avancés pour les stablecoins et les actifs volatils, et son système unique de liquidation douce pour les prêts."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Libérez tout le potentiel de la DeFi et du trading simplifié. Échangez des tokens, gagnez en tant que fournisseur de liquidité et exploitez l'AMM de pointe de Bitfinity EVM.",
-				"call_to_action": "Ouvrir Sonic",
-				"description": "Sonic, un échange décentralisé multichaîne construit sur le protocole Internet Computer (ICP), offre une large gamme de services DeFi. Les utilisateurs peuvent facilement échanger des tokens et des perpétuels, fournir des liquidités et participer à la vente de tokens LBP. Les utilisateurs peuvent s'engager dans la gouvernance DAO, staker pour des récompenses et voter sur les décisions de la plateforme.<br/><br/>Entièrement sur la chaîne et open source ! Échangez des tokens comme un pro, accumulez ces frais en tant que fournisseur de liquidité, rejoignez l'ambiance AMM et soyez une partie intégrante du Sonic DAO.",
-				"carousel": {
-					"text": "Libérez tout le potentiel de la Defi",
-					"call_to_action": "Ouvrir Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX et teneur de marché automatisé construit sur la blockchain Solana, offrant un carnet d'ordres à cours limité central qui permet des transactions rapides.",
@@ -371,17 +350,6 @@
 					"text": "Bonjour, internet auto-écrit",
 					"call_to_action": "En savoir plus"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "Une blockchain L1 souveraine qui construit, invests et accélère les technologies de pointe — en particulier le gaming Web3 — en finançant et en propulsant les écosystèmes sur le réseau Beam.",
-				"call_to_action": "Participer",
-				"description": "Beam est une blockchain Layer 1 souveraine conçue pour financer et accélérer les technologies à fort impact dans le gaming, le Web3 et l'innovation de pointe. Soutenu par une trésorerie on-chain et un écosystème de subventions, Beam investit directement dans les équipes et les infrastructures. La chaîne prend en charge des applications décentralisées évolutives avec des outils natifs et une collaboration étroite avec les fondateurs."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "Un jeu blockchain de style Pokémon où les joueurs collectent, élèvent, combattent des créatures NFT (Axies) et gagnent des tokens (AXS, SLP) dans une économie détenue par les joueurs sur la sidechain Ronin.",
-				"description": "Axie Infinity est un jeu blockchain play-to-earn où les joueurs collectent, élèvent et combattent des créatures NFT appelées Axies. Construit sur la sidechain Ronin, le jeu récompense les joueurs avec des tokens $AXS et $SLP, créant une économie circulaire de propriété et de compétition. Axie a été le pionnier du modèle P2E et est devenu l'un des premiers succès grand public du jeu Web3."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -433,11 +401,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -483,6 +446,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1656,8 +1633,7 @@
 		"text": {
 			"tab_title": "",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": ""
+			"learn_more": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1676,21 +1652,9 @@
 		},
 		"deposit": {
 			"title": "",
-			"review_title": "",
-			"progress_title": "",
-			"you_deposit": "",
 			"to": "",
 			"network": "",
-			"transaction_fee": "",
-			"approval_fee": "",
-			"transfer_fee": "",
-			"consent": "",
-			"info_title": "",
-			"info_description": "",
-			"empty_title": "",
-			"empty_description": "",
 			"approving": "",
-			"depositing": "",
 			"done": "",
 			"error": {
 				"unknown_fee": "",
@@ -2165,10 +2129,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2187,7 +2151,27 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": ""
 		}
 	},
 	"vaults": {

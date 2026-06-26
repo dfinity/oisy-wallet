@@ -226,14 +226,14 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "KI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Spiele",
+			"lending": "",
 			"nft": "NFT",
 			"rwa": "",
-			"social_media": "Soziale Medien",
+			"social": "",
 			"staking": "Beteiligungen",
-			"tools": "Tools",
-			"walletconnect": "Wallet Connect"
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +254,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": "Mehr erfahren"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Eindeutige Identitätsprüfung für vertrauliche digitale Interaktionen.",
-				"call_to_action": "Öffne DecideID",
-				"stats": "50,000+ geprüfte Anfragen",
-				"description": "Decide ID ist das Herzstück des Decide AI-Systems und gewährleistet Vertrauen und Sicherheit durch seine einzigartige Proof of Personhood (PoP)-Methode. Bei Ihrem Beitritt durchlaufen Sie einen Verifizierungsprozess, bei dem Sie mehrere Nachweise erbringen und eine spezielle Herausforderung meistern, um Ihre Identität zu bestätigen. Dadurch wird sichergestellt, dass jeder Benutzer echt, einzigartig und kein Bot ist. Ihre Principal ID, eine eindeutige On-Chain-Kennung, wird während dieses Prozesses erstellt. Sie kann in verschiedenen Anwendungen verwendet werden, die eine verifizierte Identität erfordern, und gewährleistet eine sichere und nahtlose Integration in den Anmelde- oder Login-Prozess jeder App. Darüber hinaus sorgt die Verwendung von Zero-Knowledge-Nachweisen dafür, dass Ihre privaten Daten, wie biometrische Informationen, vertraulich und sicher bleiben.<br/><br/>Genießen Sie mit Decide ID eine flexible, sichere und datenschutzorientierte Möglichkeit zur Online-Verifizierung und -Aktivierung.",
-				"carousel": {
-					"text": "Vertraue der Privacy-first Methode und interagiere online",
-					"call_to_action": "Interessiert?"
 				}
 			},
 			"icpswap": {
@@ -315,16 +304,6 @@
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Schöpfen Sie das volle Potenzial von DeFi und optimiertem Handel aus. Tauschen Sie Token, verdienen Sie als Liquiditätsanbieter und nutzen Sie das führende AMM von Bitfinity EVM.",
-				"call_to_action": "Öffne Sonic",
-				"description": "Sonic, eine dezentrale Multichain-Börse, die auf dem Internet Computer Protocol (ICP) basiert, bietet eine breite Palette an DeFi-Diensten. Nutzer können problemlos Token und Perpetuals handeln, Liquidität bereitstellen und am LBP-Token-Verkauf teilnehmen. Nutzer können sich an der DAO-Governance beteiligen, Belohnungen einbringen und über Plattformentscheidungen abstimmen.<br/><br/>Vollständig on-chain & Open Source! Tauschen Sie Token wie ein Profi, stapeln Sie Gebühren als Liquiditätsanbieter, tauchen Sie in die AMM-Szene ein und werden Sie ein integraler Bestandteil der Sonic DAO.",
-				"carousel": {
-					"text": "Schöpfen Sie das volle Potenzial von Defi",
-					"call_to_action": "Öffne Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX und automatisierter Market Maker, der auf der Solana-Blockchain basiert und ein zentrales Limit-Orderbuch bietet, das schnelle Trades ermöglicht.",
@@ -371,17 +350,6 @@
 					"text": "",
 					"call_to_action": ""
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -433,11 +401,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -483,6 +446,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1656,8 +1633,7 @@
 		"text": {
 			"tab_title": "",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": ""
+			"learn_more": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1676,21 +1652,9 @@
 		},
 		"deposit": {
 			"title": "",
-			"review_title": "",
-			"progress_title": "",
-			"you_deposit": "",
 			"to": "",
 			"network": "",
-			"transaction_fee": "",
-			"approval_fee": "",
-			"transfer_fee": "",
-			"consent": "",
-			"info_title": "",
-			"info_description": "",
-			"empty_title": "",
-			"empty_description": "",
 			"approving": "",
-			"depositing": "",
 			"done": "",
 			"error": {
 				"unknown_fee": "",
@@ -2165,10 +2129,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2187,7 +2151,27 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": ""
 		}
 	},
 	"vaults": {

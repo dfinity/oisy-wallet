@@ -4,11 +4,13 @@
 	import { LEND_BORROW_ENABLED } from '$env/lend-borrow';
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import LiquidiumBorrowingCard from '$lib/components/liquidium/LiquidiumBorrowingCard.svelte';
 	import LiquidiumMarketCard from '$lib/components/liquidium/LiquidiumMarketCard.svelte';
 	import LiquidiumPositionCard from '$lib/components/liquidium/LiquidiumPositionCard.svelte';
 	import LiquidiumProviderHero from '$lib/components/liquidium/LiquidiumProviderHero.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { LIQUIDIUM_POLL_INTERVAL_MILLIS } from '$lib/constants/liquidium.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -22,6 +24,10 @@
 	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
 
 	let reserves = $derived($liquidiumPortfolio?.reserves ?? []);
+
+	// Supplies and borrowings render in separate boxes.
+	let supplyReserves = $derived(reserves.filter(({ deposited }) => deposited > ZERO));
+	let borrowReserves = $derived(reserves.filter(({ borrowed }) => borrowed > ZERO));
 
 	const load = (): Promise<void> =>
 		loadLiquidium({ identity: $authIdentity, ethAddress: $ethAddress });
@@ -50,16 +56,32 @@
 			url={liquidium.url}
 		/>
 
-		{#if LIQUIDIUM_ENABLED && reserves.length > 0}
+		{#if LIQUIDIUM_ENABLED && supplyReserves.length > 0}
 			<StakeContentSection>
 				{#snippet title()}
-					<h4>{$i18n.liquidium.text.my_positions}</h4>
+					<h4>{$i18n.liquidium.text.supplied}</h4>
 				{/snippet}
 
 				{#snippet content()}
 					<div class="flex w-full flex-col gap-4">
-						{#each reserves as reserve (reserve.poolId)}
+						{#each supplyReserves as reserve (reserve.poolId)}
 							<LiquidiumPositionCard {reserve} />
+						{/each}
+					</div>
+				{/snippet}
+			</StakeContentSection>
+		{/if}
+
+		{#if LIQUIDIUM_ENABLED && borrowReserves.length > 0}
+			<StakeContentSection>
+				{#snippet title()}
+					<h4>{$i18n.liquidium.text.borrowed}</h4>
+				{/snippet}
+
+				{#snippet content()}
+					<div class="flex w-full flex-col gap-4">
+						{#each borrowReserves as reserve (reserve.poolId)}
+							<LiquidiumBorrowingCard {reserve} />
 						{/each}
 					</div>
 				{/snippet}

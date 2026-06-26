@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -21,16 +20,13 @@
 
 	let token = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
 
-	let suppliedAmount = $derived(
-		formatToken({ value: reserve.deposited, unitName: reserve.depositedDecimals })
+	let borrowedAmount = $derived(
+		formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })
 	);
 
-	// Yearly interest at the current supply APY.
-	let currentlyEarning = $derived((reserve.suppliedUsd * reserve.supplyApy) / 100);
-
-	let suppliedValue = $derived(
+	let borrowedValue = $derived(
 		formatCurrency({
-			value: reserve.suppliedUsd,
+			value: reserve.borrowedUsd,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage
@@ -58,31 +54,20 @@
 		{/snippet}
 
 		{#snippet description()}
-			<Badge variant={reserve.supplyApy > 0 ? 'success' : 'default'} width="w-fit">
-				{`${formatStakeApyNumber(reserve.supplyApy)}% ${$i18n.liquidium.text.apy_suffix}`}
+			<Badge variant="warning" width="w-fit">
+				{`${formatStakeApyNumber(reserve.borrowApy)}% ${$i18n.liquidium.text.borrow_rate}`}
 			</Badge>
 		{/snippet}
 
 		{#snippet titleEnd()}
-			<span
-				class="flex min-w-12 items-center justify-end gap-1 text-sm text-nowrap sm:gap-2 sm:text-base"
-			>
-				{#if currentlyEarning > 0}
-					<EarningYearlyAmount
-						showAsSuccess
-						showPlusSign
-						showWithShortenedLabel
-						value={currentlyEarning}
-					/>
-				{/if}
-
-				<span>{suppliedValue}</span>
+			<span class="block min-w-12 text-right text-sm text-nowrap sm:text-base">
+				−{borrowedValue}
 			</span>
 		{/snippet}
 
 		{#snippet descriptionEnd()}
 			<span class="block min-w-12 text-nowrap">
-				{suppliedAmount}
+				{borrowedAmount}
 				{reserve.asset}
 			</span>
 		{/snippet}
