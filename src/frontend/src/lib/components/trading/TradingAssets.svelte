@@ -1,5 +1,4 @@
 <script lang="ts">
-	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
 	import { TRADING_ASSETS_DEPOSIT_BUTTON } from '$lib/constants/test-ids.constants';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
@@ -8,39 +7,35 @@
 
 	interface Props {
 		onDeposit: () => void;
-		// Wired to the Withdraw modal in PR3.
 		onWithdraw?: (asset: OisyTradeAsset) => void;
 	}
 
 	let { onDeposit, onWithdraw }: Props = $props();
 </script>
 
-<StakeContentSection>
-	{#snippet title()}
-		<h3 class="w-full">{$i18n.trading.assets.title}</h3>
-	{/snippet}
-
-	{#snippet action()}
+<!-- Mirrors the Orders section: a plain section header (title + action) over a
+	list of token rows, instead of the boxed StakeContentSection. -->
+<div class="flex flex-col gap-2">
+	<div class="flex items-center justify-between">
+		<h3 class="text-base font-bold text-primary">{$i18n.trading.assets.title}</h3>
 		<button
-			class="font-semibold whitespace-nowrap text-brand-primary"
+			class="text-sm font-medium text-brand-primary"
 			data-tid={TRADING_ASSETS_DEPOSIT_BUTTON}
 			onclick={onDeposit}
 		>
 			{$i18n.trading.assets.deposit}
 		</button>
-	{/snippet}
+	</div>
 
-	{#snippet content()}
-		{#if $oisyTradeAssets.length === 0}
-			<p class="py-2 text-tertiary">{$i18n.trading.assets.empty}</p>
-		{:else}
-			<ul class="flex flex-col">
-				{#each $oisyTradeAssets as asset (asset.token.id)}
-					<li>
-						<TradingAssetRow {asset} {onWithdraw} />
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	{/snippet}
-</StakeContentSection>
+	{#if $oisyTradeAssets.length === 0}
+		<p class="py-2 text-tertiary">{$i18n.trading.assets.empty}</p>
+	{:else}
+		<ul class="flex flex-col">
+			{#each $oisyTradeAssets as asset (asset.token.id)}
+				<li>
+					<TradingAssetRow {asset} {onWithdraw} />
+				</li>
+			{/each}
+		</ul>
+	{/if}
+</div>

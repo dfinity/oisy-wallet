@@ -28,18 +28,17 @@
 
 	{#if $oisyTradeHasAssets}
 		<div class="flex flex-col gap-4">
-			<div class="flex flex-col gap-2">
-				<p class="text-sm text-tertiary">{$i18n.trading.text.intro}</p>
+			<p class="text-sm text-tertiary">
+				{$i18n.trading.text.intro}
 				<ExternalLink
 					ariaLabel={$i18n.trading.text.learn_more}
 					color="blue"
 					href={OISY_TRADE_LEARN_MORE_URL}
-					iconVisible={false}
-					inline
+					iconAsLast
 				>
 					{$i18n.trading.text.learn_more}
 				</ExternalLink>
-			</div>
+			</p>
 
 			<TradingAssets onDeposit={openDeposit} />
 
