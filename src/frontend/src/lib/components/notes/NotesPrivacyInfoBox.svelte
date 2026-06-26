@@ -24,6 +24,7 @@
 		color="blue"
 		href={OISY_DOCS_URL}
 		iconVisible={false}
+		styleClass="ml-[1.25em]"
 	>
 		{$i18n.core.text.learn_more}
 	</ExternalLink>
