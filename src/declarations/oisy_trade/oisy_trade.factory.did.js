@@ -6,510 +6,480 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { IDL } from '@icp-sdk/core/candid';
-
 export const idlFactory = ({ IDL }) => {
-  const Mode = IDL.Variant({
-    'RestrictedTo' : IDL.Vec(IDL.Principal),
-    'GeneralAvailability' : IDL.Null,
-  });
-  const UpgradeArg = IDL.Record({
-    'max_orders_per_chunk' : IDL.Opt(IDL.Nat32),
-    'mode' : IDL.Opt(Mode),
-    'instruction_budget' : IDL.Opt(IDL.Nat64),
-  });
-  const InitArg = IDL.Record({
-    'max_orders_per_chunk' : IDL.Nat32,
-    'mode' : Mode,
-    'instruction_budget' : IDL.Nat64,
-  });
-  const OisyTradeArg = IDL.Variant({
-    'Upgrade' : IDL.Opt(UpgradeArg),
-    'Init' : InitArg,
-  });
-  const TradingPair = IDL.Record({
-    'base' : IDL.Principal,
-    'quote' : IDL.Principal,
-  });
-  const Side = IDL.Variant({ 'Buy' : IDL.Null, 'Sell' : IDL.Null });
-  const TimeInForce = IDL.Variant({
-    'FillOrKill' : IDL.Null,
-    'GoodTilCanceled' : IDL.Null,
-  });
-  const LimitOrderRequest = IDL.Record({
-    'pair' : TradingPair,
-    'side' : Side,
-    'quantity' : IDL.Nat,
-    'price' : IDL.Nat,
-    'time_in_force' : IDL.Opt(TimeInForce),
-  });
-  const OrderId = IDL.Text;
-  const TokenId = IDL.Record({ 'ledger_id' : IDL.Principal });
-  const AddLimitOrderError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({ 'TradingHalted' : IDL.Null })),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'AmountExceedsMaximum' : IDL.Null,
-          'InvalidPrice' : IDL.Record({
-            'price' : IDL.Nat,
-            'tick_size' : IDL.Nat,
-          }),
-          'InvalidQuantity' : IDL.Record({
-            'lot_size' : IDL.Nat,
-            'quantity' : IDL.Nat,
-          }),
-          'InsufficientBalance' : IDL.Record({
-            'token' : TokenId,
-            'available' : IDL.Nat,
-            'required' : IDL.Nat,
-          }),
-          'InvalidNotional' : IDL.Record({
-            'max' : IDL.Opt(IDL.Nat),
-            'min' : IDL.Nat,
-            'notional' : IDL.Nat,
-          }),
-          'UnknownTradingPair' : IDL.Null,
-        })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const TokenMetadata = IDL.Record({
-    'decimals' : IDL.Nat8,
-    'symbol' : IDL.Text,
-  });
-  const Token = IDL.Record({ 'id' : TokenId, 'metadata' : TokenMetadata });
-  const AddTradingPairRequest = IDL.Record({
-    'base' : Token,
-    'quote' : Token,
-    'min_notional' : IDL.Nat,
-    'lot_size' : IDL.Nat,
-    'taker_fee_bps' : IDL.Nat16,
-    'maker_fee_bps' : IDL.Nat16,
-    'tick_size' : IDL.Nat,
-    'max_notional' : IDL.Opt(IDL.Nat),
-  });
-  const AddTradingPairError = IDL.Variant({
-    'InvalidTickSize' : IDL.Null,
-    'NotController' : IDL.Null,
-    'TradingPairAlreadyExists' : IDL.Null,
-    'InvalidLotSize' : IDL.Null,
-    'InvalidNotional' : IDL.Record({
-      'min_notional' : IDL.Nat,
-      'max_notional' : IDL.Opt(IDL.Nat),
-    }),
-    'InconsistentTokenMetadata' : IDL.Record({
-      'token' : TokenId,
-      'submitted' : TokenMetadata,
-      'expected' : TokenMetadata,
-    }),
-    'BaseEqualsQuote' : IDL.Null,
-    'InvalidBasisPoint' : IDL.Nat16,
-    'BaseDecimalsTooLarge' : IDL.Record({ 'decimals' : IDL.Nat8 }),
-    'IndivisibleTickLotForBaseDecimals' : IDL.Record({
-      'lot_size' : IDL.Nat,
-      'base_decimals' : IDL.Nat8,
-      'tick_size' : IDL.Nat,
-    }),
-  });
-  const AddTradingPairResult = IDL.Variant({
-    'Ok' : IDL.Null,
-    'Err' : AddTradingPairError,
-  });
-  const OrderStatus = IDL.Variant({
-    'Open' : IDL.Null,
-    'Filled' : IDL.Null,
-    'Expired' : IDL.Null,
-    'Canceled' : IDL.Null,
-    'Pending' : IDL.Null,
-  });
-  const OrderRecord = IDL.Record({
-    'status' : OrderStatus,
-    'owner' : IDL.Principal,
-    'filled_quantity' : IDL.Nat,
-    'side' : Side,
-    'created_at' : IDL.Nat64,
-    'last_updated_at' : IDL.Opt(IDL.Nat64),
-    'quantity' : IDL.Nat,
-    'price' : IDL.Nat,
-    'time_in_force' : TimeInForce,
-  });
-  const CancelLimitOrderError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({})),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'OrderNotFound' : IDL.Null,
-          'NotOrderOwner' : IDL.Null,
-          'OrderAlreadyTerminal' : IDL.Null,
-          'InvalidOrderId' : IDL.Null,
-        })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const DepositRequest = IDL.Record({
-    'token_id' : TokenId,
-    'amount' : IDL.Nat,
-  });
-  const DepositResponse = IDL.Record({ 'block_index' : IDL.Nat });
-  const DepositError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(
-        IDL.Variant({
-          'CallFailed' : IDL.Record({
-            'method' : IDL.Text,
-            'ledger' : IDL.Principal,
-            'reason' : IDL.Text,
-          }),
-          'LedgerTemporarilyUnavailable' : IDL.Null,
-          'OperationInProgress' : IDL.Null,
-        })
-      ),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'AmountExceedsMaximum' : IDL.Null,
-          'InsufficientAllowance' : IDL.Record({ 'allowance' : IDL.Nat }),
-          'UnsupportedToken' : IDL.Record({ 'token_id' : TokenId }),
-          'InsufficientFunds' : IDL.Record({ 'balance' : IDL.Nat }),
-        })
-      ),
-      'InternalError' : IDL.Opt(
-        IDL.Variant({
-          'CandidDecodeFailed' : IDL.Record({
-            'method' : IDL.Text,
-            'ledger' : IDL.Principal,
-            'reason' : IDL.Text,
-          }),
-          'LedgerError' : IDL.Record({ 'reason' : IDL.Text }),
-        })
-      ),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const DepositResult = IDL.Variant({
-    'Ok' : DepositResponse,
-    'Err' : DepositError,
-  });
-  const FilterToken = IDL.Variant({ 'ById' : TokenId });
-  const Balance = IDL.Record({ 'free' : IDL.Nat, 'reserved' : IDL.Nat });
-  const UserTokenBalance = IDL.Record({ 'token' : Token, 'balance' : Balance });
-  const GetBalancesError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({})),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'TokenNotSupported' : FilterToken,
-          'FilterTooLarge' : IDL.Record({
-            'len' : IDL.Nat32,
-            'max' : IDL.Nat32,
-          }),
-        })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const GetBalancesResult = IDL.Variant({
-    'Ok' : IDL.Vec(UserTokenBalance),
-    'Err' : GetBalancesError,
-  });
-  const GetEventsArgs = IDL.Record({
-    'start' : IDL.Nat64,
-    'length' : IDL.Nat64,
-  });
-  const WithdrawEvent = IDL.Record({
-    'token' : TokenId,
-    'block_index' : IDL.Nat64,
-    'user' : IDL.Principal,
-    'amount' : IDL.Nat,
-  });
-  const AddTradingPairEvent = IDL.Record({
-    'quote_metadata' : TokenMetadata,
-    'base' : TokenId,
-    'quote' : TokenId,
-    'min_notional' : IDL.Nat,
-    'book_id' : IDL.Nat64,
-    'lot_size' : IDL.Nat,
-    'taker_fee_bps' : IDL.Nat16,
-    'maker_fee_bps' : IDL.Nat16,
-    'base_metadata' : TokenMetadata,
-    'tick_size' : IDL.Nat,
-    'max_notional' : IDL.Opt(IDL.Nat),
-  });
-  const DepositEvent = IDL.Record({
-    'token' : TokenId,
-    'user' : IDL.Principal,
-    'amount' : IDL.Nat,
-  });
-  const PairToken = IDL.Variant({ 'Base' : IDL.Null, 'Quote' : IDL.Null });
-  const BalanceOperation = IDL.Variant({
-    'Transfer' : IDL.Record({
-      'fee' : IDL.Opt(IDL.Nat),
-      'token' : PairToken,
-      'to_order' : IDL.Nat64,
-      'from_order' : IDL.Nat64,
-      'amount' : IDL.Nat,
-    }),
-    'Unreserve' : IDL.Record({
-      'token' : PairToken,
-      'order' : IDL.Nat64,
-      'amount' : IDL.Nat,
-    }),
-  });
-  const SettlingEvent = IDL.Record({
-    'balance_operations' : IDL.Vec(BalanceOperation),
-    'book_id' : IDL.Nat64,
-  });
-  const MatchingEvent = IDL.Record({
-    'orders' : IDL.Vec(IDL.Nat64),
-    'book_id' : IDL.Nat64,
-  });
-  const EventOrderId = IDL.Record({ 'seq' : IDL.Nat64, 'book_id' : IDL.Nat64 });
-  const CancelLimitOrderEvent = IDL.Record({ 'order_id' : EventOrderId });
-  const SetHaltEvent = IDL.Record({
-    'book_ids' : IDL.Opt(IDL.Vec(IDL.Nat64)),
-    'halted' : IDL.Bool,
-  });
-  const AddLimitOrderEvent = IDL.Record({
-    'side' : Side,
-    'user' : IDL.Principal,
-    'quantity' : IDL.Nat,
-    'order_id' : EventOrderId,
-    'price' : IDL.Nat,
-    'time_in_force' : TimeInForce,
-  });
-  const EventType = IDL.Variant({
-    'Withdraw' : WithdrawEvent,
-    'AddTradingPair' : AddTradingPairEvent,
-    'Upgrade' : UpgradeArg,
-    'Init' : InitArg,
-    'Deposit' : DepositEvent,
-    'Settling' : SettlingEvent,
-    'Matching' : MatchingEvent,
-    'CancelLimitOrder' : CancelLimitOrderEvent,
-    'SetHalt' : SetHaltEvent,
-    'AddLimitOrder' : AddLimitOrderEvent,
-  });
-  const Event = IDL.Record({ 'timestamp' : IDL.Nat64, 'payload' : EventType });
-  const GetEventsResult = IDL.Record({
-    'total_event_count' : IDL.Nat64,
-    'events' : IDL.Vec(Event),
-  });
-  const GetMyOrdersFilter = IDL.Variant({
-    'ById' : OrderId,
-    'ByPage' : IDL.Record({ 'after' : IDL.Opt(OrderId), 'length' : IDL.Nat32 }),
-  });
-  const GetMyOrdersArgs = IDL.Record({ 'filter' : GetMyOrdersFilter });
-  const UserOrder = IDL.Record({
-    'id' : OrderId,
-    'order' : OrderRecord,
-    'pair' : TradingPair,
-  });
-  const GetMyOrdersError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({})),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({ 'OrderNotFound' : IDL.Null, 'InvalidOrderId' : IDL.Null })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const GetOrderBookDepthRequest = IDL.Record({
-    'limit' : IDL.Opt(IDL.Nat32),
-    'trading_pair' : TradingPair,
-  });
-  const PriceLevel = IDL.Record({ 'quantity' : IDL.Nat, 'price' : IDL.Nat });
-  const OrderBookDepth = IDL.Record({
-    'asks' : IDL.Vec(PriceLevel),
-    'bids' : IDL.Vec(PriceLevel),
-  });
-  const GetOrderBookDepthError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({})),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'LimitTooLarge' : IDL.Record({
-            'max' : IDL.Nat32,
-            'requested' : IDL.Nat32,
-          }),
-          'UnknownTradingPair' : IDL.Null,
-        })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const GetOrderBookDepthResult = IDL.Variant({
-    'Ok' : OrderBookDepth,
-    'Err' : GetOrderBookDepthError,
-  });
-  const OrderBookTicker = IDL.Record({
-    'ask' : IDL.Opt(PriceLevel),
-    'bid' : IDL.Opt(PriceLevel),
-  });
-  const GetOrderBookTickerError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(IDL.Variant({})),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({ 'UnknownTradingPair' : IDL.Null })
-      ),
-      'InternalError' : IDL.Opt(IDL.Variant({})),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const GetOrderBookTickerResult = IDL.Variant({
-    'Ok' : OrderBookTicker,
-    'Err' : GetOrderBookTickerError,
-  });
-  const TradingStatus = IDL.Variant({
-    'Trading' : IDL.Null,
-    'Halted' : IDL.Null,
-  });
-  const TradingPairInfo = IDL.Record({
-    'status' : TradingStatus,
-    'base' : Token,
-    'quote' : Token,
-    'min_notional' : IDL.Nat,
-    'lot_size' : IDL.Nat,
-    'taker_fee_bps' : IDL.Nat16,
-    'maker_fee_bps' : IDL.Nat16,
-    'tick_size' : IDL.Nat,
-    'max_notional' : IDL.Opt(IDL.Nat),
-  });
-  const UnauthorizedError = IDL.Variant({ 'NotController' : IDL.Null });
-  const UnauthorizedResult = IDL.Variant({
-    'Ok' : IDL.Null,
-    'Err' : UnauthorizedError,
-  });
-  const WithdrawRequest = IDL.Record({
-    'token_id' : TokenId,
-    'amount' : IDL.Nat,
-  });
-  const WithdrawResponse = IDL.Record({ 'block_index' : IDL.Nat });
-  const WithdrawError = IDL.Record({
-    'kind' : IDL.Variant({
-      'TemporaryError' : IDL.Opt(
-        IDL.Variant({
-          'CallFailed' : IDL.Record({
-            'method' : IDL.Text,
-            'ledger' : IDL.Principal,
-            'reason' : IDL.Text,
-          }),
-          'LedgerFeeChanged' : IDL.Null,
-          'LedgerTemporarilyUnavailable' : IDL.Null,
-          'OperationInProgress' : IDL.Null,
-        })
-      ),
-      'RequestError' : IDL.Opt(
-        IDL.Variant({
-          'AmountExceedsMaximum' : IDL.Null,
-          'InsufficientBalance' : IDL.Record({ 'available' : IDL.Nat }),
-          'UnsupportedToken' : IDL.Record({ 'token_id' : TokenId }),
-          'AmountTooSmall' : IDL.Record({ 'min_amount' : IDL.Nat }),
-        })
-      ),
-      'InternalError' : IDL.Opt(
-        IDL.Variant({
-          'CandidDecodeFailed' : IDL.Record({
-            'method' : IDL.Text,
-            'ledger' : IDL.Principal,
-            'reason' : IDL.Text,
-          }),
-          'LedgerError' : IDL.Record({ 'reason' : IDL.Text }),
-          'LedgerInsufficientFunds' : IDL.Record({ 'balance' : IDL.Nat }),
-        })
-      ),
-    }),
-    'message' : IDL.Opt(IDL.Text),
-  });
-  const WithdrawResult = IDL.Variant({
-    'Ok' : WithdrawResponse,
-    'Err' : WithdrawError,
-  });
-  
-  return IDL.Service({
-    'add_limit_order' : IDL.Func(
-        [LimitOrderRequest],
-        [IDL.Variant({ 'Ok' : OrderId, 'Err' : AddLimitOrderError })],
-        [],
-      ),
-    'add_trading_pair' : IDL.Func(
-        [AddTradingPairRequest],
-        [AddTradingPairResult],
-        [],
-      ),
-    'cancel_limit_order' : IDL.Func(
-        [OrderId],
-        [IDL.Variant({ 'Ok' : OrderRecord, 'Err' : CancelLimitOrderError })],
-        [],
-      ),
-    'deposit' : IDL.Func([DepositRequest], [DepositResult], []),
-    'get_balances' : IDL.Func(
-        [IDL.Opt(IDL.Vec(FilterToken))],
-        [GetBalancesResult],
-        ['query'],
-      ),
-    'get_events' : IDL.Func([GetEventsArgs], [GetEventsResult], ['query']),
-    'get_fee_balances' : IDL.Func(
-        [IDL.Opt(IDL.Vec(FilterToken))],
-        [GetBalancesResult],
-        ['query'],
-      ),
-    'get_my_orders' : IDL.Func(
-        [IDL.Opt(GetMyOrdersArgs)],
-        [IDL.Variant({ 'Ok' : IDL.Vec(UserOrder), 'Err' : GetMyOrdersError })],
-        ['query'],
-      ),
-    'get_order_book_depth' : IDL.Func(
-        [GetOrderBookDepthRequest],
-        [GetOrderBookDepthResult],
-        ['query'],
-      ),
-    'get_order_book_ticker' : IDL.Func(
-        [TradingPair],
-        [GetOrderBookTickerResult],
-        ['query'],
-      ),
-    'get_trading_pairs' : IDL.Func([], [IDL.Vec(TradingPairInfo)], ['query']),
-    'halt_trading' : IDL.Func(
-        [IDL.Opt(IDL.Vec(TradingPair))],
-        [UnauthorizedResult],
-        [],
-      ),
-    'list_supported_tokens' : IDL.Func([], [IDL.Vec(Token)], ['query']),
-    'resume_trading' : IDL.Func(
-        [IDL.Opt(IDL.Vec(TradingPair))],
-        [UnauthorizedResult],
-        [],
-      ),
-    'withdraw' : IDL.Func([WithdrawRequest], [WithdrawResult], []),
-  });
+	const Mode = IDL.Variant({
+		RestrictedTo: IDL.Vec(IDL.Principal),
+		GeneralAvailability: IDL.Null
+	});
+	const UpgradeArg = IDL.Record({
+		max_orders_per_chunk: IDL.Opt(IDL.Nat32),
+		mode: IDL.Opt(Mode),
+		instruction_budget: IDL.Opt(IDL.Nat64)
+	});
+	const InitArg = IDL.Record({
+		max_orders_per_chunk: IDL.Nat32,
+		mode: Mode,
+		instruction_budget: IDL.Nat64
+	});
+	const OisyTradeArg = IDL.Variant({
+		Upgrade: IDL.Opt(UpgradeArg),
+		Init: InitArg
+	});
+	const TradingPair = IDL.Record({
+		base: IDL.Principal,
+		quote: IDL.Principal
+	});
+	const Side = IDL.Variant({ Buy: IDL.Null, Sell: IDL.Null });
+	const TimeInForce = IDL.Variant({
+		FillOrKill: IDL.Null,
+		GoodTilCanceled: IDL.Null
+	});
+	const LimitOrderRequest = IDL.Record({
+		pair: TradingPair,
+		side: Side,
+		quantity: IDL.Nat,
+		price: IDL.Nat,
+		time_in_force: IDL.Opt(TimeInForce)
+	});
+	const OrderId = IDL.Text;
+	const TokenId = IDL.Record({ ledger_id: IDL.Principal });
+	const AddLimitOrderError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({ TradingHalted: IDL.Null })),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					AmountExceedsMaximum: IDL.Null,
+					InvalidPrice: IDL.Record({
+						price: IDL.Nat,
+						tick_size: IDL.Nat
+					}),
+					InvalidQuantity: IDL.Record({
+						lot_size: IDL.Nat,
+						quantity: IDL.Nat
+					}),
+					InsufficientBalance: IDL.Record({
+						token: TokenId,
+						available: IDL.Nat,
+						required: IDL.Nat
+					}),
+					InvalidNotional: IDL.Record({
+						max: IDL.Opt(IDL.Nat),
+						min: IDL.Nat,
+						notional: IDL.Nat
+					}),
+					UnknownTradingPair: IDL.Null
+				})
+			),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const TokenMetadata = IDL.Record({
+		decimals: IDL.Nat8,
+		symbol: IDL.Text
+	});
+	const Token = IDL.Record({ id: TokenId, metadata: TokenMetadata });
+	const AddTradingPairRequest = IDL.Record({
+		base: Token,
+		quote: Token,
+		min_notional: IDL.Nat,
+		lot_size: IDL.Nat,
+		taker_fee_bps: IDL.Nat16,
+		maker_fee_bps: IDL.Nat16,
+		tick_size: IDL.Nat,
+		max_notional: IDL.Opt(IDL.Nat)
+	});
+	const AddTradingPairError = IDL.Variant({
+		InvalidTickSize: IDL.Null,
+		NotController: IDL.Null,
+		TradingPairAlreadyExists: IDL.Null,
+		InvalidLotSize: IDL.Null,
+		InvalidNotional: IDL.Record({
+			min_notional: IDL.Nat,
+			max_notional: IDL.Opt(IDL.Nat)
+		}),
+		InconsistentTokenMetadata: IDL.Record({
+			token: TokenId,
+			submitted: TokenMetadata,
+			expected: TokenMetadata
+		}),
+		BaseEqualsQuote: IDL.Null,
+		InvalidBasisPoint: IDL.Nat16,
+		BaseDecimalsTooLarge: IDL.Record({ decimals: IDL.Nat8 }),
+		IndivisibleTickLotForBaseDecimals: IDL.Record({
+			lot_size: IDL.Nat,
+			base_decimals: IDL.Nat8,
+			tick_size: IDL.Nat
+		})
+	});
+	const AddTradingPairResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddTradingPairError
+	});
+	const OrderStatus = IDL.Variant({
+		Open: IDL.Null,
+		Filled: IDL.Null,
+		Expired: IDL.Null,
+		Canceled: IDL.Null,
+		Pending: IDL.Null
+	});
+	const OrderRecord = IDL.Record({
+		status: OrderStatus,
+		owner: IDL.Principal,
+		filled_quantity: IDL.Nat,
+		side: Side,
+		created_at: IDL.Nat64,
+		last_updated_at: IDL.Opt(IDL.Nat64),
+		quantity: IDL.Nat,
+		price: IDL.Nat,
+		time_in_force: TimeInForce
+	});
+	const CancelLimitOrderError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({})),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					OrderNotFound: IDL.Null,
+					NotOrderOwner: IDL.Null,
+					OrderAlreadyTerminal: IDL.Null,
+					InvalidOrderId: IDL.Null
+				})
+			),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const DepositRequest = IDL.Record({
+		token_id: TokenId,
+		amount: IDL.Nat
+	});
+	const DepositResponse = IDL.Record({ block_index: IDL.Nat });
+	const DepositError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(
+				IDL.Variant({
+					CallFailed: IDL.Record({
+						method: IDL.Text,
+						ledger: IDL.Principal,
+						reason: IDL.Text
+					}),
+					LedgerTemporarilyUnavailable: IDL.Null,
+					OperationInProgress: IDL.Null
+				})
+			),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					AmountExceedsMaximum: IDL.Null,
+					InsufficientAllowance: IDL.Record({ allowance: IDL.Nat }),
+					UnsupportedToken: IDL.Record({ token_id: TokenId }),
+					InsufficientFunds: IDL.Record({ balance: IDL.Nat })
+				})
+			),
+			InternalError: IDL.Opt(
+				IDL.Variant({
+					CandidDecodeFailed: IDL.Record({
+						method: IDL.Text,
+						ledger: IDL.Principal,
+						reason: IDL.Text
+					}),
+					LedgerError: IDL.Record({ reason: IDL.Text })
+				})
+			)
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const DepositResult = IDL.Variant({
+		Ok: DepositResponse,
+		Err: DepositError
+	});
+	const FilterToken = IDL.Variant({ ById: TokenId });
+	const Balance = IDL.Record({ free: IDL.Nat, reserved: IDL.Nat });
+	const UserTokenBalance = IDL.Record({ token: Token, balance: Balance });
+	const GetBalancesError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({})),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					TokenNotSupported: FilterToken,
+					FilterTooLarge: IDL.Record({
+						len: IDL.Nat32,
+						max: IDL.Nat32
+					})
+				})
+			),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const GetBalancesResult = IDL.Variant({
+		Ok: IDL.Vec(UserTokenBalance),
+		Err: GetBalancesError
+	});
+	const GetEventsArgs = IDL.Record({
+		start: IDL.Nat64,
+		length: IDL.Nat64
+	});
+	const WithdrawEvent = IDL.Record({
+		token: TokenId,
+		block_index: IDL.Nat64,
+		user: IDL.Principal,
+		amount: IDL.Nat
+	});
+	const AddTradingPairEvent = IDL.Record({
+		quote_metadata: TokenMetadata,
+		base: TokenId,
+		quote: TokenId,
+		min_notional: IDL.Nat,
+		book_id: IDL.Nat64,
+		lot_size: IDL.Nat,
+		taker_fee_bps: IDL.Nat16,
+		maker_fee_bps: IDL.Nat16,
+		base_metadata: TokenMetadata,
+		tick_size: IDL.Nat,
+		max_notional: IDL.Opt(IDL.Nat)
+	});
+	const DepositEvent = IDL.Record({
+		token: TokenId,
+		user: IDL.Principal,
+		amount: IDL.Nat
+	});
+	const PairToken = IDL.Variant({ Base: IDL.Null, Quote: IDL.Null });
+	const BalanceOperation = IDL.Variant({
+		Transfer: IDL.Record({
+			fee: IDL.Opt(IDL.Nat),
+			token: PairToken,
+			to_order: IDL.Nat64,
+			from_order: IDL.Nat64,
+			amount: IDL.Nat
+		}),
+		Unreserve: IDL.Record({
+			token: PairToken,
+			order: IDL.Nat64,
+			amount: IDL.Nat
+		})
+	});
+	const SettlingEvent = IDL.Record({
+		balance_operations: IDL.Vec(BalanceOperation),
+		book_id: IDL.Nat64
+	});
+	const MatchingEvent = IDL.Record({
+		orders: IDL.Vec(IDL.Nat64),
+		book_id: IDL.Nat64
+	});
+	const EventOrderId = IDL.Record({ seq: IDL.Nat64, book_id: IDL.Nat64 });
+	const CancelLimitOrderEvent = IDL.Record({ order_id: EventOrderId });
+	const SetHaltEvent = IDL.Record({
+		book_ids: IDL.Opt(IDL.Vec(IDL.Nat64)),
+		halted: IDL.Bool
+	});
+	const AddLimitOrderEvent = IDL.Record({
+		side: Side,
+		user: IDL.Principal,
+		quantity: IDL.Nat,
+		order_id: EventOrderId,
+		price: IDL.Nat,
+		time_in_force: TimeInForce
+	});
+	const EventType = IDL.Variant({
+		Withdraw: WithdrawEvent,
+		AddTradingPair: AddTradingPairEvent,
+		Upgrade: UpgradeArg,
+		Init: InitArg,
+		Deposit: DepositEvent,
+		Settling: SettlingEvent,
+		Matching: MatchingEvent,
+		CancelLimitOrder: CancelLimitOrderEvent,
+		SetHalt: SetHaltEvent,
+		AddLimitOrder: AddLimitOrderEvent
+	});
+	const Event = IDL.Record({ timestamp: IDL.Nat64, payload: EventType });
+	const GetEventsResult = IDL.Record({
+		total_event_count: IDL.Nat64,
+		events: IDL.Vec(Event)
+	});
+	const GetMyOrdersFilter = IDL.Variant({
+		ById: OrderId,
+		ByPage: IDL.Record({ after: IDL.Opt(OrderId), length: IDL.Nat32 })
+	});
+	const GetMyOrdersArgs = IDL.Record({ filter: GetMyOrdersFilter });
+	const UserOrder = IDL.Record({
+		id: OrderId,
+		order: OrderRecord,
+		pair: TradingPair
+	});
+	const GetMyOrdersError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({})),
+			RequestError: IDL.Opt(IDL.Variant({ OrderNotFound: IDL.Null, InvalidOrderId: IDL.Null })),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const GetOrderBookDepthRequest = IDL.Record({
+		limit: IDL.Opt(IDL.Nat32),
+		trading_pair: TradingPair
+	});
+	const PriceLevel = IDL.Record({ quantity: IDL.Nat, price: IDL.Nat });
+	const OrderBookDepth = IDL.Record({
+		asks: IDL.Vec(PriceLevel),
+		bids: IDL.Vec(PriceLevel)
+	});
+	const GetOrderBookDepthError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({})),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					LimitTooLarge: IDL.Record({
+						max: IDL.Nat32,
+						requested: IDL.Nat32
+					}),
+					UnknownTradingPair: IDL.Null
+				})
+			),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const GetOrderBookDepthResult = IDL.Variant({
+		Ok: OrderBookDepth,
+		Err: GetOrderBookDepthError
+	});
+	const OrderBookTicker = IDL.Record({
+		ask: IDL.Opt(PriceLevel),
+		bid: IDL.Opt(PriceLevel)
+	});
+	const GetOrderBookTickerError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(IDL.Variant({})),
+			RequestError: IDL.Opt(IDL.Variant({ UnknownTradingPair: IDL.Null })),
+			InternalError: IDL.Opt(IDL.Variant({}))
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const GetOrderBookTickerResult = IDL.Variant({
+		Ok: OrderBookTicker,
+		Err: GetOrderBookTickerError
+	});
+	const TradingStatus = IDL.Variant({
+		Trading: IDL.Null,
+		Halted: IDL.Null
+	});
+	const TradingPairInfo = IDL.Record({
+		status: TradingStatus,
+		base: Token,
+		quote: Token,
+		min_notional: IDL.Nat,
+		lot_size: IDL.Nat,
+		taker_fee_bps: IDL.Nat16,
+		maker_fee_bps: IDL.Nat16,
+		tick_size: IDL.Nat,
+		max_notional: IDL.Opt(IDL.Nat)
+	});
+	const UnauthorizedError = IDL.Variant({ NotController: IDL.Null });
+	const UnauthorizedResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: UnauthorizedError
+	});
+	const WithdrawRequest = IDL.Record({
+		token_id: TokenId,
+		amount: IDL.Nat
+	});
+	const WithdrawResponse = IDL.Record({ block_index: IDL.Nat });
+	const WithdrawError = IDL.Record({
+		kind: IDL.Variant({
+			TemporaryError: IDL.Opt(
+				IDL.Variant({
+					CallFailed: IDL.Record({
+						method: IDL.Text,
+						ledger: IDL.Principal,
+						reason: IDL.Text
+					}),
+					LedgerFeeChanged: IDL.Null,
+					LedgerTemporarilyUnavailable: IDL.Null,
+					OperationInProgress: IDL.Null
+				})
+			),
+			RequestError: IDL.Opt(
+				IDL.Variant({
+					AmountExceedsMaximum: IDL.Null,
+					InsufficientBalance: IDL.Record({ available: IDL.Nat }),
+					UnsupportedToken: IDL.Record({ token_id: TokenId }),
+					AmountTooSmall: IDL.Record({ min_amount: IDL.Nat })
+				})
+			),
+			InternalError: IDL.Opt(
+				IDL.Variant({
+					CandidDecodeFailed: IDL.Record({
+						method: IDL.Text,
+						ledger: IDL.Principal,
+						reason: IDL.Text
+					}),
+					LedgerError: IDL.Record({ reason: IDL.Text }),
+					LedgerInsufficientFunds: IDL.Record({ balance: IDL.Nat })
+				})
+			)
+		}),
+		message: IDL.Opt(IDL.Text)
+	});
+	const WithdrawResult = IDL.Variant({
+		Ok: WithdrawResponse,
+		Err: WithdrawError
+	});
+
+	return IDL.Service({
+		add_limit_order: IDL.Func(
+			[LimitOrderRequest],
+			[IDL.Variant({ Ok: OrderId, Err: AddLimitOrderError })],
+			[]
+		),
+		add_trading_pair: IDL.Func([AddTradingPairRequest], [AddTradingPairResult], []),
+		cancel_limit_order: IDL.Func(
+			[OrderId],
+			[IDL.Variant({ Ok: OrderRecord, Err: CancelLimitOrderError })],
+			[]
+		),
+		deposit: IDL.Func([DepositRequest], [DepositResult], []),
+		get_balances: IDL.Func([IDL.Opt(IDL.Vec(FilterToken))], [GetBalancesResult], ['query']),
+		get_events: IDL.Func([GetEventsArgs], [GetEventsResult], ['query']),
+		get_fee_balances: IDL.Func([IDL.Opt(IDL.Vec(FilterToken))], [GetBalancesResult], ['query']),
+		get_my_orders: IDL.Func(
+			[IDL.Opt(GetMyOrdersArgs)],
+			[IDL.Variant({ Ok: IDL.Vec(UserOrder), Err: GetMyOrdersError })],
+			['query']
+		),
+		get_order_book_depth: IDL.Func(
+			[GetOrderBookDepthRequest],
+			[GetOrderBookDepthResult],
+			['query']
+		),
+		get_order_book_ticker: IDL.Func([TradingPair], [GetOrderBookTickerResult], ['query']),
+		get_trading_pairs: IDL.Func([], [IDL.Vec(TradingPairInfo)], ['query']),
+		halt_trading: IDL.Func([IDL.Opt(IDL.Vec(TradingPair))], [UnauthorizedResult], []),
+		list_supported_tokens: IDL.Func([], [IDL.Vec(Token)], ['query']),
+		resume_trading: IDL.Func([IDL.Opt(IDL.Vec(TradingPair))], [UnauthorizedResult], []),
+		withdraw: IDL.Func([WithdrawRequest], [WithdrawResult], [])
+	});
 };
 
 export const init = ({ IDL }) => {
-  const Mode = IDL.Variant({
-    'RestrictedTo' : IDL.Vec(IDL.Principal),
-    'GeneralAvailability' : IDL.Null,
-  });
-  const UpgradeArg = IDL.Record({
-    'max_orders_per_chunk' : IDL.Opt(IDL.Nat32),
-    'mode' : IDL.Opt(Mode),
-    'instruction_budget' : IDL.Opt(IDL.Nat64),
-  });
-  const InitArg = IDL.Record({
-    'max_orders_per_chunk' : IDL.Nat32,
-    'mode' : Mode,
-    'instruction_budget' : IDL.Nat64,
-  });
-  const OisyTradeArg = IDL.Variant({
-    'Upgrade' : IDL.Opt(UpgradeArg),
-    'Init' : InitArg,
-  });
-  
-  return [OisyTradeArg];
+	const Mode = IDL.Variant({
+		RestrictedTo: IDL.Vec(IDL.Principal),
+		GeneralAvailability: IDL.Null
+	});
+	const UpgradeArg = IDL.Record({
+		max_orders_per_chunk: IDL.Opt(IDL.Nat32),
+		mode: IDL.Opt(Mode),
+		instruction_budget: IDL.Opt(IDL.Nat64)
+	});
+	const InitArg = IDL.Record({
+		max_orders_per_chunk: IDL.Nat32,
+		mode: Mode,
+		instruction_budget: IDL.Nat64
+	});
+	const OisyTradeArg = IDL.Variant({
+		Upgrade: IDL.Opt(UpgradeArg),
+		Init: InitArg
+	});
+
+	return [OisyTradeArg];
 };
