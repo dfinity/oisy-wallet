@@ -16,6 +16,7 @@
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { tradingDepositWizardSteps } from '$lib/config/trading.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { oisyTradeDepositableTokens } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
@@ -50,11 +51,17 @@
 	let isEmpty = $derived($oisyTradeDepositableTokens.length === 0);
 
 	// Reuse the shared token-picker pipeline (search box + network/type filters) the
-	// swap and send modals use, seeded with the DEX-depositable tokens.
+	// swap and send modals use, seeded with the DEX-depositable tokens. Honor the
+	// page's selected network like the send modal: the default "All networks" view is
+	// pseudo-chain-fusion (mainnet-only), so without this a testnet DEX (staging) would
+	// strip its own TESTICP/ckSepolia* tokens from the picker.
 	const tokensListContext = initModalTokensListContext({
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
 		// svelte-ignore state_referenced_locally -- the context is initialized once at mount; the reactive token list is kept in sync below via `setTokens`.
-		tokens: $oisyTradeDepositableTokens
+		tokens: $oisyTradeDepositableTokens,
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- initialized once at mount; the page network is fixed for the modal's lifetime and locks the in-modal selector below.
+		filterNetwork: $selectedNetwork
 	});
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
@@ -163,6 +170,7 @@
 		</ContentWithToolbar>
 	{:else if currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 		<ModalTokensList
+			networkSelectorViewOnly={nonNullish($selectedNetwork)}
 			onSelectNetworkFilter={() => goToStep(WizardStepsTradingDeposit.FILTER_NETWORKS)}
 			onTokenButtonClick={onSelectToken}
 		>
