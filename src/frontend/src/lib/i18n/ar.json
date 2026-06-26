@@ -226,7 +226,6 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "",
-			"defi": "التمويل اللامركزي",
 			"dex": "DEX",
 			"game": "لعبة",
 			"lending": "",
@@ -234,8 +233,7 @@
 			"rwa": "",
 			"social": "",
 			"staking": "التخزين",
-			"tools": "أدوات",
-			"walletconnect": "WalletConnect"
+			"tools": "أدوات"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -353,15 +351,6 @@
 					"call_to_action": ""
 				}
 			},
-			"caffeine2": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
-			},
 			"mobox": {
 				"name": "",
 				"one_liner": "",
@@ -408,11 +397,6 @@
 				"description": ""
 			},
 			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

@@ -212,7 +212,6 @@ interface I18nDapps {
 		aa_new: string;
 		ab_icp: string;
 		ai: string;
-		defi: string;
 		dex: string;
 		game: string;
 		lending: string;
@@ -221,7 +220,6 @@ interface I18nDapps {
 		social: string;
 		staking: string;
 		tools: string;
-		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -264,12 +262,6 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		caffeine2: {
-			name: string;
-			one_liner: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
@@ -280,7 +272,6 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		sanctum: { name: string; one_liner: string; description: string };
-		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
 		liquidium: {

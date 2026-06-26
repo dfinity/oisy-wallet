@@ -226,7 +226,6 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "ИИ",
-			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "Игра",
 			"lending": "",
@@ -234,8 +233,7 @@
 			"rwa": "",
 			"social": "",
 			"staking": "Стейкинг",
-			"tools": "Инструменты",
-			"walletconnect": "WalletConnect"
+			"tools": "Инструменты"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -353,15 +351,6 @@
 					"call_to_action": "Попробовать KongSwap"
 				}
 			},
-			"caffeine2": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
-			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "Платформа GameFi на BNB Chain, сочетающая Free-to-Play игры, доходное фермерство в DeFi и механики NFT — с поддержкой play-to-earn и управлением сообществом.",
@@ -408,11 +397,6 @@
 				"description": ""
 			},
 			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

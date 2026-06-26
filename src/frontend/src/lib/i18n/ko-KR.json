@@ -226,7 +226,6 @@
 			"aa_new": "최근 추가됨",
 			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "게임",
 			"lending": "",
@@ -234,8 +233,7 @@
 			"rwa": "RWA",
 			"social": "",
 			"staking": "스테이킹",
-			"tools": "도구",
-			"walletconnect": "WalletConnect"
+			"tools": "도구"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -353,15 +351,6 @@
 					"call_to_action": "더 알아보기"
 				}
 			},
-			"caffeine2": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
-			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "플레이 투 언과 커뮤니티 거버넌스를 기반으로 무료 플레이 게임, DeFi 수익 파밍, NFT 메커니즘을 결합한 BNB 체인의 GameFi 플랫폼.",
@@ -411,11 +400,6 @@
 				"name": "Sanctum",
 				"one_liner": "LST 간 즉시 스왑과 자체 LST 출시 도구를 갖춘 솔라나 네이티브 유동 스테이킹 프로토콜.",
 				"description": "Sanctum은 유동 스테이킹 토큰(LST) 간 즉각적이고 슬리피지 없는 스왑을 가능하게 하는 솔라나의 유동 스테이킹 인프라 프로토콜입니다. 새로운 LST가 공유 유동성을 활용할 수 있도록 지원하여 생태계 성장을 도모하며, 자동화된 발행 및 상환 기능이 있는 브랜드 토큰 발행 도구를 제공합니다. 플랫폼의 Infinity 풀, 라우터, 리저브 시스템은 스테이킹 생태계 전반에 걸쳐 깊은 유동성, 구성 가능성 및 안전성을 제공합니다."
-			},
-			"sphere_finance": {
-				"name": "Sphere Finance",
-				"one_liner": "거버넌스 획득, 재무 수익 파밍, $SPHERE 토큰 중심의 수익 창출 도구 구축에 초점을 맞춘 메타 거버넌스 DeFi 프로토콜.",
-				"description": "Sphere Finance는 거버넌스 토큰을 획득하고 기본 토큰인 $SPHERE 주변의 프로토콜 수익을 극대화하는 도구를 구축하는 DeFi 메타 거버넌스 프로토콜입니다. 파트너 프로토콜 전반에 걸쳐 자본 배분을 자동화하고 재무를 사용하여 수익을 창출합니다. 거버넌스는 veTETU 스타일 스테이킹을 통해 획득되며, 장기적인 프로토콜 건전성과 인센티브를 일치시킵니다."
 			},
 			"binaryx": {
 				"name": "BinaryX",

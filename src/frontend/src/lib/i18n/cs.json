@@ -226,7 +226,6 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "AI",
-			"defi": "DeFi",
 			"dex": "DEX",
 			"game": "Hra",
 			"lending": "",
@@ -234,8 +233,7 @@
 			"rwa": "",
 			"social": "",
 			"staking": "Staking",
-			"tools": "Nářadí",
-			"walletconnect": "WalletConnect"
+			"tools": "Nářadí"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -353,15 +351,6 @@
 					"call_to_action": "Zjistit více"
 				}
 			},
-			"caffeine2": {
-				"name": "",
-				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
-			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "GameFi platforma na síti BNB Chain, která propojuje free-to-play hry, DeFi výnosy a NFT mechaniky.",
@@ -408,11 +397,6 @@
 				"description": ""
 			},
 			"sanctum": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
-			"sphere_finance": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
