@@ -396,9 +396,9 @@ describe('oisy-trade.utils — limit order', () => {
 		});
 
 		it('buy: free quote / price floored to lot, null without a price', () => {
-			expect(maxSpendBaseAmount({ side: 'buy', freeBase: 0, freeQuote: 30, price: 2.69, pair })).toBe(
-				11
-			); // 30 / 2.69 = 11.15 → floor to 0.25 → 11.0
+			expect(
+				maxSpendBaseAmount({ side: 'buy', freeBase: 0, freeQuote: 30, price: 2.69, pair })
+			).toBe(11); // 30 / 2.69 = 11.15 → floor to 0.25 → 11.0
 			expect(
 				maxSpendBaseAmount({ side: 'buy', freeBase: 0, freeQuote: 30, price: 0, pair })
 			).toBeNull();

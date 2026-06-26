@@ -102,7 +102,9 @@ export const toOisyTradeWithdrawTokens = ({
 	balances: UserTokenBalance[];
 	icrcTokens: IcToken[];
 }): OisyTradeWithdrawToken[] => {
-	const tokenByLedgerCanisterId = new Map(icrcTokens.map((token) => [token.ledgerCanisterId, token]));
+	const tokenByLedgerCanisterId = new Map(
+		icrcTokens.map((token) => [token.ledgerCanisterId, token])
+	);
 
 	return balances
 		.map(({ token: { id }, balance: { free, reserved } }) => {

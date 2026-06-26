@@ -3,11 +3,11 @@
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import TradingAssets from '$lib/components/trading/TradingAssets.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
 	import TradingOnboarding from '$lib/components/trading/TradingOnboarding.svelte';
 	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
+	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import {
@@ -85,11 +85,7 @@
 				<h3 class="text-base font-bold text-primary">{$i18n.trading.orders.title}</h3>
 				<LimitOrder>
 					{#snippet trigger(open)}
-						<button
-							class="text-sm font-medium text-brand-primary"
-							onclick={open}
-							type="button"
-						>
+						<button class="text-sm font-medium text-brand-primary" onclick={open} type="button">
 							{$i18n.trading.orders.add_limit_order}
 						</button>
 					{/snippet}
