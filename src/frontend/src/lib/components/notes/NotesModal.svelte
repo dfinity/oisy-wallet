@@ -423,7 +423,9 @@
 	}
 
 	/* Force the modal to the same height as view mode on desktop. */
-	.notes-editing :global(div.container) {
-		height: var(--dialog-max-height);
+	@media (min-width: 768px) {
+		.notes-editing :global(div.wrapper.dialog) {
+			height: var(--dialog-max-height, 100%);
+		}
 	}
 </style>
