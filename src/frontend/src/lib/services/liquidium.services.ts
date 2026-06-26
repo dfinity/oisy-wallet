@@ -48,6 +48,9 @@ export const loadLiquidium = async ({
 		return;
 	}
 
+	const principal = identity.getPrincipal();
+	liquidiumStore.init(principal);
+
 	try {
 		const { market, accounts, positions } = liquidiumClient({ identity });
 
@@ -63,7 +66,7 @@ export const loadLiquidium = async ({
 				})
 			: null;
 
-		liquidiumStore.set({ markets, portfolio });
+		liquidiumStore.setForPrincipal({ principal, data: { markets, portfolio } });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
