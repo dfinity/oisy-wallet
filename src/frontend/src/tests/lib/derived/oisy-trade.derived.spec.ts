@@ -71,13 +71,7 @@ describe('oisy-trade.derived', () => {
 	const icpLedgerId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 	const ckusdcLedgerId = 'xevnm-gaaaa-aaaar-qafnq-cai';
 
-	const tradeToken = ({
-		symbol,
-		ledgerId
-	}: {
-		symbol: string;
-		ledgerId: string;
-	}): OisyTradeToken =>
+	const tradeToken = ({ symbol, ledgerId }: { symbol: string; ledgerId: string }): OisyTradeToken =>
 		({
 			id: { ledger_id: Principal.fromText(ledgerId) },
 			metadata: { symbol, decimals: 8 }

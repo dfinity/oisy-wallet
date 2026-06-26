@@ -1,6 +1,6 @@
 import type {
-	PriceLevel,
 	Token as OisyTradeToken,
+	PriceLevel,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
