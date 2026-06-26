@@ -128,6 +128,34 @@ fn sign_onramper_widget_url_signs_the_callers_verified_icp_address() {
 }
 
 #[test]
+fn sign_onramper_widget_url_does_not_sign_unverified_wallet_fields() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    let result = sign(
+        &pic_setup,
+        caller,
+        SignOnramperWidgetUrlRequest {
+            wallets: vec![entry("btc", "attacker-btc-address")],
+            network_wallets: vec![entry("icp", &icp_address)],
+            wallet_address_tags: vec![entry("btc", "attacker-tag")],
+        },
+    );
+
+    let response = match result {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
+        SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+    };
+    assert_eq!(
+        response.signed_query,
+        format!("networkWallets=icp:{icp_address}"),
+        "only backend-verified networkWallets may be signed"
+    );
+}
+
+#[test]
 fn sign_onramper_widget_url_rejects_address_not_owned_by_caller() {
     let pic_setup = setup();
     provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
@@ -164,6 +192,29 @@ fn sign_onramper_widget_url_rejects_address_for_underivable_network() {
     assert_eq!(
         result,
         SignOnramperWidgetUrlResult::Err(SignOnramperWidgetUrlError::AddressDerivationFailed)
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_rejects_mixed_request_when_any_network_is_underivable() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    let result = sign(
+        &pic_setup,
+        caller,
+        network_wallets_request(vec![
+            entry("icp", &icp_address),
+            entry("dogecoin", "DOGEaddress"),
+        ]),
+    );
+
+    assert_eq!(
+        result,
+        SignOnramperWidgetUrlResult::Err(SignOnramperWidgetUrlError::AddressDerivationFailed),
+        "one unverifiable networkWallets entry must reject the whole signing request"
     );
 }
 
