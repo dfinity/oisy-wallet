@@ -214,6 +214,11 @@ describe('liquidium-active-tx.services', () => {
 	describe('outflow-id correlation (borrow / withdraw)', () => {
 		const buildBorrowTx = (refs: Record<string, string>): ActiveUserTransaction => {
 			const tx = buildTx(refs);
+
+			if (!('Liquidium' in tx.data)) {
+				return tx;
+			}
+
 			return { ...tx, data: { Liquidium: { ...tx.data.Liquidium, action: { Borrow: null } } } };
 		};
 
