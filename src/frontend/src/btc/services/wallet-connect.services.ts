@@ -418,19 +418,17 @@ export const signPsbt = ({
 			// are network-segregated (or the UTXO's network can be cryptographically proven), reject
 			// non-mainnet signPsbt. This guard is independent of the approved WC namespaces because
 			// incoming session_request chainIds are NOT validated against them.
-			const networkId = nonNullish(request.params.chainId)
-				? BIP122_CHAINS[request.params.chainId]?.networkId
-				: undefined;
+			// `bitcoinJsNetwork` is the single chainId→network mapping; unknown/non-mainnet chains
+			// resolve to a non-`networks.bitcoin` value, so this also covers unknown chain ids.
+			const network = bitcoinJsNetwork(request.params.chainId);
 
-			if (networkId !== BTC_MAINNET_NETWORK_ID) {
+			if (network !== networks.bitcoin) {
 				toastsError({
 					msg: { text: get(i18n).wallet_connect.error.btc_non_mainnet_sign_not_supported }
 				});
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 				return { success: false };
 			}
-
-			const network = bitcoinJsNetwork(request.params.chainId);
 
 			modalNext();
 
