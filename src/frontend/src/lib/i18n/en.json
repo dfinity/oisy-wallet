@@ -353,6 +353,15 @@
 					"call_to_action": "Learn more"
 				}
 			},
+			"caffeine2": {
+				"name": "Caffeine",
+				"one_liner": "AIware apps on-demand. Caffeine is an AI-powered platform that lets you build fully functional web applications just by describing what you want. No coding experience needed, simply chat with Caffeine and watch your ideas come to life.",
+				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
+				"carousel": {
+					"text": "AIware apps on-demand",
+					"call_to_action": "Learn more"
+				}
+			},
 			"mobox": {
 				"name": "Mobox",
 				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
