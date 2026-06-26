@@ -6,11 +6,7 @@ import {
 import type { OptionBtcAddress } from '$btc/types/address';
 import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
 import { buildBtcAccountAddresses } from '$btc/utils/wallet-connect.utils';
-import {
-	BIP122_MAINNET_CHAINS_KEYS,
-	BIP122_REGTEST_CHAINS_KEYS,
-	BIP122_TESTNET_CHAINS_KEYS
-} from '$env/bip122-chains.env';
+import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
 import {
 	CAIP10_DEVNET_CHAINS_KEYS,
 	CAIP10_MAINNET_CHAINS_KEYS,
@@ -316,39 +312,26 @@ export class WalletConnectClient extends WalletConnectListener {
 							}
 						}
 					: {}),
-				...(nonNullish(this.#btcAddressMainnet) ||
-				nonNullish(this.#btcAddressTestnet) ||
-				nonNullish(this.#btcAddressRegtest)
+				// TODO(security): temporary workaround — only advertise BTC mainnet over WalletConnect.
+				// OISY derives a single ECDSA key for all BTC networks, so a signature obtained on a
+				// testnet/regtest request is valid to spend the same key's mainnet UTXOs (identical P2WPKH
+				// script + network-agnostic BIP-143 sighash). Re-enable non-mainnet chains only once BTC
+				// keys are network-segregated. NOTE: this is hygiene, not the load-bearing guard — incoming
+				// session_request chainIds are not validated against the approved namespace, so the
+				// authoritative check lives at the signing path (signPsbt service).
+				...(nonNullish(this.#btcAddressMainnet)
 					? {
 							bip122: {
-								chains: [
-									...(nonNullish(this.#btcAddressMainnet) ? BIP122_MAINNET_CHAINS_KEYS : []),
-									...(nonNullish(this.#btcAddressTestnet) ? BIP122_TESTNET_CHAINS_KEYS : []),
-									...(nonNullish(this.#btcAddressRegtest) ? BIP122_REGTEST_CHAINS_KEYS : [])
-								],
+								chains: [...BIP122_MAINNET_CHAINS_KEYS],
 								methods: [
 									SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 									SESSION_REQUEST_BTC_SIGN_MESSAGE,
 									SESSION_REQUEST_BTC_SIGN_PSBT
 								],
 								events: ['bip122_addressesChanged'],
-								accounts: [
-									...(nonNullish(this.#btcAddressMainnet)
-										? BIP122_MAINNET_CHAINS_KEYS.map(
-												(chain) => `${chain}:${this.#btcAddressMainnet}`
-											)
-										: []),
-									...(nonNullish(this.#btcAddressTestnet)
-										? BIP122_TESTNET_CHAINS_KEYS.map(
-												(chain) => `${chain}:${this.#btcAddressTestnet}`
-											)
-										: []),
-									...(nonNullish(this.#btcAddressRegtest)
-										? BIP122_REGTEST_CHAINS_KEYS.map(
-												(chain) => `${chain}:${this.#btcAddressRegtest}`
-											)
-										: [])
-								]
+								accounts: BIP122_MAINNET_CHAINS_KEYS.map(
+									(chain) => `${chain}:${this.#btcAddressMainnet}`
+								)
 							}
 						}
 					: {})
