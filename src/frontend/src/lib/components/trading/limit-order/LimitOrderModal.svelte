@@ -3,6 +3,7 @@
 	import { setContext } from 'svelte';
 	import LimitOrderWizard from '$lib/components/trading/limit-order/LimitOrderWizard.svelte';
 	import { limitOrderWizardSteps } from '$lib/config/limit-order.config';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,8 +25,16 @@
 
 	// Shared token-picker context, reused from the swap token list so the
 	// base/quote choosing steps get the same search + filters UX. The picker
-	// steps seed the eligible tokens via `setTokens`.
-	const tokensListContext = initModalTokensListContext({ tokens: [] });
+	// steps seed the eligible tokens via `setTokens`. Honor the page's selected
+	// network like the send modal: the default "All networks" view is
+	// pseudo-chain-fusion (mainnet-only), so without this a testnet DEX (staging)
+	// would strip its own TESTICP/ckSepolia* tokens from the picker.
+	const tokensListContext = initModalTokensListContext({
+		tokens: [],
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- initialized once at mount; the page network is fixed for the modal's lifetime.
+		filterNetwork: $selectedNetwork
+	});
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	const reset = () => {

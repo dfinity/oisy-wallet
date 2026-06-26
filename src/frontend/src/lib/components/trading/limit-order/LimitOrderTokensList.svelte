@@ -4,8 +4,8 @@
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -34,7 +34,7 @@
 	// UX as the swap token list. Trade tokens without a matching app token are
 	// dropped (they can't be displayed by the shared item).
 	const tokens: Token[] = $derived.by(() => {
-		const byLedger: Record<string, Token> = $allIcrcTokens.reduce<Record<string, Token>>(
+		const byLedger: Record<string, Token> = $enabledIcTokens.reduce<Record<string, Token>>(
 			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
 			{}
 		);
@@ -59,8 +59,9 @@
 		setTokens(tokens);
 	});
 
-	// OISY TRADE lists ICP-network tokens only, so the network filter stays
-	// view-only — the shared picker still renders search and category filters.
+	// OISY TRADE lists IC-network tokens only (mainnet or the testnet ledgers a
+	// staging DEX trades), so the network filter stays view-only — the shared
+	// picker still renders search and category filters.
 	const onSelectNetworkFilter = () => {};
 </script>
 
