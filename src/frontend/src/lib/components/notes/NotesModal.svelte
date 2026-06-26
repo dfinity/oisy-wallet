@@ -255,7 +255,7 @@
 
 {#snippet notesBody()}
 	{#if step === 'editor'}
-		<ContentWithToolbar styleClass="flex min-h-0 flex-col gap-4 items-stretch">
+		<ContentWithToolbar styleClass="flex min-h-0 flex-col gap-4 items-stretch overflow-y-auto">
 			{#key editorInstance}
 				<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
 			{/key}
@@ -376,10 +376,16 @@
 {/snippet}
 
 <!-- Notes leads a capped, centered modal on desktop: it grows with content from a
-	comfortable minimum up to ~80% of the viewport, then the list scrolls internally
+	comfortable minimum up to ~80% of the viewport, then the body scrolls internally
 	(below) rather than the whole modal reaching the screen edges. Mobile stays
-	full-page (the global modal default). -->
-<div class="sm:[--dialog-max-height:80dvh]" class:notes-editing={step === 'editor'}>
+	full-page (the global modal default). The min-height is clamped to the max so that
+	on short viewports (where gix's fixed 554px min would otherwise win over the 80dvh
+	max and push the modal past the screen edges) the modal still fits and its body
+	scrolls. -->
+<div
+	class="sm:[--dialog-max-height:80dvh] sm:[--dialog-min-height:min(554.25px,80dvh)]"
+	class:notes-editing={step === 'editor'}
+>
 	<Modal disablePointerEvents={busy} {onClose} testId={NOTES_MODAL}>
 		{#snippet title()}{#if nonNullish(pendingDeleteNote)}<Responsive up="md"
 					>{$i18n.notes.text.delete_note}</Responsive

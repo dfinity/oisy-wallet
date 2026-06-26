@@ -55,7 +55,10 @@
 	});
 </script>
 
-<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4" testId={NOTES_VIEW}>
+<ContentWithToolbar
+	styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto"
+	testId={NOTES_VIEW}
+>
 	<!-- Long notes scroll inside the box; the metadata and actions stay pinned below. -->
 	<div
 		class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
