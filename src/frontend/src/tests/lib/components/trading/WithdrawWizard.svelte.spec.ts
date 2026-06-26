@@ -17,7 +17,10 @@ describe('WithdrawWizard', () => {
 			[SEND_CONTEXT_KEY, initSendContext({ token: mockValidIcToken })]
 		]);
 
-	const step = (name: WizardStepsTradingWithdraw): WizardStep => ({ name, title: name });
+	const step = (name: WizardStepsTradingWithdraw): WizardStep<WizardStepsTradingWithdraw> => ({
+		name,
+		title: name
+	});
 
 	const baseProps = {
 		token: mockValidIcToken,
