@@ -91,6 +91,10 @@ export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'
 );
+export const modalLimitOrder: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'limit-order'
+);
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'buy'

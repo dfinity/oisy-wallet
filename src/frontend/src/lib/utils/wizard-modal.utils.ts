@@ -4,6 +4,7 @@ import type {
 	WizardStepsAuthHelp,
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
+	WizardStepsLimitOrder,
 	WizardStepsReceive,
 	WizardStepsScanner,
 	WizardStepsSend,
@@ -25,7 +26,8 @@ type StepName =
 	| TokenModalSteps
 	| WizardStepsGetTokenType
 	| WizardStepsScanner
-	| WizardStepsTradingDeposit;
+	| WizardStepsTradingDeposit
+	| WizardStepsLimitOrder;
 
 export const goToWizardStep = <T extends StepName>({
 	modal,
