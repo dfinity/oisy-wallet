@@ -130,6 +130,22 @@ describe('liquidium.services', () => {
 			});
 		});
 
+		it('still refreshes markets/portfolio when only the asset-prices call fails', async () => {
+			listPools.mockResolvedValue([{ id: 'pool-btc' }]);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+			getAssetPrices.mockRejectedValue(new Error('prices down'));
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio,
+				assetPrices: {}
+			});
+		});
+
 		it('swallows SDK errors and leaves the store unchanged', async () => {
 			listPools.mockRejectedValue(new Error('rpc down'));
 
