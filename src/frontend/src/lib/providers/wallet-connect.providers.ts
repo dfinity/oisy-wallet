@@ -322,16 +322,22 @@ export class WalletConnectClient extends WalletConnectListener {
 				...(nonNullish(this.#btcAddressMainnet)
 					? {
 							bip122: {
-								chains: [...BIP122_MAINNET_CHAINS_KEYS],
+								chains: [
+									...(nonNullish(this.#btcAddressMainnet) ? BIP122_MAINNET_CHAINS_KEYS : [])
+								],
 								methods: [
 									SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 									SESSION_REQUEST_BTC_SIGN_MESSAGE,
 									SESSION_REQUEST_BTC_SIGN_PSBT
 								],
 								events: ['bip122_addressesChanged'],
-								accounts: BIP122_MAINNET_CHAINS_KEYS.map(
-									(chain) => `${chain}:${this.#btcAddressMainnet}`
-								)
+								accounts: [
+									...(nonNullish(this.#btcAddressMainnet)
+										? BIP122_MAINNET_CHAINS_KEYS.map(
+												(chain) => `${chain}:${this.#btcAddressMainnet}`
+											)
+										: [])
+								]
 							}
 						}
 					: {})
