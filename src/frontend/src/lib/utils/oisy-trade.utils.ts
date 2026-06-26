@@ -674,9 +674,11 @@ export const mapOisyTradeOrders = ({
 export const orderStatusView = (
 	status: OisyTradeOrderStatus
 ): { labelKey: OisyTradeOrderStatus; pillVariant: BadgeVariant } => {
+	// Mirrors the wireframe pills: Open resting → green (success), Pending → amber
+	// (warning), Filled → green, Canceled → muted (default), Expired → distinct amber.
 	const pillVariant: Record<OisyTradeOrderStatus, BadgeVariant> = {
-		Open: 'info',
-		Pending: 'info',
+		Open: 'success',
+		Pending: 'warning',
 		Filled: 'success',
 		Canceled: 'default',
 		Expired: 'warning'

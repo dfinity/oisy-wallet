@@ -738,8 +738,8 @@ describe('oisy-trade.utils — orders', () => {
 
 	describe('orderStatusView', () => {
 		it('maps every status to its label key and pill variant', () => {
-			expect(orderStatusView('Open')).toEqual({ labelKey: 'Open', pillVariant: 'info' });
-			expect(orderStatusView('Pending')).toEqual({ labelKey: 'Pending', pillVariant: 'info' });
+			expect(orderStatusView('Open')).toEqual({ labelKey: 'Open', pillVariant: 'success' });
+			expect(orderStatusView('Pending')).toEqual({ labelKey: 'Pending', pillVariant: 'warning' });
 			expect(orderStatusView('Filled')).toEqual({ labelKey: 'Filled', pillVariant: 'success' });
 			expect(orderStatusView('Canceled')).toEqual({
 				labelKey: 'Canceled',
