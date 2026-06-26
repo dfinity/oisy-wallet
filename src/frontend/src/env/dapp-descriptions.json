@@ -78,7 +78,7 @@
 		"discord": "https://discord.com/invite/8TEMtqJJCS",
 		"github": "https://github.com/Liquidium-Inc",
 		"telegram": "https://t.me/LiquidiumWTF",
-		"tags": ["dapps.categories.defi", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
+		"tags": ["dapps.categories.lending", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
 		"description": "dapps.descriptions.liquidium.description",
 		"usesInternetIdentity": false,
 		"stats": "",
