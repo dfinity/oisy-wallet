@@ -3,7 +3,7 @@ import type {
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
-import { icrcTokens } from '$icp/derived/icrc.derived';
+import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import { toOisyTradeWithdrawTokens } from '$lib/utils/oisy-trade.utils';
@@ -27,7 +27,7 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 // DEX balances joined with the matching OISY token, so the Trading tab can offer
 // a Withdraw entry per holding with the token pre-resolved.
 export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
-	[oisyTradeBalances, icrcTokens],
-	([$oisyTradeBalances, $icrcTokens]) =>
-		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $icrcTokens })
+	[oisyTradeBalances, enabledIcTokens],
+	([$oisyTradeBalances, $enabledIcTokens]) =>
+		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
 );
