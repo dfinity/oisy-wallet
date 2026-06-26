@@ -46,7 +46,9 @@
 			return;
 		}
 
-		if (isNullish(amount)) {
+		// Reject nullish, non-finite (NaN/Infinity) and non-positive amounts before
+		// advancing — otherwise the service call fails later during parsing/validation.
+		if (isNullish(amount) || !Number.isFinite(Number(amount)) || Number(amount) <= 0) {
 			toastsError({ msg: { text: $i18n.send.assertion.amount_invalid } });
 			return;
 		}
