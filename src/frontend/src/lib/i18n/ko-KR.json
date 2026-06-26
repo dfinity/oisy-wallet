@@ -226,14 +226,14 @@
 			"aa_new": "최근 추가됨",
 			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "게임",
+			"lending": "",
 			"nft": "NFT",
 			"rwa": "RWA",
-			"social_media": "소셜 미디어",
+			"social": "",
 			"staking": "스테이킹",
-			"tools": "도구",
-			"walletconnect": "WalletConnect"
+			"tools": "도구"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +254,6 @@
 				"carousel": {
 					"text": "OpenChat - 프라이버시 메신저",
 					"call_to_action": "더 보기"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "신뢰할 수 있는 디지털 참여를 위한 고유 신원 인증.",
-				"call_to_action": "DecideID 열기",
-				"stats": "50,000건 이상의 추론 요청",
-				"description": "Decide ID는 Decide AI 시스템의 핵심으로, 고유한 인격 증명(PoP) 방법론을 통해 신뢰와 보안을 보장합니다. 가입 시 여러 증명을 제공하고 특별한 도전 과제를 완료하는 인증 과정을 거쳐 신원을 확인합니다. 이를 통해 모든 사용자가 실제 인물이며, 중복되지 않고, 봇이 아님을 보장합니다. 이 과정에서 고유한 온체인 식별자인 Principal ID가 생성됩니다. 이는 인증된 인격이 필요한 다양한 애플리케이션에서 사용되어, 앱의 회원가입 또는 로그인 프로세스에 안전하고 원활하게 통합됩니다. 또한 영지식 증명을 사용하여 생체 정보와 같은 개인 데이터가 기밀로 안전하게 유지됩니다.<br/><br/>Decide ID와 함께 유연하고 안전하며 프라이버시 우선의 방식으로 온라인에서 인증하고 참여하세요.",
-				"carousel": {
-					"text": "프라이버시 우선의 방식으로 온라인에서 인증하고 참여하세요",
-					"call_to_action": "관심 있으신가요?"
 				}
 			},
 			"icpswap": {
@@ -315,16 +304,6 @@
 				"call_to_action": "경험해보기",
 				"description": "Curve Finance는 이더리움 및 EVM 호환 체인의 선도적인 탈중앙화 거래소, 스테이블코인 공급자 및 대출 플랫폼입니다. 스테이블코인 및 변동성 자산을 위한 고급 자동화 마켓 메이커와 대출을 위한 독자적인 소프트 청산 시스템으로 잘 알려져 있습니다."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "DeFi의 완전한 잠재력과 간소화된 거래를 경험하세요. 토큰 스왑, 유동성 공급자로 수익 창출, Bitfinity EVM의 선도적인 AMM 활용.",
-				"call_to_action": "Sonic 열기",
-				"description": "인터넷 컴퓨터 프로토콜(ICP) 기반의 멀티체인 탈중앙화 거래소인 Sonic은 광범위한 DeFi 서비스를 제공합니다. 사용자는 토큰과 무기한 계약을 쉽게 거래하고, 유동성을 제공하며, LBP 토큰 세일에 참여할 수 있습니다. DAO 거버넌스 참여, 보상 스테이킹, 플랫폼 결정 투표도 가능합니다.<br/><br/>완전 온체인 및 오픈 소스! 전문가처럼 토큰을 스왑하고, 유동성 공급자로 수수료를 쌓고, AMM에 참여하며, Sonic DAO의 핵심 구성원이 되세요.",
-				"carousel": {
-					"text": "DeFi의 완전한 잠재력을 경험하세요",
-					"call_to_action": "Sonic 열기"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "솔라나 블록체인에 구축된 DEX 및 자동화 마켓 메이커로, 빠른 거래를 가능하게 하는 중앙 지정가 주문서를 제공합니다.",
@@ -371,17 +350,6 @@
 					"text": "안녕하세요, 자체 작성 인터넷",
 					"call_to_action": "더 알아보기"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "프론티어 기술, 특히 Web3 게임에 투자하고 가속화하며, Beam 네트워크의 생태계에 자금을 지원하고 구동하는 독립적인 L1 블록체인.",
-				"call_to_action": "함께하기",
-				"description": "Beam은 게임, Web3 및 프론티어 혁신 전반에 걸쳐 고영향 기술에 자금을 지원하고 가속화하도록 설계된 독립적인 레이어 1 블록체인입니다. 온체인 재무 및 그랜트 생태계로 뒷받침되는 Beam은 팀과 인프라에 직접 투자합니다. 이 체인은 기본 도구와 긴밀한 창업자 협업을 통해 확장 가능한 탈중앙화 애플리케이션을 지원합니다."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "플레이어가 NFT 생물(Axie)을 수집, 사육, 전투하고 Ronin 사이드체인의 플레이어 소유 경제에서 토큰(AXS, SLP)을 획득하는 포켓몬 스타일의 블록체인 게임.",
-				"description": "Axie Infinity는 플레이어가 Axie라고 불리는 NFT 생물을 수집, 사육, 전투하는 플레이 투 언 블록체인 게임입니다. Ronin 사이드체인에 구축된 이 게임은 플레이어에게 $AXS 및 $SLP 토큰을 보상으로 제공하여 소유권과 경쟁의 순환 경제를 만듭니다. Axie는 P2E 모델을 선도했으며 Web3의 초기 주류 게임 성공 사례 중 하나가 되었습니다."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -433,11 +401,6 @@
 				"one_liner": "LST 간 즉시 스왑과 자체 LST 출시 도구를 갖춘 솔라나 네이티브 유동 스테이킹 프로토콜.",
 				"description": "Sanctum은 유동 스테이킹 토큰(LST) 간 즉각적이고 슬리피지 없는 스왑을 가능하게 하는 솔라나의 유동 스테이킹 인프라 프로토콜입니다. 새로운 LST가 공유 유동성을 활용할 수 있도록 지원하여 생태계 성장을 도모하며, 자동화된 발행 및 상환 기능이 있는 브랜드 토큰 발행 도구를 제공합니다. 플랫폼의 Infinity 풀, 라우터, 리저브 시스템은 스테이킹 생태계 전반에 걸쳐 깊은 유동성, 구성 가능성 및 안전성을 제공합니다."
 			},
-			"sphere_finance": {
-				"name": "Sphere Finance",
-				"one_liner": "거버넌스 획득, 재무 수익 파밍, $SPHERE 토큰 중심의 수익 창출 도구 구축에 초점을 맞춘 메타 거버넌스 DeFi 프로토콜.",
-				"description": "Sphere Finance는 거버넌스 토큰을 획득하고 기본 토큰인 $SPHERE 주변의 프로토콜 수익을 극대화하는 도구를 구축하는 DeFi 메타 거버넌스 프로토콜입니다. 파트너 프로토콜 전반에 걸쳐 자본 배분을 자동화하고 재무를 사용하여 수익을 창출합니다. 거버넌스는 veTETU 스타일 스테이킹을 통해 획득되며, 장기적인 프로토콜 건전성과 인센티브를 일치시킵니다."
-			},
 			"binaryx": {
 				"name": "BinaryX",
 				"one_liner": "전 세계 부동산에 대한 분할 소유권과 수동 소득을 제공하는 토큰화된 부동산 투자 플랫폼.",
@@ -483,6 +446,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
