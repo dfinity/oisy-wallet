@@ -110,8 +110,11 @@ export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-t
 export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
+export const NAVIGATION_ITEM_NFTS = 'navigation-item-nfts';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
+export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
+export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
