@@ -257,18 +257,22 @@
 {/snippet}
 
 {#if layout === 'desktop'}
-	{#each DESKTOP_NAVIGATION_SECTIONS as section (section.id)}
+	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}
 		{@const items = section.items.filter((id) => nonNullish(descriptors[id]))}
 		{#if items.length > 0}
-			<p
-				class="mt-2 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase first:mt-0"
-				data-tid={prefixedTestId(SECTION_META[section.id].testId)}
-			>
-				{SECTION_META[section.id].label()}
-			</p>
-			{#each items as id (id)}
-				{@render navItem(id)}
-			{/each}
+			<!-- Each group is its own box so the heading hugs its items (small gap);
+			     the separation between groups (mt-3) is clearly larger. -->
+			<div class="flex flex-col gap-0.5" class:mt-3={sectionIndex > 0}>
+				<p
+					class="mb-1 px-3 text-[0.625rem] font-bold tracking-widest text-tertiary uppercase"
+					data-tid={prefixedTestId(SECTION_META[section.id].testId)}
+				>
+					{SECTION_META[section.id].label()}
+				</p>
+				{#each items as id (id)}
+					{@render navItem(id)}
+				{/each}
+			</div>
 		{/if}
 	{/each}
 {:else}
