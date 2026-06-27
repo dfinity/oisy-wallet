@@ -383,7 +383,11 @@
 	max and push the modal past the screen edges) the modal still fits and its body
 	scrolls. -->
 <div
-	class="sm:[--dialog-max-height:80dvh] sm:[--dialog-min-height:min(554.25px,80dvh)]"
+	class={`sm:[--dialog-max-height:80dvh] ${
+		nonNullish(pendingDeleteNote)
+			? 'sm:[--dialog-min-height:0]'
+			: 'sm:[--dialog-min-height:min(554.25px,80dvh)]'
+	}`}
 	class:notes-editing={step === 'editor'}
 >
 	<Modal disablePointerEvents={busy} {onClose} testId={NOTES_MODAL}>
