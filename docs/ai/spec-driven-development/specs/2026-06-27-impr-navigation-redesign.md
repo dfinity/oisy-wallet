@@ -133,6 +133,28 @@ backed by its own page at `AppPath.Nfts` (`/nfts/`): on desktop under
 The Assets tab for NFTs (`TokenTypes.NFTS` in `activeAssetsTabStore`) is removed
 so NFTs is reached only via the nav item.
 
+## NFTs page hero — counts, not value
+
+On the NFTs page (`/nfts/`) the hero no longer shows the fiat **AUM / total
+balance** (`ExchangeBalance`) used on the Assets pages — an NFT portfolio has no
+meaningful single fiat figure. Instead the hero shows:
+
+- a prominent **total NFT count** ("12 NFTs"; "0 NFTs" when empty; singular
+  "1 NFT"), and
+- a row of **per-network count pills** — one per network the user holds NFTs on,
+  each rendered "{network} · {count}" (e.g. "ICP · 8", "Ethereum · 3",
+  "Base · 1"), ordered by count descending.
+
+The counts come from the same enabled-NFT set the list renders
+(`getEnabledNfts({ $nftStore, $enabledNonFungibleNetworkTokens })`), so the hero
+total always matches the list. The hero keeps its existing action row (Receive,
+etc.) and the `selectedNetworkNftUnsupported` inflow-disabled rule. Privacy mode
+does **not** hide the counts (they are not fiat balances). On a collection page
+the existing collection hero is unchanged.
+
+Grounding: `HeroContent.svelte` already derives `isNftsPage`; this adds an
+`isNftsPage` branch that renders the NFT-count hero instead of `ExchangeBalance`.
+
 ## Assets tabs — unchanged except NFTs
 
 Per the PM: **the Assets internal tabs remain.** Assets keeps its tab behaviour
@@ -236,6 +258,8 @@ Each PR updates `docs/ai/PRODUCT.md` in the same PR and runs the local gates
   the grey open state, on desktop no blue; the underlying page keeps its pill.
 - NFTs is reachable (desktop Portfolio / mobile More sheet), renders its own
   page, and is gone from the Assets tab bar.
+- On the NFTs page the hero shows the **total NFT count** and **per-network
+  count pills** (no fiat AUM), and the total matches the rendered list.
 - Rewards is reachable from the More group on both platforms; it is gone as a
   top-level item.
 - Assets tabs (Tokens / Earning / Trading) behave as today, minus NFTs.
