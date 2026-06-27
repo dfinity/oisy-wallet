@@ -73,6 +73,10 @@
 			return AppPath.Earning;
 		}
 
+		if ($activeAssetsTabStore === TokenTypes.TRADING) {
+			return AppPath.Trading;
+		}
+
 		if ($activeAssetsTabStore === TokenTypes.TOKENS) {
 			return AppPath.Tokens;
 		}

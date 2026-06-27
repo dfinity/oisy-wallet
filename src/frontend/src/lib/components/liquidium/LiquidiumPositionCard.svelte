@@ -54,7 +54,7 @@
 		{/snippet}
 
 		{#snippet title()}
-			<span class="text-sm sm:text-lg">{$i18n.liquidium.text.supplied} {reserve.asset}</span>
+			<span class="text-sm sm:text-lg">{reserve.asset}</span>
 		{/snippet}
 
 		{#snippet description()}

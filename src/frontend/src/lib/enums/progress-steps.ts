@@ -133,6 +133,14 @@ export enum ProgressStepsClaimStakingReward {
 	DONE = 'done'
 }
 
+export enum ProgressStepsTradingDeposit {
+	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
+	DEPOSIT = 'deposit',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum ProgressStepsPayment {
 	REQUEST_DETAILS = 'request_details',
 	CREATE_TRANSACTION = 'create_transaction',

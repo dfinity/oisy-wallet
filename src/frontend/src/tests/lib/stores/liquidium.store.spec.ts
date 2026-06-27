@@ -15,7 +15,8 @@ describe('liquidium.store', () => {
 				available: true
 			}
 		],
-		portfolio: null
+		portfolio: null,
+		assetPrices: {}
 	};
 
 	beforeEach(() => {
@@ -23,7 +24,11 @@ describe('liquidium.store', () => {
 	});
 
 	it('initializes with empty markets and no portfolio', () => {
-		expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+		expect(get(liquidiumStore)).toEqual({
+			markets: [],
+			portfolio: null,
+			assetPrices: {}
+		});
 	});
 
 	it('replaces the store data on set', () => {
@@ -36,6 +41,10 @@ describe('liquidium.store', () => {
 		liquidiumStore.set(data);
 		liquidiumStore.reset();
 
-		expect(get(liquidiumStore)).toEqual({ markets: [], portfolio: null });
+		expect(get(liquidiumStore)).toEqual({
+			markets: [],
+			portfolio: null,
+			assetPrices: {}
+		});
 	});
 });

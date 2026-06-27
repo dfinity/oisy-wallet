@@ -212,14 +212,14 @@ interface I18nDapps {
 		aa_new: string;
 		ab_icp: string;
 		ai: string;
-		defi: string;
+		dex: string;
 		game: string;
+		lending: string;
 		nft: string;
 		rwa: string;
-		social_media: string;
+		social: string;
 		staking: string;
 		tools: string;
-		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -236,14 +236,6 @@ interface I18nDapps {
 			stats: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		decideid: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			stats: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
 		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };
 		uniswap: { name: string; one_liner: string; call_to_action: string; description: string };
@@ -257,13 +249,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		sonic: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
@@ -277,8 +262,6 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		beam: { name: string; one_liner: string; call_to_action: string; description: string };
-		axie_infinity: { name: string; one_liner: string; description: string };
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
@@ -289,7 +272,6 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		sanctum: { name: string; one_liner: string; description: string };
-		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
 		liquidium: {
@@ -308,6 +290,13 @@ interface I18nDapps {
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 		icp_flags: { name: string; one_liner: string; description: string };
+		cloud_engines: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		hyperliquid: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -1312,6 +1301,7 @@ interface I18nWallet_connect {
 		unknown_parameter: string;
 		wallet_not_initialized: string;
 		btc_broadcast_not_supported: string;
+		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
@@ -1320,6 +1310,21 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
+	};
+}
+
+interface I18nTrading {
+	text: { tab_title: string; intro: string; learn_more: string };
+	provider_unavailable: { title: string; description: string };
+	onboarding: { title: string; description: string; deposit: string };
+	assets: { title: string; deposit: string; withdraw: string; available: string };
+	deposit: {
+		title: string;
+		to: string;
+		network: string;
+		approving: string;
+		done: string;
+		error: { unknown_fee: string; deposit_failed: string };
 	};
 }
 
@@ -1655,10 +1660,10 @@ interface I18nLiquidium {
 		health_factor: string;
 		net_value: string;
 		net_apy: string;
-		my_positions: string;
 		markets: string;
 		supplied: string;
 		borrowed: string;
+		borrow_rate: string;
 		apy_suffix: string;
 		supply_label: string;
 		borrow_label: string;
@@ -1678,6 +1683,26 @@ interface I18nLiquidium {
 		supply_agreement: string;
 		provider_fee: string;
 		insufficient_funds_for_fee: string;
+		borrow_review: string;
+		borrow_review_subtitle: string;
+		borrowing: string;
+		borrow_apy: string;
+		resulting_ltv: string;
+		projected_health_factor: string;
+		borrowing_power: string;
+		collateral: string;
+		minimum_borrow: string;
+		provider: string;
+		funds_delivered_to: string;
+		your_oisy_address: string;
+		borrow_risk_info: string;
+		borrow_at_risk_warning: string;
+		borrow_exceeds_power: string;
+		borrow_below_minimum: string;
+		borrow_high_risk_warning: string;
+		borrow_risk_confirm: string;
+		starting_to_borrow: string;
+		borrow_started: string;
 	};
 }
 
@@ -1881,6 +1906,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;

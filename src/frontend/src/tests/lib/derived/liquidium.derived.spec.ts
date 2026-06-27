@@ -40,6 +40,7 @@ describe('liquidiumEarningData', () => {
 		totalBorrowedUsd: 0,
 		netValueUsd: 1000,
 		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
 		healthFactorPercent: 100
 	};
 
@@ -61,7 +62,8 @@ describe('liquidiumEarningData', () => {
 					available: true
 				}
 			],
-			portfolio
+			portfolio,
+			assetPrices: {}
 		});
 
 		const data = get(liquidiumEarningData);
@@ -102,6 +104,7 @@ describe('liquidium derived stores', () => {
 		totalBorrowedUsd: 200,
 		netValueUsd: 1000,
 		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
 		healthFactorPercent: 73
 	};
 
@@ -112,7 +115,7 @@ describe('liquidium derived stores', () => {
 	describe('liquidiumMarkets', () => {
 		it('reflects the markets in the store', () => {
 			const markets = [market()];
-			liquidiumStore.set({ markets, portfolio: null });
+			liquidiumStore.set({ markets, portfolio: null, assetPrices: {} });
 
 			expect(get(liquidiumMarkets)).toEqual(markets);
 		});
@@ -124,7 +127,7 @@ describe('liquidium derived stores', () => {
 
 	describe('liquidiumPortfolio', () => {
 		it('reflects the portfolio in the store', () => {
-			liquidiumStore.set({ markets: [], portfolio });
+			liquidiumStore.set({ markets: [], portfolio, assetPrices: {} });
 
 			expect(get(liquidiumPortfolio)).toEqual(portfolio);
 		});
@@ -138,7 +141,8 @@ describe('liquidium derived stores', () => {
 		it('returns the best APY across available pools', () => {
 			liquidiumStore.set({
 				markets: [market({ supplyApy: 5 }), market({ poolId: 'pool-eth', supplyApy: 7 })],
-				portfolio: null
+				portfolio: null,
+				assetPrices: {}
 			});
 
 			expect(get(liquidiumMaxSupplyApy)).toBe(7);
@@ -150,7 +154,8 @@ describe('liquidium derived stores', () => {
 					market({ supplyApy: 5 }),
 					market({ poolId: 'pool-eth', supplyApy: 9, available: false })
 				],
-				portfolio: null
+				portfolio: null,
+				assetPrices: {}
 			});
 
 			expect(get(liquidiumMaxSupplyApy)).toBe(5);
@@ -163,7 +168,7 @@ describe('liquidium derived stores', () => {
 
 	describe('liquidiumNetValueUsd', () => {
 		it('reflects the portfolio net value', () => {
-			liquidiumStore.set({ markets: [], portfolio });
+			liquidiumStore.set({ markets: [], portfolio, assetPrices: {} });
 
 			expect(get(liquidiumNetValueUsd)).toBe(1000);
 		});
@@ -175,7 +180,7 @@ describe('liquidium derived stores', () => {
 
 	describe('liquidiumHealthFactorPercent', () => {
 		it('reflects the portfolio health factor', () => {
-			liquidiumStore.set({ markets: [], portfolio });
+			liquidiumStore.set({ markets: [], portfolio, assetPrices: {} });
 
 			expect(get(liquidiumHealthFactorPercent)).toBe(73);
 		});
