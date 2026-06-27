@@ -312,8 +312,13 @@
 	{:else}
 		<!-- gap-6 gives a comfortable space between the pinned search and the list;
 			pb-0! drops the shared modal's large bottom padding so the list sits a
-			little above the footer divider (the ~16px content gap remains). -->
-		<ContentWithToolbar styleClass="mx-2 flex min-h-0 flex-col items-stretch gap-6 pb-0!">
+			little above the footer divider (the ~16px content gap remains).
+			overflow-y-auto lets the empty/skeleton states scroll within the body on
+			short viewports (the list state scrolls inside its own region below, so
+			this stays a no-op there). -->
+		<ContentWithToolbar
+			styleClass="mx-2 flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
+		>
 			{#if showSkeleton}
 				<SkeletonCards rows={3} />
 			{:else if isEmpty}
