@@ -22,7 +22,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
-- **NFTs is a first-class destination.** It has its own page (`/nfts/`) reached from a dedicated nav item, and is **no longer** a tab inside Assets. The Assets internal tabs (Tokens / Earning / Trading) are otherwise unchanged.
+- **NFTs is a first-class destination.** It has its own page (`/nfts/`) reached from a dedicated nav item, and is **no longer** a tab inside Assets. The Assets internal tabs (Tokens / Earning / Trading) are otherwise unchanged. On that page the hero shows a **total NFT count** (e.g. "12 NFTs") with **per-network count pills** (e.g. "ICP · 8") instead of a fiat balance — an NFT portfolio has no single fiat figure — and the total matches the rendered list. Privacy mode does not hide these counts.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
 
