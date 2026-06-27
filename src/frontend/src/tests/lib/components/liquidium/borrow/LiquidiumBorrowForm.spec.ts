@@ -88,4 +88,13 @@ describe('LiquidiumBorrowForm', () => {
 
 		expect(reviewButton(getByRole)).toBeEnabled();
 	});
+
+	it('blocks borrowing and warns when the price is unavailable', () => {
+		const { container, getByRole } = render(LiquidiumBorrowForm, {
+			props: { ...baseProps, amount: 1, borrowPrice: 0 }
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.borrow_prices_unavailable);
+		expect(reviewButton(getByRole)).toBeDisabled();
+	});
 });

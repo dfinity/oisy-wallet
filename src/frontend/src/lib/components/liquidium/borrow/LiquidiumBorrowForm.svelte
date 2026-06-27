@@ -114,13 +114,21 @@
 		return undefined;
 	};
 
+	// No price → USD cap/risk validation silently no-ops (newBorrowUsd is always 0), so block
+	// borrowing entirely until prices load (loadLiquidium falls back to {} on a prices failure).
+	let pricesUnavailable = $derived(borrowPrice <= 0);
+
 	// Any non-healthy projection requires explicit confirmation.
 	let needsConfirm = $derived(
 		hasAmount && !belowMinimum && preview.valid && preview.healthLevel !== 'healthy'
 	);
 
 	let canReview = $derived(
-		hasAmount && !belowMinimum && preview.valid && (!needsConfirm || confirmChecked)
+		hasAmount &&
+			!belowMinimum &&
+			!pricesUnavailable &&
+			preview.valid &&
+			(!needsConfirm || confirmChecked)
 	);
 </script>
 
@@ -190,6 +198,12 @@
 	</ModalValue>
 
 	<LiquidiumHealthFactor percent={preview.projectedHealthPercent} />
+
+	{#if pricesUnavailable}
+		<MessageBox level="warning" styleClass="mt-3">
+			{$i18n.liquidium.text.borrow_prices_unavailable}
+		</MessageBox>
+	{/if}
 
 	<!-- Amount errors show inside the input; only the risk confirmation lives here. -->
 	{#if needsConfirm}
