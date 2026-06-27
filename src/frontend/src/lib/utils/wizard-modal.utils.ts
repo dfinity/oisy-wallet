@@ -11,8 +11,7 @@ import type {
 	WizardStepsTradingDeposit
 } from '$lib/enums/wizard-steps';
 import type { WizardStepsGetTokenType } from '$lib/types/get-token';
-import type { WizardSteps } from '$lib/types/wizard';
-import type { WizardModal } from '@dfinity/gix-components';
+import type { WizardModal, WizardSteps } from '$lib/types/wizard';
 
 type StepName =
 	| WizardStepsSend

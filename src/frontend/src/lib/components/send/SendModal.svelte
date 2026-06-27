@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 	import { setContext } from 'svelte';
@@ -17,6 +16,7 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
 		allSendNftsWizardSteps,
 		allSendWizardSteps,
