@@ -63,37 +63,41 @@
 					<div class="relative flex grow-1 justify-between">
 						<TokensFilter>
 							{#snippet overflowableContent()}
-								<Tabs
-									styleClass="mt-2 mb-6"
-									tabVariant="menu"
-									tabs={[
-										{
-											label: $i18n.tokens.text.title,
-											id: TokenTypes.TOKENS,
-											path: `${AppPath.Tokens}${page.url.search}`
-										},
-										...(EARNING_ENABLED
-											? [
-													{
-														label: $i18n.earning.text.tab_title,
-														id: TokenTypes.EARNING,
-														path: `${AppPath.Earning}${page.url.search}`
-													}
-												]
-											: []),
-										...(TRADING_ENABLED
-											? [
-													{
-														label: $i18n.trading.text.tab_title,
-														id: TokenTypes.TRADING,
-														path: `${AppPath.Trading}${page.url.search}`
-													}
-												]
-											: [])
-									]}
-									trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
-									bind:activeTab
-								/>
+								<!-- NFTs is its own nav destination now, so the standalone NFTs page
+								     shows no Tokens/Earning/Trading tab bar. -->
+								{#if tab !== TokenTypes.NFTS}
+									<Tabs
+										styleClass="mt-2 mb-6"
+										tabVariant="menu"
+										tabs={[
+											{
+												label: $i18n.tokens.text.title,
+												id: TokenTypes.TOKENS,
+												path: `${AppPath.Tokens}${page.url.search}`
+											},
+											...(EARNING_ENABLED
+												? [
+														{
+															label: $i18n.earning.text.tab_title,
+															id: TokenTypes.EARNING,
+															path: `${AppPath.Earning}${page.url.search}`
+														}
+													]
+												: []),
+											...(TRADING_ENABLED
+												? [
+														{
+															label: $i18n.trading.text.tab_title,
+															id: TokenTypes.TRADING,
+															path: `${AppPath.Trading}${page.url.search}`
+														}
+													]
+												: [])
+										]}
+										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
+										bind:activeTab
+									/>
+								{/if}
 							{/snippet}
 						</TokensFilter>
 					</div>
