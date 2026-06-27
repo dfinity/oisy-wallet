@@ -123,6 +123,9 @@ export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
+export const NFT_HERO_COUNT = 'nft-hero-count';
+export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
+
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';
 

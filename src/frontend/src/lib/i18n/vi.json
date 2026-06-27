@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
 			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
 			"title_not_supported": "",

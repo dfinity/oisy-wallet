@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "你的 NFT 将显示在这里",
 			"description_empty": "看起来你还没有收到 NFT",
 			"title_not_supported": "所选网络尚不支持 NFT",

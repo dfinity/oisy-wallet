@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
 			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",

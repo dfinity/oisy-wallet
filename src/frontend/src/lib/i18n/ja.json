@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "あなたのNFTがここに表示されます。",
 			"description_empty": "まだNFTを受け取っていないようです。",
 			"title_not_supported": "選択されたネットワークではNFTはまだサポートされていません。",

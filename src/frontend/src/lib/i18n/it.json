@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "I tuoi NFT appariranno qui",
 			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
 			"title_not_supported": "",

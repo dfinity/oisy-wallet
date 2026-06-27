@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "$count NFT",
+			"count_other": "$count NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
 			"title_not_supported": "NFTs are not yet supported on the selected network",

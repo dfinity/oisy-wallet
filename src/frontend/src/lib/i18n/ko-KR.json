@@ -1431,6 +1431,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT가 여기에 표시됩니다",
 			"description_empty": "아직 받은 NFT가 없는 것 같습니다",
 			"title_not_supported": "선택한 네트워크에서는 아직 NFT를 지원하지 않습니다",
