@@ -72,11 +72,6 @@
 											id: TokenTypes.TOKENS,
 											path: `${AppPath.Tokens}${page.url.search}`
 										},
-										{
-											label: $i18n.nfts.text.title,
-											id: TokenTypes.NFTS,
-											path: `${AppPath.Nfts}${page.url.search}`
-										},
 										...(EARNING_ENABLED
 											? [
 													{
