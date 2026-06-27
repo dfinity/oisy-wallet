@@ -85,7 +85,7 @@ dependencies = [
  "hex",
  "hmac",
  "ic-canister-sig-creation",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ledger-types",
@@ -1231,7 +1231,7 @@ name = "ic-cycles-ledger-client"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-types",
  "serde",
  "serde_bytes",
@@ -1242,7 +1242,7 @@ name = "ic-cycles-ledger-pic"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-types",
  "pocket-ic",
  "serde",
@@ -1254,7 +1254,7 @@ name = "ic-cycles-ledger-types"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "serde",
  "serde_bytes",
 ]
@@ -2621,7 +2621,7 @@ dependencies = [
  "getrandom 0.2.17",
  "hex",
  "ic-canister-sig-creation",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
  "paste",
@@ -2718,6 +2718,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "psm",
+ "windows-sys 0.52.0",
  "windows-sys 0.59.0",
 ]
 
