@@ -1,11 +1,8 @@
 import { Theme } from '$lib/types/theme';
 
-type EnvUtilsModule = typeof import('$lib/utils/env.utils');
-type ThemeUtilsModule = typeof import('$lib/utils/theme.utils');
-
-const importThemeUtils = async ({ nodeRuntime }: { nodeRuntime: boolean }): Promise<ThemeUtilsModule> => {
+const importThemeUtils = async ({ nodeRuntime }: { nodeRuntime: boolean }) => {
 	vi.doMock('$lib/utils/env.utils', async (importOriginal) => ({
-		...(await importOriginal<EnvUtilsModule>()),
+		...(await importOriginal()),
 		isNode: () => nodeRuntime
 	}));
 

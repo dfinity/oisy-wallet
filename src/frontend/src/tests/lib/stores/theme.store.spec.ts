@@ -1,16 +1,13 @@
 import { Theme } from '$lib/types/theme';
 import { get } from 'svelte/store';
 
-type ThemeStoreModule = typeof import('$lib/stores/theme.store');
-type ThemeUtilsModule = typeof import('$lib/utils/theme.utils');
-
 const importThemeStore = async ({
 	initialTheme,
 	systemTheme = Theme.LIGHT
 }: {
 	initialTheme: Theme | undefined;
 	systemTheme?: Theme;
-}): Promise<ThemeStoreModule> => {
+}) => {
 	vi.doMock('$lib/utils/theme.utils', () => ({
 		initTheme: vi.fn(() => initialTheme),
 		applyTheme: vi.fn(),
@@ -23,8 +20,7 @@ const importThemeStore = async ({
 	return await import('$lib/stores/theme.store');
 };
 
-const importMockedThemeUtils = async (): Promise<ThemeUtilsModule> =>
-	await import('$lib/utils/theme.utils');
+const importMockedThemeUtils = async () => await import('$lib/utils/theme.utils');
 
 describe('theme.store', () => {
 	afterEach(() => {
