@@ -273,6 +273,38 @@
 	{/if}
 {/snippet}
 
+{#snippet navCard(id: NavigationItemId)}
+	{@const descriptor = descriptors[id]}
+	{#if nonNullish(descriptor)}
+		{@const Icon = descriptor.icon}
+		{@const cardClass = `flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{#snippet cardInner()}
+			<Icon />
+			<span class="text-xs font-medium">{descriptor.label}</span>
+		{/snippet}
+		{#if nonNullish(descriptor.href)}
+			<a
+				class={cardClass}
+				aria-label={descriptor.ariaLabel}
+				data-tid={descriptor.testId}
+				href={descriptor.href}
+			>
+				{@render cardInner()}
+			</a>
+		{:else}
+			<button
+				class={cardClass}
+				aria-label={descriptor.ariaLabel}
+				data-tid={descriptor.testId}
+				onclick={descriptor.onclick}
+				type="button"
+			>
+				{@render cardInner()}
+			</button>
+		{/if}
+	{/if}
+{/snippet}
+
 {#if layout === 'desktop'}
 	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}
 		{@const items = section.items.filter((id) => nonNullish(descriptors[id]))}
@@ -354,7 +386,7 @@
 				visible={openSheet === slot.id}
 			>
 				{#each slot.items.filter((id) => nonNullish(descriptors[id])) as id (id)}
-					{@render navItem(id)}
+					{@render navCard(id)}
 				{/each}
 			</NavigationGroupSheet>
 		{/if}
