@@ -43,6 +43,10 @@ export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
+export const isTradingPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Trading}`) ?? false;
+export const isProvidersLiquidiumPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.ProvidersLiquidium}`) ?? false;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -65,6 +69,11 @@ export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPat
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
 export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
+
+export const isRouteTrading = ({ route: { id } }: Page): boolean => isTradingPath(id);
+
+export const isRouteProvidersLiquidium = ({ route: { id } }: Page): boolean =>
+	isProvidersLiquidiumPath(id);
 
 const tokenUrl = ({
 	token,
