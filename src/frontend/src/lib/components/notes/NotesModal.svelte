@@ -282,24 +282,29 @@
 			<NotesPrivacyInfoBox />
 
 			{#snippet toolbar()}
-				<ButtonGroup>
-					<ButtonCancel
-						disabled={busy}
-						fullWidth
-						onclick={leaveEditor}
-						testId={NOTES_CANCEL_BUTTON}
-					/>
-					<Button
-						colorStyle="primary"
-						disabled={saveDisabled}
-						loading={busy}
-						onclick={handleSave}
-						testId={NOTES_SAVE_BUTTON}
-						type="button"
-					>
-						{$i18n.core.text.save}
-					</Button>
-				</ButtonGroup>
+				<!-- Desktop keeps the footer actions. On mobile they move to the header
+					(below), where the soft keyboard can't cover them; the empty footer is
+					hidden via CSS. -->
+				<Responsive up="md">
+					<ButtonGroup>
+						<ButtonCancel
+							disabled={busy}
+							fullWidth
+							onclick={leaveEditor}
+							testId={NOTES_CANCEL_BUTTON}
+						/>
+						<Button
+							colorStyle="primary"
+							disabled={saveDisabled}
+							loading={busy}
+							onclick={handleSave}
+							testId={NOTES_SAVE_BUTTON}
+							type="button"
+						>
+							{$i18n.core.text.save}
+						</Button>
+					</ButtonGroup>
+				</Responsive>
 			{/snippet}
 		</ContentWithToolbar>
 	{:else if step === 'view' && nonNullish(viewNote)}
@@ -400,6 +405,36 @@
 					>{$i18n.notes.text.delete_note}</Responsive
 				><Responsive down="sm">{stepTitle}</Responsive>{:else}{stepTitle}{/if}{/snippet}
 
+		<!-- On mobile the editor's Cancel/Save live in the header (always above the soft
+			keyboard); on desktop they stay in the footer (above). -->
+		{#snippet headerLeft()}
+			{#if step === 'editor'}
+				<Responsive down="sm">
+					<Button link onclick={leaveEditor} testId={NOTES_CANCEL_BUTTON} type="button">
+						{$i18n.core.text.cancel}
+					</Button>
+				</Responsive>
+			{/if}
+		{/snippet}
+
+		{#snippet headerRight()}
+			{#if step === 'editor'}
+				<Responsive down="sm">
+					<Button
+						disabled={saveDisabled}
+						link
+						loading={busy}
+						onclick={handleSave}
+						styleClass="font-bold"
+						testId={NOTES_SAVE_BUTTON}
+						type="button"
+					>
+						{$i18n.core.text.save}
+					</Button>
+				</Responsive>
+			{/if}
+		{/snippet}
+
 		{#if nonNullish(pendingDeleteNote)}
 			<!-- Desktop: the confirmation replaces the modal content (like Contacts).
 				Mobile: the body stays and the confirmation is a bottom sheet (below). -->
@@ -433,5 +468,14 @@
 	/* The editor step has no (X): the only ways out are Cancel or Save. */
 	.notes-editing :global(button[data-tid='close-modal']) {
 		display: none;
+	}
+
+	/* On mobile the editor's Cancel/Save move to the header (so the soft keyboard
+		can't cover them), leaving the ContentWithToolbar footer empty — hide it.
+		Matches the md (768px) breakpoint where the header actions switch off. */
+	@media (max-width: 767.98px) {
+		.notes-editing :global(div.content > :last-child) {
+			display: none;
+		}
 	}
 </style>
