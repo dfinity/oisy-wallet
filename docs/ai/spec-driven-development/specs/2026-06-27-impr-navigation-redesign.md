@@ -34,10 +34,10 @@ There is exactly **one** "you are here" signal, and it is blue. It always lands
 on the actual page the user is on — never two things at once.
 
 - **Blue** — the current page. Only ever one.
-- **Grey pill / fill** — a submenu/sheet is open *over another page* (a
+- **Grey pill / fill** — a submenu/sheet is open _over another page_ (a
   "pressed/open" state, not a selection). The page underneath keeps its blue.
   **Mobile only** — see below.
-- **Blue pill / fill** — a submenu/sheet is open *over its own page* (you are on
+- **Blue pill / fill** — a submenu/sheet is open _over its own page_ (you are on
   a page inside that group and its sheet is open). The parent stays blue with a
   blue "open" treatment; the active child is marked inside. **Mobile only.**
 
@@ -54,13 +54,13 @@ NFTs sits in Portfolio next to Assets and Notes lives in the More group.
 
 ### Desktop sidebar
 
-| Heading       | Items                                  |
-| ------------- | -------------------------------------- |
-| (logo)        | OISY WALLET                            |
-| **PORTFOLIO** | Assets · **NFTs** · Activity           |
-| **FINANCE**   | Trade *(NEW)* · Borrow *(NEW)* · Earn  |
+| Heading       | Items                                        |
+| ------------- | -------------------------------------------- |
+| (logo)        | OISY WALLET                                  |
+| **PORTFOLIO** | Assets · **NFTs** · Activity                 |
+| **FINANCE**   | Trade _(NEW)_ · Borrow _(NEW)_ · Earn        |
 | **MORE**      | Explore · **Notes** · Settings · **Rewards** |
-| (footer)      | social links (X, GitHub)               |
+| (footer)      | social links (X, GitHub)                     |
 
 ### Mobile bottom bar
 
@@ -72,21 +72,21 @@ More**.
 
 ### Route mapping (`src/frontend/src/lib/constants/routes.constants.ts`)
 
-| Nav entry        | Destination / behaviour                                          |
-| ---------------- | ---------------------------------------------------------------- |
-| Assets           | `AppPath.Tokens` (`/`), preserving the active-assets-tab behaviour |
-| NFTs             | `AppPath.Nfts` (`/nfts/`) — now a nav item + page, not an Assets tab |
-| Activity         | `AppPath.Activity`                                               |
-| Trade            | `AppPath.Trading` (`/trading/`), labelled "Trade", `NEW` tag     |
-| Borrow           | `AppPath.Borrow` (`/borrow/`) — Liquidium, `NEW` tag (see open questions) |
-| Earn             | `AppPath.Earn` (`/earn/`), labelled "Earn"                       |
-| Explore          | `AppPath.Explore`                                               |
-| Notes            | opens the Notes modal (`modalStore.openNotes`) — interim         |
-| Settings         | `AppPath.Settings`                                              |
-| Rewards          | `AppPath.Rewards` / Earn rewards — see [Rewards](#rewards)        |
+| Nav entry | Destination / behaviour                                                   |
+| --------- | ------------------------------------------------------------------------- |
+| Assets    | `AppPath.Tokens` (`/`), preserving the active-assets-tab behaviour        |
+| NFTs      | `AppPath.Nfts` (`/nfts/`) — now a nav item + page, not an Assets tab      |
+| Activity  | `AppPath.Activity`                                                        |
+| Trade     | `AppPath.Trading` (`/trading/`), labelled "Trade", `NEW` tag              |
+| Borrow    | `AppPath.Borrow` (`/borrow/`) — Liquidium, `NEW` tag (see open questions) |
+| Earn      | `AppPath.Earn` (`/earn/`), labelled "Earn"                                |
+| Explore   | `AppPath.Explore`                                                         |
+| Notes     | opens the Notes modal (`modalStore.openNotes`) — interim                  |
+| Settings  | `AppPath.Settings`                                                        |
+| Rewards   | `AppPath.Rewards` / Earn rewards — see [Rewards](#rewards)                |
 
 Naming distinction the PM confirmed: the **Finance** group uses **Earn**
-(`/earn/`) and **Trade** (`/trading/`) as standalone destinations — *not* the
+(`/earn/`) and **Trade** (`/trading/`) as standalone destinations — _not_ the
 **Earning** (`/earning/`) and **Trading** tabs that live inside Assets.
 
 ## Desktop — sidebar
@@ -122,7 +122,7 @@ States (clusters 1–4 of the design):
 3. **On a page inside a group, sheet closed** → the group's entry (cradle /
    More) turns **solid blue**; nothing is grey because nothing is open.
 4. **On a group page with that group's sheet open** → the group's entry is
-   **blue with a blue "open" fill** (it owns your current page *and* is open),
+   **blue with a blue "open" fill** (it owns your current page _and_ is open),
    and the active child is marked selected inside the sheet.
 
 ## NFTs becomes a nav item and a page
@@ -146,11 +146,11 @@ points.
 
 For now, the **Notes** nav item opens the existing modal
 (`modalStore.openNotes`, `modalNotes` derived, `NotesModal` from PR #13134) — it
-is *not* yet a page. On mobile Notes is a top-level bar slot; on desktop it is an
+is _not_ yet a page. On mobile Notes is a top-level bar slot; on desktop it is an
 item in the More group.
 
 Because the modal is a transient overlay, not a destination, Notes never takes
-the blue "current page" treatment in this interim (there is no Notes *page* to be
+the blue "current page" treatment in this interim (there is no Notes _page_ to be
 "on"). On **mobile**, while the modal is open Notes shows the **grey
 "pressed/open"** state and the underlying page keeps its blue. On **desktop**,
 where the grey state does not exist, Notes shows no blue while its modal is open;
