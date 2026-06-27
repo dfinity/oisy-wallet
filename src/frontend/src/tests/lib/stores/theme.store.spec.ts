@@ -38,6 +38,8 @@ describe('theme.store', () => {
 			const { initThemeStore } = await importThemeStore({ initialTheme: Theme.DARK });
 			const { initTheme } = await importMockedThemeUtils();
 
+			vi.mocked(initTheme).mockClear();
+
 			const store = initThemeStore();
 
 			expect(get(store)).toBe(Theme.DARK);
