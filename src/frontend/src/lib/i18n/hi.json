@@ -226,14 +226,14 @@
 			"aa_new": "",
 			"ab_icp": "",
 			"ai": "",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "गेम",
+			"lending": "",
 			"nft": "",
 			"rwa": "",
-			"social_media": "सोशल मीडिया",
+			"social": "",
 			"staking": "स्टेकिंग",
-			"tools": "टूल्स",
-			"walletconnect": "वॉलेटकनेक्ट"
+			"tools": "टूल्स"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +254,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": "और दिखाएँ"
-				}
-			},
-			"decideid": {
-				"name": "डिसाइडआईडी",
-				"one_liner": "विश्वसनीय डिजिटल सहभागिता के लिए अद्वितीय पहचान सत्यापन।",
-				"call_to_action": "डिसाइडआईडी खोलें",
-				"stats": "50,000+ अनुमान अनुरोध",
-				"description": "डिसाइड आईडी डिसाइड एआई सिस्टम के केंद्र में है, जो अपनी अनूठी प्रूफ ऑफ पर्सनहुड (PoP) कार्यप्रणाली के माध्यम से विश्वास और सुरक्षा सुनिश्चित करता है। जब आप जुड़ते हैं, तो आप एक सत्यापन प्रक्रिया से गुजरेंगे जहाँ आप अपनी पहचान की पुष्टि करने के लिए कई प्रमाण प्रदान करते हैं और एक विशेष चुनौती पूरी करते हैं। यह सुनिश्चित करता है कि प्रत्येक उपयोगकर्ता वास्तविक, अद्वितीय और बॉट नहीं है। आपकी प्रिंसिपल आईडी, एक अद्वितीय ऑन-चेन पहचानकर्ता, इस प्रक्रिया के दौरान बनाई जाती है। इसका उपयोग विभिन्न अनुप्रयोगों में किया जा सकता है जिनके लिए सत्यापित व्यक्ति की आवश्यकता होती है, जो किसी भी ऐप के साइन-अप या लॉगिन प्रक्रिया में एक सुरक्षित और सहज एकीकरण सुनिश्चित करता है। इसके अलावा, शून्य-ज्ञान प्रमाणों का उपयोग यह मतलब है कि आपका निजी डेटा, जैसे कि बायोमेट्रिक जानकारी, गोपनीय और सुरक्षित रहता है।<br/><br/>डिसाइड आईडी के साथ, ऑनलाइन सत्यापित करने और संलग्न होने के एक लचीले, सुरक्षित और गोपनीयता-प्रथम तरीके का आनंद लें।",
-				"carousel": {
-					"text": "ऑनलाइन सत्यापित करने और संलग्न होने के एक गोपनीयता-प्रथम तरीके का आनंद लें",
-					"call_to_action": "रुचि है?"
 				}
 			},
 			"icpswap": {
@@ -315,16 +304,6 @@
 				"call_to_action": "ताना-बाना बुनें",
 				"description": "कर्व फाइनेंस एथेरियम और EVM-संगत चेनों पर एक अग्रणी विकेन्द्रीकृत एक्सचेंज, स्थिर मुद्रा प्रदाता और उधार मंच है। यह स्थिर सिक्कों और अस्थिर संपत्तियों के लिए अपने उन्नत स्वचालित बाजार-निर्माताओं और ऋणों के लिए अपनी अनूठी सॉफ्ट-लिक्विडेशन प्रणाली के लिए जाना जाता है।"
 			},
-			"sonic": {
-				"name": "सोनिक",
-				"one_liner": "DeFi की पूरी क्षमता और सुव्यवस्थित ट्रेडिंग को अनलॉक करें। टोकन स्वैप करें, एक लिक्विडिटी प्रदाता के रूप में कमाएँ और Bitfinity EVM के अग्रणी AMM का उपयोग करें।",
-				"call_to_action": "सोनिक खोलें",
-				"description": "सोनिक, इंटरनेट कंप्यूटर प्रोटोकॉल (ICP) पर बनाया गया एक मल्टीचेन विकेन्द्रीकृत एक्सचेंज, DeFi सेवाओं की एक विस्तृत श्रृंखला प्रदान करता है। उपयोगकर्ता आसानी से टोकन और परपेचुअल ट्रेड कर सकते हैं, लिक्विडिटी प्रदान कर सकते हैं, और LBP टोकन बिक्री में भाग ले सकते हैं। उपयोगकर्ता DAO शासन में संलग्न हो सकते हैं, पुरस्कार के लिए स्टेक कर सकते हैं, और प्लेटफ़ॉर्म निर्णयों पर वोट कर सकते हैं।<br/><br/>पूरी तरह से ऑन-चेन और ओपन-सोर्स! एक पेशेवर की तरह टोकन स्वैप करें, एक लिक्विडिटी प्रदाता के रूप में उन शुल्कों को जमा करें, AMM वाइब में शामिल हों, और सोनिक DAO का एक अभिन्न अंग बनें।",
-				"carousel": {
-					"text": "DeFi की पूरी क्षमता को अनलॉक करें",
-					"call_to_action": "सोनिक खोलें"
-				}
-			},
 			"raydium": {
 				"name": "रेडियम",
 				"one_liner": "सोलाना ब्लॉकचेन पर बनाया गया DEX और स्वचालित बाजार निर्माता, एक केंद्रीय सीमा आदेश पुस्तिका की पेशकश करता है जो तेजी से ट्रेडों को सक्षम बनाता है।",
@@ -371,17 +350,6 @@
 					"text": "",
 					"call_to_action": ""
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -433,11 +401,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -483,6 +446,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1641,6 +1618,7 @@
 			"unknown_parameter": "अज्ञात पैरामीटर।",
 			"wallet_not_initialized": "अप्रत्याशित त्रुटि। आपका वॉलेट पता प्रारंभ नहीं हुआ है।",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1660,6 +1638,28 @@
 		"provider_unavailable": {
 			"title": "",
 			"description": ""
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": ""
+		},
+		"deposit": {
+			"title": "",
+			"to": "",
+			"network": "",
+			"approving": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
 		}
 	},
 	"transaction": {
@@ -2129,10 +2129,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2151,7 +2151,27 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": ""
 		}
 	},
 	"vaults": {

@@ -10,7 +10,8 @@ import {
 	ActivityKind,
 	ActivityStatus,
 	type Activity,
-	type InflowActivity
+	type InflowActivity,
+	type OutflowActivity
 } from '@liquidium/client';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
@@ -24,7 +25,10 @@ describe('liquidium-active-tx.services', () => {
 	const txid = '0xabc123';
 
 	const list = vi.fn();
+	const getStatus = vi.fn();
 	const apply = vi.mocked(activeUserTransactionsServices.applyActiveUserTransactionPollUpdate);
+
+	const outflowId = 'outflow-1';
 
 	const buildTx = (refs: Record<string, string>): ActiveUserTransaction => ({
 		id: 'tx-1',
@@ -60,13 +64,29 @@ describe('liquidium-active-tx.services', () => {
 		...overrides
 	});
 
+	const buildOutflowActivity = (overrides: Partial<OutflowActivity> = {}): Activity => ({
+		id: outflowId,
+		poolId,
+		asset: 'USDC',
+		chain: 'ETH',
+		amount: 100n,
+		timestampMs: 0,
+		txid: null,
+		confirmations: null,
+		requiredConfirmations: null,
+		direction: ActivityDirection.outflow,
+		kind: ActivityKind.borrow,
+		status: ActivityStatus.pending,
+		...overrides
+	});
+
 	const poll = (tx: ActiveUserTransaction) =>
 		pollLiquidiumActiveUserTransactions({ identity: mockIdentity, transactions: [tx] });
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(liquidiumApi.liquidiumClient).mockReturnValue({
-			activities: { list }
+			activities: { list, getStatus }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 	});
 
@@ -187,5 +207,113 @@ describe('liquidium-active-tx.services', () => {
 		const [[{ update }]] = apply.mock.calls;
 
 		expect(update?.status).toEqual({ Succeeded: null });
+	});
+
+	// Outflows (borrow / withdraw) correlate by the receipt id via `getStatus`, since the
+	// on-chain txid may be assigned only later.
+	describe('outflow-id correlation (borrow / withdraw)', () => {
+		const buildBorrowTx = (refs: Record<string, string>): ActiveUserTransaction => {
+			const tx = buildTx(refs);
+
+			if (!('Liquidium' in tx.data)) {
+				return tx;
+			}
+
+			return { ...tx, data: { Liquidium: { ...tx.data.Liquidium, action: { Borrow: null } } } };
+		};
+
+		it('resolves by outflow id via getStatus (not the txid list) and terminalizes', async () => {
+			getStatus.mockResolvedValue({
+				found: true,
+				activity: buildOutflowActivity({ status: ActivityStatus.confirmed })
+			});
+
+			await poll(
+				buildBorrowTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId
+				})
+			);
+
+			expect(getStatus).toHaveBeenCalledExactlyOnceWith({ id: outflowId, profileId });
+			expect(list).not.toHaveBeenCalled();
+
+			const [[{ update }]] = apply.mock.calls;
+
+			expect(update?.status).toEqual({ Succeeded: null });
+		});
+
+		it('advances a sent outflow to Executing', async () => {
+			getStatus.mockResolvedValue({
+				found: true,
+				activity: buildOutflowActivity({ status: ActivityStatus.sent })
+			});
+
+			await poll(
+				buildBorrowTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId
+				})
+			);
+
+			const [[{ update }]] = apply.mock.calls;
+
+			expect(update?.status).toEqual({ Executing: null });
+		});
+
+		it('surfaces an error from a failed outflow', async () => {
+			getStatus.mockResolvedValue({
+				found: true,
+				activity: buildOutflowActivity({ status: ActivityStatus.failed })
+			});
+
+			await poll(
+				buildBorrowTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId
+				})
+			);
+
+			const [[{ update }]] = apply.mock.calls;
+
+			expect(update?.status).toEqual({ Failed: null });
+			expect(update?.error).toBeTruthy();
+		});
+
+		it('does nothing while the outflow id is not yet found', async () => {
+			getStatus.mockResolvedValue({ found: false, id: outflowId });
+
+			await poll(
+				buildBorrowTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId
+				})
+			);
+
+			expect(apply).not.toHaveBeenCalled();
+		});
+
+		it('prefers the outflow id over a later-persisted txid', async () => {
+			getStatus.mockResolvedValue({
+				found: true,
+				activity: buildOutflowActivity({ status: ActivityStatus.confirmed })
+			});
+
+			// Both refs present (txid learned after submit): the outflow id still wins.
+			await poll(
+				buildBorrowTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID]: outflowId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+				})
+			);
+
+			expect(getStatus).toHaveBeenCalledExactlyOnceWith({ id: outflowId, profileId });
+			expect(list).not.toHaveBeenCalled();
+
+			const [[{ update }]] = apply.mock.calls;
+
+			expect(update?.status).toEqual({ Succeeded: null });
+		});
 	});
 });
