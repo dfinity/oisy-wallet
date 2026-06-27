@@ -78,6 +78,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "자산",
+			"nfts": "",
 			"settings": "설정",
 			"dapp_explorer": "탐색",
 			"activity": "활동",
@@ -103,6 +104,7 @@
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
+			"nfts": "",
 			"settings": "설정 열기",
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",

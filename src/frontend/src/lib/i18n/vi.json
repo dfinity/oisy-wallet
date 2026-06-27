@@ -78,6 +78,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
+			"nfts": "",
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
@@ -103,6 +104,7 @@
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
+			"nfts": "",
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",

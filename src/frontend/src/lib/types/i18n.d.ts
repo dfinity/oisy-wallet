@@ -75,6 +75,7 @@ interface I18nCore {
 interface I18nNavigation {
 	text: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
@@ -100,6 +101,7 @@ interface I18nNavigation {
 	};
 	alt: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;

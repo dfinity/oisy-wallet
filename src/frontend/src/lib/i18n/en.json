@@ -78,6 +78,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
+			"nfts": "NFTs",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
@@ -103,6 +104,7 @@
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
+			"nfts": "Open the NFTs view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",

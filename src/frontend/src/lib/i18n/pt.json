@@ -78,6 +78,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Ativos",
+			"nfts": "",
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
@@ -103,6 +104,7 @@
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
+			"nfts": "",
 			"settings": "Abrir suas configurações",
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",

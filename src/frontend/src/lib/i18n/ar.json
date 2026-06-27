@@ -78,6 +78,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
@@ -103,6 +104,7 @@
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
