@@ -15,17 +15,17 @@
 </script>
 
 <!--
-	A navigation group's bottom sheet. It is a custom panel that sits ABOVE the
-	bottom bar (offset by the bar height) rather than the gix BottomSheet, which
-	anchors flush to the viewport bottom and would cover the bar. The whole overlay
-	sits at z-10, below the bar (z-12), so the bar/cradle stay visible and
-	un-dimmed while the sheet is open. It deliberately does not set
-	bottomSheetOpenStore (which would hide the bar).
+	A navigation group's bottom sheet. It is rendered inside the bottom bar's
+	stacking context but at a NEGATIVE z, so the bar buttons (incl. the cradle)
+	paint on top and stay visible — while the whole bar context (z-12) still sits
+	above the page, so the scrim dims the page. The scrim stops at the bar top so
+	the bar itself is never dimmed, and the panel is offset just above the bar. It
+	deliberately does not set bottomSheetOpenStore (which would hide the bar).
 -->
 {#if visible}
-	<div class="fixed inset-0 z-10" data-tid={testId}>
+	<div class="pointer-events-none fixed inset-0 -z-[1]" data-tid={testId}>
 		<button
-			class="absolute inset-0 h-full w-full bg-[var(--backdrop)] backdrop-blur-sm"
+			class="pointer-events-auto absolute inset-x-0 top-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] bg-[var(--backdrop)] backdrop-blur-sm"
 			aria-label={$i18n.core.text.close}
 			onclick={onClose}
 			tabindex="-1"
@@ -34,7 +34,7 @@
 		></button>
 
 		<div
-			class="absolute inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] rounded-t-3xl bg-primary px-4 pt-3 pb-5 shadow-[0_-10px_34px_rgba(20,30,60,0.16)]"
+			class="pointer-events-auto absolute inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] rounded-t-3xl bg-primary px-4 pt-3 pb-5 shadow-[0_-10px_34px_rgba(20,30,60,0.16)]"
 			transition:fly={{ y: 320, duration: 200 }}
 		>
 			<div class="mx-auto mb-3 h-1 w-9 rounded-full bg-tertiary"></div>
