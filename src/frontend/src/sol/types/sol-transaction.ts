@@ -81,8 +81,9 @@ export interface MappedSolTransaction {
 	// so the review must label it as an approval, not a send.
 	isApproval?: boolean;
 	// `true` when the message contains at least one instruction whose effects the
-	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
-	// it surfaces a warning so the user knows the review is incomplete and can decide.
+	// review screen cannot display. It only stays non-blocking when no reviewed
+	// movement is mixed into the same summary; mixed reviewed/unreviewed messages are
+	// `ambiguous`.
 	unreviewed?: boolean;
 	// `true` when the message bundles instructions that disagree on source,
 	// destination, payer or action type. The summary keeps a single value per field,
