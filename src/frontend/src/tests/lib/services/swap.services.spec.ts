@@ -953,6 +953,36 @@ describe('swap.services', () => {
 			expect(createPermit).not.toHaveBeenCalled();
 		});
 
+		it('throws for a native (default Ethereum) source token instead of approving a contract-less coin', async () => {
+			const nativeSourceToken = {
+				...mockSourceToken,
+				standard: { code: 'ethereum' },
+				category: 'default'
+			} as unknown as Erc20Token;
+
+			await expect(
+				fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: nativeSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					destinationNetwork: mockDestinationNetwork,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				})
+			).rejects.toThrow();
+
+			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
+		});
+
 		it('should execute delta swap successfully when isGasless is true', async () => {
 			await fetchVeloraDeltaSwap({
 				identity: mockIdentity,
