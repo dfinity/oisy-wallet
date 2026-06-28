@@ -349,7 +349,11 @@ export const sortTransactions = ({
 			: sameTimestampTypeRank(typeA) - sameTimestampTypeRank(typeB);
 	}
 
-	return nonNullish(timestampA) ? -1 : 1;
+	if (nonNullish(timestampA)) {
+		return -1;
+	}
+
+	return nonNullish(timestampB) ? 1 : 0;
 };
 
 export const isTransactionsStoreInitialized = ({
