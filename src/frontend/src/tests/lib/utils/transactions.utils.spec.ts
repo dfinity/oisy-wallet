@@ -784,6 +784,19 @@ describe('transactions.utils', () => {
 
 			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
 		});
+
+		it('should place the received leg above the sent leg when timestamps tie', () => {
+			const sent = { timestamp: 5, type: 'send' } as AnyTransactionUi;
+			const received = { timestamp: 5, type: 'receive' } as AnyTransactionUi;
+
+			// Deterministic regardless of input order: the received leg always ends up above the sent one.
+			expect(
+				[sent, received].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+			).toEqual([received, sent]);
+			expect(
+				[received, sent].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+			).toEqual([received, sent]);
+		});
 	});
 
 	describe('isTransactionsStoreInitialized', () => {

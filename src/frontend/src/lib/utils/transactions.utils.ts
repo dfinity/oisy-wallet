@@ -315,18 +315,38 @@ const isMicroTransaction = ({
 	return false;
 };
 
+// Ranks transaction types for the same-timestamp tie-breaker in `sortTransactions`: the received
+// leg of a pair sorts above the sent one; any other type keeps a stable position after them.
+const sameTimestampTypeRank = (type: AnyTransactionUi['type']): number => {
+	if (type === 'receive') {
+		return 0;
+	}
+
+	if (type === 'send') {
+		return 1;
+	}
+
+	return 2;
+};
+
 export const sortTransactions = ({
-	transactionA: { timestamp: timestampA },
-	transactionB: { timestamp: timestampB }
+	transactionA: { timestamp: timestampA, type: typeA },
+	transactionB: { timestamp: timestampB, type: typeB }
 }: {
 	transactionA: AnyTransactionUi;
 	transactionB: AnyTransactionUi;
 }): number => {
 	if (nonNullish(timestampA) && nonNullish(timestampB)) {
-		return (
+		const bySeconds =
 			Number(normalizeTimestampToSeconds(timestampB)) -
-			Number(normalizeTimestampToSeconds(timestampA))
-		);
+			Number(normalizeTimestampToSeconds(timestampA));
+
+		// The two legs of one operation (a swap, or a self-transfer) share the same block timestamp
+		// and tie here. Break the tie deterministically — received leg above the sent one — so these
+		// pairs render consistently instead of in an arbitrary insertion order.
+		return bySeconds !== 0
+			? bySeconds
+			: sameTimestampTypeRank(typeA) - sameTimestampTypeRank(typeB);
 	}
 
 	return nonNullish(timestampA) ? -1 : 1;
