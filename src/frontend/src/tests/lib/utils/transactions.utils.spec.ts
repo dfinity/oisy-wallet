@@ -502,7 +502,7 @@ describe('transactions.utils', () => {
 					certified: false
 				};
 				const erc20ReceiveLeg: EthCertifiedTransaction = {
-					data: { ...mockEthTransaction, hash: duplicateHash, value: ZERO },
+					data: { ...mockEthTransaction, hash: duplicateHash },
 					certified: false
 				};
 
