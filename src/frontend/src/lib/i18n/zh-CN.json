@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "您似乎还没有质押任何代币",
 			"full_history": "显示完整历史记录",
-			"recent_history": "关闭完整历史记录",
-			"harvest_autopilot_carousel_slide_title": "通过Harvest Autopilot Yield Farming在OISY中赚取",
-			"harvest_autopilot_carousel_slide_cta": "了解更多"
+			"recent_history": "关闭完整历史记录"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "提取代币时出现错误。",

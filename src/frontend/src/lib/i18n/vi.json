@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "Có vẻ như bạn chưa staking token nào",
 			"full_history": "Xem toàn bộ lịch sử",
-			"recent_history": "Đóng toàn bộ lịch sử",
-			"harvest_autopilot_carousel_slide_title": "Kiếm tiền trong OISY với Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Tìm hiểu thêm"
+			"recent_history": "Đóng toàn bộ lịch sử"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Đã xảy ra lỗi khi rút token.",

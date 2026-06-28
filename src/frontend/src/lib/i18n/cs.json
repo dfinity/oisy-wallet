@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
-			"recent_history": "Zavřít celou historii",
-			"harvest_autopilot_carousel_slide_title": "Vydělávejte v OISY s Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Zjistit více"
+			"recent_history": "Zavřít celou historii"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",

@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "아직 스테이킹한 토큰이 없는 것 같습니다",
 			"full_history": "전체 내역 보기",
-			"recent_history": "전체 내역 닫기",
-			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming으로 OISY에서 수익 창출",
-			"harvest_autopilot_carousel_slide_cta": "자세히 알아보기"
+			"recent_history": "전체 내역 닫기"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "토큰 출금 중 오류가 발생했습니다.",

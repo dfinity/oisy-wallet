@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "Wygląda na to, że nie stakowano jeszcze żadnych tokenów",
 			"full_history": "Pokaż pełną historię",
-			"recent_history": "Zamknij pełną historię",
-			"harvest_autopilot_carousel_slide_title": "Zarabiaj w OISY z Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Dowiedz się więcej"
+			"recent_history": "Zamknij pełną historię"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Coś poszło nie tak podczas wypłacania tokenów.",

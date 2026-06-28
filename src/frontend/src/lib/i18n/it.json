@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "Sembra che tu non abbia ancora messo in staking nessun token",
 			"full_history": "Mostra cronologia completa",
-			"recent_history": "Chiudi cronologia completa",
-			"harvest_autopilot_carousel_slide_title": "Guadagna in OISY con Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Scopri di più"
+			"recent_history": "Chiudi cronologia completa"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Si è verificato un errore durante il prelievo dei token.",

@@ -2254,9 +2254,7 @@
 			"title_empty_3": "",
 			"description_empty": "Sie haben noch keine Token gestakt",
 			"full_history": "Vollständige Historie anzeigen",
-			"recent_history": "Vollständige Historie schließen",
-			"harvest_autopilot_carousel_slide_title": "Mit Harvest Autopilot Yield Farming in OISY verdienen",
-			"harvest_autopilot_carousel_slide_cta": "Mehr erfahren"
+			"recent_history": "Vollständige Historie schließen"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Beim Abheben der Token ist ein Fehler aufgetreten.",
