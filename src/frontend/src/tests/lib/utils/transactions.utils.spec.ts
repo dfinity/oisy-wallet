@@ -797,6 +797,14 @@ describe('transactions.utils', () => {
 				[received, sent].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
 			).toEqual([received, sent]);
 		});
+
+		it('should return 0 when both timestamps are nullish', () => {
+			const a = { timestamp: undefined } as AnyTransactionUi;
+			const b = { timestamp: undefined } as AnyTransactionUi;
+
+			expect(sortTransactions({ transactionA: a, transactionB: b })).toBe(0);
+			expect(sortTransactions({ transactionA: b, transactionB: a })).toBe(0);
+		});
 	});
 
 	describe('isTransactionsStoreInitialized', () => {
