@@ -153,9 +153,14 @@ vi.mock('$eth/utils/eip712.utils', () => ({
 	getSignParamsEIP712: vi.fn(() => 'mock-hash')
 }));
 
-vi.mock('$eth/utils/eth.utils', () => ({
-	isNotDefaultEthereumToken: vi.fn(() => true)
-}));
+vi.mock('$eth/utils/eth.utils', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		isNotDefaultEthereumToken: vi.fn(() => true)
+	};
+});
 
 vi.mock('$lib/api/signer.api', () => ({
 	signPrehash: vi.fn(() => Promise.resolve('mock-signature'))
@@ -1672,6 +1677,44 @@ describe('swap.services', () => {
 					event_type: 'delta',
 					result_status: 'success'
 				})
+			});
+		});
+
+		describe('quote mode by source token type', () => {
+			it('requests an "all"-mode quote for an ERC-20 source token', async () => {
+				mockGetQuote.mockResolvedValue({ market: { destAmount: '456' } });
+
+				await fetchVeloraSwapAmount({
+					sourceToken,
+					destinationToken,
+					amount,
+					userAddress,
+					slippage
+				});
+
+				expect(mockGetQuote).toHaveBeenCalledWith(expect.objectContaining({ mode: 'all' }));
+			});
+
+			it('forces a "market"-mode quote for a native (default Ethereum) source token', async () => {
+				// Velora Delta cannot pull native funds and we do not implement its native deposit
+				// flow, so native sources must use the Market route to avoid the Delta approval crash.
+				const nativeSourceToken = {
+					...sourceToken,
+					standard: { code: 'ethereum' },
+					category: 'default'
+				} as unknown as Erc20Token;
+
+				mockGetQuote.mockResolvedValue({ market: { destAmount: '456' } });
+
+				await fetchVeloraSwapAmount({
+					sourceToken: nativeSourceToken,
+					destinationToken,
+					amount,
+					userAddress,
+					slippage
+				});
+
+				expect(mockGetQuote).toHaveBeenCalledWith(expect.objectContaining({ mode: 'market' }));
 			});
 		});
 	});
