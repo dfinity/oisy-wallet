@@ -7,11 +7,11 @@ import type {
 	OneSecIcpToEvmData
 } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
-import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import type {
 	CreateActiveUserTransactionParams,
 	UpdateActiveUserTransactionParams
 } from '$lib/types/api';
+import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 export const mockActiveUserTransactionId = '11111111-1111-4111-8111-111111111111';

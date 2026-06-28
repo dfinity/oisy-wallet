@@ -14,9 +14,7 @@ describe('ActiveUserTransactionItem', () => {
 			}
 		});
 
-		expect(
-			screen.getByText(`${en.liquidium.text.action_supply} 1 BTC`)
-		).toBeInTheDocument();
+		expect(screen.getByText(`${en.liquidium.text.action_supply} 1 BTC`)).toBeInTheDocument();
 		expect(screen.getByText('Liquidium')).toBeInTheDocument();
 		expect(screen.queryByText(/→/)).not.toBeInTheDocument();
 	});
