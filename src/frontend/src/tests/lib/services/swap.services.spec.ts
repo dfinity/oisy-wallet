@@ -978,7 +978,7 @@ describe('swap.services', () => {
 					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
 					swapDetails: mockSwapDetails
 				})
-			).rejects.toThrow();
+			).rejects.toThrow('Velora Delta swaps do not support native source tokens.');
 
 			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
 		});
