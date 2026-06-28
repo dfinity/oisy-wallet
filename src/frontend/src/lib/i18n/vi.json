@@ -223,15 +223,15 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Mới thêm",
+			"ab_icp": "ICP",
 			"ai": "AI",
 			"dex": "DEX",
 			"game": "Trò chơi",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Mạng xã hội",
 			"staking": "Staking",
 			"tools": "Công cụ"
 		},

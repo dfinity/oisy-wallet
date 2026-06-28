@@ -223,15 +223,15 @@
 			"website": "$dAppNameの画像"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "最近追加",
+			"ab_icp": "ICP",
 			"ai": "AI",
 			"dex": "DEX",
 			"game": "ゲーム",
-			"lending": "",
+			"lending": "レンディング",
 			"nft": "NFT",
-			"rwa": "",
-			"social": "",
+			"rwa": "RWA",
+			"social": "ソーシャル",
 			"staking": "ステーキング",
 			"tools": "ツール"
 		},

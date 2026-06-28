@@ -223,15 +223,15 @@
 			"website": "Obraz $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "Ostatnio dodane",
+			"ab_icp": "ICP",
+			"ai": "AI",
 			"dex": "DEX",
 			"game": "Gra",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Społecznościowe",
 			"staking": "Staking",
 			"tools": "Narzędzia"
 		},

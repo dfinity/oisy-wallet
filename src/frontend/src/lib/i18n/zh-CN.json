@@ -223,15 +223,15 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "最近添加",
+			"ab_icp": "ICP",
 			"ai": "人工智能",
 			"dex": "DEX",
 			"game": "游戏",
-			"lending": "",
+			"lending": "借贷",
 			"nft": "NFT",
-			"rwa": "",
-			"social": "",
+			"rwa": "RWA",
+			"social": "社交",
 			"staking": "质押",
 			"tools": "工具包"
 		},

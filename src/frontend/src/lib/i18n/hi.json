@@ -223,15 +223,15 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "हाल ही में जोड़ा गया",
+			"ab_icp": "ICP",
+			"ai": "एआई",
 			"dex": "DEX",
 			"game": "गेम",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "लेंडिंग",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "सोशल",
 			"staking": "स्टेकिंग",
 			"tools": "टूल्स"
 		},

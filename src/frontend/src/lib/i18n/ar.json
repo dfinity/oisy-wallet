@@ -223,15 +223,15 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "مضاف حديثًا",
+			"ab_icp": "ICP",
+			"ai": "الذكاء الاصطناعي",
 			"dex": "DEX",
 			"game": "لعبة",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "الإقراض",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "اجتماعي",
 			"staking": "التخزين",
 			"tools": "أدوات"
 		},
