@@ -30,12 +30,14 @@ describe('oisy-trade.services', () => {
 	} as Identity;
 
 	const deferred = <T>() => {
-		let resolve: (value: T) => void;
+		let resolve: (value: T) => void = () => {
+			throw new Error('Deferred promise resolved before initialization');
+		};
 		const promise = new Promise<T>((res) => {
 			resolve = res;
 		});
 
-		return { promise, resolve: resolve! };
+		return { promise, resolve };
 	};
 
 	beforeEach(() => {
