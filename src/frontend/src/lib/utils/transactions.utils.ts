@@ -97,7 +97,11 @@ const findDuplicateEthNativeTransactions = (
 
 				if (hasNonNative) {
 					for (const tx of group) {
-						if (isTokenEthereumNative(tx.token)) {
+						// Only the zero-value native entry is a duplicate: the gas/fee companion that
+						// block explorers return alongside an ERC-20 transfer. A native entry that moved
+						// value is a real leg — e.g. the native input of a native→token swap — and must
+						// stay next to the token leg instead of being collapsed into it.
+						if (isTokenEthereumNative(tx.token) && tx.transaction.value === ZERO) {
 							duplicates.add(tx);
 						}
 					}
