@@ -67,6 +67,22 @@ export const modalHarvestUnstake: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'harvest-unstake'
 );
+export const modalLiquidiumSupply: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-supply'
+);
+export const modalLiquidiumBorrow: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-borrow'
+);
+export const modalLiquidiumWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-withdraw'
+);
+export const modalTradingDeposit: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'trading-deposit'
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'

@@ -7,7 +7,11 @@ export interface LiquidiumStore extends Readable<LiquidiumStoreData> {
 }
 
 const initLiquidiumStore = (): LiquidiumStore => {
-	const defaultStoreValue: LiquidiumStoreData = { markets: [], portfolio: null };
+	const defaultStoreValue: LiquidiumStoreData = {
+		markets: [],
+		portfolio: null,
+		assetPrices: {}
+	};
 	const { subscribe, set } = writable<LiquidiumStoreData>(defaultStoreValue);
 
 	return {

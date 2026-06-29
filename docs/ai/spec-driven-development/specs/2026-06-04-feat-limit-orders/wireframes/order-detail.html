@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Order detail + cancel</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--accent: #0b57f5;
+				--accent-soft: #e9efff;
+				--danger: #d12e5e;
+				--danger-soft: #fdeef2;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: #f0efeb;
+				padding: 1.5rem;
+			}
+			.state-toggle {
+				display: flex;
+				gap: 6px;
+				max-width: 380px;
+				margin: 0 auto 1rem;
+				flex-wrap: wrap;
+			}
+			.toggle-btn {
+				font-size: 12px;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+			}
+			.toggle-btn.active {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.scene {
+				position: relative;
+				background: var(--color-background-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem;
+				max-width: 420px;
+				margin: 0 auto;
+				min-height: 560px;
+			}
+			.modal {
+				position: relative;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				max-width: 380px;
+				margin: 0 auto;
+				overflow: hidden;
+			}
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 14px 16px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.modal-head-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--color-text-primary);
+			}
+			.modal-x {
+				position: absolute;
+				right: 14px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 16px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.body {
+				padding: 1.25rem;
+			}
+			/* status pill */
+			.status-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1rem;
+			}
+			.status-lbl {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+			}
+			.status-pill {
+				font-size: 12px;
+				font-weight: 500;
+				padding: 3px 10px;
+				border-radius: 12px;
+			}
+			.s-pending {
+				background: var(--color-background-warning);
+				color: var(--color-text-warning);
+			}
+			.s-open {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.s-filled {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.s-cancelled {
+				background: var(--color-background-secondary);
+				color: var(--color-text-tertiary);
+			}
+			.status-pill i {
+				font-size: 12px;
+				vertical-align: -1px;
+			}
+			/* two-box hero (same as the order review) */
+			.hero-box {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				position: relative;
+				margin-bottom: 1rem;
+			}
+			.hero-seg {
+				padding: 12px 14px;
+			}
+			.hero-seg-2 {
+				border-top: 0.5px solid var(--color-border-tertiary);
+			}
+			.hero-lbl {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				margin-bottom: 8px;
+			}
+			.hero-lbl strong {
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				color: var(--color-text-primary);
+			}
+			.hero-line {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.tok-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				flex-shrink: 0;
+			}
+			.tok-dot-u {
+				background: var(--color-background-success);
+				color: var(--color-text-success);
+			}
+			.hero-amount {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat-sm {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.hero-arrow {
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				color: var(--color-text-tertiary);
+			}
+			/* price card */
+			.price-card {
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 12px 14px;
+				margin-bottom: 4px;
+			}
+			.price-head {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+			.price-head-lbl {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+			}
+			.price-head-val {
+				font-size: 18px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+			}
+			.price-sub {
+				margin-top: 10px;
+				padding-top: 10px;
+				border-top: 0.5px solid var(--color-border-tertiary);
+				display: flex;
+				flex-direction: column;
+				gap: 7px;
+			}
+			.price-sub-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 12px;
+			}
+			.price-sub-row .k {
+				color: var(--color-text-tertiary);
+			}
+			.price-sub-row .v {
+				color: var(--color-text-secondary);
+				font-weight: 500;
+			}
+			.diff {
+				font-size: 12px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+			}
+			.mv {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 13px;
+			}
+			.mv.nb {
+				border-bottom: none;
+			}
+			.mv-lbl {
+				color: var(--color-text-secondary);
+			}
+			.mv-val {
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			/* destructive in-modal action (mirrors contacts "Delete contact") */
+			.danger-action {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 8px;
+				width: 100%;
+				margin-top: 12px;
+				padding: 11px;
+				border: none;
+				border-radius: var(--border-radius-md);
+				background: transparent;
+				color: var(--danger);
+				font-size: 14px;
+				font-weight: 600;
+				font-family: var(--font-sans);
+				cursor: pointer;
+			}
+			.danger-action:hover {
+				background: var(--danger-soft);
+			}
+			.btn-group {
+				display: flex;
+				gap: 10px;
+				margin-top: 14px;
+				padding-top: 16px;
+				border-top: 0.5px solid var(--color-border-tertiary);
+			}
+			.btn {
+				flex: 1;
+				padding: 13px;
+				border-radius: var(--border-radius-lg);
+				font-size: 15px;
+				font-weight: 600;
+				cursor: pointer;
+				font-family: var(--font-sans);
+				border: none;
+				background: var(--accent-soft);
+				color: var(--accent);
+			}
+			.btn-danger {
+				background: var(--danger);
+				color: #ffffff;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+			}
+			/* confirmation overlay */
+			.overlay {
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.35);
+				display: none;
+				z-index: 5;
+			}
+			.overlay.show {
+				display: block;
+			}
+			.confirm {
+				position: absolute;
+				background: var(--color-background-primary);
+				border-radius: var(--border-radius-lg);
+				box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+				width: 320px;
+			}
+			/* desktop: centered */
+			.overlay.desktop .confirm {
+				left: 50%;
+				top: 50%;
+				transform: translate(-50%, -50%);
+			}
+			/* mobile: bottom sheet */
+			.overlay.mobile .confirm {
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: 100%;
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+				border-top-left-radius: 16px;
+				border-top-right-radius: 16px;
+			}
+			.confirm-grab {
+				display: none;
+			}
+			.overlay.mobile .confirm-grab {
+				display: block;
+				width: 36px;
+				height: 4px;
+				border-radius: 2px;
+				background: var(--color-border-secondary);
+				margin: 8px auto 0;
+			}
+			.confirm-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 16px 16px 12px;
+			}
+			.confirm-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--color-text-primary);
+			}
+			.confirm-body {
+				padding: 0 16px 14px;
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				line-height: 1.5;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.confirm-facts {
+				margin: 12px 0 0;
+				background: var(--color-background-secondary);
+				border-radius: var(--border-radius-md);
+				padding: 8px 12px;
+			}
+			.confirm-facts .price-sub-row {
+				padding: 3px 0;
+			}
+			.confirm-btns {
+				display: flex;
+				gap: 10px;
+				padding: 14px 16px 16px;
+			}
+			.note {
+				max-width: 380px;
+				margin: 1rem auto 0;
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				line-height: 1.5;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="state-toggle">
+			<button class="toggle-btn active" id="t-open" onclick="setStatus('open', this)">Open</button>
+			<button class="toggle-btn" id="t-pending" onclick="setStatus('pending', this)">
+				Pending
+			</button>
+			<button class="toggle-btn" id="t-filled" onclick="setStatus('filled', this)">Filled</button>
+			<button class="toggle-btn" id="t-cancelled" onclick="setStatus('cancelled', this)">
+				Cancelled
+			</button>
+		</div>
+		<div class="state-toggle">
+			<button class="toggle-btn active" id="d-desktop" onclick="setDevice('desktop', this)">
+				Confirm: desktop
+			</button>
+			<button class="toggle-btn" id="d-mobile" onclick="setDevice('mobile', this)">
+				Confirm: mobile sheet
+			</button>
+		</div>
+
+		<div class="scene">
+			<!-- Order detail modal (opened by tapping any order row) -->
+			<div class="modal">
+				<div class="modal-head">
+					<span class="modal-head-title">Order details</span>
+					<i class="ti ti-x modal-x"></i>
+				</div>
+				<div class="body">
+					<div class="status-row">
+						<span class="status-lbl">Status</span>
+						<span class="status-pill s-open" id="status-pill">Open</span>
+					</div>
+
+					<!-- review-style two-box hero -->
+					<div class="hero-box">
+						<div class="hero-seg">
+							<div class="hero-lbl">You <strong>SELL</strong></div>
+							<div class="hero-line">
+								<div class="tok-dot">ICP</div>
+								<div>
+									<div class="hero-amount">100 ICP</div>
+									<div class="hero-fiat-sm">$269.00</div>
+								</div>
+							</div>
+						</div>
+						<div class="hero-seg hero-seg-2">
+							<div class="hero-lbl">You get at least</div>
+							<div class="hero-line">
+								<div class="tok-dot tok-dot-u">USD</div>
+								<div>
+									<div class="hero-amount">275.00 ckUSDC</div>
+									<div class="hero-fiat-sm">$275.00</div>
+								</div>
+							</div>
+						</div>
+						<div class="hero-arrow"><i class="ti ti-arrow-down"></i></div>
+					</div>
+
+					<!-- price section -->
+					<div class="price-card">
+						<div class="price-head">
+							<span class="price-head-lbl">Limit price</span>
+							<span class="price-head-val">2.75 ckUSDC / ICP</span>
+						</div>
+						<div class="price-sub">
+							<div class="price-sub-row">
+								<span class="k">Current value</span
+								><span class="v">2.69 ckUSDC / ICP (oisy feed)</span>
+							</div>
+							<div class="price-sub-row">
+								<span class="k">Value difference</span><span class="diff">+2.23%</span>
+							</div>
+							<div class="price-sub-row" id="queue-row">
+								<span class="k">Queue position</span><span class="v">15% are ahead</span>
+							</div>
+						</div>
+					</div>
+
+					<div class="mv">
+						<span class="mv-lbl">DEX</span><span class="mv-val">OISY TRADE</span>
+					</div>
+					<div class="mv">
+						<span class="mv-lbl">Order type</span><span class="mv-val">Good until canceled</span>
+					</div>
+					<div class="mv nb">
+						<span class="mv-lbl">Fee (maker / taker)</span><span class="mv-val">0% / 0.20%</span>
+					</div>
+
+					<!-- destructive action — only for active (Pending/Open) -->
+					<button class="danger-action" id="cancel-action" onclick="openConfirm()">
+						<i class="ti ti-circle-x"></i> Cancel order
+					</button>
+
+					<div class="btn-group">
+						<button class="btn">Close</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- cancel confirmation (desktop dialog / mobile bottom sheet) -->
+			<div class="overlay desktop" id="overlay">
+				<div class="confirm">
+					<div class="confirm-grab"></div>
+					<div class="confirm-head">
+						<span class="confirm-title">Cancel this limit order?</span>
+						<i class="ti ti-x modal-x" style="position: static" onclick="closeConfirm()"></i>
+					</div>
+					<div class="confirm-body">
+						The reserved funds return to your free balance. This can't be undone — you can place a
+						new order anytime.
+						<div class="confirm-facts">
+							<div class="price-sub-row">
+								<span class="k">Order</span><span class="v">Sell ICP for ckUSDC</span>
+							</div>
+							<div class="price-sub-row">
+								<span class="k">Price</span><span class="v">2.75 ckUSDC / ICP</span>
+							</div>
+							<div class="price-sub-row">
+								<span class="k">Returns to free</span><span class="v">100 ICP</span>
+							</div>
+						</div>
+					</div>
+					<div class="confirm-btns">
+						<button class="btn" onclick="closeConfirm()">Keep order</button>
+						<button class="btn btn-danger"><i class="ti ti-circle-x"></i> Cancel order</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="note">
+			Demo — toggle the order status (top) and the confirmation device (below). Tapping an order row
+			in the Trading tab opens this detail modal; only <strong>Pending / Open</strong> orders show
+			the <strong>Cancel order</strong> action, which opens the confirmation.
+		</div>
+
+		<script>
+			let device = 'desktop';
+			function setStatus(s, el) {
+				const map = {
+					open: 'Open',
+					pending: 'Pending',
+					filled: '<i class="ti ti-check"></i> Filled',
+					cancelled: '<i class="ti ti-x"></i> Cancelled'
+				};
+				const cls = {
+					open: 's-open',
+					pending: 's-pending',
+					filled: 's-filled',
+					cancelled: 's-cancelled'
+				};
+				const pill = document.getElementById('status-pill');
+				pill.innerHTML = map[s];
+				pill.className = 'status-pill ' + cls[s];
+				const active = s === 'open' || s === 'pending';
+				// cancel action only for active orders
+				document.getElementById('cancel-action').style.display = active ? 'flex' : 'none';
+				// queue position shown for active orders (Pending = projected, Open = live); hidden once terminal
+				document.getElementById('queue-row').style.display = active ? 'flex' : 'none';
+				document
+					.querySelectorAll('.state-toggle')[0]
+					.querySelectorAll('.toggle-btn')
+					.forEach((b) => b.classList.remove('active'));
+				el.classList.add('active');
+				closeConfirm();
+			}
+			function setDevice(d, el) {
+				device = d;
+				document.getElementById('d-desktop').classList.toggle('active', d === 'desktop');
+				document.getElementById('d-mobile').classList.toggle('active', d === 'mobile');
+			}
+			function openConfirm() {
+				const o = document.getElementById('overlay');
+				o.className = 'overlay show ' + device;
+			}
+			function closeConfirm() {
+				document.getElementById('overlay').className = 'overlay ' + device;
+			}
+		</script>
+	</body>
+</html>

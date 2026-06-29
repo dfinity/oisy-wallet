@@ -3,11 +3,7 @@ import {
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
 } from '$btc/constants/wallet-connect.constants';
-import {
-	BIP122_MAINNET_CHAINS_KEYS,
-	BIP122_REGTEST_CHAINS_KEYS,
-	BIP122_TESTNET_CHAINS_KEYS
-} from '$env/bip122-chains.env';
+import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
 import * as signerEnv from '$env/signer.env';
 import * as signerConstants from '$lib/constants/signer.constants';
 import { UNEXPECTED_ERROR, WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
@@ -221,24 +217,32 @@ describe('wallet-connect.providers', () => {
 				});
 			});
 
-			it('should advertise the chains and accounts for every present BTC network', async () => {
+			// Temporary security workaround: OISY derives a single ECDSA key for all BTC networks, so a
+			// signature obtained on a testnet/regtest request could be reused to spend mainnet UTXOs.
+			// Until BTC keys are network-segregated, only mainnet is advertised over WalletConnect.
+			it('should advertise only mainnet chains and accounts even when testnet/regtest addresses are present', async () => {
 				const supportedNamespaces = await approveAndGetSupportedNamespaces({
 					...mockParams,
 					btcAddressTestnet: mockBtcAddress,
 					btcAddressRegtest: mockBtcAddress
 				});
 
-				expect(supportedNamespaces.bip122.chains).toEqual([
-					...BIP122_MAINNET_CHAINS_KEYS,
-					...BIP122_TESTNET_CHAINS_KEYS,
-					...BIP122_REGTEST_CHAINS_KEYS
-				]);
+				expect(supportedNamespaces.bip122.chains).toEqual([...BIP122_MAINNET_CHAINS_KEYS]);
 
-				expect(supportedNamespaces.bip122.accounts).toEqual([
-					...BIP122_MAINNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`),
-					...BIP122_TESTNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`),
-					...BIP122_REGTEST_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`)
-				]);
+				expect(supportedNamespaces.bip122.accounts).toEqual(
+					BIP122_MAINNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`)
+				);
+			});
+
+			it('should not advertise a bip122 namespace when only testnet/regtest addresses are present', async () => {
+				const supportedNamespaces = await approveAndGetSupportedNamespaces({
+					...mockParams,
+					btcAddressMainnet: undefined,
+					btcAddressTestnet: mockBtcAddress,
+					btcAddressRegtest: mockBtcAddress
+				});
+
+				expect(supportedNamespaces.bip122).toBeUndefined();
 			});
 
 			it('should not advertise a bip122 namespace when no BTC address is present', async () => {
@@ -264,10 +268,29 @@ describe('wallet-connect.providers', () => {
 				expect(id).toBe(mockProposal.id);
 				expect(namespaces).toEqual({});
 
-				// A BTC address is present, so the account addresses are exposed as a session property.
+				// A BTC mainnet address is present, so the account addresses are exposed as a session property.
 				expect(JSON.parse(sessionProperties.bip122_getAccountAddresses)).toEqual([
 					expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })
 				]);
+			});
+
+			it('should not expose bip122_getAccountAddresses when only testnet/regtest addresses are present', async () => {
+				const listener = await WalletConnectClient.init({
+					...mockParams,
+					btcAddressMainnet: undefined,
+					btcAddressTestnet: mockBtcAddress,
+					btcAddressRegtest: mockBtcAddress
+				});
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockApproveSession).toHaveBeenCalledOnce();
+
+				const [[{ sessionProperties }]] = mockApproveSession.mock.calls;
+
+				// Mainnet-only: with no mainnet address the account addresses are empty, so the session
+				// property is omitted entirely.
+				expect(sessionProperties?.bip122_getAccountAddresses).toBeUndefined();
 			});
 		});
 

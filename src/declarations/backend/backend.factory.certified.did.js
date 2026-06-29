@@ -681,7 +681,9 @@ export const idlFactory = ({ IDL }) => {
 		signed_query: IDL.Text
 	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
+		AddressMismatch: IDL.Null,
 		RateLimited: RateLimitError,
+		AddressDerivationFailed: IDL.Null,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({

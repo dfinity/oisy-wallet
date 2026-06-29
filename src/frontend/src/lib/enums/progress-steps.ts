@@ -126,9 +126,31 @@ export enum ProgressStepsLiquidiumSupply {
 	DONE = 'done'
 }
 
+export enum ProgressStepsLiquidiumBorrow {
+	INITIALIZATION = 'initialization',
+	SUBMIT = 'submit',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
+export enum ProgressStepsLiquidiumWithdraw {
+	INITIALIZATION = 'initialization',
+	SUBMIT = 'submit',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
 export enum ProgressStepsClaimStakingReward {
 	INITIALIZATION = 'initialization',
 	CLAIM = 'claim',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
+export enum ProgressStepsTradingDeposit {
+	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
+	DEPOSIT = 'deposit',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }

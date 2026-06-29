@@ -1,7 +1,7 @@
 import type { EarningCardFields } from '$env/types/env.earning-cards';
 import type { Readable } from 'svelte/store';
 
-export type EarningType = 'stake' | 'reward';
+export type EarningType = 'stake' | 'reward' | 'lending';
 
 export interface EarningProviderCardConfig {
 	id: string;
