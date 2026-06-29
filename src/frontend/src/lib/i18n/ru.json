@@ -223,15 +223,15 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Недавно добавленные",
+			"ab_icp": "ICP",
 			"ai": "ИИ",
 			"dex": "DEX",
 			"game": "Игра",
-			"lending": "",
+			"lending": "Лендинг",
 			"nft": "NFT",
-			"rwa": "",
-			"social": "",
+			"rwa": "RWA",
+			"social": "Социальные",
 			"staking": "Стейкинг",
 			"tools": "Инструменты"
 		},
@@ -2255,9 +2255,7 @@
 			"title_empty_3": "",
 			"description_empty": "Похоже, вы ещё не стейкировали ни одного токена",
 			"full_history": "Показать полную историю",
-			"recent_history": "Закрыть полную историю",
-			"harvest_autopilot_carousel_slide_title": "Зарабатывайте в OISY с Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Узнать больше"
+			"recent_history": "Закрыть полную историю"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "При выводе токенов произошла ошибка.",
