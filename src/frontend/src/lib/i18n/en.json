@@ -1633,7 +1633,8 @@
 		"text": {
 			"tab_title": "Trading",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"provider_name": "OISY TRADE"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
@@ -1648,7 +1649,9 @@
 			"title": "My assets",
 			"deposit": "+ Deposit",
 			"withdraw": "Withdraw",
-			"available": "Available: $amount"
+			"available": "Available: $amount",
+			"available_label": "Available:",
+			"empty": "No assets deposited yet"
 		},
 		"deposit": {
 			"title": "Deposit",

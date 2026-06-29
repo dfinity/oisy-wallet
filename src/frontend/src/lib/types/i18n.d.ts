@@ -1314,10 +1314,17 @@ interface I18nWallet_connect {
 }
 
 interface I18nTrading {
-	text: { tab_title: string; intro: string; learn_more: string };
+	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
 	provider_unavailable: { title: string; description: string };
 	onboarding: { title: string; description: string; deposit: string };
-	assets: { title: string; deposit: string; withdraw: string; available: string };
+	assets: {
+		title: string;
+		deposit: string;
+		withdraw: string;
+		available: string;
+		available_label: string;
+		empty: string;
+	};
 	deposit: {
 		title: string;
 		to: string;

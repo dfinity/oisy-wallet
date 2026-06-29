@@ -1633,7 +1633,8 @@
 		"text": {
 			"tab_title": "",
 			"intro": "",
-			"learn_more": ""
+			"learn_more": "",
+			"provider_name": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1648,7 +1649,9 @@
 			"title": "",
 			"deposit": "",
 			"withdraw": "",
-			"available": ""
+			"available": "",
+			"available_label": "",
+			"empty": ""
 		},
 		"deposit": {
 			"title": "",
