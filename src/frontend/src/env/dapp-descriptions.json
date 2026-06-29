@@ -239,11 +239,7 @@
 		"usesInternetIdentity": true,
 		"stats": "",
 		"logo": "/images/dapps/icpindex-logo.webp",
-		"screenshots": ["/images/dapps/icpindex-screenshot.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.icpindex.carousel.text",
-			"callToAction": "dapps.descriptions.icpindex.carousel.call_to_action"
-		}
+		"screenshots": ["/images/dapps/icpindex-screenshot.webp"]
 	},
 	{
 		"id": "waterneuron",
