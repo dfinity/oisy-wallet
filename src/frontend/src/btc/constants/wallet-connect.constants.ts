@@ -7,6 +7,7 @@ import type { NetworkId } from '$lib/types/network';
 export const SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES = 'getAccountAddresses';
 export const SESSION_REQUEST_BTC_SIGN_MESSAGE = 'signMessage';
 export const SESSION_REQUEST_BTC_SIGN_PSBT = 'signPsbt';
+export const SESSION_REQUEST_BTC_ADDRESSES_CHANGED = 'bip122_addressesChanged';
 
 export const BTC_ECDSA_KEY_ID: EcdsaKeyId = {
 	curve: { secp256k1: null },
