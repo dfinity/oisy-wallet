@@ -48,8 +48,7 @@ describe('LimitOrderWizard', () => {
 		modal,
 		progressStep: ProgressStepsLimitOrder.INITIALIZATION,
 		onBack: () => {},
-		onClose: () => {},
-		onNext: () => {}
+		onClose: () => {}
 	};
 
 	const context = () =>
