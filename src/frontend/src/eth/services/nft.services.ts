@@ -42,8 +42,12 @@ const loadOnChainImageUrl = async ({
 // the NFT polling loop reuses it instead of re-resolving — and re-reporting —
 // the same media on every refresh. A `null` entry records a token that resolved
 // to no media (so we don't re-report that either). Transient failures are not
-// cached, so they keep retrying on the next poll. Exposed so tests can reset it.
-export const onChainImageUrlCache = new SvelteMap<string, string | null>();
+// cached, so they keep retrying on the next poll.
+const onChainImageUrlCache = new SvelteMap<string, string | null>();
+
+export const __test__only__clear_on_chain_image_url_cache__ = (): void => {
+	onChainImageUrlCache.clear();
+};
 
 const withOnChainMediaFallback = async ({
 	networkId,

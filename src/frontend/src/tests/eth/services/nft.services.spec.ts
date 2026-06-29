@@ -1,7 +1,10 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-import { loadNftsByNetwork, onChainImageUrlCache } from '$eth/services/nft.services';
+import {
+	__test__only__clear_on_chain_image_url_cache__,
+	loadNftsByNetwork
+} from '$eth/services/nft.services';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL } from '$lib/constants/analytics.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
@@ -106,7 +109,7 @@ describe('nft.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			onChainImageUrlCache.clear();
+			__test__only__clear_on_chain_image_url_cache__();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
 			vi.mocked(infuraErc721Providers).mockReturnValue(mockInfuraErc721Provider);
