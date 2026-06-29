@@ -111,6 +111,11 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#ethAddress = ethAddress;
 		this.#solAddressMainnet = solAddressMainnet;
 		this.#solAddressDevnet = solAddressDevnet;
+		// Gating the BTC mainnet address off suppresses everything OISY advertises for bip122: the
+		// namespace, the `bip122_getAccountAddresses` session property and the address emit are all
+		// guarded on `nonNullish(this.#btcAddressMainnet)`. Incoming bip122 `session_request`s are
+		// rejected separately in `onSessionRequest` (a previously-approved session could still deliver
+		// one). See BTC_WALLET_CONNECT_ENABLED.
 		this.#btcAddressMainnet = BTC_WALLET_CONNECT_ENABLED ? btcAddressMainnet : undefined;
 		this.#btcPrincipal = btcPrincipal;
 	}
