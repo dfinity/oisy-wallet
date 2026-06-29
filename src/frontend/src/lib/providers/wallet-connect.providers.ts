@@ -1,4 +1,5 @@
 import {
+	SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
@@ -322,7 +323,7 @@ export class WalletConnectClient extends WalletConnectListener {
 									SESSION_REQUEST_BTC_SIGN_MESSAGE,
 									SESSION_REQUEST_BTC_SIGN_PSBT
 								],
-								events: ['bip122_addressesChanged'],
+								events: [SESSION_REQUEST_BTC_ADDRESSES_CHANGED],
 								accounts: [
 									...(nonNullish(this.#btcAddressMainnet)
 										? BIP122_MAINNET_CHAINS_KEYS.map(
@@ -373,7 +374,9 @@ export class WalletConnectClient extends WalletConnectListener {
 				// so a dApp that never lists `bip122_addressesChanged` ends up with an empty event set and
 				// the SDK's `isValidEmit` rejects the emit — which would otherwise surface as a spurious
 				// "Unexpected error" toast on an otherwise successful connection.
-				if (!(session.namespaces.bip122?.events ?? []).includes('bip122_addressesChanged')) {
+				if (
+					!(session.namespaces.bip122?.events ?? []).includes(SESSION_REQUEST_BTC_ADDRESSES_CHANGED)
+				) {
 					return [];
 				}
 
@@ -382,7 +385,7 @@ export class WalletConnectClient extends WalletConnectListener {
 						topic: session.topic,
 						chainId,
 						event: {
-							name: 'bip122_addressesChanged',
+							name: SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 							data: btcAccountAddresses
 						}
 					})

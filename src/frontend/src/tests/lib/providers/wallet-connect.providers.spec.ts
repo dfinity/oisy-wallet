@@ -1,4 +1,5 @@
 import {
+	SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
@@ -309,7 +310,7 @@ describe('wallet-connect.providers', () => {
 
 			it('should emit to sessions whose approved namespace subscribed to the event', async () => {
 				mockGetActiveSessions.mockReturnValue({
-					session1: sessionWith(['bip122_addressesChanged'])
+					session1: sessionWith([SESSION_REQUEST_BTC_ADDRESSES_CHANGED])
 				});
 
 				const listener = await WalletConnectClient.init(mockParams);
@@ -321,7 +322,7 @@ describe('wallet-connect.providers', () => {
 					topic: 'mock-topic',
 					chainId: BIP122_MAINNET_CHAINS_KEYS[0],
 					event: {
-						name: 'bip122_addressesChanged',
+						name: SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 						data: [expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })]
 					}
 				});
