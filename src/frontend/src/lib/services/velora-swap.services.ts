@@ -1,7 +1,7 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import { SWAP_MODE, SWAP_SIDE } from '$lib/constants/swap.constants';
+import { SWAP_MODE, SWAP_MODE_MARKET, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -53,7 +53,7 @@ export const fetchVeloraSwapAmount = async ({
 	// flow we don't implement — the Delta path would crash trying to approve a native coin.
 	// Force native sources onto the Market route, which signs a standard swap transaction
 	// carrying the native value.
-	const mode = isDefaultEthereumToken(sourceToken) ? 'market' : SWAP_MODE;
+	const mode = isDefaultEthereumToken(sourceToken) ? SWAP_MODE_MARKET : SWAP_MODE;
 
 	const baseParams: GetQuoteParams = {
 		amount: `${amount}`,
