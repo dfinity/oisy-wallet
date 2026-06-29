@@ -2,5 +2,6 @@
 export enum TokenTypes {
 	TOKENS = 'tokens',
 	NFTS = 'nfts',
-	EARNING = 'earning'
+	EARNING = 'earning',
+	TRADING = 'trading'
 }

@@ -1,0 +1,878 @@
+// OISY TRADE canister: an order book DEX on the Internet Computer.
+//
+// Unit conventions
+// ----------------
+// Token amounts are integers in the token's smallest denomination ("base
+// units"); the conversion factor for a token with `decimals = d` is `10^d`.
+// E.g. 1.5 ckUSDT (6 dp) = `1_500_000`; 0.01 ICP (8 dp) = `1_000_000`.
+//
+// Prices are denominated in **quote-token smallest units per one WHOLE
+// base token** (not per base smallest unit). This makes the notional of
+// an order equal to `price × quantity / 10^base_decimals` in quote
+// smallest units — see `LimitOrderRequest`.
+//
+// Running example — ICP/ckUSDT (base_decimals = 8, quote_decimals = 6).
+// Listing parameters that mirror Binance's 0.001 USDT × 0.01 ICP grid:
+//
+//   tick_size = 0.001 × 10^6 = 1_000            (price increment)
+//   lot_size  = 0.01  × 10^8 = 1_000_000        (quantity increment)
+//
+// A limit buy of 0.5 ICP at 10.50 USDT translates to:
+//
+//   price    = 10.50 × 10^6 = 10_500_000        (10_500 ticks)
+//   quantity = 0.5   × 10^8 = 50_000_000        (50 lots)
+//   notional = price × quantity / 10^8
+//            = 10_500_000 × 50_000_000 / 10^8
+//            = 5_250_000                        (= 5.25 USDT reserved)
+//
+// Error disposition contract
+// ---------------------------
+// User-facing errors ALWAYS follow this structure:
+//
+//   record {
+//       kind : variant {
+//           // Caller-side error; the request will not succeed as-is. Correct
+//           // the input or satisfy a precondition. Do NOT auto-retry unchanged.
+//           RequestError : opt variant { /* error details */ };
+//           // Transient; the client MAY retry the same request with some back-off.
+//           TemporaryError : opt variant { /* error details */ };
+//           // Canister-side error; surface to operators. Do NOT retry.
+//           InternalError : opt variant { /* error details */ };
+//       };
+//       // Advisory, human-readable text derived from the detailed failure,
+//       // meant for older clients that cannot parse the error detail. Not
+//       // localized, the exact text may change, and clients MUST NOT parse it.
+//       message : opt text;
+//   };
+//
+// The `kind` arm is the contract; branch on it and the inner leaf, never on
+// `message`. Every error declares all three arms; an arm it cannot currently
+// produce is an empty `opt variant {}`, reserved so leaves can be added later
+// without breaking clients. Each arm's payload is `opt variant`: a client built
+// against an older interface decodes an unknown future leaf as `null` while
+// still reading the arm and `message`.
+
+// Unique identifier for an order, assigned by the canister upon submission.
+// Opaque identifier, not meant to be interpreted by clients.
+// Encoded as a 32-character hex string.
+type OrderId = text;
+
+// Side of an order.
+type Side = variant {
+	// Buy order (bid). On submission reserves `price × quantity / 10^base_decimals`
+	// of the *quote* token from the caller's free balance.
+	Buy;
+	// Sell order (ask). On submission reserves `quantity` of the *base*
+	// token from the caller's free balance.
+	Sell
+};
+
+// A trading pair identified by the base and quote token ledger principals.
+type TradingPair = record {
+	// The base token ledger canister principal.
+	base : principal;
+	// The quote token ledger canister principal.
+	quote : principal
+};
+
+// Request to place a new limit order.
+// Time-in-force policy governing how long a limit order stays active in the
+// order book.
+type TimeInForce = variant {
+	// Rests in the book until filled or canceled; may fill partially over time.
+	GoodTilCanceled;
+	// Must fill in full when the engine processes it, otherwise the whole order
+	// is killed with zero execution. Never rests.
+	FillOrKill
+};
+
+type LimitOrderRequest = record {
+	// The trading pair to place the order on.
+	pair : TradingPair;
+	// Whether this is a buy or sell order.
+	side : Side;
+	// Limit price in quote-token smallest units per one whole base token
+	// (see top-of-file unit conventions). Must be a positive multiple of
+	// the pair's `tick_size`.
+	price : nat;
+	// Order quantity in base-token smallest units. Must be a positive
+	// multiple of the pair's `lot_size`.
+	quantity : nat;
+	// Time-in-force policy. Absent defaults to GoodTilCanceled.
+	time_in_force : opt TimeInForce
+};
+
+// Error returned when placing a limit order fails. See the disposition
+// contract at the top of this file.
+type AddLimitOrderError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The amount exceeds the maximum supported value.
+			AmountExceedsMaximum;
+			// The requested trading pair is not registered.
+			UnknownTradingPair;
+			// The price is not a positive multiple of the tick size.
+			InvalidPrice : record { price : nat; tick_size : nat };
+			// The quantity is not a positive multiple of the lot size.
+			InvalidQuantity : record { quantity : nat; lot_size : nat };
+			// The caller's free balance in `token` is below `required`.
+			// For a `Sell`, `token` is the base and `required` is `quantity`.
+			// For a `Buy`, `token` is the quote and `required` is the scaled
+			// quote amount `price × quantity / 10^base_decimals`.
+			InsufficientBalance : record { token : TokenId; available : nat; required : nat };
+			// The order's notional (price × quantity / 10^base_decimals, in
+			// quote smallest units) is below `min` or above `max`.
+			InvalidNotional : record { notional : nat; min : nat; max : opt nat }
+		};
+		TemporaryError : opt variant {
+			// Trading is halted (globally or on this pair); no new orders are accepted.
+			TradingHalted
+		};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+// Error returned when canceling a limit order fails. See the disposition
+// contract at the top of this file.
+type CancelLimitOrderError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The supplied order id was not a well-formed order id.
+			InvalidOrderId;
+			// No order with the given ID exists.
+			OrderNotFound;
+			// The caller does not own the order.
+			NotOrderOwner;
+			// The order has reached a terminal state (Filled, Canceled, or
+			// Expired) and can no longer be canceled.
+			OrderAlreadyTerminal
+		};
+		TemporaryError : opt variant {};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+// Information about a listed trading pair.
+// Whether trading on a pair is currently active or halted.
+type TradingStatus = variant {
+	// Trading on the pair is active.
+	Trading;
+	// Trading on the pair is halted.
+	Halted
+};
+
+type TradingPairInfo = record {
+	// The base token.
+	base : Token;
+	// The quote token.
+	quote : Token;
+	// Whether trading on this pair is currently active or halted.
+	status : TradingStatus;
+	// Minimum price increment, in the same units as `price` (quote-token
+	// smallest units per one whole base token). All order prices must be a
+	// positive multiple of this value.
+	tick_size : nat;
+	// Minimum order quantity, in base-token smallest units. All order
+	// quantities must be a positive multiple of this value.
+	lot_size : nat;
+	// Maker fee rate, in basis points.
+	maker_fee_bps : nat16;
+	// Taker fee rate, in basis points.
+	taker_fee_bps : nat16;
+	// Minimum order notional in quote-token smallest units.
+	min_notional : nat;
+	// Maximum order notional in quote-token smallest units, if any.
+	max_notional : opt nat
+};
+
+// A single price level in an order book, aggregated across all resting orders at that price.
+type PriceLevel = record {
+	// Price in quote-token smallest units per one whole base token
+	// (see top-of-file unit conventions).
+	price : nat;
+	// Total quantity, in base-token smallest units, across all resting
+	// orders at this price.
+	quantity : nat
+};
+
+// Top-of-book view of an order book for a trading pair.
+type OrderBookTicker = record {
+	// Best bid (highest-priced buy level), or `null` if the bid side is empty.
+	bid : opt PriceLevel;
+	// Best ask (lowest-priced sell level), or `null` if the ask side is empty.
+	ask : opt PriceLevel
+};
+
+// Price-aggregated depth view of an order book for a trading pair.
+type OrderBookDepth = record {
+	// Bid levels sorted by price descending (best bid first).
+	bids : vec PriceLevel;
+	// Ask levels sorted by price ascending (best ask first).
+	asks : vec PriceLevel
+};
+
+// Error returned by the `get_order_book_ticker` query. See the disposition
+// contract at the top of this file.
+type GetOrderBookTickerError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The requested trading pair is not registered.
+			UnknownTradingPair
+		};
+		TemporaryError : opt variant {};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+type GetOrderBookTickerResult = variant { Ok : OrderBookTicker; Err : GetOrderBookTickerError };
+
+// Request for the `get_order_book_depth` query.
+type GetOrderBookDepthRequest = record {
+	// The trading pair whose depth should be returned.
+	trading_pair : TradingPair;
+	// Maximum number of price levels returned per side. When absent, the canister
+	// returns 100 levels per side. The maximum accepted value is 1000; above
+	// that the query returns `LimitTooLarge`. `opt 0` is accepted and returns
+	// empty `bids`/`asks` vectors.
+	limit : opt nat32
+};
+
+// Error returned by the `get_order_book_depth` query. See the disposition
+// contract at the top of this file.
+type GetOrderBookDepthError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The requested trading pair is not registered.
+			UnknownTradingPair;
+			// The requested depth limit exceeds the maximum supported value (1000).
+			LimitTooLarge : record { requested : nat32; max : nat32 }
+		};
+		TemporaryError : opt variant {};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+type GetOrderBookDepthResult = variant { Ok : OrderBookDepth; Err : GetOrderBookDepthError };
+
+// Status of an order.
+type OrderStatus = variant {
+	// The order is pending processing.
+	Pending;
+	// The order is open and resting in the order book.
+	Open;
+	// The order has been fully filled.
+	Filled;
+	/// The order has been canceled.
+	Canceled;
+	// The order was terminated by the engine because its time-in-force could
+	// not be honored (a Fill-or-Kill that could not fully fill).
+	Expired
+};
+
+/// Full view of an order as stored by the canister.
+type OrderRecord = record {
+	/// Principal that placed the order.
+	owner : principal;
+	/// Whether the order is a buy or a sell.
+	side : Side;
+	/// Limit price as originally placed, in quote-token smallest units
+	/// per one whole base token (see top-of-file unit conventions).
+	price : nat;
+	/// Quantity originally placed, in base-token smallest units.
+	quantity : nat;
+	/// Cumulative quantity filled so far, in base-token smallest units.
+	/// Remaining is `quantity − filled_quantity`.
+	filled_quantity : nat;
+	/// Current lifecycle state.
+	status : OrderStatus;
+	/// Submission time in nanoseconds since the Unix epoch.
+	created_at : nat64;
+	/// Time of the most recent modifying event (fill, status transition, or
+	/// cancel) in nanoseconds since the Unix epoch; null until first modified.
+	last_updated_at : opt nat64;
+	/// Time-in-force policy the order was placed with.
+	time_in_force : TimeInForce
+};
+
+/// Request for `get_my_orders`.
+type GetMyOrdersArgs = record {
+	/// How to select the caller's orders.
+	filter : GetMyOrdersFilter
+};
+
+/// Selector for `get_my_orders`: a point lookup by id or a page.
+type GetMyOrdersFilter = variant {
+	/// Return the single matching order if the caller owns it, else empty.
+	ById : OrderId;
+	/// Return a page over the caller's orders, newest first. `length` is capped
+	/// at 100. Pages via a cursor: pass the previous page's last order id as
+	/// `after`; null starts from the newest order.
+	ByPage : record { after : opt OrderId; length : nat32 }
+};
+
+/// One entry in a `get_my_orders` response: an order the caller placed.
+type UserOrder = record {
+	/// The order's unique identifier.
+	id : OrderId;
+	/// The trading pair the order was placed on.
+	pair : TradingPair;
+	/// The full order record.
+	order : OrderRecord
+};
+
+// Error returned by the `get_my_orders` query. See the disposition contract at
+// the top of this file.
+type GetMyOrdersError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// An order id in the filter (`ById` target or `ByPage.after`
+			// cursor) was not a well-formed order id.
+			InvalidOrderId;
+			// A well-formed order id in the filter (`ById` target or
+			// `ByPage.after` cursor) is unknown or not owned by the caller.
+			OrderNotFound
+		};
+		TemporaryError : opt variant {};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+// A token identified by its ledger canister ID.
+type TokenId = record {
+	// The canister ID of the token's ledger.
+	ledger_id : principal
+};
+
+// Metadata associated with a token.
+type TokenMetadata = record {
+	// The token's ticker symbol (e.g. "ckBTC").
+	symbol : text;
+	// The number of decimal places used by the token.
+	decimals : nat8
+};
+
+// A token with its identity and metadata.
+type Token = record {
+	// The token's unique identifier.
+	id : TokenId;
+	// The token's metadata.
+	metadata : TokenMetadata
+};
+
+// Error returned by the deposit endpoint. See the disposition contract at the
+// top of this file.
+type DepositError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The amount exceeds the maximum supported value.
+			AmountExceedsMaximum;
+			// The token is not part of any registered trading pair.
+			UnsupportedToken : record { token_id : TokenId };
+			// The caller's external wallet does not hold enough funds.
+			InsufficientFunds : record { balance : nat };
+			// The caller's ICRC-2 allowance to the canister is not large enough.
+			InsufficientAllowance : record { allowance : nat }
+		};
+		TemporaryError : opt variant {
+			// Another deposit or withdrawal is already in flight for this
+			// (caller, token). Retry once the previous operation completes.
+			OperationInProgress;
+			// The token ledger is temporarily unavailable.
+			LedgerTemporarilyUnavailable;
+			// The inter-canister call to the token ledger failed.
+			CallFailed : record { ledger : principal; method : text; reason : text }
+		};
+		InternalError : opt variant {
+			// The icrc2_transfer_from call returned an unexpected ledger error.
+			LedgerError : record { reason : text };
+			// The ledger's response could not be Candid-decoded.
+			CandidDecodeFailed : record { ledger : principal; method : text; reason : text }
+		}
+	};
+	message : opt text
+};
+
+// Request to deposit tokens into the canister.
+type DepositRequest = record {
+	// The token to deposit.
+	token_id : TokenId;
+	// The amount to deposit, in the token's base units.
+	// The caller's ICRC-2 allowance to the canister on the token ledger must cover
+	// `amount + ledger_fee` (the `icrc2_transfer_from` fee is charged against
+	// the allowance on top of the transferred amount).
+	amount : nat
+};
+
+// Response after a successful deposit.
+type DepositResponse = record {
+	// The block index of the transfer on the token ledger.
+	block_index : nat
+};
+
+type DepositResult = variant { Ok : DepositResponse; Err : DepositError };
+
+// Request to withdraw tokens from the canister.
+type WithdrawRequest = record {
+	// The token to withdraw.
+	token_id : TokenId;
+	// The amount to withdraw from the caller's free balance, in the
+	// token's base units. The ledger transfer fee is deducted from this
+	// amount, so the caller receives `amount - ledger_fee` on the ledger;
+	// `amount` must therefore be strictly greater than `ledger_fee`
+	// (otherwise the call returns `Err(AmountTooSmall)`).
+	amount : nat
+};
+
+// Response after a successful withdrawal.
+type WithdrawResponse = record {
+	// The block index of the transfer on the token ledger.
+	block_index : nat
+};
+
+// Error returned by the withdraw endpoint. See the disposition contract at the
+// top of this file.
+type WithdrawError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The amount exceeds the maximum supported value.
+			AmountExceedsMaximum;
+			// The requested amount is below the ledger's transfer fee.
+			// `min_amount` is the ledger's `icrc1_fee` + 1.
+			AmountTooSmall : record { min_amount : nat };
+			// The token is not part of any registered trading pair.
+			UnsupportedToken : record { token_id : TokenId };
+			// The caller does not have enough free balance.
+			InsufficientBalance : record { available : nat }
+		};
+		TemporaryError : opt variant {
+			// Another deposit or withdrawal is already in flight for this
+			// (caller, token). Retry once the previous operation completes.
+			OperationInProgress;
+			// The token ledger is temporarily unavailable.
+			LedgerTemporarilyUnavailable;
+			// The inter-canister call to the token ledger failed.
+			CallFailed : record { ledger : principal; method : text; reason : text };
+			// The ledger fee changed between fetch and transfer; nothing
+			// happened on the ledger. Rare; retry.
+			LedgerFeeChanged
+		};
+		InternalError : opt variant {
+			// The icrc1_transfer call returned an unexpected ledger error.
+			LedgerError : record { reason : text };
+			// The ledger reported insufficient funds against the canister's
+			// own accounting — a genuine invariant violation.
+			LedgerInsufficientFunds : record { balance : nat };
+			// The ledger's response could not be Candid-decoded.
+			CandidDecodeFailed : record { ledger : principal; method : text; reason : text }
+		}
+	};
+	message : opt text
+};
+
+type WithdrawResult = variant { Ok : WithdrawResponse; Err : WithdrawError };
+
+// A user's balance for a given token.
+type Balance = record {
+	// Funds available for new orders or withdrawal.
+	free : nat;
+	// Funds locked by open orders.
+	reserved : nat
+};
+
+// Selector for filtering tokens. New variants may be added in
+// backward-compatible upgrades.
+type FilterToken = variant {
+	ById : TokenId
+};
+
+// A single `(token, balance)` entry in a `get_balances` response.
+type UserTokenBalance = record {
+	token : Token;
+	balance : Balance
+};
+
+// Error reported by `get_balances` / `get_fee_balances`. These are read
+// endpoints, so a failure dooms the whole call (no per-entry partial success).
+// See the disposition contract at the top of this file.
+type GetBalancesError = record {
+	kind : variant {
+		RequestError : opt variant {
+			// The filter referenced a token that the canister does not support.
+			TokenNotSupported : FilterToken;
+			// The filter exceeded the maximum number of entries.
+			FilterTooLarge : record { len : nat32; max : nat32 }
+		};
+		TemporaryError : opt variant {};
+		InternalError : opt variant {}
+	};
+	message : opt text
+};
+
+// Response shape for `get_balances`.
+type GetBalancesResult = variant {
+	Ok : vec UserTokenBalance;
+	Err : GetBalancesError
+};
+
+// Request to add a new trading pair to the canister.
+type AddTradingPairRequest = record {
+	// The base token of the pair.
+	base : Token;
+	// The quote token of the pair.
+	quote : Token;
+	// Minimum price increment, in quote-token smallest units per one whole
+	// base token (same scale as `price`; see top-of-file unit conventions).
+	// Must be greater than zero. Additionally, `tick_size × lot_size` must
+	// be a multiple of `10^base_decimals` so every fill settles to an exact
+	// integer quote amount.
+	tick_size : nat;
+	// Minimum order quantity, in base-token smallest units (same scale as
+	// `quantity`). Must be greater than zero.
+	lot_size : nat;
+	// Maker fee rate in basis points (1 bps = 0.01 %). Must be in 0..=10_000.
+	maker_fee_bps : nat16;
+	// Taker fee rate in basis points (1 bps = 0.01 %). Must be in 0..=10_000.
+	taker_fee_bps : nat16;
+	// Minimum order notional in quote token smallest units. Must be greater than zero.
+	min_notional : nat;
+	// Maximum order notional in quote token smallest units, if any. When set,
+	// must be greater than or equal to min_notional.
+	max_notional : opt nat
+};
+
+// Error returned by the add_trading_pair endpoint.
+type AddTradingPairError = variant {
+	// The caller is not a controller of the canister.
+	NotController;
+	// The base and quote tokens are the same.
+	BaseEqualsQuote;
+	// The tick size must be greater than zero.
+	InvalidTickSize;
+	// The lot size must be greater than zero.
+	InvalidLotSize;
+	// One of the fee rates is outside 0..=10_000 bps; the carried value is the offending bps.
+	InvalidBasisPoint : nat16;
+	// A trading pair with the same base and quote tokens already exists.
+	TradingPairAlreadyExists;
+	// The submitted token metadata does not match the previously registered metadata.
+	InconsistentTokenMetadata : record {
+		token : TokenId;
+		expected : TokenMetadata;
+		submitted : TokenMetadata
+	};
+	// The base token has too many decimals for settlement to be representable
+	// (10^base_decimals must fit a nat64, i.e. decimals <= 19).
+	BaseDecimalsTooLarge : record { decimals : nat8 };
+	// tick_size * lot_size is not a multiple of 10^base_decimals, so some fills
+	// could not settle to an exact quote amount. Choose a coarser tick or lot.
+	IndivisibleTickLotForBaseDecimals : record {
+		tick_size : nat;
+		lot_size : nat;
+		base_decimals : nat8
+	};
+	// The notional bounds are invalid: min_notional is zero, a bound is too
+	// large to fit the 256-bit quantity representation, or max_notional is set
+	// and smaller than min_notional.
+	InvalidNotional : record { min_notional : nat; max_notional : opt nat }
+};
+
+type AddTradingPairResult = variant { Ok : null; Err : AddTradingPairError };
+
+// Error returned by controller-gated endpoints when the caller is not
+// authorized to perform the requested action.
+type UnauthorizedError = variant {
+	// The caller is not a controller of the canister.
+	NotController
+};
+
+type UnauthorizedResult = variant { Ok : null; Err : UnauthorizedError };
+
+// Controls who may call update endpoints on the canister.
+type Mode = variant {
+	// Anyone may call update endpoints.
+	GeneralAvailability;
+	// Only the listed principals may call update endpoints.
+	RestrictedTo : vec principal
+};
+
+// Argument for canister initialization.
+type InitArg = record {
+	// Controls who may call update endpoints.
+	mode : Mode;
+	// Maximum pending orders matched per chunked-execution chunk.
+	max_orders_per_chunk : nat32;
+	// Maximum instructions consumed before a chunk yields.
+	instruction_budget : nat64
+};
+
+// Argument for canister upgrade.
+type UpgradeArg = record {
+	// If set, changes who may call update endpoints.
+	mode : opt Mode;
+	// If set, overrides the current `max_orders_per_chunk`.
+	max_orders_per_chunk : opt nat32;
+	// If set, overrides the current `instruction_budget`.
+	instruction_budget : opt nat64
+};
+
+// Argument passed to the canister on init or upgrade.
+type OisyTradeArg = variant { Init : InitArg; Upgrade : opt UpgradeArg };
+
+// Event payload for adding a trading pair.
+type AddTradingPairEvent = record {
+	book_id : nat64;
+	base : TokenId;
+	quote : TokenId;
+	tick_size : nat;
+	lot_size : nat;
+	base_metadata : TokenMetadata;
+	quote_metadata : TokenMetadata;
+	maker_fee_bps : nat16;
+	taker_fee_bps : nat16;
+	min_notional : nat;
+	max_notional : opt nat
+};
+
+// Structured order identifier used in events.
+type EventOrderId = record {
+	book_id : nat64;
+	seq : nat64
+};
+
+// Event payload for adding a limit order.
+type AddLimitOrderEvent = record {
+	user : principal;
+	order_id : EventOrderId;
+	side : Side;
+	price : nat;
+	quantity : nat;
+	time_in_force : TimeInForce
+};
+
+// Event payload for a deposit.
+type DepositEvent = record {
+	user : principal;
+	token : TokenId;
+	amount : nat
+};
+
+// Event payload for a successful withdrawal.
+type WithdrawEvent = record {
+	block_index : nat64;
+	user : principal;
+	token : TokenId;
+	amount : nat
+};
+
+/// Event payload for canceling a limit order.
+type CancelLimitOrderEvent = record {
+	order_id : EventOrderId
+};
+
+// Event payload recording a halt status change. `book_ids` is null for a
+// global change and a list of order book ids for a per-pair change. `halted`
+// is the new status applied to the targeted scope.
+type SetHaltEvent = record {
+	book_ids : opt vec nat64;
+	halted : bool
+};
+
+// Engine drove a matching round on `book_id`, processing these orders in
+// FIFO order. Drives replay of the matching engine.
+type MatchingEvent = record {
+	book_id : nat64;
+	orders : vec nat64
+};
+
+// Declarative record of the balance operations produced by a matching round
+// or a cancellation.
+type SettlingEvent = record {
+	book_id : nat64;
+	balance_operations : vec BalanceOperation
+};
+
+// Balance movement recorded during settlement. `from_order` / `to_order` /
+// `order` are order sequence numbers (`OrderSeq`) that the canister resolves
+// to principals via its order history at apply time — they are not user
+// principals.
+type BalanceOperation = variant {
+	Transfer : record {
+		from_order : nat64;
+		to_order : nat64;
+		token : PairToken;
+		amount : nat;
+		// Fee withheld from the credited transfer for the per-token fee
+		// pool.
+		fee : opt nat
+	};
+	Unreserve : record {
+		order : nat64;
+		token : PairToken;
+		amount : nat
+	}
+};
+
+type PairToken = variant { Base; Quote };
+
+// Type of a canister event.
+type EventType = variant {
+	Init : InitArg;
+	Upgrade : UpgradeArg;
+	AddTradingPair : AddTradingPairEvent;
+	Deposit : DepositEvent;
+	AddLimitOrder : AddLimitOrderEvent;
+	CancelLimitOrder : CancelLimitOrderEvent;
+	Settling : SettlingEvent;
+	Matching : MatchingEvent;
+	Withdraw : WithdrawEvent;
+	SetHalt : SetHaltEvent
+};
+
+// A canister event with a timestamp.
+type Event = record {
+	timestamp : nat64;
+	payload : EventType
+};
+
+// Arguments for the get_events query.
+type GetEventsArgs = record {
+	start : nat64;
+	length : nat64
+};
+
+// Result of the get_events query.
+type GetEventsResult = record {
+	events : vec Event;
+	total_event_count : nat64
+};
+
+service : (OisyTradeArg) -> {
+	// ===== Public / user endpoints =====
+
+	// Submit a new limit order. The order is queued for *asynchronous*
+	// processing by the matching engine; an `OrderId` is returned
+	// immediately. An `Ok` response means the order was accepted into the
+	// queue, not that it filled — call `get_my_orders` to observe the actual
+	// lifecycle (`Pending` → `Open` / `Filled` / `Canceled`).
+	add_limit_order : (LimitOrderRequest) -> (variant { Ok : OrderId; Err : AddLimitOrderError });
+
+	/// Cancel a limit order previously submitted by the caller. Any remaining
+	/// reserved balance is credited back to the caller's free balance.
+	cancel_limit_order : (OrderId) -> (variant { Ok : OrderRecord; Err : CancelLimitOrderError });
+
+	// Query all listed trading pairs.
+	get_trading_pairs : () -> (vec TradingPairInfo) query;
+
+	// Query the top-of-book (best bid and best ask, each aggregated across all
+	// resting orders at that price) for a trading pair. Returns
+	// `UnknownTradingPair` if the pair is not registered. Either side of the
+	// returned `OrderBookTicker` may be `null` independently when that side of
+	// the book is empty.
+	get_order_book_ticker : (TradingPair) -> (GetOrderBookTickerResult) query;
+
+	// Query price-aggregated depth for a trading pair. See
+	// `GetOrderBookDepthRequest` for the semantics of the `limit` field.
+	// Returns `UnknownTradingPair` if the pair is not registered.
+	get_order_book_depth : (GetOrderBookDepthRequest) -> (GetOrderBookDepthResult) query;
+
+	// Deposit tokens into the canister. Calls `icrc2_transfer_from` on the token
+	// ledger to pull `amount` from the caller to the canister, then
+	// credits the caller's free balance.
+	//
+	// The caller must have previously called `icrc2_approve` authorizing the canister
+	// as spender. The ledger charges its fee on both `icrc2_approve` and
+	// `icrc2_transfer_from`, so:
+	// - the allowance must cover `amount + ledger_fee`;
+	// - the caller's on-ledger balance must cover `amount + 2 × ledger_fee`.
+	deposit : (DepositRequest) -> (DepositResult);
+
+	// Withdraw tokens from the canister. Debits `amount` from the caller's
+	// free balance and transfers `amount - ledger_fee` to the caller via
+	// `icrc1_transfer` on the token ledger.
+	//
+	// `amount` must be strictly greater than the token ledger's fee
+	// (otherwise `AmountTooSmall`).
+	// Only free balance is eligible — funds reserved by open orders are not
+	// withdrawable until the order fills or is canceled.
+	withdraw : (WithdrawRequest) -> (WithdrawResult);
+
+	// Query the caller's balances.
+	//
+	// - `null`: returns every token the caller holds with non-zero balance.
+	// - `opt vec { ... }`: looks up each entry in the filter (including
+	//   zero balances). Duplicate filter entries are collapsed and returned
+	//   only once. An empty filter (`opt vec {}`) returns an empty `Ok`
+	//   vector, and is semantically distinct from `null`.
+	//
+	// The whole call fails with `TokenNotSupported` if the filter references
+	// a token the canister does not support — reads are cheap to re-issue, so
+	// there is no per-entry partial success.
+	//
+	// The order of entries in the returned `vec UserTokenBalance` is
+	// unspecified; callers must identify each result by the `token` field.
+	get_balances : (opt vec FilterToken) -> (GetBalancesResult) query;
+
+	// Query the canister-owned fee pool. Mirrors `get_balances` shape:
+	//
+	// - `null`: returns every token with a non-zero fee balance.
+	// - `opt vec { ... }`: looks up each entry (including zero balances).
+	//   Duplicates collapsed; empty filter returns an empty `Ok` vector.
+	//
+	// The whole call fails with `TokenNotSupported` if the filter references
+	// an unsupported token.
+	//
+	// Each returned `Balance` carries the fee amount in `free`;
+	// `reserved` is always zero (fees have no reserved concept).
+	get_fee_balances : (opt vec FilterToken) -> (GetBalancesResult) query;
+
+	// Return the caller's orders, either a single order by id or a page,
+	// newest first. The argument is optional: an absent argument is equivalent
+	// to a page from the newest order with the maximum length.
+	// Returns `InvalidOrderId` if an order id (the `ById` target or the
+	// `ByPage` cursor) is malformed, and `OrderNotFound` if it is well-formed
+	// but unknown or not owned by the caller.
+	get_my_orders : (opt GetMyOrdersArgs) -> (variant { Ok : vec UserOrder; Err : GetMyOrdersError }) query;
+
+	// List every token registered with the canister. Intended as a primitive
+	// for clients that need to discover which tokens a user might hold
+	// (e.g. wallet-state recovery after losing local state).
+	list_supported_tokens : () -> (vec Token) query;
+
+	// ===== END of Public / user endpoints =====
+
+	// ===== Admin endpoints (controller-only) =====
+
+	// Add a new trading pair to the canister. Only callable by a controller.
+	add_trading_pair : (AddTradingPairRequest) -> (AddTradingPairResult);
+
+	// Halt trading: a halted pair rejects new orders and is skipped by the
+	// matching engine, while cancels and withdrawals remain open. `null` halts
+	// the whole DEX; a list of pairs halts only those pairs. Only callable by a
+	// controller. Idempotent — halting already-halted scope succeeds. Traps if
+	// any listed pair is not registered, or if the list contains more than 100
+	// trading pairs.
+	halt_trading : (opt vec TradingPair) -> (UnauthorizedResult);
+
+	// Resume trading. `null` clears the global halt and every per-pair halt; a
+	// list of pairs resumes only those pairs. Only callable by a controller.
+	// Idempotent — resuming an already-active scope succeeds. Traps if any
+	// listed pair is not registered, or if the list contains more than 100
+	// trading pairs.
+	resume_trading : (opt vec TradingPair) -> (UnauthorizedResult);
+
+	// ===== END of Admin endpoints (controller-only) =====
+
+	// ===== Debug endpoints (no backwards-compatibility guarantee) =====
+
+	// *WARNING*: This is a debug endpoint, backwards-compatibility is not guaranteed.
+	// Returns events from the event log starting at the given index.
+	// The response contains at most 2000 events.
+	get_events : (GetEventsArgs) -> (GetEventsResult) query;
+
+	// ===== END of Debug endpoints (no backwards-compatibility guarantee) =====
+}

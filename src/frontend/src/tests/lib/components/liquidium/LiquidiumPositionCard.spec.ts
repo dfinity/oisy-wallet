@@ -1,9 +1,12 @@
 import LiquidiumPositionCard from '$lib/components/liquidium/LiquidiumPositionCard.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { modalLiquidiumWithdraw } from '$lib/derived/modal.derived';
+import { modalStore } from '$lib/stores/modal.store';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('LiquidiumPositionCard', () => {
 	const reserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
@@ -25,7 +28,7 @@ describe('LiquidiumPositionCard', () => {
 	it('renders the supplied asset, APY and amount', () => {
 		const { container } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
 
-		expect(container).toHaveTextContent(en.liquidium.text.supplied);
+		// The "Supplied" label lives on the section header now, not the card.
 		expect(container).toHaveTextContent('BTC');
 		expect(container).toHaveTextContent(en.liquidium.text.apy_suffix);
 		expect(container).toHaveTextContent(`${formatStakeApyNumber(5)}%`);
@@ -45,5 +48,17 @@ describe('LiquidiumPositionCard', () => {
 		});
 
 		expect(container).toHaveTextContent(`${formatStakeApyNumber(0)}%`);
+	});
+
+	it('opens the withdraw modal from the Withdraw button', async () => {
+		modalStore.close();
+
+		const { getByRole } = render(LiquidiumPositionCard, { props: { reserve: reserve() } });
+
+		await fireEvent.click(getByRole('button', { name: en.liquidium.text.action_withdraw }));
+
+		expect(get(modalLiquidiumWithdraw)).toBeTruthy();
+
+		modalStore.close();
 	});
 });

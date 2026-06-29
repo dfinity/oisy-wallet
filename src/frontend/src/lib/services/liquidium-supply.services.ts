@@ -1,8 +1,6 @@
-import type { TokenId } from '$declarations/backend/backend.did';
 import type { EthAddress } from '$eth/types/address';
 import { liquidiumClient } from '$lib/api/liquidium.api';
 import { TRACK_COUNT_LIQUIDIUM_SUBMITTED } from '$lib/constants/analytics.constants';
-import { LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS } from '$lib/constants/liquidium.constants';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -13,9 +11,9 @@ import {
 	liquidiumTrackingMetadata,
 	toLiquidiumExternalRefs
 } from '$lib/utils/liquidium-active-tx.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { liquidiumAssetTokenId } from '$lib/utils/liquidium.utils';
+import { nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { Principal } from '@icp-sdk/core/principal';
 import {
 	SupplyAction,
 	type Asset,
@@ -49,15 +47,6 @@ export type LiquidiumSupplyBroadcast = (params: {
 	target: NativeAddressSupplyTarget;
 	amount: bigint;
 }) => Promise<string>;
-
-// Backend `TokenId` for the AUT record — the ck-asset ledger backing the asset.
-const liquidiumAssetTokenId = (asset: string): TokenId => {
-	const ledgerCanisterId = LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS[asset];
-
-	assertNonNullish(ledgerCanisterId, `No ICRC ledger configured for Liquidium asset ${asset}`);
-
-	return { Icrc: Principal.fromText(ledgerCanisterId) };
-};
 
 // Supplies `amount` (base units) of `asset`: resolve/create profile → broadcast the
 // transfer → record an AUT so the modal can close before settlement.
