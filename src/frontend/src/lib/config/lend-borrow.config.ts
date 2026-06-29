@@ -1,4 +1,4 @@
-import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
+import { WizardStepsLiquidiumBorrow, WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 import { LendBorrowProvider, type LendBorrowProviderConfig } from '$lib/types/lend-borrow';
 import type { WizardStepsParams } from '$lib/types/steps';
 import type { WizardSteps } from '@dfinity/gix-components';
@@ -28,5 +28,22 @@ export const liquidiumSupplyWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumSupply.SUPPLYING,
 		title: i18n.liquidium.text.supplying
+	}
+];
+
+export const liquidiumBorrowWizardSteps = ({
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsLiquidiumBorrow> => [
+	{
+		name: WizardStepsLiquidiumBorrow.BORROW,
+		title: i18n.liquidium.text.action_borrow
+	},
+	{
+		name: WizardStepsLiquidiumBorrow.REVIEW,
+		title: i18n.liquidium.text.borrow_review
+	},
+	{
+		name: WizardStepsLiquidiumBorrow.BORROWING,
+		title: i18n.liquidium.text.borrowing
 	}
 ];

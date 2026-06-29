@@ -223,15 +223,15 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "مضاف حديثًا",
+			"ab_icp": "ICP",
+			"ai": "الذكاء الاصطناعي",
 			"dex": "DEX",
 			"game": "لعبة",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "الإقراض",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "اجتماعي",
 			"staking": "التخزين",
 			"tools": "أدوات"
 		},
@@ -2168,6 +2168,7 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
@@ -2254,9 +2255,7 @@
 			"title_empty_3": "",
 			"description_empty": "",
 			"full_history": "",
-			"recent_history": "",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"recent_history": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",

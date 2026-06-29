@@ -223,15 +223,15 @@
 			"website": "Immagine di $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "Aggiunti di recente",
+			"ab_icp": "ICP",
+			"ai": "IA",
 			"dex": "DEX",
 			"game": "Gioco",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Social",
 			"staking": "Staking",
 			"tools": "Strumenti"
 		},
@@ -2168,6 +2168,7 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
@@ -2254,9 +2255,7 @@
 			"title_empty_3": "",
 			"description_empty": "Sembra che tu non abbia ancora messo in staking nessun token",
 			"full_history": "Mostra cronologia completa",
-			"recent_history": "Chiudi cronologia completa",
-			"harvest_autopilot_carousel_slide_title": "Guadagna in OISY con Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Scopri di più"
+			"recent_history": "Chiudi cronologia completa"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Si è verificato un errore durante il prelievo dei token.",

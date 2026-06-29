@@ -223,15 +223,15 @@
 			"website": "$dAppName की छवि"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "हाल ही में जोड़ा गया",
+			"ab_icp": "ICP",
+			"ai": "एआई",
 			"dex": "DEX",
 			"game": "गेम",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "लेंडिंग",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "सोशल",
 			"staking": "स्टेकिंग",
 			"tools": "टूल्स"
 		},
@@ -2168,6 +2168,7 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
@@ -2254,9 +2255,7 @@
 			"title_empty_3": "",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक कोई टोकन स्टेक नहीं किया है",
 			"full_history": "पूरा इतिहास दिखाएं",
-			"recent_history": "पूरा इतिहास बंद करें",
-			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield Farming के साथ OISY में कमाएं",
-			"harvest_autopilot_carousel_slide_cta": "और जानें"
+			"recent_history": "पूरा इतिहास बंद करें"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "टोकन निकालते समय कुछ गलत हो गया।",

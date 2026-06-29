@@ -1699,6 +1699,7 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;
 		starting_to_borrow: string;
@@ -1785,8 +1786,6 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
-		harvest_autopilot_carousel_slide_title: string;
-		harvest_autopilot_carousel_slide_cta: string;
 	};
 	error: {
 		unexpected_error_on_withdraw: string;
