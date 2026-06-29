@@ -38,5 +38,9 @@ export const LIQUIDIUM_HEALTH_CRITICAL_PERCENT = 15;
 
 export type LiquidiumHealthLevel = 'healthy' | 'at-risk' | 'critical';
 
+// Relative tolerance on the borrowing-power cap so a "Max" amount (rounded to the
+// token's decimals) doesn't trip its own limit.
+export const LIQUIDIUM_BORROWING_POWER_TOLERANCE = 1e-6;
+
 // Refresh cadence for markets + positions while the provider page is visible.
 export const LIQUIDIUM_POLL_INTERVAL_MILLIS = 30_000;

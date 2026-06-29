@@ -2168,6 +2168,7 @@
 			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
 			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
 			"borrow_below_minimum": "Amount is below the minimum borrow.",
+			"borrow_prices_unavailable": "Prices are temporarily unavailable. Borrowing is disabled until they load.",
 			"borrow_high_risk_warning": "This borrow puts your position close to liquidation.",
 			"borrow_risk_confirm": "I understand this borrow increases my liquidation risk.",
 			"starting_to_borrow": "Submitting your loan...",
