@@ -38,7 +38,7 @@ describe('DappsCarousel', () => {
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps and featured reward is unknown', () => {
+	it('should render nothing if there are no dApps and the featured reward is unknown', () => {
 		vi.spyOn(rewards, 'FEATURED_REWARD_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
 			'test' as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
 		);
