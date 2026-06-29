@@ -229,7 +229,7 @@ export interface FormatSlippageParams {
 
 export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
 
-export interface GetQuoteParams extends QuoteParams<'all'> {
+export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
 }
 
