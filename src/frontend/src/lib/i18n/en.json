@@ -1635,7 +1635,8 @@
 		"text": {
 			"tab_title": "Trading",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"provider_name": "OISY TRADE"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
@@ -1650,13 +1651,27 @@
 			"title": "My assets",
 			"deposit": "+ Deposit",
 			"withdraw": "Withdraw",
-			"available": "Available: $amount"
+			"available": "Available: $amount",
+			"available_label": "Available:",
+			"empty": "No assets deposited yet"
 		},
 		"deposit": {
 			"title": "Deposit",
+			"review_title": "Review deposit",
+			"progress_title": "Depositing",
+			"you_deposit": "You deposit",
 			"to": "To",
 			"network": "Network",
+			"transaction_fee": "Transaction fee",
+			"approval_fee": "Approval fee",
+			"transfer_fee": "Transfer fee",
+			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
+			"info_title": "OISY TRADE: on-chain order book",
+			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
+			"empty_title": "Nothing to deposit yet",
+			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
 			"approving": "Approving",
+			"depositing": "Depositing",
 			"done": "Done",
 			"error": {
 				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
