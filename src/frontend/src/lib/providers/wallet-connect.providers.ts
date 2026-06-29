@@ -1,4 +1,5 @@
 import {
+	SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
@@ -323,7 +324,7 @@ export class WalletConnectClient extends WalletConnectListener {
 									SESSION_REQUEST_BTC_SIGN_MESSAGE,
 									SESSION_REQUEST_BTC_SIGN_PSBT
 								],
-								events: ['bip122_addressesChanged'],
+								events: [SESSION_REQUEST_BTC_ADDRESSES_CHANGED],
 								accounts: [
 									...(nonNullish(this.#btcAddressMainnet)
 										? BIP122_MAINNET_CHAINS_KEYS.map(
@@ -368,18 +369,29 @@ export class WalletConnectClient extends WalletConnectListener {
 		const sessions = Object.values(this.#walletKit.getActiveSessions());
 
 		await Promise.all(
-			sessions.flatMap((session) =>
-				(session.namespaces.bip122?.chains ?? []).map((chainId) =>
+			sessions.flatMap((session) => {
+				// Only emit to sessions whose approved bip122 namespace actually subscribed to the event.
+				// `buildApprovedNamespaces` intersects the events we offer with the ones the dApp requested,
+				// so a dApp that never lists `bip122_addressesChanged` ends up with an empty event set and
+				// the SDK's `isValidEmit` rejects the emit — which would otherwise surface as a spurious
+				// "Unexpected error" toast on an otherwise successful connection.
+				if (
+					!(session.namespaces.bip122?.events ?? []).includes(SESSION_REQUEST_BTC_ADDRESSES_CHANGED)
+				) {
+					return [];
+				}
+
+				return (session.namespaces.bip122?.chains ?? []).map((chainId) =>
 					this.#walletKit.emitSessionEvent({
 						topic: session.topic,
 						chainId,
 						event: {
-							name: 'bip122_addressesChanged',
+							name: SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 							data: btcAccountAddresses
 						}
 					})
-				)
-			)
+				);
+			})
 		);
 	};
 
