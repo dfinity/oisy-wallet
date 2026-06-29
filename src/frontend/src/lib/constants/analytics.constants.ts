@@ -184,3 +184,4 @@ export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
+export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';
