@@ -110,9 +110,6 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#ethAddress = ethAddress;
 		this.#solAddressMainnet = solAddressMainnet;
 		this.#solAddressDevnet = solAddressDevnet;
-		// Gating the BTC mainnet address off disables the entire bip122 surface in one place: the
-		// namespace advertisement, the `bip122_getAccountAddresses` session property and the address
-		// emit are all guarded on `nonNullish(this.#btcAddressMainnet)`. See BTC_WALLET_CONNECT_ENABLED.
 		this.#btcAddressMainnet = BTC_WALLET_CONNECT_ENABLED ? btcAddressMainnet : undefined;
 		this.#btcPrincipal = btcPrincipal;
 	}
