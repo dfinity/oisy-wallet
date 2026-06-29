@@ -8,6 +8,7 @@ import type { OptionBtcAddress } from '$btc/types/address';
 import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
 import { buildBtcAccountAddresses } from '$btc/utils/wallet-connect.utils';
 import { BIP122_MAINNET_CHAINS_KEYS } from '$env/bip122-chains.env';
+import { BTC_WALLET_CONNECT_ENABLED } from '$env/btc-wallet-connect.env';
 import {
 	CAIP10_DEVNET_CHAINS_KEYS,
 	CAIP10_MAINNET_CHAINS_KEYS,
@@ -110,7 +111,12 @@ export class WalletConnectClient extends WalletConnectListener {
 		this.#ethAddress = ethAddress;
 		this.#solAddressMainnet = solAddressMainnet;
 		this.#solAddressDevnet = solAddressDevnet;
-		this.#btcAddressMainnet = btcAddressMainnet;
+		// Gating the BTC mainnet address off suppresses everything OISY advertises for bip122: the
+		// namespace, the `bip122_getAccountAddresses` session property and the address emit are all
+		// guarded on `nonNullish(this.#btcAddressMainnet)`. Incoming bip122 `session_request`s are
+		// rejected separately in `onSessionRequest` (a previously-approved session could still deliver
+		// one). See BTC_WALLET_CONNECT_ENABLED.
+		this.#btcAddressMainnet = BTC_WALLET_CONNECT_ENABLED ? btcAddressMainnet : undefined;
 		this.#btcPrincipal = btcPrincipal;
 	}
 
