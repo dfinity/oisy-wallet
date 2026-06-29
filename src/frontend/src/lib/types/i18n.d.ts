@@ -1730,10 +1730,26 @@ interface I18nLiquidium {
 		borrow_at_risk_warning: string;
 		borrow_exceeds_power: string;
 		borrow_below_minimum: string;
+		borrow_prices_unavailable: string;
 		borrow_high_risk_warning: string;
 		borrow_risk_confirm: string;
 		starting_to_borrow: string;
 		borrow_started: string;
+		withdraw_review: string;
+		withdraw_review_subtitle: string;
+		withdrawing: string;
+		starting_to_withdraw: string;
+		withdraw_started: string;
+		supplied_label: string;
+		withdrawable: string;
+		reserved_by_debt: string;
+		withdraw_exceeds_free_collateral: string;
+		withdraw_exceeds_supplied: string;
+		withdraw_prices_unavailable: string;
+		withdraw_risk_info: string;
+		withdraw_at_risk_warning: string;
+		withdraw_high_risk_warning: string;
+		withdraw_risk_confirm: string;
 	};
 }
 
@@ -1816,8 +1832,6 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
-		harvest_autopilot_carousel_slide_title: string;
-		harvest_autopilot_carousel_slide_cta: string;
 	};
 	error: {
 		unexpected_error_on_withdraw: string;

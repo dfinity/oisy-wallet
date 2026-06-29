@@ -225,15 +225,15 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
+			"aa_new": "مضاف حديثًا",
+			"ab_icp": "ICP",
+			"ai": "الذكاء الاصطناعي",
 			"dex": "DEX",
 			"game": "لعبة",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "الإقراض",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "اجتماعي",
 			"staking": "التخزين",
 			"tools": "أدوات"
 		},
@@ -2205,10 +2205,26 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
-			"borrow_started": ""
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": ""
 		}
 	},
 	"vaults": {
@@ -2291,9 +2307,7 @@
 			"title_empty_3": "",
 			"description_empty": "",
 			"full_history": "",
-			"recent_history": "",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"recent_history": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
