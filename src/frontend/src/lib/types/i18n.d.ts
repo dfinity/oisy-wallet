@@ -1314,7 +1314,7 @@ interface I18nWallet_connect {
 }
 
 interface I18nTrading {
-	text: { tab_title: string; intro: string; learn_more: string };
+	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
 	provider_unavailable: { title: string; description: string };
 	orders: { title: string; add_limit_order: string };
 	limit_order: {
@@ -1408,12 +1408,31 @@ interface I18nTrading {
 		place_error: string;
 	};
 	onboarding: { title: string; description: string; deposit: string };
-	assets: { title: string; deposit: string; withdraw: string; available: string };
+	assets: {
+		title: string;
+		deposit: string;
+		withdraw: string;
+		available: string;
+		available_label: string;
+		empty: string;
+	};
 	deposit: {
 		title: string;
+		review_title: string;
+		progress_title: string;
+		you_deposit: string;
 		to: string;
 		network: string;
+		transaction_fee: string;
+		approval_fee: string;
+		transfer_fee: string;
+		consent: string;
+		info_title: string;
+		info_description: string;
+		empty_title: string;
+		empty_description: string;
 		approving: string;
+		depositing: string;
 		done: string;
 		error: { unknown_fee: string; deposit_failed: string };
 	};
