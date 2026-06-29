@@ -20,7 +20,7 @@
 
 	interface Props {
 		asset: OisyTradeAsset;
-		// Wired to the Withdraw modal in PR3; a no-op placeholder for now.
+		// Wired to the Withdraw modal in PR3; the button only renders once a handler is provided.
 		onWithdraw?: (asset: OisyTradeAsset) => void;
 	}
 
@@ -104,11 +104,14 @@
 		</LogoButton>
 	</div>
 
-	<button
-		class="ml-2 shrink-0 font-semibold text-brand-primary"
-		data-tid={TRADING_ASSET_WITHDRAW_BUTTON}
-		onclick={() => onWithdraw?.(asset)}
-	>
-		{$i18n.trading.assets.withdraw}
-	</button>
+	{#if nonNullish(onWithdraw)}
+		<button
+			class="ml-2 shrink-0 font-semibold text-brand-primary"
+			data-tid={TRADING_ASSET_WITHDRAW_BUTTON}
+			onclick={() => onWithdraw(asset)}
+			type="button"
+		>
+			{$i18n.trading.assets.withdraw}
+		</button>
+	{/if}
 </div>

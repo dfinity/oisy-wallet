@@ -22,6 +22,7 @@
 			class="text-sm font-medium text-brand-primary"
 			data-tid={TRADING_ASSETS_DEPOSIT_BUTTON}
 			onclick={onDeposit}
+			type="button"
 		>
 			{$i18n.trading.assets.deposit}
 		</button>
