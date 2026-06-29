@@ -1,6 +1,11 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
+import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
+import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { loadNftsByNetwork } from '$eth/services/nft.services';
 import type { EthNonFungibleToken } from '$eth/types/nft';
+import { MediaStatusEnum } from '$lib/enums/media-status';
+import type { Nft } from '$lib/types/nft';
+import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -13,12 +18,33 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	AlchemyProvider: vi.fn()
 }));
 
+vi.mock('$eth/providers/infura-erc721.providers', () => ({
+	infuraErc721Providers: vi.fn()
+}));
+
+vi.mock('$eth/providers/infura-erc1155.providers', () => ({
+	infuraErc1155Providers: vi.fn()
+}));
+
+vi.mock(import('$lib/utils/nfts.utils'), async (importOriginal) => ({
+	...(await importOriginal()),
+	getMediaStatusOrCache: vi.fn()
+}));
+
 describe('nft.services', () => {
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
 		getNftsByOwner: vi.fn()
 	} as unknown as AlchemyProvider;
+
+	const mockInfuraErc721Provider = {
+		getNftMetadata: vi.fn()
+	} as unknown as ReturnType<typeof infuraErc721Providers>;
+
+	const mockInfuraErc1155Provider = {
+		getNftMetadata: vi.fn()
+	} as unknown as ReturnType<typeof infuraErc1155Providers>;
 
 	describe('loadNftsByNetwork', () => {
 		const mockNft1 = {
@@ -49,6 +75,17 @@ describe('nft.services', () => {
 			}
 		};
 
+		const mockErc721NftWithoutImage: Nft = {
+			...mockNft1,
+			imageUrl: undefined,
+			mediaStatus: { image: MediaStatusEnum.INVALID_DATA, thumbnail: MediaStatusEnum.INVALID_DATA }
+		};
+		const mockErc1155NftWithoutImage: Nft = {
+			...mockNft3,
+			imageUrl: undefined,
+			mediaStatus: { image: MediaStatusEnum.INVALID_DATA, thumbnail: MediaStatusEnum.INVALID_DATA }
+		};
+
 		const erc721AzukiToken = { ...AZUKI_ELEMENTAL_BEANS_TOKEN, version: BigInt(1), enabled: true };
 		const erc1155NyanCatToken = { ...NYAN_CAT_TOKEN, version: BigInt(1), enabled: true };
 		const mockWalletAddress = mockEthAddress;
@@ -63,6 +100,9 @@ describe('nft.services', () => {
 			vi.clearAllMocks();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
+			vi.mocked(infuraErc721Providers).mockReturnValue(mockInfuraErc721Provider);
+			vi.mocked(infuraErc1155Providers).mockReturnValue(mockInfuraErc1155Provider);
+			vi.mocked(getMediaStatusOrCache).mockResolvedValue(MediaStatusEnum.OK);
 		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
@@ -147,6 +187,114 @@ describe('nft.services', () => {
 				`Failed to load NFTs for tokens: ${erc1155NyanCatToken.address} on network: ${mockParams.networkId.toString()}.`,
 				mockError
 			);
+		});
+
+		describe('on-chain media fallback', () => {
+			it('resolves the image from the contract when Alchemy returns no media (ERC721)', async () => {
+				vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([
+					mockErc721NftWithoutImage
+				]);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockResolvedValueOnce({
+					id: mockErc721NftWithoutImage.id,
+					imageUrl: 'https://arweave.net/on-chain-image'
+				});
+
+				const result = await loadNftsByNetwork({
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				});
+
+				expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledExactlyOnceWith({
+					contractAddress: mockErc721NftWithoutImage.collection.address,
+					tokenId: mockErc721NftWithoutImage.id
+				});
+				expect(result).toStrictEqual([
+					{
+						...mockErc721NftWithoutImage,
+						imageUrl: 'https://arweave.net/on-chain-image',
+						mediaStatus: {
+							image: MediaStatusEnum.OK,
+							thumbnail: MediaStatusEnum.INVALID_DATA
+						}
+					}
+				]);
+			});
+
+			it('resolves the image from the contract when Alchemy returns no media (ERC1155)', async () => {
+				vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([
+					mockErc1155NftWithoutImage
+				]);
+				vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockResolvedValueOnce({
+					id: mockErc1155NftWithoutImage.id,
+					imageUrl: 'https://arweave.net/on-chain-1155'
+				});
+
+				const result = await loadNftsByNetwork({
+					...mockParams,
+					tokens: [erc1155NyanCatToken],
+					networkId: erc1155NyanCatToken.network.id
+				});
+
+				expect(mockInfuraErc1155Provider.getNftMetadata).toHaveBeenCalledExactlyOnceWith({
+					contractAddress: mockErc1155NftWithoutImage.collection.address,
+					tokenId: mockErc1155NftWithoutImage.id
+				});
+				expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
+				expect(result[0].imageUrl).toBe('https://arweave.net/on-chain-1155');
+			});
+
+			it('does not query the contract when Alchemy already returns media', async () => {
+				vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1]);
+
+				const result = await loadNftsByNetwork({
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				});
+
+				expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
+				expect(result).toStrictEqual([mockNft1]);
+			});
+
+			it('leaves the NFT without media when the contract has none either', async () => {
+				vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([
+					mockErc721NftWithoutImage
+				]);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockResolvedValueOnce({
+					id: mockErc721NftWithoutImage.id
+				});
+
+				const result = await loadNftsByNetwork({
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				});
+
+				expect(result).toStrictEqual([mockErc721NftWithoutImage]);
+				expect(getMediaStatusOrCache).not.toHaveBeenCalled();
+			});
+
+			it('keeps the NFT and warns when the contract lookup fails', async () => {
+				const mockError = new Error('tokenURI failed');
+
+				vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([
+					mockErc721NftWithoutImage
+				]);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockRejectedValueOnce(mockError);
+
+				const result = await loadNftsByNetwork({
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				});
+
+				expect(result).toStrictEqual([mockErc721NftWithoutImage]);
+				expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+					`Failed to resolve on-chain media for NFT ${mockErc721NftWithoutImage.id} of token: ${mockErc721NftWithoutImage.collection.address} on network: ${erc721AzukiToken.network.id.toString()}.`,
+					mockError
+				);
+			});
 		});
 	});
 });
