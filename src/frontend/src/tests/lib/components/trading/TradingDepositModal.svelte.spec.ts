@@ -1,4 +1,7 @@
-import type { Token as OisyTradeToken } from '$declarations/oisy_trade/oisy_trade.did';
+import type {
+	Token as OisyTradeToken,
+	TradingPairInfo
+} from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -39,6 +42,12 @@ const supportedToken = (): OisyTradeToken =>
 		metadata: { symbol: 'ICP', decimals: 8 }
 	}) as unknown as OisyTradeToken;
 
+const buildPair = ({ base, quote }: { base: string; quote: string }): TradingPairInfo =>
+	({
+		base: { metadata: { symbol: base } },
+		quote: { metadata: { symbol: quote } }
+	}) as unknown as TradingPairInfo;
+
 describe('TradingDepositModal', () => {
 	const icp: IcToken = {
 		...mockValidIcToken,
@@ -60,6 +69,24 @@ describe('TradingDepositModal', () => {
 
 		expect(getByText(en.trading.deposit.empty_title)).toBeInTheDocument();
 		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
+	});
+
+	it('should render the supported token symbols as chips in the empty state', () => {
+		oisyTradeStore.set({
+			pairs: [
+				buildPair({ base: 'ICP', quote: 'ckUSDC' }),
+				buildPair({ base: 'ckBTC', quote: 'ckUSDC' })
+			],
+			supportedTokens: undefined,
+			balances: undefined
+		});
+
+		const { getByText } = render(TradingDepositModal);
+
+		expect(getByText(en.trading.deposit.empty_title)).toBeInTheDocument();
+		expect(getByText('ICP')).toBeInTheDocument();
+		expect(getByText('ckUSDC')).toBeInTheDocument();
+		expect(getByText('ckBTC')).toBeInTheDocument();
 	});
 
 	it('should render the deposit form when there is a depositable token', () => {
