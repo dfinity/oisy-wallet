@@ -96,5 +96,16 @@ export const loadNftsByNetwork = async ({
 		}
 	}
 
-	return await Promise.all(nfts.map((nft) => withOnChainMediaFallback({ networkId, nft })));
+	// Resolve the on-chain media fallback in small batches rather than all at
+	// once, to avoid bursting Infura when many owned NFTs lack Alchemy media.
+	const fallbackBatches = createBatches<Nft>({ items: nfts, batchSize: 10 });
+
+	const withFallback: Nft[] = [];
+	for (const batch of fallbackBatches) {
+		withFallback.push(
+			...(await Promise.all(batch.map((nft) => withOnChainMediaFallback({ networkId, nft }))))
+		);
+	}
+
+	return withFallback;
 };
