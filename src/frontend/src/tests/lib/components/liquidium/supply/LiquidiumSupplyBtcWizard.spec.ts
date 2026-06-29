@@ -4,6 +4,7 @@ import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
@@ -11,12 +12,12 @@ import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import type { WizardStep } from '@dfinity/gix-components';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('LiquidiumSupplyBtcWizard', () => {
@@ -101,5 +102,30 @@ describe('LiquidiumSupplyBtcWizard', () => {
 		});
 
 		expect(container).toHaveTextContent(en.liquidium.text.starting_to_supply);
+	});
+
+	it('selects UTXOs for the gross transfer (supply amount + inflow fee)', async () => {
+		// The broadcast sends `amount + inflowFee`, so UTXO selection must cover the gross
+		// amount — selecting for the net amount alone under-funds the signer (NotEnoughFunds).
+		allUtxosStore.setAllUtxos({ allUtxos: [mockUtxo] });
+		feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1000n });
+		btcPendingSentTransactionsStore.setPendingTransactions({
+			address: mockBtcAddress,
+			pendingTransactions: []
+		});
+
+		// 0.001 BTC = 100_000 sat; + 50 sat inflow fee = 100_050 sat → 0.0010005 BTC.
+		const grossAmount = Number(convertSatoshisToBtc(100_050n));
+
+		render(LiquidiumSupplyBtcWizard, {
+			props: { ...baseProps, currentStep: step(WizardStepsLiquidiumSupply.SUPPLY) },
+			context: context()
+		});
+
+		await waitFor(() => {
+			expect(btcUtxosService.prepareBtcSend).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: grossAmount })
+			);
+		});
 	});
 });

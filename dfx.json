@@ -50,6 +50,29 @@
 				}
 			}
 		},
+		"oisy_trade": {
+			"type": "custom",
+			"build": "scripts/build.oisy_trade.sh",
+			"candid": "target/oisy_trade.did",
+			"wasm": "target/oisy_trade.wasm.gz",
+			"shrink": false,
+			"specified_id": "proc5-daaaa-aaaar-qb5va-cai",
+			"remote": {
+				"id": {
+					"__default": "2vxsx-fae",
+					"test_be_1": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_1": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_2": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_3": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_4": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_5": "proc5-daaaa-aaaar-qb5va-cai",
+					"test_fe_6": "proc5-daaaa-aaaar-qb5va-cai",
+					"audit": "proc5-daaaa-aaaar-qb5va-cai",
+					"staging": "proc5-daaaa-aaaar-qb5va-cai",
+					"e2e": "proc5-daaaa-aaaar-qb5va-cai"
+				}
+			}
+		},
 		"icp_swap_pool": {
 			"type": "custom",
 			"build": "scripts/build.icp_swap_pool.sh",

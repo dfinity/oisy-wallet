@@ -13,6 +13,7 @@ import {
 	liquidiumNetInterestUsd
 } from '$lib/utils/liquidium.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { AssetPrices } from '@liquidium/client';
 import { derived, type Readable } from 'svelte/store';
 
 export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
@@ -23,6 +24,12 @@ export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
 export const liquidiumPortfolio: Readable<LiquidiumPortfolio | null> = derived(
 	liquidiumStore,
 	({ portfolio }) => portfolio
+);
+
+// SDK USD prices for the borrow form's USD / fiat math.
+export const liquidiumAssetPrices: Readable<AssetPrices> = derived(
+	liquidiumStore,
+	({ assetPrices }) => assetPrices
 );
 
 // Best supply APY across enterable pools (Earn card badge).
