@@ -223,15 +223,15 @@
 			"website": "$dAppNameの画像"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "最近追加",
+			"ab_icp": "ICP",
 			"ai": "AI",
 			"dex": "DEX",
 			"game": "ゲーム",
-			"lending": "",
+			"lending": "レンディング",
 			"nft": "NFT",
-			"rwa": "",
-			"social": "",
+			"rwa": "RWA",
+			"social": "ソーシャル",
 			"staking": "ステーキング",
 			"tools": "ツール"
 		},
@@ -2262,10 +2262,26 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
-			"borrow_started": ""
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": ""
 		}
 	},
 	"vaults": {
@@ -2348,9 +2364,7 @@
 			"title_empty_3": "",
 			"description_empty": "まだトークンをステークしていないようです",
 			"full_history": "全履歴を表示",
-			"recent_history": "全履歴を閉じる",
-			"harvest_autopilot_carousel_slide_title": "Harvest Autopilot Yield FarmingでOISYを稼ぐ",
-			"harvest_autopilot_carousel_slide_cta": "詳しく見る"
+			"recent_history": "全履歴を閉じる"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "トークンの引き出し中にエラーが発生しました。",

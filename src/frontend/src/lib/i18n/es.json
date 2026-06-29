@@ -223,15 +223,15 @@
 			"website": "Imagen de $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Añadido recientemente",
+			"ab_icp": "ICP",
 			"ai": "IA",
 			"dex": "DEX",
 			"game": "Juego",
-			"lending": "",
-			"nft": "",
-			"rwa": "",
-			"social": "",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Social",
 			"staking": "Staking",
 			"tools": "Herramientas"
 		},
@@ -2262,10 +2262,26 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
-			"borrow_started": ""
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": ""
 		}
 	},
 	"vaults": {
@@ -2348,9 +2364,7 @@
 			"title_empty_3": "",
 			"description_empty": "Parece que aún no has hecho staking de ningún token",
 			"full_history": "Mostrar historial completo",
-			"recent_history": "Cerrar historial completo",
-			"harvest_autopilot_carousel_slide_title": "Gana en OISY con Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Saber más"
+			"recent_history": "Cerrar historial completo"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Algo salió mal al retirar los tokens.",

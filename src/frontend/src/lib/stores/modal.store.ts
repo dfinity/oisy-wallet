@@ -72,6 +72,8 @@ export interface Modal<T> {
 		| 'harvest-unstake'
 		| 'liquidium-supply'
 		| 'limit-order'
+		| 'liquidium-borrow'
+		| 'liquidium-withdraw'
 		| 'trading-deposit'
 		| 'universal-scanner'
 		| 'pay-dialog'
@@ -146,6 +148,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openHarvestUnstake: (id: symbol) => void;
 	openLiquidiumSupply: (id: symbol) => void;
 	openLimitOrder: (id: symbol) => void;
+	openLiquidiumBorrow: (id: symbol) => void;
+	openLiquidiumWithdraw: (id: symbol) => void;
 	openTradingDeposit: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
@@ -258,6 +262,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openHarvestUnstake: setType('harvest-unstake'),
 		openLiquidiumSupply: setType('liquidium-supply'),
 		openLimitOrder: setType('limit-order'),
+		openLiquidiumBorrow: setType('liquidium-borrow'),
+		openLiquidiumWithdraw: setType('liquidium-withdraw'),
 		openTradingDeposit: setType('trading-deposit'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
