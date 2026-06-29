@@ -140,8 +140,8 @@ export enum WizardStepsScanner {
 
 export enum WizardStepsLimitOrder {
 	FORM = 'Form',
-	BASE_TOKEN = 'Base token',
-	QUOTE_TOKEN = 'Quote token',
+	BASE_TOKEN = 'Base Token',
+	QUOTE_TOKEN = 'Quote Token',
 	REVIEW = 'Review',
 	PLACING = 'Placing'
 }
