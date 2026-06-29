@@ -471,8 +471,9 @@ describe('transactions.utils', () => {
 			};
 
 			it('should keep the ERC-20 transaction when native and ERC-20 share the same hash on the same network', () => {
+				// A real ERC-20 transfer's native companion moved no value (it is only the gas/fee entry).
 				const nativeTx: EthCertifiedTransaction = {
-					data: { ...mockEthTransaction, hash: duplicateHash },
+					data: { ...mockEthTransaction, hash: duplicateHash, value: ZERO },
 					certified: false
 				};
 				const erc20Tx: EthCertifiedTransaction = {
@@ -491,6 +492,31 @@ describe('transactions.utils', () => {
 
 				expect(result).toHaveLength(1);
 				expect(result[0].token).toBe(PEPE_TOKEN);
+			});
+
+			it('should keep the native leg when it moved value (e.g. a native→ERC-20 swap) sharing the hash', () => {
+				// The native input of a swap shares its hash with the received-token transfer, but it is
+				// a real transfer (non-zero value), so both legs must remain in the activity list.
+				const nativeSwapLeg: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const erc20ReceiveLeg: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, USDC_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeSwapLeg],
+						[USDC_TOKEN_ID]: [erc20ReceiveLeg]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+				expect(result.map(({ token }) => token)).toEqual([ETHEREUM_TOKEN, USDC_TOKEN]);
 			});
 
 			it('should keep both transactions when they have different hashes', () => {
@@ -570,7 +596,7 @@ describe('transactions.utils', () => {
 			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {
 				const sharedHash = duplicateHash;
 				const nativeTx: EthCertifiedTransaction = {
-					data: { ...mockEthTransaction, hash: sharedHash },
+					data: { ...mockEthTransaction, hash: sharedHash, value: ZERO },
 					certified: false
 				};
 				const pepeTx: EthCertifiedTransaction = {
