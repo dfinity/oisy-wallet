@@ -60,7 +60,6 @@
 			{currentStep}
 			onBack={modal.back}
 			onClose={close}
-			onNext={modal.next}
 			{steps}
 			bind:progressStep
 			bind:modal
