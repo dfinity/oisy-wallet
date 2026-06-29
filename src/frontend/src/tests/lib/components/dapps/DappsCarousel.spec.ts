@@ -27,7 +27,7 @@ describe('DappsCarousel', () => {
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps has the carousel prop and no rewards', () => {
+	it('should render nothing if no dApps have the carousel prop and no rewards', () => {
 		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
