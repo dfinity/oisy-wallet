@@ -235,6 +235,8 @@ describe('nft.services', () => {
 						token_network: mockErc721NftWithoutImage.collection.network.name,
 						token_address: mockErc721NftWithoutImage.collection.address,
 						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_symbol: mockErc721NftWithoutImage.collection.symbol,
+						token_name: mockErc721NftWithoutImage.collection.name,
 						token_id: `${mockErc721NftWithoutImage.id}`
 					}
 				});
@@ -301,6 +303,8 @@ describe('nft.services', () => {
 						token_network: mockErc721NftWithoutImage.collection.network.name,
 						token_address: mockErc721NftWithoutImage.collection.address,
 						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_symbol: mockErc721NftWithoutImage.collection.symbol,
+						token_name: mockErc721NftWithoutImage.collection.name,
 						token_id: `${mockErc721NftWithoutImage.id}`
 					}
 				});
@@ -333,6 +337,8 @@ describe('nft.services', () => {
 						token_network: mockErc721NftWithoutImage.collection.network.name,
 						token_address: mockErc721NftWithoutImage.collection.address,
 						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_symbol: mockErc721NftWithoutImage.collection.symbol,
+						token_name: mockErc721NftWithoutImage.collection.name,
 						token_id: `${mockErc721NftWithoutImage.id}`
 					}
 				});

@@ -57,6 +57,8 @@ const withOnChainMediaFallback = async ({
 				token_network: nft.collection.network.name,
 				token_address: nft.collection.address,
 				token_standard: nft.collection.standard.code,
+				...(nonNullish(nft.collection.symbol) && { token_symbol: nft.collection.symbol }),
+				...(nonNullish(nft.collection.name) && { token_name: nft.collection.name }),
 				token_id: `${nft.id}`
 			}
 		});
