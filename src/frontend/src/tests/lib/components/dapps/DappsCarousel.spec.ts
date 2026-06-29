@@ -18,7 +18,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
-	it('should render nothing if there is no dApps and no rewards', () => {
+	it('should render nothing if there are no dApps and no rewards', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 
