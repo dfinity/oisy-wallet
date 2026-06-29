@@ -5,7 +5,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
-		decimalsOfStep,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		isPresetSelected,
@@ -26,8 +25,6 @@
 		bid: number | null;
 		ask: number | null;
 		fillOrKill: boolean;
-		baseNum: number;
-		freeSpend: number;
 		depthLevels: {
 			asks: { price: number; quantity: number }[];
 			bids: { price: number; quantity: number }[];
@@ -44,8 +41,6 @@
 		bid,
 		ask,
 		fillOrKill,
-		baseNum,
-		freeSpend,
 		depthLevels,
 		onPriceInput
 	}: Props = $props();

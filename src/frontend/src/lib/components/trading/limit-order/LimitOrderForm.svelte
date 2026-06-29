@@ -162,12 +162,10 @@
 
 		<LimitOrderPriceSection
 			{ask}
-			{baseNum}
 			{bid}
 			{currentValue}
 			{depthLevels}
 			{fillOrKill}
-			{freeSpend}
 			{onPriceInput}
 			{pairView}
 			{side}

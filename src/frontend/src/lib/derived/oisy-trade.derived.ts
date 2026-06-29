@@ -43,10 +43,10 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = derived(
 	[oisyTradeSupportedTokens, enabledIcTokens],
 	([$supportedTokens, $enabledIcTokens]) => {
-		const byLedger = $enabledIcTokens.reduce<Record<string, IcToken>>(
-			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
-			{}
-		);
+		const byLedger = $enabledIcTokens.reduce<Record<string, IcToken>>((acc, token) => {
+			acc[token.ledgerCanisterId] = token;
+			return acc;
+		}, {});
 
 		return $supportedTokens.reduce<Record<string, IcToken>>((acc, tradeToken) => {
 			const { symbol } = tradeToken.metadata;
@@ -54,7 +54,10 @@ export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = deriv
 				return acc;
 			}
 			const token = byLedger[tradeToken.id.ledger_id.toText()];
-			return nonNullish(token) ? { ...acc, [symbol]: token } : acc;
+			if (nonNullish(token)) {
+				acc[symbol] = token;
+			}
+			return acc;
 		}, {});
 	}
 );

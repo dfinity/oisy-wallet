@@ -169,7 +169,7 @@
 					side: toCandidSide(side),
 					quantity: toQuantity({ baseAmount: baseNum, baseDecimals: pairView.baseDecimals }),
 					price: toPriceUnits({ price: priceNum, quoteDecimals: pairView.quoteDecimals }),
-					time_in_force: fillOrKill ? [{ FillOrKill: null }] : [{ GoodTilCanceled: null }]
+					time_in_force: fillOrKill ? [{ FillOrKill: null }] : []
 				}
 			});
 

@@ -39,9 +39,9 @@
 	>
 		<span class="bg-success-subtle h-4 w-4 flex-shrink-0 rounded"></span>
 		<span class="flex-1 text-xs text-secondary">
-			{replacePlaceholders($i18n.trading.limit_order.routing_name, { $provider: '' })}<strong
-				class="font-semibold text-primary">{OISY_TRADE_PROVIDER_NAME}</strong
-			>
+			{replacePlaceholders($i18n.trading.limit_order.routing_name, {
+				$provider: OISY_TRADE_PROVIDER_NAME
+			})}
 		</span>
 		<span class="rounded-full border border-disabled bg-primary px-2 py-0.5 text-xs text-tertiary">
 			{$i18n.trading.limit_order.routing_tag}
