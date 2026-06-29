@@ -8,11 +8,6 @@ export const SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES = 'getAccountAddresses';
 export const SESSION_REQUEST_BTC_SIGN_MESSAGE = 'signMessage';
 export const SESSION_REQUEST_BTC_SIGN_PSBT = 'signPsbt';
 
-// Bitcoin (bip122) event advertised in the approved namespace and emitted to deliver the account
-// address set. The same value MUST be used when advertising, emitting and guarding the emit: the
-// SDK's `isValidEmit` rejects any event name absent from the session's approved namespace events.
-export const SESSION_EVENT_BTC_ADDRESSES_CHANGED = 'bip122_addressesChanged';
-
 export const BTC_ECDSA_KEY_ID: EcdsaKeyId = {
 	curve: { secp256k1: null },
 	name: SIGNER_ROOT_KEY_NAME
