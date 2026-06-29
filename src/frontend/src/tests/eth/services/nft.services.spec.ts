@@ -1,7 +1,7 @@
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-import { loadNftsByNetwork } from '$eth/services/nft.services';
+import { loadNftsByNetwork, onChainImageUrlCache } from '$eth/services/nft.services';
 import type { EthNonFungibleToken } from '$eth/types/nft';
 import { TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL } from '$lib/constants/analytics.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
@@ -106,6 +106,7 @@ describe('nft.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			onChainImageUrlCache.clear();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
 			vi.mocked(infuraErc721Providers).mockReturnValue(mockInfuraErc721Provider);
@@ -342,6 +343,31 @@ describe('nft.services', () => {
 						token_id: `${mockErc721NftWithoutImage.id}`
 					}
 				});
+			});
+
+			it('resolves on-chain media only once across repeated polls', async () => {
+				vi.mocked(mockAlchemyProvider.getNftsByOwner)
+					.mockResolvedValueOnce([mockErc721NftWithoutImage])
+					.mockResolvedValueOnce([mockErc721NftWithoutImage]);
+				vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockResolvedValueOnce({
+					id: mockErc721NftWithoutImage.id,
+					imageUrl: 'https://arweave.net/on-chain-image'
+				});
+
+				const params = {
+					...mockParams,
+					tokens: [erc721AzukiToken],
+					networkId: erc721AzukiToken.network.id
+				};
+
+				const first = await loadNftsByNetwork(params);
+				const second = await loadNftsByNetwork(params);
+
+				// On-chain resolution and the event happen once; the second poll reuses the cache.
+				expect(mockInfuraErc721Provider.getNftMetadata).toHaveBeenCalledOnce();
+				expect(trackEvent).toHaveBeenCalledOnce();
+				expect(first[0].imageUrl).toBe('https://arweave.net/on-chain-image');
+				expect(second[0].imageUrl).toBe('https://arweave.net/on-chain-image');
 			});
 		});
 	});

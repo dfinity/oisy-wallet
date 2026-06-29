@@ -12,6 +12,7 @@ import type { Nft } from '$lib/types/nft';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 // Alchemy is the source for owned NFTs, but it sometimes returns no media URL
 // for a token it has not indexed yet, even when the collection's metadata (and
@@ -37,6 +38,13 @@ const loadOnChainImageUrl = async ({
 	return imageUrl;
 };
 
+// Caches the on-chain image URL resolved per (network, contract, token id) so
+// the NFT polling loop reuses it instead of re-resolving — and re-reporting —
+// the same media on every refresh. A `null` entry records a token that resolved
+// to no media (so we don't re-report that either). Transient failures are not
+// cached, so they keep retrying on the next poll. Exposed so tests can reset it.
+export const onChainImageUrlCache = new SvelteMap<string, string | null>();
+
 const withOnChainMediaFallback = async ({
 	networkId,
 	nft
@@ -46,6 +54,19 @@ const withOnChainMediaFallback = async ({
 }): Promise<Nft> => {
 	if (nonNullish(nft.imageUrl)) {
 		return nft;
+	}
+
+	const withImageUrl = async (imageUrl: string): Promise<Nft> => ({
+		...nft,
+		imageUrl,
+		mediaStatus: { ...nft.mediaStatus, image: await getMediaStatusOrCache(imageUrl) }
+	});
+
+	const cacheKey = `${networkId.toString()}#${nft.collection.address}#${nft.id}`;
+
+	if (onChainImageUrlCache.has(cacheKey)) {
+		const cached = onChainImageUrlCache.get(cacheKey);
+		return nonNullish(cached) ? await withImageUrl(cached) : nft;
 	}
 
 	const trackLoad = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
@@ -66,24 +87,21 @@ const withOnChainMediaFallback = async ({
 	try {
 		const imageUrl = await loadOnChainImageUrl({ networkId, nft });
 
-		// `success` means we recovered an image URL; `error` covers both a load
-		// that returned no image and one that threw (handled below).
+		// Cache the resolved outcome (the URL, or `null` for "no media on chain")
+		// so later polls reuse it without re-resolving or re-reporting.
+		onChainImageUrlCache.set(cacheKey, imageUrl ?? null);
+
+		// `success` means we recovered an image URL; `error` means the contract
+		// metadata exposed no usable image.
 		trackLoad(
 			nonNullish(imageUrl)
 				? PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
 				: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
 		);
 
-		if (isNullish(imageUrl)) {
-			return nft;
-		}
-
-		return {
-			...nft,
-			imageUrl,
-			mediaStatus: { ...nft.mediaStatus, image: await getMediaStatusOrCache(imageUrl) }
-		};
+		return nonNullish(imageUrl) ? await withImageUrl(imageUrl) : nft;
 	} catch (err: unknown) {
+		// Not cached: a transient failure should be retried on the next poll.
 		trackLoad(PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR);
 		consoleWarn(
 			`Failed to resolve on-chain media for NFT ${nft.id} of token: ${nft.collection.address} on network: ${networkId.toString()}.`,
