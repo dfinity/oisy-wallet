@@ -223,15 +223,15 @@
 			"website": "Obrázek $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Nedávno přidané",
+			"ab_icp": "ICP",
 			"ai": "AI",
 			"dex": "DEX",
 			"game": "Hra",
-			"lending": "",
+			"lending": "Lending",
 			"nft": "NFT",
-			"rwa": "",
-			"social": "",
+			"rwa": "RWA",
+			"social": "Sociální",
 			"staking": "Staking",
 			"tools": "Nářadí"
 		},
@@ -2168,10 +2168,26 @@
 			"borrow_at_risk_warning": "",
 			"borrow_exceeds_power": "",
 			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
 			"borrow_high_risk_warning": "",
 			"borrow_risk_confirm": "",
 			"starting_to_borrow": "",
-			"borrow_started": ""
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": ""
 		}
 	},
 	"vaults": {
@@ -2254,9 +2270,7 @@
 			"title_empty_3": "",
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
-			"recent_history": "Zavřít celou historii",
-			"harvest_autopilot_carousel_slide_title": "Vydělávejte v OISY s Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Zjistit více"
+			"recent_history": "Zavřít celou historii"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",

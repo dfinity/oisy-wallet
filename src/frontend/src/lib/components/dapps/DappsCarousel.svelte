@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
-	import { EARNING_ENABLED } from '$env/earning';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import { addUserHiddenDappId } from '$lib/api/backend.api';
 	import Carousel from '$lib/components/carousel/Carousel.svelte';
 	import DappsCarouselSlide from '$lib/components/dapps/DappsCarouselSlide.svelte';
-	import { stakeProvidersConfig } from '$lib/config/stake.config';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		userProfileLoaded,
@@ -21,7 +18,6 @@
 		CarouselSlideOisyDappDescription,
 		OisyDappDescription
 	} from '$lib/types/dapp-description';
-	import { StakeProvider } from '$lib/types/stake';
 	import { filterCarouselDapps } from '$lib/utils/dapps.utils';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -61,20 +57,6 @@
 			: undefined
 	);
 
-	let harvestAutopilotSlide = $derived(
-		EARNING_ENABLED
-			? ({
-					id: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name,
-					carousel: {
-						text: $i18n.stake.text.harvest_autopilot_carousel_slide_title,
-						callToAction: $i18n.stake.text.harvest_autopilot_carousel_slide_cta
-					},
-					logo: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].logo,
-					name: stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name
-				} as CarouselSlideOisyDappDescription)
-			: undefined
-	);
-
 	/*
 	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
 	 1. The component now displays data from difference sources - featured airdrop and dApps
@@ -86,7 +68,6 @@
 		filterCarouselDapps({
 			dAppDescriptions: [
 				...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
-				...(nonNullish(harvestAutopilotSlide) ? [harvestAutopilotSlide] : []),
 				...dAppDescriptions
 			],
 			hiddenDappsIds
@@ -144,10 +125,6 @@
 						: undefined}
 					{dappsCarouselSlide}
 					onCloseCarouselSlide={closeSlide}
-					pagePath={nonNullish(harvestAutopilotSlide) &&
-					harvestAutopilotSlide.id === dappsCarouselSlide.id
-						? AppPath.Earn
-						: undefined}
 				/>
 			{/each}
 		</Carousel>
