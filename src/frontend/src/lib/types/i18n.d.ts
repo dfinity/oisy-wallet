@@ -1704,6 +1704,21 @@ interface I18nLiquidium {
 		borrow_risk_confirm: string;
 		starting_to_borrow: string;
 		borrow_started: string;
+		withdraw_review: string;
+		withdraw_review_subtitle: string;
+		withdrawing: string;
+		starting_to_withdraw: string;
+		withdraw_started: string;
+		supplied_label: string;
+		withdrawable: string;
+		reserved_by_debt: string;
+		withdraw_exceeds_free_collateral: string;
+		withdraw_exceeds_supplied: string;
+		withdraw_prices_unavailable: string;
+		withdraw_risk_info: string;
+		withdraw_at_risk_warning: string;
+		withdraw_high_risk_warning: string;
+		withdraw_risk_confirm: string;
 	};
 }
 

@@ -133,6 +133,13 @@ export enum ProgressStepsLiquidiumBorrow {
 	DONE = 'done'
 }
 
+export enum ProgressStepsLiquidiumWithdraw {
+	INITIALIZATION = 'initialization',
+	SUBMIT = 'submit',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
 export enum ProgressStepsClaimStakingReward {
 	INITIALIZATION = 'initialization',
 	CLAIM = 'claim',

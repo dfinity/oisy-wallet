@@ -2172,7 +2172,22 @@
 			"borrow_high_risk_warning": "This borrow puts your position close to liquidation.",
 			"borrow_risk_confirm": "I understand this borrow increases my liquidation risk.",
 			"starting_to_borrow": "Submitting your loan...",
-			"borrow_started": "The loan is now being activated."
+			"borrow_started": "The loan is now being activated.",
+			"withdraw_review": "Review withdraw",
+			"withdraw_review_subtitle": "You withdraw",
+			"withdrawing": "Withdrawing",
+			"starting_to_withdraw": "Submitting your withdrawal...",
+			"withdraw_started": "The withdrawal is now being processed.",
+			"supplied_label": "Supplied",
+			"withdrawable": "Withdrawable",
+			"reserved_by_debt": "Reserved by open debt",
+			"withdraw_exceeds_free_collateral": "Cannot withdraw more than your free collateral while debt is open.",
+			"withdraw_exceeds_supplied": "Amount exceeds your supplied balance.",
+			"withdraw_prices_unavailable": "Prices are temporarily unavailable. Withdrawing is disabled until they load.",
+			"withdraw_risk_info": "Withdrawing collateral lowers your health factor. If it falls too far your remaining collateral can be liquidated.",
+			"withdraw_at_risk_warning": "This withdrawal noticeably lowers your health factor.",
+			"withdraw_high_risk_warning": "This withdrawal puts your position close to liquidation.",
+			"withdraw_risk_confirm": "I understand this withdrawal increases my liquidation risk."
 		}
 	},
 	"vaults": {
