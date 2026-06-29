@@ -3,6 +3,9 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { EthNonFungibleToken } from '$eth/types/nft';
+import { TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { createBatches } from '$lib/services/batch.services';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
@@ -45,8 +48,29 @@ const withOnChainMediaFallback = async ({
 		return nft;
 	}
 
+	const trackLoad = (resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES) =>
+		trackEvent({
+			name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				result_status: resultStatus,
+				token_network: nft.collection.network.name,
+				token_address: nft.collection.address,
+				token_standard: nft.collection.standard.code,
+				token_id: `${nft.id}`
+			}
+		});
+
 	try {
 		const imageUrl = await loadOnChainImageUrl({ networkId, nft });
+
+		// `success` means we recovered an image URL; `error` covers both a load
+		// that returned no image and one that threw (handled below).
+		trackLoad(
+			nonNullish(imageUrl)
+				? PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+				: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR
+		);
 
 		if (isNullish(imageUrl)) {
 			return nft;
@@ -58,6 +82,7 @@ const withOnChainMediaFallback = async ({
 			mediaStatus: { ...nft.mediaStatus, image: await getMediaStatusOrCache(imageUrl) }
 		};
 	} catch (err: unknown) {
+		trackLoad(PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR);
 		consoleWarn(
 			`Failed to resolve on-chain media for NFT ${nft.id} of token: ${nft.collection.address} on network: ${networkId.toString()}.`,
 			err

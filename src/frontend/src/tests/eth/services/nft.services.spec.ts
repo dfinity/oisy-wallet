@@ -3,7 +3,10 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { loadNftsByNetwork } from '$eth/services/nft.services';
 import type { EthNonFungibleToken } from '$eth/types/nft';
+import { TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL } from '$lib/constants/analytics.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import type { Nft } from '$lib/types/nft';
 import { getMediaStatusOrCache } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -29,6 +32,11 @@ vi.mock('$eth/providers/infura-erc1155.providers', () => ({
 vi.mock(import('$lib/utils/nfts.utils'), async (importOriginal) => ({
 	...(await importOriginal()),
 	getMediaStatusOrCache: vi.fn()
+}));
+
+vi.mock(import('$lib/services/analytics.services'), async (importOriginal) => ({
+	...(await importOriginal()),
+	trackEvent: vi.fn()
 }));
 
 describe('nft.services', () => {
@@ -219,6 +227,17 @@ describe('nft.services', () => {
 						}
 					}
 				]);
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+						token_network: mockErc721NftWithoutImage.collection.network.name,
+						token_address: mockErc721NftWithoutImage.collection.address,
+						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_id: `${mockErc721NftWithoutImage.id}`
+					}
+				});
 			});
 
 			it('resolves the image from the contract when Alchemy returns no media (ERC1155)', async () => {
@@ -255,6 +274,7 @@ describe('nft.services', () => {
 
 				expect(mockInfuraErc721Provider.getNftMetadata).not.toHaveBeenCalled();
 				expect(result).toStrictEqual([mockNft1]);
+				expect(trackEvent).not.toHaveBeenCalled();
 			});
 
 			it('leaves the NFT without media when the contract has none either', async () => {
@@ -273,6 +293,17 @@ describe('nft.services', () => {
 
 				expect(result).toStrictEqual([mockErc721NftWithoutImage]);
 				expect(getMediaStatusOrCache).not.toHaveBeenCalled();
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						token_network: mockErc721NftWithoutImage.collection.network.name,
+						token_address: mockErc721NftWithoutImage.collection.address,
+						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_id: `${mockErc721NftWithoutImage.id}`
+					}
+				});
 			});
 
 			it('keeps the NFT and warns when the contract lookup fails', async () => {
@@ -294,6 +325,17 @@ describe('nft.services', () => {
 					`Failed to resolve on-chain media for NFT ${mockErc721NftWithoutImage.id} of token: ${mockErc721NftWithoutImage.collection.address} on network: ${erc721AzukiToken.network.id.toString()}.`,
 					mockError
 				);
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL,
+					metadata: {
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+						result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						token_network: mockErc721NftWithoutImage.collection.network.name,
+						token_address: mockErc721NftWithoutImage.collection.address,
+						token_standard: mockErc721NftWithoutImage.collection.standard.code,
+						token_id: `${mockErc721NftWithoutImage.id}`
+					}
+				});
 			});
 		});
 	});
