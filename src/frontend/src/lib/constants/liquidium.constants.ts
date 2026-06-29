@@ -42,5 +42,8 @@ export type LiquidiumHealthLevel = 'healthy' | 'at-risk' | 'critical';
 // token's decimals) doesn't trip its own limit.
 export const LIQUIDIUM_BORROWING_POWER_TOLERANCE = 1e-6;
 
+// Withdraw free-collateral cap tolerance, so a "Max" amount doesn't flag itself.
+export const LIQUIDIUM_WITHDRAW_CAP_TOLERANCE = 1e-6;
+
 // Refresh cadence for markets + positions while the provider page is visible.
 export const LIQUIDIUM_POLL_INTERVAL_MILLIS = 30_000;

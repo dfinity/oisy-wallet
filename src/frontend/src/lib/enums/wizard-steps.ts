@@ -99,6 +99,12 @@ export enum WizardStepsLiquidiumBorrow {
 	BORROWING = 'Borrowing'
 }
 
+export enum WizardStepsLiquidiumWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing'
+}
+
 export enum WizardStepsClaimStakingReward {
 	REVIEW = 'Review',
 	CLAIMING = 'Claiming'
