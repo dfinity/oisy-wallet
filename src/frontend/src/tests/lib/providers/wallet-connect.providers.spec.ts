@@ -27,6 +27,14 @@ vi.mock('@walletconnect/utils', async (importOriginal) => {
 	};
 });
 
+const mockBtcWalletConnectEnabled = vi.hoisted(() => ({ value: true }));
+
+vi.mock('$env/btc-wallet-connect.env', () => ({
+	get BTC_WALLET_CONNECT_ENABLED() {
+		return mockBtcWalletConnectEnabled.value;
+	}
+}));
+
 describe('wallet-connect.providers', () => {
 	describe('WalletConnectClient', () => {
 		const mockProposal: WalletKitTypes.SessionProposal = {
@@ -85,6 +93,8 @@ describe('wallet-connect.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			mockBtcWalletConnectEnabled.value = true;
 
 			vi.spyOn(WalletKit, 'init').mockResolvedValue(walletKitSpy);
 
@@ -215,6 +225,14 @@ describe('wallet-connect.providers', () => {
 					events: ['bip122_addressesChanged'],
 					accounts: BIP122_MAINNET_CHAINS_KEYS.map((chain) => `${chain}:${mockBtcAddress}`)
 				});
+			});
+
+			it('should not advertise a bip122 namespace when the BTC WalletConnect feature is disabled', async () => {
+				mockBtcWalletConnectEnabled.value = false;
+
+				const supportedNamespaces = await approveAndGetSupportedNamespaces(mockParams);
+
+				expect(supportedNamespaces.bip122).toBeUndefined();
 			});
 
 			// Temporary security workaround: OISY derives a single ECDSA key for all BTC networks, so a
