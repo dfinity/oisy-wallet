@@ -15,7 +15,8 @@ import {
 	mockCreateActiveUserTransactionParams,
 	mockUpdateActiveUserTransactionParams
 } from '$tests/mocks/active-user-transactions.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal2 } from '$tests/mocks/identity.mock';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -24,6 +25,11 @@ vi.mock('$lib/api/backend.api', () => ({
 	deleteActiveUserTransaction: vi.fn(),
 	getActiveUserTransactions: vi.fn()
 }));
+
+const mockIdentity2: Identity = {
+	getPrincipal: () => mockPrincipal2,
+	transformRequest: mockIdentity.transformRequest
+};
 
 describe('active-user-transactions.services', () => {
 	beforeEach(() => {
@@ -86,6 +92,32 @@ describe('active-user-transactions.services', () => {
 
 			expect(get(activeUserTransactionsStore)).toBeUndefined();
 		});
+
+		it('drops a late response from a previous principal after an account switch', async () => {
+			const previousPrincipalTx = { ...mockActiveUserTransaction, id: 'previous-principal' };
+			const currentPrincipalTx = { ...mockActiveUserTransaction, id: 'current-principal' };
+			let resolvePreviousLoad: (
+				transactions: (typeof mockActiveUserTransaction)[]
+			) => void = () => {};
+			vi.spyOn(backendApi, 'getActiveUserTransactions')
+				.mockReturnValueOnce(
+					new Promise((resolve) => {
+						resolvePreviousLoad = resolve;
+					})
+				)
+				.mockResolvedValueOnce([currentPrincipalTx]);
+
+			const previousLoad = loadActiveUserTransactions({ identity: mockIdentity });
+
+			await loadActiveUserTransactions({ identity: mockIdentity2 });
+
+			expect(get(activeUserTransactionsList)).toEqual([currentPrincipalTx]);
+
+			resolvePreviousLoad([previousPrincipalTx]);
+			await previousLoad;
+
+			expect(get(activeUserTransactionsList)).toEqual([currentPrincipalTx]);
+		});
 	});
 
 	describe('createActiveUserTransaction', () => {
@@ -121,6 +153,27 @@ describe('active-user-transactions.services', () => {
 					...mockCreateActiveUserTransactionParams
 				})
 			).rejects.toEqual(mockActiveUserTransactionErrorNotFound);
+			expect(get(activeUserTransactionsList)).toEqual([]);
+		});
+
+		it('drops a late created row from a previous principal after an account switch', async () => {
+			let resolveCreate: (transaction: typeof mockActiveUserTransaction) => void = () => {};
+			vi.spyOn(backendApi, 'createActiveUserTransaction').mockReturnValueOnce(
+				new Promise((resolve) => {
+					resolveCreate = resolve;
+				})
+			);
+
+			const inFlight = createActiveUserTransaction({
+				identity: mockIdentity,
+				...mockCreateActiveUserTransactionParams
+			});
+
+			activeUserTransactionsStore.init(mockIdentity2.getPrincipal());
+
+			resolveCreate(mockActiveUserTransaction);
+			await inFlight;
+
 			expect(get(activeUserTransactionsList)).toEqual([]);
 		});
 	});
