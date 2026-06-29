@@ -93,9 +93,29 @@ export enum WizardStepsLiquidiumSupply {
 	SUPPLYING = 'Supplying'
 }
 
+export enum WizardStepsLiquidiumBorrow {
+	BORROW = 'Borrow',
+	REVIEW = 'Review',
+	BORROWING = 'Borrowing'
+}
+
+export enum WizardStepsLiquidiumWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing'
+}
+
 export enum WizardStepsClaimStakingReward {
 	REVIEW = 'Review',
 	CLAIMING = 'Claiming'
+}
+
+export enum WizardStepsTradingDeposit {
+	DEPOSIT = 'Deposit',
+	TOKENS_LIST = 'Tokens List',
+	FILTER_NETWORKS = 'Filter Networks',
+	REVIEW = 'Review',
+	DEPOSITING = 'Depositing'
 }
 
 export const WizardStepsGetToken = {
