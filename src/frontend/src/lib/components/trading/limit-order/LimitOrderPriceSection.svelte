@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import LimitOrderValueDifference from '$lib/components/trading/limit-order/LimitOrderValueDifference.svelte';
+	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -253,7 +253,7 @@
 			<span class="text-xs text-secondary">{pairView?.quoteSymbol ?? ''}</span>
 		</div>
 		{#if priceNum > 0 && currentValue > 0}
-			<LimitOrderValueDifference crossing={crossing || fillOrKill} value={valueDiff} />
+			<ValueDifference iconPosition="left" muted={!(crossing || fillOrKill)} value={valueDiff} />
 		{/if}
 	</div>
 
