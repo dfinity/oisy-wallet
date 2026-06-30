@@ -109,7 +109,6 @@
 		"@dfinity/internet-identity-playwright": "^3.0.0",
 		"@icp-sdk/bindgen": "^0.2.0",
 		"@playwright/test": "^1.60.0",
-		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.65.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
