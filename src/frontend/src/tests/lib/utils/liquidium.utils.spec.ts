@@ -1,11 +1,13 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
+	liquidiumFreeCollateralUsd,
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
 	liquidiumMaxSupplyApy,
 	liquidiumNetApy,
 	liquidiumNetInterestUsd,
+	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
 	liquidiumResultingLtvPercent,
 	mapLiquidiumMarket,
@@ -246,6 +248,94 @@ describe('liquidium.utils', () => {
 					newBorrowUsd: 0,
 					totalCollateralUsd: 100,
 					weightedLiquidationThresholdBps: 0
+				})
+			).toBe(0);
+		});
+	});
+
+	describe('liquidiumFreeCollateralUsd', () => {
+		it('returns the full collateral when there is no debt', () => {
+			expect(
+				liquidiumFreeCollateralUsd({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 0,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(100_000);
+		});
+
+		it('subtracts the collateral pledged to debt at the liquidation threshold', () => {
+			// debt $20k at 0.8 → reserved 25k → free 75k.
+			expect(
+				liquidiumFreeCollateralUsd({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 20_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBeCloseTo(75_000, 5);
+		});
+
+		it('clamps to 0 and treats debt with a zero threshold as fully reserved', () => {
+			expect(
+				liquidiumFreeCollateralUsd({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 90_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(0);
+			expect(
+				liquidiumFreeCollateralUsd({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 10_000,
+					weightedLiquidationThresholdBps: 0
+				})
+			).toBe(0);
+		});
+	});
+
+	describe('liquidiumProjectedHealthAfterWithdrawPercent', () => {
+		it('stays at 100 when there is no debt', () => {
+			expect(
+				liquidiumProjectedHealthAfterWithdrawPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 0,
+					withdrawUsd: 50_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(100);
+		});
+
+		it('reproduces the current health for a zero withdraw', () => {
+			// ltv 20k/100k = 0.2; health = (1 − 0.2/0.8)×100 = 75.
+			expect(
+				liquidiumProjectedHealthAfterWithdrawPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 20_000,
+					withdrawUsd: 0,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBeCloseTo(75, 5);
+		});
+
+		it('lowers health as collateral is removed', () => {
+			// remaining 50k; ltv 20k/50k = 0.4; health = (1 − 0.4/0.8)×100 = 50.
+			expect(
+				liquidiumProjectedHealthAfterWithdrawPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 20_000,
+					withdrawUsd: 50_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBeCloseTo(50, 5);
+		});
+
+		it('is 0 when the withdraw removes all (or more than all) collateral', () => {
+			expect(
+				liquidiumProjectedHealthAfterWithdrawPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 20_000,
+					withdrawUsd: 100_000,
+					weightedLiquidationThresholdBps: 8_000
 				})
 			).toBe(0);
 		});

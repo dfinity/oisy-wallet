@@ -7,7 +7,7 @@ import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
-import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/icrc-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
@@ -1118,6 +1118,14 @@ export const fetchVeloraDeltaSwap = async ({
 	maxPriorityFeePerGas,
 	swapDetails
 }: SwapVeloraParams): Promise<void> => {
+	// Velora Delta settles by pulling the source token via allowance/permit, which a native coin
+	// (no contract address) can't satisfy without the unimplemented DepositNativeAndPreSign flow.
+	// Native sources are routed to the Market quote upstream (fetchVeloraSwapAmount); fail fast
+	// here so a routing regression surfaces clearly instead of crashing on an undefined address.
+	if (isDefaultEthereumToken(sourceToken)) {
+		throw new Error('Velora Delta swaps do not support native source tokens.');
+	}
+
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
