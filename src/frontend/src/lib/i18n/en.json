@@ -98,7 +98,8 @@
 			"hide_balances": "Hide balances",
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
-			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances."
+			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
+			"notes": "Notes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -117,7 +118,8 @@
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
-			"show_balances": "Show the hidden balances"
+			"show_balances": "Show the hidden balances",
+			"notes": "Open notes"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2469,6 +2471,41 @@
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
 			"no_response": "Sorry, I didn't get a response from the LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Notes",
+			"note": "Note",
+			"add_title": "Add new note",
+			"edit_note": "Edit note",
+			"delete_note": "Delete note",
+			"delete_confirm_text": "This will delete the note '$note'. This action cannot be undone.",
+			"back": "Back",
+			"empty_title": "Your notes are empty",
+			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
+			"empty_add": "Add new note",
+			"add_note": "Add note",
+			"note_label": "Note",
+			"placeholder": "Write a note…",
+			"search_placeholder": "Search note",
+			"no_results": "No notes match your search.",
+			"privacy_info": "Only you can see your notes, stored encrypted in $oisy_short.",
+			"created": "Created $date",
+			"updated": "Updated $date",
+			"created_updated": "Created $created · Updated $updated",
+			"too_long": "Note must be $maxCharacters characters or fewer.",
+			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
+			"decryption_failed": "Couldn't decrypt this note"
+		},
+		"alt": {
+			"edit": "Edit note",
+			"delete": "Delete note"
+		},
+		"error": {
+			"load": "Couldn't load your notes. Please try again.",
+			"save": "Couldn't save your note. Please try again.",
+			"delete": "Couldn't delete your note. Please try again."
 		}
 	}
 }

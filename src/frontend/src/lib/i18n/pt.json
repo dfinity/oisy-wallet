@@ -98,7 +98,8 @@
 			"hide_balances": "Ocultar saldos",
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo privado ativado. Clique [P] para mostrar os seus saldos novamente.",
-			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para mostrar os seus saldos novamente."
+			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para mostrar os seus saldos novamente.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
@@ -117,7 +118,8 @@
 			"refer_a_friend": "Gerar um link de referência para um amigo",
 			"address_book": "Abrir livro de endereços",
 			"hide_balances": "Ocultar os saldos exibidos",
-			"show_balances": "Mostrar os saldos ocultos"
+			"show_balances": "Mostrar os saldos ocultos",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Documentação"
@@ -2469,6 +2471,41 @@
 		"errors": {
 			"unknown": "Desculpe, ocorreu um erro ao obter uma resposta do LLM.",
 			"no_response": "Desculpe, não recebi uma resposta do LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

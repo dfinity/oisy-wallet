@@ -98,7 +98,8 @@
 			"hide_balances": "Ocultar saldos",
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo de privacidad activado. Pulsa [P] para mostrar tus saldos de nuevo.",
-			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos."
+			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Ir a la vista de activos",
@@ -117,7 +118,8 @@
 			"refer_a_friend": "Generar un enlace de referido para un amigo",
 			"address_book": "agenda",
 			"hide_balances": "Ocultar saldos ",
-			"show_balances": "Mostrar saldos"
+			"show_balances": "Mostrar saldos",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2469,6 +2471,41 @@
 		"errors": {
 			"unknown": "",
 			"no_response": ""
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

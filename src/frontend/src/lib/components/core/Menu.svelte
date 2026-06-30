@@ -18,6 +18,7 @@
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
+	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
 	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
@@ -37,6 +38,7 @@
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
+		NAVIGATION_MENU_NOTES_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_SCANNER_BUTTON,
 		NAVIGATION_MENU_PAY_BUTTON,
@@ -91,6 +93,7 @@
 	);
 
 	const addressModalId = Symbol();
+	const notesModalId = Symbol();
 	const referralModalId = Symbol();
 	const universalScannerModalId = Symbol();
 	const payDialogModalId = Symbol();
@@ -157,6 +160,15 @@
 			>
 				<IconUsersRound size="20" />
 				{$i18n.navigation.text.address_book}
+			</ButtonMenu>
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.notes}
+				onclick={() => modalStore.openNotes(notesModalId)}
+				testId={NAVIGATION_MENU_NOTES_BUTTON}
+			>
+				<IconNotebook size="20" />
+				{$i18n.navigation.text.notes}
 			</ButtonMenu>
 
 			<ButtonMenu
