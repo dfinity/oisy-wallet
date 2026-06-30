@@ -142,7 +142,8 @@
 <WizardModal
 	bind:this={modal}
 	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING ||
-		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
+		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS ||
+		currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 	onClose={close}
 	{steps}
 	bind:currentStep
