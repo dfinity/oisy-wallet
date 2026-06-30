@@ -92,26 +92,6 @@ export const savePersonalNote = async ({
 	return entry;
 };
 
-/**
- * Re-saves a previously deleted note verbatim (for Undo): same id and the same
- * `created_at_ns` / `updated_at_ns`, so it returns to its original sort position
- * as if the delete never happened.
- */
-export const restorePersonalNote = async ({
-	identity,
-	note
-}: {
-	identity: Identity;
-	note: PersonalNoteUi;
-}): Promise<void> => {
-	const { id, ...envelope } = note;
-	const encrypted = await encryptPersonalNote({ envelope, noteId: id, identity });
-	await setPersonalNoteApi({ identity, note_id: id, encrypted_note: encrypted });
-
-	personalNotesStore.upsert(note);
-	await refreshCount(identity);
-};
-
 export const deletePersonalNote = async ({
 	identity,
 	id
