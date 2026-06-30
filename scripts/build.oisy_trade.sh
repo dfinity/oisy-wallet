@@ -19,14 +19,17 @@ print_help() {
 OISY_TRADE_BUILDENV="$DFX_NETWORK"
 export OISY_TRADE_BUILDENV
 
-# Candid is pinned to oisy-trade `main` (exposes the full order interface,
-# including the time-in-force / fill-or-kill parameter the feature targets).
+# Candid + Wasm pinned to a tagged oisy-trade release (kong/icp_swap-style).
+# v0.2.0 is the first release exposing the time-in-force / fill-or-kill
+# parameter the feature targets, so candid and wasm now come from one release
+# (no more candid-on-a-commit + older-wasm split). Bump OISY_TRADE_RELEASE to
+# upgrade — the asset URLs derive from it.
+OISY_TRADE_RELEASE="oisy_trade_canister-v0.2.0"
+OISY_TRADE_RELEASE_URL="https://github.com/dfinity/oisy-trade/releases/download/${OISY_TRADE_RELEASE}"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="https://raw.githubusercontent.com/dfinity/oisy-trade/7e7967a41d31785324d9112ecc0dd8b85dc39abe/canister/oisy_trade.did"
-# Wasm is pinned to the latest tagged release (the only published build); only
-# used for local replica deploys — staging/ic resolve via 'remote.id' in dfx.json.
+CANDID_URL="${OISY_TRADE_RELEASE_URL}/oisy_trade.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-WASM_URL="https://github.com/dfinity/oisy-trade/releases/download/oisy_trade_canister-v0.1.0/oisy_trade_canister.wasm.gz"
+WASM_URL="${OISY_TRADE_RELEASE_URL}/oisy_trade_canister.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.oisy_trade.candid dfx.json)"
 WASM_FILE="$(jq -r .canisters.oisy_trade.wasm dfx.json)"

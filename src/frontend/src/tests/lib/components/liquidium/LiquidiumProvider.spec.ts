@@ -53,6 +53,7 @@ describe('LiquidiumProvider', () => {
 		totalBorrowedUsd: 0,
 		netValueUsd: 1000,
 		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
 		healthFactorPercent: 73
 	};
 
@@ -61,22 +62,22 @@ describe('LiquidiumProvider', () => {
 	});
 
 	it('renders the markets and the positions section when data is present', () => {
-		liquidiumStore.set({ markets: [market], portfolio });
+		liquidiumStore.set({ markets: [market], portfolio, assetPrices: {} });
 
 		const { container } = render(LiquidiumProvider);
 
 		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
-		expect(container).toHaveTextContent(en.liquidium.text.my_positions);
+		expect(container).toHaveTextContent(en.liquidium.text.supplied);
 		expect(container).toHaveTextContent(en.liquidium.text.markets);
 		expect(container).toHaveTextContent('BTC');
 	});
 
 	it('hides the positions section when there are no reserves', () => {
-		liquidiumStore.set({ markets: [market], portfolio: null });
+		liquidiumStore.set({ markets: [market], portfolio: null, assetPrices: {} });
 
 		const { container } = render(LiquidiumProvider);
 
 		expect(container).toHaveTextContent(en.liquidium.text.markets);
-		expect(container).not.toHaveTextContent(en.liquidium.text.my_positions);
+		expect(container).not.toHaveTextContent(en.liquidium.text.supplied);
 	});
 });

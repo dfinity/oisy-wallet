@@ -1,6 +1,14 @@
 import type {
+	DepositRequest,
+	DepositResponse,
+	GetOrderBookDepthRequest,
+	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
+	OrderBookDepth,
+	OrderBookTicker,
+	OrderId,
 	Token,
+	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
@@ -52,6 +60,59 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 
 		// `Err` is `{ kind, message }`; prefer the canister's message, else the
 		// single `kind` discriminant (a variant, so exactly one key — deterministic).
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	getOrderBookTicker = async (pair: TradingPair): Promise<OrderBookTicker> => {
+		const { get_order_book_ticker } = this.caller({ certified: false });
+
+		const response = await get_order_book_ticker(pair);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	getOrderBookDepth = async (request: GetOrderBookDepthRequest): Promise<OrderBookDepth> => {
+		const { get_order_book_depth } = this.caller({ certified: false });
+
+		const response = await get_order_book_depth(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	addLimitOrder = async (request: LimitOrderRequest): Promise<OrderId> => {
+		// `add_limit_order` mutates the order book, so it must run on the certified service.
+		const { add_limit_order } = this.caller({ certified: true });
+
+		const response = await add_limit_order(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		const { kind, message } = response.Err;
+		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+	};
+
+	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
+		const { deposit } = this.caller({ certified: true });
+
+		const response = await deposit(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
 		const { kind, message } = response.Err;
 		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
 	};

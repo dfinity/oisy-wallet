@@ -1,0 +1,100 @@
+<script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
+	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
+	import type { LiquidiumBorrowPreview } from '$lib/services/liquidium-borrow.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { LendBorrowProvider } from '$lib/types/lend-borrow';
+	import type { LiquidiumMarket } from '$lib/types/liquidium';
+	import type { OptionAmount } from '$lib/types/send';
+	import { formatStakeApyNumber } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		market: LiquidiumMarket;
+		borrowPrice: number;
+		preview: LiquidiumBorrowPreview;
+		amount: OptionAmount;
+		onBack: () => void;
+		onConfirm: () => void;
+	}
+
+	let { market, borrowPrice, preview, amount, onBack, onConfirm }: Props = $props();
+
+	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
+
+	let borrowToken = $derived(LIQUIDIUM_ASSET_TOKENS[market.asset]);
+	let healthLevel = $derived(preview.healthLevel);
+</script>
+
+<ContentWithToolbar>
+	{#if nonNullish(borrowToken)}
+		<SendTokenReview exchangeRate={borrowPrice} sendAmount={amount} token={borrowToken}>
+			{#snippet subtitle()}{$i18n.liquidium.text.borrow_review_subtitle}{/snippet}
+		</SendTokenReview>
+	{/if}
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.borrow_apy}{/snippet}
+		{#snippet mainValue()}
+			<span class="text-warning-primary">{formatStakeApyNumber(market.borrowApy)}%</span>
+		{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.resulting_ltv}{/snippet}
+		{#snippet mainValue()}{preview.resultingLtvPercent.toFixed(1)}%{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.projected_health_factor}{/snippet}
+		{#snippet mainValue()}
+			<span
+				class:text-error-primary={healthLevel === 'critical'}
+				class:text-success-primary={healthLevel === 'healthy'}
+				class:text-warning-primary={healthLevel === 'at-risk'}
+			>
+				{Math.round(preview.projectedHealthPercent)}%
+			</span>
+		{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.funds_delivered_to}{/snippet}
+		{#snippet mainValue()}{replaceOisyPlaceholders(
+				$i18n.liquidium.text.your_oisy_address
+			)}{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}{$i18n.liquidium.text.provider}{/snippet}
+		{#snippet mainValue()}{liquidium.name}{/snippet}
+	</ModalValue>
+
+	{#if healthLevel === 'critical'}
+		<MessageBox level="error" styleClass="mt-4">
+			{$i18n.liquidium.text.borrow_high_risk_warning}
+		</MessageBox>
+	{:else if healthLevel === 'at-risk'}
+		<MessageBox level="warning" styleClass="mt-4">
+			{$i18n.liquidium.text.borrow_at_risk_warning}
+		</MessageBox>
+	{/if}
+
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onBack} />
+
+			<Button onclick={onConfirm}>
+				{$i18n.liquidium.text.action_borrow}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
+</ContentWithToolbar>
