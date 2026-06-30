@@ -73,16 +73,52 @@ export POCKET_IC_MUTE_SERVER=1
 
 # Run tests
 
-# Each integration test spins up a PocketIC instance holding several canisters,
-# so peak memory scales with test parallelism. On CI's 4-vCPU / 16 GB runners,
-# parallelism can exhaust memory and crash the PocketIC server mid-run
-# (connection reset -> SIGABRT). With the larger ic-vetkeys backend wasm, even
-# 2 threads crashed near the end of the run (~instance 191 of ~194), so run the
-# CI suite single-threaded — overridable via RUST_TEST_THREADS — while leaving
-# local runs at full speed.
-if [ -n "${CI:-}" ]; then
-  export RUST_TEST_THREADS="${RUST_TEST_THREADS:-1}"
-fi
+# Each integration test spins up a PocketIC instance holding several canisters.
+# The PocketIC server's memory grows with every instance it has ever served
+# (deleted instances are not fully reclaimed), so running the whole `it` suite
+# in a single process eventually OOM-kills the server mid-run (connection reset
+# -> SIGABRT) — and the larger the backend wasm grows, the sooner it dies.
+#
+# On CI, bound that growth by running the integration suite in chunks: each
+# chunk is its own `cargo test --test it` process with a fresh PocketIC server,
+# so peak server memory is capped at one chunk's worth of instances. Explicit
+# cargo arguments (e.g. `-- --ignored candid`) and local runs keep the original
+# single-process behaviour.
+run_it_in_chunks() {
+  local chunk_size="${BACKEND_IT_TEST_CHUNK_SIZE:-40}"
+  local tests=()
+  local line
+  while IFS= read -r line; do
+    tests+=("${line%: test}")
+  done < <(cargo test -p backend --test it -- --list 2>/dev/null | grep ': test$')
 
-echo "Running backend integration tests."
-cargo test -p backend "${@}"
+  if [ "${#tests[@]}" -eq 0 ]; then
+    echo "Could not list integration tests; running them in a single process." >&2
+    cargo test -p backend --test it
+    return
+  fi
+
+  echo "Running ${#tests[@]} integration tests in chunks of ${chunk_size}."
+  local status=0 i
+  for ((i = 0; i < ${#tests[@]}; i += chunk_size)); do
+    local chunk=("${tests[@]:i:chunk_size}")
+    echo "::group::it tests $((i + 1))-$((i + ${#chunk[@]})) / ${#tests[@]}"
+    cargo test -p backend --test it -- --exact "${chunk[@]}" || status=1
+    echo "::endgroup::"
+  done
+  return "$status"
+}
+
+echo "Running backend tests."
+if [ -n "${CI:-}" ] && [ "$#" -eq 0 ]; then
+  # Single-threaded within a chunk keeps peak live memory low; chunking caps the
+  # cumulative server growth that single-threading alone could not. Overridable
+  # via RUST_TEST_THREADS.
+  export RUST_TEST_THREADS="${RUST_TEST_THREADS:-1}"
+  rc=0
+  cargo test -p backend --lib || rc=1
+  run_it_in_chunks || rc=1
+  exit "$rc"
+else
+  cargo test -p backend "${@}"
+fi
