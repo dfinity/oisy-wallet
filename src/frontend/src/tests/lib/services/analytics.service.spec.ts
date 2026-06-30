@@ -500,4 +500,116 @@ describe('plausible analytics service', () => {
 
 		consoleDebugSpy.mockRestore();
 	});
+
+	describe('cfs_sign tracking', () => {
+		const lastCfsSignProps = () => {
+			const call = trackMock.mock.calls.findLast(([name]) => name === 'cfs_sign');
+			return call?.[1]?.props as Record<string, string> | undefined;
+		};
+
+		it('emits a success cfs_sign event with the method, status and duration props', async () => {
+			const { withCfsSignTracking, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			const result = await withCfsSignTracking({
+				method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_TRANSACTION,
+				fn: () => Promise.resolve('signature')
+			});
+
+			expect(result).toBe('signature');
+
+			const props = lastCfsSignProps();
+
+			expect(props).toMatchObject({
+				event_context: 'signer',
+				event_subcontext: 'eth_sign_transaction',
+				result_status: 'success',
+				token_network: 'eth'
+			});
+			expect(props?.result_duration_in_seconds).toEqual(expect.any(String));
+			expect(props?.result_duration_in_seconds_rounded).toEqual(expect.any(String));
+			expect(props).not.toHaveProperty('result_error');
+			expect(props).not.toHaveProperty('result_error_severity');
+		});
+
+		it('derives token_network from the method prefix and omits it for chain-agnostic methods', async () => {
+			const { withCfsSignTracking, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			await withCfsSignTracking({
+				method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_SEND,
+				fn: () => Promise.resolve('ok')
+			});
+
+			expect(lastCfsSignProps()?.token_network).toBe('btc');
+
+			await withCfsSignTracking({
+				method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.SCHNORR_SIGN,
+				fn: () => Promise.resolve('ok')
+			});
+
+			expect(lastCfsSignProps()?.token_network).toBe('sol');
+
+			await withCfsSignTracking({
+				method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.GENERIC_SIGN_WITH_ECDSA,
+				fn: () => Promise.resolve('ok')
+			});
+
+			expect(lastCfsSignProps()).not.toHaveProperty('token_network');
+		});
+
+		it('emits an error cfs_sign event with severity=blocker for a signer payment error and re-throws', async () => {
+			const { withCfsSignTracking, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } = await import('$lib/enums/plausible');
+			const { SignerCanisterPaymentError } = await import('$lib/canisters/signer.errors');
+
+			await initPlausibleAnalytics();
+
+			const err = new SignerCanisterPaymentError({ UnsupportedPaymentType: null });
+
+			await expect(
+				withCfsSignTracking({
+					method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_TRANSACTION,
+					fn: () => Promise.reject(err)
+				})
+			).rejects.toBe(err);
+
+			const props = lastCfsSignProps();
+
+			expect(props).toMatchObject({
+				event_subcontext: 'eth_sign_transaction',
+				result_status: 'error',
+				result_error: err.message,
+				result_error_text: err.message,
+				result_error_severity: 'blocker'
+			});
+		});
+
+		it('emits severity=critical for a non-payment signer error', async () => {
+			const { withCfsSignTracking, initPlausibleAnalytics } =
+				await import('$lib/services/analytics.services');
+			const { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } = await import('$lib/enums/plausible');
+
+			await initPlausibleAnalytics();
+
+			await expect(
+				withCfsSignTracking({
+					method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_PREHASH,
+					fn: () => Promise.reject(new Error('Signing error'))
+				})
+			).rejects.toThrow('Signing error');
+
+			expect(lastCfsSignProps()).toMatchObject({
+				result_status: 'error',
+				result_error_severity: 'critical'
+			});
+		});
+	});
 });

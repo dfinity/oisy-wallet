@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { isSignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
@@ -8,10 +9,12 @@ import {
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
 	type PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES,
+	PLAUSIBLE_EVENT_RESULT_SEVERITIES,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	type PLAUSIBLE_EVENT_SUBCONTEXT_CFS,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
 import en from '$lib/i18n/en.json';
@@ -19,6 +22,7 @@ import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
@@ -248,4 +252,93 @@ export const buildLearnMoreEvent = ({
 			source_path
 		}
 	};
+};
+
+// Derive the chain the signer method belongs to from its name prefix, so dashboards
+// can group the outage by network without parsing the method. `generic_*` calls are
+// chain-agnostic and carry no `token_network`.
+const cfsSignTokenNetwork = (method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS): string | undefined =>
+	method.startsWith('eth_')
+		? 'eth'
+		: method.startsWith('btc_')
+			? 'btc'
+			: method.startsWith('schnorr_')
+				? 'sol'
+				: undefined;
+
+/**
+ * Emit a single `cfs_sign` event for a paid chain-fusion-signer call.
+ *
+ * Fires on both success and error. On error it carries the mapped message, the full
+ * raw error text, and a severity: `blocker` when OISY's backend cannot pay the signer
+ * (a {@link isSignerCanisterPaymentError} — the cycles-outage incident this event is
+ * designed to surface), `critical` otherwise.
+ */
+export const trackCfsSign = ({
+	method,
+	status,
+	durationSeconds,
+	err
+}: {
+	method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS;
+	status: PLAUSIBLE_EVENT_RESULT_STATUSES;
+	durationSeconds: number;
+	err?: unknown;
+}) => {
+	const tokenNetwork = cfsSignTokenNetwork(method);
+
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.CFS_SIGN,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.SIGNER,
+			event_subcontext: method,
+			result_status: status,
+			result_duration_in_seconds: durationSeconds.toString(),
+			result_duration_in_seconds_rounded: Math.round(durationSeconds).toString(),
+			...(nonNullish(tokenNetwork) && { token_network: tokenNetwork }),
+			...(nonNullish(err) && {
+				result_error: (err as Error).message,
+				result_error_text: errorDetailToString(err) ?? '',
+				result_error_severity: isSignerCanisterPaymentError(err)
+					? PLAUSIBLE_EVENT_RESULT_SEVERITIES.BLOCKER
+					: PLAUSIBLE_EVENT_RESULT_SEVERITIES.CRITICAL
+			})
+		}
+	});
+};
+
+/**
+ * Wrap a paid chain-fusion-signer call so it emits a {@link trackCfsSign} event with
+ * its measured duration on both success and error. Always re-throws so existing error
+ * handling (and the user-facing toast) still runs — tracking must never swallow the error.
+ */
+export const withCfsSignTracking = async <T>({
+	method,
+	fn
+}: {
+	method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS;
+	fn: () => Promise<T>;
+}): Promise<T> => {
+	const start = performance.now();
+
+	try {
+		const result = await fn();
+
+		trackCfsSign({
+			method,
+			status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			durationSeconds: (performance.now() - start) / 1000
+		});
+
+		return result;
+	} catch (err: unknown) {
+		trackCfsSign({
+			method,
+			status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			durationSeconds: (performance.now() - start) / 1000,
+			err
+		});
+
+		throw err;
+	}
 };

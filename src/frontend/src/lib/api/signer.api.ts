@@ -9,6 +9,8 @@ import type { EthAddress } from '$eth/types/address';
 import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENT_SUBCONTEXT_CFS } from '$lib/enums/plausible';
+import { withCfsSignTracking } from '$lib/services/analytics.services';
 import type {
 	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
@@ -20,26 +22,32 @@ import { assertNonNullish } from '@dfinity/utils';
 
 const signerApi = new CanisterApi<SignerCanister>();
 
-export const getBtcAddress = async ({
+export const getBtcAddress = ({
 	identity,
 	network
 }: CanisterApiFunctionParams<{
 	network: BitcoinNetwork;
-}>): Promise<BtcAddress> => {
-	const { getBtcAddress } = await signerCanister({ identity });
+}>): Promise<BtcAddress> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_ADDRESS,
+		fn: async () => {
+			const { getBtcAddress } = await signerCanister({ identity });
 
-	return getBtcAddress({ network });
-};
+			return getBtcAddress({ network });
+		}
+	});
 
-export const getEthAddress = async ({
-	identity
-}: CanisterApiFunctionParams): Promise<EthAddress> => {
-	const { getEthAddress } = await signerCanister({ identity });
+export const getEthAddress = ({ identity }: CanisterApiFunctionParams): Promise<EthAddress> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_ADDRESS,
+		fn: async () => {
+			const { getEthAddress } = await signerCanister({ identity });
 
-	return getEthAddress();
-};
+			return getEthAddress();
+		}
+	});
 
-export const getBtcBalance = async ({
+export const getBtcBalance = ({
 	identity,
 	network,
 	canisterId,
@@ -47,87 +55,123 @@ export const getBtcBalance = async ({
 }: CanisterApiFunctionParams<{
 	network: BitcoinNetwork;
 	minConfirmations?: number;
-}>): Promise<bigint> => {
-	const { getBtcBalance } = await signerCanister({ identity, canisterId });
+}>): Promise<bigint> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_BALANCE,
+		fn: async () => {
+			const { getBtcBalance } = await signerCanister({ identity, canisterId });
 
-	return getBtcBalance({ network, minConfirmations });
-};
+			return getBtcBalance({ network, minConfirmations });
+		}
+	});
 
-export const signTransaction = async ({
+export const signTransaction = ({
 	transaction,
 	identity
 }: CanisterApiFunctionParams<{
 	transaction: EthSignTransactionRequest;
-}>): Promise<string> => {
-	const { signTransaction } = await signerCanister({ identity });
+}>): Promise<string> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_TRANSACTION,
+		fn: async () => {
+			const { signTransaction } = await signerCanister({ identity });
 
-	return signTransaction({ transaction });
-};
+			return signTransaction({ transaction });
+		}
+	});
 
-export const signBtc = async ({
+export const signBtc = ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<SendBtcParams>): Promise<SignBtcResponse> => {
-	const { signBtc } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SignBtcResponse> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_SIGN,
+		fn: async () => {
+			const { signBtc } = await signerCanister({ identity });
 
-	return signBtc(params);
-};
+			return signBtc(params);
+		}
+	});
 
-export const signMessage = async ({
+export const signMessage = ({
 	message,
 	identity
-}: CanisterApiFunctionParams<{ message: string }>): Promise<string> => {
-	const { personalSign } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<{ message: string }>): Promise<string> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_PERSONAL_SIGN,
+		fn: async () => {
+			const { personalSign } = await signerCanister({ identity });
 
-	return personalSign({ message });
-};
+			return personalSign({ message });
+		}
+	});
 
-export const signPrehash = async ({
+export const signPrehash = ({
 	hash,
 	identity
 }: CanisterApiFunctionParams<{
 	hash: string;
-}>): Promise<string> => {
-	const { signPrehash } = await signerCanister({ identity });
+}>): Promise<string> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.ETH_SIGN_PREHASH,
+		fn: async () => {
+			const { signPrehash } = await signerCanister({ identity });
 
-	return signPrehash({ hash });
-};
+			return signPrehash({ hash });
+		}
+	});
 
-export const sendBtc = async ({
+export const sendBtc = ({
 	identity,
 	...params
-}: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> => {
-	const { sendBtc } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<SendBtcParams>): Promise<SendBtcResponse> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.BTC_CALLER_SEND,
+		fn: async () => {
+			const { sendBtc } = await signerCanister({ identity });
 
-	return sendBtc(params);
-};
+			return sendBtc(params);
+		}
+	});
 
-export const getSchnorrPublicKey = async ({
+export const getSchnorrPublicKey = ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array> => {
-	const { getSchnorrPublicKey } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.SCHNORR_PUBLIC_KEY,
+		fn: async () => {
+			const { getSchnorrPublicKey } = await signerCanister({ identity });
 
-	return await getSchnorrPublicKey(rest);
-};
+			return await getSchnorrPublicKey(rest);
+		}
+	});
 
-export const signWithSchnorr = async ({
+export const signWithSchnorr = ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array> => {
-	const { signWithSchnorr } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.SCHNORR_SIGN,
+		fn: async () => {
+			const { signWithSchnorr } = await signerCanister({ identity });
 
-	return await signWithSchnorr(rest);
-};
+			return await signWithSchnorr(rest);
+		}
+	});
 
-export const genericSignWithEcdsa = async ({
+export const genericSignWithEcdsa = ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> => {
-	const { genericSignWithEcdsa } = await signerCanister({ identity });
+}: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> =>
+	withCfsSignTracking({
+		method: PLAUSIBLE_EVENT_SUBCONTEXT_CFS.GENERIC_SIGN_WITH_ECDSA,
+		fn: async () => {
+			const { genericSignWithEcdsa } = await signerCanister({ identity });
 
-	return await genericSignWithEcdsa(rest);
-};
+			return await genericSignWithEcdsa(rest);
+		}
+	});
 
 const signerCanister = async ({
 	identity,

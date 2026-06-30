@@ -27,6 +27,12 @@ export class SignerCanisterPaymentError extends CanisterInternalError {
 	}
 }
 
+// A `SignerCanisterPaymentError` means OISY's backend cannot pay the chain-fusion
+// signer for the call (e.g. it is out of cycles on the cycles ledger) — every
+// `PaymentError` variant maps to "signer temporarily unavailable", not a user error.
+export const isSignerCanisterPaymentError = (err: unknown): boolean =>
+	err instanceof SignerCanisterPaymentError;
+
 export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);

@@ -20,6 +20,7 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
+	CFS_SIGN = 'cfs_sign',
 	ONRAMPER_OPEN = 'onramper_open'
 }
 
@@ -74,6 +75,22 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 	ACCOUNTS = 'accounts',
 	CONSENT_MESSAGE = 'consent_message',
 	CALL_CANISTER = 'call_canister'
+}
+
+// Chain-fusion-signer method names carried on each `cfs_sign` event so the
+// outage can be broken down by which paid signer call failed.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_CFS {
+	ETH_ADDRESS = 'eth_address',
+	ETH_SIGN_TRANSACTION = 'eth_sign_transaction',
+	ETH_SIGN_PREHASH = 'eth_sign_prehash',
+	ETH_PERSONAL_SIGN = 'eth_personal_sign',
+	BTC_CALLER_ADDRESS = 'btc_caller_address',
+	BTC_CALLER_BALANCE = 'btc_caller_balance',
+	BTC_CALLER_SIGN = 'btc_caller_sign',
+	BTC_CALLER_SEND = 'btc_caller_send',
+	SCHNORR_PUBLIC_KEY = 'schnorr_public_key',
+	SCHNORR_SIGN = 'schnorr_sign',
+	GENERIC_SIGN_WITH_ECDSA = 'generic_sign_with_ecdsa'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
@@ -144,6 +161,13 @@ export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
 	ERROR = 'error',
 	CANCEL = 'cancel',
 	EXECUTING = 'executing'
+}
+
+export enum PLAUSIBLE_EVENT_RESULT_SEVERITIES {
+	BLOCKER = 'blocker',
+	CRITICAL = 'critical',
+	MAJOR = 'major',
+	MINOR = 'minor'
 }
 
 export enum PLAUSIBLE_EVENT_TYPES_SIGNER {

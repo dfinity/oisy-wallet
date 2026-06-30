@@ -58,6 +58,22 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
 
+### Chain-fusion-signer call tracking (`cfs_sign`)
+
+Every paid chain-fusion-signer call fires a `cfs_sign` Plausible event on **both** success and error. The calls are wrapped at the single API chokepoint `src/frontend/src/lib/api/signer.api.ts` via the `withCfsSignTracking()` helper, so address/balance reads as well as the signing operations (ETH transaction / prehash / personal-sign, BTC sign / send, Schnorr, generic ECDSA) are all covered.
+
+| Attribute                                | Value                                                                                                                                                          |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `event_context`                          | `signer` (`PLAUSIBLE_EVENT_CONTEXTS.SIGNER`)                                                                                                                   |
+| `event_subcontext`                       | the called signer method (`PLAUSIBLE_EVENT_SUBCONTEXT_CFS`, e.g. `eth_sign_transaction`)                                                                       |
+| `result_status`                          | `success` / `error`                                                                                                                                            |
+| `result_duration_in_seconds`(`_rounded`) | measured wall-clock duration of the call                                                                                                                       |
+| `token_network`                          | derived from the method prefix (`eth` / `btc` / `sol`); omitted for chain-agnostic generic calls                                                               |
+| `result_error` / `result_error_text`     | mapped message / full raw error text (error only)                                                                                                              |
+| `result_error_severity`                  | `blocker` when OISY's backend cannot pay the signer (it is out of cycles — a `SignerCanisterPaymentError`); `critical` for any other signer error (error only) |
+
+The `blocker` severity makes the backend-out-of-cycles outage — which blocks signing for **every** user — visible on dashboards before support tickets arrive. Tracking is fire-and-forget: `withCfsSignTracking` always re-throws so it never swallows the underlying error or interrupts a send.
+
 ---
 
 ## Exchange-rate sourcing
