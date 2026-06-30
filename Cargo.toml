@@ -35,7 +35,7 @@ lazy_static = "1.5"
 # See:
 # Server version: https://github.com/dfinity/pocketic/releases/tag/12.0.0
 # Library version: https://docs.rs/pocket-ic/12.0.0
-pocket-ic = "13.0.0"
+pocket-ic = "14.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
 tiny-keccak = { version = "2.0", features = ["keccak"] }
