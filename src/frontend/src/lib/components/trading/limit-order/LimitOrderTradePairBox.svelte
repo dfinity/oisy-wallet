@@ -210,7 +210,7 @@
 		</div>
 		<div class="mt-1.5 flex items-center gap-2">
 			<span class="w-full text-xl text-secondary">
-				{quoteAmount > 0 ? quoteAmount : '—'}
+				{quoteAmount > 0 ? quoteAmount : '-'}
 			</span>
 			<LimitOrderTokenPill
 				disabled={!nonNullish(baseSymbol)}

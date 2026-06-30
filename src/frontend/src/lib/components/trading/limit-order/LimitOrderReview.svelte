@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -124,7 +125,7 @@
 		<div class="border-t border-disabled px-3.5 py-3">
 			<div class="mb-1 text-xs text-secondary">{quoteLabel}</div>
 			<div class="text-xl font-medium text-primary">
-				{quoteAmount > 0 ? quoteAmount : '—'}
+				{quoteAmount > 0 ? quoteAmount : '-'}
 				{quote}
 			</div>
 		</div>
@@ -161,7 +162,7 @@
 								$quote: quote,
 								$base: base
 							})
-						: '—'}
+						: '-'}
 				</span>
 			</div>
 			<div class="flex items-center justify-between text-xs">
@@ -202,7 +203,7 @@
 	</ModalValue>
 
 	{#if severe}
-		<div class="mt-4">
+		<div class="mt-4" transition:slide>
 			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
 					<Checkbox

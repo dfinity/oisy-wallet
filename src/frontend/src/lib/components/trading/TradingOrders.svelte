@@ -31,7 +31,7 @@
 			{#if $oisyTradeActiveOrders.length === 0}
 				<p class="py-2 text-tertiary">{$i18n.trading.orders.empty_active}</p>
 			{:else}
-				<ul class="flex flex-col">
+				<ul class="flex flex-col list-none">
 					{#each $oisyTradeActiveOrders as order (order.id)}
 						<li><TradingOrderRow {order} /></li>
 					{/each}
@@ -41,7 +41,7 @@
 			{#if $oisyTradeHistoryOrders.length === 0}
 				<p class="py-2 text-tertiary">{$i18n.trading.orders.empty_history}</p>
 			{:else}
-				<ul class="flex flex-col">
+				<ul class="flex flex-col list-none">
 					{#each $oisyTradeHistoryOrders as order (order.id)}
 						<li><TradingOrderRow {order} /></li>
 					{/each}

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 	import LimitOrderRouting from '$lib/components/trading/limit-order/LimitOrderRouting.svelte';
@@ -191,7 +192,9 @@
 				</button>
 			</div>
 			{#if fokHelpVisible}
-				<p class="mt-2 text-xs text-tertiary">{$i18n.trading.limit_order.fok_help}</p>
+				<p class="mt-2 text-xs text-tertiary" transition:slide
+					>{$i18n.trading.limit_order.fok_help}</p
+				>
 			{/if}
 		</div>
 
