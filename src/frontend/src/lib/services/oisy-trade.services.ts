@@ -15,7 +15,10 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 		return;
 	}
 
+	const principal = identity.getPrincipal();
 	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
+
+	oisyTradeStore.init(principal);
 
 	try {
 		const [pairs, supportedTokens, balances] = await Promise.all([
@@ -24,7 +27,7 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 			getBalances({ identity, nullishIdentityErrorMessage })
 		]);
 
-		oisyTradeStore.set({ pairs, supportedTokens, balances });
+		oisyTradeStore.setForPrincipal({ principal, data: { pairs, supportedTokens, balances } });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
