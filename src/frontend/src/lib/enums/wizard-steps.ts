@@ -137,3 +137,11 @@ export enum WizardStepsScanner {
 	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
 	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
 }
+
+export enum WizardStepsLimitOrder {
+	FORM = 'Form',
+	BASE_TOKEN = 'Base Token',
+	QUOTE_TOKEN = 'Quote Token',
+	REVIEW = 'Review',
+	PLACING = 'Placing'
+}
