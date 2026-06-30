@@ -1,14 +1,18 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
+	import LiquidiumWithdrawModal from '$lib/components/liquidium/withdraw/LiquidiumWithdrawModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { modalLiquidiumWithdraw } from '$lib/derived/modal.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
@@ -18,6 +22,8 @@
 	}
 
 	let { reserve }: Props = $props();
+
+	const modalId = Symbol();
 
 	let token = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
 
@@ -54,7 +60,7 @@
 		{/snippet}
 
 		{#snippet title()}
-			<span class="text-sm sm:text-lg">{$i18n.liquidium.text.supplied} {reserve.asset}</span>
+			<span class="text-sm sm:text-lg">{reserve.asset}</span>
 		{/snippet}
 
 		{#snippet description()}
@@ -86,5 +92,22 @@
 				{reserve.asset}
 			</span>
 		{/snippet}
+
+		{#snippet action()}
+			<span class="ml-2 flex">
+				<Button
+					colorStyle="secondary-light"
+					onclick={() => modalStore.openLiquidiumWithdraw(modalId)}
+					paddingSmall
+				>
+					{$i18n.liquidium.text.action_withdraw}
+				</Button>
+			</span>
+		{/snippet}
 	</LogoButton>
+
+	<!-- Outside LogoButton's <button> to keep valid HTML. -->
+	{#if $modalLiquidiumWithdraw && $modalStore?.id === modalId}
+		<LiquidiumWithdrawModal {reserve} />
+	{/if}
 </div>

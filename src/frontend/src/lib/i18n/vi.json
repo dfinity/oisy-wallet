@@ -223,17 +223,17 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Mới thêm",
+			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Trò chơi",
-			"nft": "",
-			"rwa": "",
-			"social_media": "Mạng xã hội",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Mạng xã hội",
 			"staking": "Staking",
-			"tools": "Công cụ",
-			"walletconnect": "WalletConnect"
+			"tools": "Công cụ"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +254,6 @@
 				"carousel": {
 					"text": "OpenChat - tin nhắn bảo mật",
 					"call_to_action": "Hiển thị thêm"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Xác minh danh tính duy nhất cho các tương tác kỹ thuật số đáng tin cậy.",
-				"call_to_action": "Mở DecideID",
-				"stats": "Hơn 50.000 yêu cầu",
-				"description": "Decide ID là trung tâm của hệ thống Decide AI, đảm bảo sự tin cậy và bảo mật thông qua phương pháp Xác minh danh tính - Proof of Personhood (PoP) độc đáo của nó. Khi bạn tham gia, bạn sẽ trải qua một quá trình xác minh trong đó bạn cung cấp nhiều bằng chứng và hoàn thành một thử thách đặc biệt để xác nhận danh tính của mình. Điều này đảm bảo rằng mọi người dùng đều là thật, duy nhất và không phải là bot. ID chính của bạn, một định danh duy nhất trên chuỗi, được tạo trong quá trình này. Nó có thể được sử dụng trên các ứng dụng khác nhau yêu cầu xác minh nhân thân, đảm bảo tích hợp an toàn và liền mạch vào quy trình đăng ký hoặc đăng nhập của bất kỳ ứng dụng nào. Ngoài ra, việc sử dụng các bằng chứng không kiến thức có nghĩa là dữ liệu cá nhân của bạn, như thông tin sinh trắc học, vẫn được bảo mật và an toàn.<br/><br/>Với Decide ID, hãy tận hưởng một cách linh hoạt, an toàn và ưu tiên quyền riêng tư để xác minh và tương tác trực tuyến.",
-				"carousel": {
-					"text": "Tận hưởng xác thực và tương tác online một cách bảo mật",
-					"call_to_action": "Bạn có hứng thú không?"
 				}
 			},
 			"icpswap": {
@@ -315,16 +304,6 @@
 				"call_to_action": "Bị cuốn hút",
 				"description": "Curve Finance là một sàn giao dịch phi tập trung, nhà cung cấp stablecoin và nền tảng cho vay hàng đầu trên Ethereum và các chuỗi tương thích với EVM. Nó nổi tiếng với các nhà tạo lập thị trường tự động tiên tiến cho stablecoin và các tài sản biến động, và hệ thống thanh lý mềm độc đáo cho các khoản vay."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Mở khóa toàn bộ tiềm năng của DeFi và giao dịch hợp lý. Hoán đổi token, kiếm tiền với tư cách là nhà cung cấp thanh khoản và khai thác AMM hàng đầu của Bitfinity EVM.",
-				"call_to_action": "Mở Sonic",
-				"description": "Sonic, một sàn giao dịch phi tập trung đa chuỗi được xây dựng trên Giao thức Máy tính Internet (ICP), cung cấp một loạt các dịch vụ DeFi. Người dùng có thể dễ dàng giao dịch token và các hợp đồng vĩnh viễn, cung cấp thanh khoản và tham gia bán token LBP. Người dùng có thể tham gia quản trị DAO, đặt cược để nhận phần thưởng và bỏ phiếu cho các quyết định của nền tảng.<br/><br/>Hoàn toàn trên chuỗi và mã nguồn mở! Hoán đổi token như một chuyên gia, tích lũy các khoản phí đó với tư cách là nhà cung cấp thanh khoản, tham gia vào không khí AMM và trở thành một phần không thể thiếu của Sonic DAO.",
-				"carousel": {
-					"text": "Mở khóa toàn bộ tiềm năng của Defi",
-					"call_to_action": "Mở Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX và nhà tạo lập thị trường tự động được xây dựng trên chuỗi khối Solana, cung cấp một sổ lệnh giới hạn trung tâm cho phép giao dịch nhanh chóng.",
@@ -371,17 +350,6 @@
 					"text": "Xin chào, internet tự viết",
 					"call_to_action": "Tìm hiểu thêm"
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -433,11 +401,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -483,6 +446,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1656,11 +1633,142 @@
 		"text": {
 			"tab_title": "",
 			"intro": "",
-			"learn_more": ""
+			"learn_more": "",
+			"provider_name": ""
 		},
 		"provider_unavailable": {
 			"title": "",
 			"description": ""
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_base_token": "",
+			"select_quote_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"lowest_ask": "",
+			"highest_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": "",
+			"available_label": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
+			"to": "",
+			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"consent": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
+			"approving": "",
+			"depositing": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
 		}
 	},
 	"transaction": {
@@ -2130,10 +2238,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2152,7 +2260,43 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": ""
 		}
 	},
 	"vaults": {
@@ -2235,9 +2379,7 @@
 			"title_empty_3": "",
 			"description_empty": "Có vẻ như bạn chưa staking token nào",
 			"full_history": "Xem toàn bộ lịch sử",
-			"recent_history": "Đóng toàn bộ lịch sử",
-			"harvest_autopilot_carousel_slide_title": "Kiếm tiền trong OISY với Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Tìm hiểu thêm"
+			"recent_history": "Đóng toàn bộ lịch sử"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Đã xảy ra lỗi khi rút token.",
