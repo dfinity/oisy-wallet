@@ -111,10 +111,10 @@ run_it_in_chunks() {
 
 echo "Running backend tests."
 if [ -n "${CI:-}" ] && [ "$#" -eq 0 ]; then
-  # Single-threaded within a chunk keeps peak live memory low; chunking caps the
-  # cumulative server growth that single-threading alone could not. Overridable
-  # via RUST_TEST_THREADS.
-  export RUST_TEST_THREADS="${RUST_TEST_THREADS:-1}"
+  # Chunking caps the cumulative PocketIC server memory (a fresh server per
+  # chunk), so the suite no longer needs to run single-threaded — peak memory is
+  # one chunk's instances regardless of parallelism. RUST_TEST_THREADS is still
+  # honoured if set, e.g. to pin parallelism on a smaller runner.
   rc=0
   cargo test -p backend --lib || rc=1
   run_it_in_chunks || rc=1
