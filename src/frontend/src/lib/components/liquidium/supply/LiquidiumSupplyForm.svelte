@@ -20,6 +20,9 @@
 		totalFee?: bigint;
 		// Provider fee (base units); shown as a row and reserved from Max.
 		inflowFee?: bigint;
+		// The provider-fee estimate failed (e.g. stale oracle price). Unlike repay, supply does not
+		// guess a fee — it surfaces a retry message and stays disabled until prices refresh.
+		inflowFeeUnavailable?: boolean;
 		// Rail-specific balance check (gas/provider-fee coverage); owned by the wizard,
 		// which holds the per-chain fee context.
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
@@ -34,6 +37,7 @@
 		amount = $bindable(),
 		totalFee,
 		inflowFee,
+		inflowFeeUnavailable = false,
 		onCustomErrorValidate,
 		feeDisplay,
 		onClose,
@@ -67,7 +71,7 @@
 </script>
 
 <StakeForm
-	disabled={!agreementChecked || feeMissing}
+	disabled={!agreementChecked || feeMissing || inflowFeeUnavailable}
 	{onClose}
 	{onCustomErrorValidate}
 	{onNext}
@@ -91,6 +95,12 @@
 		<LiquidiumProviderFee {inflowFee} />
 
 		{@render feeDisplay()}
+
+		{#if inflowFeeUnavailable}
+			<MessageBox level="warning" styleClass="mt-3">
+				{$i18n.liquidium.text.supply_prices_unavailable}
+			</MessageBox>
+		{/if}
 
 		<LiquidiumSupplyAgreement bind:checked={agreementChecked} />
 	{/snippet}

@@ -1807,6 +1807,7 @@ interface I18nLiquidium {
 		supply_agreement: string;
 		provider_fee: string;
 		insufficient_funds_for_fee: string;
+		supply_prices_unavailable: string;
 		borrow_review: string;
 		borrow_review_subtitle: string;
 		borrowing: string;
@@ -1843,6 +1844,16 @@ interface I18nLiquidium {
 		withdraw_at_risk_warning: string;
 		withdraw_high_risk_warning: string;
 		withdraw_risk_confirm: string;
+		repay_review: string;
+		repay_review_subtitle: string;
+		repaying: string;
+		starting_to_repay: string;
+		repay_started: string;
+		current_debt: string;
+		interest_accrued: string;
+		debt_after_repay: string;
+		repay_exceeds_debt: string;
+		repay_prices_unavailable: string;
 	};
 }
 
