@@ -1397,6 +1397,7 @@ interface I18nTrading {
 		row_buy: string;
 		status_open: string;
 		status_pending: string;
+		status_partial: string;
 		status_filled: string;
 		status_canceled: string;
 		status_expired: string;

@@ -27,6 +27,7 @@ import {
 	maxSpendBaseAmount,
 	oisyTradeAssetHasReserved,
 	oisyTradeDepositableTokens,
+	oisyTradeOrderDisplayStatus,
 	oisyTradeSupportedTokenSymbols,
 	orderStatusView,
 	presetTargetPrice,
@@ -736,19 +737,38 @@ describe('oisy-trade.utils — orders', () => {
 		});
 	});
 
+	describe('oisyTradeOrderDisplayStatus', () => {
+		it('shows an Open order with a fill as Partial, others unchanged', () => {
+			expect(oisyTradeOrderDisplayStatus({ status: 'Open', filledQuantity: 0 } as never)).toBe(
+				'Open'
+			);
+			expect(oisyTradeOrderDisplayStatus({ status: 'Open', filledQuantity: 1.5 } as never)).toBe(
+				'Partial'
+			);
+			expect(oisyTradeOrderDisplayStatus({ status: 'Pending', filledQuantity: 0 } as never)).toBe(
+				'Pending'
+			);
+			expect(oisyTradeOrderDisplayStatus({ status: 'Filled', filledQuantity: 10 } as never)).toBe(
+				'Filled'
+			);
+		});
+	});
+
 	describe('orderStatusView', () => {
 		it('maps every status to its label key and pill variant', () => {
 			expect(orderStatusView('Open')).toEqual({ labelKey: 'Open', pillVariant: 'success' });
 			expect(orderStatusView('Pending')).toEqual({ labelKey: 'Pending', pillVariant: 'warning' });
+			// Partial (Open with a fill) reads amber like Pending.
+			expect(orderStatusView('Partial')).toEqual({ labelKey: 'Partial', pillVariant: 'warning' });
 			expect(orderStatusView('Filled')).toEqual({ labelKey: 'Filled', pillVariant: 'success' });
+			// Canceled and Expired share the same muted default pill.
 			expect(orderStatusView('Canceled')).toEqual({
 				labelKey: 'Canceled',
 				pillVariant: 'default'
 			});
-			// Expired is a distinct amber/warning pill.
 			expect(orderStatusView('Expired')).toEqual({
 				labelKey: 'Expired',
-				pillVariant: 'warning'
+				pillVariant: 'default'
 			});
 		});
 	});

@@ -13,6 +13,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
+	OisyTradeOrderDisplayStatus,
 	OisyTradeOrderStatus,
 	OisyTradeOrderView,
 	OisyTradeWithdrawToken
@@ -669,19 +670,27 @@ export const mapOisyTradeOrders = ({
 	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
 
 // Status → display: the i18n label key (under `trading.orders.status`) and the
-// `Badge` pill variant. Open/Pending read as neutral-info, Filled as success,
-// Canceled as a muted default, and Expired as a distinct amber/warning pill.
+// An Open order that has already filled some quantity is shown as the derived
+// "Partial" status — still active, and (like Pending) amber.
+export const oisyTradeOrderDisplayStatus = ({
+	status,
+	filledQuantity
+}: OisyTradeOrderView): OisyTradeOrderDisplayStatus =>
+	status === 'Open' && filledQuantity > 0 ? 'Partial' : status;
+
+// `Badge` pill variant. Open resting → green; Pending and the derived Partial →
+// amber (still working); Filled → green; Canceled and Expired share the same
+// muted default — both are plain terminal outcomes, neither an error.
 export const orderStatusView = (
-	status: OisyTradeOrderStatus
-): { labelKey: OisyTradeOrderStatus; pillVariant: BadgeVariant } => {
-	// Mirrors the wireframe pills: Open resting → green (success), Pending → amber
-	// (warning), Filled → green, Canceled → muted (default), Expired → distinct amber.
-	const pillVariant: Record<OisyTradeOrderStatus, BadgeVariant> = {
+	status: OisyTradeOrderDisplayStatus
+): { labelKey: OisyTradeOrderDisplayStatus; pillVariant: BadgeVariant } => {
+	const pillVariant: Record<OisyTradeOrderDisplayStatus, BadgeVariant> = {
 		Open: 'success',
 		Pending: 'warning',
+		Partial: 'warning',
 		Filled: 'success',
 		Canceled: 'default',
-		Expired: 'warning'
+		Expired: 'default'
 	};
 
 	return { labelKey: status, pillVariant: pillVariant[status] };

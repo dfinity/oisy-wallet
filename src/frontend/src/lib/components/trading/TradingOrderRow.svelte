@@ -9,7 +9,7 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { orderStatusView } from '$lib/utils/oisy-trade.utils';
+	import { oisyTradeOrderDisplayStatus, orderStatusView } from '$lib/utils/oisy-trade.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -21,7 +21,7 @@
 	// order-book depth reads and is out of scope for this section.
 	let { order }: Props = $props();
 
-	let { side, base, quote, quantity, price, status } = $derived(order);
+	let { side, base, quote, quantity, price } = $derived(order);
 
 	let baseSymbol = $derived(getTokenDisplaySymbol(base));
 	let quoteSymbol = $derived(getTokenDisplaySymbol(quote));
@@ -56,11 +56,12 @@
 		})
 	);
 
-	let { labelKey, pillVariant } = $derived(orderStatusView(status));
+	let { labelKey, pillVariant } = $derived(orderStatusView(oisyTradeOrderDisplayStatus(order)));
 
 	const statusLabels = $derived({
 		Open: $i18n.trading.orders.status_open,
 		Pending: $i18n.trading.orders.status_pending,
+		Partial: $i18n.trading.orders.status_partial,
 		Filled: $i18n.trading.orders.status_filled,
 		Canceled: $i18n.trading.orders.status_canceled,
 		Expired: $i18n.trading.orders.status_expired

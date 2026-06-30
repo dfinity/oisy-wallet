@@ -36,6 +36,10 @@ export interface OisyTradeOrderView {
 // The five candid `OrderStatus` discriminants, flattened to a string union.
 export type OisyTradeOrderStatus = 'Pending' | 'Open' | 'Filled' | 'Canceled' | 'Expired';
 
+// Display-only status: an Open order that has already partially filled is shown
+// as "Partial" (still active). Not a candid discriminant.
+export type OisyTradeOrderDisplayStatus = OisyTradeOrderStatus | 'Partial';
+
 // A DEX balance entry resolved to the matching OISY token, ready for display in
 // the Trading tab "My assets" section.
 export interface OisyTradeAsset {

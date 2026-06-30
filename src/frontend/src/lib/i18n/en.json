@@ -1736,6 +1736,7 @@
 			"row_buy": "$base with $quote_amount $quote at $price",
 			"status_open": "Open",
 			"status_pending": "Pending",
+			"status_partial": "Partial",
 			"status_filled": "Filled",
 			"status_canceled": "Canceled",
 			"status_expired": "Expired"
