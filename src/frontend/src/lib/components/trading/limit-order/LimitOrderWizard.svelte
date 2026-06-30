@@ -198,6 +198,7 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.QUOTE_TOKEN);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.QUOTE_TOKEN}
 	<LimitOrderTokensList
@@ -210,6 +211,7 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.FORM);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
