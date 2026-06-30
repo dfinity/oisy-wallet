@@ -27,11 +27,15 @@
 
 	// Provider inflow fee for this asset, passed to the wizard.
 	let inflowFee = $state<bigint | undefined>();
+	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
+	let inflowFeeUnavailable = $state(false);
 
 	$effect(() => {
 		const identity = $authIdentity;
 
 		if (nonNullish(identity)) {
+			inflowFeeUnavailable = false;
+
 			// Market data widens asset/chain to open strings (future assets); narrow to
 			// the SDK's strict mutating-flow types at this boundary.
 			estimateLiquidiumInflowFee({
@@ -40,7 +44,10 @@
 				chain: market.chain as Chain
 			})
 				.then((fee) => (inflowFee = fee))
-				.catch(consoleError);
+				.catch((err: unknown) => {
+					consoleError(err);
+					inflowFeeUnavailable = true;
+				});
 		}
 	});
 
@@ -77,6 +84,7 @@
 				<LiquidiumSupplyBtcWizard
 					{currentStep}
 					{inflowFee}
+					{inflowFeeUnavailable}
 					{market}
 					onBack={modal.back}
 					onClose={close}
@@ -88,6 +96,7 @@
 				<LiquidiumSupplyEthWizard
 					{currentStep}
 					{inflowFee}
+					{inflowFeeUnavailable}
 					{market}
 					onBack={modal.back}
 					onClose={close}

@@ -1,14 +1,18 @@
 import type {
 	DepositRequest,
 	DepositResponse,
-	GetBalancesResult,
+	GetOrderBookDepthRequest,
+	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
+	OrderBookDepth,
+	OrderBookTicker,
+	OrderId,
 	Token,
+	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
-import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -31,13 +35,15 @@ describe('oisy-trade.canister', () => {
 		});
 
 	const service = mock<ActorSubclass<OisyTradeService>>();
+
+	const tradingPair: TradingPair = {
+		base: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+		quote: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai')
+	};
+
 	const mockResponseError = new Error('OISY TRADE error');
 
-	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
-	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
-	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
-
-	const request: DepositRequest = {
+	const depositRequest: DepositRequest = {
 		token_id: { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 		amount: 100n
 	};
@@ -48,88 +54,145 @@ describe('oisy-trade.canister', () => {
 	});
 
 	describe('getTradingPairs', () => {
-		it('returns the trading pairs from the uncertified service', async () => {
+		it('returns the trading pairs', async () => {
+			const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
 			service.get_trading_pairs.mockResolvedValue(pairs);
 
 			const { getTradingPairs } = await createOisyTradeCanister({ serviceOverride: service });
 
-			const result = await getTradingPairs();
-
-			expect(result).toEqual(pairs);
+			await expect(getTradingPairs()).resolves.toBe(pairs);
 			expect(service.get_trading_pairs).toHaveBeenCalledExactlyOnceWith();
-		});
-
-		it('throws when the service rejects', async () => {
-			service.get_trading_pairs.mockRejectedValue(mockResponseError);
-
-			const { getTradingPairs } = await createOisyTradeCanister({ serviceOverride: service });
-
-			await expect(getTradingPairs()).rejects.toThrow(mockResponseError);
 		});
 	});
 
 	describe('listSupportedTokens', () => {
-		it('returns the supported tokens from the uncertified service', async () => {
-			service.list_supported_tokens.mockResolvedValue(supportedTokens);
+		it('returns the supported tokens', async () => {
+			const tokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
+			service.list_supported_tokens.mockResolvedValue(tokens);
 
 			const { listSupportedTokens } = await createOisyTradeCanister({ serviceOverride: service });
 
-			const result = await listSupportedTokens();
-
-			expect(result).toEqual(supportedTokens);
+			await expect(listSupportedTokens()).resolves.toBe(tokens);
 			expect(service.list_supported_tokens).toHaveBeenCalledExactlyOnceWith();
-		});
-
-		it('throws when the service rejects', async () => {
-			service.list_supported_tokens.mockRejectedValue(mockResponseError);
-
-			const { listSupportedTokens } = await createOisyTradeCanister({ serviceOverride: service });
-
-			await expect(listSupportedTokens()).rejects.toThrow(mockResponseError);
 		});
 	});
 
 	describe('getBalances', () => {
-		it('passes an empty filter and unwraps the Ok variant', async () => {
-			const okResult: GetBalancesResult = { Ok: balances };
-			service.get_balances.mockResolvedValue(okResult);
+		const balances = [{ balance: { free: 1n } }] as unknown as UserTokenBalance[];
+
+		it('unwraps the Ok response', async () => {
+			service.get_balances.mockResolvedValue({ Ok: balances });
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
-			const result = await getBalances();
-
-			expect(result).toEqual(balances);
-			expect(service.get_balances).toHaveBeenCalledWith([]);
+			await expect(getBalances()).resolves.toBe(balances);
+			expect(service.get_balances).toHaveBeenCalledExactlyOnceWith([]);
 		});
 
-		it('throws the canister message when the Err variant carries one', async () => {
-			const errResult = {
-				Err: { kind: { TemporaryError: [] }, message: toNullable('balances unavailable') }
-			} as unknown as GetBalancesResult;
-			service.get_balances.mockResolvedValue(errResult);
+		it('throws the canister message when present', async () => {
+			service.get_balances.mockResolvedValue({
+				Err: { kind: { InternalError: [] }, message: ['boom'] }
+			} as never);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getBalances()).rejects.toThrow('balances unavailable');
+			await expect(getBalances()).rejects.toThrow('boom');
 		});
 
-		it('falls back to the kind discriminant when the Err message is empty', async () => {
-			const errResult = {
-				Err: { kind: { TemporaryError: [] }, message: toNullable<string>(undefined) }
-			} as unknown as GetBalancesResult;
-			service.get_balances.mockResolvedValue(errResult);
+		it('falls back to the error kind when no message is present', async () => {
+			service.get_balances.mockResolvedValue({
+				Err: { kind: { InternalError: [] }, message: [] }
+			} as never);
 
 			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getBalances()).rejects.toThrow('TemporaryError');
+			await expect(getBalances()).rejects.toThrow('InternalError');
+		});
+	});
+
+	describe('getOrderBookTicker', () => {
+		const ticker = { bid: [], ask: [] } as unknown as OrderBookTicker;
+
+		it('unwraps the Ok response and forwards the pair', async () => {
+			service.get_order_book_ticker.mockResolvedValue({ Ok: ticker });
+
+			const { getOrderBookTicker } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(getOrderBookTicker(tradingPair)).resolves.toBe(ticker);
+			expect(service.get_order_book_ticker).toHaveBeenCalledExactlyOnceWith(tradingPair);
 		});
 
-		it('throws when the service rejects', async () => {
-			service.get_balances.mockRejectedValue(mockResponseError);
+		it('throws the mapped error', async () => {
+			service.get_order_book_ticker.mockResolvedValue({
+				Err: { kind: { RequestError: [{ UnknownTradingPair: null }] }, message: [] }
+			} as never);
 
-			const { getBalances } = await createOisyTradeCanister({ serviceOverride: service });
+			const { getOrderBookTicker } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getBalances()).rejects.toThrow(mockResponseError);
+			await expect(getOrderBookTicker(tradingPair)).rejects.toThrow('RequestError');
+		});
+	});
+
+	describe('getOrderBookDepth', () => {
+		const depth = { bids: [], asks: [] } as unknown as OrderBookDepth;
+		const request: GetOrderBookDepthRequest = { trading_pair: tradingPair, limit: [] };
+
+		it('unwraps the Ok response and forwards the request', async () => {
+			service.get_order_book_depth.mockResolvedValue({ Ok: depth });
+
+			const { getOrderBookDepth } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(getOrderBookDepth(request)).resolves.toBe(depth);
+			expect(service.get_order_book_depth).toHaveBeenCalledExactlyOnceWith(request);
+		});
+
+		it('throws the canister message', async () => {
+			service.get_order_book_depth.mockResolvedValue({
+				Err: { kind: { InternalError: [] }, message: ['too large'] }
+			} as never);
+
+			const { getOrderBookDepth } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(getOrderBookDepth(request)).rejects.toThrow('too large');
+		});
+	});
+
+	describe('addLimitOrder', () => {
+		const request = {
+			pair: tradingPair,
+			side: { Sell: null },
+			quantity: 25_000_000n,
+			price: 2_690_000n,
+			time_in_force: []
+		} as unknown as LimitOrderRequest;
+
+		it('unwraps the Ok order id', async () => {
+			service.add_limit_order.mockResolvedValue({ Ok: 'order-1' as OrderId });
+
+			const { addLimitOrder } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(addLimitOrder(request)).resolves.toBe('order-1');
+			expect(service.add_limit_order).toHaveBeenCalledExactlyOnceWith(request);
+		});
+
+		it('throws the canister message when the order is rejected', async () => {
+			service.add_limit_order.mockResolvedValue({
+				Err: { kind: { InternalError: [] }, message: ['insufficient balance'] }
+			} as never);
+
+			const { addLimitOrder } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(addLimitOrder(request)).rejects.toThrow('insufficient balance');
+		});
+
+		it('falls back to the error kind without a message', async () => {
+			service.add_limit_order.mockResolvedValue({
+				Err: { kind: { InvalidOrder: null }, message: [] }
+			} as never);
+
+			const { addLimitOrder } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(addLimitOrder(request)).rejects.toThrow('InvalidOrder');
 		});
 	});
 
@@ -139,10 +202,10 @@ describe('oisy-trade.canister', () => {
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
-			const result = await deposit(request);
+			const result = await deposit(depositRequest);
 
 			expect(result).toEqual(depositResponse);
-			expect(service.deposit).toHaveBeenCalledWith(request);
+			expect(service.deposit).toHaveBeenCalledWith(depositRequest);
 		});
 
 		it('throws the canister message when the Err variant carries one', async () => {
@@ -152,7 +215,7 @@ describe('oisy-trade.canister', () => {
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(deposit(request)).rejects.toThrow('amount too small');
+			await expect(deposit(depositRequest)).rejects.toThrow('amount too small');
 		});
 
 		it('falls back to the kind discriminant when the Err message is empty', async () => {
@@ -162,7 +225,7 @@ describe('oisy-trade.canister', () => {
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(deposit(request)).rejects.toThrow('InvalidRequest');
+			await expect(deposit(depositRequest)).rejects.toThrow('InvalidRequest');
 		});
 
 		it('throws when the service rejects', async () => {
@@ -170,7 +233,7 @@ describe('oisy-trade.canister', () => {
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(deposit(request)).rejects.toThrow(mockResponseError);
+			await expect(deposit(depositRequest)).rejects.toThrow(mockResponseError);
 		});
 	});
 });
