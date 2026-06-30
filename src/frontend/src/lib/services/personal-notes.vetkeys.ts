@@ -21,8 +21,12 @@ const PERSONAL_NOTES_MAP_NAME = 'personal_notes';
 const MAP_NAME_BYTE_LENGTH = 32;
 
 const mapNameBytes = (): Uint8Array => {
+	const encoded = new TextEncoder().encode(PERSONAL_NOTES_MAP_NAME);
+	if (encoded.length > MAP_NAME_BYTE_LENGTH) {
+		throw new Error(`PERSONAL_NOTES_MAP_NAME exceeds ${MAP_NAME_BYTE_LENGTH} bytes`);
+	}
 	const bytes = new Uint8Array(MAP_NAME_BYTE_LENGTH);
-	bytes.set(new TextEncoder().encode(PERSONAL_NOTES_MAP_NAME));
+	bytes.set(encoded);
 	return bytes;
 };
 
