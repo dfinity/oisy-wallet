@@ -112,7 +112,7 @@
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.65.1",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/postcss": "4.3.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.3.1",
@@ -137,7 +137,7 @@
 		"tailwindcss": "4.3.0",
 		"tslib": "^2.8.1",
 		"typescript": "^5.4.5",
-		"vite": "^7.3.2",
+		"vite": "^8.0.16",
 		"vite-node": "^6.0.0",
 		"vitest": "^4.1.9",
 		"vitest-mock-extended": "^4.0.0"
