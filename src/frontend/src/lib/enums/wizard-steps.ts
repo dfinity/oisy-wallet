@@ -99,6 +99,18 @@ export enum WizardStepsLiquidiumSupply {
 	SUPPLYING = 'Supplying'
 }
 
+export enum WizardStepsLiquidiumBorrow {
+	BORROW = 'Borrow',
+	REVIEW = 'Review',
+	BORROWING = 'Borrowing'
+}
+
+export enum WizardStepsLiquidiumWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing'
+}
+
 export enum WizardStepsClaimStakingReward {
 	REVIEW = 'Review',
 	CLAIMING = 'Claiming'
@@ -130,4 +142,12 @@ export enum WizardStepsScanner {
 	PAYMENT_FAILED = 'Payment Failed',
 	WALLET_CONNECT_CONNECT = WizardStepsWalletConnect.CONNECT,
 	WALLET_CONNECT_REVIEW = WizardStepsWalletConnect.REVIEW
+}
+
+export enum WizardStepsLimitOrder {
+	FORM = 'Form',
+	BASE_TOKEN = 'Base Token',
+	QUOTE_TOKEN = 'Quote Token',
+	REVIEW = 'Review',
+	PLACING = 'Placing'
 }

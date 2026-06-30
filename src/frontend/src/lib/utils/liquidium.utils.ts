@@ -91,6 +91,59 @@ export const liquidiumProjectedHealthPercent = ({
 	return Math.min(100, Math.max(0, currentHealthPercent - marginalPercent));
 };
 
+// Free collateral USD: max(0, collateral − debt / threshold); full collateral when no debt.
+// Open debt with a zero threshold (edge payload) → fully reserved.
+export const liquidiumFreeCollateralUsd = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	if (totalDebtUsd <= 0) {
+		return Math.max(0, totalCollateralUsd);
+	}
+
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (thresholdRatio <= 0) {
+		return 0;
+	}
+
+	return Math.max(0, totalCollateralUsd - totalDebtUsd / thresholdRatio);
+};
+
+// Projected health after removing `withdrawUsd` of collateral: (1 − ltv / threshold) × 100,
+// clamped. Threshold held constant (v1 approximation; canister is the final gate).
+export const liquidiumProjectedHealthAfterWithdrawPercent = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	withdrawUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	withdrawUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	if (totalDebtUsd <= 0) {
+		return 100;
+	}
+
+	const remainingCollateralUsd = totalCollateralUsd - withdrawUsd;
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (remainingCollateralUsd <= 0 || thresholdRatio <= 0) {
+		return 0;
+	}
+
+	const resultingLtv = totalDebtUsd / remainingCollateralUsd;
+
+	return Math.min(100, Math.max(0, (1 - resultingLtv / thresholdRatio) * 100));
+};
+
 const isUnderSupplyCap = ({ totalSupply, supplyCap }: Pool): boolean =>
 	!nonNullish(supplyCap) || totalSupply < supplyCap;
 

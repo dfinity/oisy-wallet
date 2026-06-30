@@ -1,4 +1,6 @@
 import type {
+	OrderBookDepth,
+	OrderBookTicker,
 	Token,
 	TradingPairInfo,
 	UserTokenBalance
@@ -11,6 +13,14 @@ export interface OisyTradeStoreData {
 	pairs: TradingPairInfo[] | undefined;
 	supportedTokens: Token[] | undefined;
 	balances: UserTokenBalance[] | undefined;
+}
+
+// Live, per-pair order-book snapshot kept fresh while the limit-order form is
+// open. Keyed by the pair's symbol pair (e.g. "ICP/ckUSDC"). `undefined` = not
+// loaded yet for that pair.
+export interface OisyTradeOrderBook {
+	ticker: OrderBookTicker | undefined;
+	depth: OrderBookDepth | undefined;
 }
 
 // A DEX balance entry resolved to the matching OISY token, ready for display in
