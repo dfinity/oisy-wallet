@@ -161,3 +161,10 @@ export enum ProgressStepsPayment {
 	SIGN_TRANSACTION = 'sign_transaction',
 	PAY = 'pay'
 }
+
+export enum ProgressStepsLimitOrder {
+	INITIALIZATION = 'initialization',
+	PLACE = 'place',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
