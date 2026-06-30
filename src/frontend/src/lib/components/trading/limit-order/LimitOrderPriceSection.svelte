@@ -254,7 +254,13 @@
 			<span class="text-xs text-secondary">{pairView?.quoteSymbol ?? ''}</span>
 		</div>
 		{#if priceNum > 0 && currentValue > 0}
-			<ValueDifference iconPosition="left" value={valueDiff} />
+			<ValueDifference
+				errorLevel={-5}
+				iconPosition="left"
+				muted={!(crossing || fillOrKill)}
+				value={valueDiff}
+				warningLevel={0}
+			/>
 		{/if}
 	</div>
 

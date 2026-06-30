@@ -64,7 +64,7 @@
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
-	const severe = $derived(valueDiff < -5);
+	const severe = $derived(crossing && valueDiff < -5);
 
 	const quoteLabel = $derived(
 		side === 'sell'
@@ -167,7 +167,13 @@
 			</div>
 			<div class="flex items-center justify-between text-xs">
 				<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
-				<ValueDifference iconPosition="left" value={valueDiff} />
+				<ValueDifference
+					errorLevel={-5}
+					iconPosition="left"
+					muted={!(crossing || fillOrKill)}
+					value={valueDiff}
+					warningLevel={0}
+				/>
 			</div>
 			{#if nonNullish(queueText)}
 				<div class="flex items-center justify-between text-xs">

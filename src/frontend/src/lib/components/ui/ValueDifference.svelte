@@ -44,6 +44,7 @@
 		class:font-bold={isWarning || isError}
 		class:gap-2={iconPosition === 'left'}
 		class:text-error-primary={isError}
+		class:text-primary={muted}
 		class:text-success-primary={isSuccess}
 		class:text-warning-primary={isWarning}
 	>
