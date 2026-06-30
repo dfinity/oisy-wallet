@@ -56,7 +56,7 @@ use shared::{
     },
 };
 
-use crate::state::{read_state, set_config};
+use crate::state::{ensure_personal_notes, read_state, set_config};
 
 mod active_user_transactions;
 mod api;
@@ -110,6 +110,12 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // Attach the personal-notes store eagerly so `stats()` (a query, which
+    // cannot run the lazy init) reports the persisted count after an upgrade.
+    // Fresh installs (`init`) stay lazy to avoid allocating its memory regions
+    // in canisters that never use notes.
+    ensure_personal_notes();
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

@@ -143,7 +143,7 @@ fn init_personal_notes() {
 }
 
 /// Ensures the personal-notes store is initialised, creating it on first use.
-fn ensure_personal_notes() {
+pub(crate) fn ensure_personal_notes() {
     if read_state(|s| s.personal_notes.is_none()) {
         init_personal_notes();
     }
