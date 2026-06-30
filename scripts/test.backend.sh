@@ -86,6 +86,10 @@ export POCKET_IC_MUTE_SERVER=1
 # single-process behaviour.
 run_it_in_chunks() {
   local chunk_size="${BACKEND_IT_TEST_CHUNK_SIZE:-40}"
+  if ! [[ "$chunk_size" =~ ^[1-9][0-9]*$ ]]; then
+    echo "BACKEND_IT_TEST_CHUNK_SIZE must be a positive integer (got '${chunk_size}')." >&2
+    return 1
+  fi
   local tests=()
   local line
   while IFS= read -r line; do
