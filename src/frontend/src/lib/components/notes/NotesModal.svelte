@@ -418,7 +418,13 @@
 		{#snippet headerLeft()}
 			{#if step === 'editor'}
 				<Responsive down="sm">
-					<Button link onclick={leaveEditor} testId={NOTES_CANCEL_BUTTON} type="button">
+					<Button
+						disabled={busy}
+						link
+						onclick={leaveEditor}
+						testId={NOTES_CANCEL_BUTTON}
+						type="button"
+					>
 						{$i18n.core.text.cancel}
 					</Button>
 				</Responsive>
