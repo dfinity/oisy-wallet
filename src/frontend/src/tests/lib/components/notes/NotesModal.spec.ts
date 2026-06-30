@@ -11,7 +11,7 @@ import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 const note = (id: string): PersonalNoteUi => ({
 	id,
@@ -71,5 +71,23 @@ describe('NotesModal', () => {
 		// The read path has no edit/delete yet; those actions arrive with the editor.
 		expect(queryByTestId(NOTES_VIEW_EDIT_BUTTON)).toBeNull();
 		expect(queryByTestId(NOTES_VIEW_DELETE_BUTTON)).toBeNull();
+	});
+
+	it('returns to the list when the viewed note disappears', async () => {
+		personalNotesStore.setLoaded({ entries: [note('a'), note('b')], count: 2 });
+
+		const { getByTestId, getByText, queryByTestId } = render(NotesModal);
+
+		await fireEvent.click(getByText('note a'));
+
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+
+		// The viewed note vanishes (e.g. decryption failure or removal on reload).
+		personalNotesStore.setLoaded({ entries: [note('b')], count: 1 });
+
+		await waitFor(() => {
+			expect(queryByTestId(NOTES_VIEW)).toBeNull();
+			expect(getByText('note b')).toBeInTheDocument();
+		});
 	});
 });
