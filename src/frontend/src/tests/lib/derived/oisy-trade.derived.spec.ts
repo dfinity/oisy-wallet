@@ -38,13 +38,7 @@ vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
 });
 
 describe('oisy-trade.derived — orders', () => {
-	const buildOrder = ({
-		id,
-		status
-	}: {
-		id: string;
-		status: OisyTradeOrderStatus;
-	}): UserOrder =>
+	const buildOrder = ({ id, status }: { id: string; status: OisyTradeOrderStatus }): UserOrder =>
 		({
 			id,
 			pair: {

@@ -35,7 +35,6 @@
 		progressStep: string;
 		onBack: () => void;
 		onClose: () => void;
-		onNext: () => void;
 	}
 
 	let {
@@ -44,8 +43,7 @@
 		modal = $bindable(),
 		progressStep = $bindable(),
 		onBack,
-		onClose,
-		onNext
+		onClose
 	}: Props = $props();
 
 	// --- shared form state -------------------------------------------------
@@ -237,7 +235,7 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={onNext}
+		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}

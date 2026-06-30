@@ -105,7 +105,7 @@
 	</div>
 
 	<button
-		class="ml-2 shrink-0 font-semibold text-brand-primary"
+		class="ml-2 shrink-0 text-sm font-medium text-brand-primary"
 		data-tid={TRADING_ASSET_WITHDRAW_BUTTON}
 		onclick={() => onWithdraw?.(asset)}
 	>
