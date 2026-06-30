@@ -2263,6 +2263,7 @@
 			"supply_agreement": "I understand my assets will be supplied to the Liquidium protocol and are subject to on-chain smart-contract risk.",
 			"provider_fee": "Provider fee",
 			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the provider fee.",
+			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
 			"borrow_review": "Review borrow",
 			"borrow_review_subtitle": "You borrow",
 			"borrowing": "Borrowing",
@@ -2298,7 +2299,17 @@
 			"withdraw_risk_info": "Withdrawing collateral lowers your health factor. If it falls too far your remaining collateral can be liquidated.",
 			"withdraw_at_risk_warning": "This withdrawal noticeably lowers your health factor.",
 			"withdraw_high_risk_warning": "This withdrawal puts your position close to liquidation.",
-			"withdraw_risk_confirm": "I understand this withdrawal increases my liquidation risk."
+			"withdraw_risk_confirm": "I understand this withdrawal increases my liquidation risk.",
+			"repay_review": "Review repay",
+			"repay_review_subtitle": "You repay",
+			"repaying": "Repaying",
+			"starting_to_repay": "Submitting your repayment...",
+			"repay_started": "The repayment is now being processed.",
+			"current_debt": "Current debt",
+			"interest_accrued": "Interest accrued",
+			"debt_after_repay": "Debt after repay",
+			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
+			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
 		}
 	},
 	"vaults": {
