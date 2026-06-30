@@ -65,14 +65,19 @@ export const personalNoteSnippet = ({
  */
 export const personalNotePreviewParts = (value: string): { title: string; body: string } => {
 	const text = neutralizePersonalNoteText(value);
-	const newline = text.indexOf('\n');
-	let title = (newline === -1 ? text : text.slice(0, newline)).trim();
-	let body = (newline === -1 ? '' : text.slice(newline + 1)).replace(/\s+/gu, ' ').trim();
+	const lines = text.split('\n');
 
-	if (title === '' && body !== '') {
-		title = body;
-		body = '';
+	const firstNonEmptyIndex = lines.findIndex((line) => line.trim() !== '');
+	if (firstNonEmptyIndex === -1) {
+		return { title: '', body: '' };
 	}
+
+	const title = lines[firstNonEmptyIndex].trim();
+	const body = lines
+		.slice(firstNonEmptyIndex + 1)
+		.join('\n')
+		.replace(/\s+/gu, ' ')
+		.trim();
 
 	return { title, body };
 };

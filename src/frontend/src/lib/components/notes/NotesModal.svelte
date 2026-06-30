@@ -251,6 +251,14 @@
 			busy = false;
 		}
 	};
+
+	$effect(() => {
+		// If the selected note disappears while viewing (e.g. store refresh), keep
+		// title/body in sync by returning to the list.
+		if (step === 'view' && isNullish(viewNote)) {
+			backToList();
+		}
+	});
 </script>
 
 {#snippet notesBody()}

@@ -130,4 +130,22 @@ describe('NotesModal', () => {
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
 		);
 	});
+
+	it('returns to the list when the viewed note disappears', async () => {
+		personalNotesStore.setLoaded({ entries: [note('a'), note('b')], count: 2 });
+
+		const { getByTestId, getByText, queryByTestId } = render(NotesModal);
+
+		await fireEvent.click(getByText('note a'));
+
+		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
+
+		// The viewed note vanishes (e.g. decryption failure or removal on reload).
+		personalNotesStore.setLoaded({ entries: [note('b')], count: 1 });
+
+		await waitFor(() => {
+			expect(queryByTestId(NOTES_VIEW)).toBeNull();
+			expect(getByText('note b')).toBeInTheDocument();
+		});
+	});
 });
