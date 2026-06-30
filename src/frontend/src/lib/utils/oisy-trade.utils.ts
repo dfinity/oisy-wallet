@@ -10,8 +10,10 @@ import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OisyTradeAsset } from '$lib/types/oisy-trade';
+import { parseToken } from '$lib/utils/parse.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 import { fromNullable, nonNullish } from '@dfinity/utils';
+import Decimal from 'decimal.js';
 
 // ---------------------------------------------------------------------------
 // Pure helpers backing the limit-order form. Everything user-facing is computed
@@ -46,6 +48,12 @@ export interface LimitOrderPairView {
 }
 
 const pow10 = (decimals: number): number => 10 ** decimals;
+
+const toSmallestUnits = ({ value, decimals }: { value: number; decimals: number }): bigint =>
+	parseToken({
+		value: new Decimal(value.toString()).toDecimalPlaces(decimals).toFixed(),
+		unitName: decimals
+	});
 
 // Decimal places implied by a (possibly non-power-of-ten) step. Robust for
 // values like 0.25 (→ 2) and exponential notation like "1e-7" (→ 7).
@@ -494,7 +502,7 @@ export const toQuantity = ({
 }: {
 	baseAmount: number;
 	baseDecimals: number;
-}): bigint => BigInt((baseAmount * pow10(baseDecimals)).toFixed(0));
+}): bigint => toSmallestUnits({ value: baseAmount, decimals: baseDecimals });
 
 // Convert a human price (quote per whole base) to the candid `price`
 // (quote smallest units per whole base).
@@ -504,7 +512,7 @@ export const toPriceUnits = ({
 }: {
 	price: number;
 	quoteDecimals: number;
-}): bigint => BigInt((price * pow10(quoteDecimals)).toFixed(0));
+}): bigint => toSmallestUnits({ value: price, decimals: quoteDecimals });
 
 // Candid `Side` from the form side.
 export const toCandidSide = (side: LimitOrderSide): Side =>
