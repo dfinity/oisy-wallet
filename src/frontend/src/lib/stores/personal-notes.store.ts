@@ -30,11 +30,13 @@ const initPersonalNotesStore = (): PersonalNotesStore => {
 	const { subscribe, set, update }: Writable<PersonalNotesStoreData> =
 		writable<PersonalNotesStoreData>(EMPTY_DATA);
 
-	const toRecord = (entries: PersonalNoteEntryUi[]): Record<string, PersonalNoteEntryUi> =>
-		entries.reduce<Record<string, PersonalNoteEntryUi>>(
-			(acc, entry) => ({ ...acc, [entry.id]: entry }),
-			{}
-		);
+	const toRecord = (entries: PersonalNoteEntryUi[]): Record<string, PersonalNoteEntryUi> => {
+		const record: Record<string, PersonalNoteEntryUi> = {};
+		for (const entry of entries) {
+			record[entry.id] = entry;
+		}
+		return record;
+	};
 
 	return {
 		subscribe,

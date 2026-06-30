@@ -85,4 +85,22 @@ describe('LiquidiumSupplyForm', () => {
 
 		expect(container).not.toHaveTextContent(en.liquidium.text.insufficient_funds_for_fee);
 	});
+
+	it('surfaces a retry message when the provider-fee estimate is unavailable', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: { ...baseProps, inflowFeeUnavailable: true },
+			context: mockContext()
+		});
+
+		expect(container).toHaveTextContent(en.liquidium.text.supply_prices_unavailable);
+	});
+
+	it('does not show the retry message when the fee is available', () => {
+		const { container } = render(LiquidiumSupplyForm, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.supply_prices_unavailable);
+	});
 });

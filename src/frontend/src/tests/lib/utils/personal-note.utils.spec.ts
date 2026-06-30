@@ -80,6 +80,13 @@ describe('personal-note.utils', () => {
 			});
 		});
 
+		it('keeps title and body separate when the note starts with blank lines', () => {
+			expect(personalNotePreviewParts('\n\nTitle\nBody')).toEqual({
+				title: 'Title',
+				body: 'Body'
+			});
+		});
+
 		it('neutralizes bidi characters', () => {
 			expect(personalNotePreviewParts('a\u202Eb')).toEqual({ title: 'ab', body: '' });
 		});

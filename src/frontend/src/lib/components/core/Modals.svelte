@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
@@ -68,7 +69,7 @@
 		<ReferralCodeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
-	{:else if $modalNotes}
+	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
 		<NotesModal />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />

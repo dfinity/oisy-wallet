@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
@@ -162,14 +163,16 @@
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
 
-			<ButtonMenu
-				ariaLabel={$i18n.navigation.alt.notes}
-				onclick={() => modalStore.openNotes(notesModalId)}
-				testId={NAVIGATION_MENU_NOTES_BUTTON}
-			>
-				<IconNotebook size="20" />
-				{$i18n.navigation.text.notes}
-			</ButtonMenu>
+			{#if PERSONAL_NOTES_ENABLED}
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.notes}
+					onclick={() => modalStore.openNotes(notesModalId)}
+					testId={NAVIGATION_MENU_NOTES_BUTTON}
+				>
+					<IconNotebook size="20" />
+					{$i18n.navigation.text.notes}
+				</ButtonMenu>
+			{/if}
 
 			<ButtonMenu
 				ariaLabel={$isPrivacyMode
