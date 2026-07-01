@@ -100,6 +100,7 @@ interface I18nNavigation {
 		show_balances: string;
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
+		notes: string;
 	};
 	alt: {
 		tokens: string;
@@ -119,6 +120,7 @@ interface I18nNavigation {
 		address_book: string;
 		hide_balances: string;
 		show_balances: string;
+		notes: string;
 	};
 	short: { documentation: string };
 }
@@ -2074,6 +2076,35 @@ interface I18nAi_assistant {
 	errors: { unknown: string; no_response: string };
 }
 
+interface I18nNotes {
+	text: {
+		title: string;
+		note: string;
+		add_title: string;
+		edit_note: string;
+		delete_note: string;
+		delete_confirm_text: string;
+		back: string;
+		empty_title: string;
+		empty_subtitle: string;
+		empty_add: string;
+		add_note: string;
+		note_label: string;
+		placeholder: string;
+		search_placeholder: string;
+		no_results: string;
+		privacy_info: string;
+		created: string;
+		updated: string;
+		created_updated: string;
+		too_long: string;
+		cap_reached: string;
+		decryption_failed: string;
+	};
+	alt: { edit: string; delete: string };
+	error: { load: string; save: string; delete: string };
+}
+
 interface I18n {
 	lang: Languages;
 	borrowings: I18nBorrowings;
@@ -2129,4 +2160,5 @@ interface I18n {
 	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
+	notes: I18nNotes;
 }

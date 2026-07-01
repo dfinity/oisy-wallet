@@ -104,7 +104,8 @@
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
-			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы."
+			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Активы",
@@ -123,7 +124,8 @@
 			"refer_a_friend": "Реферальная ссылка для друга",
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
-			"show_balances": "Показать скрытые балансы"
+			"show_balances": "Показать скрытые балансы",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Документы"
@@ -2539,6 +2541,41 @@
 		"errors": {
 			"unknown": "Извините, что-то пошло не так с получением ответа от помощника.",
 			"no_response": "Извините, я не получил ответа от помощника."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

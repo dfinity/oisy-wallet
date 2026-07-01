@@ -8,6 +8,7 @@ export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
+export const NAVIGATION_MENU_NOTES_BUTTON = 'navigation-menu-notes-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
@@ -266,6 +267,18 @@ export const ADDRESS_BOOK_SEARCH_CONTACT_INPUT = 'address-book-search-contact-in
 export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
 export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
+
+export const NOTES_MODAL = 'notes-modal';
+export const NOTES_SEARCH_INPUT = 'notes-search-input';
+export const NOTES_NO_RESULTS = 'notes-no-results';
+export const NOTES_LIST = 'notes-list';
+export const NOTES_LIST_ITEM = 'notes-list-item';
+export const NOTES_RETRY_DECRYPT_BUTTON = 'notes-retry-decrypt-button';
+export const NOTES_ADD_BUTTON = 'notes-add-button';
+export const NOTES_VIEW = 'notes-view';
+export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
+export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
+export const NOTES_BACK_BUTTON = 'notes-back-button';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
