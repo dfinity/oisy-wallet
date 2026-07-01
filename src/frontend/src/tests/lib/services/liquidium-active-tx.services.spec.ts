@@ -90,6 +90,28 @@ describe('liquidium-active-tx.services', () => {
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
 	});
 
+	it('does nothing for an empty transaction list (no client created)', async () => {
+		await pollLiquidiumActiveUserTransactions({ identity: mockIdentity, transactions: [] });
+
+		expect(liquidiumApi.liquidiumClient).not.toHaveBeenCalled();
+		expect(apply).not.toHaveBeenCalled();
+	});
+
+	it('swallows a polling error without throwing or applying an update', async () => {
+		list.mockRejectedValue(new Error('SDK unavailable'));
+
+		await expect(
+			poll(
+				buildTx({
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID]: profileId,
+					[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid
+				})
+			)
+		).resolves.toBeUndefined();
+
+		expect(apply).not.toHaveBeenCalled();
+	});
+
 	it('does nothing without a profile id', async () => {
 		await poll(buildTx({ [LIQUIDIUM_EXTERNAL_REF_KEYS.TXID]: txid }));
 

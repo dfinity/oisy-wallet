@@ -1,4 +1,5 @@
 import LimitOrderTradePairBox from '$lib/components/trading/limit-order/LimitOrderTradePairBox.svelte';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { LimitOrderPairView, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -76,7 +77,12 @@ describe('LimitOrderTradePairBox', () => {
 			props: { ...baseProps, baseAmount: '200', freeBase: 100 }
 		});
 
-		expect(container).toHaveTextContent(en.trading.limit_order.error_balance_sell.split(' $')[0]);
+		expect(container).toHaveTextContent(
+			replacePlaceholders(en.trading.limit_order.error_balance_sell, {
+				$amount: '100',
+				$symbol: 'ICP'
+			})
+		);
 	});
 
 	it('shows the lot-multiple error when the amount is not a multiple of the lot size', () => {
@@ -84,7 +90,12 @@ describe('LimitOrderTradePairBox', () => {
 			props: { ...baseProps, baseAmount: '4.1' }
 		});
 
-		expect(container).toHaveTextContent(en.trading.limit_order.error_lot_multiple.split(' $')[0]);
+		expect(container).toHaveTextContent(
+			replacePlaceholders(en.trading.limit_order.error_lot_multiple, {
+				$step: '0.25',
+				$symbol: 'ICP'
+			})
+		);
 	});
 
 	it('invokes onSelectQuote when the quote pill is clicked', async () => {

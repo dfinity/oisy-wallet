@@ -437,7 +437,12 @@ export const queuePositionDisplay = (fraction: number | null): QueuePositionDisp
 		return { front: true, percent: 0 };
 	}
 	if (pct < 10) {
-		return { front: false, percent: Math.ceil(pct * 10) / 10 };
+		// One decimal, rounded up — but if that rounds up to 10 (e.g. 9.91),
+		// fall through to the whole-number branch so the boundary stays consistent.
+		const rounded = Math.ceil(pct * 10) / 10;
+		if (rounded < 10) {
+			return { front: false, percent: rounded };
+		}
 	}
 	return { front: false, percent: Math.round(pct) };
 };
