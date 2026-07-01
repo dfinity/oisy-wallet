@@ -25,5 +25,5 @@
 	<span class="text-sm font-medium" class:text-primary={nonNullish(symbol)}>
 		{symbol ?? $i18n.core.text.select}
 	</span>
-	<span class="rotate-90 text-tertiary"><IconChevronRight size="14" /></span>
+	<span class="rotate-90 text-tertiary" aria-hidden="true"><IconChevronRight size="14" /></span>
 </button>

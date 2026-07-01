@@ -36,6 +36,16 @@ vi.mock('$lib/derived/oisy-trade.derived', () => ({
 describe('LimitOrderWizard', () => {
 	const steps = limitOrderWizardSteps({ i18n: en });
 
+	// Resolve a wizard step by name, failing loudly if the config no longer
+	// defines it (rather than silently rendering the default step).
+	const stepByName = (name: WizardStepsLimitOrder) => {
+		const step = steps.find((s) => s.name === name);
+
+		expect(step).toBeDefined();
+
+		return step;
+	};
+
 	const modal = {
 		back: vi.fn(),
 		next: vi.fn(),
@@ -84,7 +94,7 @@ describe('LimitOrderWizard', () => {
 		const { getByText } = render(LimitOrderWizard, {
 			props: {
 				...baseProps,
-				currentStep: steps.find((s) => s.name === WizardStepsLimitOrder.BASE_TOKEN)
+				currentStep: stepByName(WizardStepsLimitOrder.BASE_TOKEN)
 			},
 			context: context()
 		});
@@ -96,7 +106,7 @@ describe('LimitOrderWizard', () => {
 		const { getByText } = render(LimitOrderWizard, {
 			props: {
 				...baseProps,
-				currentStep: steps.find((s) => s.name === WizardStepsLimitOrder.QUOTE_TOKEN)
+				currentStep: stepByName(WizardStepsLimitOrder.QUOTE_TOKEN)
 			},
 			context: context()
 		});
@@ -108,7 +118,7 @@ describe('LimitOrderWizard', () => {
 		const { container } = render(LimitOrderWizard, {
 			props: {
 				...baseProps,
-				currentStep: steps.find((s) => s.name === WizardStepsLimitOrder.REVIEW)
+				currentStep: stepByName(WizardStepsLimitOrder.REVIEW)
 			},
 			context: context()
 		});
@@ -120,7 +130,7 @@ describe('LimitOrderWizard', () => {
 		const { container } = render(LimitOrderWizard, {
 			props: {
 				...baseProps,
-				currentStep: steps.find((s) => s.name === WizardStepsLimitOrder.PLACING),
+				currentStep: stepByName(WizardStepsLimitOrder.PLACING),
 				progressStep: ProgressStepsLimitOrder.PLACE
 			},
 			context: context()
@@ -133,7 +143,7 @@ describe('LimitOrderWizard', () => {
 		render(LimitOrderWizard, {
 			props: {
 				...baseProps,
-				currentStep: steps.find((s) => s.name === WizardStepsLimitOrder.PLACING),
+				currentStep: stepByName(WizardStepsLimitOrder.PLACING),
 				progressStep: ProgressStepsLimitOrder.PLACE
 			},
 			context: context()

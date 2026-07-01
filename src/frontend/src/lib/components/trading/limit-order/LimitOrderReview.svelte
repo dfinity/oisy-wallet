@@ -73,22 +73,27 @@
 		fillOrKill ? $i18n.trading.limit_order.order_type_fok : $i18n.trading.limit_order.order_type_gtc
 	);
 
-	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : 0);
-	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : 0);
-	const feePercent = (value: number): string =>
-		value === 0
-			? $i18n.trading.limit_order.no_fee
-			: replacePlaceholders($i18n.trading.limit_order.fee_percent, { $value: value.toString() });
+	// Null while the pair is unknown (loading / missing) so the UI shows "—"
+	// rather than the misleading "no fee" label a 0 fallback would render.
+	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : null);
+	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : null);
+	const feePercent = (value: number | null): string =>
+		value === null
+			? '—'
+			: value === 0
+				? $i18n.trading.limit_order.no_fee
+				: replacePlaceholders($i18n.trading.limit_order.fee_percent, { $value: value.toString() });
 
-	// Queue position only for a resting order (a crossing order fills now).
+	// Queue position only for a resting order (a crossing order fills now) with a
+	// known pair — without one the tick size (and thus the position) is unknown.
 	const queueText = $derived.by((): string | undefined => {
-		if (crossing) {
+		if (crossing || !nonNullish(pairView)) {
 			return undefined;
 		}
 		const fraction = queuePositionFraction({
 			side,
 			price,
-			tickSize: pairView?.tickSize ?? 0,
+			tickSize: pairView.tickSize,
 			asks: depthLevels.asks,
 			bids: depthLevels.bids
 		});

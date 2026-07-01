@@ -38,8 +38,8 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 // canister id), keyed by symbol. The trade canister exposes only symbol/decimals,
 // so the form joins against the enabled IC tokens (which include testnets when a
 // testnet network is on) to recover the logo, name, network and standard the
-// shared `TokenInput` needs. This is the same resolution inlined in
-// `LimitOrderTokensList`, surfaced here so the form can thread the real token.
+// shared `TokenInput` needs. The limit-order token picker performs the same
+// per-ledger resolution; surfacing it here lets the form thread the real token.
 export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = derived(
 	[oisyTradeSupportedTokens, enabledIcTokens],
 	([$supportedTokens, $enabledIcTokens]) => {

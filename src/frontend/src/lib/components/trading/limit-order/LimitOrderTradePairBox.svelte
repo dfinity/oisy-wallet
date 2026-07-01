@@ -65,6 +65,12 @@
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
 
+	// Round the read-only readout to the quote token's decimals so JS float
+	// multiplication artifacts (e.g. 0.1 * 3 = 0.30000000000000004) never surface.
+	const quoteAmountDisplay = $derived(
+		quoteAmount > 0 ? parseFloat(quoteAmount.toFixed(pairView?.quoteDecimals ?? 8)) : '—'
+	);
+
 	const baseLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.you_sell : $i18n.trading.limit_order.you_buy
 	);
@@ -210,7 +216,7 @@
 		</div>
 		<div class="mt-1.5 flex items-center gap-2">
 			<span class="w-full text-xl text-secondary">
-				{quoteAmount > 0 ? quoteAmount : '—'}
+				{quoteAmountDisplay}
 			</span>
 			<LimitOrderTokenPill
 				disabled={!nonNullish(baseSymbol)}
