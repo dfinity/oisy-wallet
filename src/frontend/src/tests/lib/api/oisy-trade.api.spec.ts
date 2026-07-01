@@ -9,7 +9,9 @@ import type {
 	Token,
 	TradingPair,
 	TradingPairInfo,
-	UserTokenBalance
+	UserTokenBalance,
+	WithdrawRequest,
+	WithdrawResponse
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
 	addLimitOrder,
@@ -18,7 +20,8 @@ import {
 	getOrderBookDepth,
 	getOrderBookTicker,
 	getTradingPairs,
-	listSupportedTokens
+	listSupportedTokens,
+	withdraw
 } from '$lib/api/oisy-trade.api';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
 import * as appConstants from '$lib/constants/app.constants';
@@ -173,6 +176,30 @@ describe('oisy-trade.api', () => {
 		it('throws when the identity is nullish', async () => {
 			await expect(deposit({ identity: null, request: depositRequest })).rejects.toThrow();
 			expect(oisyTradeCanisterMock.deposit).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('withdraw', () => {
+		const tokenId = { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+		const withdrawRequest: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
+		const response: WithdrawResponse = { block_index: 42n };
+
+		it('delegates to the canister with the request', async () => {
+			oisyTradeCanisterMock.withdraw.mockResolvedValue(response);
+
+			const result = await withdraw({
+				identity: mockIdentity,
+				request: withdrawRequest,
+				canisterId: mockLedgerCanisterId
+			});
+
+			expect(result).toEqual(response);
+			expect(oisyTradeCanisterMock.withdraw).toHaveBeenCalledExactlyOnceWith(withdrawRequest);
+		});
+
+		it('throws when the identity is nullish', async () => {
+			await expect(withdraw({ identity: null, request: withdrawRequest })).rejects.toThrow();
+			expect(oisyTradeCanisterMock.withdraw).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -1261,11 +1261,18 @@ export interface PendingTransaction {
 	utxos: Array<Utxo>;
 }
 /**
- * A single stored entry returned by `get_personal_notes`. `encrypted_note` is
- * decrypted client-side.
+ * A single stored entry returned by `get_personal_notes`, and the upsert
+ * payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
  */
 export interface PersonalNoteEntry {
+	/**
+	 * The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	 * client-side.
+	 */
 	encrypted_note: Uint8Array;
+	/**
+	 * Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	 */
 	note_id: string;
 }
 export type PersonalNoteError =
