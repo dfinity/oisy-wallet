@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"no_borrowings": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Отмена",
