@@ -266,15 +266,22 @@ inside the `(public)` layout (OISY logo header, branded background). It has **fo
 states**.
 
 **Background & theme:** the page must use OISY's **existing** branded background,
-not a bespoke gradient. The horizon-glow background ships as
-`src/frontend/static/images/oisy_bg_light.webp` / `oisy_bg_dark.webp` (with
-`landing_bg_light/dark.webp` for the landing/sign surface), mounted globally via
-`#app-background-container` in
-[`src/frontend/src/app.html`](../../../../src/frontend/src/app.html) and toggled by
-the `:root[theme='light'|'dark']` setting. The recipient page reuses this, so it
-gets **light and dark themes** for free and stays visually consistent with the rest
-of OISY. (The full-page wireframe inlines the real `oisy_bg_*` assets and includes a
-light/dark toggle to confirm both.)
+not a bespoke gradient — and specifically the **landing** artwork, since the
+recipient page is a signed-out public surface. Per
+[`src/frontend/src/app.html`](../../../../src/frontend/src/app.html), the
+`#app-background-container` mounts two pairs and switches on
+`:root[theme='light'|'dark']`:
+
+- `landing_bg_light.webp` / `landing_bg_dark.webp` — the **default / signed-out
+  landing** background. **This is the one the recipient page uses.**
+- `oisy_bg_light.webp` / `oisy_bg_dark.webp` — the "classic" **in-app** background,
+  shown only on signed-in / lock views that opt in via `[data-app-view]`. **Not**
+  the recipient page.
+
+Reusing the landing background gives the recipient page **light and dark themes**
+for free and keeps it visually consistent with the OISY landing/sign screens. (The
+full-page wireframes inline the real `landing_bg_*` assets and include a light/dark
+toggle to confirm both.)
 
 **Header:** reuse OISY's existing landing header — the logged-out variant of
 [`src/frontend/src/lib/components/hero/Header.svelte`](../../../../src/frontend/src/lib/components/hero/Header.svelte)
@@ -459,7 +466,7 @@ test-ids. Component tests mirroring `NoteView.spec.ts` / `NotesModal.spec.ts`.
 **PR-4 (frontend) — recipient page.** The `(public)/notes/share/[token]` route with
 the **four states** (locked → revealed → outro, plus unavailable), rendering the
 real OISY header (`hero/Header.svelte` logged-out variant) over the branded
-`oisy_bg_*` background with **light/dark** support. On load it does the
+**`landing_bg_*`** background with **light/dark** support. On load it does the
 **non-destructive peek** to decrypt + show the sender name on Locked; Reveal
 fetches/consumes the content. Reuse `neutralizePersonalNoteText` (for both the note
 **and** the sender name) / `linkifyPersonalNote` for safe rendering, the Notes-modal
@@ -531,7 +538,7 @@ as the behaviour change.
     state also offers a primary **Discover OISY** button. Neither the note view nor
     the outro shows a "sign up" CTA.
 11. The recipient page renders the **real OISY header** (logged-out variant) over the
-    branded `oisy_bg_*` background and works in **both light and dark** themes.
+    branded `landing_bg_*` background and works in **both light and dark** themes.
 12. **Sender name:** when a name is set, the Locked screen reads "<name> shared a
     note with you" and the revealed title "Shared note from <name>" (ellipsized if
     long); when blank, the generic strings are used. The name round-trips
@@ -577,7 +584,7 @@ as the behaviour change.
    for the cap (a per-creator counter vs. a `(creator, token)` index), accounting for
    shares that expire or are consumed.
 8. **Header & theme on the public route.** The recipient page should render the real
-   `hero/Header.svelte` (logged-out) over the `oisy_bg_*` background with light/dark.
+   `hero/Header.svelte` (logged-out) over the `landing_bg_*` background with light/dark.
    Confirm whether to point the `(public)/notes/share/[token]` route at the hero
    header directly, or lift the hero header + background into a shared layout the
    `(public)` group can opt into — and that theme + background work on a route loaded
