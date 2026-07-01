@@ -103,11 +103,11 @@ fn shares_count(pic_setup: &PicBackend, caller: Principal) -> u64 {
 }
 
 // -------------------------------------------------------------------------------------------------
-// - Guards, anonymous access, and the reusable / single-use lifecycle (one shared instance)
+// - Guards + the reusable-share lifecycle (peek + repeated get, never consumable)
 // -------------------------------------------------------------------------------------------------
 
 #[test]
-fn guards_and_lifecycle() {
+fn guards_and_reusable_share_lifecycle() {
     let pic_setup = setup();
     let alice = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(alice);
@@ -133,7 +133,6 @@ fn guards_and_lifecycle() {
         "anonymous create must be rejected by the guard"
     );
 
-    // --- Reusable share: peek + repeated get, anonymously, both work. ---
     let reusable = token(2);
     create_share(&pic_setup, alice, &reusable, now + ONE_HOUR_NS, false)
         .expect("create should succeed");
@@ -159,11 +158,38 @@ fn guards_and_lifecycle() {
         "a reusable share never frees its cap slot on read"
     );
 
-    // --- Single-use share: consume once, then it's gone. ---
-    let single = token(3);
+    // An unknown token collapses to the same NotFound for every anonymous endpoint.
+    let unknown = token(99);
+    assert_eq!(
+        peek_share(&pic_setup, anonymous, &unknown),
+        Err(PersonalNoteShareError::NotFound)
+    );
+    assert_eq!(
+        get_share(&pic_setup, anonymous, &unknown),
+        Err(PersonalNoteShareError::NotFound)
+    );
+    assert_eq!(
+        consume_share(&pic_setup, anonymous, &unknown),
+        Err(PersonalNoteShareError::NotFound)
+    );
+}
+
+// -------------------------------------------------------------------------------------------------
+// - The single-use lifecycle (consume once, then gone) + create validation
+// -------------------------------------------------------------------------------------------------
+
+#[test]
+fn single_use_lifecycle_and_create_validation() {
+    let pic_setup = setup();
+    let alice = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(alice);
+    let anonymous = Principal::anonymous();
+    let now = now_ns(&pic_setup);
+
+    let single = token(1);
     create_share(&pic_setup, alice, &single, now + ONE_HOUR_NS, true)
         .expect("create should succeed");
-    assert_eq!(shares_count(&pic_setup, alice), 2);
+    assert_eq!(shares_count(&pic_setup, alice), 1);
 
     // get (reusable-only) must not return a single-use share's content.
     assert_eq!(
@@ -185,17 +211,20 @@ fn guards_and_lifecycle() {
     );
     assert_eq!(
         shares_count(&pic_setup, alice),
-        1,
+        0,
         "consuming a share frees its cap slot"
     );
 
-    // --- Validation ---
+    // --- Create validation ---
+    let existing = token(2);
+    create_share(&pic_setup, alice, &existing, now + ONE_HOUR_NS, false)
+        .expect("create should succeed");
     assert_eq!(
-        create_share(&pic_setup, alice, &reusable, now + ONE_HOUR_NS, false),
+        create_share(&pic_setup, alice, &existing, now + ONE_HOUR_NS, false),
         Err(PersonalNoteShareError::DuplicateToken)
     );
     assert_eq!(
-        create_share(&pic_setup, alice, &token(4), now.saturating_sub(1), false),
+        create_share(&pic_setup, alice, &token(3), now.saturating_sub(1), false),
         Err(PersonalNoteShareError::InvalidExpiry),
         "an expiry in the past must be rejected"
     );
@@ -203,7 +232,7 @@ fn guards_and_lifecycle() {
         create_share(
             &pic_setup,
             alice,
-            &token(5),
+            &token(4),
             now + MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS + ONE_HOUR_NS,
             false
         ),
@@ -215,7 +244,7 @@ fn guards_and_lifecycle() {
             alice,
             "create_personal_note_share",
             CreatePersonalNoteShareRequest {
-                token: token(6),
+                token: token(5),
                 ct_meta: ByteBuf::from(vec![
                     0u8;
                     MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES + 1
@@ -233,22 +262,7 @@ fn guards_and_lifecycle() {
     assert_eq!(
         shares_count(&pic_setup, alice),
         1,
-        "none of the rejected creates should have been stored"
-    );
-
-    // An unknown token collapses to the same NotFound for every anonymous endpoint.
-    let unknown = token(99);
-    assert_eq!(
-        peek_share(&pic_setup, anonymous, &unknown),
-        Err(PersonalNoteShareError::NotFound)
-    );
-    assert_eq!(
-        get_share(&pic_setup, anonymous, &unknown),
-        Err(PersonalNoteShareError::NotFound)
-    );
-    assert_eq!(
-        consume_share(&pic_setup, anonymous, &unknown),
-        Err(PersonalNoteShareError::NotFound)
+        "only the one valid share should remain; rejected creates are not stored"
     );
 }
 
@@ -277,7 +291,7 @@ fn expired_shares_are_unavailable_to_every_endpoint() {
     assert!(get_share(&pic_setup, anonymous, &reusable).is_ok());
 
     // Advance the IC's virtual clock past both shares' expiry.
-    pic_setup.pic.advance_time(Duration::from_secs(2 * 60 * 60));
+    pic_setup.pic.advance_time(Duration::from_hours(2));
     pic_setup.pic.tick();
 
     assert_eq!(
