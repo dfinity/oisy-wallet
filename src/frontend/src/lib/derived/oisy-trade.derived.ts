@@ -1,6 +1,7 @@
 import type {
 	Token,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
@@ -9,10 +10,16 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type {
+	OisyTradeAsset,
+	OisyTradeOrderView,
+	OisyTradeWithdrawToken
+} from '$lib/types/oisy-trade';
 import {
+	isOisyTradeOrderActive,
 	oisyTradeDepositableTokens as mapDepositableTokens,
 	mapOisyTradeAssets,
+	mapOisyTradeOrders,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
 	sumOisyTradeAssetsUsd,
 	toOisyTradeWithdrawTokens
@@ -35,14 +42,6 @@ export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 	({ balances }) => balances ?? []
 );
 
-// DEX balances joined with the matching OISY token, so the Trading tab can offer
-// a Withdraw entry per holding with the token pre-resolved.
-export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
-	[oisyTradeBalances, enabledIcTokens],
-	([$oisyTradeBalances, $enabledIcTokens]) =>
-		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
-);
-
 // True once the first load has resolved (balances populated). Distinguishes the
 // initial loading state from a genuinely empty wallet, so the Trading tab can show
 // skeletons first instead of flashing the onboarding placeholder.
@@ -50,44 +49,28 @@ export const oisyTradeLoaded: Readable<boolean> = derived(oisyTradeStore, ({ bal
 	nonNullish(balances)
 );
 
-// The supported trade tokens resolved to their matching app `IcToken` (by ledger
-// canister id), keyed by symbol. The trade canister exposes only symbol/decimals,
-// so the form joins against the enabled IC tokens (which include testnets when a
-// testnet network is on) to recover the logo, name, network and standard the
-// shared `TokenInput` needs. The limit-order token picker performs the same
-// per-ledger resolution; surfacing it here lets the form thread the real token.
-export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = derived(
-	[oisyTradeSupportedTokens, enabledIcTokens],
-	([$supportedTokens, $enabledIcTokens]) => {
-		const byLedger = $enabledIcTokens.reduce<Record<string, IcToken>>((acc, token) => {
-			acc[token.ledgerCanisterId] = token;
-			return acc;
-		}, {});
-
-		return $supportedTokens.reduce<Record<string, IcToken>>((acc, tradeToken) => {
-			const { symbol } = tradeToken.metadata;
-			if (symbol in acc) {
-				return acc;
-			}
-			const token = byLedger[tradeToken.id.ledger_id.toText()];
-			if (nonNullish(token)) {
-				acc[symbol] = token;
-			}
-			return acc;
-		}, {});
-	}
+const oisyTradeRawOrders: Readable<UserOrder[]> = derived(
+	oisyTradeStore,
+	({ orders }) => orders ?? []
 );
 
-// Free DEX balance per token symbol, in human units (smallest units scaled by
-// the token's own decimals). Keyed by symbol so the limit-order form can look
-// up the spend/receive balances for the chosen base/quote.
-export const oisyTradeFreeBalanceBySymbol: Readable<Record<string, number>> = derived(
-	oisyTradeBalances,
-	($balances) =>
-		$balances.reduce<Record<string, number>>((acc, { token, balance }) => {
-			acc[token.metadata.symbol] = Number(balance.free) / 10 ** token.metadata.decimals;
-			return acc;
-		}, {})
+// The caller's orders resolved to OISY tokens, newest first. Orders whose
+// base/quote ledger the wallet doesn't know are dropped.
+export const oisyTradeOrders: Readable<OisyTradeOrderView[]> = derived(
+	[oisyTradeRawOrders, enabledIcTokens],
+	([$orders, $enabledIcTokens]) => mapOisyTradeOrders({ orders: $orders, tokens: $enabledIcTokens })
+);
+
+// Working orders (Active tab): status Pending or Open.
+export const oisyTradeActiveOrders: Readable<OisyTradeOrderView[]> = derived(
+	oisyTradeOrders,
+	($orders) => $orders.filter(isOisyTradeOrderActive)
+);
+
+// Terminal orders (History tab): status Filled, Canceled or Expired.
+export const oisyTradeHistoryOrders: Readable<OisyTradeOrderView[]> = derived(
+	oisyTradeOrders,
+	($orders) => $orders.filter((order) => !isOisyTradeOrderActive(order))
 );
 
 // The distinct union of base + quote token symbols across all trading pairs —
@@ -134,4 +117,49 @@ export const oisyTradeDepositableTokens: Readable<IcToken[]> = derived(
 			tokens: $enabledIcTokens,
 			hasBalance: (token) => ($balances?.[token.id]?.data ?? ZERO) > ZERO
 		})
+);
+
+// DEX balances joined with the matching OISY token, so the Trading tab can offer
+// a Withdraw entry per holding with the token pre-resolved.
+export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
+	[oisyTradeBalances, enabledIcTokens],
+	([$oisyTradeBalances, $enabledIcTokens]) =>
+		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
+);
+
+// The supported trade tokens resolved to their matching app `IcToken` (by ledger
+// canister id), keyed by symbol. The trade canister exposes only symbol/decimals,
+// so the form joins against `enabledIcTokens` (the user's enabled IC tokens,
+// including testnets and the built-in ICP tokens) to recover the logo, name,
+// network and standard the shared `TokenInput` needs — so a testnet DEX resolves
+// its tokens too. Same resolution inlined in `LimitOrderTokensList`.
+export const oisyTradeIcTokenBySymbol: Readable<Record<string, IcToken>> = derived(
+	[oisyTradeSupportedTokens, enabledIcTokens],
+	([$supportedTokens, $enabledIcTokens]) => {
+		const byLedger = $enabledIcTokens.reduce<Record<string, IcToken>>(
+			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
+			{}
+		);
+
+		return $supportedTokens.reduce<Record<string, IcToken>>((acc, tradeToken) => {
+			const { symbol } = tradeToken.metadata;
+			if (symbol in acc) {
+				return acc;
+			}
+			const token = byLedger[tradeToken.id.ledger_id.toText()];
+			return nonNullish(token) ? { ...acc, [symbol]: token } : acc;
+		}, {});
+	}
+);
+
+// Free DEX balance per token symbol, in human units (smallest units scaled by
+// the token's own decimals). Keyed by symbol so the limit-order form can look
+// up the spend/receive balances for the chosen base/quote.
+export const oisyTradeFreeBalanceBySymbol: Readable<Record<string, number>> = derived(
+	oisyTradeBalances,
+	($balances) =>
+		$balances.reduce<Record<string, number>>((acc, { token, balance }) => {
+			acc[token.metadata.symbol] = Number(balance.free) / 10 ** token.metadata.decimals;
+			return acc;
+		}, {})
 );

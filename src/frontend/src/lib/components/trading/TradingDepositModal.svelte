@@ -17,10 +17,7 @@
 	import { tradingDepositWizardSteps } from '$lib/config/trading.config';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import {
-		oisyTradeDepositableTokens,
-		oisyTradeSupportedTokenSymbols
-	} from '$lib/derived/oisy-trade.derived';
+	import { oisyTradeDepositableTokens } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingDeposit } from '$lib/enums/wizard-steps';
 	import { depositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
@@ -145,7 +142,8 @@
 <WizardModal
 	bind:this={modal}
 	disablePointerEvents={currentStep?.name === WizardStepsTradingDeposit.DEPOSITING ||
-		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS}
+		currentStep?.name === WizardStepsTradingDeposit.FILTER_NETWORKS ||
+		currentStep?.name === WizardStepsTradingDeposit.TOKENS_LIST}
 	onClose={close}
 	{steps}
 	bind:currentStep
@@ -160,9 +158,9 @@
 			/>
 
 			<div class="mt-4 flex flex-wrap justify-center gap-2">
-				{#each $oisyTradeSupportedTokenSymbols as symbol (symbol)}
+				{#each $oisyTradeDepositableTokens as token (token.id)}
 					<span class="rounded-full border-1 border-tertiary bg-primary px-3 py-1 text-sm">
-						{symbol}
+						{token.symbol}
 					</span>
 				{/each}
 			</div>

@@ -135,7 +135,7 @@
 		}
 	};
 
-	// Refresh the order book whenever either token or the side changes.
+	// Reset the price anchor whenever either token or the side changes.
 	$effect(() => {
 		// Touch the dependencies so the effect re-runs on pair/side change.
 		baseSymbol;
@@ -146,11 +146,12 @@
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
 
-	// LimitOrderReview expects finite numbers; empty/partial inputs parse to NaN.
-	const finiteOrZero = (value: string): number => {
-		const parsed = parseFloat(value);
-		return Number.isFinite(parsed) ? parsed : 0;
-	};
+	// Parsed Review inputs, guarded against NaN from empty/partial fields so the
+	// Review step never renders NaN (nor feeds NaN% into ValueDifference).
+	const reviewBaseAmount = $derived(
+		Number.isFinite(parseFloat(baseAmount)) ? parseFloat(baseAmount) : 0
+	);
+	const reviewPrice = $derived(Number.isFinite(parseFloat(price)) ? parseFloat(price) : 0);
 
 	const place = async () => {
 		if (isNullish(pairInfo) || isNullish(pairView)) {
@@ -173,7 +174,7 @@
 					side: toCandidSide(side),
 					quantity: toQuantity({ baseAmount: baseNum, baseDecimals: pairView.baseDecimals }),
 					price: toPriceUnits({ price: priceNum, quoteDecimals: pairView.quoteDecimals }),
-					time_in_force: fillOrKill ? [{ FillOrKill: null }] : []
+					time_in_force: fillOrKill ? [{ FillOrKill: null }] : [{ GoodTilCanceled: null }]
 				}
 			});
 
@@ -204,6 +205,7 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.QUOTE_TOKEN);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.QUOTE_TOKEN}
 	<LimitOrderTokensList
@@ -216,11 +218,12 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.FORM);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
 		{ask}
-		baseAmount={finiteOrZero(baseAmount)}
+		baseAmount={reviewBaseAmount}
 		{bid}
 		{currentValue}
 		{depthLevels}
@@ -228,7 +231,7 @@
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
 		{pairView}
-		price={finiteOrZero(price)}
+		price={reviewPrice}
 		{side}
 		bind:giveUpConfirmed
 	/>
@@ -241,12 +244,7 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={() => {
-			// Each fresh visit must re-confirm a severe give-up, even if a prior
-			// visit (or now-stale market data) had already confirmed it.
-			giveUpConfirmed = false;
-			goTo(WizardStepsLimitOrder.REVIEW);
-		}}
+		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}
