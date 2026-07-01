@@ -12,7 +12,7 @@
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
-	import { loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
+	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -177,6 +177,11 @@
 					time_in_force: fillOrKill ? [{ FillOrKill: null }] : [{ GoodTilCanceled: null }]
 				}
 			});
+
+			// The place call resolves once the order is accepted (Pending/Open), so
+			// reload immediately to surface it in the Active list rather than waiting
+			// for the next poll.
+			await loadOisyTrade({ identity: $authIdentity });
 
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
