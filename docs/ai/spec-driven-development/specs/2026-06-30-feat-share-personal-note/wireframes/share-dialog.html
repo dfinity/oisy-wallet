@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Share note dialog (OISY)</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--white: #ffffff;
+				--text-primary: #0f0f0e;
+				--text-secondary: #5f5e5a;
+				--text-tertiary: #8a8983;
+				--brand: #0b57f5;
+				--brand-hover: #0a4cd6;
+				--brand-subtle: #e8f0fe;
+				--brand-subtle-border: #dfe6f5;
+				--bg-dim: #f4f5f7;
+				--bg-soft: #f5f5f3;
+				--radius-card: 12px;
+				--radius-btn: 12px;
+				--radius-modal: 20px;
+				--font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+			}
+			* { box-sizing: border-box; margin: 0; padding: 0; }
+			body {
+				font-family: var(--font); color: var(--text-primary);
+				background: #e9eaec; padding: 2rem 1.25rem;
+			}
+			.page-note {
+				max-width: 940px; margin: 0 auto 1.75rem; text-align: center;
+				font-size: 12px; color: #6b6a66; line-height: 1.55;
+			}
+			.page-note b { color: #2a2a28; }
+			.grid { display: flex; flex-wrap: wrap; gap: 2.25rem; justify-content: center; align-items: flex-start; }
+			.col { display: flex; flex-direction: column; align-items: center; }
+			.col-label {
+				font-size: 11px; font-weight: 700; letter-spacing: .05em;
+				text-transform: uppercase; color: #6b6a66; margin-bottom: .75rem;
+			}
+			.stack-v { display: flex; flex-direction: column; gap: 1.5rem; }
+
+			/* ---- modal shell ---- */
+			.dialog {
+				width: 420px; max-width: 100%; background: var(--white);
+				border-radius: var(--radius-modal); box-shadow: 0 20px 60px rgba(0,0,0,.18);
+				overflow: hidden;
+			}
+			.modal-head {
+				position: relative; display: flex; align-items: center; justify-content: center;
+				padding: 1.15rem 1.25rem; border-bottom: 1px solid #eceae6;
+			}
+			.modal-title { font-size: 1.15rem; font-weight: 700; }
+			.modal-x {
+				position: absolute; right: 1.1rem; top: 50%; transform: translateY(-50%);
+				font-size: 1.1rem; color: var(--text-primary); cursor: pointer; line-height: 1;
+			}
+			.modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.25rem; }
+			.modal-foot { padding: 1.1rem 1.25rem; border-top: 1px solid #eceae6; }
+
+			.field-label {
+				font-size: 11px; font-weight: 700; letter-spacing: .04em;
+				text-transform: uppercase; color: var(--text-tertiary); margin-bottom: .55rem;
+			}
+			.field-label .opt { text-transform: none; letter-spacing: 0; font-weight: 600; color: var(--text-tertiary); }
+			.name-input {
+				width: 100%; font-family: inherit; font-size: 14px; padding: .7rem .85rem;
+				border: 1px solid var(--brand-subtle-border); border-radius: var(--radius-card);
+				background: var(--bg-soft); color: var(--text-primary);
+			}
+			.name-input::placeholder { color: var(--text-tertiary); }
+			.name-hint { font-size: 12px; color: var(--text-tertiary); margin-top: .4rem; }
+
+			.note-context {
+				background: var(--bg-soft); border: 1px solid var(--brand-subtle-border);
+				border-radius: var(--radius-card); padding: .75rem .85rem;
+			}
+			.note-context .nc-title {
+				font-weight: 700; font-size: 14px; color: var(--text-primary);
+				white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* matches list-view `truncate` */
+			}
+			.nc-caption { margin-top: .5rem; font-size: 12px; line-height: 1.45; color: var(--text-tertiary); }
+			.note-context .nc-body {
+				margin-top: .25rem; font-weight: 400; font-size: 13.5px; line-height: 1.45;
+				color: var(--text-tertiary); white-space: pre-line;
+				display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+
+			/* segmented expiry */
+			.segmented {
+				display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem;
+			}
+			.segmented button {
+				font-family: inherit; font-size: 12.5px; font-weight: 600; padding: .65rem .2rem;
+				background: var(--bg-soft); border: 1px solid var(--brand-subtle-border);
+				color: var(--text-secondary); cursor: pointer; border-radius: 10px;
+			}
+			.segmented button.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+			/* destroy-after-viewing */
+			.toggle-row { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer; }
+			.cbox {
+				width: 20px; height: 20px; border-radius: 6px; flex: none; margin-top: 1px;
+				border: 1.5px solid #c3c2bd; display: flex; align-items: center; justify-content: center;
+				color: #fff; font-size: 13px;
+			}
+			.cbox.on { background: var(--brand); border-color: var(--brand); }
+			.toggle-text { font-size: 14px; font-weight: 600; }
+			.toggle-sub { font-size: 12.5px; color: var(--text-tertiary); margin-top: 1px; }
+
+			/* info box */
+			.info {
+				display: flex; gap: .6rem; align-items: flex-start;
+				background: var(--brand-subtle); border-radius: var(--radius-card);
+				padding: .8rem .85rem; font-size: 13px; color: var(--text-primary); line-height: 1.5;
+			}
+			.info i { color: var(--brand); font-size: 18px; margin-top: 1px; flex: none; }
+			.info a { color: var(--brand); font-weight: 600; text-decoration: none; white-space: nowrap; }
+			/* standard "OISY protects you!" variant: green shield, bold lead */
+			.info.protect i { color: #1f9d57; }
+			.info.protect b { font-weight: 700; }
+			.info.warn { background: var(--bg-soft); color: var(--text-secondary); }
+			.info.warn i { color: var(--text-tertiary); }
+
+			/* buttons */
+			.btn {
+				font-family: inherit; width: 100%; display: flex; align-items: center;
+				justify-content: center; gap: .5rem; cursor: pointer; border: none;
+				font-size: 15px; font-weight: 600; border-radius: var(--radius-btn); padding: .95rem;
+			}
+			.btn-primary { background: var(--brand); color: #fff; }
+			.btn-primary:hover { background: var(--brand-hover); }
+			.btn-secondary { background: var(--brand-subtle); color: var(--brand); }
+			.btn-group { display: flex; gap: .65rem; }
+
+			/* link ready */
+			.link-box {
+				display: flex; align-items: center; gap: .5rem;
+				border: 1px solid var(--brand-subtle-border); border-radius: var(--radius-card);
+				padding: .4rem .4rem .4rem .8rem; background: var(--bg-soft);
+			}
+			.link-text {
+				flex: 1; font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+				font-size: 12px; color: var(--text-secondary);
+				white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+			}
+			.copy-btn {
+				display: flex; align-items: center; gap: .35rem; white-space: nowrap;
+				background: var(--brand); color: #fff; border: none; cursor: pointer;
+				font-family: inherit; font-size: 12.5px; font-weight: 600;
+				padding: .55rem .8rem; border-radius: 9px;
+			}
+			.recap { display: flex; align-items: center; gap: .45rem; font-size: 13px; color: var(--text-secondary); }
+			.recap i { color: var(--brand); font-size: 16px; }
+			.success-dot { color: #2e7d32; }
+
+			/* phone frame */
+			.phone {
+				width: 330px; background: #f6eef0; border-radius: 26px; overflow: hidden;
+				box-shadow: 0 16px 48px rgba(0,0,0,.16);
+			}
+			.sheet { background: var(--white); border-radius: 22px 22px 0 0; margin-top: 56px; }
+			.sheet .dialog { width: 100%; border-radius: 0; box-shadow: none; }
+			.grab { display: flex; justify-content: center; padding: .6rem 0 .25rem; background: var(--white); }
+			.grab span { width: 36px; height: 4px; border-radius: 2px; background: #cdcdc9; }
+		</style>
+	</head>
+	<body>
+		<p class="page-note">
+			OISY · Personal notes — <b>Share note</b> dialog, opened from the Share link on the
+			note view. Same shell as the Note modal (white surface, blue accent, ButtonGroup footer;
+			bottom sheet on mobile). Two states: <b>A · Configure</b> then <b>B · Link ready</b>.
+			Static mock.
+		</p>
+
+		<div class="grid">
+			<!-- DESKTOP -->
+			<div class="col">
+				<div class="col-label">Desktop · dialog</div>
+				<div class="stack-v">
+					<!-- STATE A -->
+					<div class="dialog">
+						<div class="modal-head">
+							<div class="modal-title">Share note</div>
+							<div class="modal-x"><i class="ti ti-x"></i></div>
+						</div>
+						<div class="modal-body">
+							<div>
+								<div class="field-label">Sharing</div>
+								<div class="note-context">
+									<div class="nc-title">This is a very long title that never ends and keeps going</div>
+									<div class="nc-body">Lorem Ipsum
+and here line 2 — plus a third line that runs past the two-line preview so it clips with an ellipsis…</div>
+								</div>
+								<p class="nc-caption">Shares a copy of the note as it is now. Editing or deleting the note later won't change this link.</p>
+							</div>
+							<div>
+								<div class="field-label">Your name <span class="opt">(optional)</span></div>
+								<input class="name-input" type="text" maxlength="20" value="Peter" placeholder="e.g. Peter" />
+								<div class="name-hint">Shown to whoever opens the link. Up to 20 characters.</div>
+							</div>
+							<div>
+								<div class="field-label">Link expires after</div>
+								<div class="segmented">
+									<button>1 hour</button>
+									<button class="active">24 hours</button>
+									<button>7 days</button>
+									<button>30 days</button>
+								</div>
+							</div>
+							<label class="toggle-row">
+								<span class="cbox"></span>
+								<span>
+									<div class="toggle-text">Destroy after viewing</div>
+									<div class="toggle-sub">The link works once, then stops opening.</div>
+								</span>
+							</label>
+							<div class="info protect">
+								<i class="ti ti-shield-check-filled"></i>
+								<span><b>OISY protects you!</b> The share key lives in the link itself and is
+								never sent to OISY, so only someone with the full link can read this note.
+								<a href="#">Learn more</a></span>
+							</div>
+						</div>
+						<div class="modal-foot">
+							<div class="btn-group">
+								<button class="btn btn-secondary">Cancel</button>
+								<button class="btn btn-primary">Create link</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- STATE B -->
+					<div class="dialog">
+						<div class="modal-head">
+							<div class="modal-title">Share link ready</div>
+							<div class="modal-x"><i class="ti ti-x"></i></div>
+						</div>
+						<div class="modal-body">
+							<div>
+								<div class="field-label">Anyone with this link can read the note</div>
+								<div class="link-box">
+									<span class="link-text">https://oisy.com/notes/share/9f3aQ7x2k…#k=••••••••</span>
+									<button class="copy-btn"><i class="ti ti-copy"></i> Copy</button>
+								</div>
+							</div>
+							<div class="recap">
+								<i class="ti ti-clock"></i>
+								<span>Expires in 24 hours · single-use</span>
+							</div>
+							<div class="info warn">
+								<i class="ti ti-alert-triangle"></i>
+								<span>OISY can't recover or revoke this link once shared. It stops working
+								after it's used or expires.</span>
+							</div>
+						</div>
+						<div class="modal-foot">
+							<button class="btn btn-primary">Done</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- MOBILE -->
+			<div class="col">
+				<div class="col-label">Mobile · bottom sheet</div>
+				<div class="stack-v">
+					<!-- STATE A -->
+					<div class="phone">
+						<div class="sheet">
+							<div class="dialog">
+								<div class="modal-head">
+									<div class="modal-title">Share note</div>
+									<div class="modal-x"><i class="ti ti-x"></i></div>
+								</div>
+								<div class="modal-body">
+									<div>
+										<div class="field-label">Sharing</div>
+										<div class="note-context">
+									<div class="nc-title">This is a very long title that never ends and keeps going</div>
+									<div class="nc-body">Lorem Ipsum
+and here line 2 — plus a third line that runs past the two-line preview so it clips with an ellipsis…</div>
+								</div>
+									<p class="nc-caption">Shares a copy of the note as it is now. Editing or deleting it later won't change this link.</p>
+									</div>
+									<div>
+										<div class="field-label">Your name <span class="opt">(optional)</span></div>
+										<input class="name-input" type="text" maxlength="20" value="Peter" placeholder="e.g. Peter" />
+										<div class="name-hint">Shown to whoever opens the link. Up to 20 characters.</div>
+									</div>
+									<div>
+										<div class="field-label">Link expires after</div>
+										<div class="segmented">
+											<button>1 hour</button>
+											<button class="active">24 hours</button>
+											<button>7 days</button>
+											<button>30 days</button>
+										</div>
+									</div>
+									<label class="toggle-row">
+										<span class="cbox"></span>
+										<span>
+											<div class="toggle-text">Destroy after viewing</div>
+											<div class="toggle-sub">The link works once, then stops opening.</div>
+										</span>
+									</label>
+									<div class="info protect">
+										<i class="ti ti-shield-check-filled"></i>
+										<span><b>OISY protects you!</b> The share key lives in the link itself and
+										is never sent to OISY. <a href="#">Learn more</a></span>
+									</div>
+								</div>
+								<div class="modal-foot">
+									<div class="btn-group">
+										<button class="btn btn-secondary">Cancel</button>
+										<button class="btn btn-primary">Create link</button>
+									</div>
+								</div>
+							</div>
+							<div class="grab"><span></span></div>
+						</div>
+					</div>
+
+					<!-- STATE B -->
+					<div class="phone">
+						<div class="sheet">
+							<div class="dialog">
+								<div class="modal-head">
+									<div class="modal-title">Share link ready</div>
+									<div class="modal-x"><i class="ti ti-x"></i></div>
+								</div>
+								<div class="modal-body">
+									<div>
+										<div class="field-label">Anyone with this link can read the note</div>
+										<div class="link-box">
+											<span class="link-text">https://oisy.com/notes/share/9f3aQ7x2k…#k=••••</span>
+											<button class="copy-btn"><i class="ti ti-copy"></i> Copy</button>
+										</div>
+									</div>
+									<div class="recap">
+										<i class="ti ti-clock"></i>
+										<span>Expires in 24 hours · single-use</span>
+									</div>
+									<div class="info warn">
+										<i class="ti ti-alert-triangle"></i>
+										<span>OISY can't recover or revoke this link once shared.</span>
+									</div>
+								</div>
+								<div class="modal-foot">
+									<button class="btn btn-primary">Done</button>
+								</div>
+							</div>
+							<div class="grab"><span></span></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
