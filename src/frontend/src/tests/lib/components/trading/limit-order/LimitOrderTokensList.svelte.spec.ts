@@ -14,17 +14,19 @@ import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
-const { mockPairs, mockEnabledIcTokens } = vi.hoisted(() => {
+const { mockPairs, mockEnabledIcTokens, mockBalances } = vi.hoisted(() => {
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const { writable } = require('svelte/store');
 	return {
 		mockPairs: writable([]),
-		mockEnabledIcTokens: writable([])
+		mockEnabledIcTokens: writable([]),
+		mockBalances: writable([])
 	};
 });
 
 vi.mock('$lib/derived/oisy-trade.derived', () => ({
-	oisyTradePairs: mockPairs
+	oisyTradePairs: mockPairs,
+	oisyTradeBalances: mockBalances
 }));
 
 vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
