@@ -37,4 +37,10 @@ describe('LiquidiumBorrowingCard', () => {
 
 		expect(container.textContent).toContain('−');
 	});
+
+	it('renders a Repay action button', () => {
+		const { getByText } = render(LiquidiumBorrowingCard, { props: { reserve: reserve() } });
+
+		expect(getByText(en.liquidium.text.action_repay)).toBeInTheDocument();
+	});
 });
