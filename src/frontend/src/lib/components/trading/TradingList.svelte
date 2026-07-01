@@ -14,7 +14,7 @@
 		OISY_TRADE_LEARN_MORE_URL,
 		OISY_TRADE_POLL_INTERVAL_MILLIS
 	} from '$lib/constants/oisy-trade.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
+	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalOisyTradeWithdraw,
 		modalOisyTradeWithdrawData,
@@ -40,7 +40,12 @@
 {#if OISY_TRADE_ENABLED}
 	<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
 
-	{#if !$oisyTradeLoaded}
+	<!--
+		Only skeleton while a signed-in load is actually in flight. Signed out,
+		`loadOisyTrade` resets the store (balances stay unresolved) and never
+		populates it, so gate on the identity to settle on onboarding instead.
+	-->
+	{#if $authSignedIn && !$oisyTradeLoaded}
 		<TradingListSkeleton />
 	{:else if $oisyTradeHasAssets}
 		<div class="flex flex-col gap-4">

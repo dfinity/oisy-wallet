@@ -78,7 +78,7 @@
 						? replacePlaceholders($i18n.trading.limit_order.spread_value, {
 								$value: spreadPercent.toFixed(1)
 							})
-						: '—'}
+						: '-'}
 				</span>
 			</div>
 			{#if !fillOrKill}
