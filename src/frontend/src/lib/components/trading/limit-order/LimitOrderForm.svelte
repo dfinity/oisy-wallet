@@ -176,7 +176,9 @@
 
 		<!-- Fill-or-kill: collapsed description, (?) expands it (Active-networks pattern). -->
 		<div class="rounded-lg border border-disabled bg-secondary px-3 py-2">
-			<div class="flex items-center justify-between">
+			<!-- `--checkbox-label-order: 1` puts the box before the label (same as the
+				 transaction-filter panels), so it reads "[✓] Fill or kill". -->
+			<div style="--checkbox-label-order: 1;" class="flex items-center justify-between">
 				<Checkbox checked={fillOrKill} inputId="limit-order-fok" onChange={toggleFok} text="inline">
 					<span class="text-sm font-semibold text-primary">
 						{$i18n.trading.limit_order.fok_title}
