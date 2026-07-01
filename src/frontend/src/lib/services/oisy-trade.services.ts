@@ -1,6 +1,7 @@
 import type {
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
+	TokenId as OisyTradeTokenId,
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
@@ -9,16 +10,20 @@ import type {
 import {
 	addLimitOrder as addLimitOrderApi,
 	getBalances,
+	getMyOrders,
 	getOrderBookDepth as getOrderBookDepthApi,
 	getOrderBookTicker as getOrderBookTickerApi,
 	getTradingPairs,
-	listSupportedTokens
+	listSupportedTokens,
+	withdraw
 } from '$lib/api/oisy-trade.api';
+import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
 import { consoleError } from '$lib/utils/console.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -34,16 +39,67 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
 
 	try {
-		const [pairs, supportedTokens, balances] = await Promise.all([
+		// `ByPage` with no `after` cursor returns the newest orders first; 100 is
+		// the canister's per-page cap. Pagination of older orders is a follow-up.
+		// Orders are non-critical: a failure there falls back to an empty list so
+		// the core pairs/tokens/balances still populate the Trading tab.
+		const [pairs, supportedTokens, balances, orders] = await Promise.all([
 			getTradingPairs({ identity, nullishIdentityErrorMessage }),
 			listSupportedTokens({ identity, nullishIdentityErrorMessage }),
-			getBalances({ identity, nullishIdentityErrorMessage })
+			getBalances({ identity, nullishIdentityErrorMessage }),
+			getMyOrders({
+				identity,
+				nullishIdentityErrorMessage,
+				args: { filter: { ByPage: { after: [], length: 100 } } }
+			}).catch((err: unknown) => {
+				consoleError(err);
+				return [];
+			})
 		]);
 
-		oisyTradeStore.set({ pairs, supportedTokens, balances });
+		oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
+};
+
+// Withdraws `amount` (the gross figure entered by the user) from the caller's
+// free DEX balance back to their wallet. The ledger transfer fee is deducted by
+// the canister, so the user receives `amount - ledger_fee`. On success the
+// Trading-tab balances are reloaded so the new free balance is reflected.
+export const withdrawFromOisyTrade = async ({
+	identity,
+	tokenId,
+	amount,
+	decimals,
+	progress
+}: {
+	identity: NullishIdentity;
+	tokenId: OisyTradeTokenId;
+	amount: string;
+	decimals: number;
+	progress?: (step: ProgressStepsTradingWithdraw) => void;
+}): Promise<void> => {
+	progress?.(ProgressStepsTradingWithdraw.WITHDRAW);
+
+	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
+
+	assertNonNullish(identity, nullishIdentityErrorMessage);
+
+	await withdraw({
+		identity,
+		nullishIdentityErrorMessage,
+		request: {
+			token_id: tokenId,
+			amount: parseToken({ value: amount, unitName: decimals })
+		}
+	});
+
+	progress?.(ProgressStepsTradingWithdraw.UPDATE_UI);
+
+	await loadOisyTrade({ identity });
+
+	progress?.(ProgressStepsTradingWithdraw.DONE);
 };
 
 // Best-effort load of the live ticker + aggregated depth for a single pair,

@@ -68,7 +68,8 @@ describe('TradingAssets', () => {
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: undefined,
-			balances: [buildBalance({ free: 100000000n, reserved: ZERO })]
+			balances: [buildBalance({ free: 100000000n, reserved: ZERO })],
+			orders: undefined
 		});
 
 		const { queryByText, getAllByText } = render(TradingAssets, {
