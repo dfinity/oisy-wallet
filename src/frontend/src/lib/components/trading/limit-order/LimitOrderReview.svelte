@@ -156,7 +156,7 @@
 			<span class="text-sm text-secondary">{$i18n.trading.limit_order.limit_price}</span>
 			<span class="text-lg font-semibold text-primary">
 				{replacePlaceholders($i18n.trading.limit_order.limit_price_value, {
-					$price: price.toString(),
+					$price: formatTradeAmount({ amount: price, decimals: pairView?.quoteDecimals ?? 8 }),
 					$quote: quote,
 					$base: base
 				})}
@@ -168,7 +168,10 @@
 				<span class="font-medium text-secondary">
 					{currentValue > 0
 						? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
-								$price: currentValue.toString(),
+								$price: formatTradeAmount({
+									amount: currentValue,
+									decimals: pairView?.quoteDecimals ?? 8
+								}),
 								$quote: quote,
 								$base: base
 							})
