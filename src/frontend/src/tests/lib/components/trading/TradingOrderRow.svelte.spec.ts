@@ -1,9 +1,39 @@
+import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingOrderRow from '$lib/components/trading/TradingOrderRow.svelte';
+import { loadOrderBook } from '$lib/services/oisy-trade.services';
 import { modalStore } from '$lib/stores/modal.store';
 import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$lib/services/oisy-trade.services', () => ({
+	loadOrderBook: vi.fn(() => Promise.resolve(undefined))
+}));
+
+// A single ICP/ckUSDC pair so the row can resolve the order book for its order.
+vi.mock('$lib/derived/oisy-trade.derived', async () => {
+	const { writable } = await import('svelte/store');
+	const { Principal } = await import('@dfinity/principal');
+	const pair: TradingPairInfo = {
+		status: { Trading: null },
+		base: {
+			id: { ledger_id: Principal.fromText('aaaaa-aa') },
+			metadata: { symbol: 'ICP', decimals: 8 }
+		},
+		quote: {
+			id: { ledger_id: Principal.fromText('aaaaa-aa') },
+			metadata: { symbol: 'ckUSDC', decimals: 6 }
+		},
+		min_notional: 1_000_000n,
+		lot_size: 100_000_000n,
+		taker_fee_bps: 0,
+		maker_fee_bps: 0,
+		tick_size: 10_000n,
+		max_notional: []
+	};
+	return { oisyTradePairs: writable([pair]) };
+});
 
 const base: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
 const quote: IcToken = { ...mockValidIcToken, symbol: 'ckUSDC', decimals: 6 };
@@ -18,6 +48,18 @@ const order: OisyTradeOrderView = {
 	filledQuantity: 0,
 	status: 'Open'
 };
+
+// Half the ask volume (the 2.4 level) is priced better than the 2.5 sell price.
+const bookWithVolumeAhead = {
+	ticker: { ask: [], bid: [] },
+	depth: {
+		asks: [
+			{ price: 2_400_000n, quantity: 500_000_000n },
+			{ price: 2_600_000n, quantity: 500_000_000n }
+		],
+		bids: []
+	}
+} as const;
 
 describe('TradingOrderRow', () => {
 	beforeEach(() => {
@@ -42,5 +84,39 @@ describe('TradingOrderRow', () => {
 		await fireEvent.click(container.querySelector('button') as HTMLButtonElement);
 
 		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: order }));
+	});
+
+	it('shows the queue position under the status for an active order with volume ahead', async () => {
+		vi.mocked(loadOrderBook).mockResolvedValue(bookWithVolumeAhead);
+
+		const { container } = render(TradingOrderRow, { props: { order } });
+
+		await waitFor(() => expect(container).toHaveTextContent('50% are ahead'));
+	});
+
+	it('shows no queue position for a front-of-book active order', async () => {
+		// No ask volume priced better than the order → front of book (0%).
+		vi.mocked(loadOrderBook).mockResolvedValue({
+			ticker: { ask: [], bid: [] },
+			depth: { asks: [{ price: 2_600_000n, quantity: 500_000_000n }], bids: [] }
+		});
+
+		const { container } = render(TradingOrderRow, { props: { order } });
+
+		await waitFor(() => expect(loadOrderBook).toHaveBeenCalled());
+
+		expect(container).not.toHaveTextContent('are ahead');
+	});
+
+	it('shows no queue position for a terminal (history) order', () => {
+		vi.mocked(loadOrderBook).mockResolvedValue(bookWithVolumeAhead);
+
+		const { container } = render(TradingOrderRow, {
+			props: { order: { ...order, status: 'Filled' } }
+		});
+
+		// Terminal rows never load or show queue position.
+		expect(loadOrderBook).not.toHaveBeenCalled();
+		expect(container).not.toHaveTextContent('are ahead');
 	});
 });
