@@ -3,14 +3,10 @@
 /*
 We explicitly need to import Tailwind with a plain CSS @import as described in their documentation.
 Trying to import it with Sass — such as using @use — leads to reproducibility issues.
-The base path is set via a standalone @source rather than the `source(...)` function on the
-@import: Vite 8's bundled postcss-import cannot parse `@import 'tailwindcss' source(...)` and fails
-to resolve the bare specifier. The @source directive is handled by @tailwindcss/postcss and keeps
-content detection anchored for Docker builds.
+Additionally, we need to explicitly set the base path in order to avoid issues with building the app via Docker.
 */
 /* prettier-ignore */
-@import 'tailwindcss';
-@source '../../../../../src';
+@import 'tailwindcss' source("../../../../../src");
 @config '../../../../../tailwind.config.ts';
 
 /*
