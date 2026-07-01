@@ -20,7 +20,7 @@ pub const MAX_PERSONAL_NOTES_PER_USER: usize = 1_000;
 
 /// Upper bound on the stored ciphertext, in bytes. The cleartext cap is 2,000
 /// Unicode code points (enforced client-side); this bound covers the worst-case
-/// multi-byte UTF-8 expansion (~3 bytes/char), the JSON envelope, and the AEAD
+/// multi-byte UTF-8 expansion (~4 bytes/code point), the JSON envelope, and the AEAD
 /// overhead, with generous headroom. Defense-in-depth only — the canister can
 /// never inspect the cleartext.
 pub const MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES: usize = 10_000;
