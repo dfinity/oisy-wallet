@@ -312,18 +312,6 @@ div.step {
 	}
 }
 
-// Native selects
-div.select {
-	& .icon {
-		--disable-contrast: var(--color-foreground-primary);
-	}
-
-	option {
-		background: var(--color-background-primary);
-		color: var(--color-foreground-primary);
-	}
-}
-
 // Toasts
 .toast {
 	--toast-error-background: var(--color-background-error-light);
