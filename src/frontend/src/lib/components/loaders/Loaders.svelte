@@ -12,6 +12,7 @@
 	import LoaderActiveUserTransactions from '$lib/components/loaders/LoaderActiveUserTransactions.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
+	import LoaderLiquidium from '$lib/components/loaders/LoaderLiquidium.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderSwapTokens from '$lib/components/loaders/LoaderSwapTokens.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
@@ -58,6 +59,8 @@
 		<BalancesIdbSetter />
 
 		<LoaderHarvest />
+
+		<LoaderLiquidium />
 
 		<LoaderSwapTokens />
 

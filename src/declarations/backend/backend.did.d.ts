@@ -1270,11 +1270,28 @@ export interface Settings {
 export type SignOnramperWidgetUrlError =
 	| {
 			/**
+			 * A wallet address supplied by the caller did not match the address the backend derives for
+			 * that network from the caller's principal. The backend signs only addresses the caller
+			 * provably owns, so a mismatch (a derivation-parity bug or a tampering attempt) fails the
+			 * whole request rather than signing an address the caller may not control.
+			 */
+			AddressMismatch: null;
+	  }
+	| {
+			/**
 			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
 			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
 			 * signing oracle.
 			 */
 			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The backend could not derive one of the caller's addresses (e.g. a threshold public-key
+			 * read failed), so the supplied address could not be verified. The request is rejected
+			 * rather than signing an unverified address.
+			 */
+			AddressDerivationFailed: null;
 	  }
 	| {
 			/**
@@ -2137,14 +2154,17 @@ export interface _SERVICE {
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	/**
-	 * Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
+	 * Sign the `OnRamper` widget's `networkWallets` with the controller-managed HMAC secret, after
+	 * verifying each supplied address matches the one the backend derives for the caller.
 	 *
 	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	 * The signed addresses are the backend-derived ones, and signing only happens when the caller's
+	 * supplied addresses match — so a caller can only ever obtain a signature over addresses they own.
 	 * Authenticated callers only: anonymous principals cannot extract signatures.
 	 *
 	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
-	 * can persist its sliding window — a query would discard the recorded call. The frontend already
-	 * invokes it as a certified (replicated) call, so there is no added latency.
+	 * can persist its sliding window, and because address derivation makes inter-canister
+	 * (management-canister public-key) calls. The frontend already invokes it as a certified call.
 	 */
 	sign_onramper_widget_url: ActorMethod<
 		[SignOnramperWidgetUrlRequest],

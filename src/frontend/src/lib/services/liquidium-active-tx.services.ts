@@ -11,11 +11,47 @@ import {
 } from '$lib/utils/liquidium-active-tx.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { ActivityFilter, ActivityStatus, type LiquidiumClient } from '@liquidium/client';
+import {
+	ActivityFilter,
+	ActivityStatus,
+	type Activity,
+	type LiquidiumClient
+} from '@liquidium/client';
 import { get } from 'svelte/store';
 
 // Bridges `0x`/case differences between oisy's broadcast hash and the SDK's txid.
 const normalizeTxid = (value: string): string => value.toLowerCase().replace(/^0x/, '');
+
+// Outflows (borrow/withdraw) correlate by the receipt `id` (txid may come late); inflows
+// (supply) by the unique on-chain txid.
+const resolveLiquidiumActivity = async ({
+	client,
+	profileId,
+	txid,
+	outflowId
+}: {
+	client: LiquidiumClient;
+	profileId: string;
+	txid?: string;
+	outflowId?: string;
+}): Promise<Activity | undefined> => {
+	if (nonNullish(outflowId)) {
+		const response = await client.activities.getStatus({ id: outflowId, profileId });
+		return response.found ? response.activity : undefined;
+	}
+
+	if (nonNullish(txid)) {
+		const target = normalizeTxid(txid);
+		const activities = await client.activities.list({ profileId, filter: ActivityFilter.all });
+		return activities.find(
+			({ txid: activityTxid, txids }) =>
+				(nonNullish(activityTxid) && normalizeTxid(activityTxid) === target) ||
+				(txids ?? []).some((t) => normalizeTxid(t) === target)
+		);
+	}
+
+	return undefined;
+};
 
 const pollLiquidiumActiveUserTransaction = async ({
 	tx,
@@ -30,22 +66,14 @@ const pollLiquidiumActiveUserTransaction = async ({
 		const refs = toLiquidiumExternalRefsMap(tx.external_refs);
 		const profileId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.PROFILE_ID];
 		const txid = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.TXID];
+		const outflowId = refs[LIQUIDIUM_EXTERNAL_REF_KEYS.OUTFLOW_ID];
 
-		// Both persisted at supply time; a row missing either isn't pollable yet.
-		if (isNullish(profileId) || isNullish(txid)) {
+		// Not pollable without a profile and either a txid or an outflow id.
+		if (isNullish(profileId) || (isNullish(txid) && isNullish(outflowId))) {
 			return;
 		}
 
-		const target = normalizeTxid(txid);
-		const activities = await client.activities.list({ profileId, filter: ActivityFilter.all });
-
-		// A unique on-chain txid pins the exact activity; `filter: all` includes
-		// completed legs, so a confirmed/failed one terminalizes the row.
-		const activity = activities.find(
-			({ txid: activityTxid, txids }) =>
-				(nonNullish(activityTxid) && normalizeTxid(activityTxid) === target) ||
-				(txids ?? []).some((t) => normalizeTxid(t) === target)
-		);
+		const activity = await resolveLiquidiumActivity({ client, profileId, txid, outflowId });
 
 		if (isNullish(activity)) {
 			return;

@@ -228,17 +228,17 @@
 			"website": "Imagen de $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Añadido recientemente",
+			"ab_icp": "ICP",
 			"ai": "IA",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Juego",
-			"nft": "",
-			"rwa": "",
-			"social_media": "Redes Sociales",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Social",
 			"staking": "Staking",
-			"tools": "Herramientas",
-			"walletconnect": "WalletConnect"
+			"tools": "Herramientas"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -259,17 +259,6 @@
 				"carousel": {
 					"text": "OpenChat - mensajería privada",
 					"call_to_action": "Mostrar más"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Verificación de Identidad Única para Interacciones Digitales Confiables.",
-				"call_to_action": "Abrir DecideID",
-				"stats": "Más de 50,000 solicitudes de inferencia",
-				"description": "Decide ID es el corazón del sistema de IA Decide, asegurando la confianza y seguridad a través de su metodología única de Prueba de Persona (PoP). Al unirte, pasarás por un proceso de verificación donde proporcionarás múltiples pruebas y completarás un desafío especial para confirmar tu identidad. Esto asegura que cada usuario es real, único y no un bot. Tu ID Principal, un identificador único en la cadena, se crea durante este proceso. Puede ser utilizado en varias aplicaciones que requieren una persona verificada, asegurando una integración segura y sin problemas en el proceso de registro o inicio de sesión de cualquier aplicación. Además, el uso de pruebas de conocimiento cero significa que tus datos privados, como la información biométrica, permanecen confidenciales y seguros.<br/><br/>Con Decide ID, disfruta de una manera flexible, segura y centrada en la privacidad para verificar e interactuar en línea.",
-				"carousel": {
-					"text": "Disfruta de una manera centrada en la privacidad para verificar e interactuar en línea",
-					"call_to_action": "¿Interesado?"
 				}
 			},
 			"icpswap": {
@@ -320,16 +309,6 @@
 				"call_to_action": "Entra en la curva",
 				"description": "Curve finance es un exchange descentralizado líder, proveedor de stablecoins y plataforma de préstamos en Ethereum y cadenas compatibles con EVM. Es conocido por sus avanzados creadores de mercado automatizados para stablecoins y activos volátiles, y su sistema único de liquidación suave para préstamos."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Desbloquea todo el potencial de DeFi y el comercio optimizado. Intercambia tokens, gana como proveedor de liquidez y aprovecha el AMM líder de Bitfinity EVM.",
-				"call_to_action": "Abrir Sonic",
-				"description": "Sonic, un exchange descentralizado multicadena construido en el Protocolo de Internet Computer (ICP), ofrece una amplia gama de servicios DeFi. Los usuarios pueden comerciar fácilmente con tokens y perpetuos, proporcionar liquidez y participar en la venta de tokens LBP. Los usuarios pueden participar en la gobernanza de la DAO, hacer staking para obtener recompensas y votar en las decisiones de la plataforma.<br/><br/>¡Totalmente en la cadena y de código abierto! Intercambia tokens como un profesional, acumula esas comisiones como proveedor de liquidez, únete a la vibra AMM y sé parte integral de la DAO de Sonic.",
-				"carousel": {
-					"text": "Desbloquea todo el potencial de DeFi",
-					"call_to_action": "Abrir Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX y creador de mercado automatizado construido en la blockchain de Solana, que ofrece un libro de órdenes de límite central que permite operaciones rápidas.",
@@ -376,17 +355,6 @@
 					"text": "Hola, internet que se escribe solo",
 					"call_to_action": "Saber más"
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -438,11 +406,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -488,6 +451,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1646,6 +1623,7 @@
 			"unknown_parameter": "Parámetro desconocido.",
 			"wallet_not_initialized": "Error inesperado. La dirección de tu billetera no está inicializada.",
 			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
@@ -1654,6 +1632,148 @@
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"intro": "",
+			"learn_more": "",
+			"provider_name": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_base_token": "",
+			"select_quote_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"lowest_ask": "",
+			"highest_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": "",
+			"available_label": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
+			"to": "",
+			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"consent": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
+			"approving": "",
+			"depositing": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
 		}
 	},
 	"transaction": {
@@ -2123,10 +2243,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2145,7 +2265,54 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"supply_prices_unavailable": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": "",
+			"repay_review": "",
+			"repay_review_subtitle": "",
+			"repaying": "",
+			"starting_to_repay": "",
+			"repay_started": "",
+			"current_debt": "",
+			"interest_accrued": "",
+			"debt_after_repay": "",
+			"repay_exceeds_debt": "",
+			"repay_prices_unavailable": ""
 		}
 	},
 	"vaults": {
@@ -2228,9 +2395,7 @@
 			"title_empty_3": "",
 			"description_empty": "Parece que aún no has hecho staking de ningún token",
 			"full_history": "Mostrar historial completo",
-			"recent_history": "Cerrar historial completo",
-			"harvest_autopilot_carousel_slide_title": "Gana en OISY con Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Saber más"
+			"recent_history": "Cerrar historial completo"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Algo salió mal al retirar los tokens.",

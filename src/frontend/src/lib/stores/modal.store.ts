@@ -70,6 +70,12 @@ export interface Modal<T> {
 		| 'get-token'
 		| 'harvest-stake'
 		| 'harvest-unstake'
+		| 'liquidium-supply'
+		| 'limit-order'
+		| 'liquidium-borrow'
+		| 'liquidium-withdraw'
+		| 'liquidium-repay'
+		| 'trading-deposit'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -141,6 +147,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openHarvestStake: (id: symbol) => void;
 	openHarvestUnstake: (id: symbol) => void;
+	openLiquidiumSupply: (id: symbol) => void;
+	openLimitOrder: (id: symbol) => void;
+	openLiquidiumBorrow: (id: symbol) => void;
+	openLiquidiumWithdraw: (id: symbol) => void;
+	openLiquidiumRepay: (id: symbol) => void;
+	openTradingDeposit: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -250,6 +262,12 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHarvestStake: setType('harvest-stake'),
 		openHarvestUnstake: setType('harvest-unstake'),
+		openLiquidiumSupply: setType('liquidium-supply'),
+		openLimitOrder: setType('limit-order'),
+		openLiquidiumBorrow: setType('liquidium-borrow'),
+		openLiquidiumWithdraw: setType('liquidium-withdraw'),
+		openLiquidiumRepay: setType('liquidium-repay'),
+		openTradingDeposit: setType('trading-deposit'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),
