@@ -83,6 +83,11 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		section_portfolio: string;
+		section_finance: string;
+		section_more: string;
 		airdrops: string;
 		earning: string;
 		pay: string;
@@ -109,6 +114,9 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		earning: string;
 		airdrops: string;
 		pay: string;
 		wallet_connect: string;

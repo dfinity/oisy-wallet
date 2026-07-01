@@ -14,7 +14,9 @@
 	class="flex h-full w-full flex-col justify-between overflow-auto py-3 pl-4 md:pl-8"
 	data-tid={SIDEBAR_NAVIGATION_MENU}
 >
-	<div class="mb-6 flex flex-col gap-3">
+	<!-- Condensed desktop list: tight 2px gaps and ~40px rows ([&_.nav-item]:py-2),
+	     matching the design; mobile is unaffected (it uses MobileNavigationMenu). -->
+	<div class="mb-6 flex flex-col gap-0.5 [&_.nav-item]:py-2">
 		<NavigationMenuMainItems />
 	</div>
 
