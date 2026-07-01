@@ -31,7 +31,7 @@
 	let showHeaderLeft = $derived(nonNullish(headerLeft));
 
 	/**
-	 * @deprecated according new design there should be no sticky footer
+	 * @deprecated According to the new design, there should be no sticky footer.
 	 */
 	let showFooterAlert = $derived(nonNullish(footer) && role === 'alert');
 

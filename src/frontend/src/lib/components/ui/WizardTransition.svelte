@@ -4,7 +4,7 @@
 
 	interface Props {
 		children: Snippet;
-		// Instead of a number an object is used to make svelte notice any updates need rerender
+		// An object (rather than a plain number) is used so that Svelte notices updates that require a re-render.
 		transition?: { diff: number };
 	}
 
@@ -12,16 +12,16 @@
 
 	const DEFAULT_OFFSET = 200;
 	const ANIMATION_DURATION = 200;
-	let absolutOffset = $state(DEFAULT_OFFSET);
+	let absoluteOffset = $state(DEFAULT_OFFSET);
 	let slideOffset = $derived(
-		transition.diff === 0 ? 0 : transition.diff > 0 ? absolutOffset : -absolutOffset
+		transition.diff === 0 ? 0 : transition.diff > 0 ? absoluteOffset : -absoluteOffset
 	);
 </script>
 
 {#key transition}
 	<div
 		class="transition"
-		bind:clientWidth={absolutOffset}
+		bind:clientWidth={absoluteOffset}
 		in:fly|global={{ x: slideOffset, duration: ANIMATION_DURATION }}
 	>
 		{@render children()}
