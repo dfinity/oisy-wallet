@@ -694,6 +694,22 @@ export type DeleteContactResult =
 			 */
 			Err: ContactError;
 	  };
+export interface DeletePersonalNoteRequest {
+	note_id: string;
+}
+export type DeletePersonalNoteResult =
+	| {
+			/**
+			 * The note was deleted (idempotent — also `Ok` when it did not exist).
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be deleted due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 export type DismissedNotification =
 	| {
 			Qualified: {
@@ -834,6 +850,32 @@ export type GetContactsResult =
 			 * The contacts were not retrieved due to an error.
 			 */
 			Err: ContactError;
+	  };
+export type GetPersonalNotesCountResult =
+	| {
+			/**
+			 * The caller's total note count.
+			 */
+			Ok: bigint;
+	  }
+	| {
+			/**
+			 * The count could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
+export type GetPersonalNotesResult =
+	| {
+			/**
+			 * All of the caller's (encrypted) notes.
+			 */
+			Ok: Array<PersonalNoteEntry>;
+	  }
+	| {
+			/**
+			 * The notes could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
 	  };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult =
@@ -1191,6 +1233,72 @@ export interface PendingTransaction {
 	utxos: Array<Utxo>;
 }
 /**
+ * A single stored entry returned by `get_personal_notes`, and the upsert
+ * payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
+ */
+export interface PersonalNoteEntry {
+	/**
+	 * The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	 * client-side.
+	 */
+	encrypted_note: Uint8Array;
+	/**
+	 * Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	 */
+	note_id: string;
+}
+export type PersonalNoteError =
+	| {
+			/**
+			 * The ciphertext exceeds [`MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`].
+			 */
+			NoteCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTES_PER_USER`] and tried to add
+			 * a *new* note. No existing note is evicted.
+			 */
+			TooManyNotes: null;
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-caller write rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `note_id` exceeds [`MAX_PERSONAL_NOTE_ID_BYTES`].
+			 */
+			NoteIdTooLong: null;
+	  }
+	| {
+			/**
+			 * An unexpected internal error (e.g. a vetKeys access/derivation failure).
+			 * The message never contains note cleartext (the canister cannot read it).
+			 */
+			InternalError: { msg: string };
+	  };
+/**
+ * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+ * vetKey and the store's public verification key). Both return opaque bytes on
+ * success; the wire shape is identical, so one enum serves both.
+ */
+export type PersonalNotesVetkeyResult =
+	| {
+			/**
+			 * vetKey bytes, opaque to the canister.
+			 */
+			Ok: Uint8Array;
+	  }
+	| {
+			/**
+			 * The vetKey could not be derived due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
+/**
  * Which external provider the agreement belongs to.
  *
  * Add a new variant and redeploy the canister when onboarding a new provider.
@@ -1239,6 +1347,19 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+export type SetPersonalNoteResult =
+	| {
+			/**
+			 * The note was created or updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be stored due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
@@ -1382,6 +1503,10 @@ export interface Stats {
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
 	agreement_history_count: bigint;
+	/**
+	 * Total number of stored (encrypted) personal-note entries across all users.
+	 */
+	personal_notes_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -1911,6 +2036,14 @@ export interface _SERVICE {
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
 	/**
+	 * Deletes one of the caller's personal notes. Idempotent — deleting a missing
+	 * note returns `Ok`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `RateLimited`).
+	 */
+	delete_personal_note: ActorMethod<[DeletePersonalNoteRequest], DeletePersonalNoteResult>;
+	/**
 	 * Returns whether the backend is currently fetching and caching exchange rates.
 	 *
 	 * Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
@@ -2002,6 +2135,42 @@ export interface _SERVICE {
 	 * background fetch.
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
+	/**
+	 * Returns all of the caller's (encrypted) personal notes, decrypted client-side.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes: ActorMethod<[], GetPersonalNotesResult>;
+	/**
+	 * Returns the caller's total note count (drives the client-side capacity gate).
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_count: ActorMethod<[], GetPersonalNotesCountResult>;
+	/**
+	 * Derives the caller's encrypted vetKey for the supplied transport public key.
+	 * The browser decrypts it and derives the per-user symmetric key.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_encrypted_vetkey: ActorMethod<[Uint8Array], PersonalNotesVetkeyResult>;
+	/**
+	 * Returns the personal-notes vetKey verification (public) key. The browser uses
+	 * it to verify the derived vetKey. Same value for every user.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_vetkey_public_key: ActorMethod<[], PersonalNotesVetkeyResult>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
@@ -2142,6 +2311,15 @@ export interface _SERVICE {
 	 * or rotate the secret per environment.
 	 */
 	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
+	/**
+	 * Creates or updates one of the caller's personal notes (add and edit share the
+	 * same upsert, keyed by `note_id`). The value is opaque ciphertext.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `TooManyNotes`,
+	 * `NoteCiphertextTooLarge`, `RateLimited`).
+	 */
+	set_personal_note: ActorMethod<[PersonalNoteEntry], SetPersonalNoteResult>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
