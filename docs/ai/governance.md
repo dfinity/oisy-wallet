@@ -149,3 +149,49 @@ How:
 This is what makes the docs _auto-adapting_: every PR is a small
 opportunity to keep them honest. Reviewers should reject code PRs that
 introduce a new pattern without the matching doc update.
+
+## Agent-rules sync
+
+Some agents (notably Copilot's PR reviewer) load only their tool-specific
+entry file — they don't traverse the `docs/ai/**` link graph. That breaks
+the truth hierarchy in practice: a rule documented in
+`docs/ai/frontend/stack-and-patterns.md` never reaches them, so they
+suggest changes that contradict it (e.g. proposing Tailwind v3 `!mb-6`
+when v4 uses `mb-6!`).
+
+To bridge the gap without duplicating rules by hand, **bug-catching
+highlights** are sourced from tagged blocks inside `docs/ai/**` (and
+`AGENTS.md`) and synced into the tool-specific entry files by
+[`scripts/build.agent-rules.mjs`](../../scripts/build.agent-rules.mjs).
+The sync is gated by
+[`.github/workflows/agent-rules-check.yml`](../../.github/workflows/agent-rules-check.yml).
+
+### Marker convention
+
+Wrap a single bullet or paragraph in the source page:
+
+```markdown
+<!-- agent-rules:start id="tailwind-v4-important" -->
+
+- Important modifier is a suffix in v4: write `mb-6!`, not `!mb-6`.
+
+<!-- agent-rules:end -->
+```
+
+`id` must be unique across the whole source set.
+
+### Adding a highlight
+
+1. Wrap the block in the appropriate `docs/ai/**` page.
+2. Add the `id` to the `blockIds` list of the relevant destination in
+   `scripts/build.agent-rules.mjs` (`DESTINATIONS`).
+3. Run `node scripts/build.agent-rules.mjs` and commit the regenerated
+   destination file alongside the source change.
+
+### What belongs in the highlights
+
+Only **version-sensitive syntax** or **forbidden-pattern overrides** that
+the tool's training prior gets wrong and that no other gate (lint,
+clippy, `svelte-check`) catches. Architectural / structural guidance
+stays link-only — the tools that crawl will see it; the ones that don't
+weren't going to follow nuanced taxonomy anyway.
