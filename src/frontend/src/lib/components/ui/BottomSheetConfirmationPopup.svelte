@@ -1,39 +1,22 @@
 <script lang="ts">
 	import { BottomSheet } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		onCancel: () => void;
 		title: Snippet;
 		content: Snippet;
-		disabled?: boolean;
 	}
 
-	let { onCancel, title, content, disabled = false }: Props = $props();
+	let { onCancel, title, content }: Props = $props();
 </script>
 
 {#snippet body()}
 	<div class="flex w-full flex-col">
-		<div class="w-full p-4">
-			<ButtonIcon
-				ariaLabel={$i18n.core.alt.close_details}
-				{disabled}
-				onclick={onCancel}
-				styleClass="text-disabled float-right"
-			>
-				{#snippet icon()}
-					<IconClose size="24" />
-				{/snippet}
-			</ButtonIcon>
-		</div>
-
-		<h3 class="mt-4 mb-2 text-center">{@render title()}</h3>
+		<h3 class="px-5 pt-5 pb-2 text-xl font-bold">{@render title()}</h3>
 
 		{@render content()}
 	</div>
