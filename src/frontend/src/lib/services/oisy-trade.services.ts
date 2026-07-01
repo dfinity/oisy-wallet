@@ -41,6 +41,8 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 	try {
 		// `ByPage` with no `after` cursor returns the newest orders first; 100 is
 		// the canister's per-page cap. Pagination of older orders is a follow-up.
+		// Orders are non-critical: a failure there falls back to an empty list so
+		// the core pairs/tokens/balances still populate the Trading tab.
 		const [pairs, supportedTokens, balances, orders] = await Promise.all([
 			getTradingPairs({ identity, nullishIdentityErrorMessage }),
 			listSupportedTokens({ identity, nullishIdentityErrorMessage }),
@@ -49,6 +51,9 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 				identity,
 				nullishIdentityErrorMessage,
 				args: { filter: { ByPage: { after: [], length: 100 } } }
+			}).catch((err: unknown) => {
+				consoleError(err);
+				return [];
 			})
 		]);
 
