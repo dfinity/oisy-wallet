@@ -67,9 +67,18 @@ const deriveKeyMaterial = ({ identity }: { identity: Identity }): Promise<Derive
 	}
 
 	const promise = (async (): Promise<DerivedKeyMaterial> => {
-		const storedCryptoKey = await get<CryptoKey>(idbCacheKey(principal));
+		let storedCryptoKey: CryptoKey | undefined;
+		try {
+			storedCryptoKey = await get<CryptoKey>(idbCacheKey(principal));
+		} catch {
+			storedCryptoKey = undefined;
+		}
 		if (nonNullish(storedCryptoKey)) {
-			return DerivedKeyMaterial.fromCryptoKey(storedCryptoKey);
+			try {
+				return DerivedKeyMaterial.fromCryptoKey(storedCryptoKey);
+			} catch {
+				// Treat an unreadable/stale cached key as a cache miss and re-derive.
+			}
 		}
 
 		const transportSecretKey = TransportSecretKey.random();
@@ -88,7 +97,11 @@ const deriveKeyMaterial = ({ identity }: { identity: Identity }): Promise<Derive
 		);
 
 		const derivedKeyMaterial = await vetKey.asDerivedKeyMaterial();
-		await set(idbCacheKey(principal), derivedKeyMaterial.getCryptoKey());
+		try {
+			await set(idbCacheKey(principal), derivedKeyMaterial.getCryptoKey());
+		} catch {
+			// IndexedDB caching is best-effort; encryption/decryption should still work this session.
+		}
 		return derivedKeyMaterial;
 	})();
 

@@ -1,7 +1,13 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import TradingOrderDetailModal from '$lib/components/trading/TradingOrderDetailModal.svelte';
 	import TradingOrderRow from '$lib/components/trading/TradingOrderRow.svelte';
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import {
+		modalOisyTradeOrderDetail,
+		modalOisyTradeOrderDetailData
+	} from '$lib/derived/modal.derived';
 	import { oisyTradeActiveOrders, oisyTradeHistoryOrders } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -50,3 +56,7 @@
 		{/if}
 	</Tabs>
 </div>
+
+{#if $modalOisyTradeOrderDetail && nonNullish($modalOisyTradeOrderDetailData)}
+	<TradingOrderDetailModal order={$modalOisyTradeOrderDetailData} />
+{/if}
