@@ -2055,6 +2055,7 @@ interface I18nNotes {
 		text: {
 			share_note: string;
 			snapshot_caption: string;
+			cap_reached: string;
 			expires_after: string;
 			expiry_1h: string;
 			expiry_24h: string;

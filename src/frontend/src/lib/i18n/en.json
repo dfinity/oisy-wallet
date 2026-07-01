@@ -2532,6 +2532,7 @@
 			"text": {
 				"share_note": "Share note",
 				"snapshot_caption": "Shares a copy of the note as it is now. Editing or deleting the note later won't change this link.",
+				"cap_reached": "You've reached the maximum of $max active share links. They free up as they expire or are used.",
 				"expires_after": "Link expires after",
 				"expiry_1h": "1 hour",
 				"expiry_24h": "24 hours",

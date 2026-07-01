@@ -1,7 +1,8 @@
 import {
 	consumePersonalNoteShare,
 	createPersonalNoteShare,
-	getPersonalNoteShare
+	getPersonalNoteShare,
+	getPersonalNoteSharesCount
 } from '$lib/api/backend.api';
 import {
 	decryptShareContent,
@@ -60,6 +61,14 @@ export const createNoteShare = async ({
 
 	return { link, token };
 };
+
+/**
+ * The caller's current number of active (unexpired, unconsumed) shares. Drives
+ * the Share dialog's "at capacity" gate against `MAX_PERSONAL_NOTE_SHARES_PER_USER`;
+ * the backend `TooManyShares` rejection on create remains the source of truth.
+ */
+export const getActiveShareCount = async ({ identity }: { identity: Identity }): Promise<number> =>
+	Number(await getPersonalNoteSharesCount({ identity }));
 
 /**
  * Fetches + decrypts the note content when the recipient clicks "Reveal note".

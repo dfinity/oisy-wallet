@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Identity } from '@icp-sdk/core/agent';
+	import { onMount } from 'svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -10,14 +11,16 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
+	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
+		NOTES_SHARE_CAP_MESSAGE,
 		NOTES_SHARE_CREATE_BUTTON,
 		NOTES_SHARE_DONE_BUTTON,
 		NOTES_SHARE_LINK_COPY,
 		NOTES_SHARE_SINGLE_USE_CHECKBOX
 	} from '$lib/constants/test-ids.constants';
-	import { createNoteShare } from '$lib/services/personal-note-share.services';
+	import { createNoteShare, getActiveShareCount } from '$lib/services/personal-note-share.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
@@ -46,6 +49,18 @@
 	let singleUse = $state(false);
 	let busy = $state(false);
 	let createdLink = $state<string | undefined>();
+	let atCap = $state(false);
+
+	// The count query gates the UI; the backend `TooManyShares` rejection stays
+	// authoritative. A failed count is non-fatal — leave the action enabled and
+	// let create surface the cap.
+	onMount(async () => {
+		try {
+			atCap = (await getActiveShareCount({ identity })) >= MAX_PERSONAL_NOTE_SHARES_PER_USER;
+		} catch (_: unknown) {
+			atCap = false;
+		}
+	});
 
 	const selectedExpiryLabel = $derived(
 		$i18n.notes.share.text[
@@ -70,6 +85,11 @@
 			});
 			createdLink = link;
 		} catch (err: unknown) {
+			// Lost a race to the cap since mount (e.g. another tab): reflect it in
+			// the UI instead of only toasting a generic failure.
+			if (err !== null && typeof err === 'object' && 'TooManyShares' in err) {
+				atCap = true;
+			}
 			toastsError({ msg: { text: $i18n.notes.share.error.create }, err });
 		} finally {
 			busy = false;
@@ -80,6 +100,13 @@
 <ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto">
 	{#if createdLink === undefined}
 		<!-- State A — configure -->
+		{#if atCap}
+			<p class="shrink-0 text-sm text-tertiary" data-tid={NOTES_SHARE_CAP_MESSAGE}>
+				{replacePlaceholders($i18n.notes.share.text.cap_reached, {
+					$max: `${MAX_PERSONAL_NOTE_SHARES_PER_USER}`
+				})}
+			</p>
+		{/if}
 		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-3">
 			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
 				{preview.title}
@@ -159,6 +186,7 @@
 				<ButtonCancel disabled={busy} onclick={onClose} />
 				<Button
 					colorStyle="primary"
+					disabled={atCap}
 					loading={busy}
 					onclick={onCreate}
 					testId={NOTES_SHARE_CREATE_BUTTON}

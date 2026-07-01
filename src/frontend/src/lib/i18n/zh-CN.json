@@ -2532,6 +2532,7 @@
 			"text": {
 				"share_note": "",
 				"snapshot_caption": "",
+				"cap_reached": "",
 				"expires_after": "",
 				"expiry_1h": "",
 				"expiry_24h": "",

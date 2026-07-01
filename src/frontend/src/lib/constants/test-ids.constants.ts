@@ -282,6 +282,7 @@ export const NOTES_VIEW_SHARE_BUTTON = 'notes-view-share-button';
 export const NOTES_BACK_BUTTON = 'notes-back-button';
 export const NOTES_SHARE_SINGLE_USE_CHECKBOX = 'notes-share-single-use-checkbox';
 export const NOTES_SHARE_CREATE_BUTTON = 'notes-share-create-button';
+export const NOTES_SHARE_CAP_MESSAGE = 'notes-share-cap-message';
 export const NOTES_SHARE_LINK_COPY = 'notes-share-link-copy';
 export const NOTES_SHARE_DONE_BUTTON = 'notes-share-done-button';
 export const NOTES_INPUT = 'notes-input';
