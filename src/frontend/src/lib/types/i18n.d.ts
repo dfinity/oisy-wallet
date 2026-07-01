@@ -1462,6 +1462,23 @@ interface I18nTrading {
 		done: string;
 		error: { unknown_fee: string; deposit_failed: string };
 	};
+	withdraw: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		amount_label: string;
+		from: string;
+		network: string;
+		transaction_fee: string;
+		transfer_fee: string;
+		you_receive: string;
+		reserved_note: string;
+		submit: string;
+		open: string;
+		progress_withdraw: string;
+		progress_done: string;
+		error: string;
+	};
 }
 
 interface I18nTransaction {

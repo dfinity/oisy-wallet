@@ -71,7 +71,7 @@
 	const quoteAmountDisplay = $derived(
 		quoteAmount > 0
 			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
-			: '—'
+			: '-'
 	);
 
 	const baseLabel = $derived(

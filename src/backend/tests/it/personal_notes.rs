@@ -231,3 +231,26 @@ fn set_personal_note_rate_limits_repeated_callers() {
         "the write exceeding the limit should be rate limited; got {limited:?}"
     );
 }
+
+#[test]
+fn delete_personal_note_rate_limits_repeated_callers() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(caller);
+
+    // Deleting a missing note is idempotent, so we can call it repeatedly to hit
+    // the limiter without needing to re-create notes.
+    for i in 0..30 {
+        let result = delete_note(&pic_setup, caller, &note_id(1));
+        assert!(
+            result.is_ok(),
+            "delete {i} within the limit should succeed: {result:?}"
+        );
+    }
+
+    let limited = delete_note(&pic_setup, caller, &note_id(1));
+    assert!(
+        matches!(limited, Err(PersonalNoteError::RateLimited(_))),
+        "the delete exceeding the limit should be rate limited; got {limited:?}"
+    );
+}
