@@ -108,9 +108,15 @@ footer bracket them.
 
 Around `MobileNavigationMenu.svelte`. Five slots: **Assets · Activity · Finance
 (cradle) · Notes · More**. The Finance cradle is a raised center button (layers
-icon). Finance and More each open a **bottom sheet** of their children; opening
-a sheet sets `bottomSheetOpenStore`, which already hides the bar
-(`MobileNavigationMenu.svelte`).
+icon). Finance and More each open a **bottom sheet** of their children, with the
+group name as the sheet heading.
+
+The **bar stays visible while a group's sheet is open** so its cradle/More entry
+can show the grey/blue "open" state below the sheet (see clusters 2 and 4). The
+nav sheets therefore do **not** set `bottomSheetOpenStore` — that store stays
+reserved for the unrelated sheets (e.g. token pickers) that legitimately hide
+the bar. Tapping the open group again, the backdrop, or any destination closes
+the sheet.
 
 States (clusters 1–4 of the design):
 
