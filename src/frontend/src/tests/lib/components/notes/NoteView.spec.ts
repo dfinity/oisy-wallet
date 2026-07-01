@@ -33,6 +33,18 @@ describe('NoteView', () => {
 		expect(link?.getAttribute('rel')).toContain('noopener');
 	});
 
+	it('uses the first non-empty line as the title when the note starts with blank lines', () => {
+		const { container } = render(NoteView, {
+			props: { note: { ...note, note: '\n\nTitle\nBody' }, ...baseProps() }
+		});
+
+		const title = container.querySelector('p.font-bold');
+		const body = container.querySelector('p.whitespace-pre-wrap');
+
+		expect(title?.textContent?.trim()).toBe('Title');
+		expect(body?.textContent?.trim()).toBe('Body');
+	});
+
 	it('does not linkify dangerous schemes', () => {
 		const { container } = render(NoteView, {
 			props: {
