@@ -1,6 +1,7 @@
 import TradingList from '$lib/components/trading/TradingList.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 const { mockEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
 	mockEnabled: { value: true },
@@ -32,8 +33,11 @@ describe('TradingList', () => {
 		expect(container).toHaveTextContent(en.trading.orders.add_limit_order);
 	});
 
-	it('loads the trade data on mount when enabled', () => {
+	it('loads the trade data on mount when enabled', async () => {
 		render(TradingList);
+
+		// IntervalLoader triggers onLoad in onMount; flush it before asserting.
+		await tick();
 
 		expect(mockLoadOisyTrade).toHaveBeenCalled();
 	});
@@ -47,10 +51,12 @@ describe('TradingList', () => {
 		expect(queryByText(en.trading.text.intro)).toBeNull();
 	});
 
-	it('does not load the trade data when disabled', () => {
+	it('does not load the trade data when disabled', async () => {
 		mockEnabled.value = false;
 
 		render(TradingList);
+
+		await tick();
 
 		expect(mockLoadOisyTrade).not.toHaveBeenCalled();
 	});
