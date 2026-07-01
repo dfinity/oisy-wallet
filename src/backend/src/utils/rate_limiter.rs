@@ -51,6 +51,27 @@ thread_local! {
     /// Rate-limits `delete_personal_note`: max 30 calls per caller per minute.
     pub(crate) static DELETE_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
         RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `create_personal_note_share`: max 20 calls per caller per
+    /// minute. The authenticated creator is a real principal, so this is a
+    /// normal per-caller limit (mirrors `SET_PERSONAL_NOTE_RATE_LIMITER`).
+    pub(crate) static CREATE_PERSONAL_NOTE_SHARE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Coarse **global** limiter for `consume_personal_note_share`: max 600
+    /// calls total per minute, across *every* anonymous caller. An anonymous
+    /// update call has no distinguishing principal — `msg_caller()` is always
+    /// `Principal::anonymous()` — so `check_caller()` naturally buckets all
+    /// anonymous callers together under this one limiter, capping total
+    /// anonymous update-call volume rather than limiting any single caller
+    /// (which isn't possible here). `peek`/`get` are anonymous *queries*, not
+    /// updates: state changes made during query execution are not persisted
+    /// on the IC, so a stateful limiter on them would be a no-op on the
+    /// common (non-certified) query path and is intentionally not used —
+    /// their abuse surface is instead bounded by a cheap O(log n) lookup and
+    /// the token-guessing search space.
+    pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(600, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
