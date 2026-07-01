@@ -11,9 +11,10 @@
 		title: Snippet;
 		content: Snippet;
 		disabled?: boolean;
+		showCloseButton?: boolean;
 	}
 
-	let { onCancel, title, content, disabled = false }: Props = $props();
+	let { onCancel, title, content, disabled = false, showCloseButton = true }: Props = $props();
 </script>
 
 <div class="fixed inset-0 z-50">
@@ -22,16 +23,18 @@
 			<div class="flex w-full items-center justify-between gap-4 p-4">
 				<h3 class="m-0">{@render title()}</h3>
 
-				<ButtonIcon
-					ariaLabel={$i18n.core.alt.close_details}
-					{disabled}
-					onclick={onCancel}
-					styleClass="text-disabled"
-				>
-					{#snippet icon()}
-						<IconClose size="24" />
-					{/snippet}
-				</ButtonIcon>
+				{#if showCloseButton}
+					<ButtonIcon
+						ariaLabel={$i18n.core.alt.close_details}
+						{disabled}
+						onclick={onCancel}
+						styleClass="text-disabled"
+					>
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
+					</ButtonIcon>
+				{/if}
 			</div>
 		{/snippet}
 
