@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Modal, Popover } from '@dfinity/gix-components';
+	import { Modal } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
