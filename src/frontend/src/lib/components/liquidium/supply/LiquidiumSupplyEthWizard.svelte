@@ -42,6 +42,7 @@
 		amount: OptionAmount;
 		supplyProgressStep: string;
 		inflowFee?: bigint;
+		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
 		onClose: () => void;
 		onNext: () => void;
@@ -53,6 +54,7 @@
 		amount = $bindable(),
 		supplyProgressStep = $bindable(),
 		inflowFee,
+		inflowFeeUnavailable,
 		currentStep,
 		onClose,
 		onNext,
@@ -243,6 +245,7 @@
 			<LiquidiumSupplyForm
 				{feeDisplay}
 				{inflowFee}
+				{inflowFeeUnavailable}
 				{market}
 				{onClose}
 				onCustomErrorValidate={validateSupplyAmount}

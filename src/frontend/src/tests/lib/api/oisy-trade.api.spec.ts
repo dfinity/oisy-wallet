@@ -1,18 +1,27 @@
 import type {
 	DepositRequest,
 	DepositResponse,
+	GetOrderBookDepthRequest,
+	LimitOrderRequest,
+	OrderBookDepth,
+	OrderBookTicker,
+	OrderId,
 	Token,
+	TradingPair,
 	TradingPairInfo,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
+	addLimitOrder,
 	deposit,
 	getBalances,
+	getOrderBookDepth,
+	getOrderBookTicker,
 	getTradingPairs,
 	listSupportedTokens
 } from '$lib/api/oisy-trade.api';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
-import { ZERO } from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -21,11 +30,12 @@ import { mock } from 'vitest-mock-extended';
 describe('oisy-trade.api', () => {
 	const oisyTradeCanisterMock = mock<OisyTradeCanister>();
 
-	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
-	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
-	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
+	const tradingPair: TradingPair = {
+		base: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
+		quote: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai')
+	};
 
-	const request: DepositRequest = {
+	const depositRequest: DepositRequest = {
 		token_id: { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') },
 		amount: 100n
 	};
@@ -36,62 +46,113 @@ describe('oisy-trade.api', () => {
 
 		// eslint-disable-next-line require-await
 		vi.spyOn(OisyTradeCanister, 'create').mockImplementation(async () => oisyTradeCanisterMock);
+		vi.spyOn(appConstants, 'OISY_TRADE_CANISTER_ID', 'get').mockImplementation(
+			() => mockLedgerCanisterId
+		);
 	});
 
 	describe('getTradingPairs', () => {
-		it('delegates to the canister and returns its result', async () => {
+		it('delegates to the canister', async () => {
+			const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
 			oisyTradeCanisterMock.getTradingPairs.mockResolvedValue(pairs);
 
-			const result = await getTradingPairs({
-				identity: mockIdentity,
-				canisterId: mockLedgerCanisterId
-			});
+			const result = await getTradingPairs({ identity: mockIdentity });
 
-			expect(result).toEqual(pairs);
+			expect(result).toBe(pairs);
 			expect(oisyTradeCanisterMock.getTradingPairs).toHaveBeenCalledOnce();
 		});
 
-		it('throws when the identity is nullish', async () => {
+		it('throws without an identity', async () => {
 			await expect(getTradingPairs({ identity: null })).rejects.toThrow();
-			expect(oisyTradeCanisterMock.getTradingPairs).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('listSupportedTokens', () => {
-		it('delegates to the canister and returns its result', async () => {
-			oisyTradeCanisterMock.listSupportedTokens.mockResolvedValue(supportedTokens);
+		it('delegates to the canister', async () => {
+			const tokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
+			oisyTradeCanisterMock.listSupportedTokens.mockResolvedValue(tokens);
 
-			const result = await listSupportedTokens({
-				identity: mockIdentity,
-				canisterId: mockLedgerCanisterId
-			});
+			const result = await listSupportedTokens({ identity: mockIdentity });
 
-			expect(result).toEqual(supportedTokens);
+			expect(result).toBe(tokens);
 			expect(oisyTradeCanisterMock.listSupportedTokens).toHaveBeenCalledOnce();
 		});
 
-		it('throws when the identity is nullish', async () => {
+		it('throws without an identity', async () => {
 			await expect(listSupportedTokens({ identity: null })).rejects.toThrow();
-			expect(oisyTradeCanisterMock.listSupportedTokens).not.toHaveBeenCalled();
 		});
 	});
 
 	describe('getBalances', () => {
-		it('delegates to the canister and returns its result', async () => {
+		it('delegates to the canister', async () => {
+			const balances = [{ balance: { free: 1n } }] as unknown as UserTokenBalance[];
 			oisyTradeCanisterMock.getBalances.mockResolvedValue(balances);
 
-			const result = await getBalances({
-				identity: mockIdentity,
-				canisterId: mockLedgerCanisterId
-			});
+			const result = await getBalances({ identity: mockIdentity });
 
-			expect(result).toEqual(balances);
+			expect(result).toBe(balances);
 			expect(oisyTradeCanisterMock.getBalances).toHaveBeenCalledOnce();
 		});
 
-		it('throws when the identity is nullish', async () => {
+		it('throws without an identity', async () => {
 			await expect(getBalances({ identity: null })).rejects.toThrow();
-			expect(oisyTradeCanisterMock.getBalances).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('getOrderBookTicker', () => {
+		it('delegates to the canister with the pair', async () => {
+			const ticker = { bid: [], ask: [] } as unknown as OrderBookTicker;
+			oisyTradeCanisterMock.getOrderBookTicker.mockResolvedValue(ticker);
+
+			const result = await getOrderBookTicker({ identity: mockIdentity, pair: tradingPair });
+
+			expect(result).toBe(ticker);
+			expect(oisyTradeCanisterMock.getOrderBookTicker).toHaveBeenCalledExactlyOnceWith(tradingPair);
+		});
+
+		it('throws without an identity', async () => {
+			await expect(getOrderBookTicker({ identity: null, pair: tradingPair })).rejects.toThrow();
+		});
+	});
+
+	describe('getOrderBookDepth', () => {
+		const request: GetOrderBookDepthRequest = { trading_pair: tradingPair, limit: [] };
+
+		it('delegates to the canister with the request', async () => {
+			const depth = { bids: [], asks: [] } as unknown as OrderBookDepth;
+			oisyTradeCanisterMock.getOrderBookDepth.mockResolvedValue(depth);
+
+			const result = await getOrderBookDepth({ identity: mockIdentity, request });
+
+			expect(result).toBe(depth);
+			expect(oisyTradeCanisterMock.getOrderBookDepth).toHaveBeenCalledExactlyOnceWith(request);
+		});
+
+		it('throws without an identity', async () => {
+			await expect(getOrderBookDepth({ identity: null, request })).rejects.toThrow();
+		});
+	});
+
+	describe('addLimitOrder', () => {
+		const request = {
+			pair: tradingPair,
+			side: { Sell: null },
+			quantity: 25_000_000n,
+			price: 2_690_000n,
+			time_in_force: []
+		} as unknown as LimitOrderRequest;
+
+		it('delegates to the canister with the request', async () => {
+			oisyTradeCanisterMock.addLimitOrder.mockResolvedValue('order-1' as OrderId);
+
+			const result = await addLimitOrder({ identity: mockIdentity, request });
+
+			expect(result).toBe('order-1');
+			expect(oisyTradeCanisterMock.addLimitOrder).toHaveBeenCalledExactlyOnceWith(request);
+		});
+
+		it('throws without an identity', async () => {
+			await expect(addLimitOrder({ identity: null, request })).rejects.toThrow();
 		});
 	});
 
@@ -101,16 +162,16 @@ describe('oisy-trade.api', () => {
 
 			const result = await deposit({
 				identity: mockIdentity,
-				request,
+				request: depositRequest,
 				canisterId: mockLedgerCanisterId
 			});
 
 			expect(result).toEqual(depositResponse);
-			expect(oisyTradeCanisterMock.deposit).toHaveBeenCalledWith(request);
+			expect(oisyTradeCanisterMock.deposit).toHaveBeenCalledWith(depositRequest);
 		});
 
 		it('throws when the identity is nullish', async () => {
-			await expect(deposit({ identity: null, request })).rejects.toThrow();
+			await expect(deposit({ identity: null, request: depositRequest })).rejects.toThrow();
 			expect(oisyTradeCanisterMock.deposit).not.toHaveBeenCalled();
 		});
 	});
