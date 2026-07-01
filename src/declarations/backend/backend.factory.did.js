@@ -198,7 +198,6 @@ export const idlFactory = ({ IDL }) => {
 		expires_at_ns: IDL.Nat64
 	});
 	const PersonalNoteShareError = IDL.Variant({
-		MetaCiphertextTooLarge: IDL.Null,
 		InvalidExpiry: IDL.Null,
 		NotFound: IDL.Null,
 		ContentCiphertextTooLarge: IDL.Null,
@@ -367,7 +366,6 @@ export const idlFactory = ({ IDL }) => {
 	const CreatePersonalNoteShareRequest = IDL.Record({
 		token: IDL.Text,
 		ct_content: IDL.Vec(IDL.Nat8),
-		ct_meta: IDL.Vec(IDL.Nat8),
 		single_use: IDL.Bool,
 		expires_at_ns: IDL.Nat64
 	});
@@ -717,15 +715,6 @@ export const idlFactory = ({ IDL }) => {
 		enabled: IDL.Bool,
 		allowed_external_content_source_urls: IDL.Opt(IDL.Vec(IDL.Text))
 	});
-	const PersonalNoteSharePeek = IDL.Record({
-		ct_meta: IDL.Vec(IDL.Nat8),
-		single_use: IDL.Bool,
-		expires_at_ns: IDL.Nat64
-	});
-	const PeekPersonalNoteShareResult = IDL.Variant({
-		Ok: PersonalNoteSharePeek,
-		Err: PersonalNoteShareError
-	});
 	const SaveUserTransactionsRequest = IDL.Record({
 		token_id: TokenId,
 		transactions: IDL.Vec(UserTransaction)
@@ -914,7 +903,6 @@ export const idlFactory = ({ IDL }) => {
 		http_request_transform: IDL.Func([TransformArgs], [HttpRequestResult], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], []),
 		new_user_signups_allowed: IDL.Func([], [IDL.Bool], ['query']),
-		peek_personal_note_share: IDL.Func([IDL.Text], [PeekPersonalNoteShareResult], ['query']),
 		remove_custom_token: IDL.Func([CustomToken], [], []),
 		save_user_transactions: IDL.Func(
 			[SaveUserTransactionsRequest],

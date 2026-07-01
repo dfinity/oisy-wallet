@@ -1,8 +1,4 @@
-import {
-	PERSONAL_NOTE_SHARE_VERSION,
-	type PersonalNoteShareContentEnvelope,
-	type PersonalNoteShareMetaEnvelope
-} from '$lib/types/personal-note-share';
+import type { PersonalNoteShareContentEnvelope } from '$lib/types/personal-note-share';
 
 /**
  * Per-share symmetric crypto for note sharing. Each share gets a fresh random
@@ -18,9 +14,8 @@ import {
  *
  * Wire format of every ciphertext: `iv (12 bytes) ‖ AES-GCM(ct+tag)`. The
  * random 96-bit IV is generated per encryption and prepended. The share token
- * is bound in as additional authenticated data (AAD), distinct per part
- * (`<token>:meta` vs `<token>:note`), so a ciphertext cannot be replayed under
- * a different token or swapped between the meta and content slots.
+ * is bound in as additional authenticated data (AAD, `<token>:note`), so a
+ * ciphertext cannot be replayed under a different token.
  */
 
 const ALGORITHM = 'AES-GCM';
@@ -85,7 +80,6 @@ export const importShareKey = (rawBase64Url: string): Promise<CryptoKey> =>
 		'decrypt'
 	]);
 
-const metaAad = (token: string): Uint8Array<ArrayBuffer> => encodeUtf8(`${token}:meta`);
 const contentAad = (token: string): Uint8Array<ArrayBuffer> => encodeUtf8(`${token}:note`);
 
 const encrypt = async ({
@@ -123,17 +117,6 @@ const decrypt = async ({
 	);
 };
 
-export const encryptShareMeta = ({
-	key,
-	meta,
-	token
-}: {
-	key: CryptoKey;
-	meta: PersonalNoteShareMetaEnvelope;
-	token: string;
-}): Promise<Uint8Array<ArrayBuffer>> =>
-	encrypt({ key, plaintext: encodeUtf8(JSON.stringify(meta)), aad: metaAad(token) });
-
 export const encryptShareContent = ({
 	key,
 	content,
@@ -144,19 +127,6 @@ export const encryptShareContent = ({
 	token: string;
 }): Promise<Uint8Array<ArrayBuffer>> =>
 	encrypt({ key, plaintext: encodeUtf8(JSON.stringify(content)), aad: contentAad(token) });
-
-export const decryptShareMeta = async ({
-	key,
-	ciphertext,
-	token
-}: {
-	key: CryptoKey;
-	ciphertext: Uint8Array;
-	token: string;
-}): Promise<PersonalNoteShareMetaEnvelope> => {
-	const bytes = await decrypt({ key, data: new Uint8Array(ciphertext), aad: metaAad(token) });
-	return JSON.parse(textDecoder.decode(bytes)) as PersonalNoteShareMetaEnvelope;
-};
 
 export const decryptShareContent = async ({
 	key,
@@ -170,24 +140,3 @@ export const decryptShareContent = async ({
 	const bytes = await decrypt({ key, data: new Uint8Array(ciphertext), aad: contentAad(token) });
 	return JSON.parse(textDecoder.decode(bytes)) as PersonalNoteShareContentEnvelope;
 };
-
-/**
- * Builds a fresh envelope pair for a note being shared. Returned as cleartext;
- * the caller encrypts each part with the share key before upload.
- */
-export const buildShareEnvelopes = ({
-	note,
-	senderName
-}: {
-	note: string;
-	senderName?: string;
-}): {
-	meta: PersonalNoteShareMetaEnvelope;
-	content: PersonalNoteShareContentEnvelope;
-} => ({
-	meta: {
-		v: PERSONAL_NOTE_SHARE_VERSION,
-		...(senderName !== undefined && senderName.length > 0 ? { sender_name: senderName } : {})
-	},
-	content: { v: PERSONAL_NOTE_SHARE_VERSION, note }
-});

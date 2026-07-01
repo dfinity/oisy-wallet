@@ -432,18 +432,15 @@ type CreateContactResult = variant {
 	// The contact could not be created due to an error
 	Err : ContactError
 };
-// Create-share request. `token`, `ct_meta`, and `ct_content` are opaque
-// ciphertext/ids to the canister — it enforces only their sizes and the
-// expiry/flag fields, never the note content or (via `ct_meta`) the sender
-// name.
+// Create-share request. `token` and `ct_content` are opaque ciphertext/ids to
+// the canister — it enforces only their sizes and the expiry/flag fields,
+// never the note content.
 type CreatePersonalNoteShareRequest = record {
 	// Opaque, client-generated random id; also the map key.
 	token : text;
-	// AES-GCM ciphertext of `{ v, note }`, keyed by the same per-share key.
+	// AES-GCM ciphertext of `{ v, note }`, keyed by the per-share key held
+	// only in the link fragment.
 	ct_content : blob;
-	// AES-GCM ciphertext of `{ v, sender_name? }`, keyed by the per-share key
-	// held only in the link fragment.
-	ct_meta : blob;
 	single_use : bool;
 	expires_at_ns : nat64
 };
@@ -843,10 +840,6 @@ type Outpoint = record {
 	// The index of the specific output within that transaction (since a transaction can have multiple outputs).
 	vout : nat32
 };
-type PeekPersonalNoteShareResult = variant {
-	Ok : PersonalNoteSharePeek;
-	Err : PersonalNoteShareError
-};
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 // A single stored entry returned by `get_personal_notes`. `encrypted_note` is
 // decrypted client-side.
@@ -871,8 +864,6 @@ type PersonalNoteShareContent = record {
 	expires_at_ns : nat64
 };
 type PersonalNoteShareError = variant {
-	// `ct_meta` exceeds [`MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES`].
-	MetaCiphertextTooLarge;
 	// `expires_at_ns` is not strictly in the future of IC time, or is
 	// further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
 	InvalidExpiry;
@@ -896,13 +887,6 @@ type PersonalNoteShareError = variant {
 	// The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
 	TokenTooLong;
 	InternalError : record { msg : text }
-};
-// Returned by `peek_personal_note_share`. Never includes `ct_content` — the
-// peek is intentionally non-destructive and cannot itself reveal the note.
-type PersonalNoteSharePeek = record {
-	ct_meta : blob;
-	single_use : bool;
-	expires_at_ns : nat64
 };
 // Shared result for the two vetKey-derivation endpoints (the caller's encrypted
 // vetKey and the store's public verification key). Both return opaque bytes on
@@ -1383,9 +1367,9 @@ service : (Arg) -> {
 	// # Returns
 	// The created contact on success.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
-	// Creates a share for one of the caller's notes. The note text, the sender
-	// name, and the share key never reach the canister — only opaque
-	// ciphertext, the expiry, and the single-use flag.
+	// Creates a share for one of the caller's notes. The note text and the share
+	// key never reach the canister — only opaque ciphertext, the expiry, and the
+	// single-use flag.
 	//
 	// # Errors
 	// Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
@@ -1504,7 +1488,10 @@ service : (Arg) -> {
 	get_exchange_rates : () -> (vec record { TokenId; opt ExchangeRate });
 	// Returns the note ciphertext for a **reusable** (non-single-use), unexpired
 	// share. A single-use share's content is only ever returned by
-	// `consume_personal_note_share`. Callable anonymously.
+	// `consume_personal_note_share`. Callable anonymously — a deliberate,
+	// narrowly-scoped exception to notes endpoints normally requiring an
+	// authenticated caller, since the recipient of a share link has no OISY
+	// identity.
 	//
 	// # Errors
 	// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
@@ -1608,16 +1595,6 @@ service : (Arg) -> {
 	// Exposed as an unauthenticated query so the landing page can display an info banner before the
 	// user signs in.
 	new_user_signups_allowed : () -> (bool) query;
-	// Non-destructive: returns a share's encrypted metadata (never the note
-	// content) for an unexpired token, without consuming a single-use share.
-	// Callable anonymously — a deliberate, narrowly-scoped exception to notes
-	// endpoints normally requiring an authenticated caller, since the recipient
-	// of a share link has no OISY identity.
-	//
-	// # Errors
-	// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for an
-	// expired or unknown token).
-	peek_personal_note_share : (text) -> (PeekPersonalNoteShareResult) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.

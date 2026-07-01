@@ -630,10 +630,9 @@ export type CreateContactResult =
 			Err: ContactError;
 	  };
 /**
- * Create-share request. `token`, `ct_meta`, and `ct_content` are opaque
- * ciphertext/ids to the canister — it enforces only their sizes and the
- * expiry/flag fields, never the note content or (via `ct_meta`) the sender
- * name.
+ * Create-share request. `token` and `ct_content` are opaque ciphertext/ids to
+ * the canister — it enforces only their sizes and the expiry/flag fields,
+ * never the note content.
  */
 export interface CreatePersonalNoteShareRequest {
 	/**
@@ -641,14 +640,10 @@ export interface CreatePersonalNoteShareRequest {
 	 */
 	token: string;
 	/**
-	 * AES-GCM ciphertext of `{ v, note }`, keyed by the same per-share key.
+	 * AES-GCM ciphertext of `{ v, note }`, keyed by the per-share key held
+	 * only in the link fragment.
 	 */
 	ct_content: Uint8Array;
-	/**
-	 * AES-GCM ciphertext of `{ v, sender_name? }`, keyed by the per-share key
-	 * held only in the link fragment.
-	 */
-	ct_meta: Uint8Array;
 	single_use: boolean;
 	expires_at_ns: bigint;
 }
@@ -1261,9 +1256,6 @@ export interface Outpoint {
 	 */
 	vout: number;
 }
-export type PeekPersonalNoteShareResult =
-	| { Ok: PersonalNoteSharePeek }
-	| { Err: PersonalNoteShareError };
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
@@ -1319,12 +1311,6 @@ export interface PersonalNoteShareContent {
 export type PersonalNoteShareError =
 	| {
 			/**
-			 * `ct_meta` exceeds [`MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES`].
-			 */
-			MetaCiphertextTooLarge: null;
-	  }
-	| {
-			/**
 			 * `expires_at_ns` is not strictly in the future of IC time, or is
 			 * further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
 			 */
@@ -1374,15 +1360,6 @@ export type PersonalNoteShareError =
 			TokenTooLong: null;
 	  }
 	| { InternalError: { msg: string } };
-/**
- * Returned by `peek_personal_note_share`. Never includes `ct_content` — the
- * peek is intentionally non-destructive and cannot itself reveal the note.
- */
-export interface PersonalNoteSharePeek {
-	ct_meta: Uint8Array;
-	single_use: boolean;
-	expires_at_ns: bigint;
-}
 /**
  * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
  * vetKey and the store's public verification key). Both return opaque bytes on
@@ -2126,9 +2103,9 @@ export interface _SERVICE {
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
 	/**
-	 * Creates a share for one of the caller's notes. The note text, the sender
-	 * name, and the share key never reach the canister — only opaque
-	 * ciphertext, the expiry, and the single-use flag.
+	 * Creates a share for one of the caller's notes. The note text and the share
+	 * key never reach the canister — only opaque ciphertext, the expiry, and the
+	 * single-use flag.
 	 *
 	 * # Errors
 	 * Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
@@ -2270,7 +2247,10 @@ export interface _SERVICE {
 	/**
 	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
 	 * share. A single-use share's content is only ever returned by
-	 * `consume_personal_note_share`. Callable anonymously.
+	 * `consume_personal_note_share`. Callable anonymously — a deliberate,
+	 * narrowly-scoped exception to notes endpoints normally requiring an
+	 * authenticated caller, since the recipient of a share link has no OISY
+	 * identity.
 	 *
 	 * # Errors
 	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
@@ -2397,18 +2377,6 @@ export interface _SERVICE {
 	 * user signs in.
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
-	/**
-	 * Non-destructive: returns a share's encrypted metadata (never the note
-	 * content) for an unexpired token, without consuming a single-use share.
-	 * Callable anonymously — a deliberate, narrowly-scoped exception to notes
-	 * endpoints normally requiring an authenticated caller, since the recipient
-	 * of a share link has no OISY identity.
-	 *
-	 * # Errors
-	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for an
-	 * expired or unknown token).
-	 */
-	peek_personal_note_share: ActorMethod<[string], PeekPersonalNoteShareResult>;
 	/**
 	 * Remove custom token for the user.
 	 */

@@ -7,18 +7,16 @@ use shared::types::{
     personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
     personal_note_share::{
         PersonalNoteShareError, MAX_PERSONAL_NOTE_SHARES_PER_USER,
-        MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS, MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES,
-        MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES,
+        MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS, MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES,
     },
 };
 
 /// The stored record for one share. `creator` is kept only to enforce
-/// [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] and is never returned by any
-/// read/peek endpoint — a recipient can't learn who created a share.
+/// [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] and is never returned by any read
+/// endpoint — a recipient can't learn who created a share.
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct PersonalNoteShareRecord {
     pub creator: Principal,
-    pub ct_meta: ByteBuf,
     pub ct_content: ByteBuf,
     pub expires_at_ns: u64,
     pub single_use: bool,
@@ -39,13 +37,7 @@ pub fn validate_token(token: &str) -> Result<(), PersonalNoteShareError> {
     Ok(())
 }
 
-pub fn validate_ciphertext_sizes(
-    ct_meta: &[u8],
-    ct_content: &[u8],
-) -> Result<(), PersonalNoteShareError> {
-    if ct_meta.len() > MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES {
-        return Err(PersonalNoteShareError::MetaCiphertextTooLarge);
-    }
+pub fn validate_content_size(ct_content: &[u8]) -> Result<(), PersonalNoteShareError> {
     if ct_content.len() > MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES {
         return Err(PersonalNoteShareError::ContentCiphertextTooLarge);
     }
@@ -92,17 +84,11 @@ mod tests {
     }
 
     #[test]
-    fn ciphertext_bounds() {
-        assert!(validate_ciphertext_sizes(&[], &[]).is_ok());
+    fn content_bound() {
+        assert!(validate_content_size(&[]).is_ok());
+        assert!(validate_content_size(&vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES]).is_ok());
         assert_eq!(
-            validate_ciphertext_sizes(
-                &vec![0u8; MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES + 1],
-                &[]
-            ),
-            Err(PersonalNoteShareError::MetaCiphertextTooLarge)
-        );
-        assert_eq!(
-            validate_ciphertext_sizes(&[], &vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES + 1]),
+            validate_content_size(&vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES + 1]),
             Err(PersonalNoteShareError::ContentCiphertextTooLarge)
         );
     }
@@ -138,7 +124,6 @@ mod tests {
     fn record_expiry() {
         let record = PersonalNoteShareRecord {
             creator: Principal::anonymous(),
-            ct_meta: ByteBuf::from(vec![]),
             ct_content: ByteBuf::from(vec![]),
             expires_at_ns: 100,
             single_use: false,

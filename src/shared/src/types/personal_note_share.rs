@@ -22,12 +22,6 @@ pub const MAX_PERSONAL_NOTE_SHARES_PER_USER: usize = 100;
 /// directly.
 pub const MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES: u32 = 64;
 
-/// Upper bound on the stored `ct_meta` ciphertext, in bytes. Covers the
-/// encrypted `{ v, sender_name? }` envelope, where `sender_name` is capped at
-/// 20 UTF-8 code points client-side; generous headroom for multi-byte
-/// expansion, the JSON envelope, and AEAD overhead.
-pub const MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES: usize = 500;
-
 /// How much further into the future than IC time a share's `expires_at_ns`
 /// may be set (30 days — the longest expiry option in the creator UI).
 /// Defense-in-depth against a client bypassing the UI to request an
@@ -35,28 +29,16 @@ pub const MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES: usize = 500;
 /// active-share-cap slot forever.
 pub const MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS: u64 = 30 * 24 * 60 * 60 * 1_000_000_000;
 
-/// Create-share request. `token`, `ct_meta`, and `ct_content` are opaque
-/// ciphertext/ids to the canister — it enforces only their sizes and the
-/// expiry/flag fields, never the note content or (via `ct_meta`) the sender
-/// name.
+/// Create-share request. `token` and `ct_content` are opaque ciphertext/ids to
+/// the canister — it enforces only their sizes and the expiry/flag fields,
+/// never the note content.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct CreatePersonalNoteShareRequest {
     /// Opaque, client-generated random id; also the map key.
     pub token: String,
-    /// AES-GCM ciphertext of `{ v, sender_name? }`, keyed by the per-share key
-    /// held only in the link fragment.
-    pub ct_meta: ByteBuf,
-    /// AES-GCM ciphertext of `{ v, note }`, keyed by the same per-share key.
+    /// AES-GCM ciphertext of `{ v, note }`, keyed by the per-share key held
+    /// only in the link fragment.
     pub ct_content: ByteBuf,
-    pub expires_at_ns: u64,
-    pub single_use: bool,
-}
-
-/// Returned by `peek_personal_note_share`. Never includes `ct_content` — the
-/// peek is intentionally non-destructive and cannot itself reveal the note.
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct PersonalNoteSharePeek {
-    pub ct_meta: ByteBuf,
     pub expires_at_ns: u64,
     pub single_use: bool,
 }
@@ -72,8 +54,6 @@ pub struct PersonalNoteShareContent {
 pub enum PersonalNoteShareError {
     /// The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
     TokenTooLong,
-    /// `ct_meta` exceeds [`MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES`].
-    MetaCiphertextTooLarge,
     /// `ct_content` exceeds `personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`.
     ContentCiphertextTooLarge,
     /// `expires_at_ns` is not strictly in the future of IC time, or is
