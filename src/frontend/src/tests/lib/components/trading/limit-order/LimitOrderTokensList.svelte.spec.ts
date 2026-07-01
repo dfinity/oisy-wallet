@@ -61,7 +61,7 @@ describe('LimitOrderTokensList', () => {
 
 	it('renders the shared modal tokens list', () => {
 		const { getByTestId } = render(LimitOrderTokensList, {
-			props: { mode: 'base', onSelect: () => {}, onCancel: () => {} },
+			props: { mode: 'base', side: 'sell', onSelect: () => {}, onCancel: () => {} },
 			context: mockContext()
 		});
 
@@ -84,7 +84,7 @@ describe('LimitOrderTokensList', () => {
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
 
 		render(LimitOrderTokensList, {
-			props: { mode: 'base', onSelect: () => {}, onCancel: () => {} },
+			props: { mode: 'base', side: 'sell', onSelect: () => {}, onCancel: () => {} },
 			context
 		});
 
@@ -110,7 +110,13 @@ describe('LimitOrderTokensList', () => {
 		]);
 
 		const { getByTestId } = render(LimitOrderTokensList, {
-			props: { mode: 'quote', baseSymbol: 'ICP', onSelect: () => {}, onCancel: () => {} },
+			props: {
+				mode: 'quote',
+				side: 'buy',
+				baseSymbol: 'ICP',
+				onSelect: () => {},
+				onCancel: () => {}
+			},
 			context: mockContext([])
 		});
 
