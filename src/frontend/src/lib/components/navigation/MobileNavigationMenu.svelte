@@ -22,7 +22,7 @@
 		     buttons/cradle are not clipped by the mask. -webkit-mask is required for
 		     iOS Safari. -->
 		<div
-			class="pointer-events-none absolute inset-0 -z-[1] border-t-1 border-tertiary bg-primary-inverted-alt [-webkit-mask-image:radial-gradient(circle_31px_at_50%_0,transparent_30px,black_31px)] [mask-image:radial-gradient(circle_31px_at_50%_0,transparent_30px,black_31px)]"
+			class="pointer-events-none absolute inset-0 -z-[1] border-t-1 border-tertiary bg-primary-inverted-alt [-webkit-mask-image:radial-gradient(circle_28px_at_50%_0,transparent_27px,black_28px)] [mask-image:radial-gradient(circle_28px_at_50%_0,transparent_27px,black_28px)]"
 		></div>
 		{@render children()}
 	</div>
