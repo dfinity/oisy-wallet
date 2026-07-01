@@ -140,6 +140,13 @@ export enum ProgressStepsLiquidiumWithdraw {
 	DONE = 'done'
 }
 
+export enum ProgressStepsLiquidiumRepay {
+	INITIALIZATION = 'initialization',
+	TRANSFER = 'transfer',
+	REGISTER = 'register',
+	DONE = 'done'
+}
+
 export enum ProgressStepsClaimStakingReward {
 	INITIALIZATION = 'initialization',
 	CLAIM = 'claim',
@@ -160,4 +167,11 @@ export enum ProgressStepsPayment {
 	CREATE_TRANSACTION = 'create_transaction',
 	SIGN_TRANSACTION = 'sign_transaction',
 	PAY = 'pay'
+}
+
+export enum ProgressStepsLimitOrder {
+	INITIALIZATION = 'initialization',
+	PLACE = 'place',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
 }

@@ -1,4 +1,5 @@
 import {
+	SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
 	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
@@ -26,6 +27,14 @@ vi.mock('@walletconnect/utils', async (importOriginal) => {
 		buildApprovedNamespaces: vi.fn()
 	};
 });
+
+const mockBtcWalletConnectEnabled = vi.hoisted(() => ({ value: true }));
+
+vi.mock('$env/btc-wallet-connect.env', () => ({
+	get BTC_WALLET_CONNECT_ENABLED() {
+		return mockBtcWalletConnectEnabled.value;
+	}
+}));
 
 describe('wallet-connect.providers', () => {
 	describe('WalletConnectClient', () => {
@@ -63,6 +72,7 @@ describe('wallet-connect.providers', () => {
 		const mockDisconnectSession = vi.fn();
 		const mockRejectSession = vi.fn();
 		const mockApproveSession = vi.fn();
+		const mockEmitSessionEvent = vi.fn();
 		const mockRespondSessionRequest = vi.fn();
 		const mockPair = vi.fn();
 		const mockOn = vi.fn();
@@ -74,6 +84,7 @@ describe('wallet-connect.providers', () => {
 			disconnectSession: mockDisconnectSession,
 			rejectSession: mockRejectSession,
 			approveSession: mockApproveSession,
+			emitSessionEvent: mockEmitSessionEvent,
 			respondSessionRequest: mockRespondSessionRequest,
 			core: {
 				pairing: { pair: mockPair }
@@ -85,6 +96,8 @@ describe('wallet-connect.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			mockBtcWalletConnectEnabled.value = true;
 
 			vi.spyOn(WalletKit, 'init').mockResolvedValue(walletKitSpy);
 
@@ -217,6 +230,14 @@ describe('wallet-connect.providers', () => {
 				});
 			});
 
+			it('should not advertise a bip122 namespace when the BTC WalletConnect feature is disabled', async () => {
+				mockBtcWalletConnectEnabled.value = false;
+
+				const supportedNamespaces = await approveAndGetSupportedNamespaces(mockParams);
+
+				expect(supportedNamespaces.bip122).toBeUndefined();
+			});
+
 			// Temporary security workaround: OISY derives a single ECDSA key for all BTC networks, so a
 			// signature obtained on a testnet/regtest request could be reused to spend mainnet UTXOs.
 			// Until BTC keys are network-segregated, only mainnet is advertised over WalletConnect.
@@ -291,6 +312,53 @@ describe('wallet-connect.providers', () => {
 				// Mainnet-only: with no mainnet address the account addresses are empty, so the session
 				// property is omitted entirely.
 				expect(sessionProperties?.bip122_getAccountAddresses).toBeUndefined();
+			});
+		});
+
+		describe('emit bip122_addressesChanged on approval', () => {
+			const sessionWith = (events: string[]) => ({
+				topic: 'mock-topic',
+				namespaces: {
+					bip122: {
+						chains: BIP122_MAINNET_CHAINS_KEYS,
+						events
+					}
+				}
+			});
+
+			it('should emit to sessions whose approved namespace subscribed to the event', async () => {
+				mockGetActiveSessions.mockReturnValue({
+					session1: sessionWith([SESSION_REQUEST_BTC_ADDRESSES_CHANGED])
+				});
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockEmitSessionEvent).toHaveBeenCalledTimes(BIP122_MAINNET_CHAINS_KEYS.length);
+				expect(mockEmitSessionEvent).toHaveBeenCalledWith({
+					topic: 'mock-topic',
+					chainId: BIP122_MAINNET_CHAINS_KEYS[0],
+					event: {
+						name: SESSION_REQUEST_BTC_ADDRESSES_CHANGED,
+						data: [expect.objectContaining({ address: mockBtcAddress, intention: 'payment' })]
+					}
+				});
+			});
+
+			it('should not emit to sessions whose approved namespace did not subscribe to the event', async () => {
+				// `buildApprovedNamespaces` intersects offered events with the dApp's requested events, so a
+				// dApp that never lists the event ends up with an empty event set; emitting anyway is the
+				// `isValidEmit` rejection that surfaced as a spurious connection error.
+				mockGetActiveSessions.mockReturnValue({
+					session1: sessionWith([])
+				});
+
+				const listener = await WalletConnectClient.init(mockParams);
+
+				await listener.approveSession(mockProposal);
+
+				expect(mockEmitSessionEvent).not.toHaveBeenCalled();
 			});
 		});
 
