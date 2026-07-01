@@ -39,7 +39,7 @@ fragment, never sent to the server" model shown in the reference wireframe.
 
 ## Background (today's code, on the PR #13287 branch)
 
-### The personal-notes crypto path (what we are *not* reusing for the recipient)
+### The personal-notes crypto path (what we are _not_ reusing for the recipient)
 
 - [`src/frontend/src/lib/services/personal-notes.vetkeys.ts`](../../../../src/frontend/src/lib/services/personal-notes.vetkeys.ts)
   derives the per-user key via `@dfinity/vetkeys` (`EncryptedVetKey` →
@@ -71,9 +71,9 @@ fragment, never sent to the server" model shown in the reference wireframe.
 ### Where the recipient page lives
 
 - The repo already has an unauthenticated route group
-  [`src/frontend/src/routes/(public)`](../../../../src/frontend/src/routes/(public))
+  [`src/frontend/src/routes/(public)`](<../../../../src/frontend/src/routes/(public)>)
   with its own OISY-branded layout
-  ([`(public)/+layout.svelte`](../../../../src/frontend/src/routes/(public)/+layout.svelte)
+  ([`(public)/+layout.svelte`](<../../../../src/frontend/src/routes/(public)/+layout.svelte>)
   renders the `OisyWalletLogo` header). The share-recipient page is a new route in
   this group, so it loads with **no identity** and inherits OISY branding for free.
 
@@ -83,7 +83,7 @@ fragment, never sent to the server" model shown in the reference wireframe.
   already renders a note read-only with **safe rendering**: text is neutralized
   (`neutralizePersonalNoteText`), bidi/control chars stripped, line breaks via
   `whitespace-pre-wrap`, and URLs linkified to `rel="noopener noreferrer"
-  target="_blank"` anchors (`linkifyPersonalNote`). The recipient view reuses these
+target="_blank"` anchors (`linkifyPersonalNote`). The recipient view reuses these
   exact utilities from
   [`personal-note.utils.ts`](../../../../src/frontend/src/lib/utils/personal-note.utils.ts)
   so a shared note can never execute scripts or reorder UI.
@@ -95,7 +95,7 @@ fragment, never sent to the server" model shown in the reference wireframe.
 > **Sharing notes** between users (`EncryptedMaps` supports it; we use a per-user
 > key and do not expose sharing) and exporting notes.
 
-That refers to *principal-to-principal* sharing inside `EncryptedMaps`. This spec
+That refers to _principal-to-principal_ sharing inside `EncryptedMaps`. This spec
 does **not** do that. It introduces an independent, link-based share path with a
 per-share key, leaving the per-user note store and its vetKD key untouched. The
 shared copy is exactly that — a **copy**; editing the original note later does not
@@ -145,7 +145,7 @@ What the canister (and node providers) can see: that a share **exists**, its
 ciphertext **size**, its **expiry**, its **single-use flag**, and **access
 timing**. It cannot see the note text, **which note** it came from (the token is
 independent random, unrelated to `note_id`), or the recipient's identity. The
-creating principal *is* known to the canister at creation time (the create call is
+creating principal _is_ known to the canister at creation time (the create call is
 authenticated), but the content is not.
 
 The fragment (`#k=…`) is never sent in an HTTP request and is excluded from the
@@ -213,7 +213,7 @@ delete-note confirmation), with two states:
     list view does it** —
     [`NoteListItem.svelte`](../../../../src/frontend/src/lib/components/notes/NoteListItem.svelte)
     uses Tailwind `truncate` (i.e. `white-space: nowrap; overflow: hidden;
-    text-overflow: ellipsis`) plus `overflow-wrap: anywhere`. Reuse that same
+text-overflow: ellipsis`) plus `overflow-wrap: anywhere`. Reuse that same
     treatment here for visual consistency.
   - The **body preview** is clamped to two lines (`-webkit-line-clamp: 2`) and
     ellipsizes when the note is longer; it reuses the note's safe rendering
@@ -370,12 +370,12 @@ New shared types in `src/shared/src/types/personal_note_share.rs` (or extend
 `personal_note.rs`), and result enums in `result_types.rs` following the existing
 `SetPersonalNoteResult` / `From<Result<…>>` pattern.
 
-| Endpoint | Kind | Guard | Purpose |
-| --- | --- | --- | --- |
-| `create_personal_note_share` | `update` | `caller_is_registered_user` + rate-limited | Store `{ token, ct_meta, ct_content, expires_at_ns, single_use, creator }`. Rejects oversized ciphertext (reuse a `…CiphertextTooLarge` bound), duplicate token, and **per-user active-share-cap overflow** (`TooManyShares`). |
-| `peek_personal_note_share` | `query` | **none (anonymous OK)** | **Non-destructive.** Returns `ct_meta` + expiry + `single_use` for an unexpired token (never `ct_content`, never mutates). Drives the Locked screen's sender name without burning a single-use link. `NotFound` if expired/unknown. |
-| `get_personal_note_share` | `query` | **none (anonymous OK)** | Return `ct_content` + expiry for a **reusable**, unexpired token; else `NotFound`. Never returns a single-use share's content. |
-| `consume_personal_note_share` | `update` | **none (anonymous OK)** | For a **single-use**, unexpired token: return `ct_content` once and **atomically delete** the entry; else `NotFound`. |
+| Endpoint                      | Kind     | Guard                                      | Purpose                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_personal_note_share`  | `update` | `caller_is_registered_user` + rate-limited | Store `{ token, ct_meta, ct_content, expires_at_ns, single_use, creator }`. Rejects oversized ciphertext (reuse a `…CiphertextTooLarge` bound), duplicate token, and **per-user active-share-cap overflow** (`TooManyShares`).      |
+| `peek_personal_note_share`    | `query`  | **none (anonymous OK)**                    | **Non-destructive.** Returns `ct_meta` + expiry + `single_use` for an unexpired token (never `ct_content`, never mutates). Drives the Locked screen's sender name without burning a single-use link. `NotFound` if expired/unknown. |
+| `get_personal_note_share`     | `query`  | **none (anonymous OK)**                    | Return `ct_content` + expiry for a **reusable**, unexpired token; else `NotFound`. Never returns a single-use share's content.                                                                                                      |
+| `consume_personal_note_share` | `update` | **none (anonymous OK)**                    | For a **single-use**, unexpired token: return `ct_content` once and **atomically delete** the entry; else `NotFound`.                                                                                                               |
 
 `creator` (a `StoredPrincipal`, known from the authenticated create call) is stored
 **only** to enforce the per-user cap and is **never** returned by any read/peek
@@ -587,8 +587,8 @@ as the behaviour change.
 
 1. **Fire-and-forget confirmed.** No revocation/management surface in v1
    (decided). Re-confirm we accept that a leaked link cannot be killed before
-   expiry, mitigated only by short expiries + single-use. *(If this later feels too
-   risky, "revoke all shares for a note" is the smallest add-on.)*
+   expiry, mitigated only by short expiries + single-use. _(If this later feels too
+   risky, "revoke all shares for a note" is the smallest add-on.)_
 2. **Expiry option set & default.** Proposed **1h / 24h / 7d / 30d, default 24h**.
    Confirm or adjust (e.g. add a 15-minute option, or cap at 7 days).
 3. **Single-use default.** Proposed **off**. Confirm.
@@ -621,8 +621,8 @@ Track the following interactions:
 
 - **Share entry point clicked** — the "Share note" link is opened from the note view.
 - **Share link created** — a link is generated. Include the **non-personal**
-  attributes: **validity/expiry** and **single-use** (yes/no). *(Whether a name was
-  set is a reasonable optional property; the name value itself is not.)*
+  attributes: **validity/expiry** and **single-use** (yes/no). _(Whether a name was
+  set is a reasonable optional property; the name value itself is not.)_
 - **Share link used** — a recipient opens the shared-note page (the link is visited).
 - **Reveal clicked** — the recipient clicks Reveal.
 - **Note copied** — the recipient uses Copy note.
