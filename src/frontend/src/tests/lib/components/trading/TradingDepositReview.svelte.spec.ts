@@ -5,8 +5,25 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
+const { exchangesMock } = vi.hoisted(() => {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	const { writable: createWritable } = require('svelte/store');
+	return { exchangesMock: createWritable({}) };
+});
+
+vi.mock(import('$lib/derived/exchange.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get exchanges() {
+		return exchangesMock;
+	}
+}));
+
 describe('TradingDepositReview', () => {
 	const token: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8, fee: 10000n };
+
+	beforeEach(() => {
+		exchangesMock.set({});
+	});
 
 	const baseProps = {
 		token,
@@ -22,6 +39,17 @@ describe('TradingDepositReview', () => {
 		expect(getByText(en.trading.text.provider_name)).toBeInTheDocument();
 		expect(getByText(en.trading.deposit.network)).toBeInTheDocument();
 		expect(getByText(en.trading.deposit.transaction_fee)).toBeInTheDocument();
+	});
+
+	it('should render the fee breakdown in fiat when an exchange rate is available', () => {
+		exchangesMock.set({ [token.id]: { usd: 7 } });
+
+		const { getAllByText, getByText } = render(TradingDepositReview, { props: { ...baseProps } });
+
+		expect(getByText(en.trading.deposit.transaction_fee)).toBeInTheDocument();
+		// The fiat branch formats fees through `formatCurrency` (default USD), so a
+		// "$"-prefixed value is rendered instead of the raw token amount + symbol.
+		expect(getAllByText((content) => content.includes('$')).length).toBeGreaterThan(0);
 	});
 
 	it('should call onConfirm when the confirm button is clicked', async () => {
