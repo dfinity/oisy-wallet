@@ -45,7 +45,7 @@ const getNewTooltipPosition = ({
 		};
 	}
 
-	// If the the tooltip falls outside the container, we need to adjust.
+	// If the tooltip falls outside the container, we need to adjust.
 	const containerRight = containerRect.x + containerRect.width - scrollbarWidth;
 	if (newTooltipX < containerRect.x) {
 		newTooltipX = containerRect.x;

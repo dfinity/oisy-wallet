@@ -95,12 +95,21 @@
 
 	const moveTooltipToBody = () => {
 		// Move tooltip to the body to avoid it being cut off by `overflow: hidden` ancestors.
-		if (nonNullish(tooltipComponent)) {
+		// Skip when it is already a direct child of the body, so we don't needlessly re-order
+		// tooltips (appendChild moves the node to the end) or do redundant DOM work on every effect.
+		if (nonNullish(tooltipComponent) && tooltipComponent.parentElement !== document.body) {
 			document.body.appendChild(tooltipComponent);
 		}
 	};
 
-	onMount(moveTooltipToBody);
+	onMount(() => {
+		moveTooltipToBody();
+		// If the pointer is already over the target when the tooltip mounts (e.g. a DelayedTooltip
+		// activating after its delay), `mouseenter` won't fire — reflect the hovered state now.
+		if (target?.matches(':hover') === true) {
+			onMouseEnter();
+		}
+	});
 
 	$effect(() => {
 		// Re-attach to the body after re-renders, mirroring the legacy afterUpdate.
