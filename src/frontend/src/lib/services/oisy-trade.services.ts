@@ -9,6 +9,7 @@ import type {
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
 	addLimitOrder as addLimitOrderApi,
+	cancelLimitOrder as cancelLimitOrderApi,
 	getBalances,
 	getMyOrders,
 	getOrderBookDepth as getOrderBookDepthApi,
@@ -149,4 +150,18 @@ export const placeLimitOrder = async ({
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	return await addLimitOrderApi({ identity, request, nullishIdentityErrorMessage });
+};
+
+export const cancelLimitOrder = async ({
+	identity,
+	orderId
+}: {
+	identity: NullishIdentity;
+	orderId: OrderId;
+}): Promise<void> => {
+	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
+
+	assertNonNullish(identity, nullishIdentityErrorMessage);
+
+	await cancelLimitOrderApi({ identity, orderId, nullishIdentityErrorMessage });
 };

@@ -1401,6 +1401,21 @@ interface I18nTrading {
 		status_canceled: string;
 		status_expired: string;
 	};
+	order_detail: {
+		title: string;
+		status: string;
+		filled: string;
+		cancel_order: string;
+		cancel_error: string;
+		confirm_title: string;
+		confirm_description: string;
+		confirm_order: string;
+		confirm_price: string;
+		confirm_returns_to_free: string;
+		confirm_keep: string;
+		confirm_order_sell: string;
+		confirm_order_buy: string;
+	};
 	limit_order: {
 		title: string;
 		review_title: string;

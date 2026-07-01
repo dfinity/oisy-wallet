@@ -1,7 +1,11 @@
-import type { Token as TradeToken } from '$declarations/oisy_trade/oisy_trade.did';
+import type {
+	Token as TradeToken,
+	UserTokenBalance
+} from '$declarations/oisy_trade/oisy_trade.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
 import {
 	initModalTokensListContext,
@@ -53,12 +57,28 @@ describe('LimitOrderTokensList', () => {
 		ledgerCanisterId: ledgerId
 	});
 
+	const balanceOf = ({ ledgerId, free }: { ledgerId: string; free: bigint }): UserTokenBalance =>
+		({
+			token: { id: { ledger_id: Principal.fromText(ledgerId) } },
+			balance: { free, reserved: ZERO }
+		}) as unknown as UserTokenBalance;
+
+	const icpPair = {
+		base: tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+		quote: tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
+	};
+	const enabledIcpCkusdc = [
+		icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
+		icToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
+	];
+
 	const mockContext = (tokens = [ICP_TOKEN]) =>
 		new Map([[MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens })]]);
 
 	beforeEach(() => {
 		mockPairs.set([]);
 		mockEnabledIcTokens.set([]);
+		mockBalances.set([]);
 	});
 
 	it('renders the shared modal tokens list', () => {
@@ -70,17 +90,11 @@ describe('LimitOrderTokensList', () => {
 		expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 	});
 
-	it('seeds the picker with base symbols resolved to enabled IC tokens', async () => {
-		mockPairs.set([
-			{
-				base: tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
-				quote: tradeToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
-			}
-		]);
-		mockEnabledIcTokens.set([
-			icToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
-			icToken({ symbol: 'ckUSDC', ledgerId: ckusdcLedgerId })
-		]);
+	it('seeds the spend leg with deposited base symbols resolved to enabled IC tokens', async () => {
+		mockPairs.set([icpPair]);
+		mockEnabledIcTokens.set(enabledIcpCkusdc);
+		// A Sell spends the base, so it must be deposited to appear.
+		mockBalances.set([balanceOf({ ledgerId: icpLedgerId, free: 1_000_000n })]);
 
 		const context = mockContext([]);
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
@@ -97,6 +111,48 @@ describe('LimitOrderTokensList', () => {
 		const filtered = get(ctx.filteredTokens);
 
 		expect(filtered.some((token: { symbol: string }) => token.symbol === 'ICP')).toBeTruthy();
+	});
+
+	it('drops non-deposited tokens from the spend leg', async () => {
+		mockPairs.set([icpPair]);
+		mockEnabledIcTokens.set(enabledIcpCkusdc);
+		// No deposit → the Sell (spend) base list is empty.
+		mockBalances.set([]);
+
+		const context = mockContext([]);
+		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
+
+		render(LimitOrderTokensList, {
+			props: { mode: 'base', side: 'sell', onSelect: () => {}, onCancel: () => {} },
+			context
+		});
+
+		await tick();
+
+		expect(
+			get(ctx.filteredTokens).some((token: { symbol: string }) => token.symbol === 'ICP')
+		).toBeFalsy();
+	});
+
+	it('lists the receive leg without requiring a deposit (Buy base)', async () => {
+		mockPairs.set([icpPair]);
+		mockEnabledIcTokens.set(enabledIcpCkusdc);
+		// A Buy receives the base, so it appears even with no DEX balance.
+		mockBalances.set([]);
+
+		const context = mockContext([]);
+		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
+
+		render(LimitOrderTokensList, {
+			props: { mode: 'base', side: 'buy', onSelect: () => {}, onCancel: () => {} },
+			context
+		});
+
+		await tick();
+
+		expect(
+			get(ctx.filteredTokens).some((token: { symbol: string }) => token.symbol === 'ICP')
+		).toBeTruthy();
 	});
 
 	it('renders for the quote mode', () => {

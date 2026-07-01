@@ -1730,6 +1730,21 @@
 			"status_canceled": "Canceled",
 			"status_expired": "Expired"
 		},
+		"order_detail": {
+			"title": "Order details",
+			"status": "Status",
+			"filled": "Filled",
+			"cancel_order": "Cancel order",
+			"cancel_error": "The order couldn't be canceled — it stays active. Try again in a moment.",
+			"confirm_title": "Cancel this limit order?",
+			"confirm_description": "The reserved funds return to your free balance. This can't be undone.",
+			"confirm_order": "Order",
+			"confirm_price": "Price",
+			"confirm_returns_to_free": "Returns to free",
+			"confirm_keep": "Keep order",
+			"confirm_order_sell": "Sell $base for $quote",
+			"confirm_order_buy": "Buy $base with $quote"
+		},
 		"limit_order": {
 			"title": "Limit order",
 			"review_title": "Review limit order",
