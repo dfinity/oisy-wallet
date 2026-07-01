@@ -339,7 +339,7 @@
 				     page, grey while its sheet is open over another page. The label
 				     matches the other bar items (text-sm). -->
 				<button
-					class="relative flex flex-1 flex-col items-center gap-0 p-1.5 pt-2.25 text-center text-sm text-primary"
+					class="relative flex flex-1 flex-col items-center justify-end p-1.5 text-center text-sm text-primary"
 					class:text-brand-primary-alt={ownsCurrent}
 					class:text-tertiary={pressed}
 					aria-expanded={open}
@@ -348,17 +348,16 @@
 					onclick={() => toggleSheet(slot.id)}
 					type="button"
 				>
-					<!-- Circle centered on the bar's top edge (≈half protrudes into the
-					     notch above). Absolute, so the 24px spacer below keeps the label
-					     on the same row as the other bar labels. -->
+					<!-- Circle embedded in the bar's hump (bottom:28px, matching the
+					     design). Absolute, so the label stays on the same row as the other
+					     bar labels (bottom-aligned by the bar's items-end). -->
 					<span
-						class="absolute top-0 left-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary shadow-sm transition-colors"
+						class="absolute bottom-7 left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />
 						{/if}
 					</span>
-					<span class="h-6"></span>
 					{SECTION_META[slot.id].label()}
 				</button>
 			{:else}
