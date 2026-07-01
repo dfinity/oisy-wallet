@@ -270,14 +270,15 @@ describe('oisy-trade.canister', () => {
 			await expect(withdraw(withdrawRequest)).rejects.toThrow('no funds');
 		});
 
-		it('falls back to the kind discriminant when the Err message is empty', async () => {
+		it('falls back to the inner reason when the Err message is empty', async () => {
 			service.withdraw.mockResolvedValue({
 				Err: { kind: { RequestError: [{ AmountExceedsMaximum: null }] }, message: [] }
 			});
 
 			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(withdraw(withdrawRequest)).rejects.toThrow('RequestError');
+			// Routed through `mapOisyTradeError`: message falls back to the inner reason.
+			await expect(withdraw(withdrawRequest)).rejects.toThrow('AmountExceedsMaximum');
 		});
 
 		it('throws when withdraw throws', async () => {
