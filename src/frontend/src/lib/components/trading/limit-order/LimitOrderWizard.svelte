@@ -17,7 +17,7 @@
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
 	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
-	import { trackTrading } from '$lib/services/trading-analytics.services';
+	import { trackTrading, type TrackTradingParams } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -172,7 +172,7 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
-		const orderFields = {
+		const orderFields: Pick<TrackTradingParams, 'base' | 'quote' | 'side' | 'orderType'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,

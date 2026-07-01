@@ -9,15 +9,21 @@ import { trackEvent } from '$lib/services/analytics.services';
 import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 import { nonNullish, notEmptyString } from '@dfinity/utils';
 
+// The order's time-in-force, as the two labels the form produces: fill-or-kill
+// vs. good-til-canceled.
+export type OisyTradeOrderType = 'FOK' | 'GTC';
+
 export interface TrackTradingParams {
 	// Which trading flow the event belongs to (limit order / cancel / deposit / withdraw).
 	subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING;
 	// Lifecycle: `executing` when the flow starts, then `success` / `error`.
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
+	// Pair leg symbols — free-form token symbols (no closed set), so kept as strings.
 	base?: string;
 	quote?: string;
 	side?: LimitOrderSide;
-	orderType?: string;
+	orderType?: OisyTradeOrderType;
+	// Token symbol; open-ended like `base`/`quote`, so a plain symbol string.
 	token?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
