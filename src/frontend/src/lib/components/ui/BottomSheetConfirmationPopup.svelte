@@ -18,22 +18,24 @@
 
 <div class="fixed inset-0 z-50">
 	<BottomSheet transition>
-		<div class="flex w-full flex-col">
-			<div class="w-full p-4">
+		{#snippet header()}
+			<div class="flex w-full items-center justify-between gap-4 p-4">
+				<h3 class="m-0">{@render title()}</h3>
+
 				<ButtonIcon
 					ariaLabel={$i18n.core.alt.close_details}
 					{disabled}
 					onclick={onCancel}
-					styleClass="text-disabled float-right"
+					styleClass="text-disabled"
 				>
 					{#snippet icon()}
 						<IconClose size="24" />
 					{/snippet}
 				</ButtonIcon>
 			</div>
+		{/snippet}
 
-			<h3 class="mt-4 mb-2 text-center">{@render title()}</h3>
-
+		<div class="flex w-full flex-col">
 			{@render content()}
 		</div>
 	</BottomSheet>
