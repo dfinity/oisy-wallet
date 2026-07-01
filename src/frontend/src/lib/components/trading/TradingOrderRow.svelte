@@ -179,7 +179,7 @@
 		// Only surface a figure when there is volume ahead; a "Front of book" (0%)
 		// order shows nothing on the compact row.
 		if (display === null || display.front) {
-			return undefined;
+			return;
 		}
 		return replacePlaceholders($i18n.trading.limit_order.are_ahead, {
 			$percentage: display.percent.toString()
