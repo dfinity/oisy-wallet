@@ -17,6 +17,7 @@ import {
 	deriveQuoteAmount,
 	feeBpsToPercent,
 	floorToStep,
+	formatTradeAmount,
 	isMultipleOfStep,
 	isOrderValid,
 	isPresetSelected,
@@ -143,6 +144,13 @@ describe('oisy-trade.utils', () => {
 			expect(deriveNotional({ baseAmount: 10, price: 2.5 })).toBe(25);
 			expect(deriveQuoteAmount({ baseAmount: 0, price: 2.5 })).toBeNaN();
 			expect(deriveQuoteAmount({ baseAmount: 10, price: 0 })).toBeNaN();
+		});
+
+		it('formatTradeAmount rounds to the token decimals without float artifacts', () => {
+			// 0.1 * 3 = 0.30000000000000004 as a raw JS float.
+			expect(formatTradeAmount({ amount: 0.1 * 3, decimals: 6 })).toBe('0.3');
+			expect(formatTradeAmount({ amount: 25, decimals: 6 })).toBe('25');
+			expect(formatTradeAmount({ amount: 1.23456789, decimals: 2 })).toBe('1.23');
 		});
 	});
 
