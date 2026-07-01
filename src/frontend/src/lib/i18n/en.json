@@ -1781,6 +1781,23 @@
 				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
 				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
 			}
+		},
+		"withdraw": {
+			"title": "Withdraw",
+			"review_title": "Review withdrawal",
+			"progress_title": "Withdrawing",
+			"amount_label": "You withdraw",
+			"from": "From",
+			"network": "Network",
+			"transaction_fee": "Transaction fee",
+			"transfer_fee": "Transfer fee",
+			"you_receive": "You receive",
+			"reserved_note": "$amount reserved · locked by open orders",
+			"submit": "Withdraw",
+			"open": "Withdraw",
+			"progress_withdraw": "Sending $symbol to your wallet",
+			"progress_done": "Done",
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
 		}
 	},
 	"transaction": {

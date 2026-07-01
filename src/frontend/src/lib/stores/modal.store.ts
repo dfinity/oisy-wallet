@@ -8,6 +8,7 @@ import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -77,6 +78,7 @@ export interface Modal<T> {
 		| 'liquidium-withdraw'
 		| 'liquidium-repay'
 		| 'trading-deposit'
+		| 'oisy-trade-withdraw'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -155,6 +157,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openLiquidiumWithdraw: (id: symbol) => void;
 	openLiquidiumRepay: (id: symbol) => void;
 	openTradingDeposit: (id: symbol) => void;
+	openOisyTradeWithdraw: (params: SetWithDataParams<OisyTradeWithdrawToken>) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -271,6 +274,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openLiquidiumWithdraw: setType('liquidium-withdraw'),
 		openLiquidiumRepay: setType('liquidium-repay'),
 		openTradingDeposit: setType('trading-deposit'),
+		openOisyTradeWithdraw: <(params: SetWithDataParams<OisyTradeWithdrawToken>) => void>(
+			setTypeWithData('oisy-trade-withdraw')
+		),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),
