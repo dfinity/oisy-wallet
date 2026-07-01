@@ -279,6 +279,11 @@ export const NOTES_VIEW = 'notes-view';
 export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
 export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
 export const NOTES_BACK_BUTTON = 'notes-back-button';
+export const NOTES_INPUT = 'notes-input';
+export const NOTES_SAVE_BUTTON = 'notes-save-button';
+export const NOTES_CANCEL_BUTTON = 'notes-cancel-button';
+export const NOTES_EDITOR_DELETE_BUTTON = 'notes-editor-delete-button';
+export const NOTES_DELETE_CONFIRM_BUTTON = 'notes-delete-confirm-button';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';

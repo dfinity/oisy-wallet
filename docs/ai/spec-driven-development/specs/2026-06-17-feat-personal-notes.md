@@ -377,7 +377,11 @@ A new `NotesModal.svelte` (new folder
   cannot create a redundant write or bump `updated_at_ns`. The same form and the
   same `savePersonalNote` upsert serve both add and edit. **Layout order inside the
   form:**
-  1. "Note" label + textarea (validation error appears directly under it).
+  1. "Note" label + textarea (validation error appears directly under it). The
+     textarea has a **~4-row minimum** (matching the view note-box) and **fills the
+     available modal height**, so the editor opens at the same height as the View it
+     came from; for long notes the **textarea scrolls internally** while the
+     metadata, Delete, privacy box and footer stay pinned.
   2. **Created/updated line directly below the textarea** ("Created {date}" /
      "Created {date} · Updated {date}"), so the metadata sits close to the text it
      describes.
@@ -457,7 +461,8 @@ apply.
 **Padding / spacing.** Reuse OISY's **existing modal padding and spacing tokens** (the
 same the Address-book modal uses) for the header, body, footer, and the gap between
 elements — this spec introduces **no new spacing values**; the only sizing constants
-it adds are the modal min/max above and the view note-box min height (~4 rows).
+it adds are the modal min/max above and the view note-box / editor textarea min
+height (~4 rows).
 
 **List scroll detail.** When the list scrolls (more notes than fit), the **search +
 "Add note" toolbar scrolls with the rows** (it is part of the scrollable body); only
