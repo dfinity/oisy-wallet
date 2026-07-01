@@ -77,6 +77,9 @@
 	);
 
 	const onCreate = async () => {
+		if (atCap || busy) {
+			return;
+		}
 		busy = true;
 		try {
 			const { link } = await createNoteShare({
