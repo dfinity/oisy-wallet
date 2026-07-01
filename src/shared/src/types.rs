@@ -21,6 +21,7 @@ pub mod notification;
 pub mod number;
 pub mod onramper;
 pub mod personal_note;
+pub mod personal_note_share;
 pub mod pow;
 pub mod result_types;
 pub mod settings;
@@ -67,4 +68,7 @@ pub struct Stats {
     pub active_user_transactions_count: u64,
     /// Total number of stored (encrypted) personal-note entries across all users.
     pub personal_notes_count: u64,
+    /// Total number of stored personal-note shares across all users (active or
+    /// not yet pruned).
+    pub personal_note_shares_count: u64,
 }

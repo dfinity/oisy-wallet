@@ -6,6 +6,7 @@ mod contacts;
 mod custom_token;
 mod exchange;
 mod onramper;
+mod personal_note_shares;
 mod personal_notes;
 mod settings;
 mod signer;

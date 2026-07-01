@@ -2,7 +2,7 @@ use std::{borrow::Cow, ops::Deref};
 
 use candid::{decode_one, encode_one, CandidType, Deserialize, Principal};
 use ic_stable_structures::storable::{Blob, Bound, Storable};
-use shared::types::token_id::TokenId;
+use shared::types::{personal_note_share::MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES, token_id::TokenId};
 
 #[derive(Default)]
 pub struct Candid<T>(pub T)
@@ -161,5 +161,71 @@ impl Storable for ActiveUserTransactionKey {
             .expect("active user transaction id should be valid UTF-8")
             .to_owned();
         Self(principal, id)
+    }
+}
+
+/// The map key for a personal-note share: the opaque, client-generated random
+/// token. Bounded (not fixed-size) — the client is expected to generate a
+/// 128-bit token, but the bound only enforces generous headroom over that.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct PersonalNoteShareToken(pub String);
+
+impl Storable for PersonalNoteShareToken {
+    const BOUND: Bound = Bound::Bounded {
+        max_size: MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES,
+        is_fixed_size: false,
+    };
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Borrowed(self.0.as_bytes())
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.0.into_bytes()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(
+            String::from_utf8(bytes.into_owned())
+                .expect("personal note share token should be valid UTF-8"),
+        )
+    }
+}
+
+/// Composite key for the by-creator share index: `(creator, token)`. Lets a
+/// cap check range-scan a single creator's shares without touching the
+/// (potentially much larger) primary token-keyed map. Encoding mirrors
+/// [`ActiveUserTransactionKey`]: `[u32 BE principal_len][principal_bytes][token_bytes]`.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub struct PersonalNoteShareCreatorKey(pub StoredPrincipal, pub PersonalNoteShareToken);
+
+impl Storable for PersonalNoteShareCreatorKey {
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        let principal_bytes = self.0.to_bytes();
+        let token_bytes = self.1.to_bytes();
+        let principal_len =
+            u32::try_from(principal_bytes.len()).expect("principal length should fit in u32");
+        let mut buf = Vec::with_capacity(4 + principal_bytes.len() + token_bytes.len());
+        buf.extend_from_slice(&principal_len.to_be_bytes());
+        buf.extend_from_slice(&principal_bytes);
+        buf.extend_from_slice(&token_bytes);
+        Cow::Owned(buf)
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        let principal_len = u32::from_be_bytes(
+            bytes[..4]
+                .try_into()
+                .expect("failed to decode principal length"),
+        ) as usize;
+        let principal = StoredPrincipal::from_bytes(Cow::Borrowed(&bytes[4..4 + principal_len]));
+        let token = PersonalNoteShareToken::from_bytes(Cow::Borrowed(&bytes[4 + principal_len..]));
+        Self(principal, token)
     }
 }

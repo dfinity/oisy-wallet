@@ -12,6 +12,7 @@
 use ic_stable_structures::storable::Blob;
 
 pub mod service;
+pub mod share;
 
 /// Domain separator bound into the vetKD derivation for the personal-notes
 /// store. Never change this for a deployed canister — it is part of the key
