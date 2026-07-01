@@ -24,6 +24,7 @@
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
+	import { TRACK_NOTE_SHARE_OPEN } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
 		NOTES_ADD_BUTTON,
@@ -37,6 +38,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		deletePersonalNote,
 		loadPersonalNotes,
@@ -246,6 +248,9 @@
 		const entry = get(personalNotesStore).entries?.[id];
 		pendingShareNote =
 			nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
+		if (nonNullish(pendingShareNote)) {
+			trackEvent({ name: TRACK_NOTE_SHARE_OPEN });
+		}
 	};
 
 	const closeShare = () => {

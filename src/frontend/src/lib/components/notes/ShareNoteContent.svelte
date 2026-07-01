@@ -11,6 +11,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
+	import { TRACK_NOTE_SHARE_CREATED } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
@@ -20,6 +21,7 @@
 		NOTES_SHARE_LINK_COPY,
 		NOTES_SHARE_SINGLE_USE_CHECKBOX
 	} from '$lib/constants/test-ids.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { createNoteShare, getActiveShareCount } from '$lib/services/personal-note-share.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -84,6 +86,15 @@
 				singleUse
 			});
 			createdLink = link;
+			trackEvent({
+				name: TRACK_NOTE_SHARE_CREATED,
+				metadata: {
+					expiry: (
+						EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]
+					).labelKey.replace('expiry_', ''),
+					singleUse: `${singleUse}`
+				}
+			});
 		} catch (err: unknown) {
 			// Lost a race to the cap since mount (e.g. another tab): reflect it in
 			// the UI instead of only toasting a generic failure.
