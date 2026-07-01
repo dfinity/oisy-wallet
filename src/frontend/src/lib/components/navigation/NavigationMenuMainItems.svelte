@@ -351,9 +351,11 @@
 					<!-- Circle embedded in the bar's hump (bottom:28px, matching the
 					     design). Anchored to the bar (the button is not positioned, so this
 					     centers on the whole bar at 50% — the same reference as the hump SVG
-					     — not just this slot). The label stays on the row (items-end). -->
+					     — not just this slot). The safe-area inset lifts it in step with the
+					     row (padded by the same inset) so it clears the iOS home indicator.
+					     The label stays on the row (items-end). -->
 					<span
-						class="absolute bottom-7 left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
+						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />
