@@ -122,14 +122,15 @@ describe('oisy-trade.canister', () => {
 			expect(service.get_order_book_ticker).toHaveBeenCalledExactlyOnceWith(tradingPair);
 		});
 
-		it('throws the mapped error', async () => {
+		it('throws the mapped error with the inner reason', async () => {
 			service.get_order_book_ticker.mockResolvedValue({
 				Err: { kind: { RequestError: [{ UnknownTradingPair: null }] }, message: [] }
 			} as never);
 
 			const { getOrderBookTicker } = await createOisyTradeCanister({ serviceOverride: service });
 
-			await expect(getOrderBookTicker(tradingPair)).rejects.toThrow('RequestError');
+			// Routed through `mapOisyTradeError`: message falls back to the inner reason.
+			await expect(getOrderBookTicker(tradingPair)).rejects.toThrow('UnknownTradingPair');
 		});
 	});
 
@@ -185,9 +186,9 @@ describe('oisy-trade.canister', () => {
 			await expect(addLimitOrder(request)).rejects.toThrow('insufficient balance');
 		});
 
-		it('falls back to the error kind without a message', async () => {
+		it('falls back to the inner reason when no message is present', async () => {
 			service.add_limit_order.mockResolvedValue({
-				Err: { kind: { InvalidOrder: null }, message: [] }
+				Err: { kind: { RequestError: [{ InvalidOrder: null }] }, message: [] }
 			} as never);
 
 			const { addLimitOrder } = await createOisyTradeCanister({ serviceOverride: service });
@@ -218,9 +219,12 @@ describe('oisy-trade.canister', () => {
 			await expect(deposit(depositRequest)).rejects.toThrow('amount too small');
 		});
 
-		it('falls back to the kind discriminant when the Err message is empty', async () => {
+		it('falls back to the inner reason when the Err message is empty', async () => {
 			service.deposit.mockResolvedValue({
-				Err: { kind: { InvalidRequest: [] }, message: toNullable<string>(undefined) }
+				Err: {
+					kind: { RequestError: [{ InvalidRequest: null }] },
+					message: toNullable<string>(undefined)
+				}
 			} as unknown as Awaited<ReturnType<typeof service.deposit>>);
 
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
