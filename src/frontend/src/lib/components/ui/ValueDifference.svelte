@@ -43,7 +43,7 @@
 	<span>⚠</span>
 {/snippet}
 
-{#if nonNullish(value)}
+{#if nonNullish(value) && Number.isFinite(value)}
 	<span
 		class="inline-flex items-center gap-1"
 		class:font-bold={isWarning || isError}

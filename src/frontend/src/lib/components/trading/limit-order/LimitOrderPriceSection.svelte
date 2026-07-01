@@ -53,8 +53,15 @@
 
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));
 
+	// The book side we'd cross against (bid when selling, ask when buying). Null
+	// when that side is empty — without it crossing is indeterminate, so we can't
+	// judge FOK-blocked and mustn't surface a bogus reference price of 0.
+	const referencePrice = $derived(side === 'sell' ? bid : ask);
+
 	// FOK that can't cross would be canceled — surfaced as a blocking warning.
-	const fokBlocked = $derived(fillOrKill && priceNum > 0 && active && !crossing);
+	const fokBlocked = $derived(
+		fillOrKill && priceNum > 0 && active && nonNullish(referencePrice) && !crossing
+	);
 
 	const tickValid = $derived(
 		nonNullish(pairView) && priceNum > 0 ? validatePrice({ price: priceNum, pair: pairView }) : true
@@ -149,7 +156,7 @@
 	const warningText = $derived.by((): { text: string; danger: boolean } | undefined => {
 		const t = $i18n.trading.limit_order;
 		if (fokBlocked) {
-			const refPrice = (side === 'sell' ? bid : ask) ?? 0;
+			const refPrice = referencePrice ?? 0;
 			return {
 				text: replacePlaceholders(
 					side === 'sell' ? t.warning_fok_blocked_sell : t.warning_fok_blocked_buy,
