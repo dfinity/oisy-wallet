@@ -111,7 +111,7 @@ describe('LimitOrderForm', () => {
 		expect(queryByText(en.trading.limit_order.fok_help)).toBeNull();
 
 		const infoButton = container.querySelector(
-			`button[aria-label="${en.trading.limit_order.fok_title}"]`
+			'button[aria-controls="limit-order-fok-help"]'
 		) as HTMLButtonElement;
 
 		await fireEvent.click(infoButton);

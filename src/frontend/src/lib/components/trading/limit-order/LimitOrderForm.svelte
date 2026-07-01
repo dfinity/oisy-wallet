@@ -183,7 +183,9 @@
 				</Checkbox>
 				<button
 					class="flex h-4 w-4 items-center text-tertiary"
-					aria-label={$i18n.trading.limit_order.fok_title}
+					aria-controls="limit-order-fok-help"
+					aria-expanded={fokHelpVisible}
+					aria-label={fokHelpVisible ? $i18n.core.text.collapse : $i18n.core.text.expand}
 					onclick={toggleFokHelp}
 					type="button"
 				>
@@ -191,7 +193,9 @@
 				</button>
 			</div>
 			{#if fokHelpVisible}
-				<p class="mt-2 text-xs text-tertiary">{$i18n.trading.limit_order.fok_help}</p>
+				<p id="limit-order-fok-help" class="mt-2 text-xs text-tertiary">
+					{$i18n.trading.limit_order.fok_help}
+				</p>
 			{/if}
 		</div>
 
