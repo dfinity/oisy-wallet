@@ -150,7 +150,6 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		const { kind, message } = response.Err;
-		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+		throw mapOisyTradeError(response.Err);
 	};
 }
