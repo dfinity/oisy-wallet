@@ -280,7 +280,6 @@ export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
 export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
 export const NOTES_VIEW_SHARE_BUTTON = 'notes-view-share-button';
 export const NOTES_BACK_BUTTON = 'notes-back-button';
-export const NOTES_SHARE_NAME_INPUT = 'notes-share-name-input';
 export const NOTES_SHARE_SINGLE_USE_CHECKBOX = 'notes-share-single-use-checkbox';
 export const NOTES_SHARE_CREATE_BUTTON = 'notes-share-create-button';
 export const NOTES_SHARE_LINK_COPY = 'notes-share-link-copy';

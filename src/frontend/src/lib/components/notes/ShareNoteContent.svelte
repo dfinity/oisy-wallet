@@ -8,7 +8,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import InputText from '$lib/components/ui/InputText.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
@@ -16,14 +15,12 @@
 		NOTES_SHARE_CREATE_BUTTON,
 		NOTES_SHARE_DONE_BUTTON,
 		NOTES_SHARE_LINK_COPY,
-		NOTES_SHARE_NAME_INPUT,
 		NOTES_SHARE_SINGLE_USE_CHECKBOX
 	} from '$lib/constants/test-ids.constants';
 	import { createNoteShare } from '$lib/services/personal-note-share.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
-	import { MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH } from '$lib/types/personal-note-share';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNotePreviewParts } from '$lib/utils/personal-note.utils';
 
@@ -45,16 +42,6 @@
 
 	const preview = $derived(personalNotePreviewParts(note.note));
 
-	let senderName = $state('');
-	// Client-side cap by code points (mirrors the backend ct_meta bound). Emoji /
-	// CJK count as one, matching how the user sees the length.
-	$effect(() => {
-		const codePoints = [...senderName];
-		if (codePoints.length > MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH) {
-			senderName = codePoints.slice(0, MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH).join('');
-		}
-	});
-
 	let durationMs = $state(24 * HOUR_MS);
 	let singleUse = $state(false);
 	let busy = $state(false);
@@ -75,11 +62,9 @@
 	const onCreate = async () => {
 		busy = true;
 		try {
-			const trimmedName = senderName.trim();
 			const { link } = await createNoteShare({
 				identity,
 				note: note.note,
-				senderName: trimmedName === '' ? undefined : trimmedName,
 				durationMs,
 				singleUse
 			});
@@ -106,22 +91,6 @@
 			{/if}
 		</div>
 		<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
-
-		<div class="flex flex-col gap-1">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.your_name}</span>
-			<InputText
-				name="share-sender-name"
-				placeholder=""
-				required={false}
-				testId={NOTES_SHARE_NAME_INPUT}
-				bind:value={senderName}
-			/>
-			<span class="text-xs text-tertiary">
-				{replacePlaceholders($i18n.notes.share.text.your_name_hint, {
-					$max: `${MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH}`
-				})}
-			</span>
-		</div>
 
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
