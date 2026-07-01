@@ -2517,6 +2517,11 @@
 			"load": "",
 			"save": "",
 			"delete": ""
+		},
+		"share": {
+			"text": {
+				"share_note": ""
+			}
 		}
 	}
 }

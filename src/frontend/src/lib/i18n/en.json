@@ -2517,6 +2517,11 @@
 			"load": "Couldn't load your notes. Please try again.",
 			"save": "Couldn't save your note. Please try again.",
 			"delete": "Couldn't delete your note. Please try again."
+		},
+		"share": {
+			"text": {
+				"share_note": "Share note"
+			}
 		}
 	}
 }

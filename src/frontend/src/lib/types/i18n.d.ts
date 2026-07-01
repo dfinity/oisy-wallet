@@ -2039,6 +2039,7 @@ interface I18nNotes {
 	};
 	alt: { edit: string; delete: string };
 	error: { load: string; save: string; delete: string };
+	share: { text: { share_note: string } };
 }
 
 interface I18n {

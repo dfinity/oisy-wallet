@@ -278,6 +278,7 @@ export const NOTES_ADD_BUTTON = 'notes-add-button';
 export const NOTES_VIEW = 'notes-view';
 export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
 export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
+export const NOTES_VIEW_SHARE_BUTTON = 'notes-view-share-button';
 export const NOTES_BACK_BUTTON = 'notes-back-button';
 export const NOTES_INPUT = 'notes-input';
 export const NOTES_SAVE_BUTTON = 'notes-save-button';
