@@ -15,6 +15,7 @@ pub mod custom_token;
 pub mod dapp;
 pub mod delegation;
 pub mod exchange;
+pub mod exchange_cost;
 pub mod experimental_feature;
 pub mod network;
 pub mod notification;

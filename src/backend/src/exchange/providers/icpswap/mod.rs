@@ -7,7 +7,7 @@ use shared::types::{exchange::ExchangeData, token_id::TokenId};
 use crate::{
     exchange::supplemental::{SupplementalPriceProvider, SupplementalPricesFuture},
     types::storable::StoredTokenId,
-    utils::http_outcall,
+    utils::http_outcall::{self, OutcallTag},
 };
 
 const DEFAULT_BASE_URL: &str = "https://api.icpswap.com";
@@ -112,13 +112,20 @@ impl IcpSwapProvider {
             self.base_url.trim_end_matches('/')
         );
 
-        let response = http_outcall::get(
+        let requested_tokens = [ledger_text.to_string()];
+
+        let response = http_outcall::get_tagged(
             &url,
             vec![HttpHeader {
                 name: "Accept".to_string(),
                 value: "application/json".to_string(),
             }],
             MAX_RESPONSE_BYTES,
+            OutcallTag {
+                provider: "icpswap",
+                path_for_log: format!("/info/token/{ledger_text}"),
+                requested_tokens: &requested_tokens,
+            },
             self.replicated,
         )
         .await?;

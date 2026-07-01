@@ -742,14 +742,144 @@ export interface EvmTransactionData {
 	gas_used: [] | [bigint];
 	gas_price: [] | [bigint];
 }
+/**
+ * Response of `exchange_rate_cost_summary()`.
+ *
+ * Holds aggregates over four nested windows (1 min / 5 min / 1 h /
+ * 24 h) plus a global tally of everything currently in the ring
+ * buffer.
+ */
+export interface ExchangeCostSummary {
+	now_ns: bigint;
+	/**
+	 * Ground-truth balance-delta measurement per refresh tick. See
+	 * [`ExchangeRefreshTickStats`].
+	 */
+	refresh_tick: ExchangeRefreshTickStats;
+	buffer_capacity: bigint;
+	buffer_len: bigint;
+	/**
+	 * Total cycles burned by *all* outcalls currently in the buffer.
+	 * Useful for sanity-checking the per-window aggregates.
+	 */
+	cycles_total_buffered: bigint;
+	windows: Array<ExchangeCostWindow>;
+}
+/**
+ * Aggregates over a single window length. Window length is captured
+ * in `window_seconds` so consumers can graph them consistently.
+ */
+export interface ExchangeCostWindow {
+	providers: Array<ExchangeProviderWindowStats>;
+	window_seconds: bigint;
+}
 export interface ExchangeData {
 	price_24h_change_pct: [] | [number];
 	market_cap: [] | [number];
 	timestamp_ns: bigint;
 	price: [] | [number];
 }
+/**
+ * One HTTP outcall executed by the exchange-rate fetcher.
+ *
+ * Emitted by the backend's `http_outcall` wrapper into a thread-local
+ * ring buffer, then surfaced to controllers via
+ * `exchange_rate_cost_log()`. Used to attribute per-call cycle cost to
+ * the provider / endpoint that issued it.
+ */
+export interface ExchangeOutcallRecord {
+	/**
+	 * HTTP status code; `0` if the outcall failed before a response
+	 * was received.
+	 */
+	status: number;
+	/**
+	 * Caller-supplied response-size cap passed to the management
+	 * canister.
+	 */
+	max_response_bytes: bigint;
+	timestamp_ns: bigint;
+	/**
+	 * Short tag identifying the provider + endpoint
+	 * (e.g. `"coingecko_simple"`, `"coingecko_token"`, `"icpswap"`).
+	 */
+	provider: string;
+	/**
+	 * Cycles charged by the management canister for this outcall.
+	 *
+	 * Taken from the `ic0.cost_http_request` system API (via
+	 * `ic_cdk::management_canister::cost_http_request`) on the exact
+	 * request dispatched — the same value `http_request` uses to attach
+	 * cycles. Exact for the actual subnet size and automatically correct
+	 * across IC pricing changes. The charge is against
+	 * `max_response_bytes`, not the actual response size.
+	 */
+	cycles_charged: bigint;
+	/**
+	 * Token identifiers (as `Debug` strings) the outcall asked the
+	 * provider for. Empty for endpoints whose request payload is not
+	 * per-token (none today, but reserved).
+	 */
+	requested_tokens: Array<string>;
+	/**
+	 * HTTP path + query, with any API key stripped.
+	 */
+	url_path: string;
+	/**
+	 * Wall-clock duration of the `await`, in nanoseconds.
+	 */
+	duration_ns: bigint;
+	/**
+	 * Bytes returned in the response body (`0` on transport error).
+	 */
+	response_bytes: bigint;
+}
+/**
+ * Per-provider aggregates over a single time window.
+ */
+export interface ExchangeProviderWindowStats {
+	error_count: bigint;
+	bytes_total: bigint;
+	provider: string;
+	call_count: bigint;
+	duration_ns_avg: bigint;
+	duration_ns_p95: bigint;
+	cycles_avg: bigint;
+	cycles_p95: bigint;
+	cycles_total: bigint;
+}
 export interface ExchangeRate {
 	usd: ExchangeData;
+}
+/**
+ * Ground-truth cycle burn measured per refresh tick by reading the
+ * canister balance immediately before and after the entire refresh
+ * completes (i.e. around `refresh_exchange_rates`, not around each
+ * individual outcall). Used as a sanity check on the per-call
+ * formula sum: if the formula constants are right, the sum of
+ * `cycles_charged` across all outcalls in a tick should be close to
+ * `balance_delta` for the same tick.
+ *
+ * Less polluted than per-`await` deltas because the in-flight lock
+ * keeps refreshes serial; the only confounders are concurrent
+ * inter-canister activity (rare on the exchange path) and short
+ * query-burst work in between the two balance reads.
+ */
+export interface ExchangeRefreshTickStats {
+	tick_count: bigint;
+	/**
+	 * Number of outcalls issued across all refresh ticks since
+	 * canister start (may exceed buffered outcalls because the ring
+	 * buffer overwrites old entries).
+	 */
+	outcall_count_total: bigint;
+	/**
+	 * Sum of `(balance_before - balance_after)` deltas observed
+	 * across all refresh ticks since canister start. Compare to the
+	 * formula-derived `cycles_total_buffered` to see if the IC
+	 * pricing constants in `outcall_cost_cycles` are correct.
+	 */
+	balance_delta_total: bigint;
 }
 export interface ExperimentalFeatureSettings {
 	enabled: boolean;
@@ -1910,6 +2040,26 @@ export interface _SERVICE {
 	 * This operation is idempotent - it will return OK if the contact has already been deleted.
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
+	/**
+	 * Returns every outgoing exchange-rate HTTP outcall the canister has
+	 * recorded since the last upgrade, oldest entry first.
+	 *
+	 * Telemetry only — the ring buffer caps at
+	 * [`crate::exchange::cost_log::BUFFER_CAPACITY`] entries and lives in
+	 * `thread_local!` memory that is wiped on upgrade. Restricted to
+	 * controllers + configured allowed-callers; the entries include
+	 * upstream URLs and requested token IDs, neither of which we want to
+	 * surface to anonymous callers.
+	 */
+	exchange_rate_cost_log: ActorMethod<[], Array<ExchangeOutcallRecord>>;
+	/**
+	 * Returns per-provider aggregates over 1-min, 5-min, 1-h and 24-h
+	 * windows for the outcalls currently buffered, plus a global tally.
+	 *
+	 * Restricted to controllers + configured allowed-callers for the same
+	 * reason as [`exchange_rate_cost_log`].
+	 */
+	exchange_rate_cost_summary: ActorMethod<[], ExchangeCostSummary>;
 	/**
 	 * Returns whether the backend is currently fetching and caching exchange rates.
 	 *

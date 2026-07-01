@@ -1,11 +1,15 @@
 use candid::Nat;
 use ic_cdk::{
+    api::time,
     management_canister::{
-        http_request, transform_context_from_query, HttpHeader, HttpMethod, HttpRequestArgs,
-        HttpRequestResult, TransformArgs, TransformContext,
+        cost_http_request, http_request, transform_context_from_query, HttpHeader, HttpMethod,
+        HttpRequestArgs, HttpRequestResult, TransformArgs, TransformContext,
     },
     query,
 };
+use shared::types::exchange_cost::ExchangeOutcallRecord;
+
+use crate::exchange::cost_log;
 
 const USER_AGENT: &str = "OisyWalletBackend";
 
@@ -93,38 +97,88 @@ async fn execute(request: HttpRequestArgs) -> Result<HttpRequestResult, String> 
     }
 }
 
-/// Performs an HTTP GET outcall.
+/// Telemetry tag for an outgoing exchange-rate outcall. Threaded into
+/// [`get_tagged`] so the per-call cost ends up attributed to the right
+/// provider in the [`crate::exchange::cost_log`] ring buffer.
 ///
-/// Sends a GET request to `url` with a `User-Agent` header and validates
-/// that the response status is in the 2xx range. Attaches
-/// [`http_request_transform`] to normalise the response (it strips volatile
-/// headers); in replicated mode that normalisation is also what lets the
-/// replicas reach consensus.
+/// `requested_tokens` is the slice of token-id debug strings the caller
+/// is asking the provider for. `path_for_log` is the URL path + query
+/// **without** the base host and **without** any API key — already
+/// safe to surface to a controller.
+pub(crate) struct OutcallTag<'a> {
+    pub provider: &'static str,
+    pub path_for_log: String,
+    pub requested_tokens: &'a [String],
+}
+
+/// GET outcall that records a per-call entry in
+/// [`crate::exchange::cost_log`]. Used by the exchange-rate fetcher so
+/// the controller-facing report can attribute cycle cost to each
+/// provider call.
 ///
-/// # Arguments
-/// * `url` - The URL to fetch.
-/// * `headers` - Additional headers appended after `User-Agent`.
-/// * `max_response_bytes` - Upper bound on the response size in bytes. Keep this as low as possible
-///   to minimise cycle costs.
-/// * `replicated` - When `true`, every replica issues the request and they reach consensus on the
-///   response; when `false`, a single replica handles it (cheaper, but unverified). The
-///   [`http_request_transform`] is attached regardless so the response is normalised the same way.
-pub(crate) async fn get(
+/// `replicated` controls IC consensus: `true` runs the request on every
+/// replica with the [`http_request_transform`] reconciliation step
+/// (expensive but verified); `false` runs it on a single replica
+/// (cheaper, unverified). The transform is attached regardless so the
+/// response (status + body) is normalised the same way in both modes.
+///
+/// Cycle cost is taken from the [`cost_http_request`] system API on the
+/// exact request we dispatch. That is what `http_request` itself uses to
+/// attach cycles, so the recorded value is the precise amount the IC
+/// charges — for the actual subnet size, and automatically correct if IC
+/// pricing changes. We deliberately do **not** read
+/// `canister_cycle_balance()` around the `await`: the exchange path issues
+/// many outcalls concurrently via `join_all`, so a balance delta during
+/// one `await` is polluted by every concurrent sibling's charge.
+pub(crate) async fn get_tagged(
     url: &str,
     headers: Vec<HttpHeader>,
     max_response_bytes: u64,
+    tag: OutcallTag<'_>,
     replicated: bool,
 ) -> Result<HttpRequestResult, String> {
+    let started_ns = time();
+
     let transform = transform_context_from_query("http_request_transform".to_string(), vec![]);
 
-    execute(build_get_request(
+    let request = build_get_request(
         url,
         headers,
         max_response_bytes,
         replicated,
         Some(transform),
-    ))
-    .await
+    );
+    let cycles_charged = cost_http_request(&request);
+
+    let outcome = execute(request).await;
+
+    let ended_ns = time();
+
+    let (status, response_bytes) = match &outcome {
+        Ok(resp) => (status_to_u32(&resp.status), resp.body.len() as u64),
+        Err(_) => (0, 0),
+    };
+
+    cost_log::record(ExchangeOutcallRecord {
+        timestamp_ns: started_ns,
+        provider: tag.provider.to_string(),
+        url_path: tag.path_for_log,
+        requested_tokens: tag.requested_tokens.to_vec(),
+        cycles_charged,
+        response_bytes,
+        max_response_bytes,
+        status,
+        duration_ns: ended_ns.saturating_sub(started_ns),
+    });
+
+    outcome
+}
+
+fn status_to_u32(status: &Nat) -> u32 {
+    // HTTP status codes are always in 100..600, so parsing the Nat's
+    // decimal representation as a `u32` is always sufficient. Saturate
+    // defensively rather than panicking inside the telemetry path.
+    status.0.to_string().parse::<u32>().unwrap_or(u32::MAX)
 }
 
 /// Performs an HTTP POST outcall with a JSON body.

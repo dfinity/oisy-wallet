@@ -4,7 +4,7 @@ use ic_cdk::{api::time, management_canister::HttpHeader};
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 
-use crate::utils::http_outcall::get;
+use crate::utils::http_outcall::{get_tagged, OutcallTag};
 
 const DEFAULT_BASE_URL: &str = "https://pro-api.coingecko.com/api/v3";
 const SIMPLE_PRICE_PATH: &str = "/simple/price";
@@ -85,12 +85,21 @@ impl CoinGeckoClient {
     async fn fetch_prices(
         &self,
         url: &str,
+        provider_tag: &'static str,
+        requested_tokens: &[String],
         max_response_bytes: u64,
     ) -> Result<HashMap<String, ExchangeData>, String> {
-        let response = get(
+        let path_for_log = url.strip_prefix(&self.base_url).unwrap_or(url).to_string();
+
+        let response = get_tagged(
             url,
             vec![self.auth_header()],
             max_response_bytes,
+            OutcallTag {
+                provider: provider_tag,
+                path_for_log,
+                requested_tokens,
+            },
             self.replicated,
         )
         .await?;
@@ -120,8 +129,15 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url, response_bytes_for(coin_ids.len()))
-            .await
+        let requested_tokens: Vec<String> = coin_ids.iter().map(|s| (*s).to_string()).collect();
+
+        self.fetch_prices(
+            &url,
+            "coingecko_simple",
+            &requested_tokens,
+            response_bytes_for(coin_ids.len()),
+        )
+        .await
     }
 
     /// Fetches token prices from the `CoinGecko`
@@ -138,8 +154,21 @@ impl CoinGeckoClient {
             self.base_url
         );
 
-        self.fetch_prices(&url, response_bytes_for(addresses.len()))
-            .await
+        // Prefix every requested-token entry with the platform so the
+        // controller-facing log preserves which chain each address
+        // belongs to (the same address can appear on multiple chains).
+        let requested_tokens: Vec<String> = addresses
+            .iter()
+            .map(|a| format!("{platform}:{a}"))
+            .collect();
+
+        self.fetch_prices(
+            &url,
+            "coingecko_token",
+            &requested_tokens,
+            response_bytes_for(addresses.len()),
+        )
+        .await
     }
 }
 

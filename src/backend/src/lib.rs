@@ -24,6 +24,7 @@ use shared::{
         custom_token::CustomToken,
         dapp::AddHiddenDappIdRequest,
         exchange::ExchangeRate,
+        exchange_cost::{ExchangeCostSummary, ExchangeOutcallRecord},
         experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
