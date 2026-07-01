@@ -17,7 +17,7 @@ import { idlFactory as idlFactoryOisyTrade } from '$declarations/oisy_trade/oisy
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapOisyTradeError } from '$lib/canisters/oisy-trade.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices, fromNullable } from '@dfinity/utils';
+import { Canister, createServices } from '@dfinity/utils';
 
 export class OisyTradeCanister extends Canister<OisyTradeService> {
 	static async create({
@@ -71,8 +71,7 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		const { kind, message } = response.Err;
-		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+		throw mapOisyTradeError(response.Err);
 	};
 
 	getOrderBookDepth = async (request: GetOrderBookDepthRequest): Promise<OrderBookDepth> => {
@@ -84,8 +83,7 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		const { kind, message } = response.Err;
-		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+		throw mapOisyTradeError(response.Err);
 	};
 
 	addLimitOrder = async (request: LimitOrderRequest): Promise<OrderId> => {
@@ -98,8 +96,7 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		const { kind, message } = response.Err;
-		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+		throw mapOisyTradeError(response.Err);
 	};
 
 	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
@@ -111,7 +108,6 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 			return response.Ok;
 		}
 
-		const { kind, message } = response.Err;
-		throw new Error(fromNullable(message) ?? Object.keys(kind)[0]);
+		throw mapOisyTradeError(response.Err);
 	};
 }
