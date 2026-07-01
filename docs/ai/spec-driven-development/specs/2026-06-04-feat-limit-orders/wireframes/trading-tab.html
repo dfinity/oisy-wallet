@@ -310,11 +310,12 @@
 			.venue-tag {
 				display: inline-block;
 				font-size: 10px;
-				font-weight: 500;
+				font-weight: 400;
 				padding: 1px 7px;
-				border-radius: 10px;
-				background: var(--color-background-info);
-				color: var(--color-text-info);
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				color: var(--color-text-secondary);
 				margin-left: 6px;
 				vertical-align: 1px;
 				white-space: nowrap;
@@ -615,8 +616,8 @@
 						<div class="row">
 							<div class="tok-dot">ICP</div>
 							<div class="row-info">
-								<div class="row-name">ICP</div>
-								<div class="row-sub">OISY TRADE</div>
+								<div class="row-name">ICP <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">Internet Computer</div>
 							</div>
 							<div class="row-right">
 								<div class="row-main pval">250 ICP</div>
@@ -628,8 +629,8 @@
 						<div class="row">
 							<div class="tok-dot tok-dot-u">USD</div>
 							<div class="row-info">
-								<div class="row-name">ckUSDC</div>
-								<div class="row-sub">OISY TRADE</div>
+								<div class="row-name">ckUSDC <span class="venue-tag">OISY TRADE</span></div>
+								<div class="row-sub">USD Coin on Internet Computer</div>
 							</div>
 							<div class="row-right">
 								<div class="row-main pval">150.00 ckUSDC</div>

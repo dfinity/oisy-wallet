@@ -7,7 +7,7 @@ import { consoleError } from '$lib/utils/console.utils';
 import { mapLiquidiumMarket, mapLiquidiumPortfolio } from '$lib/utils/liquidium.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { Chain } from '@liquidium/client';
+import { Chain, type AssetPrices } from '@liquidium/client';
 
 // Resolves the (single, ETH-owned) Liquidium profile, creating one if absent.
 // Creation is signature-gated via the wallet adapter's `signMessage`.
@@ -51,7 +51,15 @@ export const loadLiquidium = async ({
 	try {
 		const { market, accounts, positions } = liquidiumClient({ identity });
 
-		const pools = await market.listPools();
+		// Prices feed only the Borrow form's USD math; a price-fetch failure must not block the
+		// markets/portfolio refresh the Supply dashboard relies on — default to empty and log.
+		const [pools, assetPrices] = await Promise.all([
+			market.listPools(),
+			market.getAssetPrices().catch((err: unknown): AssetPrices => {
+				consoleError(err);
+				return {};
+			})
+		]);
 		const markets = pools.map(mapLiquidiumMarket);
 
 		const profileId = nonNullish(ethAddress) ? await accounts.getProfileId(ethAddress) : null;
@@ -63,7 +71,7 @@ export const loadLiquidium = async ({
 				})
 			: null;
 
-		liquidiumStore.set({ markets, portfolio });
+		liquidiumStore.set({ markets, portfolio, assetPrices });
 	} catch (err: unknown) {
 		consoleError(err);
 	}
