@@ -146,6 +146,13 @@
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
 
+	// Parsed Review inputs, guarded against NaN from empty/partial fields so the
+	// Review step never renders NaN (nor feeds NaN% into ValueDifference).
+	const reviewBaseAmount = $derived(
+		Number.isFinite(parseFloat(baseAmount)) ? parseFloat(baseAmount) : 0
+	);
+	const reviewPrice = $derived(Number.isFinite(parseFloat(price)) ? parseFloat(price) : 0);
+
 	const place = async () => {
 		if (isNullish(pairInfo) || isNullish(pairView)) {
 			return;
@@ -216,7 +223,7 @@
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
 		{ask}
-		baseAmount={parseFloat(baseAmount)}
+		baseAmount={reviewBaseAmount}
 		{bid}
 		{currentValue}
 		{depthLevels}
@@ -224,7 +231,7 @@
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
 		{pairView}
-		price={parseFloat(price)}
+		price={reviewPrice}
 		{side}
 		bind:giveUpConfirmed
 	/>
