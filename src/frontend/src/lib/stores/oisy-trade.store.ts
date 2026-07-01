@@ -10,7 +10,8 @@ const initOisyTradeStore = (): OisyTradeStore => {
 	const defaultStoreValue: OisyTradeStoreData = {
 		pairs: undefined,
 		supportedTokens: undefined,
-		balances: undefined
+		balances: undefined,
+		orders: undefined
 	};
 	const { subscribe, set } = writable<OisyTradeStoreData>(defaultStoreValue);
 
