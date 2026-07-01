@@ -36,16 +36,17 @@
 
 	let { note, onBack, onEdit, onDelete, onShare }: Props = $props();
 
-	// First line is the bold title (matching the list); the rest is the body with
+	// First non-empty line is the bold title (matching the list); the rest is the body with
 	// line breaks preserved. URLs in both become safe links (Decision 16).
 	const neutralized = $derived(neutralizePersonalNoteText(note.note));
-	const newline = $derived(neutralized.indexOf('\n'));
-	const titleSegments = $derived(
-		linkifyPersonalNote(newline === -1 ? neutralized : neutralized.slice(0, newline))
+	const lines = $derived(neutralized.split('\n'));
+	const firstNonEmptyIndex = $derived(lines.findIndex((line) => line.trim() !== ''));
+	const titleText = $derived(firstNonEmptyIndex === -1 ? '' : lines[firstNonEmptyIndex].trim());
+	const bodyText = $derived(
+		firstNonEmptyIndex === -1 ? '' : lines.slice(firstNonEmptyIndex + 1).join('\n')
 	);
-	const bodySegments = $derived(
-		newline === -1 ? [] : linkifyPersonalNote(neutralized.slice(newline + 1))
-	);
+	const titleSegments = $derived(linkifyPersonalNote(titleText));
+	const bodySegments = $derived(bodyText === '' ? [] : linkifyPersonalNote(bodyText));
 
 	const metaLine = $derived.by(() => {
 		const created = formatPersonalNoteTimestamp({

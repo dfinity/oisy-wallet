@@ -389,6 +389,8 @@ export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbo
 export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
+export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
+export const TRADING_ORDER_CANCEL_CONFIRM_BUTTON = 'trading-order-cancel-confirm-button';
 
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';

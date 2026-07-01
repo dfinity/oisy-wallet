@@ -81,13 +81,13 @@
 	// `undefined` when the share flow is closed.
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
-	let loading = $state(false);
+	let loading = $state(!$personalNotesLoaded);
 	let busy = $state(false);
 
 	let searchTerm = $state('');
 
 	const notes = $derived($personalNotesList);
-	const showSkeleton = $derived(loading || isNullish(notes));
+	const showSkeleton = $derived(loading);
 	const isEmpty = $derived(!showSkeleton && (notes?.length ?? 0) === 0);
 
 	// Client-side search: case-insensitive substring over the full (decrypted) note
