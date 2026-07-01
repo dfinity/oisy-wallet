@@ -11,6 +11,7 @@ import {
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
 const { mockPairs, mockEnabledIcTokens } = vi.hoisted(() => {
@@ -89,7 +90,7 @@ describe('LimitOrderTokensList', () => {
 
 		// The component's effect resolves the base symbols and pushes them through
 		// `setTokens`; the picker's filtered list then exposes the ICP token.
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await tick();
 
 		const filtered = get(ctx.filteredTokens);
 

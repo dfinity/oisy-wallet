@@ -34,10 +34,12 @@
 	// UX as the swap token list. Trade tokens without a matching app token are
 	// dropped (they can't be displayed by the shared item).
 	const tokens: Token[] = $derived.by(() => {
-		const byLedger: Record<string, Token> = $enabledIcTokens.reduce<Record<string, Token>>(
-			(acc, token) => ({ ...acc, [token.ledgerCanisterId]: token }),
-			{}
-		);
+		// Lookup objects (not Map/Set, which the svelte/prefer-svelte-reactivity
+		// rule disallows in components) keep the resolve + dedupe linear.
+		const byLedger: Record<string, Token> = {};
+		for (const token of $enabledIcTokens) {
+			byLedger[token.ledgerCanisterId] = token;
+		}
 
 		const tradeTokens =
 			mode === 'base'
@@ -47,12 +49,16 @@
 		// Resolve each eligible trade token to its app token (by ledger id), drop
 		// the ones with no match, then dedupe by symbol (a symbol can recur across
 		// several markets) keeping the first occurrence.
-		return tradeTokens
-			.map((tradeToken) => byLedger[tradeToken.id.ledger_id.toText()])
-			.filter(nonNullish)
-			.filter(
-				(token, index, all) => all.findIndex(({ symbol }) => symbol === token.symbol) === index
-			);
+		const seen: Record<string, true> = {};
+		const result: Token[] = [];
+		for (const tradeToken of tradeTokens) {
+			const token = byLedger[tradeToken.id.ledger_id.toText()];
+			if (nonNullish(token) && !(token.symbol in seen)) {
+				seen[token.symbol] = true;
+				result.push(token);
+			}
+		}
+		return result;
 	});
 
 	$effect(() => {
