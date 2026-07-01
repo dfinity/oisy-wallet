@@ -34,8 +34,7 @@ export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterI
 // Fee-only EVM transfer simulation target. The actual Liquidium native-address target is
 // returned by the SDK at execution time; using the sender address here can underestimate
 // ERC-20 gas when the protocol address has no token balance yet.
-export const LIQUIDIUM_EVM_FEE_ESTIMATE_DESTINATION =
-	'0x0000000000000000000000000000000000000001';
+export const LIQUIDIUM_EVM_FEE_ESTIMATE_DESTINATION = '0x0000000000000000000000000000000000000001';
 
 // Display bands — Liquidium publishes no discrete cut-offs, so oisy picks its own
 // (spec → Open question #7).

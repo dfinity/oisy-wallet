@@ -1,7 +1,7 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import * as feeServices from '$eth/services/fee.services';
-import * as listenerServices from '$eth/services/eth-listener.services';
 import * as ethTokensDerived from '$eth/derived/tokens.derived';
+import * as listenerServices from '$eth/services/eth-listener.services';
+import * as feeServices from '$eth/services/fee.services';
 import * as evmTokensDerived from '$evm/derived/tokens.derived';
 import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
 import { ZERO } from '$lib/constants/app.constants';
@@ -11,11 +11,11 @@ import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { WizardStep } from '@dfinity/gix-components';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 // No matching enabled native token in the test, so the EthFeeContext (and its fee
 // estimation) never mounts — rendering exercises the wizard's setup/deriveds only,
