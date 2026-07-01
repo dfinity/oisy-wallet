@@ -22,7 +22,6 @@
 			class="text-sm font-medium text-brand-primary"
 			data-tid={TRADING_ASSETS_DEPOSIT_BUTTON}
 			onclick={onDeposit}
-			type="button"
 		>
 			{$i18n.trading.assets.deposit}
 		</button>
@@ -31,7 +30,7 @@
 	{#if $oisyTradeAssets.length === 0}
 		<p class="py-2 text-tertiary">{$i18n.trading.assets.empty}</p>
 	{:else}
-		<ul class="flex flex-col">
+		<ul class="flex flex-col list-none">
 			{#each $oisyTradeAssets as asset (asset.token.id)}
 				<li>
 					<TradingAssetRow {asset} {onWithdraw} />

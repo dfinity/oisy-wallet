@@ -1,7 +1,8 @@
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { assertNonNullish, nowInBigIntNanoSeconds, type QueryParams } from '@dfinity/utils';
 import {
 	AccountIdentifier,
 	IcpLedgerCanister,
@@ -10,6 +11,23 @@ import {
 import { toCandidAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
+
+export const accountBalance = async ({
+	certified,
+	owner,
+	identity,
+	...rest
+}: {
+	owner: Principal;
+	identity: NullishIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<bigint> => {
+	assertNonNullish(identity);
+
+	const { accountBalance } = await ledgerCanister({ identity, ...rest });
+
+	return accountBalance({ certified, accountIdentifier: getAccountIdentifier(owner) });
+};
 
 export const transfer = async ({
 	identity,
