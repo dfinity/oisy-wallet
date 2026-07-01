@@ -339,7 +339,7 @@
 				     page, grey while its sheet is open over another page. The label
 				     matches the other bar items (text-sm). -->
 				<button
-					class="relative flex flex-1 flex-col items-center justify-end p-1.5 text-center text-sm text-primary"
+					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm text-primary"
 					class:text-brand-primary-alt={ownsCurrent}
 					class:text-tertiary={pressed}
 					aria-expanded={open}
@@ -349,8 +349,9 @@
 					type="button"
 				>
 					<!-- Circle embedded in the bar's hump (bottom:28px, matching the
-					     design). Absolute, so the label stays on the same row as the other
-					     bar labels (bottom-aligned by the bar's items-end). -->
+					     design). Anchored to the bar (the button is not positioned, so this
+					     centers on the whole bar at 50% — the same reference as the hump SVG
+					     — not just this slot). The label stays on the row (items-end). -->
 					<span
 						class="absolute bottom-7 left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
 					>
