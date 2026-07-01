@@ -77,8 +77,8 @@ describe('LimitOrderRouting', () => {
 
 		await fireEvent.click(container.querySelector('button') as HTMLButtonElement);
 
-		// Three em-dashes: ask, bid, spread.
-		expect(container.textContent?.match(/—/g)?.length).toBeGreaterThanOrEqual(3);
+		// Placeholder dashes for the three empty readouts: ask, bid, spread.
+		expect(container.textContent?.match(/[-—]/g)?.length).toBeGreaterThanOrEqual(3);
 	});
 
 	it('renders the no-fee label when fees are zero', async () => {

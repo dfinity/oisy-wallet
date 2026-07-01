@@ -60,13 +60,13 @@
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-error-primary"
 			>
 				<span>{$i18n.trading.limit_order.lowest_ask}</span>
-				<span>{nonNullish(ask) ? `${ask} ${quote}` : '—'}</span>
+				<span>{nonNullish(ask) ? `${ask} ${quote}` : '-'}</span>
 			</div>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-success-primary"
 			>
 				<span>{$i18n.trading.limit_order.highest_bid}</span>
-				<span>{nonNullish(bid) ? `${bid} ${quote}` : '—'}</span>
+				<span>{nonNullish(bid) ? `${bid} ${quote}` : '-'}</span>
 			</div>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-secondary"
@@ -77,7 +77,7 @@
 						? replacePlaceholders($i18n.trading.limit_order.spread_value, {
 								$value: spreadPercent.toFixed(1)
 							})
-						: '—'}
+						: '-'}
 				</span>
 			</div>
 			{#if !fillOrKill}
@@ -87,7 +87,7 @@
 					<span>{$i18n.trading.limit_order.maker_fee}</span>
 					<span>
 						{makerFee === null
-							? '—'
+							? '-'
 							: makerFee === 0
 								? $i18n.trading.limit_order.no_fee
 								: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
@@ -100,7 +100,7 @@
 				<span>{$i18n.trading.limit_order.taker_fee}</span>
 				<span>
 					{takerFee === null
-						? '—'
+						? '-'
 						: takerFee === 0
 							? $i18n.trading.limit_order.no_fee
 							: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
