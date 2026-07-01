@@ -43,7 +43,6 @@ const resolveLiquidiumActivity = async ({
 	if (nonNullish(txid)) {
 		const target = normalizeTxid(txid);
 		const activities = await client.activities.list({ profileId, filter: ActivityFilter.all });
-
 		return activities.find(
 			({ txid: activityTxid, txids }) =>
 				(nonNullish(activityTxid) && normalizeTxid(activityTxid) === target) ||
