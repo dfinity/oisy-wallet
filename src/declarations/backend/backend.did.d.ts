@@ -575,6 +575,11 @@ export interface Config {
 	 */
 	new_user_signups_allowed: [] | [boolean];
 }
+export type ConsumePersonalNoteShareResult =
+	| {
+			Ok: PersonalNoteShareContent;
+	  }
+	| { Err: PersonalNoteShareError };
 export interface Contact {
 	id: bigint;
 	name: string;
@@ -624,6 +629,30 @@ export type CreateContactResult =
 			 */
 			Err: ContactError;
 	  };
+/**
+ * Create-share request. `token`, `ct_meta`, and `ct_content` are opaque
+ * ciphertext/ids to the canister — it enforces only their sizes and the
+ * expiry/flag fields, never the note content or (via `ct_meta`) the sender
+ * name.
+ */
+export interface CreatePersonalNoteShareRequest {
+	/**
+	 * Opaque, client-generated random id; also the map key.
+	 */
+	token: string;
+	/**
+	 * AES-GCM ciphertext of `{ v, note }`, keyed by the same per-share key.
+	 */
+	ct_content: Uint8Array;
+	/**
+	 * AES-GCM ciphertext of `{ v, sender_name? }`, keyed by the per-share key
+	 * held only in the link fragment.
+	 */
+	ct_meta: Uint8Array;
+	single_use: boolean;
+	expires_at_ns: bigint;
+}
+export type CreatePersonalNoteShareResult = { Ok: null } | { Err: PersonalNoteShareError };
 export type CreateUserProfileError = {
 	/**
 	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
@@ -851,6 +880,10 @@ export type GetContactsResult =
 			 */
 			Err: ContactError;
 	  };
+export type GetPersonalNoteShareResult =
+	| { Ok: PersonalNoteShareContent }
+	| { Err: PersonalNoteShareError };
+export type GetPersonalNoteSharesCountResult = { Ok: bigint } | { Err: PersonalNoteShareError };
 export type GetPersonalNotesCountResult =
 	| {
 			/**
@@ -1228,6 +1261,9 @@ export interface Outpoint {
 	 */
 	vout: number;
 }
+export type PeekPersonalNoteShareResult =
+	| { Ok: PersonalNoteSharePeek }
+	| { Err: PersonalNoteShareError };
 export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
@@ -1273,6 +1309,80 @@ export type PersonalNoteError =
 			 */
 			InternalError: { msg: string };
 	  };
+/**
+ * Returned by `get_personal_note_share` / `consume_personal_note_share`.
+ */
+export interface PersonalNoteShareContent {
+	ct_content: Uint8Array;
+	expires_at_ns: bigint;
+}
+export type PersonalNoteShareError =
+	| {
+			/**
+			 * `ct_meta` exceeds [`MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES`].
+			 */
+			MetaCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * `expires_at_ns` is not strictly in the future of IC time, or is
+			 * further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * No unexpired entry for this token. Also returned for an
+			 * already-consumed single-use share and a reusable/single-use mismatch
+			 * (e.g. calling the reusable getter on a single-use share) — collapsing
+			 * every case into one response so a reader can never distinguish
+			 * "expired" from "used" from "never existed".
+			 */
+			NotFound: null;
+	  }
+	| {
+			/**
+			 * `ct_content` exceeds `personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`.
+			 */
+			ContentCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] active
+			 * shares.
+			 */
+			TooManyShares: null;
+	  }
+	| {
+			/**
+			 * The caller (create) or the shared anonymous bucket (consume) exceeded
+			 * the rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `token` already identifies an existing share; the client should
+			 * generate a fresh random token and retry.
+			 */
+			DuplicateToken: null;
+	  }
+	| {
+			/**
+			 * The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
+			 */
+			TokenTooLong: null;
+	  }
+	| { InternalError: { msg: string } };
+/**
+ * Returned by `peek_personal_note_share`. Never includes `ct_content` — the
+ * peek is intentionally non-destructive and cannot itself reveal the note.
+ */
+export interface PersonalNoteSharePeek {
+	ct_meta: Uint8Array;
+	single_use: boolean;
+	expires_at_ns: bigint;
+}
 /**
  * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
  * vetKey and the store's public verification key). Both return opaque bytes on
@@ -1495,6 +1605,11 @@ export interface Stats {
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
+	/**
+	 * Total number of stored personal-note shares across all users (active or
+	 * not yet pruned).
+	 */
+	personal_note_shares_count: bigint;
 	agreement_history_count: bigint;
 	/**
 	 * Total number of stored (encrypted) personal-note entries across all users.
@@ -1980,6 +2095,17 @@ export interface _SERVICE {
 	 */
 	config: ActorMethod<[], Config>;
 	/**
+	 * Returns a **single-use** share's content exactly once, atomically deleting
+	 * it on success. Callable anonymously; guarded only by a coarse global rate
+	 * limiter, since an anonymous update call has no distinguishing principal to
+	 * rate-limit per-caller — every anonymous caller shares one bucket.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, already-consumed, or reusable; `RateLimited` at the global cap).
+	 */
+	consume_personal_note_share: ActorMethod<[string], ConsumePersonalNoteShareResult>;
+	/**
 	 * Creates a new active user transaction record for the caller.
 	 *
 	 * # Errors
@@ -1999,6 +2125,19 @@ export interface _SERVICE {
 	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
+	/**
+	 * Creates a share for one of the caller's notes. The note text, the sender
+	 * name, and the share key never reach the canister — only opaque
+	 * ciphertext, the expiry, and the single-use flag.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
+	 * `ContentCiphertextTooLarge`, `InvalidExpiry`, `DuplicateToken`, `RateLimited`).
+	 */
+	create_personal_note_share: ActorMethod<
+		[CreatePersonalNoteShareRequest],
+		CreatePersonalNoteShareResult
+	>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -2129,6 +2268,24 @@ export interface _SERVICE {
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
+	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
+	 * share. A single-use share's content is only ever returned by
+	 * `consume_personal_note_share`. Callable anonymously.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, or single-use).
+	 */
+	get_personal_note_share: ActorMethod<[string], GetPersonalNoteShareResult>;
+	/**
+	 * Returns the caller's active-share count (drives the client-side "at cap"
+	 * gate). Mirrors `get_personal_notes_count`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError`.
+	 */
+	get_personal_note_shares_count: ActorMethod<[], GetPersonalNoteSharesCountResult>;
+	/**
 	 * Returns all of the caller's (encrypted) personal notes, decrypted client-side.
 	 *
 	 * # Errors
@@ -2240,6 +2397,18 @@ export interface _SERVICE {
 	 * user signs in.
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
+	/**
+	 * Non-destructive: returns a share's encrypted metadata (never the note
+	 * content) for an unexpired token, without consuming a single-use share.
+	 * Callable anonymously — a deliberate, narrowly-scoped exception to notes
+	 * endpoints normally requiring an authenticated caller, since the recipient
+	 * of a share link has no OISY identity.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for an
+	 * expired or unknown token).
+	 */
+	peek_personal_note_share: ActorMethod<[string], PeekPersonalNoteShareResult>;
 	/**
 	 * Remove custom token for the user.
 	 */
