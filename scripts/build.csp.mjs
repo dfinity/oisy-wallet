@@ -33,14 +33,17 @@ const removeDefaultCspTag = (indexHtml) =>
  * We need a script loader to implement a proper Content Security Policy. See the `updateCSP` doc for more information.
  */
 const injectScriptLoader = ({ content, filePath }) => {
-	// We need to provide the relative path to the script; otherwise, it will be resolved from the root at runtime.
-	// This isn't an issue if all loaders are consistent and use the same name,
-	// but it could become a problem if Svelte changes its approach, or we start hashing the script names.
+	// Load the script by an absolute path from the server root. The SPA fallback
+	// (build/index.html) is served for arbitrary deep routes (e.g.
+	// /notes/share/<token>), where a relative "main.js" would resolve against the
+	// current directory to "/notes/share/main.js" — which returns the fallback
+	// HTML, not the module — and the app would fail to boot. Prerendered pages in
+	// subfolders keep their own path prefix.
 	const buildDir = join(process.cwd(), 'build');
 	const scriptName = 'main.js';
 
 	const parentFolders = relative(buildDir, dirname(filePath));
-	const loaderSrc = `${parentFolders !== '' ? `/${parentFolders}/` : ''}${scriptName}`;
+	const loaderSrc = `/${parentFolders !== '' ? `${parentFolders}/` : ''}${scriptName}`;
 
 	return content.replace(
 		'<!-- SCRIPT_LOADER -->',
