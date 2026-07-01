@@ -10,7 +10,6 @@ import type {
 	GetAllowedCyclesResponse,
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
-	PersonalNoteSharePeek,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TokenId
@@ -669,18 +668,8 @@ export class BackendCanister extends Canister<BackendService> {
 		throw response.Err;
 	};
 
-	// Anonymous-callable read endpoints (the share recipient has no identity), so
-	// they run as non-certified queries like the other note reads.
-	peekPersonalNoteShare = async (token: string): Promise<PersonalNoteSharePeek> => {
-		const { peek_personal_note_share } = this.caller({ certified: false });
-		const response = await peek_personal_note_share(token);
-
-		if ('Ok' in response) {
-			return response.Ok;
-		}
-		throw response.Err;
-	};
-
+	// Anonymous-callable read endpoint (the share recipient has no identity), so
+	// it runs as a non-certified query like the other note reads.
 	getPersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
 		const { get_personal_note_share } = this.caller({ certified: false });
 		const response = await get_personal_note_share(token);

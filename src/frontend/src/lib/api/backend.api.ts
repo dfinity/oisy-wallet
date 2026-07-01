@@ -8,7 +8,6 @@ import type {
 	GetAllowedCyclesResponse,
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
-	PersonalNoteSharePeek,
 	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
@@ -414,14 +413,6 @@ export const createPersonalNoteShare = async ({
 }: CanisterApiFunctionParams<CreatePersonalNoteShareRequest>): Promise<void> => {
 	const { createPersonalNoteShare } = await backendCanister({ identity });
 	return createPersonalNoteShare(request);
-};
-
-export const peekPersonalNoteShare = async ({
-	identity,
-	token
-}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteSharePeek> => {
-	const { peekPersonalNoteShare } = await backendCanister({ identity });
-	return peekPersonalNoteShare(token);
 };
 
 export const getPersonalNoteShare = async ({

@@ -1,9 +1,6 @@
 import {
-	buildShareEnvelopes,
 	decryptShareContent,
-	decryptShareMeta,
 	encryptShareContent,
-	encryptShareMeta,
 	exportShareKey,
 	generateShareKey,
 	generateShareToken,
@@ -11,16 +8,11 @@ import {
 } from '$lib/services/personal-note-share.crypto';
 import {
 	PERSONAL_NOTE_SHARE_VERSION,
-	type PersonalNoteShareContentEnvelope,
-	type PersonalNoteShareMetaEnvelope
+	type PersonalNoteShareContentEnvelope
 } from '$lib/types/personal-note-share';
 
 describe('personal-note-share.crypto', () => {
 	const token = generateShareToken();
-	const meta: PersonalNoteShareMetaEnvelope = {
-		v: PERSONAL_NOTE_SHARE_VERSION,
-		sender_name: 'Peter'
-	};
 	const content: PersonalNoteShareContentEnvelope = {
 		v: PERSONAL_NOTE_SHARE_VERSION,
 		note: 'private — 日本語 😀 \n second line https://example.com'
@@ -64,51 +56,24 @@ describe('personal-note-share.crypto', () => {
 		});
 	});
 
-	describe('meta encrypt / decrypt', () => {
-		it('round-trips the meta envelope', async () => {
-			const key = await generateShareKey();
-			const ciphertext = await encryptShareMeta({ key, meta, token });
-
-			expect(ciphertext).toBeInstanceOf(Uint8Array);
-
-			const decrypted = await decryptShareMeta({ key, ciphertext, token });
-
-			expect(decrypted).toEqual(meta);
-		});
-
-		it('uses a random IV, so encrypting the same meta twice differs', async () => {
-			const key = await generateShareKey();
-			const a = await encryptShareMeta({ key, meta, token });
-			const b = await encryptShareMeta({ key, meta, token });
-
-			expect(a).not.toEqual(b);
-		});
-
-		it('fails to decrypt with a different token (AAD binding)', async () => {
-			const key = await generateShareKey();
-			const ciphertext = await encryptShareMeta({ key, meta, token });
-
-			await expect(
-				decryptShareMeta({ key, ciphertext, token: generateShareToken() })
-			).rejects.toThrow();
-		});
-
-		it('fails to decrypt with a different key', async () => {
-			const key = await generateShareKey();
-			const otherKey = await generateShareKey();
-			const ciphertext = await encryptShareMeta({ key, meta, token });
-
-			await expect(decryptShareMeta({ key: otherKey, ciphertext, token })).rejects.toThrow();
-		});
-	});
-
 	describe('content encrypt / decrypt', () => {
 		it('round-trips the content envelope', async () => {
 			const key = await generateShareKey();
 			const ciphertext = await encryptShareContent({ key, content, token });
+
+			expect(ciphertext).toBeInstanceOf(Uint8Array);
+
 			const decrypted = await decryptShareContent({ key, ciphertext, token });
 
 			expect(decrypted).toEqual(content);
+		});
+
+		it('uses a random IV, so encrypting the same content twice differs', async () => {
+			const key = await generateShareKey();
+			const a = await encryptShareContent({ key, content, token });
+			const b = await encryptShareContent({ key, content, token });
+
+			expect(a).not.toEqual(b);
 		});
 
 		it('fails to decrypt with a different token (AAD binding)', async () => {
@@ -119,43 +84,13 @@ describe('personal-note-share.crypto', () => {
 				decryptShareContent({ key, ciphertext, token: generateShareToken() })
 			).rejects.toThrow();
 		});
-	});
 
-	describe('meta / content AAD separation', () => {
-		it('cannot decrypt a meta ciphertext as content, or vice versa, under the same token+key', async () => {
+		it('fails to decrypt with a different key', async () => {
 			const key = await generateShareKey();
-			const metaCiphertext = await encryptShareMeta({ key, meta, token });
-			const contentCiphertext = await encryptShareContent({ key, content, token });
+			const otherKey = await generateShareKey();
+			const ciphertext = await encryptShareContent({ key, content, token });
 
-			// Same token, same key, but the ":meta" / ":note" AAD keeps the two slots
-			// non-interchangeable.
-			await expect(
-				decryptShareContent({ key, ciphertext: metaCiphertext, token })
-			).rejects.toThrow();
-			await expect(
-				decryptShareMeta({ key, ciphertext: contentCiphertext, token })
-			).rejects.toThrow();
-		});
-	});
-
-	describe('buildShareEnvelopes', () => {
-		it('sets the version and includes a non-empty sender name', () => {
-			const { meta: builtMeta, content: builtContent } = buildShareEnvelopes({
-				note: 'hello',
-				senderName: 'Peter'
-			});
-
-			expect(builtMeta).toEqual({ v: PERSONAL_NOTE_SHARE_VERSION, sender_name: 'Peter' });
-			expect(builtContent).toEqual({ v: PERSONAL_NOTE_SHARE_VERSION, note: 'hello' });
-		});
-
-		it('omits the sender name when undefined or empty', () => {
-			expect(buildShareEnvelopes({ note: 'hello' }).meta).toEqual({
-				v: PERSONAL_NOTE_SHARE_VERSION
-			});
-			expect(buildShareEnvelopes({ note: 'hello', senderName: '' }).meta).toEqual({
-				v: PERSONAL_NOTE_SHARE_VERSION
-			});
+			await expect(decryptShareContent({ key: otherKey, ciphertext, token })).rejects.toThrow();
 		});
 	});
 });

@@ -1,14 +1,6 @@
 import * as backendApi from '$lib/api/backend.api';
-import {
-	decryptShareContent,
-	decryptShareMeta,
-	importShareKey
-} from '$lib/services/personal-note-share.crypto';
-import {
-	createNoteShare,
-	loadSharedNote,
-	peekSharedNote
-} from '$lib/services/personal-note-share.services';
+import { decryptShareContent, importShareKey } from '$lib/services/personal-note-share.crypto';
+import { createNoteShare, loadSharedNote } from '$lib/services/personal-note-share.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { AnonymousIdentity } from '@icp-sdk/core/agent';
 
@@ -31,7 +23,6 @@ describe('personal-note-share.services', () => {
 			const { link, token } = await createNoteShare({
 				identity: mockIdentity,
 				note,
-				senderName: 'Peter',
 				durationMs: 24 * HOUR_MS,
 				singleUse: false
 			});
@@ -48,9 +39,8 @@ describe('personal-note-share.services', () => {
 			expect(uploaded.token).toBe(token);
 			expect(uploaded.single_use).toBeFalsy();
 			expect(uploaded.expires_at_ns).toBeGreaterThan(BigInt(Date.now()) * 1_000_000n);
-			// The plaintext note and sender name must never be uploaded.
+			// The plaintext note must never be uploaded.
 			expect(new TextDecoder().decode(uploaded.ct_content)).not.toContain(note);
-			expect(new TextDecoder().decode(uploaded.ct_meta)).not.toContain('Peter');
 
 			// The fragment key round-trips the uploaded ciphertext back to cleartext.
 			const cryptoKey = await importShareKey(key);
@@ -58,19 +48,16 @@ describe('personal-note-share.services', () => {
 			await expect(
 				decryptShareContent({ key: cryptoKey, ciphertext: uploaded.ct_content, token })
 			).resolves.toEqual({ v: 1, note });
-			await expect(
-				decryptShareMeta({ key: cryptoKey, ciphertext: uploaded.ct_meta, token })
-			).resolves.toEqual({ v: 1, sender_name: 'Peter' });
 		});
 
-		it('omits the sender name when not provided', async () => {
+		it('passes the single-use flag through', async () => {
 			const createSpy = vi
 				.spyOn(backendApi, 'createPersonalNoteShare')
 				.mockResolvedValue(undefined);
 
-			const { link, token } = await createNoteShare({
+			await createNoteShare({
 				identity: mockIdentity,
-				note: 'anon',
+				note: 'burn me',
 				durationMs: HOUR_MS,
 				singleUse: true
 			});
@@ -78,71 +65,11 @@ describe('personal-note-share.services', () => {
 			const [[uploaded]] = createSpy.mock.calls;
 
 			expect(uploaded.single_use).toBeTruthy();
-
-			const cryptoKey = await importShareKey(keyFromLink(link));
-
-			await expect(
-				decryptShareMeta({ key: cryptoKey, ciphertext: uploaded.ct_meta, token })
-			).resolves.toEqual({ v: 1 });
-		});
-	});
-
-	describe('peekSharedNote', () => {
-		it('decrypts the sender name from the anonymous, non-destructive peek', async () => {
-			const createSpy = vi
-				.spyOn(backendApi, 'createPersonalNoteShare')
-				.mockResolvedValue(undefined);
-			const { link, token } = await createNoteShare({
-				identity: mockIdentity,
-				note: 'x',
-				senderName: 'Alice',
-				durationMs: HOUR_MS,
-				singleUse: true
-			});
-			const [[uploaded]] = createSpy.mock.calls;
-
-			const peekSpy = vi.spyOn(backendApi, 'peekPersonalNoteShare').mockResolvedValue({
-				ct_meta: uploaded.ct_meta,
-				single_use: true,
-				expires_at_ns: uploaded.expires_at_ns
-			});
-
-			const peek = await peekSharedNote({ token, key: keyFromLink(link) });
-
-			expect(peek).toEqual({ senderName: 'Alice', singleUse: true });
-			// Peek runs with no identity.
-			expect(peekSpy.mock.calls[0][0].identity).toBeInstanceOf(AnonymousIdentity);
 		});
 	});
 
 	describe('loadSharedNote', () => {
-		it('consumes a single-use share and decrypts the note', async () => {
-			const createSpy = vi
-				.spyOn(backendApi, 'createPersonalNoteShare')
-				.mockResolvedValue(undefined);
-			const { link, token } = await createNoteShare({
-				identity: mockIdentity,
-				note: 'top secret',
-				durationMs: HOUR_MS,
-				singleUse: true
-			});
-			const [[uploaded]] = createSpy.mock.calls;
-
-			const consumeSpy = vi.spyOn(backendApi, 'consumePersonalNoteShare').mockResolvedValue({
-				ct_content: uploaded.ct_content,
-				expires_at_ns: uploaded.expires_at_ns
-			});
-			const getSpy = vi.spyOn(backendApi, 'getPersonalNoteShare');
-
-			const note = await loadSharedNote({ token, key: keyFromLink(link), singleUse: true });
-
-			expect(note).toBe('top secret');
-			expect(consumeSpy).toHaveBeenCalledOnce();
-			expect(consumeSpy.mock.calls[0][0].identity).toBeInstanceOf(AnonymousIdentity);
-			expect(getSpy).not.toHaveBeenCalled();
-		});
-
-		it('reads a reusable share via get, not consume', async () => {
+		it('reads a reusable share via get (never consume) and reports singleUse=false', async () => {
 			const createSpy = vi
 				.spyOn(backendApi, 'createPersonalNoteShare')
 				.mockResolvedValue(undefined);
@@ -160,11 +87,41 @@ describe('personal-note-share.services', () => {
 			});
 			const consumeSpy = vi.spyOn(backendApi, 'consumePersonalNoteShare');
 
-			const note = await loadSharedNote({ token, key: keyFromLink(link), singleUse: false });
+			const result = await loadSharedNote({ token, key: keyFromLink(link) });
 
-			expect(note).toBe('reusable secret');
+			expect(result).toEqual({ note: 'reusable secret', singleUse: false });
 			expect(getSpy).toHaveBeenCalledOnce();
+			expect(getSpy.mock.calls[0][0].identity).toBeInstanceOf(AnonymousIdentity);
 			expect(consumeSpy).not.toHaveBeenCalled();
+		});
+
+		it('consumes a single-use share (get misses) and reports singleUse=true', async () => {
+			const createSpy = vi
+				.spyOn(backendApi, 'createPersonalNoteShare')
+				.mockResolvedValue(undefined);
+			const { link, token } = await createNoteShare({
+				identity: mockIdentity,
+				note: 'top secret',
+				durationMs: HOUR_MS,
+				singleUse: true
+			});
+			const [[uploaded]] = createSpy.mock.calls;
+
+			// A single-use share returns NotFound from the reusable getter.
+			const getSpy = vi
+				.spyOn(backendApi, 'getPersonalNoteShare')
+				.mockRejectedValue({ NotFound: null });
+			const consumeSpy = vi.spyOn(backendApi, 'consumePersonalNoteShare').mockResolvedValue({
+				ct_content: uploaded.ct_content,
+				expires_at_ns: uploaded.expires_at_ns
+			});
+
+			const result = await loadSharedNote({ token, key: keyFromLink(link) });
+
+			expect(result).toEqual({ note: 'top secret', singleUse: true });
+			expect(getSpy).toHaveBeenCalledOnce();
+			expect(consumeSpy).toHaveBeenCalledOnce();
+			expect(consumeSpy.mock.calls[0][0].identity).toBeInstanceOf(AnonymousIdentity);
 		});
 	});
 });
