@@ -49,11 +49,7 @@ fn create_share(
         single_use,
     };
     pic_setup
-        .update::<Result<(), PersonalNoteShareError>>(
-            caller,
-            "create_personal_note_share",
-            request,
-        )
+        .update::<Result<(), PersonalNoteShareError>>(caller, "create_personal_note_share", request)
         .expect("create_personal_note_share should reach the handler")
 }
 
@@ -101,11 +97,7 @@ fn consume_share(
 
 fn shares_count(pic_setup: &PicBackend, caller: Principal) -> u64 {
     pic_setup
-        .query::<Result<u64, PersonalNoteShareError>>(
-            caller,
-            "get_personal_note_shares_count",
-            (),
-        )
+        .query::<Result<u64, PersonalNoteShareError>>(caller, "get_personal_note_shares_count", ())
         .expect("get_personal_note_shares_count should reach the handler")
         .expect("get_personal_note_shares_count should succeed")
 }
@@ -224,7 +216,10 @@ fn guards_and_lifecycle() {
             "create_personal_note_share",
             CreatePersonalNoteShareRequest {
                 token: token(6),
-                ct_meta: ByteBuf::from(vec![0u8; MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES + 1]),
+                ct_meta: ByteBuf::from(vec![
+                    0u8;
+                    MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES + 1
+                ]),
                 ct_content: ByteBuf::from(vec![]),
                 expires_at_ns: now + ONE_HOUR_NS,
                 single_use: false,
