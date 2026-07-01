@@ -31,25 +31,24 @@ pub const MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES: usize = 10_000;
 pub const MAX_PERSONAL_NOTE_ID_BYTES: usize = 32;
 
 /// Upsert (add **or** edit) request. Keyed by the stable, client-generated
-/// `note_id`; the same id is reused across edits.
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct SetPersonalNoteRequest {
-    /// Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
-    pub note_id: String,
-    /// The encrypted note envelope. Opaque ciphertext to the canister.
-    pub encrypted_note: ByteBuf,
-}
+/// `note_id`; the same id is reused across edits. Structurally identical to
+/// [`PersonalNoteEntry`], so it is an alias — candid emits a single record and
+/// the Rust signature matches the generated interface.
+pub type SetPersonalNoteRequest = PersonalNoteEntry;
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct DeletePersonalNoteRequest {
     pub note_id: String,
 }
 
-/// A single stored entry returned by `get_personal_notes`. `encrypted_note` is
-/// decrypted client-side.
+/// A single stored entry returned by `get_personal_notes`, and the upsert
+/// payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct PersonalNoteEntry {
+    /// Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
     pub note_id: String,
+    /// The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+    /// client-side.
     pub encrypted_note: ByteBuf,
 }
 
