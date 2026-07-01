@@ -391,6 +391,10 @@ type Config = record {
 	// config payloads persisted before this field existed.
 	new_user_signups_allowed : opt bool
 };
+type ConsumePersonalNoteShareResult = variant {
+	Ok : PersonalNoteShareContent;
+	Err : PersonalNoteShareError
+};
 type Contact = record {
 	id : nat64;
 	name : text;
@@ -427,6 +431,25 @@ type CreateContactResult = variant {
 	Ok : Contact;
 	// The contact could not be created due to an error
 	Err : ContactError
+};
+// Create-share request. `token`, `ct_meta`, and `ct_content` are opaque
+// ciphertext/ids to the canister — it enforces only their sizes and the
+// expiry/flag fields, never the note content or (via `ct_meta`) the sender
+// name.
+type CreatePersonalNoteShareRequest = record {
+	// Opaque, client-generated random id; also the map key.
+	token : text;
+	// AES-GCM ciphertext of `{ v, note }`, keyed by the same per-share key.
+	ct_content : blob;
+	// AES-GCM ciphertext of `{ v, sender_name? }`, keyed by the per-share key
+	// held only in the link fragment.
+	ct_meta : blob;
+	single_use : bool;
+	expires_at_ns : nat64
+};
+type CreatePersonalNoteShareResult = variant {
+	Ok;
+	Err : PersonalNoteShareError
 };
 type CreateUserProfileError = variant {
 	// Sign-ups of new users are currently disabled on the backend. Callers that already have a
@@ -571,6 +594,14 @@ type GetContactsResult = variant {
 	Ok : vec Contact;
 	// The contacts were not retrieved due to an error.
 	Err : ContactError
+};
+type GetPersonalNoteShareResult = variant {
+	Ok : PersonalNoteShareContent;
+	Err : PersonalNoteShareError
+};
+type GetPersonalNoteSharesCountResult = variant {
+	Ok : nat64;
+	Err : PersonalNoteShareError
 };
 type GetPersonalNotesCountResult = variant {
 	// The caller's total note count.
@@ -812,6 +843,10 @@ type Outpoint = record {
 	// The index of the specific output within that transaction (since a transaction can have multiple outputs).
 	vout : nat32
 };
+type PeekPersonalNoteShareResult = variant {
+	Ok : PersonalNoteSharePeek;
+	Err : PersonalNoteShareError
+};
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 // A single stored entry returned by `get_personal_notes`. `encrypted_note` is
 // decrypted client-side.
@@ -829,6 +864,45 @@ type PersonalNoteError = variant {
 	// An unexpected internal error (e.g. a vetKeys access/derivation failure).
 	// The message never contains note cleartext (the canister cannot read it).
 	InternalError : record { msg : text }
+};
+// Returned by `get_personal_note_share` / `consume_personal_note_share`.
+type PersonalNoteShareContent = record {
+	ct_content : blob;
+	expires_at_ns : nat64
+};
+type PersonalNoteShareError = variant {
+	// `ct_meta` exceeds [`MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES`].
+	MetaCiphertextTooLarge;
+	// `expires_at_ns` is not strictly in the future of IC time, or is
+	// further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
+	InvalidExpiry;
+	// No unexpired entry for this token. Also returned for an
+	// already-consumed single-use share and a reusable/single-use mismatch
+	// (e.g. calling the reusable getter on a single-use share) — collapsing
+	// every case into one response so a reader can never distinguish
+	// "expired" from "used" from "never existed".
+	NotFound;
+	// `ct_content` exceeds `personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`.
+	ContentCiphertextTooLarge;
+	// The caller is already at [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] active
+	// shares.
+	TooManyShares;
+	// The caller (create) or the shared anonymous bucket (consume) exceeded
+	// the rate limit.
+	RateLimited : RateLimitError;
+	// The `token` already identifies an existing share; the client should
+	// generate a fresh random token and retry.
+	DuplicateToken;
+	// The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
+	TokenTooLong;
+	InternalError : record { msg : text }
+};
+// Returned by `peek_personal_note_share`. Never includes `ct_content` — the
+// peek is intentionally non-destructive and cannot itself reveal the note.
+type PersonalNoteSharePeek = record {
+	ct_meta : blob;
+	single_use : bool;
+	expires_at_ns : nat64
 };
 // Shared result for the two vetKey-derivation endpoints (the caller's encrypted
 // vetKey and the store's public verification key). Both return opaque bytes on
@@ -972,6 +1046,9 @@ type Stats = record {
 	custom_token_count : nat64;
 	exchange_rates_count : nat64;
 	token_activity_count : nat64;
+	// Total number of stored personal-note shares across all users (active or
+	// not yet pruned).
+	personal_note_shares_count : nat64;
 	agreement_history_count : nat64;
 	// Total number of stored (encrypted) personal-note entries across all users.
 	personal_notes_count : nat64;
@@ -1282,6 +1359,15 @@ service : (Arg) -> {
 	);
 	// Gets the canister configuration.
 	config : () -> (Config) query;
+	// Returns a **single-use** share's content exactly once, atomically deleting
+	// it on success. Callable anonymously; guarded only by a coarse global rate
+	// limiter, since an anonymous update call has no distinguishing principal to
+	// rate-limit per-caller — every anonymous caller shares one bucket.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	// unknown, already-consumed, or reusable; `RateLimited` at the global cap).
+	consume_personal_note_share : (text) -> (ConsumePersonalNoteShareResult);
 	// Creates a new active user transaction record for the caller.
 	//
 	// # Errors
@@ -1297,6 +1383,16 @@ service : (Arg) -> {
 	// # Returns
 	// The created contact on success.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
+	// Creates a share for one of the caller's notes. The note text, the sender
+	// name, and the share key never reach the canister — only opaque
+	// ciphertext, the expiry, and the single-use flag.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
+	// `ContentCiphertextTooLarge`, `InvalidExpiry`, `DuplicateToken`, `RateLimited`).
+	create_personal_note_share : (CreatePersonalNoteShareRequest) -> (
+		CreatePersonalNoteShareResult
+	);
 	// It creates a new user profile for the caller.
 	// If the user has already a profile, it will return that profile.
 	//
@@ -1406,6 +1502,22 @@ service : (Arg) -> {
 	// state (`token_activity`) and may need an update context to schedule the
 	// background fetch.
 	get_exchange_rates : () -> (vec record { TokenId; opt ExchangeRate });
+	// Returns the note ciphertext for a **reusable** (non-single-use), unexpired
+	// share. A single-use share's content is only ever returned by
+	// `consume_personal_note_share`. Callable anonymously.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	// unknown, or single-use).
+	get_personal_note_share : (text) -> (GetPersonalNoteShareResult) query;
+	// Returns the caller's active-share count (drives the client-side "at cap"
+	// gate). Mirrors `get_personal_notes_count`.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteShareError`.
+	get_personal_note_shares_count : () -> (
+		GetPersonalNoteSharesCountResult
+	) query;
 	// Returns all of the caller's (encrypted) personal notes, decrypted client-side.
 	//
 	// # Errors
@@ -1496,6 +1608,16 @@ service : (Arg) -> {
 	// Exposed as an unauthenticated query so the landing page can display an info banner before the
 	// user signs in.
 	new_user_signups_allowed : () -> (bool) query;
+	// Non-destructive: returns a share's encrypted metadata (never the note
+	// content) for an unexpired token, without consuming a single-use share.
+	// Callable anonymously — a deliberate, narrowly-scoped exception to notes
+	// endpoints normally requiring an authenticated caller, since the recipient
+	// of a share link has no OISY identity.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for an
+	// expired or unknown token).
+	peek_personal_note_share : (text) -> (PeekPersonalNoteShareResult) query;
 	// Remove custom token for the user.
 	remove_custom_token : (CustomToken) -> ();
 	// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
