@@ -17,7 +17,10 @@ const getBalance = ({
 	certified,
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<bigint> => {
-	assertNonNullish(data, 'No data - ledgerCanisterId - provided to fetch balance.');
+	assertNonNullish(
+		data,
+		'No data provided to fetch the balance: the ledgerCanisterId is required.'
+	);
 
 	return accountBalance({
 		identity,
@@ -32,7 +35,10 @@ const getTransactionsFromIndex = ({
 	certified,
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<IcpIndexDid.GetAccountIdentifierTransactionsResponse> => {
-	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
+	assertNonNullish(
+		data,
+		'No data provided to fetch the transactions: the indexCanisterId is required.'
+	);
 
 	return getTransactions({
 		identity,
@@ -47,16 +53,30 @@ const getTransactionsFromIndex = ({
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestIcp>
 ): Promise<GetBalanceAndTransactions<IcpIndexDid.TransactionWithId>> => {
-	const [balance, transactions] = await Promise.all([
+	const [balanceResult, transactionsResult] = await Promise.allSettled([
 		getBalance(params),
 		getTransactionsFromIndex(params)
 	]);
 
-	// Use the Ledger balance as the source of truth and ignore the balance from the Index canister.
-	// When the Index canister is low on cycles it stops syncing new blocks without erroring, returning a
-	// stale (or zero) balance. Relying on the Ledger canister ensures the displayed balance stays correct
-	// even if the Index canister — used only for the transactions history — is lagging or frozen.
-	const { balance: _indexCanisterBalance, ...rest } = transactions;
+	// The Ledger balance is the source of truth. Without it there is nothing meaningful to display, so
+	// a Ledger failure is fatal and surfaced as a sync error.
+	if (balanceResult.status === 'rejected') {
+		throw balanceResult.reason;
+	}
+
+	const { value: balance } = balanceResult;
+
+	// A failing Index canister must not block the Ledger balance update. The Index only feeds the
+	// transactions history, so on failure we post the balance with no transaction delta and let the
+	// history catch up on the next successful tick.
+	if (transactionsResult.status === 'rejected') {
+		return { balance, transactions: [], oldest_tx_id: [] };
+	}
+
+	// Ignore the balance reported by the Index canister. When it is low on cycles it stops syncing new
+	// blocks without erroring, returning a stale (or zero) balance. Relying on the Ledger canister keeps
+	// the displayed balance correct even if the Index canister is lagging or frozen.
+	const { balance: _indexCanisterBalance, ...rest } = transactionsResult.value;
 
 	return { ...rest, balance };
 };

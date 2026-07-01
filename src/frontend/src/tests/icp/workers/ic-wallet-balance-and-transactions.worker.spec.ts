@@ -540,6 +540,29 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 				expect(walletBalances).not.toContain(staleIndexBalance);
 			});
+
+			it('should still post the Ledger balance when the Index transactions call fails', async () => {
+				indexCanisterMock.getTransactions.mockRejectedValue(new Error('Index canister failure'));
+
+				await scheduler.start(startData);
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				const walletMessages = postMessageMock.mock.calls
+					.map(([message]) => message)
+					.filter((message) => message?.msg === msg);
+
+				expect(walletMessages.length).toBeGreaterThan(0);
+				expect(walletMessages).toSatisfy(
+					(messages: { data: { wallet: { balance: { data: bigint } } } }[]) =>
+						messages.every((message) => message.data.wallet.balance.data === ledgerBalance)
+				);
+
+				// A failing Index canister must not surface as a sync error while the Ledger balance is available.
+				expect(postMessageMock).not.toHaveBeenCalledWith(
+					expect.objectContaining({ msg: `${msg}Error` })
+				);
+			});
 		});
 
 		describe('without transactions', () => {
@@ -583,14 +606,25 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				);
 			};
 
+			// The Ledger balance is authoritative, so only a Ledger failure is fatal for the sync.
 			const initErrorMock = (err: Error) =>
-				indexCanisterMock.getTransactions.mockRejectedValue(err);
+				ledgerCanisterMock.accountBalance.mockRejectedValue(err);
+
+			const initSuccessMock = () => {
+				ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
+				indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: mockBalance,
+					transactions: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			};
 
 			const { setup, teardown, tests } = initOtherScenarios({
 				initScheduler: initIcpWalletScheduler,
 				startData,
 				initCleanupMock,
 				initErrorMock,
+				initSuccessMock,
 				msg: 'syncIcpWallet'
 			});
 
