@@ -337,10 +337,13 @@
 				<!-- Raised center cradle: a white circle with a thin ring + icon in the
 				     current text colour — black by default, blue when it owns the current
 				     page, grey while its sheet is open over another page. The label
-				     matches the other bar items (text-sm). -->
+				     matches the other bar items (text-sm). All three colour classes are applied
+					     conditionally (text-primary is NOT a base class) so the active one wins
+					     regardless of Tailwind's utility source order. -->
 				<button
-					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm text-primary"
+					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
 					class:text-brand-primary-alt={ownsCurrent}
+					class:text-primary={!ownsCurrent && !pressed}
 					class:text-tertiary={pressed}
 					aria-expanded={open}
 					aria-label={SECTION_META[slot.id].label()}
