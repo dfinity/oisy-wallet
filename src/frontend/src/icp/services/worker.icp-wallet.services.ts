@@ -24,6 +24,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
 		worker: WorkerData,
 		tokenId: TokenId,
+		private readonly ledgerCanisterId: IcToken['ledgerCanisterId'],
 		private readonly indexCanisterId: IndexCanisterIdText
 	) {
 		super(worker);
@@ -42,7 +43,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 
 				// This is an additional guard because it may happen that the worker is initialised as a singleton.
 				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
-				if (ref !== this.indexCanisterId) {
+				if (ref !== this.ledgerCanisterId) {
 					return;
 				}
 
@@ -70,6 +71,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	}
 
 	static async init({
+		ledgerCanisterId,
 		indexCanisterId,
 		id: tokenId,
 		network: { id: networkId }
@@ -81,7 +83,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 		await syncWalletFromCache({ tokenId, networkId });
 
 		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
-		return new IcpWalletWorker(worker, tokenId, indexCanisterId);
+		return new IcpWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId);
 	}
 
 	protected override stopTimer = () => {
@@ -94,6 +96,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
 			msg: 'startIcpWalletTimer',
 			data: {
+				ledgerCanisterId: this.ledgerCanisterId,
 				indexCanisterId: this.indexCanisterId
 			}
 		});
@@ -107,6 +110,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
 			msg: 'triggerIcpWalletTimer',
 			data: {
+				ledgerCanisterId: this.ledgerCanisterId,
 				indexCanisterId: this.indexCanisterId
 			}
 		});
