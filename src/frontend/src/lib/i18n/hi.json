@@ -1781,6 +1781,23 @@
 				"unknown_fee": "",
 				"deposit_failed": ""
 			}
+		},
+		"withdraw": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"amount_label": "",
+			"from": "",
+			"network": "",
+			"transaction_fee": "",
+			"transfer_fee": "",
+			"you_receive": "",
+			"reserved_note": "",
+			"submit": "",
+			"open": "",
+			"progress_withdraw": "",
+			"progress_done": "",
+			"error": ""
 		}
 	},
 	"transaction": {
