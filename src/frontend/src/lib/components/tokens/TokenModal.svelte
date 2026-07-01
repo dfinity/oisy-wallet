@@ -511,7 +511,7 @@
 </WizardModal>
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}
-	<BottomSheetConfirmationPopup disabled={loading} onCancel={() => onTokenDeleteCancel(token)}>
+	<BottomSheetConfirmationPopup onCancel={() => onTokenDeleteCancel(token)}>
 		{#snippet title()}
 			{$i18n.tokens.text.delete_token}
 		{/snippet}
