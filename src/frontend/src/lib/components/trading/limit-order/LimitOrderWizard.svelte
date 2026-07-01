@@ -12,7 +12,7 @@
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
-	import { loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
+	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -135,7 +135,7 @@
 		}
 	};
 
-	// Refresh the order book whenever either token or the side changes.
+	// Reset the price anchor whenever either token or the side changes.
 	$effect(() => {
 		// Touch the dependencies so the effect re-runs on pair/side change.
 		baseSymbol;
@@ -146,11 +146,12 @@
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
 
-	// LimitOrderReview expects finite numbers; empty/partial inputs parse to NaN.
-	const finiteOrZero = (value: string): number => {
-		const parsed = parseFloat(value);
-		return Number.isFinite(parsed) ? parsed : 0;
-	};
+	// Parsed Review inputs, guarded against NaN from empty/partial fields so the
+	// Review step never renders NaN (nor feeds NaN% into ValueDifference).
+	const reviewBaseAmount = $derived(
+		Number.isFinite(parseFloat(baseAmount)) ? parseFloat(baseAmount) : 0
+	);
+	const reviewPrice = $derived(Number.isFinite(parseFloat(price)) ? parseFloat(price) : 0);
 
 	const place = async () => {
 		if (isNullish(pairInfo) || isNullish(pairView)) {
@@ -173,9 +174,14 @@
 					side: toCandidSide(side),
 					quantity: toQuantity({ baseAmount: baseNum, baseDecimals: pairView.baseDecimals }),
 					price: toPriceUnits({ price: priceNum, quoteDecimals: pairView.quoteDecimals }),
-					time_in_force: fillOrKill ? [{ FillOrKill: null }] : []
+					time_in_force: fillOrKill ? [{ FillOrKill: null }] : [{ GoodTilCanceled: null }]
 				}
 			});
+
+			// The place call resolves once the order is accepted (Pending/Open), so
+			// reload immediately to surface it in the Active list rather than waiting
+			// for the next poll.
+			await loadOisyTrade({ identity: $authIdentity });
 
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
@@ -204,6 +210,7 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.QUOTE_TOKEN);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.QUOTE_TOKEN}
 	<LimitOrderTokensList
@@ -216,11 +223,12 @@
 			activePreset = null;
 			goTo(WizardStepsLimitOrder.FORM);
 		}}
+		{side}
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
 		{ask}
-		baseAmount={finiteOrZero(baseAmount)}
+		baseAmount={reviewBaseAmount}
 		{bid}
 		{currentValue}
 		{depthLevels}
@@ -228,7 +236,7 @@
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
 		{pairView}
-		price={finiteOrZero(price)}
+		price={reviewPrice}
 		{side}
 		bind:giveUpConfirmed
 	/>
@@ -241,12 +249,7 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={() => {
-			// Each fresh visit must re-confirm a severe give-up, even if a prior
-			// visit (or now-stale market data) had already confirmed it.
-			giveUpConfirmed = false;
-			goTo(WizardStepsLimitOrder.REVIEW);
-		}}
+		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}
