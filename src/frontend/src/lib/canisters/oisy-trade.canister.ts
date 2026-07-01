@@ -8,6 +8,7 @@ import type {
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
+	OrderRecord,
 	Token,
 	TradingPair,
 	TradingPairInfo,
@@ -131,6 +132,19 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		const { add_limit_order } = this.caller({ certified: true });
 
 		const response = await add_limit_order(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapOisyTradeError(response.Err);
+	};
+
+	cancelLimitOrder = async (orderId: OrderId): Promise<OrderRecord> => {
+		// `cancel_limit_order` mutates the order book, so it must run on the certified service.
+		const { cancel_limit_order } = this.caller({ certified: true });
+
+		const response = await cancel_limit_order(orderId);
 
 		if ('Ok' in response) {
 			return response.Ok;

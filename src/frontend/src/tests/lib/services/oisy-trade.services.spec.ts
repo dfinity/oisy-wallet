@@ -8,7 +8,11 @@ import type {
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
-import { loadOisyTrade, withdrawFromOisyTrade } from '$lib/services/oisy-trade.services';
+import {
+	cancelLimitOrder,
+	loadOisyTrade,
+	withdrawFromOisyTrade
+} from '$lib/services/oisy-trade.services';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -19,7 +23,8 @@ vi.mock('$lib/api/oisy-trade.api', () => ({
 	listSupportedTokens: vi.fn(),
 	getBalances: vi.fn(),
 	getMyOrders: vi.fn(),
-	withdraw: vi.fn()
+	withdraw: vi.fn(),
+	cancelLimitOrder: vi.fn()
 }));
 
 describe('oisy-trade.services', () => {
@@ -115,6 +120,28 @@ describe('oisy-trade.services', () => {
 			).rejects.toThrow();
 
 			expect(oisyTradeApi.withdraw).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('cancelLimitOrder', () => {
+		beforeEach(() => {
+			vi.mocked(oisyTradeApi.cancelLimitOrder).mockResolvedValue(
+				{} as Awaited<ReturnType<typeof oisyTradeApi.cancelLimitOrder>>
+			);
+		});
+
+		it('cancels the order via the api with the order id', async () => {
+			await cancelLimitOrder({ identity: mockIdentity, orderId: 'order-1' });
+
+			expect(oisyTradeApi.cancelLimitOrder).toHaveBeenCalledWith(
+				expect.objectContaining({ identity: mockIdentity, orderId: 'order-1' })
+			);
+		});
+
+		it('throws and does not call the api when there is no identity', async () => {
+			await expect(cancelLimitOrder({ identity: null, orderId: 'order-1' })).rejects.toThrow();
+
+			expect(oisyTradeApi.cancelLimitOrder).not.toHaveBeenCalled();
 		});
 	});
 });
