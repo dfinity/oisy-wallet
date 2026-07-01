@@ -91,7 +91,8 @@ describe('TradingDepositModal', () => {
 				buildPair({ base: 'ckBTC', quote: 'ckUSDC' })
 			],
 			supportedTokens: undefined,
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 
 		const { getByText } = render(TradingDepositModal);
@@ -105,7 +106,8 @@ describe('TradingDepositModal', () => {
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: [supportedToken()],
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 		balancesStore.set({ id: icp.id, data: { data: 100000000n, certified: true } });
 	};
