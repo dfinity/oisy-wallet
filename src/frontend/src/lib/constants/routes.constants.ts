@@ -13,6 +13,7 @@ export enum AppPath {
 	EarnAutopilot = '/earn/autopilot/',
 	EarnRewards = '/earn/rewards/',
 	Borrow = '/borrow/',
+	Borrowings = '/borrowings/',
 	Liabilities = '/liabilities/',
 	ProvidersLiquidium = '/providers/liquidium/',
 	LicenseAgreement = '/license-agreement/',

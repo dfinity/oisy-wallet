@@ -144,6 +144,37 @@ export const liquidiumProjectedHealthAfterWithdrawPercent = ({
 	return Math.min(100, Math.max(0, (1 - resultingLtv / thresholdRatio) * 100));
 };
 
+// Projected health after repaying `repayUsd` of debt: (1 − ltv / threshold) × 100,
+// clamped. Repaying only reduces debt, so health moves toward 100% (fully cleared → 100%).
+// Threshold held constant (v1 approximation, conservative for repay; canister is the final gate).
+export const liquidiumProjectedHealthAfterRepayPercent = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	repayUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	repayUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	const remainingDebtUsd = Math.max(0, totalDebtUsd - repayUsd);
+
+	if (remainingDebtUsd <= 0) {
+		return 100;
+	}
+
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (totalCollateralUsd <= 0 || thresholdRatio <= 0) {
+		return 0;
+	}
+
+	const resultingLtv = remainingDebtUsd / totalCollateralUsd;
+
+	return Math.min(100, Math.max(0, (1 - resultingLtv / thresholdRatio) * 100));
+};
+
 const isUnderSupplyCap = ({ totalSupply, supplyCap }: Pool): boolean =>
 	!nonNullish(supplyCap) || totalSupply < supplyCap;
 
@@ -173,6 +204,7 @@ export const mapLiquidiumReserve = ({
 	depositedDecimals: Number(position.depositedDecimals),
 	borrowed: position.borrowed,
 	borrowedDecimals: Number(position.borrowedDecimals),
+	debtInterest: position.debtInterest,
 	suppliedUsd: scaledUsdToNumber({ value: suppliedUsd, decimals: usdDecimals }),
 	borrowedUsd: scaledUsdToNumber({ value: borrowedUsd, decimals: usdDecimals })
 });

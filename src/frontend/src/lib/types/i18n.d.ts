@@ -2,6 +2,10 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrowings {
+	text: { tab_title: string; no_borrowings: string };
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -1801,6 +1805,7 @@ interface I18nLiquidium {
 		supply_agreement: string;
 		provider_fee: string;
 		insufficient_funds_for_fee: string;
+		supply_prices_unavailable: string;
 		borrow_review: string;
 		borrow_review_subtitle: string;
 		borrowing: string;
@@ -1837,6 +1842,16 @@ interface I18nLiquidium {
 		withdraw_at_risk_warning: string;
 		withdraw_high_risk_warning: string;
 		withdraw_risk_confirm: string;
+		repay_review: string;
+		repay_review_subtitle: string;
+		repaying: string;
+		starting_to_repay: string;
+		repay_started: string;
+		current_debt: string;
+		interest_accrued: string;
+		debt_after_repay: string;
+		repay_exceeds_debt: string;
+		repay_prices_unavailable: string;
 	};
 }
 
@@ -2009,6 +2024,7 @@ interface I18nAi_assistant {
 
 interface I18n {
 	lang: Languages;
+	borrowings: I18nBorrowings;
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;

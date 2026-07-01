@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"no_borrowings": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Отмена",
@@ -2265,6 +2271,7 @@
 			"supply_agreement": "",
 			"provider_fee": "",
 			"insufficient_funds_for_fee": "",
+			"supply_prices_unavailable": "",
 			"borrow_review": "",
 			"borrow_review_subtitle": "",
 			"borrowing": "",
@@ -2300,7 +2307,17 @@
 			"withdraw_risk_info": "",
 			"withdraw_at_risk_warning": "",
 			"withdraw_high_risk_warning": "",
-			"withdraw_risk_confirm": ""
+			"withdraw_risk_confirm": "",
+			"repay_review": "",
+			"repay_review_subtitle": "",
+			"repaying": "",
+			"starting_to_repay": "",
+			"repay_started": "",
+			"current_debt": "",
+			"interest_accrued": "",
+			"debt_after_repay": "",
+			"repay_exceeds_debt": "",
+			"repay_prices_unavailable": ""
 		}
 	},
 	"vaults": {
