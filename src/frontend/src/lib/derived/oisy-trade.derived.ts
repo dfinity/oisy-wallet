@@ -9,12 +9,13 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import { enabledIcTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
-import type { OisyTradeAsset } from '$lib/types/oisy-trade';
+import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import {
 	oisyTradeDepositableTokens as mapDepositableTokens,
 	mapOisyTradeAssets,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
-	sumOisyTradeAssetsUsd
+	sumOisyTradeAssetsUsd,
+	toOisyTradeWithdrawTokens
 } from '$lib/utils/oisy-trade.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -32,6 +33,14 @@ export const oisyTradeSupportedTokens: Readable<Token[]> = derived(
 export const oisyTradeBalances: Readable<UserTokenBalance[]> = derived(
 	oisyTradeStore,
 	({ balances }) => balances ?? []
+);
+
+// DEX balances joined with the matching OISY token, so the Trading tab can offer
+// a Withdraw entry per holding with the token pre-resolved.
+export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = derived(
+	[oisyTradeBalances, enabledIcTokens],
+	([$oisyTradeBalances, $enabledIcTokens]) =>
+		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
 );
 
 // True once the first load has resolved (balances populated). Distinguishes the

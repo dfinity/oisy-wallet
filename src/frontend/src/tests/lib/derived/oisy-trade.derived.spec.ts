@@ -30,6 +30,7 @@ const {
 	oisyTradePairs,
 	oisyTradeSupportedTokens,
 	oisyTradeBalances,
+	oisyTradeWithdrawTokens,
 	oisyTradeLoaded,
 	oisyTradeSupportedTokenSymbols,
 	oisyTradeIcTokenBySymbol,
@@ -126,6 +127,86 @@ describe('oisy-trade.derived', () => {
 			oisyTradeStore.set({ pairs: undefined, supportedTokens: undefined, balances });
 
 			expect(get(oisyTradeBalances)).toBe(balances);
+		});
+	});
+
+	describe('oisyTradeWithdrawTokens', () => {
+		it('is empty when there are no balances', () => {
+			enabledIcTokensMock.set([mockValidIcToken]);
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([]);
+		});
+
+		it('resolves a DEX balance to the matching enabled token by ledger canister id', () => {
+			enabledIcTokensMock.set([mockValidIcToken]);
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: undefined,
+				balances: [
+					buildBalance({
+						ledgerId: mockValidIcToken.ledgerCanisterId,
+						free: 10n,
+						reserved: 3n
+					})
+				]
+			});
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([
+				{ token: mockValidIcToken, free: 10n, reserved: 3n }
+			]);
+		});
+
+		it('drops balances whose ledger is unknown to the wallet', () => {
+			enabledIcTokensMock.set([mockValidIcToken]);
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: undefined,
+				balances: [buildBalance({ ledgerId: LEDGER_ICP, free: 10n, reserved: ZERO })]
+			});
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([]);
+		});
+
+		it('resolves a testnet token enabled by ledger canister id', () => {
+			const testnetLedgerCanisterId = LEDGER_ICP;
+			const testnetToken: IcToken = {
+				...mockValidIcToken,
+				ledgerCanisterId: testnetLedgerCanisterId,
+				network: { ...mockValidIcToken.network, env: 'testnet' }
+			};
+
+			enabledIcTokensMock.set([testnetToken]);
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: undefined,
+				balances: [buildBalance({ ledgerId: testnetLedgerCanisterId, free: 7n, reserved: ZERO })]
+			});
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([
+				{ token: testnetToken, free: 7n, reserved: ZERO }
+			]);
+		});
+
+		it('recomputes when enabled tokens change', () => {
+			oisyTradeStore.set({
+				pairs: undefined,
+				supportedTokens: undefined,
+				balances: [
+					buildBalance({
+						ledgerId: mockValidIcToken.ledgerCanisterId,
+						free: 1n,
+						reserved: ZERO
+					})
+				]
+			});
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([]);
+
+			enabledIcTokensMock.set([mockValidIcToken]);
+
+			expect(get(oisyTradeWithdrawTokens)).toEqual([
+				{ token: mockValidIcToken, free: 1n, reserved: ZERO }
+			]);
 		});
 	});
 
