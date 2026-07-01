@@ -1,4 +1,4 @@
-import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import * as indexCanisterServices from '$icp/services/index-canister.services';
@@ -28,7 +28,11 @@ import {
 	nonNullish,
 	toNullable
 } from '@dfinity/utils';
-import { IcpIndexCanister, type IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
+import {
+	IcpIndexCanister,
+	IcpLedgerCanister,
+	type IcpIndexDid
+} from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexCanister,
 	IcrcLedgerCanister,
@@ -366,6 +370,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	};
 
 	describe('icp-wallet.worker', () => {
+		const ledgerCanisterMock = mock<IcpLedgerCanister>();
 		const indexCanisterMock = mock<IcpIndexCanister>();
 
 		const mockTransaction: IcpIndexDid.TransactionWithId = {
@@ -393,11 +398,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		});
 
 		const startData = {
+			ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 			indexCanisterId: ICP_INDEX_CANISTER_ID
 		};
 
 		beforeEach(() => {
+			vi.spyOn(IcpLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
 			vi.spyOn(IcpIndexCanister, 'create').mockImplementation(() => indexCanisterMock);
+
+			spyGetBalance = ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
 		});
 
 		describe('with transactions', () => {
@@ -409,13 +418,13 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			const mockPostMessageNotCertified = mockPostMessage({
 				msg,
-				ref: startData.indexCanisterId,
+				ref: startData.ledgerCanisterId,
 				transaction,
 				certified: false
 			});
 			const mockPostMessageCertified = mockPostMessage({
 				msg,
-				ref: startData.indexCanisterId,
+				ref: startData.ledgerCanisterId,
 				transaction,
 				certified: true
 			});
@@ -489,6 +498,47 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 				expect(spyGetTransactions).toHaveBeenCalledTimes(6);
+			});
+		});
+
+		describe('Ledger balance is authoritative', () => {
+			const msg = 'syncIcpWallet';
+
+			const ledgerBalance = 555n;
+			const staleIndexBalance = 100n;
+
+			let scheduler: IcWalletScheduler<PostMessageDataRequestIcp>;
+
+			beforeEach(() => {
+				scheduler = initIcpWalletScheduler(startData);
+
+				ledgerCanisterMock.accountBalance.mockResolvedValue(ledgerBalance);
+				indexCanisterMock.getTransactions.mockResolvedValue({
+					balance: staleIndexBalance,
+					transactions: [mockTransaction],
+					oldest_tx_id: [mockOldestTxId]
+				});
+			});
+
+			afterEach(() => {
+				scheduler.stop();
+			});
+
+			it('should post the Ledger balance and ignore the stale Index balance', async () => {
+				await scheduler.start(startData);
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				const walletBalances = postMessageMock.mock.calls
+					.map(([message]) => message)
+					.filter((message) => message?.msg === msg)
+					.map((message) => message.data.wallet.balance.data);
+
+				expect(walletBalances.length).toBeGreaterThan(0);
+				expect(walletBalances).toSatisfy((balances: bigint[]) =>
+					balances.every((balance) => balance === ledgerBalance)
+				);
+				expect(walletBalances).not.toContain(staleIndexBalance);
 			});
 		});
 

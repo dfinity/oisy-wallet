@@ -1,5 +1,9 @@
 import { getTransactions } from '$icp/api/icp-index.api';
-import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
+import { accountBalance } from '$icp/api/icp-ledger.api';
+import {
+	IcWalletBalanceAndTransactionsScheduler,
+	type GetBalanceAndTransactions
+} from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
@@ -8,7 +12,22 @@ import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-mes
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type { IcpIndexDid } from '@icp-sdk/canisters/ledger/icp';
 
-const getBalanceAndTransactions = ({
+const getBalance = ({
+	identity,
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<bigint> => {
+	assertNonNullish(data, 'No data - ledgerCanisterId - provided to fetch balance.');
+
+	return accountBalance({
+		identity,
+		certified,
+		owner: identity.getPrincipal(),
+		ledgerCanisterId: data.ledgerCanisterId
+	});
+};
+
+const getTransactionsFromIndex = ({
 	identity,
 	certified,
 	data
@@ -21,8 +40,25 @@ const getBalanceAndTransactions = ({
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined,
-		...data
+		indexCanisterId: data.indexCanisterId
 	});
+};
+
+const getBalanceAndTransactions = async (
+	params: SchedulerJobParams<PostMessageDataRequestIcp>
+): Promise<GetBalanceAndTransactions<IcpIndexDid.TransactionWithId>> => {
+	const [balance, transactions] = await Promise.all([
+		getBalance(params),
+		getTransactionsFromIndex(params)
+	]);
+
+	// Use the Ledger balance as the source of truth and ignore the balance from the Index canister.
+	// When the Index canister is low on cycles it stops syncing new blocks without erroring, returning a
+	// stale (or zero) balance. Relying on the Ledger canister ensures the displayed balance stays correct
+	// even if the Index canister — used only for the transactions history — is lagging or frozen.
+	const { balance: _indexCanisterBalance, ...rest } = transactions;
+
+	return { ...rest, balance };
 };
 
 const mapTransaction = ({
