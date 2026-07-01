@@ -133,7 +133,7 @@
 		<Badge variant={pillVariant} width="w-fit">
 			<span class="inline-flex items-center gap-1">
 				{#if StatusIcon}
-					<StatusIcon size="14" />
+					<span class="inline-flex" aria-hidden="true"><StatusIcon size="14" /></span>
 				{:else if statusEmoji}
 					<span aria-hidden="true">{statusEmoji}</span>
 				{/if}

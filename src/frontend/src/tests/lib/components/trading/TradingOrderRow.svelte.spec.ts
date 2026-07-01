@@ -43,4 +43,34 @@ describe('TradingOrderRow', () => {
 
 		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: order }));
 	});
+
+	// The status label span sits alongside its optional leading glyph inside the badge;
+	// its parent is the flex wrapper that holds both.
+	const badgeGlyphWrapper = (getByText: (text: string) => HTMLElement, label: string) =>
+		getByText(label).parentElement;
+
+	it.each([
+		{ status: 'Filled' as const, label: 'Filled' },
+		{ status: 'Canceled' as const, label: 'Canceled' }
+	])('renders a leading SVG glyph for the $status badge', ({ status, label }) => {
+		const { getByText } = render(TradingOrderRow, { props: { order: { ...order, status } } });
+
+		expect(badgeGlyphWrapper(getByText, label)?.querySelector('svg')).not.toBeNull();
+	});
+
+	it('renders the ⏱ emoji glyph for the Expired badge', () => {
+		const { getByText } = render(TradingOrderRow, {
+			props: { order: { ...order, status: 'Expired' } }
+		});
+
+		expect(getByText('⏱')).toBeInTheDocument();
+		expect(badgeGlyphWrapper(getByText, 'Expired')?.querySelector('svg')).toBeNull();
+	});
+
+	it('renders no leading glyph for an active (Open) badge', () => {
+		const { getByText, queryByText } = render(TradingOrderRow, { props: { order } });
+
+		expect(badgeGlyphWrapper(getByText, 'Open')?.querySelector('svg')).toBeNull();
+		expect(queryByText('⏱')).toBeNull();
+	});
 });
