@@ -229,7 +229,7 @@
 		bind:giveUpConfirmed
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.PLACING}
-	<LimitOrderProgress {progressStep} />
+	<LimitOrderProgress limitOrderProgressStep={progressStep} />
 {:else}
 	<LimitOrderForm
 		{ask}

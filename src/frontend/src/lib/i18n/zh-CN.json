@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"no_borrowings": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "取消",
@@ -223,17 +229,17 @@
 			"website": "$dAppName 的图像"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "最近添加",
+			"ab_icp": "ICP",
 			"ai": "人工智能",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "游戏",
+			"lending": "借贷",
 			"nft": "NFT",
-			"rwa": "",
-			"social_media": "社交媒体",
+			"rwa": "RWA",
+			"social": "社交",
 			"staking": "质押",
-			"tools": "工具包",
-			"walletconnect": "WalletConnect"
+			"tools": "工具包"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -254,17 +260,6 @@
 				"carousel": {
 					"text": "OpenChat - 隐私聊天工具",
 					"call_to_action": "显示更多"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "为可信赖的数字互动提供独特的身份验证。",
-				"call_to_action": "打开 DecideID",
-				"stats": "超过 50,000 次推理请求",
-				"description": "Decide ID 是 Decide AI 系统的核心，通过其独特的个人身份证明（PoP）方法确保信任和安全。当您加入时，您将通过一个验证过程，在该过程中您需要提供多个证明并完成一项特殊挑战以确认您的身份。这确保了每个用户都是真实的、独特的，而不是机器人。在此过程中会创建您的 Principal ID，这是一个独特的链上标识符。它可以用于需要验证身份的各种应用程序，确保安全无缝地集成到任何应用程序的注册或登录过程中。此外，零知识证明的使用意味着您的私人数据（如生物特征信息）保持机密和安全。<br/><br/>有了 Decide ID，您就可以享受一种灵活、安全且隐私至上的在线验证和互动方式。",
-				"carousel": {
-					"text": "享受一种隐私至上的在线验证和互动方式",
-					"call_to_action": "感兴趣吗？"
 				}
 			},
 			"icpswap": {
@@ -315,16 +310,6 @@
 				"call_to_action": "体验曲面",
 				"description": "Curve Finance 是在以太坊和 EVM 兼容链上领先的去中心化交易所、稳定币提供商和借贷平台。它以其针对稳定币和波动性资产的先进自动做市商以及其独特的贷款软清算系统而闻名。"
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "释放 DeFi 的全部潜能和简化的交易流程。兑换代币，作为流动性提供者赚取收益，并利用 Bitfinity EVM 领先的 AMM。",
-				"call_to_action": "打开 Sonic",
-				"description": "Sonic 是一个建立在互联网计算机协议（ICP）上的多链去中心化交易所，提供广泛的 DeFi 服务。用户可以轻松交易代币和永续合约，提供流动性，并参与 LBP 代币销售。用户可以参与 DAO 治理，为奖励而质押，并对平台决策进行投票。<br/><br/>完全上链和开源！像专业人士一样兑换代币，作为流动性提供者累积费用，加入 AMM 的氛围，并成为 Sonic DAO 不可或缺的一部分。",
-				"carousel": {
-					"text": "释放 Defi 的全部潜能",
-					"call_to_action": "打开 Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "建立在 Solana 区块链上的 DEX 和自动做市商，提供一个中央限价订单簿，可实现快速交易。",
@@ -371,17 +356,6 @@
 					"text": "你好，自我编写的互联网",
 					"call_to_action": "了解更多"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "一个主权级 L1 区块链，通过在 Beam 网络上资助并赋能生态系统，构建、投资并加速前沿技术——尤其是 Web3 游戏。",
-				"call_to_action": "参与其中",
-				"description": "Beam 是一个主权级 Layer 1 区块链，旨在为游戏、Web3 以及前沿创新领域的高影响力技术提供资金支持并加速发展。依托链上国库和资助生态，Beam 直接投资于团队和基础设施。该区块链通过原生工具和与创始团队的紧密协作，支持可扩展的去中心化应用。"
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "一款类似宝可梦的区块链游戏，玩家可以收集、繁殖、对战 NFT 生物（Axies），并在 Ronin 侧链上的玩家所有经济体系中赚取代币（AXS、SLP）。",
-				"description": "Axie Infinity 是一款边玩边赚（Play-to-Earn）的区块链游戏，玩家可以收集、繁殖并对战名为 Axies 的 NFT 生物。该游戏构建于 Ronin 侧链之上，通过 $AXS 和 $SLP 代币奖励玩家，形成一个所有权与竞争并存的循环经济体系。Axie 开创了 P2E 模式，成为 Web3 早期最成功的主流游戏之一。"
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -433,11 +407,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -483,6 +452,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -2299,10 +2282,10 @@
 			"health_factor": "",
 			"net_value": "",
 			"net_apy": "",
-			"my_positions": "",
 			"markets": "",
 			"supplied": "",
 			"borrowed": "",
+			"borrow_rate": "",
 			"apy_suffix": "",
 			"supply_label": "",
 			"borrow_label": "",
@@ -2321,7 +2304,54 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
-			"insufficient_funds_for_fee": ""
+			"insufficient_funds_for_fee": "",
+			"supply_prices_unavailable": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": "",
+			"repay_review": "",
+			"repay_review_subtitle": "",
+			"repaying": "",
+			"starting_to_repay": "",
+			"repay_started": "",
+			"current_debt": "",
+			"interest_accrued": "",
+			"debt_after_repay": "",
+			"repay_exceeds_debt": "",
+			"repay_prices_unavailable": ""
 		}
 	},
 	"vaults": {
@@ -2404,9 +2434,7 @@
 			"title_empty_3": "",
 			"description_empty": "您似乎还没有质押任何代币",
 			"full_history": "显示完整历史记录",
-			"recent_history": "关闭完整历史记录",
-			"harvest_autopilot_carousel_slide_title": "通过Harvest Autopilot Yield Farming在OISY中赚取",
-			"harvest_autopilot_carousel_slide_cta": "了解更多"
+			"recent_history": "关闭完整历史记录"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "提取代币时出现错误。",

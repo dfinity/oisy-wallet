@@ -271,25 +271,25 @@ describe('oisy-trade.utils — limit order', () => {
 
 	describe('isMultipleOfStep', () => {
 		it('accepts exact multiples and rejects others', () => {
-			expect(isMultipleOfStep(15.25, 0.25)).toBeTruthy();
-			expect(isMultipleOfStep(0.3, 0.25)).toBeFalsy();
-			expect(isMultipleOfStep(0, 0.25)).toBeFalsy();
-			expect(isMultipleOfStep(-0.5, 0.25)).toBeFalsy();
+			expect(isMultipleOfStep({ value: 15.25, step: 0.25 })).toBeTruthy();
+			expect(isMultipleOfStep({ value: 0.3, step: 0.25 })).toBeFalsy();
+			expect(isMultipleOfStep({ value: 0, step: 0.25 })).toBeFalsy();
+			expect(isMultipleOfStep({ value: -0.5, step: 0.25 })).toBeFalsy();
 		});
 	});
 
 	describe('floorToStep', () => {
 		it('floors to the largest valid multiple', () => {
-			expect(floorToStep(15.4994, 0.25)).toBe(15.25);
-			expect(floorToStep(0.1, 0.25)).toBe(0);
+			expect(floorToStep({ value: 15.4994, step: 0.25 })).toBe(15.25);
+			expect(floorToStep({ value: 0.1, step: 0.25 })).toBe(0);
 		});
 	});
 
 	describe('limitDecimals', () => {
 		it('caps fractional digits and strips junk', () => {
-			expect(limitDecimals('1.23456', 2)).toBe('1.23');
-			expect(limitDecimals('1.5', 0)).toBe('1');
-			expect(limitDecimals('1a.2b', 1)).toBe('1.2');
+			expect(limitDecimals({ raw: '1.23456', maxDecimals: 2 })).toBe('1.23');
+			expect(limitDecimals({ raw: '1.5', maxDecimals: 0 })).toBe('1');
+			expect(limitDecimals({ raw: '1a.2b', maxDecimals: 1 })).toBe('1.2');
 		});
 	});
 

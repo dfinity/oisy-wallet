@@ -75,6 +75,9 @@ export interface Modal<T> {
 		| 'trading-deposit'
 		| 'oisy-trade-withdraw'
 		| 'limit-order'
+		| 'liquidium-borrow'
+		| 'liquidium-withdraw'
+		| 'liquidium-repay'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -150,6 +153,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openTradingDeposit: (id: symbol) => void;
 	openOisyTradeWithdraw: (params: SetWithDataParams<OisyTradeWithdrawToken>) => void;
 	openLimitOrder: (id: symbol) => void;
+	openLiquidiumBorrow: (id: symbol) => void;
+	openLiquidiumWithdraw: (id: symbol) => void;
+	openLiquidiumRepay: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -265,6 +271,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 			setTypeWithData('oisy-trade-withdraw')
 		),
 		openLimitOrder: setType('limit-order'),
+		openLiquidiumBorrow: setType('liquidium-borrow'),
+		openLiquidiumWithdraw: setType('liquidium-withdraw'),
+		openLiquidiumRepay: setType('liquidium-repay'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),
