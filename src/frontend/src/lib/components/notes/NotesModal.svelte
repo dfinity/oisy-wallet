@@ -31,11 +31,11 @@
 	let step = $state<Step>('list');
 	let viewNoteId = $state<string | undefined>();
 
-	let loading = $state(false);
+	let loading = $state(!$personalNotesLoaded);
 	let searchTerm = $state('');
 
 	const notes = $derived($personalNotesList);
-	const showSkeleton = $derived(loading || isNullish(notes));
+	const showSkeleton = $derived(loading);
 	const isEmpty = $derived(!showSkeleton && (notes?.length ?? 0) === 0);
 
 	// Client-side search: case-insensitive substring over the full (decrypted) note

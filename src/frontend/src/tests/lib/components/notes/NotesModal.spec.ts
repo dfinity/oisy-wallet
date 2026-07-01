@@ -7,6 +7,7 @@ import {
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
+import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -89,5 +90,21 @@ describe('NotesModal', () => {
 			expect(queryByTestId(NOTES_VIEW)).toBeNull();
 			expect(getByText('note b')).toBeInTheDocument();
 		});
+	});
+
+	it('falls back to the empty state when the initial load fails', async () => {
+		// No setLoaded → onMount runs the initial load, which rejects; the skeleton
+		// must clear rather than stay stuck.
+		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+		vi.spyOn(console, 'debug').mockImplementation(() => {});
+		vi.spyOn(notesServices, 'loadPersonalNotes').mockRejectedValue(new Error('load failed'));
+
+		const { getByText } = render(NotesModal);
+
+		await waitFor(() => {
+			expect(getByText(en.notes.text.empty_title)).toBeInTheDocument();
+		});
+
+		expect(errorSpy).toHaveBeenCalled();
 	});
 });
