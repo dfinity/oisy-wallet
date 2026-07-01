@@ -17,7 +17,7 @@ import type { NullishIdentity } from '$lib/types/identity';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { assertNonNullish, notEmptyString, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -88,9 +88,10 @@ export const depositOisyTrade = async ({
 
 		return true;
 	} catch (err: unknown) {
+		const error = replaceIcErrorFields(err);
 		trackEvent({
 			name: TRACK_COUNT_TRADING_DEPOSIT_ERROR,
-			metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
+			metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
 		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
 

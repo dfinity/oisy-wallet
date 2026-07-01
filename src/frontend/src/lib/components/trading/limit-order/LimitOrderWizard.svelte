@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardModal } from '@dfinity/gix-components';
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import LimitOrderForm from '$lib/components/trading/limit-order/LimitOrderForm.svelte';
@@ -191,9 +191,10 @@
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
+			const error = replaceIcErrorFields(err);
 			trackEvent({
 				name: TRACK_COUNT_LIMIT_ORDER_ERROR,
-				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
+				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
 			});
 			toastsError({ msg: { text: $i18n.trading.limit_order.place_error }, err });
 			goTo(WizardStepsLimitOrder.REVIEW);

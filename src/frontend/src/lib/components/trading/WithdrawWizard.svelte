@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, notEmptyString } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import type { IcToken } from '$icp/types/ic-token';
 	import WithdrawForm from '$lib/components/trading/WithdrawForm.svelte';
@@ -81,9 +81,10 @@
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			const error = replaceIcErrorFields(err);
 			trackEvent({
 				name: TRACK_COUNT_TRADING_WITHDRAW_ERROR,
-				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
+				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
 			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
 

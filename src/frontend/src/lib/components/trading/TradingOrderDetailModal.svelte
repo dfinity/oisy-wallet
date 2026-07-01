@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
@@ -235,9 +235,10 @@
 			trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS, metadata: trackingMetadata });
 			close();
 		} catch (err: unknown) {
+			const error = replaceIcErrorFields(err);
 			trackEvent({
 				name: TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
-				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
+				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
 			});
 			toastsError({ msg: { text: $i18n.trading.order_detail.cancel_error }, err });
 		} finally {
