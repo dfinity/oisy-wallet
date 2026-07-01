@@ -66,7 +66,8 @@ describe('TradingList', () => {
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: undefined,
-			balances: [buildBalance()]
+			balances: [buildBalance()],
+			orders: undefined
 		});
 	};
 
@@ -80,6 +81,14 @@ describe('TradingList', () => {
 	});
 
 	it('should render the onboarding when the user has no assets', () => {
+		// Loaded (balances non-null) but empty → onboarding rather than the skeleton.
+		oisyTradeStore.set({
+			pairs: undefined,
+			supportedTokens: undefined,
+			balances: [],
+			orders: undefined
+		});
+
 		const { getByText } = render(TradingList);
 
 		expect(getByText(en.trading.onboarding.title)).toBeInTheDocument();

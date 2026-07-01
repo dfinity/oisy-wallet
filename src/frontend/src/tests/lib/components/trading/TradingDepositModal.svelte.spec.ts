@@ -84,7 +84,7 @@ describe('TradingDepositModal', () => {
 		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
 	});
 
-	it('should render the empty state when there is nothing to deposit', () => {
+	it('should render the empty state even when trading pairs are available but nothing is held', () => {
 		oisyTradeStore.set({
 			pairs: [
 				buildPair({ base: 'ICP', quote: 'ckUSDC' }),

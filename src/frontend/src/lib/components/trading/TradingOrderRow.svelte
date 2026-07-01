@@ -5,6 +5,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -16,10 +17,11 @@
 		order: OisyTradeOrderView;
 	}
 
-	// Rows are display-only here. The order detail page and the Cancel action are
-	// a follow-up (PR5); the queue position ("X% are ahead") needs per-pair
-	// order-book depth reads and is out of scope for this section.
+	// Tapping the row opens the read-only order-detail modal (Review-styled), which
+	// also hosts the Cancel action for active orders — there is no inline cancel.
 	let { order }: Props = $props();
+
+	const openDetail = () => modalStore.openOisyTradeOrderDetail({ id: Symbol(), data: order });
 
 	let { side, base, quote, quantity, price } = $derived(order);
 
@@ -84,7 +86,7 @@
 	);
 </script>
 
-<div class="flex w-full items-center gap-3 py-2.5">
+<button class="flex w-full items-center gap-3 py-2.5 text-left" onclick={openDetail} type="button">
 	<span class="flex shrink-0">
 		<TokenLogo badge={{ type: 'network' }} color="white" data={baseData} logoSize="xs" />
 	</span>
@@ -110,4 +112,4 @@
 	<span class="shrink-0">
 		<Badge variant={pillVariant} width="w-fit">{statusLabels[labelKey]}</Badge>
 	</span>
-</div>
+</button>
