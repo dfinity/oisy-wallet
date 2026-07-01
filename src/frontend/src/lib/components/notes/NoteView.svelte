@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
+	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -9,7 +10,8 @@
 		NOTES_BACK_BUTTON,
 		NOTES_VIEW,
 		NOTES_VIEW_DELETE_BUTTON,
-		NOTES_VIEW_EDIT_BUTTON
+		NOTES_VIEW_EDIT_BUTTON,
+		NOTES_VIEW_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,9 +30,11 @@
 		// (they are wired once the editor and delete flows exist).
 		onEdit?: () => void;
 		onDelete?: (id: string) => void;
+		// Wired once the share flow exists; until then the link renders but is inert.
+		onShare?: () => void;
 	}
 
-	let { note, onBack, onEdit, onDelete }: Props = $props();
+	let { note, onBack, onEdit, onDelete, onShare }: Props = $props();
 
 	// First non-empty line is the bold title (matching the list); the rest is the body with
 	// line breaks preserved. URLs in both become safe links (Decision 16).
@@ -87,7 +91,18 @@
 		{/if}
 	</div>
 
-	<span class="text-xs text-tertiary">{metaLine}</span>
+	<!-- Desktop: "Share note" is a quiet blue text link right-aligned opposite the
+	     created/updated line. Mobile: it drops to its own left-aligned line beneath.
+	     Lower-emphasis than Edit by design. Inert until the share flow is wired. -->
+	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+		<span class="text-xs text-tertiary">{metaLine}</span>
+		<div>
+			<Button link onclick={onShare} testId={NOTES_VIEW_SHARE_BUTTON}>
+				<IconShareArrow size="16" />
+				{$i18n.notes.share.text.share_note}
+			</Button>
+		</div>
+	</div>
 
 	{#if nonNullish(onEdit)}
 		<!-- Wrap so the button's own flex-1 can't stretch it vertically in this column. -->

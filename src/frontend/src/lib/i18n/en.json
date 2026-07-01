@@ -2576,6 +2576,32 @@
 			"load": "Couldn't load your notes. Please try again.",
 			"save": "Couldn't save your note. Please try again.",
 			"delete": "Couldn't delete your note. Please try again."
+		},
+		"share": {
+			"text": {
+				"share_note": "Share note",
+				"snapshot_caption": "Shares a copy of the note as it is now. Editing or deleting the note later won't change this link.",
+				"cap_reached": "You've reached the maximum of $max active share links. They free up as they expire or are used.",
+				"expires_after": "Link expires after",
+				"expiry_1h": "1 hour",
+				"expiry_24h": "24 hours",
+				"expiry_7d": "7 days",
+				"expiry_30d": "30 days",
+				"destroy_after_viewing": "Destroy after viewing",
+				"destroy_after_viewing_hint": "The link works once, then stops opening.",
+				"protects_body": "The share key lives in the link itself and is never sent to $oisy_short, so only someone with the full link can read this note.",
+				"create_link": "Create link",
+				"link_ready_title": "Share link ready",
+				"link_ready_subtitle": "Anyone with this link can read the note",
+				"link_copied": "Link copied!",
+				"recap_expires_in": "Expires in $duration",
+				"recap_single_use": "single-use",
+				"reminder": "$oisy_short can't recover or revoke this link once shared. It stops working after it's used or expires.",
+				"done": "Done"
+			},
+			"error": {
+				"create": "Couldn't create the share link. Please try again."
+			}
 		}
 	}
 }
