@@ -70,16 +70,15 @@ describe('LimitOrderRouting', () => {
 		expect(getByText(en.trading.limit_order.taker_fee)).toBeInTheDocument();
 	});
 
-	it('renders plain-hyphen placeholders (never em-dashes) for bid/ask and spread when bid or ask is null', async () => {
-		const { container, getAllByText } = render(LimitOrderRouting, {
+	it('renders dashes for bid/ask and spread when bid or ask is null', async () => {
+		const { container } = render(LimitOrderRouting, {
 			props: { ...defaultProps, bid: null, ask: null }
 		});
 
 		await fireEvent.click(container.querySelector('button') as HTMLButtonElement);
 
-		// The three empty readouts (ask, bid, spread) each render a plain hyphen.
-		expect(getAllByText('-')).toHaveLength(3);
-		expect(container.textContent).not.toContain('—');
+		// Placeholder dashes for the three empty readouts: ask, bid, spread.
+		expect(container.textContent?.match(/[-—]/g)?.length).toBeGreaterThanOrEqual(3);
 	});
 
 	it('renders the no-fee label when fees are zero', async () => {

@@ -10,6 +10,7 @@ import type {
 import {
 	addLimitOrder as addLimitOrderApi,
 	getBalances,
+	getMyOrders,
 	getOrderBookDepth as getOrderBookDepthApi,
 	getOrderBookTicker as getOrderBookTickerApi,
 	getTradingPairs,
@@ -38,13 +39,25 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
 
 	try {
-		const [pairs, supportedTokens, balances] = await Promise.all([
+		// `ByPage` with no `after` cursor returns the newest orders first; 100 is
+		// the canister's per-page cap. Pagination of older orders is a follow-up.
+		// Orders are non-critical: a failure there falls back to an empty list so
+		// the core pairs/tokens/balances still populate the Trading tab.
+		const [pairs, supportedTokens, balances, orders] = await Promise.all([
 			getTradingPairs({ identity, nullishIdentityErrorMessage }),
 			listSupportedTokens({ identity, nullishIdentityErrorMessage }),
-			getBalances({ identity, nullishIdentityErrorMessage })
+			getBalances({ identity, nullishIdentityErrorMessage }),
+			getMyOrders({
+				identity,
+				nullishIdentityErrorMessage,
+				args: { filter: { ByPage: { after: [], length: 100 } } }
+			}).catch((err: unknown) => {
+				consoleError(err);
+				return [];
+			})
 		]);
 
-		oisyTradeStore.set({ pairs, supportedTokens, balances });
+		oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
 	} catch (err: unknown) {
 		consoleError(err);
 	}

@@ -1652,9 +1652,83 @@
 			"title": "Trading is temporarily unavailable",
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
 		},
+		"onboarding": {
+			"title": "Trade on-chain with OISY TRADE",
+			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"step_deposit": "Deposit a supported token",
+			"step_order": "Place a limit order",
+			"step_withdraw": "Withdraw anytime",
+			"supported_tokens": "Supported tokens",
+			"deposit": "Deposit"
+		},
+		"assets": {
+			"title": "My assets",
+			"deposit": "+ Deposit",
+			"withdraw": "Withdraw",
+			"available": "Available: $amount",
+			"available_label": "Available:",
+			"empty": "No assets deposited yet"
+		},
+		"deposit": {
+			"title": "Deposit",
+			"review_title": "Review deposit",
+			"progress_title": "Depositing",
+			"you_deposit": "You deposit",
+			"to": "To",
+			"network": "Network",
+			"transaction_fee": "Total estimated fee",
+			"approval_fee": "Approval fee",
+			"transfer_fee": "Network fee",
+			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
+			"info_title": "OISY TRADE: on-chain order book",
+			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
+			"empty_title": "Nothing to deposit yet",
+			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
+			"approving": "Approving",
+			"approved": "Approved",
+			"approve_description": "OISY TRADE authorised to transfer $symbol",
+			"depositing": "Depositing",
+			"deposit_description": "Transferring $symbol to OISY TRADE",
+			"done": "Done",
+			"error": {
+				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
+				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
+			}
+		},
+		"withdraw": {
+			"title": "Withdraw",
+			"review_title": "Review withdrawal",
+			"progress_title": "Withdrawing",
+			"amount_label": "You withdraw",
+			"from": "From",
+			"network": "Network",
+			"transaction_fee": "Transaction fee",
+			"transfer_fee": "Transfer fee",
+			"you_receive": "You receive",
+			"reserved_note": "$amount reserved · locked by open orders",
+			"submit": "Withdraw",
+			"open": "Withdraw",
+			"progress_withdraw": "Sending $symbol to your wallet",
+			"progress_done": "Done",
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
+		},
 		"orders": {
 			"title": "Orders",
-			"add_limit_order": "+ Limit order"
+			"add_limit_order": "+ Limit order",
+			"tab_active": "Active",
+			"tab_history": "History",
+			"empty_active": "No active orders",
+			"empty_history": "No past orders",
+			"side_sell": "Sell",
+			"side_buy": "Buy",
+			"row_sell": "$quantity $base for $quote at $price",
+			"row_buy": "$base with $quote_amount $quote at $price",
+			"status_open": "Open",
+			"status_pending": "Pending",
+			"status_partial": "Partial",
+			"status_filled": "Filled",
+			"status_canceled": "Canceled",
+			"status_expired": "Expired"
 		},
 		"limit_order": {
 			"title": "Limit order",
@@ -1745,63 +1819,6 @@
 			"placing_sub": "Sending limit order to OISY TRADE",
 			"placing_done": "Order placed",
 			"place_error": "Could not place the order. Please try again."
-		},
-		"onboarding": {
-			"title": "Trade on-chain with OISY TRADE",
-			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
-			"step_deposit": "Deposit a supported token",
-			"step_order": "Place a limit order",
-			"step_withdraw": "Withdraw anytime",
-			"supported_tokens": "Supported tokens",
-			"deposit": "Deposit"
-		},
-		"assets": {
-			"title": "My assets",
-			"deposit": "+ Deposit",
-			"withdraw": "Withdraw",
-			"available": "Available: $amount",
-			"available_label": "Available:",
-			"empty": "No assets deposited yet"
-		},
-		"deposit": {
-			"title": "Deposit",
-			"review_title": "Review deposit",
-			"progress_title": "Depositing",
-			"you_deposit": "You deposit",
-			"to": "To",
-			"network": "Network",
-			"transaction_fee": "Transaction fee",
-			"approval_fee": "Approval fee",
-			"transfer_fee": "Transfer fee",
-			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
-			"info_title": "OISY TRADE: on-chain order book",
-			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
-			"empty_title": "Nothing to deposit yet",
-			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
-			"approving": "Approving",
-			"depositing": "Depositing",
-			"done": "Done",
-			"error": {
-				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
-				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
-			}
-		},
-		"withdraw": {
-			"title": "Withdraw",
-			"review_title": "Review withdrawal",
-			"progress_title": "Withdrawing",
-			"amount_label": "You withdraw",
-			"from": "From",
-			"network": "Network",
-			"transaction_fee": "Transaction fee",
-			"transfer_fee": "Transfer fee",
-			"you_receive": "You receive",
-			"reserved_note": "$amount reserved · locked by open orders",
-			"submit": "Withdraw",
-			"open": "Withdraw",
-			"progress_withdraw": "Sending $symbol to your wallet",
-			"progress_done": "Done",
-			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
 		}
 	},
 	"transaction": {

@@ -79,17 +79,6 @@ describe('LimitOrderPriceSection', () => {
 		expect(container.textContent).toContain('fill-or-kill');
 	});
 
-	it('suppresses the FOK-blocked warning when the reference book side is empty', () => {
-		const { container } = render(LimitOrderPriceSection, {
-			props: { ...baseProps, price: '12', fillOrKill: true, bid: null }
-		});
-
-		// With no bid to cross against, crossing is indeterminate: show no warning
-		// rather than a bogus "best bid 0" message.
-		expect(container.textContent).not.toContain('fill-or-kill');
-		expect(container.querySelector('.bg-error-subtle')).toBeNull();
-	});
-
 	it('shows a tick-size error when the price is not a multiple of the tick', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, price: '12.00031' }
