@@ -13,10 +13,10 @@
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconCoins from '$lib/components/icons/lucide/IconCoins.svelte';
+	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
-	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
@@ -98,7 +98,7 @@
 
 	const MOBILE_GROUP_ICON: Partial<Record<NavigationGroupId, Component>> = {
 		finance: IconLayers,
-		more: IconMoreVertical
+		more: IconEllipsis
 	};
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
@@ -334,10 +334,14 @@
 			{@const pressed = open && !ownsCurrent}
 			{@const GroupIcon = MOBILE_GROUP_ICON[slot.id]}
 			{#if slot.id === 'finance'}
-				<!-- Raised center cradle: blue by default/when it owns the page, grey while open over another page. -->
+				<!-- Raised center cradle: a white circle with a thin ring + icon in the
+				     current text colour — black by default, blue when it owns the current
+				     page, grey while its sheet is open over another page. The label
+				     matches the other bar items (text-sm). -->
 				<button
-					class="relative flex flex-1 flex-col items-center gap-1 px-3 pt-3 pb-2 text-center text-[0.625rem] font-medium text-primary"
+					class="relative flex flex-1 flex-col items-center gap-1 px-3 pt-2.25 pb-1.5 text-center text-sm text-primary"
 					class:text-brand-primary-alt={ownsCurrent}
+					class:text-tertiary={pressed}
 					aria-expanded={open}
 					aria-label={SECTION_META[slot.id].label()}
 					data-tid={prefixedTestId(SECTION_META[slot.id].testId)}
@@ -345,11 +349,7 @@
 					type="button"
 				>
 					<span
-						class="-mt-9 flex h-12 w-12 items-center justify-center rounded-full border-2 border-primary shadow-md transition-colors"
-						class:bg-brand-primary={!pressed}
-						class:bg-disabled={pressed}
-						class:text-primary-inverted={!pressed}
-						class:text-secondary={pressed}
+						class="-mt-9 flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] border-current bg-primary shadow-sm transition-colors"
 					>
 						{#if nonNullish(GroupIcon)}
 							<GroupIcon />
