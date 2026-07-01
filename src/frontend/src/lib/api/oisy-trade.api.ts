@@ -7,6 +7,7 @@ import type {
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
+	OrderRecord,
 	Token,
 	TradingPair,
 	TradingPairInfo,
@@ -153,6 +154,21 @@ export const addLimitOrder = async ({
 	});
 
 	return addLimitOrder(request);
+};
+
+export const cancelLimitOrder = async ({
+	orderId,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { orderId: OrderId }): Promise<OrderRecord> => {
+	const { cancelLimitOrder } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return cancelLimitOrder(orderId);
 };
 
 const oisyTradeCanister = async ({

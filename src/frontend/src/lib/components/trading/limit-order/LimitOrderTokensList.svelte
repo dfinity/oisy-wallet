@@ -72,11 +72,17 @@
 				(token, index, all) => all.findIndex(({ symbol }) => symbol === token.symbol) === index
 			);
 
+		// The spend leg can only use funds already on the DEX, so restrict it to
+		// tokens with a free balance (and show that balance). The receive leg — what
+		// you buy on a Buy, what you're paid on a Sell — has no such requirement, so
+		// it lists every supported token regardless of deposit.
 		return showDepositBalance
-			? resolved.map((token) => ({
-					...token,
-					balance: dexFreeByLedger[token.ledgerCanisterId] ?? ZERO
-				}))
+			? resolved
+					.map((token) => ({
+						...token,
+						balance: dexFreeByLedger[token.ledgerCanisterId] ?? ZERO
+					}))
+					.filter(({ balance }) => balance > ZERO)
 			: resolved;
 	});
 
