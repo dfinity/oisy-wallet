@@ -813,9 +813,15 @@ type Outpoint = record {
 	vout : nat32
 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
-// A single stored entry returned by `get_personal_notes`. `encrypted_note` is
-// decrypted client-side.
-type PersonalNoteEntry = record { encrypted_note : blob; note_id : text };
+// A single stored entry returned by `get_personal_notes`, and the upsert
+// payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
+type PersonalNoteEntry = record {
+	// The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	// client-side.
+	encrypted_note : blob;
+	// Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	note_id : text
+};
 type PersonalNoteError = variant {
 	// The ciphertext exceeds [`MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`].
 	NoteCiphertextTooLarge;
