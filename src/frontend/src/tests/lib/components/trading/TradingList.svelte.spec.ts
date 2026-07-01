@@ -2,6 +2,7 @@ import type { UserTokenBalance } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingList from '$lib/components/trading/TradingList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { TRADING_LIST_SKELETON } from '$lib/constants/test-ids.constants';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -70,6 +71,16 @@ describe('TradingList', () => {
 		});
 	};
 
+	// Loaded (balances resolved) but empty, so the tab settles on the onboarding
+	// placeholder rather than the initial-load skeleton.
+	const seedLoadedEmpty = () => {
+		oisyTradeStore.set({
+			pairs: undefined,
+			supportedTokens: undefined,
+			balances: []
+		});
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockEnabled.value = true;
@@ -79,10 +90,20 @@ describe('TradingList', () => {
 		setPrivacyMode({ enabled: false });
 	});
 
+	it('renders the loading skeleton before the first load resolves', () => {
+		const { getByTestId, queryByText } = render(TradingList);
+
+		expect(getByTestId(TRADING_LIST_SKELETON)).toBeInTheDocument();
+		expect(queryByText(en.trading.onboarding.title)).toBeNull();
+	});
+
 	it('should render the onboarding when the user has no assets', () => {
-		const { getByText } = render(TradingList);
+		seedLoadedEmpty();
+
+		const { getByText, queryByTestId } = render(TradingList);
 
 		expect(getByText(en.trading.onboarding.title)).toBeInTheDocument();
+		expect(queryByTestId(TRADING_LIST_SKELETON)).toBeNull();
 	});
 
 	it('renders the assets section, intro, learn-more and orders header once the user has assets', () => {
