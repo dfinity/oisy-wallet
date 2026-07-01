@@ -48,6 +48,7 @@
 	} from '$lib/types/navigation';
 	import {
 		isRouteActivity,
+		isRouteBorrowings,
 		isRouteDappExplorer,
 		isRouteEarn,
 		isRouteEarning,
@@ -110,6 +111,10 @@
 			return AppPath.Trading;
 		}
 
+		if ($activeAssetsTabStore === TokenTypes.BORROWINGS) {
+			return AppPath.Borrowings;
+		}
+
 		if ($activeAssetsTabStore === TokenTypes.TOKENS || $activeAssetsTabStore === TokenTypes.NFTS) {
 			return AppPath.Tokens;
 		}
@@ -118,7 +123,10 @@
 	});
 
 	const assetsSelected = $derived(
-		isRouteTokens(page) || isRouteEarning(page) || isRouteTransactions(page)
+		isRouteTokens(page) ||
+			isRouteEarning(page) ||
+			isRouteBorrowings(page) ||
+			isRouteTransactions(page)
 	);
 
 	// One descriptor per leaf item. A feature-flagged item resolves to no

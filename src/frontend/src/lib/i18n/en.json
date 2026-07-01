@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "Borrowings",
+			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Cancel",
