@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 	import LimitOrderRouting from '$lib/components/trading/limit-order/LimitOrderRouting.svelte';
@@ -175,7 +176,9 @@
 
 		<!-- Fill-or-kill: collapsed description, (?) expands it (Active-networks pattern). -->
 		<div class="rounded-lg border border-disabled bg-secondary px-3 py-2">
-			<div class="flex items-center justify-between">
+			<!-- `--checkbox-label-order: 1` puts the box before the label (same as the
+				 transaction-filter panels), so it reads "[✓] Fill or kill". -->
+			<div style="--checkbox-label-order: 1;" class="flex items-center justify-between">
 				<Checkbox checked={fillOrKill} inputId="limit-order-fok" onChange={toggleFok} text="inline">
 					<span class="text-sm font-semibold text-primary">
 						{$i18n.trading.limit_order.fok_title}
@@ -183,9 +186,7 @@
 				</Checkbox>
 				<button
 					class="flex h-4 w-4 items-center text-tertiary"
-					aria-controls="limit-order-fok-help"
-					aria-expanded={fokHelpVisible}
-					aria-label={fokHelpVisible ? $i18n.core.text.collapse : $i18n.core.text.expand}
+					aria-label={$i18n.trading.limit_order.fok_title}
 					onclick={toggleFokHelp}
 					type="button"
 				>
@@ -193,9 +194,9 @@
 				</button>
 			</div>
 			{#if fokHelpVisible}
-				<p id="limit-order-fok-help" class="mt-2 text-xs text-tertiary">
-					{$i18n.trading.limit_order.fok_help}
-				</p>
+				<p class="mt-2 text-xs text-tertiary" transition:slide
+					>{$i18n.trading.limit_order.fok_help}</p
+				>
 			{/if}
 		</div>
 

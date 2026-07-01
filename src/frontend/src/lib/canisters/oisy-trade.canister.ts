@@ -1,15 +1,18 @@
 import type {
 	DepositRequest,
 	DepositResponse,
+	GetMyOrdersArgs,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	_SERVICE as OisyTradeService,
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
+	OrderRecord,
 	Token,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance,
 	WithdrawRequest,
 	WithdrawResponse
@@ -64,6 +67,30 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		throw mapOisyTradeError(response.Err);
 	};
 
+	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
+		const { deposit } = this.caller({ certified: true });
+
+		const response = await deposit(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapOisyTradeError(response.Err);
+	};
+
+	withdraw = async (request: WithdrawRequest): Promise<WithdrawResponse> => {
+		const { withdraw } = this.caller({ certified: true });
+
+		const response = await withdraw(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapOisyTradeError(response.Err);
+	};
+
 	getOrderBookTicker = async (pair: TradingPair): Promise<OrderBookTicker> => {
 		const { get_order_book_ticker } = this.caller({ certified: false });
 
@@ -88,6 +115,18 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		throw mapOisyTradeError(response.Err);
 	};
 
+	getMyOrders = async (args: GetMyOrdersArgs): Promise<UserOrder[]> => {
+		const { get_my_orders } = this.caller({ certified: false });
+
+		const response = await get_my_orders([args]);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapOisyTradeError(response.Err);
+	};
+
 	addLimitOrder = async (request: LimitOrderRequest): Promise<OrderId> => {
 		// `add_limit_order` mutates the order book, so it must run on the certified service.
 		const { add_limit_order } = this.caller({ certified: true });
@@ -101,22 +140,11 @@ export class OisyTradeCanister extends Canister<OisyTradeService> {
 		throw mapOisyTradeError(response.Err);
 	};
 
-	deposit = async (request: DepositRequest): Promise<DepositResponse> => {
-		const { deposit } = this.caller({ certified: true });
+	cancelLimitOrder = async (orderId: OrderId): Promise<OrderRecord> => {
+		// `cancel_limit_order` mutates the order book, so it must run on the certified service.
+		const { cancel_limit_order } = this.caller({ certified: true });
 
-		const response = await deposit(request);
-
-		if ('Ok' in response) {
-			return response.Ok;
-		}
-
-		throw mapOisyTradeError(response.Err);
-	};
-
-	withdraw = async (request: WithdrawRequest): Promise<WithdrawResponse> => {
-		const { withdraw } = this.caller({ certified: true });
-
-		const response = await withdraw(request);
+		const response = await cancel_limit_order(orderId);
 
 		if ('Ok' in response) {
 			return response.Ok;

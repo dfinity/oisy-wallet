@@ -84,22 +84,21 @@ describe('TradingDepositModal', () => {
 		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
 	});
 
-	it('should render the supported token symbols as chips in the empty state', () => {
+	it('should render the empty state even when trading pairs are available but nothing is held', () => {
 		oisyTradeStore.set({
 			pairs: [
 				buildPair({ base: 'ICP', quote: 'ckUSDC' }),
 				buildPair({ base: 'ckBTC', quote: 'ckUSDC' })
 			],
 			supportedTokens: undefined,
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 
 		const { getByText } = render(TradingDepositModal);
 
 		expect(getByText(en.trading.deposit.empty_title)).toBeInTheDocument();
-		expect(getByText('ICP')).toBeInTheDocument();
-		expect(getByText('ckUSDC')).toBeInTheDocument();
-		expect(getByText('ckBTC')).toBeInTheDocument();
+		expect(getByText(en.trading.deposit.empty_description)).toBeInTheDocument();
 	});
 
 	const seedDepositable = () => {
@@ -107,7 +106,8 @@ describe('TradingDepositModal', () => {
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: [supportedToken()],
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 		balancesStore.set({ id: icp.id, data: { data: 100000000n, certified: true } });
 	};

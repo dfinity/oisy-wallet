@@ -1,14 +1,17 @@
 import type {
 	DepositRequest,
 	DepositResponse,
+	GetMyOrdersArgs,
 	GetOrderBookDepthRequest,
 	LimitOrderRequest,
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
+	OrderRecord,
 	Token,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance,
 	WithdrawRequest,
 	WithdrawResponse
@@ -63,51 +66,6 @@ export const getBalances = async ({
 	return getBalances();
 };
 
-export const getOrderBookTicker = async ({
-	pair,
-	identity,
-	canisterId,
-	nullishIdentityErrorMessage
-}: CanisterApiFunctionParams<{ pair: TradingPair }>): Promise<OrderBookTicker> => {
-	const { getOrderBookTicker } = await oisyTradeCanister({
-		identity,
-		canisterId,
-		nullishIdentityErrorMessage
-	});
-
-	return getOrderBookTicker(pair);
-};
-
-export const getOrderBookDepth = async ({
-	request,
-	identity,
-	canisterId,
-	nullishIdentityErrorMessage
-}: CanisterApiFunctionParams<{ request: GetOrderBookDepthRequest }>): Promise<OrderBookDepth> => {
-	const { getOrderBookDepth } = await oisyTradeCanister({
-		identity,
-		canisterId,
-		nullishIdentityErrorMessage
-	});
-
-	return getOrderBookDepth(request);
-};
-
-export const addLimitOrder = async ({
-	request,
-	identity,
-	canisterId,
-	nullishIdentityErrorMessage
-}: CanisterApiFunctionParams<{ request: LimitOrderRequest }>): Promise<OrderId> => {
-	const { addLimitOrder } = await oisyTradeCanister({
-		identity,
-		canisterId,
-		nullishIdentityErrorMessage
-	});
-
-	return addLimitOrder(request);
-};
-
 export const deposit = async ({
 	request,
 	identity,
@@ -136,6 +94,81 @@ export const withdraw = async ({
 	});
 
 	return withdraw(request);
+};
+
+export const getOrderBookTicker = async ({
+	pair,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { pair: TradingPair }): Promise<OrderBookTicker> => {
+	const { getOrderBookTicker } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getOrderBookTicker(pair);
+};
+
+export const getOrderBookDepth = async ({
+	request,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { request: GetOrderBookDepthRequest }): Promise<OrderBookDepth> => {
+	const { getOrderBookDepth } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getOrderBookDepth(request);
+};
+
+export const getMyOrders = async ({
+	args,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { args: GetMyOrdersArgs }): Promise<UserOrder[]> => {
+	const { getMyOrders } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return getMyOrders(args);
+};
+
+export const addLimitOrder = async ({
+	request,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { request: LimitOrderRequest }): Promise<OrderId> => {
+	const { addLimitOrder } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return addLimitOrder(request);
+};
+
+export const cancelLimitOrder = async ({
+	orderId,
+	identity,
+	canisterId,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams & { orderId: OrderId }): Promise<OrderRecord> => {
+	const { cancelLimitOrder } = await oisyTradeCanister({
+		identity,
+		canisterId,
+		nullishIdentityErrorMessage
+	});
+
+	return cancelLimitOrder(orderId);
 };
 
 const oisyTradeCanister = async ({
