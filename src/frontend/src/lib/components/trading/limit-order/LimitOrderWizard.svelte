@@ -135,7 +135,7 @@
 		}
 	};
 
-	// Reset the price anchor whenever either token or the side changes.
+	// Refresh the order book whenever either token or the side changes.
 	$effect(() => {
 		// Touch the dependencies so the effect re-runs on pair/side change.
 		baseSymbol;
@@ -145,6 +145,12 @@
 	});
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
+
+	// LimitOrderReview expects finite numbers; empty/partial inputs parse to NaN.
+	const finiteOrZero = (value: string): number => {
+		const parsed = parseFloat(value);
+		return Number.isFinite(parsed) ? parsed : 0;
+	};
 
 	const place = async () => {
 		if (isNullish(pairInfo) || isNullish(pairView)) {
@@ -214,7 +220,7 @@
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
 		{ask}
-		baseAmount={parseFloat(baseAmount)}
+		baseAmount={finiteOrZero(baseAmount)}
 		{bid}
 		{currentValue}
 		{depthLevels}
@@ -222,7 +228,7 @@
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
 		{pairView}
-		price={parseFloat(price)}
+		price={finiteOrZero(price)}
 		{side}
 		bind:giveUpConfirmed
 	/>
@@ -235,7 +241,12 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
+		onReview={() => {
+			// Each fresh visit must re-confirm a severe give-up, even if a prior
+			// visit (or now-stale market data) had already confirmed it.
+			giveUpConfirmed = false;
+			goTo(WizardStepsLimitOrder.REVIEW);
+		}}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}
