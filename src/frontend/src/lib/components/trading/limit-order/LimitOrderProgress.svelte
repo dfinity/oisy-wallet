@@ -5,10 +5,10 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
 	interface Props {
-		progressStep: string;
+		limitOrderProgressStep: string;
 	}
 
-	let { progressStep }: Props = $props();
+	let { limitOrderProgressStep }: Props = $props();
 
 	let steps = $state<ProgressSteps>([
 		{
@@ -29,4 +29,4 @@
 	]);
 </script>
 
-<InProgressWizard {progressStep} {steps} />
+<InProgressWizard progressStep={limitOrderProgressStep} {steps} />

@@ -26,14 +26,17 @@
 		return mid > 0 ? ((ask - bid) / mid) * 100 : null;
 	});
 
-	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : 0);
-	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : 0);
+	// null (not 0) when the pair hasn't resolved yet, so the fee rows show an
+	// "unknown" dash rather than a misleading "No fee".
+	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : null);
+	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : null);
 	const quote = $derived(pairView?.quoteSymbol ?? '');
 </script>
 
 <div class="overflow-hidden rounded-lg border border-disabled bg-secondary">
 	<button
 		class="flex w-full items-center gap-2 px-2.5 py-2 text-left"
+		aria-expanded={expanded}
 		onclick={() => (expanded = !expanded)}
 		type="button"
 	>
@@ -83,22 +86,26 @@
 				>
 					<span>{$i18n.trading.limit_order.maker_fee}</span>
 					<span>
-						{makerFee === 0
-							? $i18n.trading.limit_order.no_fee
-							: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
-									$value: makerFee.toString()
-								})}
+						{makerFee === null
+							? '—'
+							: makerFee === 0
+								? $i18n.trading.limit_order.no_fee
+								: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
+										$value: makerFee.toString()
+									})}
 					</span>
 				</div>
 			{/if}
 			<div class="flex justify-between px-2.5 py-1.5 text-xs text-secondary">
 				<span>{$i18n.trading.limit_order.taker_fee}</span>
 				<span>
-					{takerFee === 0
-						? $i18n.trading.limit_order.no_fee
-						: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
-								$value: takerFee.toString()
-							})}
+					{takerFee === null
+						? '—'
+						: takerFee === 0
+							? $i18n.trading.limit_order.no_fee
+							: replacePlaceholders($i18n.trading.limit_order.fee_percent, {
+									$value: takerFee.toString()
+								})}
 				</span>
 			</div>
 		</div>

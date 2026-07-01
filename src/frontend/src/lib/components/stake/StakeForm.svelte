@@ -30,6 +30,8 @@
 		// reserved from the Max balance regardless of token standard — unlike
 		// `totalFee`, which `getMaxTransactionAmount` only subtracts for native tokens.
 		providerFee?: bigint;
+		// Optional hard cap (base units) forwarded to "Max" — e.g. full debt for repay.
+		maxAmount?: bigint;
 		errorType?: TokenActionErrorType;
 		error?: Error;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
@@ -46,6 +48,7 @@
 		destination,
 		totalFee,
 		providerFee = ZERO,
+		maxAmount,
 		errorType = $bindable(),
 		error = $bindable(),
 		onCustomValidate,
@@ -112,6 +115,7 @@
 					balance={maxBalance}
 					error={nonNullish(errorType)}
 					fee={totalFee}
+					{maxAmount}
 					token={$sendToken}
 					bind:amountSetToMax
 					bind:amount
