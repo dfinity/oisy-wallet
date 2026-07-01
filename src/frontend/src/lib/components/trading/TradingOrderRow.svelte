@@ -1,16 +1,12 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
-	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
-	import { loadOrderBook } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
@@ -25,18 +21,20 @@
 		priceLevelToHuman,
 		queuePositionDisplay,
 		queuePositionFraction,
-		toPairView,
-		toTradingPair
+		toPairView
 	} from '$lib/utils/oisy-trade.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		order: OisyTradeOrderView;
+		// Live order-book snapshot for this order's pair, polled once per pair by the
+		// parent list. Undefined for history rows or before the first load.
+		orderBook?: OisyTradeOrderBook;
 	}
 
 	// Tapping the row opens the read-only order-detail modal (Review-styled), which
 	// also hosts the Cancel action for active orders — there is no inline cancel.
-	let { order }: Props = $props();
+	let { order, orderBook }: Props = $props();
 
 	const openDetail = () => modalStore.openOisyTradeOrderDetail({ id: Symbol(), data: order });
 
@@ -105,7 +103,8 @@
 	// Queue position — the share of same-side volume priced better than this order,
 	// shown as plain muted text under the status pill. Only for active (Pending +
 	// Open) resting orders, and only when there is volume ahead; a "Front of book"
-	// (0%) order or a crossing order that fills immediately shows nothing here.
+	// (0%) order or a crossing order that fills immediately shows nothing here. The
+	// order book itself is polled once per pair by the parent list and passed in.
 	const active = $derived(isOisyTradeOrderActive(order));
 
 	const pairInfo = $derived<TradingPairInfo | undefined>(
@@ -114,26 +113,6 @@
 		)
 	);
 	const pairView = $derived(nonNullish(pairInfo) ? toPairView(pairInfo) : undefined);
-
-	let orderBook = $state<OisyTradeOrderBook | undefined>();
-
-	const refreshOrderBook = async (): Promise<void> => {
-		if (!active || isNullish(pairInfo)) {
-			orderBook = undefined;
-			return;
-		}
-		const next = await loadOrderBook({ identity: $authIdentity, pair: toTradingPair(pairInfo) });
-		// Keep the last good snapshot on a transient failure.
-		if (nonNullish(next)) {
-			orderBook = next;
-		}
-	};
-
-	$effect(() => {
-		pairInfo;
-		active;
-		void refreshOrderBook();
-	});
 
 	const toHuman = (level: { price: bigint; quantity: bigint }) =>
 		priceLevelToHuman({
@@ -221,7 +200,3 @@
 		{/if}
 	</span>
 </button>
-
-{#if active}
-	<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={refreshOrderBook} />
-{/if}

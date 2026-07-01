@@ -1,17 +1,12 @@
 import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingOrderRow from '$lib/components/trading/TradingOrderRow.svelte';
-import { loadOrderBook } from '$lib/services/oisy-trade.services';
 import { modalStore } from '$lib/stores/modal.store';
-import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
+import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
-vi.mock('$lib/services/oisy-trade.services', () => ({
-	loadOrderBook: vi.fn(() => Promise.resolve(undefined))
-}));
-
-// A single ICP/ckUSDC pair so the row can resolve the order book for its order.
+// A single ICP/ckUSDC pair so the row can resolve tick size / decimals for its order.
 vi.mock('$lib/derived/oisy-trade.derived', async () => {
 	const { writable } = await import('svelte/store');
 	const { Principal } = await import('@dfinity/principal');
@@ -50,7 +45,7 @@ const order: OisyTradeOrderView = {
 };
 
 // Half the ask volume (the 2.4 level) is priced better than the 2.5 sell price.
-const bookWithVolumeAhead = {
+const bookWithVolumeAhead: OisyTradeOrderBook = {
 	ticker: { ask: [], bid: [] },
 	depth: {
 		asks: [
@@ -59,7 +54,13 @@ const bookWithVolumeAhead = {
 		],
 		bids: []
 	}
-} as const;
+};
+
+// No ask volume priced better than the order → front of book (0%).
+const bookFrontOfBook: OisyTradeOrderBook = {
+	ticker: { ask: [], bid: [] },
+	depth: { asks: [{ price: 2_600_000n, quantity: 500_000_000n }], bids: [] }
+};
 
 describe('TradingOrderRow', () => {
 	beforeEach(() => {
@@ -86,37 +87,27 @@ describe('TradingOrderRow', () => {
 		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: order }));
 	});
 
-	it('shows the queue position under the status for an active order with volume ahead', async () => {
-		vi.mocked(loadOrderBook).mockResolvedValue(bookWithVolumeAhead);
-
-		const { container } = render(TradingOrderRow, { props: { order } });
-
-		await waitFor(() => expect(container).toHaveTextContent('50% are ahead'));
-	});
-
-	it('shows no queue position for a front-of-book active order', async () => {
-		// No ask volume priced better than the order → front of book (0%).
-		vi.mocked(loadOrderBook).mockResolvedValue({
-			ticker: { ask: [], bid: [] },
-			depth: { asks: [{ price: 2_600_000n, quantity: 500_000_000n }], bids: [] }
+	it('shows the queue position under the status when there is volume ahead', () => {
+		const { container } = render(TradingOrderRow, {
+			props: { order, orderBook: bookWithVolumeAhead }
 		});
 
-		const { container } = render(TradingOrderRow, { props: { order } });
+		expect(container).toHaveTextContent('50% are ahead');
+	});
 
-		await waitFor(() => expect(loadOrderBook).toHaveBeenCalled());
+	it('shows no queue position for a front-of-book active order', () => {
+		const { container } = render(TradingOrderRow, {
+			props: { order, orderBook: bookFrontOfBook }
+		});
 
 		expect(container).not.toHaveTextContent('are ahead');
 	});
 
 	it('shows no queue position for a terminal (history) order', () => {
-		vi.mocked(loadOrderBook).mockResolvedValue(bookWithVolumeAhead);
-
 		const { container } = render(TradingOrderRow, {
-			props: { order: { ...order, status: 'Filled' } }
+			props: { order: { ...order, status: 'Filled' }, orderBook: bookWithVolumeAhead }
 		});
 
-		// Terminal rows never load or show queue position.
-		expect(loadOrderBook).not.toHaveBeenCalled();
 		expect(container).not.toHaveTextContent('are ahead');
 	});
 });
