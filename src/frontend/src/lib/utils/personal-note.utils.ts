@@ -26,7 +26,17 @@ export const comparePersonalNotesByUpdatedDesc = ({
 	b: PersonalNoteEntryUi;
 }): number => {
 	// Failed-to-decrypt entries have no timestamp; keep them at the bottom.
-	const aTs = isPersonalNoteDecryptionFailure(a) ? ZERO : BigInt(a.updated_at_ns);
-	const bTs = isPersonalNoteDecryptionFailure(b) ? ZERO : BigInt(b.updated_at_ns);
+	const toTimestamp = (entry: PersonalNoteEntryUi): bigint => {
+		if (isPersonalNoteDecryptionFailure(entry)) {
+			return ZERO;
+		}
+		try {
+			return BigInt(entry.updated_at_ns);
+		} catch {
+			return ZERO;
+		}
+	};
+	const aTs = toTimestamp(a);
+	const bTs = toTimestamp(b);
 	return bTs > aTs ? 1 : bTs < aTs ? -1 : 0;
 };
