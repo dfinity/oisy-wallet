@@ -9,7 +9,7 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { OisyTradeAsset } from '$lib/types/oisy-trade';
+import type { OisyTradeAsset, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
@@ -543,6 +543,30 @@ export const priceLevelToHuman = ({
 	price: Number(level.price) / pow10(quoteDecimals),
 	quantity: Number(level.quantity) / pow10(baseDecimals)
 });
+
+// Pairs each DEX balance with the OISY token sharing its ledger canister id, so
+// the wallet's logo, network, decimals and exchange rate can be reused. Entries
+// whose ledger is unknown to the wallet are dropped (nothing to display them
+// with). Used to drive the Trading-tab "Withdraw" entry points.
+export const toOisyTradeWithdrawTokens = ({
+	balances,
+	icrcTokens
+}: {
+	balances: UserTokenBalance[];
+	icrcTokens: IcToken[];
+}): OisyTradeWithdrawToken[] => {
+	const tokenByLedgerCanisterId = new Map(
+		icrcTokens.map((token) => [token.ledgerCanisterId, token])
+	);
+
+	return balances
+		.map(({ token: { id }, balance: { free, reserved } }) => {
+			const token = tokenByLedgerCanisterId.get(id.ledger_id.toText());
+
+			return nonNullish(token) ? { token, free, reserved } : undefined;
+		})
+		.filter(nonNullish);
+};
 
 // The distinct union of every base and quote token symbol across the trading
 // pairs — the set of tokens OISY TRADE supports. Used for the onboarding chips

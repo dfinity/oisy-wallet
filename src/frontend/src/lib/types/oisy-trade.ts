@@ -38,3 +38,12 @@ export interface OisyTradeAsset {
 	// Fiat value of `free`, or undefined when no exchange rate is available.
 	freeUsd: number | undefined;
 }
+
+// A DEX balance entry paired with the resolved OISY token (for the logo,
+// network, decimals and exchange rate the wallet already knows about). Used to
+// open the Withdraw flow with the token pre-selected.
+export interface OisyTradeWithdrawToken {
+	token: IcToken;
+	free: bigint;
+	reserved: bigint;
+}
