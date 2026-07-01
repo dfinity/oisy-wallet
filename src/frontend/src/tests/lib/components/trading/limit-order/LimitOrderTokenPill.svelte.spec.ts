@@ -1,6 +1,7 @@
 import LimitOrderTokenPill from '$lib/components/trading/limit-order/LimitOrderTokenPill.svelte';
-import en from '$tests/mocks/i18n.mock';
+import { i18n } from '$lib/stores/i18n.store';
 import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('LimitOrderTokenPill', () => {
 	it('renders the symbol when provided', () => {
@@ -16,7 +17,7 @@ describe('LimitOrderTokenPill', () => {
 			props: { onclick: () => {} }
 		});
 
-		expect(container).toHaveTextContent(en.core.text.select);
+		expect(container).toHaveTextContent(get(i18n).core.text.select);
 		expect(container.querySelector('button')?.className).toContain('border-dashed');
 	});
 

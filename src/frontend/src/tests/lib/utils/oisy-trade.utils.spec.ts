@@ -567,6 +567,10 @@ describe('oisy-trade.utils', () => {
 			expect(queuePositionDisplay(0.156)).toEqual({ front: false, percent: 16 });
 		});
 
+		it('rounds the < 10% boundary up to a whole 10, not 10.0', () => {
+			expect(queuePositionDisplay(0.0991)).toEqual({ front: false, percent: 10 });
+		});
+
 		it('null passes through', () => {
 			expect(queuePositionDisplay(null)).toBeNull();
 		});
