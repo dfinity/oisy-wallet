@@ -47,7 +47,12 @@
 		<div
 			class="pointer-events-none absolute inset-x-0 bottom-0 -z-[1] h-[env(safe-area-inset-bottom)] bg-[var(--color-background-primary-inverted-alt)]"
 		></div>
-		<div class="flex h-16 flex-row items-end pb-[env(safe-area-inset-bottom)]">
+		<!-- No safe-area padding here: the global `div.mobile-nav` rule
+		     (links.scss) already pads the container by the inset, which lifts this
+		     in-flow row. The hump SVG, filler and cradle above are absolutely
+		     positioned (relative to the padding box), so they don't inherit that
+		     lift and carry the inset explicitly instead. -->
+		<div class="flex h-16 flex-row items-end">
 			{@render children()}
 		</div>
 	</div>
