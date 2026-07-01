@@ -21,7 +21,7 @@
 	<BottomSheet transition>
 		{#snippet header()}
 			<div class="flex w-full items-center justify-between gap-4 p-4">
-				<h3 class="m-0">{@render title()}</h3>
+				<h3 class="m-0 min-w-0 break-words">{@render title()}</h3>
 
 				{#if showCloseButton}
 					<ButtonIcon
