@@ -28,7 +28,10 @@ describe('TradingOrderRow', () => {
 	it('renders the order intent and status pill', () => {
 		const { container } = render(TradingOrderRow, { props: { order } });
 
+		// Sell intent (side label + base symbol) and the Open status pill.
+		expect(container).toHaveTextContent('Sell');
 		expect(container).toHaveTextContent('ICP');
+		expect(container).toHaveTextContent('Open');
 	});
 
 	it('opens the order-detail modal with the order on click', async () => {
