@@ -6,13 +6,20 @@
 	import WithdrawForm from '$lib/components/trading/WithdrawForm.svelte';
 	import WithdrawProgress from '$lib/components/trading/WithdrawProgress.svelte';
 	import WithdrawReview from '$lib/components/trading/WithdrawReview.svelte';
+	import {
+		TRACK_COUNT_TRADING_WITHDRAW_ERROR,
+		TRACK_COUNT_TRADING_WITHDRAW_SUBMITTED,
+		TRACK_COUNT_TRADING_WITHDRAW_SUCCESS
+	} from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { withdrawFromOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 
 	interface Props {
 		token: IcToken;
@@ -55,6 +62,9 @@
 
 		onNext();
 
+		const trackingMetadata = oisyTradeTrackingMetadata({ token: token.symbol });
+		trackEvent({ name: TRACK_COUNT_TRADING_WITHDRAW_SUBMITTED, metadata: trackingMetadata });
+
 		try {
 			await withdrawFromOisyTrade({
 				identity: $authIdentity,
@@ -66,8 +76,14 @@
 
 			withdrawProgressStep = ProgressStepsTradingWithdraw.DONE;
 
+			trackEvent({ name: TRACK_COUNT_TRADING_WITHDRAW_SUCCESS, metadata: trackingMetadata });
+
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_TRADING_WITHDRAW_ERROR,
+				metadata: { ...trackingMetadata, error: `${err}` }
+			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
 
 			onBack();

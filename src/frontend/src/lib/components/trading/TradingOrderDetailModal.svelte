@@ -11,6 +11,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import {
+		TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
+		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED,
+		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS
+	} from '$lib/constants/analytics.constants';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -18,6 +23,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		cancelLimitOrder,
 		loadOisyTrade,
@@ -36,6 +42,7 @@
 		formatTradeAmount,
 		isOisyTradeOrderActive,
 		oisyTradeOrderDisplayStatus,
+		oisyTradeTrackingMetadata,
 		orderStatusView,
 		priceLevelToHuman,
 		queuePositionDisplay,
@@ -212,11 +219,22 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
+		const trackingMetadata = oisyTradeTrackingMetadata({
+			base: baseSymbol,
+			quote: quoteSymbol,
+			side
+		});
+		trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED, metadata: trackingMetadata });
 		try {
 			await cancelLimitOrder({ identity: $authIdentity, orderId: order.id });
 			await loadOisyTrade({ identity: $authIdentity });
+			trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS, metadata: trackingMetadata });
 			close();
 		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
+				metadata: { ...trackingMetadata, error: `${err}` }
+			});
 			toastsError({ msg: { text: $i18n.trading.order_detail.cancel_error }, err });
 		} finally {
 			canceling = false;

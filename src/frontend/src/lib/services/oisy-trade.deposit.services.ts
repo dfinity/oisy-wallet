@@ -2,12 +2,19 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { deposit as depositApi } from '$lib/api/oisy-trade.api';
+import {
+	TRACK_COUNT_TRADING_DEPOSIT_ERROR,
+	TRACK_COUNT_TRADING_DEPOSIT_SUBMITTED,
+	TRACK_COUNT_TRADING_DEPOSIT_SUCCESS
+} from '$lib/constants/analytics.constants';
 import { NANO_SECONDS_IN_MINUTE, OISY_TRADE_CANISTER_ID } from '$lib/constants/app.constants';
 import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
+import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -39,6 +46,8 @@ export const depositOisyTrade = async ({
 }: DepositOisyTradeParams): Promise<boolean> => {
 	const { auth, trading } = get(i18n);
 
+	const trackingMetadata = oisyTradeTrackingMetadata({ token: token.symbol });
+
 	try {
 		assertNonNullish(identity, auth.error.no_internet_identity);
 		assertNonNullish(OISY_TRADE_CANISTER_ID);
@@ -47,6 +56,8 @@ export const depositOisyTrade = async ({
 		const fee = getTokenFee(token);
 
 		assertNonNullish(fee, trading.deposit.error.unknown_fee);
+
+		trackEvent({ name: TRACK_COUNT_TRADING_DEPOSIT_SUBMITTED, metadata: trackingMetadata });
 
 		progress?.(ProgressStepsTradingDeposit.APPROVE);
 
@@ -72,8 +83,14 @@ export const depositOisyTrade = async ({
 
 		progress?.(ProgressStepsTradingDeposit.DONE);
 
+		trackEvent({ name: TRACK_COUNT_TRADING_DEPOSIT_SUCCESS, metadata: trackingMetadata });
+
 		return true;
 	} catch (err: unknown) {
+		trackEvent({
+			name: TRACK_COUNT_TRADING_DEPOSIT_ERROR,
+			metadata: { ...trackingMetadata, error: `${err}` }
+		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
 
 		return false;

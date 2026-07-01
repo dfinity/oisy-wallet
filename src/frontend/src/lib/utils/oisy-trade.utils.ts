@@ -10,6 +10,7 @@ import type {
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
@@ -738,4 +739,31 @@ export const priceLevelToHuman = ({
 }): { price: number; quantity: number } => ({
 	price: Number(level.price) / pow10(quoteDecimals),
 	quantity: Number(level.quantity) / pow10(baseDecimals)
+});
+
+// Non-sensitive analytics metadata for the OISY TRADE flows: pair symbols, side,
+// order type, provider and an optional error string. Deliberately excludes
+// amounts and any address/identity data.
+export const oisyTradeTrackingMetadata = ({
+	base,
+	quote,
+	side,
+	orderType,
+	token,
+	error
+}: {
+	base?: string;
+	quote?: string;
+	side?: LimitOrderSide;
+	orderType?: string;
+	token?: string;
+	error?: string;
+}): Record<string, string> => ({
+	dApp: OISY_TRADE_PROVIDER_NAME,
+	...(nonNullish(base) ? { base } : {}),
+	...(nonNullish(quote) ? { quote } : {}),
+	...(nonNullish(side) ? { side } : {}),
+	...(nonNullish(orderType) ? { orderType } : {}),
+	...(nonNullish(token) ? { token } : {}),
+	...(nonNullish(error) ? { error } : {})
 });

@@ -7,11 +7,17 @@
 	import LimitOrderProgress from '$lib/components/trading/limit-order/LimitOrderProgress.svelte';
 	import LimitOrderReview from '$lib/components/trading/limit-order/LimitOrderReview.svelte';
 	import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
+	import {
+		TRACK_COUNT_LIMIT_ORDER_ERROR,
+		TRACK_COUNT_LIMIT_ORDER_SUBMITTED,
+		TRACK_COUNT_LIMIT_ORDER_SUCCESS
+	} from '$lib/constants/analytics.constants';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -19,6 +25,7 @@
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import {
 		type LimitOrderSide,
+		oisyTradeTrackingMetadata,
 		priceLevelToHuman,
 		toCandidSide,
 		toPairView,
@@ -159,6 +166,14 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
+		const trackingMetadata = oisyTradeTrackingMetadata({
+			base: baseSymbol,
+			quote: quoteSymbol,
+			side,
+			orderType: fillOrKill ? 'FOK' : 'GTC'
+		});
+		trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_SUBMITTED, metadata: trackingMetadata });
+
 		try {
 			await placeLimitOrder({
 				identity: $authIdentity,
@@ -171,9 +186,14 @@
 				}
 			});
 
+			trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_SUCCESS, metadata: trackingMetadata });
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
+			trackEvent({
+				name: TRACK_COUNT_LIMIT_ORDER_ERROR,
+				metadata: { ...trackingMetadata, error: `${err}` }
+			});
 			toastsError({ msg: { text: $i18n.trading.limit_order.place_error }, err });
 			goTo(WizardStepsLimitOrder.REVIEW);
 		}
