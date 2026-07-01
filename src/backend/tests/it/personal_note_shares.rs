@@ -3,10 +3,12 @@ use std::time::Duration;
 use candid::Principal;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
-use shared::types::personal_note_share::{
-    CreatePersonalNoteShareRequest, PersonalNoteShareContent, PersonalNoteShareError,
-    PersonalNoteSharePeek, MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS,
-    MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES,
+use shared::types::{
+    personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES,
+    personal_note_share::{
+        CreatePersonalNoteShareRequest, PersonalNoteShareContent, PersonalNoteShareError,
+        MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS,
+    },
 };
 
 use crate::utils::{
@@ -43,7 +45,6 @@ fn create_share(
 ) -> Result<(), PersonalNoteShareError> {
     let request = CreatePersonalNoteShareRequest {
         token: tok.to_string(),
-        ct_meta: ByteBuf::from(vec![1, 2, 3]),
         ct_content: ByteBuf::from(vec![9, 8, 7]),
         expires_at_ns,
         single_use,
@@ -51,20 +52,6 @@ fn create_share(
     pic_setup
         .update::<Result<(), PersonalNoteShareError>>(caller, "create_personal_note_share", request)
         .expect("create_personal_note_share should reach the handler")
-}
-
-fn peek_share(
-    pic_setup: &PicBackend,
-    caller: Principal,
-    tok: &str,
-) -> Result<PersonalNoteSharePeek, PersonalNoteShareError> {
-    pic_setup
-        .query::<Result<PersonalNoteSharePeek, PersonalNoteShareError>>(
-            caller,
-            "peek_personal_note_share",
-            tok.to_string(),
-        )
-        .expect("peek_personal_note_share should reach the handler")
 }
 
 fn get_share(
@@ -103,7 +90,7 @@ fn shares_count(pic_setup: &PicBackend, caller: Principal) -> u64 {
 }
 
 // -------------------------------------------------------------------------------------------------
-// - Guards + the reusable-share lifecycle (peek + repeated get, never consumable)
+// - Guards + the reusable-share lifecycle (repeated get, never consumable)
 // -------------------------------------------------------------------------------------------------
 
 #[test]
@@ -120,7 +107,6 @@ fn guards_and_reusable_share_lifecycle() {
         "create_personal_note_share",
         CreatePersonalNoteShareRequest {
             token: token(1),
-            ct_meta: ByteBuf::from(vec![]),
             ct_content: ByteBuf::from(vec![]),
             expires_at_ns: now + ONE_HOUR_NS,
             single_use: false,
@@ -138,13 +124,9 @@ fn guards_and_reusable_share_lifecycle() {
         .expect("create should succeed");
     assert_eq!(shares_count(&pic_setup, alice), 1);
 
-    let peeked = peek_share(&pic_setup, anonymous, &reusable).expect("peek should succeed");
-    assert_eq!(peeked.ct_meta.as_ref(), [1, 2, 3].as_slice());
-    assert_eq!(peeked.expires_at_ns, now + ONE_HOUR_NS);
-    assert!(!peeked.single_use);
-
     let got = get_share(&pic_setup, anonymous, &reusable).expect("get should succeed");
     assert_eq!(got.ct_content.as_ref(), [9, 8, 7].as_slice());
+    assert_eq!(got.expires_at_ns, now + ONE_HOUR_NS);
     // A reusable share can be read again...
     assert!(get_share(&pic_setup, anonymous, &reusable).is_ok());
     // ...but never consumed (consume is single-use only).
@@ -158,12 +140,8 @@ fn guards_and_reusable_share_lifecycle() {
         "a reusable share never frees its cap slot on read"
     );
 
-    // An unknown token collapses to the same NotFound for every anonymous endpoint.
+    // An unknown token collapses to the same NotFound for both anonymous endpoints.
     let unknown = token(99);
-    assert_eq!(
-        peek_share(&pic_setup, anonymous, &unknown),
-        Err(PersonalNoteShareError::NotFound)
-    );
     assert_eq!(
         get_share(&pic_setup, anonymous, &unknown),
         Err(PersonalNoteShareError::NotFound)
@@ -205,11 +183,6 @@ fn single_use_lifecycle_and_create_validation() {
         "a single-use share must not be consumable twice"
     );
     assert_eq!(
-        peek_share(&pic_setup, anonymous, &single),
-        Err(PersonalNoteShareError::NotFound),
-        "a consumed share must not be peekable either"
-    );
-    assert_eq!(
         shares_count(&pic_setup, alice),
         0,
         "consuming a share frees its cap slot"
@@ -245,11 +218,7 @@ fn single_use_lifecycle_and_create_validation() {
             "create_personal_note_share",
             CreatePersonalNoteShareRequest {
                 token: token(5),
-                ct_meta: ByteBuf::from(vec![
-                    0u8;
-                    MAX_PERSONAL_NOTE_SHARE_META_CIPHERTEXT_BYTES + 1
-                ]),
-                ct_content: ByteBuf::from(vec![]),
+                ct_content: ByteBuf::from(vec![0u8; MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES + 1]),
                 expires_at_ns: now + ONE_HOUR_NS,
                 single_use: false,
             },
@@ -257,7 +226,7 @@ fn single_use_lifecycle_and_create_validation() {
         .expect("call should reach the handler");
     assert_eq!(
         oversized_result,
-        Err(PersonalNoteShareError::MetaCiphertextTooLarge)
+        Err(PersonalNoteShareError::ContentCiphertextTooLarge)
     );
     assert_eq!(
         shares_count(&pic_setup, alice),
@@ -286,18 +255,13 @@ fn expired_shares_are_unavailable_to_every_endpoint() {
         .expect("create should succeed");
     assert_eq!(shares_count(&pic_setup, alice), 2);
 
-    // Before expiry, both are readable.
-    assert!(peek_share(&pic_setup, anonymous, &reusable).is_ok());
+    // Before expiry, the reusable share is readable.
     assert!(get_share(&pic_setup, anonymous, &reusable).is_ok());
 
     // Advance the IC's virtual clock past both shares' expiry.
     pic_setup.pic.advance_time(Duration::from_hours(2));
     pic_setup.pic.tick();
 
-    assert_eq!(
-        peek_share(&pic_setup, anonymous, &reusable),
-        Err(PersonalNoteShareError::NotFound)
-    );
     assert_eq!(
         get_share(&pic_setup, anonymous, &reusable),
         Err(PersonalNoteShareError::NotFound)
