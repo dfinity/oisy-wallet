@@ -46,8 +46,13 @@ describe('TradingOrderRow', () => {
 
 	// The status label span sits alongside its optional leading glyph inside the badge;
 	// its parent is the flex wrapper that holds both.
-	const badgeGlyphWrapper = (getByText: (text: string) => HTMLElement, label: string) =>
-		getByText(label).parentElement;
+	const badgeGlyphWrapper = ({
+		getByText,
+		label
+	}: {
+		getByText: (text: string) => HTMLElement;
+		label: string;
+	}) => getByText(label).parentElement;
 
 	it.each([
 		{ status: 'Filled' as const, label: 'Filled' },
@@ -55,7 +60,7 @@ describe('TradingOrderRow', () => {
 	])('renders a leading SVG glyph for the $status badge', ({ status, label }) => {
 		const { getByText } = render(TradingOrderRow, { props: { order: { ...order, status } } });
 
-		expect(badgeGlyphWrapper(getByText, label)?.querySelector('svg')).not.toBeNull();
+		expect(badgeGlyphWrapper({ getByText, label })?.querySelector('svg')).not.toBeNull();
 	});
 
 	it('renders the ⏱ emoji glyph for the Expired badge', () => {
@@ -64,13 +69,13 @@ describe('TradingOrderRow', () => {
 		});
 
 		expect(getByText('⏱')).toBeInTheDocument();
-		expect(badgeGlyphWrapper(getByText, 'Expired')?.querySelector('svg')).toBeNull();
+		expect(badgeGlyphWrapper({ getByText, label: 'Expired' })?.querySelector('svg')).toBeNull();
 	});
 
 	it('renders no leading glyph for an active (Open) badge', () => {
 		const { getByText, queryByText } = render(TradingOrderRow, { props: { order } });
 
-		expect(badgeGlyphWrapper(getByText, 'Open')?.querySelector('svg')).toBeNull();
+		expect(badgeGlyphWrapper({ getByText, label: 'Open' })?.querySelector('svg')).toBeNull();
 		expect(queryByText('⏱')).toBeNull();
 	});
 });
