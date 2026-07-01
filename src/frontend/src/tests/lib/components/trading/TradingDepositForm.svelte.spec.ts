@@ -43,6 +43,14 @@ describe('TradingDepositForm', () => {
 		expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeDisabled();
 	});
 
+	it('should keep the review button disabled with consent but a zero amount', () => {
+		const { getByTestId } = render(TradingDepositForm, {
+			props: { ...baseProps, consent: true, amount: 0 }
+		});
+
+		expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeDisabled();
+	});
+
 	it('should enable the review button with consent and a valid amount', () => {
 		const { getByTestId } = render(TradingDepositForm, {
 			props: { ...baseProps, consent: true, amount: 5 }
