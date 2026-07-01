@@ -5,15 +5,13 @@ import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 import type { ExtToken, ExtTokenWithoutId } from '$icp/types/ext-token';
 import type { IcToken } from '$icp/types/ic-token';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
-import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { toggleableTokenGuard } from '$lib/utils/token-guards.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const isTokenExt = (token: Partial<IcToken>): token is ExtToken =>
 	token.standard?.code === 'ext';
 
-export const isTokenExtCustomToken = (token: Token): token is ExtCustomToken =>
-	isTokenExt(token) && isTokenToggleable(token);
+export const isTokenExtCustomToken = toggleableTokenGuard<ExtCustomToken>(isTokenExt);
 
 // The minting number (that wallets, frontends, etc. usually show) is 1-based indexed, it's simply (TokenIndex + 1).
 export const parseExtTokenIndex = (index: TokenIndex): TokenIndex => index + 1;

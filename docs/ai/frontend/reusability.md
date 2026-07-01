@@ -104,16 +104,17 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Common utils
 
-| Util                                                        | Where                             | Purpose                           |
-| ----------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.       |
-| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.        |
-| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper. |
-| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.         |
-| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates.            |
-| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                 |
-| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                 |
-| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                    |
+| Util                                                                                           | Where                             | Purpose                                                                                                |
+| ---------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `format.utils`, `bigint.utils`, `array.utils`, `json.utils`                                    | `$lib/utils/`                     | Generic formatting helpers.                                                                            |
+| `i18n.utils` (incl. `replacePlaceholders`)                                                     | `$lib/utils/`                     | i18n string interpolation.                                                                             |
+| `console.utils` (`consoleError`, `consoleWarn`)                                                | `$lib/utils/`                     | The only allowed console wrapper.                                                                      |
+| `error.utils`, `assert-amount.utils`, `validation` helpers                                     | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                                                              |
+| `network.utils`, `networks.utils`                                                              | `$lib/utils/`                     | Network ID predicates.                                                                                 |
+| `nav.utils`, `before-navigate.utils`, `before-unload.utils`                                    | `$lib/utils/`                     | Navigation hooks.                                                                                      |
+| `clipboard.utils`, `device.utils`, `events.utils`                                              | `$lib/utils/`                     | Browser plumbing.                                                                                      |
+| `derived-memo.utils`, `certified-store.utils`                                                  | `$lib/utils/`                     | Store helpers.                                                                                         |
+| `token-guards.utils` (`tokenStandardGuard`, `collectionStandardGuard`, `toggleableTokenGuard`) | `$lib/utils/`                     | Factories for per-standard token / collection / toggleable-custom-token type guards (eth/sol/icp/btc). |
 
 ### REST + workers
 
