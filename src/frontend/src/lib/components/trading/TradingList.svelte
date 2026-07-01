@@ -4,6 +4,7 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
+	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import {
@@ -44,7 +45,7 @@
 		</ExternalLink>
 	</div>
 
-	<!-- My assets (PR2) and Orders (PR4b) sections render here once built. -->
+	<!-- My assets (PR2) renders here once built. -->
 	{#each $oisyTradeWithdrawTokens as withdrawToken (withdrawToken.token.id)}
 		<div class="mt-4 flex items-center justify-between">
 			<span class="flex items-center gap-2 text-sm font-semibold">
@@ -60,6 +61,22 @@
 			</button>
 		</div>
 	{/each}
+
+	<!--
+		Orders section header. PR4b owns the full Active/History orders list; this
+		lightweight placeholder header carries the "+ Limit order" entry point so
+		the limit-order modal is reachable and testable in the meantime.
+	-->
+	<div class="mt-4 flex items-center justify-between">
+		<h3 class="text-base font-bold text-primary">{$i18n.trading.orders.title}</h3>
+		<LimitOrder>
+			{#snippet trigger(open)}
+				<button class="text-sm font-medium text-brand-primary" onclick={open} type="button">
+					{$i18n.trading.orders.add_limit_order}
+				</button>
+			{/snippet}
+		</LimitOrder>
+	</div>
 
 	{#if $modalOisyTradeWithdraw && nonNullish($modalOisyTradeWithdrawData)}
 		<WithdrawModal withdrawToken={$modalOisyTradeWithdrawData} />

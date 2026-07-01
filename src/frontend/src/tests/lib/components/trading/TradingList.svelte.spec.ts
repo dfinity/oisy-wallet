@@ -7,13 +7,22 @@ import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { get, type Writable } from 'svelte/store';
 
-vi.mock('$env/oisy-trade', () => ({ OISY_TRADE_ENABLED: true }));
+const { mockEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
+	mockEnabled: { value: true },
+	mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined))
+}));
 
-// Keep the IntervalLoader's onLoad a no-op so it doesn't trigger network calls.
+vi.mock('$env/oisy-trade', () => ({
+	get OISY_TRADE_ENABLED() {
+		return mockEnabled.value;
+	}
+}));
+
 vi.mock('$lib/services/oisy-trade.services', () => ({
-	loadOisyTrade: vi.fn().mockResolvedValue(undefined)
+	loadOisyTrade: mockLoadOisyTrade
 }));
 
 // Expose the joined withdraw tokens as a writable so each test seeds the rows it
@@ -36,15 +45,18 @@ describe('TradingList', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockEnabled.value = true;
 		withdrawTokensStore.set([withdrawToken]);
 		modalStore.close();
 	});
 
-	it('renders the intro, learn-more link and a withdraw trigger per holding', () => {
+	it('renders the intro, learn-more, orders header and a withdraw trigger per holding', () => {
 		const { container, getByTestId } = render(TradingList);
 
 		expect(container).toHaveTextContent(en.trading.text.intro);
 		expect(container).toHaveTextContent(en.trading.text.learn_more);
+		expect(container).toHaveTextContent(en.trading.orders.title);
+		expect(container).toHaveTextContent(en.trading.orders.add_limit_order);
 		expect(container).toHaveTextContent(mockValidIcToken.symbol);
 		expect(getByTestId(TRADING_WITHDRAW_OPEN_BUTTON)).toHaveTextContent(en.trading.withdraw.open);
 	});
@@ -66,5 +78,33 @@ describe('TradingList', () => {
 		const { queryByTestId } = render(TradingList);
 
 		expect(queryByTestId(TRADING_WITHDRAW_OPEN_BUTTON)).toBeNull();
+	});
+
+	it('loads the trade data on mount when enabled', async () => {
+		render(TradingList);
+
+		// IntervalLoader triggers onLoad in onMount; flush it before asserting.
+		await tick();
+
+		expect(mockLoadOisyTrade).toHaveBeenCalled();
+	});
+
+	it('renders the provider-unavailable empty state when trading is disabled', () => {
+		mockEnabled.value = false;
+
+		const { container, queryByText } = render(TradingList);
+
+		expect(container).toHaveTextContent(en.trading.provider_unavailable.title);
+		expect(queryByText(en.trading.text.intro)).toBeNull();
+	});
+
+	it('does not load the trade data when disabled', async () => {
+		mockEnabled.value = false;
+
+		render(TradingList);
+
+		await tick();
+
+		expect(mockLoadOisyTrade).not.toHaveBeenCalled();
 	});
 });
