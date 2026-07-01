@@ -11,7 +11,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
-	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
+	import {
+		OISY_TRADE_POLL_INTERVAL_MILLIS,
+		OISY_TRADE_PROVIDER_NAME
+	} from '$lib/constants/oisy-trade.constants';
 	import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -320,7 +323,7 @@
 
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
-			{#snippet mainValue()}{$i18n.trading.limit_order.order_type_gtc}{/snippet}
+			{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
 		</ModalValue>
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.limit_order.order_type}{/snippet}
