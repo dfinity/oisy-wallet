@@ -632,6 +632,24 @@ describe('oisy-trade.utils', () => {
 			expect(toPriceUnits({ price: 2.69, quoteDecimals: 6 })).toBe(2_690_000n);
 		});
 
+		it('toQuantity / toPriceUnits handle large 18-decimal values without exponential bigint input', () => {
+			expect(toQuantity({ baseAmount: 1_000, baseDecimals: 18 })).toBe(
+				1_000_000_000_000_000_000_000n
+			);
+			expect(toPriceUnits({ price: 1_000, quoteDecimals: 18 })).toBe(
+				1_000_000_000_000_000_000_000n
+			);
+		});
+
+		it('toQuantity / toPriceUnits preserve decimal-string precision when scaling', () => {
+			expect(toQuantity({ baseAmount: 1.2345678901234567, baseDecimals: 18 })).toBe(
+				1_234_567_890_123_456_700n
+			);
+			expect(toPriceUnits({ price: 1.2345678901234567, quoteDecimals: 18 })).toBe(
+				1_234_567_890_123_456_700n
+			);
+		});
+
 		it('toCandidSide maps the form side to the candid variant', () => {
 			expect(toCandidSide('sell')).toEqual({ Sell: null });
 			expect(toCandidSide('buy')).toEqual({ Buy: null });
