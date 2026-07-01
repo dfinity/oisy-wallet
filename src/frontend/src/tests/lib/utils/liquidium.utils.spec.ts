@@ -7,6 +7,7 @@ import {
 	liquidiumMaxSupplyApy,
 	liquidiumNetApy,
 	liquidiumNetInterestUsd,
+	liquidiumProjectedHealthAfterRepayPercent,
 	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
 	liquidiumResultingLtvPercent,
@@ -341,6 +342,76 @@ describe('liquidium.utils', () => {
 		});
 	});
 
+	describe('liquidiumProjectedHealthAfterRepayPercent', () => {
+		it('reproduces the current health for a zero repay', () => {
+			// ltv 40k/100k = 0.4; health = (1 − 0.4/0.8)×100 = 50.
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 40_000,
+					repayUsd: 0,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBeCloseTo(50, 5);
+		});
+
+		it('improves health as debt is repaid', () => {
+			// remaining 20k; ltv 20k/100k = 0.2; health = (1 − 0.2/0.8)×100 = 75.
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 40_000,
+					repayUsd: 20_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBeCloseTo(75, 5);
+		});
+
+		it('returns 100 when the debt is fully cleared', () => {
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 40_000,
+					repayUsd: 40_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(100);
+		});
+
+		it('returns 100 when repaying more than the outstanding debt', () => {
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 40_000,
+					repayUsd: 50_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(100);
+		});
+
+		it('is 0 when debt remains but there is no collateral or threshold', () => {
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 0,
+					totalDebtUsd: 40_000,
+					repayUsd: 10_000,
+					weightedLiquidationThresholdBps: 8_000
+				})
+			).toBe(0);
+		});
+
+		it('is 0 when debt remains but the liquidation threshold is zero', () => {
+			expect(
+				liquidiumProjectedHealthAfterRepayPercent({
+					totalCollateralUsd: 100_000,
+					totalDebtUsd: 40_000,
+					repayUsd: 10_000,
+					weightedLiquidationThresholdBps: 0
+				})
+			).toBe(0);
+		});
+	});
+
 	describe('mapLiquidiumReserve', () => {
 		it('maps a reserve to oisy units (USD numbers, base-unit amounts kept)', () => {
 			const reserve: UserReserve = {
@@ -362,6 +433,7 @@ describe('liquidium.utils', () => {
 				depositedDecimals: 8,
 				borrowed: 5n,
 				borrowedDecimals: 6,
+				debtInterest: ZERO,
 				suppliedUsd: 60_000,
 				borrowedUsd: 300
 			});
