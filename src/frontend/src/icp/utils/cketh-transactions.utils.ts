@@ -91,12 +91,11 @@ export const mapCkEthereumTransaction = ({
 			typeLabel:
 				memoInfo?.reimbursement === true
 					? 'transaction.label.reimbursement'
-					: 'transaction.label.twin_token_converted',
+					: 'receive.text.receive',
 			...(nonNullish(from) && {
 				from,
 				fromExplorerUrl: `${ethExplorerUrl}/address/${from}`
 			}),
-			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'transaction.label.twin_network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
 	}
