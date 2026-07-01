@@ -12,7 +12,7 @@
 	let { steps }: Props = $props();
 </script>
 
-{#each steps as { step: _, text, state }, i (i)}
+{#each steps as { step, text, state }, i (step)}
 	{@const last = i === steps.length - 1}
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
 		{#if state === 'completed'}
@@ -22,7 +22,7 @@
 		{:else if state === 'in_progress'}
 			<div class="spinner">
 				<span class="checkmark">{i + 1}</span>
-				<LoaderSpinner />
+				<LoaderSpinner size="small" />
 			</div>
 		{:else}
 			<span class="checkmark round">{i + 1}</span>
