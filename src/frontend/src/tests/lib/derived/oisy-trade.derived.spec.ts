@@ -31,6 +31,7 @@ const {
 	oisyTradeSupportedTokens,
 	oisyTradeBalances,
 	oisyTradeWithdrawTokens,
+	oisyTradeLoaded,
 	oisyTradeSupportedTokenSymbols,
 	oisyTradeIcTokenBySymbol,
 	oisyTradeFreeBalanceBySymbol,
@@ -206,6 +207,18 @@ describe('oisy-trade.derived', () => {
 			expect(get(oisyTradeWithdrawTokens)).toEqual([
 				{ token: mockValidIcToken, free: 1n, reserved: ZERO }
 			]);
+		});
+	});
+
+	describe('oisyTradeLoaded', () => {
+		it('is false while balances are unset', () => {
+			expect(get(oisyTradeLoaded)).toBeFalsy();
+		});
+
+		it('is true once balances resolve, even when empty', () => {
+			oisyTradeStore.set({ pairs: undefined, supportedTokens: undefined, balances: [] });
+
+			expect(get(oisyTradeLoaded)).toBeTruthy();
 		});
 	});
 

@@ -4,6 +4,7 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import TradingAssets from '$lib/components/trading/TradingAssets.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
+	import TradingListSkeleton from '$lib/components/trading/TradingListSkeleton.svelte';
 	import TradingOnboarding from '$lib/components/trading/TradingOnboarding.svelte';
 	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
@@ -13,13 +14,13 @@
 		OISY_TRADE_LEARN_MORE_URL,
 		OISY_TRADE_POLL_INTERVAL_MILLIS
 	} from '$lib/constants/oisy-trade.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
+	import { authIdentity, authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalOisyTradeWithdraw,
 		modalOisyTradeWithdrawData,
 		modalTradingDeposit
 	} from '$lib/derived/modal.derived';
-	import { oisyTradeHasAssets } from '$lib/derived/oisy-trade.derived';
+	import { oisyTradeHasAssets, oisyTradeLoaded } from '$lib/derived/oisy-trade.derived';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -39,7 +40,14 @@
 {#if OISY_TRADE_ENABLED}
 	<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
 
-	{#if $oisyTradeHasAssets}
+	<!--
+		Only skeleton while a signed-in load is actually in flight. Signed out,
+		`loadOisyTrade` resets the store (balances stay unresolved) and never
+		populates it, so gate on the identity to settle on onboarding instead.
+	-->
+	{#if $authSignedIn && !$oisyTradeLoaded}
+		<TradingListSkeleton />
+	{:else if $oisyTradeHasAssets}
 		<div class="flex flex-col gap-4">
 			<p class="text-sm text-tertiary">
 				{$i18n.trading.text.intro}

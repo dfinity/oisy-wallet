@@ -43,6 +43,13 @@ export const oisyTradeWithdrawTokens: Readable<OisyTradeWithdrawToken[]> = deriv
 		toOisyTradeWithdrawTokens({ balances: $oisyTradeBalances, icrcTokens: $enabledIcTokens })
 );
 
+// True once the first load has resolved (balances populated). Distinguishes the
+// initial loading state from a genuinely empty wallet, so the Trading tab can show
+// skeletons first instead of flashing the onboarding placeholder.
+export const oisyTradeLoaded: Readable<boolean> = derived(oisyTradeStore, ({ balances }) =>
+	nonNullish(balances)
+);
+
 // The supported trade tokens resolved to their matching app `IcToken` (by ledger
 // canister id), keyed by symbol. The trade canister exposes only symbol/decimals,
 // so the form joins against the enabled IC tokens (which include testnets when a
