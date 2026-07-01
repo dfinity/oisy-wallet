@@ -23,6 +23,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,
 		oisyTradeTrackingMetadata,
@@ -192,7 +193,7 @@
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_LIMIT_ORDER_ERROR,
-				metadata: { ...trackingMetadata, error: `${err}` }
+				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
 			});
 			toastsError({ msg: { text: $i18n.trading.limit_order.place_error }, err });
 			goTo(WizardStepsLimitOrder.REVIEW);

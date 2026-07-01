@@ -19,6 +19,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 
 	interface Props {
@@ -82,7 +83,7 @@
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_TRADING_WITHDRAW_ERROR,
-				metadata: { ...trackingMetadata, error: `${err}` }
+				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
 			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
 

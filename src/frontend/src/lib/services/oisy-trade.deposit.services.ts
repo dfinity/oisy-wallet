@@ -14,6 +14,7 @@ import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
@@ -89,7 +90,7 @@ export const depositOisyTrade = async ({
 	} catch (err: unknown) {
 		trackEvent({
 			name: TRACK_COUNT_TRADING_DEPOSIT_ERROR,
-			metadata: { ...trackingMetadata, error: `${err}` }
+			metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
 		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
 

@@ -16,7 +16,10 @@
 		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED,
 		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS
 	} from '$lib/constants/analytics.constants';
-	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
+	import {
+		OISY_TRADE_POLL_INTERVAL_MILLIS,
+		OISY_TRADE_PROVIDER_NAME
+	} from '$lib/constants/oisy-trade.constants';
 	import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -34,6 +37,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -233,7 +237,7 @@
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
-				metadata: { ...trackingMetadata, error: `${err}` }
+				metadata: { ...trackingMetadata, error: replaceIcErrorFields(err) ?? '' }
 			});
 			toastsError({ msg: { text: $i18n.trading.order_detail.cancel_error }, err });
 		} finally {
@@ -338,7 +342,7 @@
 
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
-			{#snippet mainValue()}{$i18n.trading.limit_order.order_type_gtc}{/snippet}
+			{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
 		</ModalValue>
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.limit_order.order_type}{/snippet}

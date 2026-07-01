@@ -125,8 +125,9 @@ describe('oisy-trade.services', () => {
 
 	describe('cancelLimitOrder', () => {
 		beforeEach(() => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			vi.mocked(oisyTradeApi.cancelLimitOrder).mockResolvedValue({} as any);
+			vi.mocked(oisyTradeApi.cancelLimitOrder).mockResolvedValue(
+				{} as Awaited<ReturnType<typeof oisyTradeApi.cancelLimitOrder>>
+			);
 		});
 
 		it('cancels the order via the api with the order id', async () => {
