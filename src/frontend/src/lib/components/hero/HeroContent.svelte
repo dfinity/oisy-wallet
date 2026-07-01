@@ -18,6 +18,7 @@
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import NftHeroBalance from '$lib/components/hero/NftHeroBalance.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
@@ -230,6 +231,10 @@
 			</div>
 
 			<Balance token={pageTokenUi} />
+		</div>
+	{:else if isNftsPage}
+		<div in:slide={SLIDE_PARAMS}>
+			<NftHeroBalance />
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>

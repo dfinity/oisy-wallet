@@ -84,6 +84,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
@@ -109,6 +110,7 @@
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
@@ -1435,6 +1437,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
 			"title_not_supported": "",

@@ -4,6 +4,8 @@ import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_EXPLORER,
+	NAVIGATION_ITEM_NFTS,
+	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS
@@ -31,20 +33,31 @@ describe('NavigationMainMenuItems', () => {
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_NFTS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 	});
 
-	it('builds assets link with NFTs path when assetsTab = NFTS', () => {
+	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const nftsLink = getByTestId(NAVIGATION_ITEM_NFTS);
+
+		expect(nftsLink.getAttribute('href')).toContain(AppPath.Nfts);
+	});
+
+	it('keeps the assets link on the Tokens list when a stale NFTS tab is persisted', () => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.NFTS });
 
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
-		expect(tokenLink.getAttribute('href')).toContain(AppPath.Nfts);
+		expect(tokenLink.getAttribute('href')).not.toContain(AppPath.Nfts);
+		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
 	});
 
 	it('builds assets link with Earning path when assetsTab = EARNING', () => {

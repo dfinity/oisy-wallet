@@ -84,6 +84,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "एसेट्स",
+			"nfts": "",
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
@@ -109,6 +110,7 @@
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
+			"nfts": "",
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
@@ -1435,6 +1437,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
 			"title_not_supported": "",
