@@ -1,19 +1,25 @@
+import type { UserTokenBalance } from '$declarations/oisy_trade/oisy_trade.did';
+import type { IcToken } from '$icp/types/ic-token';
 import TradingList from '$lib/components/trading/TradingList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { TRADING_WITHDRAW_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
-import { oisyTradeWithdrawTokens } from '$lib/derived/oisy-trade.derived';
-import { modalStore } from '$lib/stores/modal.store';
-import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
+import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { Principal } from '@icp-sdk/core/principal';
+import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { get, type Writable } from 'svelte/store';
 
-const { mockEnabled, mockLoadOisyTrade } = vi.hoisted(() => ({
-	mockEnabled: { value: true },
-	mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined))
-}));
+const { enabledIcTokensMock, exchangesMock, mockEnabled, mockLoadOisyTrade } = vi.hoisted(() => {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	const { writable: createWritable } = require('svelte/store');
+	return {
+		enabledIcTokensMock: createWritable([]),
+		exchangesMock: createWritable({}),
+		mockEnabled: { value: true },
+		mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined))
+	};
+});
 
 vi.mock('$env/oisy-trade', () => ({
 	get OISY_TRADE_ENABLED() {
@@ -21,66 +27,77 @@ vi.mock('$env/oisy-trade', () => ({
 	}
 }));
 
+vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get enabledIcTokens() {
+		return enabledIcTokensMock;
+	}
+}));
+
+vi.mock(import('$lib/derived/exchange.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get exchanges() {
+		return exchangesMock;
+	}
+}));
+
 vi.mock('$lib/services/oisy-trade.services', () => ({
 	loadOisyTrade: mockLoadOisyTrade
 }));
 
-// Expose the joined withdraw tokens as a writable so each test seeds the rows it
-// needs without standing up the canister-balance → enabled-token join.
-vi.mock('$lib/derived/oisy-trade.derived', async () => {
-	const { writable: createWritable } = await import('svelte/store');
-	return { oisyTradeWithdrawTokens: createWritable([]) };
-});
+const LEDGER_ICP = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
+
+const buildBalance = (): UserTokenBalance =>
+	({
+		token: { id: { ledger_id: Principal.fromText(LEDGER_ICP) } },
+		balance: { free: 100000000n, reserved: ZERO }
+	}) as unknown as UserTokenBalance;
 
 describe('TradingList', () => {
-	const withdrawTokensStore = oisyTradeWithdrawTokens as unknown as Writable<
-		OisyTradeWithdrawToken[]
-	>;
+	const icp: IcToken = {
+		...mockValidIcToken,
+		ledgerCanisterId: LEDGER_ICP,
+		symbol: 'ICP',
+		decimals: 8
+	};
 
-	const withdrawToken: OisyTradeWithdrawToken = {
-		token: mockValidIcToken,
-		free: 5_000_000n,
-		reserved: ZERO
+	const seedAssets = () => {
+		enabledIcTokensMock.set([icp]);
+		oisyTradeStore.set({
+			pairs: undefined,
+			supportedTokens: undefined,
+			balances: [buildBalance()]
+		});
 	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockEnabled.value = true;
-		withdrawTokensStore.set([withdrawToken]);
-		modalStore.close();
+		oisyTradeStore.reset();
+		enabledIcTokensMock.set([]);
+		exchangesMock.set({});
+		setPrivacyMode({ enabled: false });
 	});
 
-	it('renders the intro, learn-more, orders header and a withdraw trigger per holding', () => {
-		const { container, getByTestId } = render(TradingList);
+	it('should render the onboarding when the user has no assets', () => {
+		const { getByText } = render(TradingList);
 
+		expect(getByText(en.trading.onboarding.title)).toBeInTheDocument();
+	});
+
+	it('renders the assets section, intro, learn-more and orders header once the user has assets', () => {
+		seedAssets();
+
+		const { container, getByText } = render(TradingList);
+
+		expect(getByText(en.trading.assets.title)).toBeInTheDocument();
 		expect(container).toHaveTextContent(en.trading.text.intro);
 		expect(container).toHaveTextContent(en.trading.text.learn_more);
 		expect(container).toHaveTextContent(en.trading.orders.title);
 		expect(container).toHaveTextContent(en.trading.orders.add_limit_order);
-		expect(container).toHaveTextContent(mockValidIcToken.symbol);
-		expect(getByTestId(TRADING_WITHDRAW_OPEN_BUTTON)).toHaveTextContent(en.trading.withdraw.open);
 	});
 
-	it('opens the withdraw modal with the token pre-selected on click', async () => {
-		const openSpy = vi.spyOn(modalStore, 'openOisyTradeWithdraw');
-
-		const { getByTestId } = render(TradingList);
-
-		await fireEvent.click(getByTestId(TRADING_WITHDRAW_OPEN_BUTTON));
-
-		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: withdrawToken }));
-		expect(get(modalStore)?.data).toStrictEqual(withdrawToken);
-	});
-
-	it('renders no withdraw trigger when there are no holdings', () => {
-		withdrawTokensStore.set([]);
-
-		const { queryByTestId } = render(TradingList);
-
-		expect(queryByTestId(TRADING_WITHDRAW_OPEN_BUTTON)).toBeNull();
-	});
-
-	it('loads the trade data on mount when enabled', async () => {
+	it('loads the trade data on mount via the interval loader', async () => {
 		render(TradingList);
 
 		// IntervalLoader triggers onLoad in onMount; flush it before asserting.
@@ -95,7 +112,7 @@ describe('TradingList', () => {
 		const { container, queryByText } = render(TradingList);
 
 		expect(container).toHaveTextContent(en.trading.provider_unavailable.title);
-		expect(queryByText(en.trading.text.intro)).toBeNull();
+		expect(queryByText(en.trading.onboarding.title)).toBeNull();
 	});
 
 	it('does not load the trade data when disabled', async () => {

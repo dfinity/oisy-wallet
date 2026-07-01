@@ -11,6 +11,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		deriveQuoteAmount,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		validateAmount
@@ -65,10 +66,12 @@
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
 
-	// Round the read-only readout to the quote token's decimals so JS float
-	// multiplication artifacts (e.g. 0.1 * 3 = 0.30000000000000004) never surface.
+	// Format through the shared token formatter (rounds to the quote decimals,
+	// no raw float artifacts).
 	const quoteAmountDisplay = $derived(
-		quoteAmount > 0 ? parseFloat(quoteAmount.toFixed(pairView?.quoteDecimals ?? 8)) : '—'
+		quoteAmount > 0
+			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
+			: '-'
 	);
 
 	const baseLabel = $derived(

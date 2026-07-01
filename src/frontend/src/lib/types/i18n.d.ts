@@ -1411,7 +1411,15 @@ interface I18nTrading {
 		placing_done: string;
 		place_error: string;
 	};
-	onboarding: { title: string; description: string; deposit: string };
+	onboarding: {
+		title: string;
+		description: string;
+		step_deposit: string;
+		step_order: string;
+		step_withdraw: string;
+		supported_tokens: string;
+		deposit: string;
+	};
 	assets: {
 		title: string;
 		deposit: string;

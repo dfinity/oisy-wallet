@@ -2,7 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TradingAssets from '$lib/components/trading/TradingAssets.svelte';
+	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
+	import TradingOnboarding from '$lib/components/trading/TradingOnboarding.svelte';
 	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -11,72 +13,71 @@
 		OISY_TRADE_LEARN_MORE_URL,
 		OISY_TRADE_POLL_INTERVAL_MILLIS
 	} from '$lib/constants/oisy-trade.constants';
-	import { TRADING_WITHDRAW_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalOisyTradeWithdraw, modalOisyTradeWithdrawData } from '$lib/derived/modal.derived';
-	import { oisyTradeWithdrawTokens } from '$lib/derived/oisy-trade.derived';
+	import {
+		modalOisyTradeWithdraw,
+		modalOisyTradeWithdrawData,
+		modalTradingDeposit
+	} from '$lib/derived/modal.derived';
+	import { oisyTradeHasAssets } from '$lib/derived/oisy-trade.derived';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 
 	const load = (): Promise<void> => loadOisyTrade({ identity: $authIdentity });
 
-	// Each entry opens the Withdraw flow with its token pre-selected. The polished
-	// "My assets" rows that carry this link are built in PR2; this list is the
-	// minimal reachable trigger so the flow is usable and testable in isolation.
-	const openWithdraw = (withdrawToken: OisyTradeWithdrawToken) =>
-		modalStore.openOisyTradeWithdraw({ id: Symbol(), data: withdrawToken });
+	const modalId = Symbol();
+	const openDeposit = () => modalStore.openTradingDeposit(modalId);
+
+	// Opens the Withdraw flow with the chosen My-assets holding pre-selected. The
+	// asset already carries the free/reserved split the modal needs.
+	const openWithdraw = ({ token, free, reserved }: OisyTradeAsset) =>
+		modalStore.openOisyTradeWithdraw({ id: Symbol(), data: { token, free, reserved } });
 </script>
 
 {#if OISY_TRADE_ENABLED}
 	<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
 
-	<div class="flex flex-col gap-2">
-		<p class="text-sm text-tertiary">{$i18n.trading.text.intro}</p>
-		<ExternalLink
-			ariaLabel={$i18n.trading.text.learn_more}
-			color="blue"
-			href={OISY_TRADE_LEARN_MORE_URL}
-			iconVisible={false}
-			inline
-		>
-			{$i18n.trading.text.learn_more}
-		</ExternalLink>
-	</div>
+	{#if $oisyTradeHasAssets}
+		<div class="flex flex-col gap-4">
+			<p class="text-sm text-tertiary">
+				{$i18n.trading.text.intro}
+				<ExternalLink
+					ariaLabel={$i18n.trading.text.learn_more}
+					color="blue"
+					href={OISY_TRADE_LEARN_MORE_URL}
+					iconAsLast
+				>
+					{$i18n.trading.text.learn_more}
+				</ExternalLink>
+			</p>
 
-	<!-- My assets (PR2) renders here once built. -->
-	{#each $oisyTradeWithdrawTokens as withdrawToken (withdrawToken.token.id)}
-		<div class="mt-4 flex items-center justify-between">
-			<span class="flex items-center gap-2 text-sm font-semibold">
-				<TokenLogo data={withdrawToken.token} logoSize="xs" />
-				{withdrawToken.token.symbol}
-			</span>
-			<button
-				class="text-sm font-semibold text-brand-primary"
-				data-tid={TRADING_WITHDRAW_OPEN_BUTTON}
-				onclick={() => openWithdraw(withdrawToken)}
-			>
-				{$i18n.trading.withdraw.open}
-			</button>
+			<TradingAssets onDeposit={openDeposit} onWithdraw={openWithdraw} />
+
+			<!--
+				Orders section header. PR4b owns the full Active/History orders list;
+				this lightweight placeholder header carries the "+ Limit order" entry
+				point so the limit-order modal is reachable and testable in the meantime.
+			-->
+			<div class="mt-4 flex items-center justify-between">
+				<h3 class="text-base font-bold text-primary">{$i18n.trading.orders.title}</h3>
+				<LimitOrder>
+					{#snippet trigger(open)}
+						<button class="text-sm font-medium text-brand-primary" onclick={open} type="button">
+							{$i18n.trading.orders.add_limit_order}
+						</button>
+					{/snippet}
+				</LimitOrder>
+			</div>
 		</div>
-	{/each}
+	{:else}
+		<TradingOnboarding onDeposit={openDeposit} />
+	{/if}
 
-	<!--
-		Orders section header. PR4b owns the full Active/History orders list; this
-		lightweight placeholder header carries the "+ Limit order" entry point so
-		the limit-order modal is reachable and testable in the meantime.
-	-->
-	<div class="mt-4 flex items-center justify-between">
-		<h3 class="text-base font-bold text-primary">{$i18n.trading.orders.title}</h3>
-		<LimitOrder>
-			{#snippet trigger(open)}
-				<button class="text-sm font-medium text-brand-primary" onclick={open} type="button">
-					{$i18n.trading.orders.add_limit_order}
-				</button>
-			{/snippet}
-		</LimitOrder>
-	</div>
+	{#if $modalTradingDeposit && $modalStore?.id === modalId}
+		<TradingDepositModal />
+	{/if}
 
 	{#if $modalOisyTradeWithdraw && nonNullish($modalOisyTradeWithdrawData)}
 		<WithdrawModal withdrawToken={$modalOisyTradeWithdrawData} />

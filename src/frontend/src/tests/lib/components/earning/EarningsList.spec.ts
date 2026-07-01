@@ -4,13 +4,17 @@ import * as erc4626Derived from '$eth/derived/erc4626.derived';
 import { allVaults } from '$eth/derived/vaults.derived';
 import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import EarningsList from '$lib/components/earning/EarningsList.svelte';
+import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	EARNING_CARD_SKELETON,
 	EARNING_NO_POSITION_PLACEHOLDER
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
+import { liquidiumStore } from '$lib/stores/liquidium.store';
 import { tokenListStore } from '$lib/stores/token-list.store';
+import { LendBorrowProvider } from '$lib/types/lend-borrow';
+import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Vault } from '$lib/types/vaults';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -22,6 +26,10 @@ vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
+}));
+
+vi.mock('$env/lend-borrow', () => ({
+	anyLendBorrowProviderEnabled: true
 }));
 
 describe('EarningsList', () => {
@@ -84,9 +92,34 @@ describe('EarningsList', () => {
 		);
 	};
 
+	const supplyReserve: LiquidiumReserve = {
+		poolId: 'pool-btc',
+		asset: 'BTC',
+		chain: 'BTC',
+		supplyApy: 5,
+		borrowApy: 0,
+		deposited: 100_000_000n,
+		depositedDecimals: 8,
+		borrowed: ZERO,
+		borrowedDecimals: 8,
+		suppliedUsd: 1000,
+		borrowedUsd: 0
+	};
+
+	const portfolioWith = (reserves: LiquidiumReserve[]): LiquidiumPortfolio => ({
+		reserves,
+		totalSuppliedUsd: 0,
+		totalBorrowedUsd: 0,
+		netValueUsd: 0,
+		availableBorrowsUsd: 0,
+		weightedLiquidationThresholdBps: 8000,
+		healthFactorPercent: 100
+	});
+
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		tokenListStore.set({ filter: '' });
+		liquidiumStore.reset();
 		mockCustomTokensInitialized();
 	});
 
@@ -261,6 +294,64 @@ describe('EarningsList', () => {
 
 		expect(getByText('Enabled Vault')).toBeInTheDocument();
 		expect(getByText('Base Vault')).toBeInTheDocument();
+	});
+
+	it('should render Liquidium supply positions with a provider tag alongside vaults', () => {
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken })]);
+		liquidiumStore.set({ markets: [], portfolio: portfolioWith([supplyReserve]), assetPrices: {} });
+
+		const { getByText, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(getByText('Autopilot Vault')).toBeInTheDocument();
+		expect(
+			getByText(lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name)
+		).toBeInTheDocument();
+	});
+
+	it('should render Liquidium supply positions even when there are no vaults', () => {
+		mockAllVaultsStore([]);
+		liquidiumStore.set({ markets: [], portfolio: portfolioWith([supplyReserve]), assetPrices: {} });
+
+		const { getByText, queryByTestId } = render(EarningsList);
+
+		expect(queryByTestId(EARNING_NO_POSITION_PLACEHOLDER)).not.toBeInTheDocument();
+		expect(
+			getByText(lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name)
+		).toBeInTheDocument();
+	});
+
+	it('sorts vaults and Liquidium supplies together by USD value (highest first)', () => {
+		const providerName = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name;
+
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken, overrides: { usdBalance: 100 } })]);
+		liquidiumStore.set({
+			markets: [],
+			portfolio: portfolioWith([{ ...supplyReserve, suppliedUsd: 5000 }]),
+			assetPrices: {}
+		});
+
+		const { container } = render(EarningsList);
+		const text = container.textContent ?? '';
+
+		// Liquidium supply ($5000) outranks the Autopilot vault ($100), so it renders first.
+		expect(text.indexOf(providerName)).toBeLessThan(text.indexOf('Autopilot Vault'));
+	});
+
+	it('sorts a higher-value vault above a lower-value Liquidium supply', () => {
+		const providerName = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name;
+
+		mockAllVaultsStore([toVault({ token: mockAutopilotToken, overrides: { usdBalance: 9000 } })]);
+		liquidiumStore.set({
+			markets: [],
+			portfolio: portfolioWith([{ ...supplyReserve, suppliedUsd: 100 }]),
+			assetPrices: {}
+		});
+
+		const { container } = render(EarningsList);
+		const text = container.textContent ?? '';
+
+		expect(text.indexOf('Autopilot Vault')).toBeLessThan(text.indexOf(providerName));
 	});
 
 	it('should show skeletons when custom tokens are not initialized', () => {
