@@ -3,9 +3,9 @@ use shared::types::{exchange::ExchangeRate, token_id::TokenId};
 
 use crate::{
     exchange::{
-        cached_rates_snapshot, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
-        note_rate_request, priceable_tokens_for_caller, release_refresh_lock,
-        stale_or_missing_tokens, try_acquire_refresh_lock,
+        custom_tokens_to_mark, fetch_and_update_prices, is_exchange_rate_refresh_enabled,
+        note_rate_request, priceable_tokens_for_caller, release_refresh_lock, snapshot_and_stale,
+        try_acquire_refresh_lock,
     },
     state::{mutate_api_keys, read_state},
     token,
@@ -54,10 +54,9 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         return Vec::new();
     }
 
-    let active_ids: Vec<TokenId> = tokens.iter().map(|s| s.0.clone()).collect();
-    token::mark_tokens_active(&active_ids);
+    token::mark_tokens_active(&custom_tokens_to_mark(&tokens));
 
-    let stale = stale_or_missing_tokens(&tokens);
+    let (snapshot, stale) = snapshot_and_stale(tokens);
     let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
         None
     } else {
@@ -85,7 +84,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         });
     }
 
-    cached_rates_snapshot(tokens)
+    snapshot
 }
 
 #[query(guard = "caller_is_not_anonymous")]
