@@ -189,3 +189,9 @@ export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';
 // Personal note sharing (creator side; properties never carry the note, token or key)
 export const TRACK_NOTE_SHARE_OPEN = 'note_share_open';
 export const TRACK_NOTE_SHARE_CREATED = 'note_share_created';
+
+// Personal note sharing (recipient side; anonymous, properties never carry the note, token or key)
+export const TRACK_NOTE_SHARE_RECIPIENT_VIEW = 'note_share_recipient_view';
+export const TRACK_NOTE_SHARE_RECIPIENT_REVEALED = 'note_share_recipient_revealed';
+export const TRACK_NOTE_SHARE_RECIPIENT_UNAVAILABLE = 'note_share_recipient_unavailable';
+export const TRACK_NOTE_SHARE_RECIPIENT_DISCOVER = 'note_share_recipient_discover';

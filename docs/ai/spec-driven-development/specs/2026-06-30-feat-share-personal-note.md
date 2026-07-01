@@ -303,7 +303,10 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
      pattern (green shield, bold lead) on the blue background, body **"This note was
      decrypted right here in your browser — OISY only ever stored an encrypted
      copy,"** plus a **Learn more** link. This leads with the positive security
-     story rather than only the negative "can't reopen" caveat.
+     story rather than only the negative "can't reopen" caveat. The **Learn more**
+     link — and any URL linkified inside the note — opens in a **new tab**, so the
+     recipient never navigates away from a note that may be single-use and
+     uncopied. (Only the terminal **Discover OISY** CTA navigates in the same tab.)
    - **Copy note** — copies the full plaintext to the clipboard (reuse OISY's
      existing copy-to-clipboard control). Convenience, not a security change (the
      recipient already holds the plaintext on screen), but it matters most for
@@ -321,8 +324,10 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    safe."** Below: a one-line multi-chain pitch (Bitcoin, Ethereum, Solana, ICP and
    more; 100% onchain), a few feature points, and a **single** primary
    call-to-action. The CTA is an **invitation, not a command** — labelled **"Discover
-   OISY"** (it links out to oisy.com to browse; deliberately not "Get started" /
+   OISY"** (it navigates to oisy.com to browse; deliberately not "Get started" /
    "Open OISY", which would imply a sign-up flow begins on click, and it does not).
+   It opens **in the same tab** — the outro is the end of the flow with nothing to
+   return to, so a new tab would only litter.
    There is no separate "Learn more" link, since it would point to the same
    destination as the button. Because the page renders the real OISY header (which
    already carries the logo top-left), the outro **does not repeat a large hero
@@ -336,8 +341,8 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    token / missing-or-bad fragment key — **"This link has expired or already been
    used."** The canister returns the same not-found for all of these, so the page
    does not distinguish them (avoids leaking whether a token ever existed). Offers a
-   single **"Discover OISY"** button to oisy.com (same destination as the outro
-   CTA). It is styled **primary**, not ghost — since it's the only action on the
+   single **"Discover OISY"** button to oisy.com, **in the same tab** (same
+   destination and behaviour as the outro CTA). It is styled **primary**, not ghost — since it's the only action on the
    page, a greyed-out secondary button reads as disabled. (Replaces an earlier
    ambiguous "What is OISY?" label that read like it opened docs.)
 

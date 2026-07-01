@@ -1,0 +1,99 @@
+<script lang="ts">
+	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import {
+		NOTES_SHARE_RECIPIENT_COPY,
+		NOTES_SHARE_RECIPIENT_DONE_BUTTON,
+		NOTES_SHARE_RECIPIENT_NOTE,
+		NOTES_SHARE_RECIPIENT_REVEALED,
+		NOTES_SHARE_RECIPIENT_SINGLE_USE_CAVEAT
+	} from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { copyToClipboard } from '$lib/utils/clipboard.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { linkifyPersonalNote } from '$lib/utils/personal-note.utils';
+
+	interface Props {
+		note: string;
+		singleUse: boolean;
+		onDone: () => void;
+	}
+
+	let { note, singleUse, onDone }: Props = $props();
+
+	// Same safe rendering as NoteView: bidi-neutralized, only http(s) URLs become
+	// links (auto-escaped text, never {@html}), line breaks preserved on display.
+	const segments = $derived(linkifyPersonalNote(note));
+
+	const onCopy = async () => {
+		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
+	};
+</script>
+
+<div class="flex min-h-0 flex-1 flex-col gap-4" data-tid={NOTES_SHARE_RECIPIENT_REVEALED}>
+	<div class="flex flex-col gap-2">
+		<h1 class="text-xl font-bold text-primary">{$i18n.notes.share.recipient.revealed_title}</h1>
+		{#if singleUse}
+			<p class="text-sm text-tertiary" data-tid={NOTES_SHARE_RECIPIENT_SINGLE_USE_CAVEAT}>
+				{$i18n.notes.share.recipient.single_use_caveat}
+			</p>
+		{/if}
+	</div>
+
+	<div
+		class="min-h-32 flex-1 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
+		data-tid={NOTES_SHARE_RECIPIENT_NOTE}
+	>
+		<p style="overflow-wrap: anywhere;" class="whitespace-pre-wrap text-primary"
+			>{#each segments as segment, index (index)}{#if segment.href}<a
+						class="text-brand-primary underline"
+						href={segment.href}
+						rel="noopener noreferrer"
+						target="_blank">{segment.text}</a
+					>{:else}{segment.text}{/if}{/each}</p
+		>
+	</div>
+
+	<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
+		<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong>
+		{replaceOisyPlaceholders($i18n.notes.share.recipient.protects_body)}
+		<ExternalLink
+			ariaLabel={$i18n.core.text.learn_more}
+			color="blue"
+			href={OISY_DOCS_URL}
+			iconVisible={false}
+			styleClass="ml-[1.25em]"
+		>
+			{$i18n.core.text.learn_more}
+		</ExternalLink>
+	</MessageBox>
+
+	<ButtonGroup>
+		<Button
+			colorStyle="secondary-light"
+			onclick={onCopy}
+			testId={NOTES_SHARE_RECIPIENT_COPY}
+			type="button"
+		>
+			{$i18n.notes.share.recipient.copy_note}
+		</Button>
+		<Button
+			colorStyle="primary"
+			onclick={onDone}
+			testId={NOTES_SHARE_RECIPIENT_DONE_BUTTON}
+			type="button"
+		>
+			{$i18n.notes.share.text.done}
+		</Button>
+	</ButtonGroup>
+</div>
+
+{#snippet shieldIcon()}
+	<div class="min-w-5 py-0 text-success-primary sm:py-0.5">
+		<IconShieldCheck size="20" />
+	</div>
+{/snippet}
