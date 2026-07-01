@@ -1,8 +1,10 @@
+import * as lendBorrowEnv from '$env/lend-borrow';
 import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
+import * as liquidiumDerived from '$lib/derived/liquidium.derived';
 import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
@@ -381,6 +383,39 @@ describe('ExchangeBalance', () => {
 			const { getByText } = renderComponent();
 
 			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+	});
+
+	describe('Liquidium net value', () => {
+		beforeEach(() => {
+			mockHeroContext.loading.set(false);
+		});
+
+		it('should add supplied-minus-borrowed net value to the total when enabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should deduct a negative net value (net debt) from the total when enabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(-100));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$235.00')).toBeInTheDocument();
+		});
+
+		it('should ignore Liquidium net value when the feature is disabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(false);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$335.00')).toBeInTheDocument();
 		});
 	});
 });
