@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
-	import LimitOrderValueDifference from '$lib/components/trading/limit-order/LimitOrderValueDifference.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -90,16 +93,15 @@
 				? $i18n.trading.limit_order.no_fee
 				: replacePlaceholders($i18n.trading.limit_order.fee_percent, { $value: value.toString() });
 
-	// Queue position only for a resting order (a crossing order fills now) with a
-	// known pair — without one the tick size (and thus the position) is unknown.
+	// Queue position only for a resting order (a crossing order fills now).
 	const queueText = $derived.by((): string | undefined => {
-		if (crossing || !nonNullish(pairView)) {
+		if (crossing) {
 			return undefined;
 		}
 		const fraction = queuePositionFraction({
 			side,
 			price,
-			tickSize: pairView.tickSize,
+			tickSize: pairView?.tickSize ?? 0,
 			asks: depthLevels.asks,
 			bids: depthLevels.bids
 		});
@@ -175,7 +177,14 @@
 			</div>
 			<div class="flex items-center justify-between text-xs">
 				<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
-				<LimitOrderValueDifference crossing={crossing || fillOrKill} value={valueDiff} />
+				<ValueDifference
+					errorLevel={-5}
+					iconPosition="left"
+					muted={!(crossing || fillOrKill)}
+					successNeutral
+					value={valueDiff}
+					warningLevel={0}
+				/>
 			</div>
 			{#if nonNullish(queueText)}
 				<div class="flex items-center justify-between text-xs">
@@ -211,15 +220,20 @@
 	</ModalValue>
 
 	{#if severe}
-		<div class="bg-error-subtle mt-3 rounded-lg px-3 py-2.5 text-xs text-error-primary">
-			<Checkbox
-				checked={giveUpConfirmed}
-				inputId="limit-order-giveup"
-				onChange={() => (giveUpConfirmed = !giveUpConfirmed)}
-				text="inline"
-			>
-				<span class="text-xs">{$i18n.trading.limit_order.give_up_confirm}</span>
-			</Checkbox>
+		<div class="mt-4" transition:slide>
+			<MessageBox level="error" styleClass="!mb-0">
+				{#snippet icon()}
+					<Checkbox
+						checked={giveUpConfirmed}
+						inputId="limit-order-giveup"
+						onChange={() => (giveUpConfirmed = !giveUpConfirmed)}
+					/>
+				{/snippet}
+
+				<label class="block text-sm leading-snug" for="limit-order-giveup">
+					<Html text={$i18n.trading.limit_order.give_up_confirm} />
+				</label>
+			</MessageBox>
 		</div>
 	{/if}
 

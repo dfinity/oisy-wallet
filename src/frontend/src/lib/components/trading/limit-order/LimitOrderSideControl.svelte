@@ -13,7 +13,7 @@
 <div class="flex gap-1 rounded-lg border border-disabled bg-secondary p-1">
 	<button
 		class="flex flex-1 items-center justify-center gap-1.5 rounded-md py-2 text-sm font-semibold transition-colors"
-		class:bg-error-subtle={side === 'sell'}
+		class:bg-error-subtle-20={side === 'sell'}
 		class:text-error-primary={side === 'sell'}
 		class:text-tertiary={side !== 'sell'}
 		aria-pressed={side === 'sell'}
@@ -25,7 +25,7 @@
 	</button>
 	<button
 		class="flex flex-1 items-center justify-center gap-1.5 rounded-md py-2 text-sm font-semibold transition-colors"
-		class:bg-success-subtle={side === 'buy'}
+		class:bg-success-subtle-20={side === 'buy'}
 		class:text-success-primary={side === 'buy'}
 		class:text-tertiary={side !== 'buy'}
 		aria-pressed={side === 'buy'}
