@@ -1,0 +1,221 @@
+<script lang="ts">
+	import type { Identity } from '@icp-sdk/core/agent';
+	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import InputText from '$lib/components/ui/InputText.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import PillButton from '$lib/components/ui/PillButton.svelte';
+	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import {
+		NOTES_SHARE_CREATE_BUTTON,
+		NOTES_SHARE_DONE_BUTTON,
+		NOTES_SHARE_LINK_COPY,
+		NOTES_SHARE_NAME_INPUT,
+		NOTES_SHARE_SINGLE_USE_CHECKBOX
+	} from '$lib/constants/test-ids.constants';
+	import { createNoteShare } from '$lib/services/personal-note-share.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { PersonalNoteUi } from '$lib/types/personal-note';
+	import { MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH } from '$lib/types/personal-note-share';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { personalNotePreviewParts } from '$lib/utils/personal-note.utils';
+
+	interface Props {
+		note: PersonalNoteUi;
+		identity: Identity;
+		onClose: () => void;
+	}
+
+	let { note, identity, onClose }: Props = $props();
+
+	const HOUR_MS = 60 * 60 * 1000;
+	const EXPIRY_OPTIONS = [
+		{ labelKey: 'expiry_1h', ms: HOUR_MS },
+		{ labelKey: 'expiry_24h', ms: 24 * HOUR_MS },
+		{ labelKey: 'expiry_7d', ms: 7 * 24 * HOUR_MS },
+		{ labelKey: 'expiry_30d', ms: 30 * 24 * HOUR_MS }
+	] as const;
+
+	const preview = $derived(personalNotePreviewParts(note.note));
+
+	let senderName = $state('');
+	// Client-side cap by code points (mirrors the backend ct_meta bound). Emoji /
+	// CJK count as one, matching how the user sees the length.
+	$effect(() => {
+		const codePoints = [...senderName];
+		if (codePoints.length > MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH) {
+			senderName = codePoints.slice(0, MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH).join('');
+		}
+	});
+
+	let durationMs = $state(24 * HOUR_MS);
+	let singleUse = $state(false);
+	let busy = $state(false);
+	let createdLink = $state<string | undefined>();
+
+	const selectedExpiryLabel = $derived(
+		$i18n.notes.share.text[
+			(EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]).labelKey
+		]
+	);
+
+	const recap = $derived(
+		`${replacePlaceholders($i18n.notes.share.text.recap_expires_in, { $duration: selectedExpiryLabel })}${
+			singleUse ? ` · ${$i18n.notes.share.text.recap_single_use}` : ''
+		}`
+	);
+
+	const onCreate = async () => {
+		busy = true;
+		try {
+			const trimmedName = senderName.trim();
+			const { link } = await createNoteShare({
+				identity,
+				note: note.note,
+				senderName: trimmedName === '' ? undefined : trimmedName,
+				durationMs,
+				singleUse
+			});
+			createdLink = link;
+		} catch (err: unknown) {
+			toastsError({ msg: { text: $i18n.notes.share.error.create }, err });
+		} finally {
+			busy = false;
+		}
+	};
+</script>
+
+<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto">
+	{#if createdLink === undefined}
+		<!-- State A — configure -->
+		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-3">
+			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+				{preview.title}
+			</span>
+			{#if preview.body !== ''}
+				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
+					{preview.body}
+				</span>
+			{/if}
+		</div>
+		<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
+
+		<div class="flex flex-col gap-1">
+			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.your_name}</span>
+			<InputText
+				name="share-sender-name"
+				placeholder=""
+				required={false}
+				testId={NOTES_SHARE_NAME_INPUT}
+				bind:value={senderName}
+			/>
+			<span class="text-xs text-tertiary">
+				{replacePlaceholders($i18n.notes.share.text.your_name_hint, {
+					$max: `${MAX_PERSONAL_NOTE_SHARE_SENDER_NAME_LENGTH}`
+				})}
+			</span>
+		</div>
+
+		<div class="flex flex-col gap-2">
+			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
+			<div class="flex flex-wrap gap-2">
+				{#each EXPIRY_OPTIONS as option (option.ms)}
+					<PillButton onClick={() => (durationMs = option.ms)} selected={durationMs === option.ms}>
+						{$i18n.notes.share.text[option.labelKey]}
+					</PillButton>
+				{/each}
+			</div>
+		</div>
+
+		<Checkbox
+			checked={singleUse}
+			inputId="share-single-use"
+			onChange={() => (singleUse = !singleUse)}
+			testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
+			text="block"
+		>
+			<div class="flex flex-col">
+				<span class="text-sm text-primary">{$i18n.notes.share.text.destroy_after_viewing}</span>
+				<span class="text-xs text-tertiary"
+					>{$i18n.notes.share.text.destroy_after_viewing_hint}</span
+				>
+			</div>
+		</Checkbox>
+
+		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
+			<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong>
+			{replaceOisyPlaceholders($i18n.notes.share.text.protects_body)}
+			<ExternalLink
+				ariaLabel={$i18n.core.text.learn_more}
+				color="blue"
+				href={OISY_DOCS_URL}
+				iconVisible={false}
+				styleClass="ml-[1.25em]"
+			>
+				{$i18n.core.text.learn_more}
+			</ExternalLink>
+		</MessageBox>
+	{:else}
+		<!-- State B — link ready -->
+		<div class="flex flex-col gap-1">
+			<span class="font-bold text-primary">{$i18n.notes.share.text.link_ready_title}</span>
+			<span class="text-sm text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+		</div>
+
+		<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-1 pr-1 pl-3">
+			<span class="min-w-0 flex-1 truncate font-mono text-xs text-secondary">{createdLink}</span>
+			<Copy
+				testId={NOTES_SHARE_LINK_COPY}
+				text={$i18n.notes.share.text.link_copied}
+				value={createdLink}
+			/>
+		</div>
+
+		<span class="text-sm text-primary">{recap}</span>
+		<span class="text-xs text-tertiary"
+			>{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span
+		>
+	{/if}
+
+	{#snippet toolbar()}
+		{#if createdLink === undefined}
+			<ButtonGroup>
+				<ButtonCancel disabled={busy} onclick={onClose} />
+				<Button
+					colorStyle="primary"
+					loading={busy}
+					onclick={onCreate}
+					testId={NOTES_SHARE_CREATE_BUTTON}
+					type="button"
+				>
+					{$i18n.notes.share.text.create_link}
+				</Button>
+			</ButtonGroup>
+		{:else}
+			<ButtonGroup>
+				<Button
+					colorStyle="primary"
+					fullWidth
+					onclick={onClose}
+					testId={NOTES_SHARE_DONE_BUTTON}
+					type="button"
+				>
+					{$i18n.notes.share.text.done}
+				</Button>
+			</ButtonGroup>
+		{/if}
+	{/snippet}
+</ContentWithToolbar>
+
+{#snippet shieldIcon()}
+	<div class="min-w-5 py-0 text-success-primary sm:py-0.5">
+		<IconShieldCheck size="20" />
+	</div>
+{/snippet}

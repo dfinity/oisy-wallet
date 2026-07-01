@@ -2520,7 +2520,29 @@
 		},
 		"share": {
 			"text": {
-				"share_note": ""
+				"share_note": "",
+				"snapshot_caption": "",
+				"your_name": "",
+				"your_name_hint": "",
+				"expires_after": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"destroy_after_viewing": "",
+				"destroy_after_viewing_hint": "",
+				"protects_body": "",
+				"create_link": "",
+				"link_ready_title": "",
+				"link_ready_subtitle": "",
+				"link_copied": "",
+				"recap_expires_in": "",
+				"recap_single_use": "",
+				"reminder": "",
+				"done": ""
+			},
+			"error": {
+				"create": ""
 			}
 		}
 	}

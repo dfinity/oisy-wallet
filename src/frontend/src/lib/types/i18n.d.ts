@@ -2039,7 +2039,31 @@ interface I18nNotes {
 	};
 	alt: { edit: string; delete: string };
 	error: { load: string; save: string; delete: string };
-	share: { text: { share_note: string } };
+	share: {
+		text: {
+			share_note: string;
+			snapshot_caption: string;
+			your_name: string;
+			your_name_hint: string;
+			expires_after: string;
+			expiry_1h: string;
+			expiry_24h: string;
+			expiry_7d: string;
+			expiry_30d: string;
+			destroy_after_viewing: string;
+			destroy_after_viewing_hint: string;
+			protects_body: string;
+			create_link: string;
+			link_ready_title: string;
+			link_ready_subtitle: string;
+			link_copied: string;
+			recap_expires_in: string;
+			recap_single_use: string;
+			reminder: string;
+			done: string;
+		};
+		error: { create: string };
+	};
 }
 
 interface I18n {
