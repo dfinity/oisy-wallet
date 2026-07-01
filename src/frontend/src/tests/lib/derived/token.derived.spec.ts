@@ -17,6 +17,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { DEFAULT_ARBITRUM_TOKEN } from '$lib/constants/tokens.constants';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -130,7 +131,10 @@ describe('token.derived', () => {
 				(networkId) => {
 					mockPage.mockNetwork(networkId.description);
 
-					expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+					// ICP (incl. its testnet pseudo-network) is always available, so it keeps resolving to the ICP token.
+					expect(get(defaultFallbackToken)).toEqual(
+						isNetworkIdICP(networkId) ? ICP_TOKEN : ETHEREUM_TOKEN
+					);
 				}
 			);
 		});
@@ -144,7 +148,10 @@ describe('token.derived', () => {
 			it.each(SUPPORTED_NETWORK_IDS)(`should return default token for network %s`, (networkId) => {
 				mockPage.mockNetwork(networkId.description);
 
-				expect(get(defaultFallbackToken)).toEqual(ETHEREUM_TOKEN);
+				// ICP (incl. its testnet pseudo-network) is always available, so it keeps resolving to the ICP token.
+				expect(get(defaultFallbackToken)).toEqual(
+					isNetworkIdICP(networkId) ? ICP_TOKEN : ETHEREUM_TOKEN
+				);
 			});
 		});
 	});
