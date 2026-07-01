@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -42,9 +43,9 @@
 	>
 		<span class="bg-success-subtle h-4 w-4 flex-shrink-0 rounded"></span>
 		<span class="flex-1 text-xs text-secondary">
-			{replacePlaceholders($i18n.trading.limit_order.routing_name, {
-				$provider: OISY_TRADE_PROVIDER_NAME
-			})}
+			{replacePlaceholders($i18n.trading.limit_order.routing_name, { $provider: '' })}<strong
+				class="font-semibold text-primary">{OISY_TRADE_PROVIDER_NAME}</strong
+			>
 		</span>
 		<span class="rounded-full border border-disabled bg-primary px-2 py-0.5 text-xs text-tertiary">
 			{$i18n.trading.limit_order.routing_tag}
@@ -55,7 +56,7 @@
 	</button>
 
 	{#if expanded}
-		<div class="border-t border-disabled">
+		<div class="border-t border-disabled" transition:slide>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-error-primary"
 			>

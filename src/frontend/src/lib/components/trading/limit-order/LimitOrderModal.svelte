@@ -48,7 +48,9 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === WizardStepsLimitOrder.PLACING}
+	disablePointerEvents={currentStep?.name === WizardStepsLimitOrder.PLACING ||
+		currentStep?.name === WizardStepsLimitOrder.BASE_TOKEN ||
+		currentStep?.name === WizardStepsLimitOrder.QUOTE_TOKEN}
 	onClose={close}
 	{steps}
 	bind:currentStep
