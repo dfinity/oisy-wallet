@@ -11,6 +11,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		deriveQuoteAmount,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		validateAmount
@@ -64,6 +65,14 @@
 	const freeSpend = $derived(side === 'sell' ? freeBase : freeQuote);
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
+
+	// Format through the shared token formatter (rounds to the quote decimals,
+	// no raw float artifacts).
+	const quoteAmountDisplay = $derived(
+		quoteAmount > 0
+			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
+			: '-'
+	);
 
 	const baseLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.you_sell : $i18n.trading.limit_order.you_buy
@@ -210,7 +219,7 @@
 		</div>
 		<div class="mt-1.5 flex items-center gap-2">
 			<span class="w-full text-xl text-secondary">
-				{quoteAmount > 0 ? quoteAmount : '-'}
+				{quoteAmountDisplay}
 			</span>
 			<LimitOrderTokenPill
 				disabled={!nonNullish(baseSymbol)}

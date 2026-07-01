@@ -253,6 +253,7 @@
 				errorLevel={-5}
 				iconPosition="left"
 				muted={!(crossing || fillOrKill)}
+				successNeutral
 				value={valueDiff}
 				warningLevel={0}
 			/>

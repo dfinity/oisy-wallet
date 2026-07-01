@@ -11,6 +11,10 @@
 		// When true the figure is rendered as neutral/informational regardless of
 		// the thresholds — e.g. a resting limit order that hasn't realized any loss.
 		muted?: boolean;
+		// When true, values above the warning threshold stay neutral instead of
+		// turning green. The limit-order crossing-gate is neutral/amber/red only
+		// (no "success" green); swap keeps its green by leaving this false.
+		successNeutral?: boolean;
 		iconPosition?: 'right' | 'left';
 	}
 
@@ -20,6 +24,7 @@
 		warningLevel = -1,
 		errorLevel = -5,
 		muted = false,
+		successNeutral = false,
 		iconPosition = 'right'
 	}: Props = $props();
 
@@ -44,8 +49,8 @@
 		class:font-bold={isWarning || isError}
 		class:gap-2={iconPosition === 'left'}
 		class:text-error-primary={isError}
-		class:text-primary={muted}
-		class:text-success-primary={isSuccess}
+		class:text-primary={muted || (isSuccess && successNeutral)}
+		class:text-success-primary={isSuccess && !successNeutral}
 		class:text-warning-primary={isWarning}
 	>
 		{#if showWarningIcon && iconPosition === 'left'}

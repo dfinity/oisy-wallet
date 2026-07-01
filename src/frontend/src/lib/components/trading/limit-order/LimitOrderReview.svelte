@@ -18,6 +18,7 @@
 		crossesBook,
 		deriveQuoteAmount,
 		feeBpsToPercent,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		queuePositionDisplay,
@@ -59,6 +60,11 @@
 	}: Props = $props();
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount, price }));
+	const quoteAmountDisplay = $derived(
+		quoteAmount > 0
+			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
+			: '-'
+	);
 	const base = $derived(pairView?.baseSymbol ?? '');
 	const quote = $derived(pairView?.quoteSymbol ?? '');
 
@@ -125,7 +131,7 @@
 		<div class="border-t border-disabled px-3.5 py-3">
 			<div class="mb-1 text-xs text-secondary">{quoteLabel}</div>
 			<div class="text-xl font-medium text-primary">
-				{quoteAmount > 0 ? quoteAmount : '-'}
+				{quoteAmountDisplay}
 				{quote}
 			</div>
 		</div>
@@ -171,6 +177,7 @@
 					errorLevel={-5}
 					iconPosition="left"
 					muted={!(crossing || fillOrKill)}
+					successNeutral
 					value={valueDiff}
 					warningLevel={0}
 				/>
