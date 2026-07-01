@@ -2,6 +2,10 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrowings {
+	text: { tab_title: string; no_borrowings: string };
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -2043,6 +2047,7 @@ interface I18nNotes {
 
 interface I18n {
 	lang: Languages;
+	borrowings: I18nBorrowings;
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;

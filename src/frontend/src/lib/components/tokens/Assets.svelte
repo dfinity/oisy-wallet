@@ -3,7 +3,9 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { TRADING_ENABLED } from '$env/trading';
+	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -86,6 +88,15 @@
 													}
 												]
 											: []),
+										...(anyLendBorrowProviderEnabled
+											? [
+													{
+														label: $i18n.borrowings.text.tab_title,
+														id: TokenTypes.BORROWINGS,
+														path: `${AppPath.Borrowings}${page.url.search}`
+													}
+												]
+											: []),
 										...(TRADING_ENABLED
 											? [
 													{
@@ -131,6 +142,8 @@
 				<EarningsList />
 			{:else if activeTab === TokenTypes.TRADING}
 				<TradingList />
+			{:else if activeTab === TokenTypes.BORROWINGS}
+				<BorrowingsList />
 			{/if}
 		</StickyHeader>
 
