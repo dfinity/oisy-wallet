@@ -32,6 +32,7 @@ import {
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
+	isRouteTrading,
 	isRouteTransactions,
 	isSettingsPath,
 	isTokensPath,
@@ -487,6 +488,25 @@ describe('nav.utils', () => {
 				expect(isRouteTransactions(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
 
 				expect(isRouteTransactions(mockPage(`/anotherGroup/${AppPath.Transactions}`))).toBeFalsy();
+			});
+		});
+
+		describe('isRouteTrading', () => {
+			it('should return true when route id matches Trading path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Trading}`;
+
+				expect(isRouteTrading(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteTrading(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Trading path', () => {
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`/anotherGroup/${AppPath.Trading}`))).toBeFalsy();
 			});
 		});
 
