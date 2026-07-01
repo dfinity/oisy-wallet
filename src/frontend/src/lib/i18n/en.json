@@ -2586,6 +2586,23 @@
 			},
 			"error": {
 				"create": "Couldn't create the share link. Please try again."
+			},
+			"recipient": {
+				"locked_title": "A note was shared with you",
+				"reveal": "Reveal note",
+				"revealed_title": "Shared note",
+				"single_use_caveat": "Single-use link — once you close or reload this page, the note is gone for good. Copy it now if you need it.",
+				"protects_body": "This note was decrypted right here in your browser — $oisy_short only ever stored an encrypted copy.",
+				"copy_note": "Copy note",
+				"note_copied": "Note copied!",
+				"outro_eyebrow": "You just opened a note kept private by $oisy_short",
+				"outro_title": "It keeps your assets just as safe",
+				"outro_subtitle": "$oisy_short is a fully onchain, self-custody wallet for Bitcoin, Ethereum, Solana, ICP and more.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana & ICP in one place",
+				"outro_feature_onchain": "100% onchain — no extension, no seed phrase",
+				"outro_feature_encrypted": "Your keys and your data, encrypted end-to-end",
+				"discover": "Discover OISY",
+				"unavailable_title": "This link has expired or already been used"
 			}
 		}
 	}
