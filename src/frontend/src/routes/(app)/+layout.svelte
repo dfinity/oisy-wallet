@@ -27,6 +27,7 @@
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import {
+		isRouteBorrowings,
 		isRouteEarning,
 		isRouteNfts,
 		isRouteTokens,
@@ -46,7 +47,9 @@
 
 	let earningRoute = $derived(isRouteEarning(page));
 
-	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute);
+	let borrowingsRoute = $derived(isRouteBorrowings(page));
+
+	let assetsRoute = $derived(tokensRoute || nftsRoute || earningRoute || borrowingsRoute);
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
