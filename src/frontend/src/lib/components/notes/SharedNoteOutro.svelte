@@ -1,12 +1,12 @@
 <script lang="ts">
 	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { TRACK_NOTE_SHARE_RECIPIENT_DISCOVER } from '$lib/constants/analytics.constants';
 	import { OISY_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON,
 		NOTES_SHARE_RECIPIENT_OUTRO
 	} from '$lib/constants/test-ids.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -33,16 +33,15 @@
 		{/each}
 	</ul>
 
-	<ExternalLink
-		ariaLabel={$i18n.notes.share.recipient.discover}
-		asButton
-		fullWidth
+	<!-- Same-tab navigation: the outro is the end of the flow with no other action,
+	     so there is nothing to return to — opening a new tab would only litter. -->
+	<a
+		class="as-button primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 no-underline"
+		data-tid={NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON}
 		href={OISY_URL}
-		iconVisible={false}
-		styleClass="primary justify-center rounded-xl px-3 py-2"
-		testId={NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON}
-		trackEvent={{ name: TRACK_NOTE_SHARE_RECIPIENT_DISCOVER, metadata: { source: 'outro' } }}
+		onclick={() =>
+			trackEvent({ name: TRACK_NOTE_SHARE_RECIPIENT_DISCOVER, metadata: { source: 'outro' } })}
 	>
 		{$i18n.notes.share.recipient.discover}
-	</ExternalLink>
+	</a>
 </div>
