@@ -5,6 +5,7 @@
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -58,6 +59,9 @@
 
 		<div
 			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)]"
+			aria-modal="true"
+			data-tid={CONFIRMATION_POPUP_MODAL}
+			role="dialog"
 		>
 			{@render body()}
 		</div>
