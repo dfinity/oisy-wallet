@@ -86,7 +86,11 @@
 	);
 </script>
 
-<button class="flex w-full items-center gap-3 py-2.5 text-left" onclick={openDetail} type="button">
+<button
+	class="-mx-2 flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-brand-subtle-10"
+	onclick={openDetail}
+	type="button"
+>
 	<span class="flex shrink-0">
 		<TokenLogo badge={{ type: 'network' }} color="white" data={baseData} logoSize="xs" />
 	</span>
