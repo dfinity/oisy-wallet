@@ -24,9 +24,7 @@ use crate::types::{
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
     personal_note::{PersonalNoteEntry, PersonalNoteError},
-    personal_note_share::{
-        PersonalNoteShareContent, PersonalNoteShareError, PersonalNoteSharePeek,
-    },
+    personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -563,20 +561,6 @@ impl From<Result<(), PersonalNoteShareError>> for CreatePersonalNoteShareResult 
         match result {
             Ok(()) => CreatePersonalNoteShareResult::Ok(()),
             Err(err) => CreatePersonalNoteShareResult::Err(err),
-        }
-    }
-}
-
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum PeekPersonalNoteShareResult {
-    Ok(PersonalNoteSharePeek),
-    Err(PersonalNoteShareError),
-}
-impl From<Result<PersonalNoteSharePeek, PersonalNoteShareError>> for PeekPersonalNoteShareResult {
-    fn from(result: Result<PersonalNoteSharePeek, PersonalNoteShareError>) -> Self {
-        match result {
-            Ok(peek) => PeekPersonalNoteShareResult::Ok(peek),
-            Err(err) => PeekPersonalNoteShareResult::Err(err),
         }
     }
 }

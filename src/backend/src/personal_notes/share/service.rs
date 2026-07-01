@@ -6,11 +6,10 @@ use candid::Principal;
 use ic_cdk::api::{msg_caller, time};
 use shared::types::personal_note_share::{
     CreatePersonalNoteShareRequest, PersonalNoteShareContent, PersonalNoteShareError,
-    PersonalNoteSharePeek,
 };
 
 use super::model::{
-    new_share_exceeds_cap, validate_ciphertext_sizes, validate_expiry, validate_token,
+    new_share_exceeds_cap, validate_content_size, validate_expiry, validate_token,
     PersonalNoteShareRecord,
 };
 use crate::{
@@ -59,7 +58,7 @@ pub fn create_personal_note_share(
     request: CreatePersonalNoteShareRequest,
 ) -> Result<(), PersonalNoteShareError> {
     validate_token(&request.token)?;
-    validate_ciphertext_sizes(&request.ct_meta, &request.ct_content)?;
+    validate_content_size(&request.ct_content)?;
     let now = time();
     validate_expiry(request.expires_at_ns, now)?;
 
@@ -80,7 +79,6 @@ pub fn create_personal_note_share(
 
         let record = PersonalNoteShareRecord {
             creator,
-            ct_meta: request.ct_meta,
             ct_content: request.ct_content,
             expires_at_ns: request.expires_at_ns,
             single_use: request.single_use,
@@ -91,28 +89,6 @@ pub fn create_personal_note_share(
             request.expires_at_ns,
         );
         Ok(())
-    })
-}
-
-/// Non-destructive: returns the share's metadata (never `ct_content`) for an
-/// unexpired token, regardless of the single-use flag.
-pub fn peek_personal_note_share(
-    token: String,
-) -> Result<PersonalNoteSharePeek, PersonalNoteShareError> {
-    validate_token(&token)?;
-    let now = time();
-    let key = PersonalNoteShareToken(token);
-    read_state(|s| {
-        let Candid(record) = s
-            .personal_note_shares
-            .get(&key)
-            .filter(|Candid(record)| !record.is_expired(now))
-            .ok_or(PersonalNoteShareError::NotFound)?;
-        Ok(PersonalNoteSharePeek {
-            ct_meta: record.ct_meta,
-            expires_at_ns: record.expires_at_ns,
-            single_use: record.single_use,
-        })
     })
 }
 

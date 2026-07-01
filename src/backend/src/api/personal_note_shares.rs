@@ -3,7 +3,7 @@ use shared::types::{
     personal_note_share::{CreatePersonalNoteShareRequest, PersonalNoteShareError},
     result_types::{
         ConsumePersonalNoteShareResult, CreatePersonalNoteShareResult, GetPersonalNoteShareResult,
-        GetPersonalNoteSharesCountResult, PeekPersonalNoteShareResult,
+        GetPersonalNoteSharesCountResult,
     },
 };
 
@@ -18,9 +18,9 @@ use crate::{
     },
 };
 
-/// Creates a share for one of the caller's notes. The note text, the sender
-/// name, and the share key never reach the canister — only opaque
-/// ciphertext, the expiry, and the single-use flag.
+/// Creates a share for one of the caller's notes. The note text and the share
+/// key never reach the canister — only opaque ciphertext, the expiry, and the
+/// single-use flag.
 ///
 /// # Errors
 /// Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
@@ -38,24 +38,12 @@ pub fn create_personal_note_share(
     service::create_personal_note_share(request).into()
 }
 
-/// Non-destructive: returns a share's encrypted metadata (never the note
-/// content) for an unexpired token, without consuming a single-use share.
-/// Callable anonymously — a deliberate, narrowly-scoped exception to notes
-/// endpoints normally requiring an authenticated caller, since the recipient
-/// of a share link has no OISY identity.
-///
-/// # Errors
-/// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for an
-/// expired or unknown token).
-#[query]
-#[must_use]
-pub fn peek_personal_note_share(token: String) -> PeekPersonalNoteShareResult {
-    service::peek_personal_note_share(token).into()
-}
-
 /// Returns the note ciphertext for a **reusable** (non-single-use), unexpired
 /// share. A single-use share's content is only ever returned by
-/// `consume_personal_note_share`. Callable anonymously.
+/// `consume_personal_note_share`. Callable anonymously — a deliberate,
+/// narrowly-scoped exception to notes endpoints normally requiring an
+/// authenticated caller, since the recipient of a share link has no OISY
+/// identity.
 ///
 /// # Errors
 /// Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
