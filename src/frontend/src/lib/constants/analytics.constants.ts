@@ -81,22 +81,6 @@ export const TRACK_COUNT_LIQUIDIUM_SUBMITTED = 'liquidium_submitted';
 export const TRACK_COUNT_LIQUIDIUM_SUCCESS = 'liquidium_success';
 export const TRACK_COUNT_LIQUIDIUM_ERROR = 'liquidium_error';
 
-// OISY TRADE — non-sensitive metadata only (pair symbols, side, order type,
-// provider, token symbol, and an error string on failures). Mirrors the swap
-// submitted/success/error lifecycle across the trading flows.
-export const TRACK_COUNT_LIMIT_ORDER_SUBMITTED = 'limit_order_submitted';
-export const TRACK_COUNT_LIMIT_ORDER_SUCCESS = 'limit_order_success';
-export const TRACK_COUNT_LIMIT_ORDER_ERROR = 'limit_order_error';
-export const TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED = 'limit_order_cancel_submitted';
-export const TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS = 'limit_order_cancel_success';
-export const TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR = 'limit_order_cancel_error';
-export const TRACK_COUNT_TRADING_DEPOSIT_SUBMITTED = 'trading_deposit_submitted';
-export const TRACK_COUNT_TRADING_DEPOSIT_SUCCESS = 'trading_deposit_success';
-export const TRACK_COUNT_TRADING_DEPOSIT_ERROR = 'trading_deposit_error';
-export const TRACK_COUNT_TRADING_WITHDRAW_SUBMITTED = 'trading_withdraw_submitted';
-export const TRACK_COUNT_TRADING_WITHDRAW_SUCCESS = 'trading_withdraw_success';
-export const TRACK_COUNT_TRADING_WITHDRAW_ERROR = 'trading_withdraw_error';
-
 // Manage Tokens
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success';

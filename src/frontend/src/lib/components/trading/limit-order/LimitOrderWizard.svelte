@@ -1,24 +1,23 @@
 <script lang="ts">
 	import type { WizardModal } from '@dfinity/gix-components';
-	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import LimitOrderForm from '$lib/components/trading/limit-order/LimitOrderForm.svelte';
 	import LimitOrderProgress from '$lib/components/trading/limit-order/LimitOrderProgress.svelte';
 	import LimitOrderReview from '$lib/components/trading/limit-order/LimitOrderReview.svelte';
 	import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
-	import {
-		TRACK_COUNT_LIMIT_ORDER_ERROR,
-		TRACK_COUNT_LIMIT_ORDER_SUBMITTED,
-		TRACK_COUNT_LIMIT_ORDER_SUCCESS
-	} from '$lib/constants/analytics.constants';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
+	import { trackTrading } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -26,7 +25,6 @@
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,
-		oisyTradeTrackingMetadata,
 		priceLevelToHuman,
 		toCandidSide,
 		toPairView,
@@ -174,13 +172,17 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
-		const trackingMetadata = oisyTradeTrackingMetadata({
+		const orderFields = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
 			orderType: fillOrKill ? 'FOK' : 'GTC'
+		};
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			...orderFields
 		});
-		trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_SUBMITTED, metadata: trackingMetadata });
 
 		try {
 			await placeLimitOrder({
@@ -194,14 +196,19 @@
 				}
 			});
 
-			trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_SUCCESS, metadata: trackingMetadata });
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				...orderFields
+			});
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
-			const error = replaceIcErrorFields(err);
-			trackEvent({
-				name: TRACK_COUNT_LIMIT_ORDER_ERROR,
-				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				...orderFields,
+				error: replaceIcErrorFields(err)
 			});
 			toastsError({ msg: { text: $i18n.trading.limit_order.place_error }, err });
 			goTo(WizardStepsLimitOrder.REVIEW);

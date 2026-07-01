@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -13,11 +13,6 @@
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import {
-		TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
-		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED,
-		TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS
-	} from '$lib/constants/analytics.constants';
-	import {
 		OISY_TRADE_POLL_INTERVAL_MILLIS,
 		OISY_TRADE_PROVIDER_NAME
 	} from '$lib/constants/oisy-trade.constants';
@@ -27,12 +22,16 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
 	import {
 		cancelLimitOrder,
 		loadOisyTrade,
 		loadOrderBook
 	} from '$lib/services/oisy-trade.services';
+	import { trackTrading } from '$lib/services/trading-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -47,7 +46,6 @@
 		formatTradeAmount,
 		isOisyTradeOrderActive,
 		oisyTradeOrderDisplayStatus,
-		oisyTradeTrackingMetadata,
 		orderStatusView,
 		priceLevelToHuman,
 		queuePositionDisplay,
@@ -224,22 +222,27 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		const trackingMetadata = oisyTradeTrackingMetadata({
-			base: baseSymbol,
-			quote: quoteSymbol,
-			side
+		const orderFields = { base: baseSymbol, quote: quoteSymbol, side };
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			...orderFields
 		});
-		trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_CANCEL_SUBMITTED, metadata: trackingMetadata });
 		try {
 			await cancelLimitOrder({ identity: $authIdentity, orderId: order.id });
 			await loadOisyTrade({ identity: $authIdentity });
-			trackEvent({ name: TRACK_COUNT_LIMIT_ORDER_CANCEL_SUCCESS, metadata: trackingMetadata });
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				...orderFields
+			});
 			close();
 		} catch (err: unknown) {
-			const error = replaceIcErrorFields(err);
-			trackEvent({
-				name: TRACK_COUNT_LIMIT_ORDER_CANCEL_ERROR,
-				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				...orderFields,
+				error: replaceIcErrorFields(err)
 			});
 			toastsError({ msg: { text: $i18n.trading.order_detail.cancel_error }, err });
 		} finally {

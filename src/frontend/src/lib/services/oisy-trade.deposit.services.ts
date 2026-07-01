@@ -2,22 +2,20 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { deposit as depositApi } from '$lib/api/oisy-trade.api';
-import {
-	TRACK_COUNT_TRADING_DEPOSIT_ERROR,
-	TRACK_COUNT_TRADING_DEPOSIT_SUBMITTED,
-	TRACK_COUNT_TRADING_DEPOSIT_SUCCESS
-} from '$lib/constants/analytics.constants';
 import { NANO_SECONDS_IN_MINUTE, OISY_TRADE_CANISTER_ID } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+} from '$lib/enums/plausible';
 import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
-import { trackEvent } from '$lib/services/analytics.services';
 import { loadOisyTrade } from '$lib/services/oisy-trade.services';
+import { trackTrading } from '$lib/services/trading-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
-import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { assertNonNullish, notEmptyString, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
@@ -47,8 +45,6 @@ export const depositOisyTrade = async ({
 }: DepositOisyTradeParams): Promise<boolean> => {
 	const { auth, trading } = get(i18n);
 
-	const trackingMetadata = oisyTradeTrackingMetadata({ token: token.symbol });
-
 	try {
 		assertNonNullish(identity, auth.error.no_internet_identity);
 		assertNonNullish(OISY_TRADE_CANISTER_ID);
@@ -58,7 +54,11 @@ export const depositOisyTrade = async ({
 
 		assertNonNullish(fee, trading.deposit.error.unknown_fee);
 
-		trackEvent({ name: TRACK_COUNT_TRADING_DEPOSIT_SUBMITTED, metadata: trackingMetadata });
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			token: token.symbol
+		});
 
 		progress?.(ProgressStepsTradingDeposit.APPROVE);
 
@@ -84,14 +84,19 @@ export const depositOisyTrade = async ({
 
 		progress?.(ProgressStepsTradingDeposit.DONE);
 
-		trackEvent({ name: TRACK_COUNT_TRADING_DEPOSIT_SUCCESS, metadata: trackingMetadata });
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			token: token.symbol
+		});
 
 		return true;
 	} catch (err: unknown) {
-		const error = replaceIcErrorFields(err);
-		trackEvent({
-			name: TRACK_COUNT_TRADING_DEPOSIT_ERROR,
-			metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			token: token.symbol,
+			error: replaceIcErrorFields(err)
 		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
 

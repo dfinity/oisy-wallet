@@ -30,7 +30,6 @@ import {
 	oisyTradeDepositableTokens,
 	oisyTradeOrderDisplayStatus,
 	oisyTradeSupportedTokenSymbols,
-	oisyTradeTrackingMetadata,
 	orderStatusView,
 	presetTargetPrice,
 	queuePositionDisplay,
@@ -310,28 +309,6 @@ describe('oisy-trade.utils — limit order', () => {
 			expect(formatTradeAmount({ amount: 0.1 * 3, decimals: 6 })).toBe('0.3');
 			expect(formatTradeAmount({ amount: 25, decimals: 6 })).toBe('25');
 			expect(formatTradeAmount({ amount: 1.23456789, decimals: 2 })).toBe('1.23');
-		});
-	});
-
-	describe('oisyTradeTrackingMetadata', () => {
-		it('includes the provider and only the provided non-sensitive fields', () => {
-			expect(
-				oisyTradeTrackingMetadata({ base: 'ICP', quote: 'ckUSDC', side: 'sell', orderType: 'GTC' })
-			).toEqual({
-				dApp: 'OISY TRADE',
-				base: 'ICP',
-				quote: 'ckUSDC',
-				side: 'sell',
-				orderType: 'GTC'
-			});
-		});
-
-		it('omits absent fields and carries a token / error when given', () => {
-			expect(oisyTradeTrackingMetadata({ token: 'ICP', error: 'boom' })).toEqual({
-				dApp: 'OISY TRADE',
-				token: 'ICP',
-				error: 'boom'
-			});
 		});
 	});
 

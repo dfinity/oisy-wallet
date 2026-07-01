@@ -1,26 +1,24 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { isNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import type { IcToken } from '$icp/types/ic-token';
 	import WithdrawForm from '$lib/components/trading/WithdrawForm.svelte';
 	import WithdrawProgress from '$lib/components/trading/WithdrawProgress.svelte';
 	import WithdrawReview from '$lib/components/trading/WithdrawReview.svelte';
-	import {
-		TRACK_COUNT_TRADING_WITHDRAW_ERROR,
-		TRACK_COUNT_TRADING_WITHDRAW_SUBMITTED,
-		TRACK_COUNT_TRADING_WITHDRAW_SUCCESS
-	} from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
 	import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { withdrawFromOisyTrade } from '$lib/services/oisy-trade.services';
+	import { trackTrading } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
-	import { oisyTradeTrackingMetadata } from '$lib/utils/oisy-trade.utils';
 
 	interface Props {
 		token: IcToken;
@@ -63,8 +61,11 @@
 
 		onNext();
 
-		const trackingMetadata = oisyTradeTrackingMetadata({ token: token.symbol });
-		trackEvent({ name: TRACK_COUNT_TRADING_WITHDRAW_SUBMITTED, metadata: trackingMetadata });
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			token: token.symbol
+		});
 
 		try {
 			await withdrawFromOisyTrade({
@@ -77,14 +78,19 @@
 
 			withdrawProgressStep = ProgressStepsTradingWithdraw.DONE;
 
-			trackEvent({ name: TRACK_COUNT_TRADING_WITHDRAW_SUCCESS, metadata: trackingMetadata });
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				token: token.symbol
+			});
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
-			const error = replaceIcErrorFields(err);
-			trackEvent({
-				name: TRACK_COUNT_TRADING_WITHDRAW_ERROR,
-				metadata: { ...trackingMetadata, ...(notEmptyString(error) ? { error } : {}) }
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				token: token.symbol,
+				error: replaceIcErrorFields(err)
 			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
 
