@@ -8,6 +8,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { preventDefault } from '$lib/utils/event-modifiers.utils';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -17,6 +19,9 @@
 		balance: OptionBalance;
 		token?: Token;
 		fee?: bigint;
+		// Optional hard cap (base units). When set, "Max" never exceeds it even if the
+		// affordable balance is higher (e.g. full debt for repay).
+		maxAmount?: bigint;
 	}
 
 	let {
@@ -25,12 +30,13 @@
 		error = false,
 		balance,
 		token,
-		fee
+		fee,
+		maxAmount
 	}: Props = $props();
 
 	let isZeroBalance = $derived(!$isIcMintingAccount && (isNullish(balance) || balance === ZERO));
 
-	let maxAmount = $derived(
+	let maxBalanceAmount = $derived(
 		nonNullish(token)
 			? getMaxTransactionAmount({
 					balance,
@@ -41,10 +47,26 @@
 			: undefined
 	);
 
+	// Clamp the affordable max to the optional base-units cap.
+	let cappedMaxAmount = $derived.by(() => {
+		if (isNullish(maxBalanceAmount) || isNullish(token) || isNullish(maxAmount)) {
+			return maxBalanceAmount;
+		}
+
+		const affordable = parseToken({ value: maxBalanceAmount, unitName: token.decimals });
+		const capped = affordable < maxAmount ? affordable : maxAmount;
+
+		return formatToken({
+			value: capped,
+			unitName: token.decimals,
+			displayDecimals: token.decimals
+		});
+	});
+
 	const setMax = () => {
-		if (!isZeroBalance && nonNullish(maxAmount)) {
+		if (!isZeroBalance && nonNullish(cappedMaxAmount)) {
 			amountSetToMax = true;
-			amount = maxAmount;
+			amount = cappedMaxAmount;
 		}
 	};
 
@@ -73,7 +95,7 @@
 	onclick={preventDefault(setMax)}
 >
 	{$i18n.core.text.max}:
-	{nonNullish(maxAmount) && nonNullish(token)
-		? `${maxAmount} ${getTokenDisplaySymbol(token)}`
+	{nonNullish(cappedMaxAmount) && nonNullish(token)
+		? `${cappedMaxAmount} ${getTokenDisplaySymbol(token)}`
 		: $i18n.core.text.not_available}
 </button>
