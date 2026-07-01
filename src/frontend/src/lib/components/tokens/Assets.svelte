@@ -74,6 +74,15 @@
 											id: TokenTypes.TOKENS,
 											path: `${AppPath.Tokens}${page.url.search}`
 										},
+										...(TRADING_ENABLED
+											? [
+													{
+														label: $i18n.trading.text.tab_title,
+														id: TokenTypes.TRADING,
+														path: `${AppPath.Trading}${page.url.search}`
+													}
+												]
+											: []),
 										{
 											label: $i18n.nfts.text.title,
 											id: TokenTypes.NFTS,
@@ -94,15 +103,6 @@
 														label: $i18n.borrowings.text.tab_title,
 														id: TokenTypes.BORROWINGS,
 														path: `${AppPath.Borrowings}${page.url.search}`
-													}
-												]
-											: []),
-										...(TRADING_ENABLED
-											? [
-													{
-														label: $i18n.trading.text.tab_title,
-														id: TokenTypes.TRADING,
-														path: `${AppPath.Trading}${page.url.search}`
 													}
 												]
 											: [])
