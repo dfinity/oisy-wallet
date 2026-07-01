@@ -1,5 +1,6 @@
 import {
 	WizardStepsLiquidiumBorrow,
+	WizardStepsLiquidiumRepay,
 	WizardStepsLiquidiumSupply,
 	WizardStepsLiquidiumWithdraw
 } from '$lib/enums/wizard-steps';
@@ -66,5 +67,22 @@ export const liquidiumWithdrawWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumWithdraw.WITHDRAWING,
 		title: i18n.liquidium.text.withdrawing
+	}
+];
+
+export const liquidiumRepayWizardSteps = ({
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsLiquidiumRepay> => [
+	{
+		name: WizardStepsLiquidiumRepay.REPAY,
+		title: i18n.liquidium.text.action_repay
+	},
+	{
+		name: WizardStepsLiquidiumRepay.REVIEW,
+		title: i18n.liquidium.text.repay_review
+	},
+	{
+		name: WizardStepsLiquidiumRepay.REPAYING,
+		title: i18n.liquidium.text.repaying
 	}
 ];
