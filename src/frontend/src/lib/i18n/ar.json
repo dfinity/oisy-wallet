@@ -1757,6 +1757,10 @@
 		"onboarding": {
 			"title": "",
 			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
 			"deposit": ""
 		},
 		"assets": {
