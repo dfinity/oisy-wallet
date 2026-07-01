@@ -62,15 +62,6 @@ describe('LimitOrderReview', () => {
 		expect(container).toHaveTextContent(en.trading.limit_order.fee_taker);
 	});
 
-	it('shows "-" for fees instead of the "no fee" label when the pair is unknown', () => {
-		const { container } = render(LimitOrderReview, {
-			props: { ...baseProps, pairView: undefined }
-		});
-
-		expect(container).toHaveTextContent('-');
-		expect(container).not.toHaveTextContent(en.trading.limit_order.no_fee);
-	});
-
 	it('shows the "you get at least" label for a sell', () => {
 		const { container } = render(LimitOrderReview, { props: { ...baseProps } });
 

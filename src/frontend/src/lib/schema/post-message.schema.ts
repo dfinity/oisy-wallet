@@ -90,6 +90,7 @@ export const PostMessageDataRequestDip20Schema = z.object({
 });
 
 export const PostMessageDataRequestIcpSchema = z.object({
+	ledgerCanisterId: CanisterIdTextSchema,
 	indexCanisterId: CanisterIdTextSchema
 });
 

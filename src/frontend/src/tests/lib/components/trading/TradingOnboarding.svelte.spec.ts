@@ -31,7 +31,8 @@ describe('TradingOnboarding', () => {
 		oisyTradeStore.set({
 			pairs: [buildPair({ base: 'ICP', quote: 'ckBTC' })],
 			supportedTokens: undefined,
-			balances: undefined
+			balances: undefined,
+			orders: undefined
 		});
 
 		const { getByText } = render(TradingOnboarding, { props: { onDeposit: () => {} } });
