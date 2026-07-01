@@ -20,6 +20,7 @@ import type {
 } from '$lib/types/oisy-trade';
 import type { BadgeVariant } from '$lib/types/style';
 import { formatToken } from '$lib/utils/format.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
@@ -237,6 +238,8 @@ export const deriveQuoteAmount = ({
 // Format a human-unit trade amount for display through the shared token
 // formatter, so it rounds to the token's decimals and matches the rest of the
 // app instead of leaking raw JS float artifacts (e.g. 0.1 * 3 = 0.30000000000000004).
+// Rounds to a fixed-decimals string first, then parses to base units with
+// `parseToken` (string-based, no float scaling) so large decimals/amounts stay exact.
 export const formatTradeAmount = ({
 	amount,
 	decimals
@@ -245,7 +248,7 @@ export const formatTradeAmount = ({
 	decimals: number;
 }): string =>
 	formatToken({
-		value: BigInt((amount * pow10(decimals)).toFixed(0)),
+		value: parseToken({ value: amount.toFixed(decimals), unitName: decimals }),
 		unitName: decimals,
 		displayDecimals: decimals
 	});
