@@ -154,6 +154,18 @@ describe('htmlRenderer', () => {
 	it('escapes an img tag with no src', () => {
 		expect(htmlRenderer('<img alt="Logo" />')).toBe('&lt;img alt="Logo" /&gt;');
 	});
+
+	it('transforms only the img tag and preserves the surrounding html', () => {
+		expect(htmlRenderer('<p>See <img src="https://oisy.com/logo.png" alt="Logo" /> here</p>')).toBe(
+			'<p>See <a href="https://oisy.com/logo.png" target="_blank" rel="noopener noreferrer" type="image/png">Logo</a> here</p>'
+		);
+	});
+
+	it('transforms multiple img tags independently', () => {
+		expect(htmlRenderer('<img src="a.png" alt="A" /><img src="b.png" alt="B" />')).toBe(
+			'<a href="a.png" target="_blank" rel="noopener noreferrer" type="image/png">A</a><a href="b.png" target="_blank" rel="noopener noreferrer" type="image/png">B</a>'
+		);
+	});
 });
 
 describe('markdownToHTML', () => {

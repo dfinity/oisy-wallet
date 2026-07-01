@@ -48,9 +48,9 @@ export const imageToLinkRenderer = (
 	if (src === undefined || src === null || src?.length === 0) {
 		return alt;
 	}
-	const fileExtention = src.includes('.') ? (src.split('.').pop() as string) : '';
+	const fileExtension = src.includes('.') ? (src.split('.').pop() as string) : '';
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a#attr-type
-	const typeProp = fileExtention === '' ? undefined : ` type="image/${fileExtention}"`;
+	const typeProp = fileExtension === '' ? undefined : ` type="image/${fileExtension}"`;
 	const titleDefined = title !== undefined && title !== null;
 	const titleProp = titleDefined ? ` title="${title}"` : undefined;
 	const text = alt === '' ? (titleDefined ? title : src) : alt;
@@ -77,7 +77,7 @@ const escapeSvgs = (html: string): string => {
 
 	// Match fenced code blocks (```...```)
 	const fencedCodeRegex = /```[\s\S]*?```/g;
-	let match;
+	let match: RegExpExecArray | null;
 	while ((match = fencedCodeRegex.exec(html)) !== null) {
 		codeBlocks.push({ start: match.index, end: match.index + match[0].length });
 	}
@@ -111,9 +111,13 @@ const transformImg = (img: string): string => {
 	return imageHtml;
 };
 
-/** Avoid <img> tags; instead, apply the same logic as for markdown images by either escaping them or converting them to links. */
+/**
+ * Avoid <img> tags; instead, apply the same logic as for markdown images by either escaping them or
+ * converting them to links. Only the <img> tags themselves are transformed, so any surrounding HTML
+ * in the same block — and additional <img> tags — are preserved and handled individually.
+ */
 export const htmlRenderer = (html: string): string =>
-	/<img\s+[^>]*>/gi.test(html) ? transformImg(html) : html;
+	html.replace(/<img\s+[^>]*>/gi, (imgTag) => transformImg(imgTag));
 
 /**
  * Marked.js renderer for proposal summary.

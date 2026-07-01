@@ -12,13 +12,23 @@
 
 	let html = $state<string | undefined>();
 	let error = $state(false);
+	// Guards against a stale render: if `text` changes while an earlier transform is still pending,
+	// the older (now superseded) result must not overwrite the newer one.
+	let latestRequest = 0;
 
-	const transform = async (text: string) => {
+	const transform = async (value: string) => {
+		const requestId = ++latestRequest;
 		try {
-			html = await markdownToHTML(text);
+			const rendered = await markdownToHTML(value);
+			if (requestId === latestRequest) {
+				html = rendered;
+				error = false;
+			}
 		} catch (err: unknown) {
-			consoleError('Failed to render markdown', err);
-			error = true;
+			if (requestId === latestRequest) {
+				consoleError('Failed to render markdown', err);
+				error = true;
+			}
 		}
 	};
 
