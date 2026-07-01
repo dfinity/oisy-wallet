@@ -2,10 +2,13 @@ import type {
 	ActiveUserTransaction,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
 	GetAllowedCyclesResponse,
 	PersonalNoteEntry,
+	PersonalNoteShareContent,
+	PersonalNoteSharePeek,
 	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
@@ -403,6 +406,45 @@ export const getPersonalNotesVetkeyPublicKey = async ({
 }: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
 	const { getPersonalNotesVetkeyPublicKey } = await backendCanister({ identity });
 	return getPersonalNotesVetkeyPublicKey();
+};
+
+export const createPersonalNoteShare = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<CreatePersonalNoteShareRequest>): Promise<void> => {
+	const { createPersonalNoteShare } = await backendCanister({ identity });
+	return createPersonalNoteShare(request);
+};
+
+export const peekPersonalNoteShare = async ({
+	identity,
+	token
+}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteSharePeek> => {
+	const { peekPersonalNoteShare } = await backendCanister({ identity });
+	return peekPersonalNoteShare(token);
+};
+
+export const getPersonalNoteShare = async ({
+	identity,
+	token
+}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteShareContent> => {
+	const { getPersonalNoteShare } = await backendCanister({ identity });
+	return getPersonalNoteShare(token);
+};
+
+export const consumePersonalNoteShare = async ({
+	identity,
+	token
+}: CanisterApiFunctionParams<{ token: string }>): Promise<PersonalNoteShareContent> => {
+	const { consumePersonalNoteShare } = await backendCanister({ identity });
+	return consumePersonalNoteShare(token);
+};
+
+export const getPersonalNoteSharesCount = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<bigint> => {
+	const { getPersonalNoteSharesCount } = await backendCanister({ identity });
+	return getPersonalNoteSharesCount();
 };
 
 const backendCanister = async ({
