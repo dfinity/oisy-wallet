@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import { LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT } from '$lib/constants/oisy-trade.constants';
 
 	interface Props {
 		value: number;
@@ -11,7 +12,7 @@
 	let { value, crossing }: Props = $props();
 
 	const text = $derived(`${value >= 0 ? '+' : ''}${value.toFixed(2)}%`);
-	const danger = $derived(value < -5);
+	const danger = $derived(value < LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
 </script>
 
 <span
@@ -22,7 +23,7 @@
 	class:text-warning-primary={crossing && !danger}
 >
 	{#if crossing}
-		<span class="flex h-3.5 w-3.5 items-center"><IconWarning /></span>
+		<span class="inline-flex shrink-0 items-center" aria-hidden="true"><IconWarning inline /></span>
 	{/if}
 	{text}
 </span>
