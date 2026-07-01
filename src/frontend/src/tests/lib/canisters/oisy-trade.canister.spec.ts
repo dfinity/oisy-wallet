@@ -10,7 +10,9 @@ import type {
 	Token,
 	TradingPair,
 	TradingPairInfo,
-	UserTokenBalance
+	UserTokenBalance,
+	WithdrawRequest,
+	WithdrawResponse
 } from '$declarations/oisy_trade/oisy_trade.did';
 import { OisyTradeCanister } from '$lib/canisters/oisy-trade.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -238,6 +240,53 @@ describe('oisy-trade.canister', () => {
 			const { deposit } = await createOisyTradeCanister({ serviceOverride: service });
 
 			await expect(deposit(depositRequest)).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('withdraw', () => {
+		const tokenId = { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
+		const withdrawRequest: WithdrawRequest = { token_id: tokenId, amount: 150_000_000n };
+		const response: WithdrawResponse = { block_index: 42n };
+
+		it('returns the response on Ok and forwards the request', async () => {
+			service.withdraw.mockResolvedValue({ Ok: response });
+
+			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(withdraw(withdrawRequest)).resolves.toEqual(response);
+			expect(service.withdraw).toHaveBeenCalledExactlyOnceWith(withdrawRequest);
+		});
+
+		it('throws the canister message when present on Err', async () => {
+			service.withdraw.mockResolvedValue({
+				Err: {
+					kind: { RequestError: [{ InsufficientBalance: { available: 5n } }] },
+					message: ['no funds']
+				}
+			});
+
+			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(withdraw(withdrawRequest)).rejects.toThrow('no funds');
+		});
+
+		it('falls back to the inner reason when the Err message is empty', async () => {
+			service.withdraw.mockResolvedValue({
+				Err: { kind: { RequestError: [{ AmountExceedsMaximum: null }] }, message: [] }
+			});
+
+			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
+
+			// Routed through `mapOisyTradeError`: message falls back to the inner reason.
+			await expect(withdraw(withdrawRequest)).rejects.toThrow('AmountExceedsMaximum');
+		});
+
+		it('throws when withdraw throws', async () => {
+			service.withdraw.mockRejectedValue(mockResponseError);
+
+			const { withdraw } = await createOisyTradeCanister({ serviceOverride: service });
+
+			await expect(withdraw(withdrawRequest)).rejects.toThrow(mockResponseError);
 		});
 	});
 });
