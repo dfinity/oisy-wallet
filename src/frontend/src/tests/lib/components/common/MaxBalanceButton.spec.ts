@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 import MaxBalanceButtonTestHost from '$tests/lib/components/common/MaxBalanceButtonTestHost.svelte';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -65,7 +66,7 @@ describe('MaxBalanceButton', () => {
 
 	it('does not set the amount for a zero balance', async () => {
 		const { getByTestId } = render(MaxBalanceButtonTestHost, {
-			props: { ...baseProps, balance: 0n, maxAmount: 100_000_000n }
+			props: { ...baseProps, balance: ZERO, maxAmount: 100_000_000n }
 		});
 
 		await fireEvent.click(getByTestId(MAX_BUTTON));
@@ -97,9 +98,11 @@ describe('MaxBalanceButton', () => {
 			});
 
 			await vi.advanceTimersByTimeAsync(499);
+
 			expect(getByTestId(amountTestId)).toHaveTextContent('1.8');
 
 			await vi.advanceTimersByTimeAsync(1);
+
 			expect(getByTestId(amountTestId)).toHaveTextContent('1.5');
 		} finally {
 			vi.useRealTimers();

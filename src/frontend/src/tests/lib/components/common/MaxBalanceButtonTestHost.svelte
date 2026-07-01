@@ -17,7 +17,7 @@
 	let amountSetToMax = $state(false);
 </script>
 
-<MaxBalanceButton bind:amount bind:amountSetToMax {balance} {fee} {maxAmount} {token} />
+<MaxBalanceButton {balance} {fee} {maxAmount} {token} bind:amount bind:amountSetToMax />
 
 <span data-tid="max-balance-button-amount">{amount ?? ''}</span>
 <span data-tid="max-balance-button-amount-set-to-max">{amountSetToMax.toString()}</span>
