@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
@@ -321,7 +322,7 @@
 					</span>
 				</div>
 				{#if currentValue > 0}
-					<div class="flex items-center justify-between text-xs">
+					<div class="flex items-center justify-between text-xs" transition:slide>
 						<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
 						<ValueDifference
 							errorLevel={-5}
@@ -333,7 +334,7 @@
 					</div>
 				{/if}
 				{#if nonNullish(queueText)}
-					<div class="flex items-center justify-between text-xs">
+					<div class="flex items-center justify-between text-xs" transition:slide>
 						<span class="text-tertiary">{$i18n.trading.limit_order.queue_position_row}</span>
 						<span class="font-medium text-secondary">{queueText}</span>
 					</div>
