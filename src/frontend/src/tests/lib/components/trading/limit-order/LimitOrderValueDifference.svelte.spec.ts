@@ -18,12 +18,21 @@ describe('LimitOrderValueDifference', () => {
 		expect(container).toHaveTextContent('-2.10%');
 	});
 
-	it('formats zero with a plus sign', () => {
+	it('formats zero without a sign', () => {
 		const { container } = render(LimitOrderValueDifference, {
 			props: { value: 0, crossing: false }
 		});
 
-		expect(container).toHaveTextContent('+0.00%');
+		expect(container).toHaveTextContent('0.00%');
+	});
+
+	it('rounds a sub-threshold negative value to a clean 0.00% (no minus sign)', () => {
+		const { container } = render(LimitOrderValueDifference, {
+			props: { value: -0.001, crossing: false }
+		});
+
+		expect(container).toHaveTextContent('0.00%');
+		expect(container).not.toHaveTextContent('-0.00%');
 	});
 
 	it('does not render the warning icon when not crossing', () => {

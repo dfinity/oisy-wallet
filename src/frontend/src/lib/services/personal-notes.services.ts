@@ -4,7 +4,11 @@ import {
 	getPersonalNotesCount,
 	setPersonalNote as setPersonalNoteApi
 } from '$lib/api/backend.api';
-import { decryptPersonalNote, encryptPersonalNote } from '$lib/services/personal-notes.vetkeys';
+import {
+	decryptPersonalNoteWithKey,
+	deriveKeyMaterial,
+	encryptPersonalNote
+} from '$lib/services/personal-notes.vetkeys';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import {
 	isPersonalNoteDecryptionFailure,
@@ -37,20 +41,28 @@ export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
 		getPersonalNotesCount({ identity })
 	]);
 
-	const decrypted: PersonalNoteEntryUi[] = await Promise.all(
-		entries.map(async ({ note_id, encrypted_note }) => {
-			try {
-				const envelope = await decryptPersonalNote({
-					encrypted: toUint8Array(encrypted_note),
-					noteId: note_id,
-					identity
-				});
-				return { id: note_id, ...envelope };
-			} catch {
-				return { id: note_id, decryptionFailed: true };
-			}
-		})
-	);
+	// Derive the key once up-front so a systemic vetKD/derivation failure rejects
+	// the load (surfacing a real error) instead of every note decoding as a
+	// per-note failure. Skip it when there are no notes so an empty list still
+	// loads without a needless round-trip.
+	let decrypted: PersonalNoteEntryUi[] = [];
+	if (entries.length > 0) {
+		const keyMaterial = await deriveKeyMaterial({ identity });
+		decrypted = await Promise.all(
+			entries.map(async ({ note_id, encrypted_note }) => {
+				try {
+					const envelope = await decryptPersonalNoteWithKey({
+						keyMaterial,
+						encrypted: toUint8Array(encrypted_note),
+						noteId: note_id
+					});
+					return { id: note_id, ...envelope };
+				} catch {
+					return { id: note_id, decryptionFailed: true };
+				}
+			})
+		);
+	}
 
 	personalNotesStore.setLoaded({ entries: decrypted, count: Number(count) });
 };

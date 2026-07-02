@@ -81,6 +81,11 @@
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
 		}
 	},
+	"progress": {
+		"completed": "Завершено",
+		"in_progress": "В процессе",
+		"failed": "Ошибка"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Активы",

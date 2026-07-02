@@ -81,6 +81,11 @@
 			"video_not_supported": "你的浏览器不支持视频播放。"
 		}
 	},
+	"progress": {
+		"completed": "已完成",
+		"in_progress": "进行中",
+		"failed": "失败"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "资产",
