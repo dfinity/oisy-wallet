@@ -1,21 +1,18 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import TradingCancelOrderConfirm from '$lib/components/trading/TradingCancelOrderConfirm.svelte';
+	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
+	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
+	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
-	import {
-		OISY_TRADE_POLL_INTERVAL_MILLIS,
-		OISY_TRADE_PROVIDER_NAME
-	} from '$lib/constants/oisy-trade.constants';
+	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -23,15 +20,21 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
+	import {
 		cancelLimitOrder,
 		loadOisyTrade,
 		loadOrderBook
 	} from '$lib/services/oisy-trade.services';
+	import { trackTrading } from '$lib/services/trading-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -125,6 +128,11 @@
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
+	const currentValueDisplay = $derived(
+		currentValue > 0
+			? formatTradeAmount({ amount: currentValue, decimals: quote.decimals })
+			: undefined
+	);
 
 	const depthLevels = $derived.by(() => {
 		if (isNullish(orderBook?.depth) || isNullish(pairView)) {
@@ -165,12 +173,6 @@
 
 	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : null);
 	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : null);
-	const feePercent = (value: number | null): string =>
-		value === null
-			? '-'
-			: value === 0
-				? $i18n.trading.limit_order.no_fee
-				: replacePlaceholders($i18n.trading.limit_order.fee_percent, { $value: value.toString() });
 
 	// Filled quantity: shown for a partial fill, and for terminal Cancelled/Expired
 	// orders that had already partly filled before leaving the book.
@@ -216,11 +218,28 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
+		const orderFields = { base: baseSymbol, quote: quoteSymbol, side };
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			...orderFields
+		});
 		try {
 			await cancelLimitOrder({ identity: $authIdentity, orderId: order.id });
 			await loadOisyTrade({ identity: $authIdentity });
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				...orderFields
+			});
 			close();
 		} catch (err: unknown) {
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				...orderFields,
+				error: replaceIcErrorFields(err)
+			});
 			toastsError({ msg: { text: $i18n.trading.order_detail.cancel_error }, err });
 		} finally {
 			canceling = false;
@@ -240,105 +259,31 @@
 			<Badge variant={pillVariant} width="w-fit">{statusLabels[labelKey]}</Badge>
 		</div>
 
-		<!-- Two-box intent hero -->
-		<div class="relative mb-4 rounded-lg border border-disabled">
-			<div class="px-3.5 py-3">
-				<div class="mb-1 text-xs text-secondary">
-					{$i18n.trading.limit_order.hero_prefix}
-					<strong class="font-bold text-primary uppercase">
-						{side === 'sell' ? $i18n.trading.limit_order.sell : $i18n.trading.limit_order.buy}
-					</strong>
-				</div>
-				<div class="text-xl font-medium text-primary">{baseAmountDisplay} {baseSymbol}</div>
-				{#if nonNullish(baseFiat)}
-					<div class="text-xs text-tertiary">{baseFiat}</div>
-				{/if}
-			</div>
-			<div class="border-t border-disabled px-3.5 py-3">
-				<div class="mb-1 text-xs text-secondary">
-					{side === 'sell'
-						? $i18n.trading.limit_order.you_get_at_least
-						: $i18n.trading.limit_order.you_pay_at_most}
-				</div>
-				<div class="text-xl font-medium text-primary">{quoteAmountDisplay} {quoteSymbol}</div>
-				{#if nonNullish(quoteFiat)}
-					<div class="text-xs text-tertiary">{quoteFiat}</div>
-				{/if}
-			</div>
-			<span
-				class="absolute top-1/2 left-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-secondary bg-primary text-tertiary"
-			>
-				{#if side === 'sell'}
-					<IconArrowDown size="16" />
-				{:else}
-					<span class="rotate-180"><IconArrowDown size="16" /></span>
-				{/if}
-			</span>
-		</div>
+		<LimitOrderIntentHero
+			baseAmount={baseAmountDisplay}
+			{baseFiat}
+			{baseSymbol}
+			quoteAmount={quoteAmountDisplay}
+			{quoteFiat}
+			{quoteSymbol}
+			{side}
+		/>
 
-		<!-- Price section -->
-		<div class="mb-3 rounded-lg border border-disabled px-3.5 py-3">
-			<div class="flex items-baseline justify-between">
-				<span class="text-sm text-secondary">{$i18n.trading.limit_order.limit_price}</span>
-				<span class="text-lg font-semibold text-primary">
-					{replacePlaceholders($i18n.trading.limit_order.limit_price_value, {
-						$price: priceDisplay,
-						$quote: quoteSymbol,
-						$base: baseSymbol
-					})}
-				</span>
-			</div>
-			<div class="mt-2.5 flex flex-col gap-1.5 border-t border-disabled pt-2.5">
-				<div class="flex items-center justify-between text-xs">
-					<span class="text-tertiary">{$i18n.trading.limit_order.current_value}</span>
-					<span class="font-medium text-secondary">
-						{currentValue > 0
-							? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
-									$price: formatTradeAmount({ amount: currentValue, decimals: quote.decimals }),
-									$quote: quoteSymbol,
-									$base: baseSymbol
-								})
-							: '-'}
-					</span>
-				</div>
-				{#if currentValue > 0}
-					<div class="flex items-center justify-between text-xs" transition:slide>
-						<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
-						<ValueDifference
-							errorLevel={-5}
-							iconPosition="left"
-							muted
-							successNeutral
-							value={valueDiff}
-						/>
-					</div>
-				{/if}
-				{#if nonNullish(queueText)}
-					<div class="flex items-center justify-between text-xs" transition:slide>
-						<span class="text-tertiary">{$i18n.trading.limit_order.queue_position_row}</span>
-						<span class="font-medium text-secondary">{queueText}</span>
-					</div>
-				{/if}
-			</div>
-		</div>
+		<LimitOrderPriceSummary
+			{baseSymbol}
+			{currentValueDisplay}
+			muted
+			{priceDisplay}
+			{queueText}
+			{quoteSymbol}
+			valueDifference={valueDiff}
+		/>
 
-		<ModalValue>
-			{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
-			{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
-		</ModalValue>
-		<ModalValue>
-			{#snippet label()}{$i18n.trading.limit_order.order_type}{/snippet}
-			{#snippet mainValue()}{$i18n.trading.limit_order.order_type_gtc}{/snippet}
-		</ModalValue>
-		<ModalValue>
-			{#snippet label()}{$i18n.trading.limit_order.fee_maker_taker}{/snippet}
-			{#snippet mainValue()}
-				{replacePlaceholders($i18n.trading.limit_order.fee_maker_taker_value, {
-					$maker: feePercent(makerFee),
-					$taker: feePercent(takerFee)
-				})}
-			{/snippet}
-		</ModalValue>
+		<LimitOrderTermsList
+			{makerFee}
+			orderTypeLabel={$i18n.trading.limit_order.order_type_gtc}
+			{takerFee}
+		/>
 		{#if showFilled}
 			<ModalValue>
 				{#snippet label()}{$i18n.trading.order_detail.filled}{/snippet}

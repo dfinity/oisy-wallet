@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
 	import { TRADING_ASSETS_DEPOSIT_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
@@ -32,7 +34,7 @@
 	{:else}
 		<ul class="flex flex-col list-none">
 			{#each $oisyTradeAssets as asset (asset.token.id)}
-				<li>
+				<li transition:slide={SLIDE_PARAMS}>
 					<TradingAssetRow {asset} {onWithdraw} />
 				</li>
 			{/each}
