@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import ActiveUserTransactionsList from '$lib/components/active-user-transactions/ActiveUserTransactionsList.svelte';
 	import AnimatedIconLoader from '$lib/components/icons/animated/AnimatedIconLoader.svelte';
 	import IconBell from '$lib/components/icons/lucide/IconBell.svelte';
 	import IconBellDot from '$lib/components/icons/lucide/IconBellDot.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import {
 		activeUserTransactionsHasUnseen,
 		activeUserTransactionsList,
