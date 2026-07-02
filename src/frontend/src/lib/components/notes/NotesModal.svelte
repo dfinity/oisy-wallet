@@ -526,8 +526,12 @@
 
 	/* On mobile the editor's Cancel/Save move to the header (so the soft keyboard
 		can't cover them), leaving the ContentWithToolbar footer empty — hide it.
-		Matches the md (768px) breakpoint where the header actions switch off. */
-	@media (max-width: 767.98px) {
+		Must match the same real-width breakpoint as the <Responsive down="sm">/
+		<Responsive up="md"> pair above (640px, Tailwind's `sm`) — not gix's own
+		768px full-page/boxed switch, which is unrelated. Using 768 here left a
+		640-767px dead zone where the header had already switched to desktop
+		(no Cancel/Save there) while this rule still hid the populated footer. */
+	@media (max-width: 639.98px) {
 		.notes-editing :global(div.content > :last-child) {
 			display: none;
 		}

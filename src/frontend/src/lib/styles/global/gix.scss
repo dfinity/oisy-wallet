@@ -257,19 +257,6 @@ div.modal {
 	}
 }
 
-div.popover {
-	--background-contrast: var(--overlay-background-contrast);
-
-	.wrapper {
-		padding: var(--padding-0_5x);
-		--padding: var(--padding-0_5x);
-
-		--border-radius: 16px;
-
-		max-width: calc(100vw - (2 * var(--padding)));
-	}
-}
-
 div.segment-button {
 	button.selected {
 		color: var(--color-foreground-primary-inverted);
@@ -309,18 +296,6 @@ div.step {
 		.text {
 			color: var(--color-foreground-primary);
 		}
-	}
-}
-
-// Native selects
-div.select {
-	& .icon {
-		--disable-contrast: var(--color-foreground-primary);
-	}
-
-	option {
-		background: var(--color-background-primary);
-		color: var(--color-foreground-primary);
 	}
 }
 
