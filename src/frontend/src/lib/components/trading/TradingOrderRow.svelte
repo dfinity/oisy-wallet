@@ -175,22 +175,22 @@
 		<TokenLogo badge={{ type: 'network' }} color="white" data={baseData} logoSize="xs" />
 	</span>
 
-	<div class="min-w-0 flex-1 text-sm leading-snug text-primary">
+	<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 text-sm leading-snug text-primary">
 		{#if $isPrivacyMode}
 			<span class="inline-flex items-center gap-1"><IconDots variant="sm" /></span>
 		{:else}
-			<span
-				class="font-semibold"
-				class:text-error-primary={side === 'sell'}
-				class:text-success-primary={side === 'buy'}
-			>
-				{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
+			<span>
+				<span
+					class="font-semibold"
+					class:text-error-primary={side === 'sell'}
+					class:text-success-primary={side === 'buy'}
+				>
+					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
+				</span>
+				{rowText}
 			</span>
-			{rowText}
 		{/if}
-		<span class="ml-1 inline-flex align-middle">
-			<TradingProviderTag />
-		</span>
+		<TradingProviderTag />
 	</div>
 
 	<span class="flex shrink-0 flex-col items-end gap-1">
