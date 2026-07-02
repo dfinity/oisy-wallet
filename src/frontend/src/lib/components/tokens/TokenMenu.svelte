@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import {
 		networkBitcoin,
 		networkEthereum,
