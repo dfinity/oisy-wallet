@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
+	import NoteText from '$lib/components/notes/NoteText.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -15,7 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { linkifyPersonalNote } from '$lib/utils/personal-note.utils';
 
 	interface Props {
 		note: string;
@@ -24,10 +24,6 @@
 	}
 
 	let { note, singleUse, onDone }: Props = $props();
-
-	// Same safe rendering as NoteView: bidi-neutralized, only http(s) URLs become
-	// links (auto-escaped text, never {@html}), line breaks preserved on display.
-	const segments = $derived(linkifyPersonalNote(note));
 
 	const onCopy = async () => {
 		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
@@ -45,17 +41,10 @@
 	</div>
 
 	<div
-		class="min-h-32 flex-1 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
+		class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
 		data-tid={NOTES_SHARE_RECIPIENT_NOTE}
 	>
-		<p style="overflow-wrap: anywhere;" class="whitespace-pre-wrap text-primary"
-			>{#each segments as segment, index (index)}{#if segment.href}<a
-						class="text-brand-primary underline"
-						href={segment.href}
-						rel="noopener noreferrer"
-						target="_blank">{segment.text}</a
-					>{:else}{segment.text}{/if}{/each}</p
-		>
+		<NoteText {note} />
 	</div>
 
 	<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
