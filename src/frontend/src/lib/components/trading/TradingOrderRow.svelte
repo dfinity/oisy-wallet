@@ -1,16 +1,35 @@
 <script lang="ts">
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { loadOrderBook } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
+	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { oisyTradeOrderDisplayStatus, orderStatusView } from '$lib/utils/oisy-trade.utils';
+	import {
+		crossesBook,
+		isOisyTradeOrderActive,
+		oisyTradeOrderDisplayStatus,
+		orderStatusView,
+		priceLevelToHuman,
+		queuePositionDisplay,
+		queuePositionFraction,
+		toPairView,
+		toTradingPair
+	} from '$lib/utils/oisy-trade.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -69,6 +88,20 @@
 		Expired: $i18n.trading.orders.status_expired
 	});
 
+	// Terminal states carry a small leading glyph in the badge (per wireframe). The SVG
+	// icons inherit the badge text color via currentColor; Expired uses the ⏱ emoji.
+	// Active states show none.
+	const statusIcons = {
+		Open: undefined,
+		Pending: undefined,
+		Partial: undefined,
+		Filled: IconCheck,
+		Canceled: IconClose,
+		Expired: undefined
+	};
+	let StatusIcon = $derived(statusIcons[labelKey]);
+	let statusEmoji = $derived(labelKey === 'Expired' ? '⏱' : undefined);
+
 	let rowText = $derived(
 		side === 'sell'
 			? replacePlaceholders($i18n.trading.orders.row_sell, {
@@ -84,6 +117,90 @@
 					$price: formattedPrice
 				})
 	);
+
+	// Queue position — the share of same-side volume priced better than this order,
+	// shown as plain muted text under the status pill. Only for active (Pending +
+	// Open) resting orders, and only when there is volume ahead; a "Front of book"
+	// (0%) order or a crossing order that fills immediately shows nothing here.
+	const active = $derived(isOisyTradeOrderActive(order));
+
+	const pairInfo = $derived<TradingPairInfo | undefined>(
+		$oisyTradePairs.find(
+			(p) => p.base.metadata.symbol === base.symbol && p.quote.metadata.symbol === quote.symbol
+		)
+	);
+	const pairView = $derived(nonNullish(pairInfo) ? toPairView(pairInfo) : undefined);
+
+	let orderBook = $state<OisyTradeOrderBook | undefined>();
+
+	const refreshOrderBook = async (): Promise<void> => {
+		if (!active || isNullish(pairInfo)) {
+			orderBook = undefined;
+			return;
+		}
+		const next = await loadOrderBook({ identity: $authIdentity, pair: toTradingPair(pairInfo) });
+		// Keep the last good snapshot on a transient failure.
+		if (nonNullish(next)) {
+			orderBook = next;
+		}
+	};
+
+	$effect(() => {
+		pairInfo;
+		active;
+		void refreshOrderBook();
+	});
+
+	const toHuman = (level: { price: bigint; quantity: bigint }) =>
+		priceLevelToHuman({
+			level,
+			baseDecimals: pairView?.baseDecimals ?? base.decimals,
+			quoteDecimals: pairView?.quoteDecimals ?? quote.decimals
+		});
+
+	const depthLevels = $derived.by(() => {
+		if (isNullish(orderBook?.depth) || isNullish(pairView)) {
+			return { asks: [], bids: [] };
+		}
+		return {
+			asks: orderBook.depth.asks.map(toHuman),
+			bids: orderBook.depth.bids.map(toHuman)
+		};
+	});
+
+	const bid = $derived.by((): number | null => {
+		const level = nonNullish(orderBook?.ticker) ? fromNullable(orderBook.ticker.bid) : undefined;
+		return nonNullish(level) && nonNullish(pairView) ? toHuman(level).price : null;
+	});
+	const ask = $derived.by((): number | null => {
+		const level = nonNullish(orderBook?.ticker) ? fromNullable(orderBook.ticker.ask) : undefined;
+		return nonNullish(level) && nonNullish(pairView) ? toHuman(level).price : null;
+	});
+
+	const crossing = $derived(crossesBook({ side, price, bid, ask }));
+
+	const queueText = $derived.by((): string | undefined => {
+		if (!active || crossing || isNullish(pairView)) {
+			return undefined;
+		}
+		const display = queuePositionDisplay(
+			queuePositionFraction({
+				side,
+				price,
+				tickSize: pairView.tickSize,
+				asks: depthLevels.asks,
+				bids: depthLevels.bids
+			})
+		);
+		// Only surface a figure when there is volume ahead; "Front of book" (0%) is
+		// left off the compact row.
+		if (display === null || display.front) {
+			return undefined;
+		}
+		return replacePlaceholders($i18n.trading.limit_order.are_ahead, {
+			$percentage: display.percent.toString()
+		});
+	});
 </script>
 
 <button
@@ -113,7 +230,23 @@
 		</span>
 	</div>
 
-	<span class="shrink-0">
-		<Badge variant={pillVariant} width="w-fit">{statusLabels[labelKey]}</Badge>
+	<span class="flex shrink-0 flex-col items-end gap-1">
+		<Badge variant={pillVariant} width="w-fit">
+			<span class="inline-flex items-center gap-1">
+				{#if StatusIcon}
+					<StatusIcon size="14" />
+				{:else if nonNullish(statusEmoji)}
+					<span aria-hidden="true">{statusEmoji}</span>
+				{/if}
+				<span>{statusLabels[labelKey]}</span>
+			</span>
+		</Badge>
+		{#if nonNullish(queueText)}
+			<span class="text-xs text-tertiary">{queueText}</span>
+		{/if}
 	</span>
 </button>
+
+{#if active}
+	<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={refreshOrderBook} />
+{/if}
