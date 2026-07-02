@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
@@ -10,6 +9,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import SkeletonQrCode from '$lib/components/ui/SkeletonQrCode.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
