@@ -63,7 +63,7 @@
 			{#snippet header()}
 				<div class="flex w-full justify-between">
 					<div class="relative flex grow-1 justify-between">
-						<TokensFilter>
+						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
 							{#snippet overflowableContent()}
 								<Tabs
 									styleClass="mt-2 mb-6"

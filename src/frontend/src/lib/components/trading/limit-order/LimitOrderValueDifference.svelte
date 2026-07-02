@@ -11,7 +11,10 @@
 
 	let { value, crossing }: Props = $props();
 
-	const text = $derived(`${value >= 0 ? '+' : ''}${value.toFixed(2)}%`);
+	// Round before signing so a sub-0.005 magnitude reads as a clean "0.00%"
+	// rather than "-0.00%" (or a spurious "+0.00%").
+	const rounded = $derived(Number(value.toFixed(2)));
+	const text = $derived(`${rounded > 0 ? '+' : ''}${rounded.toFixed(2)}%`);
 	const danger = $derived(value < LIMIT_ORDER_VALUE_DIFFERENCE_ERROR_PERCENT);
 </script>
 
