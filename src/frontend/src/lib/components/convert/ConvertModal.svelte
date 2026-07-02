@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { convertWizardSteps, type WizardStepsConvertComplete } from '$lib/config/convert.config';
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
