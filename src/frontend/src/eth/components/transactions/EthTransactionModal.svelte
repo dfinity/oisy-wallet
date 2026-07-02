@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
@@ -25,6 +24,7 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';

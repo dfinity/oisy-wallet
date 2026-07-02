@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import LimitOrderValueDifference from '$lib/components/trading/limit-order/LimitOrderValueDifference.svelte';
+	import { slide } from 'svelte/transition';
+	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		isPresetSelected,
@@ -53,12 +56,11 @@
 	const valueDiff = $derived(valueDifferencePercent({ side, price: priceNum, currentValue }));
 
 	// The book side we'd cross against (bid when selling, ask when buying). Null
-	// when that side is empty — without it we can't judge crossing or FOK-blocked,
-	// and the warning would otherwise surface a bogus reference price of 0.
+	// when that side is empty — without it crossing is indeterminate, so we can't
+	// judge FOK-blocked and mustn't surface a bogus reference price of 0.
 	const referencePrice = $derived(side === 'sell' ? bid : ask);
 
 	// FOK that can't cross would be canceled — surfaced as a blocking warning.
-	// Requires a known reference price; otherwise crossing is indeterminate.
 	const fokBlocked = $derived(
 		fillOrKill && priceNum > 0 && active && nonNullish(referencePrice) && !crossing
 	);
@@ -160,7 +162,9 @@
 			return {
 				text: replacePlaceholders(
 					side === 'sell' ? t.warning_fok_blocked_sell : t.warning_fok_blocked_buy,
-					{ $price: refPrice.toString() }
+					{
+						$price: formatTradeAmount({ amount: refPrice, decimals: pairView?.quoteDecimals ?? 8 })
+					}
 				),
 				danger: true
 			};
@@ -256,16 +260,23 @@
 			<span class="text-xs text-secondary">{pairView?.quoteSymbol ?? ''}</span>
 		</div>
 		{#if priceNum > 0 && currentValue > 0}
-			<LimitOrderValueDifference {crossing} value={valueDiff} />
+			<ValueDifference
+				errorLevel={-5}
+				iconPosition="left"
+				muted={!(crossing || fillOrKill)}
+				successNeutral
+				value={valueDiff}
+				warningLevel={0}
+			/>
 		{/if}
 	</div>
 
 	{#if nonNullish(tickError)}
-		<p class="mt-1 text-xs text-error-primary">{tickError}</p>
+		<p class="mt-1 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
 	{/if}
 
 	{#if nonNullish(queueText)}
-		<p class="mt-1.5 text-xs text-tertiary">{queueText}</p>
+		<p class="mt-1.5 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
 	{/if}
 
 	{#if nonNullish(warningText)}
@@ -275,6 +286,7 @@
 			class:bg-warning-subtle={!warningText.danger}
 			class:text-error-primary={warningText.danger}
 			class:text-warning-primary={!warningText.danger}
+			transition:slide={SLIDE_PARAMS}
 		>
 			{warningText.text}
 		</p>

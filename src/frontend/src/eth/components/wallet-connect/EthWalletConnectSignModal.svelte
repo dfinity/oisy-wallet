@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy } from 'svelte';
@@ -12,6 +11,7 @@
 	import { signMessage } from '$eth/services/wallet-connect.services';
 	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { WizardStepsSign } from '$lib/enums/wizard-steps';
