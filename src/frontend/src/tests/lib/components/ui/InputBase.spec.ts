@@ -38,7 +38,7 @@ describe('InputBase', () => {
 		expect(input(container)?.getAttribute('type')).toBe('text');
 	});
 
-	it('should be required by default and optional when disabled', () => {
+	it('should be required by default and optional when required is false', () => {
 		const { container: required } = render(InputBase, { props });
 
 		expect(input(required)?.hasAttribute('required')).toBeTruthy();

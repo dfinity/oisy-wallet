@@ -64,8 +64,8 @@
 	 * when dealing with currency or high-precision inputs (e.g. more than 15–17 decimal places).
 	 *
 	 * The native `Number()` can produce inaccurate results for such inputs. For example:
-	 * `Number(0.999999999999999876n)` or `(+"0.999999999999999876")` prints `0.9999999999999999`.
-	 * `Number(0.999999999999999812n)` or `(+"0.999999999999999812")` prints `0.9999999999999998`.
+	 * `Number("0.999999999999999876")` (i.e. `+"0.999999999999999876"`) prints `0.9999999999999999`.
+	 * `Number("0.999999999999999812")` (i.e. `+"0.999999999999999812"`) prints `0.9999999999999998`.
 	 * Reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#number_encoding
 	 *
 	 * To mitigate this, we use the `decimal.js` library, which provides arbitrary-precision decimals.
@@ -90,11 +90,17 @@
 
 		// If the value is not a valid decimal, fallback to native `Number` formatting:
 		// - The input has already failed parsing via `Decimal`, which means it's either not a number or a trivial case (like an empty string).
-		// - In such edge cases, native `Number()` will return `NaN` or coerce the value into a number, and the formatting is capped via `maximumFractionDigits`,
-		//   so any inaccuracies are irrelevant or already present in the input.
-		// - The fallback ensures we don't throw or break the rendering pipeline for malformed inputs, maintaining graceful degradation.
+		// - When `Number()` cannot coerce the input to a finite number (e.g. an intermediate-but-valid entry like a lone "."), we return the raw
+		//   value unchanged rather than leaking "NaN" into the field and the bound value.
+		// - Otherwise we cap the formatting via `maximumFractionDigits`, so any inaccuracies are irrelevant or already present in the input.
 		if (isNullish(decimalValue)) {
-			return Number(value).toLocaleString('en', {
+			const asNumber = Number(value);
+
+			if (Number.isNaN(asNumber)) {
+				return value;
+			}
+
+			return asNumber.toLocaleString('en', {
 				useGrouping: false,
 				maximumFractionDigits: wrapDecimals
 			});

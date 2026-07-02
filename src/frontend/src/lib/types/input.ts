@@ -18,12 +18,8 @@ export interface InputProps {
 	autofocus?: boolean;
 	// https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/autocomplete
 	autocomplete?: 'off' | 'on';
-	// When forwarding slots, they always appear as true
-	// This is a known issue in Svelte
-	// https://github.com/sveltejs/svelte/issues/6059
-	// To hack this, we pass a prop to avoid showing info element when not needed
-	// Ideally, this would be calculated
-	// showInfo = $$slots.label || $$slots.end
+	// Explicit toggle for the top info row (the `start` / `label` / `end` snippets). Retained from
+	// the original gix API so consumers can hide that row even when a label/end snippet is provided.
 	showInfo?: boolean;
 	onInput?: () => void;
 	onBlur?: () => void;
