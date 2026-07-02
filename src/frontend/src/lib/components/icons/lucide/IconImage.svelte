@@ -3,19 +3,27 @@
 	export const size = '24';
 </script>
 
-<svg
-	fill="none"
-	height={size}
-	stroke="currentColor"
-	stroke-linecap="round"
-	stroke-linejoin="round"
-	stroke-width="2"
-	viewBox="0 0 24 24"
-	width={size}
-	xmlns="http://www.w3.org/2000/svg"
->
-	<rect height="18" rx="2" width="18" x="3" y="3" />
-
-	<circle cx="8.5" cy="8.5" r="1.5" />
-	<polyline points="21 15 16 10 5 21" />
+<svg fill="none" height={size} viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
+	<defs>
+		<clipPath id="nftclip">
+			<rect height="16" rx="3" width="16" x="4" y="4" />
+		</clipPath>
+	</defs>
+	<rect
+		height="18"
+		opacity="0.4"
+		rx="4"
+		stroke="currentColor"
+		stroke-width="2"
+		width="18"
+		x="3"
+		y="3"
+	/>
+	<path
+		clip-path="url(#nftclip)"
+		d="M4 17.5L9.5 12.5L13 15.5L16 12.5L20 16.5V20H4Z"
+		fill="currentColor"
+		opacity="0.4"
+	/>
+	<circle cx="8.5" cy="9" fill="currentColor" r="1.6" />
 </svg>
