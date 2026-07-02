@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
@@ -19,7 +18,6 @@
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
-	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
 	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
@@ -40,7 +38,6 @@
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
-		NAVIGATION_MENU_NOTES_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_SCANNER_BUTTON,
 		NAVIGATION_MENU_PAY_BUTTON,
@@ -95,7 +92,6 @@
 	);
 
 	const addressModalId = Symbol();
-	const notesModalId = Symbol();
 	const referralModalId = Symbol();
 	const universalScannerModalId = Symbol();
 	const payDialogModalId = Symbol();
@@ -163,17 +159,6 @@
 				<IconUsersRound size="20" />
 				{$i18n.navigation.text.address_book}
 			</ButtonMenu>
-
-			{#if PERSONAL_NOTES_ENABLED}
-				<ButtonMenu
-					ariaLabel={$i18n.navigation.alt.notes}
-					onclick={() => modalStore.openNotes(notesModalId)}
-					testId={NAVIGATION_MENU_NOTES_BUTTON}
-				>
-					<IconNotebook size="20" />
-					{$i18n.navigation.text.notes}
-				</ButtonMenu>
-			{/if}
 
 			<ButtonMenu
 				ariaLabel={$isPrivacyMode
