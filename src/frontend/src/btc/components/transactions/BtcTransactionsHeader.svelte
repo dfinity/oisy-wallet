@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconInfo } from '@dfinity/gix-components';
+	import IconGixInfo from '$lib/components/icons/IconGixInfo.svelte';
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -19,7 +19,7 @@
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
 		{#if isNetworkMainnet}
-			<button class="ml-1 opacity-50" onclick={onInfoButtonClick}><IconInfo /></button>
+			<button class="ml-1 opacity-50" onclick={onInfoButtonClick}><IconGixInfo /></button>
 		{/if}
 	</div>
 
