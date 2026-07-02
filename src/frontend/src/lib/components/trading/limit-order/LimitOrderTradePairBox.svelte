@@ -74,6 +74,13 @@
 			: '-'
 	);
 
+	// Format amounts to the pair's decimals so the error strings never leak raw
+	// float artifacts (e.g. "5.699999999999999").
+	const fmtBase = (amount: number): string =>
+		formatTradeAmount({ amount, decimals: pairView?.baseDecimals ?? 8 });
+	const fmtQuote = (amount: number): string =>
+		formatTradeAmount({ amount, decimals: pairView?.quoteDecimals ?? 8 });
+
 	const baseLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.you_sell : $i18n.trading.limit_order.you_buy
 	);
@@ -117,27 +124,27 @@
 			case 'balance':
 				return side === 'sell'
 					? replacePlaceholders(t.error_balance_sell, {
-							$amount: freeBase.toString(),
+							$amount: fmtBase(freeBase),
 							$symbol: baseSymbol ?? ''
 						})
 					: replacePlaceholders(t.error_balance_buy, {
-							$cost: quoteAmount.toString(),
+							$cost: fmtQuote(quoteAmount),
 							$symbol: quoteSymbol ?? '',
-							$available: freeQuote.toString()
+							$available: fmtQuote(freeQuote)
 						});
 			case 'lot':
 				return replacePlaceholders(t.error_lot_multiple, {
-					$step: pairView?.lotSize.toString() ?? '',
+					$step: fmtBase(pairView?.lotSize ?? 0),
 					$symbol: baseSymbol ?? ''
 				});
 			case 'min_notional':
 				return replacePlaceholders(t.error_min_notional, {
-					$amount: pairView?.minNotional.toString() ?? '',
+					$amount: fmtQuote(pairView?.minNotional ?? 0),
 					$symbol: quoteSymbol ?? ''
 				});
 			case 'max_notional':
 				return replacePlaceholders(t.error_max_notional, {
-					$amount: (pairView?.maxNotional ?? 0).toString(),
+					$amount: fmtQuote(pairView?.maxNotional ?? 0),
 					$symbol: quoteSymbol ?? ''
 				});
 			default:
@@ -184,14 +191,14 @@
 							type="button"
 						>
 							{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-								$amount: freeBase.toString(),
+								$amount: fmtBase(freeBase),
 								$symbol: baseSymbol
 							})}
 						</button>
 					{:else}
 						<span class="text-tertiary">
 							{replacePlaceholders($i18n.trading.limit_order.balance, {
-								$amount: freeBase.toString(),
+								$amount: fmtBase(freeBase),
 								$symbol: baseSymbol
 							})}
 						</span>
@@ -237,14 +244,14 @@
 						type="button"
 					>
 						{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-							$amount: freeQuote.toString(),
+							$amount: fmtQuote(freeQuote),
 							$symbol: quoteSymbol
 						})}
 					</button>
 				{:else}
 					<span class="text-tertiary">
 						{replacePlaceholders($i18n.trading.limit_order.balance, {
-							$amount: freeQuote.toString(),
+							$amount: fmtQuote(freeQuote),
 							$symbol: quoteSymbol
 						})}
 					</span>

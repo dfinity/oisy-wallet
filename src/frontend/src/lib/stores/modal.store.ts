@@ -8,7 +8,7 @@ import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
-import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
+import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -74,6 +74,7 @@ export interface Modal<T> {
 		| 'liquidium-supply'
 		| 'trading-deposit'
 		| 'oisy-trade-withdraw'
+		| 'oisy-trade-order-detail'
 		| 'limit-order'
 		| 'liquidium-borrow'
 		| 'liquidium-withdraw'
@@ -152,6 +153,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openLiquidiumSupply: (id: symbol) => void;
 	openTradingDeposit: (id: symbol) => void;
 	openOisyTradeWithdraw: (params: SetWithDataParams<OisyTradeWithdrawToken>) => void;
+	openOisyTradeOrderDetail: (params: SetWithDataParams<OisyTradeOrderView>) => void;
 	openLimitOrder: (id: symbol) => void;
 	openLiquidiumBorrow: (id: symbol) => void;
 	openLiquidiumWithdraw: (id: symbol) => void;
@@ -269,6 +271,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openTradingDeposit: setType('trading-deposit'),
 		openOisyTradeWithdraw: <(params: SetWithDataParams<OisyTradeWithdrawToken>) => void>(
 			setTypeWithData('oisy-trade-withdraw')
+		),
+		openOisyTradeOrderDetail: <(params: SetWithDataParams<OisyTradeOrderView>) => void>(
+			setTypeWithData('oisy-trade-order-detail')
 		),
 		openLimitOrder: setType('limit-order'),
 		openLiquidiumBorrow: setType('liquidium-borrow'),
