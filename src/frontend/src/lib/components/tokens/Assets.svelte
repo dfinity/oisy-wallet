@@ -48,8 +48,13 @@
 		nonNullish($modalManageTokensData) ? $modalManageTokensData : ({} as ManageTokensData)
 	);
 
+	// NFTs is a standalone destination now, not a real Assets tab (its tab bar
+	// is hidden below), so visiting it must not overwrite the last real tab the
+	// user picked among Tokens/Earning/Trading/Borrowing.
 	$effect(() => {
-		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+		if (activeTab !== TokenTypes.NFTS) {
+			activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+		}
 	});
 </script>
 
