@@ -56,26 +56,17 @@ describe('TradingOrderRow', () => {
 
 	it.each([
 		{ status: 'Filled' as const, label: 'Filled' },
-		{ status: 'Canceled' as const, label: 'Canceled' }
+		{ status: 'Canceled' as const, label: 'Canceled' },
+		{ status: 'Expired' as const, label: 'Expired' }
 	])('renders a leading SVG glyph for the $status badge', ({ status, label }) => {
 		const { getByText } = render(TradingOrderRow, { props: { order: { ...order, status } } });
 
 		expect(badgeGlyphWrapper({ getByText, label })?.querySelector('svg')).not.toBeNull();
 	});
 
-	it('renders the ⏱ emoji glyph for the Expired badge', () => {
-		const { getByText } = render(TradingOrderRow, {
-			props: { order: { ...order, status: 'Expired' } }
-		});
-
-		expect(getByText('⏱')).toBeInTheDocument();
-		expect(badgeGlyphWrapper({ getByText, label: 'Expired' })?.querySelector('svg')).toBeNull();
-	});
-
 	it('renders no leading glyph for an active (Open) badge', () => {
-		const { getByText, queryByText } = render(TradingOrderRow, { props: { order } });
+		const { getByText } = render(TradingOrderRow, { props: { order } });
 
 		expect(badgeGlyphWrapper({ getByText, label: 'Open' })?.querySelector('svg')).toBeNull();
-		expect(queryByText('⏱')).toBeNull();
 	});
 });

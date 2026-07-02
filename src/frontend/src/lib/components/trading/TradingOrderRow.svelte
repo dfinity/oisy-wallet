@@ -1,6 +1,7 @@
 <script lang="ts">
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
@@ -71,19 +72,18 @@
 		Expired: $i18n.trading.orders.status_expired
 	});
 
-	// Terminal states carry a small leading glyph in the badge (per wireframe). The SVG
-	// icons inherit the badge text color via currentColor; Expired uses the ⏱ emoji.
-	// Active states (Open/Pending/Partial) show none.
+	// Terminal states carry a small leading glyph in the badge (per wireframe); the icon
+	// inherits the badge text color via currentColor. Active states (Open/Pending/Partial)
+	// show none.
 	const statusIcons = {
 		Open: undefined,
 		Pending: undefined,
 		Partial: undefined,
 		Filled: IconCheck,
 		Canceled: IconClose,
-		Expired: undefined
+		Expired: IconClock
 	};
 	let StatusIcon = $derived(statusIcons[labelKey]);
-	let statusEmoji = $derived(labelKey === 'Expired' ? '⏱' : undefined);
 
 	let rowText = $derived(
 		side === 'sell'
@@ -134,8 +134,6 @@
 			<span class="inline-flex items-center gap-1">
 				{#if StatusIcon}
 					<span class="inline-flex" aria-hidden="true"><StatusIcon size="14" /></span>
-				{:else if statusEmoji}
-					<span aria-hidden="true">{statusEmoji}</span>
 				{/if}
 				<span>{statusLabels[labelKey]}</span>
 			</span>
