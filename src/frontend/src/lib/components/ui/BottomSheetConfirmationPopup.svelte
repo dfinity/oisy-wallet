@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { BottomSheet } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -17,7 +17,7 @@
 </script>
 
 <div class="fixed inset-0 z-50">
-	<BottomSheet transition>
+	<BottomSheetContainer transition>
 		<div class="flex w-full flex-col">
 			<div class="w-full p-4">
 				<ButtonIcon
@@ -36,7 +36,7 @@
 
 			{@render content()}
 		</div>
-	</BottomSheet>
+	</BottomSheetContainer>
 
 	<Backdrop onClose={onCancel} />
 </div>
