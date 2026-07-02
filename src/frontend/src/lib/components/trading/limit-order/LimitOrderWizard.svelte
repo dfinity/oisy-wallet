@@ -180,8 +180,9 @@
 			token2: quoteSymbol,
 			side,
 			orderType: fillOrKill ? 'FOK' : 'GTC',
-			// Order volume is the base-token (`token`) quantity.
-			volume: `${baseNum}`
+			// Order volume is the base-token (`token`) quantity. Use the raw entered string
+			// rather than the parsed number so full precision is preserved (no `1e-7`).
+			volume: baseAmount
 		};
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
