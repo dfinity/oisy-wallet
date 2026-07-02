@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "पूर्ण",
+		"in_progress": "प्रगति में",
+		"failed": "विफल"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "एसेट्स",

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import GetTokenWizardStep from '$lib/components/get-token/GetTokenWizardStep.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { getTokenWizardSteps } from '$lib/config/get-token.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';

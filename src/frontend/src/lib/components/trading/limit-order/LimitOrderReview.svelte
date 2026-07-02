@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
+	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
+	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
+	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -9,9 +11,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
-	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
-	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -60,23 +59,31 @@
 	}: Props = $props();
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount, price }));
+	const base = $derived(pairView?.baseSymbol ?? '');
+	const quote = $derived(pairView?.quoteSymbol ?? '');
+
+	// Display strings, rounded to the pair's decimals so nothing leaks raw float
+	// artifacts into the shared hero / price-summary.
+	const baseAmountDisplay = $derived(
+		formatTradeAmount({ amount: baseAmount, decimals: pairView?.baseDecimals ?? 8 })
+	);
 	const quoteAmountDisplay = $derived(
 		quoteAmount > 0
 			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
 			: '-'
 	);
-	const base = $derived(pairView?.baseSymbol ?? '');
-	const quote = $derived(pairView?.quoteSymbol ?? '');
+	const priceDisplay = $derived(
+		formatTradeAmount({ amount: price, decimals: pairView?.quoteDecimals ?? 8 })
+	);
+	const currentValueDisplay = $derived(
+		currentValue > 0
+			? formatTradeAmount({ amount: currentValue, decimals: pairView?.quoteDecimals ?? 8 })
+			: undefined
+	);
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
 	const severe = $derived(crossing && valueDiff < -5);
-
-	const quoteLabel = $derived(
-		side === 'sell'
-			? $i18n.trading.limit_order.you_get_at_least
-			: $i18n.trading.limit_order.you_pay_at_most
-	);
 
 	const orderType = $derived(
 		fillOrKill ? $i18n.trading.limit_order.order_type_fok : $i18n.trading.limit_order.order_type_gtc
@@ -86,12 +93,6 @@
 	// rather than the misleading "no fee" label a 0 fallback would render.
 	const makerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.makerFeeBps) : null);
 	const takerFee = $derived(nonNullish(pairView) ? feeBpsToPercent(pairView.takerFeeBps) : null);
-	const feePercent = (value: number | null): string =>
-		value === null
-			? '-'
-			: value === 0
-				? $i18n.trading.limit_order.no_fee
-				: replacePlaceholders($i18n.trading.limit_order.fee_percent, { $value: value.toString() });
 
 	// Queue position only for a resting order (a crossing order fills now).
 	const queueText = $derived.by((): string | undefined => {
@@ -121,103 +122,25 @@
 </script>
 
 <ContentWithToolbar>
-	<!-- Two-box hero: base always on top, side-aware labels. -->
-	<div class="relative mb-4 rounded-lg border border-disabled">
-		<div class="px-3.5 py-3">
-			<div class="mb-1 text-xs text-secondary">
-				{$i18n.trading.limit_order.hero_prefix}
-				<strong class="font-bold text-primary uppercase">
-					{side === 'sell' ? $i18n.trading.limit_order.sell : $i18n.trading.limit_order.buy}
-				</strong>
-			</div>
-			<div class="text-xl font-medium text-primary">{baseAmount} {base}</div>
-		</div>
-		<div class="border-t border-disabled px-3.5 py-3">
-			<div class="mb-1 text-xs text-secondary">{quoteLabel}</div>
-			<div class="text-xl font-medium text-primary">
-				{quoteAmountDisplay}
-				{quote}
-			</div>
-		</div>
-		<span
-			class="absolute top-1/2 left-1/2 flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-secondary bg-primary text-tertiary"
-		>
-			{#if side === 'sell'}
-				<IconArrowDown size="16" />
-			{:else}
-				<span class="rotate-180"><IconArrowDown size="16" /></span>
-			{/if}
-		</span>
-	</div>
+	<LimitOrderIntentHero
+		baseAmount={baseAmountDisplay}
+		baseSymbol={base}
+		quoteAmount={quoteAmountDisplay}
+		quoteSymbol={quote}
+		{side}
+	/>
 
-	<!-- Price section card -->
-	<div class="mb-3 rounded-lg border border-disabled px-3.5 py-3">
-		<div class="flex items-baseline justify-between">
-			<span class="text-sm text-secondary">{$i18n.trading.limit_order.limit_price}</span>
-			<span class="text-lg font-semibold text-primary">
-				{replacePlaceholders($i18n.trading.limit_order.limit_price_value, {
-					$price: price.toString(),
-					$quote: quote,
-					$base: base
-				})}
-			</span>
-		</div>
-		<div class="mt-2.5 flex flex-col gap-1.5 border-t border-disabled pt-2.5">
-			<div class="flex items-center justify-between text-xs">
-				<span class="text-tertiary">{$i18n.trading.limit_order.current_value}</span>
-				<span class="font-medium text-secondary">
-					{currentValue > 0
-						? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
-								$price: currentValue.toString(),
-								$quote: quote,
-								$base: base
-							})
-						: '-'}
-				</span>
-			</div>
-			<div class="flex items-center justify-between text-xs">
-				<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
-				<ValueDifference
-					errorLevel={-5}
-					iconPosition="left"
-					muted={!(crossing || fillOrKill)}
-					successNeutral
-					value={valueDiff}
-					warningLevel={0}
-				/>
-			</div>
-			{#if nonNullish(queueText)}
-				<div class="flex items-center justify-between text-xs">
-					<span class="text-tertiary">{$i18n.trading.limit_order.queue_position_row}</span>
-					<span class="font-medium text-secondary">{queueText}</span>
-				</div>
-			{/if}
-		</div>
-	</div>
+	<LimitOrderPriceSummary
+		baseSymbol={base}
+		{currentValueDisplay}
+		muted={!(crossing || fillOrKill)}
+		{priceDisplay}
+		{queueText}
+		quoteSymbol={quote}
+		valueDifference={valueDiff}
+	/>
 
-	<ModalValue>
-		{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
-		{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
-	</ModalValue>
-	<ModalValue>
-		{#snippet label()}{$i18n.trading.limit_order.order_type}{/snippet}
-		{#snippet mainValue()}{orderType}{/snippet}
-	</ModalValue>
-	<ModalValue>
-		{#snippet label()}
-			{fillOrKill ? $i18n.trading.limit_order.fee_taker : $i18n.trading.limit_order.fee_maker_taker}
-		{/snippet}
-		{#snippet mainValue()}
-			{#if fillOrKill}
-				{feePercent(takerFee)}
-			{:else}
-				{replacePlaceholders($i18n.trading.limit_order.fee_maker_taker_value, {
-					$maker: feePercent(makerFee),
-					$taker: feePercent(takerFee)
-				})}
-			{/if}
-		{/snippet}
-	</ModalValue>
+	<LimitOrderTermsList {makerFee} orderTypeLabel={orderType} {takerFee} takerOnly={fillOrKill} />
 
 	{#if severe}
 		<div class="mt-4" transition:slide>

@@ -81,6 +81,11 @@
 			"video_not_supported": "Votre navigateur ne prend pas en charge la lecture vidéo."
 		}
 	},
+	"progress": {
+		"completed": "Terminé",
+		"in_progress": "En cours",
+		"failed": "Échec"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Actifs",
