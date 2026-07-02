@@ -18,7 +18,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 
 - **Portfolio** — Assets, NFTs, Activity.
 - **Finance** — Earn (with Trade and Borrow joining as the group is built out).
-- **More** — Explore, Notes, Settings, Rewards.
+- **More** — Notes, Explore, Rewards, Settings.
 
 There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
