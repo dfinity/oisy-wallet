@@ -61,7 +61,7 @@
 	// Whether to render the address input inside a bottom sheet (with an "Enter
 	// manually" trigger) instead of inline next to the camera. Requires both a
 	// mobile device (touch-first ergonomics) and a viewport below `lg` (1024px):
-	// gix-components' BottomSheet drops its sticky `position: fixed` styling at
+	// the bottom sheet drops its sticky `position: fixed` styling at
 	// >=1024px, so a wide-viewport mobile (dev-tools emulation, landscape
 	// phablets, some Android tablets) would render the sheet inline in the
 	// document flow and the trigger would appear broken — fall back to the
