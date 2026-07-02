@@ -17,7 +17,7 @@ Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by
 The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that share one set of destinations arranged by a grouped information architecture: **Portfolio**, **Finance**, and **More**. The grouping is intentionally different per form factor — the mobile bar has limited slots, so Notes earns a top-level slot there while NFTs lives in the More group; on desktop NFTs sits in Portfolio and Notes lives in More.
 
 - **Portfolio** — Assets, NFTs, Activity.
-- **Finance** — Trade, Borrow, Earn.
+- **Finance** — Trade, Earn, Borrow.
 - **More** — Notes, Explore, Rewards, Settings.
 
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
