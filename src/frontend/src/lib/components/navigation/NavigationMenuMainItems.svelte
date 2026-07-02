@@ -137,7 +137,7 @@
 				? {
 						earn: {
 							label: $i18n.navigation.text.earning,
-							ariaLabel: $i18n.navigation.alt.airdrops,
+							ariaLabel: $i18n.navigation.text.earning,
 							testId: prefixedTestId(NAVIGATION_ITEM_EARN),
 							icon: IconPlant,
 							href: url(AppPath.Earn),
