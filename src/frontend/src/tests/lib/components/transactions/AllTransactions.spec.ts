@@ -10,6 +10,12 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_VALUES,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -53,6 +59,20 @@ describe('AllTransactions', () => {
 
 		expect(title).toBeInTheDocument();
 		expect(title.textContent).toBe(en.activity.text.title);
+	});
+
+	it('should track a page_open for the Activity section on mount', () => {
+		const trackEventSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
+
+		render(AllTransactions);
+
+		expect(trackEventSpy).toHaveBeenCalledWith({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.ACTIVITY,
+				event_value: PLAUSIBLE_EVENT_VALUES.ACTIVITY_PAGE
+			}
+		});
 	});
 
 	it('renders the no Index canister warning box', () => {

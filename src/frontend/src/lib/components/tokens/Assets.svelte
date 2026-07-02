@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { AfterNavigate } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
@@ -27,11 +29,18 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
-	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_TRIGGERS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
+	import { buildAssetsTabViewEvent, trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import type { ManageTokensData } from '$lib/types/manage-tokens';
+	import { isAssetsRouteId } from '$lib/utils/nav.utils';
 
 	interface Props {
 		tab: TokenTypes;
@@ -50,6 +59,30 @@
 
 	$effect(() => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+	});
+
+	afterNavigate(({ from }: AfterNavigate) => {
+		// Count entering the Assets section, not switching the Tokens/NFTs/Earning sub-tabs:
+		// sub-tab clicks already fire view_open in Tabs.handleClick and then remount this
+		// component, so a naive per-mount fire would double-count. Suppress when the previous
+		// route was itself an Assets sub-route (initial load has from === null and counts).
+		if (nonNullish(from) && isAssetsRouteId(from.route.id)) {
+			return;
+		}
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS,
+				event_value: PLAUSIBLE_EVENT_VALUES.ASSETS_PAGE
+			}
+		});
+
+		// Landing-tab impression — completes per-tab view counts (the clicked path is
+		// covered by Tabs). Tagged `auto` to distinguish it from a deliberate tab click.
+		trackEvent(
+			buildAssetsTabViewEvent({ tabId: activeTab, trigger: PLAUSIBLE_EVENT_TRIGGERS.AUTO })
+		);
 	});
 </script>
 

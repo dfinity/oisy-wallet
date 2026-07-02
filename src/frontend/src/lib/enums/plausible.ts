@@ -20,7 +20,8 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
-	ONRAMPER_OPEN = 'onramper_open'
+	ONRAMPER_OPEN = 'onramper_open',
+	UI_CLICK = 'ui_click'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -41,6 +42,11 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	DFX = 'dfx',
 	OPEN_CRYPTOPAY = 'open_cryptopay',
 	EARN = 'earn',
+	ASSETS = 'assets',
+	ACTIVITY = 'activity',
+	EXPLORE = 'explore',
+	SETTINGS = 'settings',
+	REWARDS = 'rewards',
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
 	NETWORKS = 'networks',
@@ -81,6 +87,11 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
 	NFT_PAGE = 'nft-page',
 	EARN_PAGE = 'earn-page',
+	ASSETS_PAGE = 'assets-page',
+	ACTIVITY_PAGE = 'activity-page',
+	EXPLORE_PAGE = 'explore-page',
+	SETTINGS_PAGE = 'settings-page',
+	REWARDS_PAGE = 'rewards-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
 	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
 	TOKENS_BASIC = 'tokens_basic',
@@ -113,7 +124,8 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	EARN = 'earn',
 	SIGNER = 'signer',
 	REWARDS = 'rewards',
-	TRANSACTIONS = 'transactions'
+	TRANSACTIONS = 'transactions',
+	NAVIGATION = 'navigation'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
@@ -149,4 +161,9 @@ export enum PLAUSIBLE_EVENT_RESULT_STATUSES {
 export enum PLAUSIBLE_EVENT_TYPES_SIGNER {
 	REQUESTED = 'requested',
 	PRESENTED = 'presented'
+}
+
+export enum PLAUSIBLE_EVENT_TRIGGERS {
+	AUTO = 'auto',
+	CLICK = 'click'
 }

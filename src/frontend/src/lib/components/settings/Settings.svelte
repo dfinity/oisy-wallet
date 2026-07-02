@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
+	import { onMount } from 'svelte';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import { updateUserTransactionFilterSettings } from '$lib/api/backend.api';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
@@ -20,12 +21,17 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { hideMicroTransactions, userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
 	} from '$lib/enums/settings-modal-types';
-	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
+	import { buildLearnMoreEvent, trackEvent } from '$lib/services/analytics.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -41,6 +47,16 @@
 		modalStore.openSettings({ id: modalId, data: t });
 
 	let filterLoading = $state(false);
+
+	onMount(() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.SETTINGS,
+				event_value: PLAUSIBLE_EVENT_VALUES.SETTINGS_PAGE
+			}
+		});
+	});
 
 	const toggleMicroTransactions = async () => {
 		if (isNullish($authIdentity)) {

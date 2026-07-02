@@ -58,6 +58,20 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
 
+### Navigation section visits
+
+Each of the main navigation sections fires a `page_open` Plausible event when the user **enters** it, distinguished by `event_value`: Assets (`assets-page`), Activity (`activity-page`), Earn (`earn-page`), Explore (`explore-page`), Settings (`settings-page`). A visit is counted however the section is reached — a nav-menu click, a direct URL, the browser back/forward button, or an in-app redirect — not only on nav-menu clicks. Each section's feature component emits the event from `onMount` (the pattern Earn already used), with a matching `event_context` (`assets` / `activity` / `earn` / `explore` / `settings`).
+
+The Earn nav slot shows **Rewards** instead of Earn when `EARNING_ENABLED` is off; Rewards is tracked as its own section (`event_context = rewards`, `event_value = rewards-page`) so the two are independently visible during the rollout.
+
+### Assets sub-tab views
+
+Within Assets, the Tokens / NFTs / Earning sub-tabs each emit a `view_open` event (`event_context = assets_tab`, `event_value` = the tab id, `location_source = assets_page`) **per appearance**, with an `event_trigger` property recording the cause: `click` when the user clicked the tab, `auto` when the view was shown without a click (the landing tab on section entry, a direct URL to a sub-route, or a back/forward landing). The landing fire is entry-guarded so a sub-tab click — which already emits one `click` event and then remounts the page — is not double-counted by an additional `auto` fire. Both the click and the landing payloads are produced by the shared `buildAssetsTabViewEvent()` helper so they stay identical apart from `event_value` and `event_trigger`. (Known gap: back/forward navigation _between_ Assets sub-tabs does not emit a `view_open`, as the guard treats it as intra-section.)
+
+### Navigation clicks
+
+Clicking a navigation control fires a generic `ui_click` event — a complementary "how users navigate" signal, distinct from the "which sections get visited" `page_open` count. It carries `source_location = navigation`, a `source_sublocation` for the surface (`main_menu` for the main navigation menu, `assets_tabs` for the Assets sub-tab bar), and `event_value` for the specific target (the section id for the menu, the tab id for the tabs). A single generic event with these properties — rather than per-surface event names — keeps every navigation surface comparable in one Plausible breakdown and lets new surfaces adopt it by adding property values, not events. Payloads are built by the shared `buildUiClickEvent()` helper. `ui_click` is orthogonal to the appearance events: a main-nav click to Assets emits `ui_click` **and** `page_open` **and** the landing `view_open`, while a direct-URL/back-forward entry emits only the latter two — so `page_open` remains the complete visit metric. `ui_click` uses the standard `source_location` key; the older `location_source` on `view_open` is legacy and migrated separately.
+
 ---
 
 ## Exchange-rate sourcing
