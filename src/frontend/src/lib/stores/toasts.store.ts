@@ -1,8 +1,69 @@
-import type { ToastMsg } from '$lib/types/toast';
+import type { ToastLevel, ToastMsg, ToastMsgUI } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { toastsStore } from '@dfinity/gix-components';
 import { nonNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
+
+export interface ToastsStore extends Readable<ToastMsgUI[]> {
+	show: (msg: Partial<Pick<ToastMsgUI, 'id'>> & Omit<ToastMsgUI, 'id'>) => symbol;
+	hide: (idToHide: symbol) => void;
+	update: (params: { id: symbol; content: Partial<Omit<ToastMsgUI, 'id'>> }) => void;
+	reset: (levels?: ToastLevel[]) => void;
+}
+
+/**
+ * Toast messages (vendored from @dfinity/gix-components).
+ *
+ * - show: display a message in toast component
+ * - hide: remove the toast message with that timestamp or the first one.
+ * - update: update the existed toast content.
+ * - reset: empty all toasts or optionally only those that match particular levels
+ */
+const initToastsStore = (): ToastsStore => {
+	const { subscribe, update, set } = writable<ToastMsgUI[]>([]);
+
+	return {
+		subscribe,
+
+		show: ({ id, ...rest }: Partial<Pick<ToastMsgUI, 'id'>> & Omit<ToastMsgUI, 'id'>): symbol => {
+			const toastId = id ?? Symbol('toast');
+
+			update((messages: ToastMsgUI[]) => [...messages, { ...rest, id: toastId }]);
+
+			return toastId;
+		},
+
+		hide: (idToHide: symbol) => {
+			update((messages: ToastMsgUI[]) => messages.filter(({ id }) => id !== idToHide));
+		},
+
+		update: ({ id, content }: { id: symbol; content: Partial<Omit<ToastMsgUI, 'id'>> }) => {
+			update((messages: ToastMsgUI[]) =>
+				// use map to preserve order
+				messages.map((message) => {
+					if (message.id !== id) {
+						return message;
+					}
+					return {
+						...message,
+						...content
+					};
+				})
+			);
+		},
+
+		reset: (levels?: ToastLevel[]) => {
+			if (nonNullish(levels) && levels.length > 0) {
+				update((messages: ToastMsgUI[]) => messages.filter(({ level }) => !levels.includes(level)));
+				return;
+			}
+
+			set([]);
+		}
+	};
+};
+
+export const toastsStore = initToastsStore();
 
 export const toastsShow = (msg: ToastMsg): symbol => toastsStore.show(msg);
 
