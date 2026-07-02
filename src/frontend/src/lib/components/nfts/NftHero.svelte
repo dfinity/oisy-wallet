@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
 	import { afterNavigate, goto } from '$app/navigation';
+	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
