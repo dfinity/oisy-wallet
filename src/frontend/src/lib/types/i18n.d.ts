@@ -1832,7 +1832,6 @@ interface I18nEarning {
 	};
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
-		sprinkles: { title: string; description: string; action: string };
 		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {

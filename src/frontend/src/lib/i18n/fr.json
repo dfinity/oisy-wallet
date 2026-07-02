@@ -2281,11 +2281,6 @@
 				"description": "Efficacité de rendement maximale avec des vaults en Autopilot en un seul clic.",
 				"action": "Aller à l'Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Utilisez OISY et GAGNEZ ! L'épisode 6 est en direct 🎉",
-				"action": "Vérifier le statut"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",

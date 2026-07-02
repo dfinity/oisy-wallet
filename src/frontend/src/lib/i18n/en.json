@@ -2281,11 +2281,6 @@
 				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
 				"action": "Go to Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
-				"action": "Check status"
-			},
 			"liquidium": {
 				"title": "Liquidium",
 				"description": "Lend your assets to earn yield, or borrow against them.",
