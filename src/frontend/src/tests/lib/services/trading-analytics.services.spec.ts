@@ -19,8 +19,8 @@ describe('trading-analytics.services', () => {
 			trackTrading({
 				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-				base: 'ICP',
-				quote: 'ckUSDC',
+				token: 'ICP',
+				token2: 'ckUSDC',
 				side: 'sell',
 				orderType: 'GTC',
 				volume: '12.5'
@@ -33,8 +33,8 @@ describe('trading-analytics.services', () => {
 					event_context: 'trading',
 					event_subcontext: 'limit_order',
 					result_status: 'executing',
-					base: 'ICP',
-					quote: 'ckUSDC',
+					token: 'ICP',
+					token2: 'ckUSDC',
 					side: 'sell',
 					orderType: 'GTC',
 					volume: '12.5'

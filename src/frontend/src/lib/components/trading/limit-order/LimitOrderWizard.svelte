@@ -174,13 +174,13 @@
 
 		const orderFields: Pick<
 			TrackTradingParams,
-			'base' | 'quote' | 'side' | 'orderType' | 'volume'
+			'token' | 'token2' | 'side' | 'orderType' | 'volume'
 		> = {
-			base: baseSymbol,
-			quote: quoteSymbol,
+			token: baseSymbol,
+			token2: quoteSymbol,
 			side,
 			orderType: fillOrKill ? 'FOK' : 'GTC',
-			// Order volume is the base-token quantity.
+			// Order volume is the base-token (`token`) quantity.
 			volume: `${baseNum}`
 		};
 		trackTrading({

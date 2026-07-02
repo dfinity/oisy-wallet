@@ -18,16 +18,15 @@ export interface TrackTradingParams {
 	subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING;
 	// Lifecycle: `executing` when the flow starts, then `success` / `error`.
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
-	// Pair leg symbols — free-form token symbols (no closed set), so kept as strings.
-	base?: string;
-	quote?: string;
+	// Primary token symbol — the single token for deposit/withdraw, or the base leg of an
+	// order pair. `token`/`token2` mirror the two-token shape used by the swap events.
+	token?: string;
+	// Second leg (the quote token) of an order pair; absent for deposit/withdraw.
+	token2?: string;
 	side?: LimitOrderSide;
 	orderType?: OisyTradeOrderType;
-	// Token symbol; open-ended like `base`/`quote`, so a plain symbol string.
-	token?: string;
-	// Traded amount in the relevant token's own units (the deposited/withdrawn token,
-	// or the order's base token), as a full-precision decimal string so volume can be
-	// aggregated per token in analytics.
+	// Traded amount in `token`'s own units (the deposited/withdrawn token, or the order's
+	// base token), as a full-precision decimal string so volume can be aggregated per token.
 	volume?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
@@ -40,11 +39,10 @@ export interface TrackTradingParams {
 export const trackTrading = ({
 	subContext,
 	resultStatus,
-	base,
-	quote,
+	token,
+	token2,
 	side,
 	orderType,
-	token,
 	volume,
 	error
 }: TrackTradingParams) => {
@@ -55,11 +53,10 @@ export const trackTrading = ({
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
 			event_subcontext: subContext,
 			result_status: resultStatus,
-			...(nonNullish(base) && { base }),
-			...(nonNullish(quote) && { quote }),
+			...(nonNullish(token) && { token }),
+			...(nonNullish(token2) && { token2 }),
 			...(nonNullish(side) && { side }),
 			...(nonNullish(orderType) && { orderType }),
-			...(nonNullish(token) && { token }),
 			...(notEmptyString(volume) && { volume }),
 			...(notEmptyString(error) && { result_error: error })
 		}
