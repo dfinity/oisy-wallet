@@ -5,7 +5,7 @@
 
 <svg fill="none" height={size} viewBox="0 0 24 24" width={size} xmlns="http://www.w3.org/2000/svg">
 	<defs>
-		<clipPath id="nftclip">
+		<clipPath id="clip0_icon_image">
 			<rect height="16" rx="3" width="16" x="4" y="4" />
 		</clipPath>
 	</defs>
@@ -20,7 +20,7 @@
 		y="3"
 	/>
 	<path
-		clip-path="url(#nftclip)"
+		clip-path="url(#clip0_icon_image)"
 		d="M4 17.5L9.5 12.5L13 15.5L16 12.5L20 16.5V20H4Z"
 		fill="currentColor"
 		opacity="0.4"
