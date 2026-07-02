@@ -4,6 +4,8 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -17,37 +19,56 @@
 	let { onCancel, title, content, disabled = false, showCloseButton = true }: Props = $props();
 </script>
 
-<div class="fixed inset-0 z-50">
-	<BottomSheet transition>
-		{#snippet header()}
-			<div class="flex w-full items-center justify-between gap-4 p-4">
-				<h3
-					class="m-0 min-w-0 break-words"
-					class:text-center={!showCloseButton}
-					class:w-full={!showCloseButton}
+{#snippet body()}
+	<div class="flex w-full flex-col">
+		<div class="flex w-full items-center justify-between gap-4 px-5 pt-5 pb-2">
+			<h3 class="m-0 min-w-0 break-words text-xl font-bold" class:w-full={!showCloseButton}>
+				{@render title()}
+			</h3>
+
+			{#if showCloseButton}
+				<ButtonIcon
+					ariaLabel={$i18n.core.alt.close_details}
+					{disabled}
+					onclick={onCancel}
+					styleClass="text-disabled"
 				>
-					{@render title()}
-				</h3>
-
-				{#if showCloseButton}
-					<ButtonIcon
-						ariaLabel={$i18n.core.alt.close_details}
-						{disabled}
-						onclick={onCancel}
-						styleClass="text-disabled"
-					>
-						{#snippet icon()}
-							<IconClose size="24" />
-						{/snippet}
-					</ButtonIcon>
-				{/if}
-			</div>
-		{/snippet}
-
-		<div class="flex w-full flex-col">
-			{@render content()}
+					{#snippet icon()}
+						<IconClose size="24" />
+					{/snippet}
+				</ButtonIcon>
+			{/if}
 		</div>
-	</BottomSheet>
 
-	<Backdrop onClose={onCancel} />
-</div>
+		{@render content()}
+	</div>
+{/snippet}
+
+<!-- Mobile: a slide-up bottom sheet. gix's BottomSheet only renders as a real
+     sheet below 1024px; above it collapses to a transparent, position-relative
+     block, so on desktop we render the same content as a centered modal instead. -->
+<Responsive down="lg">
+	<div class="fixed inset-0 z-50">
+		<BottomSheet transition>
+			{@render body()}
+		</BottomSheet>
+
+		<Backdrop onClose={onCancel} />
+	</div>
+</Responsive>
+
+<!-- Desktop: a smaller modal stacked over the underlying modal. -->
+<Responsive up="1.5lg">
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<Backdrop onClose={onCancel} />
+
+		<div
+			class="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-primary shadow-[var(--overlay-box-shadow)]"
+			aria-modal="true"
+			data-tid={CONFIRMATION_POPUP_MODAL}
+			role="dialog"
+		>
+			{@render body()}
+		</div>
+	</div>
+</Responsive>
