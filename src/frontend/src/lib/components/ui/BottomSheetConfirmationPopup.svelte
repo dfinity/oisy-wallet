@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { BottomSheet } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { CONFIRMATION_POPUP_MODAL } from '$lib/constants/test-ids.constants';
@@ -44,14 +44,14 @@
 	</div>
 {/snippet}
 
-<!-- Mobile: a slide-up bottom sheet. gix's BottomSheet only renders as a real
+<!-- Mobile: a slide-up bottom sheet. The bottom sheet only renders as a real
      sheet below 1024px; above it collapses to a transparent, position-relative
      block, so on desktop we render the same content as a centered modal instead. -->
 <Responsive down="lg">
 	<div class="fixed inset-0 z-50">
-		<BottomSheet transition>
+		<BottomSheetContainer transition>
 			{@render body()}
-		</BottomSheet>
+		</BottomSheetContainer>
 
 		<Backdrop onClose={onCancel} />
 	</div>

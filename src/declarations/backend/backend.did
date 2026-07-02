@@ -475,6 +475,13 @@ type DeleteContactResult = variant {
 	// The contact was not deleted due to an error.
 	Err : ContactError
 };
+type DeletePersonalNoteRequest = record { note_id : text };
+type DeletePersonalNoteResult = variant {
+	// The note was deleted (idempotent — also `Ok` when it did not exist).
+	Ok;
+	// The note could not be deleted due to an error.
+	Err : PersonalNoteError
+};
 type DismissedNotification = variant {
 	Qualified : record {
 		kind : QualifiedNotificationKind;
@@ -564,6 +571,18 @@ type GetContactsResult = variant {
 	Ok : vec Contact;
 	// The contacts were not retrieved due to an error.
 	Err : ContactError
+};
+type GetPersonalNotesCountResult = variant {
+	// The caller's total note count.
+	Ok : nat64;
+	// The count could not be retrieved due to an error.
+	Err : PersonalNoteError
+};
+type GetPersonalNotesResult = variant {
+	// All of the caller's (encrypted) notes.
+	Ok : vec PersonalNoteEntry;
+	// The notes could not be retrieved due to an error.
+	Err : PersonalNoteError
 };
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
@@ -794,6 +813,38 @@ type Outpoint = record {
 	vout : nat32
 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
+// A single stored entry returned by `get_personal_notes`, and the upsert
+// payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
+type PersonalNoteEntry = record {
+	// The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	// client-side.
+	encrypted_note : blob;
+	// Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	note_id : text
+};
+type PersonalNoteError = variant {
+	// The ciphertext exceeds [`MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`].
+	NoteCiphertextTooLarge;
+	// The caller is already at [`MAX_PERSONAL_NOTES_PER_USER`] and tried to add
+	// a *new* note. No existing note is evicted.
+	TooManyNotes;
+	// The caller exceeded the per-caller write rate limit.
+	RateLimited : RateLimitError;
+	// The `note_id` exceeds [`MAX_PERSONAL_NOTE_ID_BYTES`].
+	NoteIdTooLong;
+	// An unexpected internal error (e.g. a vetKeys access/derivation failure).
+	// The message never contains note cleartext (the canister cannot read it).
+	InternalError : record { msg : text }
+};
+// Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+// vetKey and the store's public verification key). Both return opaque bytes on
+// success; the wire shape is identical, so one enum serves both.
+type PersonalNotesVetkeyResult = variant {
+	// vetKey bytes, opaque to the canister.
+	Ok : blob;
+	// The vetKey could not be derived due to an error.
+	Err : PersonalNoteError
+};
 // Which external provider the agreement belongs to.
 //
 // Add a new variant and redeploy the canister when onboarding a new provider.
@@ -830,6 +881,12 @@ type SaveUserTransactionsRequest = record {
 	transactions : vec UserTransaction
 };
 type SaveUserTransactionsResult = variant { Ok; Err : UserTransactionError };
+type SetPersonalNoteResult = variant {
+	// The note was created or updated successfully.
+	Ok;
+	// The note could not be stored due to an error.
+	Err : PersonalNoteError
+};
 type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
@@ -922,6 +979,8 @@ type Stats = record {
 	exchange_rates_count : nat64;
 	token_activity_count : nat64;
 	agreement_history_count : nat64;
+	// Total number of stored (encrypted) personal-note entries across all users.
+	personal_notes_count : nat64;
 	user_timestamps_count : nat64;
 	user_token_count : nat64
 };
@@ -1269,6 +1328,14 @@ service : (Arg) -> {
 	// # Notes
 	// This operation is idempotent - it will return OK if the contact has already been deleted.
 	delete_contact : (nat64) -> (DeleteContactResult);
+	// Deletes one of the caller's personal notes. Idempotent — deleting a missing
+	// note returns `Ok`.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError` (e.g. `RateLimited`).
+	delete_personal_note : (DeletePersonalNoteRequest) -> (
+		DeletePersonalNoteResult
+	);
 	// Returns whether the backend is currently fetching and caching exchange rates.
 	//
 	// Delegates to [`is_exchange_rate_refresh_enabled`] so this query stays coupled to the
@@ -1345,6 +1412,34 @@ service : (Arg) -> {
 	// state (`token_activity`) and may need an update context to schedule the
 	// background fetch.
 	get_exchange_rates : () -> (vec record { TokenId; opt ExchangeRate });
+	// Returns all of the caller's (encrypted) personal notes, decrypted client-side.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError`.
+	get_personal_notes : () -> (GetPersonalNotesResult) query;
+	// Returns the caller's total note count (drives the client-side capacity gate).
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError`.
+	get_personal_notes_count : () -> (GetPersonalNotesCountResult) query;
+	// Derives the caller's encrypted vetKey for the supplied transport public key.
+	// The browser decrypts it and derives the per-user symmetric key.
+	//
+	// This is an `update` because it makes an inter-canister call to the vetKD
+	// system API.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError`.
+	get_personal_notes_encrypted_vetkey : (blob) -> (PersonalNotesVetkeyResult);
+	// Returns the personal-notes vetKey verification (public) key. The browser uses
+	// it to verify the derived vetKey. Same value for every user.
+	//
+	// This is an `update` because it makes an inter-canister call to the vetKD
+	// system API.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError`.
+	get_personal_notes_vetkey_public_key : () -> (PersonalNotesVetkeyResult);
 	// Returns the full agreement consent/rejection history for the caller.
 	//
 	// # Returns
@@ -1457,6 +1552,13 @@ service : (Arg) -> {
 	// other configured API keys the way a full `set_api_keys` call would — the safe way to provision
 	// or rotate the secret per environment.
 	set_onramper_signing_secret : (opt text) -> ();
+	// Creates or updates one of the caller's personal notes (add and edit share the
+	// same upsert, keyed by `note_id`). The value is opaque ciphertext.
+	//
+	// # Errors
+	// Errors are enumerated by `PersonalNoteError` (e.g. `TooManyNotes`,
+	// `NoteCiphertextTooLarge`, `RateLimited`).
+	set_personal_note : (PersonalNoteEntry) -> (SetPersonalNoteResult);
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
