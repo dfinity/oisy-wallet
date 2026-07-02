@@ -1,7 +1,7 @@
 {
 	"borrowings": {
 		"text": {
-			"tab_title": "Borrowing",
+			"tab_title": "Borrowings",
 			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
 		}
 	},
