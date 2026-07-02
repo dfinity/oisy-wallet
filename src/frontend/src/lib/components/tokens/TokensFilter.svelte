@@ -15,9 +15,10 @@
 
 	interface Props {
 		overflowableContent?: Snippet;
+		hideFilter?: boolean;
 	}
 
-	let { overflowableContent }: Props = $props();
+	let { overflowableContent, hideFilter = false }: Props = $props();
 
 	let inputValue = $derived($tokenListStore.filter);
 
@@ -42,14 +43,18 @@
 	});
 </script>
 
-<SlidingInput
-	ariaLabel={$i18n.tokens.alt.filter_button}
-	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
-	{overflowableContent}
-	testIdPrefix={TOKEN_LIST_FILTER}
-	bind:inputValue
->
-	{#snippet icon()}
-		<IconSearch />
-	{/snippet}
-</SlidingInput>
+{#if hideFilter}
+	{@render overflowableContent?.()}
+{:else}
+	<SlidingInput
+		ariaLabel={$i18n.tokens.alt.filter_button}
+		inputPlaceholder={$i18n.tokens.text.filter_placeholder}
+		{overflowableContent}
+		testIdPrefix={TOKEN_LIST_FILTER}
+		bind:inputValue
+	>
+		{#snippet icon()}
+			<IconSearch />
+		{/snippet}
+	</SlidingInput>
+{/if}

@@ -191,14 +191,14 @@
 							type="button"
 						>
 							{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-								$amount: freeBase.toString(),
+								$amount: fmtBase(freeBase),
 								$symbol: baseSymbol
 							})}
 						</button>
 					{:else}
 						<span class="text-tertiary">
 							{replacePlaceholders($i18n.trading.limit_order.balance, {
-								$amount: freeBase.toString(),
+								$amount: fmtBase(freeBase),
 								$symbol: baseSymbol
 							})}
 						</span>
@@ -244,14 +244,14 @@
 						type="button"
 					>
 						{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-							$amount: freeQuote.toString(),
+							$amount: fmtQuote(freeQuote),
 							$symbol: quoteSymbol
 						})}
 					</button>
 				{:else}
 					<span class="text-tertiary">
 						{replacePlaceholders($i18n.trading.limit_order.balance, {
-							$amount: freeQuote.toString(),
+							$amount: fmtQuote(freeQuote),
 							$symbol: quoteSymbol
 						})}
 					</span>
