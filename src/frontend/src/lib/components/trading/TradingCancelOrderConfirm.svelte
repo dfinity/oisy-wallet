@@ -39,7 +39,7 @@
 	);
 </script>
 
-<BottomSheetConfirmationPopup {onCancel}>
+<BottomSheetConfirmationPopup {disabled} {onCancel} showCloseButton={false}>
 	{#snippet title()}{$i18n.trading.order_detail.confirm_title}{/snippet}
 
 	{#snippet content()}

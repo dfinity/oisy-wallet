@@ -7,12 +7,18 @@
 	import WithdrawProgress from '$lib/components/trading/WithdrawProgress.svelte';
 	import WithdrawReview from '$lib/components/trading/WithdrawReview.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
 	import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
 	import { withdrawFromOisyTrade } from '$lib/services/oisy-trade.services';
+	import { trackTrading } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 
 	interface Props {
 		token: IcToken;
@@ -55,6 +61,12 @@
 
 		onNext();
 
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			token: token.symbol
+		});
+
 		try {
 			await withdrawFromOisyTrade({
 				identity: $authIdentity,
@@ -66,8 +78,20 @@
 
 			withdrawProgressStep = ProgressStepsTradingWithdraw.DONE;
 
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				token: token.symbol
+			});
+
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				token: token.symbol,
+				error: replaceIcErrorFields(err)
+			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
 
 			onBack();

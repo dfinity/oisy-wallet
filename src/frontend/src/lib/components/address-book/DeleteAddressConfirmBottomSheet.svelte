@@ -15,7 +15,7 @@
 	let { onCancel, onDelete, address, contact, disabled = false }: Props = $props();
 </script>
 
-<BottomSheetConfirmationPopup {onCancel}>
+<BottomSheetConfirmationPopup {disabled} {onCancel} showCloseButton={false}>
 	{#snippet title()}
 		{$i18n.address.delete.title}
 	{/snippet}
