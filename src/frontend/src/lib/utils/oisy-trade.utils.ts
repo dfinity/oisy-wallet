@@ -1,17 +1,135 @@
 import type {
 	Token as OisyTradeToken,
+	OrderStatus,
 	PriceLevel,
 	Side,
 	TradingPair,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { OisyTradeAsset } from '$lib/types/oisy-trade';
+import type {
+	OisyTradeAsset,
+	OisyTradeOrderDisplayStatus,
+	OisyTradeOrderStatus,
+	OisyTradeOrderView,
+	OisyTradeWithdrawToken
+} from '$lib/types/oisy-trade';
+import type { BadgeVariant } from '$lib/types/style';
+import { formatToken } from '$lib/utils/format.utils';
+import { parseToken } from '$lib/utils/parse.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+
+// The distinct union of every base and quote token symbol across the trading
+// pairs — the set of tokens OISY TRADE supports. Used for the onboarding chips
+// and the deposit "nothing to deposit" empty state.
+export const oisyTradeSupportedTokenSymbols = (pairs: TradingPairInfo[]): string[] => [
+	...new Set(pairs.flatMap(({ base, quote }) => [base.metadata.symbol, quote.metadata.symbol]))
+];
+
+// Resolves the DEX balances (keyed by ledger canister principal) to OISY tokens
+// and enriches them with totals and fiat values. Balances whose ledger we don't
+// know are dropped — we can't render a row without the token's metadata/icon.
+export const mapOisyTradeAssets = ({
+	balances,
+	tokens,
+	exchanges
+}: {
+	balances: UserTokenBalance[];
+	tokens: IcToken[];
+	exchanges: ExchangesData;
+}): OisyTradeAsset[] => {
+	const tokenByLedgerId = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+
+	return balances.reduce<OisyTradeAsset[]>((acc, { token: dexToken, balance }) => {
+		const token = tokenByLedgerId.get(dexToken.id.ledger_id.toText());
+
+		if (token === undefined) {
+			return acc;
+		}
+
+		const { free, reserved } = balance;
+		const total = free + reserved;
+
+		acc.push({
+			token,
+			free,
+			reserved,
+			total,
+			totalUsd: calculateTokenUsdAmount({ amount: total, token, $exchanges: exchanges }),
+			freeUsd: calculateTokenUsdAmount({ amount: free, token, $exchanges: exchanges })
+		});
+
+		return acc;
+	}, []);
+};
+
+// Total fiat value of all DEX-deposited balances (free + reserved), to add to
+// the hero net-worth total.
+export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
+	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
+
+// The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
+// that the user holds in their wallet. The first token per symbol wins (the
+// combined list is ordered ICP → ICRC default → custom).
+export const oisyTradeDepositableTokens = ({
+	supportedTokens,
+	tokens,
+	hasBalance
+}: {
+	supportedTokens: OisyTradeToken[];
+	tokens: IcToken[];
+	hasBalance: (token: IcToken) => boolean;
+}): IcToken[] => {
+	// Resolve by ledger canister id (like Send and the order form), NOT by symbol,
+	// so a token's exact network/identity is preserved (e.g. a staging/testnet
+	// ledger isn't collapsed onto its mainnet namesake). Deduped by ledger id.
+	const byLedgerId = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+	const seen = new Set<string>();
+
+	return supportedTokens.reduce<IcToken[]>((acc, { id: { ledger_id } }) => {
+		const token = byLedgerId.get(ledger_id.toText());
+
+		if (nonNullish(token) && !seen.has(token.ledgerCanisterId) && hasBalance(token)) {
+			seen.add(token.ledgerCanisterId);
+			acc.push(token);
+		}
+
+		return acc;
+	}, []);
+};
+
+// True when at least one balance is reserved by an open order, i.e. the
+// "Available" line should be shown (available < total).
+export const oisyTradeAssetHasReserved = ({ reserved }: OisyTradeAsset): boolean => reserved > ZERO;
+
+// Pairs each DEX balance with the OISY token sharing its ledger canister id, so
+// the wallet's logo, network, decimals and exchange rate can be reused. Entries
+// whose ledger is unknown to the wallet are dropped (nothing to display them
+// with). Used to drive the Trading-tab "Withdraw" entry points.
+export const toOisyTradeWithdrawTokens = ({
+	balances,
+	icrcTokens
+}: {
+	balances: UserTokenBalance[];
+	icrcTokens: IcToken[];
+}): OisyTradeWithdrawToken[] => {
+	const tokenByLedgerCanisterId = new Map(
+		icrcTokens.map((token) => [token.ledgerCanisterId, token])
+	);
+
+	return balances
+		.map(({ token: { id }, balance: { free, reserved } }) => {
+			const token = tokenByLedgerCanisterId.get(id.ledger_id.toText());
+
+			return nonNullish(token) ? { token, free, reserved } : undefined;
+		})
+		.filter(nonNullish);
+};
 
 // ---------------------------------------------------------------------------
 // Pure helpers backing the limit-order form. Everything user-facing is computed
@@ -116,6 +234,24 @@ export const deriveQuoteAmount = ({
 	}
 	return baseAmount * price;
 };
+
+// Format a human-unit trade amount for display through the shared token
+// formatter, so it rounds to the token's decimals and matches the rest of the
+// app instead of leaking raw JS float artifacts (e.g. 0.1 * 3 = 0.30000000000000004).
+// Rounds to a fixed-decimals string first, then parses to base units with
+// `parseToken` (string-based, no float scaling) so large decimals/amounts stay exact.
+export const formatTradeAmount = ({
+	amount,
+	decimals
+}: {
+	amount: number;
+	decimals: number;
+}): string =>
+	formatToken({
+		value: parseToken({ value: amount.toFixed(decimals), unitName: decimals }),
+		unitName: decimals,
+		displayDecimals: decimals
+	});
 
 // Order value in human quote units (= base × price). NaN when not derivable.
 export const deriveNotional = ({
@@ -437,12 +573,7 @@ export const queuePositionDisplay = (fraction: number | null): QueuePositionDisp
 		return { front: true, percent: 0 };
 	}
 	if (pct < 10) {
-		// One decimal, rounded up — but if that rounds up to 10 (e.g. 9.91),
-		// fall through to the whole-number branch so the boundary stays consistent.
-		const rounded = Math.ceil(pct * 10) / 10;
-		if (rounded < 10) {
-			return { front: false, percent: rounded };
-		}
+		return { front: false, percent: Math.ceil(pct * 10) / 10 };
 	}
 	return { front: false, percent: Math.round(pct) };
 };
@@ -510,6 +641,91 @@ export const toPriceUnits = ({
 export const toCandidSide = (side: LimitOrderSide): Side =>
 	side === 'sell' ? { Sell: null } : { Buy: null };
 
+// ---------------------------------------------------------------------------
+// Orders — read-side view models for the Active/History list.
+// ---------------------------------------------------------------------------
+
+// The candid `OrderStatus` variant flattened to its single discriminant.
+const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
+	Object.keys(status)[0] as OisyTradeOrderStatus;
+
+// Resolve a `UserOrder` to OISY tokens (by ledger canister id, like the rest of
+// the Trading tab) and scale amounts to human units. Orders whose base or quote
+// ledger the wallet doesn't know are dropped — nothing to render them with.
+export const mapOisyTradeOrder = ({
+	order: { id, pair, order },
+	tokens
+}: {
+	order: UserOrder;
+	tokens: IcToken[];
+}): OisyTradeOrderView | undefined => {
+	const byLedger = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+
+	const base = byLedger.get(pair.base.toText());
+	const quote = byLedger.get(pair.quote.toText());
+
+	if (isNullish(base) || isNullish(quote)) {
+		return undefined;
+	}
+
+	const { side, price, quantity, filled_quantity, status } = order;
+
+	return {
+		id,
+		side: 'Sell' in side ? 'sell' : 'buy',
+		base,
+		quote,
+		// quantity / filled_quantity are base smallest units; price is quote
+		// smallest units per WHOLE base token.
+		quantity: Number(quantity) / 10 ** base.decimals,
+		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
+		price: Number(price) / 10 ** quote.decimals,
+		status: orderStatusKey(status)
+	};
+};
+
+// Map a list of `UserOrder`s to view models, dropping any whose tokens can't be
+// resolved (preserving the canister's newest-first order).
+export const mapOisyTradeOrders = ({
+	orders,
+	tokens
+}: {
+	orders: UserOrder[];
+	tokens: IcToken[];
+}): OisyTradeOrderView[] =>
+	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+
+// Status → display: the i18n label key (under `trading.orders.status`) and the
+// An Open order that has already filled some quantity is shown as the derived
+// "Partial" status — still active, and (like Pending) amber.
+export const oisyTradeOrderDisplayStatus = ({
+	status,
+	filledQuantity
+}: OisyTradeOrderView): OisyTradeOrderDisplayStatus =>
+	status === 'Open' && filledQuantity > 0 ? 'Partial' : status;
+
+// `Badge` pill variant. Open resting → green; Pending and the derived Partial →
+// amber (still working); Filled → green; Canceled and Expired share the same
+// muted default — both are plain terminal outcomes, neither an error.
+export const orderStatusView = (
+	status: OisyTradeOrderDisplayStatus
+): { labelKey: OisyTradeOrderDisplayStatus; pillVariant: BadgeVariant } => {
+	const pillVariant: Record<OisyTradeOrderDisplayStatus, BadgeVariant> = {
+		Open: 'success',
+		Pending: 'warning',
+		Partial: 'warning',
+		Filled: 'success',
+		Canceled: 'default',
+		Expired: 'default'
+	};
+
+	return { labelKey: status, pillVariant: pillVariant[status] };
+};
+
+// True when the order is still working (Active tab): Pending or Open.
+export const isOisyTradeOrderActive = ({ status }: OisyTradeOrderView): boolean =>
+	status === 'Pending' || status === 'Open';
+
 // A `PriceLevel` price scaled to human quote-per-base.
 export const priceLevelToHuman = ({
 	level,
@@ -523,86 +739,3 @@ export const priceLevelToHuman = ({
 	price: Number(level.price) / pow10(quoteDecimals),
 	quantity: Number(level.quantity) / pow10(baseDecimals)
 });
-
-// The distinct union of every base and quote token symbol across the trading
-// pairs — the set of tokens OISY TRADE supports. Used for the onboarding chips
-// and the deposit "nothing to deposit" empty state.
-export const oisyTradeSupportedTokenSymbols = (pairs: TradingPairInfo[]): string[] => [
-	...new Set(pairs.flatMap(({ base, quote }) => [base.metadata.symbol, quote.metadata.symbol]))
-];
-
-// Resolves the DEX balances (keyed by ledger canister principal) to OISY tokens
-// and enriches them with totals and fiat values. Balances whose ledger we don't
-// know are dropped — we can't render a row without the token's metadata/icon.
-export const mapOisyTradeAssets = ({
-	balances,
-	tokens,
-	exchanges
-}: {
-	balances: UserTokenBalance[];
-	tokens: IcToken[];
-	exchanges: ExchangesData;
-}): OisyTradeAsset[] => {
-	const tokenByLedgerId = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
-
-	return balances.reduce<OisyTradeAsset[]>((acc, { token: dexToken, balance }) => {
-		const token = tokenByLedgerId.get(dexToken.id.ledger_id.toText());
-
-		if (token === undefined) {
-			return acc;
-		}
-
-		const { free, reserved } = balance;
-		const total = free + reserved;
-
-		acc.push({
-			token,
-			free,
-			reserved,
-			total,
-			totalUsd: calculateTokenUsdAmount({ amount: total, token, $exchanges: exchanges }),
-			freeUsd: calculateTokenUsdAmount({ amount: free, token, $exchanges: exchanges })
-		});
-
-		return acc;
-	}, []);
-};
-
-// Total fiat value of all DEX-deposited balances (free + reserved), to add to
-// the hero net-worth total.
-export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
-	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
-
-// The OISY tokens the user can deposit: DEX-supported tokens (matched by ledger
-// canister id) that the user holds in their wallet. The first token per ledger id
-// wins (the combined list is ordered ICP → ICRC default → custom).
-export const oisyTradeDepositableTokens = ({
-	supportedTokens,
-	tokens,
-	hasBalance
-}: {
-	supportedTokens: OisyTradeToken[];
-	tokens: IcToken[];
-	hasBalance: (token: IcToken) => boolean;
-}): IcToken[] => {
-	// Resolve by ledger canister id (like Send and the order form), NOT by symbol,
-	// so a token's exact network/identity is preserved (e.g. a staging/testnet
-	// ledger isn't collapsed onto its mainnet namesake). Deduped by ledger id.
-	const byLedgerId = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
-	const seen = new Set<string>();
-
-	return supportedTokens.reduce<IcToken[]>((acc, { id: { ledger_id } }) => {
-		const token = byLedgerId.get(ledger_id.toText());
-
-		if (nonNullish(token) && !seen.has(token.ledgerCanisterId) && hasBalance(token)) {
-			seen.add(token.ledgerCanisterId);
-			acc.push(token);
-		}
-
-		return acc;
-	}, []);
-};
-
-// True when at least one balance is reserved by an open order, i.e. the
-// "Available" line should be shown (available < total).
-export const oisyTradeAssetHasReserved = ({ reserved }: OisyTradeAsset): boolean => reserved > ZERO;

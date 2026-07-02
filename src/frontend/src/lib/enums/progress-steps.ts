@@ -119,6 +119,13 @@ export enum ProgressStepsUnstake {
 	DONE = 'done'
 }
 
+export enum ProgressStepsTradingWithdraw {
+	INITIALIZATION = 'initialization',
+	WITHDRAW = 'withdraw',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum ProgressStepsLiquidiumSupply {
 	INITIALIZATION = 'initialization',
 	TRANSFER = 'transfer',

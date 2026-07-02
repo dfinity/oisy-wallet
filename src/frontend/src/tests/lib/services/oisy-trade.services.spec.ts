@@ -1,16 +1,18 @@
 import type {
-	LimitOrderRequest,
-	OrderBookDepth,
-	OrderBookTicker,
-	OrderId,
 	Token,
-	TradingPair,
+	TokenId,
 	TradingPairInfo,
+	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
+import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
+import {
+	cancelLimitOrder,
+	loadOisyTrade,
+	withdrawFromOisyTrade
+} from '$lib/services/oisy-trade.services';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -20,22 +22,16 @@ vi.mock('$lib/api/oisy-trade.api', () => ({
 	getTradingPairs: vi.fn(),
 	listSupportedTokens: vi.fn(),
 	getBalances: vi.fn(),
-	getOrderBookTicker: vi.fn(),
-	getOrderBookDepth: vi.fn(),
-	addLimitOrder: vi.fn()
+	getMyOrders: vi.fn(),
+	withdraw: vi.fn(),
+	cancelLimitOrder: vi.fn()
 }));
 
 describe('oisy-trade.services', () => {
 	const pairs = [{ tick_size: 1n }] as unknown as TradingPairInfo[];
 	const supportedTokens = [{ metadata: { symbol: 'ICP' } }] as unknown as Token[];
 	const balances = [{ balance: { free: 1n, reserved: ZERO } }] as unknown as UserTokenBalance[];
-
-	const tradingPair: TradingPair = {
-		base: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
-		quote: Principal.fromText('xevnm-gaaaa-aaaar-qafnq-cai')
-	};
-	const ticker = { bid: [], ask: [] } as unknown as OrderBookTicker;
-	const depth = { bids: [], asks: [] } as unknown as OrderBookDepth;
+	const orders = [{ id: 'order-1' }] as unknown as UserOrder[];
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -43,29 +39,39 @@ describe('oisy-trade.services', () => {
 		vi.mocked(oisyTradeApi.getTradingPairs).mockResolvedValue(pairs);
 		vi.mocked(oisyTradeApi.listSupportedTokens).mockResolvedValue(supportedTokens);
 		vi.mocked(oisyTradeApi.getBalances).mockResolvedValue(balances);
-		vi.mocked(oisyTradeApi.getOrderBookTicker).mockResolvedValue(ticker);
-		vi.mocked(oisyTradeApi.getOrderBookDepth).mockResolvedValue(depth);
-		vi.mocked(oisyTradeApi.addLimitOrder).mockResolvedValue('order-1' as OrderId);
+		vi.mocked(oisyTradeApi.getMyOrders).mockResolvedValue(orders);
+		vi.mocked(oisyTradeApi.withdraw).mockResolvedValue({ block_index: 1n });
 	});
 
 	describe('loadOisyTrade', () => {
 		it('resets the store and does not call the canister when there is no identity', async () => {
-			oisyTradeStore.set({ pairs, supportedTokens, balances });
+			oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
 
 			await loadOisyTrade({ identity: null });
 
 			expect(get(oisyTradeStore)).toEqual({
 				pairs: undefined,
 				supportedTokens: undefined,
-				balances: undefined
+				balances: undefined,
+				orders: undefined
 			});
 			expect(oisyTradeApi.getTradingPairs).not.toHaveBeenCalled();
 		});
 
-		it('loads pairs, supported tokens and balances into the store', async () => {
+		it('loads pairs, supported tokens, balances and orders into the store', async () => {
 			await loadOisyTrade({ identity: mockIdentity });
 
-			expect(get(oisyTradeStore)).toEqual({ pairs, supportedTokens, balances });
+			expect(get(oisyTradeStore)).toEqual({ pairs, supportedTokens, balances, orders });
+		});
+
+		it('requests the newest orders page (no cursor, length 100)', async () => {
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(oisyTradeApi.getMyOrders).toHaveBeenCalledWith(
+				expect.objectContaining({
+					args: { filter: { ByPage: { after: [], length: 100 } } }
+				})
+			);
 		});
 
 		it('swallows canister errors and leaves the store unchanged', async () => {
@@ -76,73 +82,66 @@ describe('oisy-trade.services', () => {
 			expect(get(oisyTradeStore)).toEqual({
 				pairs: undefined,
 				supportedTokens: undefined,
-				balances: undefined
+				balances: undefined,
+				orders: undefined
 			});
 		});
 	});
 
-	describe('loadOrderBook', () => {
-		it('returns undefined and does not call the canister without an identity', async () => {
-			await expect(loadOrderBook({ identity: null, pair: tradingPair })).resolves.toBeUndefined();
+	describe('withdrawFromOisyTrade', () => {
+		const tokenId: TokenId = { ledger_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai') };
 
-			expect(oisyTradeApi.getOrderBookTicker).not.toHaveBeenCalled();
-			expect(oisyTradeApi.getOrderBookDepth).not.toHaveBeenCalled();
-		});
+		it('parses the gross amount, calls withdraw and reloads balances', async () => {
+			const progress = vi.fn();
 
-		it('loads the ticker and depth for the pair', async () => {
-			const result = await loadOrderBook({ identity: mockIdentity, pair: tradingPair });
+			await withdrawFromOisyTrade({
+				identity: mockIdentity,
+				tokenId,
+				amount: '1.5',
+				decimals: 8,
+				progress
+			});
 
-			expect(result).toEqual({ ticker, depth });
-			expect(oisyTradeApi.getOrderBookTicker).toHaveBeenCalledWith(
-				expect.objectContaining({ identity: mockIdentity, pair: tradingPair })
-			);
-			expect(oisyTradeApi.getOrderBookDepth).toHaveBeenCalledWith(
+			expect(oisyTradeApi.withdraw).toHaveBeenCalledWith(
 				expect.objectContaining({
 					identity: mockIdentity,
-					request: { trading_pair: tradingPair, limit: [] }
+					request: { token_id: tokenId, amount: 150_000_000n }
 				})
 			);
+			// Balances are reloaded after a successful withdrawal.
+			expect(oisyTradeApi.getBalances).toHaveBeenCalled();
+			expect(progress).toHaveBeenCalledWith(ProgressStepsTradingWithdraw.WITHDRAW);
+			expect(progress).toHaveBeenCalledWith(ProgressStepsTradingWithdraw.DONE);
 		});
 
-		it('swallows canister errors and returns undefined', async () => {
-			vi.mocked(oisyTradeApi.getOrderBookTicker).mockRejectedValue(new Error('canister down'));
-
+		it('throws and does not reload when there is no identity', async () => {
 			await expect(
-				loadOrderBook({ identity: mockIdentity, pair: tradingPair })
-			).resolves.toBeUndefined();
+				withdrawFromOisyTrade({ identity: null, tokenId, amount: '1', decimals: 8 })
+			).rejects.toThrow();
+
+			expect(oisyTradeApi.withdraw).not.toHaveBeenCalled();
 		});
 	});
 
-	describe('placeLimitOrder', () => {
-		const request = {
-			pair: tradingPair,
-			side: { Sell: null },
-			quantity: 25_000_000n,
-			price: 2_690_000n,
-			time_in_force: []
-		} as unknown as LimitOrderRequest;
-
-		it('submits the order and returns the order id', async () => {
-			const result = await placeLimitOrder({ identity: mockIdentity, request });
-
-			expect(result).toBe('order-1');
-			expect(oisyTradeApi.addLimitOrder).toHaveBeenCalledWith(
-				expect.objectContaining({ identity: mockIdentity, request })
+	describe('cancelLimitOrder', () => {
+		beforeEach(() => {
+			vi.mocked(oisyTradeApi.cancelLimitOrder).mockResolvedValue(
+				{} as Awaited<ReturnType<typeof oisyTradeApi.cancelLimitOrder>>
 			);
 		});
 
-		it('throws when there is no identity', async () => {
-			await expect(placeLimitOrder({ identity: null, request })).rejects.toThrow();
+		it('cancels the order via the api with the order id', async () => {
+			await cancelLimitOrder({ identity: mockIdentity, orderId: 'order-1' });
 
-			expect(oisyTradeApi.addLimitOrder).not.toHaveBeenCalled();
+			expect(oisyTradeApi.cancelLimitOrder).toHaveBeenCalledWith(
+				expect.objectContaining({ identity: mockIdentity, orderId: 'order-1' })
+			);
 		});
 
-		it('propagates a canister error', async () => {
-			vi.mocked(oisyTradeApi.addLimitOrder).mockRejectedValue(new Error('rejected'));
+		it('throws and does not call the api when there is no identity', async () => {
+			await expect(cancelLimitOrder({ identity: null, orderId: 'order-1' })).rejects.toThrow();
 
-			await expect(placeLimitOrder({ identity: mockIdentity, request })).rejects.toThrow(
-				'rejected'
-			);
+			expect(oisyTradeApi.cancelLimitOrder).not.toHaveBeenCalled();
 		});
 	});
 });

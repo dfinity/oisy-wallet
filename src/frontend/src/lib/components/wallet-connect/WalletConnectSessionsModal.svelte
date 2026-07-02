@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { SessionTypes } from '@walletconnect/types';
 	import { onMount } from 'svelte';
@@ -15,6 +14,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
 	import {
 		disconnectListener,

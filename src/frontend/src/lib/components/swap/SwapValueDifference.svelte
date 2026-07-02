@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import {
 		SWAP_VALUE_DIFFERENCE_WARNING_VALUE,
 		SWAP_VALUE_DIFFERENCE_ERROR_VALUE
@@ -28,45 +28,11 @@
 			destinationTokenExchangeRate: $destinationTokenExchangeRate
 		})
 	);
-
-	let isError = $derived(
-		nonNullish(valueDifference) && valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE
-	);
-
-	let isWarning = $derived(
-		nonNullish(valueDifference) &&
-			valueDifference <= SWAP_VALUE_DIFFERENCE_WARNING_VALUE &&
-			valueDifference > SWAP_VALUE_DIFFERENCE_ERROR_VALUE
-	);
-
-	let isSuccess = $derived(
-		nonNullish(valueDifference) && valueDifference > SWAP_VALUE_DIFFERENCE_WARNING_VALUE
-	);
-
-	let showWarningIcon = $derived(isWarning || isError);
 </script>
 
-{#snippet valueDifferenceWarningIcon()}
-	<span>⚠</span>
-{/snippet}
-
-{#if nonNullish(valueDifference)}
-	<span
-		class="inline-flex items-center gap-1"
-		class:font-bold={isWarning || isError}
-		class:gap-2={iconPosition === 'left'}
-		class:text-error-primary={isError}
-		class:text-success-primary={isSuccess}
-		class:text-warning-primary={isWarning}
-	>
-		{#if showWarningIcon && iconPosition === 'left'}
-			{@render valueDifferenceWarningIcon()}
-		{/if}
-		<span>
-			{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
-		</span>
-		{#if showWarningIcon && iconPosition === 'right'}
-			{@render valueDifferenceWarningIcon()}
-		{/if}
-	</span>
-{/if}
+<ValueDifference
+	errorLevel={SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
+	{iconPosition}
+	value={valueDifference}
+	warningLevel={SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
+/>

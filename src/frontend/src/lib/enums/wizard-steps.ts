@@ -87,6 +87,12 @@ export enum WizardStepsUnstake {
 	UNSTAKING = 'Unstaking'
 }
 
+export enum WizardStepsTradingWithdraw {
+	WITHDRAW = 'Withdraw',
+	REVIEW = 'Review',
+	WITHDRAWING = 'Withdrawing'
+}
+
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
@@ -146,8 +152,8 @@ export enum WizardStepsScanner {
 
 export enum WizardStepsLimitOrder {
 	FORM = 'Form',
-	BASE_TOKEN = 'Base Token',
-	QUOTE_TOKEN = 'Quote Token',
+	BASE_TOKEN = 'Base token',
+	QUOTE_TOKEN = 'Quote token',
 	REVIEW = 'Review',
 	PLACING = 'Placing'
 }

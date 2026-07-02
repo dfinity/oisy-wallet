@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"no_borrowings": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "취소",
@@ -74,6 +80,11 @@
 			"standalone_mode": "앱과 $oisy_short 모두 홈 화면에 설치된 경우 알려진 연결 문제가 발생할 수 있습니다. $oisy_short 연결 또는 트랜잭션 서명에 문제가 발생하면 일반 브라우저에서 앱을 실행해 주세요. 현재 수정 작업 중이며 곧 해결될 예정입니다. <a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">자세히 알아보기</a>",
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
+	},
+	"progress": {
+		"completed": "완료됨",
+		"in_progress": "진행 중",
+		"failed": "실패"
 	},
 	"navigation": {
 		"text": {
@@ -1640,9 +1651,98 @@
 			"title": "",
 			"description": ""
 		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": "",
+			"available_label": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
+			"to": "",
+			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"consent": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
+			"approving": "",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
+		},
+		"withdraw": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"amount_label": "",
+			"from": "",
+			"network": "",
+			"transaction_fee": "",
+			"transfer_fee": "",
+			"you_receive": "",
+			"reserved_note": "",
+			"submit": "",
+			"open": "",
+			"progress_withdraw": "",
+			"progress_done": "",
+			"error": ""
+		},
 		"orders": {
 			"title": "",
-			"add_limit_order": ""
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "",
+			"empty_history": "",
+			"side_sell": "",
+			"side_buy": "",
+			"row_sell": "",
+			"row_buy": "",
+			"status_open": "",
+			"status_pending": "",
+			"status_partial": "",
+			"status_filled": "",
+			"status_canceled": "",
+			"status_expired": ""
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
 		},
 		"limit_order": {
 			"title": "",
@@ -1733,42 +1833,6 @@
 			"placing_sub": "",
 			"placing_done": "",
 			"place_error": ""
-		},
-		"onboarding": {
-			"title": "",
-			"description": "",
-			"deposit": ""
-		},
-		"assets": {
-			"title": "",
-			"deposit": "",
-			"withdraw": "",
-			"available": "",
-			"available_label": "",
-			"empty": ""
-		},
-		"deposit": {
-			"title": "",
-			"review_title": "",
-			"progress_title": "",
-			"you_deposit": "",
-			"to": "",
-			"network": "",
-			"transaction_fee": "",
-			"approval_fee": "",
-			"transfer_fee": "",
-			"consent": "",
-			"info_title": "",
-			"info_description": "",
-			"empty_title": "",
-			"empty_description": "",
-			"approving": "",
-			"depositing": "",
-			"done": "",
-			"error": {
-				"unknown_fee": "",
-				"deposit_failed": ""
-			}
 		}
 	},
 	"transaction": {
