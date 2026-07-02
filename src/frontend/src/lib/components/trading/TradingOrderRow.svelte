@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
-	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
+	import IconClockAlert from '$lib/components/icons/lucide/IconClockAlert.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
@@ -81,7 +81,7 @@
 		Partial: undefined,
 		Filled: IconCheck,
 		Canceled: IconClose,
-		Expired: IconClock
+		Expired: IconClockAlert
 	};
 	let StatusIcon = $derived(statusIcons[labelKey]);
 
