@@ -11,29 +11,40 @@
 		title: Snippet;
 		content: Snippet;
 		disabled?: boolean;
+		showCloseButton?: boolean;
 	}
 
-	let { onCancel, title, content, disabled = false }: Props = $props();
+	let { onCancel, title, content, disabled = false, showCloseButton = true }: Props = $props();
 </script>
 
 <div class="fixed inset-0 z-50">
 	<BottomSheet transition>
-		<div class="flex w-full flex-col">
-			<div class="w-full p-4">
-				<ButtonIcon
-					ariaLabel={$i18n.core.alt.close_details}
-					{disabled}
-					onclick={onCancel}
-					styleClass="text-disabled float-right"
+		{#snippet header()}
+			<div class="flex w-full items-center justify-between gap-4 p-4">
+				<h3
+					class="m-0 min-w-0 break-words"
+					class:text-center={!showCloseButton}
+					class:w-full={!showCloseButton}
 				>
-					{#snippet icon()}
-						<IconClose size="24" />
-					{/snippet}
-				</ButtonIcon>
+					{@render title()}
+				</h3>
+
+				{#if showCloseButton}
+					<ButtonIcon
+						ariaLabel={$i18n.core.alt.close_details}
+						{disabled}
+						onclick={onCancel}
+						styleClass="text-disabled"
+					>
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
+					</ButtonIcon>
+				{/if}
 			</div>
+		{/snippet}
 
-			<h3 class="mt-4 mb-2 text-center">{@render title()}</h3>
-
+		<div class="flex w-full flex-col">
 			{@render content()}
 		</div>
 	</BottomSheet>
