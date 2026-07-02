@@ -22,6 +22,7 @@ import type { BadgeVariant } from '$lib/types/style';
 import { formatToken } from '$lib/utils/format.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
+import { doesTokenMatchFilter } from '$lib/utils/tokens.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
 // The distinct union of every base and quote token symbol across the trading
@@ -725,6 +726,83 @@ export const orderStatusView = (
 // True when the order is still working (Active tab): Pending or Open.
 export const isOisyTradeOrderActive = ({ status }: OisyTradeOrderView): boolean =>
 	status === 'Pending' || status === 'Open';
+
+// ---------------------------------------------------------------------------
+// Trading-tab search — free-text matching across the assets and orders lists.
+// Token identity reuses the app-wide token filter (symbol, name, canister id,
+// …); network, side, status and provider match against the very labels the
+// rows render, so the search works in whatever language the user is in (a
+// French "vendre" matches a sell order). Callers thread the localized strings
+// in, keeping the matchers pure and unit-testable.
+// ---------------------------------------------------------------------------
+
+export interface OisyTradeSearchLabels {
+	sideSell: string;
+	sideBuy: string;
+	status: Record<OisyTradeOrderDisplayStatus, string>;
+	provider: string;
+}
+
+const includesFilter = ({ value, filter }: { value: string; filter: string }): boolean =>
+	value.toLowerCase().includes(filter);
+
+// A token matches on the app's standard token filter or on its network name.
+// `filter` is expected pre-normalized (trimmed, lower-cased) by the callers below.
+const oisyTradeTokenMatchesFilter = ({
+	token,
+	filter
+}: {
+	token: IcToken;
+	filter: string;
+}): boolean =>
+	doesTokenMatchFilter({ token, filter }) || includesFilter({ value: token.network.name, filter });
+
+export const oisyTradeAssetMatchesFilter = ({
+	asset: { token },
+	filter,
+	providerLabel
+}: {
+	asset: OisyTradeAsset;
+	filter: string;
+	providerLabel: string;
+}): boolean => {
+	const normalized = filter.trim().toLowerCase();
+	if (normalized === '') {
+		return true;
+	}
+
+	return (
+		oisyTradeTokenMatchesFilter({ token, filter: normalized }) ||
+		includesFilter({ value: providerLabel, filter: normalized })
+	);
+};
+
+export const oisyTradeOrderMatchesFilter = ({
+	order,
+	filter,
+	labels
+}: {
+	order: OisyTradeOrderView;
+	filter: string;
+	labels: OisyTradeSearchLabels;
+}): boolean => {
+	const normalized = filter.trim().toLowerCase();
+	if (normalized === '') {
+		return true;
+	}
+
+	const { base, quote, side } = order;
+	const sideLabel = side === 'sell' ? labels.sideSell : labels.sideBuy;
+	const statusLabel = labels.status[oisyTradeOrderDisplayStatus(order)];
+
+	return (
+		oisyTradeTokenMatchesFilter({ token: base, filter: normalized }) ||
+		oisyTradeTokenMatchesFilter({ token: quote, filter: normalized }) ||
+		includesFilter({ value: sideLabel, filter: normalized }) ||
+		includesFilter({ value: statusLabel, filter: normalized }) ||
+		includesFilter({ value: labels.provider, filter: normalized })
+	);
+};
 
 // A `PriceLevel` price scaled to human quote-per-base.
 export const priceLevelToHuman = ({

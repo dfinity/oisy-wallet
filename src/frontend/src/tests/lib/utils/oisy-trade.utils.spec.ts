@@ -7,9 +7,14 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { OisyTradeOrderStatus } from '$lib/types/oisy-trade';
+import type {
+	OisyTradeAsset,
+	OisyTradeOrderStatus,
+	OisyTradeOrderView
+} from '$lib/types/oisy-trade';
 import {
 	type LimitOrderPairView,
+	type OisyTradeSearchLabels,
 	crossesBook,
 	decimalsOfStep,
 	deriveNotional,
@@ -27,8 +32,10 @@ import {
 	mapOisyTradeOrders,
 	maxSpendBaseAmount,
 	oisyTradeAssetHasReserved,
+	oisyTradeAssetMatchesFilter,
 	oisyTradeDepositableTokens,
 	oisyTradeOrderDisplayStatus,
+	oisyTradeOrderMatchesFilter,
 	oisyTradeSupportedTokenSymbols,
 	orderStatusView,
 	presetTargetPrice,
@@ -801,6 +808,143 @@ describe('oisy-trade.utils — orders', () => {
 			expect(activeFor('Filled')).toBeFalsy();
 			expect(activeFor('Canceled')).toBeFalsy();
 			expect(activeFor('Expired')).toBeFalsy();
+		});
+	});
+});
+
+describe('oisy-trade.utils — search', () => {
+	// baseToken carries the ICP network (name "Internet Computer") from the shared mock.
+	const base: IcToken = { ...mockValidIcToken, symbol: 'ICP', name: 'Internet Computer' };
+	const quote: IcToken = {
+		...mockValidIcToken,
+		id: parseTokenId('QuoteTokenId'),
+		symbol: 'ckUSDC',
+		name: 'ckUSDC'
+	};
+
+	const labels: OisyTradeSearchLabels = {
+		sideSell: 'Sell',
+		sideBuy: 'Buy',
+		status: {
+			Open: 'Open',
+			Pending: 'Pending',
+			Partial: 'Partial',
+			Filled: 'Filled',
+			Canceled: 'Canceled',
+			Expired: 'Expired'
+		},
+		provider: 'OISY TRADE'
+	};
+
+	const order: OisyTradeOrderView = {
+		id: 'order-1',
+		side: 'sell',
+		base,
+		quote,
+		quantity: 100,
+		price: 2.5,
+		filledQuantity: 0,
+		status: 'Open'
+	};
+
+	describe('oisyTradeAssetMatchesFilter', () => {
+		const asset: OisyTradeAsset = {
+			token: base,
+			free: ZERO,
+			reserved: ZERO,
+			total: ZERO,
+			totalUsd: undefined,
+			freeUsd: undefined
+		};
+
+		const matches = (filter: string): boolean =>
+			oisyTradeAssetMatchesFilter({ asset, filter, providerLabel: labels.provider });
+
+		it('matches everything on an empty or whitespace filter', () => {
+			expect(matches('')).toBeTruthy();
+			expect(matches('   ')).toBeTruthy();
+		});
+
+		it('matches on token symbol and name, case-insensitively', () => {
+			expect(matches('icp')).toBeTruthy();
+			expect(matches('ICP')).toBeTruthy();
+			expect(matches('internet')).toBeTruthy();
+		});
+
+		it('matches on the network name', () => {
+			expect(matches('Internet Computer')).toBeTruthy();
+		});
+
+		it('matches on the provider label', () => {
+			expect(matches('oisy')).toBeTruthy();
+		});
+
+		it('does not match an unrelated term', () => {
+			expect(matches('dogecoin')).toBeFalsy();
+		});
+	});
+
+	describe('oisyTradeOrderMatchesFilter', () => {
+		const matches = ({
+			order: candidate = order,
+			filter
+		}: {
+			order?: OisyTradeOrderView;
+			filter: string;
+		}): boolean => oisyTradeOrderMatchesFilter({ order: candidate, filter, labels });
+
+		it('matches everything on an empty filter', () => {
+			expect(matches({ filter: '' })).toBeTruthy();
+		});
+
+		it('matches on either the base or the quote token', () => {
+			expect(matches({ filter: 'icp' })).toBeTruthy();
+			expect(matches({ filter: 'ckusdc' })).toBeTruthy();
+		});
+
+		it('matches on the network name', () => {
+			expect(matches({ filter: 'internet' })).toBeTruthy();
+		});
+
+		it('matches a sell order on the side label but not the opposite side', () => {
+			expect(matches({ filter: 'sell' })).toBeTruthy();
+			expect(matches({ filter: 'buy' })).toBeFalsy();
+		});
+
+		it('matches a buy order on the buy side label', () => {
+			expect(matches({ order: { ...order, side: 'buy' }, filter: 'buy' })).toBeTruthy();
+		});
+
+		it('matches on the status label', () => {
+			expect(matches({ filter: 'open' })).toBeTruthy();
+			expect(matches({ filter: 'filled' })).toBeFalsy();
+		});
+
+		it('matches the derived Partial status of a partially filled open order', () => {
+			expect(matches({ order: { ...order, filledQuantity: 10 }, filter: 'partial' })).toBeTruthy();
+		});
+
+		it('matches on the provider label', () => {
+			expect(matches({ filter: 'oisy trade' })).toBeTruthy();
+		});
+
+		it('adapts side and status matching to localized labels', () => {
+			const frLabels: OisyTradeSearchLabels = {
+				...labels,
+				sideSell: 'Vendre',
+				status: { ...labels.status, Open: 'Ouvert' }
+			};
+
+			expect(
+				oisyTradeOrderMatchesFilter({ order, filter: 'vendre', labels: frLabels })
+			).toBeTruthy();
+			expect(
+				oisyTradeOrderMatchesFilter({ order, filter: 'ouvert', labels: frLabels })
+			).toBeTruthy();
+		});
+
+		it('does not match an unrelated term', () => {
+			expect(matches({ filter: 'zzz' })).toBeFalsy();
 		});
 	});
 });
