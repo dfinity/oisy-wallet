@@ -81,6 +81,11 @@
 			"video_not_supported": "Your browser does not support video playback."
 		}
 	},
+	"progress": {
+		"completed": "Completed",
+		"in_progress": "In progress",
+		"failed": "Failed"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
