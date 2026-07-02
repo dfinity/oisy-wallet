@@ -10,13 +10,19 @@
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import {
+		PLAUSIBLE_EVENT_RESULT_STATUSES,
+		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+	} from '$lib/enums/plausible';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
 	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
+	import { trackTrading, type TrackTradingParams } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,
 		priceLevelToHuman,
@@ -166,6 +172,18 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
+		const orderFields: Pick<TrackTradingParams, 'base' | 'quote' | 'side' | 'orderType'> = {
+			base: baseSymbol,
+			quote: quoteSymbol,
+			side,
+			orderType: fillOrKill ? 'FOK' : 'GTC'
+		};
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			...orderFields
+		});
+
 		try {
 			await placeLimitOrder({
 				identity: $authIdentity,
@@ -183,9 +201,20 @@
 			// for the next poll.
 			await loadOisyTrade({ identity: $authIdentity });
 
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				...orderFields
+			});
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
+			trackTrading({
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				...orderFields,
+				error: replaceIcErrorFields(err)
+			});
 			toastsError({ msg: { text: $i18n.trading.limit_order.place_error }, err });
 			goTo(WizardStepsLimitOrder.REVIEW);
 		}
