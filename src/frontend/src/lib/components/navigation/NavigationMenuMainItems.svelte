@@ -25,6 +25,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import {
 		isRouteActivity,
+		isRouteBorrowings,
 		isRouteDappExplorer,
 		isRouteEarn,
 		isRouteEarning,
@@ -64,6 +65,14 @@
 			return AppPath.Earning;
 		}
 
+		if ($activeAssetsTabStore === TokenTypes.TRADING) {
+			return AppPath.Trading;
+		}
+
+		if ($activeAssetsTabStore === TokenTypes.BORROWINGS) {
+			return AppPath.Borrowings;
+		}
+
 		if ($activeAssetsTabStore === TokenTypes.TOKENS) {
 			return AppPath.Tokens;
 		}
@@ -72,7 +81,11 @@
 	});
 
 	let assetsSelected = $derived(
-		isRouteTokens(page) || isRouteNfts(page) || isRouteEarning(page) || isRouteTransactions(page)
+		isRouteTokens(page) ||
+			isRouteNfts(page) ||
+			isRouteEarning(page) ||
+			isRouteBorrowings(page) ||
+			isRouteTransactions(page)
 	);
 </script>
 

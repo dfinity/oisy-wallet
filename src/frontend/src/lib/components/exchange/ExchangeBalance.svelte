@@ -2,13 +2,17 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
+	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { liquidiumNetValueUsd } from '$lib/derived/liquidium.derived';
 	import { enabledFungibleNetworkTokensUi } from '$lib/derived/network-tokens-ui.derived';
+	import { oisyTradeUsdValue } from '$lib/derived/oisy-trade.derived';
 	import {
 		tokenCategoryFilter,
 		showTokenCategoryFilter,
@@ -47,9 +51,15 @@
 
 	const totalStakeUsd = $derived(sumTokensUiUsdStakeBalance(heroTokens));
 
+	// DEX-deposited balances (free + reserved) count toward net worth; gated by
+	// the Trading feature/provider flags so the production hero stays unchanged.
+	const totalTradeUsd = $derived(anyTradingProviderEnabled ? $oisyTradeUsdValue : 0);
+
+	const totalLiquidiumUsd = $derived(anyLendBorrowProviderEnabled ? $liquidiumNetValueUsd : 0);
+
 	let balance = $derived(
 		formatCurrency({
-			value: $loaded ? totalUsd + totalStakeUsd : 0,
+			value: $loaded ? totalUsd + totalStakeUsd + totalTradeUsd + totalLiquidiumUsd : 0,
 			currency: $currentCurrency,
 			exchangeRate: $currencyExchangeStore,
 			language: $currentLanguage

@@ -3,6 +3,9 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
+	import { TRADING_ENABLED } from '$env/trading';
+	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -17,6 +20,7 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
+	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
@@ -59,7 +63,7 @@
 			{#snippet header()}
 				<div class="flex w-full justify-between">
 					<div class="relative flex grow-1 justify-between">
-						<TokensFilter>
+						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
 							{#snippet overflowableContent()}
 								<Tabs
 									styleClass="mt-2 mb-6"
@@ -81,6 +85,24 @@
 														label: $i18n.earning.text.tab_title,
 														id: TokenTypes.EARNING,
 														path: `${AppPath.Earning}${page.url.search}`
+													}
+												]
+											: []),
+										...(anyLendBorrowProviderEnabled
+											? [
+													{
+														label: $i18n.borrowings.text.tab_title,
+														id: TokenTypes.BORROWINGS,
+														path: `${AppPath.Borrowings}${page.url.search}`
+													}
+												]
+											: []),
+										...(TRADING_ENABLED
+											? [
+													{
+														label: $i18n.trading.text.tab_title,
+														id: TokenTypes.TRADING,
+														path: `${AppPath.Trading}${page.url.search}`
 													}
 												]
 											: [])
@@ -118,6 +140,10 @@
 				<NftsList />
 			{:else if activeTab === TokenTypes.EARNING}
 				<EarningsList />
+			{:else if activeTab === TokenTypes.TRADING}
+				<TradingList />
+			{:else if activeTab === TokenTypes.BORROWINGS}
+				<BorrowingsList />
 			{/if}
 		</StickyHeader>
 

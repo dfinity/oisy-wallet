@@ -2,6 +2,10 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrowings {
+	text: { tab_title: string; no_borrowings: string };
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -70,6 +74,12 @@ interface I18nCore {
 		up_one_level: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
+}
+
+interface I18nProgress {
+	completed: string;
+	in_progress: string;
+	failed: string;
 }
 
 interface I18nNavigation {
@@ -212,14 +222,14 @@ interface I18nDapps {
 		aa_new: string;
 		ab_icp: string;
 		ai: string;
-		defi: string;
+		dex: string;
 		game: string;
+		lending: string;
 		nft: string;
 		rwa: string;
-		social_media: string;
+		social: string;
 		staking: string;
 		tools: string;
-		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -236,14 +246,6 @@ interface I18nDapps {
 			stats: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		decideid: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			stats: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
 		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };
 		uniswap: { name: string; one_liner: string; call_to_action: string; description: string };
@@ -257,13 +259,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		sonic: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
@@ -277,8 +272,6 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		beam: { name: string; one_liner: string; call_to_action: string; description: string };
-		axie_infinity: { name: string; one_liner: string; description: string };
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
@@ -289,7 +282,6 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		sanctum: { name: string; one_liner: string; description: string };
-		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
 		liquidium: {
@@ -308,6 +300,13 @@ interface I18nDapps {
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 		icp_flags: { name: string; one_liner: string; description: string };
+		cloud_engines: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		hyperliquid: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -1312,6 +1311,7 @@ interface I18nWallet_connect {
 		unknown_parameter: string;
 		wallet_not_initialized: string;
 		btc_broadcast_not_supported: string;
+		btc_non_mainnet_sign_not_supported: string;
 		btc_psbt_decode: string;
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
@@ -1320,6 +1320,191 @@ interface I18nWallet_connect {
 		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
+	};
+}
+
+interface I18nTrading {
+	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
+	provider_unavailable: { title: string; description: string };
+	onboarding: {
+		title: string;
+		description: string;
+		step_deposit: string;
+		step_order: string;
+		step_withdraw: string;
+		supported_tokens: string;
+		deposit: string;
+	};
+	assets: {
+		title: string;
+		deposit: string;
+		withdraw: string;
+		available: string;
+		available_label: string;
+		empty: string;
+	};
+	deposit: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		you_deposit: string;
+		to: string;
+		network: string;
+		transaction_fee: string;
+		approval_fee: string;
+		transfer_fee: string;
+		consent: string;
+		info_title: string;
+		info_description: string;
+		empty_title: string;
+		empty_description: string;
+		approving: string;
+		approved: string;
+		approve_description: string;
+		depositing: string;
+		deposit_description: string;
+		done: string;
+		error: { unknown_fee: string; deposit_failed: string };
+	};
+	withdraw: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		amount_label: string;
+		from: string;
+		network: string;
+		transaction_fee: string;
+		transfer_fee: string;
+		you_receive: string;
+		reserved_note: string;
+		submit: string;
+		open: string;
+		progress_withdraw: string;
+		progress_done: string;
+		error: string;
+	};
+	orders: {
+		title: string;
+		add_limit_order: string;
+		tab_active: string;
+		tab_history: string;
+		empty_active: string;
+		empty_history: string;
+		side_sell: string;
+		side_buy: string;
+		row_sell: string;
+		row_buy: string;
+		status_open: string;
+		status_pending: string;
+		status_partial: string;
+		status_filled: string;
+		status_canceled: string;
+		status_expired: string;
+	};
+	order_detail: {
+		title: string;
+		status: string;
+		filled: string;
+		cancel_order: string;
+		cancel_error: string;
+		confirm_title: string;
+		confirm_description: string;
+		confirm_order: string;
+		confirm_price: string;
+		confirm_returns_to_free: string;
+		confirm_keep: string;
+		confirm_order_sell: string;
+		confirm_order_buy: string;
+	};
+	limit_order: {
+		title: string;
+		review_title: string;
+		placing_title: string;
+		sell: string;
+		buy: string;
+		select_base_token: string;
+		select_quote_token: string;
+		you_sell: string;
+		you_buy: string;
+		hero_prefix: string;
+		you_get_at_least: string;
+		you_pay_at_most: string;
+		connector_for: string;
+		connector_with: string;
+		network: string;
+		amount_placeholder: string;
+		price_placeholder: string;
+		max: string;
+		max_with_amount: string;
+		set_price_first: string;
+		balance: string;
+		pick_token_to_begin: string;
+		pick_token_to_price: string;
+		pick_token_to_trade_against: string;
+		price_label_sell_resting: string;
+		price_label_buy_resting: string;
+		price_label_sell_crossing: string;
+		price_label_buy_crossing: string;
+		price_label_fok_sell: string;
+		price_label_fok_buy: string;
+		price_label_default: string;
+		preset_bid: string;
+		preset_ask: string;
+		preset_market: string;
+		preset_sell_1: string;
+		preset_sell_5: string;
+		preset_buy_1: string;
+		preset_buy_5: string;
+		value_difference: string;
+		value_difference_label: string;
+		queue_position: string;
+		queue_position_row: string;
+		front_of_book: string;
+		are_ahead: string;
+		warning_crossing_sell: string;
+		warning_crossing_buy: string;
+		warning_fok_sell: string;
+		warning_fok_buy: string;
+		warning_fok_blocked_sell: string;
+		warning_fok_blocked_buy: string;
+		error_balance_sell: string;
+		error_balance_buy: string;
+		error_lot_multiple: string;
+		error_tick_multiple: string;
+		error_min_notional: string;
+		error_max_notional: string;
+		fok_title: string;
+		fok_help: string;
+		routing_name: string;
+		routing_tag: string;
+		lowest_ask: string;
+		highest_bid: string;
+		spread: string;
+		spread_value: string;
+		maker_fee: string;
+		taker_fee: string;
+		no_fee: string;
+		fee_percent: string;
+		review_button: string;
+		place_order_button: string;
+		limit_price: string;
+		limit_price_value: string;
+		current_value: string;
+		current_value_feed: string;
+		dex: string;
+		order_type: string;
+		order_type_gtc: string;
+		order_type_fok: string;
+		fee_maker_taker: string;
+		fee_taker: string;
+		fee_maker_taker_value: string;
+		give_up_confirm: string;
+		market_moved_sell: string;
+		market_moved_buy: string;
+		placing_initializing: string;
+		placing_sub: string;
+		placing_done: string;
+		place_error: string;
 	};
 }
 
@@ -1655,10 +1840,10 @@ interface I18nLiquidium {
 		health_factor: string;
 		net_value: string;
 		net_apy: string;
-		my_positions: string;
 		markets: string;
 		supplied: string;
 		borrowed: string;
+		borrow_rate: string;
 		apy_suffix: string;
 		supply_label: string;
 		borrow_label: string;
@@ -1678,6 +1863,53 @@ interface I18nLiquidium {
 		supply_agreement: string;
 		provider_fee: string;
 		insufficient_funds_for_fee: string;
+		supply_prices_unavailable: string;
+		borrow_review: string;
+		borrow_review_subtitle: string;
+		borrowing: string;
+		borrow_apy: string;
+		resulting_ltv: string;
+		projected_health_factor: string;
+		borrowing_power: string;
+		collateral: string;
+		minimum_borrow: string;
+		provider: string;
+		funds_delivered_to: string;
+		your_oisy_address: string;
+		borrow_risk_info: string;
+		borrow_at_risk_warning: string;
+		borrow_exceeds_power: string;
+		borrow_below_minimum: string;
+		borrow_prices_unavailable: string;
+		borrow_high_risk_warning: string;
+		borrow_risk_confirm: string;
+		starting_to_borrow: string;
+		borrow_started: string;
+		withdraw_review: string;
+		withdraw_review_subtitle: string;
+		withdrawing: string;
+		starting_to_withdraw: string;
+		withdraw_started: string;
+		supplied_label: string;
+		withdrawable: string;
+		reserved_by_debt: string;
+		withdraw_exceeds_free_collateral: string;
+		withdraw_exceeds_supplied: string;
+		withdraw_prices_unavailable: string;
+		withdraw_risk_info: string;
+		withdraw_at_risk_warning: string;
+		withdraw_high_risk_warning: string;
+		withdraw_risk_confirm: string;
+		repay_review: string;
+		repay_review_subtitle: string;
+		repaying: string;
+		starting_to_repay: string;
+		repay_started: string;
+		current_debt: string;
+		interest_accrued: string;
+		debt_after_repay: string;
+		repay_exceeds_debt: string;
+		repay_prices_unavailable: string;
 	};
 }
 
@@ -1760,8 +1992,6 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
-		harvest_autopilot_carousel_slide_title: string;
-		harvest_autopilot_carousel_slide_cta: string;
 	};
 	error: {
 		unexpected_error_on_withdraw: string;
@@ -1852,7 +2082,9 @@ interface I18nAi_assistant {
 
 interface I18n {
 	lang: Languages;
+	borrowings: I18nBorrowings;
 	core: I18nCore;
+	progress: I18nProgress;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;
@@ -1881,6 +2113,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;

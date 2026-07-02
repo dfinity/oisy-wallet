@@ -344,6 +344,20 @@ export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
+// Trading
+export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
+export const TRADING_ASSETS_DEPOSIT_BUTTON = 'trading-assets-deposit-button';
+export const TRADING_ASSET_WITHDRAW_BUTTON = 'trading-asset-withdraw-button';
+export const TRADING_ONBOARDING_DEPOSIT_BUTTON = 'trading-onboarding-deposit-button';
+export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
+export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
+export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbox';
+export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
+export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
+export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
+export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
+export const TRADING_ORDER_CANCEL_CONFIRM_BUTTON = 'trading-order-cancel-confirm-button';
+
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
 export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
@@ -360,3 +374,6 @@ export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-butto
 
 // BUY MODAL
 export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';
+
+// CONFIRMATION POPUP
+export const CONFIRMATION_POPUP_MODAL = 'confirmation-popup-modal';
