@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "مكتمل",
+		"in_progress": "قيد التقدم",
+		"failed": "فشل"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",

@@ -2,10 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		isPresetSelected,
@@ -160,7 +162,9 @@
 			return {
 				text: replacePlaceholders(
 					side === 'sell' ? t.warning_fok_blocked_sell : t.warning_fok_blocked_buy,
-					{ $price: refPrice.toString() }
+					{
+						$price: formatTradeAmount({ amount: refPrice, decimals: pairView?.quoteDecimals ?? 8 })
+					}
 				),
 				danger: true
 			};
@@ -268,11 +272,11 @@
 	</div>
 
 	{#if nonNullish(tickError)}
-		<p class="mt-1 text-xs text-error-primary" transition:slide>{tickError}</p>
+		<p class="mt-1 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
 	{/if}
 
 	{#if nonNullish(queueText)}
-		<p class="mt-1.5 text-xs text-tertiary" transition:slide>{queueText}</p>
+		<p class="mt-1.5 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
 	{/if}
 
 	{#if nonNullish(warningText)}
@@ -282,7 +286,7 @@
 			class:bg-warning-subtle={!warningText.danger}
 			class:text-error-primary={warningText.danger}
 			class:text-warning-primary={!warningText.danger}
-			transition:slide
+			transition:slide={SLIDE_PARAMS}
 		>
 			{warningText.text}
 		</p>
