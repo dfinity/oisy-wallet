@@ -17,6 +17,7 @@ import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
+import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 const APPROVE_EXPIRATION_MINUTES = 5n;
@@ -45,6 +46,9 @@ export const depositOisyTrade = async ({
 }: DepositOisyTradeParams): Promise<boolean> => {
 	const { auth, trading } = get(i18n);
 
+	// Full-precision human amount (smallest units → token units) for volume analytics.
+	const volume = formatUnits(amount, token.decimals);
+
 	try {
 		assertNonNullish(identity, auth.error.no_internet_identity);
 		assertNonNullish(OISY_TRADE_CANISTER_ID);
@@ -57,7 +61,8 @@ export const depositOisyTrade = async ({
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-			token: token.symbol
+			token: token.symbol,
+			volume
 		});
 
 		progress?.(ProgressStepsTradingDeposit.APPROVE);
@@ -87,7 +92,8 @@ export const depositOisyTrade = async ({
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-			token: token.symbol
+			token: token.symbol,
+			volume
 		});
 
 		return true;
@@ -96,6 +102,7 @@ export const depositOisyTrade = async ({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 			token: token.symbol,
+			volume,
 			error: replaceIcErrorFields(err)
 		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });

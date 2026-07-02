@@ -218,7 +218,8 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		const orderFields = { base: baseSymbol, quote: quoteSymbol, side };
+		// Order volume is the base-token quantity.
+		const orderFields = { base: baseSymbol, quote: quoteSymbol, side, volume: `${quantity}` };
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,

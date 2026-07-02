@@ -25,6 +25,10 @@ export interface TrackTradingParams {
 	orderType?: OisyTradeOrderType;
 	// Token symbol; open-ended like `base`/`quote`, so a plain symbol string.
 	token?: string;
+	// Traded amount in the relevant token's own units (the deposited/withdrawn token,
+	// or the order's base token), as a full-precision decimal string so volume can be
+	// aggregated per token in analytics.
+	volume?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
 }
@@ -41,6 +45,7 @@ export const trackTrading = ({
 	side,
 	orderType,
 	token,
+	volume,
 	error
 }: TrackTradingParams) => {
 	trackEvent({
@@ -55,6 +60,7 @@ export const trackTrading = ({
 			...(nonNullish(side) && { side }),
 			...(nonNullish(orderType) && { orderType }),
 			...(nonNullish(token) && { token }),
+			...(notEmptyString(volume) && { volume }),
 			...(notEmptyString(error) && { result_error: error })
 		}
 	});

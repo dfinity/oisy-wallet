@@ -172,11 +172,16 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
-		const orderFields: Pick<TrackTradingParams, 'base' | 'quote' | 'side' | 'orderType'> = {
+		const orderFields: Pick<
+			TrackTradingParams,
+			'base' | 'quote' | 'side' | 'orderType' | 'volume'
+		> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
-			orderType: fillOrKill ? 'FOK' : 'GTC'
+			orderType: fillOrKill ? 'FOK' : 'GTC',
+			// Order volume is the base-token quantity.
+			volume: `${baseNum}`
 		};
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
