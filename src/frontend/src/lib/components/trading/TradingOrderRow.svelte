@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
+	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconClockAlert from '$lib/components/icons/lucide/IconClockAlert.svelte';
+	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
@@ -83,6 +86,19 @@
 		Canceled: $i18n.trading.orders.status_canceled,
 		Expired: $i18n.trading.orders.status_expired
 	});
+
+	// Terminal states carry a small leading glyph in the badge (per wireframe); the icon
+	// inherits the badge text color via currentColor. Active states (Open/Pending/Partial)
+	// show none.
+	const statusIcons = {
+		Open: undefined,
+		Pending: undefined,
+		Partial: undefined,
+		Filled: IconCheck,
+		Canceled: IconClose,
+		Expired: IconClockAlert
+	};
+	let StatusIcon = $derived(statusIcons[labelKey]);
 
 	let rowText = $derived(
 		side === 'sell'
@@ -175,26 +191,33 @@
 		<TokenLogo badge={{ type: 'network' }} color="white" data={baseData} logoSize="xs" />
 	</span>
 
-	<div class="min-w-0 flex-1 text-sm leading-snug text-primary">
+	<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 text-sm leading-snug text-primary">
 		{#if $isPrivacyMode}
 			<span class="inline-flex items-center gap-1"><IconDots variant="sm" /></span>
 		{:else}
-			<span
-				class="font-semibold"
-				class:text-error-primary={side === 'sell'}
-				class:text-success-primary={side === 'buy'}
-			>
-				{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
+			<span>
+				<span
+					class="font-semibold"
+					class:text-error-primary={side === 'sell'}
+					class:text-success-primary={side === 'buy'}
+				>
+					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
+				</span>
+				{rowText}
 			</span>
-			{rowText}
 		{/if}
-		<span class="ml-1 inline-flex align-middle">
-			<TradingProviderTag />
-		</span>
+		<TradingProviderTag />
 	</div>
 
 	<span class="flex shrink-0 flex-col items-end gap-1">
-		<Badge variant={pillVariant} width="w-fit">{statusLabels[labelKey]}</Badge>
+		<Badge variant={pillVariant} width="w-fit">
+			<span class="inline-flex items-center gap-1">
+				{#if StatusIcon}
+					<span class="inline-flex" aria-hidden="true"><StatusIcon size="14" /></span>
+				{/if}
+				<span>{statusLabels[labelKey]}</span>
+			</span>
+		</Badge>
 		{#if nonNullish(queueText)}
 			<span class="text-xs text-tertiary">{queueText}</span>
 		{/if}

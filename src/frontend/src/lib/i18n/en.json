@@ -1731,7 +1731,7 @@
 			"cancel_order": "Cancel order",
 			"cancel_error": "The order couldn't be canceled — it stays active. Try again in a moment.",
 			"confirm_title": "Cancel this limit order?",
-			"confirm_description": "The reserved funds return to your free balance. This can't be undone.",
+			"confirm_description": "The reserved funds return to your free balance. This can't be undone. You can place a new order anytime.",
 			"confirm_order": "Order",
 			"confirm_price": "Price",
 			"confirm_returns_to_free": "Returns to free",

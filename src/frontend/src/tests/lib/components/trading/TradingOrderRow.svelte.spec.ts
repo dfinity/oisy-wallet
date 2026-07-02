@@ -87,6 +87,32 @@ describe('TradingOrderRow', () => {
 		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: order }));
 	});
 
+	// The status label span sits alongside its optional leading glyph inside the badge;
+	// its parent is the flex wrapper that holds both.
+	const badgeGlyphWrapper = ({
+		getByText,
+		label
+	}: {
+		getByText: (text: string) => HTMLElement;
+		label: string;
+	}) => getByText(label).parentElement;
+
+	it.each([
+		{ status: 'Filled' as const, label: 'Filled' },
+		{ status: 'Canceled' as const, label: 'Canceled' },
+		{ status: 'Expired' as const, label: 'Expired' }
+	])('renders a leading SVG glyph for the $status badge', ({ status, label }) => {
+		const { getByText } = render(TradingOrderRow, { props: { order: { ...order, status } } });
+
+		expect(badgeGlyphWrapper({ getByText, label })?.querySelector('svg')).not.toBeNull();
+	});
+
+	it('renders no leading glyph for an active (Open) badge', () => {
+		const { getByText } = render(TradingOrderRow, { props: { order } });
+
+		expect(badgeGlyphWrapper({ getByText, label: 'Open' })?.querySelector('svg')).toBeNull();
+	});
+
 	it('shows the queue position under the status when there is volume ahead', () => {
 		const { container } = render(TradingOrderRow, {
 			props: { order, orderBook: bookWithVolumeAhead }
