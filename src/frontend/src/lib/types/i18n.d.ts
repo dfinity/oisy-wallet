@@ -76,6 +76,12 @@ interface I18nCore {
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
+interface I18nProgress {
+	completed: string;
+	in_progress: string;
+	failed: string;
+}
+
 interface I18nNavigation {
 	text: {
 		tokens: string;
@@ -1395,6 +1401,21 @@ interface I18nTrading {
 		status_canceled: string;
 		status_expired: string;
 	};
+	order_detail: {
+		title: string;
+		status: string;
+		filled: string;
+		cancel_order: string;
+		cancel_error: string;
+		confirm_title: string;
+		confirm_description: string;
+		confirm_order: string;
+		confirm_price: string;
+		confirm_returns_to_free: string;
+		confirm_keep: string;
+		confirm_order_sell: string;
+		confirm_order_buy: string;
+	};
 	limit_order: {
 		title: string;
 		review_title: string;
@@ -2063,6 +2084,7 @@ interface I18n {
 	lang: Languages;
 	borrowings: I18nBorrowings;
 	core: I18nCore;
+	progress: I18nProgress;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;

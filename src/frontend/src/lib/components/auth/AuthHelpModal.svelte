@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import AuthHelpForm from '$lib/components/auth/AuthHelpForm.svelte';
 	import AuthHelpNewIdentityForm from '$lib/components/auth/AuthHelpNewIdentityForm.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { authHelpWizardSteps } from '$lib/config/auth-help.config';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { WizardStepsAuthHelp } from '$lib/enums/wizard-steps';

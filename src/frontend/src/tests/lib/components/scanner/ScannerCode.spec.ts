@@ -266,7 +266,7 @@ describe('ScannerCode.svelte', () => {
 
 		it('should render the inline input on a mobile device with a viewport >= lg', () => {
 			// e.g. dev-tools mobile emulation at 1280px, or a landscape phablet -
-			// gix-components' BottomSheet drops its `position: fixed` styling at >=1024px,
+			// the bottom sheet drops its `position: fixed` styling at >=1024px,
 			// so we must fall back to the inline-input layout even when isMobile() is true.
 			screensStore.set('xl');
 

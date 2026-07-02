@@ -81,6 +81,11 @@
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
+	"progress": {
+		"completed": "完了",
+		"in_progress": "進行中",
+		"failed": "失敗"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "資産",
@@ -1723,6 +1728,21 @@
 			"status_filled": "",
 			"status_canceled": "",
 			"status_expired": ""
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
 		},
 		"limit_order": {
 			"title": "",

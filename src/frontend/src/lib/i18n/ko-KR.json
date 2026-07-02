@@ -81,6 +81,11 @@
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
 	},
+	"progress": {
+		"completed": "완료됨",
+		"in_progress": "진행 중",
+		"failed": "실패"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "자산",
@@ -1723,6 +1728,21 @@
 			"status_filled": "",
 			"status_canceled": "",
 			"status_expired": ""
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
 		},
 		"limit_order": {
 			"title": "",
