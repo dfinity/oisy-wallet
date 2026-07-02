@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconUser, Popover } from '@dfinity/gix-components';
+	import { IconUser } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -29,6 +29,7 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
 	import {
