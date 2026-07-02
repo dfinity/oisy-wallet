@@ -67,7 +67,10 @@
 		<StickyHeader>
 			{#snippet header()}
 				<div class="flex w-full justify-between">
-					<div class="relative flex grow-1 justify-between">
+					<!-- min-w-0: without it this flex item won't shrink below its
+					     tab row's natural width on narrow viewports (see the
+					     matching note in SlidingInput.svelte). -->
+					<div class="relative flex min-w-0 grow-1 justify-between">
 						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
 							{#snippet overflowableContent()}
 								<!-- NFTs is its own nav destination now, so the standalone NFTs page
