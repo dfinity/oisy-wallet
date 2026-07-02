@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -10,6 +9,7 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import {
 		WizardStepsConvert,

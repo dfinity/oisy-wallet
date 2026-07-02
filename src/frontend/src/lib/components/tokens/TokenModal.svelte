@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
@@ -22,6 +21,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
 		TRACK_DELETE_TOKEN_SUCCESS,
 		TRACK_EDIT_TOKEN_SUCCESS
