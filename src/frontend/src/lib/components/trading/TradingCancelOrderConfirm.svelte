@@ -2,7 +2,6 @@
 	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { TRADING_ORDER_CANCEL_CONFIRM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
@@ -40,12 +39,12 @@
 	);
 </script>
 
-<BottomSheetConfirmationPopup {disabled} {onCancel}>
+<BottomSheetConfirmationPopup {disabled} {onCancel} showCloseButton={false}>
 	{#snippet title()}{$i18n.trading.order_detail.confirm_title}{/snippet}
 
 	{#snippet content()}
-		<ContentWithToolbar styleClass="flex flex-col pb-5">
-			<p class="mb-4 text-center text-sm text-tertiary">
+		<div class="flex flex-col px-5 pb-5">
+			<p class="mb-4 text-sm text-tertiary">
 				{$i18n.trading.order_detail.confirm_description}
 			</p>
 
@@ -64,7 +63,7 @@
 				</div>
 			</div>
 
-			{#snippet toolbar()}
+			<div class="mt-5">
 				<ButtonGroup>
 					<Button colorStyle="secondary" {disabled} onclick={onCancel}>
 						{$i18n.trading.order_detail.confirm_keep}
@@ -78,7 +77,7 @@
 						{$i18n.trading.order_detail.cancel_order}
 					</Button>
 				</ButtonGroup>
-			{/snippet}
-		</ContentWithToolbar>
+			</div>
+		</div>
 	{/snippet}
 </BottomSheetConfirmationPopup>

@@ -392,3 +392,6 @@ export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-butto
 
 // BUY MODAL
 export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';
+
+// CONFIRMATION POPUP
+export const CONFIRMATION_POPUP_MODAL = 'confirmation-popup-modal';

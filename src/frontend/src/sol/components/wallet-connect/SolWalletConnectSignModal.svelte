@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
@@ -9,6 +8,7 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
