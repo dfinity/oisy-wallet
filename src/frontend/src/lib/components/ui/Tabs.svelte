@@ -52,6 +52,7 @@
 <div class={`flex items-center ${styleClass ?? ''}`}>
 	{#each tabs as { label, shortLabel, id, path }, index (id)}
 		<button
+			type="button"
 			class="justify-center rounded-none border-0 text-sm font-semibold transition-colors hover:border-brand-primary sm:text-base"
 			class:border-b-2={activeTab === id || tabVariant === 'default'}
 			class:border-brand-primary={activeTab === id}
