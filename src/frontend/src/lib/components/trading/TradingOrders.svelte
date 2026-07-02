@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import TradingOrderDetailModal from '$lib/components/trading/TradingOrderDetailModal.svelte';
@@ -8,6 +9,7 @@
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		modalOisyTradeOrderDetail,
@@ -108,7 +110,9 @@
 			{:else}
 				<ul class="flex flex-col list-none">
 					{#each $oisyTradeActiveOrders as order (order.id)}
-						<li><TradingOrderRow {order} orderBook={orderBooks[pairKey(order)]} /></li>
+						<li transition:slide={SLIDE_PARAMS}>
+							<TradingOrderRow {order} orderBook={orderBooks[pairKey(order)]} />
+						</li>
 					{/each}
 				</ul>
 			{/if}
@@ -118,7 +122,9 @@
 			{:else}
 				<ul class="flex flex-col list-none">
 					{#each $oisyTradeHistoryOrders as order (order.id)}
-						<li><TradingOrderRow {order} /></li>
+						<li transition:slide={SLIDE_PARAMS}>
+							<TradingOrderRow {order} />
+						</li>
 					{/each}
 				</ul>
 			{/if}
