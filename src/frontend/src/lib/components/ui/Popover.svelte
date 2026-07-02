@@ -32,9 +32,10 @@
 		children
 	}: Props = $props();
 
-	// Fallback used when `--padding` cannot be read (e.g. before the CSS
-	// variables are applied). Matches the default declared in
-	// `src/lib/styles/global/variables.scss`.
+	// Conservative fallback used only when `--padding` cannot be read (e.g. during SSR or
+	// before the CSS variables are applied). The live value from
+	// `src/lib/styles/global/variables.scss` (`round(0.45rem, 1px)`) is read at runtime and
+	// takes precedence; this constant just guards that pre-paint edge case.
 	const DEFAULT_VIEWPORT_PADDING = 8;
 
 	let popoverTop = $state(0);
@@ -117,8 +118,14 @@
 
 		measure();
 
+		const reset = () => {
+			placementResolved = false;
+			panelWidth = 0;
+		};
+
 		if (typeof ResizeObserver === 'undefined') {
-			return {};
+			// Still reset state on unmount so a later re-mount re-measures from scratch.
+			return { destroy: reset };
 		}
 
 		const ro = new ResizeObserver(measure);
@@ -129,8 +136,7 @@
 			destroy: () => {
 				ro.disconnect();
 
-				placementResolved = false;
-				panelWidth = 0;
+				reset();
 			}
 		};
 	};
@@ -165,7 +171,8 @@
 				<button
 					class="close icon-only"
 					aria-label={$i18n.core.text.close}
-					onclick={stopPropagation(close)}><IconClose /></button
+					onclick={stopPropagation(close)}
+					type="button"><IconClose /></button
 				>
 			{/if}
 
