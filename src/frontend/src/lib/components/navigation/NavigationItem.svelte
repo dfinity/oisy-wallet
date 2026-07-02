@@ -39,7 +39,7 @@
 		     inline at the label's own baseline, so it reads as a raised badge
 		     rather than a same-size continuation of the label text. -->
 		<div
-			class="absolute -mt-1.5 ml-10 scale-75 text-xs/4.5 font-bold uppercase md:relative md:ml-1 md:-translate-y-1.5 md:scale-[0.8]"
+			class="absolute -mt-1.5 ml-10 scale-75 text-xs/4.5 font-bold uppercase md:relative md:ml-1 md:mt-0 md:-translate-y-1.5 md:scale-[0.8]"
 		>
 			<Tag size="sm" variant={tagVariant}>{tag}</Tag>
 		</div>
