@@ -196,6 +196,7 @@
 	<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 text-sm leading-snug text-primary">
 		{#if $isPrivacyMode}
 			<span class="inline-flex items-center gap-1"><IconDots variant="sm" /></span>
+			<TradingProviderTag />
 		{:else}
 			<span>
 				<span
@@ -205,10 +206,9 @@
 				>
 					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
 				</span>
-				{rowText}
+				{rowText} <span class="inline-flex align-middle"><TradingProviderTag /></span>
 			</span>
 		{/if}
-		<TradingProviderTag />
 	</div>
 
 	<span class="flex shrink-0 flex-col items-end gap-1">
