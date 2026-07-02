@@ -81,6 +81,11 @@
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
 		}
 	},
+	"progress": {
+		"completed": "Dokončeno",
+		"in_progress": "Probíhá",
+		"failed": "Selhalo"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",

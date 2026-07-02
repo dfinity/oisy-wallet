@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';

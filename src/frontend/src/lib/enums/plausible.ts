@@ -20,7 +20,8 @@ export enum PLAUSIBLE_EVENTS {
 	TRANSACTION_FILTER = 'transaction_filter',
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
-	ONRAMPER_OPEN = 'onramper_open'
+	ONRAMPER_OPEN = 'onramper_open',
+	TRADING = 'trading'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -44,7 +45,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	TRANSACTIONS = 'transactions',
 	SIGNER = 'signer',
 	NETWORKS = 'networks',
-	LEARN_MORE = 'learn_more'
+	LEARN_MORE = 'learn_more',
+	TRADING = 'trading'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -74,6 +76,13 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 	ACCOUNTS = 'accounts',
 	CONSENT_MESSAGE = 'consent_message',
 	CALL_CANISTER = 'call_canister'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRADING {
+	LIMIT_ORDER = 'limit_order',
+	CANCEL_ORDER = 'cancel_order',
+	DEPOSIT = 'deposit',
+	WITHDRAW = 'withdraw'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
