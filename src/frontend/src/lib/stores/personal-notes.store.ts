@@ -4,7 +4,7 @@ import { comparePersonalNotesByUpdatedDesc } from '$lib/utils/personal-note.util
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface PersonalNotesStoreData {
-	/** Decrypted entries keyed by note id; cleartext lives in memory only. `undefined` until first load. */
+	/** Decrypted entries keyed by note id; cleartext lives in memory only. `undefined` until first load (or an optimistic write). */
 	entries: Record<string, PersonalNoteEntryUi> | undefined;
 	/** Total note count reported by the backend (drives the capacity gate). */
 	count: number;
