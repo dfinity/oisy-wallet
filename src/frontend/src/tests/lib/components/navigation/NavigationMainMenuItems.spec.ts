@@ -5,7 +5,6 @@ import {
 	NAVIGATION_ITEM_ACTIVITY,
 	NAVIGATION_ITEM_EXPLORER,
 	NAVIGATION_ITEM_NFTS,
-	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS
@@ -36,9 +35,11 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_NFTS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
-		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
+		// Notes (PERSONAL_NOTES_ENABLED), Trade (TRADING_ENABLED) and Earn
+		// (EARNING_ENABLED) are feature-flagged off in tests, so they are not
+		// asserted here.
 	});
 
 	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {
