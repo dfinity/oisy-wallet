@@ -52,6 +52,12 @@ describe('TokensFilter', () => {
 		expect(getByTestId(`${TOKEN_LIST_FILTER}-open-btn`)).toBeInTheDocument();
 	});
 
+	it('should not render the filter button when hideFilter is true', () => {
+		const { queryByTestId } = render(TokensFilter, { props: { hideFilter: true } });
+
+		expect(queryByTestId(`${TOKEN_LIST_FILTER}-open-btn`)).not.toBeInTheDocument();
+	});
+
 	// SvelteKit route IDs don't include trailing slashes (e.g. `/(app)`, `/(app)/nfts`).
 	// The is*Path helpers normalize them internally.
 	describe('filter persistence across asset tabs', () => {
