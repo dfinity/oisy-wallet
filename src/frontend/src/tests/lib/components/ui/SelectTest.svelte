@@ -16,7 +16,7 @@
 
 <button data-tid="test" onclick={changeValue}>change</button>
 
-<Select name="test" selectedValue={value}>
+<Select name="test" bind:selectedValue={value}>
 	{#each options as { label, value } (value)}
 		<SelectOption {value}>{label}</SelectOption>
 	{/each}
