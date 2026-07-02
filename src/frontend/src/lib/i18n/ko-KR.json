@@ -81,6 +81,11 @@
 			"video_not_supported": "브라우저가 동영상 재생을 지원하지 않습니다."
 		}
 	},
+	"progress": {
+		"completed": "완료됨",
+		"in_progress": "진행 중",
+		"failed": "실패"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "자산",

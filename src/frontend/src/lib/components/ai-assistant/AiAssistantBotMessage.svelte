@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Markdown } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import IconRetry from '$lib/components/icons/IconRetry.svelte';
+	import Markdown from '$lib/components/ui/Markdown.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
