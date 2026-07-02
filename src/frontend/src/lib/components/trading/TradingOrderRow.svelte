@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -8,6 +9,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -219,7 +221,7 @@
 			</span>
 		</Badge>
 		{#if nonNullish(queueText)}
-			<span class="text-xs text-tertiary">{queueText}</span>
+			<span class="text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</span>
 		{/if}
 	</span>
 </button>
