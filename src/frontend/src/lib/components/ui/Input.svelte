@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { Input as GixInput, type InputProps as GixInputProps } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ButtonPaste from '$lib/components/ui/ButtonPaste.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
+	import InputBase from '$lib/components/ui/InputBase.svelte';
+	import type { InputProps as InputBaseProps } from '$lib/types/input';
 
-	export interface InputProps extends GixInputProps {
+	export interface InputProps extends InputBaseProps {
 		showResetButton?: boolean;
 		resetButtonAriaLabel?: string;
 		showPasteButton?: boolean;
@@ -29,7 +30,7 @@
 	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
 	class="base-input"
 >
-	<GixInput {...props} bind:value>
+	<InputBase {...props} bind:value>
 		{#snippet innerEnd()}
 			<div class="flex items-center pl-2" bind:clientWidth={endWidth}>
 				{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
@@ -46,7 +47,7 @@
 				{@render innerEndProp?.()}
 			</div>
 		{/snippet}
-	</GixInput>
+	</InputBase>
 </div>
 
 <style lang="scss">
