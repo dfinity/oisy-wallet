@@ -10,6 +10,7 @@ import * as vetkeys from '$lib/services/personal-notes.vetkeys';
 import { personalNotesList, personalNotesStore } from '$lib/stores/personal-notes.store';
 import { isPersonalNoteDecryptionFailure } from '$lib/types/personal-note';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { DerivedKeyMaterial } from '@dfinity/vetkeys';
 import { get } from 'svelte/store';
 
 describe('personal-notes.services', () => {
@@ -25,7 +26,8 @@ describe('personal-notes.services', () => {
 				{ note_id: 'bad', encrypted_note: new Uint8Array([2]) }
 			]);
 			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(2n);
-			vi.spyOn(vetkeys, 'decryptPersonalNote').mockImplementation(({ noteId }) =>
+			vi.spyOn(vetkeys, 'deriveKeyMaterial').mockResolvedValue({} as DerivedKeyMaterial);
+			vi.spyOn(vetkeys, 'decryptPersonalNoteWithKey').mockImplementation(({ noteId }) =>
 				noteId === 'bad'
 					? Promise.reject(new Error('cannot decrypt'))
 					: Promise.resolve({ note: 'hello', created_at_ns: '100', updated_at_ns: '100' })
@@ -42,6 +44,16 @@ describe('personal-notes.services', () => {
 
 			expect(bad !== undefined && isPersonalNoteDecryptionFailure(bad)).toBeTruthy();
 			expect(good !== undefined && !isPersonalNoteDecryptionFailure(good)).toBeTruthy();
+		});
+
+		it('propagates a systemic derivation failure instead of a fully-failed list', async () => {
+			vi.spyOn(backendApi, 'getPersonalNotes').mockResolvedValue([
+				{ note_id: 'a', encrypted_note: new Uint8Array([1]) }
+			]);
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+			vi.spyOn(vetkeys, 'deriveKeyMaterial').mockRejectedValue(new Error('vetKD down'));
+
+			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('vetKD down');
 		});
 	});
 
