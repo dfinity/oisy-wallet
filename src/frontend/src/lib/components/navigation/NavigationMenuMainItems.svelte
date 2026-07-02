@@ -5,6 +5,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import { TRADING_ENABLED } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
@@ -224,15 +225,21 @@
 				selected: isRouteDappExplorer(page)
 			},
 			// Interim: opens the Notes modal (not a page yet), so it never takes the
-			// blue "current page" treatment.
-			notes: {
-				label: $i18n.navigation.text.notes,
-				ariaLabel: $i18n.navigation.alt.notes,
-				testId: prefixedTestId(NAVIGATION_ITEM_NOTES),
-				icon: IconNotebook,
-				onclick: () => modalStore.openNotes(notesModalId),
-				selected: false
-			},
+			// blue "current page" treatment. Gated on PERSONAL_NOTES_ENABLED to match
+			// the modal host (Modals.svelte), which only mounts NotesModal under the same
+			// flag — without the gate the nav shows a dead entry in production (flag off).
+			...(PERSONAL_NOTES_ENABLED
+				? {
+						notes: {
+							label: $i18n.navigation.text.notes,
+							ariaLabel: $i18n.navigation.alt.notes,
+							testId: prefixedTestId(NAVIGATION_ITEM_NOTES),
+							icon: IconNotebook,
+							onclick: () => modalStore.openNotes(notesModalId),
+							selected: false
+						}
+					}
+				: {}),
 			settings: {
 				label: $i18n.navigation.text.settings,
 				ariaLabel: $i18n.navigation.alt.settings,
