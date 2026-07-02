@@ -3,11 +3,17 @@ import type { IcToken } from '$icp/types/ic-token';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { deposit as depositApi } from '$lib/api/oisy-trade.api';
 import { NANO_SECONDS_IN_MINUTE, OISY_TRADE_CANISTER_ID } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+} from '$lib/enums/plausible';
 import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 import { loadOisyTrade } from '$lib/services/oisy-trade.services';
+import { trackTrading } from '$lib/services/trading-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -48,6 +54,12 @@ export const depositOisyTrade = async ({
 
 		assertNonNullish(fee, trading.deposit.error.unknown_fee);
 
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+			token: token.symbol
+		});
+
 		progress?.(ProgressStepsTradingDeposit.APPROVE);
 
 		await approve({
@@ -72,8 +84,20 @@ export const depositOisyTrade = async ({
 
 		progress?.(ProgressStepsTradingDeposit.DONE);
 
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			token: token.symbol
+		});
+
 		return true;
 	} catch (err: unknown) {
+		trackTrading({
+			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			token: token.symbol,
+			error: replaceIcErrorFields(err)
+		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
 
 		return false;
