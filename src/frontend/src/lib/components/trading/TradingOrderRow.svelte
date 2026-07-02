@@ -206,7 +206,7 @@
 				>
 					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
 				</span>
-				{rowText}<span class="ml-1 inline-flex align-middle"><TradingProviderTag /></span>
+				{rowText} <span class="inline-flex align-middle"><TradingProviderTag /></span>
 			</span>
 		{/if}
 	</div>
