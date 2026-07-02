@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Zakończono",
+		"in_progress": "W toku",
+		"failed": "Niepowodzenie"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Aktywa",
