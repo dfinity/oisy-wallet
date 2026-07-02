@@ -279,12 +279,14 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    fetched yet** and a chat-app link-preview/unfurler bot cannot consume a
    single-use link. The **Reveal note** click is what fetches the content (and, for
    single-use, burns it).
-2. **Revealed:** the note text, rendered with the **same safe rendering** as
-   `NoteView` (`neutralizePersonalNoteText` + `linkifyPersonalNote`,
-   `whitespace-pre-wrap`, links `rel="noopener noreferrer" target="_blank"`).
-   **No timestamps, no sender identity** (decided: text only). Layout, top to
-   bottom:
-   - The title is the generic **"Shared note"**.
+2. **Revealed:** the note text, rendered by the **same shared note-render
+   component as the in-app view** (`NoteView`), so a shared note looks identical
+   to how its owner sees it — the **first non-empty line is the bold title**, the
+   rest is the body, text is bidi-neutralized, and only `http(s)` URLs become
+   `rel="noopener noreferrer" target="_blank"` links. **No timestamps, no sender
+   identity** (decided: text only). Layout, top to bottom:
+   - The card heading is the generic **"Shared note"** (above the note's own
+     bold first-line title).
    - **Single-use caveat as plain text** directly under the title
      (not a boxed alert) — **"Single-use link — once you close or reload this page,
      the note is gone for good. Copy it now if you need it."** Stating the
