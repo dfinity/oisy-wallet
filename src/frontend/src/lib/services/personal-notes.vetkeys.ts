@@ -57,7 +57,11 @@ const toUint8Array = (value: Uint8Array | number[]): Uint8Array =>
  * non-extractable `CryptoKey` is cached in IndexedDB so the vetKD round-trip
  * happens at most once per device, and in memory for the session.
  */
-const deriveKeyMaterial = ({ identity }: { identity: Identity }): Promise<DerivedKeyMaterial> => {
+export const deriveKeyMaterial = ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<DerivedKeyMaterial> => {
 	const principal = identity.getPrincipal();
 	const cacheKey = principal.toText();
 
