@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
