@@ -63,7 +63,7 @@
 			{#snippet header()}
 				<div class="flex w-full justify-between">
 					<div class="relative flex grow-1 justify-between">
-						<TokensFilter>
+						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
 							{#snippet overflowableContent()}
 								<!-- NFTs is its own nav destination now, so the standalone NFTs page
 								     shows no Tokens/Earning/Trading tab bar. -->

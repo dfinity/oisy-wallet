@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { TRADING_ASSET_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
@@ -82,7 +84,7 @@
 			{#snippet descriptionEnd()}
 				<span class="flex flex-col items-end text-nowrap">
 					{#if hasReserved}
-						<span>
+						<span transition:slide={SLIDE_PARAMS}>
 							{#if $isPrivacyMode}
 								<span class="inline-flex items-center gap-1"
 									>{$i18n.trading.assets.available_label} <IconDots variant="xs" /></span
@@ -97,7 +99,7 @@
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />
 					{:else if nonNullish(formattedTotalUsd)}
-						<span>{formattedTotalUsd}</span>
+						<span transition:slide={SLIDE_PARAMS}>{formattedTotalUsd}</span>
 					{/if}
 				</span>
 			{/snippet}

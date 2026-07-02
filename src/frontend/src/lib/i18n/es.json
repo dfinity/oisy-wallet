@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Completado",
+		"in_progress": "En curso",
+		"failed": "Fallido"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Activos",
