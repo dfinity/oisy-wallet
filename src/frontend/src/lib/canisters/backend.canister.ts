@@ -4,8 +4,10 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	PersonalNoteEntry,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TokenId
@@ -589,6 +591,68 @@ export class BackendCanister extends Canister<BackendService> {
 			return response.Ok.transactions;
 		}
 
+		throw response.Err;
+	};
+
+	setPersonalNote = async (request: PersonalNoteEntry): Promise<void> => {
+		const { set_personal_note } = this.caller({ certified: true });
+		const response = await set_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	deletePersonalNote = async (request: DeletePersonalNoteRequest): Promise<void> => {
+		const { delete_personal_note } = this.caller({ certified: true });
+		const response = await delete_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotes = async (): Promise<PersonalNoteEntry[]> => {
+		const { get_personal_notes } = this.caller({ certified: false });
+		const response = await get_personal_notes();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesCount = async (): Promise<bigint> => {
+		const { get_personal_notes_count } = this.caller({ certified: false });
+		const response = await get_personal_notes_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_personal_notes_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_personal_notes_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
 		throw response.Err;
 	};
 }
