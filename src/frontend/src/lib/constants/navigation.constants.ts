@@ -4,7 +4,7 @@ import type { NavigationBarSlot, NavigationSection } from '$lib/types/navigation
 // under its heading (headings render from PR 2 on).
 export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 	{ id: 'portfolio', items: ['assets', 'nfts', 'activity'] },
-	{ id: 'finance', items: ['trade', 'borrow', 'earn'] },
+	{ id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ id: 'more', items: ['explore', 'notes', 'settings', 'rewards'] }
 ];
 
@@ -15,7 +15,7 @@ export const DESKTOP_NAVIGATION_SECTIONS: NavigationSection[] = [
 export const MOBILE_NAVIGATION_BAR: NavigationBarSlot[] = [
 	{ type: 'item', id: 'assets' },
 	{ type: 'item', id: 'activity' },
-	{ type: 'group', id: 'finance', items: ['trade', 'borrow', 'earn'] },
+	{ type: 'group', id: 'finance', items: ['trade', 'earn', 'borrow'] },
 	{ type: 'item', id: 'notes' },
 	{ type: 'group', id: 'more', items: ['nfts', 'explore', 'settings', 'rewards'] }
 ];
