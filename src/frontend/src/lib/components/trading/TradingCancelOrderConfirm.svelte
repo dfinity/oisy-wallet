@@ -65,7 +65,7 @@
 
 			<div class="mt-5">
 				<ButtonGroup>
-					<Button colorStyle="secondary" {disabled} onclick={onCancel}>
+					<Button colorStyle="secondary-light" {disabled} onclick={onCancel}>
 						{$i18n.trading.order_detail.confirm_keep}
 					</Button>
 					<Button
