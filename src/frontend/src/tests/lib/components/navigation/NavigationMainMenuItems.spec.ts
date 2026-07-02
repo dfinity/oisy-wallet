@@ -29,6 +29,7 @@ describe('NavigationMainMenuItems', () => {
 
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
+		bottomSheetOpenStore.set(false);
 	});
 
 	it('renders all basic navigation items', () => {

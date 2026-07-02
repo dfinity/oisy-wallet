@@ -37,6 +37,8 @@
 
 		<div
 			class="pointer-events-auto absolute inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] rounded-t-3xl bg-primary px-4 pt-3 pb-5 shadow-[0_-10px_34px_rgba(20,30,60,0.16)]"
+			aria-label={label}
+			role="dialog"
 			transition:fly={{ y: 320, duration: 200 }}
 		>
 			<div class="mx-auto mb-3 h-1 w-9 rounded-full bg-tertiary"></div>
