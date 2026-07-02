@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { IconUser } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
@@ -14,6 +13,7 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
+	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';

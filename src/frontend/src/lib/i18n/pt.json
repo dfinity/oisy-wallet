@@ -109,7 +109,7 @@
 			"hide_balances": "Ocultar saldos",
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo privado ativado. Clique [P] para mostrar os seus saldos novamente.",
-			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para mostrar os seus saldos novamente.",
+			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para ocultar os seus saldos.",
 			"notes": ""
 		},
 		"alt": {
