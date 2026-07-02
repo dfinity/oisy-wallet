@@ -34,7 +34,7 @@
 
 	const breadcrumbItems = $derived([
 		{
-			label: $i18n.navigation.text.tokens,
+			label: $i18n.navigation.text.nfts,
 			url: nftsUrl({
 				originSelectedNetwork: $userSelectedNetworkStore
 			})
