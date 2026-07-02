@@ -21,6 +21,7 @@
 	import LiquidiumSupplyProgress from '$lib/components/liquidium/supply/LiquidiumSupplyProgress.svelte';
 	import LiquidiumSupplyReview from '$lib/components/liquidium/supply/LiquidiumSupplyReview.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { LIQUIDIUM_EVM_FEE_ESTIMATE_DESTINATION } from '$lib/constants/liquidium.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -223,7 +224,7 @@
 	<EthFeeContext
 		bind:this={feeContext}
 		{amount}
-		destination={$ethAddress ?? ''}
+		destination={LIQUIDIUM_EVM_FEE_ESTIMATE_DESTINATION}
 		{nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsLiquidiumSupply.SUPPLYING}
 		sendToken={$sendToken}
