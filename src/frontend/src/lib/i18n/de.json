@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Abgeschlossen",
+		"in_progress": "In Bearbeitung",
+		"failed": "Fehlgeschlagen"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",

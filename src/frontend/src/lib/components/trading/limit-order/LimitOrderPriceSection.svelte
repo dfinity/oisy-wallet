@@ -6,6 +6,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
+		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
 		isPresetSelected,
@@ -160,7 +161,9 @@
 			return {
 				text: replacePlaceholders(
 					side === 'sell' ? t.warning_fok_blocked_sell : t.warning_fok_blocked_buy,
-					{ $price: refPrice.toString() }
+					{
+						$price: formatTradeAmount({ amount: refPrice, decimals: pairView?.quoteDecimals ?? 8 })
+					}
 				),
 				danger: true
 			};
