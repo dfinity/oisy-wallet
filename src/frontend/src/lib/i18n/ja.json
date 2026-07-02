@@ -81,6 +81,11 @@
 			"video_not_supported": "ブラウザがビデオ再生をサポートしていません。"
 		}
 	},
+	"progress": {
+		"completed": "完了",
+		"in_progress": "進行中",
+		"failed": "失敗"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "資産",

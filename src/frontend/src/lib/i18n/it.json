@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Completato",
+		"in_progress": "In corso",
+		"failed": "Non riuscito"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",

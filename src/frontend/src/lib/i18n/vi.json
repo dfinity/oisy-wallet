@@ -81,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Hoàn tất",
+		"in_progress": "Đang xử lý",
+		"failed": "Thất bại"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
