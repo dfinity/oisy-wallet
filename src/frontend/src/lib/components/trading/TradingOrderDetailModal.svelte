@@ -293,7 +293,7 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
-				<Button colorStyle="secondary" onclick={close}>{$i18n.core.text.close}</Button>
+				<Button colorStyle="secondary-light" onclick={close}>{$i18n.core.text.close}</Button>
 				{#if active}
 					<Button
 						colorStyle="error"
