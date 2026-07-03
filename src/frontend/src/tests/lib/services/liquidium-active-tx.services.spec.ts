@@ -5,14 +5,7 @@ import * as activeUserTransactionsServices from '$lib/services/active-user-trans
 import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import {
-	ActivityDirection,
-	ActivityKind,
-	ActivityStatus,
-	type Activity,
-	type InflowActivity,
-	type OutflowActivity
-} from '@liquidium/client';
+import type { Activity, InflowActivity, LiquidiumState, OutflowActivity } from '@liquidium/client';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/active-user-transactions.services', () => ({
@@ -48,6 +41,20 @@ describe('liquidium-active-tx.services', () => {
 		created_at_ns: ZERO
 	});
 
+	const inflowStatus = (state: LiquidiumState): InflowActivity['status'] => ({
+		operation: 'deposit',
+		state,
+		confirmations: null,
+		requiredConfirmations: null
+	});
+
+	const outflowStatus = (state: LiquidiumState): OutflowActivity['status'] => ({
+		operation: 'borrow',
+		state,
+		confirmations: null,
+		requiredConfirmations: null
+	});
+
 	const buildActivity = (overrides: Partial<InflowActivity> = {}): Activity => ({
 		id: 'act-1',
 		poolId,
@@ -55,12 +62,8 @@ describe('liquidium-active-tx.services', () => {
 		chain: 'BTC',
 		amount: 100n,
 		timestampMs: 0,
-		txid,
-		confirmations: null,
-		requiredConfirmations: null,
-		direction: ActivityDirection.inflow,
-		kind: ActivityKind.deposit,
-		status: ActivityStatus.pending,
+		txids: [txid],
+		status: inflowStatus('confirming'),
 		...overrides
 	});
 
@@ -71,12 +74,8 @@ describe('liquidium-active-tx.services', () => {
 		chain: 'ETH',
 		amount: 100n,
 		timestampMs: 0,
-		txid: null,
-		confirmations: null,
-		requiredConfirmations: null,
-		direction: ActivityDirection.outflow,
-		kind: ActivityKind.borrow,
-		status: ActivityStatus.pending,
+		txids: [],
+		status: outflowStatus('confirming'),
 		...overrides
 	});
 
@@ -127,7 +126,7 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('terminalizes from the txid-matched activity', async () => {
-		list.mockResolvedValue([buildActivity({ status: ActivityStatus.confirmed })]);
+		list.mockResolvedValue([buildActivity({ status: inflowStatus('completed') })]);
 
 		await poll(
 			buildTx({
@@ -142,7 +141,7 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('surfaces an error from a failed activity', async () => {
-		list.mockResolvedValue([buildActivity({ status: ActivityStatus.failed })]);
+		list.mockResolvedValue([buildActivity({ status: inflowStatus('failed') })]);
 
 		await poll(
 			buildTx({
@@ -158,7 +157,7 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('advances an in-flight activity to Executing', async () => {
-		list.mockResolvedValue([buildActivity({ status: ActivityStatus.detected })]);
+		list.mockResolvedValue([buildActivity({ status: inflowStatus('processing') })]);
 
 		await poll(
 			buildTx({
@@ -173,7 +172,7 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('does not advance for a non-progressing status', async () => {
-		list.mockResolvedValue([buildActivity({ status: ActivityStatus.requested })]);
+		list.mockResolvedValue([buildActivity({ status: inflowStatus('action_required') })]);
 
 		await poll(
 			buildTx({
@@ -186,7 +185,9 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('does nothing when no activity matches the txid', async () => {
-		list.mockResolvedValue([buildActivity({ txid: '0xother', status: ActivityStatus.confirmed })]);
+		list.mockResolvedValue([
+			buildActivity({ txids: ['0xother'], status: inflowStatus('completed') })
+		]);
 
 		await poll(
 			buildTx({
@@ -200,7 +201,9 @@ describe('liquidium-active-tx.services', () => {
 
 	it('matches txid ignoring case and a 0x prefix mismatch', async () => {
 		// Stored ref carries `0x` + uppercase; the SDK activity carries neither.
-		list.mockResolvedValue([buildActivity({ txid: 'abc123', status: ActivityStatus.confirmed })]);
+		list.mockResolvedValue([
+			buildActivity({ txids: ['abc123'], status: inflowStatus('completed') })
+		]);
 
 		await poll(
 			buildTx({
@@ -215,9 +218,7 @@ describe('liquidium-active-tx.services', () => {
 	});
 
 	it('matches against the activity txids array', async () => {
-		list.mockResolvedValue([
-			buildActivity({ txid: null, txids: [txid], status: ActivityStatus.confirmed })
-		]);
+		list.mockResolvedValue([buildActivity({ txids: [txid], status: inflowStatus('completed') })]);
 
 		await poll(
 			buildTx({
@@ -247,7 +248,7 @@ describe('liquidium-active-tx.services', () => {
 		it('resolves by outflow id via getStatus (not the txid list) and terminalizes', async () => {
 			getStatus.mockResolvedValue({
 				found: true,
-				activity: buildOutflowActivity({ status: ActivityStatus.confirmed })
+				activity: buildOutflowActivity({ status: outflowStatus('active') })
 			});
 
 			await poll(
@@ -268,7 +269,7 @@ describe('liquidium-active-tx.services', () => {
 		it('advances a sent outflow to Executing', async () => {
 			getStatus.mockResolvedValue({
 				found: true,
-				activity: buildOutflowActivity({ status: ActivityStatus.sent })
+				activity: buildOutflowActivity({ status: outflowStatus('confirming') })
 			});
 
 			await poll(
@@ -286,7 +287,7 @@ describe('liquidium-active-tx.services', () => {
 		it('surfaces an error from a failed outflow', async () => {
 			getStatus.mockResolvedValue({
 				found: true,
-				activity: buildOutflowActivity({ status: ActivityStatus.failed })
+				activity: buildOutflowActivity({ status: outflowStatus('failed') })
 			});
 
 			await poll(
@@ -318,7 +319,7 @@ describe('liquidium-active-tx.services', () => {
 		it('prefers the outflow id over a later-persisted txid', async () => {
 			getStatus.mockResolvedValue({
 				found: true,
-				activity: buildOutflowActivity({ status: ActivityStatus.confirmed })
+				activity: buildOutflowActivity({ status: outflowStatus('active') })
 			});
 
 			// Both refs present (txid learned after submit): the outflow id still wins.

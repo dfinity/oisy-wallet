@@ -11,12 +11,7 @@ import {
 } from '$lib/utils/liquidium-active-tx.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import {
-	ActivityFilter,
-	ActivityStatus,
-	type Activity,
-	type LiquidiumClient
-} from '@liquidium/client';
+import { ActivityFilter, type Activity, type LiquidiumClient } from '@liquidium/client';
 import { get } from 'svelte/store';
 
 // Bridges `0x`/case differences between oisy's broadcast hash and the SDK's txid.
@@ -43,11 +38,7 @@ const resolveLiquidiumActivity = async ({
 	if (nonNullish(txid)) {
 		const target = normalizeTxid(txid);
 		const activities = await client.activities.list({ profileId, filter: ActivityFilter.all });
-		return activities.find(
-			({ txid: activityTxid, txids }) =>
-				(nonNullish(activityTxid) && normalizeTxid(activityTxid) === target) ||
-				(txids ?? []).some((t) => normalizeTxid(t) === target)
-		);
+		return activities.find(({ txids }) => (txids ?? []).some((t) => normalizeTxid(t) === target));
 	}
 
 	return undefined;
@@ -91,10 +82,7 @@ const pollLiquidiumActiveUserTransaction = async ({
 			return;
 		}
 
-		const error =
-			activity.status === ActivityStatus.failed
-				? get(i18n).liquidium.text.transaction_failed
-				: undefined;
+		const error = 'Failed' in candidate ? get(i18n).liquidium.text.transaction_failed : undefined;
 
 		await applyActiveUserTransactionPollUpdate({
 			identity,

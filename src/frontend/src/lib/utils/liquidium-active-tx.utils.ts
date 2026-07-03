@@ -11,7 +11,7 @@ import {
 	type LiquidiumExternalRefKey
 } from '$lib/types/liquidium-active-tx';
 import { nonNullish } from '@dfinity/utils';
-import { ActivityStatus, type Activity } from '@liquidium/client';
+import type { Activity } from '@liquidium/client';
 
 export const isLiquidiumActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'Liquidium' in tx.data;
@@ -84,22 +84,23 @@ export const buildLiquidiumTrackingMetadata = ({
 	});
 };
 
-// Liquidium activity status → AUT status; `undefined` for statuses that don't advance the row.
+// Liquidium activity status → AUT status; `undefined` for states that don't advance the row.
 export const liquidiumActivityToStatus = (
 	status: Activity['status']
 ): ActiveUserTransactionStatus | undefined => {
-	switch (status) {
-		case ActivityStatus.confirmed:
+	switch (status.state) {
+		// `completed` for inflows/withdrawals; `active` once a borrow's loan is live.
+		case 'completed':
+		case 'active':
 			return { Succeeded: null };
-		case ActivityStatus.failed:
+		case 'failed':
+		case 'expired':
 			return { Failed: null };
-		case ActivityStatus.pending:
-		case ActivityStatus.detected:
-		case ActivityStatus.processing:
-		case ActivityStatus.sent:
+		case 'confirming':
+		case 'processing':
 			return { Executing: null };
 		default:
-			// `requested` (and any unknown status) → no advance.
+			// `action_required` (and any unknown state) → no advance.
 			return undefined;
 	}
 };
