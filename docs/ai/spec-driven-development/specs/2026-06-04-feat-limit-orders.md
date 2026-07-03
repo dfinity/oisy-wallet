@@ -25,12 +25,11 @@ Not in v1: order expiry, market orders, order book depth view, multiple DEX inte
 
 ### Canister
 
-|                  |                                |
-| ---------------- | ------------------------------ |
-| Display name     | OISY TRADE                     |
-| Repo             | `dfinity/oisy-trade` (private) |
-| Staging canister | `proc5-daaaa-aaaar-qb5va-cai`  |
-| Mainnet canister | TBD — update when deployed     |
+|              |                                                                        |
+| ------------ | ---------------------------------------------------------------------- |
+| Display name | OISY TRADE                                                             |
+| Repo         | `dfinity/oisy-trade` (private)                                         |
+| Canister     | `sy2xe-miaaa-aaaar-qb7sq-cai` (mainnet — used across all environments) |
 
 The full Candid interface is at `canister/dex.did` in the `dfinity/oisy-trade` repo.
 

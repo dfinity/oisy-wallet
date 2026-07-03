@@ -266,13 +266,11 @@
 				});
 			}
 
-			if (
-				!(
-					isSwapError(err) &&
-					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-				)
-			) {
+			if (!(
+				isSwapError(err) &&
+				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+			)) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
