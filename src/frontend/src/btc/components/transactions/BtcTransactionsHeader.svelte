@@ -19,7 +19,12 @@
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
 		{#if isNetworkMainnet}
-			<button class="ml-1 opacity-50" onclick={onInfoButtonClick}><IconGixInfo /></button>
+			<button
+				class="ml-1 opacity-50"
+				aria-label={$i18n.core.text.info}
+				onclick={onInfoButtonClick}
+				type="button"><IconGixInfo /></button
+			>
 		{/if}
 	</div>
 
