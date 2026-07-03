@@ -221,8 +221,11 @@
 		color: var(--background-contrast);
 
 		// Folded in from the former gix.scss `div.popover .wrapper` override layer (OISY-owned):
-		// tighter padding, a 16px radius, and a matching first-paint width cap.
-		padding: var(--padding-0_5x);
+		// a 16px radius, a matching first-paint width cap, and `--padding` scaled to 0.5x so the
+		// placement calcs and inner content inherit the tighter unit. The wrapper's own box padding
+		// stays at `--padding-2x`: in gix the override's `padding` declaration lost specificity to
+		// gix's base `.wrapper { padding: var(--padding-2x) }`, so 2x is what actually rendered.
+		padding: var(--padding-2x);
 		--padding: var(--padding-0_5x);
 		--border-radius: 16px;
 

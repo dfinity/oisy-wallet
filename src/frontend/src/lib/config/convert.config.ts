@@ -9,8 +9,7 @@ export interface ConvertWizardStepsParams extends WizardStepsParams {
 }
 
 export type WizardStepsConvertComplete =
-	| Exclude<WizardStepsConvert, 'QR_CODE_SCAN'>
-	| WizardStepsSend.QR_CODE_SCAN;
+	Exclude<WizardStepsConvert, 'QR_CODE_SCAN'> | WizardStepsSend.QR_CODE_SCAN;
 
 export const convertWizardSteps = ({
 	i18n,
