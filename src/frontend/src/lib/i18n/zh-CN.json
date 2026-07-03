@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "资产",
+			"nfts": "",
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "奖励",
 			"earning": "赚取",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "前往资产视图",
+			"nfts": "",
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "打开奖励视图",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "你的 NFT 将显示在这里",
 			"description_empty": "看起来你还没有收到 NFT",
 			"title_not_supported": "所选网络尚不支持 NFT",
@@ -2269,11 +2303,6 @@
 				"description": "一键Autopilot金库，实现最大收益效率。",
 				"action": "前往Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "使用OISY并赚取！第6集已上线 🎉",
-				"action": "查看状态"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "质押中",
 			"currentEarning": "当前收益",
 			"earningPotential": "收益潜力",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "条款"
 		},
 		"terms": {

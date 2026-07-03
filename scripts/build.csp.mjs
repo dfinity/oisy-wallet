@@ -3,7 +3,7 @@
 import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
@@ -42,7 +42,9 @@ const injectScriptLoader = ({ content, filePath }) => {
 	const buildDir = join(process.cwd(), 'build');
 	const scriptName = 'main.js';
 
-	const parentFolders = relative(buildDir, dirname(filePath));
+	// `relative()` yields OS-separator paths; normalize to forward slashes so the
+	// generated URL is valid regardless of the build platform (e.g. Windows).
+	const parentFolders = relative(buildDir, dirname(filePath)).split(sep).join('/');
 	const loaderSrc = `/${parentFolders !== '' ? `${parentFolders}/` : ''}${scriptName}`;
 
 	return content.replace(

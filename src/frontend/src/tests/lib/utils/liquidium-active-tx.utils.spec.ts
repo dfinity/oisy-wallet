@@ -10,7 +10,14 @@ import {
 	toLiquidiumExternalRefs,
 	toLiquidiumExternalRefsMap
 } from '$lib/utils/liquidium-active-tx.utils';
-import { ActivityStatus } from '@liquidium/client';
+import type { Activity, LiquidiumState } from '@liquidium/client';
+
+const activityStatus = (state: LiquidiumState): Activity['status'] => ({
+	operation: 'deposit',
+	state,
+	confirmations: null,
+	requiredConfirmations: null
+});
 
 const liquidiumTx: ActiveUserTransaction = {
 	id: 'tx-1',
@@ -73,18 +80,18 @@ describe('liquidium-active-tx.utils', () => {
 
 	describe('liquidiumActivityToStatus', () => {
 		it.each([
-			{ status: ActivityStatus.confirmed, expected: { Succeeded: null } },
-			{ status: ActivityStatus.failed, expected: { Failed: null } },
-			{ status: ActivityStatus.pending, expected: { Executing: null } },
-			{ status: ActivityStatus.detected, expected: { Executing: null } },
-			{ status: ActivityStatus.processing, expected: { Executing: null } },
-			{ status: ActivityStatus.sent, expected: { Executing: null } }
-		])('maps $status', ({ status, expected }) => {
-			expect(liquidiumActivityToStatus(status)).toEqual(expected);
+			{ state: 'completed', expected: { Succeeded: null } },
+			{ state: 'active', expected: { Succeeded: null } },
+			{ state: 'failed', expected: { Failed: null } },
+			{ state: 'expired', expected: { Failed: null } },
+			{ state: 'confirming', expected: { Executing: null } },
+			{ state: 'processing', expected: { Executing: null } }
+		] as const)('maps $state', ({ state, expected }) => {
+			expect(liquidiumActivityToStatus(activityStatus(state))).toEqual(expected);
 		});
 
-		it('does not advance on requested', () => {
-			expect(liquidiumActivityToStatus(ActivityStatus.requested)).toBeUndefined();
+		it('does not advance on action_required', () => {
+			expect(liquidiumActivityToStatus(activityStatus('action_required'))).toBeUndefined();
 		});
 	});
 

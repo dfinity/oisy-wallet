@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "資産",
+			"nfts": "",
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
+			"nfts": "",
 			"settings": "設定を表示",
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "エアドロップ報酬を表示",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "あなたのNFTがここに表示されます。",
 			"description_empty": "まだNFTを受け取っていないようです。",
 			"title_not_supported": "選択されたネットワークではNFTはまだサポートされていません。",
@@ -2269,11 +2303,6 @@
 				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
 				"action": "Autopilotへ移動"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
-				"action": "ステータスを確認"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "ステーク中",
 			"currentEarning": "現在の収益",
 			"earningPotential": "収益ポテンシャル",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "条件"
 		},
 		"terms": {

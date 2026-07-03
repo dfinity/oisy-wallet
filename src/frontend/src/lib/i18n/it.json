@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",
+			"nfts": "",
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Ricompense",
 			"earning": "Guadagna",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
+			"nfts": "",
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Apri la vista Ricompense",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "I tuoi NFT appariranno qui",
 			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
 			"title_not_supported": "",
@@ -2269,11 +2303,6 @@
 				"description": "Massima efficienza di rendimento con vault in Autopilot con un solo clic.",
 				"action": "Vai all'Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Usa OISY e GUADAGNA! L'episodio 6 è in diretta 🎉",
-				"action": "Controlla stato"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "In staking",
 			"currentEarning": "Guadagno attuale",
 			"earningPotential": "Potenziale di guadagno",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Condizioni"
 		},
 		"terms": {

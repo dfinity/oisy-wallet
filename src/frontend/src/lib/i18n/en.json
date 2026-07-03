@@ -1,7 +1,29 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Welcome to Borrow!",
+			"header_description": "Access liquidity without selling — borrow stablecoins or BTC against your crypto.",
+			"borrowing_options": "Borrowing options",
+			"borrowing_potential": "Borrowing potential",
+			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
+			"available_best_provider": "available · best provider",
+			"remaining_best_provider": "remaining · best provider",
+			"active_loans": "Active loans",
+			"no_active_loans": "no active loans",
+			"amount_borrowed": "$amount borrowed",
+			"borrow_apr_from": "Borrow APR from"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "Liquidium",
+				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
+				"action": "Borrow"
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
-			"tab_title": "Borrowings",
+			"tab_title": "Borrowing",
 			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
 		}
 	},
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
+			"nfts": "NFTs",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
+			"trade": "Trade",
+			"borrow": "Borrow",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "More",
 			"airdrops": "Rewards",
 			"earning": "Earn",
 			"pay": "$oisy_short PAY",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
+			"nfts": "Open the NFTs view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
+			"trade": "Open the Trade view",
+			"borrow": "Open the Borrow view",
+			"earning": "Open the Earn view",
 			"airdrops": "Open the Rewards view",
 			"pay": "Open the $oisy_short PAY",
 			"wallet_connect": "Open the WalletConnect",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "$count NFT",
+			"count_other": "$count NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
 			"title_not_supported": "NFTs are not yet supported on the selected network",
@@ -2269,11 +2303,6 @@
 				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
 				"action": "Go to Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
-				"action": "Check status"
-			},
 			"liquidium": {
 				"title": "Liquidium",
 				"description": "Lend your assets to earn yield, or borrow against them.",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
 			"earningPotential": "Earning potential",
+			"currentBorrowing": "Currently borrowing",
+			"interestPerYear": "Interest / year",
 			"terms": "Terms"
 		},
 		"terms": {

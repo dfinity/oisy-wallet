@@ -27,7 +27,7 @@
 		// (they are wired once the editor and delete flows exist).
 		onEdit?: () => void;
 		onDelete?: (id: string) => void;
-		// Wired once the share flow exists; until then the link renders but is inert.
+		// Opens the share flow. The Share link only renders when this is provided.
 		onShare?: () => void;
 	}
 
@@ -61,15 +61,17 @@
 
 	<!-- Desktop: "Share note" is a quiet blue text link right-aligned opposite the
 	     created/updated line. Mobile: it drops to its own left-aligned line beneath.
-	     Lower-emphasis than Edit by design. Inert until the share flow is wired. -->
+	     Lower-emphasis than Edit by design. -->
 	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 		<span class="text-xs text-tertiary">{metaLine}</span>
-		<div>
-			<Button link onclick={onShare} testId={NOTES_VIEW_SHARE_BUTTON}>
-				<IconShareArrow size="16" />
-				{$i18n.notes.share.text.share_note}
-			</Button>
-		</div>
+		{#if nonNullish(onShare)}
+			<div>
+				<Button link onclick={onShare} testId={NOTES_VIEW_SHARE_BUTTON} type="button">
+					<IconShareArrow size="16" />
+					{$i18n.notes.share.text.share_note}
+				</Button>
+			</div>
+		{/if}
 	</div>
 
 	{#if nonNullish(onEdit)}

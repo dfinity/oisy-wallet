@@ -619,7 +619,7 @@ describe('nav.utils', () => {
 			});
 
 			it('should return true when route id is any subroute of the Earn path', () => {
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnRewards}`))).toBeTruthy();
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnAutopilot}`))).toBeTruthy();
 				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}/subroute`))).toBeTruthy();
 			});
 
@@ -739,7 +739,7 @@ describe('nav.utils', () => {
 
 		it('isEarnPath', () => {
 			expect(isEarnPath(withAppPrefix(AppPath.Earn))).toBeTruthy();
-			expect(isEarnPath(withAppPrefix(AppPath.EarnRewards))).toBeTruthy();
+			expect(isEarnPath(withAppPrefix(AppPath.EarnAutopilot))).toBeTruthy();
 			expect(isEarnPath('/(app)/earn/whatever')).toBeTruthy();
 			expect(isEarnPath(null)).toBeFalsy();
 		});

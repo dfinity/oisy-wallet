@@ -33,24 +33,6 @@ export const mockHarvestProvider: EarningProvider = {
 	data: readable(mockHarvestProviderData)
 };
 
-export const mockRewardsCardConfig = {
-	id: 'sprinkles_s1e6',
-	titles: ['mock.rewards.title'],
-	description: 'mock.rewards.description',
-	logo: '/images/rewards/oisy-reward-logo.svg',
-	fields: [] as EarningCardFields[],
-	actionText: 'mock.rewards.action'
-};
-
-export const mockRewardsProvider: EarningProvider = {
-	id: 'sprinkles_s1e6',
-	type: 'reward',
-	card: mockRewardsCardConfig,
-	data: readable<EarningProviderData>({
-		action: vi.fn().mockResolvedValue(undefined)
-	})
-};
-
 export const mockGoldDaoCardConfig = {
 	id: 'gold-dao-staking',
 	titles: ['mock.golddao.title'],

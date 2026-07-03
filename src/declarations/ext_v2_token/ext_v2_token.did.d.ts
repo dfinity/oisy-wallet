@@ -15,9 +15,7 @@ export type AccountIdentifier__1 = string;
 export type AssetHandle = string;
 export type AssetId = number;
 export type AssetType =
-	| { other: string }
-	| { canister: { id: AssetId; canister: string } }
-	| { direct: Uint32Array };
+	{ other: string } | { canister: { id: AssetId; canister: string } } | { direct: Uint32Array };
 export type Balance = bigint;
 export interface BalanceRequest {
 	token: TokenIdentifier;
@@ -201,9 +199,7 @@ export type Metadata =
 			};
 	  };
 export type MetadataContainer =
-	| { blob: Uint8Array }
-	| { data: Array<MetadataValue> }
-	| { json: string };
+	{ blob: Uint8Array } | { data: Array<MetadataValue> } | { json: string };
 export type MetadataLegacy =
 	| {
 			fungible: {

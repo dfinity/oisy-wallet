@@ -103,6 +103,7 @@
 			// the UI instead of only toasting a generic failure.
 			if (err !== null && typeof err === 'object' && 'TooManyShares' in err) {
 				atCap = true;
+				return;
 			}
 			toastsError({ msg: { text: $i18n.notes.share.error.create }, err });
 		} finally {
@@ -200,7 +201,7 @@
 				<ButtonCancel disabled={busy} onclick={onClose} />
 				<Button
 					colorStyle="primary"
-					disabled={atCap}
+					disabled={atCap || busy}
 					loading={busy}
 					onclick={onCreate}
 					testId={NOTES_SHARE_CREATE_BUTTON}

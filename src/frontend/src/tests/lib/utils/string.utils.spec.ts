@@ -1,6 +1,48 @@
-import { compareNatural } from '$lib/utils/string.utils';
+import {
+	compareNatural,
+	normalizeTextFilter,
+	someTextMatchesFilter,
+	textMatchesFilter
+} from '$lib/utils/string.utils';
 
 describe('string.utils', () => {
+	describe('normalizeTextFilter', () => {
+		it('trims and lower-cases', () => {
+			expect(normalizeTextFilter('  Vendre  ')).toBe('vendre');
+			expect(normalizeTextFilter('OISY')).toBe('oisy');
+			expect(normalizeTextFilter('')).toBe('');
+		});
+	});
+
+	describe('textMatchesFilter', () => {
+		it('matches a case-insensitive substring against a normalized filter', () => {
+			expect(textMatchesFilter({ value: 'Internet Computer', filter: 'internet' })).toBeTruthy();
+			expect(textMatchesFilter({ value: 'Vendre', filter: 'end' })).toBeTruthy();
+			expect(textMatchesFilter({ value: 'Sell', filter: 'buy' })).toBeFalsy();
+		});
+	});
+
+	describe('someTextMatchesFilter', () => {
+		it('matches everything on an empty or whitespace filter', () => {
+			expect(someTextMatchesFilter({ values: ['Sell', 'Open'], filter: '' })).toBeTruthy();
+			expect(someTextMatchesFilter({ values: ['Sell', 'Open'], filter: '   ' })).toBeTruthy();
+		});
+
+		it('matches when any candidate contains the filter', () => {
+			expect(someTextMatchesFilter({ values: ['Sell', 'Open'], filter: 'open' })).toBeTruthy();
+			expect(someTextMatchesFilter({ values: ['Sell', 'Open'], filter: 'sel' })).toBeTruthy();
+		});
+
+		it('normalizes the filter before matching', () => {
+			expect(someTextMatchesFilter({ values: ['Vendre'], filter: '  VEND  ' })).toBeTruthy();
+		});
+
+		it('does not match when no candidate contains the filter', () => {
+			expect(someTextMatchesFilter({ values: ['Sell', 'Open'], filter: 'filled' })).toBeFalsy();
+			expect(someTextMatchesFilter({ values: [], filter: 'x' })).toBeFalsy();
+		});
+	});
+
 	describe('compareNatural', () => {
 		it('should sort embedded numbers numerically, not lexicographically', () => {
 			const input = ['10 Address', '1 Name', '2 Age'];

@@ -52,19 +52,13 @@ describe('TokensFilter', () => {
 		expect(getByTestId(`${TOKEN_LIST_FILTER}-open-btn`)).toBeInTheDocument();
 	});
 
-	it('should not render the filter button when hideFilter is true', () => {
-		const { queryByTestId } = render(TokensFilter, { props: { hideFilter: true } });
-
-		expect(queryByTestId(`${TOKEN_LIST_FILTER}-open-btn`)).not.toBeInTheDocument();
-	});
-
 	// SvelteKit route IDs don't include trailing slashes (e.g. `/(app)`, `/(app)/nfts`).
 	// The is*Path helpers normalize them internally.
 	describe('filter persistence across asset tabs', () => {
 		it.each([
 			{ label: 'Tokens tab', routeId: `${ROUTE_ID_GROUP_APP}` },
-			{ label: 'NFTs tab', routeId: `${ROUTE_ID_GROUP_APP}/nfts` },
 			{ label: 'Earning tab', routeId: `${ROUTE_ID_GROUP_APP}/earning` },
+			{ label: 'Trading tab', routeId: `${ROUTE_ID_GROUP_APP}/trading` },
 			{ label: 'Transactions page', routeId: `${ROUTE_ID_GROUP_APP}/transactions` },
 			{ label: 'WalletConnect page', routeId: `${ROUTE_ID_GROUP_APP}/wc` }
 		])('should preserve filter when navigating from $label', ({ routeId }) => {
@@ -82,6 +76,7 @@ describe('TokensFilter', () => {
 			{ label: 'Settings', routeId: `${ROUTE_ID_GROUP_APP}/settings` },
 			{ label: 'Activity', routeId: `${ROUTE_ID_GROUP_APP}/activity` },
 			{ label: 'Explore', routeId: `${ROUTE_ID_GROUP_APP}/explore` },
+			{ label: 'NFTs page', routeId: `${ROUTE_ID_GROUP_APP}/nfts` },
 			{ label: 'null (fresh load)', routeId: null }
 		])('should reset filter when navigating from $label', ({ routeId }) => {
 			render(TokensFilter);
