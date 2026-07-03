@@ -813,8 +813,11 @@ describe('oisy-trade.utils — orders', () => {
 });
 
 describe('oisy-trade.utils — search', () => {
-	// baseToken carries the ICP network (name "Internet Computer") from the shared mock.
-	const base: IcToken = { ...mockValidIcToken, symbol: 'ICP', name: 'Internet Computer' };
+	// base carries the ICP network (name "Internet Computer") from the shared mock.
+	// Its token name is deliberately distinct from both the symbol and the network
+	// name, so the symbol / token-name / network-name facets can be tested in
+	// isolation ("icp" → symbol only, "sample" → name only, "internet" → network only).
+	const base: IcToken = { ...mockValidIcToken, symbol: 'ICP', name: 'Sample Token' };
 	const quote: IcToken = {
 		...mockValidIcToken,
 		id: parseTokenId('QuoteTokenId'),
@@ -865,14 +868,17 @@ describe('oisy-trade.utils — search', () => {
 			expect(matches('   ')).toBeTruthy();
 		});
 
-		it('matches on token symbol and name, case-insensitively', () => {
+		it('matches on the token symbol, case-insensitively', () => {
 			expect(matches('icp')).toBeTruthy();
 			expect(matches('ICP')).toBeTruthy();
-			expect(matches('internet')).toBeTruthy();
 		});
 
-		it('matches on the network name', () => {
-			expect(matches('Internet Computer')).toBeTruthy();
+		it('matches on the token name (term absent from symbol and network)', () => {
+			expect(matches('sample')).toBeTruthy();
+		});
+
+		it('matches on the network name (term absent from symbol and token name)', () => {
+			expect(matches('internet')).toBeTruthy();
 		});
 
 		it('matches on the provider label', () => {
@@ -898,11 +904,12 @@ describe('oisy-trade.utils — search', () => {
 		});
 
 		it('matches on either the base or the quote token', () => {
-			expect(matches({ filter: 'icp' })).toBeTruthy();
-			expect(matches({ filter: 'ckusdc' })).toBeTruthy();
+			expect(matches({ filter: 'icp' })).toBeTruthy(); // base symbol
+			expect(matches({ filter: 'sample' })).toBeTruthy(); // base name (name-only term)
+			expect(matches({ filter: 'ckusdc' })).toBeTruthy(); // quote symbol
 		});
 
-		it('matches on the network name', () => {
+		it('matches on the network name (term absent from symbols and token names)', () => {
 			expect(matches({ filter: 'internet' })).toBeTruthy();
 		});
 

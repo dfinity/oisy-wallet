@@ -58,6 +58,7 @@ describe('TokensFilter', () => {
 		it.each([
 			{ label: 'Tokens tab', routeId: `${ROUTE_ID_GROUP_APP}` },
 			{ label: 'Earning tab', routeId: `${ROUTE_ID_GROUP_APP}/earning` },
+			{ label: 'Trading tab', routeId: `${ROUTE_ID_GROUP_APP}/trading` },
 			{ label: 'Transactions page', routeId: `${ROUTE_ID_GROUP_APP}/transactions` },
 			{ label: 'WalletConnect page', routeId: `${ROUTE_ID_GROUP_APP}/wc` }
 		])('should preserve filter when navigating from $label', ({ routeId }) => {

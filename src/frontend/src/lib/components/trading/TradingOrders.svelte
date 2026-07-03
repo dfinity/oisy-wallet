@@ -65,11 +65,12 @@
 	// polled once per distinct pair, not once per order.
 	const pairKey = ({ base, quote }: OisyTradeOrderView): string => `${base.symbol}/${quote.symbol}`;
 
-	// The distinct pairs backing the current active orders, resolved to their
-	// candid pair info (needed to query the book), keyed by symbol pair.
+	// The distinct pairs backing the currently rendered active orders, resolved to
+	// their candid pair info (needed to query the book), keyed by symbol pair. Based
+	// on the filtered list so an active search doesn't poll books for hidden rows.
 	const activePairs = $derived.by((): Record<string, TradingPairInfo> => {
 		const pairs: Record<string, TradingPairInfo> = {};
-		for (const order of $oisyTradeActiveOrders) {
+		for (const order of filteredActiveOrders) {
 			const info = $oisyTradePairs.find(
 				(p) =>
 					p.base.metadata.symbol === order.base.symbol &&
