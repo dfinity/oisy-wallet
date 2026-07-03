@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import Decimal from 'decimal.js';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import TradingCancelOrderConfirm from '$lib/components/trading/TradingCancelOrderConfirm.svelte';
@@ -218,7 +219,14 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		const orderFields = { base: baseSymbol, quote: quoteSymbol, side };
+		// Order volume is the base-token quantity. `quantity` is a JS number, so stringify it
+		// via Decimal to get a plain decimal string (no `1e-7`/float artifacts).
+		const orderFields = {
+			base: baseSymbol,
+			quote: quoteSymbol,
+			side,
+			volume: new Decimal(quantity).toFixed()
+		};
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,

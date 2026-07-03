@@ -194,7 +194,9 @@
 							testId: prefixedTestId(NAVIGATION_ITEM_EARN),
 							icon: IconPlant,
 							href: url(AppPath.Earn),
-							selected: isRouteEarn(page)
+							selected: isRouteEarn(page),
+							tag: $i18n.core.text.new,
+							tagVariant: 'emphasis'
 						}
 					}
 				: {}),

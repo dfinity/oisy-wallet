@@ -82,9 +82,7 @@ interface MinedTxEvent {
 }
 
 type PendingTxEvent =
-	| string
-	| { removed?: boolean; transaction: { hash: string } }
-	| { hash: string };
+	string | { removed?: boolean; transaction: { hash: string } } | { hash: string };
 
 /**
  * Generic eth_subscribe wrapper for Alchemy (and other WS JSON-RPC providers).
