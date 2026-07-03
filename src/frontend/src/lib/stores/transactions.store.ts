@@ -30,8 +30,7 @@ export type TransactionsStoreIdParams<T extends TransactionTypes> = Omit<
 export type NullableCertifiedTransactions = null;
 
 export type TransactionsData<T extends TransactionTypes> =
-	| CertifiedTransaction<T>[]
-	| NullableCertifiedTransactions;
+	CertifiedTransaction<T>[] | NullableCertifiedTransactions;
 
 export interface TransactionsStore<T extends TransactionTypes> extends CertifiedStore<
 	TransactionsData<T>

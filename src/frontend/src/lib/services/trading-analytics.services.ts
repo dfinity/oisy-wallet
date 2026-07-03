@@ -18,13 +18,17 @@ export interface TrackTradingParams {
 	subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING;
 	// Lifecycle: `executing` when the flow starts, then `success` / `error`.
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
-	// Pair leg symbols — free-form token symbols (no closed set), so kept as strings.
+	// Order pair leg symbols — free-form token symbols (no closed set), so kept as strings.
+	// Emitted as the swap-style `token`/`token2` metadata keys (base → token, quote → token2).
 	base?: string;
 	quote?: string;
 	side?: LimitOrderSide;
 	orderType?: OisyTradeOrderType;
-	// Token symbol; open-ended like `base`/`quote`, so a plain symbol string.
+	// Single-token flows (deposit/withdraw). Emitted as the `token` metadata key.
 	token?: string;
+	// Traded amount in the primary token's own units (the deposited/withdrawn token, or the
+	// order's base token), as a full-precision decimal string so volume aggregates per token.
+	volume?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
 }
@@ -41,8 +45,11 @@ export const trackTrading = ({
 	side,
 	orderType,
 	token,
+	volume,
 	error
 }: TrackTradingParams) => {
+	// The primary token key is sourced from `token` (deposit/withdraw) or the order's `base`.
+	const primaryToken = token ?? base;
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.TRADING,
 		metadata: {
@@ -50,11 +57,11 @@ export const trackTrading = ({
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
 			event_subcontext: subContext,
 			result_status: resultStatus,
-			...(nonNullish(base) && { base }),
-			...(nonNullish(quote) && { quote }),
+			...(nonNullish(primaryToken) && { token: primaryToken }),
+			...(nonNullish(quote) && { token2: quote }),
 			...(nonNullish(side) && { side }),
 			...(nonNullish(orderType) && { orderType }),
-			...(nonNullish(token) && { token }),
+			...(notEmptyString(volume) && { volume }),
 			...(notEmptyString(error) && { result_error: error })
 		}
 	});
