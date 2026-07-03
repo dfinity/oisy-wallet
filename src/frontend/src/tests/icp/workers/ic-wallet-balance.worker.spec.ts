@@ -110,9 +110,7 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initWithBalance = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		msg,
@@ -232,9 +230,7 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initOtherScenarios = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		startData = undefined,

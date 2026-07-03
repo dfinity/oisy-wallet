@@ -56,20 +56,21 @@
 			"candid": "target/oisy_trade.did",
 			"wasm": "target/oisy_trade.wasm.gz",
 			"shrink": false,
-			"specified_id": "proc5-daaaa-aaaar-qb5va-cai",
+			"specified_id": "sy2xe-miaaa-aaaar-qb7sq-cai",
 			"remote": {
 				"id": {
-					"__default": "2vxsx-fae",
-					"test_be_1": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_1": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_2": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_3": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_4": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_5": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_6": "proc5-daaaa-aaaar-qb5va-cai",
-					"audit": "proc5-daaaa-aaaar-qb5va-cai",
-					"staging": "proc5-daaaa-aaaar-qb5va-cai",
-					"e2e": "proc5-daaaa-aaaar-qb5va-cai"
+					"ic": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"beta": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_be_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_2": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_3": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_4": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_5": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_6": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"audit": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"staging": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"e2e": "sy2xe-miaaa-aaaar-qb7sq-cai"
 				}
 			}
 		},
@@ -173,10 +174,20 @@
 			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
-					"__default": "2vxsx-fae",
-					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai",
+					"beta": "2vxsx-fae",
+					"test_be_1": "2vxsx-fae",
+					"test_fe_1": "2vxsx-fae",
+					"test_fe_2": "2vxsx-fae",
+					"test_fe_3": "2vxsx-fae",
+					"test_fe_4": "2vxsx-fae",
+					"test_fe_5": "2vxsx-fae",
+					"test_fe_6": "2vxsx-fae",
 					"audit": "yo6ep-dyaaa-aaaal-ajs6q-cai",
-					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
+					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"e2e": "2vxsx-fae",
+					"local": "2vxsx-fae",
+					"old-backend": "2vxsx-fae"
 				}
 			}
 		},

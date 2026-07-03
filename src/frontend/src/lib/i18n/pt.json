@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -2291,6 +2313,8 @@
 			"currentStaked": "Em staking",
 			"currentEarning": "Ganhando atualmente",
 			"earningPotential": "Potencial de ganho",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Condições"
 		},
 		"terms": {
