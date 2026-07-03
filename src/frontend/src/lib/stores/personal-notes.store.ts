@@ -4,6 +4,8 @@ import { comparePersonalNotesByUpdatedDesc } from '$lib/utils/personal-note.util
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface PersonalNotesStoreData {
+	/** Principal that owns the decrypted cache; undefined when no user's notes are cached. */
+	ownerPrincipal: string | undefined;
 	/** Decrypted entries keyed by note id; cleartext lives in memory only. `undefined` until first load (or an optimistic write). */
 	entries: Record<string, PersonalNoteEntryUi> | undefined;
 	/** Total note count reported by the backend (drives the capacity gate). */
@@ -12,17 +14,30 @@ export interface PersonalNotesStoreData {
 	loaded: boolean;
 }
 
-const EMPTY_DATA: PersonalNotesStoreData = { entries: undefined, count: 0, loaded: false };
+const emptyData = (ownerPrincipal?: string): PersonalNotesStoreData => ({
+	ownerPrincipal,
+	entries: undefined,
+	count: 0,
+	loaded: false
+});
+
+const EMPTY_DATA: PersonalNotesStoreData = emptyData();
 
 export interface PersonalNotesStore extends Readable<PersonalNotesStoreData> {
+	/** Mark a principal as the current owner while its encrypted notes are loading. */
+	beginLoad: (params: { ownerPrincipal: string }) => void;
 	/** Replace the cache with a freshly loaded set and mark the store loaded. */
-	setLoaded: (params: { entries: PersonalNoteEntryUi[]; count: number }) => void;
+	setLoaded: (params: {
+		ownerPrincipal: string;
+		entries: PersonalNoteEntryUi[];
+		count: number;
+	}) => void;
 	/** Add or replace a single entry (optimistic write). */
-	upsert: (entry: PersonalNoteEntryUi) => void;
+	upsert: (params: { ownerPrincipal: string; entry: PersonalNoteEntryUi }) => void;
 	/** Remove an entry by id (optimistic delete). */
-	remove: (id: string) => void;
+	remove: (params: { ownerPrincipal: string; id: string }) => void;
 	/** Update the authoritative count after a write. */
-	setCount: (count: number) => void;
+	setCount: (params: { ownerPrincipal: string; count: number }) => void;
 	reset: () => void;
 }
 
@@ -40,18 +55,33 @@ const initPersonalNotesStore = (): PersonalNotesStore => {
 
 	return {
 		subscribe,
-		setLoaded: ({ entries, count }) => set({ entries: toRecord(entries), count, loaded: true }),
-		upsert: (entry) =>
-			update((data) => ({
-				...data,
-				entries: { ...(data.entries ?? {}), [entry.id]: entry }
-			})),
-		remove: (id) =>
+		beginLoad: ({ ownerPrincipal }) => set(emptyData(ownerPrincipal)),
+		setLoaded: ({ ownerPrincipal, entries, count }) =>
+			update((data) =>
+				data.ownerPrincipal === ownerPrincipal
+					? { ownerPrincipal, entries: toRecord(entries), count, loaded: true }
+					: data
+			),
+		upsert: ({ ownerPrincipal, entry }) =>
+			update((data) =>
+				data.ownerPrincipal === ownerPrincipal
+					? {
+							...data,
+							entries: { ...(data.entries ?? {}), [entry.id]: entry }
+						}
+					: data
+			),
+		remove: ({ ownerPrincipal, id }) =>
 			update((data) => {
+				if (data.ownerPrincipal !== ownerPrincipal) {
+					return data;
+				}
+
 				const { [id]: _removed, ...rest } = data.entries ?? {};
 				return { ...data, entries: rest };
 			}),
-		setCount: (count) => update((data) => ({ ...data, count })),
+		setCount: ({ ownerPrincipal, count }) =>
+			update((data) => (data.ownerPrincipal === ownerPrincipal ? { ...data, count } : data)),
 		reset: () => set(EMPTY_DATA)
 	};
 };

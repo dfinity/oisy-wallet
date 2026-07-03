@@ -270,11 +270,12 @@ text-overflow: ellipsis`) plus `overflow-wrap: anywhere`. Reuse that same
   option — expiry is mandatory.
 - **"Destroy after viewing"** — an optional checkbox (default **off**). When on,
   the link is single-use.
-- An **"OISY protects you!" info box** (not a plain explainer line): the standard
-  pattern — green shield + bold **"OISY protects you!"** lead — on OISY's **blue**
-  info background, body **"The share key lives in the link itself and is never sent
-  to OISY, so only someone with the full link can read this note,"** plus a **Learn
-  more** link.
+- An **encryption-notice info box** (not a plain explainer line): the standard
+  pattern — green shield + bold **"End-to-end encrypted."** lead — on OISY's **blue**
+  info background, with a **context-specific** body for the share-creation screen:
+  **"Only the recipient of this link can read your note."** (the other boxes say
+  "Only you can read your notes," which would be misleading here since the point is
+  to let the link holder read it), plus a flush **"Learn more"** link.
 - Footer: **Cancel** / **Create link**.
 
 **State B — link created:**

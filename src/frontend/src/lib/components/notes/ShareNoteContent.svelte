@@ -161,14 +161,12 @@
 		</Checkbox>
 
 		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
-			<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong>
-			{replaceOisyPlaceholders($i18n.notes.share.text.protects_body)}
-			<ExternalLink
+			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
+			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
 				color="blue"
 				href={OISY_DOCS_URL}
 				iconVisible={false}
-				styleClass="ml-[1.25em]"
 			>
 				{$i18n.core.text.learn_more}
 			</ExternalLink>
