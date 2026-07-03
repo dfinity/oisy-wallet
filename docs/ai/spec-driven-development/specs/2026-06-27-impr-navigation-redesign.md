@@ -139,6 +139,13 @@ backed by its own page at `AppPath.Nfts` (`/nfts/`): on desktop under
 The Assets tab for NFTs (`TokenTypes.NFTS` in `activeAssetsTabStore`) is removed
 so NFTs is reached only via the nav item.
 
+As a standalone destination, the `/nfts/` page shows **no Tokens / Earning /
+Trading tab bar** (`Assets.svelte` renders the tab `Tabs` only when its `tab`
+is not `NFTS`); the page keeps its own header — search, refresh, sort and the
+settings menu (which holds the Ungrouped / Collections grouping) — plus the
+count hero below. Cross-destination movement is the navigation's job now, not an
+in-page tab.
+
 ## NFTs page hero — counts, not value
 
 On the NFTs page (`/nfts/`) the hero no longer shows the fiat **AUM / total
