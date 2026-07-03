@@ -16,8 +16,8 @@
 	background would be invisible). Grey, not a blue tint, since there's already
 	blue above (the Note panel) and below (Cancel/Save). -->
 <MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary! text-left">
-	<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong>{$i18n.notes.text
-		.encrypted_info}<ExternalLink
+	<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
+	>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 		ariaLabel={$i18n.core.text.learn_more}
 		color="blue"
 		href={OISY_DOCS_URL}

@@ -2597,7 +2597,7 @@
 			"search_placeholder": "Search note",
 			"no_results": "No notes match your search.",
 			"encrypted_lead": "End-to-end encrypted.",
-			"encrypted_info": "Only you can read your notes. ",
+			"encrypted_info": "Only you can read your notes.",
 			"created": "Created $date",
 			"updated": "Updated $date",
 			"created_updated": "Created $created · Updated $updated",
