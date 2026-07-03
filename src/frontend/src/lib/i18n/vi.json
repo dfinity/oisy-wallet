@@ -109,7 +109,8 @@
 			"hide_balances": "Ẩn số dư",
 			"show_balances": "Hiện số dư",
 			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
-			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn."
+			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
@@ -128,7 +129,8 @@
 			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
-			"show_balances": "Hiện số dư bị ẩn"
+			"show_balances": "Hiện số dư bị ẩn",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Tài liệu"
@@ -2544,6 +2546,41 @@
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
 			"no_response": "Xin lỗi, tôi không nhận được phản hồi từ LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

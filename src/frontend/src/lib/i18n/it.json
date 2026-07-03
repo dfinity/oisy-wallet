@@ -109,7 +109,8 @@
 			"hide_balances": "Nascondi saldi",
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
-			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi."
+			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
@@ -128,7 +129,8 @@
 			"refer_a_friend": "Genera un link di riferimento per un amico",
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
-			"show_balances": "Mostra i saldi nascosti"
+			"show_balances": "Mostra i saldi nascosti",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2544,6 +2546,41 @@
 		"errors": {
 			"unknown": "",
 			"no_response": ""
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

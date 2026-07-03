@@ -109,7 +109,8 @@
 			"hide_balances": "残高を非表示",
 			"show_balances": "残高を表示",
 			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
-			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。"
+			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
@@ -128,7 +129,8 @@
 			"refer_a_friend": "友達の紹介リンクを生成",
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
-			"show_balances": "非表示の残高を表示する"
+			"show_balances": "非表示の残高を表示する",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"
@@ -2544,6 +2546,41 @@
 		"errors": {
 			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",
 			"no_response": "申し訳ありませんが、LLMから応答がありませんでした。"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }
