@@ -18,15 +18,16 @@ export interface TrackTradingParams {
 	subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING;
 	// Lifecycle: `executing` when the flow starts, then `success` / `error`.
 	resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES;
-	// Primary token symbol — the single token for deposit/withdraw, or the base leg of an
-	// order pair. `token`/`token2` mirror the two-token shape used by the swap events.
-	token?: string;
-	// Second leg (the quote token) of an order pair; absent for deposit/withdraw.
-	token2?: string;
+	// Order pair leg symbols — free-form token symbols (no closed set), so kept as strings.
+	// Emitted as the swap-style `token`/`token2` metadata keys (base → token, quote → token2).
+	base?: string;
+	quote?: string;
 	side?: LimitOrderSide;
 	orderType?: OisyTradeOrderType;
-	// Traded amount in `token`'s own units (the deposited/withdrawn token, or the order's
-	// base token), as a full-precision decimal string so volume can be aggregated per token.
+	// Single-token flows (deposit/withdraw). Emitted as the `token` metadata key.
+	token?: string;
+	// Traded amount in the primary token's own units (the deposited/withdrawn token, or the
+	// order's base token), as a full-precision decimal string so volume aggregates per token.
 	volume?: string;
 	// Sanitized (IC-request-id-stripped) error string; omitted when empty.
 	error?: string;
@@ -39,13 +40,16 @@ export interface TrackTradingParams {
 export const trackTrading = ({
 	subContext,
 	resultStatus,
-	token,
-	token2,
+	base,
+	quote,
 	side,
 	orderType,
+	token,
 	volume,
 	error
 }: TrackTradingParams) => {
+	// The primary token key is sourced from `token` (deposit/withdraw) or the order's `base`.
+	const primaryToken = token ?? base;
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.TRADING,
 		metadata: {
@@ -53,8 +57,8 @@ export const trackTrading = ({
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
 			event_subcontext: subContext,
 			result_status: resultStatus,
-			...(nonNullish(token) && { token }),
-			...(nonNullish(token2) && { token2 }),
+			...(nonNullish(primaryToken) && { token: primaryToken }),
+			...(nonNullish(quote) && { token2: quote }),
 			...(nonNullish(side) && { side }),
 			...(nonNullish(orderType) && { orderType }),
 			...(notEmptyString(volume) && { volume }),

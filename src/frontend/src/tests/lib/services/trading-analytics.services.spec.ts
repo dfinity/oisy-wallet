@@ -19,13 +19,14 @@ describe('trading-analytics.services', () => {
 			trackTrading({
 				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-				token: 'ICP',
-				token2: 'ckUSDC',
+				base: 'ICP',
+				quote: 'ckUSDC',
 				side: 'sell',
 				orderType: 'GTC',
 				volume: '12.5'
 			});
 
+			// `base`/`quote` params map onto the swap-style `token`/`token2` metadata keys.
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'trading',
 				metadata: {

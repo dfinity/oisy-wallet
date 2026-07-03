@@ -219,11 +219,11 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		// Order volume is the base-token (`token`) quantity. `quantity` is a JS number, so
-		// stringify it via Decimal to get a plain decimal string (no `1e-7`/float artifacts).
+		// Order volume is the base-token quantity. `quantity` is a JS number, so stringify it
+		// via Decimal to get a plain decimal string (no `1e-7`/float artifacts).
 		const orderFields = {
-			token: baseSymbol,
-			token2: quoteSymbol,
+			base: baseSymbol,
+			quote: quoteSymbol,
 			side,
 			volume: new Decimal(quantity).toFixed()
 		};
