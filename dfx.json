@@ -56,20 +56,21 @@
 			"candid": "target/oisy_trade.did",
 			"wasm": "target/oisy_trade.wasm.gz",
 			"shrink": false,
-			"specified_id": "proc5-daaaa-aaaar-qb5va-cai",
+			"specified_id": "sy2xe-miaaa-aaaar-qb7sq-cai",
 			"remote": {
 				"id": {
-					"__default": "2vxsx-fae",
-					"test_be_1": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_1": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_2": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_3": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_4": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_5": "proc5-daaaa-aaaar-qb5va-cai",
-					"test_fe_6": "proc5-daaaa-aaaar-qb5va-cai",
-					"audit": "proc5-daaaa-aaaar-qb5va-cai",
+					"ic": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"beta": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_be_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_1": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_2": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_3": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_4": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_5": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"test_fe_6": "sy2xe-miaaa-aaaar-qb7sq-cai",
+					"audit": "sy2xe-miaaa-aaaar-qb7sq-cai",
 					"staging": "sy2xe-miaaa-aaaar-qb7sq-cai",
-					"e2e": "proc5-daaaa-aaaar-qb5va-cai"
+					"e2e": "sy2xe-miaaa-aaaar-qb7sq-cai"
 				}
 			}
 		},
