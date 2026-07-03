@@ -103,6 +103,7 @@
 			// the UI instead of only toasting a generic failure.
 			if (err !== null && typeof err === 'object' && 'TooManyShares' in err) {
 				atCap = true;
+				return;
 			}
 			toastsError({ msg: { text: $i18n.notes.share.error.create }, err });
 		} finally {
