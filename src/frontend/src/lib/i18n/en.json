@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Welcome to Borrow!",
+			"header_description": "Access liquidity without selling — borrow stablecoins or BTC against your crypto.",
+			"borrowing_options": "Borrowing options",
+			"borrowing_potential": "Borrowing potential",
+			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
+			"available_best_provider": "available · best provider",
+			"remaining_best_provider": "remaining · best provider",
+			"active_loans": "Active loans",
+			"no_active_loans": "no active loans",
+			"amount_borrowed": "$amount borrowed",
+			"borrow_apr_from": "Borrow APR from"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "Liquidium",
+				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
+				"action": "Borrow"
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "Borrowing",
@@ -2294,6 +2316,8 @@
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
 			"earningPotential": "Earning potential",
+			"currentBorrowing": "Currently borrowing",
+			"interestPerYear": "Interest / year",
 			"terms": "Terms"
 		},
 		"terms": {

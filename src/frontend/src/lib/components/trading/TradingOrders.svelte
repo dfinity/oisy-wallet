@@ -62,12 +62,10 @@
 			return;
 		}
 		const entries = await Promise.all(
-			keys.map(
-				async (key): Promise<[string, OisyTradeOrderBook | undefined]> => [
-					key,
-					await loadOrderBook({ identity: $authIdentity, pair: toTradingPair(pairs[key]) })
-				]
-			)
+			keys.map(async (key): Promise<[string, OisyTradeOrderBook | undefined]> => [
+				key,
+				await loadOrderBook({ identity: $authIdentity, pair: toTradingPair(pairs[key]) })
+			])
 		);
 		// Keep the last good snapshot per pair on a transient failure.
 		const next = { ...untrack(() => orderBooks) };

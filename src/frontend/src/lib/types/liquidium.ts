@@ -12,6 +12,9 @@ export interface LiquidiumMarket {
 	chain: string;
 	supplyApy: number; // percent
 	borrowApy: number; // percent
+	// Maximum loan-to-value ratio (0–1) for this collateral; drives the borrowing-power
+	// potential. Optional so existing market fixtures need not set it.
+	maxLtv?: number;
 	frozen: boolean;
 	// Not frozen and under supply cap; else renders as "Coming soon".
 	available: boolean;
