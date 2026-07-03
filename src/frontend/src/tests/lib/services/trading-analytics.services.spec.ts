@@ -22,9 +22,11 @@ describe('trading-analytics.services', () => {
 				base: 'ICP',
 				quote: 'ckUSDC',
 				side: 'sell',
-				orderType: 'GTC'
+				orderType: 'GTC',
+				volume: '12.5'
 			});
 
+			// `base`/`quote` params map onto the swap-style `token`/`token2` metadata keys.
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: 'trading',
 				metadata: {
@@ -32,10 +34,11 @@ describe('trading-analytics.services', () => {
 					event_context: 'trading',
 					event_subcontext: 'limit_order',
 					result_status: 'executing',
-					base: 'ICP',
-					quote: 'ckUSDC',
+					token: 'ICP',
+					token2: 'ckUSDC',
 					side: 'sell',
-					orderType: 'GTC'
+					orderType: 'GTC',
+					volume: '12.5'
 				}
 			});
 		});
@@ -61,11 +64,12 @@ describe('trading-analytics.services', () => {
 			});
 		});
 
-		it('omits absent optional fields and an empty error', () => {
+		it('omits absent optional fields, an empty volume and an empty error', () => {
 			trackTrading({
 				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				token: 'ckUSDC',
+				volume: '',
 				error: ''
 			});
 

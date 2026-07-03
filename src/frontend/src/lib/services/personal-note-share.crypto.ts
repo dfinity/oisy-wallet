@@ -48,7 +48,8 @@ const toBase64Url = (bytes: Uint8Array): string => {
 
 const fromBase64Url = (value: string): Uint8Array<ArrayBuffer> => {
 	const base64 = value.replaceAll('-', '+').replaceAll('_', '/');
-	const binary = atob(base64);
+	const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+	const binary = atob(padded);
 	return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 

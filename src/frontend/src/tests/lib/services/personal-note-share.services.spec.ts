@@ -123,5 +123,24 @@ describe('personal-note-share.services', () => {
 			expect(consumeSpy).toHaveBeenCalledOnce();
 			expect(consumeSpy.mock.calls[0][0].identity).toBeInstanceOf(AnonymousIdentity);
 		});
+
+		it('rethrows a non-NotFound get error without consuming', async () => {
+			vi.spyOn(backendApi, 'createPersonalNoteShare').mockResolvedValue(undefined);
+			const { link, token } = await createNoteShare({
+				identity: mockIdentity,
+				note: 'x',
+				durationMs: HOUR_MS,
+				singleUse: false
+			});
+
+			// A transient error must propagate, not be misread as a single-use miss.
+			const transient = new Error('network');
+			const getSpy = vi.spyOn(backendApi, 'getPersonalNoteShare').mockRejectedValue(transient);
+			const consumeSpy = vi.spyOn(backendApi, 'consumePersonalNoteShare');
+
+			await expect(loadSharedNote({ token, key: keyFromLink(link) })).rejects.toThrow(transient);
+			expect(getSpy).toHaveBeenCalledOnce();
+			expect(consumeSpy).not.toHaveBeenCalled();
+		});
 	});
 });

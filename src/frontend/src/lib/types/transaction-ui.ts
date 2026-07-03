@@ -10,10 +10,7 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
 export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
 
 export type AnyTransactionUi =
-	| BtcTransactionUi
-	| EthTransactionUi
-	| IcTransactionUi
-	| SolTransactionUi;
+	BtcTransactionUi | EthTransactionUi | IcTransactionUi | SolTransactionUi;
 
 export type AnyTransactionUiWithToken = AnyTransactionUi & {
 	token: Token;

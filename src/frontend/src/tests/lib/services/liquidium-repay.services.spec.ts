@@ -144,7 +144,17 @@ describe('liquidium-repay.services', () => {
 			address: 'bc1qexample'
 		};
 
-		const buildFlow = (target: SupplyTarget): SupplyFlow => ({ type: 'transfer', target, submit });
+		const buildFlow = (target: SupplyTarget): SupplyFlow => ({
+			type: 'transfer',
+			target,
+			status: {
+				operation: 'repayment',
+				state: 'confirming',
+				confirmations: null,
+				requiredConfirmations: null
+			},
+			submit
+		});
 
 		const run = () =>
 			executeLiquidiumRepay({

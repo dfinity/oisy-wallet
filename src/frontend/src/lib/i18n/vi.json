@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
+			"nfts": "",
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
+			"nfts": "",
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
 			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
 			"title_not_supported": "",
@@ -2269,11 +2303,6 @@
 				"description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
 				"action": "Đi đến Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Dùng OISY và KIẾM TIỀN! Tập 6 đã ra mắt 🎉",
-				"action": "Kiểm tra trạng thái"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "Đang staking",
 			"currentEarning": "Đang kiếm được",
 			"earningPotential": "Tiềm năng kiếm tiền",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Điều khoản"
 		},
 		"terms": {

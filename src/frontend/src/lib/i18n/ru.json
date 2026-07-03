@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Активы",
+			"nfts": "",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Активы",
+			"nfts": "",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
 			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",
@@ -2269,11 +2303,6 @@
 				"description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
 				"action": "Перейти к Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод 6 уже в эфире 🎉",
-				"action": "Проверить статус"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "В стейкинге",
 			"currentEarning": "Сейчас зарабатываю",
 			"earningPotential": "Потенциал заработка",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Условия"
 		},
 		"terms": {

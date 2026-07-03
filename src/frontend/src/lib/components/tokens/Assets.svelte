@@ -48,8 +48,13 @@
 		nonNullish($modalManageTokensData) ? $modalManageTokensData : ({} as ManageTokensData)
 	);
 
+	// NFTs is a standalone destination now, not a real Assets tab (its tab bar
+	// is hidden below), so visiting it must not overwrite the last real tab the
+	// user picked among Tokens/Earning/Trading/Borrowing.
 	$effect(() => {
-		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+		if (activeTab !== TokenTypes.NFTS) {
+			activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+		}
 	});
 </script>
 
@@ -62,54 +67,59 @@
 		<StickyHeader>
 			{#snippet header()}
 				<div class="flex w-full justify-between">
-					<div class="relative flex grow-1 justify-between">
-						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
+					<!-- min-w-0: without it this flex item won't shrink below its
+					     tab row's natural width on narrow viewports (see the
+					     matching note in SlidingInput.svelte). -->
+					<div class="relative flex min-w-0 grow-1 justify-between">
+						<TokensFilter>
 							{#snippet overflowableContent()}
-								<Tabs
-									styleClass="mt-2 mb-6"
-									tabVariant="menu"
-									tabs={[
-										{
-											label: $i18n.tokens.text.title,
-											id: TokenTypes.TOKENS,
-											path: `${AppPath.Tokens}${page.url.search}`
-										},
-										{
-											label: $i18n.nfts.text.title,
-											id: TokenTypes.NFTS,
-											path: `${AppPath.Nfts}${page.url.search}`
-										},
-										...(EARNING_ENABLED
-											? [
-													{
-														label: $i18n.earning.text.tab_title,
-														id: TokenTypes.EARNING,
-														path: `${AppPath.Earning}${page.url.search}`
-													}
-												]
-											: []),
-										...(anyLendBorrowProviderEnabled
-											? [
-													{
-														label: $i18n.borrowings.text.tab_title,
-														id: TokenTypes.BORROWINGS,
-														path: `${AppPath.Borrowings}${page.url.search}`
-													}
-												]
-											: []),
-										...(TRADING_ENABLED
-											? [
-													{
-														label: $i18n.trading.text.tab_title,
-														id: TokenTypes.TRADING,
-														path: `${AppPath.Trading}${page.url.search}`
-													}
-												]
-											: [])
-									]}
-									trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
-									bind:activeTab
-								/>
+								<!-- NFTs is its own nav destination now, so the standalone NFTs page
+								     shows no Tokens/Earning/Trading tab bar. -->
+								{#if tab !== TokenTypes.NFTS}
+									<Tabs
+										styleClass="mt-2 mb-6"
+										tabVariant="menu"
+										tabs={[
+											{
+												label: $i18n.tokens.text.title,
+												id: TokenTypes.TOKENS,
+												path: `${AppPath.Tokens}${page.url.search}`
+											},
+											...(TRADING_ENABLED
+												? [
+														{
+															label: $i18n.trading.text.tab_title,
+															shortLabel: $i18n.navigation.text.trade,
+															id: TokenTypes.TRADING,
+															path: `${AppPath.Trading}${page.url.search}`
+														}
+													]
+												: []),
+											...(EARNING_ENABLED
+												? [
+														{
+															label: $i18n.earning.text.tab_title,
+															shortLabel: $i18n.navigation.text.earning,
+															id: TokenTypes.EARNING,
+															path: `${AppPath.Earning}${page.url.search}`
+														}
+													]
+												: []),
+											...(anyLendBorrowProviderEnabled
+												? [
+														{
+															label: $i18n.borrowings.text.tab_title,
+															shortLabel: $i18n.navigation.text.borrow,
+															id: TokenTypes.BORROWINGS,
+															path: `${AppPath.Borrowings}${page.url.search}`
+														}
+													]
+												: [])
+										]}
+										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
+										bind:activeTab
+									/>
+								{/if}
 							{/snippet}
 						</TokensFilter>
 					</div>
