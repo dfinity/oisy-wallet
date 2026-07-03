@@ -220,7 +220,7 @@ text-overflow: ellipsis`) plus `overflow-wrap: anywhere`. Reuse that same
 - An **encryption-notice info box** (not a plain explainer line): the standard
   pattern — green shield + bold **"End-to-end encrypted."** lead — on OISY's **blue**
   info background, with a **context-specific** body for the share-creation screen:
-  **"Only the recipient of this link can read this note."** (the other boxes say
+  **"Only the recipient of this link can read your note."** (the other boxes say
   "Only you can read your notes," which would be misleading here since the point is
   to let the link holder read it), plus a flush **"Learn more"** link.
 - Footer: **Cancel** / **Create link**.
