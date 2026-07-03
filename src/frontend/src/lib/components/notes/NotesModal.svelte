@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
@@ -10,6 +9,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import {
 		NOTES_LIST,

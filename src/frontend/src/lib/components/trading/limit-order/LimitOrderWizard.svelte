@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardModal } from '@dfinity/gix-components';
 	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
@@ -21,7 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
-	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import type { WizardModal, WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,

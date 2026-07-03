@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import type { IcToken } from '$icp/types/ic-token';
@@ -18,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 
 	interface Props {
