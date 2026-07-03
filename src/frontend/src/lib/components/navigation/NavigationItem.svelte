@@ -7,7 +7,8 @@
 	interface Props {
 		label?: Snippet;
 		icon?: Snippet;
-		href: string;
+		href?: string;
+		onclick?: () => void;
 		selected?: boolean;
 		ariaLabel: string;
 		testId?: string;
@@ -15,16 +16,20 @@
 		tagVariant?: TagVariant;
 	}
 
-	let { label, icon, href, selected = false, ariaLabel, testId, tag, tagVariant }: Props = $props();
+	let {
+		label,
+		icon,
+		href,
+		onclick,
+		selected = false,
+		ariaLabel,
+		testId,
+		tag,
+		tagVariant
+	}: Props = $props();
 </script>
 
-<a
-	class="nav-item flex min-w-0 flex-1"
-	class:selected
-	aria-label={ariaLabel}
-	data-tid={testId}
-	{href}
->
+{#snippet content()}
 	{@render icon?.()}
 	<span class="block w-full truncate md:w-auto">
 		{@render label?.()}
@@ -36,4 +41,27 @@
 			<Tag size="sm" variant={tagVariant}>{tag}</Tag>
 		</div>
 	{/if}
-</a>
+{/snippet}
+
+{#if nonNullish(href)}
+	<a
+		class="nav-item flex min-w-0 flex-1"
+		class:selected
+		aria-label={ariaLabel}
+		data-tid={testId}
+		{href}
+	>
+		{@render content()}
+	</a>
+{:else}
+	<button
+		class="nav-item flex min-w-0 flex-1"
+		class:selected
+		aria-label={ariaLabel}
+		data-tid={testId}
+		{onclick}
+		type="button"
+	>
+		{@render content()}
+	</button>
+{/if}

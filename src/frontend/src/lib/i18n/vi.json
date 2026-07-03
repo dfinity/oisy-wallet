@@ -111,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
+			"nfts": "",
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
@@ -136,6 +137,7 @@
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
+			"nfts": "",
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
@@ -1462,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
 			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
 			"title_not_supported": "",

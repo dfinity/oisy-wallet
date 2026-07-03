@@ -102,6 +102,7 @@ interface I18nProgress {
 interface I18nNavigation {
 	text: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
@@ -127,6 +128,7 @@ interface I18nNavigation {
 	};
 	alt: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
@@ -1149,6 +1151,8 @@ interface I18nToken_tag {
 interface I18nNfts {
 	text: {
 		title: string;
+		count_one: string;
+		count_other: string;
 		title_empty: string;
 		description_empty: string;
 		title_not_supported: string;
