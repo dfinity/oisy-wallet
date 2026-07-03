@@ -89,7 +89,7 @@
 		     viewports instead of pushing the page wider than the device — which
 		     on Android Chrome forces a zoom-out that misplaces the fixed bottom
 		     nav bar under the browser's own UI. -->
-		<div class="no-scrollbar flex min-w-0 overflow-x-auto pr-12">
+		<div class="no-scrollbar flex min-w-0 overflow-x-auto pr-12" inert={visible}>
 			{@render overflowableContent()}
 		</div>
 	{/if}
