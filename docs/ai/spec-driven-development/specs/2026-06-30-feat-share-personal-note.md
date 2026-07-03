@@ -297,14 +297,15 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    - **Long notes behave like the Notes modal:** the card is height-capped
      (≈ **80% of viewport height**, reusing the notes modal's `--dialog-max-height`
      convention) and **only the note text scrolls**, inside its own region — the
-     title and single-use line stay pinned at the top, and the "OISY protects you!"
+     title and single-use line stay pinned at the top, and the encryption-notice
      box plus Copy / Done stay pinned at the bottom. Mirror the `NoteView`
      `ContentWithToolbar` scroll-region pattern rather than letting the whole page
      grow.
-   - An **"OISY protects you!" reassurance box** beneath the note — the standard
-     pattern (green shield, bold lead) on the blue background, body **"This note was
-     decrypted right here in your browser — OISY only ever stored an encrypted
-     copy,"** plus a **Learn more** link. This leads with the positive security
+   - An **encryption-notice reassurance box** beneath the note — the standard
+     pattern (green shield, bold lead) on the blue background, with the **same copy as
+     the in-app notes box**: bold **"End-to-end encrypted."** + **"Only you can read
+     your notes."** plus a **Learn more** link (no extra indent before the link). This
+     leads with the positive security
      story rather than only the negative "can't reopen" caveat. The **Learn more**
      link — and any URL linkified inside the note — opens in a **new tab**, so the
      recipient never navigates away from a note that may be single-use and
