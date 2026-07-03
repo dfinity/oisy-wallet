@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -22,7 +22,7 @@
 		<button
 			class="absolute top-2 right-2 text-tertiary"
 			aria-label={$i18n.core.text.close}
-			onclick={onClick}><IconClose /></button
+			onclick={onClick}><IconCloseThin /></button
 		>
 		{@render children()}
 	</div>
