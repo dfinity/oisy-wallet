@@ -53,8 +53,7 @@ export const areAddressesEqual = <T extends Address>({
 	address2,
 	...rest
 }: { address1: OptionAddress<T>; address2: OptionAddress<T> } & (
-	| { networkId: NetworkId }
-	| { addressType: TokenAccountIdTypes }
+	{ networkId: NetworkId } | { addressType: TokenAccountIdTypes }
 )): boolean => {
 	if (isNullish(address1) || isNullish(address2)) {
 		return false;

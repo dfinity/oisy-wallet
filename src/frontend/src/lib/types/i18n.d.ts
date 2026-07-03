@@ -2,6 +2,23 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrow {
+	text: {
+		header_title: string;
+		header_description: string;
+		borrowing_options: string;
+		borrowing_potential: string;
+		borrowing_power_hint: string;
+		available_best_provider: string;
+		remaining_best_provider: string;
+		active_loans: string;
+		no_active_loans: string;
+		amount_borrowed: string;
+		borrow_apr_from: string;
+	};
+	cards: { liquidium: { title: string; description: string; action: string } };
+}
+
 interface I18nBorrowings {
 	text: { tab_title: string; no_borrowings: string };
 }
@@ -1842,6 +1859,8 @@ interface I18nEarning {
 		currentStaked: string;
 		currentEarning: string;
 		earningPotential: string;
+		currentBorrowing: string;
+		interestPerYear: string;
 		terms: string;
 	};
 	terms: { flexible: string };
@@ -2125,6 +2144,7 @@ interface I18nNotes {
 
 interface I18n {
 	lang: Languages;
+	borrow: I18nBorrow;
 	borrowings: I18nBorrowings;
 	core: I18nCore;
 	progress: I18nProgress;
