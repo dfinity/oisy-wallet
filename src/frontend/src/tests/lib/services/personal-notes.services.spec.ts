@@ -69,7 +69,8 @@ describe('personal-notes.services', () => {
 
 		it('does not repopulate the store when an old load resolves after reset', async () => {
 			let resolveEntries:
-				((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void) | undefined;
+				| ((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void)
+				| undefined;
 
 			vi.spyOn(backendApi, 'getPersonalNotes').mockReturnValue(
 				new Promise((resolve) => {
@@ -100,6 +101,32 @@ describe('personal-notes.services', () => {
 				count: 0,
 				loaded: false
 			});
+		});
+
+		it('keeps the cached notes when a same-owner reload fails', async () => {
+			const cached = {
+				id: 'cached',
+				note: 'keep me',
+				created_at_ns: '100',
+				updated_at_ns: '100'
+			};
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [cached],
+				count: 1
+			});
+
+			// A same-owner refresh (e.g. the decryption-failure Retry) that fails must
+			// not blank the last-known-good list.
+			vi.spyOn(backendApi, 'getPersonalNotes').mockRejectedValue(new Error('network down'));
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+
+			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('network down');
+
+			expect((get(personalNotesList) ?? []).map(({ id }) => id)).toEqual(['cached']);
+			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
+			expect(get(personalNotesStore).loaded).toBeTruthy();
 		});
 	});
 
