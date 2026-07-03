@@ -69,8 +69,7 @@ describe('personal-notes.services', () => {
 
 		it('does not repopulate the store when an old load resolves after reset', async () => {
 			let resolveEntries:
-				| ((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void)
-				| undefined;
+				((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void) | undefined;
 
 			vi.spyOn(backendApi, 'getPersonalNotes').mockReturnValue(
 				new Promise((resolve) => {
