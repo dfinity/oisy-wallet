@@ -18,9 +18,7 @@ export interface assistant_message {
 	}>;
 }
 export type backend_config =
-	| { worker: null }
-	| { ollama: null }
-	| { openrouter: { api_key: string } };
+	{ worker: null } | { ollama: null } | { openrouter: { api_key: string } };
 export interface chat_message_v0 {
 	content: string;
 	role: { user: null } | { assistant: null } | { system: null };
