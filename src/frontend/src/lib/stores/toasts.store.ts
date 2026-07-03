@@ -14,10 +14,10 @@ export interface ToastsStore extends Readable<ToastMsgUI[]> {
 /**
  * Toast messages (vendored from @dfinity/gix-components).
  *
- * - show: display a message in toast component
- * - hide: remove the toast message with that timestamp or the first one.
- * - update: update the existed toast content.
- * - reset: empty all toasts or optionally only those that match particular levels
+ * - show: append a new toast (assigning an id when none is provided) and return its id.
+ * - hide: remove the toast with the given id.
+ * - update: update the content of an existing toast (matched by id), preserving order.
+ * - reset: empty all toasts, or optionally only those matching the given levels.
  */
 const initToastsStore = (): ToastsStore => {
 	const { subscribe, update, set } = writable<ToastMsgUI[]>([]);
