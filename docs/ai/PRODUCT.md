@@ -17,16 +17,17 @@ Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by
 The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that share one set of destinations arranged by a grouped information architecture: **Portfolio**, **Finance**, and **More**. The grouping is intentionally different per form factor — the mobile bar has limited slots, so Notes earns a top-level slot there while NFTs lives in the More group; on desktop NFTs sits in Portfolio and Notes lives in More.
 
 - **Portfolio** — Assets, NFTs, Activity.
-- **Finance** — Earn (with Trade and Borrow joining as the group is built out).
+- **Finance** — Trade, Earn, Borrow.
 - **More** — Notes, Explore, Rewards, Settings.
 
-There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
+On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
 - **NFTs is a first-class destination.** It has its own page (`/nfts/`) reached from a dedicated nav item, and is **no longer** a tab inside Assets. The Assets internal tabs (Tokens / Earning / Trading) are otherwise unchanged. On that page the hero shows a **total NFT count** (e.g. "12 NFTs") with **per-network count pills** (e.g. "ICP · 8") instead of a fiat balance — an NFT portfolio has no single fiat figure — and the total matches the rendered list. Privacy mode does not hide these counts.
+- **Finance destinations.** **Trade** (`/trading/`) and **Earn** (`/earn/`) are standalone destinations, distinct from the Trading / Earning tabs inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag. Borrow currently routes to the Liquidium provider page (`/providers/liquidium/`); Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
 
-The grouped item set currently renders as a flat list per form factor. The desktop section headings and the mobile raised-center **Finance cradle** + **bottom sheets** are deliberately not drawn yet — they land in follow-up changes; until then there is no "menu-open" state.
+The **mobile** bottom bar still renders its grouped items as a flat list; the raised-center **Finance cradle** and the **bottom sheets** (and their open-state signals) land in a follow-up. The desktop sidebar's logo header and social-links footer are likewise a follow-up.
 
 ---
 
