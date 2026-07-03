@@ -110,8 +110,11 @@ export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-t
 export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
+export const NAVIGATION_ITEM_NFTS = 'navigation-item-nfts';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
+export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
+export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
@@ -119,6 +122,9 @@ export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
+
+export const NFT_HERO_COUNT = 'nft-hero-count';
+export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
 
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';
@@ -279,6 +285,11 @@ export const NOTES_VIEW = 'notes-view';
 export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
 export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
 export const NOTES_BACK_BUTTON = 'notes-back-button';
+export const NOTES_INPUT = 'notes-input';
+export const NOTES_SAVE_BUTTON = 'notes-save-button';
+export const NOTES_CANCEL_BUTTON = 'notes-cancel-button';
+export const NOTES_EDITOR_DELETE_BUTTON = 'notes-editor-delete-button';
+export const NOTES_DELETE_CONFIRM_BUTTON = 'notes-delete-confirm-button';
 
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';

@@ -111,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",
+			"nfts": "",
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
@@ -136,6 +137,7 @@
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
+			"nfts": "",
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
@@ -1462,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
 			"title_not_supported": "NFT zatím nejsou na vybrané síti podporovány",

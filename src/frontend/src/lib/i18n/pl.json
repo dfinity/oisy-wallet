@@ -111,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Aktywa",
+			"nfts": "",
 			"settings": "Ustawienia",
 			"dapp_explorer": "Przeglądaj",
 			"activity": "Aktywność",
@@ -136,6 +137,7 @@
 		},
 		"alt": {
 			"tokens": "Przejdź do widoku aktywów",
+			"nfts": "",
 			"settings": "Otwórz ustawienia",
 			"dapp_explorer": "Otwórz eksplorator aplikacji",
 			"activity": "Otwórz widok aktywności",
@@ -1462,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Twoje NFT pojawią się tutaj",
 			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych NFT",
 			"title_not_supported": "",
