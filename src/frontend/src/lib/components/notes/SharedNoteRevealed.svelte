@@ -15,7 +15,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		note: string;
@@ -48,14 +47,12 @@
 	</div>
 
 	<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
-		<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong>
-		{replaceOisyPlaceholders($i18n.notes.share.recipient.protects_body)}
-		<ExternalLink
+		<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong>{$i18n.notes.text
+			.encrypted_info}<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
 			color="blue"
 			href={OISY_DOCS_URL}
 			iconVisible={false}
-			styleClass="ml-[1.25em]"
 		>
 			{$i18n.core.text.learn_more}
 		</ExternalLink>

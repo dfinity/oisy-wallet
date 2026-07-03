@@ -2099,7 +2099,8 @@ interface I18nNotes {
 		placeholder: string;
 		search_placeholder: string;
 		no_results: string;
-		privacy_info: string;
+		encrypted_lead: string;
+		encrypted_info: string;
 		created: string;
 		updated: string;
 		created_updated: string;
@@ -2137,7 +2138,6 @@ interface I18nNotes {
 			reveal: string;
 			revealed_title: string;
 			single_use_caveat: string;
-			protects_body: string;
 			copy_note: string;
 			note_copied: string;
 			outro_eyebrow: string;

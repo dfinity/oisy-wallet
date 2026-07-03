@@ -4,7 +4,6 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 {#snippet shieldIcon()}
@@ -17,14 +16,12 @@
 	background would be invisible). Grey, not a blue tint, since there's already
 	blue above (the Note panel) and below (Cancel/Save). -->
 <MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary! text-left">
-	<strong>{`${replaceOisyPlaceholders($i18n.core.text.oisy_protects_you)} `}</strong
-	>{replaceOisyPlaceholders($i18n.notes.text.privacy_info)}
-	<ExternalLink
+	<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong>{$i18n.notes.text
+		.encrypted_info}<ExternalLink
 		ariaLabel={$i18n.core.text.learn_more}
 		color="blue"
 		href={OISY_DOCS_URL}
 		iconVisible={false}
-		styleClass="ml-[1.25em]"
 	>
 		{$i18n.core.text.learn_more}
 	</ExternalLink>
