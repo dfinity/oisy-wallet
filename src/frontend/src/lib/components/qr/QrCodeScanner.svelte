@@ -18,8 +18,8 @@
 	let { onScan, onBack, universalScanner = false }: Props = $props();
 
 	let resolveQrCodePromise:
-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
-		| undefined = $state(undefined);
+		(({ status, code }: { status: QrStatus; code?: string }) => void) | undefined =
+		$state(undefined);
 
 	let cameraPermissionDenied = $state(false);
 
