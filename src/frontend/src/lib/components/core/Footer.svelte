@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/state';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
+	import IconGixGitHub from '$lib/components/icons/IconGixGitHub.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -47,7 +47,7 @@
 					ariaLabel={$i18n.navigation.text.source_code_on_github}
 					href={OISY_REPO_URL}
 				>
-					<IconGitHub />
+					<IconGixGitHub />
 				</ExternalLinkIcon>
 			</div>
 		</div>
