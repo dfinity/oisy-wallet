@@ -32,8 +32,6 @@
 
 	let visible = $state(false);
 
-	let overflowableContentWidth = $state(0);
-
 	let button: HTMLButtonElement | undefined = $state();
 	let inputElement: HTMLInputElement | undefined = $state();
 
@@ -91,20 +89,14 @@
 		     viewports instead of pushing the page wider than the device — which
 		     on Android Chrome forces a zoom-out that misplaces the fixed bottom
 		     nav bar under the browser's own UI. -->
-		<div
-			class="no-scrollbar flex min-w-0 overflow-x-auto pr-12"
-			bind:clientWidth={overflowableContentWidth}
-		>
+		<div class="no-scrollbar flex min-w-0 overflow-x-auto pr-12">
 			{@render overflowableContent()}
 		</div>
 	{/if}
 	<div class="absolute right-0 z-2 w-full">
 		{#if visible}
 			<div
-				style:--overflowable-w={`${overflowableContentWidth}px`}
 				class="input-field condensed absolute right-0 -mt-[11px] mr-px flex overflow-hidden"
-				class:md:w-[270px]={nonNullish(overflowableContent)}
-				class:overflowable-input={nonNullish(overflowableContent)}
 				class:w-[270px]={isNullish(overflowableContent)}
 				class:w-full={nonNullish(overflowableContent)}
 				in:slide={{ ...SLIDE_PARAMS, axis: 'x' }}
@@ -157,11 +149,3 @@
 		</ButtonIcon>
 	</div>
 </div>
-
-<style lang="scss">
-	@media (min-width: 768px) {
-		.overflowable-input {
-			max-width: calc(100% - var(--overflowable-w, 0px) + 2rem);
-		}
-	}
-</style>
