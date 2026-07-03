@@ -83,12 +83,12 @@ describe('NavigationMainMenuItems', () => {
 		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
-	it('surfaces Borrow in Finance linking to the Liquidium provider page', () => {
+	it('surfaces Borrow in Finance linking to the Borrow page', () => {
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const borrowLink = getByTestId(NAVIGATION_ITEM_BORROW);
 
-		expect(borrowLink.getAttribute('href')).toContain(AppPath.ProvidersLiquidium);
+		expect(borrowLink.getAttribute('href')).toContain(AppPath.Borrow);
 	});
 
 	it('surfaces NFTs as its own nav item linking to the NFTs page', () => {

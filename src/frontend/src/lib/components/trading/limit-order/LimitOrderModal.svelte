@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { setContext } from 'svelte';
 	import LimitOrderWizard from '$lib/components/trading/limit-order/LimitOrderWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { limitOrderWizardSteps } from '$lib/config/limit-order.config';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Asset, Chain } from '@liquidium/client';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -17,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 
