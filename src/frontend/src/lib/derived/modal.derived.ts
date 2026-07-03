@@ -267,6 +267,10 @@ export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
 );
+export const modalNotes: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'notes'
+);
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'dapp-details'

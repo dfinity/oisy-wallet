@@ -109,7 +109,8 @@
 			"hide_balances": "隐藏余额",
 			"show_balances": "显示余额",
 			"privacy_mode_enabled": "隐私模式已开启。按 [P] 键再次显示余额。",
-			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。"
+			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "前往资产视图",
@@ -128,7 +129,8 @@
 			"refer_a_friend": "为朋友生成一个推荐链接",
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
-			"show_balances": "显示已隐藏的余额"
+			"show_balances": "显示已隐藏的余额",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "文档"
@@ -2544,6 +2546,41 @@
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",
 			"no_response": "抱歉，我没有从大语言模型中获取反馈"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }
