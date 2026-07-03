@@ -5,10 +5,10 @@ import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
 import * as oisyTradeServices from '$lib/services/oisy-trade.services';
 import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import type { WizardStep } from '@dfinity/gix-components';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('WithdrawWizard', () => {
