@@ -1,10 +1,14 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
+	liquidiumBorrowingPowerPotentialUsd,
+	liquidiumBorrowInterestUsd,
 	liquidiumFreeCollateralUsd,
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
+	liquidiumMaxLtv,
 	liquidiumMaxSupplyApy,
+	liquidiumMinBorrowApy,
 	liquidiumNetApy,
 	liquidiumNetInterestUsd,
 	liquidiumProjectedHealthAfterRepayPercent,
@@ -77,9 +81,15 @@ describe('liquidium.utils', () => {
 				chain: 'BTC',
 				supplyApy: expect.closeTo(5),
 				borrowApy: expect.closeTo(9),
+				maxLtv: expect.closeTo(0),
 				frozen: false,
 				available: true
 			});
+		});
+
+		it('maps maxLtv from basis points to a 0–1 ratio', () => {
+			// maxLtv is basis points: 7000 / 10_000 = 0.7.
+			expect(mapLiquidiumMarket(buildPool({ maxLtv: 7000n })).maxLtv).toBeCloseTo(0.7);
 		});
 
 		it('is unavailable when frozen', () => {
@@ -109,6 +119,70 @@ describe('liquidium.utils', () => {
 
 		it('returns 0 when there are no markets', () => {
 			expect(liquidiumMaxSupplyApy([])).toBe(0);
+		});
+	});
+
+	describe('liquidiumMinBorrowApy', () => {
+		it('returns the lowest borrow APY across available pools, ignoring unavailable ones', () => {
+			const markets = [
+				mapLiquidiumMarket(buildPool({ id: 'a', borrowingRate: 9n })),
+				mapLiquidiumMarket(buildPool({ id: 'b', borrowingRate: 4n })),
+				mapLiquidiumMarket(buildPool({ id: 'c', borrowingRate: 1n, frozen: true }))
+			];
+
+			expect(liquidiumMinBorrowApy(markets)).toBeCloseTo(4);
+		});
+
+		it('returns 0 when there are no markets', () => {
+			expect(liquidiumMinBorrowApy([])).toBe(0);
+		});
+	});
+
+	describe('liquidiumMaxLtv', () => {
+		it('returns the highest maxLtv across available pools, ignoring unavailable ones', () => {
+			const markets = [
+				mapLiquidiumMarket(buildPool({ id: 'a', maxLtv: 5000n })),
+				mapLiquidiumMarket(buildPool({ id: 'b', maxLtv: 7000n })),
+				mapLiquidiumMarket(buildPool({ id: 'c', maxLtv: 9000n, frozen: true }))
+			];
+
+			expect(liquidiumMaxLtv(markets)).toBeCloseTo(0.7);
+		});
+
+		it('returns 0 when there are no markets', () => {
+			expect(liquidiumMaxLtv([])).toBe(0);
+		});
+	});
+
+	describe('liquidiumBorrowingPowerPotentialUsd', () => {
+		it('adds idle-wallet potential to the already-available borrowing power', () => {
+			expect(
+				liquidiumBorrowingPowerPotentialUsd({
+					availableBorrowsUsd: 1500,
+					walletBalanceUsd: 10_000,
+					maxLtv: 0.7
+				})
+			).toBeCloseTo(1500 + 10_000 * 0.7);
+		});
+
+		it('is just the wallet potential when there is no supplied collateral', () => {
+			expect(
+				liquidiumBorrowingPowerPotentialUsd({
+					availableBorrowsUsd: 0,
+					walletBalanceUsd: 2000,
+					maxLtv: 0.5
+				})
+			).toBeCloseTo(1000);
+		});
+
+		it('floors a negative wallet balance at 0', () => {
+			expect(
+				liquidiumBorrowingPowerPotentialUsd({
+					availableBorrowsUsd: 300,
+					walletBalanceUsd: -50,
+					maxLtv: 0.7
+				})
+			).toBe(300);
 		});
 	});
 
@@ -565,6 +639,53 @@ describe('liquidium.utils', () => {
 					])
 				)
 			).toBeCloseTo((1000 * 5 + 2000 * 3 - 500 * 8) / 100);
+		});
+	});
+
+	describe('liquidiumBorrowInterestUsd', () => {
+		const buildReserve = (overrides: Partial<LiquidiumReserve>): LiquidiumReserve => ({
+			poolId: 'p',
+			asset: 'BTC',
+			chain: 'BTC',
+			supplyApy: 0,
+			borrowApy: 0,
+			deposited: ZERO,
+			depositedDecimals: 8,
+			borrowed: ZERO,
+			borrowedDecimals: 8,
+			suppliedUsd: 0,
+			borrowedUsd: 0,
+			...overrides
+		});
+
+		const buildPortfolio = (reserves: LiquidiumReserve[]): LiquidiumPortfolio => ({
+			reserves,
+			totalSuppliedUsd: 0,
+			totalBorrowedUsd: 0,
+			netValueUsd: 0,
+			availableBorrowsUsd: 0,
+			weightedLiquidationThresholdBps: 8000,
+			healthFactorPercent: 100
+		});
+
+		it('is 0 when there is no portfolio', () => {
+			expect(liquidiumBorrowInterestUsd(null)).toBe(0);
+		});
+
+		it('is 0 when there are no reserves', () => {
+			expect(liquidiumBorrowInterestUsd(buildPortfolio([]))).toBe(0);
+		});
+
+		it('sums borrow cost across reserves, ignoring supplies', () => {
+			expect(
+				liquidiumBorrowInterestUsd(
+					buildPortfolio([
+						buildReserve({ suppliedUsd: 1000, supplyApy: 5 }),
+						buildReserve({ borrowedUsd: 2000, borrowApy: 8 }),
+						buildReserve({ borrowedUsd: 500, borrowApy: 10 })
+					])
+				)
+			).toBeCloseTo((2000 * 8 + 500 * 10) / 100);
 		});
 	});
 

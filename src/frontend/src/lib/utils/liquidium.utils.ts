@@ -184,6 +184,9 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 	chain: pool.chain,
 	supplyApy: rateToPercent({ rate: pool.lendingRate, rateDecimals: pool.rateDecimals }),
 	borrowApy: rateToPercent({ rate: pool.borrowingRate, rateDecimals: pool.rateDecimals }),
+	// pool.maxLtv is basis points (the SDK uses it directly as `maxAllowedLtvBps`), not the
+	// rate scale — convert to a 0–1 ratio.
+	maxLtv: Number(pool.maxLtv) / 10_000,
 	frozen: pool.frozen,
 	available: !pool.frozen && isUnderSupplyCap(pool)
 });
@@ -265,6 +268,38 @@ export const liquidiumNetApy = ({ reserves }: LiquidiumPortfolio): number | null
 export const liquidiumMaxSupplyApy = (markets: LiquidiumMarket[]): number =>
 	markets.reduce(
 		(max, { supplyApy, available }) => (available ? Math.max(max, supplyApy) : max),
+		0
+	);
+
+// Lowest borrow APY across enterable pools (Borrow card "from" badge); 0 when none.
+export const liquidiumMinBorrowApy = (markets: LiquidiumMarket[]): number => {
+	const rates = markets.filter(({ available }) => available).map(({ borrowApy }) => borrowApy);
+
+	return rates.length > 0 ? Math.min(...rates) : 0;
+};
+
+// Best (highest) max-LTV ratio across enterable pools; 0 when none.
+export const liquidiumMaxLtv = (markets: LiquidiumMarket[]): number =>
+	markets.reduce((max, { maxLtv, available }) => (available ? Math.max(max, maxLtv ?? 0) : max), 0);
+
+// Estimated total borrowing power in USD: the power still available from already-supplied
+// collateral, plus what idle wallet assets could unlock if supplied. Deliberately an
+// over-approximation (all fungibles, best max-LTV) mirroring the Earn page's earning
+// potential — the protocol remains the real gate on any actual borrow.
+export const liquidiumBorrowingPowerPotentialUsd = ({
+	availableBorrowsUsd,
+	walletBalanceUsd,
+	maxLtv
+}: {
+	availableBorrowsUsd: number;
+	walletBalanceUsd: number;
+	maxLtv: number;
+}): number => availableBorrowsUsd + Math.max(0, walletBalanceUsd) * maxLtv;
+
+// Yearly borrow interest in USD (Σ borrowedUsd·borrowApy / 100); 0 when no positions.
+export const liquidiumBorrowInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
+	(portfolio?.reserves ?? []).reduce(
+		(acc, { borrowedUsd, borrowApy }) => acc + (borrowedUsd * borrowApy) / 100,
 		0
 	);
 

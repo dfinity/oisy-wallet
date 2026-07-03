@@ -14,6 +14,7 @@ export const OisyMetadataSchema = z.object({
 	OISY_REFERRAL_URL: z.url(),
 	OISY_EARN_URL: z.url(),
 	OISY_EARN_HARVEST_AUTOPILOT_URL: z.url(),
+	OISY_BORROW_URL: z.url(),
 	OISY_WELCOME_TWITTER_URL: z.url(),
 	OISY_INTERNET_IDENTITY_URL: z.url(),
 	OISY_FIND_INTERNET_IDENTITY_URL: z.url(),
