@@ -201,7 +201,7 @@
 				<ButtonCancel disabled={busy} onclick={onClose} />
 				<Button
 					colorStyle="primary"
-					disabled={atCap}
+					disabled={atCap || busy}
 					loading={busy}
 					onclick={onCreate}
 					testId={NOTES_SHARE_CREATE_BUTTON}
