@@ -161,9 +161,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const initWithoutTransactions = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		msg,
 		initScheduler,
@@ -250,9 +248,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const initOtherScenarios = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		startData = undefined,
