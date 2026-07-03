@@ -2,6 +2,23 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrow {
+	text: {
+		header_title: string;
+		header_description: string;
+		borrowing_options: string;
+		borrowing_potential: string;
+		borrowing_power_hint: string;
+		available_best_provider: string;
+		remaining_best_provider: string;
+		active_loans: string;
+		no_active_loans: string;
+		amount_borrowed: string;
+		borrow_apr_from: string;
+	};
+	cards: { liquidium: { title: string; description: string; action: string } };
+}
+
 interface I18nBorrowings {
 	text: { tab_title: string; no_borrowings: string };
 }
@@ -85,6 +102,7 @@ interface I18nProgress {
 interface I18nNavigation {
 	text: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
@@ -106,9 +124,11 @@ interface I18nNavigation {
 		show_balances: string;
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
+		notes: string;
 	};
 	alt: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
@@ -125,6 +145,7 @@ interface I18nNavigation {
 		address_book: string;
 		hide_balances: string;
 		show_balances: string;
+		notes: string;
 	};
 	short: { documentation: string };
 }
@@ -1130,6 +1151,8 @@ interface I18nToken_tag {
 interface I18nNfts {
 	text: {
 		title: string;
+		count_one: string;
+		count_other: string;
 		title_empty: string;
 		description_empty: string;
 		title_not_supported: string;
@@ -1828,6 +1851,8 @@ interface I18nEarning {
 		currentStaked: string;
 		currentEarning: string;
 		earningPotential: string;
+		currentBorrowing: string;
+		interestPerYear: string;
 		terms: string;
 	};
 	terms: { flexible: string };
@@ -2080,8 +2105,38 @@ interface I18nAi_assistant {
 	errors: { unknown: string; no_response: string };
 }
 
+interface I18nNotes {
+	text: {
+		title: string;
+		note: string;
+		add_title: string;
+		edit_note: string;
+		delete_note: string;
+		delete_confirm_text: string;
+		back: string;
+		empty_title: string;
+		empty_subtitle: string;
+		empty_add: string;
+		add_note: string;
+		note_label: string;
+		placeholder: string;
+		search_placeholder: string;
+		no_results: string;
+		privacy_info: string;
+		created: string;
+		updated: string;
+		created_updated: string;
+		too_long: string;
+		cap_reached: string;
+		decryption_failed: string;
+	};
+	alt: { edit: string; delete: string };
+	error: { load: string; save: string; delete: string };
+}
+
 interface I18n {
 	lang: Languages;
+	borrow: I18nBorrow;
 	borrowings: I18nBorrowings;
 	core: I18nCore;
 	progress: I18nProgress;
@@ -2136,4 +2191,5 @@ interface I18n {
 	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
+	notes: I18nNotes;
 }

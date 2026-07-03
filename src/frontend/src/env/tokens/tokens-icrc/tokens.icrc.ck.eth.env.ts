@@ -32,9 +32,7 @@ export const LOCAL_CKETH_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText;
 
 export const LOCAL_CKETH_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as
-	| CanisterIdText
-	| null
-	| undefined;
+	CanisterIdText | null | undefined;
 
 export const LOCAL_CKETH_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as OptionCanisterIdText;

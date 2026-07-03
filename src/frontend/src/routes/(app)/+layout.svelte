@@ -148,7 +148,7 @@
 				{/if}
 
 				<MobileNavigationMenu>
-					<NavigationMenuMainItems testIdPrefix="mobile" />
+					<NavigationMenuMainItems layout="mobile" testIdPrefix="mobile" />
 				</MobileNavigationMenu>
 
 				<Modals />

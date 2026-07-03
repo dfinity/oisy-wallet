@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
+			"nfts": "",
 			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
@@ -109,10 +132,12 @@
 			"hide_balances": "Salden verbergen",
 			"show_balances": "Salden anzeigen",
 			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
-			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen."
+			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
+			"nfts": "",
 			"settings": "Einstellungen öffnen",
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "Empfehlungslink für einen Freund erstellen",
 			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
-			"show_balances": "Versteckte Salden anzeigen"
+			"show_balances": "Versteckte Salden anzeigen",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Doku"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Deine NFTs erscheinen hier",
 			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
 			"title_not_supported": "",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "Gestakt",
 			"currentEarning": "Aktuell verdienend",
 			"earningPotential": "Verdienstpotenzial",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Bedingungen"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "",
 			"no_response": ""
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

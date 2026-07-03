@@ -12,6 +12,24 @@ Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by
 
 ---
 
+## Navigation
+
+The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that share one set of destinations arranged by a grouped information architecture: **Portfolio**, **Finance**, and **More**. The grouping is intentionally different per form factor — the mobile bar has limited slots, so Notes earns a top-level slot there while NFTs lives in the More group; on desktop NFTs sits in Portfolio and Notes lives in More.
+
+- **Portfolio** — Assets, NFTs, Activity.
+- **Finance** — Earn (with Trade and Borrow joining as the group is built out).
+- **More** — Notes, Explore, Rewards, Settings.
+
+There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
+
+- **NFTs is a first-class destination.** It has its own page (`/nfts/`) reached from a dedicated nav item, and is **no longer** a tab inside Assets. The Assets internal tabs (Tokens / Earning / Trading) are otherwise unchanged. On that page the hero shows a **total NFT count** (e.g. "12 NFTs") with **per-network count pills** (e.g. "ICP · 8") instead of a fiat balance — an NFT portfolio has no single fiat figure — and the total matches the rendered list. Privacy mode does not hide these counts.
+- **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
+- **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
+
+The grouped item set currently renders as a flat list per form factor. The desktop section headings and the mobile raised-center **Finance cradle** + **bottom sheets** are deliberately not drawn yet — they land in follow-up changes; until then there is no "menu-open" state.
+
+---
+
 ## Analytics
 
 OISY uses [Plausible](https://plausible.io/) for privacy-friendly, cookieless analytics. Plausible is initialized once at app boot via the `@plausible-analytics/tracker` npm package. All events are fired through the central `trackEvent()` function in `src/frontend/src/lib/services/analytics.services.ts`, which wraps the tracker in a try/catch so analytics never disrupts the user flow.
@@ -96,6 +114,23 @@ The user-menu popover (the `IconUser` button) carries a **Language** selector fo
 The user menu also carries the **theme/appearance** selector when signed in (unchanged).
 
 The **currency** selector does **not** appear in the user menu — it is always reached via the Settings Preferences card.
+
+---
+
+## Personal notes
+
+Signed-in users have a private list of free-text **personal notes**, reached from a **Notes** item in the user menu placed directly **after Contacts**. The item opens a Notes modal that lists the user's notes newest-first, with a client-side **search** field to filter them; tapping a note opens a **read-only view**, and add, edit, and delete are all supported.
+
+A note is a free-standing memo — it is **not** attached to any transaction, address, token, or network. Each note is body text plus created/updated timestamps; there is no **stored** title (the list and read-only view show the note's first line in bold as a de-facto title), and no rich text, attachments, tags, or folders.
+
+- **End-to-end encrypted via vetKeys.** Notes are encrypted in the browser before they leave the device and decrypted in the browser on read, so the canister and the node providers only ever store and see **ciphertext**. A per-user symmetric key is derived via vetKD (one key per principal) and cached as a non-extractable `CryptoKey` in IndexedDB, so it is derived once per device. One user cannot read or write another user's notes.
+- **Lazy loading.** Nothing loads at wallet startup. The notes (and the per-user key) are fetched, derived, and decrypted on the **first** open of the Notes modal; the decrypted notes are cached for the session, so re-opening is instant.
+- **Limits.** A note holds up to **2,000 characters** (counted in Unicode code points, so any language / script / emoji is supported), enforced client-side; the backend independently rejects oversized ciphertext. Empty or whitespace-only notes cannot be saved. A user may keep up to **1,000 notes**; at the cap, creating a new note is refused (and the UI disables "Add note") while editing and deleting existing notes still work — no note is ever evicted.
+- **Timestamps** are stored as UTC and displayed in the user's local timezone: a never-edited note reads "Created …", an edited note "Updated …" (and rises to the top, since the list sorts by last update).
+- **Safe rendering.** Note text is rendered as plain text (auto-escaped, never as HTML), with line breaks handled by CSS and bidi/control characters neutralized on display, so a note cannot execute scripts or reorder surrounding UI. In the read-only view, `http`/`https` URLs become safe links that open in a new tab (`rel="noopener noreferrer"`); no other scheme is linkified.
+- **Delete asks for confirmation** (the same pattern as deleting a contact): a "Delete note" prompt naming the note (its first ~15 characters, bold) and warning "This action cannot be undone.", shown as a dialog on desktop and a bottom sheet on mobile, with Cancel / Delete note. A single note that fails to decrypt shows an inline error with a Retry action without affecting the others.
+
+The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
 ---
 

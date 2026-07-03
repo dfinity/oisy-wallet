@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",
+			"nfts": "",
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
@@ -109,10 +132,12 @@
 			"hide_balances": "Nascondi saldi",
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
-			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi."
+			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
+			"nfts": "",
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "Genera un link di riferimento per un amico",
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
-			"show_balances": "Mostra i saldi nascosti"
+			"show_balances": "Mostra i saldi nascosti",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "I tuoi NFT appariranno qui",
 			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
 			"title_not_supported": "",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "In staking",
 			"currentEarning": "Guadagno attuale",
 			"earningPotential": "Potenziale di guadagno",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Condizioni"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "",
 			"no_response": ""
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

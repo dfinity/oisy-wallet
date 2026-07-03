@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "एसेट्स",
+			"nfts": "",
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
@@ -109,10 +132,12 @@
 			"hide_balances": "शेष राशि छुपाएं",
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
-			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।"
+			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
+			"nfts": "",
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "एक दोस्त के लिए रेफरल लिंक जनरेट करें",
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
-			"show_balances": "छिपी हुई शेष राशि दिखाएं"
+			"show_balances": "छिपी हुई शेष राशि दिखाएं",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
 			"title_not_supported": "",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "स्टेक किया गया",
 			"currentEarning": "अभी कमाई",
 			"earningPotential": "कमाई की संभावना",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "शर्तें"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "क्षमा करें, LLM से प्रतिक्रिया प्राप्त करने में कुछ गलत हो गया।",
 			"no_response": "क्षमा करें, मुझे LLM से कोई प्रतिक्रिया नहीं मिली।"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

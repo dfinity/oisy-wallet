@@ -28,21 +28,15 @@ interface IcWalletStore<T> {
 
 export type GetBalanceAndTransactions<
 	TWithId extends
-		| IcrcIndexDid.TransactionWithId
-		| IcpIndexDid.TransactionWithId
-		| Dip20TransactionWithId
+		IcrcIndexDid.TransactionWithId | IcpIndexDid.TransactionWithId | Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
 	TWithId extends
-		| IcrcIndexDid.TransactionWithId
-		| IcpIndexDid.TransactionWithId
-		| Dip20TransactionWithId,
+		IcrcIndexDid.TransactionWithId | IcpIndexDid.TransactionWithId | Dip20TransactionWithId,
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrcStrict
-		| PostMessageDataRequestIcp
-		| PostMessageDataRequestDip20
+		PostMessageDataRequestIcrcStrict | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
 

@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",
+			"nfts": "",
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
@@ -109,10 +132,12 @@
 			"hide_balances": "Skrýt zůstatky",
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
-			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků."
+			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
+			"nfts": "",
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "Vygenerovat pozvánku pro přítele",
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
-			"show_balances": "Zobrazit skryté zůstatky"
+			"show_balances": "Zobrazit skryté zůstatky",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Dokumentace"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
 			"title_not_supported": "NFT zatím nejsou na vybrané síti podporovány",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "Stakováno",
 			"currentEarning": "Aktuálně vyděláváno",
 			"earningPotential": "Výdělečný potenciál",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Podmínky"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
 			"no_response": "Omlouvám se, nedostal jsem odpověď od LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

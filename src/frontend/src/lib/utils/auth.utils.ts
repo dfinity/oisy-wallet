@@ -14,8 +14,7 @@ const isAlternativeOrigin = (): boolean => {
 };
 
 export const getOptionalDerivationOrigin = ():
-	| { derivationOrigin: string }
-	| Record<string, never> =>
+	{ derivationOrigin: string } | Record<string, never> =>
 	isAlternativeOrigin() && !isNullishOrEmpty(AUTH_DERIVATION_ORIGIN)
 		? {
 				derivationOrigin: AUTH_DERIVATION_ORIGIN

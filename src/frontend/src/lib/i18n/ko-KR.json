@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "자산",
+			"nfts": "",
 			"settings": "설정",
 			"dapp_explorer": "탐색",
 			"activity": "활동",
@@ -109,10 +132,12 @@
 			"hide_balances": "잔액 숨기기",
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
-			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요."
+			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
+			"nfts": "",
 			"settings": "설정 열기",
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "친구를 위한 추천 링크 생성",
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
-			"show_balances": "숨겨진 잔액 표시"
+			"show_balances": "숨겨진 잔액 표시",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "문서"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT가 여기에 표시됩니다",
 			"description_empty": "아직 받은 NFT가 없는 것 같습니다",
 			"title_not_supported": "선택한 네트워크에서는 아직 NFT를 지원하지 않습니다",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "스테이킹 중",
 			"currentEarning": "현재 수익 중",
 			"earningPotential": "수익 잠재력",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "조건"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "죄송합니다. LLM에서 응답을 가져오는 중 문제가 발생했습니다.",
 			"no_response": "죄송합니다. LLM에서 응답을 받지 못했습니다."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

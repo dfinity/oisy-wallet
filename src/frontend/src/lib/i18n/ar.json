@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
@@ -109,10 +132,12 @@
 			"hide_balances": "إخفاء الأرصدة",
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
-			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك."
+			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "إنشاء رابط إحالة لصديق",
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
-			"show_balances": "إظهار الأرصدة المخفية"
+			"show_balances": "إظهار الأرصدة المخفية",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
 			"title_not_supported": "",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": ""
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",
 			"no_response": "عذرًا، لم أتلق ردًا من LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

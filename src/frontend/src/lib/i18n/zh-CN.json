@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,6 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "资产",
+			"nfts": "",
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
@@ -109,10 +132,12 @@
 			"hide_balances": "隐藏余额",
 			"show_balances": "显示余额",
 			"privacy_mode_enabled": "隐私模式已开启。按 [P] 键再次显示余额。",
-			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。"
+			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "前往资产视图",
+			"nfts": "",
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
@@ -128,7 +153,8 @@
 			"refer_a_friend": "为朋友生成一个推荐链接",
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
-			"show_balances": "显示已隐藏的余额"
+			"show_balances": "显示已隐藏的余额",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "文档"
@@ -1438,6 +1464,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "你的 NFT 将显示在这里",
 			"description_empty": "看起来你还没有收到 NFT",
 			"title_not_supported": "所选网络尚不支持 NFT",
@@ -2285,6 +2313,8 @@
 			"currentStaked": "质押中",
 			"currentEarning": "当前收益",
 			"earningPotential": "收益潜力",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "条款"
 		},
 		"terms": {
@@ -2544,6 +2574,41 @@
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",
 			"no_response": "抱歉，我没有从大语言模型中获取反馈"
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }
