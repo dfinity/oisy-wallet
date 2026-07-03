@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
@@ -8,6 +7,7 @@
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { STAKE_PROVIDER_LOGO } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';

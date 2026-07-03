@@ -26,9 +26,7 @@ export const walletDataRef = (
 
 export abstract class IcWalletScheduler<
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrc
-		| PostMessageDataRequestIcp
-		| PostMessageDataRequestDip20
+		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 > implements Scheduler<PostMessageDataRequest> {
 	protected ref: PostMessageCommon['ref'] | undefined;
 

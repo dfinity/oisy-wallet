@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { IconCheck } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 
 	interface Props {
 		selectable?: boolean;
@@ -74,7 +74,7 @@
 				{#if selectable}
 					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
 						{#if selected}
-							<IconCheck size="16px" />
+							<IconGixCheck size="16px" />
 						{/if}
 					</span>
 				{/if}
