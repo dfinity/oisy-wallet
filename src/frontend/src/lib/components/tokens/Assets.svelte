@@ -71,7 +71,7 @@
 					     tab row's natural width on narrow viewports (see the
 					     matching note in SlidingInput.svelte). -->
 					<div class="relative flex min-w-0 grow-1 justify-between">
-						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
+						<TokensFilter>
 							{#snippet overflowableContent()}
 								<!-- NFTs is its own nav destination now, so the standalone NFTs page
 								     shows no Tokens/Earning/Trading tab bar. -->
