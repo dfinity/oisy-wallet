@@ -82,8 +82,7 @@ export interface ActiveUserTransactionRef {
  * dedupe twin variants anyway.
  */
 export type ActiveUserTransactionResult =
-	| { Ok: ActiveUserTransaction }
-	| { Err: ActiveUserTransactionError };
+	{ Ok: ActiveUserTransaction } | { Err: ActiveUserTransactionError };
 /**
  * Lifecycle status of an active user transaction.
  *
@@ -93,10 +92,7 @@ export type ActiveUserTransactionResult =
  * terminal states are immutable (idempotent no-op).
  */
 export type ActiveUserTransactionStatus =
-	| { Failed: null }
-	| { Executing: null }
-	| { Succeeded: null }
-	| { Pending: null };
+	{ Failed: null } | { Executing: null } | { Succeeded: null } | { Pending: null };
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -116,8 +112,7 @@ export interface AddHiddenDappIdRequest {
 	dapp_id: string;
 }
 export type AddUserDismissedNotificationResult =
-	| { Ok: null }
-	| { Err: AddDismissedNotificationError };
+	{ Ok: null } | { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult =
 	| {
 			/**
@@ -941,8 +936,7 @@ export interface GetUserTransactionsResponse {
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
-	| { Ok: GetUserTransactionsResponse }
-	| { Err: UserTransactionError };
+	{ Ok: GetUserTransactionsResponse } | { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -1036,10 +1030,7 @@ export interface IcrcTransactionData {
  * The kind of ICRC ledger operation.
  */
 export type IcrcTransactionType =
-	| { Approve: { spender: string } }
-	| { Burn: null }
-	| { Mint: null }
-	| { Transfer: null };
+	{ Approve: { spender: string } } | { Burn: null } | { Mint: null } | { Transfer: null };
 /**
  * An account identifier for Internet Computer tokens.
  */
@@ -1065,10 +1056,7 @@ export type Icrcv2AccountId =
  * Represents the MIME type of image.
  */
 export type ImageMimeType =
-	| { 'image/gif': null }
-	| { 'image/png': null }
-	| { 'image/jpeg': null }
-	| { 'image/webp': null };
+	{ 'image/gif': null } | { 'image/png': null } | { 'image/jpeg': null } | { 'image/webp': null };
 export interface InitArg {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -1109,10 +1097,7 @@ export interface InitArg {
  * Which Liquidium lend/borrow action an active transaction tracks.
  */
 export type LiquidiumAction =
-	| { Withdraw: null }
-	| { Repay: null }
-	| { Borrow: null }
-	| { Supply: null };
+	{ Withdraw: null } | { Repay: null } | { Borrow: null } | { Supply: null };
 export interface LiquidiumData {
 	/**
 	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
@@ -1319,8 +1304,7 @@ export interface ProviderAgreementType {
 	scope: ProviderAgreementScope;
 }
 export type QualifiedNotificationKind =
-	| { NoIndexCanister: null }
-	| { UnavailableIndexCanister: null };
+	{ NoIndexCanister: null } | { UnavailableIndexCanister: null };
 /**
  * Error returned when a caller exceeds the allowed call rate.
  */
@@ -1529,10 +1513,7 @@ export type Token =
 	| { Erc4626: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
-	| { Btc: BtcAddress }
-	| { Eth: EthAddress }
-	| { Sol: string }
-	| { Icrcv2: Icrcv2AccountId };
+	{ Btc: BtcAddress } | { Eth: EthAddress } | { Sol: string } | { Icrcv2: Icrcv2AccountId };
 /**
  * A unified token identifier covering both native and custom tokens for the main supported chains.
  * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
