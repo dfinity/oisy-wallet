@@ -111,7 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",
-			"nfts": "",
+			"nfts": "Oggetti da collezione",
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
@@ -142,7 +142,7 @@
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
-			"nfts": "",
+			"nfts": "Apri la vista degli oggetti da collezione",
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",

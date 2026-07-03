@@ -111,7 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "资产",
-			"nfts": "",
+			"nfts": "收藏品",
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
@@ -142,7 +142,7 @@
 		},
 		"alt": {
 			"tokens": "前往资产视图",
-			"nfts": "",
+			"nfts": "打开收藏品视图",
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
