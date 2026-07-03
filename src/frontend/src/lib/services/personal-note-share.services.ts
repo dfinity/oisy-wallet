@@ -79,7 +79,18 @@ export const loadSharedNote = async ({
 	const identity = new AnonymousIdentity();
 	const cryptoKey = await importShareKey(key);
 
-	const reusable = await getPersonalNoteShare({ identity, token }).catch(() => undefined);
+	// Only a `NotFound` means "not a reusable share, try single-use". Any other
+	// error (transient/network) must propagate rather than trigger a consume.
+	let reusable;
+	try {
+		reusable = await getPersonalNoteShare({ identity, token });
+	} catch (err: unknown) {
+		if (typeof err === 'object' && err !== null && 'NotFound' in err) {
+			reusable = undefined;
+		} else {
+			throw err;
+		}
+	}
 	if (reusable !== undefined) {
 		const { note } = await decryptShareContent({
 			key: cryptoKey,
