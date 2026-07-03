@@ -21,6 +21,7 @@
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
+	import Tag from '$lib/components/ui/Tag.svelte';
 	import {
 		DESKTOP_NAVIGATION_SECTIONS,
 		MOBILE_NAVIGATION_BAR
@@ -292,10 +293,15 @@
 	{@const descriptor = descriptors[id]}
 	{#if nonNullish(descriptor)}
 		{@const Icon = descriptor.icon}
-		{@const cardClass = `flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
 		{#snippet cardInner()}
 			<Icon />
 			<span class="text-xs font-medium">{descriptor.label}</span>
+			{#if nonNullish(descriptor.tag)}
+				<span class="absolute top-0.5 right-0.5 origin-top-right scale-75">
+					<Tag size="sm" variant={descriptor.tagVariant}>{descriptor.tag}</Tag>
+				</span>
+			{/if}
 		{/snippet}
 		{#if nonNullish(descriptor.href)}
 			<a
