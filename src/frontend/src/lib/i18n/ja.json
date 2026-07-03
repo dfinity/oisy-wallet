@@ -2303,11 +2303,6 @@
 				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
 				"action": "Autopilotへ移動"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
-				"action": "ステータスを確認"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
