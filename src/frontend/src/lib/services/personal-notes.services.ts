@@ -7,7 +7,8 @@ import {
 import {
 	decryptPersonalNoteWithKey,
 	deriveKeyMaterial,
-	encryptPersonalNote
+	encryptPersonalNote,
+	resetPersonalNotesKeyCache
 } from '$lib/services/personal-notes.vetkeys';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import {
@@ -25,9 +26,22 @@ const nowNs = (): string => (BigInt(Date.now()) * 1_000_000n).toString();
 const toUint8Array = (value: Uint8Array | number[]): Uint8Array =>
 	value instanceof Uint8Array ? value : Uint8Array.from(value);
 
-const refreshCount = async (identity: Identity): Promise<void> => {
+const ownerPrincipal = (identity: Identity): string => identity.getPrincipal().toText();
+
+const assertPersonalNotesOwner = (owner: string): void => {
+	if (get(personalNotesStore).ownerPrincipal !== owner) {
+		throw new Error('Personal notes cache does not belong to the current identity.');
+	}
+};
+
+export const resetPersonalNotesSession = (): void => {
+	personalNotesStore.reset();
+	resetPersonalNotesKeyCache();
+};
+
+const refreshCount = async (identity: Identity, owner: string): Promise<void> => {
 	const count = await getPersonalNotesCount({ identity });
-	personalNotesStore.setCount(Number(count));
+	personalNotesStore.setCount({ ownerPrincipal: owner, count: Number(count) });
 };
 
 /**
@@ -36,6 +50,9 @@ const refreshCount = async (identity: Identity): Promise<void> => {
  * blanking the whole list (per-note isolation).
  */
 export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
+	const owner = ownerPrincipal(identity);
+	personalNotesStore.beginLoad({ ownerPrincipal: owner });
+
 	const [entries, count] = await Promise.all([
 		getPersonalNotes({ identity }),
 		getPersonalNotesCount({ identity })
@@ -64,10 +81,12 @@ export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
 		);
 	}
 
-	personalNotesStore.setLoaded({ entries: decrypted, count: Number(count) });
+	personalNotesStore.setLoaded({ ownerPrincipal: owner, entries: decrypted, count: Number(count) });
 };
 
-const lookupCreatedAtNs = (id: string): string | undefined => {
+const lookupCreatedAtNs = ({ id, owner }: { id: string; owner: string }): string | undefined => {
+	assertPersonalNotesOwner(owner);
+
 	const entry = get(personalNotesStore).entries?.[id];
 	return entry === undefined || isPersonalNoteDecryptionFailure(entry)
 		? undefined
@@ -87,11 +106,14 @@ export const savePersonalNote = async ({
 	id?: string;
 	note: string;
 }): Promise<PersonalNoteUi> => {
+	const owner = ownerPrincipal(identity);
+	assertPersonalNotesOwner(owner);
+
 	const noteId = id ?? generatePersonalNoteId();
 	const now = nowNs();
 	const envelope: PersonalNoteEnvelope = {
 		note,
-		created_at_ns: id !== undefined ? (lookupCreatedAtNs(id) ?? now) : now,
+		created_at_ns: id !== undefined ? (lookupCreatedAtNs({ id, owner }) ?? now) : now,
 		updated_at_ns: now
 	};
 
@@ -99,8 +121,8 @@ export const savePersonalNote = async ({
 	await setPersonalNoteApi({ identity, note_id: noteId, encrypted_note: encrypted });
 
 	const entry: PersonalNoteUi = { id: noteId, ...envelope };
-	personalNotesStore.upsert(entry);
-	await refreshCount(identity);
+	personalNotesStore.upsert({ ownerPrincipal: owner, entry });
+	await refreshCount(identity, owner);
 	return entry;
 };
 
@@ -111,7 +133,10 @@ export const deletePersonalNote = async ({
 	identity: Identity;
 	id: string;
 }): Promise<void> => {
+	const owner = ownerPrincipal(identity);
+	assertPersonalNotesOwner(owner);
+
 	await deletePersonalNoteApi({ identity, note_id: id });
-	personalNotesStore.remove(id);
-	await refreshCount(identity);
+	personalNotesStore.remove({ ownerPrincipal: owner, id });
+	await refreshCount(identity, owner);
 };
