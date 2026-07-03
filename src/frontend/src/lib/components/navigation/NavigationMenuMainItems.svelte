@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import type { Component } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
@@ -13,9 +14,12 @@
 	import IconActivity from '$lib/components/icons/iconly/IconActivity.svelte';
 	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconCoins from '$lib/components/icons/lucide/IconCoins.svelte';
+	import IconEllipsis from '$lib/components/icons/lucide/IconEllipsis.svelte';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
+	import IconLayers from '$lib/components/icons/lucide/IconLayers.svelte';
 	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
+	import NavigationGroupSheet from '$lib/components/navigation/NavigationGroupSheet.svelte';
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import {
 		DESKTOP_NAVIGATION_SECTIONS,
@@ -87,6 +91,18 @@
 
 	const notesModalId = Symbol();
 
+	// Which group's bottom sheet is open on mobile (null = none).
+	let openSheet = $state<NavigationGroupId | null>(null);
+
+	const toggleSheet = (id: NavigationGroupId) => {
+		openSheet = openSheet === id ? null : id;
+	};
+
+	const MOBILE_GROUP_ICON: Partial<Record<NavigationGroupId, Component>> = {
+		finance: IconLayers,
+		more: IconEllipsis
+	};
+
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
 	const networkId = $derived($userSelectedNetworkStore);
@@ -95,6 +111,8 @@
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
+		// Reaching any destination closes an open group sheet.
+		openSheet = null;
 	});
 
 	const url = (path: AppPath): string =>
@@ -241,11 +259,10 @@
 		})
 	);
 
-	// Mobile interim layout (flat-but-grouped-aware): the bar slots are flattened
-	// into a single list. The cradle + bottom sheets render in PR 3.
-	const mobileItemIds = $derived<NavigationItemId[]>(
-		MOBILE_NAVIGATION_BAR.flatMap((slot) => (slot.type === 'item' ? [slot.id] : slot.items))
-	);
+	// A group "owns" the current page when one of its children is the active page;
+	// that drives the cradle/More blue (owns) vs grey (open over another page).
+	const groupOwnsCurrentPage = (items: NavigationItemId[]): boolean =>
+		items.some((id) => descriptors[id]?.selected === true);
 </script>
 
 {#snippet navItem(id: NavigationItemId)}
@@ -271,6 +288,38 @@
 	{/if}
 {/snippet}
 
+{#snippet navCard(id: NavigationItemId)}
+	{@const descriptor = descriptors[id]}
+	{#if nonNullish(descriptor)}
+		{@const Icon = descriptor.icon}
+		{@const cardClass = `flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{#snippet cardInner()}
+			<Icon />
+			<span class="text-xs font-medium">{descriptor.label}</span>
+		{/snippet}
+		{#if nonNullish(descriptor.href)}
+			<a
+				class={cardClass}
+				aria-label={descriptor.ariaLabel}
+				data-tid={descriptor.testId}
+				href={descriptor.href}
+			>
+				{@render cardInner()}
+			</a>
+		{:else}
+			<button
+				class={cardClass}
+				aria-label={descriptor.ariaLabel}
+				data-tid={descriptor.testId}
+				onclick={descriptor.onclick}
+				type="button"
+			>
+				{@render cardInner()}
+			</button>
+		{/if}
+	{/if}
+{/snippet}
+
 {#if layout === 'desktop'}
 	{#each DESKTOP_NAVIGATION_SECTIONS as section, sectionIndex (section.id)}
 		{@const items = section.items.filter((id) => nonNullish(descriptors[id]))}
@@ -291,7 +340,79 @@
 		{/if}
 	{/each}
 {:else}
-	{#each mobileItemIds as id (id)}
-		{@render navItem(id)}
+	{#each MOBILE_NAVIGATION_BAR as slot (slot.id)}
+		{#if slot.type === 'item'}
+			{@render navItem(slot.id)}
+		{:else}
+			{@const ownsCurrent = groupOwnsCurrentPage(slot.items)}
+			{@const open = openSheet === slot.id}
+			{@const pressed = open && !ownsCurrent}
+			{@const GroupIcon = MOBILE_GROUP_ICON[slot.id]}
+			{#if slot.id === 'finance'}
+				<!-- Raised center cradle: a white circle with a thin ring + icon in the
+				     current text colour — black by default, blue when it owns the current
+				     page, grey while its sheet is open over another page. The label
+				     matches the other bar items (text-sm). All three colour classes are applied
+					     conditionally (text-primary is NOT a base class) so the active one wins
+					     regardless of Tailwind's utility source order. -->
+				<button
+					class="flex min-w-0 flex-1 flex-col items-center justify-end p-1.5 text-center text-sm"
+					class:text-brand-primary-alt={ownsCurrent}
+					class:text-primary={!ownsCurrent && !pressed}
+					class:text-tertiary={pressed}
+					aria-expanded={open}
+					aria-label={SECTION_META[slot.id].label()}
+					data-tid={prefixedTestId(SECTION_META[slot.id].testId)}
+					onclick={() => toggleSheet(slot.id)}
+					type="button"
+				>
+					<!-- Circle embedded in the bar's hump (bottom:28px, matching the
+					     design). Anchored to the bar (the button is not positioned, so this
+					     centers on the whole bar at 50% — the same reference as the hump SVG
+					     — not just this slot). The safe-area inset lifts it in step with the
+					     row (which the global `.mobile-nav` container padding lifts) so it clears the indicator.
+					     The label stays on the row (items-end). -->
+					<span
+						class="absolute bottom-[calc(1.75rem+env(safe-area-inset-bottom))] left-1/2 flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border-[1.5px] border-current bg-primary transition-colors"
+					>
+						{#if nonNullish(GroupIcon)}
+							<GroupIcon />
+						{/if}
+					</span>
+					{SECTION_META[slot.id].label()}
+				</button>
+			{:else}
+				<button
+					class="nav-item flex min-w-0 flex-1"
+					class:bg-disabled={pressed}
+					class:selected={ownsCurrent}
+					aria-expanded={open}
+					aria-label={SECTION_META[slot.id].label()}
+					data-tid={prefixedTestId(SECTION_META[slot.id].testId)}
+					onclick={() => toggleSheet(slot.id)}
+					type="button"
+				>
+					{#if nonNullish(GroupIcon)}
+						<GroupIcon />
+					{/if}
+					<span class="block w-full truncate md:w-auto">{SECTION_META[slot.id].label()}</span>
+				</button>
+			{/if}
+		{/if}
+	{/each}
+
+	{#each MOBILE_NAVIGATION_BAR as slot (slot.id)}
+		{#if slot.type === 'group'}
+			<NavigationGroupSheet
+				label={SECTION_META[slot.id].label()}
+				onClose={() => (openSheet = null)}
+				testId={prefixedTestId(`${SECTION_META[slot.id].testId}-sheet`)}
+				visible={openSheet === slot.id}
+			>
+				{#each slot.items.filter((id) => nonNullish(descriptors[id])) as id (id)}
+					{@render navCard(id)}
+				{/each}
+			</NavigationGroupSheet>
+		{/if}
 	{/each}
 {/if}

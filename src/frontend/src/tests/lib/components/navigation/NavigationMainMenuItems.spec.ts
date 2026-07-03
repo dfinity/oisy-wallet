@@ -16,9 +16,10 @@ import {
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
+import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-import { render } from '@testing-library/svelte';
-import { readable } from 'svelte/store';
+import { fireEvent, render } from '@testing-library/svelte';
+import { get, readable } from 'svelte/store';
 
 vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_NETWORK_ID));
 
@@ -28,6 +29,7 @@ describe('NavigationMainMenuItems', () => {
 
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
+		bottomSheetOpenStore.set(false);
 	});
 
 	it('renders all basic navigation items', () => {
@@ -54,12 +56,31 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_GROUP_MORE)).toBeInTheDocument();
 	});
 
-	it('does not render section headings on the mobile layout', () => {
-		const { queryByTestId } = render(NavigationMainMenuItems, { props: { layout: 'mobile' } });
+	it('renders the Finance cradle and More group buttons on the mobile layout', () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
 
+		expect(getByTestId(NAVIGATION_GROUP_FINANCE)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_GROUP_MORE)).toBeInTheDocument();
+		// Portfolio is a desktop-only section, not a mobile bar slot.
 		expect(queryByTestId(NAVIGATION_GROUP_PORTFOLIO)).toBeNull();
-		expect(queryByTestId(NAVIGATION_GROUP_FINANCE)).toBeNull();
-		expect(queryByTestId(NAVIGATION_GROUP_MORE)).toBeNull();
+	});
+
+	it('opens the Finance sheet on cradle click without hiding the bar', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		// Sheet closed: a Finance child (Borrow) is not in the bar.
+		expect(queryByTestId(NAVIGATION_ITEM_BORROW)).toBeNull();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		// The sheet now shows the Finance children, and the bar stays (store untouched).
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toBeInTheDocument();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
 	it('surfaces Borrow in Finance linking to the Liquidium provider page', () => {
