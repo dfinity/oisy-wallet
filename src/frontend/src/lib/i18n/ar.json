@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
 			"title_not_supported": "",
@@ -2269,11 +2303,6 @@
 				"description": "",
 				"action": ""
 			},
-			"sprinkles": {
-				"title": "",
-				"description": "",
-				"action": ""
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": ""
 		},
 		"terms": {
