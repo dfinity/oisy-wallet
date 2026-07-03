@@ -109,7 +109,8 @@
 			"hide_balances": "إخفاء الأرصدة",
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
-			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك."
+			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
@@ -128,7 +129,8 @@
 			"refer_a_friend": "إنشاء رابط إحالة لصديق",
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
-			"show_balances": "إظهار الأرصدة المخفية"
+			"show_balances": "إظهار الأرصدة المخفية",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -2544,6 +2546,41 @@
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",
 			"no_response": "عذرًا، لم أتلق ردًا من LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

@@ -3,7 +3,9 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CustomToken,
+	DeletePersonalNoteRequest,
 	GetAllowedCyclesResponse,
+	PersonalNoteEntry,
 	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
@@ -354,6 +356,53 @@ export const getActiveUserTransactions = async ({
 	const { getActiveUserTransactions } = await backendCanister({ identity });
 
 	return getActiveUserTransactions();
+};
+
+export const setPersonalNote = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<PersonalNoteEntry>): Promise<void> => {
+	const { setPersonalNote } = await backendCanister({ identity });
+	return setPersonalNote(request);
+};
+
+export const deletePersonalNote = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<DeletePersonalNoteRequest>): Promise<void> => {
+	const { deletePersonalNote } = await backendCanister({ identity });
+	return deletePersonalNote(request);
+};
+
+export const getPersonalNotes = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<PersonalNoteEntry[]> => {
+	const { getPersonalNotes } = await backendCanister({ identity });
+	return getPersonalNotes();
+};
+
+export const getPersonalNotesCount = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<bigint> => {
+	const { getPersonalNotesCount } = await backendCanister({ identity });
+	return getPersonalNotesCount();
+};
+
+export const getPersonalNotesEncryptedVetkey = async ({
+	identity,
+	transportPublicKey
+}: CanisterApiFunctionParams<{
+	transportPublicKey: Uint8Array;
+}>): Promise<Uint8Array | number[]> => {
+	const { getPersonalNotesEncryptedVetkey } = await backendCanister({ identity });
+	return getPersonalNotesEncryptedVetkey(transportPublicKey);
+};
+
+export const getPersonalNotesVetkeyPublicKey = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
+	const { getPersonalNotesVetkeyPublicKey } = await backendCanister({ identity });
+	return getPersonalNotesVetkeyPublicKey();
 };
 
 const backendCanister = async ({
