@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Активы",
+			"nfts": "",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Активы",
+			"nfts": "",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
 			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",
