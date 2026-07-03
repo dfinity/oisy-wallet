@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { IconClose, IconWarning } from '@dfinity/gix-components';
+	import { IconWarning } from '@dfinity/gix-components';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -17,7 +18,7 @@
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}><IconClose /></button>
+		<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}><IconCloseThin /></button>
 	</div>
 {:else if BETA && envBannerVisible}
 	<div
@@ -26,7 +27,7 @@
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
 			<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}>
-				<IconClose />
+				<IconCloseThin />
 			</button>
 		</WarningBanner>
 	</div>
