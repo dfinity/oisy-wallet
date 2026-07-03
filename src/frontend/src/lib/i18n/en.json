@@ -2626,7 +2626,7 @@
 				"expiry_30d": "30 days",
 				"destroy_after_viewing": "Destroy after viewing",
 				"destroy_after_viewing_hint": "The link works once, then stops opening.",
-				"protects_body": "The share key lives in the link itself and is never sent to $oisy_short, so only someone with the full link can read this note.",
+				"protects_body": "Only the recipient of this link can read this note.",
 				"create_link": "Create link",
 				"link_ready_title": "Share link ready",
 				"link_ready_subtitle": "Anyone with this link can read the note",
