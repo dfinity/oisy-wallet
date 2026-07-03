@@ -114,7 +114,10 @@ describe('personal-notes.store', () => {
 			ownerPrincipal: mockPrincipalText,
 			entry: note({ id: 'old', updated: '300' })
 		});
-		personalNotesStore.setCount({ ownerPrincipal: mockPrincipalText, count: MAX_PERSONAL_NOTES_PER_USER });
+		personalNotesStore.setCount({
+			ownerPrincipal: mockPrincipalText,
+			count: MAX_PERSONAL_NOTES_PER_USER
+		});
 
 		expect(get(personalNotesStore)).toEqual({
 			ownerPrincipal: mockPrincipalText2,

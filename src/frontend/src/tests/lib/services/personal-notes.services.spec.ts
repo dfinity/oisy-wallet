@@ -68,7 +68,8 @@ describe('personal-notes.services', () => {
 		});
 
 		it('does not repopulate the store when an old load resolves after reset', async () => {
-			let resolveEntries: (value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void;
+			let resolveEntries:
+				((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void) | undefined;
 
 			vi.spyOn(backendApi, 'getPersonalNotes').mockReturnValue(
 				new Promise((resolve) => {
@@ -86,7 +87,10 @@ describe('personal-notes.services', () => {
 			const loadPromise = loadPersonalNotes(mockIdentity);
 
 			personalNotesStore.reset();
-			resolveEntries!([{ note_id: 'stale', encrypted_note: new Uint8Array([1]) }]);
+			if (resolveEntries === undefined) {
+				throw new Error('Expected getPersonalNotes promise resolver to be initialized.');
+			}
+			resolveEntries([{ note_id: 'stale', encrypted_note: new Uint8Array([1]) }]);
 
 			await loadPromise;
 

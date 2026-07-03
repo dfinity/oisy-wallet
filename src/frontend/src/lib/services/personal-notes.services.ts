@@ -39,7 +39,13 @@ export const resetPersonalNotesSession = (): void => {
 	resetPersonalNotesKeyCache();
 };
 
-const refreshCount = async (identity: Identity, owner: string): Promise<void> => {
+const refreshCount = async ({
+	identity,
+	owner
+}: {
+	identity: Identity;
+	owner: string;
+}): Promise<void> => {
 	const count = await getPersonalNotesCount({ identity });
 	personalNotesStore.setCount({ ownerPrincipal: owner, count: Number(count) });
 };
@@ -122,7 +128,7 @@ export const savePersonalNote = async ({
 
 	const entry: PersonalNoteUi = { id: noteId, ...envelope };
 	personalNotesStore.upsert({ ownerPrincipal: owner, entry });
-	await refreshCount(identity, owner);
+	await refreshCount({ identity, owner });
 	return entry;
 };
 
@@ -138,5 +144,5 @@ export const deletePersonalNote = async ({
 
 	await deletePersonalNoteApi({ identity, note_id: id });
 	personalNotesStore.remove({ ownerPrincipal: owner, id });
-	await refreshCount(identity, owner);
+	await refreshCount({ identity, owner });
 };
