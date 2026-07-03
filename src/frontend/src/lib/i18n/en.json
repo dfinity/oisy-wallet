@@ -23,7 +23,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "Borrowings",
+			"tab_title": "Borrowing",
 			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
 		}
 	},
@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
+			"nfts": "NFTs",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
+			"trade": "Trade",
+			"borrow": "Borrow",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "More",
 			"airdrops": "Rewards",
 			"earning": "Earn",
 			"pay": "$oisy_short PAY",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
+			"nfts": "Open the NFTs view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
+			"trade": "Open the Trade view",
+			"borrow": "Open the Borrow view",
+			"earning": "Open the Earn view",
 			"airdrops": "Open the Rewards view",
 			"pay": "Open the $oisy_short PAY",
 			"wallet_connect": "Open the WalletConnect",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "$count NFT",
+			"count_other": "$count NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
 			"title_not_supported": "NFTs are not yet supported on the selected network",

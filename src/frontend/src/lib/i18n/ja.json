@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "資産",
+			"nfts": "",
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
+			"nfts": "",
 			"settings": "設定を表示",
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "エアドロップ報酬を表示",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "あなたのNFTがここに表示されます。",
 			"description_empty": "まだNFTを受け取っていないようです。",
 			"title_not_supported": "選択されたネットワークではNFTはまだサポートされていません。",

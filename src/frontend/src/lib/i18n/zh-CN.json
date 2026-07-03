@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "资产",
+			"nfts": "",
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "奖励",
 			"earning": "赚取",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "前往资产视图",
+			"nfts": "",
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "打开奖励视图",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "你的 NFT 将显示在这里",
 			"description_empty": "看起来你还没有收到 NFT",
 			"title_not_supported": "所选网络尚不支持 NFT",

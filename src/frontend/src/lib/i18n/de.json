@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
+			"nfts": "",
 			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Prämien",
 			"earning": "Verdienen",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
+			"nfts": "",
 			"settings": "Einstellungen öffnen",
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Belohnungsübersicht öffnen",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Deine NFTs erscheinen hier",
 			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
 			"title_not_supported": "",

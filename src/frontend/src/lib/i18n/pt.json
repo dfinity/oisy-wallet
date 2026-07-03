@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Ativos",
+			"nfts": "",
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Recompensas",
 			"earning": "Ganhar",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
+			"nfts": "",
 			"settings": "Abrir suas configurações",
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Abrir a visualização de airdrops",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Seus NFT aparecerão aqui",
 			"description_empty": "Parece que você ainda não recebeu NFT",
 			"title_not_supported": "",
