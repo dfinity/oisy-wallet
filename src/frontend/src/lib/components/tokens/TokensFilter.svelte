@@ -8,29 +8,28 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import {
 		isEarningPath,
-		isNftsPath,
 		isTokensPath,
+		isTradingPath,
 		isTransactionsPath
 	} from '$lib/utils/nav.utils';
 
 	interface Props {
 		overflowableContent?: Snippet;
-		hideFilter?: boolean;
 	}
 
-	let { overflowableContent, hideFilter = false }: Props = $props();
+	let { overflowableContent }: Props = $props();
 
 	let inputValue = $derived($tokenListStore.filter);
 
-	// Persist the filter when switching between asset tabs (Tokens, NFTs, Earning) or returning from transactions.
-	// Reset it when navigating from any other page (e.g. Settings, Activity).
+	// Persist the filter when switching between asset tabs (Tokens, Earning, Trading) or returning from transactions.
+	// Reset it when navigating from any other page (e.g. Settings, Activity, NFTs — a standalone destination now).
 	afterNavigate(({ from }) => {
 		const previousRoute = from?.route?.id ?? null;
 
 		if (
 			!isTokensPath(previousRoute) &&
-			!isNftsPath(previousRoute) &&
 			!isEarningPath(previousRoute) &&
+			!isTradingPath(previousRoute) &&
 			!isTransactionsPath(previousRoute)
 		) {
 			tokenListStore.set({ filter: '' });
@@ -43,18 +42,14 @@
 	});
 </script>
 
-{#if hideFilter}
-	{@render overflowableContent?.()}
-{:else}
-	<SlidingInput
-		ariaLabel={$i18n.tokens.alt.filter_button}
-		inputPlaceholder={$i18n.tokens.text.filter_placeholder}
-		{overflowableContent}
-		testIdPrefix={TOKEN_LIST_FILTER}
-		bind:inputValue
-	>
-		{#snippet icon()}
-			<IconSearch />
-		{/snippet}
-	</SlidingInput>
-{/if}
+<SlidingInput
+	ariaLabel={$i18n.tokens.alt.filter_button}
+	inputPlaceholder={$i18n.tokens.text.filter_placeholder}
+	{overflowableContent}
+	testIdPrefix={TOKEN_LIST_FILTER}
+	bind:inputValue
+>
+	{#snippet icon()}
+		<IconSearch />
+	{/snippet}
+</SlidingInput>

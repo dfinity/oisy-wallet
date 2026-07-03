@@ -1,4 +1,26 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
 	"borrowings": {
 		"text": {
 			"tab_title": "",
@@ -89,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",
+			"nfts": "",
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
 			"pay": "",
@@ -114,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
+			"nfts": "",
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Otevřít zobrazení odměn",
 			"pay": "",
 			"wallet_connect": "",
@@ -1440,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
 			"title_not_supported": "NFT zatím nejsou na vybrané síti podporovány",
@@ -2269,11 +2303,6 @@
 				"description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
 				"action": "Přejít na Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
-				"action": "Zkontrolovat stav"
-			},
 			"liquidium": {
 				"title": "",
 				"description": "",
@@ -2287,6 +2316,8 @@
 			"currentStaked": "Stakováno",
 			"currentEarning": "Aktuálně vyděláváno",
 			"earningPotential": "Výdělečný potenciál",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Podmínky"
 		},
 		"terms": {
