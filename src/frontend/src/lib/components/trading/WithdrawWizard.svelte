@@ -61,10 +61,14 @@
 
 		onNext();
 
+		// The entered amount is already in human token units — carry it as volume.
+		const volume = `${amount}`;
+
 		trackTrading({
 			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-			token: token.symbol
+			token: token.symbol,
+			volume
 		});
 
 		try {
@@ -81,7 +85,8 @@
 			trackTrading({
 				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				token: token.symbol
+				token: token.symbol,
+				volume
 			});
 
 			setTimeout(onClose, 750);
@@ -90,6 +95,7 @@
 				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				token: token.symbol,
+				volume,
 				error: replaceIcErrorFields(err)
 			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
