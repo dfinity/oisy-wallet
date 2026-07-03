@@ -102,9 +102,15 @@ interface I18nProgress {
 interface I18nNavigation {
 	text: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		section_portfolio: string;
+		section_finance: string;
+		section_more: string;
 		airdrops: string;
 		earning: string;
 		pay: string;
@@ -127,9 +133,13 @@ interface I18nNavigation {
 	};
 	alt: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		earning: string;
 		airdrops: string;
 		pay: string;
 		wallet_connect: string;
@@ -1149,6 +1159,8 @@ interface I18nToken_tag {
 interface I18nNfts {
 	text: {
 		title: string;
+		count_one: string;
+		count_other: string;
 		title_empty: string;
 		description_empty: string;
 		title_not_supported: string;
@@ -1837,7 +1849,6 @@ interface I18nEarning {
 	};
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
-		sprinkles: { title: string; description: string; action: string };
 		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {

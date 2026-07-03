@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
 			"title_not_supported": "",
@@ -2287,11 +2299,6 @@
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
-			},
-			"sprinkles": {
 				"title": "",
 				"description": "",
 				"action": ""

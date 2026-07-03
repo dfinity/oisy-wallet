@@ -111,9 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "자산",
+			"nfts": "",
 			"settings": "설정",
 			"dapp_explorer": "탐색",
 			"activity": "활동",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "리워드",
 			"earning": "수익",
 			"pay": "",
@@ -136,9 +142,13 @@
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
+			"nfts": "",
 			"settings": "설정 열기",
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "리워드 보기 열기",
 			"pay": "",
 			"wallet_connect": "",
@@ -1462,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT가 여기에 표시됩니다",
 			"description_empty": "아직 받은 NFT가 없는 것 같습니다",
 			"title_not_supported": "선택한 네트워크에서는 아직 NFT를 지원하지 않습니다",
@@ -2290,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "원클릭 Autopilot vault로 최대 수익 효율을 실현하세요.",
 				"action": "Autopilot으로 이동"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISY를 사용하고 수익을 창출하세요! 에피소드 6 공개 중 🎉",
-				"action": "상태 확인"
 			},
 			"liquidium": {
 				"title": "",

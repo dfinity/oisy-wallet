@@ -8,7 +8,6 @@ export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
-export const NAVIGATION_MENU_NOTES_BUTTON = 'navigation-menu-notes-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
@@ -110,15 +109,27 @@ export const SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE = 'settings-networks-modal-t
 export const SETTINGS_NETWORKS_MODAL_SAVE_BUTTON = 'settings-networks-modal-save-button';
 
 export const NAVIGATION_ITEM_TOKENS = 'navigation-item-tokens';
+export const NAVIGATION_ITEM_NFTS = 'navigation-item-nfts';
 export const NAVIGATION_ITEM_ACTIVITY = 'navigation-item-activity';
+export const NAVIGATION_ITEM_TRADE = 'navigation-item-trade';
+export const NAVIGATION_ITEM_BORROW = 'navigation-item-borrow';
+export const NAVIGATION_ITEM_EARN = 'navigation-item-earn';
 export const NAVIGATION_ITEM_EXPLORER = 'navigation-item-explore';
+export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
 
+export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
+export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
+export const NAVIGATION_GROUP_MORE = 'navigation-group-more';
+
 export const SIDEBAR_NAVIGATION_MENU = 'sidebar-navigation-menu';
 
 export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
+
+export const NFT_HERO_COUNT = 'nft-hero-count';
+export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
 
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';
