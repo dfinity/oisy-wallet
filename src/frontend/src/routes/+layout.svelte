@@ -22,11 +22,13 @@
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
+	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { personalNotesStore } from '$lib/stores/personal-notes.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
@@ -94,6 +96,19 @@
 	$effect(() => {
 		[worker, $authStore, $isLocked];
 		worker?.syncAuthIdle({ auth: $authStore, locked: $isLocked });
+	});
+
+	$effect(() => {
+		const currentPrincipal = $authStore.identity?.getPrincipal().toText();
+		const notesOwnerPrincipal = $personalNotesStore.ownerPrincipal;
+
+		if (nonNullish(notesOwnerPrincipal) && notesOwnerPrincipal !== currentPrincipal) {
+			resetPersonalNotesSession();
+
+			if ($modalStore?.type === 'notes') {
+				modalStore.close();
+			}
+		}
 	});
 
 	/**
