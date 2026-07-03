@@ -54,12 +54,12 @@
 	} from '$lib/types/navigation';
 	import {
 		isRouteActivity,
+		isRouteBorrow,
 		isRouteBorrowings,
 		isRouteDappExplorer,
 		isRouteEarn,
 		isRouteEarning,
 		isRouteNfts,
-		isRouteProvidersLiquidium,
 		isRouteRewards,
 		isRouteSettings,
 		isRouteTokens,
@@ -179,7 +179,7 @@
 			},
 			// Trade and Borrow are NEW Finance destinations. Trade is gated behind
 			// TRADING_ENABLED like the Assets Trading tab; Borrow routes to the
-			// Liquidium provider page (no dedicated /borrow/ route exists yet).
+			// dedicated /borrow/ page.
 			...(TRADING_ENABLED
 				? {
 						trade: {
@@ -199,8 +199,8 @@
 				ariaLabel: $i18n.navigation.alt.borrow,
 				testId: prefixedTestId(NAVIGATION_ITEM_BORROW),
 				icon: IconCoins,
-				href: url(AppPath.ProvidersLiquidium),
-				selected: isRouteProvidersLiquidium(page),
+				href: url(AppPath.Borrow),
+				selected: isRouteBorrow(page),
 				tag: $i18n.core.text.new,
 				tagVariant: 'emphasis'
 			},

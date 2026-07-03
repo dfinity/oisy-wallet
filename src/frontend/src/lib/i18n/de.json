@@ -111,7 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Vermögen",
-			"nfts": "",
+			"nfts": "Sammlerstücke",
 			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
@@ -142,7 +142,7 @@
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
-			"nfts": "",
+			"nfts": "Sammlerstücke-Ansicht öffnen",
 			"settings": "Einstellungen öffnen",
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
