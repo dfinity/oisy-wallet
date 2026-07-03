@@ -1,5 +1,4 @@
 import * as navModule from '$app/navigation';
-import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import EarningOpportunitiesPage from '$lib/components/earning/Earning.svelte';
 import * as earningDerived from '$lib/derived/earning.derived';
@@ -38,8 +37,6 @@ const mockRewardEligibilityContext = {
 describe('EarningOpportunitiesPage', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-
-		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
 
 		vi.spyOn(earningRegistry, 'earningProviders', 'get').mockReturnValue([mockHarvestProvider]);
 
