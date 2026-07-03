@@ -5,7 +5,7 @@ import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
-import type { WizardStep } from '@dfinity/gix-components';
+import type { WizardStep } from '$lib/types/wizard';
 import { render } from '@testing-library/svelte';
 
 // No matching enabled native token in the test, so the EthFeeContext (and its fee

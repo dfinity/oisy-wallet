@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -22,6 +21,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { TRACK_NOTE_SHARE_OPEN } from '$lib/constants/analytics.constants';

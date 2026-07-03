@@ -111,7 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Ativos",
-			"nfts": "",
+			"nfts": "Colecionáveis",
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
@@ -142,7 +142,7 @@
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
-			"nfts": "",
+			"nfts": "Abrir a visualização de colecionáveis",
 			"settings": "Abrir suas configurações",
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
