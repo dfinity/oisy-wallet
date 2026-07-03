@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import LiquidiumBorrowForm from '$lib/components/liquidium/borrow/LiquidiumBorrowForm.svelte';
 	import LiquidiumBorrowProgress from '$lib/components/liquidium/borrow/LiquidiumBorrowProgress.svelte';
 	import LiquidiumBorrowReview from '$lib/components/liquidium/borrow/LiquidiumBorrowReview.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumBorrowWizardSteps } from '$lib/config/lend-borrow.config';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
@@ -19,6 +19,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
