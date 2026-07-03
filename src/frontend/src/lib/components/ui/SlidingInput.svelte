@@ -85,7 +85,16 @@
 	{/if}
 
 	{#if nonNullish(overflowableContent)}
-		<div class="flex pr-12" bind:clientWidth={overflowableContentWidth}>
+		<!-- min-w-0 lets this flex item shrink below its content's natural width
+		     (a flex item's automatic min-width is otherwise content-based) so an
+		     overflowing child (e.g. a 4+ tab row) scrolls internally on narrow
+		     viewports instead of pushing the page wider than the device — which
+		     on Android Chrome forces a zoom-out that misplaces the fixed bottom
+		     nav bar under the browser's own UI. -->
+		<div
+			class="no-scrollbar flex min-w-0 overflow-x-auto pr-12"
+			bind:clientWidth={overflowableContentWidth}
+		>
 			{@render overflowableContent()}
 		</div>
 	{/if}
