@@ -1,7 +1,12 @@
 import NotesModal from '$lib/components/notes/NotesModal.svelte';
+import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
+	NOTES_ADD_BUTTON,
+	NOTES_DELETE_CONFIRM_BUTTON,
+	NOTES_INPUT,
 	NOTES_LIST_ITEM,
 	NOTES_NO_RESULTS,
+	NOTES_SAVE_BUTTON,
 	NOTES_SEARCH_INPUT,
 	NOTES_VIEW,
 	NOTES_VIEW_DELETE_BUTTON,
@@ -12,7 +17,9 @@ import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 const note = (id: string): PersonalNoteUi => ({
 	id,
@@ -31,9 +38,10 @@ describe('NotesModal', () => {
 	it('renders the empty state when there are no notes', () => {
 		personalNotesStore.setLoaded({ entries: [], count: 0 });
 
-		const { getByText } = render(NotesModal);
+		const { getByText, getByTestId } = render(NotesModal);
 
 		expect(getByText(en.notes.text.empty_title)).toBeInTheDocument();
+		expect(getByTestId(NOTES_ADD_BUTTON)).toBeInTheDocument();
 	});
 
 	it('renders the notes list', () => {
@@ -42,6 +50,34 @@ describe('NotesModal', () => {
 		const { getAllByTestId } = render(NotesModal);
 
 		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(2);
+	});
+
+	it('disables "Add note" at the per-user cap', () => {
+		personalNotesStore.setLoaded({ entries: [note('a')], count: MAX_PERSONAL_NOTES_PER_USER });
+
+		const { getByTestId } = render(NotesModal);
+
+		expect(getByTestId(NOTES_ADD_BUTTON)).toBeDisabled();
+	});
+
+	it('saves a new note through the service', async () => {
+		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('new'));
+		personalNotesStore.setLoaded({ entries: [], count: 0 });
+
+		const { getByTestId } = render(NotesModal);
+
+		await fireEvent.click(getByTestId(NOTES_ADD_BUTTON));
+		await fireEvent.input(getByTestId(NOTES_INPUT), { target: { value: 'fresh note' } });
+		await tick();
+		await fireEvent.click(getByTestId(NOTES_SAVE_BUTTON));
+
+		await waitFor(() =>
+			expect(saveSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				id: undefined,
+				note: 'fresh note'
+			})
+		);
 	});
 
 	it('filters the list with the search field', async () => {
@@ -61,17 +97,38 @@ describe('NotesModal', () => {
 		expect(getByTestId(NOTES_NO_RESULTS)).toBeInTheDocument();
 	});
 
-	it('opens the read-only view on row click without edit/delete actions', async () => {
+	it('opens the read-only view on row click and reaches the editor via Edit', async () => {
 		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
 
-		const { getByTestId, getByText, queryByTestId } = render(NotesModal);
+		const { getByTestId, getByText } = render(NotesModal);
 
 		await fireEvent.click(getByText('note a'));
 
 		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
-		// The read path has no edit/delete yet; those actions arrive with the editor.
-		expect(queryByTestId(NOTES_VIEW_EDIT_BUTTON)).toBeNull();
-		expect(queryByTestId(NOTES_VIEW_DELETE_BUTTON)).toBeNull();
+
+		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));
+
+		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
+	});
+
+	it('deletes a note only after the confirmation step', async () => {
+		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
+		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
+
+		const { getByTestId, getByText } = render(NotesModal);
+
+		// Open the note (row → view), where Delete lives, then request deletion.
+		await fireEvent.click(getByText('note a'));
+		await fireEvent.click(getByTestId(NOTES_VIEW_DELETE_BUTTON));
+
+		// The confirmation is shown; nothing is deleted yet.
+		expect(deleteSpy).not.toHaveBeenCalled();
+
+		await fireEvent.click(getByTestId(NOTES_DELETE_CONFIRM_BUTTON));
+
+		await waitFor(() =>
+			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, id: 'a' })
+		);
 	});
 
 	it('returns to the list when the viewed note disappears', async () => {

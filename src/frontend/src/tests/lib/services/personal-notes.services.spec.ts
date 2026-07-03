@@ -3,7 +3,6 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	deletePersonalNote,
 	loadPersonalNotes,
-	restorePersonalNote,
 	savePersonalNote
 } from '$lib/services/personal-notes.services';
 import * as vetkeys from '$lib/services/personal-notes.vetkeys';
@@ -112,37 +111,6 @@ describe('personal-notes.services', () => {
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, note_id: 'note-1' });
 			expect(get(personalNotesList)).toEqual([]);
 			expect(get(personalNotesStore).count).toBe(0);
-		});
-	});
-
-	describe('restorePersonalNote', () => {
-		it('re-saves verbatim (same id and timestamps) and refreshes the count', async () => {
-			const note = {
-				id: 'note-1',
-				note: 'restore me',
-				created_at_ns: '100',
-				updated_at_ns: '150'
-			};
-			const setSpy = vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
-			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
-			const encryptSpy = vi
-				.spyOn(vetkeys, 'encryptPersonalNote')
-				.mockResolvedValue(new Uint8Array([9]));
-
-			await restorePersonalNote({ identity: mockIdentity, note });
-
-			expect(encryptSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				noteId: 'note-1',
-				envelope: { note: 'restore me', created_at_ns: '100', updated_at_ns: '150' }
-			});
-			expect(setSpy).toHaveBeenCalledWith({
-				identity: mockIdentity,
-				note_id: 'note-1',
-				encrypted_note: new Uint8Array([9])
-			});
-			expect(get(personalNotesList)).toEqual([note]);
-			expect(get(personalNotesStore).count).toBe(1);
 		});
 	});
 });
