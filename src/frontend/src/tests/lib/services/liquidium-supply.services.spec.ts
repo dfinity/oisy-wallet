@@ -37,7 +37,17 @@ describe('liquidium-supply.services', () => {
 		address: 'bc1qexample'
 	};
 
-	const buildFlow = (target: SupplyTarget): SupplyFlow => ({ type: 'transfer', target, submit });
+	const buildFlow = (target: SupplyTarget): SupplyFlow => ({
+		type: 'transfer',
+		target,
+		status: {
+			operation: 'deposit',
+			state: 'confirming',
+			confirmations: null,
+			requiredConfirmations: null
+		},
+		submit
+	});
 
 	const run = () =>
 		executeLiquidiumSupply({

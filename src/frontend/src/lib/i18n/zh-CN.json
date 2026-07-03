@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "资产",
-			"nfts": "",
+			"nfts": "收藏品",
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "奖励",
 			"earning": "赚取",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "前往资产视图",
-			"nfts": "",
+			"nfts": "打开收藏品视图",
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "打开奖励视图",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "一键Autopilot金库，实现最大收益效率。",
 				"action": "前往Autopilot"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "使用OISY并赚取！第6集已上线 🎉",
-				"action": "查看状态"
 			},
 			"liquidium": {
 				"title": "",

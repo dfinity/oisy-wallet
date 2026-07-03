@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -10,6 +9,7 @@
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import SystemThemeListener from '$lib/components/ui/SystemThemeListener.svelte';
+	import Toasts from '$lib/components/ui/Toasts.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,

@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
-			"nfts": "",
+			"nfts": "المقتنيات",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
-			"nfts": "",
+			"nfts": "فتح عرض المقتنيات",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -2291,11 +2299,6 @@
 		},
 		"cards": {
 			"harvest_autopilot": {
-				"title": "",
-				"description": "",
-				"action": ""
-			},
-			"sprinkles": {
 				"title": "",
 				"description": "",
 				"action": ""

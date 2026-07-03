@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",
-			"nfts": "",
+			"nfts": "Sběratelské předměty",
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
-			"nfts": "",
+			"nfts": "Otevřít zobrazení sběratelských předmětů",
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Otevřít zobrazení odměn",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
 				"action": "Přejít na Autopilot"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
-				"action": "Zkontrolovat stav"
 			},
 			"liquidium": {
 				"title": "",

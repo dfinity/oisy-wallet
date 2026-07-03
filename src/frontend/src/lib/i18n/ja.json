@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "資産",
-			"nfts": "",
+			"nfts": "コレクティブル",
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
-			"nfts": "",
+			"nfts": "コレクティブルビューを開く",
 			"settings": "設定を表示",
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "エアドロップ報酬を表示",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "ワンクリックのAutopilot vaultで最大限のイールド効率を実現。",
 				"action": "Autopilotへ移動"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISYを使って稼ごう！エピソード6が公開中 🎉",
-				"action": "ステータスを確認"
 			},
 			"liquidium": {
 				"title": "",

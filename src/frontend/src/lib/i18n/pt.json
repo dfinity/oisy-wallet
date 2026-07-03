@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Ativos",
-			"nfts": "",
+			"nfts": "Colecionáveis",
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Recompensas",
 			"earning": "Ganhar",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
-			"nfts": "",
+			"nfts": "Abrir a visualização de colecionáveis",
 			"settings": "Abrir suas configurações",
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Abrir a visualização de airdrops",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "Máxima eficiência de rendimento com vaults no Autopilot com um único clique.",
 				"action": "Ir para o Autopilot"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Use o OISY e GANHE! O episódio 6 está no ar 🎉",
-				"action": "Verificar status"
 			},
 			"liquidium": {
 				"title": "",

@@ -106,6 +106,11 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		section_portfolio: string;
+		section_finance: string;
+		section_more: string;
 		airdrops: string;
 		earning: string;
 		pay: string;
@@ -132,6 +137,9 @@ interface I18nNavigation {
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		earning: string;
 		airdrops: string;
 		pay: string;
 		wallet_connect: string;
@@ -1841,7 +1849,6 @@ interface I18nEarning {
 	};
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
-		sprinkles: { title: string; description: string; action: string };
 		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {

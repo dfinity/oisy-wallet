@@ -6,7 +6,7 @@ import {
 } from '$lib/enums/wizard-steps';
 import { LendBorrowProvider, type LendBorrowProviderConfig } from '$lib/types/lend-borrow';
 import type { WizardStepsParams } from '$lib/types/steps';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { WizardSteps } from '$lib/types/wizard';
 
 // Lend & borrow providers (mirrors `stakeProvidersConfig`): source of truth for
 // each provider's name/logo/url/description. Liquidium only for now.

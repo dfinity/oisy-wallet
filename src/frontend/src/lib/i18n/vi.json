@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
-			"nfts": "",
+			"nfts": "Vật phẩm sưu tầm",
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
-			"nfts": "",
+			"nfts": "Mở chế độ xem vật phẩm sưu tầm",
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
 				"action": "Đi đến Autopilot"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Dùng OISY và KIẾM TIỀN! Tập 6 đã ra mắt 🎉",
-				"action": "Kiểm tra trạng thái"
 			},
 			"liquidium": {
 				"title": "",

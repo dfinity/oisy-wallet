@@ -111,10 +111,15 @@
 	"navigation": {
 		"text": {
 			"tokens": "एसेट्स",
-			"nfts": "",
+			"nfts": "संग्रहणीय वस्तुएं",
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
 			"pay": "",
@@ -137,10 +142,13 @@
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
-			"nfts": "",
+			"nfts": "संग्रहणीय वस्तुओं का दृश्य खोलें",
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "पुरस्कार दृश्य खोलें",
 			"pay": "",
 			"wallet_connect": "",
@@ -2294,11 +2302,6 @@
 				"title": "Harvest – Autopilot",
 				"description": "एक क्लिक के Autopilot vaults के साथ अधिकतम यील्ड दक्षता।",
 				"action": "Autopilot पर जाएं"
-			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "OISY उपयोग करें और कमाएं! एपिसोड 6 लाइव है 🎉",
-				"action": "स्थिति जांचें"
 			},
 			"liquidium": {
 				"title": "",
