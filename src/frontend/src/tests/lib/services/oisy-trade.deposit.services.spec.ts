@@ -2,9 +2,14 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import { deposit as depositApi } from '$lib/api/oisy-trade.api';
 import * as appConstants from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_RESULT_STATUSES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
+} from '$lib/enums/plausible';
 import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 import { depositOisyTrade } from '$lib/services/oisy-trade.deposit.services';
 import { loadOisyTrade } from '$lib/services/oisy-trade.services';
+import { trackTrading } from '$lib/services/trading-analytics.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -15,6 +20,7 @@ import { Principal } from '@icp-sdk/core/principal';
 vi.mock('$icp/api/icrc-ledger.api');
 vi.mock('$lib/api/oisy-trade.api');
 vi.mock('$lib/services/oisy-trade.services');
+vi.mock('$lib/services/trading-analytics.services');
 vi.mock('$lib/utils/wallet.utils');
 vi.mock('$lib/stores/toasts.store');
 
@@ -78,6 +84,26 @@ describe('oisy-trade.deposit.services', () => {
 			]);
 		});
 
+		it('tracks executing and success events with the token volume on success', async () => {
+			const analyticsAmount = 123_456_789n;
+
+			await depositOisyTrade({ identity: mockIdentity, token, amount: analyticsAmount });
+
+			expect(trackTrading).toHaveBeenNthCalledWith(1, {
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+				token: token.symbol,
+				volume: '1.23456789'
+			});
+			expect(trackTrading).toHaveBeenNthCalledWith(2, {
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				token: token.symbol,
+				volume: '1.23456789'
+			});
+			expect(trackTrading).toHaveBeenCalledTimes(2);
+		});
+
 		it('sets the approve expiry to now plus five minutes', async () => {
 			const nowNs = 1_000_000n;
 			vi.useFakeTimers();
@@ -126,6 +152,28 @@ describe('oisy-trade.deposit.services', () => {
 			expect(depositApi).not.toHaveBeenCalled();
 			expect(loadOisyTrade).not.toHaveBeenCalled();
 			expect(toastsError).toHaveBeenCalledOnce();
+		});
+
+		it('tracks executing and sanitized error events when approve fails', async () => {
+			vi.mocked(approve).mockRejectedValue(new Error('approve failed, Request ID: abc123'));
+
+			const result = await depositOisyTrade({ identity: mockIdentity, token, amount });
+
+			expect(result).toBeFalsy();
+			expect(trackTrading).toHaveBeenNthCalledWith(1, {
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+				token: token.symbol,
+				volume: '0.00001'
+			});
+			expect(trackTrading).toHaveBeenNthCalledWith(2, {
+				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				token: token.symbol,
+				volume: '0.00001',
+				error: 'approve failed'
+			});
+			expect(trackTrading).toHaveBeenCalledTimes(2);
 		});
 
 		it('returns false and does not reload when the deposit fails', async () => {
