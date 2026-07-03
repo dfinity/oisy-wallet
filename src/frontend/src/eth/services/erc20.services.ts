@@ -57,14 +57,12 @@ export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 			Partial<Pick<Erc20Token, 'id'>>;
 
 		const loadKnownContracts = (): Promise<ContractData>[] =>
-			ERC20_CONTRACTS.map(
-				async ({ network, ...contract }): Promise<ContractData> => ({
-					...contract,
-					network,
-					category: 'default',
-					...(await infuraErc20Providers(network.id).metadata(contract))
-				})
-			);
+			ERC20_CONTRACTS.map(async ({ network, ...contract }): Promise<ContractData> => ({
+				...contract,
+				network,
+				category: 'default',
+				...(await infuraErc20Providers(network.id).metadata(contract))
+			}));
 
 		const contracts = await Promise.all(loadKnownContracts());
 		erc20DefaultTokensStore.set([...ALL_DEFAULT_ERC20_TOKENS, ...contracts.map(mapErc20Token)]);
