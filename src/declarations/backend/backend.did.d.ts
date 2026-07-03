@@ -871,8 +871,7 @@ export type GetContactsResult =
 			Err: ContactError;
 	  };
 export type GetPersonalNoteShareResult =
-	| { Ok: PersonalNoteShareContent }
-	| { Err: PersonalNoteShareError };
+	{ Ok: PersonalNoteShareContent } | { Err: PersonalNoteShareError };
 export type GetPersonalNoteSharesCountResult = { Ok: bigint } | { Err: PersonalNoteShareError };
 export type GetPersonalNotesCountResult =
 	| {
