@@ -77,6 +77,16 @@ describe('TradingOrderRow', () => {
 		expect(container).toHaveTextContent('Open');
 	});
 
+	it('renders the provider tag inline within the order intent text block', () => {
+		const { getByText } = render(TradingOrderRow, { props: { order } });
+
+		// The side label, order text and provider tag share one text block so the
+		// tag wraps with the text instead of dropping to its own flex line.
+		const textBlock = getByText('Sell').parentElement;
+
+		expect(textBlock).toHaveTextContent('OISY TRADE');
+	});
+
 	it('opens the order-detail modal with the order on click', async () => {
 		const openSpy = vi.spyOn(modalStore, 'openOisyTradeOrderDetail');
 
