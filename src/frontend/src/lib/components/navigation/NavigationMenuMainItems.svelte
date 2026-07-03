@@ -293,10 +293,10 @@
 	{@const descriptor = descriptors[id]}
 	{#if nonNullish(descriptor)}
 		{@const Icon = descriptor.icon}
-		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
+		{@const cardClass = `relative flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center no-underline ${descriptor.selected ? 'bg-brand-subtle-20 text-brand-primary-alt' : 'bg-secondary text-primary'}`}
 		{#snippet cardInner()}
 			<Icon />
-			<span class="text-xs font-medium">{descriptor.label}</span>
+			<span class="text-sm font-semibold">{descriptor.label}</span>
 			{#if nonNullish(descriptor.tag)}
 				<span class="absolute top-0.5 right-0.5 origin-top-right scale-75">
 					<Tag size="sm" variant={descriptor.tagVariant}>{descriptor.tag}</Tag>
