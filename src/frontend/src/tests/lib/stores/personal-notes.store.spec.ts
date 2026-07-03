@@ -6,6 +6,7 @@ import {
 	personalNotesStore
 } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
+import { mockPrincipalText, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
 
 const note = ({ id, updated }: { id: string; updated: string }): PersonalNoteUi => ({
@@ -27,7 +28,10 @@ describe('personal-notes.store', () => {
 	});
 
 	it('setLoaded populates a newest-first list and marks loaded', () => {
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+
 		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
 			entries: [
 				note({ id: 'a', updated: '100' }),
 				note({ id: 'c', updated: '300' }),
@@ -41,33 +45,85 @@ describe('personal-notes.store', () => {
 	});
 
 	it('upsert adds and replaces by id', () => {
-		personalNotesStore.setLoaded({ entries: [note({ id: 'a', updated: '100' })], count: 1 });
-		personalNotesStore.upsert(note({ id: 'b', updated: '200' }));
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
+			entries: [note({ id: 'a', updated: '100' })],
+			count: 1
+		});
+		personalNotesStore.upsert({
+			ownerPrincipal: mockPrincipalText,
+			entry: note({ id: 'b', updated: '200' })
+		});
 
 		expect(get(personalNotesList)?.map(({ id }) => id)).toEqual(['b', 'a']);
 
-		personalNotesStore.upsert(note({ id: 'a', updated: '300' }));
+		personalNotesStore.upsert({
+			ownerPrincipal: mockPrincipalText,
+			entry: note({ id: 'a', updated: '300' })
+		});
 
 		expect(get(personalNotesList)?.map(({ id }) => id)).toEqual(['a', 'b']);
 	});
 
 	it('remove deletes by id', () => {
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
 			entries: [note({ id: 'a', updated: '100' }), note({ id: 'b', updated: '200' })],
 			count: 2
 		});
-		personalNotesStore.remove('a');
+		personalNotesStore.remove({ ownerPrincipal: mockPrincipalText, id: 'a' });
 
 		expect(get(personalNotesList)?.map(({ id }) => id)).toEqual(['b']);
 	});
 
 	it('atPersonalNotesCapacity reflects the count vs the cap', () => {
-		personalNotesStore.setLoaded({ entries: [], count: MAX_PERSONAL_NOTES_PER_USER - 1 });
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
+			entries: [],
+			count: MAX_PERSONAL_NOTES_PER_USER - 1
+		});
 
 		expect(get(atPersonalNotesCapacity)).toBeFalsy();
 
-		personalNotesStore.setCount(MAX_PERSONAL_NOTES_PER_USER);
+		personalNotesStore.setCount({
+			ownerPrincipal: mockPrincipalText,
+			count: MAX_PERSONAL_NOTES_PER_USER
+		});
 
 		expect(get(atPersonalNotesCapacity)).toBeTruthy();
+	});
+
+	it('ignores stale writes after the owner changes', () => {
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
+			entries: [note({ id: 'a', updated: '100' })],
+			count: 1
+		});
+
+		personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText2 });
+		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
+			entries: [note({ id: 'old', updated: '300' })],
+			count: 1
+		});
+		personalNotesStore.upsert({
+			ownerPrincipal: mockPrincipalText,
+			entry: note({ id: 'old', updated: '300' })
+		});
+		personalNotesStore.setCount({
+			ownerPrincipal: mockPrincipalText,
+			count: MAX_PERSONAL_NOTES_PER_USER
+		});
+
+		expect(get(personalNotesStore)).toEqual({
+			ownerPrincipal: mockPrincipalText2,
+			entries: undefined,
+			count: 0,
+			loaded: false
+		});
 	});
 });

@@ -17,7 +17,7 @@ import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -28,6 +28,11 @@ const note = (id: string): PersonalNoteUi => ({
 	updated_at_ns: '100'
 });
 
+const setLoadedNotes = ({ entries, count }: { entries: PersonalNoteUi[]; count: number }) => {
+	personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+	personalNotesStore.setLoaded({ ownerPrincipal: mockPrincipalText, entries, count });
+};
+
 describe('NotesModal', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -36,7 +41,7 @@ describe('NotesModal', () => {
 	});
 
 	it('renders the empty state when there are no notes', () => {
-		personalNotesStore.setLoaded({ entries: [], count: 0 });
+		setLoadedNotes({ entries: [], count: 0 });
 
 		const { getByText, getByTestId } = render(NotesModal);
 
@@ -45,7 +50,7 @@ describe('NotesModal', () => {
 	});
 
 	it('renders the notes list', () => {
-		personalNotesStore.setLoaded({ entries: [note('a'), note('b')], count: 2 });
+		setLoadedNotes({ entries: [note('a'), note('b')], count: 2 });
 
 		const { getAllByTestId } = render(NotesModal);
 
@@ -53,7 +58,7 @@ describe('NotesModal', () => {
 	});
 
 	it('disables "Add note" at the per-user cap', () => {
-		personalNotesStore.setLoaded({ entries: [note('a')], count: MAX_PERSONAL_NOTES_PER_USER });
+		setLoadedNotes({ entries: [note('a')], count: MAX_PERSONAL_NOTES_PER_USER });
 
 		const { getByTestId } = render(NotesModal);
 
@@ -62,7 +67,7 @@ describe('NotesModal', () => {
 
 	it('saves a new note through the service', async () => {
 		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('new'));
-		personalNotesStore.setLoaded({ entries: [], count: 0 });
+		setLoadedNotes({ entries: [], count: 0 });
 
 		const { getByTestId } = render(NotesModal);
 
@@ -81,7 +86,7 @@ describe('NotesModal', () => {
 	});
 
 	it('filters the list with the search field', async () => {
-		personalNotesStore.setLoaded({ entries: [note('apple'), note('banana')], count: 2 });
+		setLoadedNotes({ entries: [note('apple'), note('banana')], count: 2 });
 
 		const { getByTestId, getAllByTestId, queryByTestId } = render(NotesModal);
 
@@ -98,7 +103,7 @@ describe('NotesModal', () => {
 	});
 
 	it('opens the read-only view on row click and reaches the editor via Edit', async () => {
-		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
+		setLoadedNotes({ entries: [note('a')], count: 1 });
 
 		const { getByTestId, getByText } = render(NotesModal);
 
@@ -113,7 +118,7 @@ describe('NotesModal', () => {
 
 	it('deletes a note only after the confirmation step', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
-		personalNotesStore.setLoaded({ entries: [note('a')], count: 1 });
+		setLoadedNotes({ entries: [note('a')], count: 1 });
 
 		const { getByTestId, getByText } = render(NotesModal);
 
@@ -132,7 +137,7 @@ describe('NotesModal', () => {
 	});
 
 	it('returns to the list when the viewed note disappears', async () => {
-		personalNotesStore.setLoaded({ entries: [note('a'), note('b')], count: 2 });
+		setLoadedNotes({ entries: [note('a'), note('b')], count: 2 });
 
 		const { getByTestId, getByText, queryByTestId } = render(NotesModal);
 
@@ -141,7 +146,11 @@ describe('NotesModal', () => {
 		expect(getByTestId(NOTES_VIEW)).toBeInTheDocument();
 
 		// The viewed note vanishes (e.g. decryption failure or removal on reload).
-		personalNotesStore.setLoaded({ entries: [note('b')], count: 1 });
+		personalNotesStore.setLoaded({
+			ownerPrincipal: mockPrincipalText,
+			entries: [note('b')],
+			count: 1
+		});
 
 		await waitFor(() => {
 			expect(queryByTestId(NOTES_VIEW)).toBeNull();
