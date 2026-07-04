@@ -2596,7 +2596,8 @@
 			"placeholder": "",
 			"search_placeholder": "",
 			"no_results": "",
-			"privacy_info": "",
+			"encrypted_lead": "",
+			"encrypted_info": "",
 			"created": "",
 			"updated": "",
 			"created_updated": "",
@@ -2637,6 +2638,22 @@
 			},
 			"error": {
 				"create": ""
+			},
+			"recipient": {
+				"locked_title": "",
+				"reveal": "",
+				"revealed_title": "",
+				"single_use_caveat": "",
+				"copy_note": "",
+				"note_copied": "",
+				"outro_eyebrow": "",
+				"outro_title": "",
+				"outro_subtitle": "",
+				"outro_feature_multichain": "",
+				"outro_feature_onchain": "",
+				"outro_feature_encrypted": "",
+				"discover": "",
+				"unavailable_title": ""
 			}
 		}
 	}
