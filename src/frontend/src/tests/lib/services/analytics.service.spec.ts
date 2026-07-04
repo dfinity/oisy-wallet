@@ -59,7 +59,34 @@ describe('plausible analytics service', () => {
 		await initPlausibleAnalytics();
 
 		expect(initMock).toHaveBeenCalledWith({
-			domain: 'test.com'
+			domain: 'test.com',
+			transformRequest: expect.any(Function)
+		});
+	});
+
+	it('should strip URL fragments before sending Plausible payloads', async () => {
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		const [{ transformRequest }] = initMock.mock.calls[0];
+
+		expect(
+			transformRequest({
+				n: 'pageview',
+				u: 'https://oisy.com/notes/share/token?k=v#k=SECRET',
+				d: 'oisy.com',
+				r: 'https://example.com/from',
+				p: { key: 'value' },
+				i: false
+			})
+		).toEqual({
+			n: 'pageview',
+			u: 'https://oisy.com/notes/share/token?k=v',
+			d: 'oisy.com',
+			r: 'https://example.com/from',
+			p: { key: 'value' },
+			i: false
 		});
 	});
 

@@ -21,9 +21,27 @@ import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { init, track } from '@plausible-analytics/tracker';
+import type { init, PlausibleRequestPayload, track } from '@plausible-analytics/tracker';
 
 let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
+
+const stripUrlFragment = (url: string): string => {
+	try {
+		const parsed = new URL(url);
+		parsed.hash = '';
+		return parsed.toString();
+	} catch (_: unknown) {
+		return url.split('#')[0];
+	}
+};
+
+const sanitizePlausiblePayloadUrl = (
+	payload: PlausibleRequestPayload
+): PlausibleRequestPayload => {
+	const sanitizedUrl = stripUrlFragment(payload.u);
+
+	return sanitizedUrl === payload.u ? payload : { ...payload, u: sanitizedUrl };
+};
 
 export const initPlausibleAnalytics = async () => {
 	if (
@@ -44,7 +62,8 @@ export const initPlausibleAnalytics = async () => {
 		const tracker = await loadPlausibleTracker();
 
 		tracker.init({
-			domain: PLAUSIBLE_DOMAIN
+			domain: PLAUSIBLE_DOMAIN,
+			transformRequest: sanitizePlausiblePayloadUrl
 		});
 
 		plausibleTracker = tracker;
