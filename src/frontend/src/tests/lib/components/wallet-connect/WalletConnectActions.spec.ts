@@ -9,9 +9,9 @@ describe('WalletConnectActions', () => {
 	};
 
 	it('should enable the approve button by default', () => {
-		const { getByText } = render(WalletConnectActions, { props });
+		const { getByRole } = render(WalletConnectActions, { props });
 
-		expect(getByText(en.core.text.approve).closest('button')).not.toBeDisabled();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeEnabled();
 	});
 
 	it('should disable the approve button when approveDisabled is true', () => {
