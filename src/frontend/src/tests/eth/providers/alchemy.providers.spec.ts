@@ -51,15 +51,17 @@ vi.mock('$env/rest/alchemy.env', () => ({
 
 /* eslint-disable local-rules/prefer-object-params -- mirrors the native (type, listener) WebSocket signature */
 class MockWebSocket {
+	static readonly CONNECTING = 0;
 	static readonly OPEN = 1;
 	static readonly CLOSED = 3;
 	static instances: MockWebSocket[] = [];
 
 	url: string;
-	readyState = MockWebSocket.OPEN;
+	readyState = MockWebSocket.CONNECTING;
 	send = vi.fn();
 	close = vi.fn(() => {
 		this.readyState = MockWebSocket.CLOSED;
+		this.dispatch('close');
 	});
 
 	private readonly listeners: Record<string, ((ev?: unknown) => void)[]> = {};
@@ -78,6 +80,12 @@ class MockWebSocket {
 	}
 
 	dispatch(type: string, ev?: unknown) {
+		// Model the real lifecycle: `open` transitions the socket to OPEN before listeners run, so
+		// `send`'s `readyState === OPEN` guard behaves as it would in the browser.
+		if (type === 'open') {
+			this.readyState = MockWebSocket.OPEN;
+		}
+
 		[...(this.listeners[type] ?? [])].forEach((cb) => cb(ev));
 	}
 }
