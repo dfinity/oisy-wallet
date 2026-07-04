@@ -1,7 +1,11 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
+import {
+	AlchemyProvider,
+	alchemyProviders,
+	initMinedTransactionsListener
+} from '$eth/providers/alchemy.providers';
 import type { AlchemyProviderContract, AlchemyProviderContracts } from '$eth/types/alchemy';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -44,6 +48,40 @@ vi.mock(import('viem'), async (importOriginal) => {
 vi.mock('$env/rest/alchemy.env', () => ({
 	ALCHEMY_API_KEY: 'test-api-key'
 }));
+
+/* eslint-disable local-rules/prefer-object-params -- mirrors the native (type, listener) WebSocket signature */
+class MockWebSocket {
+	static readonly OPEN = 1;
+	static readonly CLOSED = 3;
+	static instances: MockWebSocket[] = [];
+
+	url: string;
+	readyState = MockWebSocket.OPEN;
+	send = vi.fn();
+	close = vi.fn(() => {
+		this.readyState = MockWebSocket.CLOSED;
+	});
+
+	private readonly listeners: Record<string, ((ev?: unknown) => void)[]> = {};
+
+	constructor(url: string) {
+		this.url = url;
+		MockWebSocket.instances.push(this);
+	}
+
+	addEventListener(type: string, cb: (ev?: unknown) => void) {
+		(this.listeners[type] ??= []).push(cb);
+	}
+
+	removeEventListener(type: string, cb: (ev?: unknown) => void) {
+		this.listeners[type] = (this.listeners[type] ?? []).filter((l) => l !== cb);
+	}
+
+	dispatch(type: string, ev?: unknown) {
+		[...(this.listeners[type] ?? [])].forEach((cb) => cb(ev));
+	}
+}
+/* eslint-enable local-rules/prefer-object-params */
 
 describe('alchemy.providers', () => {
 	const ALCHEMY_API_KEY = 'test-api-key';
@@ -736,6 +774,70 @@ describe('alchemy.providers', () => {
 					$network: ICP_NETWORK_ID.toString()
 				})
 			);
+		});
+	});
+
+	describe('subscribeAlchemyWs (via initMinedTransactionsListener)', () => {
+		let originalWebSocket: typeof WebSocket;
+
+		const initListener = () =>
+			initMinedTransactionsListener({
+				listener: vi.fn(),
+				networkId: ETHEREUM_NETWORK.id
+			});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.useFakeTimers();
+
+			MockWebSocket.instances = [];
+			originalWebSocket = global.WebSocket;
+			global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
+		});
+
+		afterEach(() => {
+			global.WebSocket = originalWebSocket;
+			vi.useRealTimers();
+		});
+
+		it('should subscribe on open', () => {
+			initListener();
+
+			expect(MockWebSocket.instances).toHaveLength(1);
+
+			MockWebSocket.instances[0].dispatch('open');
+
+			expect(MockWebSocket.instances[0].send).toHaveBeenCalledOnce();
+		});
+
+		it('should reconnect and re-subscribe after an unexpected close', async () => {
+			initListener();
+
+			expect(MockWebSocket.instances).toHaveLength(1);
+
+			MockWebSocket.instances[0].dispatch('close');
+
+			// A generous advance covers the (local) reconnect backoff.
+			await vi.advanceTimersByTimeAsync(5_000);
+
+			expect(MockWebSocket.instances).toHaveLength(2);
+
+			MockWebSocket.instances[1].dispatch('open');
+
+			expect(MockWebSocket.instances[1].send).toHaveBeenCalledOnce();
+		});
+
+		it('should not reconnect after an intentional disconnect', async () => {
+			const listener = initListener();
+
+			expect(MockWebSocket.instances).toHaveLength(1);
+
+			await listener.disconnect();
+			MockWebSocket.instances[0].dispatch('close');
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(MockWebSocket.instances).toHaveLength(1);
 		});
 	});
 });
