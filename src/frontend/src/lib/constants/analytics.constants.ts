@@ -185,3 +185,7 @@ export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
 export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';
+
+// Personal note sharing (creator side; properties never carry the note, token or key)
+export const TRACK_NOTE_SHARE_OPEN = 'note_share_open';
+export const TRACK_NOTE_SHARE_CREATED = 'note_share_created';
