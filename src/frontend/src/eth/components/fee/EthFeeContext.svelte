@@ -357,6 +357,8 @@
 		}
 
 		// A fresh fetch cycle (mount, `observe` flip, or foreground return) restores the retry budget.
+		clearTimeout(retryTimer);
+		retryTimer = undefined;
 		retryAttempts = 0;
 
 		debounceUpdateFeeData();
