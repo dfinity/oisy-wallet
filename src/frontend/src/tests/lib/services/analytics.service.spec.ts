@@ -69,7 +69,7 @@ describe('plausible analytics service', () => {
 
 		await initPlausibleAnalytics();
 
-		const [{ transformRequest }] = initMock.mock.calls[0];
+		const [[{ transformRequest }]] = initMock.mock.calls;
 
 		expect(
 			transformRequest({

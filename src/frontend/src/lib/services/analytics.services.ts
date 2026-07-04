@@ -35,9 +35,7 @@ const stripUrlFragment = (url: string): string => {
 	}
 };
 
-const sanitizePlausiblePayloadUrl = (
-	payload: PlausibleRequestPayload
-): PlausibleRequestPayload => {
+const sanitizePlausiblePayloadUrl = (payload: PlausibleRequestPayload): PlausibleRequestPayload => {
 	const sanitizedUrl = stripUrlFragment(payload.u);
 
 	return sanitizedUrl === payload.u ? payload : { ...payload, u: sanitizedUrl };
