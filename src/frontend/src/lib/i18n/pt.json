@@ -2637,6 +2637,23 @@
 			},
 			"error": {
 				"create": ""
+			},
+			"recipient": {
+				"locked_title": "",
+				"reveal": "",
+				"revealed_title": "",
+				"single_use_caveat": "",
+				"protects_body": "",
+				"copy_note": "",
+				"note_copied": "",
+				"outro_eyebrow": "",
+				"outro_title": "",
+				"outro_subtitle": "",
+				"outro_feature_multichain": "",
+				"outro_feature_onchain": "",
+				"outro_feature_encrypted": "",
+				"discover": "",
+				"unavailable_title": ""
 			}
 		}
 	}
