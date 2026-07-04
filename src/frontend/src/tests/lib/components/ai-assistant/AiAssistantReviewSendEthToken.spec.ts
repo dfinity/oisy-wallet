@@ -41,8 +41,10 @@ describe('AiAssistantReviewSendEthToken', () => {
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: SEPOLIA_TOKEN })]]);
 
 	const mockEthFeeStore = () => {
-		const store = ethFeeStore.initEthFeeStore();
-		store.setFee(mockFees);
+		// Build the store directly rather than through the (possibly spied) factory, so it is
+		// guaranteed to hold the fee regardless of test order.
+		const { subscribe } = writable<ethFeeStore.FeeStoreData>(mockFees);
+		const store: ethFeeStore.EthFeeStore = { subscribe, setFee: vi.fn() };
 
 		vi.spyOn(ethFeeStore, 'initEthFeeStore').mockImplementation(() => store);
 	};
