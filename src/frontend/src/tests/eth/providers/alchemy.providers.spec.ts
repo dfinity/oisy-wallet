@@ -80,10 +80,14 @@ class MockWebSocket {
 	}
 
 	dispatch(type: string, ev?: unknown) {
-		// Model the real lifecycle: `open` transitions the socket to OPEN before listeners run, so
+		// Model the real lifecycle: `open`/`close` update readyState before listeners run, so
 		// `send`'s `readyState === OPEN` guard behaves as it would in the browser.
 		if (type === 'open') {
 			this.readyState = MockWebSocket.OPEN;
+		}
+
+		if (type === 'close') {
+			this.readyState = MockWebSocket.CLOSED;
 		}
 
 		[...(this.listeners[type] ?? [])].forEach((cb) => cb(ev));
