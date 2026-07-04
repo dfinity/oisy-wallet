@@ -57,7 +57,12 @@ const refreshCount = async ({
  */
 export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
 	const owner = ownerPrincipal(identity);
-	personalNotesStore.beginLoad({ ownerPrincipal: owner });
+	// Only blank the cache when the owner changes; a same-owner refresh keeps the
+	// last-known-good list so a failed reload (e.g. the decryption-failure Retry)
+	// doesn't drop the notes already on screen.
+	if (get(personalNotesStore).ownerPrincipal !== owner) {
+		personalNotesStore.beginLoad({ ownerPrincipal: owner });
+	}
 
 	const [entries, count] = await Promise.all([
 		getPersonalNotes({ identity }),
