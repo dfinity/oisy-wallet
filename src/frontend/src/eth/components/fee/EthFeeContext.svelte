@@ -323,6 +323,11 @@
 		clearTimeout(retryTimer);
 		retryTimer = setTimeout(() => {
 			retryTimer = undefined;
+
+			if (isDestroyed || !observe) {
+				return;
+			}
+
 			debounceUpdateFeeData();
 		}, delay);
 	};
