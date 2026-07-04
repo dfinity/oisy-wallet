@@ -155,6 +155,16 @@ Requests are still handled **one at a time**: while a request from one dApp is u
 
 ---
 
+## Ethereum
+
+### Transaction fees
+
+When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
+
+A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
+
+---
+
 ## Bitcoin
 
 ### Pending-transaction reservation
