@@ -307,7 +307,7 @@ A new `NotesModal.svelte` (new folder
   composed as **one balanced, vertically-centered group** with even spacing: a small
   neutral-grey icon tile, the heading **"Your notes are empty"**, a one-line subtitle
   (**"Create a private, encrypted note to keep details safe alongside your wallet."**),
-  the primary **"Add new note"** button, and below it the **"OISY protects you!"
+  the primary **"Add new note"** button, and below it the **"End-to-end encrypted"
   privacy info box** — so a first-time user sees that notes are private and encrypted
   **before** creating one. (Grouping all four with symmetric whitespace, rather than
   centering the illustration and pinning the box to the bottom, keeps it calm.)
@@ -386,7 +386,7 @@ A new `NotesModal.svelte` (new folder
      "Created {date} · Updated {date}"), so the metadata sits close to the text it
      describes.
   3. **Delete** action (when editing an existing note).
-  4. **A separate "OISY protects you!" privacy info box** _after_ the Note panel
+  4. **A separate "End-to-end encrypted" privacy info box** _after_ the Note panel
      (its own box, shield icon + bold lead + body + "Learn more" — see
      [UI copy](#ui-copy-i18n)) — not inline helper text.
 
@@ -551,11 +551,11 @@ Strings live under `navigation.text.notes` (menu) and a new `notes.*` block:
 - **Add/edit field label:** "Note"; **placeholder:** a content hint, e.g.
   "Write a note…".
 - **Privacy info box** (a separate **neutral-grey** box, reusing OISY's existing
-  shield "OISY protects you!" info-box pattern — e.g. the Recent-Activity small-value
-  notice): green shield + bold lead **"OISY protects you!"** + body **"Only you can
-  see your notes, stored encrypted in OISY."** + a **"Learn more"** link. Shown on the
-  empty state and in the editor (consistent style), **not** inline helper text under
-  the field.
+  shield info-box pattern — e.g. the Recent-Activity small-value
+  notice): green shield + bold lead **"End-to-end encrypted."** + body **"Only you
+  can read your notes."** + a **"Learn more"** link (no extra indent before the link).
+  Shown on the empty state and in the editor (consistent style), **not** inline helper
+  text under the field.
 - **Timestamps:** list row "Created {$date}" / "Updated {$date}"; edit view
   "Created {$date}" or "Created {$created} · Updated {$updated}" (the `·` joins
   them). `{$date}` is the localized relative/absolute time.

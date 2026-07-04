@@ -2596,7 +2596,8 @@
 			"placeholder": "Write a note…",
 			"search_placeholder": "Search note",
 			"no_results": "No notes match your search.",
-			"privacy_info": "Only you can see your notes, stored encrypted in $oisy_short.",
+			"encrypted_lead": "End-to-end encrypted.",
+			"encrypted_info": "Only you can read your notes.",
 			"created": "Created $date",
 			"updated": "Updated $date",
 			"created_updated": "Created $created · Updated $updated",
@@ -2625,7 +2626,7 @@
 				"expiry_30d": "30 days",
 				"destroy_after_viewing": "Destroy after viewing",
 				"destroy_after_viewing_hint": "The link works once, then stops opening.",
-				"protects_body": "The share key lives in the link itself and is never sent to $oisy_short, so only someone with the full link can read this note.",
+				"protects_body": "Only the recipient of this link can read your note.",
 				"create_link": "Create link",
 				"link_ready_title": "Share link ready",
 				"link_ready_subtitle": "Anyone with this link can read the note",
@@ -2637,6 +2638,22 @@
 			},
 			"error": {
 				"create": "Couldn't create the share link. Please try again."
+			},
+			"recipient": {
+				"locked_title": "A note was shared with you",
+				"reveal": "Reveal note",
+				"revealed_title": "Shared note",
+				"single_use_caveat": "Single-use link — once you close or reload this page, the note is gone for good. Copy it now if you need it.",
+				"copy_note": "Copy note",
+				"note_copied": "Note copied!",
+				"outro_eyebrow": "You just opened a note kept private by $oisy_short",
+				"outro_title": "It keeps your assets just as safe",
+				"outro_subtitle": "$oisy_short is a fully onchain, self-custody wallet for Bitcoin, Ethereum, Solana, ICP and more.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana & ICP in one place",
+				"outro_feature_onchain": "100% onchain — no extension, no seed phrase",
+				"outro_feature_encrypted": "Your keys and your data, encrypted end-to-end",
+				"discover": "Discover OISY",
+				"unavailable_title": "This link has expired or already been used"
 			}
 		}
 	}

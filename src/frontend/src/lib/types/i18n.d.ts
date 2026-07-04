@@ -2129,7 +2129,8 @@ interface I18nNotes {
 		placeholder: string;
 		search_placeholder: string;
 		no_results: string;
-		privacy_info: string;
+		encrypted_lead: string;
+		encrypted_info: string;
 		created: string;
 		updated: string;
 		created_updated: string;
@@ -2162,6 +2163,22 @@ interface I18nNotes {
 			done: string;
 		};
 		error: { create: string };
+		recipient: {
+			locked_title: string;
+			reveal: string;
+			revealed_title: string;
+			single_use_caveat: string;
+			copy_note: string;
+			note_copied: string;
+			outro_eyebrow: string;
+			outro_title: string;
+			outro_subtitle: string;
+			outro_feature_multichain: string;
+			outro_feature_onchain: string;
+			outro_feature_encrypted: string;
+			discover: string;
+			unavailable_title: string;
+		};
 	};
 }
 
