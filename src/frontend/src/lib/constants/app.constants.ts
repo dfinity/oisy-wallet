@@ -221,6 +221,10 @@ export const MAX_PERSONAL_NOTE_LENGTH = 2_000;
 // client-side "at capacity" gate; the backend `TooManyNotes` rejection remains
 // the source of truth.
 export const MAX_PERSONAL_NOTES_PER_USER = 1_000;
+// Per-user active-share cap; mirrors the backend's `MAX_PERSONAL_NOTE_SHARES_PER_USER`.
+// Drives the client-side "at capacity" gate in the Share dialog; the backend
+// `TooManyShares` rejection remains the source of truth.
+export const MAX_PERSONAL_NOTE_SHARES_PER_USER = 100;
 
 // Network bonus multiplier
 export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
