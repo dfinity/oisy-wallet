@@ -15,10 +15,10 @@ describe('WalletConnectActions', () => {
 	});
 
 	it('should disable the approve button when approveDisabled is true', () => {
-		const { getByText } = render(WalletConnectActions, {
+		const { getByRole } = render(WalletConnectActions, {
 			props: { ...props, approveDisabled: true }
 		});
 
-		expect(getByText(en.core.text.approve).closest('button')).toBeDisabled();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 });
