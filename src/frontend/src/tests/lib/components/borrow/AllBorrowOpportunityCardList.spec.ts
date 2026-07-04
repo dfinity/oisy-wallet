@@ -75,8 +75,6 @@ describe('AllBorrowOpportunityCardList', () => {
 		render(AllBorrowOpportunityCardList);
 
 		expect(screen.queryByText('mock.liquidium.title')).not.toBeInTheDocument();
-		expect(
-			screen.queryByRole('button', { name: 'mock.liquidium.action' })
-		).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'mock.liquidium.action' })).not.toBeInTheDocument();
 	});
 });
