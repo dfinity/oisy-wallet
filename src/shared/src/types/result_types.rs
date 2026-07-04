@@ -24,6 +24,7 @@ use crate::types::{
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
     personal_note::{PersonalNoteEntry, PersonalNoteError},
+    personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -546,6 +547,64 @@ impl From<Result<ByteBuf, PersonalNoteError>> for PersonalNotesVetkeyResult {
         match result {
             Ok(vetkey) => PersonalNotesVetkeyResult::Ok(vetkey),
             Err(err) => PersonalNotesVetkeyResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreatePersonalNoteShareResult {
+    Ok(()),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<(), PersonalNoteShareError>> for CreatePersonalNoteShareResult {
+    fn from(result: Result<(), PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(()) => CreatePersonalNoteShareResult::Ok(()),
+            Err(err) => CreatePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>> for GetPersonalNoteShareResult {
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => GetPersonalNoteShareResult::Ok(content),
+            Err(err) => GetPersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ConsumePersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>>
+    for ConsumePersonalNoteShareResult
+{
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => ConsumePersonalNoteShareResult::Ok(content),
+            Err(err) => ConsumePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteSharesCountResult {
+    Ok(u64),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<u64, PersonalNoteShareError>> for GetPersonalNoteSharesCountResult {
+    fn from(result: Result<u64, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(count) => GetPersonalNoteSharesCountResult::Ok(count),
+            Err(err) => GetPersonalNoteSharesCountResult::Err(err),
         }
     }
 }
