@@ -217,11 +217,12 @@ text-overflow: ellipsis`) plus `overflow-wrap: anywhere`. Reuse that same
   option — expiry is mandatory.
 - **"Destroy after viewing"** — an optional checkbox (default **off**). When on,
   the link is single-use.
-- An **"OISY protects you!" info box** (not a plain explainer line): the standard
-  pattern — green shield + bold **"OISY protects you!"** lead — on OISY's **blue**
-  info background, body **"The share key lives in the link itself and is never sent
-  to OISY, so only someone with the full link can read this note,"** plus a **Learn
-  more** link.
+- An **encryption-notice info box** (not a plain explainer line): the standard
+  pattern — green shield + bold **"End-to-end encrypted."** lead — on OISY's **blue**
+  info background, with a **context-specific** body for the share-creation screen:
+  **"Only the recipient of this link can read your note."** (the other boxes say
+  "Only you can read your notes," which would be misleading here since the point is
+  to let the link holder read it), plus a flush **"Learn more"** link.
 - Footer: **Cancel** / **Create link**.
 
 **State B — link created:**
@@ -279,12 +280,14 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    fetched yet** and a chat-app link-preview/unfurler bot cannot consume a
    single-use link. The **Reveal note** click is what fetches the content (and, for
    single-use, burns it).
-2. **Revealed:** the note text, rendered with the **same safe rendering** as
-   `NoteView` (`neutralizePersonalNoteText` + `linkifyPersonalNote`,
-   `whitespace-pre-wrap`, links `rel="noopener noreferrer" target="_blank"`).
-   **No timestamps, no sender identity** (decided: text only). Layout, top to
-   bottom:
-   - The title is the generic **"Shared note"**.
+2. **Revealed:** the note text, rendered by the **same shared note-render
+   component as the in-app view** (`NoteView`), so a shared note looks identical
+   to how its owner sees it — the **first non-empty line is the bold title**, the
+   rest is the body, text is bidi-neutralized, and only `http(s)` URLs become
+   `rel="noopener noreferrer" target="_blank"` links. **No timestamps, no sender
+   identity** (decided: text only). Layout, top to bottom:
+   - The card heading is the generic **"Shared note"** (above the note's own
+     bold first-line title).
    - **Single-use caveat as plain text** directly under the title
      (not a boxed alert) — **"Single-use link — once you close or reload this page,
      the note is gone for good. Copy it now if you need it."** Stating the
@@ -295,15 +298,19 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    - **Long notes behave like the Notes modal:** the card is height-capped
      (≈ **80% of viewport height**, reusing the notes modal's `--dialog-max-height`
      convention) and **only the note text scrolls**, inside its own region — the
-     title and single-use line stay pinned at the top, and the "OISY protects you!"
+     title and single-use line stay pinned at the top, and the encryption-notice
      box plus Copy / Done stay pinned at the bottom. Mirror the `NoteView`
      `ContentWithToolbar` scroll-region pattern rather than letting the whole page
      grow.
-   - An **"OISY protects you!" reassurance box** beneath the note — the standard
-     pattern (green shield, bold lead) on the blue background, body **"This note was
-     decrypted right here in your browser — OISY only ever stored an encrypted
-     copy,"** plus a **Learn more** link. This leads with the positive security
-     story rather than only the negative "can't reopen" caveat.
+   - An **encryption-notice reassurance box** beneath the note — the standard
+     pattern (green shield, bold lead) on the blue background, with the **same copy as
+     the in-app notes box**: bold **"End-to-end encrypted."** + **"Only you can read
+     your notes."** plus a **Learn more** link (no extra indent before the link). This
+     leads with the positive security
+     story rather than only the negative "can't reopen" caveat. The **Learn more**
+     link — and any URL linkified inside the note — opens in a **new tab**, so the
+     recipient never navigates away from a note that may be single-use and
+     uncopied. (Only the terminal **Discover OISY** CTA navigates in the same tab.)
    - **Copy note** — copies the full plaintext to the clipboard (reuse OISY's
      existing copy-to-clipboard control). Convenience, not a security change (the
      recipient already holds the plaintext on screen), but it matters most for
@@ -321,8 +328,10 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    safe."** Below: a one-line multi-chain pitch (Bitcoin, Ethereum, Solana, ICP and
    more; 100% onchain), a few feature points, and a **single** primary
    call-to-action. The CTA is an **invitation, not a command** — labelled **"Discover
-   OISY"** (it links out to oisy.com to browse; deliberately not "Get started" /
+   OISY"** (it navigates to oisy.com to browse; deliberately not "Get started" /
    "Open OISY", which would imply a sign-up flow begins on click, and it does not).
+   It opens **in the same tab** — the outro is the end of the flow with nothing to
+   return to, so a new tab would only litter.
    There is no separate "Learn more" link, since it would point to the same
    destination as the button. Because the page renders the real OISY header (which
    already carries the logo top-left), the outro **does not repeat a large hero
@@ -336,8 +345,8 @@ shared layout (see [Open questions](#open-questions-facts-to-confirm)).
    token / missing-or-bad fragment key — **"This link has expired or already been
    used."** The canister returns the same not-found for all of these, so the page
    does not distinguish them (avoids leaking whether a token ever existed). Offers a
-   single **"Discover OISY"** button to oisy.com (same destination as the outro
-   CTA). It is styled **primary**, not ghost — since it's the only action on the
+   single **"Discover OISY"** button to oisy.com, **in the same tab** (same
+   destination and behaviour as the outro CTA). It is styled **primary**, not ghost — since it's the only action on the
    page, a greyed-out secondary button reads as disabled. (Replaces an earlier
    ambiguous "What is OISY?" label that read like it opened docs.)
 
