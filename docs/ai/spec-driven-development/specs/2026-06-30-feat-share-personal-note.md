@@ -177,9 +177,9 @@ in layers:
   client-side with a fresh per-share AES-GCM-256 key that never reaches the
   canister; only `ct_content` — plus the token, expiry, `single_use` flag, and
   `creator` — is stored. The key lives **only** in the link fragment (`#k=…`),
-  which is never sent in an HTTP request or the `Referer` (the recipient page
-  sets `Referrer-Policy: no-referrer`). The ciphertext is bound to its token as
-  AES-GCM additional authenticated data (`<token>:note`), so a blob can't be
+  which is never sent in an HTTP request. `Referrer-Policy: no-referrer` is set
+  so the token in the path is not leaked via the `Referer` header to outbound links.
+  The ciphertext is bound to its token as AES-GCM additional authenticated data (`<token>:note`), so a blob can't be
   replayed under a different token. A full canister/replica compromise yields
   ciphertext only — not the note, not which note it came from, not the
   recipient.
