@@ -31,6 +31,22 @@ describe('Toasts', () => {
 		expect(container.querySelector('.wrapper')?.classList).toContain('error');
 	});
 
+	it('does not apply the elevated class by default', () => {
+		toastsStore.show({ level: 'success', text: 'copied' });
+
+		const { container } = render(ToastsTest);
+
+		expect(container.querySelector('.wrapper')?.classList).not.toContain('elevated');
+	});
+
+	it('applies the elevated class when a modal is open', () => {
+		toastsStore.show({ level: 'success', text: 'copied' });
+
+		const { container } = render(ToastsTest, { props: { elevated: true } });
+
+		expect(container.querySelector('.wrapper')?.classList).toContain('elevated');
+	});
+
 	it('renders a toast per level with its icon', () => {
 		(['success', 'warn', 'error', 'info'] as const).forEach((level) =>
 			toastsStore.show({ level, text: level })
