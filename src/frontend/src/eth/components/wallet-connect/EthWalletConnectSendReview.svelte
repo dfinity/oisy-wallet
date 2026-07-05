@@ -26,6 +26,7 @@
 		erc20Approve: boolean;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
+		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -38,6 +39,7 @@
 		erc20Approve,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
+		approveDisabled = false,
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -98,6 +100,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {onApprove} {onReject} />
+		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>
