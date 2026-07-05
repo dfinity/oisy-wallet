@@ -36,8 +36,11 @@
 		left: 50%;
 		transform: translate(-50%, 0);
 
-		// If a bottom sheet is displayed the toasts should have a related offset
-		bottom: calc(var(--layout-bottom-offset, 0) + var(--padding-2x));
+		// If a bottom sheet is displayed the toasts should have a related offset.
+		// The fallback must carry a unit: `calc()` rejects a unitless 0 added to a
+		// length, which would drop the whole declaration and let the fixed toast
+		// fall back to its static position (mid-page) instead of the viewport bottom.
+		bottom: calc(var(--layout-bottom-offset, 0px) + var(--padding-2x));
 
 		// A little narrower than the section to differentiate notifications from content
 		width: calc(100% - var(--padding-8x) - var(--padding-0_5x));
