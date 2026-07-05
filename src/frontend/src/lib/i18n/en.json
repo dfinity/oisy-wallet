@@ -2331,7 +2331,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Lend & borrow native BTC, ETH, USDC and USDT. Lending logic runs on Liquidium's canisters; $oisy_short provides the UX.",
+			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
 			"net_value": "Net value",
 			"net_apy": "Net APY",
