@@ -135,6 +135,17 @@ A note is a free-standing memo — it is **not** attached to any transaction, ad
 
 The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
+### Sharing a note
+
+From an open note, the user can create a **share link** that lets anyone holding the link read that one note — no OISY account required. Sharing is always initiated by the user, per note.
+
+- **A snapshot, not a live view.** A share captures the note **as it is at creation**; editing or deleting the note afterwards does not change what an existing link shows. Sharing an updated version means creating a new link.
+- **The canister never sees the note.** The note is encrypted in the browser with a fresh per-share key, and only opaque ciphertext is uploaded. The key travels **inside the link itself** and is never sent to OISY, so only someone with the full link can read the note — OISY and the node providers cannot. There is no server-side copy in the clear, so losing the link means losing access.
+- **Abuse-resistant by design.** The link carries a random, unguessable identifier, so shares can't be found by guessing; opening a single-use link is rate-limited on the backend; and an expired, already-used, or unknown link all return the **same** "unavailable" response, so links can't be probed to learn which ones exist. Creating shares is itself rate-limited and capped per user.
+- **Expiry and single-use.** The creator picks how long the link stays valid — **1 hour, 24 hours, 7 days, or 30 days** — and can optionally make it **single-use**, so it stops opening after it has been viewed once. Expiry is enforced by the backend.
+- **No revocation.** Once shared, OISY cannot recall or revoke a link; it simply stops working after it expires or, for a single-use link, after its first view.
+- **Limit.** A user may hold up to **100 active share links** at a time. At the cap the Share dialog disables link creation and explains that links free up as they expire or are used; existing shares are never evicted.
+
 ---
 
 ## WalletConnect

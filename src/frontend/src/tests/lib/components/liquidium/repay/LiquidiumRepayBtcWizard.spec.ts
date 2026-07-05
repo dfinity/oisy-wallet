@@ -12,12 +12,12 @@ import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
-import type { WizardStep } from '@dfinity/gix-components';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 

@@ -41,14 +41,14 @@ export const isEarningPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
 export const isTradingPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Trading}`) ?? false;
+export const isBorrowPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrow}`) ?? false;
 export const isBorrowingsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrowings}`) ?? false;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}`) ?? false;
-export const isProvidersLiquidiumPath = (path: string | null) =>
-	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.ProvidersLiquidium}`) ?? false;
 
 export const transactionsUrl = ({ token }: { token: Token }): string =>
 	tokenUrl({ path: AppPath.Transactions, token });
@@ -69,14 +69,12 @@ export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
 export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
 
 export const isRouteTrading = ({ route: { id } }: Page): boolean => isTradingPath(id);
+export const isRouteBorrow = ({ route: { id } }: Page): boolean => isBorrowPath(id);
 export const isRouteBorrowings = ({ route: { id } }: Page): boolean => isBorrowingsPath(id);
 
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 
 export const isRouteEarn = ({ route: { id } }: Page): boolean => isEarnPath(id);
-
-export const isRouteProvidersLiquidium = ({ route: { id } }: Page): boolean =>
-	isProvidersLiquidiumPath(id);
 
 const tokenUrl = ({
 	token,

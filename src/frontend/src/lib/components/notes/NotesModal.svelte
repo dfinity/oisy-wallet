@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
@@ -14,14 +13,18 @@
 	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
 	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
+	import ShareNoteBottomSheet from '$lib/components/notes/ShareNoteBottomSheet.svelte';
+	import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
+	import { TRACK_NOTE_SHARE_OPEN } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
 		NOTES_ADD_BUTTON,
@@ -35,6 +38,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		deletePersonalNote,
 		loadPersonalNotes,
@@ -72,6 +76,10 @@
 	// The note awaiting delete confirmation (the confirmation dialog/bottom sheet is
 	// shown while set); `undefined` when no confirmation is open.
 	let pendingDeleteNote = $state<PersonalNoteUi | undefined>();
+
+	// The note being shared (the share dialog/bottom sheet is shown while set);
+	// `undefined` when the share flow is closed.
+	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
 	let loading = $state(!$personalNotesLoaded);
 	let busy = $state(false);
@@ -234,6 +242,21 @@
 		pendingDeleteNote = undefined;
 	};
 
+	// Share opens over the note view (like delete): the note stays selected, so
+	// closing the share dialog returns to it.
+	const openShare = (id: string) => {
+		const entry = get(personalNotesStore).entries?.[id];
+		pendingShareNote =
+			nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
+		if (nonNullish(pendingShareNote)) {
+			trackEvent({ name: TRACK_NOTE_SHARE_OPEN });
+		}
+	};
+
+	const closeShare = () => {
+		pendingShareNote = undefined;
+	};
+
 	const confirmDelete = async (id: string) => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -321,6 +344,7 @@
 			onBack={backToList}
 			onDelete={requestDelete}
 			onEdit={() => nonNullish(viewNote) && openEditor({ id: viewNote.id, fromView: true })}
+			onShare={() => nonNullish(viewNote) && openShare(viewNote.id)}
 		/>
 	{:else}
 		<!-- gap-6 gives a comfortable space between the pinned search and the list;
@@ -411,6 +435,9 @@
 	<Modal disablePointerEvents={busy} {onClose} testId={NOTES_MODAL}>
 		{#snippet title()}{#if nonNullish(pendingDeleteNote)}<Responsive up="md"
 					>{$i18n.notes.text.delete_note}</Responsive
+				><Responsive down="sm">{stepTitle}</Responsive
+				>{:else if nonNullish(pendingShareNote)}<Responsive up="md"
+					>{$i18n.notes.share.text.share_note}</Responsive
 				><Responsive down="sm">{stepTitle}</Responsive>{:else}{stepTitle}{/if}{/snippet}
 
 		<!-- On mobile the editor's Cancel/Save live in the header (always above the soft
@@ -461,6 +488,13 @@
 				/>
 			</Responsive>
 			<Responsive down="sm">{@render notesBody()}</Responsive>
+		{:else if nonNullish(pendingShareNote) && nonNullish($authIdentity)}
+			<!-- Same pattern as delete: desktop replaces the content, mobile keeps the
+				body and shows a bottom sheet (below). -->
+			<Responsive up="md">
+				<ShareNoteContent identity={$authIdentity} note={pendingShareNote} onClose={closeShare} />
+			</Responsive>
+			<Responsive down="sm">{@render notesBody()}</Responsive>
 		{:else}
 			{@render notesBody()}
 		{/if}
@@ -475,6 +509,12 @@
 			onCancel={cancelDelete}
 			onDelete={confirmDelete}
 		/>
+	</Responsive>
+{/if}
+
+{#if nonNullish(pendingShareNote) && nonNullish($authIdentity)}
+	<Responsive down="sm">
+		<ShareNoteBottomSheet identity={$authIdentity} note={pendingShareNote} onClose={closeShare} />
 	</Responsive>
 {/if}
 

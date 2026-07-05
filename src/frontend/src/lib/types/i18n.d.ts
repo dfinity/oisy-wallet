@@ -2129,7 +2129,8 @@ interface I18nNotes {
 		placeholder: string;
 		search_placeholder: string;
 		no_results: string;
-		privacy_info: string;
+		encrypted_lead: string;
+		encrypted_info: string;
 		created: string;
 		updated: string;
 		created_updated: string;
@@ -2139,6 +2140,46 @@ interface I18nNotes {
 	};
 	alt: { edit: string; delete: string };
 	error: { load: string; save: string; delete: string };
+	share: {
+		text: {
+			share_note: string;
+			snapshot_caption: string;
+			cap_reached: string;
+			expires_after: string;
+			expiry_1h: string;
+			expiry_24h: string;
+			expiry_7d: string;
+			expiry_30d: string;
+			destroy_after_viewing: string;
+			destroy_after_viewing_hint: string;
+			protects_body: string;
+			create_link: string;
+			link_ready_title: string;
+			link_ready_subtitle: string;
+			link_copied: string;
+			recap_expires_in: string;
+			recap_single_use: string;
+			reminder: string;
+			done: string;
+		};
+		error: { create: string };
+		recipient: {
+			locked_title: string;
+			reveal: string;
+			revealed_title: string;
+			single_use_caveat: string;
+			copy_note: string;
+			note_copied: string;
+			outro_eyebrow: string;
+			outro_title: string;
+			outro_subtitle: string;
+			outro_feature_multichain: string;
+			outro_feature_onchain: string;
+			outro_feature_encrypted: string;
+			discover: string;
+			unavailable_title: string;
+		};
+	};
 }
 
 interface I18n {

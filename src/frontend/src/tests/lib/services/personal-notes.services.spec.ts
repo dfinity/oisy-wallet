@@ -8,9 +8,19 @@ import {
 import * as vetkeys from '$lib/services/personal-notes.vetkeys';
 import { personalNotesList, personalNotesStore } from '$lib/stores/personal-notes.store';
 import { isPersonalNoteDecryptionFailure } from '$lib/types/personal-note';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	mockIdentity,
+	mockPrincipal2,
+	mockPrincipalText,
+	mockPrincipalText2
+} from '$tests/mocks/identity.mock';
 import type { DerivedKeyMaterial } from '@dfinity/vetkeys';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
+
+const mockIdentity2 = {
+	getPrincipal: () => mockPrincipal2
+} as unknown as Identity;
 
 describe('personal-notes.services', () => {
 	beforeEach(() => {
@@ -34,6 +44,8 @@ describe('personal-notes.services', () => {
 
 			await loadPersonalNotes(mockIdentity);
 
+			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
+
 			const list = get(personalNotesList) ?? [];
 
 			expect(list).toHaveLength(2);
@@ -54,10 +66,77 @@ describe('personal-notes.services', () => {
 
 			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('vetKD down');
 		});
+
+		it('does not repopulate the store when an old load resolves after reset', async () => {
+			let resolveEntries:
+				((value: Awaited<ReturnType<typeof backendApi.getPersonalNotes>>) => void) | undefined;
+
+			vi.spyOn(backendApi, 'getPersonalNotes').mockReturnValue(
+				new Promise((resolve) => {
+					resolveEntries = resolve;
+				})
+			);
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+			vi.spyOn(vetkeys, 'deriveKeyMaterial').mockResolvedValue({} as DerivedKeyMaterial);
+			vi.spyOn(vetkeys, 'decryptPersonalNoteWithKey').mockResolvedValue({
+				note: 'stale',
+				created_at_ns: '100',
+				updated_at_ns: '100'
+			});
+
+			const loadPromise = loadPersonalNotes(mockIdentity);
+
+			personalNotesStore.reset();
+			if (resolveEntries === undefined) {
+				throw new Error('Expected getPersonalNotes promise resolver to be initialized.');
+			}
+			resolveEntries([{ note_id: 'stale', encrypted_note: new Uint8Array([1]) }]);
+
+			await loadPromise;
+
+			expect(get(personalNotesStore)).toEqual({
+				ownerPrincipal: undefined,
+				entries: undefined,
+				count: 0,
+				loaded: false
+			});
+		});
+
+		it('keeps the cached notes when a same-owner reload fails', async () => {
+			const cached = {
+				id: 'cached',
+				note: 'keep me',
+				created_at_ns: '100',
+				updated_at_ns: '100'
+			};
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [cached],
+				count: 1
+			});
+
+			// A same-owner refresh (e.g. the decryption-failure Retry) that fails must
+			// not blank the last-known-good list.
+			vi.spyOn(backendApi, 'getPersonalNotes').mockRejectedValue(new Error('network down'));
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+
+			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('network down');
+
+			expect((get(personalNotesList) ?? []).map(({ id }) => id)).toEqual(['cached']);
+			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
+			expect(get(personalNotesStore).loaded).toBeTruthy();
+		});
 	});
 
 	describe('savePersonalNote', () => {
 		it('encrypts, stores, and refreshes the count for a new note', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [],
+				count: 0
+			});
 			const setSpy = vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
 			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
 			vi.spyOn(vetkeys, 'encryptPersonalNote').mockResolvedValue(new Uint8Array([9]));
@@ -76,7 +155,9 @@ describe('personal-notes.services', () => {
 		});
 
 		it('reuses the id and created_at_ns when editing', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
 				entries: [{ id: 'note-1', note: 'old', created_at_ns: '100', updated_at_ns: '100' }],
 				count: 1
 			});
@@ -95,11 +176,31 @@ describe('personal-notes.services', () => {
 			expect(entry.created_at_ns).toBe('100');
 			expect(BigInt(entry.updated_at_ns)).toBeGreaterThanOrEqual(100n);
 		});
+
+		it('rejects a stale editor save before writing with a different identity', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [{ id: 'note-1', note: 'old', created_at_ns: '100', updated_at_ns: '100' }],
+				count: 1
+			});
+			const setSpy = vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
+
+			await expect(
+				savePersonalNote({ identity: mockIdentity2, id: 'note-1', note: 'leaked note' })
+			).rejects.toThrow('Personal notes cache does not belong to the current identity.');
+
+			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
+			expect(mockIdentity2.getPrincipal().toText()).toBe(mockPrincipalText2);
+			expect(setSpy).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('deletePersonalNote', () => {
 		it('removes the note from the store and refreshes the count', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
 				entries: [{ id: 'note-1', note: 'x', created_at_ns: '100', updated_at_ns: '100' }],
 				count: 1
 			});

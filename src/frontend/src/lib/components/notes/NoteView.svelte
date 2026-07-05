@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
+	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
+	import NoteText from '$lib/components/notes/NoteText.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -9,17 +11,14 @@
 		NOTES_BACK_BUTTON,
 		NOTES_VIEW,
 		NOTES_VIEW_DELETE_BUTTON,
-		NOTES_VIEW_EDIT_BUTTON
+		NOTES_VIEW_EDIT_BUTTON,
+		NOTES_VIEW_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {
-		formatPersonalNoteTimestamp,
-		linkifyPersonalNote,
-		neutralizePersonalNoteText
-	} from '$lib/utils/personal-note.utils';
+	import { formatPersonalNoteTimestamp } from '$lib/utils/personal-note.utils';
 
 	interface Props {
 		note: PersonalNoteUi;
@@ -28,21 +27,11 @@
 		// (they are wired once the editor and delete flows exist).
 		onEdit?: () => void;
 		onDelete?: (id: string) => void;
+		// Opens the share flow. The Share link only renders when this is provided.
+		onShare?: () => void;
 	}
 
-	let { note, onBack, onEdit, onDelete }: Props = $props();
-
-	// First non-empty line is the bold title (matching the list); the rest is the body with
-	// line breaks preserved. URLs in both become safe links (Decision 16).
-	const neutralized = $derived(neutralizePersonalNoteText(note.note));
-	const lines = $derived(neutralized.split('\n'));
-	const firstNonEmptyIndex = $derived(lines.findIndex((line) => line.trim() !== ''));
-	const titleText = $derived(firstNonEmptyIndex === -1 ? '' : lines[firstNonEmptyIndex].trim());
-	const bodyText = $derived(
-		firstNonEmptyIndex === -1 ? '' : lines.slice(firstNonEmptyIndex + 1).join('\n')
-	);
-	const titleSegments = $derived(linkifyPersonalNote(titleText));
-	const bodySegments = $derived(bodyText === '' ? [] : linkifyPersonalNote(bodyText));
+	let { note, onBack, onEdit, onDelete, onShare }: Props = $props();
 
 	const metaLine = $derived.by(() => {
 		const created = formatPersonalNoteTimestamp({
@@ -67,27 +56,23 @@
 	<div
 		class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-brand-subtle-20 p-4"
 	>
-		<p style="overflow-wrap: anywhere;" class="font-bold text-primary">
-			{#each titleSegments as segment, index (index)}{#if segment.href}<a
-						class="text-brand-primary underline"
-						href={segment.href}
-						rel="noopener noreferrer"
-						target="_blank">{segment.text}</a
-					>{:else}{segment.text}{/if}{/each}
-		</p>
-		{#if bodySegments.length > 0}
-			<p style="overflow-wrap: anywhere;" class="whitespace-pre-wrap text-primary">
-				{#each bodySegments as segment, index (index)}{#if segment.href}<a
-							class="text-brand-primary underline"
-							href={segment.href}
-							rel="noopener noreferrer"
-							target="_blank">{segment.text}</a
-						>{:else}{segment.text}{/if}{/each}
-			</p>
-		{/if}
+		<NoteText note={note.note} />
 	</div>
 
-	<span class="text-xs text-tertiary">{metaLine}</span>
+	<!-- Desktop: "Share note" is a quiet blue text link right-aligned opposite the
+	     created/updated line. Mobile: it drops to its own left-aligned line beneath.
+	     Lower-emphasis than Edit by design. -->
+	<div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+		<span class="text-xs text-tertiary">{metaLine}</span>
+		{#if nonNullish(onShare)}
+			<div>
+				<Button link onclick={onShare} testId={NOTES_VIEW_SHARE_BUTTON} type="button">
+					<IconShareArrow size="16" />
+					{$i18n.notes.share.text.share_note}
+				</Button>
+			</div>
+		{/if}
+	</div>
 
 	{#if nonNullish(onEdit)}
 		<!-- Wrap so the button's own flex-1 can't stretch it vertically in this column. -->

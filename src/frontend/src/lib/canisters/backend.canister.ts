@@ -3,11 +3,13 @@ import type {
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
 	PersonalNoteEntry,
+	PersonalNoteShareContent,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TokenId
@@ -649,6 +651,48 @@ export class BackendCanister extends Canister<BackendService> {
 	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
 		const { get_personal_notes_vetkey_public_key } = this.caller({ certified: true });
 		const response = await get_personal_notes_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {
+		const { create_personal_note_share } = this.caller({ certified: true });
+		const response = await create_personal_note_share(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable read endpoint (the share recipient has no identity), so
+	// it runs as a non-certified query like the other note reads.
+	getPersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { get_personal_note_share } = this.caller({ certified: false });
+		const response = await get_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	consumePersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { consume_personal_note_share } = this.caller({ certified: true });
+		const response = await consume_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNoteSharesCount = async (): Promise<bigint> => {
+		const { get_personal_note_shares_count } = this.caller({ certified: false });
+		const response = await get_personal_note_shares_count();
 
 		if ('Ok' in response) {
 			return response.Ok;

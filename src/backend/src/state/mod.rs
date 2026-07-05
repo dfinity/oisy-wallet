@@ -15,16 +15,17 @@ use crate::{
         BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
         EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
-        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID,
+        USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
+        USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
             ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
             BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-            UserTransactionsMap,
+            PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TokenActivityMap, UserProfileMap,
+            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -65,6 +66,14 @@ pub(crate) struct State {
     /// (ids 14–17) and survives upgrades regardless of this field;
     /// [`EncryptedMaps::init`] re-attaches to it on first access.
     pub(crate) personal_notes: Option<EncryptedMaps<AccessRights>>,
+    /// Publicly-readable, token-keyed store of personal-note shares. Unlike
+    /// `personal_notes` above, this is a plain `StableBTreeMap` (the value is
+    /// already client-side ciphertext under a per-share key, so there is no
+    /// vetKD derivation and no lazy init needed).
+    pub(crate) personal_note_shares: PersonalNoteShareMap,
+    /// By-creator index over `personal_note_shares`, used only to enforce the
+    /// per-user active-share cap without scanning the primary map.
+    pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
 }
 
 impl From<&State> for Stats {
@@ -83,6 +92,7 @@ impl From<&State> for Stats {
                 .personal_notes
                 .as_ref()
                 .map_or(0, |em| em.mapkey_vals.len()),
+            personal_note_shares_count: state.personal_note_shares.len(),
         }
     }
 }
@@ -108,6 +118,10 @@ thread_local! {
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
             // Initialised lazily on first access (see `ensure_personal_notes`).
             personal_notes: None,
+            personal_note_shares: PersonalNoteShareMap::init(mm.borrow().get(PERSONAL_NOTE_SHARES_MEMORY_ID)),
+            personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap::init(
+                mm.borrow().get(PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID),
+            ),
         })
     );
 }

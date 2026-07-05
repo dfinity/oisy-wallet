@@ -11,12 +11,12 @@ import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/Liquidium
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
+import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
-import type { WizardStep } from '@dfinity/gix-components';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 

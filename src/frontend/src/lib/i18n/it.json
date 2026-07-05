@@ -111,7 +111,7 @@
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",
-			"nfts": "",
+			"nfts": "Oggetti da collezione",
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
@@ -142,7 +142,7 @@
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
-			"nfts": "",
+			"nfts": "Apri la vista degli oggetti da collezione",
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",
@@ -2596,7 +2596,8 @@
 			"placeholder": "",
 			"search_placeholder": "",
 			"no_results": "",
-			"privacy_info": "",
+			"encrypted_lead": "",
+			"encrypted_info": "",
 			"created": "",
 			"updated": "",
 			"created_updated": "",
@@ -2612,6 +2613,48 @@
 			"load": "",
 			"save": "",
 			"delete": ""
+		},
+		"share": {
+			"text": {
+				"share_note": "",
+				"snapshot_caption": "",
+				"cap_reached": "",
+				"expires_after": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"destroy_after_viewing": "",
+				"destroy_after_viewing_hint": "",
+				"protects_body": "",
+				"create_link": "",
+				"link_ready_title": "",
+				"link_ready_subtitle": "",
+				"link_copied": "",
+				"recap_expires_in": "",
+				"recap_single_use": "",
+				"reminder": "",
+				"done": ""
+			},
+			"error": {
+				"create": ""
+			},
+			"recipient": {
+				"locked_title": "",
+				"reveal": "",
+				"revealed_title": "",
+				"single_use_caveat": "",
+				"copy_note": "",
+				"note_copied": "",
+				"outro_eyebrow": "",
+				"outro_title": "",
+				"outro_subtitle": "",
+				"outro_feature_multichain": "",
+				"outro_feature_onchain": "",
+				"outro_feature_encrypted": "",
+				"discover": "",
+				"unavailable_title": ""
+			}
 		}
 	}
 }
