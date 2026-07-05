@@ -7,6 +7,8 @@
 	import FactBox from '$lib/components/ui/FactBox.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
+	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
+	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { LendBorrowProvider } from '$lib/types/lend-borrow';
 
@@ -33,7 +35,22 @@
 	{/snippet}
 
 	{#snippet content()}
-		<p class="mt-4 text-sm text-secondary">{$i18n.liquidium.info.description}</p>
+		<p class="mt-4 text-sm text-secondary">
+			{$i18n.liquidium.info.description}
+			<ExternalLink
+				ariaLabel={$i18n.core.text.learn_more}
+				href={liquidium.docsUrl}
+				iconAsLast
+				styleClass="ml-1"
+				trackEvent={buildLearnMoreEvent({
+					sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.LIQUIDIUM,
+					labelKey: 'core.text.learn_more',
+					url: liquidium.docsUrl
+				})}
+			>
+				{$i18n.core.text.learn_more}
+			</ExternalLink>
+		</p>
 
 		<div class="mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
 			<FactBox>

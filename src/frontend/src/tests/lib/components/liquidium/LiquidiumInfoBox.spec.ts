@@ -41,6 +41,14 @@ describe('LiquidiumInfoBox', () => {
 		expect(getByText(en.stake.text.visit_provider)).toBeInTheDocument();
 	});
 
+	it('should render the learn more link with correct href', () => {
+		const { getByRole } = render(LiquidiumInfoBox);
+
+		const link = getByRole('link', { name: en.core.text.learn_more });
+
+		expect(link).toHaveAttribute('href', liquidium.docsUrl);
+	});
+
 	it('should render all three fact boxes', () => {
 		const { getByText } = render(LiquidiumInfoBox);
 
