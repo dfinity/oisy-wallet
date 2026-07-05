@@ -159,10 +159,11 @@ describe('TradingOrders', () => {
 		expect(container).toHaveTextContent('ckBTC');
 		expect(container).not.toHaveTextContent('ICP');
 
-		await waitFor(() => expect(mockLoadOrderBook).toHaveBeenCalledTimes(1));
+		await waitFor(() => expect(mockLoadOrderBook).toHaveBeenCalledOnce());
 		const [loadOrderBookParams] = mockLoadOrderBook.mock.calls[0] as unknown as [
 			{ pair: { base: { toText: () => string } } }
 		];
+
 		expect(loadOrderBookParams.pair.base.toText()).toBe(CKBTC_LEDGER);
 	});
 
@@ -176,6 +177,7 @@ describe('TradingOrders', () => {
 		expect(container).toHaveTextContent(en.core.text.no_results);
 
 		await tick();
+
 		expect(mockLoadOrderBook).not.toHaveBeenCalled();
 	});
 
