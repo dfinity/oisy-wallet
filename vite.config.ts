@@ -42,9 +42,7 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'barcode-detector', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', ...lazy].find((lib) =>
-							folder.includes(lib)
-						) === undefined &&
+						['@sveltejs', 'svelte', ...lazy].find((lib) => folder.includes(lib)) === undefined &&
 						folder.includes('node_modules')
 					) {
 						return 'vendor';
