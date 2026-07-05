@@ -11,7 +11,6 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
-	import { TRACK_NOTE_SHARE_CREATED } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
@@ -21,11 +20,13 @@
 		NOTES_SHARE_LINK_COPY,
 		NOTES_SHARE_SINGLE_USE_CHECKBOX
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { createNoteShare, getActiveShareCount } from '$lib/services/personal-note-share.services';
+	import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNotePreviewParts } from '$lib/utils/personal-note.utils';
 
@@ -70,6 +71,15 @@
 		]
 	);
 
+	// Locale-independent expiry label for analytics (e.g. `7d`) — the option key,
+	// never the localized text, so no locale leaks into metadata.
+	const expiryLabel = $derived(
+		(EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]).labelKey.replace(
+			'expiry_',
+			''
+		)
+	);
+
 	const recap = $derived(
 		`${replacePlaceholders($i18n.notes.share.text.recap_expires_in, { $duration: selectedExpiryLabel })}${
 			singleUse ? ` · ${$i18n.notes.share.text.recap_single_use}` : ''
@@ -89,16 +99,22 @@
 				singleUse
 			});
 			createdLink = link;
-			trackEvent({
-				name: TRACK_NOTE_SHARE_CREATED,
-				metadata: {
-					expiry: (
-						EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]
-					).labelKey.replace('expiry_', ''),
-					singleUse: `${singleUse}`
-				}
+			trackNoteShare({
+				step: 'create',
+				side: 'creator',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				singleUse,
+				expiry: expiryLabel
 			});
 		} catch (err: unknown) {
+			trackNoteShare({
+				step: 'create',
+				side: 'creator',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				singleUse,
+				expiry: expiryLabel,
+				error: replaceIcErrorFields(err)
+			});
 			// Lost a race to the cap since mount (e.g. another tab): reflect it in
 			// the UI instead of only toasting a generic failure.
 			if (err !== null && typeof err === 'object' && 'TooManyShares' in err) {

@@ -24,7 +24,6 @@
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
-	import { TRACK_NOTE_SHARE_OPEN } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
 		NOTES_ADD_BUTTON,
@@ -39,8 +38,10 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
+	import {
+		trackNoteShare,
+		trackPersonalNote
+	} from '$lib/services/personal-notes-analytics.services';
 	import {
 		deletePersonalNote,
 		loadPersonalNotes,
@@ -253,7 +254,7 @@
 		pendingShareNote =
 			nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
 		if (nonNullish(pendingShareNote)) {
-			trackEvent({ name: TRACK_NOTE_SHARE_OPEN });
+			trackNoteShare({ step: 'open', side: 'creator' });
 		}
 	};
 
