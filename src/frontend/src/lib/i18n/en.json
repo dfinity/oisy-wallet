@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Welcome to Borrow!",
-			"header_description": "Access liquidity without selling — borrow stablecoins or BTC against your crypto.",
+			"header_description": "Access liquidity without selling. Borrow stablecoins or BTC against your crypto.",
 			"borrowing_options": "Borrowing options",
 			"borrowing_potential": "Borrowing potential",
 			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
