@@ -160,7 +160,7 @@ describe('TradingOrders', () => {
 		expect(container).not.toHaveTextContent('ICP');
 
 		await waitFor(() => expect(mockLoadOrderBook).toHaveBeenCalledTimes(1));
-		const [loadOrderBookParams] = mockLoadOrderBook.mock.calls[0] as [
+		const [loadOrderBookParams] = mockLoadOrderBook.mock.calls[0] as unknown as [
 			{ pair: { base: { toText: () => string } } }
 		];
 		expect(loadOrderBookParams.pair.base.toText()).toBe(CKBTC_LEDGER);
