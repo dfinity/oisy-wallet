@@ -1,5 +1,7 @@
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import {
 	deletePersonalNote,
 	loadPersonalNotes,
@@ -22,9 +24,14 @@ const mockIdentity2 = {
 	getPrincipal: () => mockPrincipal2
 } as unknown as Identity;
 
+vi.mock('$lib/services/personal-notes-analytics.services', () => ({
+	trackPersonalNote: vi.fn()
+}));
+
 describe('personal-notes.services', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.clearAllMocks();
 		personalNotesStore.reset();
 	});
 
@@ -152,6 +159,52 @@ describe('personal-notes.services', () => {
 
 			expect(list.map(({ id }) => id)).toEqual([entry.id]);
 			expect(get(personalNotesStore).count).toBe(1);
+			// First create while the count is still 0 → flagged as the user's first note.
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: true
+			});
+		});
+
+		it('does not flag isFirstNote when notes already exist', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [{ id: 'note-1', note: 'existing', created_at_ns: '100', updated_at_ns: '100' }],
+				count: 1
+			});
+			vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(2n);
+			vi.spyOn(vetkeys, 'encryptPersonalNote').mockResolvedValue(new Uint8Array([9]));
+
+			await savePersonalNote({ identity: mockIdentity, note: 'second note' });
+
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: false
+			});
+		});
+
+		it('tracks a create error and rethrows without leaking the note', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [],
+				count: 0
+			});
+			vi.spyOn(vetkeys, 'encryptPersonalNote').mockRejectedValue(new Error('boom'));
+
+			await expect(
+				savePersonalNote({ identity: mockIdentity, note: 'secret text' })
+			).rejects.toThrow('boom');
+
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				error: 'boom'
+			});
 		});
 
 		it('reuses the id and created_at_ns when editing', async () => {
@@ -175,6 +228,11 @@ describe('personal-notes.services', () => {
 			expect(entry.note).toBe('edited');
 			expect(entry.created_at_ns).toBe('100');
 			expect(BigInt(entry.updated_at_ns)).toBeGreaterThanOrEqual(100n);
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'edit',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: false
+			});
 		});
 
 		it('rejects a stale editor save before writing with a different identity', async () => {
@@ -193,6 +251,8 @@ describe('personal-notes.services', () => {
 			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
 			expect(mockIdentity2.getPrincipal().toText()).toBe(mockPrincipalText2);
 			expect(setSpy).not.toHaveBeenCalled();
+			// The ownership guard rejects before any operation — no analytics event fires.
+			expect(trackPersonalNote).not.toHaveBeenCalled();
 		});
 	});
 
@@ -212,6 +272,32 @@ describe('personal-notes.services', () => {
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, note_id: 'note-1' });
 			expect(get(personalNotesList)).toEqual([]);
 			expect(get(personalNotesStore).count).toBe(0);
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'delete',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+		});
+
+		it('tracks a delete error and rethrows', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [{ id: 'note-1', note: 'x', created_at_ns: '100', updated_at_ns: '100' }],
+				count: 1
+			});
+			vi.spyOn(backendApi, 'deletePersonalNote').mockRejectedValue(new Error('boom'));
+
+			await expect(deletePersonalNote({ identity: mockIdentity, id: 'note-1' })).rejects.toThrow(
+				'boom'
+			);
+
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'delete',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				error: 'boom'
+			});
+			// The optimistic remove must not have run on a failed delete.
+			expect((get(personalNotesList) ?? []).map(({ id }) => id)).toEqual(['note-1']);
 		});
 	});
 });

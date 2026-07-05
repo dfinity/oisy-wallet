@@ -12,6 +12,8 @@ import {
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
@@ -33,11 +35,27 @@ const setLoadedNotes = ({ entries, count }: { entries: PersonalNoteUi[]; count: 
 	personalNotesStore.setLoaded({ ownerPrincipal: mockPrincipalText, entries, count });
 };
 
+vi.mock('$lib/services/personal-notes-analytics.services', () => ({
+	trackPersonalNote: vi.fn()
+}));
+
 describe('NotesModal', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.clearAllMocks();
 		mockAuthStore();
 		personalNotesStore.reset();
+	});
+
+	it('tracks the notes surface opening on mount', () => {
+		setLoadedNotes({ entries: [], count: 0 });
+
+		render(NotesModal);
+
+		expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+			step: 'open',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
 	});
 
 	it('renders the empty state when there are no notes', () => {
