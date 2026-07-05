@@ -1,8 +1,7 @@
 This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 Implementers must also follow the analytics conventions in
-[`docs/ai/frontend/analytics.md`](../../frontend/analytics.md) and reconcile new
-events / properties with the canonical Confluence registry,
-[OISY / Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events).
+[`docs/ai/frontend/analytics.md`](../../frontend/analytics.md), the canonical
+reference for events and their property schema.
 
 # Spec: Personal-notes analytics (Plausible)
 
@@ -191,12 +190,13 @@ Update the affected component specs.
 **Quality gates (every PR):** `npm run format`, `npm run lint -- --max-warnings 0`,
 `npm run check`, `npm run test`.
 
-**Docs (PR-2 / PR-3):** [`docs/ai/PRODUCT.md`](../../PRODUCT.md) already has an
+**Docs:** [`docs/ai/PRODUCT.md`](../../PRODUCT.md) already has an
 `## Analytics` section (with a `### "Learn More" Link Tracking` subsection). Add a
 `### Personal notes tracking` subsection there documenting the `personal_note` and
 `note_share` events and their property matrices, following the Learn-More pattern,
 and cross-reference it from the existing `## Personal notes` / `### Sharing a note`
-sections. Do this in the same PR as the behaviour it describes.
+sections. **Status:** deferred by the product owner (2026-07-05) to a separate
+follow-up PR — not landed in the lifecycle / share PRs.
 
 ## Out of Scope
 
@@ -237,10 +237,7 @@ Values are strings; optional fields absent, never `undefined`.
 
 The share consolidation renames live events. Existing Plausible dashboards / goals
 referencing `note_share_*` will need updating to the single `note_share` event
-filtered by `event_modifier` / `source_location`. Update the Confluence
-[Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events)
-page: remove the six old share names, add `personal_note` and `note_share` with
-their property matrices.
+filtered by `event_modifier` / `source_location`.
 
 ## Decisions (locked)
 
@@ -262,7 +259,8 @@ their property matrices.
 
 ## Post-Merge
 
-`PRODUCT.md` is updated **in the behaviour-change PRs** (see Docs above), not here
-— its `## Analytics` section documents tracking behaviour, so the new
-`personal_note` / `note_share` events belong in it. Also note the new/renamed
-events in the PR bodies and update the Confluence page as above.
+`PRODUCT.md`'s `## Analytics` section still needs the `### Personal notes tracking`
+subsection (see Docs above) and reconciliation with
+[`analytics.md`](../../frontend/analytics.md). **Deferred** by the product owner
+(2026-07-05) to a separate follow-up PR — it is **not** part of the lifecycle /
+share PRs. The new/renamed events are documented in the PR bodies meanwhile.
