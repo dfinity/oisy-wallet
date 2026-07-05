@@ -168,6 +168,59 @@ recomputable per-share key derived from the user's vetKD key plus re-encryption 
 every edit — a materially larger crypto surface (recorded under
 [Pending decisions](#pending-decisions-facts-clear-owner-must-decide)).
 
+## Security model — access to a shared note
+
+How the backend protects a shared note that anyone holding the link can read,
+in layers:
+
+- **Opaque to the canister (primary protection).** The note is encrypted
+  client-side with a fresh per-share AES-GCM-256 key that never reaches the
+  canister; only `ct_content` — plus the token, expiry, `single_use` flag, and
+  `creator` — is stored. The key lives **only** in the link fragment (`#k=…`),
+  which is never sent in an HTTP request. `Referrer-Policy: no-referrer` is set
+  so the token in the path is not leaked via the `Referer` header to outbound links.
+  The ciphertext is bound to its token as AES-GCM additional authenticated data (`<token>:note`), so a blob can't be
+  replayed under a different token. A full canister/replica compromise yields
+  ciphertext only — not the note, not which note it came from, not the
+  recipient.
+- **Unguessable capability.** Access is gated by a 128-bit cryptographically
+  random `token` (the map key), independent of the note's id — guessing a valid
+  one is a 2^128 search. Possession of the full link (token + fragment key) _is_
+  the authorization; there is no owner to check the caller against, which is
+  what lets a logged-out recipient read it.
+- **Endpoint guards.** `create_personal_note_share` is authenticated
+  (`caller_is_registered_user`) and the count query is authenticated; the two
+  reads — `get_personal_note_share` (reusable, query) and
+  `consume_personal_note_share` (single-use, update) — are anonymous. Anonymous
+  read is a deliberate, narrowly-scoped exception to "notes endpoints are always
+  authenticated", because the recipient has no OISY identity.
+- **Rate limiting.** `consume` (update) is capped by a coarse **global** limiter
+  — 600 calls/min shared across all anonymous callers (an anonymous update has
+  no distinguishing principal). `get` (query) has no stateful limiter: one would
+  be a no-op on the non-certified query path, so its abuse surface is bounded by
+  the token search space and an `O(log n)` lookup. `create` (update) is
+  per-caller rate-limited (20/min).
+- **Time-bounding.** Expiry is mandatory (≤ 30 days) and enforced server-side
+  against IC time on **every** read; expired entries return `NotFound` and are
+  pruned lazily on access plus by an hourly sweep.
+- **Single-use consumption.** A single-use share's content is returned exactly
+  once by `consume`, which atomically deletes the entry; `get` never returns a
+  single-use share's content.
+- **Write-side caps.** A per-user active-share cap of 100 (`TooManyShares`) and
+  a ciphertext size bound limit how much a single user can put in the store.
+- **Non-disclosure / anti-enumeration.** `creator` is stored only for the cap
+  and is never returned by any read — a recipient can't learn who created a
+  share. Expired / consumed / unknown / reusable-vs-single-use-mismatch all
+  collapse to the **same** `NotFound`, so a caller can't distinguish "expired"
+  from "used" from "never existed", and can't enumerate.
+
+**Residual risks (accepted, by design).** A leaked link means anyone holding it
+can read the note (fire-and-forget; no revocation), mitigated only by the
+mandatory short expiry and optional single-use. The `get` query has no
+app-level frequency guard (a query-path limitation; generic query spam is a
+platform concern). The global `consume` bucket means a flood could exhaust the
+600/min budget and rate-limit legitimate single-use reveals during that window.
+
 ## Design
 
 ### Entry point — "Share" action in the note view — see [wireframe](./2026-06-30-feat-share-personal-note/wireframes/note-view-with-share.html)
