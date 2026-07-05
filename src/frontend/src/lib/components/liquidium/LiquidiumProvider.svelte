@@ -5,6 +5,7 @@
 	import { LIQUIDIUM_ENABLED } from '$env/liquidium';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import LiquidiumBorrowingCard from '$lib/components/liquidium/LiquidiumBorrowingCard.svelte';
+	import LiquidiumInfoBox from '$lib/components/liquidium/LiquidiumInfoBox.svelte';
 	import LiquidiumMarketCard from '$lib/components/liquidium/LiquidiumMarketCard.svelte';
 	import LiquidiumPositionCard from '$lib/components/liquidium/LiquidiumPositionCard.svelte';
 	import LiquidiumProviderHero from '$lib/components/liquidium/LiquidiumProviderHero.svelte';
@@ -22,6 +23,8 @@
 	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
 	const liquidium = lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM];
+
+	let infoBoxRef = $state<HTMLElement | undefined>();
 
 	let reserves = $derived($liquidiumPortfolio?.reserves ?? []);
 
@@ -47,13 +50,13 @@
 	<div class="flex flex-col gap-6 pb-6">
 		<LiquidiumProviderHero
 			logo={liquidium.logo}
+			onLearnMore={() => infoBoxRef?.scrollIntoView({ behavior: 'smooth' })}
 			pageDescription={replaceOisyPlaceholders(
 				resolveText({ i18n: $i18n, path: liquidium.descriptionKey })
 			)}
 			pageTitle={liquidium.name}
 			portfolio={$liquidiumPortfolio}
 			showSummary={LIQUIDIUM_ENABLED}
-			url={liquidium.url}
 		/>
 
 		{#if LIQUIDIUM_ENABLED && supplyReserves.length > 0}
@@ -103,5 +106,9 @@
 				{/snippet}
 			</StakeContentSection>
 		{/if}
+
+		<div bind:this={infoBoxRef}>
+			<LiquidiumInfoBox />
+		</div>
 	</div>
 {/if}
