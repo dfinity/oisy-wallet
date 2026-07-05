@@ -160,7 +160,10 @@ describe('TradingOrders', () => {
 		expect(container).not.toHaveTextContent('ICP');
 
 		await waitFor(() => expect(mockLoadOrderBook).toHaveBeenCalledTimes(1));
-		expect(mockLoadOrderBook.mock.calls[0][0].pair.base.toText()).toBe(CKBTC_LEDGER);
+		const [loadOrderBookParams] = mockLoadOrderBook.mock.calls[0] as [
+			{ pair: { base: { toText: () => string } } }
+		];
+		expect(loadOrderBookParams.pair.base.toText()).toBe(CKBTC_LEDGER);
 	});
 
 	it('shows no results without polling when the active filter hides every order', async () => {
