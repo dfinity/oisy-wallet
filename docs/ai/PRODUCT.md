@@ -71,8 +71,9 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 | SignerSignIn                         | `signer`          | —                         |
 | RewardsRequirements                  | `rewards`         | `requirements`            |
 | TransactionsFilterContactsEmptyState | `transactions`    | —                         |
+| LiquidiumInfoBox                     | `liquidium`       | —                         |
 
-**Excluded:** `HarvestAutopilotOverview` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
+**Excluded:** `HarvestAutopilotOverview` / `LiquidiumProviderHero` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
 
 **Deferred to a follow-up:**
 
