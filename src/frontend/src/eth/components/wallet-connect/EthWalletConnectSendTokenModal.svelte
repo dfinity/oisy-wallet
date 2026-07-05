@@ -205,6 +205,7 @@
 					<EthWalletConnectSendReview
 						{amount}
 						{application}
+						approveDisabled={isNullish($feeStore)}
 						{data}
 						{destination}
 						{erc20Approve}
