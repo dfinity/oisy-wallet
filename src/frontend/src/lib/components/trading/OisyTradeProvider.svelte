@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
@@ -8,11 +9,16 @@
 	import OisyTradePositions from '$lib/components/trading/OisyTradePositions.svelte';
 	import OisyTradeProviderHero from '$lib/components/trading/OisyTradeProviderHero.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
+	import TradingOrderDetailModal from '$lib/components/trading/TradingOrderDetailModal.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalTradingDeposit } from '$lib/derived/modal.derived';
+	import {
+		modalOisyTradeOrderDetail,
+		modalOisyTradeOrderDetailData,
+		modalTradingDeposit
+	} from '$lib/derived/modal.derived';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -44,6 +50,10 @@
 
 			{#if $modalTradingDeposit && $modalStore?.id === depositModalId}
 				<TradingDepositModal />
+			{/if}
+
+			{#if $modalOisyTradeOrderDetail && nonNullish($modalOisyTradeOrderDetailData)}
+				<TradingOrderDetailModal order={$modalOisyTradeOrderDetailData} />
 			{/if}
 		{:else}
 			<EmptyState
