@@ -4,7 +4,6 @@
 	import { afterNavigate } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
-	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
@@ -75,47 +74,52 @@
 	{/snippet}
 
 	{#snippet content()}
+		<!--
+			The two metric boxes are centered on desktop but switch to a condensed,
+			left-aligned layout on mobile (smaller value type, no fixed height), per
+			the design's mobile hero treatment.
+		-->
 		<div class="flex w-full flex-col gap-3 sm:flex-row">
-			<StakeContentCard>
-				{#snippet content()}
-					<span class="text-sm font-semibold">{$i18n.trading.page.trading_potential}</span>
-					<span class="text-2xl font-bold sm:text-3xl">
-						{#if $isPrivacyMode}
-							<IconDots variant="lg" />
-						{:else}
-							{depositable}
-						{/if}
-					</span>
-					<span class="text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
-				{/snippet}
-			</StakeContentCard>
+			<div
+				class="flex w-full flex-col gap-1.5 rounded-xl border border-disabled bg-secondary p-4 sm:w-1/2 sm:items-center sm:text-center"
+			>
+				<span class="text-sm font-semibold">{$i18n.trading.page.trading_potential}</span>
+				<span class="text-2xl font-bold sm:text-3xl">
+					{#if $isPrivacyMode}
+						<IconDots variant="lg" />
+					{:else}
+						{depositable}
+					{/if}
+				</span>
+				<span class="text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
+			</div>
 
-			<StakeContentCard>
-				{#snippet content()}
-					<span class="text-sm font-semibold">{$i18n.trading.page.deposited_assets}</span>
-					<span class="text-2xl font-bold sm:text-3xl">
-						{#if $isPrivacyMode}
-							<IconDots variant="lg" />
-						{:else}
-							{deposited}
-						{/if}
-					</span>
-					<span class="text-xs text-tertiary">
-						{#if $isPrivacyMode}
-							<IconDots variant="xs" />
-						{:else if hasReserved}
-							{replacePlaceholders($i18n.trading.page.free, { $amount: free })} · {replacePlaceholders(
-								$i18n.trading.page.in_orders,
-								{ $amount: reserved }
-							)}
-						{:else if hasDeposits}
-							{$i18n.trading.page.deposited_all_free}
-						{:else}
-							{$i18n.trading.page.deposited_empty}
-						{/if}
-					</span>
-				{/snippet}
-			</StakeContentCard>
+			<div
+				class="flex w-full flex-col gap-1.5 rounded-xl border border-disabled bg-secondary p-4 sm:w-1/2 sm:items-center sm:text-center"
+			>
+				<span class="text-sm font-semibold">{$i18n.trading.page.deposited_assets}</span>
+				<span class="text-2xl font-bold sm:text-3xl">
+					{#if $isPrivacyMode}
+						<IconDots variant="lg" />
+					{:else}
+						{deposited}
+					{/if}
+				</span>
+				<span class="text-xs text-tertiary">
+					{#if $isPrivacyMode}
+						<IconDots variant="xs" />
+					{:else if hasReserved}
+						{replacePlaceholders($i18n.trading.page.free, { $amount: free })} · {replacePlaceholders(
+							$i18n.trading.page.in_orders,
+							{ $amount: reserved }
+						)}
+					{:else if hasDeposits}
+						{$i18n.trading.page.deposited_all_free}
+					{:else}
+						{$i18n.trading.page.deposited_empty}
+					{/if}
+				</span>
+			</div>
 		</div>
 	{/snippet}
 </StakeContentSection>
