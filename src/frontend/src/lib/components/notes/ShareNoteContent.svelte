@@ -145,20 +145,25 @@
 			</div>
 		</div>
 
-		<Checkbox
-			checked={singleUse}
-			inputId="share-single-use"
-			onChange={() => (singleUse = !singleUse)}
-			testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
-			text="block"
-		>
-			<div class="flex flex-col">
-				<span class="text-sm text-primary">{$i18n.notes.share.text.destroy_after_viewing}</span>
-				<span class="text-xs text-tertiary"
-					>{$i18n.notes.share.text.destroy_after_viewing_hint}</span
-				>
-			</div>
-		</Checkbox>
+		<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
+			 the transaction-filter panels); `flex-start` keeps it top-aligned with the
+			 title rather than centered against the two-line block. -->
+		<div style="--checkbox-label-order: 1; --checkbox-align-items: flex-start;">
+			<Checkbox
+				checked={singleUse}
+				inputId="share-single-use"
+				onChange={() => (singleUse = !singleUse)}
+				testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
+				text="block"
+			>
+				<div class="flex flex-col">
+					<span class="text-sm text-primary">{$i18n.notes.share.text.destroy_after_viewing}</span>
+					<span class="text-xs text-tertiary"
+						>{$i18n.notes.share.text.destroy_after_viewing_hint}</span
+					>
+				</div>
+			</Checkbox>
+		</div>
 
 		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
