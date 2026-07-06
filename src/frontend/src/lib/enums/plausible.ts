@@ -125,7 +125,8 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	SIGNER = 'signer',
 	REWARDS = 'rewards',
 	TRANSACTIONS = 'transactions',
-	LIQUIDIUM = 'liquidium'
+	LIQUIDIUM = 'liquidium',
+	OISY_TRADE = 'oisy_trade'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
