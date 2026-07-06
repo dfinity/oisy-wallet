@@ -20,7 +20,9 @@
 			? 'border-brand-primary bg-brand-primary text-primary-inverted hover:border-brand-secondary hover:bg-brand-secondary'
 			: 'border-primary bg-primary text-secondary hover:bg-brand-subtle-10'
 	}`}
+	aria-pressed={selected}
 	onclick={onClick}
+	type="button"
 >
 	{@render children()}
 </button>
