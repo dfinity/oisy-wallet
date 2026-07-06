@@ -14,6 +14,14 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { liquidiumHealthLevel } from '$lib/utils/liquidium.utils';
 
+	interface Props {
+		widthClass?: string;
+		showHealthFactor?: boolean;
+		showWithShortenedLabel?: boolean;
+	}
+
+	let { widthClass, showHealthFactor = true, showWithShortenedLabel = false }: Props = $props();
+
 	let hasDebt = $derived($liquidiumTotalBorrowedUsd > 0);
 
 	let healthLevel = $derived(
@@ -23,7 +31,7 @@
 	);
 </script>
 
-<StakeContentCard>
+<StakeContentCard {widthClass}>
 	{#snippet content()}
 		<div class="text-sm font-bold">{$i18n.borrow.text.active_loans}</div>
 
@@ -40,16 +48,20 @@
 			}) ?? ''}
 		</div>
 
-		<div class="text-sm font-bold text-tertiary sm:text-base">
+		<div class="text-sm text-tertiary sm:text-base">
 			{#if hasDebt}
 				{$i18n.borrow.text.apr}
-				<EarningYearlyAmount value={$liquidiumBorrowInterestUsd} />
+				<EarningYearlyAmount
+					showMinusSign
+					{showWithShortenedLabel}
+					value={$liquidiumBorrowInterestUsd}
+				/>
 			{:else}
 				{$i18n.borrow.text.no_active_loans}
 			{/if}
 		</div>
 
-		{#if hasDebt && nonNullish($liquidiumHealthFactorPercent)}
+		{#if showHealthFactor && hasDebt && nonNullish($liquidiumHealthFactorPercent)}
 			<div
 				class="mt-2 text-sm font-bold"
 				class:text-error-primary={healthLevel === 'critical'}
