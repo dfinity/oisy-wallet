@@ -6,14 +6,12 @@
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconClockAlert from '$lib/components/icons/lucide/IconClockAlert.svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
-	import type { CardData } from '$lib/types/token-card';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -42,8 +40,6 @@
 	let baseSymbol = $derived(getTokenDisplaySymbol(base));
 	let quoteSymbol = $derived(getTokenDisplaySymbol(quote));
 
-	let baseData = $derived<CardData>(base);
-
 	// The price is quote-per-base in human units; render with the quote's display
 	// decimals so it reads like the limit price the user placed.
 	let formattedPrice = $derived(
@@ -62,14 +58,24 @@
 		})
 	);
 
-	// Buy rows lead with the quote amount spent (quantity × price), mirroring the
-	// wireframe copy ("Buy ICP with 300 ckUSDC at 2.60").
+	// The quote leg of the order (quantity × price), spent on a buy / received on a
+	// sell — shown as the muted second amount on the right.
 	let formattedQuoteAmount = $derived(
 		formatToken({
 			value: BigInt(Math.round(quantity * price * 10 ** quote.decimals)),
 			unitName: quote.decimals,
 			displayDecimals: quote.decimals
 		})
+	);
+
+	// Signed legs on the right: the base leaves the account on a sell (−) and
+	// arrives on a buy (+); the quote is the mirror image. U+2212 is the typographic
+	// minus so the two signs align under tabular-nums.
+	let baseAmountSigned = $derived(
+		`${side === 'sell' ? '−' : '+'}${formattedQuantity} ${baseSymbol}`
+	);
+	let quoteAmountSigned = $derived(
+		`${side === 'sell' ? '+' : '−'}${formattedQuoteAmount} ${quoteSymbol}`
 	);
 
 	let { labelKey, pillVariant } = $derived(orderStatusView(oisyTradeOrderDisplayStatus(order)));
@@ -96,20 +102,16 @@
 	};
 	let StatusIcon = $derived(statusIcons[labelKey]);
 
-	let rowText = $derived(
-		side === 'sell'
-			? replacePlaceholders($i18n.trading.orders.row_sell, {
-					$quantity: formattedQuantity,
-					$base: baseSymbol,
-					$quote: quoteSymbol,
-					$price: formattedPrice
-				})
-			: replacePlaceholders($i18n.trading.orders.row_buy, {
-					$base: baseSymbol,
-					$quote_amount: formattedQuoteAmount,
-					$quote: quoteSymbol,
-					$price: formattedPrice
-				})
+	// The tail of the intent line after the coloured side word and bold base symbol
+	// — e.g. "for ckUSDC @ 2.75" (sell) / "with ckUSDC @ 2.60" (buy).
+	let phrase = $derived(
+		replacePlaceholders(
+			side === 'sell' ? $i18n.trading.orders.row_phrase_sell : $i18n.trading.orders.row_phrase_buy,
+			{
+				$quote: quoteSymbol,
+				$price: formattedPrice
+			}
+		)
 	);
 
 	// Queue position — the share of same-side volume priced better than this order,
@@ -172,7 +174,7 @@
 		if (display === null || display.front) {
 			return;
 		}
-		return replacePlaceholders($i18n.trading.limit_order.are_ahead, {
+		return replacePlaceholders($i18n.trading.orders.queue_ahead, {
 			$percentage: display.percent.toString()
 		});
 	});
@@ -182,16 +184,12 @@
 	The venue's own page, so no provider tag on the row. Display only for now —
 	tapping to open the order-detail modal is wired in a later stacked PR.
 -->
-<div class="flex w-full items-center gap-3 py-2.5">
-	<span class="flex shrink-0">
-		<TokenLogo badge={{ type: 'network' }} color="white" data={baseData} logoSize="xs" />
-	</span>
-
-	<div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-1 text-sm leading-snug text-primary">
-		{#if $isPrivacyMode}
-			<span class="inline-flex items-center gap-1"><IconDots variant="sm" /></span>
-		{:else}
-			<span>
+<div class="flex w-full items-center gap-3 py-3">
+	<div class="min-w-0 flex-1">
+		<div class="flex flex-wrap items-center gap-x-1 text-base leading-snug text-primary">
+			{#if $isPrivacyMode}
+				<span class="inline-flex items-center gap-1"><IconDots variant="sm" /></span>
+			{:else}
 				<span
 					class="font-semibold"
 					class:text-error-primary={side === 'sell'}
@@ -199,12 +197,18 @@
 				>
 					{side === 'sell' ? $i18n.trading.orders.side_sell : $i18n.trading.orders.side_buy}
 				</span>
-				{rowText}
-			</span>
+				<span class="font-semibold">{baseSymbol}</span>
+				<span class="tabular-nums">{phrase}</span>
+			{/if}
+		</div>
+		{#if nonNullish(queueText)}
+			<div class="mt-0.5 text-xs text-tertiary tabular-nums" transition:slide={SLIDE_PARAMS}>
+				{queueText}
+			</div>
 		{/if}
 	</div>
 
-	<span class="flex shrink-0 flex-col items-end gap-1">
+	<span class="shrink-0">
 		<Badge variant={pillVariant} width="w-fit">
 			<span class="inline-flex items-center gap-1">
 				{#if StatusIcon}
@@ -213,8 +217,14 @@
 				<span>{statusLabels[labelKey]}</span>
 			</span>
 		</Badge>
-		{#if nonNullish(queueText)}
-			<span class="text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</span>
-		{/if}
 	</span>
+
+	<div class="flex shrink-0 flex-col items-end text-right">
+		{#if $isPrivacyMode}
+			<IconDots variant="md" />
+		{:else}
+			<span class="text-base font-semibold text-primary tabular-nums">{baseAmountSigned}</span>
+			<span class="text-sm text-tertiary tabular-nums">{quoteAmountSigned}</span>
+		{/if}
+	</div>
 </div>
