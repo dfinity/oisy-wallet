@@ -4,8 +4,12 @@
 	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeOrderRow from '$lib/components/trading/OisyTradeOrderRow.svelte';
+	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -77,6 +81,27 @@
 <StakeContentSection>
 	{#snippet title()}
 		<h4>{$i18n.trading.page.active_orders}</h4>
+	{/snippet}
+
+	{#snippet action()}
+		<LimitOrder>
+			{#snippet trigger(open)}
+				{#if $oisyTradeHasAssets}
+					<Button colorStyle="primary" onclick={open} paddingSmall type="button">
+						<IconPlus size="16" />
+						{$i18n.trading.page.new_order}
+					</Button>
+				{:else}
+					<!-- Deposit-first: no free balance to place an order against yet. -->
+					<DelayedTooltip text={$i18n.trading.page.new_order_disabled}>
+						<Button colorStyle="primary" disabled paddingSmall type="button">
+							<IconPlus size="16" />
+							{$i18n.trading.page.new_order}
+						</Button>
+					</DelayedTooltip>
+				{/if}
+			{/snippet}
+		</LimitOrder>
 	{/snippet}
 
 	{#snippet content()}

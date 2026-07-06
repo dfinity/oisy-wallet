@@ -1374,6 +1374,8 @@ interface I18nTrading {
 		active_orders: string;
 		active_orders_empty_deposit: string;
 		active_orders_empty_place: string;
+		new_order: string;
+		new_order_disabled: string;
 	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
