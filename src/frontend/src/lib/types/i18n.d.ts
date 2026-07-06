@@ -1872,8 +1872,8 @@ interface I18nLiquidium {
 		description: string;
 		health_factor: string;
 		net_value: string;
-		net_apy: string;
 		markets: string;
+		total_supplied: string;
 		supplied: string;
 		borrowed: string;
 		borrow_rate: string;

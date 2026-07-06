@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import ActiveLoansCard from '$lib/components/borrow/ActiveLoansCard.svelte';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
+	import LiquidiumHealthFactor from '$lib/components/liquidium/LiquidiumHealthFactor.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LiquidiumPortfolio } from '$lib/types/liquidium';
-	import { formatCurrency, formatStakeApyNumber } from '$lib/utils/format.utils';
-	import { liquidiumHealthLevel, liquidiumNetApy } from '$lib/utils/liquidium.utils';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { liquidiumNetInterestUsd, liquidiumSupplyInterestUsd } from '$lib/utils/liquidium.utils';
 
 	interface Props {
 		portfolio: LiquidiumPortfolio | null;
@@ -15,12 +18,21 @@
 
 	let { portfolio }: Props = $props();
 
-	// No positions ⇒ no debt ⇒ 100% healthy.
-	let healthPercent = $derived(portfolio?.healthFactorPercent ?? 100);
-	let healthLevel = $derived(liquidiumHealthLevel(healthPercent));
+	let hasDebt = $derived((portfolio?.totalBorrowedUsd ?? 0) > 0);
+	let healthFactorPercent = $derived(portfolio?.healthFactorPercent ?? 100);
 
-	// Net APY (supply earnings − borrow cost); null when there's nothing to annualise.
-	let netApy = $derived(nonNullish(portfolio) ? liquidiumNetApy(portfolio) : null);
+	let totalSuppliedUsd = $derived(portfolio?.totalSuppliedUsd ?? 0);
+	let formattedTotalSupplied = $derived(
+		formatCurrency({
+			value: totalSuppliedUsd,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
+
+	// Yearly supply earnings in USD, shown as a neutral "APY $x/year" line.
+	let supplyInterestUsd = $derived(liquidiumSupplyInterestUsd(portfolio));
 
 	let netValueUsd = $derived(portfolio?.netValueUsd ?? 0);
 	let formattedNetValue = $derived(
@@ -32,49 +44,68 @@
 		})
 	);
 
-	let netApyLabel = $derived(
-		nonNullish(netApy)
-			? `${netApy >= 0 ? '+' : '−'}${formatStakeApyNumber(Math.abs(netApy))}%`
-			: '0.00%'
+	// Net yearly interest in USD = supply earnings/year − borrow cost/year. Green when
+	// positive, red when negative, tertiary when zero.
+	let netInterestUsd = $derived(liquidiumNetInterestUsd(portfolio));
+	// Format the magnitude; the sign prefix below is driven by netInterestUsd so it never
+	// disagrees with the amount (and avoids a doubled "-" from a signed format).
+	let netInterestYearly = $derived(
+		replacePlaceholders($i18n.stake.text.active_earning_per_year_short, {
+			$amount:
+				formatCurrency({
+					value: Math.abs(netInterestUsd),
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				}) ?? ''
+		})
 	);
 </script>
 
 <div class="mt-6 flex w-full flex-col gap-3 sm:flex-row">
 	<StakeContentCard widthClass="sm:w-1/3">
 		{#snippet content()}
-			<div class="text-sm font-bold">{$i18n.liquidium.text.health_factor}</div>
+			<div class="text-sm font-bold">{$i18n.liquidium.text.total_supplied}</div>
 
-			<div
-				class="my-1 text-lg font-bold sm:text-xl"
-				class:text-error-primary={healthLevel === 'critical'}
-				class:text-success-primary={healthLevel === 'healthy'}
-				class:text-warning-primary={healthLevel === 'at-risk'}
-			>
-				{Math.round(healthPercent)}%
+			<div class="my-1 text-lg font-bold sm:text-xl">{formattedTotalSupplied}</div>
+
+			<div class="text-sm text-tertiary sm:text-base">
+				{$i18n.liquidium.text.apy_suffix}
+				<EarningYearlyAmount showPlusSign showWithShortenedLabel value={supplyInterestUsd} />
 			</div>
 		{/snippet}
 	</StakeContentCard>
+
+	<ActiveLoansCard showHealthFactor={false} showWithShortenedLabel widthClass="sm:w-1/3" />
 
 	<StakeContentCard widthClass="sm:w-1/3">
 		{#snippet content()}
 			<div class="text-sm font-bold">{$i18n.liquidium.text.net_value}</div>
 
 			<div class="my-1 text-lg font-bold sm:text-xl">{formattedNetValue}</div>
-		{/snippet}
-	</StakeContentCard>
-
-	<StakeContentCard widthClass="sm:w-1/3">
-		{#snippet content()}
-			<div class="text-sm font-bold">{$i18n.liquidium.text.net_apy}</div>
 
 			<div
-				class="my-1 text-lg font-bold sm:text-xl"
-				class:text-error-primary={nonNullish(netApy) && netApy < 0}
-				class:text-success-primary={nonNullish(netApy) && netApy > 0}
-				class:text-tertiary={!nonNullish(netApy)}
+				class="text-sm font-bold sm:text-base"
+				class:text-error-primary={netInterestUsd < 0}
+				class:text-success-primary={netInterestUsd > 0}
+				class:text-tertiary={netInterestUsd === 0}
 			>
-				{netApyLabel}
+				{$i18n.liquidium.text.apy_suffix}
+				{netInterestUsd > 0
+					? `+${netInterestYearly}`
+					: netInterestUsd < 0
+						? `−${netInterestYearly}`
+						: netInterestYearly}
 			</div>
 		{/snippet}
 	</StakeContentCard>
 </div>
+
+{#if hasDebt}
+	<div class="mt-5 w-full">
+		<LiquidiumHealthFactor
+			label={$i18n.liquidium.text.health_factor}
+			percent={healthFactorPercent}
+		/>
+	</div>
+{/if}

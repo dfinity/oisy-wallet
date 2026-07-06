@@ -29,60 +29,70 @@ describe('LiquidiumSummary', () => {
 		healthFactorPercent: 73
 	};
 
-	it('renders the health factor, net value and net APY labels', () => {
+	it('renders the total supplied, active loans and net value blocks', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio } });
 
-		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
+		expect(container).toHaveTextContent(en.borrow.text.active_loans);
 		expect(container).toHaveTextContent(en.liquidium.text.net_value);
-		expect(container).toHaveTextContent(en.liquidium.text.net_apy);
 	});
 
-	it('renders the portfolio health factor percentage', () => {
+	it('labels the yearly supply earnings with the APY suffix', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio } });
 
-		expect(container).toHaveTextContent('73%');
+		expect(container).toHaveTextContent(en.liquidium.text.apy_suffix);
 	});
 
-	it('defaults to 100% health when there is no portfolio', () => {
+	it('still renders the block labels when there is no portfolio', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio: null } });
 
-		expect(container).toHaveTextContent('100%');
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
+		expect(container).toHaveTextContent(en.liquidium.text.net_value);
 	});
 
-	it('renders a negative net APY with a minus sign', () => {
-		const negativeApy: LiquidiumPortfolio = {
+	it('signs the net interest from net interest, not net value', () => {
+		const netNegative: LiquidiumPortfolio = {
 			...portfolio,
 			reserves: [
+				{ ...portfolio.reserves[0], suppliedUsd: 1000, supplyApy: 1 },
 				{
 					...portfolio.reserves[0],
-					supplyApy: 1,
-					borrowApy: 20,
-					borrowedUsd: 900
+					poolId: 'pool-eth',
+					suppliedUsd: 0,
+					borrowedUsd: 1000,
+					borrowApy: 5
 				}
 			],
-			totalBorrowedUsd: 900,
-			netValueUsd: 100
+			totalSuppliedUsd: 1000,
+			totalBorrowedUsd: 1000,
+			// Positive on purpose: the sign must follow net interest, not this.
+			netValueUsd: 200
 		};
 
-		const { container } = render(LiquidiumSummary, { props: { portfolio: negativeApy } });
+		const { container } = render(LiquidiumSummary, { props: { portfolio: netNegative } });
 
-		// Weighted (1000·1 − 900·20) / 100 < 0 → shown with a minus sign.
-		expect(container).toHaveTextContent('−');
+		// Net interest = (1000·1 − 1000·5) / 100 = −$40/yr.
+		expect(container).toHaveTextContent('−$40.00');
+		expect(container).not.toHaveTextContent('+$40.00');
 	});
 
-	it('renders an at-risk health factor (amber band)', () => {
-		const { container } = render(LiquidiumSummary, {
-			props: { portfolio: { ...portfolio, healthFactorPercent: 30 } }
-		});
+	it('hides the health factor bar when there is no debt', () => {
+		const { container } = render(LiquidiumSummary, { props: { portfolio } });
 
-		expect(container).toHaveTextContent('30%');
+		expect(container).not.toHaveTextContent(en.liquidium.text.health_factor);
 	});
 
-	it('renders a critical health factor (red band)', () => {
-		const { container } = render(LiquidiumSummary, {
-			props: { portfolio: { ...portfolio, healthFactorPercent: 8 } }
-		});
+	it('shows the health factor bar when there is debt', () => {
+		const withDebt: LiquidiumPortfolio = {
+			...portfolio,
+			totalBorrowedUsd: 500,
+			netValueUsd: 500,
+			healthFactorPercent: 42
+		};
 
-		expect(container).toHaveTextContent('8%');
+		const { container } = render(LiquidiumSummary, { props: { portfolio: withDebt } });
+
+		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent('42%');
 	});
 });

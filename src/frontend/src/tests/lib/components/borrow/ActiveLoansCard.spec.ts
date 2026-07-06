@@ -51,4 +51,13 @@ describe('ActiveLoansCard', () => {
 		expect(container).not.toHaveTextContent(en.borrow.text.no_active_loans);
 		expect(container).toHaveTextContent(en.borrow.text.apr);
 	});
+
+	it('hides the health factor when showHealthFactor is false', () => {
+		liquidiumStore.set({ markets: [], portfolio, assetPrices: {} });
+
+		const { container } = render(ActiveLoansCard, { props: { showHealthFactor: false } });
+
+		expect(container).not.toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.borrow.text.apr);
+	});
 });
