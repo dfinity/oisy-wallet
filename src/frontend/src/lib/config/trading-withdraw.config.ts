@@ -16,5 +16,12 @@ export const tradingWithdrawWizardSteps = ({
 	{
 		name: WizardStepsTradingWithdraw.WITHDRAWING,
 		title: i18n.trading.withdraw.progress_title
+	},
+	// Appended after the linear Withdraw → Review → Withdrawing flow so that
+	// `modal.next`/`modal.back` keep stepping through it untouched; the tokens
+	// list is only ever reached via an explicit jump.
+	{
+		name: WizardStepsTradingWithdraw.TOKENS_LIST,
+		title: i18n.send.text.select_token
 	}
 ];
