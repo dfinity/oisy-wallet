@@ -2161,8 +2161,7 @@ interface I18nNotes {
 			expiry_7d: string;
 			expiry_30d: string;
 			single_use: string;
-			destroy_after_viewing: string;
-			destroy_after_viewing_hint: string;
+			single_use_option: string;
 			protects_body: string;
 			create_link: string;
 			link_ready_title: string;
