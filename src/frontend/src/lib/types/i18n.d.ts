@@ -2160,6 +2160,7 @@ interface I18nNotes {
 			expiry_24h: string;
 			expiry_7d: string;
 			expiry_30d: string;
+			single_use: string;
 			destroy_after_viewing: string;
 			destroy_after_viewing_hint: string;
 			protects_body: string;

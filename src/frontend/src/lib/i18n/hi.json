@@ -2634,6 +2634,7 @@
 				"expiry_24h": "",
 				"expiry_7d": "",
 				"expiry_30d": "",
+				"single_use": "",
 				"destroy_after_viewing": "",
 				"destroy_after_viewing_hint": "",
 				"protects_body": "",
