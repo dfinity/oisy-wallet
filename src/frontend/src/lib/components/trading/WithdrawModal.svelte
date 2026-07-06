@@ -151,11 +151,7 @@
 
 		{#if currentStep?.name === WizardStepsTradingWithdraw.TOKENS_LIST}
 			<!-- Network filter is view-only: OISY TRADE holds IC-network tokens only. -->
-			<ModalTokensList
-				networkSelectorViewOnly
-				onSelectNetworkFilter={() => {}}
-				onTokenButtonClick={onSelectToken}
-			>
+			<ModalTokensList networkSelectorViewOnly onTokenButtonClick={onSelectToken}>
 				{#snippet tokenListItem(listToken, onClick)}
 					<ModalTokensListItem {onClick} token={listToken} />
 				{/snippet}
