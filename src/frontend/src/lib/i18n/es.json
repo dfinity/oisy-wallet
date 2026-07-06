@@ -11,6 +11,7 @@
 			"active_loans": "",
 			"no_active_loans": "",
 			"amount_borrowed": "",
+			"apr": "",
 			"borrow_apr_from": ""
 		},
 		"cards": {
@@ -2405,6 +2406,16 @@
 			"debt_after_repay": "",
 			"repay_exceeds_debt": "",
 			"repay_prices_unavailable": ""
+		},
+		"info": {
+			"title": "",
+			"description": "",
+			"fact_1_title": "",
+			"fact_1_description": "",
+			"fact_2_title": "",
+			"fact_2_description": "",
+			"fact_3_title": "",
+			"fact_3_description": ""
 		}
 	},
 	"vaults": {

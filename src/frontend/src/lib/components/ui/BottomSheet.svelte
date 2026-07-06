@@ -34,6 +34,11 @@
 
 	$effect(() => {
 		bottomSheetOpenStore.set(visible);
+
+		// Reset on teardown: modal-driven sheets (e.g. PayDialog) are unmounted on
+		// close rather than toggled via visible, so the effect never re-runs with
+		// false — without this the store stays true and hides the mobile nav bar.
+		return () => bottomSheetOpenStore.set(false);
 	});
 </script>
 

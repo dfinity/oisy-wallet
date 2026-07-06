@@ -23,7 +23,8 @@ describe('lend-borrow.config', () => {
 				name: 'Liquidium',
 				descriptionKey: 'liquidium.text.description',
 				logo: '/images/dapps/liquidium-logo.webp',
-				url: 'https://liquidium.fi/docs/quick-start/core-concepts'
+				url: 'https://liquidium.fi/',
+				docsUrl: 'https://liquidium.fi/docs'
 			});
 		});
 	});
