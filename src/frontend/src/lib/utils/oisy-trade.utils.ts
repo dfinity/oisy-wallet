@@ -20,6 +20,7 @@ import type {
 } from '$lib/types/oisy-trade';
 import type { BadgeVariant } from '$lib/types/style';
 import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	normalizeTextFilter,
@@ -679,7 +680,7 @@ export const mapOisyTradeOrder = ({
 		return undefined;
 	}
 
-	const { side, price, quantity, filled_quantity, status } = order;
+	const { side, price, quantity, filled_quantity, status, created_at } = order;
 
 	return {
 		id,
@@ -691,7 +692,8 @@ export const mapOisyTradeOrder = ({
 		quantity: Number(quantity) / 10 ** base.decimals,
 		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
 		price: Number(price) / 10 ** quote.decimals,
-		status: orderStatusKey(status)
+		status: orderStatusKey(status),
+		createdAt: created_at
 	};
 };
 
@@ -705,6 +707,30 @@ export const mapOisyTradeOrders = ({
 	tokens: IcToken[];
 }): OisyTradeOrderView[] =>
 	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+
+// Terminal-order breakdown for the Order-history header, e.g. "2 filled · 1
+// canceled". Only non-zero buckets appear; an all-empty history yields "".
+export const oisyTradeHistoryCountLabel = ({
+	orders,
+	i18n
+}: {
+	orders: OisyTradeOrderView[];
+	i18n: I18n;
+}): string => {
+	const count = (status: OisyTradeOrderStatus): number =>
+		orders.filter((order) => order.status === status).length;
+
+	return (
+		[
+			{ n: count('Filled'), key: i18n.trading.orders.count_filled },
+			{ n: count('Expired'), key: i18n.trading.orders.count_expired },
+			{ n: count('Canceled'), key: i18n.trading.orders.count_canceled }
+		] as const
+	)
+		.filter(({ n }) => n > 0)
+		.map(({ n, key }) => replacePlaceholders(key, { $count: `${n}` }))
+		.join(' · ');
+};
 
 // Status → display: the i18n label key (under `trading.orders.status`) and the
 // An Open order that has already filled some quantity is shown as the derived

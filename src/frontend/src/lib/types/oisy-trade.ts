@@ -31,6 +31,9 @@ export interface OisyTradeOrderView {
 	// Cumulative filled quantity in whole base tokens.
 	filledQuantity: number;
 	status: OisyTradeOrderStatus;
+	// Submission time in nanoseconds since the Unix epoch — shown as the history
+	// row's meta line (when the order was placed).
+	createdAt: bigint;
 }
 
 // The five candid `OrderStatus` discriminants, flattened to a string union.

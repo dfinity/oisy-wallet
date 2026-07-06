@@ -1702,7 +1702,8 @@
 			"active_orders_empty_deposit": "",
 			"active_orders_empty_place": "",
 			"new_order": "",
-			"new_order_disabled": ""
+			"new_order_disabled": "",
+			"order_history": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1787,7 +1788,10 @@
 			"status_partial": "",
 			"status_filled": "",
 			"status_canceled": "",
-			"status_expired": ""
+			"status_expired": "",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
 		},
 		"order_detail": {
 			"title": "",

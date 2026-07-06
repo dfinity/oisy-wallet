@@ -1702,7 +1702,8 @@
 			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
 			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
 			"new_order": "New order",
-			"new_order_disabled": "Deposit tokens to place a limit order."
+			"new_order_disabled": "Deposit tokens to place a limit order.",
+			"order_history": "Order history"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
@@ -1787,7 +1788,10 @@
 			"status_partial": "Partial",
 			"status_filled": "Filled",
 			"status_canceled": "Canceled",
-			"status_expired": "Expired"
+			"status_expired": "Expired",
+			"count_filled": "$count filled",
+			"count_expired": "$count expired",
+			"count_canceled": "$count canceled"
 		},
 		"order_detail": {
 			"title": "Order details",
