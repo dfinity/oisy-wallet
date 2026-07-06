@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Welcome to Borrow!",
-			"header_description": "Access liquidity without selling — borrow stablecoins or BTC against your crypto.",
+			"header_description": "Access liquidity without selling. Borrow stablecoins or BTC against your crypto.",
 			"borrowing_options": "Borrowing options",
 			"borrowing_potential": "Borrowing potential",
 			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
@@ -11,6 +11,7 @@
 			"active_loans": "Active loans",
 			"no_active_loans": "no active loans",
 			"amount_borrowed": "$amount borrowed",
+			"apr": "APR",
 			"borrow_apr_from": "Borrow APR from"
 		},
 		"cards": {
@@ -2331,7 +2332,7 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Lend & borrow native BTC, ETH, USDC and USDT. Lending logic runs on Liquidium's canisters; $oisy_short provides the UX.",
+			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
 			"net_value": "Net value",
 			"net_apy": "Net APY",
@@ -2405,6 +2406,16 @@
 			"debt_after_repay": "Debt after repay",
 			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
 			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
+		},
+		"info": {
+			"title": "What is Liquidium",
+			"description": "Liquidium is a decentralized, non-custodial lending protocol where you can supply or borrow across multiple blockchain networks. Built on the Internet Computer, it enables cross-chain lending without centralized bridges or wrapped tokens.",
+			"fact_1_title": "Earn on Your BTC",
+			"fact_1_description": "Lend your Bitcoin to earn yield from over-collateralized loans.",
+			"fact_2_title": "Non-Custodial",
+			"fact_2_description": "Deposits are secured by on-chain smart contracts, with no centralized control.",
+			"fact_3_title": "Native, Cross-Chain",
+			"fact_3_description": "Assets stay on their native chains, so you can supply on one and borrow on another."
 		}
 	},
 	"vaults": {

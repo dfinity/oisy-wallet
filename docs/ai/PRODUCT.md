@@ -71,8 +71,9 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 | SignerSignIn                         | `signer`          | —                         |
 | RewardsRequirements                  | `rewards`         | `requirements`            |
 | TransactionsFilterContactsEmptyState | `transactions`    | —                         |
+| LiquidiumInfoBox                     | `liquidium`       | —                         |
 
-**Excluded:** `HarvestAutopilotOverview` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
+**Excluded:** `HarvestAutopilotOverview` / `LiquidiumProviderHero` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
 
 **Deferred to a follow-up:**
 
@@ -163,6 +164,16 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 OISY supports **several dApp connections at once**, each independently manageable. Connecting a new dApp leaves the already-connected ones in place, and the "Connected Apps" list shows every live session. Each row's close button disconnects only that dApp; a "Disconnect all" control tears every connection down in one tap. When a dApp ends its own session, only that entry is removed and the others keep working. Incoming sign/send requests route to the correct session by topic across all open connections. Previously connected sessions are restored after a page refresh.
 
 Requests are still handled **one at a time**: while a request from one dApp is under review, a request arriving from another is rejected with a "request skipped" notice. Session proposals are likewise reviewed one at a time — the user adds connections sequentially (scan/paste → review → approve, then repeat).
+
+---
+
+## Ethereum
+
+### Transaction fees
+
+When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
+
+A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
 ---
 
