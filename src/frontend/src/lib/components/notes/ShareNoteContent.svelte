@@ -136,7 +136,7 @@
 
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
-			<div class="flex flex-wrap gap-2">
+			<div class="flex flex-wrap gap-2 [&_button]:text-sm">
 				{#each EXPIRY_OPTIONS as option (option.ms)}
 					<PillButton onClick={() => (durationMs = option.ms)} selected={durationMs === option.ms}>
 						{$i18n.notes.share.text[option.labelKey]}
