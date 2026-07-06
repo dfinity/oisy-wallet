@@ -5,7 +5,8 @@ import type {
 	OrderBookDepth,
 	OrderBookTicker,
 	OrderId,
-	TradingPair
+	TradingPair,
+	UserOrder
 } from '$declarations/oisy_trade/oisy_trade.did';
 import {
 	addLimitOrder as addLimitOrderApi,
@@ -18,6 +19,10 @@ import {
 	listSupportedTokens,
 	withdraw
 } from '$lib/api/oisy-trade.api';
+import {
+	OISY_TRADE_MAX_ORDER_PAGES,
+	OISY_TRADE_ORDERS_PAGE_SIZE
+} from '$lib/constants/oisy-trade.constants';
 import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
@@ -27,6 +32,49 @@ import { consoleError } from '$lib/utils/console.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+// Loads the caller's orders newest-first, following the `get_my_orders`
+// `ByPage` cursor. The canister caps a page at `OISY_TRADE_ORDERS_PAGE_SIZE`, so
+// up to `OISY_TRADE_MAX_ORDER_PAGES` pages are fetched to surface deeper history.
+// Best-effort: a failing page returns the orders loaded so far, keeping orders
+// non-critical to the rest of the load.
+const loadMyOrders = async ({
+	identity,
+	nullishIdentityErrorMessage
+}: {
+	identity: NonNullable<NullishIdentity>;
+	nullishIdentityErrorMessage: string;
+}): Promise<UserOrder[]> => {
+	const orders: UserOrder[] = [];
+	let after: [] | [OrderId] = [];
+
+	for (let page = 0; page < OISY_TRADE_MAX_ORDER_PAGES; page += 1) {
+		const batch: UserOrder[] | null = await getMyOrders({
+			identity,
+			nullishIdentityErrorMessage,
+			args: { filter: { ByPage: { after, length: OISY_TRADE_ORDERS_PAGE_SIZE } } }
+		}).catch((err: unknown) => {
+			consoleError(err);
+			return null;
+		});
+
+		if (isNullish(batch)) {
+			break;
+		}
+
+		orders.push(...batch);
+
+		// A short page means the oldest order has been reached; stop paging.
+		const lastOrder = batch.at(-1);
+		if (batch.length < OISY_TRADE_ORDERS_PAGE_SIZE || isNullish(lastOrder)) {
+			break;
+		}
+
+		after = [lastOrder.id];
+	}
+
+	return orders;
+};
 
 // Best-effort load of trading pairs, supported tokens and the caller's DEX
 // balances into `oisyTradeStore`; errors are logged so a transient canister
@@ -40,22 +88,13 @@ export const loadOisyTrade = async ({ identity }: { identity: NullishIdentity })
 	const nullishIdentityErrorMessage = get(i18n).auth.error.no_internet_identity;
 
 	try {
-		// `ByPage` with no `after` cursor returns the newest orders first; 100 is
-		// the canister's per-page cap. Pagination of older orders is a follow-up.
-		// Orders are non-critical: a failure there falls back to an empty list so
+		// Orders are non-critical: `loadMyOrders` falls back to whatever loaded so
 		// the core pairs/tokens/balances still populate the Trading tab.
 		const [pairs, supportedTokens, balances, orders] = await Promise.all([
 			getTradingPairs({ identity, nullishIdentityErrorMessage }),
 			listSupportedTokens({ identity, nullishIdentityErrorMessage }),
 			getBalances({ identity, nullishIdentityErrorMessage }),
-			getMyOrders({
-				identity,
-				nullishIdentityErrorMessage,
-				args: { filter: { ByPage: { after: [], length: 100 } } }
-			}).catch((err: unknown) => {
-				consoleError(err);
-				return [];
-			})
+			loadMyOrders({ identity, nullishIdentityErrorMessage })
 		]);
 
 		oisyTradeStore.set({ pairs, supportedTokens, balances, orders });
