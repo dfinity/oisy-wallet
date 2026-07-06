@@ -1695,7 +1695,8 @@
 			"free": "",
 			"in_orders": "",
 			"in_orders_label": "",
-			"positions": ""
+			"positions": "",
+			"deposit": ""
 		},
 		"provider_unavailable": {
 			"title": "",
