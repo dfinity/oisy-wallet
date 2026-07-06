@@ -69,6 +69,19 @@
 			z-index: var(--toast-error-z-index);
 		}
 
+		// Below the medium breakpoint the mobile bottom navigation is shown, fixed
+		// at the bottom of the screen. Lift bottom toasts above it (via the existing
+		// offset hook) so they don't cover the nav. On >= medium the nav is hidden,
+		// so drop the offset back to zero (an explicit length, not `initial`, so it
+		// never depends on the `bottom` fallback carrying a unit).
+		&.bottom {
+			--layout-bottom-offset: calc(4rem + env(safe-area-inset-bottom));
+
+			@include media.min-width(medium) {
+				--layout-bottom-offset: 0px;
+			}
+		}
+
 		@include media.min-width(medium) {
 			// A little narrower than the section to differentiate notifications from content
 			max-width: calc(var(--section-max-width) - var(--padding-2x));
