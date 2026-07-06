@@ -104,4 +104,10 @@ describe('OisyTradeProviderHero', () => {
 
 		expect(onDeposit).toHaveBeenCalledOnce();
 	});
+
+	it('renders the Withdraw button disabled (wiring pending #13395)', () => {
+		const { getByRole } = render(OisyTradeProviderHero, { props: { onDeposit: vi.fn() } });
+
+		expect(getByRole('button', { name: en.trading.page.withdraw })).toBeDisabled();
+	});
 });
