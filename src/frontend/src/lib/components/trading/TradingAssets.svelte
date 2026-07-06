@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { slide } from 'svelte/transition';
 	import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
 	import { TRADING_ASSETS_DEPOSIT_BUTTON } from '$lib/constants/test-ids.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
@@ -22,7 +24,6 @@
 			class="text-sm font-medium text-brand-primary"
 			data-tid={TRADING_ASSETS_DEPOSIT_BUTTON}
 			onclick={onDeposit}
-			type="button"
 		>
 			{$i18n.trading.assets.deposit}
 		</button>
@@ -31,9 +32,9 @@
 	{#if $oisyTradeAssets.length === 0}
 		<p class="py-2 text-tertiary">{$i18n.trading.assets.empty}</p>
 	{:else}
-		<ul class="flex flex-col">
+		<ul class="flex flex-col list-none">
 			{#each $oisyTradeAssets as asset (asset.token.id)}
-				<li>
+				<li transition:slide={SLIDE_PARAMS}>
 					<TradingAssetRow {asset} {onWithdraw} />
 				</li>
 			{/each}

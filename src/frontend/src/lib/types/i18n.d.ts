@@ -2,6 +2,10 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrowings {
+	text: { tab_title: string; no_borrowings: string };
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -72,6 +76,12 @@ interface I18nCore {
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
+interface I18nProgress {
+	completed: string;
+	in_progress: string;
+	failed: string;
+}
+
 interface I18nNavigation {
 	text: {
 		tokens: string;
@@ -96,6 +106,7 @@ interface I18nNavigation {
 		show_balances: string;
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
+		notes: string;
 	};
 	alt: {
 		tokens: string;
@@ -115,6 +126,7 @@ interface I18nNavigation {
 		address_book: string;
 		hide_balances: string;
 		show_balances: string;
+		notes: string;
 	};
 	short: { documentation: string };
 }
@@ -1316,7 +1328,96 @@ interface I18nWallet_connect {
 interface I18nTrading {
 	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
 	provider_unavailable: { title: string; description: string };
-	orders: { title: string; add_limit_order: string };
+	onboarding: {
+		title: string;
+		description: string;
+		step_deposit: string;
+		step_order: string;
+		step_withdraw: string;
+		supported_tokens: string;
+		deposit: string;
+	};
+	assets: {
+		title: string;
+		deposit: string;
+		withdraw: string;
+		available: string;
+		available_label: string;
+		empty: string;
+	};
+	deposit: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		you_deposit: string;
+		to: string;
+		network: string;
+		transaction_fee: string;
+		approval_fee: string;
+		transfer_fee: string;
+		consent: string;
+		info_title: string;
+		info_description: string;
+		empty_title: string;
+		empty_description: string;
+		approving: string;
+		approved: string;
+		approve_description: string;
+		depositing: string;
+		deposit_description: string;
+		done: string;
+		error: { unknown_fee: string; deposit_failed: string };
+	};
+	withdraw: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		amount_label: string;
+		from: string;
+		network: string;
+		transaction_fee: string;
+		transfer_fee: string;
+		you_receive: string;
+		reserved_note: string;
+		submit: string;
+		open: string;
+		progress_withdraw: string;
+		progress_done: string;
+		error: string;
+	};
+	orders: {
+		title: string;
+		add_limit_order: string;
+		tab_active: string;
+		tab_history: string;
+		empty_active: string;
+		empty_history: string;
+		side_sell: string;
+		side_buy: string;
+		row_sell: string;
+		row_buy: string;
+		status_open: string;
+		status_pending: string;
+		status_partial: string;
+		status_filled: string;
+		status_canceled: string;
+		status_expired: string;
+	};
+	order_detail: {
+		title: string;
+		status: string;
+		filled: string;
+		cancel_order: string;
+		cancel_error: string;
+		confirm_title: string;
+		confirm_description: string;
+		confirm_order: string;
+		confirm_price: string;
+		confirm_returns_to_free: string;
+		confirm_keep: string;
+		confirm_order_sell: string;
+		confirm_order_buy: string;
+	};
 	limit_order: {
 		title: string;
 		review_title: string;
@@ -1406,35 +1507,6 @@ interface I18nTrading {
 		placing_sub: string;
 		placing_done: string;
 		place_error: string;
-	};
-	onboarding: { title: string; description: string; deposit: string };
-	assets: {
-		title: string;
-		deposit: string;
-		withdraw: string;
-		available: string;
-		available_label: string;
-		empty: string;
-	};
-	deposit: {
-		title: string;
-		review_title: string;
-		progress_title: string;
-		you_deposit: string;
-		to: string;
-		network: string;
-		transaction_fee: string;
-		approval_fee: string;
-		transfer_fee: string;
-		consent: string;
-		info_title: string;
-		info_description: string;
-		empty_title: string;
-		empty_description: string;
-		approving: string;
-		depositing: string;
-		done: string;
-		error: { unknown_fee: string; deposit_failed: string };
 	};
 }
 
@@ -2010,9 +2082,40 @@ interface I18nAi_assistant {
 	errors: { unknown: string; no_response: string };
 }
 
+interface I18nNotes {
+	text: {
+		title: string;
+		note: string;
+		add_title: string;
+		edit_note: string;
+		delete_note: string;
+		delete_confirm_text: string;
+		back: string;
+		empty_title: string;
+		empty_subtitle: string;
+		empty_add: string;
+		add_note: string;
+		note_label: string;
+		placeholder: string;
+		search_placeholder: string;
+		no_results: string;
+		privacy_info: string;
+		created: string;
+		updated: string;
+		created_updated: string;
+		too_long: string;
+		cap_reached: string;
+		decryption_failed: string;
+	};
+	alt: { edit: string; delete: string };
+	error: { load: string; save: string; delete: string };
+}
+
 interface I18n {
 	lang: Languages;
+	borrowings: I18nBorrowings;
 	core: I18nCore;
+	progress: I18nProgress;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;
@@ -2064,4 +2167,5 @@ interface I18n {
 	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
+	notes: I18nNotes;
 }

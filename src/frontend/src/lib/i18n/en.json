@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "Borrowings",
+			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Cancel",
@@ -75,6 +81,11 @@
 			"video_not_supported": "Your browser does not support video playback."
 		}
 	},
+	"progress": {
+		"completed": "Completed",
+		"in_progress": "In progress",
+		"failed": "Failed"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
@@ -98,7 +109,8 @@
 			"hide_balances": "Hide balances",
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
-			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances."
+			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
+			"notes": "Notes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -117,7 +129,8 @@
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
-			"show_balances": "Show the hidden balances"
+			"show_balances": "Show the hidden balances",
+			"notes": "Open notes"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -1640,9 +1653,98 @@
 			"title": "Trading is temporarily unavailable",
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
 		},
+		"onboarding": {
+			"title": "Trade on-chain with OISY TRADE",
+			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"step_deposit": "Deposit a supported token",
+			"step_order": "Place a limit order",
+			"step_withdraw": "Withdraw anytime",
+			"supported_tokens": "Supported tokens",
+			"deposit": "Deposit"
+		},
+		"assets": {
+			"title": "My assets",
+			"deposit": "+ Deposit",
+			"withdraw": "Withdraw",
+			"available": "Available: $amount",
+			"available_label": "Available:",
+			"empty": "No assets deposited yet"
+		},
+		"deposit": {
+			"title": "Deposit",
+			"review_title": "Review deposit",
+			"progress_title": "Depositing",
+			"you_deposit": "You deposit",
+			"to": "To",
+			"network": "Network",
+			"transaction_fee": "Total estimated fee",
+			"approval_fee": "Approval fee",
+			"transfer_fee": "Network fee",
+			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
+			"info_title": "OISY TRADE: on-chain order book",
+			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
+			"empty_title": "Nothing to deposit yet",
+			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
+			"approving": "Approving",
+			"approved": "Approved",
+			"approve_description": "OISY TRADE authorised to transfer $symbol",
+			"depositing": "Depositing",
+			"deposit_description": "Transferring $symbol to OISY TRADE",
+			"done": "Done",
+			"error": {
+				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
+				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
+			}
+		},
+		"withdraw": {
+			"title": "Withdraw",
+			"review_title": "Review withdrawal",
+			"progress_title": "Withdrawing",
+			"amount_label": "You withdraw",
+			"from": "From",
+			"network": "Network",
+			"transaction_fee": "Transaction fee",
+			"transfer_fee": "Transfer fee",
+			"you_receive": "You receive",
+			"reserved_note": "$amount reserved · locked by open orders",
+			"submit": "Withdraw",
+			"open": "Withdraw",
+			"progress_withdraw": "Sending $symbol to your wallet",
+			"progress_done": "Done",
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
+		},
 		"orders": {
 			"title": "Orders",
-			"add_limit_order": "+ Limit order"
+			"add_limit_order": "+ Limit order",
+			"tab_active": "Active",
+			"tab_history": "History",
+			"empty_active": "No active orders",
+			"empty_history": "No past orders",
+			"side_sell": "Sell",
+			"side_buy": "Buy",
+			"row_sell": "$quantity $base for $quote at $price",
+			"row_buy": "$base with $quote_amount $quote at $price",
+			"status_open": "Open",
+			"status_pending": "Pending",
+			"status_partial": "Partial",
+			"status_filled": "Filled",
+			"status_canceled": "Canceled",
+			"status_expired": "Expired"
+		},
+		"order_detail": {
+			"title": "Order details",
+			"status": "Status",
+			"filled": "Filled",
+			"cancel_order": "Cancel order",
+			"cancel_error": "The order couldn't be canceled — it stays active. Try again in a moment.",
+			"confirm_title": "Cancel this limit order?",
+			"confirm_description": "The reserved funds return to your free balance. This can't be undone. You can place a new order anytime.",
+			"confirm_order": "Order",
+			"confirm_price": "Price",
+			"confirm_returns_to_free": "Returns to free",
+			"confirm_keep": "Keep order",
+			"confirm_order_sell": "Sell $base for $quote",
+			"confirm_order_buy": "Buy $base with $quote"
 		},
 		"limit_order": {
 			"title": "Limit order",
@@ -1733,42 +1835,6 @@
 			"placing_sub": "Sending limit order to OISY TRADE",
 			"placing_done": "Order placed",
 			"place_error": "Could not place the order. Please try again."
-		},
-		"onboarding": {
-			"title": "Trade on-chain with OISY TRADE",
-			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
-			"deposit": "Deposit"
-		},
-		"assets": {
-			"title": "My assets",
-			"deposit": "+ Deposit",
-			"withdraw": "Withdraw",
-			"available": "Available: $amount",
-			"available_label": "Available:",
-			"empty": "No assets deposited yet"
-		},
-		"deposit": {
-			"title": "Deposit",
-			"review_title": "Review deposit",
-			"progress_title": "Depositing",
-			"you_deposit": "You deposit",
-			"to": "To",
-			"network": "Network",
-			"transaction_fee": "Transaction fee",
-			"approval_fee": "Approval fee",
-			"transfer_fee": "Transfer fee",
-			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
-			"info_title": "OISY TRADE: on-chain order book",
-			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
-			"empty_title": "Nothing to deposit yet",
-			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
-			"approving": "Approving",
-			"depositing": "Depositing",
-			"done": "Done",
-			"error": {
-				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
-				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
-			}
 		}
 	},
 	"transaction": {
@@ -2480,6 +2546,41 @@
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
 			"no_response": "Sorry, I didn't get a response from the LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Notes",
+			"note": "Note",
+			"add_title": "Add new note",
+			"edit_note": "Edit note",
+			"delete_note": "Delete note",
+			"delete_confirm_text": "This will delete the note '$note'. This action cannot be undone.",
+			"back": "Back",
+			"empty_title": "Your notes are empty",
+			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
+			"empty_add": "Add new note",
+			"add_note": "Add note",
+			"note_label": "Note",
+			"placeholder": "Write a note…",
+			"search_placeholder": "Search note",
+			"no_results": "No notes match your search.",
+			"privacy_info": "Only you can see your notes, stored encrypted in $oisy_short.",
+			"created": "Created $date",
+			"updated": "Updated $date",
+			"created_updated": "Created $created · Updated $updated",
+			"too_long": "Note must be $maxCharacters characters or fewer.",
+			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
+			"decryption_failed": "Couldn't decrypt this note"
+		},
+		"alt": {
+			"edit": "Edit note",
+			"delete": "Delete note"
+		},
+		"error": {
+			"load": "Couldn't load your notes. Please try again.",
+			"save": "Couldn't save your note. Please try again.",
+			"delete": "Couldn't delete your note. Please try again."
 		}
 	}
 }

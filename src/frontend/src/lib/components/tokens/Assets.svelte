@@ -3,7 +3,9 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
+	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { TRADING_ENABLED } from '$env/trading';
+	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -61,7 +63,7 @@
 			{#snippet header()}
 				<div class="flex w-full justify-between">
 					<div class="relative flex grow-1 justify-between">
-						<TokensFilter>
+						<TokensFilter hideFilter={tab === TokenTypes.TRADING}>
 							{#snippet overflowableContent()}
 								<Tabs
 									styleClass="mt-2 mb-6"
@@ -83,6 +85,15 @@
 														label: $i18n.earning.text.tab_title,
 														id: TokenTypes.EARNING,
 														path: `${AppPath.Earning}${page.url.search}`
+													}
+												]
+											: []),
+										...(anyLendBorrowProviderEnabled
+											? [
+													{
+														label: $i18n.borrowings.text.tab_title,
+														id: TokenTypes.BORROWINGS,
+														path: `${AppPath.Borrowings}${page.url.search}`
 													}
 												]
 											: []),
@@ -131,6 +142,8 @@
 				<EarningsList />
 			{:else if activeTab === TokenTypes.TRADING}
 				<TradingList />
+			{:else if activeTab === TokenTypes.BORROWINGS}
+				<BorrowingsList />
 			{/if}
 		</StickyHeader>
 

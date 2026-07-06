@@ -1,4 +1,10 @@
 {
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"no_borrowings": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Anuluj",
@@ -75,6 +81,11 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Zakończono",
+		"in_progress": "W toku",
+		"failed": "Niepowodzenie"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Aktywa",
@@ -98,7 +109,8 @@
 			"hide_balances": "Ukryj salda",
 			"show_balances": "Pokaż salda",
 			"privacy_mode_enabled": "Tryb prywatności włączony. Naciśnij [P], aby ponownie pokazać salda.",
-			"privacy_mode_disabled": "Tryb prywatności wyłączony. Naciśnij [P], aby ukryć salda."
+			"privacy_mode_disabled": "Tryb prywatności wyłączony. Naciśnij [P], aby ukryć salda.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "Przejdź do widoku aktywów",
@@ -117,7 +129,8 @@
 			"refer_a_friend": "Wygeneruj link polecający dla znajomego",
 			"address_book": "Otwórz kontakty",
 			"hide_balances": "Ukryj wyświetlane salda",
-			"show_balances": "Pokaż ukryte salda"
+			"show_balances": "Pokaż ukryte salda",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "Dokumentacja"
@@ -1640,9 +1653,98 @@
 			"title": "",
 			"description": ""
 		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"deposit": "",
+			"withdraw": "",
+			"available": "",
+			"available_label": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
+			"to": "",
+			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"consent": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
+			"approving": "",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
+		},
+		"withdraw": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"amount_label": "",
+			"from": "",
+			"network": "",
+			"transaction_fee": "",
+			"transfer_fee": "",
+			"you_receive": "",
+			"reserved_note": "",
+			"submit": "",
+			"open": "",
+			"progress_withdraw": "",
+			"progress_done": "",
+			"error": ""
+		},
 		"orders": {
 			"title": "",
-			"add_limit_order": ""
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "",
+			"empty_history": "",
+			"side_sell": "",
+			"side_buy": "",
+			"row_sell": "",
+			"row_buy": "",
+			"status_open": "",
+			"status_pending": "",
+			"status_partial": "",
+			"status_filled": "",
+			"status_canceled": "",
+			"status_expired": ""
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
 		},
 		"limit_order": {
 			"title": "",
@@ -1733,42 +1835,6 @@
 			"placing_sub": "",
 			"placing_done": "",
 			"place_error": ""
-		},
-		"onboarding": {
-			"title": "",
-			"description": "",
-			"deposit": ""
-		},
-		"assets": {
-			"title": "",
-			"deposit": "",
-			"withdraw": "",
-			"available": "",
-			"available_label": "",
-			"empty": ""
-		},
-		"deposit": {
-			"title": "",
-			"review_title": "",
-			"progress_title": "",
-			"you_deposit": "",
-			"to": "",
-			"network": "",
-			"transaction_fee": "",
-			"approval_fee": "",
-			"transfer_fee": "",
-			"consent": "",
-			"info_title": "",
-			"info_description": "",
-			"empty_title": "",
-			"empty_description": "",
-			"approving": "",
-			"depositing": "",
-			"done": "",
-			"error": {
-				"unknown_fee": "",
-				"deposit_failed": ""
-			}
 		}
 	},
 	"transaction": {
@@ -2480,6 +2546,41 @@
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",
 			"no_response": "Przepraszamy, nie otrzymałem odpowiedzi od LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"privacy_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
 		}
 	}
 }

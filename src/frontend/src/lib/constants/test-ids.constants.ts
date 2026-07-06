@@ -8,6 +8,7 @@ export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
+export const NAVIGATION_MENU_NOTES_BUTTON = 'navigation-menu-notes-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
@@ -267,6 +268,18 @@ export const ADDRESS_EDIT_CANCEL_BUTTON = 'address-edit-cancel-button';
 export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
+export const NOTES_MODAL = 'notes-modal';
+export const NOTES_SEARCH_INPUT = 'notes-search-input';
+export const NOTES_NO_RESULTS = 'notes-no-results';
+export const NOTES_LIST = 'notes-list';
+export const NOTES_LIST_ITEM = 'notes-list-item';
+export const NOTES_RETRY_DECRYPT_BUTTON = 'notes-retry-decrypt-button';
+export const NOTES_ADD_BUTTON = 'notes-add-button';
+export const NOTES_VIEW = 'notes-view';
+export const NOTES_VIEW_EDIT_BUTTON = 'notes-view-edit-button';
+export const NOTES_VIEW_DELETE_BUTTON = 'notes-view-delete-button';
+export const NOTES_BACK_BUTTON = 'notes-back-button';
+
 export const CONTACT_SHOW_ADD_ADDRESS_BUTTON = 'contact-show-add-address-button';
 export const CONTACT_SHOW_CLOSE_BUTTON = 'contact-show-close-button';
 export const CONTACT_HEADER_EDIT_BUTTON = 'contact-header-edit-button';
@@ -345,12 +358,18 @@ export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-withdraw-button';
 
 // Trading
+export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
 export const TRADING_ASSETS_DEPOSIT_BUTTON = 'trading-assets-deposit-button';
 export const TRADING_ASSET_WITHDRAW_BUTTON = 'trading-asset-withdraw-button';
 export const TRADING_ONBOARDING_DEPOSIT_BUTTON = 'trading-onboarding-deposit-button';
 export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
 export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
 export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbox';
+export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
+export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
+export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
+export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
+export const TRADING_ORDER_CANCEL_CONFIRM_BUTTON = 'trading-order-cancel-confirm-button';
 
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
@@ -368,3 +387,6 @@ export const GET_TOKEN_MODAL_OPEN_SWAP_BUTTON = 'get-token-modal-open-swap-butto
 
 // BUY MODAL
 export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';
+
+// CONFIRMATION POPUP
+export const CONFIRMATION_POPUP_MODAL = 'confirmation-popup-modal';

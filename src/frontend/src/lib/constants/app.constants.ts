@@ -212,6 +212,16 @@ export const CONTACT_MAX_LABEL_LENGTH = 50;
 // Contact validation
 export const CONTACT_MAX_NAME_LENGTH = 100;
 
+// Personal notes
+// Cleartext cap, enforced client-side (the backend only ever sees ciphertext).
+// Counted in Unicode code points, not UTF-16 units, so emoji / CJK / astral
+// characters are measured as the user sees them.
+export const MAX_PERSONAL_NOTE_LENGTH = 2_000;
+// Per-user cap; mirrors the backend's `MAX_PERSONAL_NOTES_PER_USER`. Drives the
+// client-side "at capacity" gate; the backend `TooManyNotes` rejection remains
+// the source of truth.
+export const MAX_PERSONAL_NOTES_PER_USER = 1_000;
+
 // Network bonus multiplier
 export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
