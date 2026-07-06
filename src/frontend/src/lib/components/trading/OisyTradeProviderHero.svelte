@@ -130,6 +130,15 @@
 						{$i18n.trading.page.deposited_empty}
 					{/if}
 				</span>
+
+				<!--
+					Withdraw is disabled until #13395 lets the withdraw form open without a
+					pre-selected token. Wiring it (and gating it to when the user has
+					deposits, per the spec's Empty state) is the follow-up once that lands.
+				-->
+				<Button colorStyle="primary" disabled fullWidth styleClass="mt-4 sm:mt-auto">
+					{$i18n.trading.page.withdraw}
+				</Button>
 			</div>
 		</div>
 	{/snippet}

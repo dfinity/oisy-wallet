@@ -1696,7 +1696,8 @@
 			"in_orders": "$amount in orders",
 			"in_orders_label": "in orders",
 			"positions": "My positions",
-			"deposit": "Deposit"
+			"deposit": "Deposit",
+			"withdraw": "Withdraw"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
