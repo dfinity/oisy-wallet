@@ -1,5 +1,6 @@
 import type { IcToken } from '$icp/types/ic-token';
 import OisyTradeActiveOrders from '$lib/components/trading/OisyTradeActiveOrders.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
 import en from '$tests/mocks/i18n.mock';
@@ -44,7 +45,8 @@ const order: OisyTradeOrderView = {
 	quantity: 10,
 	price: 2.5,
 	filledQuantity: 0,
-	status: 'Open'
+	status: 'Open',
+	createdAt: ZERO
 };
 
 describe('OisyTradeActiveOrders', () => {

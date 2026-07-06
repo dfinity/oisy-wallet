@@ -34,6 +34,7 @@ import {
 	oisyTradeAssetHasReserved,
 	oisyTradeAssetMatchesFilter,
 	oisyTradeDepositableTokens,
+	oisyTradeHistoryCountLabel,
 	oisyTradeOrderDisplayStatus,
 	oisyTradeOrderMatchesFilter,
 	oisyTradeSupportedTokenSymbols,
@@ -53,6 +54,7 @@ import {
 	valueDifferencePercent
 } from '$lib/utils/oisy-trade.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -649,6 +651,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity,
 		filledQuantity = ZERO,
 		status,
+		createdAt = 42n,
 		base = baseLedgerId,
 		quote = quoteLedgerId
 	}: {
@@ -658,6 +661,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity: bigint;
 		filledQuantity?: bigint;
 		status: OisyTradeOrderStatus;
+		createdAt?: bigint;
 		base?: string;
 		quote?: string;
 	}): UserOrder =>
@@ -669,7 +673,8 @@ describe('oisy-trade.utils — orders', () => {
 				price,
 				quantity,
 				filled_quantity: filledQuantity,
-				status: { [status]: null }
+				status: { [status]: null },
+				created_at: createdAt
 			}
 		}) as unknown as UserOrder;
 
@@ -695,7 +700,8 @@ describe('oisy-trade.utils — orders', () => {
 				quantity: 100,
 				price: 2.75,
 				filledQuantity: 25,
-				status: 'Open'
+				status: 'Open',
+				createdAt: 42n
 			});
 		});
 
@@ -765,6 +771,32 @@ describe('oisy-trade.utils — orders', () => {
 			const views = mapOisyTradeOrders({ orders, tokens });
 
 			expect(views.map(({ id }) => id)).toEqual(['a', 'c']);
+		});
+	});
+
+	describe('oisyTradeHistoryCountLabel', () => {
+		const history = (...statuses: OisyTradeOrderStatus[]): OisyTradeOrderView[] =>
+			mapOisyTradeOrders({
+				orders: statuses.map((status) =>
+					buildOrder({ side: 'Sell', quantity: 1n, price: 1n, status })
+				),
+				tokens
+			});
+
+		it('joins the non-zero terminal buckets with a middot', () => {
+			expect(
+				oisyTradeHistoryCountLabel({ orders: history('Filled', 'Filled', 'Canceled'), i18n: en })
+			).toBe('2 filled · 1 canceled');
+		});
+
+		it('omits empty buckets and keeps the filled/expired/canceled order', () => {
+			expect(oisyTradeHistoryCountLabel({ orders: history('Expired', 'Filled'), i18n: en })).toBe(
+				'1 filled · 1 expired'
+			);
+		});
+
+		it('is empty for no history', () => {
+			expect(oisyTradeHistoryCountLabel({ orders: [], i18n: en })).toBe('');
 		});
 	});
 
@@ -861,7 +893,8 @@ describe('oisy-trade.utils — search', () => {
 		quantity: 100,
 		price: 2.5,
 		filledQuantity: 0,
-		status: 'Open'
+		status: 'Open',
+		createdAt: ZERO
 	};
 
 	describe('oisyTradeAssetMatchesFilter', () => {
