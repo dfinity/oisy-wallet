@@ -4,6 +4,7 @@
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import { TRADING_ENABLED } from '$env/trading';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import OisyTradePositions from '$lib/components/trading/OisyTradePositions.svelte';
 	import OisyTradeProviderHero from '$lib/components/trading/OisyTradeProviderHero.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
@@ -29,6 +30,8 @@
 			<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
 
 			<OisyTradeProviderHero />
+
+			<OisyTradePositions />
 		{:else}
 			<EmptyState
 				description={$i18n.trading.provider_unavailable.description}
