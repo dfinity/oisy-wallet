@@ -1684,6 +1684,17 @@
 			"learn_more": "",
 			"provider_name": ""
 		},
+		"page": {
+			"tagline": "",
+			"tagline_desktop": "",
+			"trading_potential": "",
+			"trading_potential_hint": "",
+			"deposited_assets": "",
+			"deposited_all_free": "",
+			"deposited_empty": "",
+			"free": "",
+			"in_orders": ""
+		},
 		"provider_unavailable": {
 			"title": "",
 			"description": ""

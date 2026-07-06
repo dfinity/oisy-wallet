@@ -42,6 +42,7 @@ import {
 	queuePositionDisplay,
 	queuePositionFraction,
 	spendAmount,
+	sumOisyTradeAssetsFreeUsd,
 	sumOisyTradeAssetsUsd,
 	toOisyTradeWithdrawTokens,
 	toPairView,
@@ -147,6 +148,19 @@ describe('oisy-trade.utils — balances & deposit', () => {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				] as any)
 			).toBe(15);
+		});
+	});
+
+	describe('sumOisyTradeAssetsFreeUsd', () => {
+		it('sums the free fiat value, treating undefined as zero', () => {
+			expect(
+				sumOisyTradeAssetsFreeUsd([
+					{ freeUsd: 8 },
+					{ freeUsd: undefined },
+					{ freeUsd: 2 }
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				] as any)
+			).toBe(10);
 		});
 	});
 

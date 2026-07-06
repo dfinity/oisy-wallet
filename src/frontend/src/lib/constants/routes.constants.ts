@@ -15,6 +15,7 @@ export enum AppPath {
 	Borrowings = '/borrowings/',
 	Liabilities = '/liabilities/',
 	ProvidersLiquidium = '/providers/liquidium/',
+	ProvidersOisyTrade = '/providers/oisy-trade/',
 	LicenseAgreement = '/license-agreement/',
 	PrivacyPolicy = '/privacy-policy/',
 	TermsOfUse = '/terms-of-use/'
