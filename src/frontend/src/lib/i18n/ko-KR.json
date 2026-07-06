@@ -11,6 +11,7 @@
 			"active_loans": "",
 			"no_active_loans": "",
 			"amount_borrowed": "",
+			"apr": "",
 			"borrow_apr_from": ""
 		},
 		"cards": {
