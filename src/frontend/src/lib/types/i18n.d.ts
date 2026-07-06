@@ -14,6 +14,7 @@ interface I18nBorrow {
 		active_loans: string;
 		no_active_loans: string;
 		amount_borrowed: string;
+		apr: string;
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
