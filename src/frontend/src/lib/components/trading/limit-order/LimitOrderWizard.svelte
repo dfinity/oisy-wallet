@@ -27,6 +27,7 @@
 		type LimitOrderSide,
 		presetTargetPrice,
 		priceLevelToHuman,
+		referenceRate,
 		toCandidSide,
 		toPairView,
 		toPriceUnits,
@@ -115,20 +116,11 @@
 	);
 
 	// "Current value" reference the percentage presets (Market / ±%) and the
-	// value-difference indicator anchor on. Deliberately the *cross* of the two
-	// legs' USD exchange-rate prices (base ÷ quote), NOT the DEX order-book mid.
-	// Unusual for an order-book UI, but intentional: the book mid can be stale or
-	// one-sided on a thin book, whereas the USD feed gives a stable fair-value
-	// reference independent of current on-chain liquidity. The book bid/ask/mid
-	// still drives the Bid/Ask preset and the crossing / fill-or-kill checks.
-	// 0 when either price is missing, so the percentage presets and the
-	// value-difference stay inert until the feed loads.
-	const currentValue = $derived.by((): number => {
-		if (nonNullish(baseUsdPrice) && nonNullish(quoteUsdPrice) && quoteUsdPrice > 0) {
-			return baseUsdPrice / quoteUsdPrice;
-		}
-		return 0;
-	});
+	// value-difference indicator anchor on: the cross of the two legs' USD
+	// exchange-rate prices, NOT the DEX order-book mid (see `referenceRate`). The
+	// book bid/ask/mid still drives the Bid/Ask preset and the crossing /
+	// fill-or-kill checks.
+	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
 
 	// While a preset is latched, keep the price tracking its live target as the
 	// reference rate (or book) moves — but only on the Form step. Opening Review

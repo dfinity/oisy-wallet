@@ -41,6 +41,7 @@ import {
 	presetTargetPrice,
 	queuePositionDisplay,
 	queuePositionFraction,
+	referenceRate,
 	spendAmount,
 	sumOisyTradeAssetsUsd,
 	toOisyTradeWithdrawTokens,
@@ -441,6 +442,19 @@ describe('oisy-trade.utils — limit order', () => {
 			expect(
 				maxSpendBaseAmount({ side: 'buy', freeBase: 0, freeQuote: 30, price: 0, pair })
 			).toBeNull();
+		});
+	});
+
+	describe('referenceRate', () => {
+		it('is the cross of the two USD prices (base ÷ quote)', () => {
+			expect(referenceRate({ baseUsd: 6.6, quoteUsd: 1 })).toBeCloseTo(6.6, 6);
+			expect(referenceRate({ baseUsd: 2, quoteUsd: 0.5 })).toBeCloseTo(4, 6);
+		});
+
+		it('is 0 when either price is missing or the quote price is non-positive', () => {
+			expect(referenceRate({ baseUsd: undefined, quoteUsd: 1 })).toBe(0);
+			expect(referenceRate({ baseUsd: 6.6, quoteUsd: undefined })).toBe(0);
+			expect(referenceRate({ baseUsd: 6.6, quoteUsd: 0 })).toBe(0);
 		});
 	});
 
