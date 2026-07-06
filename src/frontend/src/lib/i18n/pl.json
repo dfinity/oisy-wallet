@@ -1697,7 +1697,10 @@
 			"in_orders_label": "",
 			"positions": "",
 			"deposit": "",
-			"withdraw": ""
+			"withdraw": "",
+			"active_orders": "",
+			"active_orders_empty_deposit": "",
+			"active_orders_empty_place": ""
 		},
 		"provider_unavailable": {
 			"title": "",

@@ -1697,7 +1697,10 @@
 			"in_orders_label": "in orders",
 			"positions": "My positions",
 			"deposit": "Deposit",
-			"withdraw": "Withdraw"
+			"withdraw": "Withdraw",
+			"active_orders": "Active orders",
+			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
+			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one."
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
