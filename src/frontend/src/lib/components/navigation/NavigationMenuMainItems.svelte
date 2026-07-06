@@ -119,23 +119,23 @@
 	const url = (path: AppPath): string =>
 		networkUrl({ path, networkId, usePreviousRoute: isTransactionsRoute, fromRoute });
 
-	// NFTs left the Assets tabs (it is now its own destination), so the Assets
-	// link never resolves to the NFTs page — a persisted NFTS tab falls back to
-	// the Tokens list.
+	// NFTs and Trading each have their own destination now, so the Assets link
+	// never resolves to them — a persisted NFTS or TRADING tab falls back to the
+	// Tokens list (Trading cannot be reinstated from the Assets link).
 	const assetsPath = $derived.by(() => {
 		if ($activeAssetsTabStore === TokenTypes.EARNING) {
 			return AppPath.Earning;
-		}
-
-		if ($activeAssetsTabStore === TokenTypes.TRADING) {
-			return AppPath.Trading;
 		}
 
 		if ($activeAssetsTabStore === TokenTypes.BORROWINGS) {
 			return AppPath.Borrowings;
 		}
 
-		if ($activeAssetsTabStore === TokenTypes.TOKENS || $activeAssetsTabStore === TokenTypes.NFTS) {
+		if (
+			$activeAssetsTabStore === TokenTypes.TOKENS ||
+			$activeAssetsTabStore === TokenTypes.NFTS ||
+			$activeAssetsTabStore === TokenTypes.TRADING
+		) {
 			return AppPath.Tokens;
 		}
 

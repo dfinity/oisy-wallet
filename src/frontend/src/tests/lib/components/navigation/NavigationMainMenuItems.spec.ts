@@ -110,6 +110,17 @@ describe('NavigationMainMenuItems', () => {
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
 	});
 
+	it('keeps the assets link on the Tokens list when a stale TRADING tab is persisted', () => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TRADING });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
+		expect(tokenLink.getAttribute('href')).not.toContain(AppPath.Trading);
+		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
+	});
+
 	it('builds assets link with Earning path when assetsTab = EARNING', () => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.EARNING });
 
