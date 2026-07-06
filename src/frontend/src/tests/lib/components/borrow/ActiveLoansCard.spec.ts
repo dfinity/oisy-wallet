@@ -49,5 +49,6 @@ describe('ActiveLoansCard', () => {
 
 		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
 		expect(container).not.toHaveTextContent(en.borrow.text.no_active_loans);
+		expect(container).toHaveTextContent(en.borrow.text.apr);
 	});
 });
