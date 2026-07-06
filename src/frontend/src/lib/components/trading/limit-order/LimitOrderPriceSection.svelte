@@ -10,7 +10,6 @@
 		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
-		isPresetSelected,
 		presetTargetPrice,
 		type PricePreset,
 		queuePositionDisplay,
@@ -91,18 +90,6 @@
 			{ $base: base }
 		);
 	});
-
-	const presetSelected = (preset: PricePreset): boolean =>
-		active &&
-		isPresetSelected({
-			preset,
-			price: priceNum,
-			side,
-			currentValue,
-			bid,
-			ask,
-			tickSize: pairView?.tickSize ?? 0
-		});
 
 	const setPreset = (preset: PricePreset) => {
 		if (!nonNullish(pairView)) {
@@ -197,6 +184,12 @@
 	const bidAskLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.preset_bid : $i18n.trading.limit_order.preset_ask
 	);
+	const presets = $derived<{ preset: PricePreset; label: string }[]>([
+		{ preset: 'book', label: bidAskLabel },
+		{ preset: 0, label: $i18n.trading.limit_order.preset_market },
+		{ preset: 1, label: presetLabel1 },
+		{ preset: 5, label: presetLabel5 }
+	]);
 </script>
 
 <div
@@ -208,41 +201,24 @@
 	<div class="flex items-center justify-between gap-2">
 		<span class="text-xs text-secondary">{label}</span>
 		<div class="flex items-center gap-1.5 text-xs">
-			<button
-				class="underline"
-				class:font-semibold={presetSelected('book')}
-				class:text-brand-primary={!presetSelected('book')}
-				class:text-primary={presetSelected('book')}
-				onclick={() => setPreset('book')}
-				type="button">{bidAskLabel}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(0)}
-				class:text-brand-primary={!presetSelected(0)}
-				class:text-primary={presetSelected(0)}
-				onclick={() => setPreset(0)}
-				type="button">{$i18n.trading.limit_order.preset_market}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(1)}
-				class:text-brand-primary={!presetSelected(1)}
-				class:text-primary={presetSelected(1)}
-				onclick={() => setPreset(1)}
-				type="button">{presetLabel1}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(5)}
-				class:text-brand-primary={!presetSelected(5)}
-				class:text-primary={presetSelected(5)}
-				onclick={() => setPreset(5)}
-				type="button">{presetLabel5}</button
-			>
+			{#each presets as { preset, label }, i (preset)}
+				{#if i > 0}
+					<span class="text-tertiary">·</span>
+				{/if}
+				<!-- Border marks the latched preset; it clears on a manual price edit
+					 (which nulls `activePreset`) and follows the market while latched. -->
+				<button
+					class="rounded border px-1 py-0.5 transition-colors"
+					class:border-brand-primary={activePreset === preset}
+					class:border-transparent={activePreset !== preset}
+					class:font-semibold={activePreset === preset}
+					class:text-brand-primary={activePreset !== preset}
+					class:text-primary={activePreset === preset}
+					class:underline={activePreset !== preset}
+					onclick={() => setPreset(preset)}
+					type="button">{label}</button
+				>
+			{/each}
 		</div>
 	</div>
 

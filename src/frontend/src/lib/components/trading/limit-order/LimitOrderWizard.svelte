@@ -8,7 +8,8 @@
 	import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { oisyTradeIcTokenBySymbol, oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import {
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
 		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
@@ -24,6 +25,7 @@
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,
+		presetTargetPrice,
 		priceLevelToHuman,
 		toCandidSide,
 		toPairView,
@@ -98,14 +100,60 @@
 			: null;
 	});
 
-	// "Current value" reference: order-book mid-price (best on-chain reference
-	// available without the full USD feed integration; see PR notes). Falls back
-	// to whichever side exists, else 0 (presets/value-difference then inert).
+	// USD exchange-rate price of each leg, from the app-wide price feed.
+	const baseToken = $derived(
+		nonNullish(baseSymbol) ? $oisyTradeIcTokenBySymbol[baseSymbol] : undefined
+	);
+	const quoteToken = $derived(
+		nonNullish(quoteSymbol) ? $oisyTradeIcTokenBySymbol[quoteSymbol] : undefined
+	);
+	const baseUsdPrice = $derived(
+		nonNullish(baseToken) ? $exchanges?.[baseToken.id]?.usd : undefined
+	);
+	const quoteUsdPrice = $derived(
+		nonNullish(quoteToken) ? $exchanges?.[quoteToken.id]?.usd : undefined
+	);
+
+	// "Current value" reference the percentage presets (Market / ±%) and the
+	// value-difference indicator anchor on. Deliberately the *cross* of the two
+	// legs' USD exchange-rate prices (base ÷ quote), NOT the DEX order-book mid.
+	// Unusual for an order-book UI, but intentional: the book mid can be stale or
+	// one-sided on a thin book, whereas the USD feed gives a stable fair-value
+	// reference independent of current on-chain liquidity. The book bid/ask/mid
+	// still drives the Bid/Ask preset and the crossing / fill-or-kill checks.
+	// 0 when either price is missing, so the percentage presets and the
+	// value-difference stay inert until the feed loads.
 	const currentValue = $derived.by((): number => {
-		if (nonNullish(bid) && nonNullish(ask)) {
-			return (bid + ask) / 2;
+		if (nonNullish(baseUsdPrice) && nonNullish(quoteUsdPrice) && quoteUsdPrice > 0) {
+			return baseUsdPrice / quoteUsdPrice;
 		}
-		return bid ?? ask ?? 0;
+		return 0;
+	});
+
+	// While a preset is latched, keep the price tracking its live target as the
+	// reference rate (or book) moves — but only on the Form step. Opening Review
+	// freezes the price: this effect stops running there, mirroring how the swap
+	// flow freezes its quote at review. A manual price edit clears `activePreset`
+	// (see LimitOrderForm), so typing detaches the price from the market.
+	$effect(() => {
+		if (
+			currentStep?.name !== WizardStepsLimitOrder.FORM ||
+			isNullish(activePreset) ||
+			isNullish(pairView)
+		) {
+			return;
+		}
+		const target = presetTargetPrice({
+			preset: activePreset,
+			side,
+			currentValue,
+			bid,
+			ask,
+			tickSize: pairView.tickSize
+		});
+		if (nonNullish(target)) {
+			price = target.toString();
+		}
 	});
 
 	// Aggregated depth in human units, for the queue-position projection.
@@ -150,6 +198,24 @@
 	});
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
+
+	// Frozen market snapshot captured the moment Review opens, so the confirmation
+	// screen stays put while the ticker / price feed keep polling underneath.
+	let reviewCurrentValue = $state(0);
+	let reviewBid = $state<number | null>(null);
+	let reviewAsk = $state<number | null>(null);
+	let reviewDepthLevels = $state<{
+		asks: { price: number; quantity: number }[];
+		bids: { price: number; quantity: number }[];
+	}>({ asks: [], bids: [] });
+
+	const openReview = () => {
+		reviewCurrentValue = currentValue;
+		reviewBid = bid;
+		reviewAsk = ask;
+		reviewDepthLevels = depthLevels;
+		goTo(WizardStepsLimitOrder.REVIEW);
+	};
 
 	// Parsed Review inputs, guarded against NaN from empty/partial fields so the
 	// Review step never renders NaN (nor feeds NaN% into ValueDifference).
@@ -261,11 +327,11 @@
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
-		{ask}
+		ask={reviewAsk}
 		baseAmount={reviewBaseAmount}
-		{bid}
-		{currentValue}
-		{depthLevels}
+		bid={reviewBid}
+		currentValue={reviewCurrentValue}
+		depthLevels={reviewDepthLevels}
 		{fillOrKill}
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
@@ -283,7 +349,7 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
+		onReview={openReview}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}
