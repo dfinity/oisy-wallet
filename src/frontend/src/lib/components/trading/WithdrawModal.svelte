@@ -29,19 +29,17 @@
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
-		// A preselection only — the user can switch to any other DEX holding in-modal.
+		// Seeds the initial selection only; the user can switch token in-modal.
 		withdrawToken: OisyTradeWithdrawToken;
 	}
 
 	let { withdrawToken }: Props = $props();
 
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
-	// svelte-ignore state_referenced_locally -- the prop only seeds the initial selection; afterwards the token is driven by the in-modal picker.
+	// svelte-ignore state_referenced_locally -- prop seeds the initial selection only
 	let token = $state<IcToken>(withdrawToken.token);
 
-	// free/reserved follow the selected token, read live from the polled DEX
-	// balances. The prop snapshot only covers the preselected token while the
-	// store has no data (e.g. right after opening).
+	// Falls back to the prop snapshot until the DEX balances store has loaded.
 	let { free, reserved } = $derived.by(() => {
 		const asset = $oisyTradeAssets.find(({ token: { id } }) => id === token.id);
 
@@ -64,10 +62,7 @@
 		tradingWithdrawWizardSteps({ i18n: $i18n })
 	);
 
-	// The picker lists the user's DEX holdings with the withdrawable (free)
-	// balance instead of the wallet balance — same trick as the limit-order
-	// tokens list. `sortByBalance: false` below keeps these preset balances from
-	// being re-mapped to the wallet balances store.
+	// Show the withdrawable (free) DEX balance, not the wallet balance.
 	const withdrawableTokens = $derived(
 		$oisyTradeAssets.map(({ token: assetToken, free: assetFree, freeUsd }) => ({
 			...assetToken,
@@ -76,17 +71,17 @@
 		}))
 	);
 
-	// Reuse the shared token-picker pipeline (search box + filters) the deposit
-	// modal uses. The page's selected network is honored for the same reason: a
-	// testnet DEX (staging) must not have its own tokens stripped by the default
-	// pseudo-chain-fusion (mainnet-only) view.
 	const tokensListContext = initModalTokensListContext({
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
-		// svelte-ignore state_referenced_locally -- the context is initialized once at mount; the reactive token list is kept in sync below via `setTokens`.
+		// svelte-ignore state_referenced_locally -- kept in sync below via setTokens
 		tokens: withdrawableTokens,
+		// Honor the page network so a testnet DEX (staging) isn't stripped by the
+		// default mainnet-only view.
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
-		// svelte-ignore state_referenced_locally -- initialized once at mount; the page network is fixed for the modal's lifetime and locks the in-modal selector below.
+		// svelte-ignore state_referenced_locally -- page network is fixed for the modal's lifetime
 		filterNetwork: $selectedNetwork,
+		// Keep the free balances above from being re-sorted against the wallet
+		// balances store.
 		sortByBalance: false
 	});
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
@@ -115,8 +110,6 @@
 		goToStep(WizardStepsTradingWithdraw.WITHDRAW);
 	};
 
-	// The picker only ever lists DEX holdings; resolve the selection back to the
-	// matching asset the withdraw flow needs.
 	const onSelectToken = (selected: Token) => {
 		const matched = $oisyTradeAssets.find(({ token: { id } }) => id === selected.id);
 
@@ -157,8 +150,7 @@
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		{#if currentStep?.name === WizardStepsTradingWithdraw.TOKENS_LIST}
-			<!-- OISY TRADE holds IC-network tokens only, so the network filter stays
-				view-only — the shared picker still renders search and category filters. -->
+			<!-- Network filter is view-only: OISY TRADE holds IC-network tokens only. -->
 			<ModalTokensList
 				networkSelectorViewOnly
 				onSelectNetworkFilter={() => {}}

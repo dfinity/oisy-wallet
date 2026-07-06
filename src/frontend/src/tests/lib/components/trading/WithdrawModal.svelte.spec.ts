@@ -149,7 +149,6 @@ describe('WithdrawModal', () => {
 			props: { withdrawToken }
 		});
 
-		// The preselected ICP holding has nothing reserved.
 		expect(container).not.toHaveTextContent('reserved · locked by open orders');
 
 		await fireEvent.click(getTokenPill({ getAllByText, symbol: 'ICP' }));
@@ -158,8 +157,7 @@ describe('WithdrawModal', () => {
 
 		await fireEvent.click(getByText('ckBTC'));
 
-		// Back on the form, with the token — and its free/reserved DEX balance —
-		// switched to the selected holding.
+		// Back on the form, with free/reserved now following the selected token.
 		await waitFor(() => {
 			expect(container).toHaveTextContent(en.trading.withdraw.amount_label);
 			expect(getTokenPill({ getAllByText, symbol: 'ckBTC' })).toBeInTheDocument();
