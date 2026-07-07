@@ -9,6 +9,7 @@
 			"available_best_provider": "",
 			"remaining_best_provider": "",
 			"active_loans": "",
+			"no_active_loans": "",
 			"amount_borrowed": "",
 			"apr": "",
 			"borrow_apr_from": ""
@@ -2373,6 +2374,7 @@
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",
+			"no_assets_supplied": "",
 			"supplied": "",
 			"borrowed": "",
 			"borrow_rate": "",

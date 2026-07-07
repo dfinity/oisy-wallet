@@ -9,6 +9,7 @@
 			"available_best_provider": "available · best provider",
 			"remaining_best_provider": "remaining · best provider",
 			"active_loans": "Active loans",
+			"no_active_loans": "no active loans",
 			"amount_borrowed": "$amount borrowed",
 			"apr": "APR",
 			"borrow_apr_from": "Borrow APR from"
@@ -2373,6 +2374,7 @@
 			"net_value": "Net value",
 			"markets": "Markets",
 			"total_supplied": "Total supplied",
+			"no_assets_supplied": "no assets supplied",
 			"supplied": "Supplied",
 			"borrowed": "Borrowed",
 			"borrow_rate": "Borrow rate",
