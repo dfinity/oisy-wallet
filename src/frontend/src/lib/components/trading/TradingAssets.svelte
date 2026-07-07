@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
+	import OisyTradePositionRow from '$lib/components/trading/OisyTradePositionRow.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -29,7 +29,7 @@
 		<ul class="flex flex-col list-none">
 			{#each filteredAssets as asset (asset.token.id)}
 				<li transition:slide={SLIDE_PARAMS}>
-					<TradingAssetRow {asset} />
+					<OisyTradePositionRow {asset} variant="holdings" />
 				</li>
 			{/each}
 		</ul>
