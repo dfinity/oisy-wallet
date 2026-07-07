@@ -11,6 +11,10 @@ const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade, mockGoto } =
 	mockGoto: vi.fn()
 }));
 
+// `anyTradingProviderEnabled` currently derives from `OISY_TRADE_ENABLED`, but
+// it is mocked independently on purpose: it lets us drive the multi-provider
+// state where the surface stays reachable (another provider on) while OISY TRADE
+// is off, which is what the provider-unavailable EmptyState branch handles.
 vi.mock('$env/trading', () => ({
 	get anyTradingProviderEnabled() {
 		return mockTradingEnabled.value;
