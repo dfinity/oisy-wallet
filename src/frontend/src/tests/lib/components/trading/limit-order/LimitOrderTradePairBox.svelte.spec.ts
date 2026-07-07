@@ -54,6 +54,17 @@ describe('LimitOrderTradePairBox', () => {
 		expect(quoteInput).toHaveValue('48');
 	});
 
+	it('formats the muted quote amount to the quote decimals (no float artifacts)', () => {
+		// 0.1 * 3 = 0.30000000000000004 in raw float; the readout must round it.
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps, baseAmount: '0.1', price: '3' }
+		});
+
+		const [, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(quoteInput).toHaveValue('0.3');
+	});
+
 	it('renders the buy labels', () => {
 		const { container } = render(LimitOrderTradePairBox, {
 			props: { ...baseProps, side: 'buy' }

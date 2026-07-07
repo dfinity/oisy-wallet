@@ -69,10 +69,15 @@
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
 
-	// The quote leg is a muted, non-editable readout of the derived amount; below
-	// the min notional (or before a base is chosen) it stays empty so the shared
-	// input shows its placeholder instead of a stray `0`.
-	const quoteAmountValue = $derived<OptionAmount>(quoteAmount > 0 ? quoteAmount : undefined);
+	// The quote leg is a muted, non-editable readout of the derived amount. Format
+	// it to the quote decimals (as a string) so float artifacts from `base × price`
+	// (e.g. 0.1 × 3) never leak into the field; below the min notional (or before a
+	// base is chosen) it stays empty so the shared input shows its placeholder.
+	const quoteAmountValue = $derived<OptionAmount>(
+		quoteAmount > 0
+			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
+			: undefined
+	);
 
 	// The quote can only be chosen once a base is set (the quote list is filtered
 	// by the base's markets), mirroring the previous disabled-pill behaviour.
