@@ -4,6 +4,7 @@
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import { TRADING_ENABLED } from '$env/trading';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import OisyTradeActiveOrders from '$lib/components/trading/OisyTradeActiveOrders.svelte';
 	import OisyTradePositions from '$lib/components/trading/OisyTradePositions.svelte';
 	import OisyTradeProviderHero from '$lib/components/trading/OisyTradeProviderHero.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
@@ -48,6 +49,8 @@
 			<OisyTradeProviderHero onDeposit={openDeposit} onWithdraw={openWithdraw} />
 
 			<OisyTradePositions />
+
+			<OisyTradeActiveOrders />
 
 			{#if $modalTradingDeposit && $modalStore?.id === depositModalId}
 				<TradingDepositModal />

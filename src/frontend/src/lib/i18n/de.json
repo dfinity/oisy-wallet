@@ -1697,7 +1697,10 @@
 			"in_orders_label": "",
 			"positions": "",
 			"deposit": "",
-			"withdraw": ""
+			"withdraw": "",
+			"active_orders": "",
+			"active_orders_empty_deposit": "",
+			"active_orders_empty_place": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1776,6 +1779,9 @@
 			"side_buy": "",
 			"row_sell": "",
 			"row_buy": "",
+			"row_phrase_sell": "",
+			"row_phrase_buy": "",
+			"queue_ahead": "",
 			"status_open": "",
 			"status_pending": "",
 			"status_partial": "",
