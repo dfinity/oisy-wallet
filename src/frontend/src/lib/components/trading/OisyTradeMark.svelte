@@ -5,6 +5,12 @@
 	}
 
 	let { size = '64' }: Props = $props();
+
+	// Unique per-instance prefix so the two marks on the provider page (hero + info
+	// box) don't emit duplicate `clipPath` / `filter` ids and cross-resolve `url(#…)`.
+	const uid = $props.id();
+	const clipId = `oisyTradeMarkClip-${uid}`;
+	const shadowId = `oisyTradeMarkShadow-${uid}`;
 </script>
 
 <svg
@@ -16,8 +22,8 @@
 	width={size}
 	xmlns="http://www.w3.org/2000/svg"
 >
-	<g clip-path="url(#oisyTradeMarkClip)">
-		<g filter="url(#oisyTradeMarkShadow)">
+	<g clip-path="url(#{clipId})">
+		<g filter="url(#{shadowId})">
 			<circle cx="128" cy="128" fill="#06f" r="128" />
 		</g>
 		<rect
@@ -95,11 +101,11 @@
 		/>
 	</g>
 	<defs>
-		<clipPath id="oisyTradeMarkClip">
+		<clipPath id={clipId}>
 			<rect fill="#fff" height="256" rx="128" width="256" />
 		</clipPath>
 		<filter
-			id="oisyTradeMarkShadow"
+			id={shadowId}
 			color-interpolation-filters="sRGB"
 			filterUnits="userSpaceOnUse"
 			height="260.151"
