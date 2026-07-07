@@ -9,7 +9,6 @@
 			"available_best_provider": "available · best provider",
 			"remaining_best_provider": "remaining · best provider",
 			"active_loans": "Active loans",
-			"no_active_loans": "no active loans",
 			"amount_borrowed": "$amount borrowed",
 			"apr": "APR",
 			"borrow_apr_from": "Borrow APR from"
@@ -1721,10 +1720,6 @@
 		},
 		"assets": {
 			"title": "My positions",
-			"deposit": "+ Deposit",
-			"withdraw": "Withdraw",
-			"available": "Available: $amount",
-			"available_label": "Available:",
 			"empty": "No assets deposited yet"
 		},
 		"deposit": {

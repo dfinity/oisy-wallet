@@ -12,7 +12,6 @@ interface I18nBorrow {
 		available_best_provider: string;
 		remaining_best_provider: string;
 		active_loans: string;
-		no_active_loans: string;
 		amount_borrowed: string;
 		apr: string;
 		borrow_apr_from: string;
@@ -1394,14 +1393,7 @@ interface I18nTrading {
 		supported_tokens: string;
 		deposit: string;
 	};
-	assets: {
-		title: string;
-		deposit: string;
-		withdraw: string;
-		available: string;
-		available_label: string;
-		empty: string;
-	};
+	assets: { title: string; empty: string };
 	deposit: {
 		title: string;
 		review_title: string;
