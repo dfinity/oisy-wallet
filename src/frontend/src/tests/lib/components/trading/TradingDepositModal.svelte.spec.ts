@@ -109,7 +109,9 @@ describe('TradingDepositModal', () => {
 			balances: undefined,
 			orders: undefined
 		});
-		balancesStore.set({ id: icp.id, data: { data: 100000000n, certified: true } });
+		// Comfortably above the 1-token deposit used below plus its two ledger fees,
+		// so the amount validation does not flag it as exceeding the wallet balance.
+		balancesStore.set({ id: icp.id, data: { data: 1000000000n, certified: true } });
 	};
 
 	it('should render the deposit form when there is a depositable token', () => {

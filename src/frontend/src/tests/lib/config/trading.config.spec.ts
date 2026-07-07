@@ -19,7 +19,7 @@ describe('trading.config', () => {
 		it('uses the matching i18n titles', () => {
 			expect(steps.map(({ title }) => title)).toEqual([
 				en.trading.deposit.title,
-				en.send.text.select_token,
+				en.trading.deposit.title,
 				en.send.text.select_network_filter,
 				en.trading.deposit.review_title,
 				en.trading.deposit.progress_title

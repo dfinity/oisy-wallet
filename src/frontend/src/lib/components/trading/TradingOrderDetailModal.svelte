@@ -48,6 +48,7 @@
 		priceLevelToHuman,
 		queuePositionDisplay,
 		queuePositionFraction,
+		referenceRate,
 		toPairView,
 		toTradingPair,
 		valueDifferencePercent
@@ -120,12 +121,13 @@
 		return nonNullish(level) && nonNullish(pairView) ? toHuman(level).price : null;
 	});
 
-	const currentValue = $derived.by((): number => {
-		if (nonNullish(bid) && nonNullish(ask)) {
-			return (bid + ask) / 2;
-		}
-		return bid ?? ask ?? 0;
-	});
+	// "Current value" anchors on the cross of the two legs' USD exchange-rate
+	// prices (base ÷ quote), NOT the DEX order-book mid — mirroring the reference
+	// the limit-order creation flow uses (see `referenceRate`). The book bid/ask
+	// still drive the crossing check below.
+	const baseUsdPrice = $derived($exchanges?.[base.id]?.usd);
+	const quoteUsdPrice = $derived($exchanges?.[quote.id]?.usd);
+	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));

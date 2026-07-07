@@ -16,7 +16,8 @@ import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: vi.fn().mockReturnValue(ZERO)
+	parseToken: vi.fn().mockReturnValue(ZERO),
+	tryParseToken: vi.fn().mockReturnValue(ZERO)
 }));
 
 describe('SwapSolForm', () => {

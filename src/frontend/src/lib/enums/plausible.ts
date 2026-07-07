@@ -21,7 +21,9 @@ export enum PLAUSIBLE_EVENTS {
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
 	ONRAMPER_OPEN = 'onramper_open',
-	TRADING = 'trading'
+	TRADING = 'trading',
+	PERSONAL_NOTE = 'personal_note',
+	PERSONAL_NOTE_SHARE = 'personal_note_share'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -47,7 +49,8 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	SIGNER = 'signer',
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more',
-	TRADING = 'trading'
+	TRADING = 'trading',
+	PERSONAL_NOTES = 'personal_notes'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
@@ -86,6 +89,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRADING {
 	WITHDRAW = 'withdraw'
 }
 
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
+	SHARE = 'share'
+}
+
 export enum PLAUSIBLE_EVENT_VALUES {
 	NFT = 'nft',
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
@@ -97,7 +104,8 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	TOKENS_BASIC = 'tokens_basic',
 	TOKENS_EXTENDED = 'tokens_extended',
 	TRANSACTIONS_BASIC = 'transactions_basic',
-	TRANSACTIONS_EXTENDED = 'transactions_extended'
+	TRANSACTIONS_EXTENDED = 'transactions_extended',
+	FIRST_NOTE = 'first_note'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
@@ -126,7 +134,10 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	REWARDS = 'rewards',
 	TRANSACTIONS = 'transactions',
 	LIQUIDIUM = 'liquidium',
-	OISY_TRADE = 'oisy_trade'
+	OISY_TRADE = 'oisy_trade',
+	NOTES = 'notes',
+	NOTE_SHARE_DIALOG = 'share_dialog',
+	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {
