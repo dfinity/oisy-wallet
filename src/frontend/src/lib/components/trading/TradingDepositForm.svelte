@@ -24,6 +24,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		token?: IcToken;
@@ -60,8 +61,31 @@
 		nonNullish(token) ? ($balancesStore?.[token.id]?.data ?? ZERO) : undefined
 	);
 
+	let depositBaseUnits = $derived(
+		nonNullish(token) &&
+			!invalidAmount(amount) &&
+			Number.isFinite(Number(amount)) &&
+			Number(amount) > 0
+			? parseToken({ value: `${amount}`, unitName: token.decimals })
+			: ZERO
+	);
+
+	// The wallet must cover the deposit plus both ledger fees (approve + transfer_from).
+	let exceedsBalance = $derived(
+		nonNullish(walletBalance) && nonNullish(totalFee) && depositBaseUnits + totalFee > walletBalance
+	);
+
+	// Drives the red input highlight; the disable + inline message read the same
+	// synchronous derived so there is no debounce gap on the Review button.
+	const onCustomValidate = (): TokenActionErrorType =>
+		exceedsBalance ? 'insufficient-funds' : undefined;
+
 	let invalid = $derived(
-		!consent || invalidAmount(amount) || Number(amount) === 0 || nonNullish(errorType)
+		!consent ||
+			invalidAmount(amount) ||
+			Number(amount) === 0 ||
+			exceedsBalance ||
+			nonNullish(errorType)
 	);
 </script>
 
@@ -69,14 +93,15 @@
 	<div class="mb-4">
 		<TokenInput
 			displayUnit={inputUnit}
-			{errorType}
 			{exchangeRate}
 			isSelectable
 			onClick={onSelectToken}
+			{onCustomValidate}
 			showTokenNetwork
 			{token}
 			bind:amount
 			bind:amountSetToMax
+			bind:errorType
 		>
 			{#snippet title()}{$i18n.trading.deposit.you_deposit}{/snippet}
 
@@ -106,6 +131,12 @@
 				{/if}
 			{/snippet}
 		</TokenInput>
+
+		{#if exceedsBalance}
+			<p class="mt-1 text-xs text-error-primary">
+				{$i18n.trading.deposit.error_insufficient_balance}
+			</p>
+		{/if}
 	</div>
 
 	<div class="mb-4">

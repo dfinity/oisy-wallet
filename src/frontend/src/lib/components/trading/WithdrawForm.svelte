@@ -18,6 +18,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -49,6 +50,7 @@
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let errorType = $state<TokenActionErrorType>();
 
 	// Withdraw enters the GROSS amount debited from the free balance; the user
 	// receives gross minus the ledger transfer fee. Shown live so the net is
@@ -66,10 +68,19 @@
 		grossBaseUnits > transferFee ? grossBaseUnits - transferFee : ZERO
 	);
 
+	// The withdrawable balance is the free (non-reserved) portion; anything above
+	// it is locked by open orders and would make the service call fail.
+	let exceedsFree = $derived(grossBaseUnits > free);
+
+	// Drives the red input highlight; the disable + inline message read the same
+	// synchronous derived so there is no debounce gap on the Review button.
+	const onCustomValidate = (): TokenActionErrorType =>
+		exceedsFree ? 'insufficient-funds' : undefined;
+
 	// Block the gross-equals-or-below-fee case: the net transfer would be <= 0,
 	// which the ledger rejects, so the withdraw is guaranteed to fail.
 	let invalid = $derived(
-		invalidAmount(amount) || Number(amount) === 0 || grossBaseUnits <= transferFee
+		invalidAmount(amount) || Number(amount) === 0 || grossBaseUnits <= transferFee || exceedsFree
 	);
 </script>
 
@@ -80,10 +91,12 @@
 			exchangeRate={$sendTokenExchangeRate}
 			isSelectable
 			onClick={onSelectToken}
+			{onCustomValidate}
 			showTokenNetwork
 			token={$sendToken}
 			bind:amount
 			bind:amountSetToMax
+			bind:errorType
 		>
 			{#snippet title()}{$i18n.trading.withdraw.amount_label}{/snippet}
 
@@ -108,6 +121,12 @@
 				/>
 			{/snippet}
 		</TokenInput>
+
+		{#if exceedsFree}
+			<p class="mt-1 text-xs text-error-primary">
+				{$i18n.trading.withdraw.error_insufficient_balance}
+			</p>
+		{/if}
 
 		{#if reserved > ZERO}
 			<p class="mt-2 text-xs text-tertiary">
