@@ -54,6 +54,14 @@ describe('OisyTradeProviderHero', () => {
 		expect(getByText(en.trading.page.deposited_assets)).toBeInTheDocument();
 	});
 
+	it('separates the two tagline sentences with a space', () => {
+		const { container } = render(OisyTradeProviderHero);
+
+		expect(container).toHaveTextContent(
+			`${en.trading.page.tagline} ${en.trading.page.tagline_desktop}`
+		);
+	});
+
 	it('shows the "nothing deposited" sub-line when there are no deposits', () => {
 		const { getByText } = render(OisyTradeProviderHero);
 
