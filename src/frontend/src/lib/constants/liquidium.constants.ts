@@ -31,7 +31,8 @@ export const LIQUIDIUM_ASSET_TOKENS: Record<string, Token> = {
 export const LIQUIDIUM_ICP_TEASER_MARKET: LiquidiumMarket = {
 	poolId: 'icp-teaser',
 	asset: ICP_TOKEN.symbol,
-	chain: ICP_TOKEN.network.name,
+	// SDK-chain-style id (cf. 'BTC'/'ETH'); inert here since the teaser never opens a modal.
+	chain: 'ICP',
 	supplyApy: 0,
 	borrowApy: 0,
 	frozen: false,
