@@ -1702,7 +1702,6 @@
 			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
 			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
 			"new_order": "New order",
-			"new_order_disabled": "Deposit tokens to place a limit order.",
 			"order_history": "Order history"
 		},
 		"provider_unavailable": {
