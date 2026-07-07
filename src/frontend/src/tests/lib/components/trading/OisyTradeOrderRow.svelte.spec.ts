@@ -1,10 +1,11 @@
 import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import OisyTradeOrderRow from '$lib/components/trading/OisyTradeOrderRow.svelte';
+import { modalStore } from '$lib/stores/modal.store';
 import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 // A single ICP/ckUSDC pair so the row can resolve tick size / decimals for queue position.
 vi.mock('$lib/derived/oisy-trade.derived', async () => {
@@ -105,6 +106,16 @@ describe('OisyTradeOrderRow', () => {
 		const { queryByText } = render(OisyTradeOrderRow, { props: { order } });
 
 		expect(queryByText('OISY TRADE')).toBeNull();
+	});
+
+	it('opens the order-detail modal with the order on click', async () => {
+		const openSpy = vi.spyOn(modalStore, 'openOisyTradeOrderDetail');
+
+		const { container } = render(OisyTradeOrderRow, { props: { order } });
+
+		await fireEvent.click(container.querySelector('button') as HTMLButtonElement);
+
+		expect(openSpy).toHaveBeenCalledWith(expect.objectContaining({ data: order }));
 	});
 
 	it('shows the queue position when there is volume ahead', () => {
