@@ -1371,6 +1371,9 @@ interface I18nTrading {
 		positions: string;
 		deposit: string;
 		withdraw: string;
+		active_orders: string;
+		active_orders_empty_deposit: string;
+		active_orders_empty_place: string;
 	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
@@ -1443,6 +1446,9 @@ interface I18nTrading {
 		side_buy: string;
 		row_sell: string;
 		row_buy: string;
+		row_phrase_sell: string;
+		row_phrase_buy: string;
+		queue_ahead: string;
 		status_open: string;
 		status_pending: string;
 		status_partial: string;
