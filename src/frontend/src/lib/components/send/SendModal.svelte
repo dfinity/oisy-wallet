@@ -12,9 +12,9 @@
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import {
@@ -281,7 +281,7 @@
 	};
 </script>
 
-<SendTokenContext token={$token}>
+<TokenActionContext token={$token}>
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
@@ -348,4 +348,4 @@
 			{/if}
 		{/key}
 	</WizardModal>
-</SendTokenContext>
+</TokenActionContext>

@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import WithdrawWizard from '$lib/components/trading/WithdrawWizard.svelte';
@@ -138,7 +138,7 @@
 	const close = () => closeModal(reset);
 </script>
 
-<SendTokenContext {token}>
+<TokenActionContext {token}>
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsTradingWithdraw.WITHDRAWING ||
@@ -180,4 +180,4 @@
 			/>
 		{/if}
 	</WizardModal>
-</SendTokenContext>
+</TokenActionContext>

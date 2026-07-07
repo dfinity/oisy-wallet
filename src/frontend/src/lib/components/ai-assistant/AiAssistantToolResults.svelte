@@ -3,7 +3,7 @@
 	import AiAssistantReviewSendTokenTool from '$lib/components/ai-assistant/AiAssistantReviewSendTokenTool.svelte';
 	import AiAssistantShowBalanceTool from '$lib/components/ai-assistant/AiAssistantShowBalanceTool.svelte';
 	import AiAssistantShowContactsTool from '$lib/components/ai-assistant/AiAssistantShowContactsTool.svelte';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import { type ToolResult, ToolResultType } from '$lib/types/ai-assistant';
 
 	interface Props {
@@ -23,12 +23,12 @@
 		{:else if type === ToolResultType.SHOW_BALANCE && nonNullish(result) && 'mainCard' in result}
 			<AiAssistantShowBalanceTool {...result} {loading} {onSendMessage} />
 		{:else if type === ToolResultType.REVIEW_SEND_TOKENS && nonNullish(result) && 'token' in result}
-			<SendTokenContext token={result.token}>
+			<TokenActionContext token={result.token}>
 				<AiAssistantReviewSendTokenTool
 					{...result}
 					sendEnabled={isLastItem && results.length - 1 === index}
 				/>
-			</SendTokenContext>
+			</TokenActionContext>
 		{/if}
 	{/each}
 </div>
