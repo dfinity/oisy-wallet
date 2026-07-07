@@ -1394,14 +1394,7 @@ interface I18nTrading {
 		supported_tokens: string;
 		deposit: string;
 	};
-	assets: {
-		title: string;
-		deposit: string;
-		withdraw: string;
-		available: string;
-		available_label: string;
-		empty: string;
-	};
+	assets: { title: string; empty: string };
 	deposit: {
 		title: string;
 		review_title: string;
