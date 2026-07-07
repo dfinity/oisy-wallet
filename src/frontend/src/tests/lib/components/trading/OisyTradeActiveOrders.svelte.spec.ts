@@ -84,18 +84,18 @@ describe('OisyTradeActiveOrders', () => {
 
 	it('opens the limit-order modal when New order is clicked and the user has deposits', async () => {
 		hasAssetsMock.set(true);
-		const openSpy = vi.spyOn(modalStore, 'openLimitOrder').mockImplementation(() => {});
+		const openSpy = vi.spyOn(modalStore, 'openLimitOrder').mockImplementation((_id: symbol) => {});
 
 		const { getByRole } = render(OisyTradeActiveOrders);
 
 		await fireEvent.click(getByRole('button', { name: en.trading.page.new_order }));
 
 		expect(openSpy).toHaveBeenCalled();
+
+		openSpy.mockRestore();
 	});
 
 	it('disables the New order button when the user has no deposits', () => {
-		// The disabled button is wrapped in a tooltip span (also role=button), so
-		// target the actual <button> via its label text.
 		const { getByText } = render(OisyTradeActiveOrders);
 
 		expect(getByText(en.trading.page.new_order).closest('button')).toBeDisabled();
