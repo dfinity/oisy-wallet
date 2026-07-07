@@ -1400,6 +1400,7 @@ interface I18nTrading {
 		review_title: string;
 		progress_title: string;
 		you_deposit: string;
+		error_insufficient_balance: string;
 		to: string;
 		network: string;
 		transaction_fee: string;
@@ -1429,6 +1430,7 @@ interface I18nTrading {
 		transfer_fee: string;
 		you_receive: string;
 		reserved_note: string;
+		error_insufficient_balance: string;
 		submit: string;
 		open: string;
 		progress_withdraw: string;
