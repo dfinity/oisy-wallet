@@ -8,11 +8,16 @@
 	import OisyTradePositions from '$lib/components/trading/OisyTradePositions.svelte';
 	import OisyTradeProviderHero from '$lib/components/trading/OisyTradeProviderHero.svelte';
 	import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
+	import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalTradingDeposit } from '$lib/derived/modal.derived';
+	import {
+		modalOisyTradeWithdraw,
+		modalOisyTradeWithdrawData,
+		modalTradingDeposit
+	} from '$lib/derived/modal.derived';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,6 +26,11 @@
 
 	const depositModalId = Symbol();
 	const openDeposit = () => modalStore.openTradingDeposit(depositModalId);
+
+	// Open the withdraw flow with no pre-selected token — the modal starts on its
+	// token picker (see WithdrawModal); enabled from the hero only once deposited.
+	const withdrawModalId = Symbol();
+	const openWithdraw = () => modalStore.openOisyTradeWithdraw({ id: withdrawModalId });
 
 	// The whole surface is gated by the Trading feature flag; off (production)
 	// the route shouldn't be reachable, so send stragglers back to the wallet.
@@ -36,7 +46,7 @@
 		{#if OISY_TRADE_ENABLED}
 			<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
 
-			<OisyTradeProviderHero onDeposit={openDeposit} />
+			<OisyTradeProviderHero onDeposit={openDeposit} onWithdraw={openWithdraw} />
 
 			<OisyTradePositions />
 
@@ -44,6 +54,10 @@
 
 			{#if $modalTradingDeposit && $modalStore?.id === depositModalId}
 				<TradingDepositModal />
+			{/if}
+
+			{#if $modalOisyTradeWithdraw && $modalStore?.id === withdrawModalId}
+				<WithdrawModal withdrawToken={$modalOisyTradeWithdrawData} />
 			{/if}
 		{:else}
 			<EmptyState
