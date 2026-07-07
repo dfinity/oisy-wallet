@@ -11,7 +11,8 @@ import {
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
-	NAVIGATION_ITEM_TOKENS
+	NAVIGATION_ITEM_TOKENS,
+	NAVIGATION_ITEM_TRADE
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
@@ -40,6 +41,7 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NFTS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
