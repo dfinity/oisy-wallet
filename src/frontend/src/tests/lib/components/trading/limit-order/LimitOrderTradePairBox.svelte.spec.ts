@@ -129,4 +129,27 @@ describe('LimitOrderTradePairBox', () => {
 
 		expect(onSelectQuote).toHaveBeenCalledOnce();
 	});
+
+	it('does not invoke onSelectQuote until a base token is picked', async () => {
+		const onSelectQuote = vi.fn();
+
+		// No base yet: the quote list is filtered by the base's markets, so the
+		// quote selector must stay inert until a base is chosen.
+		const { getAllByText } = render(LimitOrderTradePairBox, {
+			props: {
+				...baseProps,
+				baseSymbol: undefined,
+				baseToken: undefined,
+				quoteSymbol: undefined,
+				quoteToken: undefined,
+				onSelectQuote
+			}
+		});
+
+		// Both legs show "Select token" without a token; the quote one is second.
+		const [, quoteSelect] = getAllByText(en.tokens.text.select_token);
+		await fireEvent.click(quoteSelect);
+
+		expect(onSelectQuote).not.toHaveBeenCalled();
+	});
 });
