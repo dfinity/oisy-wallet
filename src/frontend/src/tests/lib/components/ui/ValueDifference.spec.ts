@@ -37,12 +37,14 @@ describe('ValueDifference', () => {
 	it('renders nothing when the value is undefined', () => {
 		const { container } = render(ValueDifference, { props: { value: undefined } });
 
+		expect(container.querySelectorAll('*')).toHaveLength(0);
 		expect(container).toHaveTextContent('');
 	});
 
 	it('renders nothing when the value is not finite', () => {
 		const { container } = render(ValueDifference, { props: { value: Number.NaN } });
 
+		expect(container.querySelectorAll('*')).toHaveLength(0);
 		expect(container).toHaveTextContent('');
 	});
 });
