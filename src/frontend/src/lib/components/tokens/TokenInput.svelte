@@ -17,7 +17,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
@@ -78,13 +78,24 @@
 	const validate = () => {
 		if (invalidAmount(amount) || isNullish(token)) {
 			errorType = undefined;
+			error = undefined;
 			return;
 		}
 
-		const parsedValue = parseToken({
+		// `tryParseToken` returns `undefined` for an out-of-range amount (e.g. a
+		// user typing `1e400`) instead of throwing an unhandled error inside this
+		// debounced callback. Treat it as an invalid amount so the input shows its
+		// error state without running the custom validators on a missing value.
+		const parsedValue = tryParseToken({
 			value: `${amount}`,
 			unitName: token.decimals
 		});
+
+		if (isNullish(parsedValue)) {
+			errorType = 'invalid-amount';
+			error = new Error($i18n.send.assertion.amount_invalid);
+			return;
+		}
 
 		errorType = onCustomValidate(parsedValue);
 		error = onCustomErrorValidate(parsedValue);

@@ -19,6 +19,21 @@ export const parseToken = ({
 	unitName?: BigNumberish;
 }): bigint => parseUnits(normalizeAmountString(value), unitName);
 
+// `parseToken` throws (e.g. ethers' `RangeError: overflow` for an out-of-range
+// amount like `1e400`). Callers that run in async/debounced contexts cannot let
+// that surface as an unhandled error, so this returns `undefined` instead of
+// throwing to signal an unparseable amount.
+export const tryParseToken = (params: {
+	value: string;
+	unitName?: BigNumberish;
+}): bigint | undefined => {
+	try {
+		return parseToken(params);
+	} catch {
+		return undefined;
+	}
+};
+
 export const normalizeTokenToDecimals = ({
 	value,
 	oldUnitName,
