@@ -34,6 +34,10 @@ vi.mock('$lib/derived/oisy-trade.derived', async () => {
 const base: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
 const quote: IcToken = { ...mockValidIcToken, symbol: 'ckUSDC', decimals: 6 };
 
+// 2024-06-15 12:00 UTC — a midday timestamp so the rendered year stays 2024 in
+// any test-runner timezone.
+const CREATED_AT_NS = 1_718_452_800_000_000_000n;
+
 const order: OisyTradeOrderView = {
 	id: 'order-1',
 	side: 'sell',
@@ -42,7 +46,8 @@ const order: OisyTradeOrderView = {
 	quantity: 10,
 	price: 2.5,
 	filledQuantity: 0,
-	status: 'Open'
+	status: 'Open',
+	createdAt: CREATED_AT_NS
 };
 
 // Half the ask volume (the 2.4 level) is priced better than the 2.5 sell price.
@@ -124,6 +129,15 @@ describe('OisyTradeOrderRow', () => {
 		});
 
 		expect(container).toHaveTextContent('50% ahead in queue');
+	});
+
+	it('shows the placed-at timestamp (not the queue) for a terminal order', () => {
+		const { container } = render(OisyTradeOrderRow, {
+			props: { order: { ...order, status: 'Filled' }, orderBook: bookWithVolumeAhead }
+		});
+
+		expect(container).toHaveTextContent('2024');
+		expect(container).not.toHaveTextContent('ahead in queue');
 	});
 
 	it('masks the intent line and amounts under privacy mode while keeping the status pill', () => {

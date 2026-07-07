@@ -83,6 +83,10 @@ describe('parse.utils', () => {
 			expect(tryParseToken({ value: '1e400', unitName: 8 })).toBeUndefined();
 		});
 
+		it('returns undefined for a non-numeric amount', () => {
+			expect(tryParseToken({ value: 'not-a-number', unitName: 8 })).toBeUndefined();
+		});
+
 		it('returns undefined for too many decimals', () => {
 			expect(tryParseToken({ value: '1.0', unitName: 81 })).toBeUndefined();
 		});

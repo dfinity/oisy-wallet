@@ -1375,6 +1375,7 @@ interface I18nTrading {
 		active_orders_empty_deposit: string;
 		active_orders_empty_place: string;
 		new_order: string;
+		order_history: string;
 	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
@@ -1456,6 +1457,20 @@ interface I18nTrading {
 		status_filled: string;
 		status_canceled: string;
 		status_expired: string;
+		count_filled: string;
+		count_expired: string;
+		count_canceled: string;
+	};
+	info: {
+		title: string;
+		description: string;
+		visit_website: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
 	};
 	order_detail: {
 		title: string;

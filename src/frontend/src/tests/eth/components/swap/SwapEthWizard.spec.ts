@@ -42,7 +42,8 @@ import { get, readable, writable, type Writable } from 'svelte/store';
 const mockParseToken = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: mockParseToken
+	parseToken: mockParseToken,
+	tryParseToken: mockParseToken
 }));
 
 mockParseToken.mockReturnValue(ZERO);
