@@ -79,6 +79,11 @@ export const mapOisyTradeAssets = ({
 export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
 	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
 
+// Total fiat value of the free (unreserved) portion of DEX-deposited balances —
+// the "$X free" figure on the provider page's Deposited box.
+export const sumOisyTradeAssetsFreeUsd = (assets: OisyTradeAsset[]): number =>
+	assets.reduce((acc, { freeUsd }) => acc + (freeUsd ?? 0), 0);
+
 // The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
 // that the user holds in their wallet. The first token per symbol wins (the
 // combined list is ordered ICP → ICRC default → custom).

@@ -1684,6 +1684,17 @@
 			"learn_more": "Learn more",
 			"provider_name": "OISY TRADE"
 		},
+		"page": {
+			"tagline": "A fully onchain order-book exchange, built into your wallet.",
+			"tagline_desktop": "Set your price, place a limit order, and let it settle onchain.",
+			"trading_potential": "Trading potential",
+			"trading_potential_hint": "In your wallet, not on the exchange",
+			"deposited_assets": "Deposited assets",
+			"deposited_all_free": "All free",
+			"deposited_empty": "Nothing deposited yet",
+			"free": "$amount free",
+			"in_orders": "$amount in orders"
+		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
