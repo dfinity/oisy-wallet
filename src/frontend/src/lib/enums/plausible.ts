@@ -22,7 +22,8 @@ export enum PLAUSIBLE_EVENTS {
 	EXPORT_DATA = 'export_data',
 	ONRAMPER_OPEN = 'onramper_open',
 	TRADING = 'trading',
-	PERSONAL_NOTE = 'personal_note'
+	PERSONAL_NOTE = 'personal_note',
+	PERSONAL_NOTE_SHARE = 'personal_note_share'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -88,6 +89,10 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRADING {
 	WITHDRAW = 'withdraw'
 }
 
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
+	SHARE = 'share'
+}
+
 export enum PLAUSIBLE_EVENT_VALUES {
 	NFT = 'nft',
 	NFT_COLLECTION_PAGE = 'nft-collection-page',
@@ -130,7 +135,9 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	TRANSACTIONS = 'transactions',
 	LIQUIDIUM = 'liquidium',
 	OISY_TRADE = 'oisy_trade',
-	NOTES = 'notes'
+	NOTES = 'notes',
+	NOTE_SHARE_DIALOG = 'share_dialog',
+	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
 }
 
 export enum PLAUSIBLE_EVENT_EVENTS_KEYS {

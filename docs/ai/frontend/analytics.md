@@ -99,10 +99,10 @@ any new feature area (see §5, pattern B).
 ### `analytics.constants.ts` flat `TRACK_*` constants — simple counters
 
 Use for a **single, self-contained count** where a structured family would be
-overkill: `sign_in_success`, `wallet_connect`, `welcome_open`,
-`note_share_open`. The constant _is_ the event name (a snake_case string). These
-are grouped by domain with a comment header. Fine for one-shot funnels; reach for
-the enum pattern the moment you have more than ~2 related actions.
+overkill: `sign_in_success`, `wallet_connect`, `welcome_open`. The constant _is_
+the event name (a snake_case string). These are grouped by domain with a comment
+header. Fine for one-shot funnels; reach for the enum pattern the moment you have
+more than ~2 related actions.
 
 > Rule of thumb: **> 2 related actions, or any success/error lifecycle → enum
 > family + domain service (pattern B). One isolated ping → flat constant
@@ -262,7 +262,9 @@ export const trackFoo = ({ modifier, resultStatus, error }: TrackFooParams) => {
 `result_status` beats a cartesian explosion of `foo_create_success`,
 `foo_delete_error`, … It keeps the enum small and the dashboard groupable. Only
 fall back to distinct flat constants when the actions are genuinely unrelated
-funnels (like the note-share creator vs. recipient events).
+one-off pings (e.g. `welcome_open` vs. `wallet_connect`). Two enum families for
+one feature are fine when the flows differ — e.g. `personal_note` (lifecycle) and
+`personal_note_share` (the share funnel) share a context but track different journeys.
 
 **Firing point / lifecycle:** for async flows, fire `executing` (or a
 `submitted` counter) when the action starts, then `success` / `error` from the
