@@ -84,6 +84,7 @@ and `Cargo.toml`. The non-obvious bits:
 | Add an i18n key                               | [`docs/ai/frontend/workflows/add-i18n-key.md`](./docs/ai/frontend/workflows/add-i18n-key.md)                 |
 | Add a token / network                         | [`docs/ai/frontend/workflows/new-token-or-network.md`](./docs/ai/frontend/workflows/new-token-or-network.md) |
 | Add or change tests                           | [`docs/ai/frontend/testing.md`](./docs/ai/frontend/testing.md)                                               |
+| Add or change an analytics / tracking event   | [`docs/ai/frontend/analytics.md`](./docs/ai/frontend/analytics.md)                                           |
 
 ---
 
