@@ -13,10 +13,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
+		formatTradeAmount,
 		isOisyTradeOrderActive,
 		oisyTradeOrderDisplayStatus,
 		orderStatusView,
@@ -47,30 +47,16 @@
 
 	// The price is quote-per-base in human units; render with the quote's display
 	// decimals so it reads like the limit price the user placed.
-	let formattedPrice = $derived(
-		formatToken({
-			value: BigInt(Math.round(price * 10 ** quote.decimals)),
-			unitName: quote.decimals,
-			displayDecimals: quote.decimals
-		})
-	);
+	let formattedPrice = $derived(formatTradeAmount({ amount: price, decimals: quote.decimals }));
 
 	let formattedQuantity = $derived(
-		formatToken({
-			value: BigInt(Math.round(quantity * 10 ** base.decimals)),
-			unitName: base.decimals,
-			displayDecimals: base.decimals
-		})
+		formatTradeAmount({ amount: quantity, decimals: base.decimals })
 	);
 
 	// The quote leg of the order (quantity × price), spent on a buy / received on a
 	// sell — shown as the muted second amount on the right.
 	let formattedQuoteAmount = $derived(
-		formatToken({
-			value: BigInt(Math.round(quantity * price * 10 ** quote.decimals)),
-			unitName: quote.decimals,
-			displayDecimals: quote.decimals
-		})
+		formatTradeAmount({ amount: quantity * price, decimals: quote.decimals })
 	);
 
 	// Signed legs on the right: the base leaves the account on a sell (−) and
