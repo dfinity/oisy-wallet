@@ -195,8 +195,9 @@ Update the affected component specs.
 `### Personal notes tracking` subsection there documenting the `personal_note` and
 `note_share` events and their property matrices, following the Learn-More pattern,
 and cross-reference it from the existing `## Personal notes` / `### Sharing a note`
-sections. **Status:** deferred by the product owner (2026-07-05) to a separate
-follow-up PR — not landed in the lifecycle / share PRs.
+sections. **Status:** landed in the share PR (both events exist by then), which
+also repoints the `## Analytics` schema reference from the (event-less) Confluence
+page to `analytics.md`.
 
 ## Out of Scope
 
@@ -259,8 +260,7 @@ filtered by `event_modifier` / `source_location`.
 
 ## Post-Merge
 
-`PRODUCT.md`'s `## Analytics` section still needs the `### Personal notes tracking`
-subsection (see Docs above) and reconciliation with
-[`analytics.md`](../../frontend/analytics.md). **Deferred** by the product owner
-(2026-07-05) to a separate follow-up PR — it is **not** part of the lifecycle /
-share PRs. The new/renamed events are documented in the PR bodies meanwhile.
+`PRODUCT.md`'s `## Analytics` section gains the `### Personal notes tracking`
+subsection in the share PR (see Docs above), which also repoints its schema
+reference to [`analytics.md`](../../frontend/analytics.md). Analytics-only —
+no user-facing behaviour change beyond the events themselves.
