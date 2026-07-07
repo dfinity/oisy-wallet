@@ -240,30 +240,6 @@ export const mapLiquidiumPortfolio = ({
 	})
 });
 
-// Net APY = net supply APY − net borrow APY (value-weighted spread, matches Liquidium).
-export const liquidiumNetApy = ({ reserves }: LiquidiumPortfolio): number | null => {
-	const totalSupplied = reserves.reduce((acc, { suppliedUsd }) => acc + suppliedUsd, 0);
-	const totalBorrowed = reserves.reduce((acc, { borrowedUsd }) => acc + borrowedUsd, 0);
-
-	if (totalSupplied <= 0 && totalBorrowed <= 0) {
-		return null;
-	}
-
-	const supplyInterest = reserves.reduce(
-		(acc, { suppliedUsd, supplyApy }) => acc + suppliedUsd * supplyApy,
-		0
-	);
-	const borrowInterest = reserves.reduce(
-		(acc, { borrowedUsd, borrowApy }) => acc + borrowedUsd * borrowApy,
-		0
-	);
-
-	const netSupplyApy = totalSupplied > 0 ? supplyInterest / totalSupplied : 0;
-	const netBorrowApy = totalBorrowed > 0 ? borrowInterest / totalBorrowed : 0;
-
-	return netSupplyApy - netBorrowApy;
-};
-
 // Best supply APY across enterable pools; 0 when none.
 export const liquidiumMaxSupplyApy = (markets: LiquidiumMarket[]): number =>
 	markets.reduce(
@@ -300,6 +276,13 @@ export const liquidiumBorrowingPowerPotentialUsd = ({
 export const liquidiumBorrowInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
 	(portfolio?.reserves ?? []).reduce(
 		(acc, { borrowedUsd, borrowApy }) => acc + (borrowedUsd * borrowApy) / 100,
+		0
+	);
+
+// Yearly supply interest in USD (Σ suppliedUsd·supplyApy / 100); 0 when no positions.
+export const liquidiumSupplyInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
+	(portfolio?.reserves ?? []).reduce(
+		(acc, { suppliedUsd, supplyApy }) => acc + (suppliedUsd * supplyApy) / 100,
 		0
 	);
 

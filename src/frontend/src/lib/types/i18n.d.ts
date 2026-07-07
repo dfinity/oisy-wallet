@@ -14,6 +14,7 @@ interface I18nBorrow {
 		active_loans: string;
 		no_active_loans: string;
 		amount_borrowed: string;
+		apr: string;
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
@@ -1871,8 +1872,8 @@ interface I18nLiquidium {
 		description: string;
 		health_factor: string;
 		net_value: string;
-		net_apy: string;
 		markets: string;
+		total_supplied: string;
 		supplied: string;
 		borrowed: string;
 		borrow_rate: string;
@@ -2160,8 +2161,8 @@ interface I18nNotes {
 			expiry_24h: string;
 			expiry_7d: string;
 			expiry_30d: string;
-			destroy_after_viewing: string;
-			destroy_after_viewing_hint: string;
+			single_use: string;
+			single_use_option: string;
 			protects_body: string;
 			create_link: string;
 			link_ready_title: string;

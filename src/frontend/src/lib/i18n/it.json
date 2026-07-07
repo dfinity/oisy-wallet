@@ -11,6 +11,7 @@
 			"active_loans": "",
 			"no_active_loans": "",
 			"amount_borrowed": "",
+			"apr": "",
 			"borrow_apr_from": ""
 		},
 		"cards": {
@@ -2334,8 +2335,8 @@
 			"description": "",
 			"health_factor": "",
 			"net_value": "",
-			"net_apy": "",
 			"markets": "",
+			"total_supplied": "",
 			"supplied": "",
 			"borrowed": "",
 			"borrow_rate": "",
@@ -2634,8 +2635,8 @@
 				"expiry_24h": "",
 				"expiry_7d": "",
 				"expiry_30d": "",
-				"destroy_after_viewing": "",
-				"destroy_after_viewing_hint": "",
+				"single_use": "",
+				"single_use_option": "",
 				"protects_body": "",
 				"create_link": "",
 				"link_ready_title": "",
