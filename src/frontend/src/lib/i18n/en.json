@@ -1721,10 +1721,6 @@
 		},
 		"assets": {
 			"title": "My positions",
-			"deposit": "+ Deposit",
-			"withdraw": "Withdraw",
-			"available": "Available: $amount",
-			"available_label": "Available:",
 			"empty": "No assets deposited yet"
 		},
 		"deposit": {
