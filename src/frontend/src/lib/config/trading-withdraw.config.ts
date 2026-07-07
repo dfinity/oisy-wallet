@@ -20,6 +20,6 @@ export const tradingWithdrawWizardSteps = ({
 	// Last so it stays off the linear next/back path; reached only via an explicit jump.
 	{
 		name: WizardStepsTradingWithdraw.TOKENS_LIST,
-		title: i18n.send.text.select_token
+		title: i18n.trading.withdraw.title
 	}
 ];
