@@ -64,6 +64,7 @@
 		isRouteSettings,
 		isRouteTokens,
 		isRouteOisyTradeProvider,
+		isRouteTrading,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
@@ -145,6 +146,7 @@
 	const assetsSelected = $derived(
 		isRouteTokens(page) ||
 			isRouteEarning(page) ||
+			isRouteTrading(page) ||
 			isRouteBorrowings(page) ||
 			isRouteTransactions(page)
 	);
