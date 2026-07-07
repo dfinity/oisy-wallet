@@ -86,12 +86,13 @@ The [Personal notes](#personal-notes) feature emits two structured Plausible eve
 
 **`personal_note`** — the note lifecycle. Every event also carries `source_location: notes`.
 
-| `event_modifier` | Fires when            | `result_status`     | Extra                                                                         |
-| ---------------- | --------------------- | ------------------- | ----------------------------------------------------------------------------- |
-| `create`         | a note is created     | `success` / `error` | `event_value: first_note` on the user's first note; `result_error` on failure |
-| `edit`           | a note is edited      | `success` / `error` | `result_error` on failure                                                     |
-| `delete`         | a note is deleted     | `success` / `error` | `result_error` on failure                                                     |
-| `open`           | the Notes modal opens | `success`           | —                                                                             |
+| `event_modifier` | Fires when             | `result_status`     | Extra                                                                         |
+| ---------------- | ---------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| `create`         | a note is created      | `success` / `error` | `event_value: first_note` on the user's first note; `result_error` on failure |
+| `edit`           | a note is edited       | `success` / `error` | `result_error` on failure                                                     |
+| `delete`         | a note is deleted      | `success` / `error` | `result_error` on failure                                                     |
+| `open`           | the Notes modal opens  | `success`           | —                                                                             |
+| `view`           | a note's preview opens | `success`           | —                                                                             |
 
 **`note_share`** — the [share](#sharing-a-note) funnel, a single event covering both the creator and the recipient, under `event_subcontext: share`. The step rides in `event_modifier`; `source_location` is `share_dialog` for creator steps and `recipient_page` for recipient steps.
 
@@ -164,7 +165,7 @@ A note is a free-standing memo — it is **not** attached to any transaction, ad
 
 The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
-The lifecycle (create / edit / delete / open) is tracked via the `personal_note` Plausible event — see [Analytics → Personal notes tracking](#personal-notes-tracking).
+The lifecycle (create / edit / delete, opening the surface, and opening a note's preview) is tracked via the `personal_note` Plausible event — see [Analytics → Personal notes tracking](#personal-notes-tracking).
 
 ### Sharing a note
 
