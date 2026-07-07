@@ -1,23 +1,56 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { setContext } from 'svelte';
+	import type { IcToken } from '$icp/types/ic-token';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
+	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import WithdrawWizard from '$lib/components/trading/WithdrawWizard.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { tradingWithdrawWizardSteps } from '$lib/config/trading-withdraw.config';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
 	import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		initModalTokensListContext,
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 	import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
+		// Seeds the initial selection only; the user can switch token in-modal.
 		withdrawToken: OisyTradeWithdrawToken;
 	}
 
 	let { withdrawToken }: Props = $props();
 
-	let { token, free, reserved } = $derived(withdrawToken);
+	// eslint-disable-next-line svelte/no-unused-svelte-ignore
+	// svelte-ignore state_referenced_locally -- prop seeds the initial selection only
+	let token = $state<IcToken>(withdrawToken.token);
+
+	// Falls back to the prop snapshot until the DEX balances store has loaded.
+	let { free, reserved } = $derived.by(() => {
+		const asset = $oisyTradeAssets.find(({ token: { id } }) => id === token.id);
+
+		if (nonNullish(asset)) {
+			return { free: asset.free, reserved: asset.reserved };
+		}
+
+		return token.id === withdrawToken.token.id
+			? { free: withdrawToken.free, reserved: withdrawToken.reserved }
+			: { free: ZERO, reserved: ZERO };
+	});
 
 	let modal: WizardModal<WizardStepsTradingWithdraw> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsTradingWithdraw> | undefined = $state();
@@ -29,36 +62,122 @@
 		tradingWithdrawWizardSteps({ i18n: $i18n })
 	);
 
+	// Show the withdrawable (free) DEX balance, not the wallet balance.
+	const withdrawableTokens = $derived(
+		$oisyTradeAssets.map(({ token: assetToken, free: assetFree, freeUsd }) => ({
+			...assetToken,
+			balance: assetFree,
+			usdBalance: freeUsd
+		}))
+	);
+
+	const tokensListContext = initModalTokensListContext({
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- kept in sync below via setTokens
+		tokens: withdrawableTokens,
+		// Honor the page network so a testnet DEX (staging) isn't stripped by the
+		// default mainnet-only view.
+		// eslint-disable-next-line svelte/no-unused-svelte-ignore
+		// svelte-ignore state_referenced_locally -- page network is fixed for the modal's lifetime
+		filterNetwork: $selectedNetwork,
+		// Keep the free balances above from being re-sorted against the wallet
+		// balances store.
+		sortByBalance: false
+	});
+	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
+
+	$effect(() => {
+		tokensListContext.setTokens(withdrawableTokens);
+	});
+
+	const goToStep = (stepName: WizardStepsTradingWithdraw) => {
+		if (isNullish(modal)) {
+			return;
+		}
+
+		goToWizardStep({ modal, steps, stepName });
+	};
+
+	const showTokensList = () => {
+		tokensListContext.setFilterQuery('');
+
+		goToStep(WizardStepsTradingWithdraw.TOKENS_LIST);
+	};
+
+	const closeTokensList = () => {
+		tokensListContext.setFilterQuery('');
+
+		goToStep(WizardStepsTradingWithdraw.WITHDRAW);
+	};
+
+	const onSelectToken = (selected: Token) => {
+		const matched = $oisyTradeAssets.find(({ token: { id } }) => id === selected.id);
+
+		if (isNullish(matched)) {
+			return;
+		}
+
+		if (token.id !== matched.token.id) {
+			amount = undefined;
+			amountSetToMax = false;
+		}
+		({ token } = matched);
+
+		closeTokensList();
+	};
+
 	const reset = () => {
+		({ token } = withdrawToken);
 		amount = undefined;
 		amountSetToMax = false;
 		withdrawProgressStep = ProgressStepsTradingWithdraw.INITIALIZATION;
 		currentStep = undefined;
+		tokensListContext.resetFilters();
 	};
 
 	const close = () => closeModal(reset);
 </script>
 
-<SendTokenContext customSendBalance={free} {token}>
+<SendTokenContext {token}>
 	<WizardModal
 		bind:this={modal}
-		disablePointerEvents={currentStep?.name === WizardStepsTradingWithdraw.WITHDRAWING}
+		disablePointerEvents={currentStep?.name === WizardStepsTradingWithdraw.WITHDRAWING ||
+			currentStep?.name === WizardStepsTradingWithdraw.TOKENS_LIST}
 		onClose={close}
 		{steps}
 		bind:currentStep
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-		<WithdrawWizard
-			{currentStep}
-			onBack={modal.back}
-			onClose={close}
-			onNext={modal.next}
-			{reserved}
-			{token}
-			bind:amount
-			bind:amountSetToMax
-			bind:withdrawProgressStep
-		/>
+		{#if currentStep?.name === WizardStepsTradingWithdraw.TOKENS_LIST}
+			<!-- Network filter is view-only: OISY TRADE holds IC-network tokens only. -->
+			<ModalTokensList networkSelectorViewOnly onTokenButtonClick={onSelectToken}>
+				{#snippet tokenListItem(listToken, onClick)}
+					<ModalTokensListItem {onClick} token={listToken} />
+				{/snippet}
+				{#snippet noResults()}
+					<p class="text-primary">{$i18n.core.text.no_results}</p>
+				{/snippet}
+				{#snippet toolbar()}
+					<ButtonGroup>
+						<ButtonBack onclick={closeTokensList} />
+					</ButtonGroup>
+				{/snippet}
+			</ModalTokensList>
+		{:else}
+			<WithdrawWizard
+				{currentStep}
+				{free}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSelectToken={showTokensList}
+				{reserved}
+				{token}
+				bind:amount
+				bind:amountSetToMax
+				bind:withdrawProgressStep
+			/>
+		{/if}
 	</WizardModal>
 </SendTokenContext>
