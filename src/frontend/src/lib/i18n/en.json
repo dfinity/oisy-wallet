@@ -1700,7 +1700,9 @@
 			"withdraw": "Withdraw",
 			"active_orders": "Active orders",
 			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
-			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one."
+			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
+			"new_order": "New order",
+			"order_history": "Order history"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
@@ -1787,7 +1789,21 @@
 			"status_partial": "Partial",
 			"status_filled": "Filled",
 			"status_canceled": "Canceled",
-			"status_expired": "Expired"
+			"status_expired": "Expired",
+			"count_filled": "$count filled",
+			"count_expired": "$count expired",
+			"count_canceled": "$count canceled"
+		},
+		"info": {
+			"title": "What is OISY TRADE",
+			"description": "OISY TRADE is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
+			"visit_website": "Visit website",
+			"fact_1_title": "Buy or sell at your price",
+			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
+			"fact_2_title": "Fills even while you're away",
+			"fact_2_description": "Your order lives onchain once placed. The exchange fills it as soon as a matching order appears, whether or not you're signed in.",
+			"fact_3_title": "Fully onchain",
+			"fact_3_description": "Orders are matched and settled inside a canister on the Internet Computer, governed by the NNS, with no centralized exchange in the middle."
 		},
 		"order_detail": {
 			"title": "Order details",

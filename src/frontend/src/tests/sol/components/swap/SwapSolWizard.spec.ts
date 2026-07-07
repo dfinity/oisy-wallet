@@ -40,7 +40,8 @@ vi.mock('$lib/services/provider-agreements.services', () => ({
 vi.mock('$lib/utils/parse.utils', async () => {
 	const { ZERO } = await import('$lib/constants/app.constants');
 	return {
-		parseToken: vi.fn().mockReturnValue(ZERO)
+		parseToken: vi.fn().mockReturnValue(ZERO),
+		tryParseToken: vi.fn().mockReturnValue(ZERO)
 	};
 });
 

@@ -129,6 +129,24 @@ describe('OisyTradeProviderHero', () => {
 		expect(getByRole('button', { name: en.trading.page.withdraw })).toBeDisabled();
 	});
 
+	it('scrolls to the info box when Learn more is clicked', async () => {
+		const scrollIntoView = vi.fn();
+		const getElementById = vi
+			.spyOn(document, 'getElementById')
+			.mockReturnValue({ scrollIntoView } as unknown as HTMLElement);
+
+		const { getByText } = render(OisyTradeProviderHero, {
+			props: { onDeposit: vi.fn(), onWithdraw: vi.fn() }
+		});
+
+		await fireEvent.click(getByText(en.core.text.learn_more));
+
+		expect(getElementById).toHaveBeenCalledWith('oisy-trade-info');
+		expect(scrollIntoView).toHaveBeenCalled();
+
+		getElementById.mockRestore();
+	});
+
 	it('enables Withdraw and calls onWithdraw once deposited', async () => {
 		assetsMock.set([{ total: 100n }]);
 		const onWithdraw = vi.fn();

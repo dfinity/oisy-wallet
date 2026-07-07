@@ -8,10 +8,13 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
+	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
@@ -35,7 +38,11 @@
 
 	let { order, orderBook }: Props = $props();
 
-	let { side, base, quote, quantity, price } = $derived(order);
+	// Tapping the row opens the read-only order-detail modal (Review-styled), which
+	// also hosts the Cancel action for active orders — there is no inline cancel.
+	const openDetail = () => modalStore.openOisyTradeOrderDetail({ id: Symbol(), data: order });
+
+	let { side, base, quote, quantity, price, createdAt } = $derived(order);
 
 	let baseSymbol = $derived(getTokenDisplaySymbol(base));
 	let quoteSymbol = $derived(getTokenDisplaySymbol(quote));
@@ -164,13 +171,22 @@
 			$percentage: display.percent.toString()
 		});
 	});
+
+	// The muted line under the intent: the live queue position while the order is
+	// active, or when it was placed once it's terminal (Order-history rows).
+	const metaLine = $derived(
+		active
+			? queueText
+			: formatNanosecondsToDate({ nanoseconds: createdAt, language: $currentLanguage })
+	);
 </script>
 
-<!--
-	The venue's own page, so no provider tag on the row. Display only for now —
-	tapping to open the order-detail modal is wired in a later stacked PR.
--->
-<div class="flex w-full items-center gap-3 py-3">
+<!-- The venue's own page, so no provider tag on the row. -->
+<button
+	class="-mx-2 flex w-full items-center gap-3 rounded-lg px-2 py-3 text-left transition-colors hover:bg-brand-subtle-10"
+	onclick={openDetail}
+	type="button"
+>
 	<div class="min-w-0 flex-1">
 		<div class="flex flex-wrap items-center gap-x-1 text-base leading-snug text-primary">
 			{#if $isPrivacyMode}
@@ -187,9 +203,9 @@
 				<span class="tabular-nums">{phrase}</span>
 			{/if}
 		</div>
-		{#if nonNullish(queueText)}
+		{#if nonNullish(metaLine)}
 			<div class="mt-0.5 text-xs text-tertiary tabular-nums" transition:slide={SLIDE_PARAMS}>
-				{queueText}
+				{metaLine}
 			</div>
 		{/if}
 	</div>
@@ -213,4 +229,4 @@
 			<span class="text-sm text-tertiary tabular-nums">{quoteAmountSigned}</span>
 		{/if}
 	</div>
-</div>
+</button>
