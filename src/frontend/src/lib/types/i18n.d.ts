@@ -1919,6 +1919,7 @@ interface I18nLiquidium {
 		supply_label: string;
 		borrow_label: string;
 		coming_soon: string;
+		coming_soon_teaser: string;
 		action_supply: string;
 		action_borrow: string;
 		action_repay: string;

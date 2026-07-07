@@ -2380,6 +2380,7 @@
 			"supply_label": "",
 			"borrow_label": "",
 			"coming_soon": "",
+			"coming_soon_teaser": "",
 			"action_supply": "",
 			"action_borrow": "",
 			"action_repay": "",
