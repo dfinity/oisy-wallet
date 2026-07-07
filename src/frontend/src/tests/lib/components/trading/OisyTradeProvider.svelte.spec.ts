@@ -12,7 +12,7 @@ const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade, mockGoto } =
 }));
 
 vi.mock('$env/trading', () => ({
-	get TRADING_ENABLED() {
+	get anyTradingProviderEnabled() {
 		return mockTradingEnabled.value;
 	}
 }));
@@ -63,7 +63,7 @@ describe('OisyTradeProvider', () => {
 		expect(mockLoadOisyTrade).toHaveBeenCalled();
 	});
 
-	it('redirects away and renders nothing when the Trading feature flag is off', async () => {
+	it('redirects away and renders nothing when no trading provider is enabled', async () => {
 		mockTradingEnabled.value = false;
 
 		const { queryByText } = render(OisyTradeProvider);

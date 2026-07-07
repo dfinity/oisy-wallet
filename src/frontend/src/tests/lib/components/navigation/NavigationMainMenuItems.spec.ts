@@ -43,9 +43,8 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
-		// Notes (PERSONAL_NOTES_ENABLED), Trade (TRADING_ENABLED) and Earn
-		// (EARNING_ENABLED) are feature-flagged off in tests, so they are not
-		// asserted here.
+		// Notes (PERSONAL_NOTES_ENABLED) and Earn (EARNING_ENABLED) are
+		// feature-flagged off in tests, so they are not asserted here.
 	});
 
 	it('renders the desktop section headings', () => {

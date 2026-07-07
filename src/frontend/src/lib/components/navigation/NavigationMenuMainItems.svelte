@@ -6,7 +6,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
-	import { TRADING_ENABLED } from '$env/trading';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
@@ -180,9 +180,9 @@
 				selected: isRouteActivity(page)
 			},
 			// Trade and Borrow are NEW Finance destinations. Trade is gated behind
-			// TRADING_ENABLED like the Assets Trading tab; Borrow routes to the
+			// the trading providers like the Assets Trading tab; Borrow routes to the
 			// dedicated /borrow/ page.
-			...(TRADING_ENABLED
+			...(anyTradingProviderEnabled
 				? {
 						trade: {
 							label: $i18n.navigation.text.trade,
