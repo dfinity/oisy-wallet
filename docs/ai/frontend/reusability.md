@@ -19,7 +19,7 @@
 
 | Layer                                | Path                                                                 | What goes there                                                                                                                    |
 | ------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives. Also reach for `@dfinity/gix-components` for many primitives (Modal, Toast, BottomSheet, Spinner, …).        |
+| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives, incl. the vendored ones (Modal, Toast, BottomSheet, LoaderSpinner, Popover, Input, …).                       |
 | **App-wide presentational**          | `$lib/components/common/`                                            | Tiny shared blocks: `List`, `ListItem`, `ListItemButton`, `Divider`, `MaxBalanceButton`, `ModalHero`, `ModalListItem`, `QrButton`. |
 | **Feature components (cross-chain)** | `$lib/components/<feature>/`                                         | Cross-chain feature surfaces (auth, send, receive, swap, contact, hero, ai-assistant, settings, …). See list below.                |
 | **Chain-specific components**        | `$btc / $eth / $evm / $icp / $sol / $icp-eth /components/<feature>/` | UI specific to a chain.                                                                                                            |
