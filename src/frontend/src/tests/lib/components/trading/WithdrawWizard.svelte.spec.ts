@@ -26,8 +26,10 @@ describe('WithdrawWizard', () => {
 		token: mockValidIcToken,
 		amount: 0.01,
 		amountSetToMax: false,
+		free: 5_000_000n,
 		reserved: ZERO,
 		withdrawProgressStep: ProgressStepsTradingWithdraw.INITIALIZATION,
+		onSelectToken: () => {},
 		onClose: () => {},
 		onNext: () => {},
 		onBack: () => {}
