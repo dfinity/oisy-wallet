@@ -2396,7 +2396,7 @@
 			"supply_agreement": "I understand my assets will be supplied to the Liquidium protocol and are subject to on-chain smart-contract risk.",
 			"provider_fee": "Network fee",
 			"supply_transaction_fee": "Transaction fee",
-			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the network fee.",
+			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the fees.",
 			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
 			"borrow_review": "Review borrow",
 			"borrow_review_subtitle": "You borrow",
