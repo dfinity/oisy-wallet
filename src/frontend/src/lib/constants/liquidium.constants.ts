@@ -8,7 +8,9 @@ import {
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { OptionCanisterIdText } from '$lib/types/canister';
+import type { LiquidiumMarket } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 
 // Provider id for the earning-provider registry.
@@ -21,6 +23,20 @@ export const LIQUIDIUM_ASSET_TOKENS: Record<string, Token> = {
 	ETH: ETHEREUM_TOKEN,
 	USDC: USDC_TOKEN,
 	USDT: USDT_TOKEN
+};
+
+// Hard-coded ICP teaser appended to the Markets box until Liquidium lists ICP.
+// Advertises the asset with disabled actions; carries its own token for the logo so
+// it stays out of the shared asset/network icon sets. TODO: remove once ICP is live.
+export const LIQUIDIUM_ICP_TEASER_MARKET: LiquidiumMarket = {
+	poolId: 'icp-teaser',
+	asset: ICP_TOKEN.symbol,
+	chain: ICP_TOKEN.network.name,
+	supplyApy: 0,
+	borrowApy: 0,
+	frozen: false,
+	available: true,
+	teaser: true
 };
 
 // ck-ledger backing each asset, for the AUT's backend `TokenId`.
