@@ -9,7 +9,6 @@
 	import OisyTradeOrderRow from '$lib/components/trading/OisyTradeOrderRow.svelte';
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -92,13 +91,15 @@
 						{$i18n.trading.page.new_order}
 					</Button>
 				{:else}
-					<!-- Deposit-first: no free balance to place an order against yet. -->
-					<DelayedTooltip text={$i18n.trading.page.new_order_disabled}>
-						<Button colorStyle="primary" disabled paddingSmall type="button">
-							<IconPlus size="16" />
-							{$i18n.trading.page.new_order}
-						</Button>
-					</DelayedTooltip>
+					<!--
+						Deposit-first: no free balance to place an order against yet. Left as a
+						plain disabled button (like the other provider pages) — the Active-orders
+						empty state below already tells the user to deposit, so no tooltip.
+					-->
+					<Button colorStyle="primary" disabled paddingSmall type="button">
+						<IconPlus size="16" />
+						{$i18n.trading.page.new_order}
+					</Button>
 				{/if}
 			{/snippet}
 		</LimitOrder>

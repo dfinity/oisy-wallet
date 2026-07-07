@@ -92,8 +92,6 @@ describe('OisyTradeActiveOrders', () => {
 	});
 
 	it('disables the New order button when the user has no deposits', () => {
-		// The disabled button is wrapped in a tooltip span (also role=button), so
-		// target the actual <button> via its label text.
 		const { getByText } = render(OisyTradeActiveOrders);
 
 		expect(getByText(en.trading.page.new_order).closest('button')).toBeDisabled();
