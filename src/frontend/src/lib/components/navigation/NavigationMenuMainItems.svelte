@@ -63,6 +63,7 @@
 		isRouteRewards,
 		isRouteSettings,
 		isRouteTokens,
+		isRouteOisyTradeProvider,
 		isRouteTrading,
 		isRouteTransactions,
 		networkUrl
@@ -145,6 +146,7 @@
 	const assetsSelected = $derived(
 		isRouteTokens(page) ||
 			isRouteEarning(page) ||
+			isRouteTrading(page) ||
 			isRouteBorrowings(page) ||
 			isRouteTransactions(page)
 	);
@@ -187,8 +189,8 @@
 							ariaLabel: $i18n.navigation.alt.trade,
 							testId: prefixedTestId(NAVIGATION_ITEM_TRADE),
 							icon: IconLineChart,
-							href: url(AppPath.Trading),
-							selected: isRouteTrading(page),
+							href: url(AppPath.ProvidersOisyTrade),
+							selected: isRouteOisyTradeProvider(page),
 							tag: $i18n.core.text.new,
 							tagVariant: 'emphasis'
 						}

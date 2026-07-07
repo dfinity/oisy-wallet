@@ -1684,6 +1684,20 @@
 			"learn_more": "",
 			"provider_name": ""
 		},
+		"page": {
+			"tagline": "",
+			"tagline_desktop": "",
+			"trading_potential": "",
+			"trading_potential_hint": "",
+			"deposited_assets": "",
+			"deposited_all_free": "",
+			"deposited_empty": "",
+			"free": "",
+			"in_orders": "",
+			"in_orders_label": "",
+			"positions": "",
+			"deposit": ""
+		},
 		"provider_unavailable": {
 			"title": "",
 			"description": ""
@@ -2335,8 +2349,8 @@
 			"description": "",
 			"health_factor": "",
 			"net_value": "",
-			"net_apy": "",
 			"markets": "",
+			"total_supplied": "",
 			"supplied": "",
 			"borrowed": "",
 			"borrow_rate": "",
@@ -2635,8 +2649,8 @@
 				"expiry_24h": "",
 				"expiry_7d": "",
 				"expiry_30d": "",
-				"destroy_after_viewing": "",
-				"destroy_after_viewing_hint": "",
+				"single_use": "",
+				"single_use_option": "",
 				"protects_body": "",
 				"create_link": "",
 				"link_ready_title": "",

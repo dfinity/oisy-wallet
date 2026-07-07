@@ -1357,6 +1357,20 @@ interface I18nWallet_connect {
 
 interface I18nTrading {
 	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
+	page: {
+		tagline: string;
+		tagline_desktop: string;
+		trading_potential: string;
+		trading_potential_hint: string;
+		deposited_assets: string;
+		deposited_all_free: string;
+		deposited_empty: string;
+		free: string;
+		in_orders: string;
+		in_orders_label: string;
+		positions: string;
+		deposit: string;
+	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
 		title: string;
@@ -1872,8 +1886,8 @@ interface I18nLiquidium {
 		description: string;
 		health_factor: string;
 		net_value: string;
-		net_apy: string;
 		markets: string;
+		total_supplied: string;
 		supplied: string;
 		borrowed: string;
 		borrow_rate: string;
@@ -2161,8 +2175,8 @@ interface I18nNotes {
 			expiry_24h: string;
 			expiry_7d: string;
 			expiry_30d: string;
-			destroy_after_viewing: string;
-			destroy_after_viewing_hint: string;
+			single_use: string;
+			single_use_option: string;
 			protects_body: string;
 			create_link: string;
 			link_ready_title: string;

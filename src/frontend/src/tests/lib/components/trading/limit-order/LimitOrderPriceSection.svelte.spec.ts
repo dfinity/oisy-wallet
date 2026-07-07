@@ -113,6 +113,24 @@ describe('LimitOrderPriceSection', () => {
 		expect(parseFloat(props.price)).toBeGreaterThan(0);
 	});
 
+	it('borders the latched preset and no other', () => {
+		const { getByText } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, activePreset: 1 as PricePreset | null }
+		});
+
+		expect(getByText(en.trading.limit_order.preset_sell_1)).toHaveClass('border-brand-primary');
+		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
+	});
+
+	it('borders no preset when none is latched', () => {
+		const { getByText } = render(LimitOrderPriceSection, {
+			props: { ...baseProps, activePreset: null as PricePreset | null }
+		});
+
+		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
+		expect(getByText(en.trading.limit_order.preset_sell_1)).not.toHaveClass('border-brand-primary');
+	});
+
 	it('renders the value difference when price and current value are positive', () => {
 		const { container } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, price: '12', currentValue: 10 }
