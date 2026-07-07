@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
@@ -153,14 +153,6 @@
 	};
 
 	const close = () => closeModal(reset);
-
-	// With no seed token the wizard's first step (Withdraw) has nothing to act on,
-	// so open straight on the token picker.
-	onMount(() => {
-		if (isNullish(token)) {
-			showTokensList();
-		}
-	});
 </script>
 
 <SendTokenContext {token}>
