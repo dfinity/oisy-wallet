@@ -239,6 +239,7 @@
 			displayUnit={inputUnit}
 			exchangeRate={quoteExchangeRate}
 			isSelectable={nonNullish(baseSymbol)}
+			muted={true}
 			onClick={onSelectQuoteGuarded}
 			showTokenNetwork
 			token={quoteToken}
