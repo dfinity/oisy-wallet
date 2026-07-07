@@ -2395,6 +2395,7 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
+			"transaction_fee": "",
 			"insufficient_funds_for_fee": "",
 			"supply_prices_unavailable": "",
 			"borrow_review": "",
