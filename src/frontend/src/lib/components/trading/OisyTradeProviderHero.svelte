@@ -1,14 +1,9 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
-	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import {
@@ -23,7 +18,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { back } from '$lib/utils/nav.utils';
 
 	interface Props {
 		onDeposit: () => void;
@@ -31,12 +25,6 @@
 	}
 
 	let { onDeposit, onWithdraw }: Props = $props();
-
-	let fromRoute = $state<NavigationTarget | null>(null);
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
-	});
 
 	const fiat = (value: number): string =>
 		formatCurrency({
@@ -63,19 +51,6 @@
 
 <StakeContentSection>
 	{#snippet title()}
-		<div class="absolute top-0 left-0">
-			<ButtonIcon
-				ariaLabel={$i18n.core.text.back}
-				colorStyle="tertiary"
-				link={false}
-				onclick={() => back({ pop: nonNullish(fromRoute) })}
-			>
-				{#snippet icon()}
-					<IconBackArrow />
-				{/snippet}
-			</ButtonIcon>
-		</div>
-
 		<div class="flex w-full flex-col items-center text-center">
 			<OisyTradeMark />
 
