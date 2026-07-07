@@ -26,9 +26,10 @@
 
 	interface Props {
 		onDeposit: () => void;
+		onWithdraw: () => void;
 	}
 
-	let { onDeposit }: Props = $props();
+	let { onDeposit, onWithdraw }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -130,6 +131,17 @@
 						{$i18n.trading.page.deposited_empty}
 					{/if}
 				</span>
+
+				<!-- Enabled once the user has DEX deposits; opens the withdraw form (token picker first). -->
+				<Button
+					colorStyle="primary"
+					disabled={!hasDeposits}
+					fullWidth
+					onclick={onWithdraw}
+					styleClass="mt-4 sm:mt-auto"
+				>
+					{$i18n.trading.page.withdraw}
+				</Button>
 			</div>
 		</div>
 	{/snippet}
