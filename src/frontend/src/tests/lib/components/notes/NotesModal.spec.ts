@@ -12,6 +12,8 @@ import {
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import * as notesServices from '$lib/services/personal-notes.services';
 import { personalNotesStore } from '$lib/stores/personal-notes.store';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
@@ -33,11 +35,28 @@ const setLoadedNotes = ({ entries, count }: { entries: PersonalNoteUi[]; count: 
 	personalNotesStore.setLoaded({ ownerPrincipal: mockPrincipalText, entries, count });
 };
 
+vi.mock('$lib/services/personal-notes-analytics.services', () => ({
+	trackPersonalNote: vi.fn(),
+	trackPersonalNoteShare: vi.fn()
+}));
+
 describe('NotesModal', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.clearAllMocks();
 		mockAuthStore();
 		personalNotesStore.reset();
+	});
+
+	it('tracks the notes surface opening on mount', () => {
+		setLoadedNotes({ entries: [], count: 0 });
+
+		render(NotesModal);
+
+		expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+			step: 'open',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
 	});
 
 	it('renders the empty state when there are no notes', () => {
@@ -114,6 +133,19 @@ describe('NotesModal', () => {
 		await fireEvent.click(getByTestId(NOTES_VIEW_EDIT_BUTTON));
 
 		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
+	});
+
+	it('tracks opening a note preview on row click', async () => {
+		setLoadedNotes({ entries: [note('a')], count: 1 });
+
+		const { getByText } = render(NotesModal);
+
+		await fireEvent.click(getByText('note a'));
+
+		expect(trackPersonalNote).toHaveBeenCalledWith({
+			step: 'view',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
 	});
 
 	it('deletes a note only after the confirmation step', async () => {

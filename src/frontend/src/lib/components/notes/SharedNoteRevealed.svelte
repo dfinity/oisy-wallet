@@ -13,6 +13,7 @@
 		NOTES_SHARE_RECIPIENT_REVEALED,
 		NOTES_SHARE_RECIPIENT_SINGLE_USE_CAVEAT
 	} from '$lib/constants/test-ids.constants';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
@@ -26,6 +27,7 @@
 
 	const onCopy = async () => {
 		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
+		trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
 	};
 </script>
 

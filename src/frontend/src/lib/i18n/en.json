@@ -1696,7 +1696,13 @@
 			"in_orders": "$amount in orders",
 			"in_orders_label": "in orders",
 			"positions": "My positions",
-			"deposit": "Deposit"
+			"deposit": "Deposit",
+			"withdraw": "Withdraw",
+			"active_orders": "Active orders",
+			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
+			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
+			"new_order": "New order",
+			"order_history": "Order history"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
@@ -1724,6 +1730,7 @@
 			"review_title": "Review deposit",
 			"progress_title": "Depositing",
 			"you_deposit": "You deposit",
+			"error_insufficient_balance": "Amount exceeds your wallet balance",
 			"to": "To",
 			"network": "Network",
 			"transaction_fee": "Total estimated fee",
@@ -1756,6 +1763,7 @@
 			"transfer_fee": "Transfer fee",
 			"you_receive": "You receive",
 			"reserved_note": "$amount reserved · locked by open orders",
+			"error_insufficient_balance": "Amount exceeds your free balance",
 			"submit": "Withdraw",
 			"open": "Withdraw",
 			"progress_withdraw": "Sending $symbol to your wallet",
@@ -1773,12 +1781,29 @@
 			"side_buy": "Buy",
 			"row_sell": "$quantity $base for $quote at $price",
 			"row_buy": "$base with $quote_amount $quote at $price",
+			"row_phrase_sell": "for $quote @ $price",
+			"row_phrase_buy": "with $quote @ $price",
+			"queue_ahead": "$percentage% ahead in queue",
 			"status_open": "Open",
 			"status_pending": "Pending",
 			"status_partial": "Partial",
 			"status_filled": "Filled",
 			"status_canceled": "Canceled",
-			"status_expired": "Expired"
+			"status_expired": "Expired",
+			"count_filled": "$count filled",
+			"count_expired": "$count expired",
+			"count_canceled": "$count canceled"
+		},
+		"info": {
+			"title": "What is OISY TRADE",
+			"description": "OISY TRADE is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
+			"visit_website": "Visit website",
+			"fact_1_title": "Buy or sell at your price",
+			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
+			"fact_2_title": "Fills even while you're away",
+			"fact_2_description": "Your order lives onchain once placed. The exchange fills it as soon as a matching order appears, whether or not you're signed in.",
+			"fact_3_title": "Fully onchain",
+			"fact_3_description": "Orders are matched and settled inside a canister on the Internet Computer, governed by the NNS, with no centralized exchange in the middle."
 		},
 		"order_detail": {
 			"title": "Order details",

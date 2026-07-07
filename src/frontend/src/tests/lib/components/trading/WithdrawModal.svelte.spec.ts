@@ -3,6 +3,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
+import { modalStore } from '$lib/stores/modal.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -117,6 +118,28 @@ describe('WithdrawModal', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.amount_label);
 	});
 
+	it('opens directly on the token picker with a close (not back) action when no seed token is given', async () => {
+		setDexBalances();
+
+		const closeSpy = vi.spyOn(modalStore, 'close');
+
+		const { getByTestId, getByText, queryByText, container } = render(WithdrawModal);
+
+		await waitFor(() => {
+			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
+			expect(container).not.toHaveTextContent(en.trading.withdraw.amount_label);
+			// Root entry: nothing precedes the picker, so it offers close, not a back-to-nowhere.
+			expect(getByText(en.core.text.close)).toBeInTheDocument();
+			expect(queryByText(en.core.text.back)).not.toBeInTheDocument();
+		});
+
+		// The picker vanishing alone wouldn't prove a close (the old bug navigated to an
+		// empty step, also hiding it), so assert the close action reaches modalStore.
+		await fireEvent.click(getByText(en.core.text.close));
+
+		expect(closeSpy).toHaveBeenCalledOnce();
+	});
+
 	it('shows the reserved note when the token has reserved funds', () => {
 		const { container } = render(WithdrawModal, {
 			props: {
@@ -130,7 +153,7 @@ describe('WithdrawModal', () => {
 	it('opens the tokens list with the DEX holdings when the token selector is clicked', async () => {
 		setDexBalances();
 
-		const { getAllByText, getByTestId, container } = render(WithdrawModal, {
+		const { getAllByText, getByTestId, getByText, queryByText, container } = render(WithdrawModal, {
 			props: { withdrawToken }
 		});
 
@@ -139,6 +162,9 @@ describe('WithdrawModal', () => {
 		await waitFor(() => {
 			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 			expect(container).toHaveTextContent('ckBTC');
+			// Reached from the form (a token is selected), so the picker offers back, not close.
+			expect(getByText(en.core.text.back)).toBeInTheDocument();
+			expect(queryByText(en.core.text.close)).not.toBeInTheDocument();
 		});
 	});
 

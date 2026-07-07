@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
@@ -26,9 +27,10 @@
 
 	interface Props {
 		onDeposit: () => void;
+		onWithdraw: () => void;
 	}
 
-	let { onDeposit }: Props = $props();
+	let { onDeposit, onWithdraw }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -51,6 +53,12 @@
 
 	const hasDeposits = $derived($oisyTradeAssets.length > 0);
 	const hasReserved = $derived($oisyTradeReservedUsdValue > 0);
+
+	// Scroll down to the "What is OISY TRADE" info box (a sibling section on the
+	// same page) — resolved by DOM id rather than a hash link so it works inside
+	// the app's scroll container.
+	const scrollToInfo = () =>
+		document.getElementById('oisy-trade-info')?.scrollIntoView({ behavior: 'smooth' });
 </script>
 
 <StakeContentSection>
@@ -77,6 +85,15 @@
 				{$i18n.trading.page.tagline}
 				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
 			</p>
+
+			<button
+				class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-primary hover:underline"
+				onclick={scrollToInfo}
+				type="button"
+			>
+				{$i18n.core.text.learn_more}
+				<IconArrowDown size="14" />
+			</button>
 		</div>
 	{/snippet}
 
@@ -130,6 +147,17 @@
 						{$i18n.trading.page.deposited_empty}
 					{/if}
 				</span>
+
+				<!-- Enabled once the user has DEX deposits; opens the withdraw form (token picker first). -->
+				<Button
+					colorStyle="primary"
+					disabled={!hasDeposits}
+					fullWidth
+					onclick={onWithdraw}
+					styleClass="mt-4 sm:mt-auto"
+				>
+					{$i18n.trading.page.withdraw}
+				</Button>
 			</div>
 		</div>
 	{/snippet}
