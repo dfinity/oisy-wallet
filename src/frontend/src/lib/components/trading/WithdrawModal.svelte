@@ -178,10 +178,8 @@
 				{#snippet toolbar()}
 					<ButtonGroup>
 						{#if nonNullish(token)}
-							<!-- A token is selected: the picker was reached from the form, so go back to it. -->
 							<ButtonBack onclick={closeTokensList} />
 						{:else}
-							<!-- Root entry (hero) with no token yet: nothing precedes the picker, so close. -->
 							<ButtonCloseModal />
 						{/if}
 					</ButtonGroup>
