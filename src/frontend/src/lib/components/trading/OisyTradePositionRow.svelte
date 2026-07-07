@@ -61,35 +61,37 @@
 		<TokenNameAndNetwork {data} />
 	</span>
 
-	{#if hasReserved}
-		<span
-			class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary"
-		>
-			<span class="inline-flex" aria-label={$i18n.trading.page.in_orders_label} role="img">
-				<IconLock size="12" />
+	<span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
+		{#if hasReserved}
+			<span
+				class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary"
+			>
+				<span class="inline-flex" aria-label={$i18n.trading.page.in_orders_label} role="img">
+					<IconLock size="12" />
+				</span>
+				{#if $isPrivacyMode}
+					<IconDots variant="xs" />
+				{:else}
+					{formatAmount(reserved)}
+				{/if}
 			</span>
-			{#if $isPrivacyMode}
-				<IconDots variant="xs" />
-			{:else}
-				{formatAmount(reserved)}
-			{/if}
-		</span>
-	{/if}
+		{/if}
 
-	<span class="flex shrink-0 flex-col text-right text-nowrap">
-		<span class="font-bold">
-			{#if $isPrivacyMode}
-				<IconDots variant="md" />
-			{:else}
-				{formatAmount(total)}
-			{/if}
-		</span>
-		<span class="text-sm text-tertiary">
-			{#if $isPrivacyMode}
-				<IconDots variant="xs" />
-			{:else if nonNullish(formattedTotalUsd)}
-				{formattedTotalUsd}
-			{/if}
+		<span class="flex flex-col text-right text-nowrap">
+			<span class="font-bold">
+				{#if $isPrivacyMode}
+					<IconDots variant="md" />
+				{:else}
+					{formatAmount(total)}
+				{/if}
+			</span>
+			<span class="text-sm text-tertiary">
+				{#if $isPrivacyMode}
+					<IconDots variant="xs" />
+				{:else if nonNullish(formattedTotalUsd)}
+					{formattedTotalUsd}
+				{/if}
+			</span>
 		</span>
 	</span>
 {/snippet}
