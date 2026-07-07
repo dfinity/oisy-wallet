@@ -11,12 +11,13 @@ it sits under the frontend docs alongside
 > event's properties must never carry anything that could identify a person or
 > leak a secret. When in doubt, emit less.
 
-> **Canonical property registry.** The full, product-owned list of Plausible
-> events and their property keys lives in Confluence:
-> [OISY / Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events).
-> That page and the `enums/plausible.ts` code are meant to stay in sync — when you
-> add or rename an event or property, update **both**. If the two disagree, treat
-> the code as current state (AGENTS.md truth hierarchy) and reconcile the page.
+> **Canonical reference.** This document plus the `enums/plausible.ts` code are
+> the source of truth for events and their property keys. The shared property
+> vocabulary in §4 was consolidated here from the team's earlier Plausible notes;
+> there is no separate per-event registry to keep in sync. Event _names_ live in
+> the code (`PLAUSIBLE_EVENTS` / the `TRACK_*` constants); the property _schema_
+> lives in §4. When they disagree, the code is current state (AGENTS.md truth
+> hierarchy) — reconcile this doc to it.
 
 ---
 
@@ -118,14 +119,11 @@ Property _keys_ are a small shared schema so dashboards can filter and group
 across features. Property _values_ come from the enums in
 [`enums/plausible.ts`](../../../src/frontend/src/lib/enums/plausible.ts). Reuse an
 existing member; if none fits, **add a member to the right enum** rather than
-inlining a literal. The product-owned catalogue of every event and property key
-is maintained in Confluence —
-[OISY / Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events)
-— check it before inventing a key, and update it when you add one.
+inlining a literal.
 
-The registry organises every property into five groups — **Event**, **Source**,
-**Result**, **Token**, and **Token2**. The tables below mirror the Confluence page;
-they are the naming contract. Where a value comes from a code enum it is noted;
+The schema organises every property into five groups — **Event**, **Source**,
+**Result**, **Token**, and **Token2**. The tables below are the naming contract.
+Where a value comes from a code enum it is noted;
 otherwise it is a free string built at the call site. Keep the names exactly and
 stringify all values (§2).
 
@@ -184,8 +182,8 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `result_error_code`                  | Error code                      | `407`                                      | string                             |
 | `result_error_text`                  | Full raw error text we received | `Error parsing …`                          | sanitised string (§6)              |
 
-> Legacy: `result_error_toast_level` / `result_error_toast_key` are **deprecated**
-> on the registry — don't add them to new events.
+> Legacy: `result_error_toast_level` / `result_error_toast_key` are
+> **deprecated** — don't add them to new events.
 
 ### Token — the involved token
 
@@ -209,10 +207,10 @@ trade, deposit/withdraw): `token2_network`, `token2_address`, `token2_standard`,
 `token2_usd_value`. By convention the primary/base token is `token_*` and the
 quote/second token is `token2_*` (see `trackTrading`).
 
-> **Code vs. registry naming.** A few code enums use adjacent names for the same
-> idea — e.g. `result_error_message` in code maps to the registry's
-> `result_error_text`, and `result_error_type` is a code-side classifier not on
-> the registry. When adding events, prefer the **registry** names above and
+> **Code vs. schema naming.** A few code enums use adjacent names for the same
+> idea — e.g. `result_error_message` in code maps to this doc's
+> `result_error_text`, and `result_error_type` is a code-side classifier not in
+> the tables above. When adding events, prefer the **schema** names above and
 > reconcile any drift (code wins on current-state conflicts per the AGENTS.md
 > hierarchy, but the two should be made to agree).
 
@@ -336,9 +334,9 @@ Run the frontend gates before opening the PR: `npm run format`,
 5. Run the §6 privacy checklist against every property.
 6. Add / extend the `.spec.ts` (name + metadata + omission + privacy assertions).
 7. Run the quality gates.
-8. **Update the registry.** Add the new event / properties to the Confluence
-   [OISY / Plausible Events](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events)
-   page so it stays in sync with the code.
+8. **Keep the §4 schema current.** If you added a new property _key_ (not just a
+   new value), add it to the right group's table above so the schema stays
+   complete and dashboards can discover it.
 9. **Meta-update (commandment):** if you introduced a new pattern, enum family,
    or metadata key, update _this doc_ in the same PR, add a pointer in the
    [`AGENTS.md`](../../../AGENTS.md) "Where to look (frontend)" table if it's a
