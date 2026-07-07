@@ -3,6 +3,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import WithdrawModal from '$lib/components/trading/WithdrawModal.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { MODAL_TOKENS_LIST } from '$lib/constants/test-ids.constants';
+import { modalStore } from '$lib/stores/modal.store';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import type { OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -120,6 +121,8 @@ describe('WithdrawModal', () => {
 	it('opens directly on the token picker with a close (not back) action when no seed token is given', async () => {
 		setDexBalances();
 
+		const closeSpy = vi.spyOn(modalStore, 'close');
+
 		const { getByTestId, getByText, queryByText, container } = render(WithdrawModal);
 
 		await waitFor(() => {
@@ -129,6 +132,12 @@ describe('WithdrawModal', () => {
 			expect(getByText(en.core.text.close)).toBeInTheDocument();
 			expect(queryByText(en.core.text.back)).not.toBeInTheDocument();
 		});
+
+		// The picker vanishing alone wouldn't prove a close (the old bug navigated to an
+		// empty step, also hiding it), so assert the close action reaches modalStore.
+		await fireEvent.click(getByText(en.core.text.close));
+
+		expect(closeSpy).toHaveBeenCalledOnce();
 	});
 
 	it('shows the reserved note when the token has reserved funds', () => {
