@@ -6,9 +6,20 @@
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let loading = $state(false);
+
+	// On mobile the console is a full-screen takeover, but it lives inside the
+	// footer's low stacking context while the bottom nav bar sits at a higher
+	// z-index — so the nav would paint over the console's input row. The nav
+	// already hides itself while a bottom sheet is open; reuse that mechanism
+	// for the console's lifetime (this component only mounts while it is open).
+	$effect(() => {
+		bottomSheetOpenStore.set(true);
+		return () => bottomSheetOpenStore.set(false);
+	});
 </script>
 
 <div
