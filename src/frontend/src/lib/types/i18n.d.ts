@@ -1356,7 +1356,14 @@ interface I18nWallet_connect {
 }
 
 interface I18nTrading {
-	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
+	text: {
+		tab_title: string;
+		intro: string;
+		learn_more: string;
+		provider_name: string;
+		no_trades: string;
+		go_to_trade: string;
+	};
 	page: {
 		tagline: string;
 		tagline_desktop: string;
