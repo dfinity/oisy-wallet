@@ -2385,6 +2385,7 @@
 			"supply_label": "Supply",
 			"borrow_label": "Borrow",
 			"coming_soon": "Coming soon",
+			"coming_soon_teaser": "Coming soon...",
 			"action_supply": "Supply",
 			"action_borrow": "Borrow",
 			"action_repay": "Repay",
