@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		// The signed value difference, in percent (already computed by the caller).
@@ -42,7 +42,7 @@
 	// rather than "-0.00%" (or a spurious "+0.00%"): toFixed keeps the sign of a
 	// negative rounding-to-zero, so we must snap through Number() first.
 	let text = $derived.by((): string => {
-		if (!nonNullish(value)) {
+		if (isNullish(value)) {
 			return '';
 		}
 		const rounded = Number(value.toFixed(2));
