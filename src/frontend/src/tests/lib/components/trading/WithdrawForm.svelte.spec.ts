@@ -8,21 +8,24 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('WithdrawForm', () => {
 	const free = 5_000_000n;
 
-	const mockContext = (customSendBalance = free) =>
+	const mockContext = () =>
 		new Map<symbol, SendContext>([
-			[SEND_CONTEXT_KEY, initSendContext({ token: mockValidIcToken, customSendBalance })]
+			[SEND_CONTEXT_KEY, initSendContext({ token: mockValidIcToken })]
 		]);
 
 	const baseProps = {
 		amount: undefined,
 		amountSetToMax: false,
+		free,
 		reserved: ZERO,
 		transferFee: mockValidIcToken.fee,
+		onSelectToken: () => {},
 		onClose: () => {},
 		onNext: () => {}
 	};
@@ -102,6 +105,27 @@ describe('WithdrawForm', () => {
 			})
 		);
 		expect(testProps.amountSetToMax).toBeTruthy();
+	});
+
+	it('calls onSelectToken when the token selector is clicked', async () => {
+		const onSelectToken = vi.fn();
+
+		const { getAllByText } = render(WithdrawForm, {
+			props: { ...baseProps, onSelectToken },
+			context: mockContext()
+		});
+
+		// The token pill is the only element whose text is exactly the symbol and
+		// that sits inside a button (the fee lines render "<amount> <symbol>").
+		const tokenPill = getAllByText(mockValidIcToken.symbol).find(
+			(element) => element.closest('button') !== null
+		);
+
+		assertNonNullish(tokenPill);
+
+		await fireEvent.click(tokenPill);
+
+		expect(onSelectToken).toHaveBeenCalledOnce();
 	});
 
 	it('calls onNext when the review button is clicked', async () => {
