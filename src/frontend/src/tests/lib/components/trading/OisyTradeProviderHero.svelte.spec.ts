@@ -1,7 +1,7 @@
 import OisyTradeProviderHero from '$lib/components/trading/OisyTradeProviderHero.svelte';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 const { assetsMock, depositableMock, freeMock, reservedMock, usdMock } = vi.hoisted(() => {
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -107,5 +107,15 @@ describe('OisyTradeProviderHero', () => {
 		// Labels stay; the masked figures replace the free/in-orders text.
 		expect(getByText(en.trading.page.trading_potential)).toBeInTheDocument();
 		expect(queryByText(en.trading.page.deposited_all_free)).toBeNull();
+	});
+
+	it('calls onDeposit when the Deposit button is clicked', async () => {
+		const onDeposit = vi.fn();
+
+		const { getByText } = render(OisyTradeProviderHero, { props: { onDeposit } });
+
+		await fireEvent.click(getByText(en.trading.page.deposit));
+
+		expect(onDeposit).toHaveBeenCalledOnce();
 	});
 });

@@ -6,6 +6,7 @@
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -22,6 +23,12 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { back } from '$lib/utils/nav.utils';
+
+	interface Props {
+		onDeposit: () => void;
+	}
+
+	let { onDeposit }: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -92,6 +99,10 @@
 					{/if}
 				</span>
 				<span class="text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
+
+				<Button colorStyle="success" fullWidth onclick={onDeposit} styleClass="mt-4 sm:mt-auto">
+					{$i18n.trading.page.deposit}
+				</Button>
 			</div>
 
 			<div
