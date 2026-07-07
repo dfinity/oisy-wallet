@@ -112,15 +112,19 @@ describe('OisyTradeProviderHero', () => {
 	it('calls onDeposit when the Deposit button is clicked', async () => {
 		const onDeposit = vi.fn();
 
-		const { getByText } = render(OisyTradeProviderHero, { props: { onDeposit } });
+		const { getByText } = render(OisyTradeProviderHero, {
+			props: { onDeposit, onWithdraw: vi.fn() }
+		});
 
 		await fireEvent.click(getByText(en.trading.page.deposit));
 
 		expect(onDeposit).toHaveBeenCalledOnce();
 	});
 
-	it('renders the Withdraw button disabled (wiring pending #13395)', () => {
-		const { getByRole } = render(OisyTradeProviderHero, { props: { onDeposit: vi.fn() } });
+	it('disables Withdraw when there are no deposits', () => {
+		const { getByRole } = render(OisyTradeProviderHero, {
+			props: { onDeposit: vi.fn(), onWithdraw: vi.fn() }
+		});
 
 		expect(getByRole('button', { name: en.trading.page.withdraw })).toBeDisabled();
 	});
@@ -131,7 +135,9 @@ describe('OisyTradeProviderHero', () => {
 			.spyOn(document, 'getElementById')
 			.mockReturnValue({ scrollIntoView } as unknown as HTMLElement);
 
-		const { getByText } = render(OisyTradeProviderHero, { props: { onDeposit: vi.fn() } });
+		const { getByText } = render(OisyTradeProviderHero, {
+			props: { onDeposit: vi.fn(), onWithdraw: vi.fn() }
+		});
 
 		await fireEvent.click(getByText(en.core.text.learn_more));
 
@@ -139,5 +145,22 @@ describe('OisyTradeProviderHero', () => {
 		expect(scrollIntoView).toHaveBeenCalled();
 
 		getElementById.mockRestore();
+	});
+
+	it('enables Withdraw and calls onWithdraw once deposited', async () => {
+		assetsMock.set([{ total: 100n }]);
+		const onWithdraw = vi.fn();
+
+		const { getByRole } = render(OisyTradeProviderHero, {
+			props: { onDeposit: vi.fn(), onWithdraw }
+		});
+
+		const button = getByRole('button', { name: en.trading.page.withdraw });
+
+		expect(button).not.toBeDisabled();
+
+		await fireEvent.click(button);
+
+		expect(onWithdraw).toHaveBeenCalledOnce();
 	});
 });
