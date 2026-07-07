@@ -7,6 +7,10 @@ import type {
 } from '$declarations/oisy_trade/oisy_trade.did';
 import * as oisyTradeApi from '$lib/api/oisy-trade.api';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	OISY_TRADE_MAX_ORDER_PAGES,
+	OISY_TRADE_ORDERS_PAGE_SIZE
+} from '$lib/constants/oisy-trade.constants';
 import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 import {
 	cancelLimitOrder,
@@ -69,9 +73,61 @@ describe('oisy-trade.services', () => {
 
 			expect(oisyTradeApi.getMyOrders).toHaveBeenCalledWith(
 				expect.objectContaining({
-					args: { filter: { ByPage: { after: [], length: 100 } } }
+					args: { filter: { ByPage: { after: [], length: OISY_TRADE_ORDERS_PAGE_SIZE } } }
 				})
 			);
+		});
+
+		it('follows the ByPage cursor across pages until a short page', async () => {
+			const fullPage = Array.from({ length: OISY_TRADE_ORDERS_PAGE_SIZE }, (_, i) => ({
+				id: `a-${i}`
+			})) as unknown as UserOrder[];
+			const lastPage = [{ id: 'b-0' }] as unknown as UserOrder[];
+			vi.mocked(oisyTradeApi.getMyOrders)
+				.mockResolvedValueOnce(fullPage)
+				.mockResolvedValueOnce(lastPage);
+
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(oisyTradeApi.getMyOrders).toHaveBeenCalledTimes(2);
+			expect(oisyTradeApi.getMyOrders).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({
+					args: {
+						filter: {
+							ByPage: {
+								after: [`a-${OISY_TRADE_ORDERS_PAGE_SIZE - 1}`],
+								length: OISY_TRADE_ORDERS_PAGE_SIZE
+							}
+						}
+					}
+				})
+			);
+			expect(get(oisyTradeStore).orders).toEqual([...fullPage, ...lastPage]);
+		});
+
+		it('stops at the page cap even when every page is full', async () => {
+			const fullPage = Array.from({ length: OISY_TRADE_ORDERS_PAGE_SIZE }, (_, i) => ({
+				id: `x-${i}`
+			})) as unknown as UserOrder[];
+			vi.mocked(oisyTradeApi.getMyOrders).mockResolvedValue(fullPage);
+
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(oisyTradeApi.getMyOrders).toHaveBeenCalledTimes(OISY_TRADE_MAX_ORDER_PAGES);
+		});
+
+		it('keeps the orders loaded so far when a later page fails', async () => {
+			const fullPage = Array.from({ length: OISY_TRADE_ORDERS_PAGE_SIZE }, (_, i) => ({
+				id: `y-${i}`
+			})) as unknown as UserOrder[];
+			vi.mocked(oisyTradeApi.getMyOrders)
+				.mockResolvedValueOnce(fullPage)
+				.mockRejectedValueOnce(new Error('page 2 down'));
+
+			await loadOisyTrade({ identity: mockIdentity });
+
+			expect(get(oisyTradeStore).orders).toEqual(fullPage);
 		});
 
 		it('swallows canister errors and leaves the store unchanged', async () => {

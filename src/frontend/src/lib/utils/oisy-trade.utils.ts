@@ -79,6 +79,11 @@ export const mapOisyTradeAssets = ({
 export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
 	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
 
+// Total fiat value of the free (unreserved) portion of DEX-deposited balances —
+// the "$X free" figure on the provider page's Deposited box.
+export const sumOisyTradeAssetsFreeUsd = (assets: OisyTradeAsset[]): number =>
+	assets.reduce((acc, { freeUsd }) => acc + (freeUsd ?? 0), 0);
+
 // The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
 // that the user holds in their wallet. The first token per symbol wins (the
 // combined list is ordered ICP → ICRC default → custom).
@@ -458,6 +463,20 @@ export const maxSpendBaseAmount = ({
 // ---------------------------------------------------------------------------
 
 export type PricePreset = 'book' | 0 | 1 | 5;
+
+// The presets' fair-value anchor: the cross of the two legs' USD exchange-rate
+// prices (base ÷ quote). Deliberately independent of the DEX order-book mid — the
+// book can be stale or one-sided on a thin market, whereas the USD feed is a
+// stable reference. Returns 0 when either price is missing or the quote price is
+// non-positive, which leaves the percentage presets inert until the feed loads.
+export const referenceRate = ({
+	baseUsd,
+	quoteUsd
+}: {
+	baseUsd: number | undefined;
+	quoteUsd: number | undefined;
+}): number =>
+	nonNullish(baseUsd) && nonNullish(quoteUsd) && quoteUsd > 0 ? baseUsd / quoteUsd : 0;
 
 const snapToTick = ({ price, tickSize }: { price: number; tickSize: number }): number =>
 	parseFloat((Math.round(price / tickSize) * tickSize).toFixed(decimalsOfStep(tickSize)));

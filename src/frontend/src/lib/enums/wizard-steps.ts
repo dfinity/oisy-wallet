@@ -90,7 +90,8 @@ export enum WizardStepsUnstake {
 export enum WizardStepsTradingWithdraw {
 	WITHDRAW = 'Withdraw',
 	REVIEW = 'Review',
-	WITHDRAWING = 'Withdrawing'
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumSupply {

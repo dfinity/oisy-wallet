@@ -26,8 +26,10 @@
 	interface Props {
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
+		free: bigint;
 		reserved: bigint;
 		transferFee: bigint;
+		onSelectToken: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -35,14 +37,15 @@
 	let {
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
+		free,
 		reserved,
 		transferFee,
+		onSelectToken,
 		onClose,
 		onNext
 	}: Props = $props();
 
-	const { sendToken, sendTokenExchangeRate, sendBalance } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
@@ -75,7 +78,8 @@
 		<TokenInput
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
-			isSelectable={false}
+			isSelectable
+			onClick={onSelectToken}
 			showTokenNetwork
 			token={$sendToken}
 			bind:amount
@@ -96,7 +100,7 @@
 
 			{#snippet balance()}
 				<MaxBalanceButton
-					balance={$sendBalance}
+					balance={free}
 					fee={ZERO}
 					token={$sendToken}
 					bind:amountSetToMax
