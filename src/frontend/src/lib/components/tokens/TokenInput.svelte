@@ -27,6 +27,7 @@
 		displayUnit?: DisplayUnit;
 		exchangeRate?: number;
 		disabled?: boolean;
+		readOnly?: boolean;
 		placeholder?: string;
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
@@ -51,6 +52,7 @@
 		displayUnit = 'token',
 		exchangeRate,
 		disabled = false,
+		readOnly = false,
 		placeholder = '0',
 		errorType = $bindable(),
 		error = $bindable(),
@@ -130,9 +132,15 @@
 	<TokenInputContainer
 		error={nonNullish(errorType) || nonNullish(error)}
 		{focused}
+		{readOnly}
 		styleClass="h-14 text-3xl"
 	>
-		<div class="flex h-full w-full items-center">
+		<div
+			style={readOnly ? '--input-background: var(--color-background-disabled-alt);' : undefined}
+			class="flex h-full w-full items-center"
+			class:overflow-hidden={readOnly}
+			class:rounded-l-lg={readOnly}
+		>
 			{#if token}
 				{#if displayUnit === 'token'}
 					<TokenInputCurrencyToken

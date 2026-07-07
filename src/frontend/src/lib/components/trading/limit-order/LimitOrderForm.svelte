@@ -84,6 +84,13 @@
 		nonNullish(baseToken) ? $exchanges?.[baseToken.id]?.usd : undefined
 	);
 
+	const quoteToken = $derived(
+		nonNullish(quoteSymbol) ? $oisyTradeIcTokenBySymbol[quoteSymbol] : undefined
+	);
+	const quoteExchangeRate = $derived(
+		nonNullish(quoteToken) ? $exchanges?.[quoteToken.id]?.usd : undefined
+	);
+
 	const baseNum = $derived(parseFloat(baseAmount));
 	const priceNum = $derived(parseFloat(price));
 	const freeSpend = $derived(side === 'sell' ? freeBase : freeQuote);
@@ -157,7 +164,9 @@
 			{onSelectQuote}
 			{pairView}
 			{price}
+			{quoteExchangeRate}
 			{quoteSymbol}
+			{quoteToken}
 			{side}
 		/>
 
