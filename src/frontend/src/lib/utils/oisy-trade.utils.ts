@@ -459,6 +459,20 @@ export const maxSpendBaseAmount = ({
 
 export type PricePreset = 'book' | 0 | 1 | 5;
 
+// The presets' fair-value anchor: the cross of the two legs' USD exchange-rate
+// prices (base ÷ quote). Deliberately independent of the DEX order-book mid — the
+// book can be stale or one-sided on a thin market, whereas the USD feed is a
+// stable reference. Returns 0 when either price is missing or the quote price is
+// non-positive, which leaves the percentage presets inert until the feed loads.
+export const referenceRate = ({
+	baseUsd,
+	quoteUsd
+}: {
+	baseUsd: number | undefined;
+	quoteUsd: number | undefined;
+}): number =>
+	nonNullish(baseUsd) && nonNullish(quoteUsd) && quoteUsd > 0 ? baseUsd / quoteUsd : 0;
+
 const snapToTick = ({ price, tickSize }: { price: number; tickSize: number }): number =>
 	parseFloat((Math.round(price / tickSize) * tickSize).toFixed(decimalsOfStep(tickSize)));
 
