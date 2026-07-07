@@ -37,7 +37,7 @@ const setLoadedNotes = ({ entries, count }: { entries: PersonalNoteUi[]; count: 
 
 vi.mock('$lib/services/personal-notes-analytics.services', () => ({
 	trackPersonalNote: vi.fn(),
-	trackNoteShare: vi.fn()
+	trackPersonalNoteShare: vi.fn()
 }));
 
 describe('NotesModal', () => {

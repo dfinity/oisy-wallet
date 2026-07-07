@@ -9,7 +9,7 @@
 	import SharedNoteRevealed from '$lib/components/notes/SharedNoteRevealed.svelte';
 	import SharedNoteUnavailable from '$lib/components/notes/SharedNoteUnavailable.svelte';
 	import { loadSharedNote } from '$lib/services/personal-note-share.services';
-	import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 
 	type RecipientState = 'locked' | 'revealed' | 'outro' | 'unavailable';
 
@@ -30,14 +30,14 @@
 	let singleUse = $state(false);
 	let busy = $state(false);
 
-	onMount(() => trackNoteShare({ step: 'view', side: 'recipient' }));
+	onMount(() => trackPersonalNoteShare({ step: 'open', side: 'recipient' }));
 
 	// One neutral end state for every failure — expired, already-used, unknown
 	// token, or a missing/garbled key — so a reader can never tell them apart.
 	const toUnavailable = () => {
 		note = '';
 		flow = 'unavailable';
-		trackNoteShare({ step: 'unavailable', side: 'recipient' });
+		trackPersonalNoteShare({ step: 'unavailable', side: 'recipient' });
 	};
 
 	const onReveal = async () => {
@@ -58,7 +58,7 @@
 			note = revealedNote;
 			singleUse = revealedSingleUse;
 			flow = 'revealed';
-			trackNoteShare({ step: 'reveal', side: 'recipient', singleUse });
+			trackPersonalNoteShare({ step: 'reveal', side: 'recipient', singleUse });
 		} catch (_err: unknown) {
 			toUnavailable();
 		} finally {
@@ -70,7 +70,7 @@
 	const onDone = () => {
 		note = '';
 		flow = 'outro';
-		trackNoteShare({ step: 'close', side: 'recipient' });
+		trackPersonalNoteShare({ step: 'close', side: 'recipient' });
 	};
 </script>
 

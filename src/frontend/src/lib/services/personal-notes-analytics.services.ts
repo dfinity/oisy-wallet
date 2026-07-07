@@ -48,22 +48,21 @@ export const trackPersonalNote = ({
 	});
 };
 
-// The share-funnel step, carried in `event_modifier` so one `note_share` event
-// covers the whole flow (creator dialog + recipient page) differentiated by
+// The share-funnel step, carried in `event_modifier` so one `personal_note_share`
+// event covers the whole flow (creator dialog + recipient page) differentiated by
 // properties, replacing the six former flat `note_share_*` events.
-export type NoteShareStep =
-	| 'open' // creator opened the share dialog
+export type PersonalNoteShareStep =
+	| 'open' // a share surface was opened — the dialog (creator) or the link page (recipient)
 	| 'create' // creator generated a link
-	| 'view' // recipient opened the link
 	| 'reveal' // recipient revealed the note
 	| 'copy' // recipient copied the revealed note
 	| 'close' // recipient dismissed the revealed note (→ outro)
 	| 'unavailable' // recipient hit a dead/expired/used link
 	| 'discover'; // recipient clicked the "Discover OISY" CTA
 
-export interface TrackNoteShareParams {
+export interface TrackPersonalNoteShareParams {
 	// The funnel step → `event_modifier`.
-	step: NoteShareStep;
+	step: PersonalNoteShareStep;
 	// Which side of the funnel → `source_location` (creator dialog vs. recipient page).
 	side: 'creator' | 'recipient';
 	// Create outcome → `result_status` (success|error); omitted for the other steps.
@@ -78,7 +77,7 @@ export interface TrackNoteShareParams {
 	error?: string;
 }
 
-export const trackNoteShare = ({
+export const trackPersonalNoteShare = ({
 	step,
 	side,
 	resultStatus,
@@ -86,9 +85,9 @@ export const trackNoteShare = ({
 	expiry,
 	sourceDetail,
 	error
-}: TrackNoteShareParams) => {
+}: TrackPersonalNoteShareParams) => {
 	trackEvent({
-		name: PLAUSIBLE_EVENTS.NOTE_SHARE,
+		name: PLAUSIBLE_EVENTS.PERSONAL_NOTE_SHARE,
 		metadata: {
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.PERSONAL_NOTES,
 			event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NOTES.SHARE,

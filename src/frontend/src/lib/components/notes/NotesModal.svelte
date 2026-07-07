@@ -39,7 +39,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import {
-		trackNoteShare,
+		trackPersonalNoteShare,
 		trackPersonalNote
 	} from '$lib/services/personal-notes-analytics.services';
 	import {
@@ -257,7 +257,7 @@
 		pendingShareNote =
 			nonNullish(entry) && !isPersonalNoteDecryptionFailure(entry) ? entry : undefined;
 		if (nonNullish(pendingShareNote)) {
-			trackNoteShare({ step: 'open', side: 'creator' });
+			trackPersonalNoteShare({ step: 'open', side: 'creator' });
 		}
 	};
 

@@ -22,7 +22,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { createNoteShare, getActiveShareCount } from '$lib/services/personal-note-share.services';
-	import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
@@ -99,7 +99,7 @@
 				singleUse
 			});
 			createdLink = link;
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
@@ -107,7 +107,7 @@
 				expiry: expiryLabel
 			});
 		} catch (err: unknown) {
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,

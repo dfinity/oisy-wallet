@@ -264,7 +264,7 @@ export const trackFoo = ({ modifier, resultStatus, error }: TrackFooParams) => {
 fall back to distinct flat constants when the actions are genuinely unrelated
 one-off pings (e.g. `welcome_open` vs. `wallet_connect`). Two enum families for
 one feature are fine when the flows differ — e.g. `personal_note` (lifecycle) and
-`note_share` (the share funnel) share a context but track different journeys.
+`personal_note_share` (the share funnel) share a context but track different journeys.
 
 **Firing point / lifecycle:** for async flows, fire `executing` (or a
 `submitted` counter) when the action starts, then `success` / `error` from the

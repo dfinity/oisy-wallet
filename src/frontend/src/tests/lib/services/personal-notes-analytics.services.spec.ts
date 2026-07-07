@@ -1,9 +1,9 @@
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
-	trackNoteShare,
 	trackPersonalNote,
-	type NoteShareStep,
+	trackPersonalNoteShare,
+	type PersonalNoteShareStep,
 	type PersonalNoteStep
 } from '$lib/services/personal-notes-analytics.services';
 
@@ -150,12 +150,12 @@ describe('personal-notes-analytics.services', () => {
 		});
 	});
 
-	describe('trackNoteShare', () => {
+	describe('trackPersonalNoteShare', () => {
 		it('tracks the creator dialog open on the share_dialog source', () => {
-			trackNoteShare({ step: 'open', side: 'creator' });
+			trackPersonalNoteShare({ step: 'open', side: 'creator' });
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -166,7 +166,7 @@ describe('personal-notes-analytics.services', () => {
 		});
 
 		it('tracks a successful create with single_use, expiry and status', () => {
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
@@ -175,7 +175,7 @@ describe('personal-notes-analytics.services', () => {
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -189,7 +189,7 @@ describe('personal-notes-analytics.services', () => {
 		});
 
 		it('tracks a create error with a sanitized error string', () => {
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
@@ -199,7 +199,7 @@ describe('personal-notes-analytics.services', () => {
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -214,10 +214,10 @@ describe('personal-notes-analytics.services', () => {
 		});
 
 		it('emits single_use on a recipient reveal', () => {
-			trackNoteShare({ step: 'reveal', side: 'recipient', singleUse: true });
+			trackPersonalNoteShare({ step: 'reveal', side: 'recipient', singleUse: true });
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -229,10 +229,10 @@ describe('personal-notes-analytics.services', () => {
 		});
 
 		it('emits source_detail on a recipient discover', () => {
-			trackNoteShare({ step: 'discover', side: 'recipient', sourceDetail: 'outro' });
+			trackPersonalNoteShare({ step: 'discover', side: 'recipient', sourceDetail: 'outro' });
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -243,13 +243,13 @@ describe('personal-notes-analytics.services', () => {
 			});
 		});
 
-		it.each<NoteShareStep>(['view', 'copy', 'close', 'unavailable'])(
+		it.each<PersonalNoteShareStep>(['open', 'copy', 'close', 'unavailable'])(
 			'maps the bare recipient %s step with no extra properties',
 			(step) => {
-				trackNoteShare({ step, side: 'recipient' });
+				trackPersonalNoteShare({ step, side: 'recipient' });
 
 				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-					name: 'note_share',
+					name: 'personal_note_share',
 					metadata: {
 						event_context: 'personal_notes',
 						event_subcontext: 'share',
@@ -261,7 +261,7 @@ describe('personal-notes-analytics.services', () => {
 		);
 
 		it('omits optional fields when nullish or empty', () => {
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
@@ -271,7 +271,7 @@ describe('personal-notes-analytics.services', () => {
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'note_share',
+				name: 'personal_note_share',
 				metadata: {
 					event_context: 'personal_notes',
 					event_subcontext: 'share',
@@ -283,7 +283,7 @@ describe('personal-notes-analytics.services', () => {
 		});
 
 		it('never emits a token, key, note text, or any key beyond the fixed schema', () => {
-			trackNoteShare({
+			trackPersonalNoteShare({
 				step: 'create',
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,

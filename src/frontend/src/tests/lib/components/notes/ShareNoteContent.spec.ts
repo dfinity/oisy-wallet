@@ -7,13 +7,13 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as shareServices from '$lib/services/personal-note-share.services';
-import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
+import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$lib/services/personal-notes-analytics.services', () => ({
-	trackNoteShare: vi.fn()
+	trackPersonalNoteShare: vi.fn()
 }));
 
 describe('ShareNoteContent', () => {
@@ -57,7 +57,7 @@ describe('ShareNoteContent', () => {
 			singleUse: false
 		});
 
-		expect(trackNoteShare).toHaveBeenCalledExactlyOnceWith({
+		expect(trackPersonalNoteShare).toHaveBeenCalledExactlyOnceWith({
 			step: 'create',
 			side: 'creator',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
@@ -77,7 +77,7 @@ describe('ShareNoteContent', () => {
 		await fireEvent.click(getByTestId(NOTES_SHARE_CREATE_BUTTON));
 
 		await waitFor(() =>
-			expect(trackNoteShare).toHaveBeenCalledExactlyOnceWith(
+			expect(trackPersonalNoteShare).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					step: 'create',
 					side: 'creator',

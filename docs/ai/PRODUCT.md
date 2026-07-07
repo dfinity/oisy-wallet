@@ -94,13 +94,13 @@ The [Personal notes](#personal-notes) feature emits two structured Plausible eve
 | `open`           | the Notes modal opens  | `success`           | —                                                                             |
 | `view`           | a note's preview opens | `success`           | —                                                                             |
 
-**`note_share`** — the [share](#sharing-a-note) funnel, a single event covering both the creator and the recipient, under `event_subcontext: share`. The step rides in `event_modifier`; `source_location` is `share_dialog` for creator steps and `recipient_page` for recipient steps.
+**`personal_note_share`** — the [share](#sharing-a-note) funnel, a single event covering both the creator and the recipient, under `event_subcontext: share`. The step rides in `event_modifier`; `source_location` is `share_dialog` for creator steps and `recipient_page` for recipient steps.
 
 | `event_modifier` | Side      | Fires when                         | Extra                                                                          |
 | ---------------- | --------- | ---------------------------------- | ------------------------------------------------------------------------------ |
 | `open`           | creator   | the share dialog opens             | —                                                                              |
+| `open`           | recipient | the link page opens                | —                                                                              |
 | `create`         | creator   | a share link is created            | `single_use`, `expiry` (e.g. `7d`), `result_status`, `result_error` on failure |
-| `view`           | recipient | the link page loads                | —                                                                              |
 | `reveal`         | recipient | the note is revealed               | `single_use`                                                                   |
 | `copy`           | recipient | the revealed note is copied        | —                                                                              |
 | `close`          | recipient | the revealed note is dismissed     | —                                                                              |
@@ -178,7 +178,7 @@ From an open note, the user can create a **share link** that lets anyone holding
 - **No revocation.** Once shared, OISY cannot recall or revoke a link; it simply stops working after it expires or, for a single-use link, after its first view.
 - **Limit.** A user may hold up to **100 active share links** at a time. At the cap the Share dialog disables link creation and explains that links free up as they expire or are used; existing shares are never evicted.
 
-The share funnel — dialog open, link created, and the recipient's view / reveal / copy / close / unavailable / discover steps — is tracked via the `note_share` Plausible event; see [Analytics → Personal notes tracking](#personal-notes-tracking).
+The share funnel — dialog open, link created, and the recipient's open / reveal / copy / close / unavailable / discover steps — is tracked via the `personal_note_share` Plausible event; see [Analytics → Personal notes tracking](#personal-notes-tracking).
 
 ---
 

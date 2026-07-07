@@ -23,7 +23,7 @@ export enum PLAUSIBLE_EVENTS {
 	ONRAMPER_OPEN = 'onramper_open',
 	TRADING = 'trading',
 	PERSONAL_NOTE = 'personal_note',
-	NOTE_SHARE = 'note_share'
+	PERSONAL_NOTE_SHARE = 'personal_note_share'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {

@@ -5,7 +5,7 @@
 		NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON,
 		NOTES_SHARE_RECIPIENT_UNAVAILABLE
 	} from '$lib/constants/test-ids.constants';
-	import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -24,7 +24,7 @@
 		data-tid={NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON}
 		href={OISY_URL}
 		onclick={() =>
-			trackNoteShare({ step: 'discover', side: 'recipient', sourceDetail: 'unavailable' })}
+			trackPersonalNoteShare({ step: 'discover', side: 'recipient', sourceDetail: 'unavailable' })}
 	>
 		{$i18n.notes.share.recipient.discover}
 	</a>

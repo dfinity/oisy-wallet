@@ -11,7 +11,7 @@ import {
 	NOTES_SHARE_RECIPIENT_UNAVAILABLE
 } from '$lib/constants/test-ids.constants';
 import * as shareServices from '$lib/services/personal-note-share.services';
-import { trackNoteShare } from '$lib/services/personal-notes-analytics.services';
+import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import SharePage from '$routes/(public)/notes/share/[token]/+page@.svelte';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -24,7 +24,7 @@ vi.mock('$lib/components/hero/Header.svelte', async () => await import('./Header
 vi.mock('$app/environment', () => ({ browser: true, dev: false, building: false }));
 
 vi.mock('$lib/services/personal-notes-analytics.services', () => ({
-	trackNoteShare: vi.fn()
+	trackPersonalNoteShare: vi.fn()
 }));
 
 // Copying uses the clipboard API, which jsdom does not implement — stub the util
@@ -56,7 +56,7 @@ describe('Share recipient page', () => {
 		// Locked by default — no backend call yet.
 		expect(getByTestId(NOTES_SHARE_RECIPIENT_LOCKED)).toBeInTheDocument();
 		expect(loadSpy).not.toHaveBeenCalled();
-		expect(trackNoteShare).toHaveBeenCalledWith({ step: 'view', side: 'recipient' });
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({ step: 'open', side: 'recipient' });
 
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_REVEAL_BUTTON));
 
@@ -64,7 +64,7 @@ describe('Share recipient page', () => {
 
 		// The fragment key and the route token are passed to the loader.
 		expect(loadSpy).toHaveBeenCalledExactlyOnceWith({ token: 'tok', key: 'KEY' });
-		expect(trackNoteShare).toHaveBeenCalledWith({
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({
 			step: 'reveal',
 			side: 'recipient',
 			singleUse: false
@@ -84,7 +84,7 @@ describe('Share recipient page', () => {
 		// Copying the revealed note tracks the copy step.
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_COPY));
 		await waitFor(() =>
-			expect(trackNoteShare).toHaveBeenCalledWith({ step: 'copy', side: 'recipient' })
+			expect(trackPersonalNoteShare).toHaveBeenCalledWith({ step: 'copy', side: 'recipient' })
 		);
 
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_DONE_BUTTON));
@@ -92,7 +92,7 @@ describe('Share recipient page', () => {
 		await waitFor(() => expect(getByTestId(NOTES_SHARE_RECIPIENT_OUTRO)).toBeInTheDocument());
 
 		// Dismissing the revealed note tracks the close step.
-		expect(trackNoteShare).toHaveBeenCalledWith({ step: 'close', side: 'recipient' });
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({ step: 'close', side: 'recipient' });
 
 		// The plaintext is cleared from the DOM on the outro.
 		expect(queryByTestId(NOTES_SHARE_RECIPIENT_NOTE)).toBeNull();
@@ -101,7 +101,7 @@ describe('Share recipient page', () => {
 		// The outro "Discover OISY" CTA tracks discover with its source.
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON));
 
-		expect(trackNoteShare).toHaveBeenCalledWith({
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({
 			step: 'discover',
 			side: 'recipient',
 			sourceDetail: 'outro'
@@ -123,7 +123,7 @@ describe('Share recipient page', () => {
 		);
 
 		// A single-use reveal carries single_use: true.
-		expect(trackNoteShare).toHaveBeenCalledWith({
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({
 			step: 'reveal',
 			side: 'recipient',
 			singleUse: true
@@ -140,12 +140,12 @@ describe('Share recipient page', () => {
 		await waitFor(() => expect(getByTestId(NOTES_SHARE_RECIPIENT_UNAVAILABLE)).toBeInTheDocument());
 
 		expect(getByTestId(NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON)).toBeInTheDocument();
-		expect(trackNoteShare).toHaveBeenCalledWith({ step: 'unavailable', side: 'recipient' });
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({ step: 'unavailable', side: 'recipient' });
 
 		// The unavailable-state CTA tracks discover with its own source.
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON));
 
-		expect(trackNoteShare).toHaveBeenCalledWith({
+		expect(trackPersonalNoteShare).toHaveBeenCalledWith({
 			step: 'discover',
 			side: 'recipient',
 			sourceDetail: 'unavailable'
