@@ -144,7 +144,12 @@ export const savePersonalNote = async ({
 
 		const entry: PersonalNoteUi = { id: noteId, ...envelope };
 		personalNotesStore.upsert({ ownerPrincipal: owner, entry });
-		await refreshCount({ identity, owner });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the note save succeeded; a count refresh failure shouldn't
+			// fail the save or misreport it as an error. The count self-heals on next load.
+		}
 
 		trackPersonalNote({ step, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS, isFirstNote });
 		return entry;
