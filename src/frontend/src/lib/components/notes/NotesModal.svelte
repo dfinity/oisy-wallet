@@ -179,6 +179,9 @@
 	const openView = (id: string) => {
 		viewNoteId = id;
 		step = 'view';
+		// A note's read-only preview was opened (from the list) — distinct from `open`,
+		// which is the notes surface itself.
+		trackPersonalNote({ step: 'view', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 	};
 
 	const openEditor = ({ id, fromView = false }: { id?: string; fromView?: boolean } = {}) => {
