@@ -49,7 +49,8 @@ Framework, UI lib, chain SDKs, and dev tooling are discoverable from
 - **Analytics.** Product events go through a single `trackEvent` entry point
   and a small shared metadata vocabulary; it is non-critical, anonymous, and
   never throws into a user flow. Read [`analytics.md`](./analytics.md) before
-  wiring any tracking, and keep the code in sync with the Confluence registry.
+  wiring any tracking — it and the `PLAUSIBLE_*` enums are the canonical
+  reference for events and their property schema.
 - **Path aliases** (declared in
   [`svelte.config.js`](../../../svelte.config.js) and
   [`vitest.config.ts`](../../../vitest.config.ts)): `$lib`, `$routes`,

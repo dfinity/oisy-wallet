@@ -63,7 +63,7 @@
 		isRouteRewards,
 		isRouteSettings,
 		isRouteTokens,
-		isRouteTrading,
+		isRouteOisyTradeProvider,
 		isRouteTransactions,
 		networkUrl
 	} from '$lib/utils/nav.utils';
@@ -187,8 +187,8 @@
 							ariaLabel: $i18n.navigation.alt.trade,
 							testId: prefixedTestId(NAVIGATION_ITEM_TRADE),
 							icon: IconLineChart,
-							href: url(AppPath.Trading),
-							selected: isRouteTrading(page),
+							href: url(AppPath.ProvidersOisyTrade),
+							selected: isRouteOisyTradeProvider(page),
 							tag: $i18n.core.text.new,
 							tagVariant: 'emphasis'
 						}

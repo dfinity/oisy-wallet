@@ -1357,6 +1357,17 @@ interface I18nWallet_connect {
 
 interface I18nTrading {
 	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
+	page: {
+		tagline: string;
+		tagline_desktop: string;
+		trading_potential: string;
+		trading_potential_hint: string;
+		deposited_assets: string;
+		deposited_all_free: string;
+		deposited_empty: string;
+		free: string;
+		in_orders: string;
+	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
 		title: string;
