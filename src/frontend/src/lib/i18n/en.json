@@ -1693,7 +1693,9 @@
 			"deposited_all_free": "All free",
 			"deposited_empty": "Nothing deposited yet",
 			"free": "$amount free",
-			"in_orders": "$amount in orders"
+			"in_orders": "$amount in orders",
+			"in_orders_label": "in orders",
+			"positions": "My positions"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
