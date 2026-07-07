@@ -109,7 +109,9 @@ export const oisyTradeFreeUsdValue: Readable<number> = derived(oisyTradeAssets, 
 // "$Y in orders" part of the Deposited box.
 export const oisyTradeReservedUsdValue: Readable<number> = derived(
 	[oisyTradeUsdValue, oisyTradeFreeUsdValue],
-	([$total, $free]) => $total - $free
+	// Clamp to 0: both operands are independent Number(formatToken(...))
+	// conversions, so float rounding can otherwise yield a tiny negative.
+	([$total, $free]) => Math.max(0, $total - $free)
 );
 
 // Whether the user has any DEX deposit yet — drives the onboarding-vs-sections
