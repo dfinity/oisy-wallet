@@ -56,10 +56,10 @@
 
 			<h2 class="my-2 text-xl font-bold sm:text-2xl">{$i18n.trading.text.provider_name}</h2>
 
-			<p class="max-w-lg text-sm text-tertiary sm:text-base">
+			<div class="max-w-lg text-sm text-tertiary sm:text-base">
 				{$i18n.trading.page.tagline}
 				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
-			</p>
+			</div>
 
 			<Button innerStyleClass="items-center" link onclick={scrollToInfo} styleClass="mt-2 text-sm">
 				<span>{$i18n.core.text.learn_more}</span>
