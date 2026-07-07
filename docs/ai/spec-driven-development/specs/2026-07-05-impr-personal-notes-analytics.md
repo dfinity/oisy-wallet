@@ -12,7 +12,7 @@ events** that share one context:
 
 1. **`personal_note`** — the note lifecycle (create / edit / delete / open). New
    tracking; today this is completely uninstrumented.
-2. **`note_share`** — the share funnel. Consolidates the **six** existing flat
+2. **`personal_note_share`** — the share funnel. Consolidates the **six** existing flat
    `note_share_*` events into one event, differentiated by properties.
 
 Both use `event_context: personal_notes` and follow the house domain-service
@@ -79,7 +79,7 @@ Single entry point `trackEvent` in
 ### Shared enums (in `enums/plausible.ts`)
 
 - `PLAUSIBLE_EVENTS.PERSONAL_NOTE = 'personal_note'`
-- `PLAUSIBLE_EVENTS.NOTE_SHARE = 'note_share'`
+- `PLAUSIBLE_EVENTS.PERSONAL_NOTE_SHARE = 'personal_note_share'`
 - `PLAUSIBLE_EVENT_CONTEXTS.PERSONAL_NOTES = 'personal_notes'`
 - `PLAUSIBLE_EVENT_SUBCONTEXT_NOTES.SHARE = 'share'` (new subcontext enum for the notes area)
 - `PLAUSIBLE_EVENT_SOURCE_LOCATIONS.NOTES = 'notes'`,
@@ -89,7 +89,7 @@ Single entry point `trackEvent` in
 ### One analytics service
 
 Add `personal-notes-analytics.services.ts` exporting **two** functions,
-`trackPersonalNote` and `trackNoteShare`, both funnelling into `trackEvent`. Only
+`trackPersonalNote` and `trackPersonalNoteShare`, both funnelling into `trackEvent`. Only
 properties meaningful to a given call are attached (conditional spreads; unused
 keys omitted, never `undefined`) — [`analytics.md` §4](../../frontend/analytics.md).
 
@@ -124,21 +124,20 @@ after the awaited backend call, error in the catch); fire `open` and `view` from
 `NotesModal` (`view` on `openView`, the row-click into a note's read-only preview —
 distinct from `open`, the surface itself).
 
-#### Event 2 — `note_share` (funnel)
+#### Event 2 — `personal_note_share` (funnel)
 
 ```ts
-export type NoteShareStep =
-	| 'open' // creator opened the share dialog
+export type PersonalNoteShareStep =
+	| 'open' // a share surface was opened — the dialog (creator) or the link page (recipient)
 	| 'create' // creator generated a link
-	| 'view' // recipient opened the link
 	| 'reveal' // recipient revealed the note
 	| 'copy' // recipient clicked "Copy note" on the revealed note
 	| 'close' // recipient clicked "Done" to dismiss the revealed note (→ outro)
 	| 'unavailable' // recipient hit a dead/expired/used link
 	| 'discover'; // recipient clicked the "Discover OISY" CTA
 
-export interface TrackNoteShareParams {
-	step: NoteShareStep; // → event_modifier
+export interface TrackPersonalNoteShareParams {
+	step: PersonalNoteShareStep; // → event_modifier
 	side: 'creator' | 'recipient'; // → source_location
 	resultStatus?: PLAUSIBLE_EVENT_RESULT_STATUSES; // create: success/error
 	singleUse?: boolean; // create, reveal → single_use
@@ -156,7 +155,7 @@ Common props: `event_context: personal_notes`, `event_subcontext: share`,
 | ---------------------------------- | ---------------- | ----------------- | ------------------------------------------------------------------ |
 | `note_share_open`                  | `open`           | `share_dialog`    | —                                                                  |
 | `note_share_created`               | `create`         | `share_dialog`    | `single_use`, `expiry`, `result_status` (+`result_error` on error) |
-| `note_share_recipient_view`        | `view`           | `recipient_page`  | —                                                                  |
+| `note_share_recipient_view`        | `open`           | `recipient_page`  | —                                                                  |
 | `note_share_recipient_revealed`    | `reveal`         | `recipient_page`  | `single_use`                                                       |
 | _(new — untracked today)_          | `copy`           | `recipient_page`  | —                                                                  |
 | _(new — untracked today)_          | `close`          | `recipient_page`  | —                                                                  |
@@ -171,7 +170,7 @@ Keep PRs small and atomic (AGENTS.md commandments 2–3).
 
 **PR-1 — analytics service + enums.** Add all enum members, the
 `personal-notes-analytics.services.ts` module with `trackPersonalNote` **and**
-`trackNoteShare`, and its `.spec.ts` (every step × outcome; create success/error
+`trackPersonalNoteShare`, and its `.spec.ts` (every step × outcome; create success/error
 split; property omission; no note content / token / key). No call sites yet —
 pure, testable, zero behaviour change.
 
@@ -184,10 +183,10 @@ pure, testable, zero behaviour change.
 **PR-3 — consolidate share events + add `close`.** Replace the six `trackEvent({
 name: TRACK_NOTE_SHARE_* })` calls (`NotesModal`, `ShareNoteContent`, recipient
 `+page@.svelte`, `SharedNoteOutro`, `SharedNoteUnavailable`) with
-`trackNoteShare(...)`, and delete the six `TRACK_NOTE_SHARE_*` constants from
+`trackPersonalNoteShare(...)`, and delete the six `TRACK_NOTE_SHARE_*` constants from
 [`analytics.constants.ts`](../../../../src/frontend/src/lib/constants/analytics.constants.ts).
-Additionally fire `trackNoteShare({ step: 'copy', side: 'recipient' })` from
-`SharedNoteRevealed`'s `onCopy`, and `trackNoteShare({ step: 'close', side:
+Additionally fire `trackPersonalNoteShare({ step: 'copy', side: 'recipient' })` from
+`SharedNoteRevealed`'s `onCopy`, and `trackPersonalNoteShare({ step: 'close', side:
 'recipient' })` from the recipient page's `onDone` handler (the **Done** button).
 Update the affected component specs.
 
@@ -197,7 +196,7 @@ Update the affected component specs.
 **Docs:** [`docs/ai/PRODUCT.md`](../../PRODUCT.md) already has an
 `## Analytics` section (with a `### "Learn More" Link Tracking` subsection). Add a
 `### Personal notes tracking` subsection there documenting the `personal_note` and
-`note_share` events and their property matrices, following the Learn-More pattern,
+`personal_note_share` events and their property matrices, following the Learn-More pattern,
 and cross-reference it from the existing `## Personal notes` / `### Sharing a note`
 sections. **Status:** landed in the share PR (both events exist by then), which
 also repoints the `## Analytics` schema reference from the (event-less) Confluence
@@ -220,7 +219,7 @@ page to `analytics.md`.
   successful create additionally carries `event_value: first_note`. Edit → `edit`,
   delete → `delete` (success/error each). Opening the surface → `open` / `success`;
   opening a note's preview → `view` / `success`.
-- **Share:** exactly one event name, `note_share`, covers all six former steps
+- **Share:** exactly one event name, `personal_note_share`, covers all six former steps
   **plus the new `copy` and `close` steps**, each with the correct `event_modifier`
   - `source_location` and
     `event_context: personal_notes` / `event_subcontext: share`. Creation failures
@@ -242,7 +241,7 @@ Values are strings; optional fields absent, never `undefined`.
 ## Migration note (dashboards)
 
 The share consolidation renames live events. Existing Plausible dashboards / goals
-referencing `note_share_*` will need updating to the single `note_share` event
+referencing `note_share_*` will need updating to the single `personal_note_share` event
 filtered by `event_modifier` / `source_location`.
 
 ## Decisions (locked)
@@ -252,7 +251,7 @@ filtered by `event_modifier` / `source_location`.
 2. **Track `open` (notes surface) and `view` (single-note preview).** `open` fires
    when the notes modal opens; `view` fires when a note's read-only preview is
    opened from the list (`openView`). They are separate signals.
-3. **`note_share` keeps both `open` and `create`.** Dialog-opened and link-created
+3. **`personal_note_share` keeps both `open` and `create`.** Dialog-opened and link-created
    are tracked separately, giving the creator conversion rate.
 4. **`expiry` is a human label** (`1d` / `7d` / `30d`) — the option label the user
    picked, not a raw ms / ISO duration.
