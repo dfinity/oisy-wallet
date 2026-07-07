@@ -187,6 +187,22 @@ describe('personal-notes.services', () => {
 			});
 		});
 
+		it('does not flag isFirstNote when the store has not loaded (count is the default 0)', async () => {
+			// Owner known but load never completed (e.g. it failed): loaded=false, count=0.
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+			vi.spyOn(vetkeys, 'encryptPersonalNote').mockResolvedValue(new Uint8Array([9]));
+
+			await savePersonalNote({ identity: mockIdentity, note: 'fresh note' });
+
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: false
+			});
+		});
+
 		it('tracks a create error and rethrows without leaking the note', async () => {
 			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 			personalNotesStore.setLoaded({

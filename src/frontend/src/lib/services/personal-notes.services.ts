@@ -125,8 +125,10 @@ export const savePersonalNote = async ({
 
 	// Create vs. edit is decided by whether the caller passed an existing id.
 	const step = id === undefined ? 'create' : 'edit';
-	// First note ever: a create while the backend-reported count is still zero.
-	const isFirstNote = step === 'create' && get(personalNotesStore).count === 0;
+	// First note ever: a create while the backend-reported count is loaded and still zero.
+	// Gate on `loaded` so a failed load (count still the default 0) isn't mistaken for it.
+	const { count, loaded } = get(personalNotesStore);
+	const isFirstNote = step === 'create' && loaded && count === 0;
 
 	try {
 		const noteId = id ?? generatePersonalNoteId();
