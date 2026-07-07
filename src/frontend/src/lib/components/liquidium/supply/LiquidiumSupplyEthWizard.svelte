@@ -215,7 +215,7 @@
 
 {#snippet feeDisplay()}
 	<EthFeeDisplay>
-		{#snippet label()}{$i18n.liquidium.text.supply_transaction_fee}{/snippet}
+		{#snippet label()}{$i18n.liquidium.text.transaction_fee}{/snippet}
 	</EthFeeDisplay>
 {/snippet}
 

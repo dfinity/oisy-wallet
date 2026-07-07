@@ -1934,7 +1934,7 @@ interface I18nLiquidium {
 		supply_collateral_info: string;
 		supply_agreement: string;
 		provider_fee: string;
-		supply_transaction_fee: string;
+		transaction_fee: string;
 		insufficient_funds_for_fee: string;
 		supply_prices_unavailable: string;
 		borrow_review: string;
