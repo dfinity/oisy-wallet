@@ -12,7 +12,6 @@ interface I18nBorrow {
 		available_best_provider: string;
 		remaining_best_provider: string;
 		active_loans: string;
-		no_active_loans: string;
 		amount_borrowed: string;
 		apr: string;
 		borrow_apr_from: string;

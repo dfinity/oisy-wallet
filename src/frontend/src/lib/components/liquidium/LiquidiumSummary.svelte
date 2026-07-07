@@ -65,9 +65,17 @@
 <div class="mt-6 flex w-full flex-col gap-3 sm:flex-row">
 	<StakeContentCard widthClass="sm:w-1/3">
 		{#snippet content()}
-			<div class="text-sm font-bold">{$i18n.liquidium.text.total_supplied}</div>
+			<div class="text-sm font-bold">
+				{$i18n.liquidium.text.total_supplied}
+			</div>
 
-			<div class="my-1 text-lg font-bold sm:text-xl">{formattedTotalSupplied}</div>
+			<div
+				class="my-1 text-lg font-bold sm:text-xl"
+				class:text-primary={totalSuppliedUsd > 0}
+				class:text-tertiary={totalSuppliedUsd <= 0}
+			>
+				{formattedTotalSupplied}
+			</div>
 
 			<div class="text-sm text-tertiary sm:text-base">
 				{$i18n.liquidium.text.apy_suffix}
