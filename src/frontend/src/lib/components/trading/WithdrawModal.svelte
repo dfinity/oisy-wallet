@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import WithdrawWizard from '$lib/components/trading/WithdrawWizard.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
-	import { tradingWithdrawWizardSteps } from '$lib/config/trading-withdraw.config';
+	import {
+		allTradingWithdrawWizardSteps,
+		tradingWithdrawWizardSteps
+	} from '$lib/config/trading-withdraw.config';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { oisyTradeAssets } from '$lib/derived/oisy-trade.derived';
@@ -66,8 +70,13 @@
 	let amountSetToMax = $state(false);
 	let withdrawProgressStep: string = $state(ProgressStepsTradingWithdraw.INITIALIZATION);
 
+	// No seed token (hero entry) opens on the token picker as the first step; a seeded
+	// entry (Assets tab) opens on the withdraw form. `withdrawToken` is fixed for the
+	// modal's lifetime, so this selection — and thus the steps array — stays stable.
 	const steps: WizardSteps<WizardStepsTradingWithdraw> = $derived(
-		tradingWithdrawWizardSteps({ i18n: $i18n })
+		nonNullish(withdrawToken)
+			? tradingWithdrawWizardSteps({ i18n: $i18n })
+			: allTradingWithdrawWizardSteps({ i18n: $i18n })
 	);
 
 	// Show the withdrawable (free) DEX balance, not the wallet balance.
@@ -115,14 +124,6 @@
 	const closeTokensList = () => {
 		tokensListContext.setFilterQuery('');
 
-		// On the hero entry the picker is the first step with no token selected yet,
-		// so there's no withdraw form to go back to — close the modal instead of
-		// landing on an empty step.
-		if (isNullish(token)) {
-			close();
-			return;
-		}
-
 		goToStep(WizardStepsTradingWithdraw.WITHDRAW);
 	};
 
@@ -152,14 +153,6 @@
 	};
 
 	const close = () => closeModal(reset);
-
-	// With no seed token the wizard's first step (Withdraw) has nothing to act on,
-	// so open straight on the token picker.
-	onMount(() => {
-		if (isNullish(token)) {
-			showTokensList();
-		}
-	});
 </script>
 
 <SendTokenContext {token}>
@@ -184,7 +177,13 @@
 				{/snippet}
 				{#snippet toolbar()}
 					<ButtonGroup>
-						<ButtonBack onclick={closeTokensList} />
+						{#if nonNullish(token)}
+							<!-- A token is selected: the picker was reached from the form, so go back to it. -->
+							<ButtonBack onclick={closeTokensList} />
+						{:else}
+							<!-- Root entry (hero) with no token yet: nothing precedes the picker, so close. -->
+							<ButtonCloseModal />
+						{/if}
 					</ButtonGroup>
 				{/snippet}
 			</ModalTokensList>

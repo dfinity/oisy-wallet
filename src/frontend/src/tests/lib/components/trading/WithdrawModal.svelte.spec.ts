@@ -117,27 +117,18 @@ describe('WithdrawModal', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.amount_label);
 	});
 
-	it('opens directly on the token picker when no seed token is given', async () => {
+	it('opens directly on the token picker with a close (not back) action when no seed token is given', async () => {
 		setDexBalances();
 
-		const { getByTestId, container } = render(WithdrawModal);
+		const { getByTestId, getByText, queryByText, container } = render(WithdrawModal);
 
 		await waitFor(() => {
 			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 			expect(container).not.toHaveTextContent(en.trading.withdraw.amount_label);
+			// Root entry: nothing precedes the picker, so it offers close, not a back-to-nowhere.
+			expect(getByText(en.core.text.close)).toBeInTheDocument();
+			expect(queryByText(en.core.text.back)).not.toBeInTheDocument();
 		});
-	});
-
-	it('closes on back from the token picker when opened with no seed token', async () => {
-		setDexBalances();
-
-		const { getByTestId, getByText, queryByTestId } = render(WithdrawModal);
-
-		await waitFor(() => expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument());
-
-		await fireEvent.click(getByText(en.core.text.back));
-
-		await waitFor(() => expect(queryByTestId(MODAL_TOKENS_LIST)).not.toBeInTheDocument());
 	});
 
 	it('shows the reserved note when the token has reserved funds', () => {
@@ -153,7 +144,7 @@ describe('WithdrawModal', () => {
 	it('opens the tokens list with the DEX holdings when the token selector is clicked', async () => {
 		setDexBalances();
 
-		const { getAllByText, getByTestId, container } = render(WithdrawModal, {
+		const { getAllByText, getByTestId, getByText, queryByText, container } = render(WithdrawModal, {
 			props: { withdrawToken }
 		});
 
@@ -162,6 +153,9 @@ describe('WithdrawModal', () => {
 		await waitFor(() => {
 			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
 			expect(container).toHaveTextContent('ckBTC');
+			// Reached from the form (a token is selected), so the picker offers back, not close.
+			expect(getByText(en.core.text.back)).toBeInTheDocument();
+			expect(queryByText(en.core.text.close)).not.toBeInTheDocument();
 		});
 	});
 
