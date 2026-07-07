@@ -8,11 +8,13 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
+	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
@@ -40,7 +42,7 @@
 	// also hosts the Cancel action for active orders — there is no inline cancel.
 	const openDetail = () => modalStore.openOisyTradeOrderDetail({ id: Symbol(), data: order });
 
-	let { side, base, quote, quantity, price } = $derived(order);
+	let { side, base, quote, quantity, price, createdAt } = $derived(order);
 
 	let baseSymbol = $derived(getTokenDisplaySymbol(base));
 	let quoteSymbol = $derived(getTokenDisplaySymbol(quote));
@@ -169,6 +171,14 @@
 			$percentage: display.percent.toString()
 		});
 	});
+
+	// The muted line under the intent: the live queue position while the order is
+	// active, or when it was placed once it's terminal (Order-history rows).
+	const metaLine = $derived(
+		active
+			? queueText
+			: formatNanosecondsToDate({ nanoseconds: createdAt, language: $currentLanguage })
+	);
 </script>
 
 <!-- The venue's own page, so no provider tag on the row. -->
@@ -193,9 +203,9 @@
 				<span class="tabular-nums">{phrase}</span>
 			{/if}
 		</div>
-		{#if nonNullish(queueText)}
+		{#if nonNullish(metaLine)}
 			<div class="mt-0.5 text-xs text-tertiary tabular-nums" transition:slide={SLIDE_PARAMS}>
-				{queueText}
+				{metaLine}
 			</div>
 		{/if}
 	</div>
