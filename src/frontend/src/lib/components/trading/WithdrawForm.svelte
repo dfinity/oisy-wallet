@@ -22,7 +22,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		amount: OptionAmount;
@@ -55,22 +55,25 @@
 	// Withdraw enters the GROSS amount debited from the free balance; the user
 	// receives gross minus the ledger transfer fee. Shown live so the net is
 	// never a surprise (the inverse of the usual fee-on-top convention).
-	let grossBaseUnits = $derived(
-		nonNullish(amount) &&
-			!invalidAmount(amount) &&
-			Number.isFinite(Number(amount)) &&
-			Number(amount) > 0
-			? parseToken({ value: `${amount}`, unitName: $sendToken.decimals })
+	//
+	// Parse through decimal.js-backed tryParseToken rather than gating on JS Number:
+	// amounts beyond the Number range coerce to Infinity, which would slip past a
+	// finiteness guard and skip the free-balance check. ZERO for no/empty input;
+	// `undefined` when the value can't be represented (overflow) — treated as invalid.
+	let grossBaseUnits = $derived<bigint | undefined>(
+		nonNullish(amount) && !invalidAmount(amount) && Number(amount) > 0
+			? tryParseToken({ value: `${amount}`, unitName: $sendToken.decimals })
 			: ZERO
 	);
 
 	let receiveBaseUnits = $derived(
-		grossBaseUnits > transferFee ? grossBaseUnits - transferFee : ZERO
+		nonNullish(grossBaseUnits) && grossBaseUnits > transferFee ? grossBaseUnits - transferFee : ZERO
 	);
 
 	// The withdrawable balance is the free (non-reserved) portion; anything above
-	// it is locked by open orders and would make the service call fail.
-	let exceedsFree = $derived(grossBaseUnits > free);
+	// it is locked by open orders and would make the service call fail. An
+	// unparseable amount (`undefined`) is treated as exceeding the free balance.
+	let exceedsFree = $derived(nonNullish(grossBaseUnits) ? grossBaseUnits > free : true);
 
 	// Drives the red input highlight; the disable + inline message read the same
 	// synchronous derived so there is no debounce gap on the Review button.
@@ -78,9 +81,13 @@
 		exceedsFree ? 'insufficient-funds' : undefined;
 
 	// Block the gross-equals-or-below-fee case: the net transfer would be <= 0,
-	// which the ledger rejects, so the withdraw is guaranteed to fail.
+	// which the ledger rejects, so the withdraw is guaranteed to fail. `exceedsFree`
+	// already covers the unparseable (`undefined`) case.
 	let invalid = $derived(
-		invalidAmount(amount) || Number(amount) === 0 || grossBaseUnits <= transferFee || exceedsFree
+		invalidAmount(amount) ||
+			Number(amount) === 0 ||
+			(nonNullish(grossBaseUnits) && grossBaseUnits <= transferFee) ||
+			exceedsFree
 	);
 </script>
 

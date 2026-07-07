@@ -71,6 +71,16 @@ describe('WithdrawForm', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.error_insufficient_balance);
 	});
 
+	it('disables the review button for an amount beyond the JS Number range (coerces to Infinity)', () => {
+		const { getByTestId, container } = render(WithdrawForm, {
+			props: { ...baseProps, amount: '1e400' },
+			context: mockContext()
+		});
+
+		expect(getByTestId(TRADING_WITHDRAW_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+		expect(container).toHaveTextContent(en.trading.withdraw.error_insufficient_balance);
+	});
+
 	it('shows the reserved note when funds are locked by open orders', () => {
 		const reserved = 250_000n;
 

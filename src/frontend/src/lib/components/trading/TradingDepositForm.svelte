@@ -24,7 +24,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { tryParseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		token?: IcToken;
@@ -61,18 +61,22 @@
 		nonNullish(token) ? ($balancesStore?.[token.id]?.data ?? ZERO) : undefined
 	);
 
-	let depositBaseUnits = $derived(
-		nonNullish(token) &&
-			!invalidAmount(amount) &&
-			Number.isFinite(Number(amount)) &&
-			Number(amount) > 0
-			? parseToken({ value: `${amount}`, unitName: token.decimals })
+	// Parse through decimal.js-backed tryParseToken rather than gating on JS Number:
+	// amounts beyond the Number range coerce to Infinity, which would otherwise slip
+	// past a finiteness guard and skip the balance check. ZERO for no/empty input;
+	// `undefined` when the value can't be represented (overflow) — treated as invalid.
+	let depositBaseUnits = $derived<bigint | undefined>(
+		nonNullish(token) && !invalidAmount(amount) && Number(amount) > 0
+			? tryParseToken({ value: `${amount}`, unitName: token.decimals })
 			: ZERO
 	);
 
 	// The wallet must cover the deposit plus both ledger fees (approve + transfer_from).
+	// An unparseable amount (`undefined`) is treated as exceeding the balance.
 	let exceedsBalance = $derived(
-		nonNullish(walletBalance) && nonNullish(totalFee) && depositBaseUnits + totalFee > walletBalance
+		nonNullish(walletBalance) &&
+			nonNullish(totalFee) &&
+			(nonNullish(depositBaseUnits) ? depositBaseUnits + totalFee > walletBalance : true)
 	);
 
 	// Drives the red input highlight; the disable + inline message read the same
@@ -80,12 +84,12 @@
 	const onCustomValidate = (): TokenActionErrorType =>
 		exceedsBalance ? 'insufficient-funds' : undefined;
 
+	// `exceedsBalance` already covers the insufficient-balance case synchronously;
+	// `errorType` is debounced (300ms), so relying on it here would briefly keep
+	// the button disabled after the user corrects the amount. Kept bound to the
+	// input purely for the red highlight / Max button styling.
 	let invalid = $derived(
-		!consent ||
-			invalidAmount(amount) ||
-			Number(amount) === 0 ||
-			exceedsBalance ||
-			nonNullish(errorType)
+		!consent || invalidAmount(amount) || Number(amount) === 0 || exceedsBalance
 	);
 </script>
 
