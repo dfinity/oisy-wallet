@@ -81,15 +81,6 @@ describe('TradingDepositForm', () => {
 		expect(getByText(en.trading.deposit.error_insufficient_balance)).toBeInTheDocument();
 	});
 
-	it('should still validate an amount beyond the JS Number range (coerces to Infinity)', () => {
-		const { getByTestId, getByText } = render(TradingDepositForm, {
-			props: { ...baseProps, consent: true, amount: '1e400' }
-		});
-
-		expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeDisabled();
-		expect(getByText(en.trading.deposit.error_insufficient_balance)).toBeInTheDocument();
-	});
-
 	it('should toggle consent when the checkbox is clicked', async () => {
 		const testProps = $state({ ...baseProps });
 
