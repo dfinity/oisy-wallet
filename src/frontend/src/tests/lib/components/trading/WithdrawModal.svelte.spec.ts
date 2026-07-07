@@ -128,6 +128,18 @@ describe('WithdrawModal', () => {
 		});
 	});
 
+	it('closes on back from the token picker when opened with no seed token', async () => {
+		setDexBalances();
+
+		const { getByTestId, getByText, queryByTestId } = render(WithdrawModal);
+
+		await waitFor(() => expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument());
+
+		await fireEvent.click(getByText(en.core.text.back));
+
+		await waitFor(() => expect(queryByTestId(MODAL_TOKENS_LIST)).not.toBeInTheDocument());
+	});
+
 	it('shows the reserved note when the token has reserved funds', () => {
 		const { container } = render(WithdrawModal, {
 			props: {

@@ -115,6 +115,14 @@
 	const closeTokensList = () => {
 		tokensListContext.setFilterQuery('');
 
+		// On the hero entry the picker is the first step with no token selected yet,
+		// so there's no withdraw form to go back to — close the modal instead of
+		// landing on an empty step.
+		if (isNullish(token)) {
+			close();
+			return;
+		}
+
 		goToStep(WizardStepsTradingWithdraw.WITHDRAW);
 	};
 
