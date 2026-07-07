@@ -1,11 +1,21 @@
 import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import { TRADING_ASSET_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+
+const { mockGoto } = vi.hoisted(() => ({
+	mockGoto: vi.fn()
+}));
+
+vi.mock('$app/navigation', () => ({
+	goto: mockGoto
+}));
 
 describe('TradingAssetRow', () => {
 	const token = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
@@ -21,6 +31,7 @@ describe('TradingAssetRow', () => {
 	});
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		setPrivacyMode({ enabled: false });
 	});
 
@@ -80,5 +91,35 @@ describe('TradingAssetRow', () => {
 		await fireEvent.click(getByTestId(TRADING_ASSET_WITHDRAW_BUTTON));
 
 		expect(onWithdraw).toHaveBeenCalledExactlyOnceWith(asset);
+		expect(mockGoto).not.toHaveBeenCalled();
 	});
+
+	it('should navigate to the OISY Trade provider when the asset row is clicked', async () => {
+		const { getByText } = render(TradingAssetRow, {
+			props: { asset: buildAsset() }
+		});
+
+		const row = getByText(en.trading.text.provider_name).closest('[role="button"]');
+		assertNonNullish(row);
+
+		await fireEvent.click(row);
+
+		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(AppPath.ProvidersOisyTrade);
+	});
+
+	it.each(['Enter', ' '])(
+		'should navigate to the OISY Trade provider when pressing %s on the asset row',
+		async (key) => {
+			const { getByText } = render(TradingAssetRow, {
+				props: { asset: buildAsset() }
+			});
+
+			const row = getByText(en.trading.text.provider_name).closest('[role="button"]');
+			assertNonNullish(row);
+
+			await fireEvent.keyDown(row, { key });
+
+			expect(mockGoto).toHaveBeenCalledExactlyOnceWith(AppPath.ProvidersOisyTrade);
+		}
+	);
 });

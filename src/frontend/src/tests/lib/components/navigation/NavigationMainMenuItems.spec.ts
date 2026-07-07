@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NavigationMainMenuItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-import { AppPath } from '$lib/constants/routes.constants';
+import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	NAVIGATION_GROUP_FINANCE,
 	NAVIGATION_GROUP_MORE,
@@ -18,6 +18,7 @@ import { TokenTypes } from '$lib/enums/token-types';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -27,6 +28,7 @@ describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		mockPage.reset();
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 		userSelectedNetworkStore.set(undefined);
 		bottomSheetOpenStore.set(false);
@@ -120,6 +122,16 @@ describe('NavigationMainMenuItems', () => {
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Earning);
 	});
 
+	it('builds assets link with Trading path when assetsTab = TRADING', () => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TRADING });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
+		expect(tokenLink.getAttribute('href')).toContain(AppPath.Trading);
+	});
+
 	it('builds assets link with Tokens path when assetsTab = TOKENS', () => {
 		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TOKENS });
 
@@ -128,6 +140,14 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
+	});
+
+	it('selects the assets item on the Trading route', () => {
+		mockPage.mockRoute({ id: `${ROUTE_ID_GROUP_APP}${AppPath.Trading}` });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toHaveClass('selected');
 	});
 
 	it('should incorporate the network query param if userSelectedNetwork is set', () => {
