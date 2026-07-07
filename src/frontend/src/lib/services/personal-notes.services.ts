@@ -4,6 +4,8 @@ import {
 	getPersonalNotesCount,
 	setPersonalNote as setPersonalNoteApi
 } from '$lib/api/backend.api';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import {
 	decryptPersonalNoteWithKey,
 	deriveKeyMaterial,
@@ -17,6 +19,7 @@ import {
 	type PersonalNoteEnvelope,
 	type PersonalNoteUi
 } from '$lib/types/personal-note';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { generatePersonalNoteId } from '$lib/utils/personal-note.utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
@@ -120,21 +123,44 @@ export const savePersonalNote = async ({
 	const owner = ownerPrincipal(identity);
 	assertPersonalNotesOwner(owner);
 
-	const noteId = id ?? generatePersonalNoteId();
-	const now = nowNs();
-	const envelope: PersonalNoteEnvelope = {
-		note,
-		created_at_ns: id !== undefined ? (lookupCreatedAtNs({ id, owner }) ?? now) : now,
-		updated_at_ns: now
-	};
+	// Create vs. edit is decided by whether the caller passed an existing id.
+	const step = id === undefined ? 'create' : 'edit';
+	// First note ever: a create while the backend-reported count is loaded and still zero.
+	// Gate on `loaded` so a failed load (count still the default 0) isn't mistaken for it.
+	const { count, loaded } = get(personalNotesStore);
+	const isFirstNote = step === 'create' && loaded && count === 0;
 
-	const encrypted = await encryptPersonalNote({ envelope, noteId, identity });
-	await setPersonalNoteApi({ identity, note_id: noteId, encrypted_note: encrypted });
+	try {
+		const noteId = id ?? generatePersonalNoteId();
+		const now = nowNs();
+		const envelope: PersonalNoteEnvelope = {
+			note,
+			created_at_ns: id !== undefined ? (lookupCreatedAtNs({ id, owner }) ?? now) : now,
+			updated_at_ns: now
+		};
 
-	const entry: PersonalNoteUi = { id: noteId, ...envelope };
-	personalNotesStore.upsert({ ownerPrincipal: owner, entry });
-	await refreshCount({ identity, owner });
-	return entry;
+		const encrypted = await encryptPersonalNote({ envelope, noteId, identity });
+		await setPersonalNoteApi({ identity, note_id: noteId, encrypted_note: encrypted });
+
+		const entry: PersonalNoteUi = { id: noteId, ...envelope };
+		personalNotesStore.upsert({ ownerPrincipal: owner, entry });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the note save succeeded; a count refresh failure shouldn't
+			// fail the save or misreport it as an error. The count self-heals on next load.
+		}
+
+		trackPersonalNote({ step, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS, isFirstNote });
+		return entry;
+	} catch (err: unknown) {
+		trackPersonalNote({
+			step,
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			error: replaceIcErrorFields(err)
+		});
+		throw err;
+	}
 };
 
 export const deletePersonalNote = async ({
@@ -147,7 +173,23 @@ export const deletePersonalNote = async ({
 	const owner = ownerPrincipal(identity);
 	assertPersonalNotesOwner(owner);
 
-	await deletePersonalNoteApi({ identity, note_id: id });
-	personalNotesStore.remove({ ownerPrincipal: owner, id });
-	await refreshCount({ identity, owner });
+	try {
+		await deletePersonalNoteApi({ identity, note_id: id });
+		personalNotesStore.remove({ ownerPrincipal: owner, id });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the delete succeeded; a count refresh failure shouldn't fail
+			// it or misreport it as an error. The count self-heals on next load.
+		}
+
+		trackPersonalNote({ step: 'delete', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
+	} catch (err: unknown) {
+		trackPersonalNote({
+			step: 'delete',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			error: replaceIcErrorFields(err)
+		});
+		throw err;
+	}
 };

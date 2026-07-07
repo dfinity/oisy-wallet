@@ -19,10 +19,10 @@ export const parseToken = ({
 	unitName?: BigNumberish;
 }): bigint => parseUnits(normalizeAmountString(value), unitName);
 
-// `parseToken` throws (e.g. ethers' `RangeError: overflow` for an out-of-range
-// amount like `1e400`). Callers that run in async/debounced contexts cannot let
-// that surface as an unhandled error, so this returns `undefined` instead of
-// throwing to signal an unparseable amount.
+// Same as `parseToken` but returns `undefined` instead of throwing when the
+// value can't be represented as base units — non-numeric input, or a magnitude
+// beyond the ledger's integer range so `parseUnits` overflows. Callers treat the
+// `undefined` result as an invalid amount rather than silently skipping it.
 export const tryParseToken = (params: {
 	value: string;
 	unitName?: BigNumberish;

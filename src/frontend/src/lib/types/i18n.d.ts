@@ -1370,6 +1370,11 @@ interface I18nTrading {
 		in_orders_label: string;
 		positions: string;
 		deposit: string;
+		withdraw: string;
+		active_orders: string;
+		active_orders_empty_deposit: string;
+		active_orders_empty_place: string;
+		new_order: string;
 	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
@@ -1394,6 +1399,7 @@ interface I18nTrading {
 		review_title: string;
 		progress_title: string;
 		you_deposit: string;
+		error_insufficient_balance: string;
 		to: string;
 		network: string;
 		transaction_fee: string;
@@ -1423,6 +1429,7 @@ interface I18nTrading {
 		transfer_fee: string;
 		you_receive: string;
 		reserved_note: string;
+		error_insufficient_balance: string;
 		submit: string;
 		open: string;
 		progress_withdraw: string;
@@ -1440,6 +1447,9 @@ interface I18nTrading {
 		side_buy: string;
 		row_sell: string;
 		row_buy: string;
+		row_phrase_sell: string;
+		row_phrase_buy: string;
+		queue_ahead: string;
 		status_open: string;
 		status_pending: string;
 		status_partial: string;
