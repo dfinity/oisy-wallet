@@ -61,14 +61,10 @@
 				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
 			</p>
 
-			<button
-				class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-primary hover:underline"
-				onclick={scrollToInfo}
-				type="button"
-			>
-				{$i18n.core.text.learn_more}
-				<IconArrowDown size="14" />
-			</button>
+			<Button innerStyleClass="items-center" link onclick={scrollToInfo} styleClass="mt-2 text-sm">
+				<span>{$i18n.core.text.learn_more}</span>
+				<IconArrowDown size="18" />
+			</Button>
 		</div>
 	{/snippet}
 
