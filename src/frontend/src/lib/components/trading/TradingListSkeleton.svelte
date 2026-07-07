@@ -6,19 +6,14 @@
 
 <!--
 	Shown while the first OISY TRADE load is in flight, so the Trading tab settles
-	into My-assets/Orders or the onboarding placeholder instead of flashing the
-	placeholder first. Mirrors the My-assets + Orders section layout with the shared
+	into My-assets or the onboarding placeholder instead of flashing the
+	placeholder first. Mirrors the My-assets section layout with the shared
 	`SkeletonCard` rows.
 -->
 <div class="flex flex-col gap-4" data-tid={TRADING_LIST_SKELETON}>
 	<section class="flex flex-col gap-2">
 		<h3 class="text-base font-bold text-primary">{$i18n.trading.assets.title}</h3>
 		<SkeletonCard />
-		<SkeletonCard />
-	</section>
-
-	<section class="flex flex-col gap-2">
-		<h3 class="text-base font-bold text-primary">{$i18n.trading.orders.title}</h3>
 		<SkeletonCard />
 	</section>
 </div>

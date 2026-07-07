@@ -1721,10 +1721,6 @@
 		},
 		"assets": {
 			"title": "",
-			"deposit": "",
-			"withdraw": "",
-			"available": "",
-			"available_label": "",
 			"empty": ""
 		},
 		"deposit": {
