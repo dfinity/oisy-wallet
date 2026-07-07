@@ -69,7 +69,7 @@
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
 
-	// The quote leg is a muted, non-editable readout of the derived amount. Format
+	// The quote leg is a read-only, non-editable readout of the derived amount. Format
 	// it to the quote decimals (as a string) so float artifacts from `base × price`
 	// (e.g. 0.1 × 3) never leak into the field; below the min notional (or before a
 	// base is chosen) it stays empty so the shared input shows its placeholder.
@@ -231,7 +231,7 @@
 		<span class="h-px flex-1 bg-disabled"></span>
 	</div>
 
-	<!-- Quote row: shared token selector with a muted, non-editable derived amount -->
+	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
 	<div class="py-2">
 		<TokenInput
 			amount={quoteAmountValue}
@@ -239,8 +239,8 @@
 			displayUnit={inputUnit}
 			exchangeRate={quoteExchangeRate}
 			isSelectable={nonNullish(baseSymbol)}
-			muted={true}
 			onClick={onSelectQuoteGuarded}
+			readOnly={true}
 			showTokenNetwork
 			token={quoteToken}
 		>

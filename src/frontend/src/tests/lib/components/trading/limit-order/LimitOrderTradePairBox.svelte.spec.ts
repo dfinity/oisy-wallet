@@ -47,14 +47,14 @@ describe('LimitOrderTradePairBox', () => {
 		expect(container).toHaveTextContent(en.trading.limit_order.you_sell);
 		expect(container).toHaveTextContent(en.trading.limit_order.you_get_at_least);
 
-		// The quote leg is a muted, non-editable input; its value is the derived
+		// The quote leg is a read-only, non-editable input; its value is the derived
 		// amount (base × price = 4 × 12 = 48), not free text.
 		const [, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
 		expect(quoteInput).toHaveValue('48');
 	});
 
-	it('formats the muted quote amount to the quote decimals (no float artifacts)', () => {
+	it('formats the read-only quote amount to the quote decimals (no float artifacts)', () => {
 		// 0.1 * 3 = 0.30000000000000004 in raw float; the readout must round it.
 		const { getAllByTestId } = render(LimitOrderTradePairBox, {
 			props: { ...baseProps, baseAmount: '0.1', price: '3' }

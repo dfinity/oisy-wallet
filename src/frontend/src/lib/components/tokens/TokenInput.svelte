@@ -27,10 +27,7 @@
 		displayUnit?: DisplayUnit;
 		exchangeRate?: number;
 		disabled?: boolean;
-		// Styles the amount box as a muted, read-only readout (see
-		// `TokenInputContainer`) while keeping the token selector interactive. For
-		// derived amounts that can't be typed into; pair with `disabled`.
-		muted?: boolean;
+		readOnly?: boolean;
 		placeholder?: string;
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
@@ -55,7 +52,7 @@
 		displayUnit = 'token',
 		exchangeRate,
 		disabled = false,
-		muted = false,
+		readOnly = false,
 		placeholder = '0',
 		errorType = $bindable(),
 		error = $bindable(),
@@ -135,17 +132,14 @@
 	<TokenInputContainer
 		error={nonNullish(errorType) || nonNullish(error)}
 		{focused}
-		{muted}
+		{readOnly}
 		styleClass="h-14 text-3xl"
 	>
-		<!-- When muted, grey only the amount field (via `--input-background`) and
-			 clip it to the container's rounded-left corner — the token selector to
-			 the right keeps the active surface and stays interactive. -->
 		<div
-			style={muted ? '--input-background: var(--color-background-disabled-alt);' : undefined}
+			style={readOnly ? '--input-background: var(--color-background-disabled-alt);' : undefined}
 			class="flex h-full w-full items-center"
-			class:overflow-hidden={muted}
-			class:rounded-l-lg={muted}
+			class:overflow-hidden={readOnly}
+			class:rounded-l-lg={readOnly}
 		>
 			{#if token}
 				{#if displayUnit === 'token'}
