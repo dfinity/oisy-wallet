@@ -314,6 +314,29 @@ describe('personal-notes.services', () => {
 			});
 		});
 
+		it('treats a count-refresh failure after a successful delete as success', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [{ id: 'note-1', note: 'x', created_at_ns: '100', updated_at_ns: '100' }],
+				count: 1
+			});
+			vi.spyOn(backendApi, 'deletePersonalNote').mockResolvedValue();
+			// The delete succeeds but the follow-up count refresh fails.
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockRejectedValue(new Error('count down'));
+
+			await expect(
+				deletePersonalNote({ identity: mockIdentity, id: 'note-1' })
+			).resolves.toBeUndefined();
+
+			// The note is gone and the event reflects the delete, not the refresh.
+			expect(get(personalNotesList)).toEqual([]);
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'delete',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+		});
+
 		it('tracks a delete error and rethrows', async () => {
 			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 			personalNotesStore.setLoaded({

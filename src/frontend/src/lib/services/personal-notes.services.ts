@@ -176,7 +176,12 @@ export const deletePersonalNote = async ({
 	try {
 		await deletePersonalNoteApi({ identity, note_id: id });
 		personalNotesStore.remove({ ownerPrincipal: owner, id });
-		await refreshCount({ identity, owner });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the delete succeeded; a count refresh failure shouldn't fail
+			// it or misreport it as an error. The count self-heals on next load.
+		}
 
 		trackPersonalNote({ step: 'delete', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 	} catch (err: unknown) {
