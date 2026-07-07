@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
@@ -15,6 +16,7 @@
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
@@ -32,6 +34,7 @@
 	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -42,6 +45,7 @@
 		NAVIGATION_MENU_SCANNER_BUTTON,
 		NAVIGATION_MENU_PAY_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+		NAVIGATION_MENU_SETTINGS_BUTTON,
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
@@ -51,12 +55,14 @@
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
 		isRouteDappExplorer,
-		isRouteSettings
+		isRouteSettings,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
@@ -81,6 +87,18 @@
 
 	const handlePrivacyToggle = () => {
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
+	};
+
+	const goToSettings = async () => {
+		hidePopover();
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
@@ -287,6 +305,15 @@
 
 		{#if $authSignedIn}
 			<MenuThemeSelector />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.settings}
+				onclick={goToSettings}
+				testId={NAVIGATION_MENU_SETTINGS_BUTTON}
+			>
+				<IconlySettings size="20" />
+				{$i18n.navigation.text.settings}
+			</ButtonMenu>
 		{/if}
 	</div>
 

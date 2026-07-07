@@ -12,6 +12,7 @@ import {
 	NAVIGATION_MENU_RECEIVE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_SCANNER_BUTTON,
+	NAVIGATION_MENU_SETTINGS_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
@@ -25,6 +26,11 @@ import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
+const mockGoto = vi.fn();
+vi.mock('$app/navigation', () => ({
+	goto: (...args: unknown[]) => mockGoto(...args)
+}));
+
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
 	const menuItemReceiveButtonSelector = `button[data-tid="${NAVIGATION_MENU_RECEIVE_BUTTON}"]`;
@@ -35,6 +41,7 @@ describe('Menu', () => {
 	const menuItemScannerButtonSelector = `button[data-tid="${NAVIGATION_MENU_SCANNER_BUTTON}"]`;
 	const menuItemPayButtonSelector = `button[data-tid="${NAVIGATION_MENU_PAY_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
+	const menuItemSettingsButtonSelector = `button[data-tid="${NAVIGATION_MENU_SETTINGS_BUTTON}"]`;
 	const menuItemWhyOisyButtonSelector = `button[data-tid="${NAVIGATION_MENU_WHY_OISY_BUTTON}"]`;
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
 	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
@@ -197,6 +204,26 @@ describe('Menu', () => {
 	it('renders the support button in the menu', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemSupportButtonSelector });
+	});
+
+	it('renders the settings button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemSettingsButtonSelector });
+	});
+
+	it('navigates to the settings page when the settings button is clicked', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemSettingsButtonSelector });
+
+		const button: HTMLButtonElement | null = container.querySelector(
+			menuItemSettingsButtonSelector
+		);
+
+		assertNonNullish(button);
+
+		button.click();
+
+		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('/settings'));
 	});
 
 	it('should render the logged out version if not signed in', async () => {
