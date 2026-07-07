@@ -1,4 +1,5 @@
 import LimitOrderTradePairBox from '$lib/components/trading/limit-order/LimitOrderTradePairBox.svelte';
+import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { LimitOrderPairView, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -24,7 +25,9 @@ describe('LimitOrderTradePairBox', () => {
 		baseSymbol: 'ICP',
 		quoteSymbol: 'ckUSDC',
 		baseToken: { ...mockValidIcToken, symbol: 'ICP' },
+		quoteToken: { ...mockValidIcToken, symbol: 'ckUSDC' },
 		baseExchangeRate: 10,
+		quoteExchangeRate: 1,
 		baseAmount: '4',
 		price: '12',
 		pairView,
@@ -37,12 +40,18 @@ describe('LimitOrderTradePairBox', () => {
 	};
 
 	it('renders the sell labels and the derived quote amount', () => {
-		const { container } = render(LimitOrderTradePairBox, { props: { ...baseProps } });
+		const { container, getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps }
+		});
 
 		expect(container).toHaveTextContent(en.trading.limit_order.you_sell);
 		expect(container).toHaveTextContent(en.trading.limit_order.you_get_at_least);
-		// 4 * 12 = 48.
-		expect(container).toHaveTextContent('48');
+
+		// The quote leg is a muted, non-editable input; its value is the derived
+		// amount (base × price = 4 × 12 = 48), not free text.
+		const [, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(quoteInput).toHaveValue('48');
 	});
 
 	it('renders the buy labels', () => {
@@ -54,7 +63,7 @@ describe('LimitOrderTradePairBox', () => {
 		expect(container).toHaveTextContent(en.trading.limit_order.you_pay_at_most);
 	});
 
-	it('renders the quote token pill with the quote symbol', () => {
+	it('renders the quote token selector with the quote symbol', () => {
 		const { container } = render(LimitOrderTradePairBox, { props: { ...baseProps } });
 
 		expect(container).toHaveTextContent('ckUSDC');
@@ -98,7 +107,7 @@ describe('LimitOrderTradePairBox', () => {
 		);
 	});
 
-	it('invokes onSelectQuote when the quote pill is clicked', async () => {
+	it('invokes onSelectQuote when the quote token selector is clicked', async () => {
 		const onSelectQuote = vi.fn();
 
 		const { getByText } = render(LimitOrderTradePairBox, {

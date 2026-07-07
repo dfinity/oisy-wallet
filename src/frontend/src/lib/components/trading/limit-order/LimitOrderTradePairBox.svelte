@@ -3,7 +3,6 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import LimitOrderTokenPill from '$lib/components/trading/limit-order/LimitOrderTokenPill.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -22,7 +21,9 @@
 		baseSymbol?: string;
 		quoteSymbol?: string;
 		baseToken?: IcToken;
+		quoteToken?: IcToken;
 		baseExchangeRate?: number;
+		quoteExchangeRate?: number;
 		baseAmount: string;
 		price: string;
 		pairView?: LimitOrderPairView;
@@ -39,7 +40,9 @@
 		baseSymbol,
 		quoteSymbol,
 		baseToken,
+		quoteToken,
 		baseExchangeRate,
+		quoteExchangeRate,
 		baseAmount,
 		price,
 		pairView,
@@ -66,13 +69,18 @@
 
 	const quoteAmount = $derived(deriveQuoteAmount({ baseAmount: baseNum, price: priceNum }));
 
-	// Format through the shared token formatter (rounds to the quote decimals,
-	// no raw float artifacts).
-	const quoteAmountDisplay = $derived(
-		quoteAmount > 0
-			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
-			: '-'
-	);
+	// The quote leg is a muted, non-editable readout of the derived amount; below
+	// the min notional (or before a base is chosen) it stays empty so the shared
+	// input shows its placeholder instead of a stray `0`.
+	const quoteAmountValue = $derived<OptionAmount>(quoteAmount > 0 ? quoteAmount : undefined);
+
+	// The quote can only be chosen once a base is set (the quote list is filtered
+	// by the base's markets), mirroring the previous disabled-pill behaviour.
+	const onSelectQuoteGuarded = () => {
+		if (nonNullish(baseSymbol)) {
+			onSelectQuote();
+		}
+	};
 
 	// Format amounts to the pair's decimals so the error strings never leak raw
 	// float artifacts (e.g. "5.699999999999999").
@@ -218,45 +226,57 @@
 		<span class="h-px flex-1 bg-disabled"></span>
 	</div>
 
-	<!-- Quote row: read-only derived readout (not an input) -->
+	<!-- Quote row: shared token selector with a muted, non-editable derived amount -->
 	<div class="py-2">
-		<div class="flex items-center justify-between text-xs text-tertiary">
-			<span>{quoteLabel}</span>
-			<span>{$i18n.trading.limit_order.network}</span>
-		</div>
-		<div class="mt-1.5 flex items-center gap-2">
-			<span class="w-full text-xl text-secondary">
-				{quoteAmountDisplay}
-			</span>
-			<LimitOrderTokenPill
-				disabled={!nonNullish(baseSymbol)}
-				onclick={onSelectQuote}
-				symbol={quoteSymbol}
-			/>
-		</div>
-		<div class="mt-1 flex items-center justify-end text-xs">
-			{#if nonNullish(quoteSymbol)}
-				{#if side === 'buy'}
-					<button
-						class="font-medium text-brand-primary"
-						disabled={!maxEnabled}
-						onclick={onMax}
-						type="button"
-					>
-						{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
-							$amount: fmtQuote(freeQuote),
-							$symbol: quoteSymbol
-						})}
-					</button>
-				{:else}
-					<span class="text-tertiary">
-						{replacePlaceholders($i18n.trading.limit_order.balance, {
-							$amount: fmtQuote(freeQuote),
-							$symbol: quoteSymbol
-						})}
-					</span>
+		<TokenInput
+			amount={quoteAmountValue}
+			disabled={true}
+			displayUnit={inputUnit}
+			exchangeRate={quoteExchangeRate}
+			isSelectable={nonNullish(baseSymbol)}
+			onClick={onSelectQuoteGuarded}
+			showTokenNetwork
+			token={quoteToken}
+		>
+			{#snippet title()}{quoteLabel}{/snippet}
+
+			{#snippet amountInfo()}
+				<div class="text-tertiary">
+					{#if nonNullish(quoteToken)}
+						<TokenInputAmountExchange
+							amount={quoteAmountValue}
+							exchangeRate={quoteExchangeRate}
+							token={quoteToken}
+							bind:displayUnit={exchangeValueUnit}
+						/>
+					{/if}
+				</div>
+			{/snippet}
+
+			{#snippet balance()}
+				{#if nonNullish(quoteSymbol)}
+					{#if side === 'buy'}
+						<button
+							class="font-semibold text-brand-primary-alt"
+							disabled={!maxEnabled}
+							onclick={onMax}
+							type="button"
+						>
+							{replacePlaceholders($i18n.trading.limit_order.max_with_amount, {
+								$amount: fmtQuote(freeQuote),
+								$symbol: quoteSymbol
+							})}
+						</button>
+					{:else}
+						<span class="text-tertiary">
+							{replacePlaceholders($i18n.trading.limit_order.balance, {
+								$amount: fmtQuote(freeQuote),
+								$symbol: quoteSymbol
+							})}
+						</span>
+					{/if}
 				{/if}
-			{/if}
-		</div>
+			{/snippet}
+		</TokenInput>
 	</div>
 </div>
