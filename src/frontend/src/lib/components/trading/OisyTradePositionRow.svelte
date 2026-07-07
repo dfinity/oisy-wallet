@@ -63,9 +63,7 @@
 
 	<span class="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
 		{#if hasReserved}
-			<span
-				class="shrink-0 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary"
-			>
+			<span class="shrink-0 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary">
 				{#if $isPrivacyMode}
 					<span class="inline-flex items-center gap-1">
 						<IconDots variant="xs" />
