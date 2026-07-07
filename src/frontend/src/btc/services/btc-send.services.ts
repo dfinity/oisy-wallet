@@ -128,13 +128,13 @@ export const validateBtcSend = async ({
 	}
 	for (const utxo of utxos) {
 		if (
-			!nonNullish(utxo.outpoint) ||
-			!nonNullish(utxo.outpoint.txid) ||
+			isNullish(utxo.outpoint) ||
+			isNullish(utxo.outpoint.txid) ||
 			utxo.outpoint.txid.length === 0 ||
 			utxo.outpoint.vout === undefined ||
-			!nonNullish(utxo.value) ||
+			isNullish(utxo.value) ||
 			BigInt(utxo.value) <= ZERO ||
-			!nonNullish(utxo.height) ||
+			isNullish(utxo.height) ||
 			utxo.height < 0
 		) {
 			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);

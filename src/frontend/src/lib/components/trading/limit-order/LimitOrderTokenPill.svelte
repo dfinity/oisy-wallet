@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -14,10 +14,10 @@
 
 <button
 	class="flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2 py-1"
-	class:border-dashed={!nonNullish(symbol)}
+	class:border-dashed={isNullish(symbol)}
 	class:border-secondary={nonNullish(symbol)}
 	class:opacity-40={disabled}
-	class:text-brand-primary={!nonNullish(symbol) && !disabled}
+	class:text-brand-primary={isNullish(symbol) && !disabled}
 	{disabled}
 	{onclick}
 	type="button"

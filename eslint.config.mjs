@@ -6,6 +6,19 @@ const ZERO_BIGINT_RESTRICTION = {
 	message: 'Use the shared constant `ZERO` instead of `0n`.'
 };
 
+// `!nonNullish(x)` and `!isNullish(x)` are double negatives that read backwards;
+// each has a direct, positive counterpart in `@dfinity/utils`.
+const NULLISH_NEGATION_RESTRICTIONS = [
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='nonNullish']",
+		message: 'Use `isNullish(x)` instead of `!nonNullish(x)`.'
+	},
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='isNullish']",
+		message: 'Use `nonNullish(x)` instead of `!isNullish(x)`.'
+	}
+];
+
 export default [
 	...vitestConfig,
 	...svelteConfig,
@@ -41,7 +54,7 @@ export default [
 
 	{
 		rules: {
-			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION]
+			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION, ...NULLISH_NEGATION_RESTRICTIONS]
 		}
 	},
 
@@ -52,6 +65,7 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				ZERO_BIGINT_RESTRICTION,
+				...NULLISH_NEGATION_RESTRICTIONS,
 				{
 					selector: "MemberExpression[object.name='console'][property.name='error']",
 					message:
