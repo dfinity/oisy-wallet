@@ -17,36 +17,27 @@ import { get } from 'svelte/store';
 const baseLedgerId = mockValidIcToken.ledgerCanisterId;
 const quoteLedgerId = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 
-// The orders derivations resolve base/quote against `enabledIcTokens`; override
-// just that export (keeping the rest of the module real, so other derived
-// stores that re-export from it still load) with the two tokens so the orders
-// aren't dropped as unresolvable. The factory is hoisted, so build the tokens
-// inline to avoid referencing top-level bindings.
-vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
-	const { mockValidIcToken } = await import('$tests/mocks/ic-tokens.mock');
-	const { writable } = await import('svelte/store');
-
+// Fiat figures need exchange rates and (for the depositable total) wallet
+// balances; override just those stores so the tests can drive the values.
+const { enabledIcTokensMock, exchangesMock, balancesMock } = vi.hoisted(() => {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	const { writable: createWritable } = require('svelte/store');
 	return {
-		...(await importOriginal()),
-		enabledIcTokens: writable([
-			{ ...mockValidIcToken, symbol: 'ICP', decimals: 8 },
-			{
-				...mockValidIcToken,
-				symbol: 'ckUSDC',
-				decimals: 6,
-				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai'
-			}
-		])
+		enabledIcTokensMock: createWritable([]),
+		exchangesMock: createWritable({}),
+		balancesMock: createWritable({})
 	};
 });
 
-// Fiat figures need exchange rates and (for the depositable total) wallet
-// balances; override just those stores so the tests can drive the values.
-const { exchangesMock, balancesMock } = vi.hoisted(() => {
-	// eslint-disable-next-line @typescript-eslint/no-require-imports
-	const { writable: createWritable } = require('svelte/store');
-	return { exchangesMock: createWritable({}), balancesMock: createWritable({}) };
-});
+// The orders derivations resolve base/quote against enabled wallet tokens first,
+// then fall back to OISY TRADE supported-token metadata. Keep the enabled-token
+// store controllable so tests can model a disabled quote leg.
+vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => ({
+	...(await importOriginal()),
+	get enabledIcTokens() {
+		return enabledIcTokensMock;
+	}
+}));
 
 vi.mock(import('$lib/derived/exchange.derived'), async (importOriginal) => ({
 	...(await importOriginal()),
@@ -81,6 +72,15 @@ describe('oisy-trade.derived — orders', () => {
 
 	beforeEach(() => {
 		oisyTradeStore.reset();
+		enabledIcTokensMock.set([
+			{ ...mockValidIcToken, symbol: 'ICP', decimals: 8 },
+			{
+				...mockValidIcToken,
+				symbol: 'ckUSDC',
+				decimals: 6,
+				ledgerCanisterId: quoteLedgerId
+			}
+		]);
 	});
 
 	it('splits orders into active (Pending/Open) and history (Filled/Canceled/Expired)', () => {
@@ -116,6 +116,29 @@ describe('oisy-trade.derived — orders', () => {
 		expect(get(oisyTradeOrders)).toEqual([]);
 		expect(get(oisyTradeActiveOrders)).toEqual([]);
 		expect(get(oisyTradeHistoryOrders)).toEqual([]);
+	});
+
+	it('keeps active orders visible when a leg token is supported by the DEX but disabled in the wallet', () => {
+		enabledIcTokensMock.set([{ ...mockValidIcToken, symbol: 'ICP', decimals: 8 }]);
+
+		oisyTradeStore.set({
+			pairs: undefined,
+			supportedTokens: [
+				{
+					id: { ledger_id: Principal.fromText(baseLedgerId) },
+					metadata: { symbol: 'ICP', decimals: 8 }
+				},
+				{
+					id: { ledger_id: Principal.fromText(quoteLedgerId) },
+					metadata: { symbol: 'ckUSDC', decimals: 6 }
+				}
+			] as unknown as Token[],
+			balances: undefined,
+			orders: [buildOrder({ id: 'open', status: 'Open' })]
+		});
+
+		expect(get(oisyTradeActiveOrders).map(({ id }) => id)).toEqual(['open']);
+		expect(get(oisyTradeActiveOrders)[0].quote.symbol).toBe('ckUSDC');
 	});
 });
 
