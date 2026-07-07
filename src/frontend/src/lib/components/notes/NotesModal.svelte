@@ -38,7 +38,9 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 	import {
 		deletePersonalNote,
 		loadPersonalNotes,
@@ -165,6 +167,8 @@
 	};
 
 	onMount(() => {
+		// The notes surface opened — fires on every open (the modal remounts each time).
+		trackPersonalNote({ step: 'open', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 		// Lazy load on first open only; re-opening in the same session renders from cache.
 		if (!$personalNotesLoaded) {
 			load();
@@ -174,6 +178,9 @@
 	const openView = (id: string) => {
 		viewNoteId = id;
 		step = 'view';
+		// A note's read-only preview was opened (from the list) — distinct from `open`,
+		// which is the notes surface itself.
+		trackPersonalNote({ step: 'view', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 	};
 
 	const openEditor = ({ id, fromView = false }: { id?: string; fromView?: boolean } = {}) => {
