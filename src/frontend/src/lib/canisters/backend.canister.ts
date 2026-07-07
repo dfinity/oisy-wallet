@@ -62,7 +62,7 @@ import {
 	Canister,
 	createServices,
 	fromNullable,
-	nonNullish,
+	isNullish,
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
@@ -444,7 +444,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
-		if (!nonNullish(rate)) {
+		if (isNullish(rate)) {
 			return;
 		}
 
