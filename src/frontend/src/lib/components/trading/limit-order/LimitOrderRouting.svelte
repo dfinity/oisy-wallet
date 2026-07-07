@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
@@ -20,7 +20,7 @@
 
 	// Relative spread only: (ask − bid) / mid × 100.
 	const spreadPercent = $derived.by((): number | null => {
-		if (!nonNullish(bid) || !nonNullish(ask)) {
+		if (isNullish(bid) || isNullish(ask)) {
 			return null;
 		}
 		const mid = (ask + bid) / 2;

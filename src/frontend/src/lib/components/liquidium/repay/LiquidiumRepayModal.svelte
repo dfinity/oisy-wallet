@@ -3,7 +3,7 @@
 	import type { Asset, Chain } from '@liquidium/client';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
@@ -81,7 +81,7 @@
 </script>
 
 {#if nonNullish(token) && nonNullish($liquidiumPortfolio)}
-	<SendTokenContext {token}>
+	<TokenActionContext {token}>
 		<WizardModal
 			bind:this={modal}
 			disablePointerEvents={currentStep?.name === WizardStepsLiquidiumRepay.REPAYING}
@@ -121,5 +121,5 @@
 				/>
 			{/if}
 		</WizardModal>
-	</SendTokenContext>
+	</TokenActionContext>
 {/if}

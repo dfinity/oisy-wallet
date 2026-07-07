@@ -2,6 +2,7 @@ import type { UserTokenBalance } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingList from '$lib/components/trading/TradingList.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { TRADING_GOTO_BUTTON } from '$lib/constants/test-ids.constants';
 import { oisyTradeStore } from '$lib/stores/oisy-trade.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -80,8 +81,8 @@ describe('TradingList', () => {
 		setPrivacyMode({ enabled: false });
 	});
 
-	it('should render the onboarding when the user has no assets', () => {
-		// Loaded (balances non-null) but empty → onboarding rather than the skeleton.
+	it('should render the empty placeholder with the go-to-trade button when the user has no assets', () => {
+		// Loaded (balances non-null) but empty → the empty placeholder rather than the skeleton.
 		oisyTradeStore.set({
 			pairs: undefined,
 			supportedTokens: undefined,
@@ -89,21 +90,21 @@ describe('TradingList', () => {
 			orders: undefined
 		});
 
-		const { getByText } = render(TradingList);
+		const { getByText, getByTestId } = render(TradingList);
 
-		expect(getByText(en.trading.onboarding.title)).toBeInTheDocument();
+		expect(getByText(en.trading.text.no_trades)).toBeInTheDocument();
+		expect(getByTestId(TRADING_GOTO_BUTTON)).toBeInTheDocument();
 	});
 
-	it('renders the assets section, intro, learn-more and orders header once the user has assets', () => {
+	it('renders only the assets section once the user has assets', () => {
 		seedAssets();
 
 		const { container, getByText } = render(TradingList);
 
 		expect(getByText(en.trading.assets.title)).toBeInTheDocument();
-		expect(container).toHaveTextContent(en.trading.text.intro);
-		expect(container).toHaveTextContent(en.trading.text.learn_more);
-		expect(container).toHaveTextContent(en.trading.orders.title);
-		expect(container).toHaveTextContent(en.trading.orders.add_limit_order);
+		// Intro, learn-more and orders now live on the standalone Trade page.
+		expect(container).not.toHaveTextContent(en.trading.text.intro);
+		expect(container).not.toHaveTextContent(en.trading.orders.title);
 	});
 
 	it('loads the trade data on mount via the interval loader', async () => {

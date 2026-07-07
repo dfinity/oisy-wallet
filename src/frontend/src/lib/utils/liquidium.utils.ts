@@ -7,7 +7,7 @@ import {
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import type { Pool, UserPositionSummary, UserReserve } from '@liquidium/client';
 
@@ -176,7 +176,7 @@ export const liquidiumProjectedHealthAfterRepayPercent = ({
 };
 
 const isUnderSupplyCap = ({ totalSupply, supplyCap }: Pool): boolean =>
-	!nonNullish(supplyCap) || totalSupply < supplyCap;
+	isNullish(supplyCap) || totalSupply < supplyCap;
 
 export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 	poolId: pool.id,

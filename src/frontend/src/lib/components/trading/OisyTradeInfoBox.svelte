@@ -17,7 +17,7 @@
 	<StakeContentSection>
 		{#snippet title()}
 			<div class="flex w-full items-center gap-3 border-b border-secondary pb-4">
-				<OisyTradeMark iconSize="24" sizeClass="size-11" />
+				<OisyTradeMark size="42" />
 
 				<h4 class="flex flex-1">{$i18n.trading.info.title}</h4>
 

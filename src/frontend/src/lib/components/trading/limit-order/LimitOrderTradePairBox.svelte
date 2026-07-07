@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -112,7 +112,7 @@
 	const maxEnabled = $derived(side === 'sell' || priceNum > 0);
 
 	const amountErrorKind = $derived.by((): string | undefined => {
-		if (!nonNullish(pairView) || !(baseNum > 0)) {
+		if (isNullish(pairView) || !(baseNum > 0)) {
 			return undefined;
 		}
 		return validateAmount({
