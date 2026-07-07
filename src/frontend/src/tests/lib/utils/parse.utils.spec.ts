@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { normalizeTokenToDecimals, parseToken } from '$lib/utils/parse.utils';
+import { normalizeTokenToDecimals, parseToken, tryParseToken } from '$lib/utils/parse.utils';
 
 describe('parse.utils', () => {
 	describe('parseToken', () => {
@@ -71,6 +71,20 @@ describe('parse.utils', () => {
 			it('parses scientific notation for a tiny value with large decimals', () => {
 				expect(parseToken({ value: '7.5e-49', unitName: 50 })).toBe(75n);
 			});
+		});
+	});
+
+	describe('tryParseToken', () => {
+		it('parses a valid amount like parseToken', () => {
+			expect(tryParseToken({ value: '1.23', unitName: 8 })).toBe(123000000n);
+		});
+
+		it('returns undefined for an amount beyond the int range (overflow)', () => {
+			expect(tryParseToken({ value: '1e400', unitName: 8 })).toBeUndefined();
+		});
+
+		it('returns undefined for too many decimals', () => {
+			expect(tryParseToken({ value: '1.0', unitName: 81 })).toBeUndefined();
 		});
 	});
 

@@ -12,7 +12,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('WithdrawForm', () => {
-	const free = 5_000_000n;
+	const free = 500_000_000n;
 
 	const mockContext = () =>
 		new Map<symbol, SendContext>([
@@ -58,6 +58,17 @@ describe('WithdrawForm', () => {
 		});
 
 		expect(getByTestId(TRADING_WITHDRAW_FORM_REVIEW_BUTTON)).not.toHaveAttribute('disabled');
+	});
+
+	it('disables the review button and shows an error when the amount exceeds the free balance', () => {
+		const { getByTestId, container } = render(WithdrawForm, {
+			// free is 5 tokens (500_000_000n at 8 decimals); 10 tokens exceeds it.
+			props: { ...baseProps, amount: 10 },
+			context: mockContext()
+		});
+
+		expect(getByTestId(TRADING_WITHDRAW_FORM_REVIEW_BUTTON)).toHaveAttribute('disabled');
+		expect(container).toHaveTextContent(en.trading.withdraw.error_insufficient_balance);
 	});
 
 	it('shows the reserved note when funds are locked by open orders', () => {
