@@ -125,8 +125,10 @@ export const savePersonalNote = async ({
 
 	// Create vs. edit is decided by whether the caller passed an existing id.
 	const step = id === undefined ? 'create' : 'edit';
-	// First note ever: a create while the backend-reported count is still zero.
-	const isFirstNote = step === 'create' && get(personalNotesStore).count === 0;
+	// First note ever: a create while the backend-reported count is loaded and still zero.
+	// Gate on `loaded` so a failed load (count still the default 0) isn't mistaken for it.
+	const { count, loaded } = get(personalNotesStore);
+	const isFirstNote = step === 'create' && loaded && count === 0;
 
 	try {
 		const noteId = id ?? generatePersonalNoteId();
@@ -142,7 +144,12 @@ export const savePersonalNote = async ({
 
 		const entry: PersonalNoteUi = { id: noteId, ...envelope };
 		personalNotesStore.upsert({ ownerPrincipal: owner, entry });
-		await refreshCount({ identity, owner });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the note save succeeded; a count refresh failure shouldn't
+			// fail the save or misreport it as an error. The count self-heals on next load.
+		}
 
 		trackPersonalNote({ step, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS, isFirstNote });
 		return entry;
@@ -169,7 +176,12 @@ export const deletePersonalNote = async ({
 	try {
 		await deletePersonalNoteApi({ identity, note_id: id });
 		personalNotesStore.remove({ ownerPrincipal: owner, id });
-		await refreshCount({ identity, owner });
+		try {
+			await refreshCount({ identity, owner });
+		} catch {
+			// Best-effort: the delete succeeded; a count refresh failure shouldn't fail
+			// it or misreport it as an error. The count self-heals on next load.
+		}
 
 		trackPersonalNote({ step: 'delete', resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });
 	} catch (err: unknown) {

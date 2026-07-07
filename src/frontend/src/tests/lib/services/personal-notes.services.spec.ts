@@ -187,6 +187,42 @@ describe('personal-notes.services', () => {
 			});
 		});
 
+		it('does not flag isFirstNote when the store has not loaded (count is the default 0)', async () => {
+			// Owner known but load never completed (e.g. it failed): loaded=false, count=0.
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+			vi.spyOn(vetkeys, 'encryptPersonalNote').mockResolvedValue(new Uint8Array([9]));
+
+			await savePersonalNote({ identity: mockIdentity, note: 'fresh note' });
+
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: false
+			});
+		});
+
+		it('treats a count-refresh failure after a successful write as success', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({ ownerPrincipal: mockPrincipalText, entries: [], count: 0 });
+			vi.spyOn(backendApi, 'setPersonalNote').mockResolvedValue();
+			vi.spyOn(vetkeys, 'encryptPersonalNote').mockResolvedValue(new Uint8Array([9]));
+			// The write succeeds but the follow-up count refresh fails.
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockRejectedValue(new Error('count down'));
+
+			const entry = await savePersonalNote({ identity: mockIdentity, note: 'fresh note' });
+
+			expect(entry.note).toBe('fresh note');
+			// The saved note is still cached, and the event reflects the write, not the refresh.
+			expect((get(personalNotesList) ?? []).map(({ id }) => id)).toEqual([entry.id]);
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				isFirstNote: true
+			});
+		});
+
 		it('tracks a create error and rethrows without leaking the note', async () => {
 			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
 			personalNotesStore.setLoaded({
@@ -272,6 +308,29 @@ describe('personal-notes.services', () => {
 			expect(deleteSpy).toHaveBeenCalledWith({ identity: mockIdentity, note_id: 'note-1' });
 			expect(get(personalNotesList)).toEqual([]);
 			expect(get(personalNotesStore).count).toBe(0);
+			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
+				step: 'delete',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+		});
+
+		it('treats a count-refresh failure after a successful delete as success', async () => {
+			personalNotesStore.beginLoad({ ownerPrincipal: mockPrincipalText });
+			personalNotesStore.setLoaded({
+				ownerPrincipal: mockPrincipalText,
+				entries: [{ id: 'note-1', note: 'x', created_at_ns: '100', updated_at_ns: '100' }],
+				count: 1
+			});
+			vi.spyOn(backendApi, 'deletePersonalNote').mockResolvedValue();
+			// The delete succeeds but the follow-up count refresh fails.
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockRejectedValue(new Error('count down'));
+
+			await expect(
+				deletePersonalNote({ identity: mockIdentity, id: 'note-1' })
+			).resolves.toBeUndefined();
+
+			// The note is gone and the event reflects the delete, not the refresh.
+			expect(get(personalNotesList)).toEqual([]);
 			expect(trackPersonalNote).toHaveBeenCalledExactlyOnceWith({
 				step: 'delete',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
