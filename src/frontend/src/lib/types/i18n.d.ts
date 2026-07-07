@@ -1370,6 +1370,7 @@ interface I18nTrading {
 		in_orders_label: string;
 		positions: string;
 		deposit: string;
+		withdraw: string;
 	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {

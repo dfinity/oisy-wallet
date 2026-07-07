@@ -1696,7 +1696,8 @@
 			"in_orders": "",
 			"in_orders_label": "",
 			"positions": "",
-			"deposit": ""
+			"deposit": "",
+			"withdraw": ""
 		},
 		"provider_unavailable": {
 			"title": "",

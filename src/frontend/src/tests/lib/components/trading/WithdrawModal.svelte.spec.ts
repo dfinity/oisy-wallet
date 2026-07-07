@@ -117,6 +117,17 @@ describe('WithdrawModal', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.amount_label);
 	});
 
+	it('opens directly on the token picker when no seed token is given', async () => {
+		setDexBalances();
+
+		const { getByTestId, container } = render(WithdrawModal);
+
+		await waitFor(() => {
+			expect(getByTestId(MODAL_TOKENS_LIST)).toBeInTheDocument();
+			expect(container).not.toHaveTextContent(en.trading.withdraw.amount_label);
+		});
+	});
+
 	it('shows the reserved note when the token has reserved funds', () => {
 		const { container } = render(WithdrawModal, {
 			props: {
