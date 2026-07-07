@@ -1700,7 +1700,8 @@
 			"withdraw": "",
 			"active_orders": "",
 			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": ""
+			"active_orders_empty_place": "",
+			"new_order": ""
 		},
 		"provider_unavailable": {
 			"title": "",

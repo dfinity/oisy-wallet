@@ -1,9 +1,10 @@
 import type { IcToken } from '$icp/types/ic-token';
 import OisyTradeActiveOrders from '$lib/components/trading/OisyTradeActiveOrders.svelte';
+import { modalStore } from '$lib/stores/modal.store';
 import type { OisyTradeOrderView } from '$lib/types/oisy-trade';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 
 const { activeOrdersMock, hasAssetsMock, pairsMock } = vi.hoisted(() => {
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -77,5 +78,24 @@ describe('OisyTradeActiveOrders', () => {
 		expect(getByText(en.trading.page.active_orders)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Sell');
 		expect(container).toHaveTextContent('Open');
+	});
+
+	it('opens the limit-order modal when New order is clicked and the user has deposits', async () => {
+		hasAssetsMock.set(true);
+		const openSpy = vi.spyOn(modalStore, 'openLimitOrder').mockImplementation((_id: symbol) => {});
+
+		const { getByRole } = render(OisyTradeActiveOrders);
+
+		await fireEvent.click(getByRole('button', { name: en.trading.page.new_order }));
+
+		expect(openSpy).toHaveBeenCalled();
+
+		openSpy.mockRestore();
+	});
+
+	it('disables the New order button when the user has no deposits', () => {
+		const { getByText } = render(OisyTradeActiveOrders);
+
+		expect(getByText(en.trading.page.new_order).closest('button')).toBeDisabled();
 	});
 });
