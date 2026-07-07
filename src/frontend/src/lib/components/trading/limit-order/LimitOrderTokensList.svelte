@@ -89,16 +89,11 @@
 	$effect(() => {
 		setTokens(tokens);
 	});
-
-	// OISY TRADE lists IC-network tokens only (mainnet or the testnet ledgers a
-	// staging DEX trades), so the network filter stays view-only — the shared
-	// picker still renders search and category filters.
-	const onSelectNetworkFilter = () => {};
 </script>
 
+<!-- Network filter is view-only: OISY TRADE lists IC-network tokens only. -->
 <ModalTokensList
 	networkSelectorViewOnly={true}
-	{onSelectNetworkFilter}
 	onTokenButtonClick={(token) => onSelect(token.symbol)}
 >
 	{#snippet tokenListItem(token, onClick)}
