@@ -3,7 +3,7 @@
 	import type { Asset, Chain } from '@liquidium/client';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
@@ -71,7 +71,7 @@
 </script>
 
 {#if nonNullish(token)}
-	<SendTokenContext {token}>
+	<TokenActionContext {token}>
 		<WizardModal
 			bind:this={modal}
 			disablePointerEvents={currentStep?.name === WizardStepsLiquidiumSupply.SUPPLYING}
@@ -107,5 +107,5 @@
 				/>
 			{/if}
 		</WizardModal>
-	</SendTokenContext>
+	</TokenActionContext>
 {/if}
