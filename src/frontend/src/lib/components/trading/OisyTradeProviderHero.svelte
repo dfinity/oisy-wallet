@@ -74,7 +74,7 @@
 			left-aligned layout on mobile (smaller value type, no fixed height), per
 			the design's mobile hero treatment.
 		-->
-		<div class="flex w-full flex-col gap-3 sm:flex-row">
+		<div class="mt-6 flex w-full flex-col gap-3 sm:flex-row">
 			<div
 				class="flex w-full flex-col gap-1.5 rounded-xl border border-disabled bg-secondary p-4 sm:w-1/2 sm:items-center sm:text-center"
 			>
