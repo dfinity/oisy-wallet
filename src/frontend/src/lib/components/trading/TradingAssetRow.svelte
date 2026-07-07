@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { TRADING_ASSET_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -15,6 +17,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 	import type { CardData } from '$lib/types/token-card';
+	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { oisyTradeAssetHasReserved } from '$lib/utils/oisy-trade.utils';
@@ -27,6 +30,10 @@
 	}
 
 	let { asset, onWithdraw }: Props = $props();
+
+	const goToProvider = () => {
+		void goto(AppPath.ProvidersOisyTrade);
+	};
 
 	let { token, total, free, totalUsd } = $derived(asset);
 
@@ -51,7 +58,18 @@
 	);
 </script>
 
-<div class="flex w-full items-center">
+<div
+	class="flex w-full cursor-pointer items-center rounded-lg pr-2 hover:bg-brand-subtle-10 [&_button]:cursor-pointer"
+	onclick={goToProvider}
+	onkeydown={(e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			goToProvider();
+		}
+	}}
+	role="button"
+	tabindex={0}
+>
 	<div class="min-w-0 flex-1">
 		<LogoButton dividers={false} hover={false} rounded={false}>
 			{#snippet logo()}
@@ -109,7 +127,7 @@
 	<button
 		class="ml-2 shrink-0 text-sm font-medium text-brand-primary"
 		data-tid={TRADING_ASSET_WITHDRAW_BUTTON}
-		onclick={() => onWithdraw?.(asset)}
+		onclick={stopPropagation(() => onWithdraw?.(asset))}
 	>
 		{$i18n.trading.assets.withdraw}
 	</button>

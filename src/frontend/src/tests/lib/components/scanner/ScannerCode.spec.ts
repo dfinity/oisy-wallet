@@ -92,18 +92,6 @@ vi.mock('$lib/derived/tokens.derived', async () => {
 	};
 });
 
-vi.mock('@dfinity/gix-components', async () => {
-	const actual = await vi.importActual('@dfinity/gix-components');
-	return {
-		...actual,
-		QRCodeReader: vi.fn().mockImplementation(() => ({
-			$$render: () => '<div data-tid="mock-qr-reader">Mocked QR Reader</div>',
-			$$slots: {},
-			$$scope: {}
-		}))
-	};
-});
-
 describe('ScannerCode.svelte', () => {
 	const mockOnNext = vi.fn();
 	const mockSetData = vi.fn();

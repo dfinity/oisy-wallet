@@ -1693,7 +1693,10 @@
 			"deposited_all_free": "",
 			"deposited_empty": "",
 			"free": "",
-			"in_orders": ""
+			"in_orders": "",
+			"in_orders_label": "",
+			"positions": "",
+			"deposit": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1721,6 +1724,7 @@
 			"review_title": "",
 			"progress_title": "",
 			"you_deposit": "",
+			"error_insufficient_balance": "",
 			"to": "",
 			"network": "",
 			"transaction_fee": "",
@@ -1753,6 +1757,7 @@
 			"transfer_fee": "",
 			"you_receive": "",
 			"reserved_note": "",
+			"error_insufficient_balance": "",
 			"submit": "",
 			"open": "",
 			"progress_withdraw": "",
