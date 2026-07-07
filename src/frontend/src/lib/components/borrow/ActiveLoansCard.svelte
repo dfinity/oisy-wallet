@@ -49,16 +49,12 @@
 		</div>
 
 		<div class="text-sm text-tertiary sm:text-base">
-			{#if hasDebt}
-				{$i18n.borrow.text.apr}
-				<EarningYearlyAmount
-					showMinusSign
-					{showWithShortenedLabel}
-					value={$liquidiumBorrowInterestUsd}
-				/>
-			{:else}
-				{$i18n.borrow.text.no_active_loans}
-			{/if}
+			{$i18n.borrow.text.apr}
+			<EarningYearlyAmount
+				showMinusSign
+				{showWithShortenedLabel}
+				value={$liquidiumBorrowInterestUsd}
+			/>
 		</div>
 
 		{#if showHealthFactor && hasDebt && nonNullish($liquidiumHealthFactorPercent)}
