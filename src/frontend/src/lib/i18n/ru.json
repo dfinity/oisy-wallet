@@ -1682,7 +1682,9 @@
 			"tab_title": "",
 			"intro": "",
 			"learn_more": "",
-			"provider_name": ""
+			"provider_name": "",
+			"no_trades": "",
+			"go_to_trade": ""
 		},
 		"page": {
 			"tagline": "",
