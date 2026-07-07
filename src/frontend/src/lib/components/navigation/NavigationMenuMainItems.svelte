@@ -179,8 +179,8 @@
 				href: url(AppPath.Activity),
 				selected: isRouteActivity(page)
 			},
-			// Trade and Borrow are NEW Finance destinations. Trade is gated behind
-			// the trading providers like the Assets Trading tab; Borrow routes to the
+			// Trade and Borrow are NEW Finance destinations. Trade is gated by the
+			// trading providers like the Assets Trading tab; Borrow routes to the
 			// dedicated /borrow/ page.
 			...(anyTradingProviderEnabled
 				? {
