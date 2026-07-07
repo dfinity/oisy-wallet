@@ -3,10 +3,11 @@ import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
-const { depositableMock, freeMock, reservedMock, usdMock } = vi.hoisted(() => {
+const { assetsMock, depositableMock, freeMock, reservedMock, usdMock } = vi.hoisted(() => {
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const { writable: createWritable } = require('svelte/store');
 	return {
+		assetsMock: createWritable([]),
 		depositableMock: createWritable(0),
 		freeMock: createWritable(0),
 		reservedMock: createWritable(0),
@@ -17,6 +18,9 @@ const { depositableMock, freeMock, reservedMock, usdMock } = vi.hoisted(() => {
 // Isolate the hero from the data layer: drive the four fiat figures directly.
 vi.mock(import('$lib/derived/oisy-trade.derived'), async (importOriginal) => ({
 	...(await importOriginal()),
+	get oisyTradeAssets() {
+		return assetsMock;
+	},
 	get oisyTradeDepositableUsdValue() {
 		return depositableMock;
 	},
@@ -38,6 +42,7 @@ vi.mock('$app/navigation', () => ({
 
 describe('OisyTradeProviderHero', () => {
 	beforeEach(() => {
+		assetsMock.set([]);
 		depositableMock.set(0);
 		freeMock.set(0);
 		reservedMock.set(0);
@@ -69,6 +74,7 @@ describe('OisyTradeProviderHero', () => {
 	});
 
 	it('shows the "all free" sub-line when deposited but nothing is reserved', () => {
+		assetsMock.set([{ total: 100n }]);
 		usdMock.set(100);
 		freeMock.set(100);
 		reservedMock.set(0);

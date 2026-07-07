@@ -10,6 +10,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import {
+		oisyTradeAssets,
 		oisyTradeDepositableUsdValue,
 		oisyTradeFreeUsdValue,
 		oisyTradeReservedUsdValue,
@@ -41,7 +42,7 @@
 	const free = $derived(fiat($oisyTradeFreeUsdValue));
 	const reserved = $derived(fiat($oisyTradeReservedUsdValue));
 
-	const hasDeposits = $derived($oisyTradeUsdValue > 0);
+	const hasDeposits = $derived($oisyTradeAssets.length > 0);
 	const hasReserved = $derived($oisyTradeReservedUsdValue > 0);
 </script>
 
