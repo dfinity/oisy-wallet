@@ -1461,6 +1461,17 @@ interface I18nTrading {
 		count_expired: string;
 		count_canceled: string;
 	};
+	info: {
+		title: string;
+		description: string;
+		visit_website: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
+	};
 	order_detail: {
 		title: string;
 		status: string;

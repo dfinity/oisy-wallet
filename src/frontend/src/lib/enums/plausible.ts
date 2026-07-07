@@ -134,6 +134,7 @@ export enum PLAUSIBLE_EVENT_SOURCE_LOCATIONS {
 	REWARDS = 'rewards',
 	TRANSACTIONS = 'transactions',
 	LIQUIDIUM = 'liquidium',
+	OISY_TRADE = 'oisy_trade',
 	NOTES = 'notes',
 	NOTE_SHARE_DIALOG = 'share_dialog',
 	NOTE_SHARE_RECIPIENT_PAGE = 'recipient_page'
