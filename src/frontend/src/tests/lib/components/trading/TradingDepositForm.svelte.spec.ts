@@ -4,6 +4,7 @@ import {
 	TRADING_DEPOSIT_CONSENT_CHECKBOX,
 	TRADING_DEPOSIT_FORM_REVIEW_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { balancesStore } from '$lib/stores/balances.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -20,6 +21,16 @@ describe('TradingDepositForm', () => {
 		onClose: () => {},
 		onNext: () => {}
 	};
+
+	beforeEach(() => {
+		// Give the wallet a balance that comfortably covers the amounts used below;
+		// without it the deposit validation treats the balance as zero.
+		balancesStore.set({ id: token.id, data: { data: 100_000_000_000n, certified: true } });
+	});
+
+	afterEach(() => {
+		balancesStore.reset(token.id);
+	});
 
 	it('should render the deposit title, provider name and consent text', () => {
 		const { getByText } = render(TradingDepositForm, { props: { ...baseProps } });
@@ -57,6 +68,17 @@ describe('TradingDepositForm', () => {
 		});
 
 		expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeEnabled();
+	});
+
+	it('should disable the review button and show an error when the amount exceeds the wallet balance', () => {
+		balancesStore.set({ id: token.id, data: { data: 100_000_000n, certified: true } });
+
+		const { getByTestId, getByText } = render(TradingDepositForm, {
+			props: { ...baseProps, consent: true, amount: 5 }
+		});
+
+		expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeDisabled();
+		expect(getByText(en.trading.deposit.error_insufficient_balance)).toBeInTheDocument();
 	});
 
 	it('should toggle consent when the checkbox is clicked', async () => {
