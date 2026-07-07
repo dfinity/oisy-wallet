@@ -69,7 +69,7 @@ describe('personal-notes-analytics.services', () => {
 			});
 		});
 
-		it.each<PersonalNoteStep>(['edit', 'delete', 'open'])(
+		it.each<PersonalNoteStep>(['edit', 'delete', 'open', 'view'])(
 			'maps the %s step onto event_modifier',
 			(step) => {
 				trackPersonalNote({ step, resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS });

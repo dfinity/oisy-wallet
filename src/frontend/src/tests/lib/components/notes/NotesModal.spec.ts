@@ -134,6 +134,19 @@ describe('NotesModal', () => {
 		expect(getByTestId(NOTES_INPUT)).toBeInTheDocument();
 	});
 
+	it('tracks opening a note preview on row click', async () => {
+		setLoadedNotes({ entries: [note('a')], count: 1 });
+
+		const { getByText } = render(NotesModal);
+
+		await fireEvent.click(getByText('note a'));
+
+		expect(trackPersonalNote).toHaveBeenCalledWith({
+			step: 'view',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		});
+	});
+
 	it('deletes a note only after the confirmation step', async () => {
 		const deleteSpy = vi.spyOn(notesServices, 'deletePersonalNote').mockResolvedValue();
 		setLoadedNotes({ entries: [note('a')], count: 1 });

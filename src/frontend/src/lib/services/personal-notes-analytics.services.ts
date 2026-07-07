@@ -9,8 +9,9 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { notEmptyString } from '@dfinity/utils';
 
 // The note-lifecycle step, carried in `event_modifier` so one `personal_note`
-// event covers create/edit/delete and the surface-open ping.
-export type PersonalNoteStep = 'create' | 'edit' | 'delete' | 'open';
+// event covers create/edit/delete, the surface-open ping, and opening a note's
+// read-only preview.
+export type PersonalNoteStep = 'create' | 'edit' | 'delete' | 'open' | 'view';
 
 export interface TrackPersonalNoteParams {
 	// The lifecycle step → `event_modifier`.
