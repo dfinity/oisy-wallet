@@ -96,7 +96,7 @@ keys omitted, never `undefined`) — [`analytics.md` §4](../../frontend/analyti
 #### Event 1 — `personal_note` (lifecycle)
 
 ```ts
-export type PersonalNoteStep = 'create' | 'edit' | 'delete' | 'open';
+export type PersonalNoteStep = 'create' | 'edit' | 'delete' | 'open' | 'view';
 
 export interface TrackPersonalNoteParams {
 	step: PersonalNoteStep; // → event_modifier
@@ -113,13 +113,16 @@ export interface TrackPersonalNoteParams {
 | Note edited          | `edit`                               | `success` / `error` | `savePersonalNote` (existing-id branch) |
 | Note deleted         | `delete`                             | `success` / `error` | `deletePersonalNote`                    |
 | Notes surface opened | `open`                               | `success`           | `NotesModal` open                       |
+| Note preview opened  | `view`                               | `success`           | `NotesModal` `openView` (row click)     |
 
 Common props: `event_context: personal_notes`, `event_modifier`, `result_status`,
 optional `source_location: notes`, `event_value: first_note` on first create,
 `result_error` only on failure.
 
 Fire CRUD events from the **service layer** so every caller is covered (success
-after the awaited backend call, error in the catch); fire `open` from `NotesModal`.
+after the awaited backend call, error in the catch); fire `open` and `view` from
+`NotesModal` (`view` on `openView`, the row-click into a note's read-only preview —
+distinct from `open`, the surface itself).
 
 #### Event 2 — `note_share` (funnel)
 
@@ -174,8 +177,9 @@ pure, testable, zero behaviour change.
 
 **PR-2 — wire the lifecycle.** Call `trackPersonalNote` from `savePersonalNote`
 (create vs. edit via id presence; `isFirstNote` via the store) and
-`deletePersonalNote` (success + error), and fire `open` in `NotesModal` alongside
-the share-open call. Extend `personal-notes.services.spec.ts` / `NotesModal.spec.ts`.
+`deletePersonalNote` (success + error), and fire `open` (surface mount) and `view`
+(`openView`, a note's read-only preview) in `NotesModal`. Extend
+`personal-notes.services.spec.ts` / `NotesModal.spec.ts`.
 
 **PR-3 — consolidate share events + add `close`.** Replace the six `trackEvent({
 name: TRACK_NOTE_SHARE_* })` calls (`NotesModal`, `ShareNoteContent`, recipient
@@ -214,7 +218,8 @@ page to `analytics.md`.
 - **Lifecycle:** creating a note fires `personal_note` `create` / `success`;
   failures fire `error` with a sanitised `result_error` and no note content. First
   successful create additionally carries `event_value: first_note`. Edit → `edit`,
-  delete → `delete` (success/error each). Opening the surface → `open` / `success`.
+  delete → `delete` (success/error each). Opening the surface → `open` / `success`;
+  opening a note's preview → `view` / `success`.
 - **Share:** exactly one event name, `note_share`, covers all six former steps
   **plus the new `copy` and `close` steps**, each with the correct `event_modifier`
   - `source_location` and
@@ -244,8 +249,9 @@ filtered by `event_modifier` / `source_location`.
 
 1. **No bucketed note length.** Create/edit events emit nothing about the note's
    content or size — stay content-free.
-2. **Track `open` (notes surface).** `personal_note` fires `event_modifier: open`
-   when the notes modal opens.
+2. **Track `open` (notes surface) and `view` (single-note preview).** `open` fires
+   when the notes modal opens; `view` fires when a note's read-only preview is
+   opened from the list (`openView`). They are separate signals.
 3. **`note_share` keeps both `open` and `create`.** Dialog-opened and link-created
    are tracked separately, giving the creator conversion rate.
 4. **`expiry` is a human label** (`1d` / `7d` / `30d`) — the option label the user
