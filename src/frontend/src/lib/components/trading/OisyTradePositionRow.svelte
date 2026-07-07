@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconLock from '$lib/components/icons/IconLock.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -13,7 +14,6 @@
 	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 	import type { CardData } from '$lib/types/token-card';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { oisyTradeAssetHasReserved } from '$lib/utils/oisy-trade.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
@@ -62,14 +62,16 @@
 	</span>
 
 	{#if hasReserved}
-		<span class="shrink-0 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary">
+		<span
+			class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-2.5 py-1 text-xs font-medium text-tertiary"
+		>
+			<span class="inline-flex" aria-label={$i18n.trading.page.in_orders_label} role="img">
+				<IconLock size="12" />
+			</span>
 			{#if $isPrivacyMode}
-				<span class="inline-flex items-center gap-1">
-					<IconDots variant="xs" />
-					{$i18n.trading.page.in_orders_label}
-				</span>
+				<IconDots variant="xs" />
 			{:else}
-				{replacePlaceholders($i18n.trading.page.in_orders, { $amount: formatAmount(reserved) })}
+				{formatAmount(reserved)}
 			{/if}
 		</span>
 	{/if}
