@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
@@ -30,24 +30,32 @@
 
 	interface Props {
 		// Seeds the initial selection only; the user can switch token in-modal.
-		withdrawToken: OisyTradeWithdrawToken;
+		// Omitted (e.g. the provider-page "Withdraw" entry) opens on the token
+		// picker with no pre-selected token.
+		withdrawToken?: OisyTradeWithdrawToken;
 	}
 
 	let { withdrawToken }: Props = $props();
 
 	// eslint-disable-next-line svelte/no-unused-svelte-ignore
 	// svelte-ignore state_referenced_locally -- prop seeds the initial selection only
-	let token = $state<IcToken>(withdrawToken.token);
+	let token = $state<IcToken | undefined>(withdrawToken?.token);
 
 	// Falls back to the prop snapshot until the DEX balances store has loaded.
 	let { free, reserved } = $derived.by(() => {
-		const asset = $oisyTradeAssets.find(({ token: { id } }) => id === token.id);
+		const selected = token;
+
+		if (isNullish(selected)) {
+			return { free: ZERO, reserved: ZERO };
+		}
+
+		const asset = $oisyTradeAssets.find(({ token: { id } }) => id === selected.id);
 
 		if (nonNullish(asset)) {
 			return { free: asset.free, reserved: asset.reserved };
 		}
 
-		return token.id === withdrawToken.token.id
+		return selected.id === withdrawToken?.token.id
 			? { free: withdrawToken.free, reserved: withdrawToken.reserved }
 			: { free: ZERO, reserved: ZERO };
 	});
@@ -117,7 +125,7 @@
 			return;
 		}
 
-		if (token.id !== matched.token.id) {
+		if (token?.id !== matched.token.id) {
 			amount = undefined;
 			amountSetToMax = false;
 		}
@@ -127,7 +135,7 @@
 	};
 
 	const reset = () => {
-		({ token } = withdrawToken);
+		token = withdrawToken?.token;
 		amount = undefined;
 		amountSetToMax = false;
 		withdrawProgressStep = ProgressStepsTradingWithdraw.INITIALIZATION;
@@ -136,6 +144,14 @@
 	};
 
 	const close = () => closeModal(reset);
+
+	// With no seed token the wizard's first step (Withdraw) has nothing to act on,
+	// so open straight on the token picker.
+	onMount(() => {
+		if (isNullish(token)) {
+			showTokensList();
+		}
+	});
 </script>
 
 <SendTokenContext {token}>
@@ -164,7 +180,7 @@
 					</ButtonGroup>
 				{/snippet}
 			</ModalTokensList>
-		{:else}
+		{:else if nonNullish(token)}
 			<WithdrawWizard
 				{currentStep}
 				{free}
