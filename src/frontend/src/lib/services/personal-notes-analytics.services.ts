@@ -72,7 +72,7 @@ export interface TrackPersonalNoteShareParams {
 	// create → the human expiry label the user picked (e.g. `7d`).
 	expiry?: string;
 	// discover → `source_detail` (`outro` | `unavailable`).
-	sourceDetail?: string;
+	sourceDetail?: 'outro' | 'unavailable';
 	// Sanitized (IC-request-id-stripped) error string; create error only, omitted when empty.
 	error?: string;
 }
