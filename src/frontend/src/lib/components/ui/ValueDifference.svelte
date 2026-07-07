@@ -37,6 +37,17 @@
 	let isSuccess = $derived(!muted && nonNullish(value) && value > warningLevel);
 
 	let showWarningIcon = $derived(isWarning || isError);
+
+	// Round before signing so a sub-0.005 magnitude reads as a clean "0.00%"
+	// rather than "-0.00%" (or a spurious "+0.00%"): toFixed keeps the sign of a
+	// negative rounding-to-zero, so we must snap through Number() first.
+	let text = $derived.by((): string => {
+		if (!nonNullish(value)) {
+			return '';
+		}
+		const rounded = Number(value.toFixed(2));
+		return `${rounded > 0 ? '+' : ''}${rounded.toFixed(2)}%`;
+	});
 </script>
 
 {#snippet valueDifferenceWarningIcon()}
@@ -57,7 +68,7 @@
 			{@render valueDifferenceWarningIcon()}
 		{/if}
 		<span>
-			{`${value > 0 ? '+' : ''}${value.toFixed(2)}`}%
+			{text}
 		</span>
 		{#if showWarningIcon && iconPosition === 'right'}
 			{@render valueDifferenceWarningIcon()}
