@@ -12,8 +12,15 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { liquidiumHealthLevel } from '$lib/utils/liquidium.utils';
+
+	interface Props {
+		widthClass?: string;
+		showHealthFactor?: boolean;
+		showWithShortenedLabel?: boolean;
+	}
+
+	let { widthClass, showHealthFactor = true, showWithShortenedLabel = false }: Props = $props();
 
 	let hasDebt = $derived($liquidiumTotalBorrowedUsd > 0);
 
@@ -24,31 +31,37 @@
 	);
 </script>
 
-<StakeContentCard>
+<StakeContentCard {widthClass}>
 	{#snippet content()}
 		<div class="text-sm font-bold">{$i18n.borrow.text.active_loans}</div>
 
-		<div class="my-1 text-lg font-bold sm:text-xl">
-			<EarningYearlyAmount showAsError value={$liquidiumBorrowInterestUsd} />
+		<div
+			class="my-1 text-lg font-bold sm:text-xl"
+			class:text-error-primary={hasDebt}
+			class:text-tertiary={!hasDebt}
+		>
+			{formatCurrency({
+				value: $liquidiumTotalBorrowedUsd,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage
+			}) ?? ''}
 		</div>
 
-		<div class="text-sm font-bold text-tertiary sm:text-base">
+		<div class="text-sm text-tertiary sm:text-base">
 			{#if hasDebt}
-				{replacePlaceholders($i18n.borrow.text.amount_borrowed, {
-					$amount:
-						formatCurrency({
-							value: $liquidiumTotalBorrowedUsd,
-							currency: $currentCurrency,
-							exchangeRate: $currencyExchangeStore,
-							language: $currentLanguage
-						}) ?? ''
-				})}
+				{$i18n.borrow.text.apr}
+				<EarningYearlyAmount
+					showMinusSign
+					{showWithShortenedLabel}
+					value={$liquidiumBorrowInterestUsd}
+				/>
 			{:else}
 				{$i18n.borrow.text.no_active_loans}
 			{/if}
 		</div>
 
-		{#if hasDebt && nonNullish($liquidiumHealthFactorPercent)}
+		{#if showHealthFactor && hasDebt && nonNullish($liquidiumHealthFactorPercent)}
 			<div
 				class="mt-2 text-sm font-bold"
 				class:text-error-primary={healthLevel === 'critical'}
