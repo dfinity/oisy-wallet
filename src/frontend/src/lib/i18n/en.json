@@ -1682,7 +1682,9 @@
 			"tab_title": "Trading",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
-			"provider_name": "OISY TRADE"
+			"provider_name": "OISY TRADE",
+			"no_trades": "It looks like you haven't traded any tokens yet.",
+			"go_to_trade": "Go to Trade"
 		},
 		"page": {
 			"tagline": "A fully onchain order-book exchange, built into your wallet.",
@@ -1718,7 +1720,7 @@
 			"deposit": "Deposit"
 		},
 		"assets": {
-			"title": "My assets",
+			"title": "My positions",
 			"deposit": "+ Deposit",
 			"withdraw": "Withdraw",
 			"available": "Available: $amount",

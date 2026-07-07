@@ -8,7 +8,6 @@
 	import TradingProviderTag from '$lib/components/trading/TradingProviderTag.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { TRADING_ASSET_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -17,7 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 	import type { CardData } from '$lib/types/token-card';
-	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { oisyTradeAssetHasReserved } from '$lib/utils/oisy-trade.utils';
@@ -25,11 +23,9 @@
 
 	interface Props {
 		asset: OisyTradeAsset;
-		// Wired to the Withdraw modal in PR3; a no-op placeholder for now.
-		onWithdraw?: (asset: OisyTradeAsset) => void;
 	}
 
-	let { asset, onWithdraw }: Props = $props();
+	let { asset }: Props = $props();
 
 	const goToProvider = () => {
 		void goto(AppPath.ProvidersOisyTrade);
@@ -58,77 +54,54 @@
 	);
 </script>
 
-<div
-	class="flex w-full cursor-pointer items-center rounded-lg pr-2 hover:bg-brand-subtle-10 [&_button]:cursor-pointer"
-	onclick={goToProvider}
-	onkeydown={(e) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			goToProvider();
-		}
-	}}
-	role="button"
-	tabindex={0}
->
-	<div class="min-w-0 flex-1">
-		<LogoButton dividers={false} hover={false} rounded={false}>
-			{#snippet logo()}
-				<span class="flex">
-					<TokenLogo badge={{ type: 'network' }} color="white" {data} logoSize="lg" />
-				</span>
-			{/snippet}
+<LogoButton onClick={goToProvider}>
+	{#snippet logo()}
+		<span class="flex">
+			<TokenLogo badge={{ type: 'network' }} color="white" {data} logoSize="lg" />
+		</span>
+	{/snippet}
 
-			{#snippet title()}
-				<span class="flex items-center gap-2">
-					{symbol}
-					<TradingProviderTag />
-				</span>
-			{/snippet}
+	{#snippet title()}
+		<span class="flex items-center gap-2">
+			{symbol}
+			<TradingProviderTag />
+		</span>
+	{/snippet}
 
-			{#snippet description()}
-				<TokenNameAndNetwork {data} />
-			{/snippet}
+	{#snippet description()}
+		<TokenNameAndNetwork {data} />
+	{/snippet}
 
-			{#snippet titleEnd()}
-				<span class="block text-nowrap">
+	{#snippet titleEnd()}
+		<span class="block text-nowrap">
+			{#if $isPrivacyMode}
+				<IconDots variant="md" />
+			{:else}
+				{formatAmount(total)}
+			{/if}
+		</span>
+	{/snippet}
+
+	{#snippet descriptionEnd()}
+		<span class="flex flex-col items-end text-nowrap">
+			{#if hasReserved}
+				<span transition:slide={SLIDE_PARAMS}>
 					{#if $isPrivacyMode}
-						<IconDots variant="md" />
+						<span class="inline-flex items-center gap-1"
+							>{$i18n.trading.assets.available_label} <IconDots variant="xs" /></span
+						>
 					{:else}
-						{formatAmount(total)}
+						{replacePlaceholders($i18n.trading.assets.available, {
+							$amount: formatAmount(free)
+						})}
 					{/if}
 				</span>
-			{/snippet}
-
-			{#snippet descriptionEnd()}
-				<span class="flex flex-col items-end text-nowrap">
-					{#if hasReserved}
-						<span transition:slide={SLIDE_PARAMS}>
-							{#if $isPrivacyMode}
-								<span class="inline-flex items-center gap-1"
-									>{$i18n.trading.assets.available_label} <IconDots variant="xs" /></span
-								>
-							{:else}
-								{replacePlaceholders($i18n.trading.assets.available, {
-									$amount: formatAmount(free)
-								})}
-							{/if}
-						</span>
-					{/if}
-					{#if $isPrivacyMode}
-						<IconDots variant="xs" />
-					{:else if nonNullish(formattedTotalUsd)}
-						<span transition:slide={SLIDE_PARAMS}>{formattedTotalUsd}</span>
-					{/if}
-				</span>
-			{/snippet}
-		</LogoButton>
-	</div>
-
-	<button
-		class="ml-2 shrink-0 text-sm font-medium text-brand-primary"
-		data-tid={TRADING_ASSET_WITHDRAW_BUTTON}
-		onclick={stopPropagation(() => onWithdraw?.(asset))}
-	>
-		{$i18n.trading.assets.withdraw}
-	</button>
-</div>
+			{/if}
+			{#if $isPrivacyMode}
+				<IconDots variant="xs" />
+			{:else if nonNullish(formattedTotalUsd)}
+				<span transition:slide={SLIDE_PARAMS}>{formattedTotalUsd}</span>
+			{/if}
+		</span>
+	{/snippet}
+</LogoButton>
