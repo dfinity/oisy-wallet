@@ -266,7 +266,7 @@ describe('personal-notes-analytics.services', () => {
 				side: 'creator',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				expiry: '',
-				sourceDetail: '',
+				sourceDetail: undefined,
 				error: ''
 			});
 
