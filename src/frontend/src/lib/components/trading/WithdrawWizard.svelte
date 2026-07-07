@@ -24,9 +24,11 @@
 		token: IcToken;
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
+		free: bigint;
 		reserved: bigint;
 		withdrawProgressStep: string;
 		currentStep?: WizardStep<WizardStepsTradingWithdraw>;
+		onSelectToken: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -36,9 +38,11 @@
 		token,
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
+		free,
 		reserved,
 		withdrawProgressStep = $bindable(),
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -110,5 +114,14 @@
 {:else if currentStep?.name === WizardStepsTradingWithdraw.WITHDRAWING}
 	<WithdrawProgress symbol={token.symbol} {withdrawProgressStep} />
 {:else}
-	<WithdrawForm {onClose} {onNext} {reserved} {transferFee} bind:amount bind:amountSetToMax />
+	<WithdrawForm
+		{free}
+		{onClose}
+		{onNext}
+		{onSelectToken}
+		{reserved}
+		{transferFee}
+		bind:amount
+		bind:amountSetToMax
+	/>
 {/if}
