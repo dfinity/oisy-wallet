@@ -1,11 +1,16 @@
+import { goto } from '$app/navigation';
 import TradingAssetRow from '$lib/components/trading/TradingAssetRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { TRADING_ASSET_WITHDRAW_BUTTON } from '$lib/constants/test-ids.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
 
 describe('TradingAssetRow', () => {
 	const token = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
@@ -69,16 +74,13 @@ describe('TradingAssetRow', () => {
 		expect(queryByText('1 ICP')).toBeNull();
 	});
 
-	it('should call onWithdraw with the asset when the withdraw button is clicked', async () => {
-		const onWithdraw = vi.fn();
-		const asset = buildAsset();
-
-		const { getByTestId } = render(TradingAssetRow, {
-			props: { asset, onWithdraw }
+	it('should navigate to the OISY Trade provider page when clicked', async () => {
+		const { getByRole } = render(TradingAssetRow, {
+			props: { asset: buildAsset() }
 		});
 
-		await fireEvent.click(getByTestId(TRADING_ASSET_WITHDRAW_BUTTON));
+		await fireEvent.click(getByRole('button'));
 
-		expect(onWithdraw).toHaveBeenCalledExactlyOnceWith(asset);
+		expect(goto).toHaveBeenCalledWith(AppPath.ProvidersOisyTrade);
 	});
 });
