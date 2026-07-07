@@ -1,12 +1,11 @@
 <script lang="ts">
 	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
-	import { TRACK_NOTE_SHARE_RECIPIENT_DISCOVER } from '$lib/constants/analytics.constants';
 	import { OISY_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON,
 		NOTES_SHARE_RECIPIENT_OUTRO
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -40,7 +39,7 @@
 		data-tid={NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON}
 		href={OISY_URL}
 		onclick={() =>
-			trackEvent({ name: TRACK_NOTE_SHARE_RECIPIENT_DISCOVER, metadata: { source: 'outro' } })}
+			trackPersonalNoteShare({ step: 'discover', side: 'recipient', sourceDetail: 'outro' })}
 	>
 		{$i18n.notes.share.recipient.discover}
 	</a>

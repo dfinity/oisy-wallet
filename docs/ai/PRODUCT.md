@@ -37,7 +37,7 @@ The desktop sidebar's logo header and social-links footer remain a follow-up.
 
 OISY uses [Plausible](https://plausible.io/) for privacy-friendly, cookieless analytics. Plausible is initialized once at app boot via the `@plausible-analytics/tracker` npm package. All events are fired through the central `trackEvent()` function in `src/frontend/src/lib/services/analytics.services.ts`, which wraps the tracker in a try/catch so analytics never disrupts the user flow.
 
-The event schema is documented in the [Plausible Events Confluence page](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events). Common attributes include `event_context`, `event_key`, `event_value`, `source_location`, `source_sublocation`, and the derived `source_path`.
+The event schema and conventions are documented in [`docs/ai/frontend/analytics.md`](frontend/analytics.md) — the canonical reference — alongside the `PLAUSIBLE_*` enums in `src/frontend/src/lib/enums/plausible.ts`. Common attributes include `event_context`, `event_key`, `event_value`, `source_location`, `source_sublocation`, and the derived `source_path`.
 
 ### "Learn More" Link Tracking
 
@@ -79,6 +79,35 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
+
+### Personal notes tracking
+
+The [Personal notes](#personal-notes) feature emits two structured Plausible events, both under `event_context: personal_notes` and content-free — no event ever carries the note text, a note id, the share token, the share key, or PII. Both follow the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`) described in [`analytics.md`](frontend/analytics.md).
+
+**`personal_note`** — the note lifecycle. Every event also carries `source_location: notes`.
+
+| `event_modifier` | Fires when             | `result_status`     | Extra                                                                         |
+| ---------------- | ---------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| `create`         | a note is created      | `success` / `error` | `event_value: first_note` on the user's first note; `result_error` on failure |
+| `edit`           | a note is edited       | `success` / `error` | `result_error` on failure                                                     |
+| `delete`         | a note is deleted      | `success` / `error` | `result_error` on failure                                                     |
+| `open`           | the Notes modal opens  | `success`           | —                                                                             |
+| `view`           | a note's preview opens | `success`           | —                                                                             |
+
+**`personal_note_share`** — the [share](#sharing-a-note) funnel, a single event covering both the creator and the recipient, under `event_subcontext: share`. The step rides in `event_modifier`; `source_location` is `share_dialog` for creator steps and `recipient_page` for recipient steps.
+
+| `event_modifier` | Side      | Fires when                         | Extra                                                                          |
+| ---------------- | --------- | ---------------------------------- | ------------------------------------------------------------------------------ |
+| `open`           | creator   | the share dialog opens             | —                                                                              |
+| `open`           | recipient | the link page opens                | —                                                                              |
+| `create`         | creator   | a share link is created            | `single_use`, `expiry` (e.g. `7d`), `result_status`, `result_error` on failure |
+| `reveal`         | recipient | the note is revealed               | `single_use`                                                                   |
+| `copy`           | recipient | the revealed note is copied        | —                                                                              |
+| `close`          | recipient | the revealed note is dismissed     | —                                                                              |
+| `unavailable`    | recipient | the link is dead / expired / used  | —                                                                              |
+| `discover`       | recipient | the "Discover OISY" CTA is clicked | `source_detail` (`outro` / `unavailable`)                                      |
+
+Recipient-side steps fire on the logged-out public share page and stay anonymous. This consolidates six former flat `note_share_*` events into one; dashboards filter the funnel by `event_modifier` / `source_location`.
 
 ---
 
@@ -136,6 +165,8 @@ A note is a free-standing memo — it is **not** attached to any transaction, ad
 
 The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
+The lifecycle (create / edit / delete, opening the surface, and opening a note's preview) is tracked via the `personal_note` Plausible event — see [Analytics → Personal notes tracking](#personal-notes-tracking).
+
 ### Sharing a note
 
 From an open note, the user can create a **share link** that lets anyone holding the link read that one note — no OISY account required. Sharing is always initiated by the user, per note.
@@ -146,6 +177,8 @@ From an open note, the user can create a **share link** that lets anyone holding
 - **Expiry and single-use.** The creator picks how long the link stays valid — **1 hour, 24 hours, 7 days, or 30 days** — and can optionally make it **single-use**, so it stops opening after it has been viewed once. Expiry is enforced by the backend.
 - **No revocation.** Once shared, OISY cannot recall or revoke a link; it simply stops working after it expires or, for a single-use link, after its first view.
 - **Limit.** A user may hold up to **100 active share links** at a time. At the cap the Share dialog disables link creation and explains that links free up as they expire or are used; existing shares are never evicted.
+
+The share funnel — dialog open, link created, and the recipient's open / reveal / copy / close / unavailable / discover steps — is tracked via the `personal_note_share` Plausible event; see [Analytics → Personal notes tracking](#personal-notes-tracking).
 
 ---
 
