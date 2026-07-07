@@ -4,9 +4,10 @@
 	interface Props {
 		focused?: boolean;
 		error?: boolean;
-		// `muted` styles the box as a read-only readout (grey fill, no hover/focus
-		// affordance) while leaving any inner controls — e.g. a token selector —
-		// interactive. Used for derived amounts that can't be typed into.
+		// `muted` marks the box as a read-only readout: it drops the hover/focus
+		// border affordance so it doesn't invite editing, but keeps the active
+		// surface so an inner control — e.g. a token selector — still reads as
+		// interactive. The muted amount field greys itself (see `TokenInput`).
 		muted?: boolean;
 		styleClass?: string;
 		children: Snippet;
@@ -16,16 +17,12 @@
 </script>
 
 <div
-	class={`flex w-full items-center rounded-lg border border-solid transition-colors duration-250 ${styleClass ?? ''}`}
-	class:bg-disabled={muted}
-	class:bg-primary={!muted}
+	class={`flex w-full items-center rounded-lg border border-solid bg-primary shadow-inner transition-colors duration-250 ${styleClass ?? ''}`}
 	class:border-brand-primary={!muted && focused && !error}
-	class:border-disabled={muted && !error}
 	class:border-error-solid={error}
-	class:border-tertiary={!muted && !focused && !error}
+	class:border-tertiary={!error && (muted || !focused)}
 	class:focus-within:border-2={!muted}
 	class:hover:border-brand-primary={!muted && !error}
-	class:shadow-inner={!muted}
 >
 	{@render children()}
 </div>

@@ -138,7 +138,15 @@
 		{muted}
 		styleClass="h-14 text-3xl"
 	>
-		<div class="flex h-full w-full items-center">
+		<!-- When muted, grey only the amount field (via `--input-background`) and
+			 clip it to the container's rounded-left corner — the token selector to
+			 the right keeps the active surface and stays interactive. -->
+		<div
+			style={muted ? '--input-background: var(--color-background-disabled-alt);' : undefined}
+			class="flex h-full w-full items-center"
+			class:overflow-hidden={muted}
+			class:rounded-l-lg={muted}
+		>
 			{#if token}
 				{#if displayUnit === 'token'}
 					<TokenInputCurrencyToken
