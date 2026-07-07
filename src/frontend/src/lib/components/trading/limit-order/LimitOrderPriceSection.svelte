@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -92,7 +92,7 @@
 	});
 
 	const setPreset = (preset: PricePreset) => {
-		if (!nonNullish(pairView)) {
+		if (isNullish(pairView)) {
 			return;
 		}
 		const target = presetTargetPrice({
@@ -194,7 +194,7 @@
 
 <div
 	class="rounded-lg border bg-secondary px-3 py-2.5"
-	class:border-disabled={!nonNullish(warningText)}
+	class:border-disabled={isNullish(warningText)}
 	class:border-error-primary={nonNullish(warningText) && warningText.danger}
 	class:border-warning-primary={nonNullish(warningText) && !warningText.danger}
 >

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletConnectBtcDecodedPsbt } from '$btc/types/wallet-connect';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -29,7 +29,7 @@
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.signing_address}</p>
 	<p class="mb-4 font-normal"><output class="break-all">{source}</output></p>
 
-	{#if decodeError || !nonNullish(decoded)}
+	{#if decodeError || isNullish(decoded)}
 		<p class="mb-4 font-normal text-error-primary">
 			{$i18n.wallet_connect.error.btc_psbt_decode}
 		</p>
