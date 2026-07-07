@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import LiquidiumBorrowModal from '$lib/components/liquidium/borrow/LiquidiumBorrowModal.svelte';
 	import LiquidiumSupplyModal from '$lib/components/liquidium/supply/LiquidiumSupplyModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -24,7 +25,10 @@
 	// Per-card id so only the clicked card's modal opens.
 	const modalId = Symbol();
 
-	let token = $derived(LIQUIDIUM_ASSET_TOKENS[market.asset]);
+	// Hard-coded teaser row: advertise the asset with "Coming soon..." and disabled actions.
+	let isTeaser = $derived(market.teaser === true);
+
+	let token = $derived(isTeaser ? ICP_TOKEN : LIQUIDIUM_ASSET_TOKENS[market.asset]);
 
 	// Can't borrow a token you supplied (withdraw instead).
 	let isSupplied = $derived(
@@ -76,12 +80,16 @@
 		{/snippet}
 
 		{#snippet description()}
-			<span>
-				{$i18n.liquidium.text.supply_label}
-				<span class="text-success-primary">{formatStakeApyNumber(market.supplyApy)}%</span>
-				· {$i18n.liquidium.text.borrow_label}
-				<span class="text-warning-primary">{formatStakeApyNumber(market.borrowApy)}%</span>
-			</span>
+			{#if isTeaser}
+				<span class="text-success-primary">{$i18n.liquidium.text.coming_soon_teaser}</span>
+			{:else}
+				<span>
+					{$i18n.liquidium.text.supply_label}
+					<span class="text-success-primary">{formatStakeApyNumber(market.supplyApy)}%</span>
+					· {$i18n.liquidium.text.borrow_label}
+					<span class="text-warning-primary">{formatStakeApyNumber(market.borrowApy)}%</span>
+				</span>
+			{/if}
 		{/snippet}
 
 		{#snippet action()}
@@ -89,7 +97,7 @@
 				<div class="flex gap-2">
 					<Button
 						colorStyle="secondary"
-						disabled={!canBorrow}
+						disabled={isTeaser || !canBorrow}
 						onclick={() => modalStore.openLiquidiumBorrow(modalId)}
 						paddingSmall
 					>
@@ -97,7 +105,7 @@
 					</Button>
 
 					<Button
-						disabled={isBorrowed}
+						disabled={isTeaser || isBorrowed}
 						onclick={() => modalStore.openLiquidiumSupply(modalId)}
 						paddingSmall
 					>

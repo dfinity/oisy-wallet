@@ -18,6 +18,9 @@ export interface LiquidiumMarket {
 	frozen: boolean;
 	// Not frozen and under supply cap; else renders as "Coming soon".
 	available: boolean;
+	// Hard-coded teaser row (e.g. ICP before it is listed): shows "Coming soon..."
+	// instead of rates and keeps both actions disabled. TODO: remove once listed.
+	teaser?: boolean;
 }
 
 export interface LiquidiumReserve {
