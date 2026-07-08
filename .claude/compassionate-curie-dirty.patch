@@ -1,0 +1,894 @@
+diff --git a/docs/ai/frontend/testing.md b/docs/ai/frontend/testing.md
+index 5663c9716c..7e334e5c5b 100644
+--- a/docs/ai/frontend/testing.md
++++ b/docs/ai/frontend/testing.md
+@@ -193,9 +193,7 @@ import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
+ describe('MaxBalanceButton', () => {
+ 	it('renders the max action label', () => {
+ 		render(MaxBalanceButton, {
+-			props: {
+-				/* … */
+-			}
++			props: {/* … */}
+ 		});
+ 		expect(screen.getByRole('button', { name: get(i18n).core.text.max })).toBeInTheDocument();
+ 	});
+diff --git a/src/declarations/backend/backend.did.d.ts b/src/declarations/backend/backend.did.d.ts
+index 5875aba34d..dac296d650 100644
+--- a/src/declarations/backend/backend.did.d.ts
++++ b/src/declarations/backend/backend.did.d.ts
+@@ -82,8 +82,7 @@ export interface ActiveUserTransactionRef {
+  * dedupe twin variants anyway.
+  */
+ export type ActiveUserTransactionResult =
+-	| { Ok: ActiveUserTransaction }
+-	| { Err: ActiveUserTransactionError };
++	{ Ok: ActiveUserTransaction } | { Err: ActiveUserTransactionError };
+ /**
+  * Lifecycle status of an active user transaction.
+  *
+@@ -93,10 +92,7 @@ export type ActiveUserTransactionResult =
+  * terminal states are immutable (idempotent no-op).
+  */
+ export type ActiveUserTransactionStatus =
+-	| { Failed: null }
+-	| { Executing: null }
+-	| { Succeeded: null }
+-	| { Pending: null };
++	{ Failed: null } | { Executing: null } | { Succeeded: null } | { Pending: null };
+ export type AddDappSettingsError =
+ 	| { MaxHiddenDappIds: null }
+ 	| { VersionMismatch: null }
+@@ -116,8 +112,7 @@ export interface AddHiddenDappIdRequest {
+ 	dapp_id: string;
+ }
+ export type AddUserDismissedNotificationResult =
+-	| { Ok: null }
+-	| { Err: AddDismissedNotificationError };
++	{ Ok: null } | { Err: AddDismissedNotificationError };
+ export type AddUserHiddenDappIdResult =
+ 	| {
+ 			/**
+@@ -899,8 +894,7 @@ export interface GetUserTransactionsResponse {
+ 	transactions: Array<UserTransaction>;
+ }
+ export type GetUserTransactionsResult =
+-	| { Ok: GetUserTransactionsResponse }
+-	| { Err: UserTransactionError };
++	{ Ok: GetUserTransactionsResponse } | { Err: UserTransactionError };
+ export interface HasUserProfileResponse {
+ 	has_user_profile: boolean;
+ }
+@@ -994,10 +988,7 @@ export interface IcrcTransactionData {
+  * The kind of ICRC ledger operation.
+  */
+ export type IcrcTransactionType =
+-	| { Approve: { spender: string } }
+-	| { Burn: null }
+-	| { Mint: null }
+-	| { Transfer: null };
++	{ Approve: { spender: string } } | { Burn: null } | { Mint: null } | { Transfer: null };
+ /**
+  * An account identifier for Internet Computer tokens.
+  */
+@@ -1023,10 +1014,7 @@ export type Icrcv2AccountId =
+  * Represents the MIME type of image.
+  */
+ export type ImageMimeType =
+-	| { 'image/gif': null }
+-	| { 'image/png': null }
+-	| { 'image/jpeg': null }
+-	| { 'image/webp': null };
++	{ 'image/gif': null } | { 'image/png': null } | { 'image/jpeg': null } | { 'image/webp': null };
+ export interface InitArg {
+ 	/**
+ 	 * The derivation origin used for II authentication, ensuring users get a
+@@ -1067,10 +1055,7 @@ export interface InitArg {
+  * Which Liquidium lend/borrow action an active transaction tracks.
+  */
+ export type LiquidiumAction =
+-	| { Withdraw: null }
+-	| { Repay: null }
+-	| { Borrow: null }
+-	| { Supply: null };
++	{ Withdraw: null } | { Repay: null } | { Borrow: null } | { Supply: null };
+ export interface LiquidiumData {
+ 	/**
+ 	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
+@@ -1211,8 +1196,7 @@ export interface ProviderAgreementType {
+ 	scope: ProviderAgreementScope;
+ }
+ export type QualifiedNotificationKind =
+-	| { NoIndexCanister: null }
+-	| { UnavailableIndexCanister: null };
++	{ NoIndexCanister: null } | { UnavailableIndexCanister: null };
+ /**
+  * Error returned when a caller exceeds the allowed call rate.
+  */
+@@ -1404,10 +1388,7 @@ export type Token =
+ 	| { Erc4626: ErcToken }
+ 	| { Dip721: ExtV2Token };
+ export type TokenAccountId =
+-	| { Btc: BtcAddress }
+-	| { Eth: EthAddress }
+-	| { Sol: string }
+-	| { Icrcv2: Icrcv2AccountId };
++	{ Btc: BtcAddress } | { Eth: EthAddress } | { Sol: string } | { Icrcv2: Icrcv2AccountId };
+ /**
+  * A unified token identifier covering both native and custom tokens for the main supported chains.
+  * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
+diff --git a/src/declarations/ext_v2_token/ext_v2_token.did.d.ts b/src/declarations/ext_v2_token/ext_v2_token.did.d.ts
+index 3e642999fc..12a683de2e 100644
+--- a/src/declarations/ext_v2_token/ext_v2_token.did.d.ts
++++ b/src/declarations/ext_v2_token/ext_v2_token.did.d.ts
+@@ -15,9 +15,7 @@ export type AccountIdentifier__1 = string;
+ export type AssetHandle = string;
+ export type AssetId = number;
+ export type AssetType =
+-	| { other: string }
+-	| { canister: { id: AssetId; canister: string } }
+-	| { direct: Uint32Array };
++	{ other: string } | { canister: { id: AssetId; canister: string } } | { direct: Uint32Array };
+ export type Balance = bigint;
+ export interface BalanceRequest {
+ 	token: TokenIdentifier;
+@@ -201,9 +199,7 @@ export type Metadata =
+ 			};
+ 	  };
+ export type MetadataContainer =
+-	| { blob: Uint8Array }
+-	| { data: Array<MetadataValue> }
+-	| { json: string };
++	{ blob: Uint8Array } | { data: Array<MetadataValue> } | { json: string };
+ export type MetadataLegacy =
+ 	| {
+ 			fungible: {
+diff --git a/src/declarations/icp_swap_pool/icp_swap_pool.did.d.ts b/src/declarations/icp_swap_pool/icp_swap_pool.did.d.ts
+index ed75dd4c98..7b10113355 100644
+--- a/src/declarations/icp_swap_pool/icp_swap_pool.did.d.ts
++++ b/src/declarations/icp_swap_pool/icp_swap_pool.did.d.ts
+@@ -115,10 +115,7 @@ export interface DepositInfo {
+ 	transfer: Transfer;
+ }
+ export type DepositStatus =
+-	| { Failed: null }
+-	| { TransferCompleted: null }
+-	| { Created: null }
+-	| { Completed: null };
++	{ Failed: null } | { TransferCompleted: null } | { Created: null } | { Completed: null };
+ export type Error =
+ 	| { CommonError: null }
+ 	| { InternalError: string }
+@@ -321,10 +318,7 @@ export interface RefundInfo {
+ 	transfer: Transfer;
+ }
+ export type RefundStatus =
+-	| { Failed: null }
+-	| { CreditCompleted: null }
+-	| { Created: null }
+-	| { Completed: null };
++	{ Failed: null } | { CreditCompleted: null } | { Created: null } | { Completed: null };
+ export interface RemoveLimitOrderInfo {
+ 	err: [] | [Error__1];
+ 	status: RemoveLimitOrderStatus;
+@@ -338,10 +332,7 @@ export interface RemoveLimitOrderInfo {
+ 	tickLimit: bigint;
+ }
+ export type RemoveLimitOrderStatus =
+-	| { Failed: null }
+-	| { LimitOrderDeleted: null }
+-	| { Created: null }
+-	| { Completed: null };
++	{ Failed: null } | { LimitOrderDeleted: null } | { Created: null } | { Completed: null };
+ export type Result = { ok: bigint } | { err: Error };
+ export type Result_1 = { ok: string } | { err: Error };
+ export type Result_10 = { ok: Page } | { err: Error };
+@@ -646,10 +637,7 @@ export interface WithdrawInfo {
+ 	transfer: Transfer;
+ }
+ export type WithdrawStatus =
+-	| { Failed: null }
+-	| { CreditCompleted: null }
+-	| { Created: null }
+-	| { Completed: null };
++	{ Failed: null } | { CreditCompleted: null } | { Created: null } | { Completed: null };
+ export interface WithdrawToSubaccountArgs {
+ 	fee: bigint;
+ 	token: string;
+diff --git a/src/declarations/llm/llm.did.d.ts b/src/declarations/llm/llm.did.d.ts
+index 68875167cc..9fa025e777 100644
+--- a/src/declarations/llm/llm.did.d.ts
++++ b/src/declarations/llm/llm.did.d.ts
+@@ -18,9 +18,7 @@ export interface assistant_message {
+ 	}>;
+ }
+ export type backend_config =
+-	| { worker: null }
+-	| { ollama: null }
+-	| { openrouter: { api_key: string } };
++	{ worker: null } | { ollama: null } | { openrouter: { api_key: string } };
+ export interface chat_message_v0 {
+ 	content: string;
+ 	role: { user: null } | { assistant: null } | { system: null };
+diff --git a/src/declarations/signer/signer.did.d.ts b/src/declarations/signer/signer.did.d.ts
+index f30bd8e8cd..b8f51a00a4 100644
+--- a/src/declarations/signer/signer.did.d.ts
++++ b/src/declarations/signer/signer.did.d.ts
+@@ -71,8 +71,7 @@ export interface EcdsaPublicKeyResponse {
+ 	chain_code: Uint8Array;
+ }
+ export type EthAddressError =
+-	| { SigningError: [RejectionCode_1, string] }
+-	| { PaymentError: PaymentError };
++	{ SigningError: [RejectionCode_1, string] } | { PaymentError: PaymentError };
+ export interface EthAddressRequest {
+ 	principal: [] | [Principal];
+ }
+diff --git a/src/declarations/sol_rpc/sol_rpc.did.d.ts b/src/declarations/sol_rpc/sol_rpc.did.d.ts
+index ac7f5996dd..fe1d698cd3 100644
+--- a/src/declarations/sol_rpc/sol_rpc.did.d.ts
++++ b/src/declarations/sol_rpc/sol_rpc.did.d.ts
+@@ -185,8 +185,7 @@ export interface ConfirmedTransactionStatusWithSignature {
+  * Defines a consensus strategy for combining responses from different providers.
+  */
+ export type ConsensusStrategy =
+-	| { Equality: null }
+-	| { Threshold: { min: number; total: [] | [number] } };
++	{ Equality: null } | { Threshold: { min: number; total: [] | [number] } };
+ /**
+  * Represents a slice of the return value of the `getAccountInfo` Solana RPC method.
+  * NOTE: Data slicing is only available for base58, base64, or base64+zstd encodings.
+@@ -217,8 +216,7 @@ export interface EncodedConfirmedTransactionWithStatusMeta {
+  * Encoding of a Solana transaction.
+  */
+ export type EncodedTransaction =
+-	| { legacyBinary: string }
+-	| { binary: [string, { base58: null } | { base64: null }] };
++	{ legacyBinary: string } | { binary: [string, { base58: null } | { base64: null }] };
+ /**
+  * Represents an encoded Solana transaction with status metadata object.
+  */
+@@ -646,10 +644,7 @@ export interface LoadedAddresses {
+  * A filter for log entries.
+  */
+ export type LogFilter =
+-	| { ShowAll: null }
+-	| { HideAll: null }
+-	| { ShowPattern: Regex }
+-	| { HidePattern: Regex };
++	{ ShowAll: null } | { HideAll: null } | { ShowPattern: Regex } | { HidePattern: Regex };
+ /**
+  * Micro-lamports are used for the calculation of prioritization fees.
+  * 1_000_000 MicroLamport == 1 Lamport
+@@ -683,14 +678,12 @@ export type MultiGetAccountInfoResult =
+  * Represents an aggregated result from multiple RPC calls to the `getBalance` Solana RPC method.
+  */
+ export type MultiGetBalanceResult =
+-	| { Consistent: GetBalanceResult }
+-	| { Inconsistent: Array<[RpcSource, GetBalanceResult]> };
++	{ Consistent: GetBalanceResult } | { Inconsistent: Array<[RpcSource, GetBalanceResult]> };
+ /**
+  * Represents an aggregated result from multiple RPC calls to the `getBlock` Solana RPC method.
+  */
+ export type MultiGetBlockResult =
+-	| { Consistent: GetBlockResult }
+-	| { Inconsistent: Array<[RpcSource, GetBlockResult]> };
++	{ Consistent: GetBlockResult } | { Inconsistent: Array<[RpcSource, GetBlockResult]> };
+ /**
+  * Represents an aggregated result from multiple RPC calls to the `getRecentPrioritizationFeesResult` Solana RPC method.
+  */
+@@ -719,8 +712,7 @@ export type MultiGetSignaturesForAddressResult =
+  * Represents an aggregated result from multiple RPC calls to the `getSlot` Solana RPC method.
+  */
+ export type MultiGetSlotResult =
+-	| { Consistent: GetSlotResult }
+-	| { Inconsistent: Array<[RpcSource, GetSlotResult]> };
++	{ Consistent: GetSlotResult } | { Inconsistent: Array<[RpcSource, GetSlotResult]> };
+ /**
+  * Represents an aggregated result from multiple RPC calls to the `getTokenAccountBalance` Solana RPC method.
+  */
+@@ -741,8 +733,7 @@ export type MultiGetTransactionResult =
+  * Represents an aggregated result from multiple RPC calls for a raw JSON-RPC request.
+  */
+ export type MultiRequestResult =
+-	| { Consistent: RequestResult }
+-	| { Inconsistent: Array<[RpcSource, RequestResult]> };
++	{ Consistent: RequestResult } | { Inconsistent: Array<[RpcSource, RequestResult]> };
+ /**
+  * Represents an aggregated result from multiple RPC calls to the `sendTransaction` Solana RPC method.
+  */
+@@ -1051,9 +1042,7 @@ export interface TokenAmount {
+  * A Solana transaction confirmation status.
+  */
+ export type TransactionConfirmationStatus =
+-	| { finalized: null }
+-	| { confirmed: null }
+-	| { processed: null };
++	{ finalized: null } | { confirmed: null } | { processed: null };
+ /**
+  * Determines whether and how transactions are included in a `getBlock` response.
+  */
+diff --git a/src/declarations/xtc_ledger/xtc_ledger.did.d.ts b/src/declarations/xtc_ledger/xtc_ledger.did.d.ts
+index 981ee488a3..d27036116f 100644
+--- a/src/declarations/xtc_ledger/xtc_ledger.did.d.ts
++++ b/src/declarations/xtc_ledger/xtc_ledger.did.d.ts
+@@ -11,9 +11,7 @@ import type { IDL } from '@icp-sdk/core/candid';
+ import type { Principal } from '@icp-sdk/core/principal';
+ 
+ export type BurnError =
+-	| { InsufficientBalance: null }
+-	| { InvalidTokenContract: null }
+-	| { NotSufficientLiquidity: null };
++	{ InsufficientBalance: null } | { InvalidTokenContract: null } | { NotSufficientLiquidity: null };
+ export type BurnResult = { Ok: TransactionId } | { Err: BurnError };
+ export type CreateResult = { Ok: { canister_id: Principal } } | { Err: string };
+ export interface Event {
+diff --git a/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.btc.env.ts b/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.btc.env.ts
+index da86aa8ed2..514bd51534 100644
+--- a/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.btc.env.ts
++++ b/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.btc.env.ts
+@@ -33,9 +33,7 @@ export const LOCAL_CKBTC_LEDGER_CANISTER_ID = import.meta.env
+ 	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
+ 
+ export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_INDEX_CANISTER_ID as
+-	| CanisterIdText
+-	| null
+-	| undefined;
++	CanisterIdText | null | undefined;
+ 
+ export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
+ 	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
+diff --git a/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.eth.env.ts b/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.eth.env.ts
+index 22b4bbf070..e1d7f2c6d9 100644
+--- a/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.eth.env.ts
++++ b/src/frontend/src/env/tokens/tokens-icrc/tokens.icrc.ck.eth.env.ts
+@@ -32,9 +32,7 @@ export const LOCAL_CKETH_LEDGER_CANISTER_ID = import.meta.env
+ 	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText;
+ 
+ export const LOCAL_CKETH_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as
+-	| CanisterIdText
+-	| null
+-	| undefined;
++	CanisterIdText | null | undefined;
+ 
+ export const LOCAL_CKETH_MINTER_CANISTER_ID = import.meta.env
+ 	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as OptionCanisterIdText;
+diff --git a/src/frontend/src/eth/providers/alchemy.providers.ts b/src/frontend/src/eth/providers/alchemy.providers.ts
+index fa63704d59..38d1cc3fd5 100644
+--- a/src/frontend/src/eth/providers/alchemy.providers.ts
++++ b/src/frontend/src/eth/providers/alchemy.providers.ts
+@@ -82,9 +82,7 @@ interface MinedTxEvent {
+ }
+ 
+ type PendingTxEvent =
+-	| string
+-	| { removed?: boolean; transaction: { hash: string } }
+-	| { hash: string };
++	string | { removed?: boolean; transaction: { hash: string } } | { hash: string };
+ 
+ /**
+  * Generic eth_subscribe wrapper for Alchemy (and other WS JSON-RPC providers).
+diff --git a/src/frontend/src/eth/services/erc20.services.ts b/src/frontend/src/eth/services/erc20.services.ts
+index 8341874b85..ce6b8ce9cc 100644
+--- a/src/frontend/src/eth/services/erc20.services.ts
++++ b/src/frontend/src/eth/services/erc20.services.ts
+@@ -57,14 +57,12 @@ export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
+ 			Partial<Pick<Erc20Token, 'id'>>;
+ 
+ 		const loadKnownContracts = (): Promise<ContractData>[] =>
+-			ERC20_CONTRACTS.map(
+-				async ({ network, ...contract }): Promise<ContractData> => ({
+-					...contract,
+-					network,
+-					category: 'default',
+-					...(await infuraErc20Providers(network.id).metadata(contract))
+-				})
+-			);
++			ERC20_CONTRACTS.map(async ({ network, ...contract }): Promise<ContractData> => ({
++				...contract,
++				network,
++				category: 'default',
++				...(await infuraErc20Providers(network.id).metadata(contract))
++			}));
+ 
+ 		const contracts = await Promise.all(loadKnownContracts());
+ 		erc20DefaultTokensStore.set([...ALL_DEFAULT_ERC20_TOKENS, ...contracts.map(mapErc20Token)]);
+diff --git a/src/frontend/src/icp/components/swap/SwapIcpWizard.svelte b/src/frontend/src/icp/components/swap/SwapIcpWizard.svelte
+index fbce4a0ba9..e92e3b82cd 100644
+--- a/src/frontend/src/icp/components/swap/SwapIcpWizard.svelte
++++ b/src/frontend/src/icp/components/swap/SwapIcpWizard.svelte
+@@ -266,13 +266,11 @@
+ 				});
+ 			}
+ 
+-			if (
+-				!(
+-					isSwapError(err) &&
+-					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+-						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+-				)
+-			) {
++			if (!(
++				isSwapError(err) &&
++				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
++					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
++			)) {
+ 				trackEvent({
+ 					name: TRACK_COUNT_SWAP_ERROR,
+ 					metadata: {
+diff --git a/src/frontend/src/icp/schedulers/ic-wallet-balance-and-transactions.scheduler.ts b/src/frontend/src/icp/schedulers/ic-wallet-balance-and-transactions.scheduler.ts
+index c0ff326070..3d59ba93dc 100644
+--- a/src/frontend/src/icp/schedulers/ic-wallet-balance-and-transactions.scheduler.ts
++++ b/src/frontend/src/icp/schedulers/ic-wallet-balance-and-transactions.scheduler.ts
+@@ -28,21 +28,15 @@ interface IcWalletStore<T> {
+ 
+ export type GetBalanceAndTransactions<
+ 	TWithId extends
+-		| IcrcIndexDid.TransactionWithId
+-		| IcpIndexDid.TransactionWithId
+-		| Dip20TransactionWithId
++		IcrcIndexDid.TransactionWithId | IcpIndexDid.TransactionWithId | Dip20TransactionWithId
+ > = GetTransactions & { transactions: TWithId[] };
+ 
+ export class IcWalletBalanceAndTransactionsScheduler<
+ 	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
+ 	TWithId extends
+-		| IcrcIndexDid.TransactionWithId
+-		| IcpIndexDid.TransactionWithId
+-		| Dip20TransactionWithId,
++		IcrcIndexDid.TransactionWithId | IcpIndexDid.TransactionWithId | Dip20TransactionWithId,
+ 	PostMessageDataRequest extends
+-		| PostMessageDataRequestIcrcStrict
+-		| PostMessageDataRequestIcp
+-		| PostMessageDataRequestDip20
++		PostMessageDataRequestIcrcStrict | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ > extends IcWalletScheduler<PostMessageDataRequest> {
+ 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+ 
+diff --git a/src/frontend/src/icp/schedulers/ic-wallet-balance.scheduler.ts b/src/frontend/src/icp/schedulers/ic-wallet-balance.scheduler.ts
+index 844aa52459..f68a7abff4 100644
+--- a/src/frontend/src/icp/schedulers/ic-wallet-balance.scheduler.ts
++++ b/src/frontend/src/icp/schedulers/ic-wallet-balance.scheduler.ts
+@@ -16,9 +16,7 @@ interface IcrcBalanceStore {
+ 
+ export class IcWalletBalanceScheduler<
+ 	PostMessageDataRequest extends
+-		| PostMessageDataRequestIcrc
+-		| PostMessageDataRequestIcp
+-		| PostMessageDataRequestDip20
++		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ > extends IcWalletScheduler<PostMessageDataRequest> {
+ 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
+ 
+diff --git a/src/frontend/src/icp/schedulers/ic-wallet.scheduler.ts b/src/frontend/src/icp/schedulers/ic-wallet.scheduler.ts
+index bb60229933..92bac7da52 100644
+--- a/src/frontend/src/icp/schedulers/ic-wallet.scheduler.ts
++++ b/src/frontend/src/icp/schedulers/ic-wallet.scheduler.ts
+@@ -14,9 +14,7 @@ export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet'
+ 
+ export abstract class IcWalletScheduler<
+ 	PostMessageDataRequest extends
+-		| PostMessageDataRequestIcrc
+-		| PostMessageDataRequestIcp
+-		| PostMessageDataRequestDip20
++		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ > implements Scheduler<PostMessageDataRequest> {
+ 	protected ref: PostMessageCommon['ref'] | undefined;
+ 
+diff --git a/src/frontend/src/lib/components/qr/QrCodeScanner.svelte b/src/frontend/src/lib/components/qr/QrCodeScanner.svelte
+index 1a5b921bca..059587f860 100644
+--- a/src/frontend/src/lib/components/qr/QrCodeScanner.svelte
++++ b/src/frontend/src/lib/components/qr/QrCodeScanner.svelte
+@@ -18,8 +18,8 @@
+ 	let { onScan, onBack, universalScanner = false }: Props = $props();
+ 
+ 	let resolveQrCodePromise:
+-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
+-		| undefined = $state(undefined);
++		(({ status, code }: { status: QrStatus; code?: string }) => void) | undefined =
++		$state(undefined);
+ 
+ 	let cameraPermissionDenied = $state(false);
+ 
+diff --git a/src/frontend/src/lib/config/convert.config.ts b/src/frontend/src/lib/config/convert.config.ts
+index d4a195da42..3c3f4abd2f 100644
+--- a/src/frontend/src/lib/config/convert.config.ts
++++ b/src/frontend/src/lib/config/convert.config.ts
+@@ -9,8 +9,7 @@ export interface ConvertWizardStepsParams extends WizardStepsParams {
+ }
+ 
+ export type WizardStepsConvertComplete =
+-	| Exclude<WizardStepsConvert, 'QR_CODE_SCAN'>
+-	| WizardStepsSend.QR_CODE_SCAN;
++	Exclude<WizardStepsConvert, 'QR_CODE_SCAN'> | WizardStepsSend.QR_CODE_SCAN;
+ 
+ export const convertWizardSteps = ({
+ 	i18n,
+diff --git a/src/frontend/src/lib/services/token-manage-analytics.services.ts b/src/frontend/src/lib/services/token-manage-analytics.services.ts
+index d9411611d3..86c4b89f28 100644
+--- a/src/frontend/src/lib/services/token-manage-analytics.services.ts
++++ b/src/frontend/src/lib/services/token-manage-analytics.services.ts
+@@ -11,8 +11,7 @@ export type TokenManageEventModifier = 'import' | 'delete' | 'enable' | 'disable
+ export type TokenManageEventKey = 'index_canister';
+ 
+ export type TokenManageSourceLocation =
+-	| PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS
+-	| PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS;
++	PLAUSIBLE_EVENT_SOURCE_LOCATIONS.MANAGE_TOKENS | PLAUSIBLE_EVENT_SOURCE_LOCATIONS.TOKEN_DETAILS;
+ 
+ export interface TokenManageEventToken {
+ 	network: string;
+diff --git a/src/frontend/src/lib/stores/transactions.store.ts b/src/frontend/src/lib/stores/transactions.store.ts
+index c4e8bec2d0..97f5a79e0b 100644
+--- a/src/frontend/src/lib/stores/transactions.store.ts
++++ b/src/frontend/src/lib/stores/transactions.store.ts
+@@ -30,8 +30,7 @@ export type TransactionsStoreIdParams<T extends TransactionTypes> = Omit<
+ export type NullableCertifiedTransactions = null;
+ 
+ export type TransactionsData<T extends TransactionTypes> =
+-	| CertifiedTransaction<T>[]
+-	| NullableCertifiedTransactions;
++	CertifiedTransaction<T>[] | NullableCertifiedTransactions;
+ 
+ export interface TransactionsStore<T extends TransactionTypes> extends CertifiedStore<
+ 	TransactionsData<T>
+diff --git a/src/frontend/src/lib/types/coingecko.ts b/src/frontend/src/lib/types/coingecko.ts
+index 18ed56cd00..7b2d32bd12 100644
+--- a/src/frontend/src/lib/types/coingecko.ts
++++ b/src/frontend/src/lib/types/coingecko.ts
+@@ -56,9 +56,9 @@ export type CoingeckoSimplePrice = {
+ 	usd_24h_change?: number;
+ 	last_updated_at?: number;
+ } & {
+-	[K in
+-		| Exclude<`${Currency}`, Currency.USD>
+-		| `${Exclude<Currency, Currency.USD>}_24h_change`]?: number;
++	[
++		K in Exclude<`${Currency}`, Currency.USD> | `${Exclude<Currency, Currency.USD>}_24h_change`
++	]?: number;
+ };
+ 
+ export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
+diff --git a/src/frontend/src/lib/types/nft.ts b/src/frontend/src/lib/types/nft.ts
+index 2de818d7e6..69a34d24aa 100644
+--- a/src/frontend/src/lib/types/nft.ts
++++ b/src/frontend/src/lib/types/nft.ts
+@@ -38,6 +38,4 @@ export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
+ export type NonFungibleToken = EthNonFungibleToken | IcNonFungibleToken;
+ 
+ export type NonFungibleTokenIdentifier =
+-	| Erc721Token['address']
+-	| Erc1155Token['address']
+-	| ExtToken['canisterId'];
++	Erc721Token['address'] | Erc1155Token['address'] | ExtToken['canisterId'];
+diff --git a/src/frontend/src/lib/types/receive.ts b/src/frontend/src/lib/types/receive.ts
+index 8931f2595e..43f3e1ca6e 100644
+--- a/src/frontend/src/lib/types/receive.ts
++++ b/src/frontend/src/lib/types/receive.ts
+@@ -9,5 +9,4 @@ export interface ReceiveQRCode {
+ }
+ 
+ export type ReceiveQRCodeAction =
+-	| { enabled: true; ariaLabel: string; testId?: string; onClick: () => void }
+-	| { enabled: false };
++	{ enabled: true; ariaLabel: string; testId?: string; onClick: () => void } | { enabled: false };
+diff --git a/src/frontend/src/lib/types/style.ts b/src/frontend/src/lib/types/style.ts
+index 12866d712c..017c662053 100644
+--- a/src/frontend/src/lib/types/style.ts
++++ b/src/frontend/src/lib/types/style.ts
+@@ -24,13 +24,7 @@ export type BadgeVariant =
+ 	| 'transparent';
+ 
+ export type TagVariant =
+-	| 'default'
+-	| 'emphasis'
+-	| 'info'
+-	| 'error'
+-	| 'warning'
+-	| 'success'
+-	| 'outline';
++	'default' | 'emphasis' | 'info' | 'error' | 'warning' | 'success' | 'outline';
+ 
+ export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs' | 'xxs';
+ 
+diff --git a/src/frontend/src/lib/types/transaction-ui.ts b/src/frontend/src/lib/types/transaction-ui.ts
+index 5fe65b8657..6fb9842d44 100644
+--- a/src/frontend/src/lib/types/transaction-ui.ts
++++ b/src/frontend/src/lib/types/transaction-ui.ts
+@@ -10,10 +10,7 @@ import type { SolTransactionUi } from '$sol/types/sol-transaction';
+ export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
+ 
+ export type AnyTransactionUi =
+-	| BtcTransactionUi
+-	| EthTransactionUi
+-	| IcTransactionUi
+-	| SolTransactionUi;
++	BtcTransactionUi | EthTransactionUi | IcTransactionUi | SolTransactionUi;
+ 
+ export type AnyTransactionUiWithToken = AnyTransactionUi & {
+ 	token: Token;
+diff --git a/src/frontend/src/lib/types/transaction.ts b/src/frontend/src/lib/types/transaction.ts
+index 3744b6dbd5..4f492296d0 100644
+--- a/src/frontend/src/lib/types/transaction.ts
++++ b/src/frontend/src/lib/types/transaction.ts
+@@ -42,10 +42,9 @@ export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeeP
+ };
+ 
+ export type RequiredTransactionFeeData = {
+-	[K in keyof Pick<
+-		TransactionFeeData,
+-		'gas' | 'maxFeePerGas' | 'maxPriorityFeePerGas'
+-	>]: NonNullable<TransactionFeeData[K]>;
++	[
++		K in keyof Pick<TransactionFeeData, 'gas' | 'maxFeePerGas' | 'maxPriorityFeePerGas'>
++	]: NonNullable<TransactionFeeData[K]>;
+ };
+ 
+ export type TransactionType = z.infer<typeof TransactionTypeSchema>;
+diff --git a/src/frontend/src/lib/utils/address.utils.ts b/src/frontend/src/lib/utils/address.utils.ts
+index e082ecaa44..e905948b76 100644
+--- a/src/frontend/src/lib/utils/address.utils.ts
++++ b/src/frontend/src/lib/utils/address.utils.ts
+@@ -53,8 +53,7 @@ export const areAddressesEqual = <T extends Address>({
+ 	address2,
+ 	...rest
+ }: { address1: OptionAddress<T>; address2: OptionAddress<T> } & (
+-	| { networkId: NetworkId }
+-	| { addressType: TokenAccountIdTypes }
++	{ networkId: NetworkId } | { addressType: TokenAccountIdTypes }
+ )): boolean => {
+ 	if (isNullish(address1) || isNullish(address2)) {
+ 		return false;
+diff --git a/src/frontend/src/lib/utils/auth.utils.ts b/src/frontend/src/lib/utils/auth.utils.ts
+index 7356a0dae2..bcb5a37dab 100644
+--- a/src/frontend/src/lib/utils/auth.utils.ts
++++ b/src/frontend/src/lib/utils/auth.utils.ts
+@@ -14,8 +14,7 @@ const isAlternativeOrigin = (): boolean => {
+ };
+ 
+ export const getOptionalDerivationOrigin = ():
+-	| { derivationOrigin: string }
+-	| Record<string, never> =>
++	{ derivationOrigin: string } | Record<string, never> =>
+ 	isAlternativeOrigin() && !isNullishOrEmpty(AUTH_DERIVATION_ORIGIN)
+ 		? {
+ 				derivationOrigin: AUTH_DERIVATION_ORIGIN
+diff --git a/src/frontend/src/lib/utils/derived-memo.utils.ts b/src/frontend/src/lib/utils/derived-memo.utils.ts
+index 64e215ce1f..81af682aef 100644
+--- a/src/frontend/src/lib/utils/derived-memo.utils.ts
++++ b/src/frontend/src/lib/utils/derived-memo.utils.ts
+@@ -1,9 +1,7 @@
+ import { derived, type Readable, type Subscriber, type Unsubscriber } from 'svelte/store';
+ 
+ type Stores =
+-	| Readable<unknown>
+-	| [Readable<unknown>, ...Array<Readable<unknown>>]
+-	| Array<Readable<unknown>>;
++	Readable<unknown> | [Readable<unknown>, ...Array<Readable<unknown>>] | Array<Readable<unknown>>;
+ type StoresValues<T> =
+ 	T extends Readable<infer U> ? U : { [K in keyof T]: T[K] extends Readable<infer U> ? U : never };
+ 
+diff --git a/src/frontend/src/tests/icp/workers/ic-wallet-balance-and-transactions.worker.spec.ts b/src/frontend/src/tests/icp/workers/ic-wallet-balance-and-transactions.worker.spec.ts
+index e567a1a062..a4950f2aee 100644
+--- a/src/frontend/src/tests/icp/workers/ic-wallet-balance-and-transactions.worker.spec.ts
++++ b/src/frontend/src/tests/icp/workers/ic-wallet-balance-and-transactions.worker.spec.ts
+@@ -157,9 +157,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
+ 
+ 	const initWithoutTransactions = <
+ 		PostMessageDataRequest extends
+-			| PostMessageDataRequestIcrc
+-			| PostMessageDataRequestIcp
+-			| PostMessageDataRequestDip20
++			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ 	>({
+ 		msg,
+ 		initScheduler,
+@@ -246,9 +244,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
+ 
+ 	const initOtherScenarios = <
+ 		PostMessageDataRequest extends
+-			| PostMessageDataRequestIcrc
+-			| PostMessageDataRequestIcp
+-			| PostMessageDataRequestDip20
++			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ 	>({
+ 		initScheduler,
+ 		startData = undefined,
+diff --git a/src/frontend/src/tests/icp/workers/ic-wallet-balance.worker.spec.ts b/src/frontend/src/tests/icp/workers/ic-wallet-balance.worker.spec.ts
+index fc76959317..7311065b01 100644
+--- a/src/frontend/src/tests/icp/workers/ic-wallet-balance.worker.spec.ts
++++ b/src/frontend/src/tests/icp/workers/ic-wallet-balance.worker.spec.ts
+@@ -110,9 +110,7 @@ describe('ic-wallet-balance.worker', () => {
+ 
+ 	const initWithBalance = <
+ 		PostMessageDataRequest extends
+-			| PostMessageDataRequestIcrc
+-			| PostMessageDataRequestIcp
+-			| PostMessageDataRequestDip20
++			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ 	>({
+ 		initScheduler,
+ 		msg,
+@@ -238,9 +236,7 @@ describe('ic-wallet-balance.worker', () => {
+ 
+ 	const initOtherScenarios = <
+ 		PostMessageDataRequest extends
+-			| PostMessageDataRequestIcrc
+-			| PostMessageDataRequestIcp
+-			| PostMessageDataRequestDip20
++			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
+ 	>({
+ 		initScheduler,
+ 		startData = undefined,
+diff --git a/vitest.config.ts b/vitest.config.ts
+index 0e05a9121c..a32bf6248c 100644
+--- a/vitest.config.ts
++++ b/vitest.config.ts
+@@ -10,87 +10,85 @@ process.env = {
+ 	...readCanisterIds({ prefix: 'VITE_' })
+ };
+ 
+-export default defineConfig(
+-	(): UserConfig => ({
+-		plugins: [sveltekit(), svelteTesting()],
+-		resolve: {
+-			alias: [
+-				{
+-					find: '$lib',
+-					replacement: resolve(__dirname, 'src/frontend/src/lib')
+-				},
+-				{
+-					find: '$routes',
+-					replacement: resolve(__dirname, 'src/frontend/src/routes')
+-				},
+-				{
+-					find: '$btc',
+-					replacement: resolve(__dirname, 'src/frontend/src/btc')
+-				},
+-				{
+-					find: '$eth',
+-					replacement: resolve(__dirname, 'src/frontend/src/eth')
+-				},
+-				{
+-					find: '$evm',
+-					replacement: resolve(__dirname, 'src/frontend/src/evm')
+-				},
+-				{
+-					find: '$icp',
+-					replacement: resolve(__dirname, 'src/frontend/src/icp')
+-				},
+-				{
+-					find: '$sol',
+-					replacement: resolve(__dirname, 'src/frontend/src/sol')
+-				},
+-				{
+-					find: '$icp-eth',
+-					replacement: resolve(__dirname, 'src/frontend/src/icp-eth')
+-				},
+-				{
+-					find: '$tests',
+-					replacement: resolve(__dirname, 'src/frontend/src/tests')
+-				},
+-				{
+-					find: '$env',
+-					replacement: resolve(__dirname, 'src/frontend/src/env')
+-				},
+-				{
+-					find: '$declarations',
+-					replacement: resolve(__dirname, 'src/declarations')
+-				},
+-				{
+-					find: '@plausible-analytics/tracker',
+-					replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
+-				}
+-			]
+-		},
+-		define: {
+-			...defineViteReplacements()
+-		},
+-		test: {
+-			environment: 'jsdom',
+-			globals: true,
+-			watch: false,
+-			silent: false,
+-			setupFiles: ['./vitest.setup.ts'],
+-			include: ['src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+-			coverage: {
+-				include: ['src/frontend/src/**/*.{ts,svelte}'],
+-				exclude: [
+-					'src/frontend/src/routes/**/+page.ts',
+-					'src/frontend/src/tests/**/*',
+-					'src/frontend/src/**/*.d.ts'
+-				],
+-				// TODO: increase the thresholds slowly up to an acceptable 90% at least
+-				thresholds: {
+-					autoUpdate: true,
+-					statements: 79.7,
+-					branches: 73.4,
+-					functions: 76.8,
+-					lines: 81.0
+-				}
++export default defineConfig((): UserConfig => ({
++	plugins: [sveltekit(), svelteTesting()],
++	resolve: {
++		alias: [
++			{
++				find: '$lib',
++				replacement: resolve(__dirname, 'src/frontend/src/lib')
++			},
++			{
++				find: '$routes',
++				replacement: resolve(__dirname, 'src/frontend/src/routes')
++			},
++			{
++				find: '$btc',
++				replacement: resolve(__dirname, 'src/frontend/src/btc')
++			},
++			{
++				find: '$eth',
++				replacement: resolve(__dirname, 'src/frontend/src/eth')
++			},
++			{
++				find: '$evm',
++				replacement: resolve(__dirname, 'src/frontend/src/evm')
++			},
++			{
++				find: '$icp',
++				replacement: resolve(__dirname, 'src/frontend/src/icp')
++			},
++			{
++				find: '$sol',
++				replacement: resolve(__dirname, 'src/frontend/src/sol')
++			},
++			{
++				find: '$icp-eth',
++				replacement: resolve(__dirname, 'src/frontend/src/icp-eth')
++			},
++			{
++				find: '$tests',
++				replacement: resolve(__dirname, 'src/frontend/src/tests')
++			},
++			{
++				find: '$env',
++				replacement: resolve(__dirname, 'src/frontend/src/env')
++			},
++			{
++				find: '$declarations',
++				replacement: resolve(__dirname, 'src/declarations')
++			},
++			{
++				find: '@plausible-analytics/tracker',
++				replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
++			}
++		]
++	},
++	define: {
++		...defineViteReplacements()
++	},
++	test: {
++		environment: 'jsdom',
++		globals: true,
++		watch: false,
++		silent: false,
++		setupFiles: ['./vitest.setup.ts'],
++		include: ['src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
++		coverage: {
++			include: ['src/frontend/src/**/*.{ts,svelte}'],
++			exclude: [
++				'src/frontend/src/routes/**/+page.ts',
++				'src/frontend/src/tests/**/*',
++				'src/frontend/src/**/*.d.ts'
++			],
++			// TODO: increase the thresholds slowly up to an acceptable 90% at least
++			thresholds: {
++				autoUpdate: true,
++				statements: 79.7,
++				branches: 73.4,
++				functions: 76.8,
++				lines: 81.0
+ 			}
+ 		}
+-	})
+-);
++	}
++}));
