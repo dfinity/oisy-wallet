@@ -165,5 +165,28 @@ describe('trading-analytics.services', () => {
 				}
 			});
 		});
+
+		it('omits non-finite USD fields (NaN / Infinity)', () => {
+			trackDepositWithdraw({
+				direction: 'deposit',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				token: 'ICP',
+				amount: '20',
+				usdPrice: NaN,
+				usdValue: Infinity
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'deposit_withdraw',
+				metadata: {
+					event_context: 'trading',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'deposit',
+					result_status: 'success',
+					token_symbol: 'ICP',
+					token_amount: '20'
+				}
+			});
+		});
 	});
 });

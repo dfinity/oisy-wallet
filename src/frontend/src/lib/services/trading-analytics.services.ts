@@ -125,8 +125,8 @@ export const trackDepositWithdraw = ({
 			result_status: resultStatus,
 			...(nonNullish(token) && { token_symbol: token }),
 			...(notEmptyString(amount) && { token_amount: amount }),
-			...(nonNullish(usdPrice) && { token_usd_price: `${usdPrice}` }),
-			...(nonNullish(usdValue) && { token_usd_value: `${usdValue}` }),
+			...(Number.isFinite(usdPrice) && { token_usd_price: `${usdPrice}` }),
+			...(Number.isFinite(usdValue) && { token_usd_value: `${usdValue}` }),
 			...(notEmptyString(error) && { result_error: error })
 		}
 	});
