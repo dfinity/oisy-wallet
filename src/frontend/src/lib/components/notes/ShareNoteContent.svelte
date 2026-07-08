@@ -128,7 +128,7 @@
 	};
 </script>
 
-<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto">
+<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto">
 	{#if createdLink === undefined}
 		<!-- State A — configure -->
 		{#if atCap}
@@ -138,17 +138,21 @@
 				})}
 			</p>
 		{/if}
-		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-3">
-			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
-				{preview.title}
-			</span>
-			{#if preview.body !== ''}
-				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-tertiary">
-					{preview.body}
+		<!-- Box + caption are one group: the caption describes the snapshot above it,
+			so it hugs the box (gap-2) and the group keeps the section rhythm (gap-6). -->
+		<div class="flex flex-col gap-2">
+			<div class="flex flex-col gap-2 rounded-lg border border-brand-subtle-20 p-4">
+				<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+					{preview.title}
 				</span>
-			{/if}
+				{#if preview.body !== ''}
+					<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-tertiary">
+						{preview.body}
+					</span>
+				{/if}
+			</div>
+			<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
 		</div>
-		<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
 
 		<div class="flex flex-col gap-2">
 			<span class="font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
@@ -179,7 +183,9 @@
 			</div>
 		</div>
 
-		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
+		<!-- A soft grey callout (secondary surface) matching the editor's privacy box
+			(NotesPrivacyInfoBox). -->
+		<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-secondary! text-left">
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}

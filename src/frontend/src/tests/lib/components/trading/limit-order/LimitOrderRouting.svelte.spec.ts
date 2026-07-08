@@ -35,7 +35,7 @@ describe('LimitOrderRouting', () => {
 	it('keeps the detail rows collapsed by default', () => {
 		const { queryByText } = render(LimitOrderRouting, { props: defaultProps });
 
-		expect(queryByText(en.trading.limit_order.lowest_ask)).toBeNull();
+		expect(queryByText(en.trading.limit_order.best_ask)).toBeNull();
 	});
 
 	it('expands the detail rows when the header is clicked', async () => {
@@ -43,8 +43,8 @@ describe('LimitOrderRouting', () => {
 
 		await fireEvent.click(container.querySelector('button') as HTMLButtonElement);
 
-		expect(getByText(en.trading.limit_order.lowest_ask)).toBeInTheDocument();
-		expect(getByText(en.trading.limit_order.highest_bid)).toBeInTheDocument();
+		expect(getByText(en.trading.limit_order.best_ask)).toBeInTheDocument();
+		expect(getByText(en.trading.limit_order.best_bid)).toBeInTheDocument();
 		expect(getByText(en.trading.limit_order.spread)).toBeInTheDocument();
 		// 9 / 11 → mid 10 → spread (11-9)/10 = 20.0%
 		expect(container).toHaveTextContent('20.0%');

@@ -9,6 +9,7 @@ import {
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
 	NAVIGATION_ITEM_NFTS,
+	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
@@ -19,8 +20,23 @@ import { TokenTypes } from '$lib/enums/token-types';
 import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
+
+const navigationMocks = vi.hoisted(() => ({
+	beforeNavigateCallback: undefined as undefined | (() => void),
+	afterNavigateCallback: undefined as undefined | ((navigation: { from: null }) => void)
+}));
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn(),
+	beforeNavigate: (callback: () => void) => {
+		navigationMocks.beforeNavigateCallback = callback;
+	},
+	afterNavigate: (callback: (navigation: { from: null }) => void) => {
+		navigationMocks.afterNavigateCallback = callback;
+	}
+}));
 
 vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_NETWORK_ID));
 
@@ -45,8 +61,9 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
-		// Notes (PERSONAL_NOTES_ENABLED) and Earn (EARNING_ENABLED) are
-		// feature-flagged off in tests, so they are not asserted here.
+		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
+		// asserted here.
 	});
 
 	it('renders the desktop section headings', () => {
@@ -82,6 +99,23 @@ describe('NavigationMainMenuItems', () => {
 		// The sheet now shows the Finance children, and the bar stays (store untouched).
 		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toBeInTheDocument();
 		expect(get(bottomSheetOpenStore)).toBeFalsy();
+	});
+
+	it('closes the open group sheet when a navigation completes', async () => {
+		const { getByTestId, queryByTestId } = render(NavigationMainMenuItems, {
+			props: { layout: 'mobile' }
+		});
+
+		await fireEvent.click(getByTestId(NAVIGATION_GROUP_FINANCE));
+
+		expect(getByTestId(NAVIGATION_ITEM_BORROW)).toBeInTheDocument();
+
+		// Picking a sheet item starts a navigation: the sheet closes without its exit
+		// animation so its scrim never lingers over the freshly-rendered page.
+		navigationMocks.beforeNavigateCallback?.();
+		navigationMocks.afterNavigateCallback?.({ from: null });
+
+		await waitFor(() => expect(queryByTestId(NAVIGATION_ITEM_BORROW)).toBeNull());
 	});
 
 	it('surfaces Borrow in Finance linking to the Borrow page', () => {
