@@ -1,13 +1,16 @@
 import type { IcToken } from '$icp/types/ic-token';
 import TradingDepositForm from '$lib/components/trading/TradingDepositForm.svelte';
 import {
+	TOKEN_INPUT_CURRENCY_TOKEN,
 	TRADING_DEPOSIT_CONSENT_CHECKBOX,
 	TRADING_DEPOSIT_FORM_REVIEW_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
+import * as deviceUtils from '$lib/utils/device.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('TradingDepositForm', () => {
 	const token: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8, fee: 10000n };
@@ -110,5 +113,43 @@ describe('TradingDepositForm', () => {
 		await fireEvent.click(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON));
 
 		expect(onNext).toHaveBeenCalledOnce();
+	});
+
+	describe('amount input autofocus', () => {
+		let isDesktopSpy: MockInstance<typeof deviceUtils.isDesktop>;
+
+		beforeEach(() => {
+			isDesktopSpy = vi.spyOn(deviceUtils, 'isDesktop');
+		});
+
+		afterEach(() => {
+			isDesktopSpy.mockRestore();
+		});
+
+		it('should auto-focus the amount input on desktop when a token is selected', () => {
+			isDesktopSpy.mockReturnValue(true);
+
+			const { getByTestId } = render(TradingDepositForm, { props: { ...baseProps } });
+
+			expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).toHaveFocus();
+		});
+
+		it('should not auto-focus the amount input on mobile', () => {
+			isDesktopSpy.mockReturnValue(false);
+
+			const { getByTestId } = render(TradingDepositForm, { props: { ...baseProps } });
+
+			expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).not.toHaveFocus();
+		});
+
+		it('should not auto-focus when no token is selected', () => {
+			isDesktopSpy.mockReturnValue(true);
+
+			const { queryByTestId } = render(TradingDepositForm, {
+				props: { ...baseProps, token: undefined }
+			});
+
+			expect(queryByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).not.toBeInTheDocument();
+		});
 	});
 });
