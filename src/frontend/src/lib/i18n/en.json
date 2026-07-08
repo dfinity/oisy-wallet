@@ -1688,8 +1688,7 @@
 			"go_to_trade": "Go to Trade"
 		},
 		"page": {
-			"tagline": "A fully onchain order-book exchange, built into your wallet.",
-			"tagline_desktop": "Set your price, place a limit order, and let it settle onchain.",
+			"tagline": "Place limit orders right from your wallet. Your funds stay in smart contracts you control, never with a central party.",
 			"trading_potential": "Trading potential",
 			"trading_potential_hint": "In your wallet, not on the exchange",
 			"deposited_assets": "Deposited assets",

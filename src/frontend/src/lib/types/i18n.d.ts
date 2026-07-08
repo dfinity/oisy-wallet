@@ -1366,7 +1366,6 @@ interface I18nTrading {
 	};
 	page: {
 		tagline: string;
-		tagline_desktop: string;
 		trading_potential: string;
 		trading_potential_hint: string;
 		deposited_assets: string;
