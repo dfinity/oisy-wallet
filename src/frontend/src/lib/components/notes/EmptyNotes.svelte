@@ -24,7 +24,7 @@
 	</div>
 
 	<div class="flex flex-col gap-3">
-		<h1>{$i18n.notes.text.empty_title}</h1>
+		<h1 class="text-xl font-bold text-primary">{$i18n.notes.text.empty_title}</h1>
 		<span class="text-tertiary">{$i18n.notes.text.empty_subtitle}</span>
 	</div>
 

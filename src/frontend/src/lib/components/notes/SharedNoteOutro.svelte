@@ -16,7 +16,7 @@
 	]);
 </script>
 
-<div class="flex flex-1 flex-col gap-5 py-4 text-center" data-tid={NOTES_SHARE_RECIPIENT_OUTRO}>
+<div class="flex flex-1 flex-col gap-6 py-8 text-center" data-tid={NOTES_SHARE_RECIPIENT_OUTRO}>
 	<span class="text-sm font-bold text-brand-primary"
 		>{replaceOisyPlaceholders($i18n.notes.share.recipient.outro_eyebrow)}</span
 	>

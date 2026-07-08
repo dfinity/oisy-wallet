@@ -138,7 +138,7 @@
 				})}
 			</p>
 		{/if}
-		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-3">
+		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-4">
 			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
 				{preview.title}
 			</span>
@@ -163,10 +163,11 @@
 
 		<div class="flex flex-col gap-2">
 			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
-			<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
-				 the transaction-filter panels); `flex-start` top-aligns the box in case
-				 the label wraps on a narrow viewport. -->
-			<div style="--checkbox-label-order: 1; --checkbox-align-items: flex-start;">
+			<!-- Mirror the transaction-filter checkbox rows: box leading, and a padded
+				 row that gets its own hover background instead of the bare box-fill the
+				 shared Checkbox shows on hover by default. `flex-start` top-aligns the
+				 box in case the label wraps on a narrow viewport. -->
+			<div class="single-use">
 				<Checkbox
 					checked={singleUse}
 					inputId="share-single-use"
@@ -194,7 +195,7 @@
 		<!-- State B — link ready -->
 		<div class="flex flex-col gap-1">
 			<span class="font-bold text-primary">{$i18n.notes.share.text.link_ready_title}</span>
-			<span class="text-sm text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+			<span class="text-xs text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
 		</div>
 
 		<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-1 pr-1 pl-3">
@@ -248,3 +249,24 @@
 		<IconShieldCheck size="20" />
 	</div>
 {/snippet}
+
+<style lang="scss">
+	// The negative margin keeps the box left-aligned with the section label
+	// while the padding gives the row hover a comfortable target, matching the
+	// transaction-filter panels.
+	.single-use :global(.checkbox) {
+		--checkbox-label-order: 1;
+		--checkbox-padding: 8px;
+
+		justify-content: flex-start;
+		align-items: flex-start;
+		gap: 8px;
+
+		margin: 0 -8px;
+		border-radius: var(--border-radius);
+	}
+
+	.single-use :global(.checkbox:hover) {
+		background: var(--color-background-brand-subtle-10);
+	}
+</style>
