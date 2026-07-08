@@ -161,7 +161,7 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`                                                 | free string                                               |
 | `side`                            | Order side (trade events)                              | `buy` / `sell`                                                    | feature-local union                                       |
 | `order_type`                      | Order time-in-force (trade events)                     | `FOK` / `GTC`                                                     | feature-local union                                       |
-| `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | number → string (full precision)                          |
+| `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | string (full-precision decimal string)                    |
 
 ### Source — where it came from
 
