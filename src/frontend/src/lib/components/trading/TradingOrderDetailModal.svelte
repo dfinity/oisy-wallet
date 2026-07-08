@@ -20,16 +20,16 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import {
 		cancelLimitOrder,
 		loadOisyTrade,
 		loadOrderBook
 	} from '$lib/services/oisy-trade.services';
-	import { trackTrading } from '$lib/services/trading-analytics.services';
+	import {
+		trackLimitOrder,
+		type TrackLimitOrderParams
+	} from '$lib/services/trading-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -221,31 +221,37 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		// Order volume is the base-token quantity. `quantity` is a JS number, so stringify it
-		// via Decimal to get a plain decimal string (no `1e-7`/float artifacts).
-		const orderFields = {
+		// `quantity` and `price` are JS numbers, so stringify them via Decimal to get plain
+		// decimal strings (no `1e-7`/float artifacts). The order view carries no time-in-force,
+		// so `order_type` is omitted on cancel.
+		const orderFields: Omit<TrackLimitOrderParams, 'action' | 'resultStatus' | 'error'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
-			volume: new Decimal(quantity).toFixed()
+			baseAmount: new Decimal(quantity).toFixed(),
+			price: new Decimal(price).toFixed(),
+			baseUsdPrice,
+			quoteUsdPrice,
+			baseUsdValue: nonNullish(baseUsdPrice) ? baseUsdPrice * quantity : undefined,
+			quoteUsdValue: nonNullish(quoteUsdPrice) ? quoteUsdPrice * quoteAmount : undefined
 		};
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+		trackLimitOrder({
+			action: 'cancel',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 			...orderFields
 		});
 		try {
 			await cancelLimitOrder({ identity: $authIdentity, orderId: order.id });
 			await loadOisyTrade({ identity: $authIdentity });
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			trackLimitOrder({
+				action: 'cancel',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				...orderFields
 			});
 			close();
 		} catch (err: unknown) {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			trackLimitOrder({
+				action: 'cancel',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				...orderFields,
 				error: replaceIcErrorFields(err)

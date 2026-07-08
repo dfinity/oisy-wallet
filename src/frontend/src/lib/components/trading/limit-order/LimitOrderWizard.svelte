@@ -10,14 +10,14 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { oisyTradeIcTokenBySymbol, oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
 	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
-	import { trackTrading, type TrackTradingParams } from '$lib/services/trading-analytics.services';
+	import {
+		trackLimitOrder,
+		type TrackLimitOrderParams
+	} from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -229,20 +229,23 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
-		const orderFields: Pick<
-			TrackTradingParams,
-			'base' | 'quote' | 'side' | 'orderType' | 'volume'
-		> = {
+		const orderFields: Omit<TrackLimitOrderParams, 'action' | 'resultStatus' | 'error'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
 			orderType: fillOrKill ? 'FOK' : 'GTC',
-			// Order volume is the base-token quantity. Use the raw entered string rather than
-			// the parsed number so full precision is preserved (no `1e-7`).
-			volume: baseAmount
+			// Amounts and price use the raw entered strings rather than the parsed
+			// numbers so full precision is preserved (no `1e-7`).
+			baseAmount,
+			price,
+			// Market USD reference prices per leg + the order's per-leg USD value.
+			baseUsdPrice,
+			quoteUsdPrice,
+			baseUsdValue: nonNullish(baseUsdPrice) ? baseUsdPrice * baseNum : undefined,
+			quoteUsdValue: nonNullish(quoteUsdPrice) ? quoteUsdPrice * baseNum * priceNum : undefined
 		};
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+		trackLimitOrder({
+			action: 'create',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 			...orderFields
 		});
@@ -264,16 +267,16 @@
 			// for the next poll.
 			await loadOisyTrade({ identity: $authIdentity });
 
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			trackLimitOrder({
+				action: 'create',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				...orderFields
 			});
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			trackLimitOrder({
+				action: 'create',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				...orderFields,
 				error: replaceIcErrorFields(err)
