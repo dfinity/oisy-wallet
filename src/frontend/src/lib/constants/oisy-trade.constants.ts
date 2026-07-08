@@ -1,6 +1,12 @@
 // Display name for the OISY Trade provider, shown on the Trading tab venue tag,
-// order rows, deposit/withdraw flows, and as the `event_provider` in analytics.
+// order rows, and deposit/withdraw flows.
 export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
+
+// Stable analytics identifier for the OISY Trade provider (`event_provider`),
+// mirroring how other providers keep a dedicated id (`SwapProvider`,
+// `LIQUIDIUM_PROVIDER_ID`). Decoupled from OISY_TRADE_PROVIDER_NAME on purpose:
+// a future UI-copy change must not silently move the Plausible dimension.
+export const OISY_TRADE_ANALYTICS_PROVIDER_NAME = 'OISY Trade';
 
 // How often the Trading tab refreshes balances / pairs while visible.
 // Mirrors the Liquidium polling cadence.
