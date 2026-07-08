@@ -163,6 +163,8 @@
 					bind:tokenAmount={amount}
 				/>
 			{/if}
+		{:else if readOnlyAmount}
+			<div class="w-full pl-3 font-bold text-disabled">—</div>
 		{:else}
 			<button class="h-full w-full pl-3 text-base" onclick={onClick}
 				>{$i18n.tokens.text.select_token}</button

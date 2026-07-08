@@ -8,6 +8,7 @@ import {
 } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderTradePairBox', () => {
@@ -190,7 +191,7 @@ describe('LimitOrderTradePairBox', () => {
 
 		// No base yet: the quote list is filtered by the base's markets, so the
 		// quote selector must stay inert until a base is chosen.
-		const { getAllByText } = render(LimitOrderTradePairBox, {
+		const { getAllByRole } = render(LimitOrderTradePairBox, {
 			props: {
 				...baseProps,
 				baseSymbol: undefined,
@@ -201,8 +202,10 @@ describe('LimitOrderTradePairBox', () => {
 			}
 		});
 
-		// Both legs show "Select token" without a token; the quote one is second.
-		const [, quoteSelect] = getAllByText(en.tokens.text.select_token);
+		// Without a base the quote selector is the sole disabled button; clicking
+		// it must not open the quote picker.
+		const quoteSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
+		assertNonNullish(quoteSelect);
 		await fireEvent.click(quoteSelect);
 
 		expect(onSelectQuote).not.toHaveBeenCalled();
