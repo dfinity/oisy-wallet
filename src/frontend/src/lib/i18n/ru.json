@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Добро пожаловать в раздел Займы!",
+			"header_description": "Получай ликвидность, не продавая активы. Занимай стейблкоины под залог своих BTC, ICP и других активов.",
+			"borrowing_options": "Варианты займа",
+			"borrowing_potential": "Потенциал займа",
+			"borrowing_power_hint": "Приблизительная оценка того, сколько ты сможешь занять, если предоставишь свои активы в качестве залога, по лучшей доступной ставке.",
+			"available_best_provider": "доступно · лучший поставщик",
+			"remaining_best_provider": "остаток · лучший поставщик",
+			"active_loans": "Активные займы",
+			"no_active_loans": "нет активных займов",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR займа от"
 		},
 		"cards": {
 			"liquidium": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Коэффициент здоровья",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

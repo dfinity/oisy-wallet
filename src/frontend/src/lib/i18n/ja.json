@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "借りるへようこそ！",
+			"header_description": "売却せずに流動性を得られます。BTCやICPなどを担保にステーブルコインを借り入れましょう。",
+			"borrowing_options": "借入オプション",
+			"borrowing_potential": "借入可能額",
+			"borrowing_power_hint": "資産を担保として提供した場合に、最良の金利でどれくらい借り入れできるかの見積もりです。",
+			"available_best_provider": "利用可能 · 最良プロバイダー",
+			"remaining_best_provider": "残り · 最良プロバイダー",
+			"active_loans": "アクティブな借入",
+			"no_active_loans": "アクティブな借入はありません",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "借入APR"
 		},
 		"cards": {
 			"liquidium": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "ヘルスファクター",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

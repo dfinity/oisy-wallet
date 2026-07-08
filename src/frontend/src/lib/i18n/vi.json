@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Chào mừng đến với Vay!",
+			"header_description": "Tiếp cận thanh khoản mà không cần bán. Vay stablecoin bằng cách thế chấp BTC, ICP và nhiều tài sản khác của bạn.",
+			"borrowing_options": "Tùy chọn vay",
+			"borrowing_potential": "Tiềm năng vay",
+			"borrowing_power_hint": "Ước tính số tiền bạn có thể vay nếu thế chấp tài sản của mình, theo mức lãi suất tốt nhất hiện có.",
+			"available_best_provider": "khả dụng · nhà cung cấp tốt nhất",
+			"remaining_best_provider": "còn lại · nhà cung cấp tốt nhất",
+			"active_loans": "Khoản vay đang hoạt động",
+			"no_active_loans": "không có khoản vay đang hoạt động",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR vay từ"
 		},
 		"cards": {
 			"liquidium": {
@@ -96,7 +96,7 @@
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "Theo liên kết để tìm hiểu thêm",
 			"up_one_level": "Đi lên một cấp"
 		},
 		"warning": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Hệ số sức khỏe",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "欢迎来到借贷！",
+			"header_description": "无需卖出即可获得流动性。以您的 BTC、ICP 等资产作为抵押借入稳定币。",
+			"borrowing_options": "借贷选项",
+			"borrowing_potential": "可借额度",
+			"borrowing_power_hint": "如果您将资产作为抵押品提供，按最优利率估算的可借金额。",
+			"available_best_provider": "可用 · 最佳服务商",
+			"remaining_best_provider": "剩余 · 最佳服务商",
+			"active_loans": "活跃借款",
+			"no_active_loans": "暂无活跃借款",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "借款APR 低至"
 		},
 		"cards": {
 			"liquidium": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "健康系数",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

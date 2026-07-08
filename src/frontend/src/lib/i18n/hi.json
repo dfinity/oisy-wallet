@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "उधार में आपका स्वागत है!",
+			"header_description": "बिना बेचे लिक्विडिटी पाएं। अपने BTC, ICP और अन्य एसेट्स के बदले स्टेबलकॉइन उधार लें।",
+			"borrowing_options": "उधार के विकल्प",
+			"borrowing_potential": "उधार क्षमता",
+			"borrowing_power_hint": "यह अनुमान है कि यदि आप अपने एसेट्स को कोलैटरल के रूप में देते हैं, तो सबसे अच्छी उपलब्ध दर पर आप कितना उधार ले सकते हैं।",
+			"available_best_provider": "उपलब्ध · सर्वश्रेष्ठ प्रोवाइडर",
+			"remaining_best_provider": "शेष · सर्वश्रेष्ठ प्रोवाइडर",
+			"active_loans": "सक्रिय उधार",
+			"no_active_loans": "कोई सक्रिय उधार नहीं",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "उधार APR से"
 		},
 		"cards": {
 			"liquidium": {
@@ -96,7 +96,7 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "अधिक जानने के लिए लिंक पर जाएं",
 			"up_one_level": "एक स्तर ऊपर जाएं"
 		},
 		"warning": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "स्वास्थ्य कारक",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

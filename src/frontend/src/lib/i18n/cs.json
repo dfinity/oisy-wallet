@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Vítejte u půjček!",
+			"header_description": "Získej likviditu, aniž bys musel(a) prodávat. Půjč si stablecoiny oproti svým BTC, ICP a dalším aktivům.",
+			"borrowing_options": "Možnosti půjček",
+			"borrowing_potential": "Potenciál půjčky",
+			"borrowing_power_hint": "Odhad toho, kolik by sis mohl(a) půjčit, kdybys své assety poskytl(a) jako zajištění, za nejlepší dostupnou sazbu.",
+			"available_best_provider": "dostupné · nejlepší poskytovatel",
+			"remaining_best_provider": "zbývající · nejlepší poskytovatel",
+			"active_loans": "Aktivní půjčky",
+			"no_active_loans": "žádné aktivní půjčky",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR půjčky od"
 		},
 		"cards": {
 			"liquidium": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Faktor zdraví",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

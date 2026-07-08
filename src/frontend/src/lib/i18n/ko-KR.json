@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "대출에 오신 것을 환영합니다!",
+			"header_description": "매도하지 않고도 유동성을 확보하세요. BTC, ICP 등을 담보로 스테이블코인을 대출받으세요.",
+			"borrowing_options": "대출 옵션",
+			"borrowing_potential": "대출 가능 한도",
+			"borrowing_power_hint": "자산을 담보로 제공할 경우 최적의 금리로 대출받을 수 있는 예상 금액입니다.",
+			"available_best_provider": "이용 가능 · 최적 제공업체",
+			"remaining_best_provider": "잔여 · 최적 제공업체",
+			"active_loans": "활성 대출",
+			"no_active_loans": "활성 대출 없음",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "대출 APR"
 		},
 		"cards": {
 			"liquidium": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "건강 지수",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

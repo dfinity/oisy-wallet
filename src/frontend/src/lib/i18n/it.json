@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Benvenuto nei Prestiti!",
+			"header_description": "Accedi a liquidità senza vendere. Prendi in prestito stablecoin contro i tuoi BTC, ICP e altro.",
+			"borrowing_options": "Opzioni di prestito",
+			"borrowing_potential": "Potenziale di prestito",
+			"borrowing_power_hint": "Una stima di quanto potresti prendere in prestito se fornissi i tuoi asset come garanzia, al miglior tasso disponibile.",
+			"available_best_provider": "disponibile · miglior fornitore",
+			"remaining_best_provider": "residuo · miglior fornitore",
+			"active_loans": "Prestiti attivi",
+			"no_active_loans": "nessun prestito attivo",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR prestito da"
 		},
 		"cards": {
 			"liquidium": {
@@ -96,7 +96,7 @@
 			"switch_currency": "Cambia valuta",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "Segui il link per saperne di più",
 			"up_one_level": "Sali di un livello"
 		},
 		"warning": {
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Fattore di salute",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",
