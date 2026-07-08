@@ -307,7 +307,7 @@
 			{#if active}
 				<Hr />
 
-				<div class="flex justify-start px-3 pt-3 md:px-6">
+				<div class="flex justify-start px-3 py-3 md:px-6">
 					<Button
 						alignLeft
 						ariaLabel={$i18n.trading.order_detail.cancel_order}
