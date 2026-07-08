@@ -313,7 +313,7 @@
 						testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
 						transparent
 					>
-						<IconTrash />
+						<span aria-hidden="true"><IconTrash /></span>
 						{$i18n.trading.order_detail.cancel_order}
 					</Button>
 				</div>
