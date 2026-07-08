@@ -153,7 +153,7 @@
 
 {#snippet feeDisplay()}
 	<BtcUtxosFeeDisplay>
-		{#snippet label()}{$i18n.fee.text.network_fee}{/snippet}
+		{#snippet label()}{$i18n.liquidium.text.transaction_fee}{/snippet}
 	</BtcUtxosFeeDisplay>
 {/snippet}
 
