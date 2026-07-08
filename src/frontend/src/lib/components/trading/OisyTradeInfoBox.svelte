@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
 	import IconCoins from '$lib/components/icons/lucide/IconCoins.svelte';
 	import IconNetworks from '$lib/components/icons/lucide/IconNetworks.svelte';
@@ -10,6 +12,15 @@
 	import { PLAUSIBLE_EVENT_SOURCE_LOCATIONS } from '$lib/enums/plausible';
 	import { buildLearnMoreEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	// Optional trailing content (e.g. a "Go to Trade" button) rendered as the last
+	// element inside the box — used by the Assets Trading tab onboarding placeholder.
+	// The Trade page doesn't pass it, so the box there is unchanged.
+	interface Props {
+		footer?: Snippet;
+	}
+
+	let { footer }: Props = $props();
 </script>
 
 <!-- Scroll target for the hero "Learn more" link (see OisyTradeProviderHero). -->
@@ -39,9 +50,14 @@
 		{/snippet}
 
 		{#snippet content()}
-			<p class="mt-4 text-sm text-secondary">{$i18n.trading.info.description}</p>
+			<!-- Flex `order` reorders the three items responsively: on mobile the
+			     footer button sits between the text and the fact boxes; on desktop
+			     it drops to the end (last element in the box). -->
+			<p class="order-1 mt-4 text-sm text-secondary">{$i18n.trading.info.description}</p>
 
-			<div class="mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:grid-cols-3">
+			<div
+				class="order-3 mt-6 grid w-full grid-cols-1 gap-3 text-center text-sm md:order-2 md:grid-cols-3"
+			>
 				<FactBox>
 					{#snippet icon()}
 						<span class="rounded-full bg-brand-subtle-20 p-4 text-primary">
@@ -90,6 +106,12 @@
 					{/snippet}
 				</FactBox>
 			</div>
+
+			{#if nonNullish(footer)}
+				<div class="order-2 my-4 flex w-full justify-center md:order-3">
+					{@render footer()}
+				</div>
+			{/if}
 		{/snippet}
 	</StakeContentSection>
 </div>
