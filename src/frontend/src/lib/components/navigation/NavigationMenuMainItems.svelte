@@ -2,7 +2,7 @@
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Component } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
@@ -96,8 +96,17 @@
 	// Which group's bottom sheet is open on mobile (null = none).
 	let openSheet = $state<NavigationGroupId | null>(null);
 
+	// Skip the sheet's exit animation when it closes because the user picked an item
+	// (i.e. a navigation is starting), so the blurred scrim doesn't linger over the
+	// freshly-rendered page. Manual dismissals (scrim tap / group toggle) keep it.
+	let closeSheetInstantly = $state(false);
+
 	const toggleSheet = (id: NavigationGroupId) => {
 		openSheet = openSheet === id ? null : id;
+		// Opening (or switching) a sheet: any later manual dismissal should animate.
+		if (nonNullish(openSheet)) {
+			closeSheetInstantly = false;
+		}
 	};
 
 	const MOBILE_GROUP_ICON: Partial<Record<NavigationGroupId, Component>> = {
@@ -110,6 +119,17 @@
 	const networkId = $derived($userSelectedNetworkStore);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
+
+	// A navigation while a sheet is open means the user picked an item, so close it
+	// right away without the exit animation (see closeSheetInstantly). Closing here
+	// rather than in afterNavigate keeps it correct even if the navigation is later
+	// cancelled (afterNavigate would not run, leaving instantClose stuck true).
+	beforeNavigate(() => {
+		if (nonNullish(openSheet)) {
+			closeSheetInstantly = true;
+			openSheet = null;
+		}
+	});
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -412,6 +432,7 @@
 	{#each MOBILE_NAVIGATION_BAR as slot (slot.id)}
 		{#if slot.type === 'group'}
 			<NavigationGroupSheet
+				instantClose={closeSheetInstantly}
 				label={SECTION_META[slot.id].label()}
 				onClose={() => (openSheet = null)}
 				testId={prefixedTestId(`${SECTION_META[slot.id].testId}-sheet`)}
