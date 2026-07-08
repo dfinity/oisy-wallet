@@ -121,10 +121,13 @@
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	// A navigation while a sheet is open means the user picked an item, so close it
-	// without the exit animation (see closeSheetInstantly).
+	// right away without the exit animation (see closeSheetInstantly). Closing here
+	// rather than in afterNavigate keeps it correct even if the navigation is later
+	// cancelled (afterNavigate would not run, leaving instantClose stuck true).
 	beforeNavigate(() => {
 		if (nonNullish(openSheet)) {
 			closeSheetInstantly = true;
+			openSheet = null;
 		}
 	});
 
