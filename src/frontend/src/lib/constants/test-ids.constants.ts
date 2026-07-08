@@ -8,6 +8,7 @@ export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
+export const NAVIGATION_MENU_SETTINGS_BUTTON = 'navigation-menu-settings-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
