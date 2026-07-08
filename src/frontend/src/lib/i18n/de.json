@@ -117,11 +117,11 @@
 			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Handel",
+			"borrow": "Kredit",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finanzen",
+			"section_more": "Mehr",
 			"airdrops": "Prämien",
 			"earning": "Verdienen",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Salden anzeigen",
 			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
 			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen.",
-			"notes": ""
+			"notes": "Notizen"
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
@@ -148,9 +148,9 @@
 			"settings": "Einstellungen öffnen",
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Handelsübersicht öffnen",
+			"borrow": "Kreditübersicht öffnen",
+			"earning": "Verdienstübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen",
-			"notes": ""
+			"notes": "Notizen öffnen"
 		},
 		"short": {
 			"documentation": "Doku"

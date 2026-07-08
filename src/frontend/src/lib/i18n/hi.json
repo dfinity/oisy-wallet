@@ -117,11 +117,11 @@
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "ट्रेड",
+			"borrow": "उधार",
+			"section_portfolio": "पोर्टफोलियो",
+			"section_finance": "वित्त",
+			"section_more": "अधिक",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
 			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
-			"notes": ""
+			"notes": "नोट्स"
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
@@ -148,9 +148,9 @@
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "ट्रेड दृश्य खोलें",
+			"borrow": "उधार दृश्य खोलें",
+			"earning": "कमाई दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
 			"show_balances": "छिपी हुई शेष राशि दिखाएं",
-			"notes": ""
+			"notes": "नोट्स खोलें"
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"

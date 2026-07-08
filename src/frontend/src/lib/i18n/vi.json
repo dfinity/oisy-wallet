@@ -117,11 +117,11 @@
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Giao dịch",
+			"borrow": "Vay",
+			"section_portfolio": "Danh mục",
+			"section_finance": "Tài chính",
+			"section_more": "Thêm",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Hiện số dư",
 			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
 			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn.",
-			"notes": ""
+			"notes": "Ghi chú"
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
@@ -148,9 +148,9 @@
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Mở chế độ xem giao dịch",
+			"borrow": "Mở chế độ xem khoản vay",
+			"earning": "Mở chế độ xem kiếm tiền",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
 			"show_balances": "Hiện số dư bị ẩn",
-			"notes": ""
+			"notes": "Mở ghi chú"
 		},
 		"short": {
 			"documentation": "Tài liệu"

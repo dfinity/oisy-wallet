@@ -117,11 +117,11 @@
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Трейд",
+			"borrow": "Займы",
+			"section_portfolio": "Портфель",
+			"section_finance": "Финансы",
+			"section_more": "Ещё",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
 			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
-			"notes": ""
+			"notes": "Заметки"
 		},
 		"alt": {
 			"tokens": "Активы",
@@ -148,9 +148,9 @@
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Просмотр трейда",
+			"borrow": "Просмотр займов",
+			"earning": "Просмотр заработка",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
-			"notes": ""
+			"notes": "Открыть заметки"
 		},
 		"short": {
 			"documentation": "Документы"

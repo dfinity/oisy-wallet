@@ -117,11 +117,11 @@
 			"settings": "설정",
 			"dapp_explorer": "탐색",
 			"activity": "활동",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "거래",
+			"borrow": "대출",
+			"section_portfolio": "포트폴리오",
+			"section_finance": "금융",
+			"section_more": "더보기",
 			"airdrops": "리워드",
 			"earning": "수익",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
 			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요.",
-			"notes": ""
+			"notes": "메모"
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
@@ -148,9 +148,9 @@
 			"settings": "설정 열기",
 			"dapp_explorer": "앱 탐색기 열기",
 			"activity": "활동 보기 열기",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "거래 보기 열기",
+			"borrow": "대출 보기 열기",
+			"earning": "수익 보기 열기",
 			"airdrops": "리워드 보기 열기",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
-			"notes": ""
+			"notes": "메모 열기"
 		},
 		"short": {
 			"documentation": "문서"

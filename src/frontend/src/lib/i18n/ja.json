@@ -117,11 +117,11 @@
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "取引",
+			"borrow": "借入",
+			"section_portfolio": "ポートフォリオ",
+			"section_finance": "金融",
+			"section_more": "その他",
 			"airdrops": "エアドロップ",
 			"earning": "収益",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "残高を表示",
 			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
 			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。",
-			"notes": ""
+			"notes": "メモ"
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
@@ -148,9 +148,9 @@
 			"settings": "設定を表示",
 			"dapp_explorer": "Dapp一覧を表示",
 			"activity": "トランザクション履歴を表示",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "取引画面を表示",
+			"borrow": "借入画面を表示",
+			"earning": "収益画面を表示",
 			"airdrops": "エアドロップ報酬を表示",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
 			"show_balances": "非表示の残高を表示する",
-			"notes": ""
+			"notes": "メモを開く"
 		},
 		"short": {
 			"documentation": "ドキュメント"

@@ -117,11 +117,11 @@
 			"settings": "Configuración",
 			"dapp_explorer": "Explorar",
 			"activity": "Actividad",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Trading",
+			"borrow": "Crédito",
+			"section_portfolio": "Cartera",
+			"section_finance": "Finanzas",
+			"section_more": "Más",
 			"airdrops": "Recompensas",
 			"earning": "Ganar",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo de privacidad activado. Pulsa [P] para mostrar tus saldos de nuevo.",
 			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos.",
-			"notes": ""
+			"notes": "Notas"
 		},
 		"alt": {
 			"tokens": "Ir a la vista de activos",
@@ -148,9 +148,9 @@
 			"settings": "Abrir tu configuración",
 			"dapp_explorer": "Abrir explorador de aplicaciones",
 			"activity": "Abrir la vista de actividad",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Abrir la vista de Trading",
+			"borrow": "Abrir la vista de Crédito",
+			"earning": "Abrir la vista de Ganancias",
 			"airdrops": "Abrir la vista de Recompensas",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "agenda",
 			"hide_balances": "Ocultar saldos ",
 			"show_balances": "Mostrar saldos",
-			"notes": ""
+			"notes": "Abrir notas"
 		},
 		"short": {
 			"documentation": "Docs"

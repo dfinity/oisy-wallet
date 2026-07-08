@@ -117,11 +117,11 @@
 			"settings": "Paramètres",
 			"dapp_explorer": "Explorer",
 			"activity": "Activité",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Trading",
+			"borrow": "Prêts",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "Plus",
 			"airdrops": "Récompenses",
 			"earning": "Gains",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Afficher les soldes",
 			"privacy_mode_enabled": "Mode de confidentialité activé. Appuyez sur [P] pour afficher à nouveau vos soldes.",
 			"privacy_mode_disabled": "Mode de confidentialité désactivé. Appuyez sur [P] pour masquer vos soldes.",
-			"notes": ""
+			"notes": "Notes"
 		},
 		"alt": {
 			"tokens": "Aller à la vue des actifs",
@@ -148,9 +148,9 @@
 			"settings": "Ouvrir vos paramètres",
 			"dapp_explorer": "Ouvrir l'explorateur d'applications",
 			"activity": "Ouvrir la vue d'activité",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Ouvrir la vue du Trading",
+			"borrow": "Ouvrir la vue des prêts",
+			"earning": "Ouvrir la vue des gains",
 			"airdrops": "Ouvrir la vue des récompenses",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Ouvrir les contacts",
 			"hide_balances": "Masquer les soldes affichés",
 			"show_balances": "Afficher les soldes masqués",
-			"notes": ""
+			"notes": "Ouvrir les notes"
 		},
 		"short": {
 			"documentation": "Docs"

@@ -117,11 +117,11 @@
 			"settings": "设置",
 			"dapp_explorer": "探索",
 			"activity": "活动",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "交易",
+			"borrow": "借贷",
+			"section_portfolio": "投资组合",
+			"section_finance": "金融",
+			"section_more": "更多",
 			"airdrops": "奖励",
 			"earning": "赚取",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "显示余额",
 			"privacy_mode_enabled": "隐私模式已开启。按 [P] 键再次显示余额。",
 			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。",
-			"notes": ""
+			"notes": "笔记"
 		},
 		"alt": {
 			"tokens": "前往资产视图",
@@ -148,9 +148,9 @@
 			"settings": "打开设置",
 			"dapp_explorer": "打开应用浏览器",
 			"activity": "打开活动视图",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "打开交易视图",
+			"borrow": "打开借贷视图",
+			"earning": "打开赚取视图",
 			"airdrops": "打开奖励视图",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
 			"show_balances": "显示已隐藏的余额",
-			"notes": ""
+			"notes": "打开笔记"
 		},
 		"short": {
 			"documentation": "文档"

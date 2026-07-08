@@ -117,11 +117,11 @@
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Trading",
+			"borrow": "Prestiti",
+			"section_portfolio": "Portafoglio",
+			"section_finance": "Finanza",
+			"section_more": "Altro",
 			"airdrops": "Ricompense",
 			"earning": "Guadagna",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
 			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
-			"notes": ""
+			"notes": "Note"
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
@@ -148,9 +148,9 @@
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Apri la vista Trading",
+			"borrow": "Apri la vista Prestiti",
+			"earning": "Apri la vista Guadagni",
 			"airdrops": "Apri la vista Ricompense",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
 			"show_balances": "Mostra i saldi nascosti",
-			"notes": ""
+			"notes": "Apri le note"
 		},
 		"short": {
 			"documentation": "Docs"

@@ -117,11 +117,11 @@
 			"settings": "Configurações",
 			"dapp_explorer": "Explorar",
 			"activity": "Atividade",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Trading",
+			"borrow": "Crédito",
+			"section_portfolio": "Portfólio",
+			"section_finance": "Finanças",
+			"section_more": "Mais",
 			"airdrops": "Recompensas",
 			"earning": "Ganhar",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo privado ativado. Clique [P] para mostrar os seus saldos novamente.",
 			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para ocultar os seus saldos.",
-			"notes": ""
+			"notes": "Notas"
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
@@ -148,9 +148,9 @@
 			"settings": "Abrir suas configurações",
 			"dapp_explorer": "Abrir explorador de aplicativos",
 			"activity": "Abrir a visualização de atividade",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Abrir a visualização de Trading",
+			"borrow": "Abrir a visualização de Crédito",
+			"earning": "Abrir a visualização de Ganhos",
 			"airdrops": "Abrir a visualização de airdrops",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Abrir livro de endereços",
 			"hide_balances": "Ocultar os saldos exibidos",
 			"show_balances": "Mostrar os saldos ocultos",
-			"notes": ""
+			"notes": "Abrir notas"
 		},
 		"short": {
 			"documentation": "Documentação"

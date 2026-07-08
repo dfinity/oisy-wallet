@@ -117,11 +117,11 @@
 			"settings": "Ustawienia",
 			"dapp_explorer": "Przeglądaj",
 			"activity": "Aktywność",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Handel",
+			"borrow": "Pożyczki",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finanse",
+			"section_more": "Więcej",
 			"airdrops": "Nagrody",
 			"earning": "Zarabiaj",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Pokaż salda",
 			"privacy_mode_enabled": "Tryb prywatności włączony. Naciśnij [P], aby ponownie pokazać salda.",
 			"privacy_mode_disabled": "Tryb prywatności wyłączony. Naciśnij [P], aby ukryć salda.",
-			"notes": ""
+			"notes": "Notatki"
 		},
 		"alt": {
 			"tokens": "Przejdź do widoku aktywów",
@@ -148,9 +148,9 @@
 			"settings": "Otwórz ustawienia",
 			"dapp_explorer": "Otwórz eksplorator aplikacji",
 			"activity": "Otwórz widok aktywności",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Otwórz widok handlu",
+			"borrow": "Otwórz widok pożyczek",
+			"earning": "Otwórz widok zarobków",
 			"airdrops": "Otwórz widok nagród",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Otwórz kontakty",
 			"hide_balances": "Ukryj wyświetlane salda",
 			"show_balances": "Pokaż ukryte salda",
-			"notes": ""
+			"notes": "Otwórz notatki"
 		},
 		"short": {
 			"documentation": "Dokumentacja"

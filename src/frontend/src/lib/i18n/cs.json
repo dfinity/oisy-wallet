@@ -117,11 +117,11 @@
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Obchod",
+			"borrow": "Půjčky",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "Více",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
 			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
-			"notes": ""
+			"notes": "Poznámky"
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
@@ -148,9 +148,9 @@
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Otevřít zobrazení obchodu",
+			"borrow": "Otevřít zobrazení půjček",
+			"earning": "Otevřít zobrazení vydělávání",
 			"airdrops": "Otevřít zobrazení odměn",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
 			"show_balances": "Zobrazit skryté zůstatky",
-			"notes": ""
+			"notes": "Otevřít poznámky"
 		},
 		"short": {
 			"documentation": "Dokumentace"
