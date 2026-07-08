@@ -362,7 +362,7 @@
 			short viewports (the list state scrolls inside its own region below, so
 			this stays a no-op there). -->
 		<ContentWithToolbar
-			styleClass="mx-2 flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
+			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
 		>
 			{#if showSkeleton}
 				<SkeletonCards rows={3} />

@@ -193,25 +193,26 @@
 			</ExternalLink>
 		</MessageBox>
 	{:else}
-		<!-- State B — link ready -->
-		<div class="flex flex-col gap-1">
+		<!-- State B — link ready. A bold label with a grey subtitle per section
+			(gap-2), the two sections separated by the container's gap-4. -->
+		<div class="flex flex-col gap-2">
 			<span class="font-bold text-primary">{$i18n.notes.share.text.link_ready_title}</span>
-			<span class="text-sm text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+			<span class="text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+
+			<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-2 pr-1 pl-3">
+				<span class="min-w-0 flex-1 truncate text-secondary">{createdLink}</span>
+				<Copy
+					testId={NOTES_SHARE_LINK_COPY}
+					text={$i18n.notes.share.text.link_copied}
+					value={createdLink}
+				/>
+			</div>
 		</div>
 
-		<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-1 pr-1 pl-3">
-			<span class="min-w-0 flex-1 truncate font-mono text-xs text-secondary">{createdLink}</span>
-			<Copy
-				testId={NOTES_SHARE_LINK_COPY}
-				text={$i18n.notes.share.text.link_copied}
-				value={createdLink}
-			/>
+		<div class="flex flex-col gap-2">
+			<span class="font-bold text-primary">{recap}</span>
+			<span class="text-tertiary">{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span>
 		</div>
-
-		<span class="text-sm text-primary">{recap}</span>
-		<span class="text-xs text-tertiary"
-			>{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span
-		>
 	{/if}
 
 	{#snippet toolbar()}
