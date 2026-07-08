@@ -402,6 +402,9 @@ export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
 export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
 export const TRADING_ORDER_CANCEL_CONFIRM_BUTTON = 'trading-order-cancel-confirm-button';
 
+// Borrowings
+export const BORROWINGS_GOTO_BUTTON = 'borrowings-goto-button';
+
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
 export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
