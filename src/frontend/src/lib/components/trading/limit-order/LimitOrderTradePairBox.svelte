@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -169,7 +169,7 @@
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
 	<!-- Base row: shared amount input + token selector -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			displayUnit={inputUnit}
 			exchangeRate={baseExchangeRate}
 			isSelectable
@@ -218,7 +218,7 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
+		</TokenInputContent>
 		{#if nonNullish(amountError)}
 			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
 		{/if}
@@ -233,7 +233,7 @@
 
 	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			amount={quoteAmountValue}
 			disabled={true}
 			displayUnit={inputUnit}
@@ -283,6 +283,6 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
+		</TokenInputContent>
 	</div>
 </div>
