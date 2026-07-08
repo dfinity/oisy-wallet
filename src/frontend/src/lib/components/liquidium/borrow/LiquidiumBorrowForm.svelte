@@ -23,6 +23,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -148,6 +149,7 @@
 	<div class="mb-6">
 		<!-- Token fixed by the market for now; a selectable step comes later. -->
 		<TokenInput
+			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			exchangeRate={borrowPrice}
 			isSelectable={false}

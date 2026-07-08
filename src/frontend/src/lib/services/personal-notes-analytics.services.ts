@@ -25,7 +25,7 @@ export interface TrackPersonalNoteParams {
 	error?: string;
 }
 
-// One structured event for the personal-notes lifecycle, mirroring `trackTrading`
+// One structured event for the personal-notes lifecycle, mirroring `trackLimitOrder`
 // / `trackTokenManage`: the step rides in `event_modifier` and the outcome in
 // `result_status`, so a single `personal_note` event covers the whole lifecycle
 // instead of a name-per-step. Never carries the note text, a note id, or PII.

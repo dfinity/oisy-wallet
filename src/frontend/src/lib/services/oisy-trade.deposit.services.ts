@@ -3,19 +3,17 @@ import type { IcToken } from '$icp/types/ic-token';
 import { getTokenFee } from '$icp/utils/token.utils';
 import { deposit as depositApi } from '$lib/api/oisy-trade.api';
 import { NANO_SECONDS_IN_MINUTE, OISY_TRADE_CANISTER_ID } from '$lib/constants/app.constants';
-import {
-	PLAUSIBLE_EVENT_RESULT_STATUSES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-} from '$lib/enums/plausible';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { ProgressStepsTradingDeposit } from '$lib/enums/progress-steps';
 import { loadOisyTrade } from '$lib/services/oisy-trade.services';
-import { trackTrading } from '$lib/services/trading-analytics.services';
+import { trackDepositWithdraw } from '$lib/services/trading-analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { assertNonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
+import { assertNonNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
@@ -48,6 +46,10 @@ export const depositOisyTrade = async ({
 
 	// Full-precision human amount (smallest units → token units) for volume analytics.
 	const volume = formatUnits(amount, token.decimals);
+	// USD reference price / value at deposit time, for analytics only (omitted when absent).
+	const usdPrice = get(exchanges)?.[token.id]?.usd;
+	const usdValue = nonNullish(usdPrice) ? usdPrice * Number(volume) : undefined;
+	const analytics = { token: token.symbol, amount: volume, usdPrice, usdValue };
 
 	try {
 		assertNonNullish(identity, auth.error.no_internet_identity);
@@ -58,11 +60,10 @@ export const depositOisyTrade = async ({
 
 		assertNonNullish(fee, trading.deposit.error.unknown_fee);
 
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+		trackDepositWithdraw({
+			direction: 'deposit',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-			token: token.symbol,
-			volume
+			...analytics
 		});
 
 		progress?.(ProgressStepsTradingDeposit.APPROVE);
@@ -89,20 +90,18 @@ export const depositOisyTrade = async ({
 
 		progress?.(ProgressStepsTradingDeposit.DONE);
 
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+		trackDepositWithdraw({
+			direction: 'deposit',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-			token: token.symbol,
-			volume
+			...analytics
 		});
 
 		return true;
 	} catch (err: unknown) {
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+		trackDepositWithdraw({
+			direction: 'deposit',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-			token: token.symbol,
-			volume,
+			...analytics,
 			error: replaceIcErrorFields(err)
 		});
 		toastsError({ msg: { text: trading.deposit.error.deposit_failed }, err });
