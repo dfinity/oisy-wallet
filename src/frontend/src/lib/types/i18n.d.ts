@@ -1361,7 +1361,6 @@ interface I18nTrading {
 		intro: string;
 		learn_more: string;
 		provider_name: string;
-		no_trades: string;
 		go_to_trade: string;
 	};
 	page: {
