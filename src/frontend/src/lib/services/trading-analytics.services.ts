@@ -106,7 +106,8 @@ export interface TrackDepositWithdrawParams {
 
 // One structured event for moving assets in/out of a trading venue's custody
 // account: the direction rides in `event_modifier`, the outcome in
-// `result_status`. Venue-agnostic — `event_provider` names the venue.
+// `result_status`. The event shape is venue-agnostic, but this helper currently
+// hardcodes `event_provider` to OISY TRADE (add a provider param on first reuse).
 export const trackDepositWithdraw = ({
 	direction,
 	resultStatus,
