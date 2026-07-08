@@ -47,19 +47,20 @@ describe('OisyTradePositionRow', () => {
 	});
 
 	it('shows the "in orders" chip only when part of the balance is reserved', () => {
-		const { queryByText } = render(OisyTradePositionRow, {
+		const { queryByLabelText } = render(OisyTradePositionRow, {
 			props: { asset: buildAsset({ reserved: ZERO }) }
 		});
 
-		expect(queryByText('in orders', { exact: false })).toBeNull();
+		expect(queryByLabelText(en.trading.page.in_orders_label)).toBeNull();
 	});
 
-	it('renders the reserved amount in the "in orders" chip', () => {
-		const { getByText } = render(OisyTradePositionRow, {
+	it('renders the reserved amount with a lock icon in the "in orders" chip', () => {
+		const { getByText, getByLabelText } = render(OisyTradePositionRow, {
 			props: { asset: buildAsset({ free: 40000000n, reserved: 60000000n, total: 100000000n }) }
 		});
 
-		expect(getByText('0.6 ICP in orders')).toBeInTheDocument();
+		expect(getByLabelText(en.trading.page.in_orders_label)).toBeInTheDocument();
+		expect(getByText('0.6 ICP')).toBeInTheDocument();
 	});
 
 	it('masks the amount in privacy mode', () => {
