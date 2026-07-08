@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Vítejte u půjček!",
+			"header_description": "Získej likviditu, aniž bys musel(a) prodávat. Půjč si stablecoiny oproti svým BTC, ICP a dalším aktivům.",
+			"borrowing_options": "Možnosti půjček",
+			"borrowing_potential": "Potenciál půjčky",
+			"borrowing_power_hint": "Odhad toho, kolik by sis mohl(a) půjčit, kdybys své assety poskytl(a) jako zajištění, za nejlepší dostupnou sazbu.",
+			"available_best_provider": "dostupné · nejlepší poskytovatel",
+			"remaining_best_provider": "zbývající · nejlepší poskytovatel",
+			"active_loans": "Aktivní půjčky",
+			"no_active_loans": "žádné aktivní půjčky",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR půjčky od"
 		},
 		"cards": {
 			"liquidium": {
@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Půjčky",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,11 +117,11 @@
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Obchodovat",
+			"borrow": "Půjčit si",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "Více",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
 			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
-			"notes": ""
+			"notes": "Poznámky"
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
@@ -148,9 +148,9 @@
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Otevřít zobrazení obchodu",
+			"borrow": "Otevřít zobrazení půjček",
+			"earning": "Otevřít zobrazení vydělávání",
 			"airdrops": "Otevřít zobrazení odměn",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
 			"show_balances": "Zobrazit skryté zůstatky",
-			"notes": ""
+			"notes": "Otevřít poznámky"
 		},
 		"short": {
 			"documentation": "Dokumentace"
@@ -1680,34 +1680,34 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Obchod",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": "",
+			"learn_more": "Zjistit více",
+			"provider_name": "OISY Trade",
 			"go_to_trade": ""
 		},
 		"page": {
-			"tagline": "",
-			"trading_potential": "",
-			"trading_potential_hint": "",
-			"deposited_assets": "",
-			"deposited_all_free": "",
-			"deposited_empty": "",
-			"free": "",
-			"in_orders": "",
-			"in_orders_label": "",
-			"positions": "",
-			"deposit": "",
-			"withdraw": "",
-			"active_orders": "",
-			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": "",
-			"new_order": "",
-			"order_history": ""
+			"tagline": "Zadávej limitní pokyny přímo ze své peněženky. Tvé prostředky zůstávají ve smart kontraktech, které ovládáš ty – nikdy ne centrální strana.",
+			"trading_potential": "Obchodní potenciál",
+			"trading_potential_hint": "Ve tvé peněžence, ne na burze",
+			"deposited_assets": "Vložená aktiva",
+			"deposited_all_free": "Vše volné",
+			"deposited_empty": "Zatím nic vloženo",
+			"free": "$amount volné",
+			"in_orders": "$amount v pokynech",
+			"in_orders_label": "v pokynech",
+			"positions": "Moje pozice",
+			"deposit": "Vložit",
+			"withdraw": "Vybrat",
+			"active_orders": "Aktivní pokyny",
+			"active_orders_empty_deposit": "Vlož tokeny ze své peněženky, abys mohl(a) začít zadávat limitní pokyny na OISY Trade.",
+			"active_orders_empty_place": "Tvé otevřené a čekající limitní pokyny se zobrazí zde, jakmile nějaký zadáš.",
+			"new_order": "Nový pokyn",
+			"order_history": "Historie pokynů"
 		},
 		"provider_unavailable": {
-			"title": "",
-			"description": ""
+			"title": "Obchodování je dočasně nedostupné",
+			"description": "Momentálně není k dispozici žádný poskytovatel obchodování. Tvé zůstatky jsou v bezpečí a budou opět dostupné, jakmile bude poskytovatel zpět online."
 		},
 		"onboarding": {
 			"title": "",
@@ -1772,34 +1772,34 @@
 			"add_limit_order": "",
 			"tab_active": "",
 			"tab_history": "",
-			"empty_active": "",
+			"empty_active": "Žádné aktivní pokyny",
 			"empty_history": "",
-			"side_sell": "",
-			"side_buy": "",
+			"side_sell": "Prodej",
+			"side_buy": "Nákup",
 			"row_sell": "",
 			"row_buy": "",
-			"row_phrase_sell": "",
-			"row_phrase_buy": "",
-			"queue_ahead": "",
-			"status_open": "",
-			"status_pending": "",
-			"status_partial": "",
-			"status_filled": "",
-			"status_canceled": "",
-			"status_expired": "",
+			"row_phrase_sell": "za $quote @ $price",
+			"row_phrase_buy": "s $quote @ $price",
+			"queue_ahead": "$percentage % ve frontě před tebou",
+			"status_open": "Otevřeno",
+			"status_pending": "Čekající",
+			"status_partial": "Částečné",
+			"status_filled": "Vypořádáno",
+			"status_canceled": "Zrušeno",
+			"status_expired": "Vypršelo",
 			"count_filled": "",
 			"count_expired": "",
 			"count_canceled": ""
 		},
 		"info": {
-			"title": "",
-			"description": "",
-			"fact_1_title": "",
-			"fact_1_description": "",
-			"fact_2_title": "",
-			"fact_2_description": "",
-			"fact_3_title": "",
-			"fact_3_description": ""
+			"title": "Co je OISY Trade",
+			"description": "OISY Trade je plně onchain burza s knihou objednávek, integrovaná přímo do tvé peněženky. Nastav cenu, za kterou chceš nakoupit nebo prodat, a tvůj pokyn se onchain vypořádá ve chvíli, kdy ho trh dosáhne – i když jsi odhlášen(a).",
+			"fact_1_title": "Nakupuj nebo prodávej za svou cenu",
+			"fact_1_description": "Nastav přesnou cenu, za kterou chceš token koupit nebo prodat. Tvůj limitní pokyn zůstává v knize objednávek, dokud ho trh nedosáhne.",
+			"fact_2_title": "Vypořádá se i v tvé nepřítomnosti",
+			"fact_2_description": "Jakmile pokyn zadáš, existuje onchain. Burza ho vypořádá, jakmile se objeví odpovídající pokyn – bez ohledu na to, zda jsi přihlášen(a).",
+			"fact_3_title": "Plně onchain",
+			"fact_3_description": "Pokyny jsou spárovány a vypořádány uvnitř canisteru na Internet Computeru, spravovaného NNS, bez centralizované burzy uprostřed."
 		},
 		"order_detail": {
 			"title": "",
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Faktor zdraví",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

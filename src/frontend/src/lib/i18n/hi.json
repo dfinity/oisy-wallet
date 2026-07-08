@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "उधार में आपका स्वागत है!",
+			"header_description": "बिना बेचे लिक्विडिटी पाएं। अपने BTC, ICP और अन्य एसेट्स के बदले स्टेबलकॉइन उधार लें।",
+			"borrowing_options": "उधार के विकल्प",
+			"borrowing_potential": "उधार क्षमता",
+			"borrowing_power_hint": "यह अनुमान है कि यदि आप अपने एसेट्स को कोलैटरल के रूप में देते हैं, तो सबसे अच्छी उपलब्ध दर पर आप कितना उधार ले सकते हैं।",
+			"available_best_provider": "उपलब्ध · सर्वश्रेष्ठ प्रोवाइडर",
+			"remaining_best_provider": "शेष · सर्वश्रेष्ठ प्रोवाइडर",
+			"active_loans": "सक्रिय उधार",
+			"no_active_loans": "कोई सक्रिय उधार नहीं",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "उधार APR से"
 		},
 		"cards": {
 			"liquidium": {
@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "उधार",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -74,7 +74,7 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": "",
+			"learn_more": "और जानें",
 			"sorting": "छँटाई",
 			"unlimited": "",
 			"info": "",
@@ -96,7 +96,7 @@
 			"switch_currency": "मुद्रा बदलें",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "अधिक जानने के लिए लिंक पर जाएं",
 			"up_one_level": "एक स्तर ऊपर जाएं"
 		},
 		"warning": {
@@ -117,11 +117,11 @@
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "ट्रेड करें",
+			"borrow": "उधार लें",
+			"section_portfolio": "पोर्टफोलियो",
+			"section_finance": "वित्त",
+			"section_more": "अधिक",
 			"airdrops": "पुरस्कार",
 			"earning": "कमाएँ और पुरस्कार",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
 			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
-			"notes": ""
+			"notes": "नोट्स"
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
@@ -148,9 +148,9 @@
 			"settings": "अपनी सेटिंग्स खोलें",
 			"dapp_explorer": "ऐप एक्सप्लोरर खोलें",
 			"activity": "गतिविधि दृश्य खोलें",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "ट्रेड दृश्य खोलें",
+			"borrow": "उधार दृश्य खोलें",
+			"earning": "कमाई दृश्य खोलें",
 			"airdrops": "पुरस्कार दृश्य खोलें",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
 			"show_balances": "छिपी हुई शेष राशि दिखाएं",
-			"notes": ""
+			"notes": "नोट्स खोलें"
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"
@@ -1680,34 +1680,34 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "ट्रेडिंग",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": "",
+			"learn_more": "और जानें",
+			"provider_name": "OISY Trade",
 			"go_to_trade": ""
 		},
 		"page": {
-			"tagline": "",
-			"trading_potential": "",
-			"trading_potential_hint": "",
-			"deposited_assets": "",
-			"deposited_all_free": "",
-			"deposited_empty": "",
-			"free": "",
-			"in_orders": "",
-			"in_orders_label": "",
-			"positions": "",
-			"deposit": "",
-			"withdraw": "",
-			"active_orders": "",
-			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": "",
-			"new_order": "",
-			"order_history": ""
+			"tagline": "अपने वॉलेट से सीधे लिमिट ऑर्डर दें। आपका पैसा उन स्मार्ट कॉन्ट्रैक्ट्स में रहता है जिन्हें आप नियंत्रित करते हैं, किसी केंद्रीय पक्ष के पास कभी नहीं।",
+			"trading_potential": "ट्रेडिंग क्षमता",
+			"trading_potential_hint": "आपके वॉलेट में, एक्सचेंज पर नहीं",
+			"deposited_assets": "जमा किए गए एसेट्स",
+			"deposited_all_free": "सब उपलब्ध",
+			"deposited_empty": "अभी तक कुछ जमा नहीं हुआ",
+			"free": "$amount उपलब्ध",
+			"in_orders": "$amount ऑर्डर में",
+			"in_orders_label": "ऑर्डर में",
+			"positions": "मेरी पोजीशन",
+			"deposit": "जमा करें",
+			"withdraw": "निकालें",
+			"active_orders": "सक्रिय ऑर्डर",
+			"active_orders_empty_deposit": "OISY Trade पर लिमिट ऑर्डर देना शुरू करने के लिए अपने वॉलेट से टोकन जमा करें।",
+			"active_orders_empty_place": "आपके खुले और लंबित लिमिट ऑर्डर यहां दिखाई देंगे जैसे ही आप एक ऑर्डर देते हैं।",
+			"new_order": "नया ऑर्डर",
+			"order_history": "ऑर्डर इतिहास"
 		},
 		"provider_unavailable": {
-			"title": "",
-			"description": ""
+			"title": "ट्रेडिंग अस्थायी रूप से अनुपलब्ध है",
+			"description": "फिलहाल कोई ट्रेडिंग प्रोवाइडर उपलब्ध नहीं है। आपका बैलेंस सुरक्षित है और प्रोवाइडर के फिर से ऑनलाइन आते ही उपयोग करने लायक हो जाएगा।"
 		},
 		"onboarding": {
 			"title": "",
@@ -1772,34 +1772,34 @@
 			"add_limit_order": "",
 			"tab_active": "",
 			"tab_history": "",
-			"empty_active": "",
+			"empty_active": "कोई सक्रिय ऑर्डर नहीं",
 			"empty_history": "",
-			"side_sell": "",
-			"side_buy": "",
+			"side_sell": "बिक्री",
+			"side_buy": "खरीद",
 			"row_sell": "",
 			"row_buy": "",
-			"row_phrase_sell": "",
-			"row_phrase_buy": "",
-			"queue_ahead": "",
-			"status_open": "",
-			"status_pending": "",
-			"status_partial": "",
-			"status_filled": "",
-			"status_canceled": "",
-			"status_expired": "",
+			"row_phrase_sell": "$quote के लिए @ $price",
+			"row_phrase_buy": "$quote के साथ @ $price",
+			"queue_ahead": "कतार में आपसे आगे $percentage%",
+			"status_open": "खुला",
+			"status_pending": "लंबित",
+			"status_partial": "आंशिक",
+			"status_filled": "पूर्ण",
+			"status_canceled": "रद्द",
+			"status_expired": "समाप्त",
 			"count_filled": "",
 			"count_expired": "",
 			"count_canceled": ""
 		},
 		"info": {
-			"title": "",
-			"description": "",
-			"fact_1_title": "",
-			"fact_1_description": "",
-			"fact_2_title": "",
-			"fact_2_description": "",
-			"fact_3_title": "",
-			"fact_3_description": ""
+			"title": "OISY Trade क्या है",
+			"description": "OISY Trade एक पूरी तरह से ऑनचेन ऑर्डर-बुक एक्सचेंज है, जो सीधे आपके वॉलेट में एकीकृत है। खरीदने या बेचने के लिए एक कीमत तय करें, और आपका ऑर्डर ऑनचेन सेटल हो जाता है जैसे ही मार्केट उस कीमत तक पहुंचता है, भले ही आप साइन आउट हों।",
+			"fact_1_title": "अपनी कीमत पर खरीदें या बेचें",
+			"fact_1_description": "वह सटीक कीमत तय करें जिस पर आप कोई टोकन खरीदना या बेचना चाहते हैं। आपका लिमिट ऑर्डर तब तक बुक में रहता है जब तक मार्केट उस तक नहीं पहुंच जाता।",
+			"fact_2_title": "दूर रहने पर भी पूरा होता है",
+			"fact_2_description": "एक बार प्लेस होने के बाद आपका ऑर्डर ऑनचेन मौजूद रहता है। जैसे ही कोई मिलता-जुलता ऑर्डर आता है, एक्सचेंज इसे पूरा कर देता है — चाहे आप साइन इन हों या नहीं।",
+			"fact_3_title": "पूरी तरह से ऑनचेन",
+			"fact_3_description": "ऑर्डर Internet Computer पर एक कैनिस्टर के अंदर मैच और सेटल होते हैं, जिसे NNS द्वारा संचालित किया जाता है, बीच में कोई केंद्रीकृत एक्सचेंज नहीं होता।"
 		},
 		"order_detail": {
 			"title": "",
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "स्वास्थ्य कारक",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

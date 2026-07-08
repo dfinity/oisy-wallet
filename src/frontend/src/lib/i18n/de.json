@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Willkommen bei Ausleihen!",
+			"header_description": "Erhalte Liquidität, ohne zu verkaufen. Leihe dir Stablecoins gegen deine BTC, ICP und mehr.",
+			"borrowing_options": "Kreditoptionen",
+			"borrowing_potential": "Kreditpotenzial",
+			"borrowing_power_hint": "Eine Schätzung, wie viel du leihen könntest, wenn du deine Assets als Sicherheit hinterlegst – zum besten verfügbaren Zinssatz.",
+			"available_best_provider": "verfügbar · bester Anbieter",
+			"remaining_best_provider": "verbleibend · bester Anbieter",
+			"active_loans": "Aktive Kredite",
+			"no_active_loans": "keine aktiven Kredite",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "Kredit-APR ab"
 		},
 		"cards": {
 			"liquidium": {
@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Kredite",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -74,7 +74,7 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": "",
+			"learn_more": "Mehr erfahren",
 			"sorting": "Sortierung",
 			"unlimited": "",
 			"info": "",
@@ -96,7 +96,7 @@
 			"switch_currency": "Währung wechseln",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "Dem Link folgen, um mehr zu erfahren",
 			"up_one_level": "Eine Ebene nach oben"
 		},
 		"warning": {
@@ -117,11 +117,11 @@
 			"settings": "Einstellungen",
 			"dapp_explorer": "Entdecken",
 			"activity": "Aktivität",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Handeln",
+			"borrow": "Ausleihen",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finanzen",
+			"section_more": "Mehr",
 			"airdrops": "Prämien",
 			"earning": "Verdienen",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Salden anzeigen",
 			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
 			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen.",
-			"notes": ""
+			"notes": "Notizen"
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
@@ -148,9 +148,9 @@
 			"settings": "Einstellungen öffnen",
 			"dapp_explorer": "App-Explorer öffnen",
 			"activity": "Aktivitätsübersicht öffnen",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Handelsübersicht öffnen",
+			"borrow": "Kreditübersicht öffnen",
+			"earning": "Verdienstübersicht öffnen",
 			"airdrops": "Belohnungsübersicht öffnen",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen",
-			"notes": ""
+			"notes": "Notizen öffnen"
 		},
 		"short": {
 			"documentation": "Doku"
@@ -1680,34 +1680,34 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Handel",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": "",
+			"learn_more": "Mehr erfahren",
+			"provider_name": "OISY Trade",
 			"go_to_trade": ""
 		},
 		"page": {
-			"tagline": "",
-			"trading_potential": "",
-			"trading_potential_hint": "",
-			"deposited_assets": "",
-			"deposited_all_free": "",
-			"deposited_empty": "",
-			"free": "",
-			"in_orders": "",
-			"in_orders_label": "",
-			"positions": "",
-			"deposit": "",
-			"withdraw": "",
-			"active_orders": "",
-			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": "",
-			"new_order": "",
-			"order_history": ""
+			"tagline": "Platziere Limit-Orders direkt aus deiner Wallet. Deine Gelder bleiben in Smart Contracts, die du kontrollierst — nie bei einer zentralen Partei.",
+			"trading_potential": "Handelspotenzial",
+			"trading_potential_hint": "In deiner Wallet, nicht auf der Börse",
+			"deposited_assets": "Eingezahlte Assets",
+			"deposited_all_free": "Alles frei",
+			"deposited_empty": "Noch nichts eingezahlt",
+			"free": "$amount frei",
+			"in_orders": "$amount in Orders",
+			"in_orders_label": "in Orders",
+			"positions": "Meine Positionen",
+			"deposit": "Einzahlen",
+			"withdraw": "Auszahlen",
+			"active_orders": "Aktive Orders",
+			"active_orders_empty_deposit": "Zahle Token aus deiner Wallet ein, um Limit-Orders auf OISY Trade zu platzieren.",
+			"active_orders_empty_place": "Deine offenen und ausstehenden Limit-Orders erscheinen hier, sobald du eine platzierst.",
+			"new_order": "Neue Order",
+			"order_history": "Order-Verlauf"
 		},
 		"provider_unavailable": {
-			"title": "",
-			"description": ""
+			"title": "Handel vorübergehend nicht verfügbar",
+			"description": "Aktuell ist kein Trading-Anbieter verfügbar. Deine Guthaben sind sicher und wieder nutzbar, sobald ein Anbieter online ist."
 		},
 		"onboarding": {
 			"title": "",
@@ -1772,34 +1772,34 @@
 			"add_limit_order": "",
 			"tab_active": "",
 			"tab_history": "",
-			"empty_active": "",
+			"empty_active": "Keine aktiven Orders",
 			"empty_history": "",
-			"side_sell": "",
-			"side_buy": "",
+			"side_sell": "Verkauf",
+			"side_buy": "Kauf",
 			"row_sell": "",
 			"row_buy": "",
-			"row_phrase_sell": "",
-			"row_phrase_buy": "",
-			"queue_ahead": "",
-			"status_open": "",
-			"status_pending": "",
-			"status_partial": "",
-			"status_filled": "",
-			"status_canceled": "",
-			"status_expired": "",
+			"row_phrase_sell": "für $quote @ $price",
+			"row_phrase_buy": "mit $quote @ $price",
+			"queue_ahead": "$percentage % in der Warteschlange vor dir",
+			"status_open": "Offen",
+			"status_pending": "Ausstehend",
+			"status_partial": "Teilweise",
+			"status_filled": "Ausgeführt",
+			"status_canceled": "Storniert",
+			"status_expired": "Abgelaufen",
 			"count_filled": "",
 			"count_expired": "",
 			"count_canceled": ""
 		},
 		"info": {
-			"title": "",
-			"description": "",
-			"fact_1_title": "",
-			"fact_1_description": "",
-			"fact_2_title": "",
-			"fact_2_description": "",
-			"fact_3_title": "",
-			"fact_3_description": ""
+			"title": "Was ist OISY Trade",
+			"description": "OISY Trade ist eine vollständig onchain arbeitende Orderbuch-Börse, direkt in deine Wallet integriert. Lege einen Kauf- oder Verkaufspreis fest — deine Order wird onchain ausgeführt, sobald der Markt ihn erreicht, auch wenn du abgemeldet bist.",
+			"fact_1_title": "Kaufen oder verkaufen zu deinem Preis",
+			"fact_1_description": "Lege genau den Preis fest, zu dem du einen Token kaufen oder verkaufen möchtest. Deine Limit-Order bleibt im Orderbuch, bis der Markt ihn erreicht.",
+			"fact_2_title": "Wird auch ausgeführt, wenn du offline bist",
+			"fact_2_description": "Deine Order liegt onchain vor, sobald sie platziert ist. Die Börse führt sie aus, sobald eine passende Order erscheint — unabhängig davon, ob du angemeldet bist.",
+			"fact_3_title": "Vollständig onchain",
+			"fact_3_description": "Orders werden in einem Canister auf dem Internet Computer abgeglichen und abgewickelt, verwaltet vom NNS — ohne zentrale Börse dazwischen."
 		},
 		"order_detail": {
 			"title": "",
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Gesundheitsfaktor",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "Добро пожаловать в раздел Займы!",
+			"header_description": "Получай ликвидность, не продавая активы. Занимай стейблкоины под залог своих BTC, ICP и других активов.",
+			"borrowing_options": "Варианты займа",
+			"borrowing_potential": "Потенциал займа",
+			"borrowing_power_hint": "Приблизительная оценка того, сколько ты сможешь занять, если предоставишь свои активы в качестве залога, по лучшей доступной ставке.",
+			"available_best_provider": "доступно · лучший поставщик",
+			"remaining_best_provider": "остаток · лучший поставщик",
+			"active_loans": "Активные займы",
+			"no_active_loans": "нет активных займов",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR займа от"
 		},
 		"cards": {
 			"liquidium": {
@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Займы",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,11 +117,11 @@
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Торговать",
+			"borrow": "Брать в долг",
+			"section_portfolio": "Портфель",
+			"section_finance": "Финансы",
+			"section_more": "Ещё",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
 			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
-			"notes": ""
+			"notes": "Заметки"
 		},
 		"alt": {
 			"tokens": "Активы",
@@ -148,9 +148,9 @@
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Просмотр трейда",
+			"borrow": "Просмотр займов",
+			"earning": "Просмотр заработка",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
-			"notes": ""
+			"notes": "Открыть заметки"
 		},
 		"short": {
 			"documentation": "Документы"
@@ -1680,34 +1680,34 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Торговля",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": "",
+			"learn_more": "Узнать больше",
+			"provider_name": "OISY Trade",
 			"go_to_trade": ""
 		},
 		"page": {
-			"tagline": "",
-			"trading_potential": "",
-			"trading_potential_hint": "",
-			"deposited_assets": "",
-			"deposited_all_free": "",
-			"deposited_empty": "",
-			"free": "",
-			"in_orders": "",
-			"in_orders_label": "",
-			"positions": "",
-			"deposit": "",
-			"withdraw": "",
-			"active_orders": "",
-			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": "",
-			"new_order": "",
-			"order_history": ""
+			"tagline": "Размещай лимитные ордера прямо из своего кошелька. Твои средства остаются в смарт-контрактах, которые контролируешь ты, а не централизованная сторона.",
+			"trading_potential": "Торговый потенциал",
+			"trading_potential_hint": "В твоём кошельке, а не на бирже",
+			"deposited_assets": "Внесённые активы",
+			"deposited_all_free": "Всё доступно",
+			"deposited_empty": "Пока ничего не внесено",
+			"free": "$amount доступно",
+			"in_orders": "$amount в ордерах",
+			"in_orders_label": "в ордерах",
+			"positions": "Мои позиции",
+			"deposit": "Внести",
+			"withdraw": "Вывести",
+			"active_orders": "Активные ордера",
+			"active_orders_empty_deposit": "Внеси токены со своего кошелька, чтобы начать размещать лимитные ордера на OISY Trade.",
+			"active_orders_empty_place": "Твои открытые и ожидающие лимитные ордера появятся здесь, как только ты разместишь хотя бы один.",
+			"new_order": "Новый ордер",
+			"order_history": "История ордеров"
 		},
 		"provider_unavailable": {
-			"title": "",
-			"description": ""
+			"title": "Торговля временно недоступна",
+			"description": "Сейчас нет доступных поставщиков торговли. Твои балансы в безопасности и снова станут доступны, как только поставщик вернётся в сеть."
 		},
 		"onboarding": {
 			"title": "",
@@ -1772,34 +1772,34 @@
 			"add_limit_order": "",
 			"tab_active": "",
 			"tab_history": "",
-			"empty_active": "",
+			"empty_active": "Нет активных ордеров",
 			"empty_history": "",
-			"side_sell": "",
-			"side_buy": "",
+			"side_sell": "Продажа",
+			"side_buy": "Покупка",
 			"row_sell": "",
 			"row_buy": "",
-			"row_phrase_sell": "",
-			"row_phrase_buy": "",
-			"queue_ahead": "",
-			"status_open": "",
-			"status_pending": "",
-			"status_partial": "",
-			"status_filled": "",
-			"status_canceled": "",
-			"status_expired": "",
+			"row_phrase_sell": "за $quote @ $price",
+			"row_phrase_buy": "за $quote @ $price",
+			"queue_ahead": "$percentage% впереди в очереди",
+			"status_open": "Открыт",
+			"status_pending": "Ожидание",
+			"status_partial": "Частично",
+			"status_filled": "Исполнен",
+			"status_canceled": "Отменён",
+			"status_expired": "Истёк",
 			"count_filled": "",
 			"count_expired": "",
 			"count_canceled": ""
 		},
 		"info": {
-			"title": "",
-			"description": "",
-			"fact_1_title": "",
-			"fact_1_description": "",
-			"fact_2_title": "",
-			"fact_2_description": "",
-			"fact_3_title": "",
-			"fact_3_description": ""
+			"title": "Что такое OISY Trade",
+			"description": "OISY Trade — это полностью ончейн-биржа с книгой ордеров, встроенная прямо в твой кошелёк. Установи цену покупки или продажи, и твой ордер исполнится ончейн в тот момент, когда рынок её достигнет, даже если ты вышел из аккаунта.",
+			"fact_1_title": "Покупай или продавай по своей цене",
+			"fact_1_description": "Установи точную цену, по которой хочешь купить или продать токен. Твой лимитный ордер остаётся в книге ордеров, пока рынок её не достигнет.",
+			"fact_2_title": "Исполняется даже в твоё отсутствие",
+			"fact_2_description": "После размещения ордер существует ончейн. Биржа исполнит его, как только появится подходящий встречный ордер — независимо от того, в системе ты или нет.",
+			"fact_3_title": "Полностью ончейн",
+			"fact_3_description": "Ордера сопоставляются и исполняются внутри канистера на Internet Computer, управляемого NNS, без централизованной биржи посередине."
 		},
 		"order_detail": {
 			"title": "",
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Коэффициент здоровья",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

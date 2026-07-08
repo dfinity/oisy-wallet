@@ -1,18 +1,18 @@
 {
 	"borrow": {
 		"text": {
-			"header_title": "",
-			"header_description": "",
-			"borrowing_options": "",
-			"borrowing_potential": "",
-			"borrowing_power_hint": "",
-			"available_best_provider": "",
-			"remaining_best_provider": "",
-			"active_loans": "",
-			"no_active_loans": "",
+			"header_title": "¡Bienvenido a Préstamos!",
+			"header_description": "Obtén liquidez sin vender. Pide prestadas stablecoins contra tus BTC, ICP y más.",
+			"borrowing_options": "Opciones de préstamo",
+			"borrowing_potential": "Potencial de préstamo",
+			"borrowing_power_hint": "Una estimación de cuánto podrías pedir prestado si aportaras tus activos como garantía, a la mejor tasa disponible.",
+			"available_best_provider": "disponible · mejor proveedor",
+			"remaining_best_provider": "restante · mejor proveedor",
+			"active_loans": "Préstamos activos",
+			"no_active_loans": "sin préstamos activos",
 			"amount_borrowed": "",
-			"apr": "",
-			"borrow_apr_from": ""
+			"apr": "APR",
+			"borrow_apr_from": "APR de préstamo desde"
 		},
 		"cards": {
 			"liquidium": {
@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Préstamos",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,11 +117,11 @@
 			"settings": "Configuración",
 			"dapp_explorer": "Explorar",
 			"activity": "Actividad",
-			"trade": "",
-			"borrow": "",
-			"section_portfolio": "",
-			"section_finance": "",
-			"section_more": "",
+			"trade": "Operar",
+			"borrow": "Pedir prestado",
+			"section_portfolio": "Cartera",
+			"section_finance": "Finanzas",
+			"section_more": "Más",
 			"airdrops": "Recompensas",
 			"earning": "Ganar",
 			"pay": "",
@@ -140,7 +140,7 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo de privacidad activado. Pulsa [P] para mostrar tus saldos de nuevo.",
 			"privacy_mode_disabled": "Modo de privacidad desactivado. Pulsa [P] para ocultar tus saldos.",
-			"notes": ""
+			"notes": "Notas"
 		},
 		"alt": {
 			"tokens": "Ir a la vista de activos",
@@ -148,9 +148,9 @@
 			"settings": "Abrir tu configuración",
 			"dapp_explorer": "Abrir explorador de aplicaciones",
 			"activity": "Abrir la vista de actividad",
-			"trade": "",
-			"borrow": "",
-			"earning": "",
+			"trade": "Abrir la vista de Trading",
+			"borrow": "Abrir la vista de Crédito",
+			"earning": "Abrir la vista de Ganancias",
 			"airdrops": "Abrir la vista de Recompensas",
 			"pay": "",
 			"wallet_connect": "",
@@ -164,7 +164,7 @@
 			"address_book": "agenda",
 			"hide_balances": "Ocultar saldos ",
 			"show_balances": "Mostrar saldos",
-			"notes": ""
+			"notes": "Abrir notas"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -1680,34 +1680,34 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Trading",
 			"intro": "",
-			"learn_more": "",
-			"provider_name": "",
+			"learn_more": "Más información",
+			"provider_name": "OISY Trade",
 			"go_to_trade": ""
 		},
 		"page": {
-			"tagline": "",
-			"trading_potential": "",
-			"trading_potential_hint": "",
-			"deposited_assets": "",
-			"deposited_all_free": "",
-			"deposited_empty": "",
-			"free": "",
-			"in_orders": "",
-			"in_orders_label": "",
-			"positions": "",
-			"deposit": "",
-			"withdraw": "",
-			"active_orders": "",
-			"active_orders_empty_deposit": "",
-			"active_orders_empty_place": "",
-			"new_order": "",
-			"order_history": ""
+			"tagline": "Coloca órdenes límite directamente desde tu wallet. Tus fondos permanecen en contratos inteligentes que tú controlas, nunca con un tercero central.",
+			"trading_potential": "Potencial de trading",
+			"trading_potential_hint": "En tu wallet, no en el exchange",
+			"deposited_assets": "Activos depositados",
+			"deposited_all_free": "Todo disponible",
+			"deposited_empty": "Aún no hay depósitos",
+			"free": "$amount disponible",
+			"in_orders": "$amount en órdenes",
+			"in_orders_label": "en órdenes",
+			"positions": "Mis posiciones",
+			"deposit": "Depositar",
+			"withdraw": "Retirar",
+			"active_orders": "Órdenes activas",
+			"active_orders_empty_deposit": "Deposita tokens desde tu wallet para empezar a colocar órdenes límite en OISY Trade.",
+			"active_orders_empty_place": "Tus órdenes límite abiertas y pendientes aparecerán aquí en cuanto coloques una.",
+			"new_order": "Nueva orden",
+			"order_history": "Historial de órdenes"
 		},
 		"provider_unavailable": {
-			"title": "",
-			"description": ""
+			"title": "El trading no está disponible temporalmente",
+			"description": "Ahora mismo no hay ningún proveedor de trading disponible. Tus saldos están seguros y volverán a estar disponibles en cuanto un proveedor esté de nuevo en línea."
 		},
 		"onboarding": {
 			"title": "",
@@ -1772,34 +1772,34 @@
 			"add_limit_order": "",
 			"tab_active": "",
 			"tab_history": "",
-			"empty_active": "",
+			"empty_active": "Sin órdenes activas",
 			"empty_history": "",
-			"side_sell": "",
-			"side_buy": "",
+			"side_sell": "Vender",
+			"side_buy": "Comprar",
 			"row_sell": "",
 			"row_buy": "",
-			"row_phrase_sell": "",
-			"row_phrase_buy": "",
-			"queue_ahead": "",
-			"status_open": "",
-			"status_pending": "",
-			"status_partial": "",
-			"status_filled": "",
-			"status_canceled": "",
-			"status_expired": "",
+			"row_phrase_sell": "por $quote @ $price",
+			"row_phrase_buy": "con $quote @ $price",
+			"queue_ahead": "$percentage% por delante en la cola",
+			"status_open": "Abierta",
+			"status_pending": "Pendiente",
+			"status_partial": "Parcial",
+			"status_filled": "Ejecutada",
+			"status_canceled": "Cancelada",
+			"status_expired": "Expirada",
 			"count_filled": "",
 			"count_expired": "",
 			"count_canceled": ""
 		},
 		"info": {
-			"title": "",
-			"description": "",
-			"fact_1_title": "",
-			"fact_1_description": "",
-			"fact_2_title": "",
-			"fact_2_description": "",
-			"fact_3_title": "",
-			"fact_3_description": ""
+			"title": "Qué es OISY Trade",
+			"description": "OISY Trade es un exchange de libro de órdenes totalmente onchain, integrado directamente en tu wallet. Fija un precio de compra o venta, y tu orden se liquida onchain en cuanto el mercado lo alcanza, incluso si cerraste sesión.",
+			"fact_1_title": "Compra o vende a tu precio",
+			"fact_1_description": "Fija el precio exacto al que quieres comprar o vender un token. Tu orden límite permanece en el libro hasta que el mercado la alcanza.",
+			"fact_2_title": "Se ejecuta incluso si no estás",
+			"fact_2_description": "Tu orden vive onchain una vez colocada. El exchange la ejecuta en cuanto aparece una orden compatible, hayas iniciado sesión o no.",
+			"fact_3_title": "Totalmente onchain",
+			"fact_3_description": "Las órdenes se emparejan y liquidan dentro de un canister en Internet Computer, gobernado por el NNS, sin exchange centralizado de por medio."
 		},
 		"order_detail": {
 			"title": "",
@@ -2368,7 +2368,7 @@
 	"liquidium": {
 		"text": {
 			"description": "",
-			"health_factor": "",
+			"health_factor": "Factor de salud",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",
