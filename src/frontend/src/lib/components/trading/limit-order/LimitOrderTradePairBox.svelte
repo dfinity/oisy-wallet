@@ -225,10 +225,10 @@
 				{/if}
 			{/snippet}
 		</TokenInput>
-		{#if nonNullish(amountError)}
-			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
-		{:else if nonNullish(baseInputError)}
+		{#if nonNullish(baseInputError)}
 			<p class="mt-1 text-xs text-error-primary">{baseInputError.message}</p>
+		{:else if nonNullish(amountError)}
+			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
 		{/if}
 	</div>
 
