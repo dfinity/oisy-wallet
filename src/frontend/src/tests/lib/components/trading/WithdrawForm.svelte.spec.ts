@@ -1,8 +1,13 @@
 import WithdrawForm from '$lib/components/trading/WithdrawForm.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
-import { MAX_BUTTON, TRADING_WITHDRAW_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
+import {
+	MAX_BUTTON,
+	TOKEN_INPUT_CURRENCY_TOKEN,
+	TRADING_WITHDRAW_FORM_REVIEW_BUTTON
+} from '$lib/constants/test-ids.constants';
 import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+import * as deviceUtils from '$lib/utils/device.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getMaxTransactionAmount } from '$lib/utils/token.utils';
@@ -10,6 +15,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
 describe('WithdrawForm', () => {
 	const free = 500_000_000n;
@@ -150,5 +156,39 @@ describe('WithdrawForm', () => {
 		await fireEvent.click(getByTestId(TRADING_WITHDRAW_FORM_REVIEW_BUTTON));
 
 		expect(onNext).toHaveBeenCalledOnce();
+	});
+
+	describe('amount input autofocus', () => {
+		let isDesktopSpy: MockInstance<typeof deviceUtils.isDesktop>;
+
+		beforeEach(() => {
+			isDesktopSpy = vi.spyOn(deviceUtils, 'isDesktop');
+		});
+
+		afterEach(() => {
+			isDesktopSpy.mockRestore();
+		});
+
+		it('should auto-focus the amount input on desktop', () => {
+			isDesktopSpy.mockReturnValue(true);
+
+			const { getByTestId } = render(WithdrawForm, {
+				props: baseProps,
+				context: mockContext()
+			});
+
+			expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).toHaveFocus();
+		});
+
+		it('should not auto-focus the amount input on mobile', () => {
+			isDesktopSpy.mockReturnValue(false);
+
+			const { getByTestId } = render(WithdrawForm, {
+				props: baseProps,
+				context: mockContext()
+			});
+
+			expect(getByTestId(TOKEN_INPUT_CURRENCY_TOKEN)).not.toHaveFocus();
+		});
 	});
 });

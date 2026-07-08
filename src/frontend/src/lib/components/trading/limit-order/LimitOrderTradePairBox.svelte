@@ -270,7 +270,7 @@
 			isSelectable={nonNullish(baseSymbol)}
 			onClick={onSelectQuoteGuarded}
 			onCustomValidate={onQuoteCustomValidate}
-			readOnly={true}
+			readOnlyAmount={true}
 			showTokenNetwork
 			token={quoteToken}
 		>
