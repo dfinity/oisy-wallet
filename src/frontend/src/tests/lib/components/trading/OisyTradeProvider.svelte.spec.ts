@@ -80,8 +80,10 @@ describe('OisyTradeProvider', () => {
 		expect(queryByText(en.trading.text.provider_name)).toBeNull();
 	});
 
-	it('tracks a page_open event on mount when trading is enabled', () => {
+	it('tracks a page_open event on mount when trading is enabled', async () => {
 		render(OisyTradeProvider);
+
+		await tick();
 
 		expect(mockTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: 'page_open',
