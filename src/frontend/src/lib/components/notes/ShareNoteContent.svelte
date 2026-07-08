@@ -143,7 +143,7 @@
 				{preview.title}
 			</span>
 			{#if preview.body !== ''}
-				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
+				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-tertiary">
 					{preview.body}
 				</span>
 			{/if}
@@ -151,7 +151,7 @@
 		<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
+			<span class="font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
 			<div class="flex flex-wrap gap-2 [&_button]:text-sm">
 				{#each EXPIRY_OPTIONS as option (option.ms)}
 					<PillButton onClick={() => (durationMs = option.ms)} selected={durationMs === option.ms}>
@@ -162,7 +162,7 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
+			<span class="font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
 			<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
 				 the transaction-filter panels); `flex-start` top-aligns the box in case
 				 the label wraps on a narrow viewport. -->
@@ -174,7 +174,7 @@
 					testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
 					text="block"
 				>
-					<span class="text-sm text-primary">{$i18n.notes.share.text.single_use_option}</span>
+					<span class="text-primary">{$i18n.notes.share.text.single_use_option}</span>
 				</Checkbox>
 			</div>
 		</div>
@@ -194,7 +194,7 @@
 		<!-- State B — link ready -->
 		<div class="flex flex-col gap-1">
 			<span class="font-bold text-primary">{$i18n.notes.share.text.link_ready_title}</span>
-			<span class="text-sm text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+			<span class="text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
 		</div>
 
 		<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-1 pr-1 pl-3">
@@ -206,7 +206,7 @@
 			/>
 		</div>
 
-		<span class="text-sm text-primary">{recap}</span>
+		<span class="text-primary">{recap}</span>
 		<span class="text-xs text-tertiary"
 			>{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span
 		>
