@@ -1,9 +1,6 @@
-import {
-	PLAUSIBLE_EVENT_RESULT_STATUSES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-} from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import { trackTrading } from '$lib/services/trading-analytics.services';
+import { trackDepositWithdraw, trackLimitOrder } from '$lib/services/trading-analytics.services';
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -14,73 +11,134 @@ describe('trading-analytics.services', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('trackTrading', () => {
-		it('tracks a single trading event with context, subcontext and result status', () => {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+	describe('trackLimitOrder', () => {
+		it('tracks a create order with the full token / amount / price / USD block', () => {
+			trackLimitOrder({
+				action: 'create',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 				base: 'ICP',
 				quote: 'ckUSDC',
 				side: 'sell',
 				orderType: 'GTC',
-				volume: '12.5'
+				baseAmount: '12.5',
+				price: '8.4',
+				baseUsdPrice: 8.4,
+				quoteUsdPrice: 1,
+				baseUsdValue: 105,
+				quoteUsdValue: 105
 			});
 
-			// `base`/`quote` params map onto the swap-style `token`/`token2` metadata keys.
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'trading',
+				name: 'limit_order',
 				metadata: {
-					dApp: 'OISY TRADE',
 					event_context: 'trading',
-					event_subcontext: 'limit_order',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'create',
 					result_status: 'executing',
-					token: 'ICP',
-					token2: 'ckUSDC',
+					token_symbol: 'ICP',
+					token2_symbol: 'ckUSDC',
 					side: 'sell',
-					orderType: 'GTC',
-					volume: '12.5'
+					order_type: 'GTC',
+					token_amount: '12.5',
+					price: '8.4',
+					token_usd_price: '8.4',
+					token2_usd_price: '1',
+					token_usd_value: '105',
+					token2_usd_value: '105'
 				}
 			});
 		});
 
-		it('carries a token and a sanitized error on failures', () => {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.DEPOSIT,
+		it('tracks a cancel order without a time-in-force and carries a sanitized error', () => {
+			trackLimitOrder({
+				action: 'cancel',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				token: 'ICP',
+				base: 'ICP',
+				quote: 'ckUSDC',
+				side: 'buy',
+				baseAmount: '3',
+				price: '9',
 				error: 'boom'
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'trading',
+				name: 'limit_order',
 				metadata: {
-					dApp: 'OISY TRADE',
 					event_context: 'trading',
-					event_subcontext: 'deposit',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'cancel',
 					result_status: 'error',
-					token: 'ICP',
+					token_symbol: 'ICP',
+					token2_symbol: 'ckUSDC',
+					side: 'buy',
+					token_amount: '3',
+					price: '9',
 					result_error: 'boom'
 				}
 			});
 		});
 
-		it('omits absent optional fields, an empty volume and an empty error', () => {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+		it('omits absent optional fields', () => {
+			trackLimitOrder({
+				action: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'limit_order',
+				metadata: {
+					event_context: 'trading',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'create',
+					result_status: 'success'
+				}
+			});
+		});
+	});
+
+	describe('trackDepositWithdraw', () => {
+		it('tracks a deposit with token, amount and USD price / value', () => {
+			trackDepositWithdraw({
+				direction: 'deposit',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
+				token: 'ICP',
+				amount: '20',
+				usdPrice: 8.4,
+				usdValue: 168
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'deposit_withdraw',
+				metadata: {
+					event_context: 'trading',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'deposit',
+					result_status: 'executing',
+					token_symbol: 'ICP',
+					token_amount: '20',
+					token_usd_price: '8.4',
+					token_usd_value: '168'
+				}
+			});
+		});
+
+		it('omits absent USD fields, an empty amount and an empty error on a withdraw', () => {
+			trackDepositWithdraw({
+				direction: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				token: 'ckUSDC',
-				volume: '',
+				amount: '',
 				error: ''
 			});
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
-				name: 'trading',
+				name: 'deposit_withdraw',
 				metadata: {
-					dApp: 'OISY TRADE',
 					event_context: 'trading',
-					event_subcontext: 'withdraw',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'withdraw',
 					result_status: 'success',
-					token: 'ckUSDC'
+					token_symbol: 'ckUSDC'
 				}
 			});
 		});
