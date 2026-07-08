@@ -12,7 +12,7 @@
 
 <div class="flex rounded-lg border border-disabled bg-secondary">
 	<button
-		class="flex flex-1 items-center justify-center gap-1.5 rounded-l-lg rounded-r-none py-2 text-sm font-semibold transition-colors"
+		class="flex flex-1 items-center justify-center gap-1.5 rounded-l-lg rounded-r-none py-3 text-sm font-semibold transition-colors"
 		class:bg-error-subtle-20={side === 'sell'}
 		class:text-error-primary={side === 'sell'}
 		class:text-tertiary={side !== 'sell'}
@@ -24,7 +24,7 @@
 		{$i18n.trading.limit_order.sell}
 	</button>
 	<button
-		class="flex flex-1 items-center justify-center gap-1.5 rounded-l-none rounded-r-lg py-2 text-sm font-semibold transition-colors"
+		class="flex flex-1 items-center justify-center gap-1.5 rounded-l-none rounded-r-lg py-3 text-sm font-semibold transition-colors"
 		class:bg-success-subtle-20={side === 'buy'}
 		class:text-success-primary={side === 'buy'}
 		class:text-tertiary={side !== 'buy'}
