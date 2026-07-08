@@ -138,7 +138,7 @@
 					ariaLabel={$i18n.notes.text.delete_note}
 					colorStyle="error"
 					onclick={() => onDelete(note.id)}
-					styleClass="!flex-none"
+					styleClass="flex-none!"
 					testId={NOTES_VIEW_DELETE_BUTTON}
 					transparent
 				>
