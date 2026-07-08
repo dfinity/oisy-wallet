@@ -49,6 +49,7 @@
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
@@ -65,6 +66,7 @@
 		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		visible?: boolean;
@@ -89,15 +91,13 @@
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
-	// Wait for the popover's backdrop to finish fading out (Backdrop's 250ms
-	// FADE_OUT_DURATION) before navigating. Otherwise the blurred backdrop lingers
-	// over the freshly-rendered Settings page and reads as a flicker — unlike the
-	// other menu entries, which open a covering modal and never change the route.
-	const MENU_CLOSE_TRANSITION_MS = 250;
-
 	const goToSettings = async () => {
 		hidePopover();
-		await new Promise((resolve) => setTimeout(resolve, MENU_CLOSE_TRANSITION_MS));
+		// Wait for the popover's backdrop to finish fading out before navigating.
+		// Otherwise the blurred backdrop lingers over the freshly-rendered Settings
+		// page and reads as a flicker — unlike the other menu entries, which open a
+		// covering modal and never change the route.
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
 		await goto(
 			networkUrl({
 				path: AppPath.Settings,
