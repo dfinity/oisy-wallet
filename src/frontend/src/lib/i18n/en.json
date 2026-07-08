@@ -1683,7 +1683,7 @@
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
 			"provider_name": "OISY TRADE",
-			"no_trades": "You don't have any deposited assets or active orders",
+			"no_trades": "You don't have any deposits or active orders",
 			"go_to_trade": "Go to Trade"
 		},
 		"page": {
