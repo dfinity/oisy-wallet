@@ -60,13 +60,13 @@
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-error-primary"
 			>
-				<span>{$i18n.trading.limit_order.lowest_ask}</span>
+				<span>{$i18n.trading.limit_order.best_ask}</span>
 				<span>{nonNullish(ask) ? `${ask} ${quote}` : '-'}</span>
 			</div>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-success-primary"
 			>
-				<span>{$i18n.trading.limit_order.highest_bid}</span>
+				<span>{$i18n.trading.limit_order.best_bid}</span>
 				<span>{nonNullish(bid) ? `${bid} ${quote}` : '-'}</span>
 			</div>
 			<div
