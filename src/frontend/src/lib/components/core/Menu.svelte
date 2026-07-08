@@ -298,7 +298,7 @@
 		{/if}
 	</div>
 
-	<div class="flex max-w-80 flex-col gap-1 py-5">
+	<div class="flex max-w-80 flex-col gap-1 pt-5 pb-1">
 		{#if $authNotSignedIn}
 			<MenuLanguageSelector />
 		{/if}
