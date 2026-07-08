@@ -94,6 +94,29 @@ describe('trading-analytics.services', () => {
 				}
 			});
 		});
+
+		it('omits non-finite USD fields (NaN / Infinity)', () => {
+			trackLimitOrder({
+				action: 'create',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				base: 'ICP',
+				baseUsdPrice: NaN,
+				quoteUsdPrice: Infinity,
+				baseUsdValue: NaN,
+				quoteUsdValue: -Infinity
+			});
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: 'limit_order',
+				metadata: {
+					event_context: 'trading',
+					event_provider: 'OISY TRADE',
+					event_modifier: 'create',
+					result_status: 'success',
+					token_symbol: 'ICP'
+				}
+			});
+		});
 	});
 
 	describe('trackDepositWithdraw', () => {

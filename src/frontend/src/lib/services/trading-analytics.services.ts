@@ -74,10 +74,10 @@ export const trackLimitOrder = ({
 			...(nonNullish(orderType) && { order_type: orderType }),
 			...(notEmptyString(baseAmount) && { token_amount: baseAmount }),
 			...(notEmptyString(price) && { price }),
-			...(nonNullish(baseUsdPrice) && { token_usd_price: `${baseUsdPrice}` }),
-			...(nonNullish(quoteUsdPrice) && { token2_usd_price: `${quoteUsdPrice}` }),
-			...(nonNullish(baseUsdValue) && { token_usd_value: `${baseUsdValue}` }),
-			...(nonNullish(quoteUsdValue) && { token2_usd_value: `${quoteUsdValue}` }),
+			...(Number.isFinite(baseUsdPrice) && { token_usd_price: `${baseUsdPrice}` }),
+			...(Number.isFinite(quoteUsdPrice) && { token2_usd_price: `${quoteUsdPrice}` }),
+			...(Number.isFinite(baseUsdValue) && { token_usd_value: `${baseUsdValue}` }),
+			...(Number.isFinite(quoteUsdValue) && { token2_usd_value: `${quoteUsdValue}` }),
 			...(notEmptyString(error) && { result_error: error })
 		}
 	});
