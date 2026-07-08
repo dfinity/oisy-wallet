@@ -22,16 +22,18 @@ import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.stor
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
-let mockBeforeNavigateCallback: (() => void) | undefined;
-let mockAfterNavigateCallback: ((navigation: { from: null }) => void) | undefined;
+const navigationMocks = vi.hoisted(() => ({
+	beforeNavigateCallback: undefined as undefined | (() => void),
+	afterNavigateCallback: undefined as undefined | ((navigation: { from: null }) => void)
+}));
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn(),
 	beforeNavigate: (callback: () => void) => {
-		mockBeforeNavigateCallback = callback;
+		navigationMocks.beforeNavigateCallback = callback;
 	},
 	afterNavigate: (callback: (navigation: { from: null }) => void) => {
-		mockAfterNavigateCallback = callback;
+		navigationMocks.afterNavigateCallback = callback;
 	}
 }));
 
@@ -108,8 +110,8 @@ describe('NavigationMainMenuItems', () => {
 
 		// Picking a sheet item starts a navigation: the sheet closes without its exit
 		// animation so its scrim never lingers over the freshly-rendered page.
-		mockBeforeNavigateCallback?.();
-		mockAfterNavigateCallback?.({ from: null });
+		navigationMocks.beforeNavigateCallback?.();
+		navigationMocks.afterNavigateCallback?.({ from: null });
 
 		await waitFor(() => expect(queryByTestId(NAVIGATION_ITEM_BORROW)).toBeNull());
 	});
