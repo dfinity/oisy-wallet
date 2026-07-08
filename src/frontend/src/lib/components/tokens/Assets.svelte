@@ -29,6 +29,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
+	import { oisyTradeHasAssets } from '$lib/derived/oisy-trade.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -172,7 +173,10 @@
 				</ManageTokensButton>
 			{:else if activeTab === TokenTypes.EARNING}
 				<GoToEarnButton />
-			{:else if activeTab === TokenTypes.TRADING}
+			{:else if activeTab === TokenTypes.TRADING && $oisyTradeHasAssets}
+				<!-- Empty Trading tab shows its own Go-to-Trade button inside the
+				     onboarding info box (see TradingList); only the populated list
+				     needs the button down here. -->
 				<GoToTradeButton />
 			{:else if activeTab === TokenTypes.BORROWINGS}
 				<GoToBorrowButton />

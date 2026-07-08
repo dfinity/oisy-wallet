@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { IcToken } from '$icp/types/ic-token';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -56,6 +58,10 @@
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
+
+	// `TokenInputContent` has no built-in error message, so we render its generic
+	// parse error ourselves through the compact error line below.
+	let baseInputError = $state<Error | undefined>();
 
 	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
 	// `baseAmount` (a string), re-normalizing every edit to the pair's lot precision
@@ -124,12 +130,31 @@
 		}).errorKind;
 	});
 
-	// The limit order reports rich, pair-aware error kinds; map any of them onto a
-	// single `errorType` so the shared input shows its red highlight, and render the
-	// full pair-aware message below. Routed through `TokenInput`'s `onCustomValidate`
-	// so the component owns (and does not clobber) its own `errorType` state.
-	const onCustomValidate = (): TokenActionErrorType =>
-		nonNullish(amountErrorKind) ? 'insufficient-funds' : undefined;
+	// Each amount error belongs to a specific leg: a balance shortfall is on the token
+	// being spent (buy → quote, sell → base), the lot grid is on the base amount, and
+	// the notional bounds are on the quote-denominated order value. Surface the message
+	// — and the red highlight — under the matching token box.
+	const amountErrorField = $derived.by((): 'base' | 'quote' | undefined => {
+		switch (amountErrorKind) {
+			case 'balance':
+				return side === 'buy' ? 'quote' : 'base';
+			case 'lot':
+				return 'base';
+			case 'min_notional':
+			case 'max_notional':
+				return 'quote';
+			default:
+				return undefined;
+		}
+	});
+
+	// Map the error onto the owning leg's `errorType` so only that shared input shows
+	// its red highlight. Routed through `TokenInputContent`'s `onCustomValidate` so the
+	// component owns (and does not clobber) its own `errorType` state.
+	const onBaseCustomValidate = (): TokenActionErrorType =>
+		amountErrorField === 'base' ? 'insufficient-funds' : undefined;
+	const onQuoteCustomValidate = (): TokenActionErrorType =>
+		amountErrorField === 'quote' ? 'insufficient-funds' : undefined;
 
 	const amountError = $derived.by((): string | undefined => {
 		const t = $i18n.trading.limit_order;
@@ -164,20 +189,24 @@
 				return undefined;
 		}
 	});
+
+	const baseAmountError = $derived(amountErrorField === 'base' ? amountError : undefined);
+	const quoteAmountError = $derived(amountErrorField === 'quote' ? amountError : undefined);
 </script>
 
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
 	<!-- Base row: shared amount input + token selector -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			displayUnit={inputUnit}
 			exchangeRate={baseExchangeRate}
 			isSelectable
 			onClick={onSelectBase}
-			{onCustomValidate}
+			onCustomValidate={onBaseCustomValidate}
 			showTokenNetwork
 			token={baseToken}
 			bind:amount={getAmount, setAmount}
+			bind:error={baseInputError}
 		>
 			{#snippet title()}{baseLabel}{/snippet}
 
@@ -218,9 +247,15 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
-		{#if nonNullish(amountError)}
-			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
+		</TokenInputContent>
+		{#if nonNullish(baseInputError)}
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseInputError.message}
+			</p>
+		{:else if nonNullish(baseAmountError)}
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseAmountError}
+			</p>
 		{/if}
 	</div>
 
@@ -233,14 +268,15 @@
 
 	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			amount={quoteAmountValue}
 			disabled={true}
 			displayUnit={inputUnit}
 			exchangeRate={quoteExchangeRate}
 			isSelectable={nonNullish(baseSymbol)}
 			onClick={onSelectQuoteGuarded}
-			readOnly={true}
+			onCustomValidate={onQuoteCustomValidate}
+			readOnlyAmount={true}
 			showTokenNetwork
 			token={quoteToken}
 		>
@@ -283,6 +319,11 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
+		</TokenInputContent>
+		{#if nonNullish(quoteAmountError)}
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{quoteAmountError}
+			</p>
+		{/if}
 	</div>
 </div>

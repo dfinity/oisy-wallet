@@ -1,9 +1,14 @@
 import LimitOrderTradePairBox from '$lib/components/trading/limit-order/LimitOrderTradePairBox.svelte';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { LimitOrderPairView, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
+import {
+	formatTradeAmount,
+	type LimitOrderPairView,
+	type LimitOrderSide
+} from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderTradePairBox', () => {
@@ -105,6 +110,57 @@ describe('LimitOrderTradePairBox', () => {
 		);
 	});
 
+	it('shows the sell balance error under the base (first) token box, not the quote box', () => {
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps, side: 'sell', baseAmount: '200', freeBase: 100 }
+		});
+
+		const expected = replacePlaceholders(en.trading.limit_order.error_balance_sell, {
+			$amount: '100',
+			$symbol: 'ICP'
+		});
+
+		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(baseInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
+	});
+
+	it('shows the buy balance error under the quote (second) token box, not the base box', () => {
+		// Buy 100 ICP at 12 ckUSDC each costs 1200 ckUSDC, above the 1000 free quote.
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps, side: 'buy', baseAmount: '100', price: '12', freeQuote: 1000 }
+		});
+
+		const expected = replacePlaceholders(en.trading.limit_order.error_balance_buy, {
+			$cost: formatTradeAmount({ amount: 1200, decimals: 6 }),
+			$symbol: 'ckUSDC',
+			$available: formatTradeAmount({ amount: 1000, decimals: 6 })
+		});
+
+		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
+	});
+
+	it('shows the min-notional error under the quote (second) token box', () => {
+		// 0.25 ICP at 1 ckUSDC is a 0.25 notional, below the pair's min notional of 1.
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps, side: 'buy', baseAmount: '0.25', price: '1' }
+		});
+
+		const expected = replacePlaceholders(en.trading.limit_order.error_min_notional, {
+			$amount: '1',
+			$symbol: 'ckUSDC'
+		});
+
+		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
+	});
+
 	it('shows the lot-multiple error when the amount is not a multiple of the lot size', () => {
 		const { container } = render(LimitOrderTradePairBox, {
 			props: { ...baseProps, baseAmount: '4.1' }
@@ -135,7 +191,7 @@ describe('LimitOrderTradePairBox', () => {
 
 		// No base yet: the quote list is filtered by the base's markets, so the
 		// quote selector must stay inert until a base is chosen.
-		const { getAllByText } = render(LimitOrderTradePairBox, {
+		const { getAllByRole } = render(LimitOrderTradePairBox, {
 			props: {
 				...baseProps,
 				baseSymbol: undefined,
@@ -146,8 +202,10 @@ describe('LimitOrderTradePairBox', () => {
 			}
 		});
 
-		// Both legs show "Select token" without a token; the quote one is second.
-		const [, quoteSelect] = getAllByText(en.tokens.text.select_token);
+		// Without a base the quote selector is the sole disabled button; clicking
+		// it must not open the quote picker.
+		const quoteSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
+		assertNonNullish(quoteSelect);
 		await fireEvent.click(quoteSelect);
 
 		expect(onSelectQuote).not.toHaveBeenCalled();
