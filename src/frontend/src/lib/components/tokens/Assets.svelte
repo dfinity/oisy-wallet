@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
-	import { TRADING_ENABLED } from '$env/trading';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
 	import GoToBorrowButton from '$lib/components/borrowings/GoToBorrowButton.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
@@ -87,7 +87,7 @@
 												id: TokenTypes.TOKENS,
 												path: `${AppPath.Tokens}${page.url.search}`
 											},
-											...(TRADING_ENABLED
+											...(anyTradingProviderEnabled
 												? [
 														{
 															label: $i18n.trading.text.tab_title,
