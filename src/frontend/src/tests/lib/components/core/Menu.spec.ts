@@ -228,8 +228,11 @@ describe('Menu', () => {
 
 		button.click();
 
-		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
-			expect.stringContaining(`/settings/?network=${ICP_NETWORK_ID.description}`)
+		// Navigation is deferred until the popover backdrop has faded out, so wait for it.
+		await waitFor(() =>
+			expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
+				expect.stringContaining(`/settings/?network=${ICP_NETWORK_ID.description}`)
+			)
 		);
 	});
 

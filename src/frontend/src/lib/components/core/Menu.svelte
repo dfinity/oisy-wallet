@@ -89,8 +89,15 @@
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
 	};
 
+	// Wait for the popover's backdrop to finish fading out (Backdrop's 250ms
+	// FADE_OUT_DURATION) before navigating. Otherwise the blurred backdrop lingers
+	// over the freshly-rendered Settings page and reads as a flicker — unlike the
+	// other menu entries, which open a covering modal and never change the route.
+	const MENU_CLOSE_TRANSITION_MS = 250;
+
 	const goToSettings = async () => {
 		hidePopover();
+		await new Promise((resolve) => setTimeout(resolve, MENU_CLOSE_TRANSITION_MS));
 		await goto(
 			networkUrl({
 				path: AppPath.Settings,
