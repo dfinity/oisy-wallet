@@ -84,7 +84,8 @@
 	{#snippet action()}
 		<LimitOrder>
 			{#snippet trigger(open)}
-				{#if $oisyTradeHasAssets}
+				<!-- PREVIEW-ONLY (drop before merge): force-enable New order without a funded balance so the modal is reviewable on fe2 -->
+				{#if true || $oisyTradeHasAssets}
 					<Button colorStyle="primary" onclick={open} paddingSmall type="button">
 						{$i18n.trading.page.new_order}
 					</Button>
