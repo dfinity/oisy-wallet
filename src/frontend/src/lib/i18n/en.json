@@ -24,7 +24,8 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Borrowing",
-			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
+			"no_borrowings": "It looks like you haven't borrowed any tokens yet.",
+			"go_to_borrow": "Go to Borrow"
 		}
 	},
 	"core": {

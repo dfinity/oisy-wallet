@@ -20,7 +20,7 @@ interface I18nBorrow {
 }
 
 interface I18nBorrowings {
-	text: { tab_title: string; no_borrowings: string };
+	text: { tab_title: string; no_borrowings: string; go_to_borrow: string };
 }
 
 interface I18nCore {
