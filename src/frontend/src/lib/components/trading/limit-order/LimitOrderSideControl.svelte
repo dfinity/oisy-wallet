@@ -10,7 +10,7 @@
 	let { side = $bindable() }: Props = $props();
 </script>
 
-<div class="flex overflow-hidden rounded-lg border border-disabled bg-secondary">
+<div class="flex rounded-lg border border-disabled bg-secondary">
 	<button
 		class="flex flex-1 items-center justify-center gap-1.5 rounded-l-lg py-2 text-sm font-semibold transition-colors"
 		class:bg-error-subtle-20={side === 'sell'}
