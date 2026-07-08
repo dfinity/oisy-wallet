@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
-	import { TRADING_ENABLED } from '$env/trading';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import OisyTradeActiveOrders from '$lib/components/trading/OisyTradeActiveOrders.svelte';
 	import OisyTradeInfoBox from '$lib/components/trading/OisyTradeInfoBox.svelte';
@@ -44,10 +44,10 @@
 	const withdrawModalId = Symbol();
 	const openWithdraw = () => modalStore.openOisyTradeWithdraw({ id: withdrawModalId });
 
-	// The whole surface is gated by the Trading feature flag; off (production)
-	// the route shouldn't be reachable, so send stragglers back to the wallet.
+	// The whole surface is gated by the trading providers; with none enabled the
+	// route shouldn't be reachable, so send stragglers back to the wallet.
 	onMount(() => {
-		if (!TRADING_ENABLED) {
+		if (!anyTradingProviderEnabled) {
 			goto(AppPath.Tokens);
 			return;
 		}
@@ -62,7 +62,7 @@
 	});
 </script>
 
-{#if TRADING_ENABLED}
+{#if anyTradingProviderEnabled}
 	<div class="flex flex-col gap-6 pb-6">
 		{#if OISY_TRADE_ENABLED}
 			<IntervalLoader interval={OISY_TRADE_POLL_INTERVAL_MILLIS} onLoad={load} />
