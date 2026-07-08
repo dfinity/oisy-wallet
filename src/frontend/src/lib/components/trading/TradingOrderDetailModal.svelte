@@ -3,14 +3,15 @@
 	import Decimal from 'decimal.js';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import TradingCancelOrderConfirm from '$lib/components/trading/TradingCancelOrderConfirm.svelte';
 	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
 	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
 	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
@@ -301,19 +302,26 @@
 			</ModalValue>
 		{/if}
 
+		{#if active}
+			<Hr />
+
+			<div class="flex justify-start">
+				<Button
+					alignLeft
+					ariaLabel={$i18n.trading.order_detail.cancel_order}
+					colorStyle="error"
+					onclick={() => (showCancelConfirm = true)}
+					testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
+					transparent
+				>
+					<IconTrash />
+					{$i18n.trading.order_detail.cancel_order}
+				</Button>
+			</div>
+		{/if}
+
 		{#snippet toolbar()}
-			<ButtonGroup>
-				<Button colorStyle="secondary-light" onclick={close}>{$i18n.core.text.close}</Button>
-				{#if active}
-					<Button
-						colorStyle="error"
-						onclick={() => (showCancelConfirm = true)}
-						testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
-					>
-						{$i18n.trading.order_detail.cancel_order}
-					</Button>
-				{/if}
-			</ButtonGroup>
+			<Button colorStyle="primary" onclick={close}>{$i18n.core.text.close}</Button>
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>
