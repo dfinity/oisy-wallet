@@ -50,6 +50,12 @@ describe('LiquidiumSummary', () => {
 		expect(container).toHaveTextContent(en.liquidium.text.net_value);
 	});
 
+	it('shows the empty supplied text instead of the APY line when nothing is supplied', () => {
+		const { container } = render(LiquidiumSummary, { props: { portfolio: null } });
+
+		expect(container).toHaveTextContent(en.liquidium.text.no_assets_supplied);
+	});
+
 	it('signs the net interest from net interest, not net value', () => {
 		const netNegative: LiquidiumPortfolio = {
 			...portfolio,

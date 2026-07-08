@@ -3,13 +3,14 @@
 	import Decimal from 'decimal.js';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import TradingCancelOrderConfirm from '$lib/components/trading/TradingCancelOrderConfirm.svelte';
 	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
 	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
 	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -307,19 +308,26 @@
 			</ModalValue>
 		{/if}
 
-		{#snippet toolbar()}
-			<ButtonGroup>
-				<Button colorStyle="secondary-light" onclick={close}>{$i18n.core.text.close}</Button>
-				{#if active}
+		{#snippet outerContent()}
+			{#if active}
+				<div class="flex justify-start px-3 py-2 sm:px-6 sm:py-3">
 					<Button
+						alignLeft
+						ariaLabel={$i18n.trading.order_detail.cancel_order}
 						colorStyle="error"
 						onclick={() => (showCancelConfirm = true)}
 						testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
+						transparent
 					>
+						<span aria-hidden="true"><IconTrash /></span>
 						{$i18n.trading.order_detail.cancel_order}
 					</Button>
-				{/if}
-			</ButtonGroup>
+				</div>
+			{/if}
+		{/snippet}
+
+		{#snippet toolbar()}
+			<ButtonCloseModal isPrimary />
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>
