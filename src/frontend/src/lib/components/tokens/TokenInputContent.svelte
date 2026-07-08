@@ -25,7 +25,7 @@
 		displayUnit?: DisplayUnit;
 		exchangeRate?: number;
 		disabled?: boolean;
-		readOnly?: boolean;
+		readOnlyAmount?: boolean;
 		placeholder?: string;
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
@@ -52,7 +52,7 @@
 		displayUnit = 'token',
 		exchangeRate,
 		disabled = false,
-		readOnly = false,
+		readOnlyAmount = false,
 		placeholder = '0',
 		errorType = $bindable(),
 		error = $bindable(),
@@ -125,14 +125,12 @@
 <TokenInputContainer
 	error={nonNullish(errorType) || nonNullish(error)}
 	{focused}
-	{readOnly}
+	{readOnlyAmount}
 	styleClass="h-14 text-3xl"
 >
 	<div
-		style={readOnly ? '--input-background: var(--color-background-disabled-alt);' : undefined}
+		style={readOnlyAmount ? '--input-background: transparent;' : undefined}
 		class="flex h-full w-full items-center"
-		class:overflow-hidden={readOnly}
-		class:rounded-l-lg={readOnly}
 	>
 		{#if token}
 			{#if displayUnit === 'token'}
@@ -165,32 +163,50 @@
 					bind:tokenAmount={amount}
 				/>
 			{/if}
+		{:else if readOnlyAmount}
+			<div class="w-full pl-3 font-bold text-disabled">—</div>
 		{:else}
-			<button class="h-full w-full pl-3 text-base" onclick={onClick}
+			<button class="h-full w-full pl-3 text-base" onclick={onClick} type="button"
 				>{$i18n.tokens.text.select_token}</button
 			>
 		{/if}
 	</div>
 
-	<div class="h-3/4 w-[1px] bg-disabled"></div>
+	{#if !readOnlyAmount}
+		<div class="h-3/4 w-[1px] bg-disabled"></div>
+	{/if}
 
-	<button class="flex h-full gap-1 px-3" disabled={!isSelectable} onclick={onClick}>
-		{#if token}
-			<TokenLogo data={token} logoSize="xs" />
-			<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
-		{:else}
-			<span
-				style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
-				class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
-			>
-				<IconPlus />
-			</span>
-		{/if}
+	{#if !readOnlyAmount || isSelectable}
+		<button
+			class="flex h-full items-center gap-1 px-3 transition-colors"
+			class:bg-primary={readOnlyAmount}
+			class:border={readOnlyAmount}
+			class:border-solid={readOnlyAmount}
+			class:border-tertiary={readOnlyAmount}
+			class:hover:border-brand-primary={readOnlyAmount && isSelectable}
+			class:rounded-lg={readOnlyAmount}
+			class:shadow-inner={readOnlyAmount}
+			disabled={!isSelectable}
+			onclick={onClick}
+			type="button"
+		>
+			{#if token}
+				<TokenLogo data={token} logoSize="xs" />
+				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
+			{:else}
+				<span
+					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
+					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
+				>
+					<IconPlus />
+				</span>
+			{/if}
 
-		{#if isSelectable}
-			<IconExpandMore />
-		{/if}
-	</button>
+			{#if isSelectable}
+				<IconExpandMore />
+			{/if}
+		</button>
+	{/if}
 </TokenInputContainer>
 
 <div class="mt-2 flex min-h-6 items-center justify-between text-sm">

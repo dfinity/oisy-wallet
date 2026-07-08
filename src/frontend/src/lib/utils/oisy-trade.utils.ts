@@ -366,8 +366,10 @@ export const validateAmount = ({
 		return { ok: false };
 	}
 
+	// A sell spends the base amount outright, so its balance can be checked before a
+	// price is set; a buy's spend is the quote cost, which is only known once priced.
 	const spend = spendAmount({ side, baseAmount, price });
-	if (price > 0 && spend > freeBalance + 1e-9) {
+	if ((side === 'sell' || price > 0) && spend > freeBalance + 1e-9) {
 		return { ok: false, errorKind: 'balance' };
 	}
 

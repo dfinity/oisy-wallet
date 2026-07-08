@@ -185,12 +185,13 @@ describe('LimitOrderTradePairBox', () => {
 		expect(onSelectQuote).toHaveBeenCalledOnce();
 	});
 
-	it('does not invoke onSelectQuote until a base token is picked', async () => {
+	it('does not render the quote selector until a base token is picked', () => {
 		const onSelectQuote = vi.fn();
 
 		// No base yet: the quote list is filtered by the base's markets, so the
-		// quote selector must stay inert until a base is chosen.
-		const { getAllByText } = render(LimitOrderTradePairBox, {
+		// quote leg shows only the dash placeholder and its selector is not
+		// rendered until a base is chosen — there is nothing to open the picker.
+		const { getAllByRole } = render(LimitOrderTradePairBox, {
 			props: {
 				...baseProps,
 				baseSymbol: undefined,
@@ -201,10 +202,10 @@ describe('LimitOrderTradePairBox', () => {
 			}
 		});
 
-		// Both legs show "Select token" without a token; the quote one is second.
-		const [, quoteSelect] = getAllByText(en.tokens.text.select_token);
-		await fireEvent.click(quoteSelect);
+		// The quote selector was the sole disabled button; without a base it is gone.
+		const disabledSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
 
+		expect(disabledSelect).toBeUndefined();
 		expect(onSelectQuote).not.toHaveBeenCalled();
 	});
 });
