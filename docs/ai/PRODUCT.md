@@ -109,6 +109,24 @@ The [Personal notes](#personal-notes) feature emits two structured Plausible eve
 
 Recipient-side steps fire on the logged-out public share page and stay anonymous. This consolidates six former flat `note_share_*` events into one; dashboards filter the funnel by `event_modifier` / `source_location`.
 
+### Trading tracking
+
+The [OISY TRADE](#finance-destinations) DEX flows emit two structured Plausible events, both under `event_context: trading` with `event_provider: OISY TRADE`, following the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`). They carry only public chain data — token symbols, amounts, limit prices, and USD values — never a principal or PII. USD values are exact (`amount × exchange-rate price`), consistent with the `swap_offer` (Velora) event.
+
+**`limit_order`** — placing and cancelling a limit order.
+
+| `event_modifier` | Fires when           | `result_status`                 | Properties                                                                                                                                                                                        |
+| ---------------- | -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create`         | an order is placed   | `executing` → `success`/`error` | `token_symbol`/`token2_symbol` (base/quote), `side`, `order_type`, `token_amount`, `price`, `token_usd_price`/`token2_usd_price`, `token_usd_value`/`token2_usd_value`; `result_error` on failure |
+| `cancel`         | an order is canceled | `executing` → `success`/`error` | same block minus `order_type` (the order view carries no time-in-force)                                                                                                                           |
+
+**`deposit_withdraw`** — moving assets in and out of a trading venue's custody account. Venue-agnostic: `event_provider` names the venue.
+
+| `event_modifier` | Fires when          | `result_status`                 | Properties                                                                                      |
+| ---------------- | ------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `deposit`        | funds are deposited | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_price`, `token_usd_value`; `result_error` on failure |
+| `withdraw`       | funds are withdrawn | `executing` → `success`/`error` | same                                                                                            |
+
 ---
 
 ## Exchange-rate sourcing
