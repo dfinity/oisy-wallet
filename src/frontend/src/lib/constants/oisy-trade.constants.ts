@@ -1,6 +1,11 @@
-// Display name for the OISY TRADE provider, shown on the Trading tab venue tag,
+// Display name for the OISY Trade provider, shown on the Trading tab venue tag,
 // order rows, and deposit/withdraw flows.
-export const OISY_TRADE_PROVIDER_NAME = 'OISY TRADE';
+export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
+
+// Frozen analytics identifier for the OISY Trade provider (`dApp` property).
+// Kept as the original casing so trading events remain comparable across the
+// display rename — do NOT sync this to OISY_TRADE_PROVIDER_NAME.
+export const OISY_TRADE_ANALYTICS_DAPP_NAME = 'OISY TRADE';
 
 // How often the Trading tab refreshes balances / pairs while visible.
 // Mirrors the Liquidium polling cadence.

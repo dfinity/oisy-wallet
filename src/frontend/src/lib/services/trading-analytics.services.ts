@@ -1,4 +1,4 @@
-import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
+import { OISY_TRADE_ANALYTICS_DAPP_NAME } from '$lib/constants/oisy-trade.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -53,7 +53,7 @@ export const trackTrading = ({
 	trackEvent({
 		name: PLAUSIBLE_EVENTS.TRADING,
 		metadata: {
-			dApp: OISY_TRADE_PROVIDER_NAME,
+			dApp: OISY_TRADE_ANALYTICS_DAPP_NAME,
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
 			event_subcontext: subContext,
 			result_status: resultStatus,

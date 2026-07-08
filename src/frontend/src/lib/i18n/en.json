@@ -1683,7 +1683,7 @@
 			"tab_title": "Trading",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
-			"provider_name": "OISY TRADE",
+			"provider_name": "OISY Trade",
 			"no_trades": "You don't have any deposits or active orders",
 			"go_to_trade": "Go to Trade"
 		},
@@ -1702,7 +1702,7 @@
 			"deposit": "Deposit",
 			"withdraw": "Withdraw",
 			"active_orders": "Active orders",
-			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY TRADE.",
+			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY Trade.",
 			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
 			"new_order": "New order",
 			"order_history": "Order history"
@@ -1712,8 +1712,8 @@
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
 		},
 		"onboarding": {
-			"title": "Trade on-chain with OISY TRADE",
-			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"title": "Trade on-chain with OISY Trade",
+			"description": "OISY Trade is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
 			"step_deposit": "Deposit a supported token",
 			"step_order": "Place a limit order",
 			"step_withdraw": "Withdraw anytime",
@@ -1735,16 +1735,16 @@
 			"transaction_fee": "Total estimated fee",
 			"approval_fee": "Approval fee",
 			"transfer_fee": "Network fee",
-			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
-			"info_title": "OISY TRADE: on-chain order book",
-			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
+			"consent": "I understand my tokens will be held by the OISY Trade canister and are subject to on-chain smart contract risk.",
+			"info_title": "OISY Trade: on-chain order book",
+			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by on-chain smart contracts.",
 			"empty_title": "Nothing to deposit yet",
-			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
+			"empty_description": "OISY Trade lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
 			"approving": "Approving",
 			"approved": "Approved",
-			"approve_description": "OISY TRADE authorised to transfer $symbol",
+			"approve_description": "OISY Trade authorised to transfer $symbol",
 			"depositing": "Depositing",
-			"deposit_description": "Transferring $symbol to OISY TRADE",
+			"deposit_description": "Transferring $symbol to OISY Trade",
 			"done": "Done",
 			"error": {
 				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
@@ -1767,7 +1767,7 @@
 			"open": "Withdraw",
 			"progress_withdraw": "Sending $symbol to your wallet",
 			"progress_done": "Done",
-			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY Trade. Try again in a moment."
 		},
 		"orders": {
 			"title": "Orders",
@@ -1794,8 +1794,8 @@
 			"count_canceled": "$count canceled"
 		},
 		"info": {
-			"title": "What is OISY TRADE",
-			"description": "OISY TRADE is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
+			"title": "What is OISY Trade",
+			"description": "OISY Trade is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
 			"visit_website": "Visit website",
 			"fact_1_title": "Buy or sell at your price",
 			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
@@ -1905,7 +1905,7 @@
 			"market_moved_sell": "Market moved: best bid is now $price. At this price your fill-or-kill order would be canceled. Go back and lower your price.",
 			"market_moved_buy": "Market moved: best ask is now $price. At this price your fill-or-kill order would be canceled. Go back and raise your price.",
 			"placing_initializing": "Submitting order",
-			"placing_sub": "Sending limit order to OISY TRADE",
+			"placing_sub": "Sending limit order to OISY Trade",
 			"placing_done": "Order placed",
 			"place_error": "Could not place the order. Please try again."
 		}

@@ -86,7 +86,7 @@ describe('TradingOrderRow', () => {
 		// tag wraps with the text instead of dropping to its own flex line.
 		const textBlock = getByText('Sell').parentElement;
 
-		expect(textBlock).toHaveTextContent('OISY TRADE');
+		expect(textBlock).toHaveTextContent('OISY Trade');
 	});
 
 	it('opens the order-detail modal with the order on click', async () => {
