@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Welcome to Borrow!",
-			"header_description": "Access liquidity without selling. Borrow stablecoins or BTC against your crypto.",
+			"header_description": "Access liquidity without selling. Borrow stablecoins against your BTC, ICP, and more.",
 			"borrowing_options": "Borrowing options",
 			"borrowing_potential": "Borrowing potential",
 			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
@@ -1684,7 +1684,6 @@
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
 			"provider_name": "OISY Trade",
-			"no_trades": "You don't have any deposits or active orders",
 			"go_to_trade": "Go to Trade"
 		},
 		"page": {
