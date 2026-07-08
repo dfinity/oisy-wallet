@@ -247,9 +247,9 @@
 			{/snippet}
 		</TokenInputContent>
 		{#if nonNullish(baseInputError)}
-			<p class="mt-1 text-xs text-error-primary">{baseInputError.message}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary">{baseInputError.message}</p>
 		{:else if nonNullish(baseAmountError)}
-			<p class="mt-1 text-xs text-error-primary">{baseAmountError}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary">{baseAmountError}</p>
 		{/if}
 	</div>
 
@@ -315,7 +315,7 @@
 			{/snippet}
 		</TokenInputContent>
 		{#if nonNullish(quoteAmountError)}
-			<p class="mt-1 text-xs text-error-primary">{quoteAmountError}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary">{quoteAmountError}</p>
 		{/if}
 	</div>
 </div>
