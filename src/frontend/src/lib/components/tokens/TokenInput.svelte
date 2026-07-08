@@ -136,7 +136,7 @@
 		styleClass="h-14 text-3xl"
 	>
 		<div
-			style={readOnly ? '--input-background: var(--color-background-disabled-alt);' : undefined}
+			style={readOnly ? '--input-background: transparent;' : undefined}
 			class="flex h-full w-full items-center"
 		>
 			{#if token}
