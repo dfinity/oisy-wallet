@@ -1,4 +1,5 @@
 import type { UserData } from '$declarations/rewards/rewards.did';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
@@ -20,6 +21,7 @@ import {
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import { getSymbol } from '$lib/utils/modal.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
@@ -61,6 +63,7 @@ describe('Menu', () => {
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
 		setPrivacyMode({ enabled: false });
+		userSelectedNetworkStore.set(undefined);
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -211,7 +214,9 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemSettingsButtonSelector });
 	});
 
-	it('navigates to the settings page when the settings button is clicked', async () => {
+	it('navigates to the settings page preserving the selected network when the settings button is clicked', async () => {
+		userSelectedNetworkStore.set(ICP_NETWORK_ID);
+
 		await openMenu();
 		await waitForElement({ selector: menuItemSettingsButtonSelector });
 
@@ -223,7 +228,9 @@ describe('Menu', () => {
 
 		button.click();
 
-		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(expect.stringContaining('/settings'));
+		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
+			expect.stringContaining(`/settings/?network=${ICP_NETWORK_ID.description}`)
+		);
 	});
 
 	it('should render the logged out version if not signed in', async () => {
