@@ -219,7 +219,7 @@
 		<div class="flex items-center gap-1.5 text-xs">
 			{@render presetButton({ preset: 'book', label: bidAskLabel })}
 			<span class="text-tertiary" aria-hidden="true">|</span>
-			<div class="flex items-center gap-1">
+			<div class="flex items-center gap-0.5">
 				{#each pricePresets as { preset, label }, i (preset)}
 					{#if i > 0}
 						<span class="text-tertiary" aria-hidden="true">·</span>
