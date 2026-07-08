@@ -194,7 +194,7 @@
 
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
 	<!-- Base row: shared amount input + token selector -->
-	<div class="py-1">
+	<div class="py-2">
 		<TokenInputContent
 			displayUnit={inputUnit}
 			exchangeRate={baseExchangeRate}
@@ -261,7 +261,7 @@
 	</div>
 
 	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
-	<div class="py-1">
+	<div class="py-2">
 		<TokenInputContent
 			amount={quoteAmountValue}
 			disabled={true}

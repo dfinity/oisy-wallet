@@ -122,8 +122,8 @@ describe('LimitOrderTradePairBox', () => {
 
 		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
-		expect(baseInput.closest('div.py-1')).toHaveTextContent(expected);
-		expect(quoteInput.closest('div.py-1')).not.toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
 	it('shows the buy balance error under the quote (second) token box, not the base box', () => {
@@ -140,8 +140,8 @@ describe('LimitOrderTradePairBox', () => {
 
 		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
-		expect(quoteInput.closest('div.py-1')).toHaveTextContent(expected);
-		expect(baseInput.closest('div.py-1')).not.toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
 	it('shows the min-notional error under the quote (second) token box', () => {
@@ -157,8 +157,8 @@ describe('LimitOrderTradePairBox', () => {
 
 		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
-		expect(quoteInput.closest('div.py-1')).toHaveTextContent(expected);
-		expect(baseInput.closest('div.py-1')).not.toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
 	it('shows the lot-multiple error when the amount is not a multiple of the lot size', () => {
