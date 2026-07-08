@@ -12,10 +12,9 @@
 	</div>
 {/snippet}
 
-<!-- A neutral-grey box (the modal surface is white, so the plain level's white
-	background would be invisible). Grey, not a blue tint, since there's already
-	blue above (the Note panel) and below (Cancel/Save). -->
-<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-tertiary! text-left">
+<!-- A soft grey callout (secondary surface) so the privacy note reads as a
+	distinct reassurance box on the white modal. -->
+<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-secondary! text-left">
 	<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 	>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 		ariaLabel={$i18n.core.text.learn_more}
