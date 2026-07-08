@@ -57,6 +57,12 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
+	// `TokenInput` surfaces a generic parse error (e.g. an out-of-range amount) via
+	// its bound `error`. We render it ourselves through the compact error line below
+	// so it shares the pair-aware errors' styling and vertical rhythm instead of the
+	// looser built-in message.
+	let baseInputError = $state<Error | undefined>();
+
 	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
 	// `baseAmount` (a string), re-normalizing every edit to the pair's lot precision
 	// through the limit-order rule the parent applies in `onBaseInput`.
@@ -172,12 +178,14 @@
 		<TokenInput
 			displayUnit={inputUnit}
 			exchangeRate={baseExchangeRate}
+			hideErrorMessage
 			isSelectable
 			onClick={onSelectBase}
 			{onCustomValidate}
 			showTokenNetwork
 			token={baseToken}
 			bind:amount={getAmount, setAmount}
+			bind:error={baseInputError}
 		>
 			{#snippet title()}{baseLabel}{/snippet}
 
@@ -221,6 +229,8 @@
 		</TokenInput>
 		{#if nonNullish(amountError)}
 			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
+		{:else if nonNullish(baseInputError)}
+			<p class="mt-1 text-xs text-error-primary">{baseInputError.message}</p>
 		{/if}
 	</div>
 
