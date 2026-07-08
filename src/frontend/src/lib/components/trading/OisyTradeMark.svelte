@@ -14,7 +14,7 @@
 </script>
 
 <svg
-	aria-label="OISY TRADE"
+	aria-label="OISY Trade"
 	fill="none"
 	height={size}
 	role="img"

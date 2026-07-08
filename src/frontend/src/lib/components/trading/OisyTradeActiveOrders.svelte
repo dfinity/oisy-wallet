@@ -4,7 +4,6 @@
 	import { slide } from 'svelte/transition';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeOrderRow from '$lib/components/trading/OisyTradeOrderRow.svelte';
 	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
@@ -87,7 +86,6 @@
 			{#snippet trigger(open)}
 				{#if $oisyTradeHasAssets}
 					<Button colorStyle="primary" onclick={open} paddingSmall type="button">
-						<IconPlus size="16" />
 						{$i18n.trading.page.new_order}
 					</Button>
 				{:else}
@@ -97,7 +95,6 @@
 						empty state below already tells the user to deposit, so no tooltip.
 					-->
 					<Button colorStyle="primary" disabled paddingSmall type="button">
-						<IconPlus size="16" />
 						{$i18n.trading.page.new_order}
 					</Button>
 				{/if}
