@@ -61,10 +61,11 @@
 <div style="--input-font-size: var(--text-base)" class="flex w-full flex-1 flex-col gap-2">
 	<!-- A flat, bordered white field (same box style as the read-only note view) —
 		no tinted panel and no redundant "Note" label; the accessible name moves to
-		aria-label. -->
+		aria-label. The border brightens to brand-primary on focus (like the app's
+		text inputs) so the active field is distinguishable from its resting state. -->
 	<textarea
 		bind:this={textarea}
-		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary outline-none placeholder:text-tertiary md:flex-auto md:max-h-[calc(80dvh_-_28rem)]"
+		class="min-h-32 w-full flex-1 resize-none overflow-y-auto rounded-lg border border-brand-subtle-20 bg-primary p-4 text-base font-normal text-primary outline-none transition-colors placeholder:text-tertiary focus:border-brand-primary md:flex-auto md:max-h-[calc(80dvh_-_28rem)]"
 		aria-label={$i18n.notes.text.note_label}
 		data-tid={NOTES_INPUT}
 		{disabled}
