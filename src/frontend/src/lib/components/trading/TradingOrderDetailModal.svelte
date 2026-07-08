@@ -10,6 +10,7 @@
 	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
@@ -302,26 +303,28 @@
 			</ModalValue>
 		{/if}
 
-		{#if active}
-			<Hr />
+		{#snippet outerContent()}
+			{#if active}
+				<Hr />
 
-			<div class="flex justify-start">
-				<Button
-					alignLeft
-					ariaLabel={$i18n.trading.order_detail.cancel_order}
-					colorStyle="error"
-					onclick={() => (showCancelConfirm = true)}
-					testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
-					transparent
-				>
-					<IconTrash />
-					{$i18n.trading.order_detail.cancel_order}
-				</Button>
-			</div>
-		{/if}
+				<div class="flex justify-start px-3 pt-3 md:px-6">
+					<Button
+						alignLeft
+						ariaLabel={$i18n.trading.order_detail.cancel_order}
+						colorStyle="error"
+						onclick={() => (showCancelConfirm = true)}
+						testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
+						transparent
+					>
+						<IconTrash />
+						{$i18n.trading.order_detail.cancel_order}
+					</Button>
+				</div>
+			{/if}
+		{/snippet}
 
 		{#snippet toolbar()}
-			<Button colorStyle="primary" onclick={close}>{$i18n.core.text.close}</Button>
+			<ButtonCloseModal isPrimary />
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>
