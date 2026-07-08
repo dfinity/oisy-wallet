@@ -111,7 +111,7 @@ Recipient-side steps fire on the logged-out public share page and stay anonymous
 
 ### Trading tracking
 
-The [OISY TRADE](#finance-destinations) DEX flows emit two structured Plausible events, both under `event_context: trading` with `event_provider: OISY TRADE`, following the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`). They carry only public chain data — token symbols, amounts, limit prices, and USD values — never a principal or PII. USD values are exact (`amount × exchange-rate price`), consistent with the `swap_offer` (Velora) event.
+The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible events, both under `event_context: trading` with `event_provider: OISY Trade`, following the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`). They carry only public chain data — token symbols, amounts, limit prices, and USD values — never a principal or PII. USD values are exact (`amount × exchange-rate price`), consistent with the `swap_offer` (Velora) event.
 
 **`limit_order`** — placing and cancelling a limit order.
 

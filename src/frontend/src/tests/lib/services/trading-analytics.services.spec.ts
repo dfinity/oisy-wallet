@@ -32,7 +32,7 @@ describe('trading-analytics.services', () => {
 				name: 'limit_order',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'create',
 					result_status: 'executing',
 					token_symbol: 'ICP',
@@ -65,7 +65,7 @@ describe('trading-analytics.services', () => {
 				name: 'limit_order',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'cancel',
 					result_status: 'error',
 					token_symbol: 'ICP',
@@ -88,7 +88,7 @@ describe('trading-analytics.services', () => {
 				name: 'limit_order',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'create',
 					result_status: 'success'
 				}
@@ -110,7 +110,7 @@ describe('trading-analytics.services', () => {
 				name: 'limit_order',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'create',
 					result_status: 'success',
 					token_symbol: 'ICP'
@@ -134,7 +134,7 @@ describe('trading-analytics.services', () => {
 				name: 'deposit_withdraw',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'deposit',
 					result_status: 'executing',
 					token_symbol: 'ICP',
@@ -158,7 +158,7 @@ describe('trading-analytics.services', () => {
 				name: 'deposit_withdraw',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'withdraw',
 					result_status: 'success',
 					token_symbol: 'ckUSDC'
@@ -180,7 +180,7 @@ describe('trading-analytics.services', () => {
 				name: 'deposit_withdraw',
 				metadata: {
 					event_context: 'trading',
-					event_provider: 'OISY TRADE',
+					event_provider: 'OISY Trade',
 					event_modifier: 'deposit',
 					result_status: 'success',
 					token_symbol: 'ICP',
