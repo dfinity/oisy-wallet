@@ -2220,7 +2220,6 @@ interface I18nNotes {
 			single_use_caveat: string;
 			copy_note: string;
 			note_copied: string;
-			outro_eyebrow: string;
 			outro_title: string;
 			outro_subtitle: string;
 			outro_feature_multichain: string;
