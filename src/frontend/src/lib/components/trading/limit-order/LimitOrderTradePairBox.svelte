@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
-	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -57,8 +57,8 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	// Render TokenInput's generic parse error through our own compact error line
-	// so it matches the pair-aware errors' styling and spacing.
+	// `TokenInputContent` has no built-in error message, so we render its generic
+	// parse error ourselves through the compact error line below.
 	let baseInputError = $state<Error | undefined>();
 
 	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
@@ -173,10 +173,9 @@
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
 	<!-- Base row: shared amount input + token selector -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			displayUnit={inputUnit}
 			exchangeRate={baseExchangeRate}
-			hideErrorMessage
 			isSelectable
 			onClick={onSelectBase}
 			{onCustomValidate}
@@ -224,7 +223,7 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
+		</TokenInputContent>
 		{#if nonNullish(baseInputError)}
 			<p class="mt-1 text-xs text-error-primary">{baseInputError.message}</p>
 		{:else if nonNullish(amountError)}
@@ -241,7 +240,7 @@
 
 	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
 	<div class="py-2">
-		<TokenInput
+		<TokenInputContent
 			amount={quoteAmountValue}
 			disabled={true}
 			displayUnit={inputUnit}
@@ -291,6 +290,6 @@
 					{/if}
 				{/if}
 			{/snippet}
-		</TokenInput>
+		</TokenInputContent>
 	</div>
 </div>
