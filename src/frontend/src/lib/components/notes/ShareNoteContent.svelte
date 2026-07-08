@@ -179,7 +179,9 @@
 			</div>
 		</div>
 
-		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
+		<!-- A soft grey callout (secondary surface) matching the editor's privacy box
+			(NotesPrivacyInfoBox). -->
+		<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-secondary! text-left">
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
