@@ -9,6 +9,7 @@ import {
 	NAVIGATION_ITEM_BORROW,
 	NAVIGATION_ITEM_EXPLORER,
 	NAVIGATION_ITEM_NFTS,
+	NAVIGATION_ITEM_NOTES,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
 	NAVIGATION_ITEM_TOKENS,
@@ -60,8 +61,9 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
-		// Notes (PERSONAL_NOTES_ENABLED) and Earn (EARNING_ENABLED) are
-		// feature-flagged off in tests, so they are not asserted here.
+		expect(getByTestId(NAVIGATION_ITEM_NOTES)).toBeInTheDocument();
+		// Earn (EARNING_ENABLED) is feature-flagged off in tests, so it is not
+		// asserted here.
 	});
 
 	it('renders the desktop section headings', () => {
