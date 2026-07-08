@@ -53,9 +53,9 @@ add_pair() {
 }
 
 # base                 sym   dec  quote                sym    dec  tick                  lot                   min_notional          max_notional
-add_pair "$ICP_LEDGER_ID"   ICP   8  "$CKUSDC_LEDGER_ID" ckUSDC 6  1_000                 1_000_000             5_000_000             "opt (9_000_000_000_000 : nat)"
-add_pair "$CKBTC_LEDGER_ID" ckBTC 8  "$CKUSDC_LEDGER_ID" ckUSDC 6  1_000                 1_000_000             5_000_000             "opt (9_000_000_000_000 : nat)"
-add_pair "$CKETH_LEDGER_ID" ckETH 18 "$CKUSDC_LEDGER_ID" ckUSDC 6  1_000                 1_000_000_000_000_000 5_000_000             "opt (9_000_000_000_000 : nat)"
-add_pair "$CKBTC_LEDGER_ID" ckBTC 8  "$CKETH_LEDGER_ID"  ckETH  18 1_000_000_000_000_000 1_000_000             1_000_000_000_000_000 "null"
-add_pair "$CKBTC_LEDGER_ID" ckBTC 8  "$ICP_LEDGER_ID"    ICP    8  1_000_000             1_000_000             100_000_000           "null"
-add_pair "$CKETH_LEDGER_ID" ckETH 18 "$ICP_LEDGER_ID"    ICP    8  1_000_000             1_000_000_000_000_000 100_000_000           "null"
+add_pair "$ICP_LEDGER_ID" ICP 8 "$CKUSDC_LEDGER_ID" ckUSDC 6 1_000 1_000_000 5_000_000 "opt (9_000_000_000_000 : nat)"
+add_pair "$CKBTC_LEDGER_ID" ckBTC 8 "$CKUSDC_LEDGER_ID" ckUSDC 6 1_000 1_000_000 5_000_000 "opt (9_000_000_000_000 : nat)"
+add_pair "$CKETH_LEDGER_ID" ckETH 18 "$CKUSDC_LEDGER_ID" ckUSDC 6 1_000 1_000_000_000_000_000 5_000_000 "opt (9_000_000_000_000 : nat)"
+add_pair "$CKBTC_LEDGER_ID" ckBTC 8 "$CKETH_LEDGER_ID" ckETH 18 1_000_000_000_000_000 1_000_000 1_000_000_000_000_000 "null"
+add_pair "$CKBTC_LEDGER_ID" ckBTC 8 "$ICP_LEDGER_ID" ICP 8 1_000_000 1_000_000 100_000_000 "null"
+add_pair "$CKETH_LEDGER_ID" ckETH 18 "$ICP_LEDGER_ID" ICP 8 1_000_000 1_000_000_000_000_000 100_000_000 "null"
