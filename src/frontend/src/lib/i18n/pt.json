@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Bem-vindo aos Empréstimos!",
-			"header_description": "Aceda a liquidez sem vender. Peça stablecoins emprestadas contra os teus BTC, ICP e mais.",
+			"header_description": "Aceda à liquidez sem vender. Peça stablecoins emprestadas contra os teus BTC, ICP e mais.",
 			"borrowing_options": "Opções de empréstimo",
 			"borrowing_potential": "Potencial de empréstimo",
 			"borrowing_power_hint": "Uma estimativa de quanto poderias pedir emprestado se fornecesses os teus ativos como garantia, à melhor taxa disponível.",
