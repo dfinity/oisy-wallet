@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -247,9 +249,13 @@
 			{/snippet}
 		</TokenInputContent>
 		{#if nonNullish(baseInputError)}
-			<p class="mt-1 mb-0 text-xs text-error-primary">{baseInputError.message}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseInputError.message}
+			</p>
 		{:else if nonNullish(baseAmountError)}
-			<p class="mt-1 mb-0 text-xs text-error-primary">{baseAmountError}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseAmountError}
+			</p>
 		{/if}
 	</div>
 
@@ -315,7 +321,9 @@
 			{/snippet}
 		</TokenInputContent>
 		{#if nonNullish(quoteAmountError)}
-			<p class="mt-1 mb-0 text-xs text-error-primary">{quoteAmountError}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{quoteAmountError}
+			</p>
 		{/if}
 	</div>
 </div>
