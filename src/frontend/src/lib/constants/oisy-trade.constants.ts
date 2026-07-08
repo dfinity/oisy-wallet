@@ -1,6 +1,11 @@
-// Display name for the OISY TRADE provider, shown on the Trading tab venue tag,
+// Display name for the OISY Trade provider, shown on the Trading tab venue tag,
 // order rows, and deposit/withdraw flows.
-export const OISY_TRADE_PROVIDER_NAME = 'OISY TRADE';
+export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
+
+// Frozen analytics identifier for the OISY Trade provider (`dApp` property).
+// Kept as the original casing so trading events remain comparable across the
+// display rename — do NOT sync this to OISY_TRADE_PROVIDER_NAME.
+export const OISY_TRADE_ANALYTICS_DAPP_NAME = 'OISY TRADE';
 
 // How often the Trading tab refreshes balances / pairs while visible.
 // Mirrors the Liquidium polling cadence.
@@ -15,9 +20,9 @@ export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;
 // need an explicit "load more").
 export const OISY_TRADE_MAX_ORDER_PAGES = 5;
 
-// "Learn more" destination for the Trading tab and deposit flow.
-// TODO: point at the public OISY TRADE docs page once it exists.
-export const OISY_TRADE_LEARN_MORE_URL = 'https://github.com/dfinity/oisy-trade';
+// "Learn more" destination for the Trading tab and deposit flow: the public
+// OISY Trade docs page.
+export const OISY_TRADE_LEARN_MORE_URL = 'https://docs.oisy.com/using-oisy-wallet/oisy-trade';
 
 // Value-difference (%) of a crossing limit order at/below which the give-up is
 // "severe" — rendered red rather than amber (a >5% give-up vs current value).

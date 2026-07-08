@@ -110,7 +110,7 @@ describe('OisyTradeOrderRow', () => {
 	it('does not render the provider tag (it is the venue’s own page)', () => {
 		const { queryByText } = render(OisyTradeOrderRow, { props: { order } });
 
-		expect(queryByText('OISY TRADE')).toBeNull();
+		expect(queryByText('OISY Trade')).toBeNull();
 	});
 
 	it('opens the order-detail modal with the order on click', async () => {

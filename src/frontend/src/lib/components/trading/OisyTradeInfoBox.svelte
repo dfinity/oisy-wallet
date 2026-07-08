@@ -22,18 +22,18 @@
 				<h4 class="flex flex-1">{$i18n.trading.info.title}</h4>
 
 				<ExternalLink
-					ariaLabel={$i18n.trading.info.visit_website}
+					ariaLabel={$i18n.trading.text.learn_more}
 					href={OISY_TRADE_LEARN_MORE_URL}
 					iconAsLast
 					iconSize="15"
 					styleClass="text-sm"
 					trackEvent={buildLearnMoreEvent({
 						sourceLocation: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.OISY_TRADE,
-						labelKey: 'trading.info.visit_website',
+						labelKey: 'trading.text.learn_more',
 						url: OISY_TRADE_LEARN_MORE_URL
 					})}
 				>
-					{$i18n.trading.info.visit_website}
+					{$i18n.trading.text.learn_more}
 				</ExternalLink>
 			</div>
 		{/snippet}

@@ -896,7 +896,7 @@ describe('oisy-trade.utils — search', () => {
 			Canceled: 'Canceled',
 			Expired: 'Expired'
 		},
-		provider: 'OISY TRADE'
+		provider: 'OISY Trade'
 	};
 
 	const order: OisyTradeOrderView = {
