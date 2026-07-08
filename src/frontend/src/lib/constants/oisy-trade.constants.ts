@@ -2,10 +2,11 @@
 // order rows, and deposit/withdraw flows.
 export const OISY_TRADE_PROVIDER_NAME = 'OISY Trade';
 
-// Frozen analytics identifier for the OISY Trade provider (`dApp` property).
-// Kept as the original casing so trading events remain comparable across the
-// display rename — do NOT sync this to OISY_TRADE_PROVIDER_NAME.
-export const OISY_TRADE_ANALYTICS_DAPP_NAME = 'OISY TRADE';
+// Stable analytics identifier for the OISY Trade provider (`event_provider`),
+// mirroring how other providers keep a dedicated id (`SwapProvider`,
+// `LIQUIDIUM_PROVIDER_ID`). Decoupled from OISY_TRADE_PROVIDER_NAME on purpose:
+// a future UI-copy change must not silently move the Plausible dimension.
+export const OISY_TRADE_ANALYTICS_PROVIDER_NAME = 'OISY Trade';
 
 // How often the Trading tab refreshes balances / pairs while visible.
 // Mirrors the Liquidium polling cadence.

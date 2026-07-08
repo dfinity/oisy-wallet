@@ -21,7 +21,8 @@ export enum PLAUSIBLE_EVENTS {
 	TOKEN_MANAGE = 'token_manage',
 	EXPORT_DATA = 'export_data',
 	ONRAMPER_OPEN = 'onramper_open',
-	TRADING = 'trading',
+	LIMIT_ORDER = 'limit_order',
+	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share'
 }
@@ -82,13 +83,6 @@ export enum PLAUSIBLE_EVENT_SUBCONTEXT_SIGNER {
 	CALL_CANISTER = 'call_canister'
 }
 
-export enum PLAUSIBLE_EVENT_SUBCONTEXT_TRADING {
-	LIMIT_ORDER = 'limit_order',
-	CANCEL_ORDER = 'cancel_order',
-	DEPOSIT = 'deposit',
-	WITHDRAW = 'withdraw'
-}
-
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NOTES {
 	SHARE = 'share'
 }
@@ -99,6 +93,7 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT_PAGE = 'nft-page',
 	EARN_PAGE = 'earn-page',
 	BORROW_PAGE = 'borrow-page',
+	OISY_TRADE_PAGE = 'oisy-trade-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
 	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
 	TOKENS_BASIC = 'tokens_basic',
