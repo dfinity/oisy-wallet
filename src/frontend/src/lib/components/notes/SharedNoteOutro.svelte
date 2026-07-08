@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
+	import IconNotebook from '$lib/components/icons/lucide/IconNotebook.svelte';
 	import { OISY_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON,
@@ -16,11 +17,14 @@
 	]);
 </script>
 
-<div class="flex flex-1 flex-col gap-5 py-4 text-center" data-tid={NOTES_SHARE_RECIPIENT_OUTRO}>
-	<span class="text-sm font-bold text-brand-primary"
-		>{replaceOisyPlaceholders($i18n.notes.share.recipient.outro_eyebrow)}</span
-	>
-	<h1 class="text-2xl font-bold text-primary">{$i18n.notes.share.recipient.outro_title}</h1>
+<div
+	class="flex flex-1 flex-col items-center gap-5 py-4 text-center"
+	data-tid={NOTES_SHARE_RECIPIENT_OUTRO}
+>
+	<div class="text-brand-primary"><IconNotebook size="48" /></div>
+	<h1 class="text-2xl font-bold text-primary">
+		{replaceOisyPlaceholders($i18n.notes.share.recipient.outro_title)}
+	</h1>
 	<p class="text-tertiary">{replaceOisyPlaceholders($i18n.notes.share.recipient.outro_subtitle)}</p>
 
 	<ul class="flex flex-col gap-2 text-secondary">
@@ -35,7 +39,7 @@
 	<!-- Same-tab navigation: the outro is the end of the flow with no other action,
 	     so there is nothing to return to — opening a new tab would only litter. -->
 	<a
-		class="as-button primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 no-underline"
+		class="as-button primary mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 no-underline"
 		data-tid={NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON}
 		href={OISY_URL}
 		onclick={() =>
