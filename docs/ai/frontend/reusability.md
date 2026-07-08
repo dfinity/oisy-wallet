@@ -52,15 +52,16 @@
 
 ### Common building blocks
 
-| Component                            | Where                      | Use it for                                     |
-| ------------------------------------ | -------------------------- | ---------------------------------------------- |
-| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                       |
-| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border. |
-| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                 |
-| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.            |
-| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                  |
-| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.       |
-| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                            |
+| Component                            | Where                      | Use it for                                                                                                        |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                                                                                          |
+| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border.                                                                    |
+| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                                                                                    |
+| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.                                                                               |
+| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                                                                                     |
+| `GoToButton`                         | `$lib/components/common/`  | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`. |
+| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.                                                                          |
+| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                                                                                               |
 
 ### Cross-chain feature folders
 
