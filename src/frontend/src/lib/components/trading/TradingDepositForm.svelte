@@ -23,6 +23,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { tryParseToken } from '$lib/utils/parse.utils';
 
@@ -96,6 +97,7 @@
 <ContentWithToolbar>
 	<div class="mb-4">
 		<TokenInput
+			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			{exchangeRate}
 			isSelectable
