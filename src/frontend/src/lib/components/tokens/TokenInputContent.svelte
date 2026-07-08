@@ -177,12 +177,11 @@
 	<button
 		class="flex h-full items-center gap-1 px-3 transition-colors"
 		class:bg-primary={readOnlyAmount}
-		class:border-r={readOnlyAmount}
+		class:border={readOnlyAmount}
 		class:border-solid={readOnlyAmount}
 		class:border-tertiary={readOnlyAmount}
-		class:border-y={readOnlyAmount}
 		class:hover:border-brand-primary={readOnlyAmount && isSelectable}
-		class:rounded-r-lg={readOnlyAmount}
+		class:rounded-lg={readOnlyAmount}
 		class:shadow-inner={readOnlyAmount}
 		disabled={!isSelectable}
 		onclick={onClick}
