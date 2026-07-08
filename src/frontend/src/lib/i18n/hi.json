@@ -24,7 +24,8 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "",
-			"no_borrowings": ""
+			"no_borrowings": "",
+			"go_to_borrow": ""
 		}
 	},
 	"core": {

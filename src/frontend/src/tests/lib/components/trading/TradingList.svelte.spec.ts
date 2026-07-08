@@ -81,7 +81,7 @@ describe('TradingList', () => {
 		setPrivacyMode({ enabled: false });
 	});
 
-	it('should render the empty placeholder with the go-to-trade button when the user has no assets', () => {
+	it('should render the empty placeholder when the user has no assets', () => {
 		// Loaded (balances non-null) but empty → the empty placeholder rather than the skeleton.
 		oisyTradeStore.set({
 			pairs: undefined,
@@ -90,10 +90,11 @@ describe('TradingList', () => {
 			orders: undefined
 		});
 
-		const { getByText, getByTestId } = render(TradingList);
+		const { getByText, queryByTestId } = render(TradingList);
 
 		expect(getByText(en.trading.text.no_trades)).toBeInTheDocument();
-		expect(getByTestId(TRADING_GOTO_BUTTON)).toBeInTheDocument();
+		// The go-to-trade button now lives in the Assets footer, not the list itself.
+		expect(queryByTestId(TRADING_GOTO_BUTTON)).toBeNull();
 	});
 
 	it('renders only the assets section once the user has assets', () => {

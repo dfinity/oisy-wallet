@@ -6,6 +6,7 @@
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
 	import { TRADING_ENABLED } from '$env/trading';
 	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
+	import GoToBorrowButton from '$lib/components/borrowings/GoToBorrowButton.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
@@ -20,6 +21,7 @@
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
+	import GoToTradeButton from '$lib/components/trading/GoToTradeButton.svelte';
 	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
@@ -170,6 +172,10 @@
 				</ManageTokensButton>
 			{:else if activeTab === TokenTypes.EARNING}
 				<GoToEarnButton />
+			{:else if activeTab === TokenTypes.TRADING}
+				<GoToTradeButton />
+			{:else if activeTab === TokenTypes.BORROWINGS}
+				<GoToBorrowButton />
 			{/if}
 		</div>
 	</div>
