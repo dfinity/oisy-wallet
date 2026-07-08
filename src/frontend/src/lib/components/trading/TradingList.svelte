@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { OISY_TRADE_ENABLED } from '$env/oisy-trade';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import GoToTradeButton from '$lib/components/trading/GoToTradeButton.svelte';
+	import OisyTradeInfoBox from '$lib/components/trading/OisyTradeInfoBox.svelte';
 	import TradingAssets from '$lib/components/trading/TradingAssets.svelte';
 	import TradingListSkeleton from '$lib/components/trading/TradingListSkeleton.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -26,7 +28,11 @@
 	{:else if $oisyTradeHasAssets}
 		<TradingAssets />
 	{:else}
-		<p class="py-10 text-center text-tertiary">{$i18n.trading.text.no_trades}</p>
+		<OisyTradeInfoBox>
+			{#snippet footer()}
+				<GoToTradeButton />
+			{/snippet}
+		</OisyTradeInfoBox>
 	{/if}
 {:else}
 	<EmptyState
