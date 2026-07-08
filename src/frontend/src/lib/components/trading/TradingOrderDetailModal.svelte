@@ -304,7 +304,7 @@
 
 		{#snippet outerContent()}
 			{#if active}
-				<div class="flex justify-start px-3 py-3 md:px-6">
+				<div class="flex justify-start px-3 py-2 sm:px-6 sm:py-3">
 					<Button
 						alignLeft
 						ariaLabel={$i18n.trading.order_detail.cancel_order}
