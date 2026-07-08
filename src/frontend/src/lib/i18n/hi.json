@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "उधार",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "सेटिंग्स",
 			"dapp_explorer": "खोजें",
 			"activity": "गतिविधि",
-			"trade": "ट्रेड",
-			"borrow": "उधार",
+			"trade": "ट्रेड करें",
+			"borrow": "उधार लें",
 			"section_portfolio": "पोर्टफोलियो",
 			"section_finance": "वित्त",
 			"section_more": "अधिक",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "ट्रेडिंग",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

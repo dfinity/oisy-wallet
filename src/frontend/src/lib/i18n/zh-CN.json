@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "欠款",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -118,7 +118,7 @@
 			"dapp_explorer": "探索",
 			"activity": "活动",
 			"trade": "交易",
-			"borrow": "借贷",
+			"borrow": "借款",
 			"section_portfolio": "投资组合",
 			"section_finance": "金融",
 			"section_more": "更多",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "交易中",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

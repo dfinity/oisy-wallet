@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "대출",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "설정",
 			"dapp_explorer": "탐색",
 			"activity": "활동",
-			"trade": "거래",
-			"borrow": "대출",
+			"trade": "거래하기",
+			"borrow": "대출받기",
 			"section_portfolio": "포트폴리오",
 			"section_finance": "금융",
 			"section_more": "더보기",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "거래",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Emprunts",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "Paramètres",
 			"dapp_explorer": "Explorer",
 			"activity": "Activité",
-			"trade": "Trading",
-			"borrow": "Prêts",
+			"trade": "Trader",
+			"borrow": "Emprunter",
 			"section_portfolio": "Portfolio",
 			"section_finance": "Finance",
 			"section_more": "Plus",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Trading",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

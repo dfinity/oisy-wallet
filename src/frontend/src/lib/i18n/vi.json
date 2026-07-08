@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Khoản vay",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Đang giao dịch",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

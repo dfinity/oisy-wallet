@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Prestiti",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
-			"trade": "Trading",
-			"borrow": "Prestiti",
+			"trade": "Negozia",
+			"borrow": "Prendi in prestito",
 			"section_portfolio": "Portafoglio",
 			"section_finance": "Finanza",
 			"section_more": "Altro",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Trading",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

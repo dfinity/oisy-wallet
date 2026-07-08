@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Займы",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
-			"trade": "Трейд",
-			"borrow": "Займы",
+			"trade": "Торговать",
+			"borrow": "Брать в долг",
 			"section_portfolio": "Портфель",
 			"section_finance": "Финансы",
 			"section_more": "Ещё",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Торговля",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

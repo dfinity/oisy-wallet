@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "借入",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "設定",
 			"dapp_explorer": "DAppを探す",
 			"activity": "履歴",
-			"trade": "取引",
-			"borrow": "借入",
+			"trade": "取引する",
+			"borrow": "借りる",
 			"section_portfolio": "ポートフォリオ",
 			"section_finance": "金融",
 			"section_more": "その他",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "取引",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",

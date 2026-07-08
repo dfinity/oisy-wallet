@@ -24,7 +24,7 @@
 	},
 	"borrowings": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Půjčky",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -117,8 +117,8 @@
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
-			"trade": "Obchod",
-			"borrow": "Půjčky",
+			"trade": "Obchodovat",
+			"borrow": "Půjčit si",
 			"section_portfolio": "Portfolio",
 			"section_finance": "Finance",
 			"section_more": "Více",
@@ -1680,7 +1680,7 @@
 	},
 	"trading": {
 		"text": {
-			"tab_title": "",
+			"tab_title": "Obchod",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",
