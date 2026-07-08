@@ -179,16 +179,11 @@
 	<button
 		class="flex h-full items-center gap-1 px-3 transition-colors"
 		class:bg-primary={readOnlyAmount}
-		class:border-r={readOnlyAmount}
-		class:border-r-solid={readOnlyAmount}
-		class:border-r-tertiary={readOnlyAmount}
-		class:border-y={readOnlyAmount}
-		class:border-y-solid={readOnlyAmount}
-		class:border-y-tertiary={readOnlyAmount}
-		class:hover:border-r-brand-primary={readOnlyAmount && isSelectable}
-		class:hover:border-y-brand-primary={readOnlyAmount && isSelectable}
-		class:rounded-e-lg={readOnlyAmount}
-		class:rounded-none={readOnlyAmount}
+		class:border={readOnlyAmount}
+		class:border-solid={readOnlyAmount}
+		class:border-tertiary={readOnlyAmount}
+		class:hover:border-brand-primary={readOnlyAmount && isSelectable}
+		class:rounded-lg={readOnlyAmount}
 		class:shadow-inner={readOnlyAmount}
 		disabled={!isSelectable}
 		onclick={onClick}
