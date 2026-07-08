@@ -94,10 +94,12 @@ describe('OisyTradeProvider', () => {
 		});
 	});
 
-	it('does not track a page_open event when the Trading feature flag is off', () => {
+	it('does not track a page_open event when the Trading feature flag is off', async () => {
 		mockTradingEnabled.value = false;
 
 		render(OisyTradeProvider);
+
+		await tick();
 
 		expect(mockTrackEvent).not.toHaveBeenCalled();
 	});
