@@ -13,7 +13,9 @@
 </script>
 
 <div
-	class={`flex w-full items-center rounded-lg border border-solid bg-primary shadow-inner transition-colors duration-250 ${styleClass ?? ''}`}
+	class={`flex w-full items-center rounded-lg border border-solid shadow-inner transition-colors duration-250 ${styleClass ?? ''}`}
+	class:bg-disabled-alt={readOnly}
+	class:bg-primary={!readOnly}
 	class:border-brand-primary={!readOnly && focused && !error}
 	class:border-error-solid={error}
 	class:border-tertiary={!error && (readOnly || !focused)}

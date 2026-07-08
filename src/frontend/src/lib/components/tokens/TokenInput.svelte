@@ -138,8 +138,6 @@
 		<div
 			style={readOnly ? '--input-background: var(--color-background-disabled-alt);' : undefined}
 			class="flex h-full w-full items-center"
-			class:overflow-hidden={readOnly}
-			class:rounded-l-lg={readOnly}
 		>
 			{#if token}
 				{#if displayUnit === 'token'}
