@@ -202,6 +202,7 @@
 		class:text-brand-primary={activePreset !== preset}
 		class:text-primary={activePreset === preset}
 		class:underline={activePreset !== preset}
+		aria-pressed={activePreset === preset}
 		onclick={() => setPreset(preset)}
 		type="button">{label}</button
 	>
@@ -217,11 +218,11 @@
 		<span class="text-xs text-secondary">{label}</span>
 		<div class="flex items-center gap-1.5 text-xs">
 			{@render presetButton({ preset: 'book', label: bidAskLabel })}
-			<span class="text-tertiary">|</span>
+			<span aria-hidden="true" class="text-tertiary">|</span>
 			<div class="flex items-center gap-1">
 				{#each pricePresets as { preset, label }, i (preset)}
 					{#if i > 0}
-						<span class="text-tertiary">·</span>
+						<span aria-hidden="true" class="text-tertiary">·</span>
 					{/if}
 					{@render presetButton({ preset, label })}
 				{/each}
