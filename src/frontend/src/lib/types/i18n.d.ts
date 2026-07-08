@@ -1545,8 +1545,8 @@ interface I18nTrading {
 		fok_help: string;
 		routing_name: string;
 		routing_tag: string;
-		lowest_ask: string;
-		highest_bid: string;
+		best_ask: string;
+		best_bid: string;
 		spread: string;
 		spread_value: string;
 		maker_fee: string;
