@@ -380,6 +380,19 @@ describe('oisy-trade.utils — limit order', () => {
 			).toBeTruthy();
 		});
 
+		it('flags a sell balance shortfall even without a price', () => {
+			// A sell spends the base amount outright, so the balance is checkable before pricing.
+			expect(
+				validateAmount({ side: 'sell', baseAmount: 10, price: NaN, freeBalance: 5, pair }).errorKind
+			).toBe('balance');
+		});
+
+		it('does not flag a buy balance without a price (spend unknown)', () => {
+			expect(
+				validateAmount({ side: 'buy', baseAmount: 10, price: NaN, freeBalance: 0, pair }).errorKind
+			).toBeUndefined();
+		});
+
 		it('surfaces balance before the lot check', () => {
 			// 10.3 exceeds free 5 AND is not a 0.25 multiple → balance wins.
 			expect(
