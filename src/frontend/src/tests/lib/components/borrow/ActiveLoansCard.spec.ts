@@ -34,11 +34,11 @@ describe('ActiveLoansCard', () => {
 		liquidiumStore.reset();
 	});
 
-	it('shows the APR line and no health factor when there is no debt', () => {
+	it('shows the empty state and no health factor when there is no debt', () => {
 		const { container } = render(ActiveLoansCard);
 
 		expect(container).toHaveTextContent(en.borrow.text.active_loans);
-		expect(container).toHaveTextContent(en.borrow.text.apr);
+		expect(container).toHaveTextContent(en.borrow.text.no_active_loans);
 		expect(container).not.toHaveTextContent(en.liquidium.text.health_factor);
 	});
 
@@ -48,6 +48,7 @@ describe('ActiveLoansCard', () => {
 		const { container } = render(ActiveLoansCard);
 
 		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).not.toHaveTextContent(en.borrow.text.no_active_loans);
 		expect(container).toHaveTextContent(en.borrow.text.apr);
 	});
 
