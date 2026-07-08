@@ -184,13 +184,28 @@
 	const bidAskLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.preset_bid : $i18n.trading.limit_order.preset_ask
 	);
-	const presets = $derived<{ preset: PricePreset; label: string }[]>([
-		{ preset: 'book', label: bidAskLabel },
+	const pricePresets = $derived<{ preset: PricePreset; label: string }[]>([
 		{ preset: 0, label: $i18n.trading.limit_order.preset_market },
 		{ preset: 1, label: presetLabel1 },
 		{ preset: 5, label: presetLabel5 }
 	]);
 </script>
+
+<!-- Border marks the latched preset; it clears on a manual price edit
+	 (which nulls `activePreset`) and follows the market while latched. -->
+{#snippet presetButton({ preset, label }: { preset: PricePreset; label: string })}
+	<button
+		class="rounded border px-1 py-0.5 transition-colors"
+		class:border-brand-primary={activePreset === preset}
+		class:border-transparent={activePreset !== preset}
+		class:font-semibold={activePreset === preset}
+		class:text-brand-primary={activePreset !== preset}
+		class:text-primary={activePreset === preset}
+		class:underline={activePreset !== preset}
+		onclick={() => setPreset(preset)}
+		type="button">{label}</button
+	>
+{/snippet}
 
 <div
 	class="rounded-lg border bg-secondary px-3 py-2.5"
@@ -201,24 +216,16 @@
 	<div class="flex items-center justify-between gap-2">
 		<span class="text-xs text-secondary">{label}</span>
 		<div class="flex items-center gap-1.5 text-xs">
-			{#each presets as { preset, label }, i (preset)}
-				{#if i > 0}
-					<span class="text-tertiary">·</span>
-				{/if}
-				<!-- Border marks the latched preset; it clears on a manual price edit
-					 (which nulls `activePreset`) and follows the market while latched. -->
-				<button
-					class="rounded border px-1 py-0.5 transition-colors"
-					class:border-brand-primary={activePreset === preset}
-					class:border-transparent={activePreset !== preset}
-					class:font-semibold={activePreset === preset}
-					class:text-brand-primary={activePreset !== preset}
-					class:text-primary={activePreset === preset}
-					class:underline={activePreset !== preset}
-					onclick={() => setPreset(preset)}
-					type="button">{label}</button
-				>
-			{/each}
+			{@render presetButton({ preset: 'book', label: bidAskLabel })}
+			<span class="text-tertiary">|</span>
+			<div class="flex items-center gap-1">
+				{#each pricePresets as { preset, label }, i (preset)}
+					{#if i > 0}
+						<span class="text-tertiary">·</span>
+					{/if}
+					{@render presetButton({ preset, label })}
+				{/each}
+			</div>
 		</div>
 	</div>
 
