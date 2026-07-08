@@ -11,7 +11,8 @@ import {
 	NAVIGATION_ITEM_NFTS,
 	NAVIGATION_ITEM_REWARDS,
 	NAVIGATION_ITEM_SETTINGS,
-	NAVIGATION_ITEM_TOKENS
+	NAVIGATION_ITEM_TOKENS,
+	NAVIGATION_ITEM_TRADE
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
@@ -40,12 +41,12 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_NFTS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
+		expect(getByTestId(NAVIGATION_ITEM_TRADE)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_EXPLORER)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_REWARDS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
-		// Notes (PERSONAL_NOTES_ENABLED), Trade (TRADING_ENABLED) and Earn
-		// (EARNING_ENABLED) are feature-flagged off in tests, so they are not
-		// asserted here.
+		// Notes (PERSONAL_NOTES_ENABLED) and Earn (EARNING_ENABLED) are
+		// feature-flagged off in tests, so they are not asserted here.
 	});
 
 	it('renders the desktop section headings', () => {
