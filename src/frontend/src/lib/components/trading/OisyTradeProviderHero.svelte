@@ -56,19 +56,21 @@
 
 			<h2 class="my-2 text-xl font-bold sm:text-2xl">{$i18n.trading.text.provider_name}</h2>
 
-			<p class="max-w-lg text-sm text-tertiary sm:text-base">
+			<div class="max-w-lg text-sm text-tertiary sm:text-base">
 				{$i18n.trading.page.tagline}
 				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
-			</p>
+			</div>
 
-			<button
-				class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-primary hover:underline"
+			<Button
+				innerStyleClass="items-center"
+				link
 				onclick={scrollToInfo}
+				styleClass="mt-2 text-sm"
 				type="button"
 			>
-				{$i18n.core.text.learn_more}
-				<IconArrowDown size="14" />
-			</button>
+				<span>{$i18n.core.text.learn_more}</span>
+				<IconArrowDown size="18" />
+			</Button>
 		</div>
 	{/snippet}
 
@@ -78,7 +80,7 @@
 			left-aligned layout on mobile (smaller value type, no fixed height), per
 			the design's mobile hero treatment.
 		-->
-		<div class="flex w-full flex-col gap-3 sm:flex-row">
+		<div class="mt-6 flex w-full flex-col gap-3 sm:flex-row">
 			<div
 				class="flex w-full flex-col gap-1.5 rounded-xl border border-disabled bg-secondary p-4 sm:w-1/2 sm:items-center sm:text-center"
 			>
