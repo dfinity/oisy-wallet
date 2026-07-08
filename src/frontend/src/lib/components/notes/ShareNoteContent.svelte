@@ -166,10 +166,7 @@
 			<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
 				 the transaction-filter panels); `flex-start` top-aligns the box in case
 				 the label wraps on a narrow viewport. -->
-			<div
-				style="--checkbox-label-order: 1; --checkbox-align-items: flex-start;"
-				class="single-use-checkbox"
-			>
+			<div style="--checkbox-label-order: 1; --checkbox-align-items: flex-start;">
 				<Checkbox
 					checked={singleUse}
 					inputId="share-single-use"
@@ -251,14 +248,3 @@
 		<IconShieldCheck size="20" />
 	</div>
 {/snippet}
-
-<style lang="scss">
-	// The shared Checkbox fills the box with the solid brand-secondary colour on
-	// hover; for an unchecked box that reads as already selected and looks broken
-	// next to the label. Keep the unchecked box at its resting background on hover
-	// (only its border brightens) so hover no longer mimics the checked state.
-	.single-use-checkbox :global(.checkbox:hover input:not(:checked)) {
-		--input-background: var(--color-background-primary);
-		background: var(--color-background-primary);
-	}
-</style>
