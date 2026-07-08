@@ -24,6 +24,12 @@
 		modalOisyTradeWithdrawData,
 		modalTradingDeposit
 	} from '$lib/derived/modal.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { loadOisyTrade } from '$lib/services/oisy-trade.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -43,7 +49,16 @@
 	onMount(() => {
 		if (!anyTradingProviderEnabled) {
 			goto(AppPath.Tokens);
+			return;
 		}
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
+				event_value: PLAUSIBLE_EVENT_VALUES.OISY_TRADE_PAGE
+			}
+		});
 	});
 </script>
 

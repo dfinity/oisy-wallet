@@ -99,6 +99,7 @@ export enum PLAUSIBLE_EVENT_VALUES {
 	NFT_PAGE = 'nft-page',
 	EARN_PAGE = 'earn-page',
 	BORROW_PAGE = 'borrow-page',
+	OISY_TRADE_PAGE = 'oisy-trade-page',
 	HARVEST_AUTOPILOTS_PAGE = 'harvest-autopilots-page',
 	HARVEST_AUTOPILOT_DETAIL_PAGE = 'harvest-autopilot-detail-page',
 	TOKENS_BASIC = 'tokens_basic',
