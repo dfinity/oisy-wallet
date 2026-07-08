@@ -78,8 +78,12 @@
 			</div>
 
 			<div class="text-sm text-tertiary sm:text-base">
-				{$i18n.liquidium.text.apy_suffix}
-				<EarningYearlyAmount showPlusSign showWithShortenedLabel value={supplyInterestUsd} />
+				{#if totalSuppliedUsd > 0}
+					{$i18n.liquidium.text.apy_suffix}
+					<EarningYearlyAmount showPlusSign showWithShortenedLabel value={supplyInterestUsd} />
+				{:else}
+					{$i18n.liquidium.text.no_assets_supplied}
+				{/if}
 			</div>
 		{/snippet}
 	</StakeContentCard>

@@ -12,6 +12,7 @@ interface I18nBorrow {
 		available_best_provider: string;
 		remaining_best_provider: string;
 		active_loans: string;
+		no_active_loans: string;
 		amount_borrowed: string;
 		apr: string;
 		borrow_apr_from: string;
@@ -20,7 +21,7 @@ interface I18nBorrow {
 }
 
 interface I18nBorrowings {
-	text: { tab_title: string; no_borrowings: string };
+	text: { tab_title: string; no_borrowings: string; go_to_borrow: string };
 }
 
 interface I18nCore {
@@ -1912,6 +1913,7 @@ interface I18nLiquidium {
 		net_value: string;
 		markets: string;
 		total_supplied: string;
+		no_assets_supplied: string;
 		supplied: string;
 		borrowed: string;
 		borrow_rate: string;
