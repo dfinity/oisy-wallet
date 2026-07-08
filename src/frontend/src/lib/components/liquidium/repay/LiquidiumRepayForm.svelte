@@ -11,6 +11,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -84,6 +85,7 @@
 </script>
 
 <StakeForm
+	autofocus={isDesktop()}
 	disabled={feeMissing || inflowFeeUnavailable}
 	maxAmount={maxRepay}
 	{onClose}

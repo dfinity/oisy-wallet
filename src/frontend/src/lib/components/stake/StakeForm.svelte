@@ -23,6 +23,9 @@
 	interface Props {
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
+		// Focus the amount input on mount. Callers gate this on `isDesktop()` so
+		// mobile keyboards don't pop open over the form.
+		autofocus?: boolean;
 		disabled?: boolean;
 		destination?: Address;
 		totalFee?: bigint;
@@ -44,6 +47,7 @@
 	let {
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
+		autofocus = false,
 		disabled,
 		destination,
 		totalFee,
@@ -85,6 +89,7 @@
 <ContentWithToolbar>
 	<div class="mb-8">
 		<TokenInput
+			{autofocus}
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
 			isSelectable={false}

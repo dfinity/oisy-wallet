@@ -18,6 +18,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -127,6 +128,7 @@
 <ContentWithToolbar>
 	<div class="mb-6">
 		<TokenInput
+			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			exchangeRate={withdrawPrice}
 			isSelectable={false}
