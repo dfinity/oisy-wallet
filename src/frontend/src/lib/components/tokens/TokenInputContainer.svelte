@@ -13,14 +13,16 @@
 </script>
 
 <div
-	class={`flex w-full items-center rounded-lg border border-solid shadow-inner transition-colors duration-250 ${styleClass ?? ''}`}
-	class:bg-disabled-alt={readOnly}
+	class={`flex w-full items-center rounded-lg transition-colors duration-250 ${styleClass ?? ''}`}
 	class:bg-primary={!readOnly}
+	class:border={!readOnly}
 	class:border-brand-primary={!readOnly && focused && !error}
-	class:border-error-solid={error}
-	class:border-tertiary={!error && (readOnly || !focused)}
+	class:border-error-solid={!readOnly && error}
+	class:border-solid={!readOnly}
+	class:border-tertiary={!readOnly && !error && !focused}
 	class:focus-within:border-2={!readOnly}
 	class:hover:border-brand-primary={!readOnly && !error}
+	class:shadow-inner={!readOnly}
 >
 	{@render children()}
 </div>

@@ -170,9 +170,23 @@
 		{/if}
 	</div>
 
-	<div class="h-3/4 w-[1px] bg-disabled"></div>
+	{#if !readOnly}
+		<div class="h-3/4 w-[1px] bg-disabled"></div>
+	{/if}
 
-	<button class="flex h-full gap-1 px-3" disabled={!isSelectable} onclick={onClick}>
+	<button
+		class="flex h-full items-center gap-1 px-3 transition-colors"
+		class:bg-primary={readOnly}
+		class:border-r={readOnly}
+		class:border-solid={readOnly}
+		class:border-tertiary={readOnly}
+		class:border-y={readOnly}
+		class:hover:border-brand-primary={readOnly && isSelectable}
+		class:rounded-r-lg={readOnly}
+		class:shadow-inner={readOnly}
+		disabled={!isSelectable}
+		onclick={onClick}
+	>
 		{#if token}
 			<TokenLogo data={token} logoSize="xs" />
 			<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
