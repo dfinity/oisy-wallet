@@ -57,6 +57,8 @@
 			"wasm": "target/oisy_trade.wasm.gz",
 			"shrink": false,
 			"specified_id": "sy2xe-miaaa-aaaar-qb7sq-cai",
+			"init_arg": "(variant { Init = record { mode = variant { GeneralAvailability }; max_orders_per_chunk = 100 : nat32; instruction_budget = 1_000_000_000 : nat64 } })",
+			"post_install": "scripts/seed.oisy_trade.sh",
 			"remote": {
 				"id": {
 					"ic": "sy2xe-miaaa-aaaar-qb7sq-cai",

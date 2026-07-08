@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputContent from '$lib/components/tokens/TokenInputContent.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -56,6 +58,10 @@
 
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
+
+	// `TokenInputContent` has no built-in error message, so we render its generic
+	// parse error ourselves through the compact error line below.
+	let baseInputError = $state<Error | undefined>();
 
 	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
 	// `baseAmount` (a string), re-normalizing every edit to the pair's lot precision
@@ -200,6 +206,7 @@
 			showTokenNetwork
 			token={baseToken}
 			bind:amount={getAmount, setAmount}
+			bind:error={baseInputError}
 		>
 			{#snippet title()}{baseLabel}{/snippet}
 
@@ -241,8 +248,14 @@
 				{/if}
 			{/snippet}
 		</TokenInputContent>
-		{#if nonNullish(baseAmountError)}
-			<p class="mt-1 text-xs text-error-primary">{baseAmountError}</p>
+		{#if nonNullish(baseInputError)}
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseInputError.message}
+			</p>
+		{:else if nonNullish(baseAmountError)}
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{baseAmountError}
+			</p>
 		{/if}
 	</div>
 
@@ -308,7 +321,9 @@
 			{/snippet}
 		</TokenInputContent>
 		{#if nonNullish(quoteAmountError)}
-			<p class="mt-1 text-xs text-error-primary">{quoteAmountError}</p>
+			<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_DURATION}>
+				{quoteAmountError}
+			</p>
 		{/if}
 	</div>
 </div>
