@@ -124,12 +124,31 @@
 		}).errorKind;
 	});
 
-	// The limit order reports rich, pair-aware error kinds; map any of them onto a
-	// single `errorType` so the shared input shows its red highlight, and render the
-	// full pair-aware message below. Routed through `TokenInput`'s `onCustomValidate`
-	// so the component owns (and does not clobber) its own `errorType` state.
-	const onCustomValidate = (): TokenActionErrorType =>
-		nonNullish(amountErrorKind) ? 'insufficient-funds' : undefined;
+	// Each amount error belongs to a specific leg: a balance shortfall is on the token
+	// being spent (buy → quote, sell → base), the lot grid is on the base amount, and
+	// the notional bounds are on the quote-denominated order value. Surface the message
+	// — and the red highlight — under the matching token box.
+	const amountErrorField = $derived.by((): 'base' | 'quote' | undefined => {
+		switch (amountErrorKind) {
+			case 'balance':
+				return side === 'buy' ? 'quote' : 'base';
+			case 'lot':
+				return 'base';
+			case 'min_notional':
+			case 'max_notional':
+				return 'quote';
+			default:
+				return undefined;
+		}
+	});
+
+	// Map the error onto the owning leg's `errorType` so only that shared input shows
+	// its red highlight. Routed through `TokenInputContent`'s `onCustomValidate` so the
+	// component owns (and does not clobber) its own `errorType` state.
+	const onBaseCustomValidate = (): TokenActionErrorType =>
+		amountErrorField === 'base' ? 'insufficient-funds' : undefined;
+	const onQuoteCustomValidate = (): TokenActionErrorType =>
+		amountErrorField === 'quote' ? 'insufficient-funds' : undefined;
 
 	const amountError = $derived.by((): string | undefined => {
 		const t = $i18n.trading.limit_order;
@@ -164,6 +183,9 @@
 				return undefined;
 		}
 	});
+
+	const baseAmountError = $derived(amountErrorField === 'base' ? amountError : undefined);
+	const quoteAmountError = $derived(amountErrorField === 'quote' ? amountError : undefined);
 </script>
 
 <div class="rounded-lg border border-disabled bg-secondary px-3 py-1">
@@ -174,7 +196,7 @@
 			exchangeRate={baseExchangeRate}
 			isSelectable
 			onClick={onSelectBase}
-			{onCustomValidate}
+			onCustomValidate={onBaseCustomValidate}
 			showTokenNetwork
 			token={baseToken}
 			bind:amount={getAmount, setAmount}
@@ -219,8 +241,8 @@
 				{/if}
 			{/snippet}
 		</TokenInputContent>
-		{#if nonNullish(amountError)}
-			<p class="mt-1 text-xs text-error-primary">{amountError}</p>
+		{#if nonNullish(baseAmountError)}
+			<p class="mt-1 text-xs text-error-primary">{baseAmountError}</p>
 		{/if}
 	</div>
 
@@ -240,6 +262,7 @@
 			exchangeRate={quoteExchangeRate}
 			isSelectable={nonNullish(baseSymbol)}
 			onClick={onSelectQuoteGuarded}
+			onCustomValidate={onQuoteCustomValidate}
 			readOnly={true}
 			showTokenNetwork
 			token={quoteToken}
@@ -284,5 +307,8 @@
 				{/if}
 			{/snippet}
 		</TokenInputContent>
+		{#if nonNullish(quoteAmountError)}
+			<p class="mt-1 text-xs text-error-primary">{quoteAmountError}</p>
+		{/if}
 	</div>
 </div>
