@@ -25,7 +25,7 @@
 		displayUnit?: DisplayUnit;
 		exchangeRate?: number;
 		disabled?: boolean;
-		readOnly?: boolean;
+		readOnlyAmount?: boolean;
 		placeholder?: string;
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
@@ -52,7 +52,7 @@
 		displayUnit = 'token',
 		exchangeRate,
 		disabled = false,
-		readOnly = false,
+		readOnlyAmount = false,
 		placeholder = '0',
 		errorType = $bindable(),
 		error = $bindable(),
@@ -125,11 +125,11 @@
 <TokenInputContainer
 	error={nonNullish(errorType) || nonNullish(error)}
 	{focused}
-	{readOnly}
+	{readOnlyAmount}
 	styleClass="h-14 text-3xl"
 >
 	<div
-		style={readOnly ? '--input-background: transparent;' : undefined}
+		style={readOnlyAmount ? '--input-background: transparent;' : undefined}
 		class="flex h-full w-full items-center"
 	>
 		{#if token}
@@ -170,20 +170,20 @@
 		{/if}
 	</div>
 
-	{#if !readOnly}
+	{#if !readOnlyAmount}
 		<div class="h-3/4 w-[1px] bg-disabled"></div>
 	{/if}
 
 	<button
 		class="flex h-full items-center gap-1 px-3 transition-colors"
-		class:bg-primary={readOnly}
-		class:border-r={readOnly}
-		class:border-solid={readOnly}
-		class:border-tertiary={readOnly}
-		class:border-y={readOnly}
-		class:hover:border-brand-primary={readOnly && isSelectable}
-		class:rounded-r-lg={readOnly}
-		class:shadow-inner={readOnly}
+		class:bg-primary={readOnlyAmount}
+		class:border-r={readOnlyAmount}
+		class:border-solid={readOnlyAmount}
+		class:border-tertiary={readOnlyAmount}
+		class:border-y={readOnlyAmount}
+		class:hover:border-brand-primary={readOnlyAmount && isSelectable}
+		class:rounded-r-lg={readOnlyAmount}
+		class:shadow-inner={readOnlyAmount}
 		disabled={!isSelectable}
 		onclick={onClick}
 	>
