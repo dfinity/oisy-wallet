@@ -8,7 +8,6 @@ import {
 } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderTradePairBox', () => {
@@ -186,11 +185,12 @@ describe('LimitOrderTradePairBox', () => {
 		expect(onSelectQuote).toHaveBeenCalledOnce();
 	});
 
-	it('does not invoke onSelectQuote until a base token is picked', async () => {
+	it('does not render the quote selector until a base token is picked', () => {
 		const onSelectQuote = vi.fn();
 
 		// No base yet: the quote list is filtered by the base's markets, so the
-		// quote selector must stay inert until a base is chosen.
+		// quote leg shows only the dash placeholder and its selector is not
+		// rendered until a base is chosen — there is nothing to open the picker.
 		const { getAllByRole } = render(LimitOrderTradePairBox, {
 			props: {
 				...baseProps,
@@ -202,12 +202,10 @@ describe('LimitOrderTradePairBox', () => {
 			}
 		});
 
-		// Without a base the quote selector is the sole disabled button; clicking
-		// it must not open the quote picker.
-		const quoteSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
-		assertNonNullish(quoteSelect);
-		await fireEvent.click(quoteSelect);
+		// The quote selector was the sole disabled button; without a base it is gone.
+		const disabledSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
 
+		expect(disabledSelect).toBeUndefined();
 		expect(onSelectQuote).not.toHaveBeenCalled();
 	});
 });
