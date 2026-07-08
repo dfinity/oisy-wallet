@@ -12,7 +12,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
@@ -305,8 +304,6 @@
 
 		{#snippet outerContent()}
 			{#if active}
-				<Hr />
-
 				<div class="flex justify-start px-3 py-3 md:px-6">
 					<Button
 						alignLeft
