@@ -58,7 +58,6 @@
 
 			<div class="max-w-lg text-sm text-tertiary sm:text-base">
 				{$i18n.trading.page.tagline}
-				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
 			</div>
 
 			<Button

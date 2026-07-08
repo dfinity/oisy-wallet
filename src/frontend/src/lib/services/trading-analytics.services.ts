@@ -1,4 +1,4 @@
-import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
+import { OISY_TRADE_ANALYTICS_DAPP_NAME } from '$lib/constants/oisy-trade.constants';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -65,7 +65,7 @@ export const trackLimitOrder = ({
 		name: PLAUSIBLE_EVENTS.LIMIT_ORDER,
 		metadata: {
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
-			event_provider: OISY_TRADE_PROVIDER_NAME,
+			event_provider: OISY_TRADE_ANALYTICS_DAPP_NAME,
 			event_modifier: action,
 			result_status: resultStatus,
 			...(nonNullish(base) && { token_symbol: base }),
@@ -121,7 +121,7 @@ export const trackDepositWithdraw = ({
 		name: PLAUSIBLE_EVENTS.DEPOSIT_WITHDRAW,
 		metadata: {
 			event_context: PLAUSIBLE_EVENT_CONTEXTS.TRADING,
-			event_provider: OISY_TRADE_PROVIDER_NAME,
+			event_provider: OISY_TRADE_ANALYTICS_DAPP_NAME,
 			event_modifier: direction,
 			result_status: resultStatus,
 			...(nonNullish(token) && { token_symbol: token }),
