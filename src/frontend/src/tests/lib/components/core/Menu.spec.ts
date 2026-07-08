@@ -18,6 +18,7 @@ import {
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -226,11 +227,19 @@ describe('Menu', () => {
 
 		assertNonNullish(button);
 
+		// Navigation is deferred until the popover backdrop has faded out. Drive that
+		// deterministic delay with fake timers instead of blocking on a real timeout.
+		vi.useFakeTimers();
+
 		button.click();
+
+		await vi.advanceTimersByTimeAsync(BACKDROP_FADE_OUT_DURATION);
 
 		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
 			expect.stringContaining(`/settings/?network=${ICP_NETWORK_ID.description}`)
 		);
+
+		vi.useRealTimers();
 	});
 
 	it('should render the logged out version if not signed in', async () => {
