@@ -1,19 +1,17 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { Principal } from '@icp-sdk/core/principal';
 	import type { IcToken } from '$icp/types/ic-token';
 	import WithdrawForm from '$lib/components/trading/WithdrawForm.svelte';
 	import WithdrawProgress from '$lib/components/trading/WithdrawProgress.svelte';
 	import WithdrawReview from '$lib/components/trading/WithdrawReview.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-	} from '$lib/enums/plausible';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsTradingWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsTradingWithdraw } from '$lib/enums/wizard-steps';
 	import { withdrawFromOisyTrade } from '$lib/services/oisy-trade.services';
-	import { trackTrading } from '$lib/services/trading-analytics.services';
+	import { trackDepositWithdraw } from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -67,12 +65,15 @@
 
 		// The entered amount is already in human token units — carry it as volume.
 		const volume = `${amount}`;
+		// USD reference price / value at withdrawal time, for analytics only (omitted when absent).
+		const usdPrice = $exchanges?.[token.id]?.usd;
+		const usdValue = nonNullish(usdPrice) ? usdPrice * Number(amount) : undefined;
+		const analytics = { token: token.symbol, amount: volume, usdPrice, usdValue };
 
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+		trackDepositWithdraw({
+			direction: 'withdraw',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
-			token: token.symbol,
-			volume
+			...analytics
 		});
 
 		try {
@@ -86,20 +87,18 @@
 
 			withdrawProgressStep = ProgressStepsTradingWithdraw.DONE;
 
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+			trackDepositWithdraw({
+				direction: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
-				token: token.symbol,
-				volume
+				...analytics
 			});
 
 			setTimeout(onClose, 750);
 		} catch (err: unknown) {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.WITHDRAW,
+			trackDepositWithdraw({
+				direction: 'withdraw',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-				token: token.symbol,
-				volume,
+				...analytics,
 				error: replaceIcErrorFields(err)
 			});
 			toastsError({ msg: { text: $i18n.trading.withdraw.error }, err });
