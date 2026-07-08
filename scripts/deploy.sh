@@ -21,7 +21,7 @@ dfx deploy ckusdc_index
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
-scripts/deploy.oisy_trade.sh
+dfx deploy oisy_trade
 
 dfx deploy internet_identity
 dfx deploy cycles_ledger

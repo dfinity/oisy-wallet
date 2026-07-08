@@ -1,34 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Local-only setup for the OISY Trade DEX (`oisy_trade`).
-#
-# On mainnet/staging/test the canister is remote (see `remote.id` in dfx.json),
-# so it is neither installed nor seeded there — those environments point the
-# frontend at the already-running production canister. Locally no such canister
-# exists until we install the pinned release Wasm and give it a live market to
-# trade against, which is what this script does:
-#
-#   1. Install `oisy_trade` in GeneralAvailability mode so any local identity can
-#      place orders (order registration itself stays controller-gated, and the
-#      local deploy identity is the controller).
-#   2. Register the ICP/ckUSDC trading pair.
+# `post_install` hook for the `oisy_trade` canister (see dfx.json). dfx runs this
+# from the project root right after installing the canister, and only when it
+# actually installs it — i.e. locally, since `oisy_trade` is remote on every
+# other network. It seeds the ICP/ckUSDC trading pair so the Trade surface has a
+# live market to exercise end-to-end on a local replica. The install argument
+# (GeneralAvailability mode + chunk tuning) is set via the canister's `init_arg`
+# in dfx.json.
 #
 # Mainnet lists ICP/ckUSDT, but ckUSDT has no local ledger and no testnet twin to
 # wire it as a local wallet token; ckUSDC is the only stablecoin available as a
 # local wallet token, so it stands in for the quote leg. The pair parameters
 # mirror the production ICP/ckUSDT market (same 8/6 decimals and ~$1 price scale).
 #
-# max_orders_per_chunk / instruction_budget are conservative local-dev defaults —
-# production tuning lives in the external oisy-trade deploy, not this repo.
-
-dfx deploy oisy_trade --argument '(variant {
-  Init = record {
-    mode = variant { GeneralAvailability };
-    max_orders_per_chunk = 100 : nat32;
-    instruction_budget = 1_000_000_000 : nat64;
-  }
-})'
+# `add_trading_pair` is controller-gated; the local deploy identity is the
+# canister controller, so this call is authorized.
 
 ICP_LEDGER_ID="$(dfx canister id icp_ledger)"
 CKUSDC_LEDGER_ID="$(dfx canister id ckusdc_ledger)"
