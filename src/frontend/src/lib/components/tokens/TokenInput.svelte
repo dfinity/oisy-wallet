@@ -32,9 +32,7 @@
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
 		error?: Error;
-		// Suppresses the built-in error message so a parent that owns its own error
-		// presentation can render it with consistent styling; the red input border
-		// (driven by `errorType`/`error`) still shows.
+		// Hides the built-in error message so a parent can render it itself; the red border still shows.
 		hideErrorMessage?: boolean;
 		amountSetToMax?: boolean;
 		loading?: boolean;

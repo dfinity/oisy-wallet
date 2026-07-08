@@ -57,10 +57,8 @@
 	let exchangeValueUnit = $state<DisplayUnit>('usd');
 	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	// `TokenInput` surfaces a generic parse error (e.g. an out-of-range amount) via
-	// its bound `error`. We render it ourselves through the compact error line below
-	// so it shares the pair-aware errors' styling and vertical rhythm instead of the
-	// looser built-in message.
+	// Render TokenInput's generic parse error through our own compact error line
+	// so it matches the pair-aware errors' styling and spacing.
 	let baseInputError = $state<Error | undefined>();
 
 	// `TokenInput` two-way binds the raw amount; bridge it to the parent-owned
