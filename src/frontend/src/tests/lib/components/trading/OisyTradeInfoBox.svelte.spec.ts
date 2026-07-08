@@ -14,10 +14,10 @@ describe('OisyTradeInfoBox', () => {
 		expect(getByText(en.trading.info.fact_3_title)).toBeInTheDocument();
 	});
 
-	it('links "Visit website" to the OISY Trade docs URL', () => {
+	it('links "Learn more" to the OISY Trade docs URL', () => {
 		const { getByText } = render(OisyTradeInfoBox);
 
-		expect(getByText(en.trading.info.visit_website).closest('a')).toHaveAttribute(
+		expect(getByText(en.trading.text.learn_more).closest('a')).toHaveAttribute(
 			'href',
 			OISY_TRADE_LEARN_MORE_URL
 		);

@@ -20,9 +20,9 @@ export const OISY_TRADE_ORDERS_PAGE_SIZE = 100;
 // need an explicit "load more").
 export const OISY_TRADE_MAX_ORDER_PAGES = 5;
 
-// "Learn more" destination for the Trading tab and deposit flow.
-// TODO: point at the public OISY TRADE docs page once it exists.
-export const OISY_TRADE_LEARN_MORE_URL = 'https://github.com/dfinity/oisy-trade';
+// "Learn more" destination for the Trading tab and deposit flow: the public
+// OISY Trade docs page.
+export const OISY_TRADE_LEARN_MORE_URL = 'https://docs.oisy.com/using-oisy-wallet/oisy-trade';
 
 // Value-difference (%) of a crossing limit order at/below which the give-up is
 // "severe" — rendered red rather than amber (a >5% give-up vs current value).

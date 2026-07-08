@@ -1795,7 +1795,6 @@
 		"info": {
 			"title": "What is OISY Trade",
 			"description": "OISY Trade is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
-			"visit_website": "Visit website",
 			"fact_1_title": "Buy or sell at your price",
 			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
 			"fact_2_title": "Fills even while away",

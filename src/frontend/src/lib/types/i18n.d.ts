@@ -1463,7 +1463,6 @@ interface I18nTrading {
 	info: {
 		title: string;
 		description: string;
-		visit_website: string;
 		fact_1_title: string;
 		fact_1_description: string;
 		fact_2_title: string;
