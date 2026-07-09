@@ -225,7 +225,7 @@
 			<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-2 pr-1 pl-3">
 				<span class="min-w-0 flex-1 truncate text-secondary">{createdLink}</span>
 				{#if copied}
-					<span class="shrink-0 text-xs text-success-primary">
+					<span class="shrink-0 text-xs text-success-primary" aria-live="polite" role="status">
 						{$i18n.notes.share.text.link_copied}
 					</span>
 				{/if}
