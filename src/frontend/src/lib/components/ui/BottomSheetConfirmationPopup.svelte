@@ -48,7 +48,7 @@
      sheet below 1024px; above it collapses to a transparent, position-relative
      block, so on desktop we render the same content as a centered modal instead. -->
 <Responsive down="lg">
-	<div class="fixed inset-0 z-50">
+	<div style="z-index: var(--confirmation-popup-z-index);" class="fixed inset-0">
 		<BottomSheetContainer transition>
 			{@render body()}
 		</BottomSheetContainer>
@@ -59,7 +59,10 @@
 
 <!-- Desktop: a smaller modal stacked over the underlying modal. -->
 <Responsive up="1.5lg">
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+	<div
+		style="z-index: var(--confirmation-popup-z-index);"
+		class="fixed inset-0 flex items-center justify-center p-4"
+	>
 		<Backdrop onClose={onCancel} />
 
 		<div
