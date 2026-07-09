@@ -296,7 +296,16 @@
 	{#if step === 'editor'}
 		<ContentWithToolbar styleClass="flex min-h-0 flex-col gap-4 items-stretch overflow-y-auto">
 			{#key editorInstance}
-				<InputPersonalNote disabled={busy} bind:isValid bind:value={noteText} />
+				<InputPersonalNote
+					disabled={busy}
+					onSubmit={() => {
+						if (!saveDisabled) {
+							handleSave();
+						}
+					}}
+					bind:isValid
+					bind:value={noteText}
+				/>
 			{/key}
 
 			{#if nonNullish(editorMetadata)}

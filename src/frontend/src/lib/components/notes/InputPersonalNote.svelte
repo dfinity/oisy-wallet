@@ -12,9 +12,13 @@
 		value: string;
 		isValid: boolean;
 		disabled?: boolean;
+		// Called on Cmd+Enter (macOS) / Ctrl+Enter (Windows/Linux) so the caller can
+		// trigger the same save/create action as its Save button. Plain Enter and
+		// Shift+Enter are left untouched (they keep inserting a line break).
+		onSubmit?: () => void;
 	}
 
-	let { value = $bindable(), isValid = $bindable(), disabled = false }: Props = $props();
+	let { value = $bindable(), isValid = $bindable(), disabled = false, onSubmit }: Props = $props();
 
 	let textarea = $state<HTMLTextAreaElement | undefined>();
 
@@ -56,6 +60,15 @@
 		element.style.height = 'auto';
 		element.style.height = `${element.scrollHeight}px`;
 	});
+
+	// Cmd+Enter / Ctrl+Enter saves; plain Enter and Shift+Enter fall through
+	// unhandled so the textarea inserts a line break as usual.
+	const onKeydown = (event: KeyboardEvent) => {
+		if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+			event.preventDefault();
+			onSubmit?.();
+		}
+	};
 </script>
 
 <div style="--input-font-size: var(--text-base)" class="flex w-full flex-1 flex-col gap-2">
@@ -69,6 +82,7 @@
 		aria-label={$i18n.notes.text.note_label}
 		data-tid={NOTES_INPUT}
 		{disabled}
+		onkeydown={onKeydown}
 		placeholder={$i18n.notes.text.placeholder}
 		bind:value></textarea>
 	{#if isTooLong}

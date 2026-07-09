@@ -104,6 +104,38 @@ describe('NotesModal', () => {
 		);
 	});
 
+	it('saves a new note on Cmd+Enter in the textarea', async () => {
+		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('new'));
+		setLoadedNotes({ entries: [], count: 0 });
+
+		const { getByTestId } = render(NotesModal);
+
+		await fireEvent.click(getByTestId(NOTES_ADD_BUTTON));
+		await fireEvent.input(getByTestId(NOTES_INPUT), { target: { value: 'fresh note' } });
+		await tick();
+		await fireEvent.keyDown(getByTestId(NOTES_INPUT), { key: 'Enter', metaKey: true });
+
+		await waitFor(() =>
+			expect(saveSpy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				id: undefined,
+				note: 'fresh note'
+			})
+		);
+	});
+
+	it('does not save on Cmd+Enter while the note is empty', async () => {
+		const saveSpy = vi.spyOn(notesServices, 'savePersonalNote').mockResolvedValue(note('new'));
+		setLoadedNotes({ entries: [], count: 0 });
+
+		const { getByTestId } = render(NotesModal);
+
+		await fireEvent.click(getByTestId(NOTES_ADD_BUTTON));
+		await fireEvent.keyDown(getByTestId(NOTES_INPUT), { key: 'Enter', metaKey: true });
+
+		expect(saveSpy).not.toHaveBeenCalled();
+	});
+
 	it('filters the list with the search field', async () => {
 		setLoadedNotes({ entries: [note('apple'), note('banana')], count: 2 });
 
