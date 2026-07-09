@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "उधार",
+			"tab_title_short": "उधार",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1290,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "टोकन",
+			"title_short": "टोकन",
 			"contract_address": "अनुबंध पता",
 			"token_address": "टोकन पता",
 			"balance": "शेष राशि",
@@ -1677,6 +1679,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "ट्रेडिंग",
+			"tab_title_short": "ट्रेडिंग",
 			"intro": "",
 			"learn_more": "और जानें",
 			"provider_name": "OISY Trade",
@@ -2324,6 +2327,7 @@
 		"text": {
 			"title": "कमाएं",
 			"tab_title": "कमाई हो रही है",
+			"tab_title_short": "कमाई हो रही है",
 			"earning_opportunities": "कमाई के अवसर",
 			"header_title": "कमाएं में आपका स्वागत है!",
 			"header_description": "अपने टोकन को कमाई के अवसरों में लगाकर अपना डिजिटल एसेट पोर्टफोलियो बढ़ाएं।",

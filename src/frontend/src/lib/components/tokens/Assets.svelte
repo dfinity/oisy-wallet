@@ -85,6 +85,7 @@
 										tabs={[
 											{
 												label: $i18n.tokens.text.title,
+												shortLabel: $i18n.tokens.text.title_short,
 												id: TokenTypes.TOKENS,
 												path: `${AppPath.Tokens}${page.url.search}`
 											},
@@ -92,7 +93,7 @@
 												? [
 														{
 															label: $i18n.trading.text.tab_title,
-															shortLabel: $i18n.navigation.text.trade,
+															shortLabel: $i18n.trading.text.tab_title_short,
 															id: TokenTypes.TRADING,
 															path: `${AppPath.Trading}${page.url.search}`
 														}
@@ -102,7 +103,7 @@
 												? [
 														{
 															label: $i18n.earning.text.tab_title,
-															shortLabel: $i18n.navigation.text.earning,
+															shortLabel: $i18n.earning.text.tab_title_short,
 															id: TokenTypes.EARNING,
 															path: `${AppPath.Earning}${page.url.search}`
 														}
@@ -112,7 +113,7 @@
 												? [
 														{
 															label: $i18n.borrowings.text.tab_title,
-															shortLabel: $i18n.navigation.text.borrow,
+															shortLabel: $i18n.borrowings.text.tab_title_short,
 															id: TokenTypes.BORROWINGS,
 															path: `${AppPath.Borrowings}${page.url.search}`
 														}

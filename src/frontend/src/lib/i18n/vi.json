@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Khoản vay",
+			"tab_title_short": "Vay",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1290,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Token",
+			"title_short": "Token",
 			"contract_address": "Địa chỉ hợp đồng",
 			"token_address": "Địa chỉ token",
 			"balance": "Số dư",
@@ -1677,6 +1679,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Đang giao dịch",
+			"tab_title_short": "Giao dịch",
 			"intro": "",
 			"learn_more": "Tìm hiểu thêm",
 			"provider_name": "OISY Trade",
@@ -2324,6 +2327,7 @@
 		"text": {
 			"title": "Kiếm tiền",
 			"tab_title": "Đang kiếm tiền",
+			"tab_title_short": "Kiếm tiền",
 			"earning_opportunities": "Cơ hội kiếm tiền",
 			"header_title": "Chào mừng đến với Kiếm tiền!",
 			"header_description": "Phát triển danh mục tài sản kỹ thuật số của bạn bằng cách phân bổ token vào các cơ hội kiếm tiền.",

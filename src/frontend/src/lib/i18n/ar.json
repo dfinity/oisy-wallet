@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "",
+			"tab_title_short": "",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1290,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "التوكنات",
+			"title_short": "التوكنات",
 			"contract_address": "عنوان العقد",
 			"token_address": "عنوان التوكن",
 			"balance": "الرصيد",
@@ -1677,6 +1679,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "",
+			"tab_title_short": "",
 			"intro": "",
 			"learn_more": "",
 			"provider_name": "",
@@ -2324,6 +2327,7 @@
 		"text": {
 			"title": "اكسب",
 			"tab_title": "",
+			"tab_title_short": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": "",

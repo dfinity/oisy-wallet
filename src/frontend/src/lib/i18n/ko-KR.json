@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "대출",
+			"tab_title_short": "대출",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1290,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "토큰",
+			"title_short": "토큰",
 			"contract_address": "컨트랙트 주소",
 			"token_address": "토큰 주소",
 			"balance": "잔액",
@@ -1677,6 +1679,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "거래",
+			"tab_title_short": "거래",
 			"intro": "",
 			"learn_more": "더 알아보기",
 			"provider_name": "OISY Trade",
@@ -2324,6 +2327,7 @@
 		"text": {
 			"title": "수익 창출",
 			"tab_title": "수익 창출 중",
+			"tab_title_short": "수익",
 			"earning_opportunities": "수익 창출 기회",
 			"header_title": "수익 창출에 오신 것을 환영합니다!",
 			"header_description": "토큰을 수익 창출 기회에 할당하여 디지털 자산 포트폴리오를 늘리세요.",

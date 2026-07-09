@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "借入",
+			"tab_title_short": "借入",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1290,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "トークン",
+			"title_short": "トークン",
 			"contract_address": "コントラクトアドレス",
 			"token_address": "トークンアドレス",
 			"balance": "残高",
@@ -1677,6 +1679,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "取引",
+			"tab_title_short": "取引",
 			"intro": "",
 			"learn_more": "詳しく見る",
 			"provider_name": "OISY Trade",
@@ -2324,6 +2327,7 @@
 		"text": {
 			"title": "稼ぐ",
 			"tab_title": "稼ぎ中",
+			"tab_title_short": "収益",
 			"earning_opportunities": "稼ぐ機会",
 			"header_title": "稼ぐへようこそ！",
 			"header_description": "トークンを稼ぐ機会に割り当てて、デジタル資産ポートフォリオを増やしましょう。",
