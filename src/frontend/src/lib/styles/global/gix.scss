@@ -29,11 +29,11 @@
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
-	// Info/success toasts sit above popovers but below modals and bottom sheets
-	// (so a filter bottom sheet is not covered by background notifications).
-	--toast-info-z-index: calc(var(--overlay-z-index) + 1);
-	// Error/warn toasts sit above modal blur and bottom sheets so in-flow
-	// failures (e.g. duplicate token import) remain visible.
+	// Info/success and error/warn toasts share the same level, above modal blur
+	// and bottom sheets, so user-triggered confirmations (e.g. "Link copied!"
+	// inside a bottom sheet) and in-flow failures (e.g. duplicate token import)
+	// both stay visible over an open modal or sheet.
+	--toast-info-z-index: var(--toast-error-z-index);
 	--toast-error-z-index: calc(var(--overlay-z-index) + 4);
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
