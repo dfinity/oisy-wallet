@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "トークン",
+			"title_short": "トークン",
 			"contract_address": "コントラクトアドレス",
 			"token_address": "トークンアドレス",
 			"balance": "残高",

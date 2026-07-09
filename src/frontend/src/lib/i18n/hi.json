@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "टोकन",
+			"title_short": "टोकन",
 			"contract_address": "अनुबंध पता",
 			"token_address": "टोकन पता",
 			"balance": "शेष राशि",

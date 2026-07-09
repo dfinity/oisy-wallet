@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
+			"title_short": "Tokens",
 			"contract_address": "Contract address",
 			"token_address": "Token address",
 			"balance": "Balance",

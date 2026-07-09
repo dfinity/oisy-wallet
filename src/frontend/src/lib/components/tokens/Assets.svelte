@@ -85,6 +85,7 @@
 										tabs={[
 											{
 												label: $i18n.tokens.text.title,
+												shortLabel: $i18n.tokens.text.title_short,
 												id: TokenTypes.TOKENS,
 												path: `${AppPath.Tokens}${page.url.search}`
 											},

@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "التوكنات",
+			"title_short": "",
 			"contract_address": "عنوان العقد",
 			"token_address": "عنوان التوكن",
 			"balance": "الرصيد",

@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Токены",
+			"title_short": "Токены",
 			"contract_address": "Адрес контракта",
 			"token_address": "Адрес токена",
 			"balance": "Баланс",

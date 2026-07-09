@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Actifs",
+			"title_short": "Actifs",
 			"contract_address": "Adresse du contrat",
 			"token_address": "Adresse du token",
 			"balance": "Solde",

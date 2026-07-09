@@ -1011,6 +1011,7 @@ interface I18nPay {
 interface I18nTokens {
 	text: {
 		title: string;
+		title_short: string;
 		contract_address: string;
 		token_address: string;
 		balance: string;

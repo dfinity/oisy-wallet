@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokeny",
+			"title_short": "Tokeny",
 			"contract_address": "Adresa smlouvy",
 			"token_address": "Adresa tokenu",
 			"balance": "Zůstatek",

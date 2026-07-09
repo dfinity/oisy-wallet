@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "토큰",
+			"title_short": "토큰",
 			"contract_address": "컨트랙트 주소",
 			"token_address": "토큰 주소",
 			"balance": "잔액",

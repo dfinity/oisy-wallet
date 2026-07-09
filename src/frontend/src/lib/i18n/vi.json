@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Token",
+			"title_short": "Token",
 			"contract_address": "Địa chỉ hợp đồng",
 			"token_address": "Địa chỉ token",
 			"balance": "Số dư",

@@ -1295,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "代币",
+			"title_short": "代币",
 			"contract_address": "合约地址",
 			"token_address": "代币地址",
 			"balance": "余额",
