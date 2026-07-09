@@ -462,11 +462,7 @@
 			"liquidium": {
 				"name": "Liquidium",
 				"one_liner": "Borrow & lend native Bitcoin against USDT.",
-				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes.",
-				"carousel": {
-					"text": "Borrow & lend native Bitcoin against USDT",
-					"call_to_action": "Learn more"
-				}
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			},
 			"icpindex": {
 				"name": "ICP Index",

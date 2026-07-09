@@ -314,12 +314,7 @@ interface I18nDapps {
 		sanctum: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: {
-			name: string;
-			one_liner: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
+		liquidium: { name: string; one_liner: string; description: string };
 		icpindex: {
 			name: string;
 			one_liner: string;
