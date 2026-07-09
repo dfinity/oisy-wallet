@@ -4,12 +4,14 @@ import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	NOTES_SHARE_CAP_MESSAGE,
 	NOTES_SHARE_CREATE_BUTTON,
-	NOTES_SHARE_DONE_BUTTON
+	NOTES_SHARE_DONE_BUTTON,
+	NOTES_SHARE_LINK_COPY
 } from '$lib/constants/test-ids.constants';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as shareServices from '$lib/services/personal-note-share.services';
 import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
+import * as shareUtils from '$lib/utils/share.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
@@ -78,6 +80,29 @@ describe('ShareNoteContent', () => {
 			singleUse: false,
 			expiry: '24h'
 		});
+	});
+
+	it('confirms a copied link inline, without a toast (visible over the bottom sheet)', async () => {
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+		vi.spyOn(shareServices, 'createNoteShare').mockResolvedValue({
+			link: 'https://oisy.com/notes/share/tok#k=KEY',
+			token: 'tok'
+		});
+		const copySpy = vi.spyOn(shareUtils, 'copyText').mockResolvedValue();
+
+		const { getByTestId, container } = render(ShareNoteContent, { props: baseProps() });
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_CREATE_BUTTON));
+		await waitFor(() => expect(getByTestId(NOTES_SHARE_LINK_COPY)).toBeInTheDocument());
+
+		// The confirmation is not shown before copying.
+		expect(container).not.toHaveTextContent(en.notes.share.text.link_copied);
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_LINK_COPY));
+
+		expect(copySpy).toHaveBeenCalledExactlyOnceWith('https://oisy.com/notes/share/tok#k=KEY');
+
+		await waitFor(() => expect(container).toHaveTextContent(en.notes.share.text.link_copied));
 	});
 
 	it('tracks a create failure without leaking the note text', async () => {

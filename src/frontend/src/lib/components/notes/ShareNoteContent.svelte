@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { Identity } from '@icp-sdk/core/agent';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
@@ -29,6 +31,7 @@
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNotePreviewParts } from '$lib/utils/personal-note.utils';
+	import { copyText } from '$lib/utils/share.utils';
 
 	interface Props {
 		note: PersonalNoteUi;
@@ -53,6 +56,22 @@
 	let busy = $state(false);
 	let createdLink = $state<string | undefined>();
 	let atCap = $state(false);
+	let copied = $state(false);
+	let copiedTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	// Confirm the copy inline on the control itself: a floating toast would be
+	// hidden behind the mobile share bottom sheet.
+	const onCopyLink = async () => {
+		if (createdLink === undefined) {
+			return;
+		}
+		await copyText(createdLink);
+		copied = true;
+		clearTimeout(copiedTimeout);
+		copiedTimeout = setTimeout(() => (copied = false), 2000);
+	};
+
+	onDestroy(() => clearTimeout(copiedTimeout));
 
 	// The count query gates the UI; the backend `TooManyShares` rejection stays
 	// authoritative. A failed count is non-fatal — leave the action enabled and
@@ -205,11 +224,24 @@
 
 			<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-2 pr-1 pl-3">
 				<span class="min-w-0 flex-1 truncate text-secondary">{createdLink}</span>
-				<Copy
+				{#if copied}
+					<span class="shrink-0 text-xs text-success-primary" aria-live="polite" role="status">
+						{$i18n.notes.share.text.link_copied}
+					</span>
+				{/if}
+				<ButtonIcon
+					ariaLabel={`${$i18n.core.text.copy}: ${createdLink}`}
+					onclick={onCopyLink}
 					testId={NOTES_SHARE_LINK_COPY}
-					text={$i18n.notes.share.text.link_copied}
-					value={createdLink}
-				/>
+				>
+					{#snippet icon()}
+						{#if copied}
+							<span class="text-success-primary"><IconCircleCheck /></span>
+						{:else}
+							<IconCopy />
+						{/if}
+					{/snippet}
+				</ButtonIcon>
 			</div>
 		</div>
 
