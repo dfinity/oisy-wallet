@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Préstamos",
+			"tab_title_short": "Préstamos",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1294,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
+			"title_short": "Tokens",
 			"contract_address": "Dirección del contrato",
 			"token_address": "Dirección del token",
 			"balance": "Saldo",
@@ -1681,6 +1683,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Trading",
+			"tab_title_short": "Operar",
 			"intro": "",
 			"learn_more": "Más información",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2331,7 @@
 		"text": {
 			"title": "Ganar",
 			"tab_title": "Ganando",
+			"tab_title_short": "Ganar",
 			"earning_opportunities": "Oportunidades de ganancia",
 			"header_title": "¡Bienvenido a Ganar!",
 			"header_description": "Haz crecer tu cartera de activos digitales asignando tus tokens a oportunidades de ganancia.",
@@ -2377,12 +2381,12 @@
 			"borrowed": "Prestado",
 			"borrow_rate": "Tasa de préstamo",
 			"apy_suffix": "APY",
-			"supply_label": "Suministrar",
-			"borrow_label": "Pedir prestado",
+			"supply_label": "Suministro",
+			"borrow_label": "Préstamo",
 			"coming_soon": "Próximamente",
 			"coming_soon_teaser": "Próximamente…",
-			"action_supply": "Suministrar",
-			"action_borrow": "Pedir prestado",
+			"action_supply": "Suministro",
+			"action_borrow": "Préstamo",
 			"action_repay": "Reembolsar",
 			"action_withdraw": "Retirar",
 			"transaction_failed": "La transacción falló",

@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Půjčky",
+			"tab_title_short": "Půjčky",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1294,6 +1295,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokeny",
+			"title_short": "Tokeny",
 			"contract_address": "Adresa smlouvy",
 			"token_address": "Adresa tokenu",
 			"balance": "Zůstatek",
@@ -1681,6 +1683,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Obchod",
+			"tab_title_short": "Obchod",
 			"intro": "",
 			"learn_more": "Zjistit více",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2331,7 @@
 		"text": {
 			"title": "Vydělávat",
 			"tab_title": "Vydělávání",
+			"tab_title_short": "Vydělávat",
 			"earning_opportunities": "Příležitosti k výdělku",
 			"header_title": "Vítejte v sekci Vydělávat!",
 			"header_description": "Rozšiřujte své portfolio digitálních aktiv přidělováním tokenů do výdělečných příležitostí.",

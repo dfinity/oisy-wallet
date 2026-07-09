@@ -21,7 +21,7 @@ interface I18nBorrow {
 }
 
 interface I18nBorrowings {
-	text: { tab_title: string; no_borrowings: string; go_to_borrow: string };
+	text: { tab_title: string; tab_title_short: string; no_borrowings: string; go_to_borrow: string };
 }
 
 interface I18nCore {
@@ -1011,6 +1011,7 @@ interface I18nPay {
 interface I18nTokens {
 	text: {
 		title: string;
+		title_short: string;
 		contract_address: string;
 		token_address: string;
 		balance: string;
@@ -1358,6 +1359,7 @@ interface I18nWallet_connect {
 interface I18nTrading {
 	text: {
 		tab_title: string;
+		tab_title_short: string;
 		intro: string;
 		learn_more: string;
 		provider_name: string;
@@ -1879,6 +1881,7 @@ interface I18nEarning {
 	text: {
 		title: string;
 		tab_title: string;
+		tab_title_short: string;
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
