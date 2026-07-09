@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Займы",
+			"tab_title_short": "Займы",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1681,6 +1682,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Торговля",
+			"tab_title_short": "Торговля",
 			"intro": "",
 			"learn_more": "Узнать больше",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2330,7 @@
 		"text": {
 			"title": "Заработок",
 			"tab_title": "Зарабатываю",
+			"tab_title_short": "Зарабатываю",
 			"earning_opportunities": "Возможности заработка",
 			"header_title": "Добро пожаловать в раздел Заработок!",
 			"header_description": "Развивайте свой портфель цифровых активов, распределяя токены по возможностям заработка.",

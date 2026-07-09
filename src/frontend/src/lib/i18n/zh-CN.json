@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "欠款",
+			"tab_title_short": "借款",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1681,6 +1682,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "交易中",
+			"tab_title_short": "交易",
 			"intro": "",
 			"learn_more": "了解更多",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2330,7 @@
 		"text": {
 			"title": "赚取",
 			"tab_title": "赚取中",
+			"tab_title_short": "赚取",
 			"earning_opportunities": "赚取机会",
 			"header_title": "欢迎来到赚取！",
 			"header_description": "将您的代币分配到赚取机会中，发展您的数字资产投资组合。",

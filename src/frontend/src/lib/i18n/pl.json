@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Pożyczki",
+			"tab_title_short": "Pożycz",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1681,6 +1682,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Handel",
+			"tab_title_short": "Handel",
 			"intro": "",
 			"learn_more": "Dowiedz się więcej",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2330,7 @@
 		"text": {
 			"title": "Zarabiaj",
 			"tab_title": "Zarabianie",
+			"tab_title_short": "Zarabiaj",
 			"earning_opportunities": "Możliwości zarabiania",
 			"header_title": "Witaj w sekcji Zarabiaj!",
 			"header_description": "Rozwijaj swoje portfolio aktywów cyfrowych, przydzielając tokeny do możliwości zarabiania.",

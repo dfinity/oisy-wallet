@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Borrowing",
+			"tab_title_short": "Borrow",
 			"no_borrowings": "You don't have any active loans yet",
 			"go_to_borrow": "Go to Borrow"
 		}
@@ -1681,6 +1682,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Trading",
+			"tab_title_short": "Trade",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2330,7 @@
 		"text": {
 			"title": "Earn",
 			"tab_title": "Earning",
+			"tab_title_short": "Earn",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your digital assets portfolio by allocating your tokens to earning opportunities.",

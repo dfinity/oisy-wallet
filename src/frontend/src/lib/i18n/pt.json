@@ -25,6 +25,7 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Empréstimos",
+			"tab_title_short": "Empréstimos",
 			"no_borrowings": "",
 			"go_to_borrow": ""
 		}
@@ -1681,6 +1682,7 @@
 	"trading": {
 		"text": {
 			"tab_title": "Trading",
+			"tab_title_short": "Trading",
 			"intro": "",
 			"learn_more": "Saber mais",
 			"provider_name": "OISY Trade",
@@ -2328,6 +2330,7 @@
 		"text": {
 			"title": "Ganhar",
 			"tab_title": "Ganhando",
+			"tab_title_short": "Ganhar",
 			"earning_opportunities": "Oportunidades de ganho",
 			"header_title": "Bem-vindo ao Ganhar!",
 			"header_description": "Expanda seu portfólio de ativos digitais alocando seus tokens em oportunidades de ganho.",
