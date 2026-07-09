@@ -49,5 +49,16 @@ describe('clipboard.utils', () => {
 				duration: 2000
 			});
 		});
+
+		it('should raise the toast above overlays when overlay is set', async () => {
+			await copyToClipboard({ value, text, overlay: true });
+
+			expect(spyToastsShow).toHaveBeenCalledWith({
+				text,
+				level: 'success',
+				duration: 2000,
+				overlay: true
+			});
+		});
 	});
 });

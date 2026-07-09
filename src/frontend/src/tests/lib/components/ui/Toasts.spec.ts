@@ -47,6 +47,22 @@ describe('Toasts', () => {
 		expect(container.querySelector('.wrapper')?.classList).toContain('elevated');
 	});
 
+	it('applies the overlay class when a toast opts into it, not otherwise', () => {
+		toastsStore.show({ level: 'success', text: 'copied', overlay: true });
+
+		const { container } = render(ToastsTest);
+
+		expect(container.querySelector('.wrapper')?.classList).toContain('overlay');
+	});
+
+	it('does not apply the overlay class by default', () => {
+		toastsStore.show({ level: 'success', text: 'copied' });
+
+		const { container } = render(ToastsTest);
+
+		expect(container.querySelector('.wrapper')?.classList).not.toContain('overlay');
+	});
+
 	it('renders a toast per level with its icon', () => {
 		(['success', 'warn', 'error', 'info'] as const).forEach((level) =>
 			toastsStore.show({ level, text: level })

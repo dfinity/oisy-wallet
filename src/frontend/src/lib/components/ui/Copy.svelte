@@ -14,14 +14,17 @@
 		link?: boolean;
 		transparent?: boolean;
 		inline?: boolean;
+		// Render the confirmation toast above overlays (e.g. copying from within a
+		// bottom sheet). See ToastMsg `overlay`.
+		overlay?: boolean;
 	}
 
-	const { text, value, testId, inline = false, ...rest }: Props = $props();
+	const { text, value, testId, inline = false, overlay = false, ...rest }: Props = $props();
 
 	const handleClick = async (e: MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		await copyToClipboard({ value, text });
+		await copyToClipboard({ value, text, overlay });
 	};
 </script>
 

@@ -19,6 +19,9 @@
 	let hasErrors = $derived(
 		toasts.find(({ level }) => ['error', 'warn'].includes(level)) !== undefined
 	);
+
+	// A toast can opt into rendering above overlays (see ToastMsg `overlay`).
+	let hasOverlay = $derived(toasts.some(({ overlay }) => overlay === true));
 </script>
 
 {#if toasts.length > 0}
@@ -26,6 +29,7 @@
 		class={`wrapper ${position}`}
 		class:elevated
 		class:error={hasErrors}
+		class:overlay={hasOverlay}
 		data-tid="toasts-component"
 	>
 		{#each toasts as msg (msg.id)}
@@ -67,6 +71,13 @@
 		// sheet is still never covered by a background notification.
 		&.elevated {
 			z-index: var(--toast-error-z-index);
+		}
+
+		// Opt-in override for a toast raised explicitly above overlays (e.g. a copy
+		// confirmation shown from within a bottom sheet). Declared after `.error` /
+		// `.elevated` so it wins. Workaround pending inline confirmation feedback.
+		&.overlay {
+			z-index: var(--toast-overlay-z-index);
 		}
 
 		// Below the medium breakpoint the mobile bottom navigation is shown, fixed

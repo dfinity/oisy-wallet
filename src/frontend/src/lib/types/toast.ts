@@ -17,6 +17,11 @@ export interface ToastMsgUI {
 	icon?: Component;
 	theme?: ToastTheme;
 	renderAsHtml?: boolean;
+	// Temporarily render this toast above overlays (modals / bottom sheets) — for a
+	// confirmation triggered from within a bottom sheet, where the default toast
+	// tiers sit behind it (e.g. copying a share link). Workaround until such
+	// confirmations have inline feedback.
+	overlay?: boolean;
 }
 
 // The shape callers pass to `toastsShow` / `toastsError` — the store assigns the `id`.

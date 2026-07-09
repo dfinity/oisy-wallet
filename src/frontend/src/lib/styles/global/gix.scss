@@ -35,6 +35,11 @@
 	// Error/warn toasts sit above modal blur and bottom sheets so in-flow
 	// failures (e.g. duplicate token import) remain visible.
 	--toast-error-z-index: calc(var(--overlay-z-index) + 4);
+	// Opt-in override for a toast raised explicitly above overlays — a confirmation
+	// shown from within a bottom sheet, whose `BottomSheetConfirmationPopup` wrapper
+	// is a Tailwind `z-50`. This clears that so the confirmation (e.g. copying a
+	// share link) is visible. Temporary workaround pending inline confirmation feedback.
+	--toast-overlay-z-index: 60;
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 

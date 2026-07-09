@@ -206,6 +206,7 @@
 			<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-2 pr-1 pl-3">
 				<span class="min-w-0 flex-1 truncate text-secondary">{createdLink}</span>
 				<Copy
+					overlay
 					testId={NOTES_SHARE_LINK_COPY}
 					text={$i18n.notes.share.text.link_copied}
 					value={createdLink}
