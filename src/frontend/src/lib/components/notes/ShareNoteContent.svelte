@@ -12,7 +12,7 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_CAP_MESSAGE,
 		NOTES_SHARE_CREATE_BUTTON,
@@ -190,7 +190,7 @@
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
 				color="blue"
-				href={OISY_DOCS_URL}
+				href={OISY_NOTES_DOCS_URL}
 				iconVisible={false}
 			>
 				{$i18n.core.text.learn_more}

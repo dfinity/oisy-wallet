@@ -1,3 +1,4 @@
+import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	NOTES_SHARE_RECIPIENT_COPY,
 	NOTES_SHARE_RECIPIENT_DISCOVER_BUTTON,
@@ -13,6 +14,7 @@ import {
 import * as shareServices from '$lib/services/personal-note-share.services';
 import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import SharePage from '$routes/(public)/notes/share/[token]/+page@.svelte';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
@@ -51,7 +53,7 @@ describe('Share recipient page', () => {
 			.spyOn(shareServices, 'loadSharedNote')
 			.mockResolvedValue({ note: 'hello https://example.com', singleUse: false });
 
-		const { getByTestId, queryByTestId, container } = render(SharePage);
+		const { getByTestId, queryByTestId, container, getByRole } = render(SharePage);
 
 		// Locked by default — no backend call yet.
 		expect(getByTestId(NOTES_SHARE_RECIPIENT_LOCKED)).toBeInTheDocument();
@@ -61,6 +63,12 @@ describe('Share recipient page', () => {
 		await fireEvent.click(getByTestId(NOTES_SHARE_RECIPIENT_REVEAL_BUTTON));
 
 		await waitFor(() => expect(getByTestId(NOTES_SHARE_RECIPIENT_REVEALED)).toBeInTheDocument());
+
+		// The revealed view's "Learn more" points at the notes docs page, not the docs root.
+		expect(getByRole('link', { name: en.core.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_NOTES_DOCS_URL
+		);
 
 		// The fragment key and the route token are passed to the loader.
 		expect(loadSpy).toHaveBeenCalledExactlyOnceWith({ token: 'tok', key: 'KEY' });
