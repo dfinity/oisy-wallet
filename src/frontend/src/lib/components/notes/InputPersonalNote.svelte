@@ -12,9 +12,10 @@
 		value: string;
 		isValid: boolean;
 		disabled?: boolean;
-		// Called on Cmd+Enter (macOS) / Ctrl+Enter (Windows/Linux) so the caller can
-		// trigger the same save/create action as its Save button. Plain Enter and
-		// Shift+Enter are left untouched (they keep inserting a line break).
+		// Called on Cmd+Enter or Ctrl+Enter (Cmd is the macOS convention, Ctrl the
+		// Windows/Linux one, but either modifier is accepted on any platform) so the
+		// caller can trigger the same save/create action as its Save button. Plain
+		// Enter and Shift+Enter are left untouched (they keep inserting a line break).
 		onSubmit?: () => void;
 	}
 
