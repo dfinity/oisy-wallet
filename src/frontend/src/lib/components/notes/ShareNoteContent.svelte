@@ -146,7 +146,7 @@
 					{preview.title}
 				</span>
 				{#if preview.body !== ''}
-					<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
+					<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-tertiary">
 						{preview.body}
 					</span>
 				{/if}
@@ -155,7 +155,7 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
+			<span class="font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
 			<div class="flex flex-wrap gap-2 [&_button]:text-sm">
 				{#each EXPIRY_OPTIONS as option (option.ms)}
 					<PillButton onClick={() => (durationMs = option.ms)} selected={durationMs === option.ms}>
@@ -166,7 +166,7 @@
 		</div>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
+			<span class="font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
 			<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
 				 the transaction-filter panels); `flex-start` top-aligns the box in case
 				 the label wraps on a narrow viewport. -->
@@ -178,7 +178,7 @@
 					testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
 					text="block"
 				>
-					<span class="text-sm text-primary">{$i18n.notes.share.text.single_use_option}</span>
+					<span class="text-primary">{$i18n.notes.share.text.single_use_option}</span>
 				</Checkbox>
 			</div>
 		</div>
