@@ -230,7 +230,7 @@
 					</span>
 				{/if}
 				<ButtonIcon
-					ariaLabel={copied ? $i18n.notes.share.text.link_copied : $i18n.core.text.copy}
+					ariaLabel={`${$i18n.core.text.copy}: ${createdLink}`}
 					onclick={onCopyLink}
 					testId={NOTES_SHARE_LINK_COPY}
 				>
