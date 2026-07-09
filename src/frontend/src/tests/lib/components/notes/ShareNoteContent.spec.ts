@@ -1,5 +1,6 @@
 import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
+import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	NOTES_SHARE_CAP_MESSAGE,
 	NOTES_SHARE_CREATE_BUTTON,
@@ -9,6 +10,7 @@ import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as shareServices from '$lib/services/personal-note-share.services';
 import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
@@ -29,6 +31,18 @@ describe('ShareNoteContent', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		vi.clearAllMocks();
+	});
+
+	it('links "Learn more" to the notes docs page', () => {
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+
+		const { getByRole } = render(ShareNoteContent, { props: baseProps() });
+
+		// Points at the notes docs page, not the docs root.
+		expect(getByRole('link', { name: en.core.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_NOTES_DOCS_URL
+		);
 	});
 
 	it('creates a link and reveals it, tracking the non-personal attributes', async () => {

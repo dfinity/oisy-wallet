@@ -5,7 +5,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_RECIPIENT_COPY,
 		NOTES_SHARE_RECIPIENT_DONE_BUTTON,
@@ -53,7 +53,7 @@
 		>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
 			color="blue"
-			href={OISY_DOCS_URL}
+			href={OISY_NOTES_DOCS_URL}
 			iconVisible={false}
 		>
 			{$i18n.core.text.learn_more}

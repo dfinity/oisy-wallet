@@ -2,7 +2,7 @@
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
@@ -19,7 +19,7 @@
 	>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 		ariaLabel={$i18n.core.text.learn_more}
 		color="blue"
-		href={OISY_DOCS_URL}
+		href={OISY_NOTES_DOCS_URL}
 		iconVisible={false}
 	>
 		{$i18n.core.text.learn_more}
