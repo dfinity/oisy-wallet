@@ -1401,7 +1401,6 @@ interface I18nTrading {
 		transaction_fee: string;
 		approval_fee: string;
 		transfer_fee: string;
-		consent: string;
 		info_title: string;
 		info_description: string;
 		empty_title: string;

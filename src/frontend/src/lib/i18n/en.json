@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Total estimated fee",
 			"approval_fee": "Approval fee",
 			"transfer_fee": "Network fee",
-			"consent": "I understand my tokens will be held by the OISY Trade canister and are subject to on-chain smart contract risk.",
 			"info_title": "OISY Trade: on-chain order book",
 			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by on-chain smart contracts.",
 			"empty_title": "Nothing to deposit yet",
