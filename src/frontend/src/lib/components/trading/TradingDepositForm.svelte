@@ -150,7 +150,7 @@
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.deposit.to}{/snippet}
 			{#snippet mainValue()}
-				<span class="flex items-center gap-2">
+				<span class="inline-flex items-center gap-2">
 					<span class="flex" aria-hidden="true">
 						<OisyTradeMark size="22" />
 					</span>
