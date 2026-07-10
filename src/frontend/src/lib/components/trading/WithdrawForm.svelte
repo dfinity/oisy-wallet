@@ -152,7 +152,7 @@
 	<ModalValue>
 		{#snippet label()}{$i18n.trading.withdraw.from}{/snippet}
 		{#snippet mainValue()}
-			<span class="flex items-center gap-2">
+			<span class="inline-flex items-center gap-2">
 				<OisyTradeMark size="22" />
 				{OISY_TRADE_PROVIDER_NAME}
 			</span>
