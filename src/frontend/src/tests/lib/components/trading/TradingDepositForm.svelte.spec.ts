@@ -43,6 +43,12 @@ describe('TradingDepositForm', () => {
 		expect(getByText(en.trading.deposit.consent)).toBeInTheDocument();
 	});
 
+	it('should render the OISY Trade logo next to the provider name', () => {
+		const { getByLabelText } = render(TradingDepositForm, { props: { ...baseProps } });
+
+		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+	});
+
 	it('should disable the review button when there is no consent', () => {
 		const { getByTestId } = render(TradingDepositForm, { props: { ...baseProps } });
 

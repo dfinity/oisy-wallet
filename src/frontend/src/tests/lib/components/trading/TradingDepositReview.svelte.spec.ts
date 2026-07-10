@@ -41,6 +41,12 @@ describe('TradingDepositReview', () => {
 		expect(getByText(en.trading.deposit.transaction_fee)).toBeInTheDocument();
 	});
 
+	it('should render the OISY Trade logo next to the provider name', () => {
+		const { getByLabelText } = render(TradingDepositReview, { props: { ...baseProps } });
+
+		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+	});
+
 	it('should render the fee breakdown in fiat when an exchange rate is available', () => {
 		exchangesMock.set({ [token.id]: { usd: 7 } });
 

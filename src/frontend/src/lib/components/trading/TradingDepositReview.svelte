@@ -5,6 +5,7 @@
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SwapFee from '$lib/components/swap/SwapFee.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import TradingDepositInfoBox from '$lib/components/trading/TradingDepositInfoBox.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -77,7 +78,12 @@
 
 		<ModalValue>
 			{#snippet label()}{$i18n.trading.deposit.to}{/snippet}
-			{#snippet mainValue()}{$i18n.trading.text.provider_name}{/snippet}
+			{#snippet mainValue()}
+				<span class="flex items-center gap-2">
+					<OisyTradeMark size="22" />
+					{$i18n.trading.text.provider_name}
+				</span>
+			{/snippet}
 		</ModalValue>
 
 		{#if nonNullish(ledgerFee)}
