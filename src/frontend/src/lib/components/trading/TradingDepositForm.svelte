@@ -151,7 +151,9 @@
 			{#snippet label()}{$i18n.trading.deposit.to}{/snippet}
 			{#snippet mainValue()}
 				<span class="flex items-center gap-2">
-					<OisyTradeMark size="22" />
+					<span class="flex" aria-hidden="true">
+						<OisyTradeMark size="22" />
+					</span>
 					{$i18n.trading.text.provider_name}
 				</span>
 			{/snippet}
