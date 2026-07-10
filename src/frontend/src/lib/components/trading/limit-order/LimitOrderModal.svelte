@@ -44,6 +44,9 @@
 	const reset = () => {
 		progressStep = ProgressStepsLimitOrder.INITIALIZATION;
 		currentStep = undefined;
+		// Restore the default side so a fast reopen (before this deferred reset,
+		// while the component is still mounted) can't carry the previous side over.
+		side = 'sell';
 		tokensListContext.resetFilters();
 	};
 
