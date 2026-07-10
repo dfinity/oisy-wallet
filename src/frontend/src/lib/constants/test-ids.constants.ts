@@ -395,7 +395,6 @@ export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
 export const TRADING_GOTO_BUTTON = 'trading-goto-button';
 export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
 export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
-export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbox';
 export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
