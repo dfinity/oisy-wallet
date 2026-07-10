@@ -38,11 +38,11 @@
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
 		// svelte-ignore state_referenced_locally -- initialized once at mount; the page network is fixed for the modal's lifetime.
 		filterNetwork: $selectedNetwork,
-		// `LimitOrderTokensList` already sets the right balance per leg (the
-		// deposited DEX balance for the spend leg, the wallet balance for the
-		// receive leg — see its comments). Without this, the default sort
-		// re-maps every token against the wallet balances store, silently
-		// overwriting the spend leg's deposited balance, same as `WithdrawModal`.
+		// `LimitOrderTokensList` already sets the right DEX-deposited balance per
+		// leg (the free balance for the spend leg, the full deposit for the receive
+		// leg — see its comments). Without this, the default sort re-maps every
+		// token against the wallet balances store, silently overwriting those
+		// deposited balances, same as `WithdrawModal`.
 		sortByBalance: false
 	});
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
