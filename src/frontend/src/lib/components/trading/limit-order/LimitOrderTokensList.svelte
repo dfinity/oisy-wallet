@@ -39,9 +39,9 @@
 		(mode === 'base' && side === 'sell') || (mode === 'quote' && side === 'buy')
 	);
 
-	// DEX deposit per token (free + total, with fiat values), resolved via the
-	// same `oisyTradeAssets` the Withdraw picker and the provider page use, so all
-	// three surfaces agree on what's actually deposited.
+	// DEX deposit per token (the free and total amounts with their fiat values),
+	// resolved via the same `oisyTradeAssets` the Withdraw picker and the provider
+	// page use, so all three surfaces agree on what's actually deposited.
 	const dexAssetByLedger = $derived(
 		new Map($oisyTradeAssets.map((asset) => [asset.token.ledgerCanisterId, asset]))
 	);
