@@ -34,7 +34,7 @@ vi.mock('$lib/derived/oisy-trade.derived', () => ({
 }));
 
 describe('LimitOrderWizard', () => {
-	const steps = limitOrderWizardSteps({ i18n: en });
+	const steps = limitOrderWizardSteps({ i18n: en, side: 'sell' });
 
 	// Resolve a wizard step by name, failing loudly if the config no longer
 	// defines it (rather than silently rendering the default step).
