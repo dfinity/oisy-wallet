@@ -26,9 +26,9 @@
 
 import { chromium } from '@playwright/test';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
-import { extname, join } from 'node:path';
+import { extname, join, resolve, sep } from 'node:path';
 
 const BUILD_DIR = join(process.cwd(), 'build');
 const MAX_WORKERS = Number(process.env.PERF_MEMORY_WORKERS ?? 50);
@@ -47,31 +47,41 @@ const MIME = {
 	'.wasm': 'application/wasm'
 };
 
+// Read the requested file in one step (no check-then-use race): try the path
+// itself, then its index.html if it is a directory, then the SPA fallback.
+const readBuildFile = async (requestPath) => {
+	const requested = resolve(BUILD_DIR, `.${requestPath}`);
+	const fallback = join(BUILD_DIR, 'index.html');
+	const candidates = requested.startsWith(`${BUILD_DIR}${sep}`)
+		? [requested, join(requested, 'index.html'), fallback]
+		: [fallback];
+
+	for (const file of candidates) {
+		try {
+			return { data: await readFile(file), file };
+		} catch {
+			// not a readable file — try the next candidate
+		}
+	}
+	return undefined;
+};
+
 const startServer = () =>
-	new Promise((resolve) => {
+	new Promise((resolveServer) => {
 		// eslint-disable-next-line local-rules/prefer-object-params -- Node http handler signature
 		const server = createServer(async ({ url }, res) => {
-			try {
-				let file = join(BUILD_DIR, decodeURIComponent(new URL(url, 'http://x').pathname));
-				try {
-					if ((await stat(file)).isDirectory()) {
-						file = join(file, 'index.html');
-					}
-				} catch {
-					// SPA fallback
-					file = join(BUILD_DIR, 'index.html');
-				}
-				const data = await readFile(file);
-				res.writeHead(200, {
-					'content-type': MIME[extname(file)] ?? 'application/octet-stream'
-				});
-				res.end(data);
-			} catch {
+			const content = await readBuildFile(decodeURIComponent(new URL(url, 'http://x').pathname));
+			if (content === undefined) {
 				res.writeHead(404);
 				res.end();
+				return;
 			}
+			res.writeHead(200, {
+				'content-type': MIME[extname(content.file)] ?? 'application/octet-stream'
+			});
+			res.end(content.data);
 		});
-		server.listen(0, '127.0.0.1', () => resolve(server));
+		server.listen(0, '127.0.0.1', () => resolveServer(server));
 	});
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
