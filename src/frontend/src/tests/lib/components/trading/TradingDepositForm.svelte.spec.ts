@@ -40,6 +40,17 @@ describe('TradingDepositForm', () => {
 		expect(getByText(en.trading.text.provider_name)).toBeInTheDocument();
 	});
 
+	it('should render the OISY Trade logo, hidden from assistive tech', () => {
+		const { container } = render(TradingDepositForm, { props: { ...baseProps } });
+
+		const mark = container.querySelector('[aria-label="OISY Trade"]');
+
+		expect(mark).toBeInTheDocument();
+		// Decorative next to its own text label: must stay inside an aria-hidden
+		// wrapper so screen readers don't announce "OISY Trade" twice.
+		expect(mark?.closest('[aria-hidden="true"]')).not.toBeNull();
+	});
+
 	it('should disable the review button when there is no amount', () => {
 		const { getByTestId } = render(TradingDepositForm, { props: { ...baseProps } });
 
