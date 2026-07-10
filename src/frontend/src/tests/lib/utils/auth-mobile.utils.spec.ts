@@ -1,6 +1,7 @@
 import {
 	MOBILE_AUTH_CALLBACK_URI,
 	MOBILE_AUTH_DELEGATION_PARAM,
+	MOBILE_AUTH_OPENID_PROVIDER_PARAM,
 	MOBILE_AUTH_REDIRECT_URI_PARAM,
 	MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM
 } from '$lib/constants/mobile-auth.constants';
@@ -8,6 +9,7 @@ import {
 	buildMobileAuthBridgeUrl,
 	buildMobileAuthCallbackUrl,
 	isAllowedMobileAuthRedirectUri,
+	isOpenIdProvider,
 	isValidHexPublicKey,
 	parseMobileAuthCallbackUrl
 } from '$lib/utils/auth-mobile.utils';
@@ -44,7 +46,43 @@ describe('auth-mobile utils', () => {
 		);
 	});
 
+	describe('isOpenIdProvider', () => {
+		it.each(['google', 'apple', 'microsoft'])('should accept %s', (provider) => {
+			expect(isOpenIdProvider(provider)).toBeTruthy();
+		});
+
+		it.each([null, undefined, '', 'facebook', 'Google', ' google'])(
+			'should reject %s',
+			(provider) => {
+				expect(isOpenIdProvider(provider)).toBeFalsy();
+			}
+		);
+	});
+
 	describe('buildMobileAuthBridgeUrl', () => {
+		it('should omit the OpenID provider param by default and include it when provided', () => {
+			const withoutProvider = new URL(
+				buildMobileAuthBridgeUrl({
+					baseUrl: 'https://oisy.com',
+					sessionPublicKeyDerHex: 'deadbeef',
+					redirectUri: MOBILE_AUTH_CALLBACK_URI
+				})
+			);
+
+			expect(withoutProvider.searchParams.has(MOBILE_AUTH_OPENID_PROVIDER_PARAM)).toBeFalsy();
+
+			const withProvider = new URL(
+				buildMobileAuthBridgeUrl({
+					baseUrl: 'https://oisy.com',
+					sessionPublicKeyDerHex: 'deadbeef',
+					redirectUri: MOBILE_AUTH_CALLBACK_URI,
+					openIdProvider: 'google'
+				})
+			);
+
+			expect(withProvider.searchParams.get(MOBILE_AUTH_OPENID_PROVIDER_PARAM)).toBe('google');
+		});
+
 		it('should build the bridge URL with both params', () => {
 			const url = new URL(
 				buildMobileAuthBridgeUrl({

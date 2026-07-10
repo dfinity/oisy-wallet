@@ -4,6 +4,7 @@
 	import Header from '$lib/components/hero/Header.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		MOBILE_AUTH_OPENID_PROVIDER_PARAM,
 		MOBILE_AUTH_REDIRECT_URI_PARAM,
 		MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM
 	} from '$lib/constants/mobile-auth.constants';
@@ -12,6 +13,7 @@
 	import {
 		buildMobileAuthCallbackUrl,
 		isAllowedMobileAuthRedirectUri,
+		isOpenIdProvider,
 		isValidHexPublicKey,
 		parseMobileAuthCallbackUrl
 	} from '$lib/utils/auth-mobile.utils';
@@ -27,9 +29,16 @@
 
 	const sessionPublicKeyDerHex = readParam(MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM);
 	const redirectUri = readParam(MOBILE_AUTH_REDIRECT_URI_PARAM);
+	const openIdProviderParam = readParam(MOBILE_AUTH_OPENID_PROVIDER_PARAM);
+
+	// One-Click sign-in is optional: an absent provider means the standard
+	// Internet Identity flow; an unknown value is a malformed request.
+	const openIdProvider = isOpenIdProvider(openIdProviderParam) ? openIdProviderParam : undefined;
 
 	const validRequest =
-		isValidHexPublicKey(sessionPublicKeyDerHex) && isAllowedMobileAuthRedirectUri(redirectUri);
+		isValidHexPublicKey(sessionPublicKeyDerHex) &&
+		isAllowedMobileAuthRedirectUri(redirectUri) &&
+		(isNullish(openIdProviderParam) || nonNullish(openIdProvider));
 
 	let flow = $state<BridgeState>(browser && !validRequest ? 'invalid' : 'idle');
 
@@ -44,7 +53,10 @@
 		flow = 'signing';
 
 		try {
-			const { delegationChainJson } = await signInMobileAuthBridge({ sessionPublicKeyDerHex });
+			const { delegationChainJson } = await signInMobileAuthBridge({
+				sessionPublicKeyDerHex,
+				...(nonNullish(openIdProvider) ? { openIdProvider } : {})
+			});
 
 			flow = 'redirecting';
 

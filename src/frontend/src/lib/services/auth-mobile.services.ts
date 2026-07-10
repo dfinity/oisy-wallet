@@ -7,6 +7,7 @@ import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OpenIdProvider } from '$lib/types/auth';
 import { buildMobileAuthBridgeUrl, parseMobileAuthCallbackUrl } from '$lib/utils/auth-mobile.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { App } from '@capacitor/app';
@@ -28,7 +29,9 @@ import { get } from 'svelte/store';
  *
  * See docs/ai/spec-driven-development/specs/2026-07-10-feat-mobile-app-poc.md.
  */
-export const signInMobile = async (): Promise<void> => {
+export const signInMobile = async ({
+	openIdProvider
+}: { openIdProvider?: OpenIdProvider } = {}): Promise<void> => {
 	const sessionKey = Ed25519KeyIdentity.generate();
 
 	// Persist the session key before leaving the app: the OS may recycle the
@@ -42,7 +45,10 @@ export const signInMobile = async (): Promise<void> => {
 	const url = buildMobileAuthBridgeUrl({
 		baseUrl: OISY_URL,
 		sessionPublicKeyDerHex: uint8ArrayToHexString(sessionKey.getPublicKey().toDer()),
-		redirectUri: MOBILE_AUTH_CALLBACK_URI
+		redirectUri: MOBILE_AUTH_CALLBACK_URI,
+		// One-Click sign-in (Google / Apple / Microsoft) rides through the same
+		// bridge: Internet Identity 2.0 performs the OIDC flow on the web side.
+		...(nonNullish(openIdProvider) ? { openIdProvider } : {})
 	});
 
 	await Browser.open({ url });

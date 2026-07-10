@@ -1,6 +1,6 @@
 import { INTERNET_IDENTITY_CANISTER_ID } from '$lib/constants/app.constants';
 import { MOBILE_AUTH_MAX_TIME_TO_LIVE } from '$lib/constants/mobile-auth.constants';
-import { InternetIdentityDomain } from '$lib/types/auth';
+import { InternetIdentityDomain, type OpenIdProvider } from '$lib/types/auth';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { hexStringToUint8Array, nonNullish } from '@dfinity/utils';
 import { AuthClient, KEY_STORAGE_DELEGATION, type AuthClientStorage } from '@icp-sdk/auth/client';
@@ -30,16 +30,22 @@ class InMemoryAuthClientStorage implements AuthClientStorage {
 	}
 }
 
-// Same provider resolution as `authStore.signIn` minus the OpenID and popup
-// sizing concerns (the bridge always runs as a full tab in the system
-// browser). Kept local to the POC — extracting a shared helper from
-// `auth.store.ts` is deliberately out of scope, see the spec.
-const identityProviderUrl = (): string =>
-	nonNullish(INTERNET_IDENTITY_CANISTER_ID)
-		? /apple/i.test(navigator?.vendor)
-			? `http://localhost:4943/authorize?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
-			: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/authorize`
-		: `https://${InternetIdentityDomain.VERSION_1_0}/authorize`;
+// Same provider resolution as `authStore.signIn` minus the popup sizing
+// concerns (the bridge always runs as a full tab in the system browser).
+// Kept local to the POC — extracting a shared helper from `auth.store.ts`
+// is deliberately out of scope, see the spec.
+//
+// One-Click OpenID sign-in is only supported by Internet Identity 2.0 on
+// mainnet (id.ai); the local II replica does not handle the `?openid=…`
+// query param, so id.ai is forced for that flow.
+const identityProviderUrl = ({ openIdProvider }: { openIdProvider?: OpenIdProvider }): string =>
+	nonNullish(openIdProvider)
+		? `https://${InternetIdentityDomain.VERSION_2_0}/authorize`
+		: nonNullish(INTERNET_IDENTITY_CANISTER_ID)
+			? /apple/i.test(navigator?.vendor)
+				? `http://localhost:4943/authorize?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
+				: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/authorize`
+			: `https://${InternetIdentityDomain.VERSION_1_0}/authorize`;
 
 /**
  * Runs the Internet Identity sign-in for a session public key owned by the
@@ -51,9 +57,11 @@ const identityProviderUrl = (): string =>
  * a `PartialIdentity`.
  */
 export const signInMobileAuthBridge = async ({
-	sessionPublicKeyDerHex
+	sessionPublicKeyDerHex,
+	openIdProvider
 }: {
 	sessionPublicKeyDerHex: string;
+	openIdProvider?: OpenIdProvider;
 }): Promise<{ delegationChainJson: string }> => {
 	const sessionPublicKey = Ed25519PublicKey.fromDer(hexStringToUint8Array(sessionPublicKeyDerHex));
 
@@ -62,11 +70,12 @@ export const signInMobileAuthBridge = async ({
 	const client = new AuthClient({
 		storage,
 		identity: new PartialIdentity(sessionPublicKey),
-		identityProvider: identityProviderUrl(),
+		identityProvider: identityProviderUrl({ openIdProvider }),
 		idleOptions: {
 			disableIdle: true,
 			disableDefaultIdleCallback: true
 		},
+		...(nonNullish(openIdProvider) ? { openIdProvider } : {}),
 		...getOptionalDerivationOrigin()
 	});
 

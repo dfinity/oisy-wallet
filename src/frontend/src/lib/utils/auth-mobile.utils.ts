@@ -2,11 +2,19 @@ import {
 	MOBILE_AUTH_ALLOWED_REDIRECT_URIS,
 	MOBILE_AUTH_BRIDGE_PATH,
 	MOBILE_AUTH_DELEGATION_PARAM,
+	MOBILE_AUTH_OPENID_PROVIDER_PARAM,
 	MOBILE_AUTH_REDIRECT_URI_PARAM,
 	MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM
 } from '$lib/constants/mobile-auth.constants';
-import { isNullish, notEmptyString } from '@dfinity/utils';
+import type { OpenIdProvider } from '$lib/types/auth';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
+
+// Mirrors the `OpenIdProvider` union — the SDK's literal provider identifiers.
+const OPENID_PROVIDERS: readonly OpenIdProvider[] = ['google', 'apple', 'microsoft'];
+
+export const isOpenIdProvider = (value: Nullish<string>): value is OpenIdProvider =>
+	notEmptyString(value) && OPENID_PROVIDERS.includes(value as OpenIdProvider);
 
 export const isAllowedMobileAuthRedirectUri = (redirectUri: Nullish<string>): boolean =>
 	notEmptyString(redirectUri) && MOBILE_AUTH_ALLOWED_REDIRECT_URIS.includes(redirectUri);
@@ -19,15 +27,20 @@ export const isValidHexPublicKey = (publicKey: Nullish<string>): boolean =>
 export const buildMobileAuthBridgeUrl = ({
 	baseUrl,
 	sessionPublicKeyDerHex,
-	redirectUri
+	redirectUri,
+	openIdProvider
 }: {
 	baseUrl: string;
 	sessionPublicKeyDerHex: string;
 	redirectUri: string;
+	openIdProvider?: OpenIdProvider;
 }): string => {
 	const url = new URL(MOBILE_AUTH_BRIDGE_PATH, baseUrl);
 	url.searchParams.set(MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM, sessionPublicKeyDerHex);
 	url.searchParams.set(MOBILE_AUTH_REDIRECT_URI_PARAM, redirectUri);
+	if (nonNullish(openIdProvider)) {
+		url.searchParams.set(MOBILE_AUTH_OPENID_PROVIDER_PARAM, openIdProvider);
+	}
 	return url.toString();
 };
 

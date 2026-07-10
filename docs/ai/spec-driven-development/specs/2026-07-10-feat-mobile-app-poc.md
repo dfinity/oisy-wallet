@@ -96,6 +96,12 @@ influences derivation.
 - The web sign-in flow (popup + ICRC-29 postMessage) cannot work inside a
   WebView (no WebAuthn, no `window.opener`), so on native platforms the
   sign-in service branches to the bridge flow described above.
+- One-Click sign-in (Google / Apple / Microsoft) rides through the same
+  bridge: the app forwards the chosen provider as an `openIdProvider`
+  query param (validated against the known provider literals), and the
+  bridge runs the Internet Identity 2.0 (`id.ai`) flow with it. Note that
+  the One-Click buttons are hidden in `local`-mode builds by existing
+  design (the local II replica does not support the OpenID flow).
 
 ## Changes (grounded in real files)
 

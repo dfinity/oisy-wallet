@@ -11,6 +11,7 @@ export const MOBILE_AUTH_ALLOWED_REDIRECT_URIS: readonly string[] = [MOBILE_AUTH
 
 export const MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM = 'sessionPublicKey';
 export const MOBILE_AUTH_REDIRECT_URI_PARAM = 'redirectUri';
+export const MOBILE_AUTH_OPENID_PROVIDER_PARAM = 'openIdProvider';
 export const MOBILE_AUTH_DELEGATION_PARAM = 'delegation';
 
 // POC value: re-authenticating through the system browser every hour (the web

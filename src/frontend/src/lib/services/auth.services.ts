@@ -52,7 +52,7 @@ export const signIn = async (
 	// deep-link callback — see auth-mobile.services.ts.
 	if (isNativePlatform()) {
 		try {
-			await signInMobile();
+			await signInMobile({ openIdProvider: params.openIdProvider });
 
 			return { success: 'ok' };
 		} catch (err: unknown) {
