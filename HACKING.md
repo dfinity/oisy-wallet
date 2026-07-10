@@ -10,6 +10,7 @@ This document lists a couple of useful information for development and deploymen
 - [Faucets](#faucets)
 - [Testing](#testing)
 - [Debugging Reactivity](#debugging-reactivity)
+- [Memory Benchmarking](#memory-benchmarking)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
 - [Bitcoin](#bitcoin)
 - [Routes Styles](#routes-styles)
@@ -248,6 +249,24 @@ All `$effect` and `$derived.by` blocks are instrumented automatically. If you pr
 ```
 
 The call is a no-op in production, so it is safe to leave in the codebase.
+
+## Memory Benchmarking
+
+`npm run perf:memory` measures the browser-memory profile of the production build with a headless Chromium (via the already-installed Playwright):
+
+1. **Landing page (logged out)** — JS heap, DOM nodes and total JS transferred.
+2. **Worker scaling** — spawns N copies of the real built wallet-worker bundle (the app spawns roughly one per enabled ICRC/BTC/SOL token, see `WalletWorkers.svelte`) and reports the marginal memory cost per worker. An empty-worker control run separates the fixed V8-isolate baseline from the cost of parsing/initializing the worker bundle itself.
+
+Usage:
+
+```bash
+npm run build       # any DFX_NETWORK; the bundle is what matters
+npm run perf:memory # add -- --json for machine-readable output
+```
+
+Environment variables: `PERF_MEMORY_CHROMIUM` (path to a Chromium executable when the Playwright-managed one is unavailable) and `PERF_MEMORY_WORKERS` (worker count for the scaling phase, default 50).
+
+Process-level memory (PSS) is read from `/proc` and therefore only reported on Linux; the JS-heap numbers work everywhere. Estimate steady-state usage for a given user as `landing + per-worker cost × enabled tokens`.
 
 ## Integrate ckERC20 Tokens
 
