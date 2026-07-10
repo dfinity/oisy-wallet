@@ -1,7 +1,4 @@
-import type {
-	Token as TradeToken,
-	UserTokenBalance
-} from '$declarations/oisy_trade/oisy_trade.did';
+import type { Token as TradeToken } from '$declarations/oisy_trade/oisy_trade.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
@@ -12,25 +9,26 @@ import {
 	MODAL_TOKENS_LIST_CONTEXT_KEY,
 	type ModalTokensListContext
 } from '$lib/stores/modal-tokens-list.store';
+import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
 
-const { mockPairs, mockEnabledIcTokens, mockBalances } = vi.hoisted(() => {
+const { mockPairs, mockEnabledIcTokens, mockAssets } = vi.hoisted(() => {
 	// eslint-disable-next-line @typescript-eslint/no-require-imports
 	const { writable } = require('svelte/store');
 	return {
 		mockPairs: writable([]),
 		mockEnabledIcTokens: writable([]),
-		mockBalances: writable([])
+		mockAssets: writable([])
 	};
 });
 
 vi.mock('$lib/derived/oisy-trade.derived', () => ({
 	oisyTradePairs: mockPairs,
-	oisyTradeBalances: mockBalances
+	oisyTradeAssets: mockAssets
 }));
 
 vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
@@ -57,11 +55,22 @@ describe('LimitOrderTokensList', () => {
 		ledgerCanisterId: ledgerId
 	});
 
-	const balanceOf = ({ ledgerId, free }: { ledgerId: string; free: bigint }): UserTokenBalance =>
-		({
-			token: { id: { ledger_id: Principal.fromText(ledgerId) } },
-			balance: { free, reserved: ZERO }
-		}) as unknown as UserTokenBalance;
+	const assetOf = ({
+		symbol,
+		ledgerId,
+		free
+	}: {
+		symbol: string;
+		ledgerId: string;
+		free: bigint;
+	}): OisyTradeAsset => ({
+		token: icToken({ symbol, ledgerId }),
+		free,
+		reserved: ZERO,
+		total: free,
+		totalUsd: undefined,
+		freeUsd: undefined
+	});
 
 	const icpPair = {
 		base: tradeToken({ symbol: 'ICP', ledgerId: icpLedgerId }),
@@ -73,12 +82,20 @@ describe('LimitOrderTokensList', () => {
 	];
 
 	const mockContext = (tokens = [ICP_TOKEN]) =>
-		new Map([[MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens })]]);
+		new Map([
+			[
+				MODAL_TOKENS_LIST_CONTEXT_KEY,
+				// `sortByBalance: false` mirrors `LimitOrderModal`: without it the shared
+				// picker re-maps every token against the wallet balances store, which is
+				// exactly the regression this component's balance override guards against.
+				initModalTokensListContext({ tokens, sortByBalance: false })
+			]
+		]);
 
 	beforeEach(() => {
 		mockPairs.set([]);
 		mockEnabledIcTokens.set([]);
-		mockBalances.set([]);
+		mockAssets.set([]);
 	});
 
 	it('renders the shared modal tokens list', () => {
@@ -94,7 +111,7 @@ describe('LimitOrderTokensList', () => {
 		mockPairs.set([icpPair]);
 		mockEnabledIcTokens.set(enabledIcpCkusdc);
 		// A Sell spends the base, so it must be deposited to appear.
-		mockBalances.set([balanceOf({ ledgerId: icpLedgerId, free: 1_000_000n })]);
+		mockAssets.set([assetOf({ symbol: 'ICP', ledgerId: icpLedgerId, free: 1_000_000n })]);
 
 		const context = mockContext([]);
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
@@ -113,11 +130,36 @@ describe('LimitOrderTokensList', () => {
 		expect(filtered.some((token: { symbol: string }) => token.symbol === 'ICP')).toBeTruthy();
 	});
 
+	it('shows the deposited (free) balance, not the wallet balance, for the spend leg', async () => {
+		mockPairs.set([icpPair]);
+		mockEnabledIcTokens.set(enabledIcpCkusdc);
+		// Deposited balance differs from whatever the (unmocked) wallet balances
+		// store may hold — the picker must surface this one, not the wallet's.
+		const depositedFree = 1_000_000n;
+		mockAssets.set([assetOf({ symbol: 'ICP', ledgerId: icpLedgerId, free: depositedFree })]);
+
+		const context = mockContext([]);
+		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
+
+		render(LimitOrderTokensList, {
+			props: { mode: 'base', side: 'sell', onSelect: () => {}, onCancel: () => {} },
+			context
+		});
+
+		await tick();
+
+		const icp = get(ctx.filteredTokens).find(
+			(token: { symbol: string }) => token.symbol === 'ICP'
+		) as { balance?: bigint } | undefined;
+
+		expect(icp?.balance).toBe(depositedFree);
+	});
+
 	it('drops non-deposited tokens from the spend leg', async () => {
 		mockPairs.set([icpPair]);
 		mockEnabledIcTokens.set(enabledIcpCkusdc);
 		// No deposit → the Sell (spend) base list is empty.
-		mockBalances.set([]);
+		mockAssets.set([]);
 
 		const context = mockContext([]);
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
@@ -138,7 +180,7 @@ describe('LimitOrderTokensList', () => {
 		mockPairs.set([icpPair]);
 		mockEnabledIcTokens.set(enabledIcpCkusdc);
 		// A Buy receives the base, so it appears even with no DEX balance.
-		mockBalances.set([]);
+		mockAssets.set([]);
 
 		const context = mockContext([]);
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
