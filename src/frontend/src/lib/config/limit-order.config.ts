@@ -16,17 +16,21 @@ export const limitOrderWizardSteps = ({
 		title: i18n.trading.limit_order.title
 	},
 	{
-		// The base is what you sell on a Sell but what you buy on a Buy, so the
-		// picker title tracks the side rather than being fixed to "sell".
+		// Both pickers title by whether their leg is the one being sold or bought,
+		// which flips with the side: on a Sell the base is sold and the quote is
+		// bought; on a Buy the base is bought and the quote is sold.
 		name: WizardStepsLimitOrder.BASE_TOKEN,
 		title:
 			side === 'buy'
-				? i18n.trading.limit_order.select_base_token_buy
-				: i18n.trading.limit_order.select_base_token_sell
+				? i18n.trading.limit_order.select_buy_token
+				: i18n.trading.limit_order.select_sell_token
 	},
 	{
 		name: WizardStepsLimitOrder.QUOTE_TOKEN,
-		title: i18n.trading.limit_order.select_quote_token
+		title:
+			side === 'buy'
+				? i18n.trading.limit_order.select_sell_token
+				: i18n.trading.limit_order.select_buy_token
 	},
 	{
 		name: WizardStepsLimitOrder.REVIEW,
