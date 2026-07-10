@@ -1755,7 +1755,7 @@
 			"from": "Từ",
 			"network": "Mạng",
 			"transaction_fee": "",
-			"transfer_fee": "Phí chuyển tiền",
+			"transfer_fee": "Phí rút tiền",
 			"you_receive": "Bạn nhận",
 			"reserved_note": "$amount được giữ lại · bị khóa bởi lệnh đang mở",
 			"error_insufficient_balance": "Số tiền vượt quá số dư khả dụng của bạn",

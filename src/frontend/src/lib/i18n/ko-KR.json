@@ -1755,7 +1755,7 @@
 			"from": "출금 계정",
 			"network": "네트워크",
 			"transaction_fee": "",
-			"transfer_fee": "송금 수수료",
+			"transfer_fee": "출금 수수료",
 			"you_receive": "받는 금액",
 			"reserved_note": "$amount 예약됨 · 활성 주문으로 잠김",
 			"error_insufficient_balance": "금액이 사용 가능한 잔액을 초과합니다",

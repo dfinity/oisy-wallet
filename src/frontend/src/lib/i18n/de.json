@@ -1755,7 +1755,7 @@
 			"from": "Von",
 			"network": "Netzwerk",
 			"transaction_fee": "",
-			"transfer_fee": "Übertragungsgebühr",
+			"transfer_fee": "Abhebungsgebühr",
 			"you_receive": "Du erhältst",
 			"reserved_note": "$amount reserviert · durch offene Orders gesperrt",
 			"error_insufficient_balance": "Betrag übersteigt dein freies Guthaben",

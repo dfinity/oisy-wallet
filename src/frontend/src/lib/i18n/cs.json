@@ -1755,7 +1755,7 @@
 			"from": "Z",
 			"network": "Síť",
 			"transaction_fee": "",
-			"transfer_fee": "Poplatek za převod",
+			"transfer_fee": "Poplatek za výběr",
 			"you_receive": "Obdržíš",
 			"reserved_note": "$amount rezervováno · blokováno otevřenými pokyny",
 			"error_insufficient_balance": "Částka přesahuje tvůj volný zůstatek",

@@ -1755,7 +1755,7 @@
 			"from": "送金元",
 			"network": "ネットワーク",
 			"transaction_fee": "",
-			"transfer_fee": "送金手数料",
+			"transfer_fee": "出金手数料",
 			"you_receive": "受け取る",
 			"reserved_note": "$amount確保済み · 有効な注文によりロック中",
 			"error_insufficient_balance": "金額が利用可能残高を超えています",

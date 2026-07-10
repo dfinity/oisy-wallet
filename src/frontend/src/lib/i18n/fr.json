@@ -1755,7 +1755,7 @@
 			"from": "Depuis",
 			"network": "Réseau",
 			"transaction_fee": "",
-			"transfer_fee": "Frais de transfert",
+			"transfer_fee": "Frais de retrait",
 			"you_receive": "Vous recevez",
 			"reserved_note": "$amount réservé · bloqué par des ordres ouverts",
 			"error_insufficient_balance": "Le montant dépasse votre solde disponible",

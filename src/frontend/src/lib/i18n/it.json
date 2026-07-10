@@ -1755,7 +1755,7 @@
 			"from": "Da",
 			"network": "Rete",
 			"transaction_fee": "",
-			"transfer_fee": "Commissione di trasferimento",
+			"transfer_fee": "Commissione di prelievo",
 			"you_receive": "Ricevi",
 			"reserved_note": "$amount riservato · bloccato da ordini aperti",
 			"error_insufficient_balance": "L'importo supera il tuo saldo disponibile",

@@ -1755,7 +1755,7 @@
 			"from": "Откуда",
 			"network": "Сеть",
 			"transaction_fee": "",
-			"transfer_fee": "Комиссия за перевод",
+			"transfer_fee": "Комиссия за вывод",
 			"you_receive": "Ты получишь",
 			"reserved_note": "$amount зарезервировано · заблокировано открытыми ордерами",
 			"error_insufficient_balance": "Сумма превышает твой доступный баланс",

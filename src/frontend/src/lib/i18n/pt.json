@@ -1755,7 +1755,7 @@
 			"from": "De",
 			"network": "Rede",
 			"transaction_fee": "",
-			"transfer_fee": "Taxa de transferência",
+			"transfer_fee": "Taxa de levantamento",
 			"you_receive": "Recebes",
 			"reserved_note": "$amount reservado · bloqueado por ordens abertas",
 			"error_insufficient_balance": "O montante excede o teu saldo disponível",

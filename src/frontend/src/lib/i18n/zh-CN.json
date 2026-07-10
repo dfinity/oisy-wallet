@@ -1755,7 +1755,7 @@
 			"from": "来自",
 			"network": "网络",
 			"transaction_fee": "",
-			"transfer_fee": "转账费用",
+			"transfer_fee": "提现费",
 			"you_receive": "您将收到",
 			"reserved_note": "$amount 已保留 · 被未成交订单锁定",
 			"error_insufficient_balance": "金额超过您的可用余额",

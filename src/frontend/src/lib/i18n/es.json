@@ -1755,7 +1755,7 @@
 			"from": "Desde",
 			"network": "Red",
 			"transaction_fee": "",
-			"transfer_fee": "Comisión de transferencia",
+			"transfer_fee": "Comisión de retiro",
 			"you_receive": "Recibes",
 			"reserved_note": "$amount reservado · bloqueado por órdenes abiertas",
 			"error_insufficient_balance": "El importe supera tu saldo disponible",

@@ -1755,7 +1755,7 @@
 			"from": "Z",
 			"network": "Sieć",
 			"transaction_fee": "",
-			"transfer_fee": "Opłata za przelew",
+			"transfer_fee": "Opłata za wypłatę",
 			"you_receive": "Otrzymujesz",
 			"reserved_note": "$amount zarezerwowane · zablokowane przez otwarte zlecenia",
 			"error_insufficient_balance": "Kwota przekracza twoje dostępne saldo",

@@ -1755,7 +1755,7 @@
 			"from": "से",
 			"network": "नेटवर्क",
 			"transaction_fee": "",
-			"transfer_fee": "ट्रांसफर शुल्क",
+			"transfer_fee": "निकासी शुल्क",
 			"you_receive": "आपको मिलेगा",
 			"reserved_note": "$amount आरक्षित · खुले ऑर्डर द्वारा लॉक किया गया",
 			"error_insufficient_balance": "राशि आपके उपलब्ध बैलेंस से अधिक है",
