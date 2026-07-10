@@ -41,7 +41,6 @@
 	let token = $state<IcToken | undefined>();
 	let amount = $state<OptionAmount>();
 	let amountSetToMax = $state(false);
-	let consent = $state(false);
 
 	const steps: WizardSteps<WizardStepsTradingDeposit> = $derived(
 		tradingDepositWizardSteps({ i18n: $i18n })
@@ -73,7 +72,6 @@
 		token = undefined;
 		amount = undefined;
 		amountSetToMax = false;
-		consent = false;
 		depositProgressStep = ProgressStepsTradingDeposit.INITIALIZATION;
 		currentStep = undefined;
 		tokensListContext.resetFilters();
@@ -211,7 +209,6 @@
 			{token}
 			bind:amount
 			bind:amountSetToMax
-			bind:consent
 		/>
 	{/if}
 </WizardModal>

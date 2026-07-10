@@ -5,7 +5,6 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import TradingDepositModal from '$lib/components/trading/TradingDepositModal.svelte';
 import {
-	TRADING_DEPOSIT_CONSENT_CHECKBOX,
 	TRADING_DEPOSIT_FORM_REVIEW_BUTTON,
 	TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -120,7 +119,6 @@ describe('TradingDepositModal', () => {
 		const { getByText } = render(TradingDepositModal);
 
 		expect(getByText(en.trading.deposit.you_deposit)).toBeInTheDocument();
-		expect(getByText(en.trading.deposit.consent)).toBeInTheDocument();
 	});
 
 	it('should navigate to the tokens list and back via the token selector', async () => {
@@ -183,8 +181,6 @@ describe('TradingDepositModal', () => {
 		await waitFor(() =>
 			expect(getByTestId(TRADING_DEPOSIT_FORM_REVIEW_BUTTON)).toBeInTheDocument()
 		);
-
-		await fireEvent.click(getByTestId(TRADING_DEPOSIT_CONSENT_CHECKBOX));
 
 		const amountInput = document.querySelector<HTMLInputElement>('input[name="token-input"]');
 
