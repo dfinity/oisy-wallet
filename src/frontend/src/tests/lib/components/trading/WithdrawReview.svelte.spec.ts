@@ -36,13 +36,18 @@ describe('WithdrawReview', () => {
 		);
 	});
 
-	it('renders the OISY Trade logo next to the provider name', () => {
-		const { getByLabelText } = render(WithdrawReview, {
+	it('renders the OISY Trade logo, hidden from assistive tech', () => {
+		const { container } = render(WithdrawReview, {
 			props: baseProps,
 			context: mockContext()
 		});
 
-		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+		const mark = container.querySelector('[aria-label="OISY Trade"]');
+
+		expect(mark).toBeInTheDocument();
+		// Decorative next to its own text label: must stay inside an aria-hidden
+		// wrapper so screen readers don't announce "OISY Trade" twice.
+		expect(mark?.closest('[aria-hidden="true"]')).not.toBeNull();
 	});
 
 	it('calls onBack when the back button is clicked', async () => {

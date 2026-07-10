@@ -48,13 +48,18 @@ describe('WithdrawForm', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.you_receive);
 	});
 
-	it('renders the OISY Trade logo next to the provider name', () => {
-		const { getByLabelText } = render(WithdrawForm, {
+	it('renders the OISY Trade logo, hidden from assistive tech', () => {
+		const { container } = render(WithdrawForm, {
 			props: baseProps,
 			context: mockContext()
 		});
 
-		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+		const mark = container.querySelector('[aria-label="OISY Trade"]');
+
+		expect(mark).toBeInTheDocument();
+		// Decorative next to its own text label: must stay inside an aria-hidden
+		// wrapper so screen readers don't announce "OISY Trade" twice.
+		expect(mark?.closest('[aria-hidden="true"]')).not.toBeNull();
 	});
 
 	it('disables the review button while the amount is invalid', () => {
