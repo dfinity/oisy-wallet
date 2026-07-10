@@ -1,5 +1,6 @@
 import { goto } from '$app/navigation';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
@@ -28,6 +29,18 @@ export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
 export const liquidiumPortfolio: Readable<LiquidiumPortfolio | null> = derived(
 	liquidiumStore,
 	({ portfolio }) => portfolio
+);
+
+export const liquidiumSupplyMarkets: Readable<LiquidiumMarket[]> = derived(
+	[liquidiumMarkets, liquidiumPortfolio],
+	([markets, portfolio]) =>
+		markets.filter(
+			({ available, poolId }) =>
+				available &&
+				!(portfolio?.reserves ?? []).some(
+					(reserve) => reserve.poolId === poolId && reserve.borrowed > ZERO
+				)
+		)
 );
 
 // SDK USD prices for the borrow form's USD / fiat math.

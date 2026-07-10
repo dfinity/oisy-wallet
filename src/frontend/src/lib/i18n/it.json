@@ -2385,6 +2385,7 @@
 			"action_repay": "Rimborsa",
 			"action_withdraw": "Preleva",
 			"transaction_failed": "Transazione non riuscita",
+			"select_supply_token": "",
 			"supply_review": "Rivedi fornitura",
 			"supply_review_subtitle": "Fornisci",
 			"supplying": "Fornitura in corso",

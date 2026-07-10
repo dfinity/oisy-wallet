@@ -2385,6 +2385,7 @@
 			"action_repay": "Splatit",
 			"action_withdraw": "Vybrat",
 			"transaction_failed": "Transakce se nezdařila",
+			"select_supply_token": "",
 			"supply_review": "Zkontrolovat poskytnutí",
 			"supply_review_subtitle": "Poskytuješ",
 			"supplying": "Probíhá poskytnutí",

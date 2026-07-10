@@ -2385,6 +2385,7 @@
 			"action_repay": "",
 			"action_withdraw": "",
 			"transaction_failed": "",
+			"select_supply_token": "",
 			"supply_review": "",
 			"supply_review_subtitle": "",
 			"supplying": "",

@@ -2385,6 +2385,7 @@
 			"action_repay": "Spłać",
 			"action_withdraw": "Wypłać",
 			"transaction_failed": "Transakcja nie powiodła się",
+			"select_supply_token": "",
 			"supply_review": "Sprawdź dostarczenie",
 			"supply_review_subtitle": "Dostarczasz",
 			"supplying": "Trwa dostarczanie",

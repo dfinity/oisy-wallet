@@ -34,6 +34,10 @@ export const liquidiumSupplyWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumSupply.SUPPLYING,
 		title: i18n.liquidium.text.supplying
+	},
+	{
+		name: WizardStepsLiquidiumSupply.TOKENS_LIST,
+		title: i18n.liquidium.text.select_supply_token
 	}
 ];
 

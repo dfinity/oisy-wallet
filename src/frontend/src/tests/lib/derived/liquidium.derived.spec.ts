@@ -13,6 +13,7 @@ import {
 	liquidiumMinBorrowApy,
 	liquidiumNetValueUsd,
 	liquidiumPortfolio,
+	liquidiumSupplyMarkets,
 	liquidiumTotalBorrowedUsd
 } from '$lib/derived/liquidium.derived';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
@@ -219,6 +220,49 @@ describe('liquidium derived stores', () => {
 
 		it('is null by default', () => {
 			expect(get(liquidiumPortfolio)).toBeNull();
+		});
+	});
+
+	describe('liquidiumSupplyMarkets', () => {
+		it('keeps only available markets', () => {
+			liquidiumStore.set({
+				markets: [market(), market({ poolId: 'pool-eth', available: false })],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumSupplyMarkets)).toEqual([market()]);
+		});
+
+		it('excludes markets the user has borrowed', () => {
+			liquidiumStore.set({
+				markets: [market(), market({ poolId: 'pool-eth', asset: 'USDC', chain: 'ETH' })],
+				portfolio: {
+					...portfolio,
+					reserves: [
+						{
+							poolId: 'pool-eth',
+							asset: 'USDC',
+							chain: 'ETH',
+							supplyApy: 0,
+							borrowApy: 8,
+							deposited: ZERO,
+							depositedDecimals: 6,
+							borrowed: 1_000n,
+							borrowedDecimals: 6,
+							suppliedUsd: 0,
+							borrowedUsd: 2000
+						}
+					]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumSupplyMarkets)).toEqual([market()]);
+		});
+
+		it('is empty by default', () => {
+			expect(get(liquidiumSupplyMarkets)).toEqual([]);
 		});
 	});
 

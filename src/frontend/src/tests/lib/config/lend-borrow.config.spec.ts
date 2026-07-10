@@ -12,7 +12,11 @@ describe('lend-borrow.config', () => {
 			expect(liquidiumSupplyWizardSteps({ i18n: en })).toStrictEqual([
 				{ name: WizardStepsLiquidiumSupply.SUPPLY, title: en.liquidium.text.action_supply },
 				{ name: WizardStepsLiquidiumSupply.REVIEW, title: en.liquidium.text.supply_review },
-				{ name: WizardStepsLiquidiumSupply.SUPPLYING, title: en.liquidium.text.supplying }
+				{ name: WizardStepsLiquidiumSupply.SUPPLYING, title: en.liquidium.text.supplying },
+				{
+					name: WizardStepsLiquidiumSupply.TOKENS_LIST,
+					title: en.liquidium.text.select_supply_token
+				}
 			]);
 		});
 	});

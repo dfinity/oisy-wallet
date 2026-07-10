@@ -97,7 +97,8 @@ export enum WizardStepsTradingWithdraw {
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
-	SUPPLYING = 'Supplying'
+	SUPPLYING = 'Supplying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumBorrow {
