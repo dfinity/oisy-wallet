@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Comisión total estimada",
 			"approval_fee": "Comisión de aprobación",
 			"transfer_fee": "Comisión de red",
-			"consent": "Entiendo que mis tokens serán custodiados por el canister de OISY Trade y están sujetos al riesgo de los contratos inteligentes onchain.",
 			"info_title": "OISY Trade: libro de órdenes onchain",
 			"info_description": "Los fondos depositados son custodiados por el canister de OISY Trade y se usan para colocar órdenes límite, protegidos por contratos inteligentes onchain.",
 			"empty_title": "Aún no hay nada que depositar",

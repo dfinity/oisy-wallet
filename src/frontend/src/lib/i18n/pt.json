@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Taxa total estimada",
 			"approval_fee": "Taxa de aprovação",
 			"transfer_fee": "Taxa de rede",
-			"consent": "Compreendo que os meus tokens serão detidos pelo canister da OISY Trade e estão sujeitos ao risco de smart contracts onchain.",
 			"info_title": "OISY Trade: livro de ordens onchain",
 			"info_description": "Os fundos depositados são detidos pelo canister da OISY Trade e usados para colocar ordens limite, protegidos por smart contracts onchain.",
 			"empty_title": "Ainda não há nada para depositar",

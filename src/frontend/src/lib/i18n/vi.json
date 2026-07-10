@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Tổng phí ước tính",
 			"approval_fee": "Phí chấp thuận",
 			"transfer_fee": "Phí mạng",
-			"consent": "Tôi hiểu rằng token của tôi sẽ được giữ bởi canister OISY Trade và chịu rủi ro hợp đồng thông minh on-chain.",
 			"info_title": "OISY Trade: sổ lệnh on-chain",
 			"info_description": "Tiền đã nạp được giữ bởi canister OISY Trade và dùng để đặt lệnh giới hạn, được bảo vệ bởi hợp đồng thông minh on-chain.",
 			"empty_title": "Chưa có gì để nạp",

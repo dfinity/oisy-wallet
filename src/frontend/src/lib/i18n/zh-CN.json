@@ -1732,7 +1732,6 @@
 			"transaction_fee": "总估算费用",
 			"approval_fee": "授权费用",
 			"transfer_fee": "网络费用",
-			"consent": "我理解我的代币将由 OISY Trade 罐子（canister）保管，并承担链上智能合约风险。",
 			"info_title": "OISY Trade：链上订单簿",
 			"info_description": "存入的资金由 OISY Trade 罐子保管，用于下达限价单，并由链上智能合约提供保障。",
 			"empty_title": "暂无可存入的资产",

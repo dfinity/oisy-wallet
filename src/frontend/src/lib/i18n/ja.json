@@ -1732,7 +1732,6 @@
 			"transaction_fee": "合計推定手数料",
 			"approval_fee": "承認手数料",
 			"transfer_fee": "ネットワーク手数料",
-			"consent": "自分のトークンがOISY Tradeキャニスターに保管され、オンチェーンのスマートコントラクトリスクを負うことを理解しています。",
 			"info_title": "OISY Trade: オンチェーン板取引",
 			"info_description": "入金された資金はOISY Tradeキャニスターに保管され、指値注文に使用され、オンチェーンのスマートコントラクトによって保護されます。",
 			"empty_title": "まだ入金するものがありません",

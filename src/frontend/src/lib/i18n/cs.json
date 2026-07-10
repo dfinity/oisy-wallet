@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Celkový odhadovaný poplatek",
 			"approval_fee": "Schvalovací poplatek",
 			"transfer_fee": "Síťový poplatek",
-			"consent": "Rozumím, že mé tokeny budou drženy canisterem OISY Trade a podléhají riziku onchain smart kontraktů.",
 			"info_title": "OISY Trade: onchain kniha objednávek",
 			"info_description": "Vložené prostředky drží canister OISY Trade a používá je k zadávání limitních pokynů, zajištěných onchain smart kontrakty.",
 			"empty_title": "Zatím není co vložit",

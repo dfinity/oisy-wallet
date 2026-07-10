@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Geschätzte Gesamtgebühr",
 			"approval_fee": "Genehmigungsgebühr",
 			"transfer_fee": "Netzwerkgebühr",
-			"consent": "Mir ist bewusst, dass meine Token vom OISY Trade Canister verwahrt werden und dem Risiko von Onchain-Smart-Contracts unterliegen.",
 			"info_title": "OISY Trade: Onchain-Orderbuch",
 			"info_description": "Eingezahlte Gelder werden vom OISY Trade Canister verwahrt und für Limit-Orders verwendet, gesichert durch Onchain-Smart-Contracts.",
 			"empty_title": "Noch nichts zum Einzahlen",

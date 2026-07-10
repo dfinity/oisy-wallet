@@ -1732,7 +1732,6 @@
 			"transaction_fee": "Szacowana całkowita opłata",
 			"approval_fee": "Opłata za zatwierdzenie",
 			"transfer_fee": "Opłata sieciowa",
-			"consent": "Rozumiem, że moje tokeny zostaną przechowane przez kanister OISY Trade i podlegają ryzyku smart kontraktów onchain.",
 			"info_title": "OISY Trade: księga zleceń onchain",
 			"info_description": "Wpłacone środki są przechowywane przez kanister OISY Trade i wykorzystywane do składania zleceń z limitem, zabezpieczonych smart kontraktami onchain.",
 			"empty_title": "Nie masz jeszcze nic do wpłacenia",

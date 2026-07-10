@@ -1732,7 +1732,6 @@
 			"transaction_fee": "예상 총 수수료",
 			"approval_fee": "승인 수수료",
 			"transfer_fee": "네트워크 수수료",
-			"consent": "제 토큰이 OISY Trade 캐니스터에 보관되며 온체인 스마트 컨트랙트 위험이 따른다는 것을 이해합니다.",
 			"info_title": "OISY Trade: 온체인 오더북",
 			"info_description": "입금된 자금은 OISY Trade 캐니스터에 보관되며 지정가 주문에 사용되고, 온체인 스마트 컨트랙트로 보호됩니다.",
 			"empty_title": "아직 입금할 항목이 없습니다",
