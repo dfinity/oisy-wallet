@@ -10,14 +10,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import {
-		TRADING_DEPOSIT_CONSENT_CHECKBOX,
-		TRADING_DEPOSIT_FORM_REVIEW_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import { TRADING_DEPOSIT_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -32,7 +28,6 @@
 		token?: IcToken;
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
-		consent: boolean;
 		onSelectToken: () => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -42,7 +37,6 @@
 		token,
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
-		consent = $bindable(),
 		onSelectToken,
 		onClose,
 		onNext
@@ -90,9 +84,7 @@
 	// `errorType` is debounced (300ms), so relying on it here would briefly keep
 	// the button disabled after the user corrects the amount. Kept bound to the
 	// input purely for the red highlight / Max button styling.
-	let invalid = $derived(
-		!consent || invalidAmount(amount) || Number(amount) === 0 || exceedsBalance
-	);
+	let invalid = $derived(invalidAmount(amount) || Number(amount) === 0 || exceedsBalance);
 </script>
 
 <ContentWithToolbar>
@@ -159,19 +151,6 @@
 			{/snippet}
 		</ModalValue>
 	</div>
-
-	<label
-		class="mb-4 flex cursor-pointer items-start gap-3 rounded-lg bg-secondary p-3"
-		for={TRADING_DEPOSIT_CONSENT_CHECKBOX}
-	>
-		<Checkbox
-			checked={consent}
-			inputId={TRADING_DEPOSIT_CONSENT_CHECKBOX}
-			onChange={() => (consent = !consent)}
-			testId={TRADING_DEPOSIT_CONSENT_CHECKBOX}
-		/>
-		<span class="text-sm text-tertiary">{$i18n.trading.deposit.consent}</span>
-	</label>
 
 	<TradingDepositInfoBox />
 
