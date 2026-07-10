@@ -1,0 +1,11 @@
+{
+	"name": "@dfinity/oisy-wallet-mobile",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Capacitor shell for the OISY Wallet mobile apps (POC). Dependencies are managed by the root package.json.",
+	"scripts": {
+		"sync": "cap sync",
+		"open:android": "cap open android",
+		"open:ios": "cap open ios"
+	}
+}

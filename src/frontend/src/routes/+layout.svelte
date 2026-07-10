@@ -21,6 +21,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { initMobileAuthListener } from '$lib/services/auth-mobile.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
@@ -32,7 +33,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
-	import { isIOS } from '$lib/utils/device.utils';
+	import { isIOS, isNativePlatform } from '$lib/utils/device.utils';
 
 	interface Props {
 		children: Snippet;
@@ -53,7 +54,13 @@
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
 		 */
-		await Promise.allSettled([syncAuthStore(), initPlausibleAnalytics(), i18n.init()]);
+		await Promise.allSettled([
+			syncAuthStore(),
+			initPlausibleAnalytics(),
+			i18n.init(),
+			// Registers the deep-link handler for the auth-bridge callback in the Capacitor shell.
+			...(browser && isNativePlatform() ? [initMobileAuthListener()] : [])
+		]);
 	};
 
 	const syncAuthStore = async () => {

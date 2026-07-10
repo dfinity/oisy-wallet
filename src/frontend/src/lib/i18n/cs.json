@@ -247,6 +247,18 @@
 			"learn_more": "Zjistěte více"
 		}
 	},
+	"mobile_auth": {
+		"text": {
+			"title": "",
+			"description": "",
+			"continue": "",
+			"redirecting": ""
+		},
+		"error": {
+			"invalid_request": "",
+			"error_while_signing_in": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Všechny aplikace",

@@ -20,6 +20,7 @@ import {
 } from '$lib/constants/analytics.constants';
 import { PARAM_DELETE_IDB_CACHE, PARAM_LEVEL, PARAM_MSG } from '$lib/constants/routes.constants';
 import { trackEvent } from '$lib/services/analytics.services';
+import { signInMobile } from '$lib/services/auth-mobile.services';
 import {
 	authLoggedInAnotherTabStore,
 	authStore,
@@ -33,6 +34,7 @@ import { InternetIdentityDomain } from '$lib/types/auth';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastLevel, ToastMsg } from '$lib/types/toast';
 import { consoleError, consoleWarn } from '$lib/utils/console.utils';
+import { isNativePlatform } from '$lib/utils/device.utils';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -44,6 +46,25 @@ import { get } from 'svelte/store';
 export const signIn = async (
 	params: AuthSignInParams
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
+	// Inside the Capacitor shell the popup/postMessage flow cannot work (no
+	// WebAuthn, no `window.opener`): sign-in goes through the system browser
+	// and the auth bridge instead. The flow completes asynchronously via the
+	// deep-link callback — see auth-mobile.services.ts.
+	if (isNativePlatform()) {
+		try {
+			await signInMobile();
+
+			return { success: 'ok' };
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: get(i18n).auth.error.error_while_signing_in },
+				err
+			});
+
+			return { success: 'error', err };
+		}
+	}
+
 	busy.show();
 
 	const trackingMetadata = {

@@ -225,6 +225,11 @@ interface I18nLock {
 	};
 }
 
+interface I18nMobile_auth {
+	text: { title: string; description: string; continue: string; redirecting: string };
+	error: { invalid_request: string; error_while_signing_in: string };
+}
+
 interface I18nDapps {
 	text: {
 		all_dapps: string;
@@ -2238,6 +2243,7 @@ interface I18n {
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;
+	mobile_auth: I18nMobile_auth;
 	dapps: I18nDapps;
 	rewards: I18nRewards;
 	footer: I18nFooter;

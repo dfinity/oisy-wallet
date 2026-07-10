@@ -1,0 +1,96 @@
+# POC — builds installable mobile app artifacts (debug APK + unsigned iOS app)
+# from the Capacitor shell in mobile/.
+# See docs/ai/spec-driven-development/specs/2026-07-10-feat-mobile-app-poc.md.
+name: Mobile Apps Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/mobile-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Setup Java
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Sync Capacitor Android project
+        working-directory: mobile
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: oisy-wallet-android-debug
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+  build-ios:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Sync Capacitor iOS project
+        working-directory: mobile
+        run: npx cap sync ios
+
+      # POC: unsigned simulator build — proves the project compiles and yields
+      # an installable .app for the iOS simulator. Device .ipa distribution
+      # requires Apple signing certificates (out of scope, see spec).
+      - name: Build iOS app (simulator, unsigned)
+        working-directory: mobile/ios/App
+        run: |
+          xcodebuild build \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package iOS app artifact
+        working-directory: mobile/ios/App
+        run: |
+          cd build/Build/Products/Debug-iphonesimulator
+          zip -qry App-simulator.zip App.app
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: oisy-wallet-ios-simulator-debug
+          path: mobile/ios/App/build/Build/Products/Debug-iphonesimulator/App-simulator.zip
+          if-no-files-found: error

@@ -1,4 +1,5 @@
 import { isNode } from '$lib/utils/env.utils';
+import { Capacitor } from '@capacitor/core';
 import { nonNullish } from '@dfinity/utils';
 
 interface UserAgentData {
@@ -44,6 +45,10 @@ export const isMobile = (): boolean => {
 };
 
 export const isDesktop = () => !isMobile();
+
+// True when running inside the Capacitor shell (Android / iOS app), false in
+// any browser — including the mobile browser and installed PWAs.
+export const isNativePlatform = (): boolean => Capacitor.isNativePlatform();
 
 export const isPWAStandalone = () => {
 	if ('standalone' in navigator && nonNullish(navigator.standalone)) {

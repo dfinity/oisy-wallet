@@ -68,6 +68,9 @@
 		"benchmark": "canbench --persist --show-summary"
 	},
 	"dependencies": {
+		"@capacitor/app": "7.1.0",
+		"@capacitor/browser": "7.0.3",
+		"@capacitor/core": "7.4.4",
 		"@dfinity/ic-pub-key": "^1.0.2",
 		"@dfinity/oisy-wallet-signer": "^6.0.0",
 		"@dfinity/utils": "~4.0.3",
@@ -104,6 +107,9 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
+		"@capacitor/android": "7.4.4",
+		"@capacitor/cli": "7.4.4",
+		"@capacitor/ios": "7.4.4",
 		"@dfinity/eslint-config-oisy-wallet": "^0.5.0",
 		"@dfinity/internet-identity-playwright": "^3.0.0",
 		"@icp-sdk/bindgen": "^0.2.0",
