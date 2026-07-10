@@ -6,18 +6,14 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { oisyTradeAssets, oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import { stakeBalances } from '$lib/derived/stake.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
-	import { mapTokenUi } from '$lib/utils/token.utils';
 
 	interface Props {
 		mode: 'base' | 'quote';
@@ -33,20 +29,19 @@
 
 	const pairs = $derived($oisyTradePairs);
 
-	// Only the leg that is sold needs deposited funds (the base on a Sell, the
-	// quote on a Buy). For that leg show the free DEX balance — what can actually
-	// be traded — instead of the wallet balance; the received leg keeps the wallet
-	// balance the user already holds. The modal context (see `LimitOrderModal`)
-	// disables its own wallet-balance sort (`sortByBalance: false`) so whichever
-	// balance we set below isn't overwritten downstream, exactly like the
-	// Withdraw picker does for its (always-deposited) list.
-	const showDepositBalance = $derived(
+	// Both pickers show the DEX-deposited balance (never the wallet balance), for
+	// consistency with the Deposited box and the Withdraw picker. The spend leg —
+	// the token being sold (base on a Sell, quote on a Buy) — is the one that
+	// actually needs funds, so it shows the *free* (tradeable) portion. The modal
+	// context (see `LimitOrderModal`) disables its own wallet-balance sort
+	// (`sortByBalance: false`) so the balance we set below isn't overwritten.
+	const isSpendLeg = $derived(
 		(mode === 'base' && side === 'sell') || (mode === 'quote' && side === 'buy')
 	);
 
-	// Free DEX balance (+ its fiat value), resolved via the same `oisyTradeAssets`
-	// the Withdraw picker and the provider page use, so all three surfaces agree
-	// on what's actually deposited and available.
+	// DEX deposit per token (free + total, with fiat values), resolved via the
+	// same `oisyTradeAssets` the Withdraw picker and the provider page use, so all
+	// three surfaces agree on what's actually deposited.
 	const dexAssetByLedger = $derived(
 		new Map($oisyTradeAssets.map((asset) => [asset.token.ledgerCanisterId, asset]))
 	);
@@ -80,11 +75,11 @@
 			);
 
 		// The spend leg can only use funds already on the DEX, so restrict it to
-		// tokens with a free balance and show that free balance (not the wallet's).
-		// The receive leg — what you buy on a Buy, what you're paid on a Sell — has
-		// no such requirement, so it lists every supported token regardless of
-		// deposit, showing the wallet balance the user already holds instead.
-		return showDepositBalance
+		// tokens with a free balance and show that free (tradeable) balance. The
+		// receive leg — what you buy on a Buy, what you're paid on a Sell — has no
+		// such requirement, so it lists every supported token regardless of deposit
+		// and shows the full deposit (free + reserved), 0 when nothing is deposited.
+		return isSpendLeg
 			? resolved
 					.map((token) => {
 						const asset = dexAssetByLedger.get(token.ledgerCanisterId);
@@ -92,9 +87,11 @@
 						return { ...token, balance: asset?.free ?? ZERO, usdBalance: asset?.freeUsd };
 					})
 					.filter(({ balance }) => balance > ZERO)
-			: resolved.map((token) =>
-					mapTokenUi({ token, $balances: $balancesStore, $exchanges, $stakeBalances })
-				);
+			: resolved.map((token) => {
+					const asset = dexAssetByLedger.get(token.ledgerCanisterId);
+
+					return { ...token, balance: asset?.total ?? ZERO, usdBalance: asset?.totalUsd };
+				});
 	});
 
 	$effect(() => {
