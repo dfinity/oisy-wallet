@@ -58,7 +58,9 @@
 		{#snippet label()}{$i18n.trading.withdraw.from}{/snippet}
 		{#snippet mainValue()}
 			<span class="inline-flex items-center gap-2">
-				<OisyTradeMark size="22" />
+				<span class="flex" aria-hidden="true">
+					<OisyTradeMark size="22" />
+				</span>
 				{OISY_TRADE_PROVIDER_NAME}
 			</span>
 		{/snippet}
