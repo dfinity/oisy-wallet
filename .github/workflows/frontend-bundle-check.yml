@@ -29,8 +29,14 @@ jobs:
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
-          echo "Base branch bundle size: $SIZE KB"
+          shopt -s globstar nullglob
+          FILES=(build/_app/immutable/**/*.js build/_app/immutable/**/*.js.gz)
+          if (( ${#FILES[@]} == 0 )); then
+            echo "::error::No JS bundles found under build/_app/immutable — did the build output layout change?"
+            exit 1
+          fi
+          SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
+          echo "Base branch bundle size: $SIZE KB (${#FILES[@]} files)"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
   build-pr:
@@ -55,8 +61,14 @@ jobs:
       - name: Get bundle size
         id: get-size
         run: |
-          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
-          echo "PR bundle size: $SIZE KB"
+          shopt -s globstar nullglob
+          FILES=(build/_app/immutable/**/*.js build/_app/immutable/**/*.js.gz)
+          if (( ${#FILES[@]} == 0 )); then
+            echo "::error::No JS bundles found under build/_app/immutable — did the build output layout change?"
+            exit 1
+          fi
+          SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
+          echo "PR bundle size: $SIZE KB (${#FILES[@]} files)"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
   compare-sizes:
@@ -67,27 +79,23 @@ jobs:
     steps:
       - name: Compare bundle sizes
         run: |
-          BASE_SIZE=$BASE_SIZE
-          PR_SIZE=$PR_SIZE
+          if ! [[ $BASE_SIZE =~ ^[0-9]+$ && $PR_SIZE =~ ^[0-9]+$ && $BASE_SIZE -gt 0 && $PR_SIZE -gt 0 ]]; then
+            echo "::error::Missing or invalid bundle sizes (base='${BASE_SIZE}', pr='${PR_SIZE}') — refusing to pass vacuously."
+            exit 1
+          fi
 
           DIFF=$((PR_SIZE - BASE_SIZE))
-
-          if (( BASE_SIZE > 0 )); then
-            PERCENT=$((100 * DIFF / BASE_SIZE))
-          else
-            PERCENT=0
-          fi
+          PERCENT=$((100 * DIFF / BASE_SIZE))
 
           echo "Base bundle size: ${BASE_SIZE} KB"
           echo "PR bundle size:   ${PR_SIZE} KB"
           echo "::notice::Difference:       ${DIFF} KB"
           echo "::notice::Percent change:   ${PERCENT}%"
-          echo "::endgroup::"
 
           MAX_KB=100
           MAX_PERCENT=10
 
-           if (( DIFF > MAX_KB )); then
+          if (( DIFF > MAX_KB )); then
             echo "🚨 Bundle size increased by ${DIFF}KB, over the limit of ${MAX_KB}KB."
             exit 1
           fi
