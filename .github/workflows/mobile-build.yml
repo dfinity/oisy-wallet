@@ -27,6 +27,14 @@ jobs:
 
       - name: Build web app
         run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
+      # The post-process step emits .gz siblings for the IC asset canister;
+      # Android's asset merger treats foo and foo.gz as duplicate resources,
+      # and the WebView never serves the .gz variants anyway.
+      - name: Strip precompressed assets
+        run: find build -name '*.gz' -delete
 
       - name: Setup Java
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
@@ -60,8 +68,14 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      # The heap bump avoids v8 OOM aborts on the memory-constrained macOS runners.
       - name: Build web app
         run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
+      - name: Strip precompressed assets
+        run: find build -name '*.gz' -delete
 
       - name: Sync Capacitor iOS project
         working-directory: mobile

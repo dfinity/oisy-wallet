@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { browser } from '$app/environment';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -36,7 +36,7 @@
 	// Sign-in must start from a user gesture: Internet Identity opens in a
 	// popup, and popup blockers only allow it inside a click handler.
 	const onContinue = async () => {
-		if (!validRequest || !nonNullish(sessionPublicKeyDerHex) || !nonNullish(redirectUri)) {
+		if (!validRequest || isNullish(sessionPublicKeyDerHex) || isNullish(redirectUri)) {
 			flow = 'invalid';
 			return;
 		}

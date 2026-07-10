@@ -18,7 +18,8 @@ class InMemoryAuthClientStorage implements AuthClientStorage {
 		return this.#store.get(key) ?? null;
 	}
 
-	// eslint-disable-next-line require-await
+	// The (key, value) signature is mandated by the `AuthClientStorage` interface.
+	// eslint-disable-next-line require-await, local-rules/prefer-object-params
 	async set(key: string, value: string | CryptoKeyPair): Promise<void> {
 		this.#store.set(key, value);
 	}

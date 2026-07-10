@@ -11,7 +11,7 @@ import { buildMobileAuthBridgeUrl, parseMobileAuthCallbackUrl } from '$lib/utils
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
-import { isNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 import { KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
@@ -105,7 +105,7 @@ const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void>
 				isNullish(min) || expiration < min ? expiration : min,
 			undefined
 		);
-		if (!isNullish(earliestExpiration)) {
+		if (nonNullish(earliestExpiration)) {
 			localStorage.setItem(
 				MOBILE_AUTH_SESSION_EXPIRATION_STORAGE_KEY,
 				earliestExpiration.toString()
@@ -141,7 +141,7 @@ export const initMobileAuthListener = async (): Promise<void> => {
 	});
 
 	const launchUrl = await App.getLaunchUrl();
-	if (!isNullish(launchUrl)) {
+	if (nonNullish(launchUrl)) {
 		await handleMobileAuthCallback(launchUrl);
 	}
 };

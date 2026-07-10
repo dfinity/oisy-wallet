@@ -26,6 +26,10 @@ Android Studio / SDK for Android and Xcode + CocoaPods for iOS (macOS only).
 # 1. Build the web app (repo root)
 npm run build
 
+# 1b. Drop the .gz siblings emitted for the IC asset canister — the Android
+#     asset merger rejects them as duplicates and the WebView never uses them
+find build -name '*.gz' -delete
+
 # 2. Copy web assets + native config into the platform projects
 npx cap sync android   # or: ios   (run from mobile/)
 

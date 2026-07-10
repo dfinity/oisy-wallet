@@ -6,13 +6,14 @@ import {
 	MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM
 } from '$lib/constants/mobile-auth.constants';
 import { isNullish, notEmptyString } from '@dfinity/utils';
+import type { Nullish } from '@dfinity/zod-schemas';
 
-export const isAllowedMobileAuthRedirectUri = (redirectUri: string | null | undefined): boolean =>
+export const isAllowedMobileAuthRedirectUri = (redirectUri: Nullish<string>): boolean =>
 	notEmptyString(redirectUri) && MOBILE_AUTH_ALLOWED_REDIRECT_URIS.includes(redirectUri);
 
 const HEX_REGEX = /^(?:[0-9a-fA-F]{2})+$/;
 
-export const isValidHexPublicKey = (publicKey: string | null | undefined): boolean =>
+export const isValidHexPublicKey = (publicKey: Nullish<string>): boolean =>
 	notEmptyString(publicKey) && HEX_REGEX.test(publicKey);
 
 export const buildMobileAuthBridgeUrl = ({
