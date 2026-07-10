@@ -4,12 +4,8 @@ import en from '$tests/mocks/i18n.mock';
 
 describe('limit-order.config', () => {
 	describe('limitOrderWizardSteps', () => {
-		const mockParams = {
-			i18n: en
-		};
-
-		it('should return the correct steps with expected names and titles', () => {
-			const steps = limitOrderWizardSteps(mockParams);
+		it('should title the base leg "sell" and the quote leg "buy" for a sell', () => {
+			const steps = limitOrderWizardSteps({ i18n: en, side: 'sell' });
 
 			expect(steps).toStrictEqual([
 				{
@@ -18,11 +14,11 @@ describe('limit-order.config', () => {
 				},
 				{
 					name: WizardStepsLimitOrder.BASE_TOKEN,
-					title: en.trading.limit_order.select_base_token
+					title: en.trading.limit_order.select_sell_token
 				},
 				{
 					name: WizardStepsLimitOrder.QUOTE_TOKEN,
-					title: en.trading.limit_order.select_quote_token
+					title: en.trading.limit_order.select_buy_token
 				},
 				{
 					name: WizardStepsLimitOrder.REVIEW,
@@ -33,6 +29,19 @@ describe('limit-order.config', () => {
 					title: en.trading.limit_order.placing_title
 				}
 			]);
+		});
+
+		it('should flip the leg titles for a buy (base "buy", quote "sell")', () => {
+			const steps = limitOrderWizardSteps({ i18n: en, side: 'buy' });
+
+			expect(steps).toContainEqual({
+				name: WizardStepsLimitOrder.BASE_TOKEN,
+				title: en.trading.limit_order.select_buy_token
+			});
+			expect(steps).toContainEqual({
+				name: WizardStepsLimitOrder.QUOTE_TOKEN,
+				title: en.trading.limit_order.select_sell_token
+			});
 		});
 	});
 });
