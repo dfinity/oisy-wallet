@@ -14,13 +14,17 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 
 	let modal: WizardModal<WizardStepsLimitOrder> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsLimitOrder> | undefined = $state();
 	let progressStep: string = $state(ProgressStepsLimitOrder.INITIALIZATION);
+	// Lifted from the wizard so the step header can title the base-token picker
+	// per side ("sell" vs "buy"); the wizard binds it back as the user toggles.
+	let side: LimitOrderSide = $state('sell');
 
 	const steps: WizardSteps<WizardStepsLimitOrder> = $derived(
-		limitOrderWizardSteps({ i18n: $i18n })
+		limitOrderWizardSteps({ i18n: $i18n, side })
 	);
 
 	// Shared token-picker context, reused from the swap token list so the
@@ -65,6 +69,7 @@
 			{steps}
 			bind:progressStep
 			bind:modal
+			bind:side
 		/>
 	{/if}
 </WizardModal>

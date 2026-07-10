@@ -1487,7 +1487,8 @@ interface I18nTrading {
 		placing_title: string;
 		sell: string;
 		buy: string;
-		select_base_token: string;
+		select_base_token_sell: string;
+		select_base_token_buy: string;
 		select_quote_token: string;
 		you_sell: string;
 		you_buy: string;

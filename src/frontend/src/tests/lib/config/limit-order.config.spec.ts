@@ -4,12 +4,8 @@ import en from '$tests/mocks/i18n.mock';
 
 describe('limit-order.config', () => {
 	describe('limitOrderWizardSteps', () => {
-		const mockParams = {
-			i18n: en
-		};
-
-		it('should return the correct steps with expected names and titles', () => {
-			const steps = limitOrderWizardSteps(mockParams);
+		it('should return the correct steps with expected names and titles for a sell', () => {
+			const steps = limitOrderWizardSteps({ i18n: en, side: 'sell' });
 
 			expect(steps).toStrictEqual([
 				{
@@ -18,7 +14,7 @@ describe('limit-order.config', () => {
 				},
 				{
 					name: WizardStepsLimitOrder.BASE_TOKEN,
-					title: en.trading.limit_order.select_base_token
+					title: en.trading.limit_order.select_base_token_sell
 				},
 				{
 					name: WizardStepsLimitOrder.QUOTE_TOKEN,
@@ -33,6 +29,15 @@ describe('limit-order.config', () => {
 					title: en.trading.limit_order.placing_title
 				}
 			]);
+		});
+
+		it('should title the base-token step to buy for a buy', () => {
+			const steps = limitOrderWizardSteps({ i18n: en, side: 'buy' });
+
+			expect(steps).toContainEqual({
+				name: WizardStepsLimitOrder.BASE_TOKEN,
+				title: en.trading.limit_order.select_base_token_buy
+			});
 		});
 	});
 });
