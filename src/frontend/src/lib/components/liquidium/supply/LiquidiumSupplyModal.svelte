@@ -18,7 +18,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
-		MODAL_TOKENS_LIST_CONTEXT_KEY
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
@@ -41,7 +42,8 @@
 		nonNullish(selectedMarket) ? LIQUIDIUM_ASSET_TOKENS[selectedMarket.asset] : undefined
 	);
 
-	setContext(MODAL_TOKENS_LIST_CONTEXT_KEY, initModalTokensListContext({ tokens: [] }));
+	const tokensListContext = initModalTokensListContext({ tokens: [] });
+	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	let inflowFee = $state<bigint | undefined>();
 	// The estimate failed (e.g. stale oracle price): surface a retry message and block submit.
@@ -81,24 +83,43 @@
 		}
 	};
 
+	// Always enter the picker with a clean query so it never reopens filtered from a
+	// previous visit (mirrors the swap / trade-deposit flows).
+	const enterTokensList = () => {
+		tokensListContext.setFilterQuery('');
+		goToStep(WizardStepsLiquidiumSupply.TOKENS_LIST);
+	};
+
+	// Cancelling the picker returns to the Supply step — the amount form when a market
+	// is chosen, or the select-token prompt on a neutral launch.
+	const closeTokensList = () => {
+		tokensListContext.setFilterQuery('');
+		goToStep(WizardStepsLiquidiumSupply.SUPPLY);
+	};
+
 	const selectMarket = (nextMarket: LiquidiumMarket) => {
 		selectedMarket = nextMarket;
 		// The typed amount is token-specific; drop it when switching.
 		amount = undefined;
-		goToStep(WizardStepsLiquidiumSupply.SUPPLY);
+		closeTokensList();
 	};
 
+	// The modal is not guaranteed to unmount between opens, so restore every piece of
+	// launch state — including the selected market, its fee estimate and the picker
+	// filters — back to what the initial prop implies; otherwise the next open (or a
+	// neutral launch) inherits the previously picked token / a stale fee-error / a
+	// stale filter query.
 	const reset = () => {
+		selectedMarket = market;
 		amount = undefined;
+		inflowFee = undefined;
+		inflowFeeUnavailable = false;
 		supplyProgressStep = ProgressStepsLiquidiumSupply.INITIALIZATION;
 		currentStep = undefined;
+		tokensListContext.resetFilters();
 	};
 
 	const close = () => closeModal(reset);
-
-	// Cancelling the picker returns to the Supply step — the amount form when a market
-	// is chosen, or the select-token prompt on a neutral launch.
-	const closeTokensList = () => goToStep(WizardStepsLiquidiumSupply.SUPPLY);
 </script>
 
 <TokenActionContext {token}>
@@ -118,10 +139,7 @@
 				{selectedMarket}
 			/>
 		{:else if isNullish(selectedMarket)}
-			<LiquidiumSelectTokenForm
-				onClose={close}
-				onSelectToken={() => goToStep(WizardStepsLiquidiumSupply.TOKENS_LIST)}
-			>
+			<LiquidiumSelectTokenForm onClose={close} onSelectToken={enterTokensList}>
 				<MessageBox styleClass="sm:text-sm !items-center">
 					{$i18n.liquidium.text.supply_collateral_info}
 				</MessageBox>
@@ -135,7 +153,7 @@
 				onBack={modal.back}
 				onClose={close}
 				onNext={modal.next}
-				onSelectToken={() => goToStep(WizardStepsLiquidiumSupply.TOKENS_LIST)}
+				onSelectToken={enterTokensList}
 				bind:amount
 				bind:supplyProgressStep
 			/>
@@ -148,7 +166,7 @@
 				onBack={modal.back}
 				onClose={close}
 				onNext={modal.next}
-				onSelectToken={() => goToStep(WizardStepsLiquidiumSupply.TOKENS_LIST)}
+				onSelectToken={enterTokensList}
 				bind:amount
 				bind:supplyProgressStep
 			/>
