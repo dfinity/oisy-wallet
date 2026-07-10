@@ -36,6 +36,15 @@ describe('WithdrawReview', () => {
 		);
 	});
 
+	it('renders the OISY Trade logo next to the provider name', () => {
+		const { getByLabelText } = render(WithdrawReview, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+	});
+
 	it('calls onBack when the back button is clicked', async () => {
 		const onBack = vi.fn();
 

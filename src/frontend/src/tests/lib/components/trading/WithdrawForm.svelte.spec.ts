@@ -48,6 +48,15 @@ describe('WithdrawForm', () => {
 		expect(container).toHaveTextContent(en.trading.withdraw.you_receive);
 	});
 
+	it('renders the OISY Trade logo next to the provider name', () => {
+		const { getByLabelText } = render(WithdrawForm, {
+			props: baseProps,
+			context: mockContext()
+		});
+
+		expect(getByLabelText('OISY Trade')).toBeInTheDocument();
+	});
+
 	it('disables the review button while the amount is invalid', () => {
 		const { getByTestId } = render(WithdrawForm, {
 			props: baseProps,

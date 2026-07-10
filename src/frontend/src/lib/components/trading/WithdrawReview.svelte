@@ -4,6 +4,7 @@
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -55,7 +56,12 @@
 
 	<ModalValue>
 		{#snippet label()}{$i18n.trading.withdraw.from}{/snippet}
-		{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
+		{#snippet mainValue()}
+			<span class="flex items-center gap-2">
+				<OisyTradeMark size="22" />
+				{OISY_TRADE_PROVIDER_NAME}
+			</span>
+		{/snippet}
 	</ModalValue>
 
 	<FeeDisplay
