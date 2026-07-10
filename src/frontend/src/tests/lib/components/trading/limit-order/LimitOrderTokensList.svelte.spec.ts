@@ -58,16 +58,18 @@ describe('LimitOrderTokensList', () => {
 	const assetOf = ({
 		symbol,
 		ledgerId,
-		free
+		free,
+		reserved = ZERO
 	}: {
 		symbol: string;
 		ledgerId: string;
 		free: bigint;
+		reserved?: bigint;
 	}): OisyTradeAsset => ({
 		token: icToken({ symbol, ledgerId }),
 		free,
-		reserved: ZERO,
-		total: free,
+		reserved,
+		total: free + reserved,
 		totalUsd: undefined,
 		freeUsd: undefined
 	});
@@ -130,13 +132,16 @@ describe('LimitOrderTokensList', () => {
 		expect(filtered.some((token: { symbol: string }) => token.symbol === 'ICP')).toBeTruthy();
 	});
 
-	it('shows the deposited (free) balance, not the wallet balance, for the spend leg', async () => {
+	it('shows the deposited free balance (not wallet, not full deposit) for the spend leg', async () => {
 		mockPairs.set([icpPair]);
 		mockEnabledIcTokens.set(enabledIcpCkusdc);
 		// Deposited balance differs from whatever the (unmocked) wallet balances
-		// store may hold — the picker must surface this one, not the wallet's.
+		// store may hold — the picker must surface this one, not the wallet's. The
+		// reserved portion makes total ≠ free, proving the spend leg shows free.
 		const depositedFree = 1_000_000n;
-		mockAssets.set([assetOf({ symbol: 'ICP', ledgerId: icpLedgerId, free: depositedFree })]);
+		mockAssets.set([
+			assetOf({ symbol: 'ICP', ledgerId: icpLedgerId, free: depositedFree, reserved: 500_000n })
+		]);
 
 		const context = mockContext([]);
 		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
@@ -195,6 +200,31 @@ describe('LimitOrderTokensList', () => {
 		expect(
 			get(ctx.filteredTokens).some((token: { symbol: string }) => token.symbol === 'ICP')
 		).toBeTruthy();
+	});
+
+	it('shows the full deposit (free + reserved) balance for the receive leg', async () => {
+		mockPairs.set([icpPair]);
+		mockEnabledIcTokens.set(enabledIcpCkusdc);
+		// A Buy receives the base; show the full deposit, not just the free part.
+		mockAssets.set([
+			assetOf({ symbol: 'ICP', ledgerId: icpLedgerId, free: 1_000_000n, reserved: 500_000n })
+		]);
+
+		const context = mockContext([]);
+		const ctx = context.get(MODAL_TOKENS_LIST_CONTEXT_KEY) as ModalTokensListContext;
+
+		render(LimitOrderTokensList, {
+			props: { mode: 'base', side: 'buy', onSelect: () => {}, onCancel: () => {} },
+			context
+		});
+
+		await tick();
+
+		const icp = get(ctx.filteredTokens).find(
+			(token: { symbol: string }) => token.symbol === 'ICP'
+		) as { balance?: bigint } | undefined;
+
+		expect(icp?.balance).toBe(1_500_000n);
 	});
 
 	it('renders for the quote mode', () => {
