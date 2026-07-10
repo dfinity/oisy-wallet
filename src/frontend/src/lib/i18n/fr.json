@@ -1726,7 +1726,7 @@
 			"review_title": "Vérifier le dépôt",
 			"progress_title": "Dépôt en cours",
 			"you_deposit": "Vous déposez",
-			"error_insufficient_balance": "",
+			"error_insufficient_balance": "Le montant dépasse votre solde dans le wallet",
 			"to": "Vers",
 			"network": "Réseau",
 			"transaction_fee": "Frais totaux estimés",

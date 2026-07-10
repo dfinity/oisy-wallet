@@ -1726,7 +1726,7 @@
 			"review_title": "Revisar depósito",
 			"progress_title": "Depositando",
 			"you_deposit": "Depositas",
-			"error_insufficient_balance": "",
+			"error_insufficient_balance": "El importe supera tu saldo en la wallet",
 			"to": "A",
 			"network": "Red",
 			"transaction_fee": "Comisión total estimada",

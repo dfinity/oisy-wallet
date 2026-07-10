@@ -1726,7 +1726,7 @@
 			"review_title": "Rever depósito",
 			"progress_title": "A depositar",
 			"you_deposit": "Depositas",
-			"error_insufficient_balance": "",
+			"error_insufficient_balance": "O montante excede o teu saldo na carteira",
 			"to": "Para",
 			"network": "Rede",
 			"transaction_fee": "Taxa total estimada",

@@ -1726,7 +1726,7 @@
 			"review_title": "जमा राशि की समीक्षा करें",
 			"progress_title": "जमा हो रहा है",
 			"you_deposit": "आप जमा कर रहे हैं",
-			"error_insufficient_balance": "",
+			"error_insufficient_balance": "राशि आपके वॉलेट बैलेंस से अधिक है",
 			"to": "प्रति",
 			"network": "नेटवर्क",
 			"transaction_fee": "कुल अनुमानित शुल्क",

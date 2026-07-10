@@ -1726,7 +1726,7 @@
 			"review_title": "입금 내역 검토",
 			"progress_title": "입금 중",
 			"you_deposit": "입금 금액",
-			"error_insufficient_balance": "",
+			"error_insufficient_balance": "금액이 지갑 잔액을 초과합니다",
 			"to": "받는 곳",
 			"network": "네트워크",
 			"transaction_fee": "예상 총 수수료",
