@@ -14,13 +14,17 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 
 	let modal: WizardModal<WizardStepsLimitOrder> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsLimitOrder> | undefined = $state();
 	let progressStep: string = $state(ProgressStepsLimitOrder.INITIALIZATION);
+	// Lifted from the wizard so the step header can title the base-token picker
+	// per side ("sell" vs "buy"); the wizard binds it back as the user toggles.
+	let side: LimitOrderSide = $state('sell');
 
 	const steps: WizardSteps<WizardStepsLimitOrder> = $derived(
-		limitOrderWizardSteps({ i18n: $i18n })
+		limitOrderWizardSteps({ i18n: $i18n, side })
 	);
 
 	// Shared token-picker context, reused from the swap token list so the
@@ -33,13 +37,22 @@
 		tokens: [],
 		// eslint-disable-next-line svelte/no-unused-svelte-ignore
 		// svelte-ignore state_referenced_locally -- initialized once at mount; the page network is fixed for the modal's lifetime.
-		filterNetwork: $selectedNetwork
+		filterNetwork: $selectedNetwork,
+		// `LimitOrderTokensList` already sets the right DEX-deposited balance per
+		// leg (the free balance for the spend leg, the full deposit for the receive
+		// leg — see its comments). Without this, the default sort re-maps every
+		// token against the wallet balances store, silently overwriting those
+		// deposited balances, same as `WithdrawModal`.
+		sortByBalance: false
 	});
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	const reset = () => {
 		progressStep = ProgressStepsLimitOrder.INITIALIZATION;
 		currentStep = undefined;
+		// Restore the default side so a fast reopen (before this deferred reset,
+		// while the component is still mounted) can't carry the previous side over.
+		side = 'sell';
 		tokensListContext.resetFilters();
 	};
 
@@ -65,6 +78,7 @@
 			{steps}
 			bind:progressStep
 			bind:modal
+			bind:side
 		/>
 	{/if}
 </WizardModal>

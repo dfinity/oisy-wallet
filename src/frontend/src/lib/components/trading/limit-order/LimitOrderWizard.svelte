@@ -41,6 +41,8 @@
 		steps: WizardSteps<WizardStepsLimitOrder>;
 		modal: WizardModal<WizardStepsLimitOrder>;
 		progressStep: string;
+		// Owned by the modal so the step header can title the picker per side.
+		side?: LimitOrderSide;
 		onBack: () => void;
 		onClose: () => void;
 	}
@@ -50,12 +52,12 @@
 		steps,
 		modal = $bindable(),
 		progressStep = $bindable(),
+		side = $bindable('sell'),
 		onBack,
 		onClose
 	}: Props = $props();
 
 	// --- shared form state -------------------------------------------------
-	let side: LimitOrderSide = $state('sell');
 	let baseSymbol: string | undefined = $state();
 	let quoteSymbol: string | undefined = $state();
 	let baseAmount: string = $state('');
