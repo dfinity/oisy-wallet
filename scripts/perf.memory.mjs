@@ -31,7 +31,8 @@ import { createServer } from 'node:http';
 import { extname, join, resolve, sep } from 'node:path';
 
 const BUILD_DIR = join(process.cwd(), 'build');
-const MAX_WORKERS = Number(process.env.PERF_MEMORY_WORKERS ?? 50);
+const parsedWorkers = Number.parseInt(process.env.PERF_MEMORY_WORKERS ?? '', 10);
+const MAX_WORKERS = parsedWorkers > 0 ? parsedWorkers : 50;
 const JSON_OUTPUT = process.argv.includes('--json');
 
 const MIME = {
@@ -86,18 +87,40 @@ const startServer = () =>
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Sum proportional-set-size of the Chromium processes, grouped by process
-// type. Linux-only; returns undefined elsewhere.
+// Sum proportional-set-size of the Chromium processes launched by this
+// script (descendants of our own PID — unrelated Chrome instances on the
+// machine are excluded), grouped by process type. Linux-only; returns
+// undefined elsewhere.
 const chromiumPssKb = () => {
 	if (process.platform !== 'linux') {
 		return undefined;
 	}
 
+	const pids = readdirSync('/proc').filter((entry) => /^\d+$/.test(entry));
+
+	const parentOf = {};
+	for (const pid of pids) {
+		try {
+			parentOf[pid] = readFileSync(`/proc/${pid}/status`, 'utf8').match(/^PPid:\s+(\d+)/m)?.[1];
+		} catch {
+			// process exited while reading — ignore
+		}
+	}
+
+	const isOurs = (pid) => {
+		for (let cur = pid; cur !== undefined && cur !== '0'; cur = parentOf[cur]) {
+			if (Number(cur) === process.pid) {
+				return true;
+			}
+		}
+		return false;
+	};
+
 	const byType = {};
-	for (const pid of readdirSync('/proc').filter((entry) => /^\d+$/.test(entry))) {
+	for (const pid of pids) {
 		try {
 			const cmd = readFileSync(`/proc/${pid}/cmdline`, 'utf8');
-			if (cmd.includes('chrom')) {
+			if (cmd.includes('chrom') && isOurs(pid)) {
 				const type = cmd.match(/--type=([a-z-]+)/)?.[1] ?? 'browser';
 				const pss = Number(
 					readFileSync(`/proc/${pid}/smaps_rollup`, 'utf8').match(/^Pss:\s+(\d+) kB/m)?.[1] ?? 0
@@ -141,13 +164,14 @@ const measureLanding = async ({ browser, baseUrl }) => {
 	const { metrics } = await cdp.send('Performance.getMetrics');
 	const metric = (name) => metrics.find(({ name: n }) => n === name)?.value ?? 0;
 
+	const pssKb = rendererPssKb();
 	const result = {
 		jsHeapUsedMb: toMb(metric('JSHeapUsedSize') / 1024),
 		jsHeapTotalMb: toMb(metric('JSHeapTotalSize') / 1024),
 		domNodes: metric('Nodes'),
 		jsTransferredMb: toMb(jsTransferred / 1024),
 		jsFiles,
-		rendererPssMb: rendererPssKb() !== undefined ? toMb(rendererPssKb()) : undefined
+		rendererPssMb: pssKb !== undefined ? toMb(pssKb) : undefined
 	};
 
 	await context.close();

@@ -260,11 +260,12 @@ The call is a no-op in production, so it is safe to leave in the codebase.
 Usage:
 
 ```bash
-npm run build       # any DFX_NETWORK; the bundle is what matters
-npm run perf:memory # add -- --json for machine-readable output
+npm run playwright:install # once — downloads the Playwright-managed Chromium
+npm run build              # any DFX_NETWORK; the bundle is what matters
+npm run perf:memory        # add -- --json for machine-readable output
 ```
 
-Environment variables: `PERF_MEMORY_CHROMIUM` (path to a Chromium executable when the Playwright-managed one is unavailable) and `PERF_MEMORY_WORKERS` (worker count for the scaling phase, default 50).
+Environment variables: `PERF_MEMORY_CHROMIUM` (path to a Chromium executable, as an alternative to `playwright:install` when a browser is already available) and `PERF_MEMORY_WORKERS` (worker count for the scaling phase, default 50).
 
 Process-level memory (PSS) is read from `/proc` and therefore only reported on Linux; the JS-heap numbers work everywhere. Estimate steady-state usage for a given user as `landing + per-worker cost × enabled tokens`.
 
