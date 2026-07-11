@@ -1401,7 +1401,6 @@ interface I18nTrading {
 		transaction_fee: string;
 		approval_fee: string;
 		transfer_fee: string;
-		consent: string;
 		info_title: string;
 		info_description: string;
 		empty_title: string;
@@ -1487,8 +1486,8 @@ interface I18nTrading {
 		placing_title: string;
 		sell: string;
 		buy: string;
-		select_base_token: string;
-		select_quote_token: string;
+		select_sell_token: string;
+		select_buy_token: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;
