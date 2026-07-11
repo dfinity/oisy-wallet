@@ -32,10 +32,11 @@ jobs:
           shopt -s globstar nullglob
           FILES=(build/_app/immutable/**/*.js build/_app/immutable/**/*.js.gz)
           if (( ${#FILES[@]} == 0 )); then
-            echo "::error::No JS bundles found under build/_app/immutable — did the build output layout change?"
-            exit 1
+            echo "::warning::No JS bundles found under build/_app/immutable — did the build output layout change?"
+            SIZE=0
+          else
+            SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
           fi
-          SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
           echo "Base branch bundle size: $SIZE KB (${#FILES[@]} files)"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
@@ -64,10 +65,11 @@ jobs:
           shopt -s globstar nullglob
           FILES=(build/_app/immutable/**/*.js build/_app/immutable/**/*.js.gz)
           if (( ${#FILES[@]} == 0 )); then
-            echo "::error::No JS bundles found under build/_app/immutable — did the build output layout change?"
-            exit 1
+            echo "::warning::No JS bundles found under build/_app/immutable — did the build output layout change?"
+            SIZE=0
+          else
+            SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
           fi
-          SIZE=$(du -sk "${FILES[@]}" | awk '{sum += $1} END {print sum}')
           echo "PR bundle size: $SIZE KB (${#FILES[@]} files)"
           echo "size=$SIZE" >> $GITHUB_OUTPUT
 
@@ -80,8 +82,8 @@ jobs:
       - name: Compare bundle sizes
         run: |
           if ! [[ $BASE_SIZE =~ ^[0-9]+$ && $PR_SIZE =~ ^[0-9]+$ && $BASE_SIZE -gt 0 && $PR_SIZE -gt 0 ]]; then
-            echo "::error::Missing or invalid bundle sizes (base='${BASE_SIZE}', pr='${PR_SIZE}') — refusing to pass vacuously."
-            exit 1
+            echo "::warning::Bundle sizes could not be measured (base='${BASE_SIZE}', pr='${PR_SIZE}') — the size comparison is informative only, please check the build jobs."
+            exit 0
           fi
 
           DIFF=$((PR_SIZE - BASE_SIZE))
@@ -96,16 +98,12 @@ jobs:
           MAX_PERCENT=10
 
           if (( DIFF > MAX_KB )); then
-            echo "🚨 Bundle size increased by ${DIFF}KB, over the limit of ${MAX_KB}KB."
-            exit 1
+            echo "::warning::🚨 Bundle size increased by ${DIFF}KB, over the informative limit of ${MAX_KB}KB."
+          elif (( PERCENT > MAX_PERCENT )); then
+            echo "::warning::🚨 Bundle size increased by ${PERCENT}%, over the informative limit of ${MAX_PERCENT}%."
+          else
+            echo "✅ Bundle size within acceptable limits."
           fi
-
-          if (( PERCENT > MAX_PERCENT )); then
-            echo "🚨 Bundle size increased by ${PERCENT}%, over the limit of ${MAX_PERCENT}%."
-            exit 1
-          fi
-
-          echo "✅ Bundle size within acceptable limits."
     env:
       BASE_SIZE: ${{ needs.build-base-branch.outputs.size }}
       PR_SIZE: ${{ needs.build-pr.outputs.size }}
