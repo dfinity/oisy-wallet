@@ -138,13 +138,59 @@ influences derivation.
 - [ ] Unit tests cover the pure helpers (hex codecs, allowlist validation,
       callback parsing) and the storage handoff.
 
+## Threat model (why the POC must not ship as-is)
+
+The bridge is, by design, a **delegation-issuing endpoint on the wallet's
+most trusted origin**: it mints an `oisy.com`-derived delegation for any
+session key a caller supplies, gated only by a real Internet Identity
+authentication and the redirect-URI allowlist. That is what makes the
+principal match the web wallet — and it is also the attack surface. It
+does **not** weaken the web wallet itself (static page, no new backend
+capability, in-memory storage that never touches the browser's own
+session); the risk is confined to the delegation handoff.
+
+**The concrete attack (Android, custom scheme).** Custom URL schemes are
+not exclusive: a malicious installed app can register the same
+`oisy://auth-callback` scheme. It then deep-links the user to the genuine
+bridge with **its own** session public key. The user sees the real
+oisy.com page and the real II prompt — nothing looks wrong — and
+authenticates. II issues a delegation for the **user's** principal bound
+to the **attacker's** key, and the malicious app intercepts the redirect.
+The attacker now holds a valid delegation to the user's full wallet
+identity → account takeover. The app-side check (chain must be bound to
+_our_ session key) does **not** help here: the attacker supplied and holds
+that key, so it validates on their side.
+
+**What already limits it.** II authentication is always required (no silent
+issuance), the redirect target is exact-match allowlisted
+(`oisy://auth-callback` only), and the delegation rides in the URL fragment
+(never a query string or server log). These close the easy vectors but do
+**not** defeat the custom-scheme interception above.
+
+**Mitigations (all required before real users).**
+
+- **Decisive: verified Universal Links / App Links** instead of the custom
+  scheme, so only the app that proves domain ownership (real OISY) can
+  receive the callback. This removes the interception step and makes the
+  app-side key-binding check genuinely protective. Same model established
+  IC native apps (e.g. OpenChat) use.
+- **Scope the delegation** with `targets` (OISY's canisters) so a leaked
+  chain cannot sign arbitrary calls.
+- **Short TTL + hardware-bound key.** The POC caps the mobile TTL at 1 day
+  (down from 30) to bound the blast radius; production should pair a chosen
+  TTL with a Keychain/Keystore key and a biometric app lock so the
+  delegation is not portable even if the chain leaks.
+
+Until verified links land, this POC must **not** be enabled for real users
+on `oisy.com`.
+
 ## Explicit non-goals (does NOT do)
 
 - Does **not** publish to the App Store / Play Store (no signing, no
   store metadata, no release pipeline).
 - Does **not** implement Universal Links / Android App Links — the POC
   uses a custom URL scheme (`oisy://`). Production must move to verified
-  links (see Pending decisions).
+  links (see the Threat model and Pending decisions).
 - Does **not** add biometric app lock or hardware-backed key storage —
   the session key lives in the WebView's IndexedDB like on the web.
 - Does **not** change session TTL policy for the web app.
@@ -165,14 +211,18 @@ influences derivation.
 
 ## Pending decisions (facts are clear — someone must decide)
 
-- **Deep link scheme vs. verified links.** Production should use Universal
+- **Deep link scheme vs. verified links.** Production **must** use Universal
   Links / App Links (requires Apple team ID + `assetlinks.json` /
   `apple-app-site-association` served from `oisy.com`). Custom schemes are
-  interceptable by other apps (mitigated by the key-binding, but verified
-  links remove the vector entirely).
+  interceptable by other apps — see the [Threat model](#threat-model-why-the-poc-must-not-ship-as-is);
+  this is the decisive blocker, not a nice-to-have.
 - **Mobile session TTL.** Web uses 1 h (`AUTH_MAX_TIME_TO_LIVE`). The POC
-  bridge requests 30 days for mobile. Product needs to pick the final
+  bridge requests **1 day** for mobile (reduced from 30 days to bound the
+  blast radius of a leaked delegation). Product needs to pick the final
   value and pair it with a biometric app lock.
+- **Delegation scoping (`targets`).** The POC requests an unscoped
+  delegation. Production should scope it to OISY's canisters so a leaked
+  chain cannot sign arbitrary calls.
 - **Secure key storage.** Move the session key from IndexedDB to
   Keychain / Keystore (e.g. a Capacitor secure-storage plugin) before any
   store release.

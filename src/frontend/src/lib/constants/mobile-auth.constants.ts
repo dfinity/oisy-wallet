@@ -14,10 +14,13 @@ export const MOBILE_AUTH_REDIRECT_URI_PARAM = 'redirectUri';
 export const MOBILE_AUTH_OPENID_PROVIDER_PARAM = 'openIdProvider';
 export const MOBILE_AUTH_DELEGATION_PARAM = 'delegation';
 
-// POC value: re-authenticating through the system browser every hour (the web
-// TTL) is unacceptable UX on mobile. The final TTL is a pending decision in
-// the spec and must ship together with a biometric app lock.
-export const MOBILE_AUTH_MAX_TIME_TO_LIVE = BigInt(30 * 24 * 60 * 60) * BigInt(1_000_000_000);
+// POC value: longer than the web's 1 h (re-authenticating through the system
+// browser every hour is unacceptable UX on mobile) but deliberately short —
+// with the POC's interceptable custom-scheme callback, the TTL bounds the
+// damage of a stolen delegation (see the spec's threat model). The production
+// TTL is a pending decision and must ship together with verified app links,
+// hardware-backed key storage and a biometric app lock.
+export const MOBILE_AUTH_MAX_TIME_TO_LIVE = BigInt(24 * 60 * 60) * BigInt(1_000_000_000);
 
 // Mirror of the auth client's internal `KEY_STORAGE_EXPIRATION` localStorage
 // key (not exported by `@icp-sdk/auth`): it caches the delegation expiration
