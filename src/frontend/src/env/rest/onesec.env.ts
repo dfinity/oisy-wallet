@@ -1,1 +1,1 @@
-export const ONESEC_SWAP_ENABLED = true;
+export const ONESEC_SWAP_ENABLED = false;
