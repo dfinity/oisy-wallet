@@ -97,17 +97,18 @@ pub fn create_personal_note_share(
     let token = PersonalNoteShareToken(request.token);
 
     mutate_state(|s| {
-        if s.personal_note_shares.contains_key(&token) {
-            return Err(PersonalNoteShareError::DuplicateToken);
-        }
-        // Reclaim the caller's own expired shares before the cap check, so
-        // near-immediate-expiry shares can't accumulate in storage between
-        // creates (they'd evade the active-only count yet linger until the
-        // hourly sweep). Scoped to this one creator, so it stays cheap.
+        // Reclaim the caller's own expired shares first, so near-immediate-expiry
+        // shares can't accumulate in storage between creates (they would evade the
+        // active-only cap count yet linger until the hourly sweep), and so an
+        // expired share frees its token for reuse rather than lingering as a
+        // spurious `DuplicateToken`. Scoped to this one creator, so it stays cheap.
         let (active_count, expired) =
             partition_creator_shares(&s.personal_note_shares_by_creator, creator, now);
         for stale in expired {
             remove_share(s, &stale, creator);
+        }
+        if s.personal_note_shares.contains_key(&token) {
+            return Err(PersonalNoteShareError::DuplicateToken);
         }
         if new_share_exceeds_cap(active_count) {
             return Err(PersonalNoteShareError::TooManyShares);

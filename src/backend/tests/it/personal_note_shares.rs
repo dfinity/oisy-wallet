@@ -273,6 +273,48 @@ fn expired_shares_are_unavailable_to_every_endpoint() {
     );
 }
 
+// A creator's expired shares are reclaimed from storage on their next create,
+// so they can't be used to accumulate entries past the active-share cap. The
+// reclamation is observable because it frees the expired share's token for
+// reuse (before the fix, the stale entry lingered until the hourly sweep and
+// the reuse returned `DuplicateToken`).
+//
+// The share is expired with a few seconds of advance rather than hours, so the
+// create-path prune is the *only* thing that can reclaim it: the hourly
+// housekeeping sweep cannot have fired in that window, which keeps the test
+// from passing for the wrong reason.
+#[test]
+fn creating_a_share_prunes_the_callers_own_expired_shares() {
+    const ONE_SEC_NS: u64 = 1_000_000_000;
+
+    let pic_setup = setup();
+    let alice = Principal::from_text(CALLER).unwrap();
+    pic_setup.ensure_user_profile(alice);
+    let now = now_ns(&pic_setup);
+
+    let stale = token(1);
+    create_share(&pic_setup, alice, &stale, now + 2 * ONE_SEC_NS, false)
+        .expect("create should succeed");
+    assert_eq!(shares_count(&pic_setup, alice), 1);
+
+    // Advance just past the share's expiry: it stops counting toward the cap
+    // but, until reclaimed, still occupies its slot in storage.
+    pic_setup.pic.advance_time(Duration::from_secs(5));
+    pic_setup.pic.tick();
+    assert_eq!(
+        shares_count(&pic_setup, alice),
+        0,
+        "an expired share does not count toward the cap"
+    );
+
+    // Re-creating with the same token succeeds only because the expired entry
+    // was pruned on this create; a lingering entry would collide.
+    let now = now_ns(&pic_setup);
+    create_share(&pic_setup, alice, &stale, now + ONE_HOUR_NS, false)
+        .expect("re-creating with the pruned token should succeed");
+    assert_eq!(shares_count(&pic_setup, alice), 1);
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Rate limiting
 // -------------------------------------------------------------------------------------------------
