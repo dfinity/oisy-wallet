@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "जमा की समीक्षा करें",
 			"supply_review_subtitle": "आप जमा कर रहे हैं",
 			"supplying": "जमा हो रहा है",

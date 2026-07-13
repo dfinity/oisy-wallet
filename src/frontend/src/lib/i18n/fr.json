@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "Vérifier l'apport",
 			"supply_review_subtitle": "Vous fournissez",
 			"supplying": "Fourniture en cours",

@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "Bereitstellung prüfen",
 			"supply_review_subtitle": "Du stellst bereit",
 			"supplying": "Bereitstellung läuft",

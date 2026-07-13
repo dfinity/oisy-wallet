@@ -14,6 +14,7 @@ import {
 	liquidiumMinBorrowApy,
 	liquidiumNetValueUsd,
 	liquidiumPortfolio,
+	liquidiumRepayReserves,
 	liquidiumSupplyMarkets,
 	liquidiumTotalBorrowedUsd,
 	liquidiumWithdrawReserves
@@ -342,6 +343,40 @@ describe('liquidium derived stores', () => {
 
 		it('is empty by default', () => {
 			expect(get(liquidiumWithdrawReserves)).toEqual([]);
+		});
+	});
+
+	describe('liquidiumRepayReserves', () => {
+		const reserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
+			poolId: 'pool-usdc',
+			asset: 'USDC',
+			chain: 'ETH',
+			supplyApy: 0,
+			borrowApy: 8,
+			deposited: ZERO,
+			depositedDecimals: 6,
+			borrowed: 1_000n,
+			borrowedDecimals: 6,
+			suppliedUsd: 0,
+			borrowedUsd: 2000,
+			...overrides
+		});
+
+		it('keeps only reserves with outstanding debt', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve(), reserve({ poolId: 'pool-btc', asset: 'BTC', borrowed: ZERO })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumRepayReserves)).toEqual([reserve()]);
+		});
+
+		it('is empty by default', () => {
+			expect(get(liquidiumRepayReserves)).toEqual([]);
 		});
 	});
 

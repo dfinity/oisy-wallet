@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "공급 검토",
 			"supply_review_subtitle": "공급 금액",
 			"supplying": "공급 중",

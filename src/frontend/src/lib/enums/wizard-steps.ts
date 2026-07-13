@@ -118,7 +118,8 @@ export enum WizardStepsLiquidiumWithdraw {
 export enum WizardStepsLiquidiumRepay {
 	REPAY = 'Repay',
 	REVIEW = 'Review',
-	REPAYING = 'Repaying'
+	REPAYING = 'Repaying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsClaimStakingReward {

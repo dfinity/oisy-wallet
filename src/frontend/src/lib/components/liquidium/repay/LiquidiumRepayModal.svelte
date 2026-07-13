@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Asset, Chain } from '@liquidium/client';
+	import { setContext } from 'svelte';
+	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
+	import LiquidiumRepayTokensList from '$lib/components/liquidium/repay/LiquidiumRepayTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
@@ -15,19 +18,35 @@
 	import { getLiquidiumMaxRepayAmount } from '$lib/services/liquidium-repay.services';
 	import { estimateLiquidiumInflowFee } from '$lib/services/liquidium-supply.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		initModalTokensListContext,
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	interface Props {
-		reserve: LiquidiumReserve;
+		// Position with debt to repay; token-less launches pick one via the picker.
+		reserve?: LiquidiumReserve;
 	}
 
 	let { reserve }: Props = $props();
 
-	let token = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
+	// Seeded from the initial prop only; later switches happen through the picker.
+	// svelte-ignore state_referenced_locally
+	let selectedReserve = $state<LiquidiumReserve | undefined>(reserve);
+
+	let token = $derived(
+		nonNullish(selectedReserve) ? LIQUIDIUM_ASSET_TOKENS[selectedReserve.asset] : undefined
+	);
+
+	const tokensListContext = initModalTokensListContext({ tokens: [] });
+	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
 
 	// Provider inflow fee for this asset (repayment is an inflow), passed to the wizard.
 	let inflowFee = $state<bigint | undefined>();
@@ -41,14 +60,18 @@
 	$effect(() => {
 		const identity = $authIdentity;
 
-		if (nonNullish(identity)) {
+		if (nonNullish(identity) && nonNullish(selectedReserve)) {
+			const { asset, chain, poolId } = selectedReserve;
+
+			inflowFee = undefined;
 			inflowFeeUnavailable = false;
+			maxRepay = undefined;
 
 			// Reserve data widens asset/chain to open strings; narrow to the SDK's strict types here.
 			estimateLiquidiumInflowFee({
 				identity,
-				asset: reserve.asset as Asset,
-				chain: reserve.chain as Chain
+				asset: asset as Asset,
+				chain: chain as Chain
 			})
 				.then((fee) => (inflowFee = fee))
 				.catch((err: unknown) => {
@@ -56,7 +79,7 @@
 					inflowFeeUnavailable = true;
 				});
 
-			getLiquidiumMaxRepayAmount({ identity, ethAddress: $ethAddress, poolId: reserve.poolId })
+			getLiquidiumMaxRepayAmount({ identity, ethAddress: $ethAddress, poolId })
 				.then((amount) => (maxRepay = amount ?? undefined))
 				.catch(consoleError);
 		}
@@ -71,27 +94,71 @@
 		liquidiumRepayWizardSteps({ i18n: $i18n })
 	);
 
-	const reset = () => {
+	const goToStep = (stepName: WizardStepsLiquidiumRepay) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({ modal, steps, stepName });
+		}
+	};
+
+	// Always enter the picker with a clean query so it never reopens filtered from a
+	// previous visit (mirrors the swap / trade-deposit flows).
+	const enterTokensList = () => {
+		tokensListContext.setFilterQuery('');
+		goToStep(WizardStepsLiquidiumRepay.TOKENS_LIST);
+	};
+
+	// Cancelling the picker returns to the Repay step — the amount form when a position
+	// is chosen, or the select-token prompt on a neutral launch.
+	const closeTokensList = () => {
+		tokensListContext.setFilterQuery('');
+		goToStep(WizardStepsLiquidiumRepay.REPAY);
+	};
+
+	const selectReserve = (nextReserve: LiquidiumReserve) => {
+		selectedReserve = nextReserve;
+		// The typed amount is token-specific; drop it when switching.
 		amount = undefined;
+		closeTokensList();
+	};
+
+	// The modal is not guaranteed to unmount between opens, so restore every piece of
+	// launch state — including the selected reserve, its fee/debt estimates and the picker
+	// filters — back to what the initial prop implies; otherwise the next open (or a neutral
+	// launch) inherits the previously picked token / a stale fee-error / a stale filter query.
+	const reset = () => {
+		selectedReserve = reserve;
+		amount = undefined;
+		inflowFee = undefined;
+		inflowFeeUnavailable = false;
+		maxRepay = undefined;
 		repayProgressStep = ProgressStepsLiquidiumRepay.INITIALIZATION;
 		currentStep = undefined;
+		tokensListContext.resetFilters();
 	};
 
 	const close = () => closeModal(reset);
 </script>
 
-{#if nonNullish(token) && nonNullish($liquidiumPortfolio)}
-	<TokenActionContext {token}>
-		<WizardModal
-			bind:this={modal}
-			disablePointerEvents={currentStep?.name === WizardStepsLiquidiumRepay.REPAYING}
-			onClose={close}
-			{steps}
-			bind:currentStep
-		>
-			{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+<TokenActionContext {token}>
+	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsLiquidiumRepay.REPAYING}
+		onClose={close}
+		{steps}
+		bind:currentStep
+	>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-			{#if reserve.chain === 'BTC'}
+		{#if currentStep?.name === WizardStepsLiquidiumRepay.TOKENS_LIST}
+			<LiquidiumRepayTokensList
+				onClose={closeTokensList}
+				onSelectReserve={selectReserve}
+				{selectedReserve}
+			/>
+		{:else if isNullish(selectedReserve)}
+			<LiquidiumSelectTokenForm onClose={close} onSelectToken={enterTokensList} />
+		{:else if nonNullish($liquidiumPortfolio)}
+			{#if selectedReserve.chain === 'BTC'}
 				<LiquidiumRepayBtcWizard
 					{currentStep}
 					{inflowFee}
@@ -100,8 +167,9 @@
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
+					onSelectToken={enterTokensList}
 					portfolio={$liquidiumPortfolio}
-					{reserve}
+					reserve={selectedReserve}
 					bind:amount
 					bind:repayProgressStep
 				/>
@@ -114,12 +182,13 @@
 					onBack={modal.back}
 					onClose={close}
 					onNext={modal.next}
+					onSelectToken={enterTokensList}
 					portfolio={$liquidiumPortfolio}
-					{reserve}
+					reserve={selectedReserve}
 					bind:amount
 					bind:repayProgressStep
 				/>
 			{/if}
-		</WizardModal>
-	</TokenActionContext>
-{/if}
+		{/if}
+	</WizardModal>
+</TokenActionContext>
