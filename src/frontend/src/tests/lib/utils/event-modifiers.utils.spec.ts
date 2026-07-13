@@ -3,7 +3,13 @@ import { preventDefault, stopPropagation } from '$lib/utils/event-modifiers.util
 
 type TestEvent = OnEventParam<MouseEvent, HTMLButtonElement>;
 
-const createEvent = (): TestEvent => new MouseEvent('click') as TestEvent;
+const createEvent = (): TestEvent => {
+	const event = new MouseEvent('click');
+	Object.defineProperty(event, 'currentTarget', {
+		value: document.createElement('button')
+	});
+	return event as TestEvent;
+};
 
 describe('event-modifiers.utils', () => {
 	describe('stopPropagation', () => {
@@ -32,6 +38,14 @@ describe('event-modifiers.utils', () => {
 			stopPropagation(null)(event);
 
 			expect(stopPropagationSpy).toHaveBeenCalledTimes(2);
+		});
+
+		it('should return the callback promise', () => {
+			const event = createEvent();
+			const promise = Promise.resolve();
+			const callback = vi.fn(() => promise);
+
+			expect(stopPropagation(callback)(event)).toBe(promise);
 		});
 	});
 
