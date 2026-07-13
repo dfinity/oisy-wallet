@@ -97,5 +97,9 @@ export const liquidiumRepayWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumRepay.REPAYING,
 		title: i18n.liquidium.text.repaying
+	},
+	{
+		name: WizardStepsLiquidiumRepay.TOKENS_LIST,
+		title: i18n.liquidium.text.select_repay_token
 	}
 ];

@@ -1,11 +1,13 @@
 import {
 	lendBorrowProvidersConfig,
 	liquidiumBorrowWizardSteps,
+	liquidiumRepayWizardSteps,
 	liquidiumSupplyWizardSteps,
 	liquidiumWithdrawWizardSteps
 } from '$lib/config/lend-borrow.config';
 import {
 	WizardStepsLiquidiumBorrow,
+	WizardStepsLiquidiumRepay,
 	WizardStepsLiquidiumSupply,
 	WizardStepsLiquidiumWithdraw
 } from '$lib/enums/wizard-steps';
@@ -50,6 +52,20 @@ describe('lend-borrow.config', () => {
 				{
 					name: WizardStepsLiquidiumWithdraw.TOKENS_LIST,
 					title: en.liquidium.text.select_withdraw_token
+				}
+			]);
+		});
+	});
+
+	describe('liquidiumRepayWizardSteps', () => {
+		it('returns the repay wizard steps with expected names and titles', () => {
+			expect(liquidiumRepayWizardSteps({ i18n: en })).toStrictEqual([
+				{ name: WizardStepsLiquidiumRepay.REPAY, title: en.liquidium.text.action_repay },
+				{ name: WizardStepsLiquidiumRepay.REVIEW, title: en.liquidium.text.repay_review },
+				{ name: WizardStepsLiquidiumRepay.REPAYING, title: en.liquidium.text.repaying },
+				{
+					name: WizardStepsLiquidiumRepay.TOKENS_LIST,
+					title: en.liquidium.text.select_repay_token
 				}
 			]);
 		});

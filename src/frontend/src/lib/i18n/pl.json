@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "Sprawdź dostarczenie",
 			"supply_review_subtitle": "Dostarczasz",
 			"supplying": "Trwa dostarczanie",
