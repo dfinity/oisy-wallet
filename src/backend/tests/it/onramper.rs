@@ -128,6 +128,32 @@ fn sign_onramper_widget_url_signs_the_callers_verified_icp_address() {
 }
 
 #[test]
+fn sign_onramper_widget_url_deduplicates_repeated_networks_without_changing_output() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    // The same network repeated many times (an amplification attempt) must not derive per entry.
+    // Deriving once per distinct network is an internal optimization: the verified output must be
+    // identical to supplying the entry once, so a caller cannot use repetition to change the
+    // signed content either.
+    let repeated = vec![entry("icp", &icp_address); 50];
+    let result = sign(&pic_setup, caller, network_wallets_request(repeated));
+
+    let response = match result {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
+        SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+    };
+    // Every supplied entry is still emitted (the cache dedups derivation, not the signed output).
+    let expected_pairs = vec![format!("icp:{icp_address}"); 50].join(",");
+    assert_eq!(
+        response.signed_query,
+        format!("networkWallets={expected_pairs}")
+    );
+}
+
+#[test]
 fn sign_onramper_widget_url_does_not_sign_unverified_wallet_fields() {
     let pic_setup = setup();
     provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
