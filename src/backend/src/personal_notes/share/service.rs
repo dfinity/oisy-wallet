@@ -19,35 +19,19 @@ use crate::{
     },
 };
 
-/// Counts a creator's *active* (unexpired) shares by range-scanning the
-/// by-creator index, so the cap check never touches the (potentially much
-/// larger) primary token-keyed map. Takes the map directly — rather than
-/// re-entering `read_state`/`mutate_state` — so it can be called from inside
-/// an existing state borrow without a `RefCell` double-borrow panic. Mirrors
-/// `personal_notes::service::count_notes_in_map`.
-fn active_share_count_in(
-    by_creator: &crate::types::maps::PersonalNoteSharesByCreatorMap,
-    creator: Principal,
-    now_ns: u64,
-) -> usize {
-    let prefix = StoredPrincipal(creator);
-    let start = PersonalNoteShareCreatorKey(prefix, PersonalNoteShareToken(String::new()));
-    by_creator
-        .range(start..)
-        .take_while(|entry| entry.key().0 == prefix)
-        .filter(|entry| entry.value() > now_ns)
-        .count()
-}
-
-/// Scans one creator's slice of the by-creator index in a single pass,
-/// returning their active (unexpired) share count and the tokens of their
-/// expired shares. The caller removes the expired ones (see
-/// `create_personal_note_share`) so a creator can't mint near-immediate-expiry
-/// shares that stop counting toward the cap on the next call yet linger in
-/// storage until the hourly sweep — which would let one user's stored volume
-/// grow past the active-share cap up to the create rate-limit ceiling. Bounds
-/// work to the one creator, like `active_share_count_in`, and takes the map
-/// directly so it can run inside an existing state borrow.
+/// Range-scans one creator's slice of the by-creator index in a single pass,
+/// returning their *active* (unexpired) share count and the tokens of their
+/// *expired* shares. Scanning the by-creator index — rather than the
+/// (potentially much larger) primary token-keyed map — keeps this cheap, and
+/// taking the map directly (rather than re-entering `read_state` /
+/// `mutate_state`) lets it run inside an existing state borrow without a
+/// `RefCell` double-borrow panic.
+///
+/// `create_personal_note_share` removes the returned expired tokens before the
+/// cap check, so a creator can't mint near-immediate-expiry shares that stop
+/// counting toward the cap on the next call yet linger in storage until the
+/// hourly sweep — which would let one user's stored volume grow past the
+/// active-share cap up to the create rate-limit ceiling.
 fn partition_creator_shares(
     by_creator: &crate::types::maps::PersonalNoteSharesByCreatorMap,
     creator: Principal,
@@ -68,6 +52,18 @@ fn partition_creator_shares(
         }
     }
     (active, expired)
+}
+
+/// A creator's *active* (unexpired) share count, for the read-only count path
+/// (`get_personal_note_shares_count`), which needs the count but not the
+/// expired tokens. Thin wrapper over [`partition_creator_shares`] (an empty
+/// `Vec` does not allocate). Mirrors `personal_notes::service::count_notes_in_map`.
+fn active_share_count_in(
+    by_creator: &crate::types::maps::PersonalNoteSharesByCreatorMap,
+    creator: Principal,
+    now_ns: u64,
+) -> usize {
+    partition_creator_shares(by_creator, creator, now_ns).0
 }
 
 /// Removes a share from both the primary and by-creator maps. Used by
