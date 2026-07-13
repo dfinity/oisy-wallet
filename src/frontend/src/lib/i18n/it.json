@@ -2387,6 +2387,7 @@
 			"transaction_failed": "Transazione non riuscita",
 			"select_supply_token": "",
 			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "Rivedi fornitura",
 			"supply_review_subtitle": "Fornisci",
 			"supplying": "Fornitura in corso",

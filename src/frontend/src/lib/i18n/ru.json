@@ -2387,6 +2387,7 @@
 			"transaction_failed": "Транзакция не удалась",
 			"select_supply_token": "",
 			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "Проверить предоставление",
 			"supply_review_subtitle": "Ты предоставляешь",
 			"supplying": "Предоставление в процессе",

@@ -2387,6 +2387,7 @@
 			"transaction_failed": "Giao dịch thất bại",
 			"select_supply_token": "",
 			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "Xem lại khoản cung cấp",
 			"supply_review_subtitle": "Bạn cung cấp",
 			"supplying": "Đang cung cấp",
