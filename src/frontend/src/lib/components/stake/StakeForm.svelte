@@ -37,6 +37,10 @@
 		maxAmount?: bigint;
 		errorType?: TokenActionErrorType;
 		error?: Error;
+		// Makes the token logo a clickable selector; when set, `onClick` fires on click.
+		// Defaults to a static (non-selectable) token display.
+		isSelectable?: boolean;
+		onClick?: () => void;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		onClose: () => void;
@@ -55,6 +59,8 @@
 		maxAmount,
 		errorType = $bindable(),
 		error = $bindable(),
+		isSelectable = false,
+		onClick,
 		onCustomValidate,
 		onCustomErrorValidate,
 		onClose,
@@ -92,7 +98,8 @@
 			{autofocus}
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
-			isSelectable={false}
+			{isSelectable}
+			{onClick}
 			{onCustomErrorValidate}
 			{onCustomValidate}
 			showTokenNetwork
