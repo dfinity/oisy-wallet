@@ -677,24 +677,41 @@ export const toCandidSide = (side: LimitOrderSide): Side =>
 const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
 	Object.keys(status)[0] as OisyTradeOrderStatus;
 
+// Cached per ledger so the synthetic `TokenId` (a symbol) stays stable across
+// derivations — a fresh id would never match balance/exchange lookups keyed by
+// token id and would churn object identity on every re-derive.
+const oisyTradeFallbackTokens = new Map<string, IcToken>();
+
 const toOisyTradeFallbackToken = ({
 	token,
 	ledgerCanisterId
 }: {
 	token: OisyTradeToken;
 	ledgerCanisterId: string;
-}): IcToken => ({
-	id: parseTokenId(`OisyTrade:${ledgerCanisterId}`),
-	network: ICP_NETWORK,
-	standard: { code: 'icrc' },
-	category: 'default',
-	tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
-	name: token.metadata.symbol,
-	symbol: token.metadata.symbol,
-	decimals: token.metadata.decimals,
-	ledgerCanisterId,
-	fee: ZERO
-});
+}): IcToken => {
+	const cached = oisyTradeFallbackTokens.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const fallback: IcToken = {
+		id: parseTokenId(`OisyTrade:${ledgerCanisterId}`),
+		network: ICP_NETWORK,
+		standard: { code: 'icrc' },
+		category: 'default',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		name: token.metadata.symbol,
+		symbol: token.metadata.symbol,
+		decimals: token.metadata.decimals,
+		ledgerCanisterId,
+		fee: ZERO
+	};
+
+	oisyTradeFallbackTokens.set(ledgerCanisterId, fallback);
+
+	return fallback;
+};
 
 // Resolve a `UserOrder` to OISY tokens (by ledger canister id, like the rest of
 // the Trading tab) and scale amounts to human units. Prefer the user's enabled

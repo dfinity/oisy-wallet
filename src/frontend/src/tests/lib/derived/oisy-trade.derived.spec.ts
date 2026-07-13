@@ -132,7 +132,7 @@ describe('oisy-trade.derived — orders', () => {
 					id: { ledger_id: Principal.fromText(quoteLedgerId) },
 					metadata: { symbol: 'ckUSDC', decimals: 6 }
 				}
-			] as unknown as Token[],
+			] satisfies Token[],
 			balances: undefined,
 			orders: [buildOrder({ id: 'open', status: 'Open' })]
 		});
@@ -187,7 +187,7 @@ describe('oisy-trade.derived — fiat values', () => {
 					id: { ledger_id: Principal.fromText(baseLedgerId) },
 					metadata: { symbol: 'ICP', decimals: 8 }
 				}
-			] as unknown as Token[],
+			] satisfies Token[],
 			balances: undefined,
 			orders: undefined
 		});
