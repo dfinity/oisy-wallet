@@ -2385,6 +2385,7 @@
 			"action_repay": "Погасить",
 			"action_withdraw": "Вывести",
 			"transaction_failed": "Транзакция не удалась",
+			"select_supply_token": "",
 			"supply_review": "Проверить предоставление",
 			"supply_review_subtitle": "Ты предоставляешь",
 			"supplying": "Предоставление в процессе",

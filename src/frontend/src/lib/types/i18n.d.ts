@@ -1921,6 +1921,7 @@ interface I18nLiquidium {
 		action_repay: string;
 		action_withdraw: string;
 		transaction_failed: string;
+		select_supply_token: string;
 		supply_review: string;
 		supply_review_subtitle: string;
 		supplying: string;

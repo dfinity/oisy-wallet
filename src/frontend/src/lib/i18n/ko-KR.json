@@ -2385,6 +2385,7 @@
 			"action_repay": "상환하기",
 			"action_withdraw": "출금",
 			"transaction_failed": "트랜잭션 실패",
+			"select_supply_token": "",
 			"supply_review": "공급 검토",
 			"supply_review_subtitle": "공급 금액",
 			"supplying": "공급 중",

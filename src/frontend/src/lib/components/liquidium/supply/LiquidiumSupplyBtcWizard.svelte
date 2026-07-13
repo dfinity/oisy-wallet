@@ -36,6 +36,7 @@
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -48,6 +49,7 @@
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -171,6 +173,7 @@
 			{onClose}
 			onCustomErrorValidate={validateSupplyAmount}
 			{onNext}
+			{onSelectToken}
 			totalFee={utxosFee?.feeSatoshis}
 			bind:amount
 		/>

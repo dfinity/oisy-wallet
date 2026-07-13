@@ -2385,6 +2385,7 @@
 			"action_repay": "Reembolsar",
 			"action_withdraw": "Retirar",
 			"transaction_failed": "La transacción falló",
+			"select_supply_token": "",
 			"supply_review": "Revisar suministro",
 			"supply_review_subtitle": "Suministras",
 			"supplying": "Suministrando",
