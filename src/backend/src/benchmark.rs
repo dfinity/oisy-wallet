@@ -698,16 +698,17 @@ fn seed_personal_notes(count: u64) {
 
 #[bench]
 fn bench_set_personal_note() {
-    std::hint::black_box(personal_notes_service::set_personal_note(set_note_request(
-        0,
-    )));
+    personal_notes_service::set_personal_note(set_note_request(0))
+        .expect("bench: set_personal_note failed");
 }
 
 fn bench_get_personal_notes_with_count(count: u64) -> BenchResult {
     seed_personal_notes(count);
 
     bench_fn(|| {
-        std::hint::black_box(personal_notes_service::get_personal_notes());
+        std::hint::black_box(
+            personal_notes_service::get_personal_notes().expect("bench: get_personal_notes failed"),
+        );
     })
 }
 
@@ -726,7 +727,10 @@ fn bench_get_personal_notes_count_100() -> BenchResult {
     seed_personal_notes(100);
 
     bench_fn(|| {
-        std::hint::black_box(personal_notes_service::get_personal_notes_count());
+        std::hint::black_box(
+            personal_notes_service::get_personal_notes_count()
+                .expect("bench: get_personal_notes_count failed"),
+        );
     })
 }
 
@@ -735,11 +739,10 @@ fn bench_delete_personal_note() -> BenchResult {
     seed_personal_notes(100);
 
     bench_fn(|| {
-        std::hint::black_box(personal_notes_service::delete_personal_note(
-            DeletePersonalNoteRequest {
-                note_id: "note-0050".to_string(),
-            },
-        ));
+        personal_notes_service::delete_personal_note(DeletePersonalNoteRequest {
+            note_id: "note-0050".to_string(),
+        })
+        .expect("bench: delete_personal_note failed");
     })
 }
 
@@ -780,12 +783,15 @@ fn seed_active_user_transactions(count: u64) {
 fn bench_create_active_user_transaction() {
     let principal = *bench_principal();
     mutate_state(|s| {
-        std::hint::black_box(active_user_transactions_model::create(
-            &mut s.active_user_transactions,
-            principal,
-            make_active_user_transaction_request(0),
-            TS0_NS,
-        ));
+        std::hint::black_box(
+            active_user_transactions_model::create(
+                &mut s.active_user_transactions,
+                principal,
+                make_active_user_transaction_request(0),
+                TS0_NS,
+            )
+            .expect("bench: create active user transaction failed"),
+        );
     });
 }
 
@@ -817,18 +823,21 @@ fn bench_update_active_user_transaction() -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            std::hint::black_box(active_user_transactions_model::update(
-                &mut s.active_user_transactions,
-                principal,
-                UpdateActiveUserTransactionRequest {
-                    id: "bench-tx-0050".to_string(),
-                    status: Some(ActiveUserTransactionStatus::Executing),
-                    progress_step: Some("finalized".to_string()),
-                    external_refs: None,
-                    error: None,
-                },
-                TS1_NS,
-            ));
+            std::hint::black_box(
+                active_user_transactions_model::update(
+                    &mut s.active_user_transactions,
+                    principal,
+                    UpdateActiveUserTransactionRequest {
+                        id: "bench-tx-0050".to_string(),
+                        status: Some(ActiveUserTransactionStatus::Executing),
+                        progress_step: Some("finalized".to_string()),
+                        external_refs: None,
+                        error: None,
+                    },
+                    TS1_NS,
+                )
+                .expect("bench: update active user transaction failed"),
+            );
         });
     })
 }
@@ -840,11 +849,12 @@ fn bench_delete_active_user_transaction() -> BenchResult {
 
     bench_fn(|| {
         mutate_state(|s| {
-            std::hint::black_box(active_user_transactions_model::delete(
+            active_user_transactions_model::delete(
                 &mut s.active_user_transactions,
                 principal,
                 "bench-tx-0050".to_string(),
-            ));
+            )
+            .expect("bench: delete active user transaction failed");
         });
     })
 }
