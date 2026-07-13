@@ -2386,6 +2386,8 @@
 			"action_withdraw": "引き出す",
 			"transaction_failed": "トランザクションが失敗しました",
 			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "供給内容を確認",
 			"supply_review_subtitle": "供給する",
 			"supplying": "供給中",
