@@ -1,181 +1,181 @@
 benches:
   bench_add_user_hidden_dapp_id:
     total:
-      instructions: 2482667
+      instructions: 3565525
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_btc_add_pending_transaction_200:
     total:
-      instructions: 47143956
+      instructions: 25773308
       heap_increase: 1
       stable_memory_increase: 0
     scopes: {}
   bench_btc_add_pending_transaction_5:
     total:
-      instructions: 2017860
+      instructions: 1475804
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_btc_get_pending_transactions_200:
     total:
-      instructions: 24414479
+      instructions: 13929883
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_btc_get_pending_transactions_5:
     total:
-      instructions: 934463
+      instructions: 657989
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_config:
     total:
-      instructions: 1359
+      instructions: 1478
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_create_user_profile:
     total:
-      instructions: 682073
+      instructions: 1027527
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_delete_contact:
     total:
-      instructions: 1275830
+      instructions: 1319382
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_account_creation_timestamps_200:
     total:
-      instructions: 173870424
-      heap_increase: 0
+      instructions: 243807659
+      heap_increase: 1
       stable_memory_increase: 0
     scopes: {}
   bench_get_account_creation_timestamps_5:
     total:
-      instructions: 4284871
+      instructions: 6029434
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_account_creation_timestamps_50:
     total:
-      instructions: 43074460
+      instructions: 60597084
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_contact:
     total:
-      instructions: 460845
+      instructions: 443897
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_contacts_10:
     total:
-      instructions: 623237
+      instructions: 565045
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_contacts_200:
     total:
-      instructions: 4140611
+      instructions: 3353994
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_get_user_profile:
     total:
-      instructions: 873483
+      instructions: 1211516
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_has_user_profile:
     total:
-      instructions: 3644
+      instructions: 3159
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_http_request_metrics:
     total:
-      instructions: 30416
+      instructions: 29102
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_http_request_not_found:
     total:
-      instructions: 1397
+      instructions: 1614
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_list_custom_tokens_200:
     total:
-      instructions: 6066270
+      instructions: 5616515
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_list_custom_tokens_5:
     total:
-      instructions: 470544
+      instructions: 491311
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_remove_custom_token:
     total:
-      instructions: 1030563
+      instructions: 1172379
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_set_custom_token:
     total:
-      instructions: 318517
+      instructions: 383405
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_set_many_custom_tokens_200:
     total:
-      instructions: 32808894
+      instructions: 32782529
       heap_increase: 1
       stable_memory_increase: 0
     scopes: {}
   bench_set_many_custom_tokens_5:
     total:
-      instructions: 344997
+      instructions: 410257
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_set_user_show_testnets:
     total:
-      instructions: 2485837
+      instructions: 3541025
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_stats:
     total:
-      instructions: 324
+      instructions: 380
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_update_contact:
     total:
-      instructions: 1282022
+      instructions: 1318385
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_update_user_agreements:
     total:
-      instructions: 2486685
+      instructions: 3769782
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_update_user_experimental_features:
     total:
-      instructions: 2481510
+      instructions: 3556351
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
   bench_update_user_network_settings:
     total:
-      instructions: 2481554
+      instructions: 3564621
       heap_increase: 0
       stable_memory_increase: 0
     scopes: {}
