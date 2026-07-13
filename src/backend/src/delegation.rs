@@ -7,13 +7,14 @@ use shared::types::delegation::IIDelegationChain;
 
 use crate::state::read_config;
 
-const PRODUCTION_ECDSA_KEY_NAME: &str = "key_1";
-
 /// Reads the II verification parameters (known II canister IDs, IC root key,
 /// and whether the delegation guard is enabled) from the backend configuration.
 ///
-/// The guard is enabled for every environment **except** production
-/// (`ecdsa_key_name == "key_1"`).
+/// The guard is enabled in **every** environment, including production. It was
+/// historically disabled on production (`ecdsa_key_name == "key_1"`) because the
+/// delegation-chain verification failed on mainnet's sharded `canister_ranges`
+/// certificate path; once that verification is fixed, production enforces the
+/// same II delegation check as staging and local.
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
     read_config(|config| {
         let ii_ids = config.ii_canister_id.map(|id| vec![id]).unwrap_or_default();
@@ -21,7 +22,7 @@ pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
             .ic_root_key_raw
             .clone()
             .expect("IC root key not configured");
-        let guard_enabled = config.ecdsa_key_name != PRODUCTION_ECDSA_KEY_NAME;
+        let guard_enabled = true;
         (ii_ids, root_key, guard_enabled)
     })
 }
@@ -29,8 +30,8 @@ pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
 /// Requires a valid II delegation chain for non-controller callers.
 ///
 /// When `guard_enabled` is `false` the check is a no-op and `Ok(())` is
-/// returned immediately.  This is the case for **production** deployments
-/// (`ecdsa_key_name == "key_1"`); local and staging deployments pass `true`.
+/// returned immediately. All environments (production, staging, local) pass
+/// `true`; `false` is only used to exercise the disabled path in tests.
 ///
 /// Controllers bypass the check entirely and `Ok(())` is returned regardless
 /// of whether a chain is provided.  For all other callers the chain must be
