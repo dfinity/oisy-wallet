@@ -50,6 +50,7 @@ export const NEAR_INTENTS_TOS_LINK =
 	'https://docs.near-intents.org/security-compliance/terms-of-service';
 
 export const SWAP_MODE = 'all';
+export const SWAP_MODE_MARKET = 'market';
 export const SWAP_SIDE = 'SELL';
 
 export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {

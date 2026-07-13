@@ -21,6 +21,8 @@ dfx deploy ckusdc_index
 dfx deploy icp_swap_factory
 dfx deploy icp_swap_pool
 
+dfx deploy oisy_trade
+
 dfx deploy internet_identity
 dfx deploy cycles_ledger
 dfx deploy cycles_depositor

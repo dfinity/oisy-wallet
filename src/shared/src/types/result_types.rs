@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize};
+use serde_bytes::ByteBuf;
 
 use super::{
     bitcoin::{
@@ -22,6 +23,8 @@ use crate::types::{
     experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     onramper::{SignOnramperWidgetUrlError, SignOnramperWidgetUrlResponse},
+    personal_note::{PersonalNoteEntry, PersonalNoteError},
+    personal_note_share::{PersonalNoteShareContent, PersonalNoteShareError},
     transaction_settings::UpdateTransactionFilterSettingsError,
     user_transaction::{GetUserTransactionsResponse, UserTransactionError},
 };
@@ -461,6 +464,147 @@ impl From<Result<SignOnramperWidgetUrlResponse, SignOnramperWidgetUrlError>>
         match result {
             Ok(response) => SignOnramperWidgetUrlResult::Ok(response),
             Err(err) => SignOnramperWidgetUrlResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum SetPersonalNoteResult {
+    /// The note was created or updated successfully.
+    Ok(()),
+    /// The note could not be stored due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<(), PersonalNoteError>> for SetPersonalNoteResult {
+    fn from(result: Result<(), PersonalNoteError>) -> Self {
+        match result {
+            Ok(()) => SetPersonalNoteResult::Ok(()),
+            Err(err) => SetPersonalNoteResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum DeletePersonalNoteResult {
+    /// The note was deleted (idempotent — also `Ok` when it did not exist).
+    Ok(()),
+    /// The note could not be deleted due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<(), PersonalNoteError>> for DeletePersonalNoteResult {
+    fn from(result: Result<(), PersonalNoteError>) -> Self {
+        match result {
+            Ok(()) => DeletePersonalNoteResult::Ok(()),
+            Err(err) => DeletePersonalNoteResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNotesResult {
+    /// All of the caller's (encrypted) notes.
+    Ok(Vec<PersonalNoteEntry>),
+    /// The notes could not be retrieved due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<Vec<PersonalNoteEntry>, PersonalNoteError>> for GetPersonalNotesResult {
+    fn from(result: Result<Vec<PersonalNoteEntry>, PersonalNoteError>) -> Self {
+        match result {
+            Ok(entries) => GetPersonalNotesResult::Ok(entries),
+            Err(err) => GetPersonalNotesResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNotesCountResult {
+    /// The caller's total note count.
+    Ok(u64),
+    /// The count could not be retrieved due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<u64, PersonalNoteError>> for GetPersonalNotesCountResult {
+    fn from(result: Result<u64, PersonalNoteError>) -> Self {
+        match result {
+            Ok(count) => GetPersonalNotesCountResult::Ok(count),
+            Err(err) => GetPersonalNotesCountResult::Err(err),
+        }
+    }
+}
+
+/// Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+/// vetKey and the store's public verification key). Both return opaque bytes on
+/// success; the wire shape is identical, so one enum serves both.
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum PersonalNotesVetkeyResult {
+    /// vetKey bytes, opaque to the canister.
+    Ok(ByteBuf),
+    /// The vetKey could not be derived due to an error.
+    Err(PersonalNoteError),
+}
+impl From<Result<ByteBuf, PersonalNoteError>> for PersonalNotesVetkeyResult {
+    fn from(result: Result<ByteBuf, PersonalNoteError>) -> Self {
+        match result {
+            Ok(vetkey) => PersonalNotesVetkeyResult::Ok(vetkey),
+            Err(err) => PersonalNotesVetkeyResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum CreatePersonalNoteShareResult {
+    Ok(()),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<(), PersonalNoteShareError>> for CreatePersonalNoteShareResult {
+    fn from(result: Result<(), PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(()) => CreatePersonalNoteShareResult::Ok(()),
+            Err(err) => CreatePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>> for GetPersonalNoteShareResult {
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => GetPersonalNoteShareResult::Ok(content),
+            Err(err) => GetPersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum ConsumePersonalNoteShareResult {
+    Ok(PersonalNoteShareContent),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<PersonalNoteShareContent, PersonalNoteShareError>>
+    for ConsumePersonalNoteShareResult
+{
+    fn from(result: Result<PersonalNoteShareContent, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(content) => ConsumePersonalNoteShareResult::Ok(content),
+            Err(err) => ConsumePersonalNoteShareResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum GetPersonalNoteSharesCountResult {
+    Ok(u64),
+    Err(PersonalNoteShareError),
+}
+impl From<Result<u64, PersonalNoteShareError>> for GetPersonalNoteSharesCountResult {
+    fn from(result: Result<u64, PersonalNoteShareError>) -> Self {
+        match result {
+            Ok(count) => GetPersonalNoteSharesCountResult::Ok(count),
+            Err(err) => GetPersonalNoteSharesCountResult::Err(err),
         }
     }
 }

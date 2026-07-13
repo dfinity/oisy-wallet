@@ -1,9 +1,16 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext, type Snippet } from 'svelte';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+
+	interface Props {
+		label?: Snippet;
+	}
+
+	let { label: labelSnippet }: Props = $props();
 
 	const { sendTokenExchangeRate, sendToken, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -19,5 +26,11 @@
 	feeAmount={satoshisFee}
 	symbol={$sendTokenSymbol}
 >
-	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
+	{#snippet label()}
+		{#if nonNullish(labelSnippet)}
+			{@render labelSnippet()}
+		{:else}
+			{$i18n.fee.text.fee}
+		{/if}
+	{/snippet}
 </FeeDisplay>

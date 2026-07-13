@@ -54,4 +54,13 @@ pub enum SignOnramperWidgetUrlError {
     /// arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
     /// signing oracle.
     RateLimited(RateLimitError),
+    /// A wallet address supplied by the caller did not match the address the backend derives for
+    /// that network from the caller's principal. The backend signs only addresses the caller
+    /// provably owns, so a mismatch (a derivation-parity bug or a tampering attempt) fails the
+    /// whole request rather than signing an address the caller may not control.
+    AddressMismatch,
+    /// The backend could not derive one of the caller's addresses (e.g. a threshold public-key
+    /// read failed), so the supplied address could not be verified. The request is rejected
+    /// rather than signing an unverified address.
+    AddressDerivationFailed,
 }

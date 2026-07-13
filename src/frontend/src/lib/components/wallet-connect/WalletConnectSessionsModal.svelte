@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { SessionTypes } from '@walletconnect/types';
+	import { onMount } from 'svelte';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 	import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
@@ -14,12 +14,18 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
-	import { disconnectListener } from '$lib/services/wallet-connect.services';
+	import {
+		disconnectListener,
+		disconnectSession,
+		syncSessions
+	} from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
+	import { walletConnectSessionsStore } from '$lib/stores/wallet-connect.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { SolanaNetworks } from '$sol/types/network';
 
 	const chainIconMap: Record<string, string> = {
@@ -35,24 +41,34 @@
 		}, {})
 	};
 
-	let listener = $derived($walletConnectListenerStore);
+	let sessions = $derived($walletConnectSessionsStore);
 
-	let sessions = $derived.by((): SessionTypes.Struct[] => {
-		if (isNullish(listener)) {
-			return [];
-		}
+	// Reflect the live WalletKit sessions whenever the modal is opened, independent of which add /
+	// remove path last ran.
+	onMount(syncSessions);
 
-		return Object.values(listener.getActiveSessions());
-	});
-
-	const disconnect = async () => {
-		await disconnectListener();
-
+	const showDisconnectedToast = () =>
 		toastsShow({
 			text: $i18n.wallet_connect.info.disconnected,
 			level: 'info',
 			duration: 2000
 		});
+
+	// Disconnect a single dApp by topic; the list updates in place and the other dApps stay connected.
+	// The service catches its own errors, so only surface the success toast when it actually succeeded.
+	const disconnectOne = async (topic: string) => {
+		const { success } = await disconnectSession(topic);
+
+		if (success) {
+			showDisconnectedToast();
+		}
+	};
+
+	// Tear down every connection at once, preserving the previous one-tap teardown behaviour.
+	const disconnectAll = async () => {
+		await disconnectListener();
+
+		showDisconnectedToast();
 
 		modalStore.close();
 	};
@@ -120,7 +136,17 @@
 						{/snippet}
 
 						{#snippet action()}
-							<Button colorStyle="error" onclick={disconnect} paddingSmall transparent>
+							<Button
+								ariaLabel={replacePlaceholders($i18n.wallet_connect.text.disconnect_app, {
+									$name: name
+								})}
+								colorStyle="error"
+								onclick={() => disconnectOne(session.topic)}
+								paddingSmall
+								testId={`wallet-connect-disconnect-session-${session.topic}`}
+								transparent
+								type="button"
+							>
 								<IconLinkOff />
 							</Button>
 						{/snippet}
@@ -131,6 +157,16 @@
 
 		{#snippet toolbar()}
 			<ButtonGroup>
+				{#if sessions.length > 0}
+					<Button
+						colorStyle="error"
+						onclick={disconnectAll}
+						testId="wallet-connect-disconnect-all"
+						type="button"
+					>
+						{$i18n.wallet_connect.text.disconnect_all}
+					</Button>
+				{/if}
 				<ButtonCloseModal />
 			</ButtonGroup>
 		{/snippet}

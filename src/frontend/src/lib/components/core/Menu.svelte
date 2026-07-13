@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
@@ -13,8 +13,10 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
+	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import IconlySettings from '$lib/components/icons/iconly/IconlySettings.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconMaximize from '$lib/components/icons/lucide/IconMaximize.svelte';
@@ -29,8 +31,10 @@
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_SUPPORT_URL } from '$lib/constants/oisy.constants';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -41,23 +45,28 @@
 		NAVIGATION_MENU_SCANNER_BUTTON,
 		NAVIGATION_MENU_PAY_BUTTON,
 		NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+		NAVIGATION_MENU_SETTINGS_BUTTON,
 		NAVIGATION_MENU_SUPPORT_BUTTON,
 		NAVIGATION_MENU_DOC_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { getUserRoles } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		isRouteActivity,
 		isRouteRewards,
 		isRouteDappExplorer,
-		isRouteSettings
+		isRouteSettings,
+		networkUrl
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
+	import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
 	interface Props {
 		visible?: boolean;
@@ -80,6 +89,23 @@
 
 	const handlePrivacyToggle = () => {
 		setPrivacyMode({ enabled: !$isPrivacyMode, withToast: false, source: 'User menu click' });
+	};
+
+	const goToSettings = async () => {
+		hidePopover();
+		// Wait for the popover's backdrop to finish fading out before navigating.
+		// Otherwise the blurred backdrop lingers over the freshly-rendered Settings
+		// page and reads as a flicker — unlike the other menu entries, which open a
+		// covering modal and never change the route.
+		await waitForMilliseconds(BACKDROP_FADE_OUT_DURATION);
+		await goto(
+			networkUrl({
+				path: AppPath.Settings,
+				networkId: $userSelectedNetworkStore,
+				usePreviousRoute: false,
+				fromRoute: null
+			})
+		);
 	};
 
 	const settingsRoute = $derived(isRouteSettings(page));
@@ -279,13 +305,22 @@
 		{/if}
 	</div>
 
-	<div class="flex max-w-80 flex-col gap-5 py-5">
+	<div class="flex max-w-80 flex-col gap-1 pt-5 pb-1">
 		{#if $authNotSignedIn}
 			<MenuLanguageSelector />
 		{/if}
 
 		{#if $authSignedIn}
 			<MenuThemeSelector />
+
+			<ButtonMenu
+				ariaLabel={$i18n.navigation.alt.settings}
+				onclick={goToSettings}
+				testId={NAVIGATION_MENU_SETTINGS_BUTTON}
+			>
+				<IconlySettings size="20" />
+				{$i18n.navigation.text.settings}
+			</ButtonMenu>
 		{/if}
 	</div>
 

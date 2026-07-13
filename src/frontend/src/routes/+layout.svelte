@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
 	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
+	import SystemThemeListener from '$lib/components/ui/SystemThemeListener.svelte';
+	import Toasts from '$lib/components/ui/Toasts.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
@@ -15,15 +17,18 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { routeToken } from '$lib/derived/nav.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
+	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { personalNotesStore } from '$lib/stores/personal-notes.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
@@ -91,6 +96,19 @@
 	$effect(() => {
 		[worker, $authStore, $isLocked];
 		worker?.syncAuthIdle({ auth: $authStore, locked: $isLocked });
+	});
+
+	$effect(() => {
+		const currentPrincipal = $authStore.identity?.getPrincipal().toText();
+		const notesOwnerPrincipal = $personalNotesStore.ownerPrincipal;
+
+		if (nonNullish(notesOwnerPrincipal) && notesOwnerPrincipal !== currentPrincipal) {
+			resetPersonalNotesSession();
+
+			if ($modalStore?.type === 'notes') {
+				modalStore.close();
+			}
+		}
 	});
 
 	/**
@@ -186,21 +204,28 @@
 	// which is only updated through explicit user actions.
 	// We initialise the store from the URL on first load to preserve navigation
 	// context without promoting the route to the source of truth.
+	// The token view carries a network purely to identify the token, not as a
+	// filter choice, so we skip it there to avoid leaking that network into the
+	// asset list filter after a reload.
 	onMount(() => {
+		if (nonNullish($routeToken)) {
+			return;
+		}
+
 		userSelectedNetworkStore.set($networkId);
 	});
 </script>
 
 {#await init()}
 	<div class="text-brand-primary" in:fade>
-		<Spinner />
+		<LoaderSpinner />
 	</div>
 {:then _}
 	{@render children()}
 {/await}
 
 <Banner />
-<Toasts maxVisible={3} />
+<Toasts elevated={nonNullish($modalStore?.type)} maxVisible={3} />
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />

@@ -39,6 +39,8 @@ export abstract class WalletConnectListener implements WebSocketListener {
 		topic: string;
 		message: WalletConnectApproveRequestMessage;
 	}): Promise<void>;
+	// Disconnect a single session by topic, leaving any other sessions and pairings intact.
+	abstract disconnectSession(topic: string): Promise<void>;
 	abstract disconnect(): Promise<void>;
 }
 

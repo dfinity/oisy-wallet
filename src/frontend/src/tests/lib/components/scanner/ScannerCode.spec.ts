@@ -92,18 +92,6 @@ vi.mock('$lib/derived/tokens.derived', async () => {
 	};
 });
 
-vi.mock('@dfinity/gix-components', async () => {
-	const actual = await vi.importActual('@dfinity/gix-components');
-	return {
-		...actual,
-		QRCodeReader: vi.fn().mockImplementation(() => ({
-			$$render: () => '<div data-tid="mock-qr-reader">Mocked QR Reader</div>',
-			$$slots: {},
-			$$scope: {}
-		}))
-	};
-});
-
 describe('ScannerCode.svelte', () => {
 	const mockOnNext = vi.fn();
 	const mockSetData = vi.fn();
@@ -266,7 +254,7 @@ describe('ScannerCode.svelte', () => {
 
 		it('should render the inline input on a mobile device with a viewport >= lg', () => {
 			// e.g. dev-tools mobile emulation at 1280px, or a landscape phablet -
-			// gix-components' BottomSheet drops its `position: fixed` styling at >=1024px,
+			// the bottom sheet drops its `position: fixed` styling at >=1024px,
 			// so we must fall back to the inline-input layout even when isMobile() is true.
 			screensStore.set('xl');
 

@@ -3,9 +3,13 @@ import type {
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
 	CustomToken,
+	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	PersonalNoteEntry,
+	PersonalNoteShareContent,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TokenId
@@ -58,7 +62,7 @@ import {
 	Canister,
 	createServices,
 	fromNullable,
-	nonNullish,
+	isNullish,
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
@@ -440,7 +444,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
-		if (!nonNullish(rate)) {
+		if (isNullish(rate)) {
 			return;
 		}
 
@@ -589,6 +593,110 @@ export class BackendCanister extends Canister<BackendService> {
 			return response.Ok.transactions;
 		}
 
+		throw response.Err;
+	};
+
+	setPersonalNote = async (request: PersonalNoteEntry): Promise<void> => {
+		const { set_personal_note } = this.caller({ certified: true });
+		const response = await set_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	deletePersonalNote = async (request: DeletePersonalNoteRequest): Promise<void> => {
+		const { delete_personal_note } = this.caller({ certified: true });
+		const response = await delete_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotes = async (): Promise<PersonalNoteEntry[]> => {
+		const { get_personal_notes } = this.caller({ certified: false });
+		const response = await get_personal_notes();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesCount = async (): Promise<bigint> => {
+		const { get_personal_notes_count } = this.caller({ certified: false });
+		const response = await get_personal_notes_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_personal_notes_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_personal_notes_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {
+		const { create_personal_note_share } = this.caller({ certified: true });
+		const response = await create_personal_note_share(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable read endpoint (the share recipient has no identity), so
+	// it runs as a non-certified query like the other note reads.
+	getPersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { get_personal_note_share } = this.caller({ certified: false });
+		const response = await get_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	consumePersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { consume_personal_note_share } = this.caller({ certified: true });
+		const response = await consume_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNoteSharesCount = async (): Promise<bigint> => {
+		const { get_personal_note_shares_count } = this.caller({ certified: false });
+		const response = await get_personal_note_shares_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
 		throw response.Err;
 	};
 }

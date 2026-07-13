@@ -3,6 +3,9 @@
 .idea/
 **/*~
 
+# Claude Code local worktrees, settings and artifacts (nothing under .claude is shared)
+.claude/
+
 # ESLint and Prettier
 .eslintcache
 
@@ -50,6 +53,9 @@ codes.txt
 backend.wasm.gz
 ic-btc-canister.wasm.gz
 backend-v*.wasm.gz
+internet_identity.wasm.gz
+# download-immutable.sh caches downloaded fixtures as <name>.wasm.gz.<sha>
+*.wasm.gz.*
 /test-results/
 /playwright-report/
 /blob-report/

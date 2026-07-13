@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import OisyScanPayImg from '$lib/assets/oisy-scan-pay-img.webp';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { OISY_SCAN_URL, OISY_PAY_URL } from '$lib/constants/oisy.constants';
 	import {

@@ -1,3 +1,4 @@
+import { ICP_NETWORK, ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { OISY_URL } from '$lib/constants/oisy.constants';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
@@ -5,8 +6,10 @@ import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsShow } from '$lib/stores/toasts.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import App from '$routes/+layout.svelte';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -66,6 +69,33 @@ describe('App Layout', () => {
 		render(App, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
+	});
+
+	describe('user selected network initialization on mount', () => {
+		beforeEach(() => {
+			userSelectedNetworkStore.set(undefined);
+			mockPage.reset();
+		});
+
+		afterEach(() => {
+			mockPage.reset();
+		});
+
+		it('should initialize the network filter from a network-only deep link', () => {
+			mockPage.mock({ network: ICP_NETWORK.id.description });
+
+			render(App, { children: mockSnippet });
+
+			expect(get(userSelectedNetworkStore)).toEqual(ICP_NETWORK_ID);
+		});
+
+		it('should not initialize the network filter from the token view network on reload', () => {
+			mockPage.mock({ token: 'ICP', network: ICP_NETWORK.id.description });
+
+			render(App, { children: mockSnippet });
+
+			expect(get(userSelectedNetworkStore)).toBeUndefined();
+		});
 	});
 
 	describe('when handling AuthBroadcastChannel', () => {

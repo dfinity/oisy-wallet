@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {

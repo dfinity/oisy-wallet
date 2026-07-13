@@ -141,9 +141,9 @@ Baseline rules; ESLint a11y rules and `svelte-check` catch some violations.
 ### Focus & keyboard
 
 - Don't kill focus outlines.
-- Modals / drawers / popovers — use the existing `@dfinity/gix-components`
-  primitives (or `$lib/components/ui/`). They handle focus trap, escape,
-  click-outside. Do not roll your own.
+- Modals / drawers / popovers — use the existing `$lib/components/ui/`
+  primitives. They handle focus trap, escape, click-outside. Do not roll
+  your own.
 - Modal close button must be reachable by keyboard.
 - For lists where the user picks one of N items, focus order matches
   visual order.
@@ -181,7 +181,7 @@ icon).
 
 ### ARIA — minimum surface
 
-Use ARIA only when HTML semantics are insufficient. The `gix-components`
+Use ARIA only when HTML semantics are insufficient. The `$lib/components/ui/`
 primitives already set the right roles / `aria-*` attributes for menus,
 dialogs, tooltips, etc. — don't override them.
 

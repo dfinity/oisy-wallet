@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { getHarvestAutopilotBaseTrackingMetadata } from '$eth/utils/harvest-autopilots.utils';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import StakeWizard from '$lib/components/stake/StakeWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { stakeWizardSteps } from '$lib/config/stake.config';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
@@ -63,7 +63,7 @@
 		});
 </script>
 
-<SendTokenContext {token}>
+<TokenActionContext {token}>
 	<WizardModal
 		bind:this={modal}
 		disablePointerEvents={currentStep?.name === WizardStepsStake.STAKING}
@@ -83,4 +83,4 @@
 			bind:stakeProgressStep
 		/>
 	</WizardModal>
-</SendTokenContext>
+</TokenActionContext>

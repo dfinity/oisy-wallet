@@ -193,6 +193,24 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
 		new_user_signups_allowed: IDL.Opt(IDL.Bool)
 	});
+	const PersonalNoteShareContent = IDL.Record({
+		ct_content: IDL.Vec(IDL.Nat8),
+		expires_at_ns: IDL.Nat64
+	});
+	const PersonalNoteShareError = IDL.Variant({
+		InvalidExpiry: IDL.Null,
+		NotFound: IDL.Null,
+		ContentCiphertextTooLarge: IDL.Null,
+		TooManyShares: IDL.Null,
+		RateLimited: RateLimitError,
+		DuplicateToken: IDL.Null,
+		TokenTooLong: IDL.Null,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const ConsumePersonalNoteShareResult = IDL.Variant({
+		Ok: PersonalNoteShareContent,
+		Err: PersonalNoteShareError
+	});
 	const ActiveUserTransactionRef = IDL.Record({
 		key: IDL.Text,
 		value: IDL.Text
@@ -345,6 +363,16 @@ export const idlFactory = ({ IDL }) => {
 		Ok: Contact,
 		Err: ContactError
 	});
+	const CreatePersonalNoteShareRequest = IDL.Record({
+		token: IDL.Text,
+		ct_content: IDL.Vec(IDL.Nat8),
+		single_use: IDL.Bool,
+		expires_at_ns: IDL.Nat64
+	});
+	const CreatePersonalNoteShareResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: PersonalNoteShareError
+	});
 	const UserAgreement = IDL.Record({
 		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
 		text_sha256: IDL.Opt(IDL.Text),
@@ -443,6 +471,18 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Nat64,
 		Err: ContactError
 	});
+	const DeletePersonalNoteRequest = IDL.Record({ note_id: IDL.Text });
+	const PersonalNoteError = IDL.Variant({
+		NoteCiphertextTooLarge: IDL.Null,
+		TooManyNotes: IDL.Null,
+		RateLimited: RateLimitError,
+		NoteIdTooLong: IDL.Null,
+		InternalError: IDL.Record({ msg: IDL.Text })
+	});
+	const DeletePersonalNoteResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: PersonalNoteError
+	});
 	const GetActiveUserTransactionsResponse = IDL.Record({
 		transactions: IDL.Vec(ActiveUserTransaction)
 	});
@@ -507,6 +547,30 @@ export const idlFactory = ({ IDL }) => {
 		price: IDL.Opt(IDL.Float64)
 	});
 	const ExchangeRate = IDL.Record({ usd: ExchangeData });
+	const GetPersonalNoteShareResult = IDL.Variant({
+		Ok: PersonalNoteShareContent,
+		Err: PersonalNoteShareError
+	});
+	const GetPersonalNoteSharesCountResult = IDL.Variant({
+		Ok: IDL.Nat64,
+		Err: PersonalNoteShareError
+	});
+	const PersonalNoteEntry = IDL.Record({
+		encrypted_note: IDL.Vec(IDL.Nat8),
+		note_id: IDL.Text
+	});
+	const GetPersonalNotesResult = IDL.Variant({
+		Ok: IDL.Vec(PersonalNoteEntry),
+		Err: PersonalNoteError
+	});
+	const GetPersonalNotesCountResult = IDL.Variant({
+		Ok: IDL.Nat64,
+		Err: PersonalNoteError
+	});
+	const PersonalNotesVetkeyResult = IDL.Variant({
+		Ok: IDL.Vec(IDL.Nat8),
+		Err: PersonalNoteError
+	});
 	const AgreementType = IDL.Variant({
 		TermsOfUse: IDL.Null,
 		PrivacyPolicy: IDL.Null,
@@ -659,6 +723,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: UserTransactionError
 	});
+	const SetPersonalNoteResult = IDL.Variant({
+		Ok: IDL.Null,
+		Err: PersonalNoteError
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -681,7 +749,9 @@ export const idlFactory = ({ IDL }) => {
 		signed_query: IDL.Text
 	});
 	const SignOnramperWidgetUrlError = IDL.Variant({
+		AddressMismatch: IDL.Null,
 		RateLimited: RateLimitError,
+		AddressDerivationFailed: IDL.Null,
 		SecretNotConfigured: IDL.Null
 	});
 	const SignOnramperWidgetUrlResult = IDL.Variant({
@@ -695,7 +765,9 @@ export const idlFactory = ({ IDL }) => {
 		custom_token_count: IDL.Nat64,
 		exchange_rates_count: IDL.Nat64,
 		token_activity_count: IDL.Nat64,
+		personal_note_shares_count: IDL.Nat64,
 		agreement_history_count: IDL.Nat64,
+		personal_notes_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
@@ -779,15 +851,22 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		config: IDL.Func([], [Config], ['query']),
+		consume_personal_note_share: IDL.Func([IDL.Text], [ConsumePersonalNoteShareResult], []),
 		create_active_user_transaction: IDL.Func(
 			[CreateActiveUserTransactionRequest],
 			[ActiveUserTransactionResult],
 			[]
 		),
 		create_contact: IDL.Func([CreateContactRequest], [CreateContactResult], []),
+		create_personal_note_share: IDL.Func(
+			[CreatePersonalNoteShareRequest],
+			[CreatePersonalNoteShareResult],
+			[]
+		),
 		create_user_profile: IDL.Func([], [CreateUserProfileResult], []),
 		delete_active_user_transaction: IDL.Func([IDL.Text], [DeleteActiveUserTransactionResult], []),
 		delete_contact: IDL.Func([IDL.Nat64], [DeleteContactResult], []),
+		delete_personal_note: IDL.Func([DeletePersonalNoteRequest], [DeletePersonalNoteResult], []),
 		exchange_rate_enabled: IDL.Func([], [IDL.Bool], ['query']),
 		get_account_creation_timestamps: IDL.Func(
 			[],
@@ -802,6 +881,16 @@ export const idlFactory = ({ IDL }) => {
 		get_contacts: IDL.Func([], [GetContactsResult], ['query']),
 		get_exchange_rate: IDL.Func([TokenId], [IDL.Opt(ExchangeRate)], ['query']),
 		get_exchange_rates: IDL.Func([], [IDL.Vec(IDL.Tuple(TokenId, IDL.Opt(ExchangeRate)))], []),
+		get_personal_note_share: IDL.Func([IDL.Text], [GetPersonalNoteShareResult], ['query']),
+		get_personal_note_shares_count: IDL.Func([], [GetPersonalNoteSharesCountResult], ['query']),
+		get_personal_notes: IDL.Func([], [GetPersonalNotesResult], ['query']),
+		get_personal_notes_count: IDL.Func([], [GetPersonalNotesCountResult], ['query']),
+		get_personal_notes_encrypted_vetkey: IDL.Func(
+			[IDL.Vec(IDL.Nat8)],
+			[PersonalNotesVetkeyResult],
+			[]
+		),
+		get_personal_notes_vetkey_public_key: IDL.Func([], [PersonalNotesVetkeyResult], []),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
@@ -827,6 +916,7 @@ export const idlFactory = ({ IDL }) => {
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
+		set_personal_note: IDL.Func([PersonalNoteEntry], [SetPersonalNoteResult], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		sign_onramper_widget_url: IDL.Func(
 			[SignOnramperWidgetUrlRequest],

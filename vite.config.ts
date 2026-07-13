@@ -42,9 +42,7 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'barcode-detector', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
-							folder.includes(lib)
-						) === undefined &&
+						['@sveltejs', 'svelte', ...lazy].find((lib) => folder.includes(lib)) === undefined &&
 						folder.includes('node_modules')
 					) {
 						return 'vendor';
@@ -87,12 +85,7 @@ const config: UserConfig = {
 			plugins: [
 				{
 					name: 'fix-node-globals-polyfill',
-					setup: (build: {
-						onResolve: (
-							options: { filter: RegExp },
-							callback: (args: { path: string }) => { path: string }
-						) => void;
-					}) => {
+					setup: (build) => {
 						build.onResolve({ filter: /_virtual-process-polyfill_\.js/ }, ({ path }) => ({ path }));
 					}
 				}

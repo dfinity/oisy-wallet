@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Theme, themeStore } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
@@ -19,6 +18,7 @@
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import NftHeroBalance from '$lib/components/hero/NftHeroBalance.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
@@ -48,6 +48,8 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
+	import { themeStore } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';
@@ -229,6 +231,10 @@
 			</div>
 
 			<Balance token={pageTokenUi} />
+		</div>
+	{:else if isNftsPage}
+		<div in:slide={SLIDE_PARAMS}>
+			<NftHeroBalance />
 		</div>
 	{:else}
 		<div in:slide={SLIDE_PARAMS}>

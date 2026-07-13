@@ -4,6 +4,7 @@ import {
 	SESSION_REQUEST_BTC_SIGN_PSBT
 } from '$btc/constants/wallet-connect.constants';
 import { getAccountAddresses } from '$btc/services/wallet-connect.services';
+import { BTC_WALLET_CONNECT_ENABLED } from '$env/btc-wallet-connect.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,
@@ -92,6 +93,30 @@ export const onSessionRequest = async ({
 			request: { method }
 		}
 	} = sessionRequest;
+
+	// Defense in depth: when BTC WalletConnect is disabled, bip122 is not advertised, but a
+	// previously-approved session (or a non-conforming client) could still deliver a bip122 request.
+	// Reject the BTC methods outright so signing can never be reached while the feature is off.
+	if (
+		!BTC_WALLET_CONNECT_ENABLED &&
+		[
+			SESSION_REQUEST_BTC_SIGN_MESSAGE,
+			SESSION_REQUEST_BTC_SIGN_PSBT,
+			SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES
+		].includes(method)
+	) {
+		await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
+
+		toastsError({
+			msg: {
+				text: replacePlaceholders(get(i18n).wallet_connect.error.method_not_support, {
+					$method: method
+				})
+			}
+		});
+
+		return;
+	}
 
 	switch (method) {
 		case SESSION_REQUEST_ETH_SIGN_LEGACY:

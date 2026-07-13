@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -17,6 +16,7 @@
 		OnramperSecretNotConfiguredError
 	} from '$lib/canisters/errors';
 	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -106,7 +106,7 @@
 	// guard against late resolutions overwriting newer state via a cancellation token.
 	$effect(() => {
 		const currentIdentity = $authIdentity;
-		if (!nonNullish(currentIdentity)) {
+		if (isNullish(currentIdentity)) {
 			src = undefined;
 			signingFailed = false;
 			return;
@@ -201,9 +201,9 @@
 		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 		class:invisible={themeLoaded && nonNullish(src)}
 		class:opacity-0={themeLoaded && nonNullish(src)}
-		class:opacity-100={!themeLoaded || !nonNullish(src)}
+		class:opacity-100={!themeLoaded || isNullish(src)}
 	>
-		<Spinner inline />
+		<LoaderSpinner inline />
 	</div>
 
 	{#if nonNullish(src)}

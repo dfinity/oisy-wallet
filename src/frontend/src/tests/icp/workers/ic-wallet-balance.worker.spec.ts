@@ -1,4 +1,4 @@
-import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { walletDataRef, type IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
@@ -110,9 +110,7 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initWithBalance = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		msg,
@@ -126,13 +124,7 @@ describe('ic-wallet-balance.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
-		const ref = isNullish(startData)
-			? undefined
-			: 'ledgerCanisterId' in startData
-				? startData.ledgerCanisterId
-				: 'indexCanisterId' in startData
-					? startData.indexCanisterId
-					: startData.canisterId;
+		const ref = isNullish(startData) ? undefined : walletDataRef(startData);
 
 		const mockPostMessageNotCertified = mockPostMessage({ msg, ref, certified: false });
 		const mockPostMessageCertified = mockPostMessage({ msg, ref, certified: true });
@@ -238,9 +230,7 @@ describe('ic-wallet-balance.worker', () => {
 
 	const initOtherScenarios = <
 		PostMessageDataRequest extends
-			| PostMessageDataRequestIcrc
-			| PostMessageDataRequestIcp
-			| PostMessageDataRequestDip20
+			PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 	>({
 		initScheduler,
 		startData = undefined,
@@ -258,13 +248,7 @@ describe('ic-wallet-balance.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
-		const ref = isNullish(startData)
-			? undefined
-			: 'ledgerCanisterId' in startData
-				? startData.ledgerCanisterId
-				: 'indexCanisterId' in startData
-					? startData.indexCanisterId
-					: startData.canisterId;
+		const ref = isNullish(startData) ? undefined : walletDataRef(startData);
 
 		return {
 			setup: () => {
