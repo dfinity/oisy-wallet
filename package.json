@@ -65,7 +65,8 @@
 		"update:agent:ic-js:next": "npm run update:ic-js:next && npm run update:agent",
 		"update:oisy-eslint": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet -D",
 		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D",
-		"benchmark": "canbench --persist --show-summary"
+		"benchmark": "canbench --persist --show-summary",
+		"perf:memory": "node scripts/perf.memory.mjs"
 	},
 	"dependencies": {
 		"@dfinity/ic-pub-key": "^1.0.2",
