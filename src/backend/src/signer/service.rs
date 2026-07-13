@@ -468,9 +468,14 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
 #[cfg(test)]
 mod tests {
+    use candid::Principal;
+    use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
     use pretty_assertions::assert_eq;
 
-    use super::{eth_address_from_ecdsa_pubkey, sol_address_from_ed25519_pubkey};
+    use super::{
+        eth_address_from_ecdsa_pubkey, principal_to_account_identifier_hex,
+        sol_address_from_ed25519_pubkey,
+    };
 
     // secp256k1 private key `1` — a canonical known-answer vector. Its public key derives the
     // Ethereum address 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf (widely published).
@@ -505,6 +510,20 @@ mod tests {
     #[test]
     fn eth_address_rejects_invalid_pubkey() {
         assert!(eth_address_from_ecdsa_pubkey(&[0x00, 0x01, 0x02]).is_err());
+    }
+
+    #[test]
+    fn principal_to_account_identifier_hex_uses_the_default_subaccount() {
+        let principal =
+            Principal::from_text("xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae")
+                .expect("valid principal");
+
+        let account_id = principal_to_account_identifier_hex(&principal);
+
+        assert_eq!(
+            account_id,
+            AccountIdentifier::new(&principal, &DEFAULT_SUBACCOUNT).to_hex()
+        );
     }
 
     #[test]

@@ -61,6 +61,12 @@ export const liquidiumWithdrawReserves: Readable<LiquidiumReserve[]> = derived(
 	(portfolio) => (portfolio?.reserves ?? []).filter(({ deposited }) => deposited > ZERO)
 );
 
+// Positions the user can repay: reserves with outstanding debt.
+export const liquidiumRepayReserves: Readable<LiquidiumReserve[]> = derived(
+	liquidiumPortfolio,
+	(portfolio) => (portfolio?.reserves ?? []).filter(({ borrowed }) => borrowed > ZERO)
+);
+
 // SDK USD prices for the borrow form's USD / fiat math.
 export const liquidiumAssetPrices: Readable<AssetPrices> = derived(
 	liquidiumStore,

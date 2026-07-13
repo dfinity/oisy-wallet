@@ -2388,6 +2388,7 @@
 			"select_supply_token": "",
 			"select_borrow_token": "",
 			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "查看提供详情",
 			"supply_review_subtitle": "您提供",
 			"supplying": "提供中",

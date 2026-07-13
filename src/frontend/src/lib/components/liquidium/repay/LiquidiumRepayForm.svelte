@@ -32,6 +32,8 @@
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		// Per-rail fee row (EthFeeDisplay / BtcUtxosFeeDisplay).
 		feeDisplay: Snippet;
+		// Opens the token-selection step; when set, the token logo becomes a selector.
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -46,6 +48,7 @@
 		inflowFeeUnavailable = false,
 		onCustomErrorValidate,
 		feeDisplay,
+		onSelectToken,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -87,7 +90,9 @@
 <StakeForm
 	autofocus={isDesktop()}
 	disabled={feeMissing || inflowFeeUnavailable}
+	isSelectable={nonNullish(onSelectToken)}
 	maxAmount={maxRepay}
+	onClick={onSelectToken}
 	{onClose}
 	onCustomErrorValidate={validateAmount}
 	{onNext}

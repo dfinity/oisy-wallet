@@ -56,7 +56,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 }
 
 #[test]
-fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disabled() {
+fn test_add_pending_transaction_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -78,11 +78,11 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             add_response,
             Err(BtcAddPendingTransactionError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {add_response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {add_response:?}"
     );
 }
 
@@ -226,7 +226,7 @@ fn test_get_pending_transactions_requires_delegation_chain() {
 }
 
 #[test]
-fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
+fn test_get_pending_transactions_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -245,11 +245,11 @@ fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disa
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             response,
             Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {response:?}"
     );
 }
 
