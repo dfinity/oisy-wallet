@@ -79,12 +79,23 @@ export const signInMobileAuthBridge = async ({
 		...getOptionalDerivationOrigin()
 	});
 
-	await client.signIn({ maxTimeToLive: MOBILE_AUTH_MAX_TIME_TO_LIVE });
+	let signInError: unknown;
+	try {
+		await client.signIn({ maxTimeToLive: MOBILE_AUTH_MAX_TIME_TO_LIVE });
+	} catch (err: unknown) {
+		// `@icp-sdk/auth` v6's signIn persists the delegation chain BEFORE the
+		// session key, and its key serializer throws "Unsupported key type" for
+		// `PartialIdentity` — i.e. it rejects AFTER a fully successful II
+		// authentication. The chain is the only thing the bridge needs, so we
+		// fall through and read storage; the error only matters if no chain
+		// was persisted (a genuinely failed or cancelled sign-in).
+		signInError = err;
+	}
 
 	const delegationChainJson = await storage.get(KEY_STORAGE_DELEGATION);
 
 	if (typeof delegationChainJson !== 'string') {
-		throw new Error('Mobile auth bridge: no delegation chain was persisted after sign-in.');
+		throw signInError ?? new Error('Mobile auth bridge: no delegation chain was persisted.');
 	}
 
 	return { delegationChainJson };
