@@ -134,12 +134,13 @@ fn sign_onramper_widget_url_signs_repeated_networks_without_altering_output() {
     let caller = Principal::from_text(CALLER).expect("valid caller principal");
     let icp_address = caller_icp_account_id(caller);
 
-    // Locks the output invariant behind the request-amplification fix: `verify_caller_network_wallets`
-    // now derives each distinct network at most once, but must still emit one verified entry per
-    // supplied entry, so a repeated network produces the same signed content as before the cache.
-    // ICP is used because it derives locally (no signer): this asserts output-preservation, not the
-    // derivation-count reduction itself — that is enforced by the memoization and cannot be observed
-    // here without wiring up the BTC/ETH/SOL threshold-key derivation this suite intentionally omits.
+    // Locks the output invariant behind the request-amplification fix:
+    // `verify_caller_network_wallets` now derives each distinct network at most once, but must
+    // still emit one verified entry per supplied entry, so a repeated network produces the same
+    // signed content as before the cache. ICP is used because it derives locally (no signer):
+    // this asserts output-preservation, not the derivation-count reduction itself — that is
+    // enforced by the memoization and cannot be observed here without wiring up the BTC/ETH/SOL
+    // threshold-key derivation this suite intentionally omits.
     let repeated = vec![entry("icp", &icp_address); 50];
     let result = sign(&pic_setup, caller, network_wallets_request(repeated));
 
