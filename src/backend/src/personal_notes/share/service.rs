@@ -302,7 +302,8 @@ mod tests {
         tokens.sort();
         assert_eq!(tokens, vec!["a-old1".to_string(), "a-old2".to_string()]);
 
-        // A creator with no expired entries yields an empty prune list.
+        // Scoping check: scanning bob's slice returns bob's own expired token
+        // and zero active shares, with none of alice's entries leaking in.
         let (bob_active, bob_expired) = partition_creator_shares(&map, bob, now);
         assert_eq!(bob_active, 0);
         assert_eq!(bob_expired.len(), 1);
