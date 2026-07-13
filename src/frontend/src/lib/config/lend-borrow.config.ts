@@ -76,6 +76,10 @@ export const liquidiumWithdrawWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumWithdraw.WITHDRAWING,
 		title: i18n.liquidium.text.withdrawing
+	},
+	{
+		name: WizardStepsLiquidiumWithdraw.TOKENS_LIST,
+		title: i18n.liquidium.text.select_withdraw_token
 	}
 ];
 

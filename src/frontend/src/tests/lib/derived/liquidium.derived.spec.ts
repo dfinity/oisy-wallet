@@ -15,11 +15,12 @@ import {
 	liquidiumNetValueUsd,
 	liquidiumPortfolio,
 	liquidiumSupplyMarkets,
-	liquidiumTotalBorrowedUsd
+	liquidiumTotalBorrowedUsd,
+	liquidiumWithdrawReserves
 } from '$lib/derived/liquidium.derived';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
-import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
+import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { liquidiumNetInterestUsd } from '$lib/utils/liquidium.utils';
 import { get } from 'svelte/store';
@@ -307,6 +308,40 @@ describe('liquidium derived stores', () => {
 
 		it('is empty by default', () => {
 			expect(get(liquidiumBorrowMarkets)).toEqual([]);
+		});
+	});
+
+	describe('liquidiumWithdrawReserves', () => {
+		const reserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
+			poolId: 'pool-btc',
+			asset: 'BTC',
+			chain: 'BTC',
+			supplyApy: 5,
+			borrowApy: 9,
+			deposited: 1_000n,
+			depositedDecimals: 8,
+			borrowed: ZERO,
+			borrowedDecimals: 8,
+			suppliedUsd: 1000,
+			borrowedUsd: 0,
+			...overrides
+		});
+
+		it('keeps only reserves with a supplied balance', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve(), reserve({ poolId: 'pool-eth', asset: 'USDC', deposited: ZERO })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves)).toEqual([reserve()]);
+		});
+
+		it('is empty by default', () => {
+			expect(get(liquidiumWithdrawReserves)).toEqual([]);
 		});
 	});
 

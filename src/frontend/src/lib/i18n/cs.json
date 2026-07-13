@@ -2387,6 +2387,7 @@
 			"transaction_failed": "Transakce se nezdařila",
 			"select_supply_token": "",
 			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "Zkontrolovat poskytnutí",
 			"supply_review_subtitle": "Poskytuješ",
 			"supplying": "Probíhá poskytnutí",

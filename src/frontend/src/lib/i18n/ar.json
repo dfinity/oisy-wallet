@@ -2387,6 +2387,7 @@
 			"transaction_failed": "",
 			"select_supply_token": "",
 			"select_borrow_token": "",
+			"select_withdraw_token": "",
 			"supply_review": "",
 			"supply_review_subtitle": "",
 			"supplying": "",

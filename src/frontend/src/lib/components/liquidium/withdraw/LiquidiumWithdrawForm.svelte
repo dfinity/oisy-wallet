@@ -31,6 +31,8 @@
 		preview: LiquidiumWithdrawPreview;
 		amount: OptionAmount;
 		confirmChecked: boolean;
+		// Opens the token-selection step; when set, the token logo becomes a selector.
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -43,6 +45,7 @@
 		preview,
 		amount = $bindable(),
 		confirmChecked = $bindable(),
+		onSelectToken,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -131,7 +134,8 @@
 			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			exchangeRate={withdrawPrice}
-			isSelectable={false}
+			isSelectable={nonNullish(onSelectToken)}
+			onClick={onSelectToken}
 			onCustomErrorValidate={validateWithdrawAmount}
 			showTokenNetwork
 			token={withdrawToken}
