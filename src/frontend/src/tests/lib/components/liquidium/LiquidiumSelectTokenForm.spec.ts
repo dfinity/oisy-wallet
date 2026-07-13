@@ -25,6 +25,20 @@ describe('LiquidiumSelectTokenForm', () => {
 		expect(onSelectToken).toHaveBeenCalled();
 	});
 
+	it('renders the top banner above the input', () => {
+		const { getByTestId } = render(LiquidiumSelectTokenForm, {
+			props: {
+				onSelectToken: () => {},
+				onClose: () => {},
+				topBanner: createRawSnippet(() => ({
+					render: () => `<span data-tid="top-banner">Top banner content</span>`
+				}))
+			}
+		});
+
+		expect(getByTestId('top-banner')).toBeInTheDocument();
+	});
+
 	it('renders form-specific children below the input', () => {
 		const { getByTestId } = render(LiquidiumSelectTokenForm, {
 			props: {

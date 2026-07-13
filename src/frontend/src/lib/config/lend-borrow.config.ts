@@ -55,6 +55,10 @@ export const liquidiumBorrowWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumBorrow.BORROWING,
 		title: i18n.liquidium.text.borrowing
+	},
+	{
+		name: WizardStepsLiquidiumBorrow.TOKENS_LIST,
+		title: i18n.liquidium.text.select_borrow_token
 	}
 ];
 
@@ -72,6 +76,10 @@ export const liquidiumWithdrawWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumWithdraw.WITHDRAWING,
 		title: i18n.liquidium.text.withdrawing
+	},
+	{
+		name: WizardStepsLiquidiumWithdraw.TOKENS_LIST,
+		title: i18n.liquidium.text.select_withdraw_token
 	}
 ];
 
@@ -89,5 +97,9 @@ export const liquidiumRepayWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumRepay.REPAYING,
 		title: i18n.liquidium.text.repaying
+	},
+	{
+		name: WizardStepsLiquidiumRepay.TOKENS_LIST,
+		title: i18n.liquidium.text.select_repay_token
 	}
 ];

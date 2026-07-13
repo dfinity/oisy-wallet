@@ -6,7 +6,7 @@ import { AppPath } from '$lib/constants/routes.constants';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { EarningProviderData } from '$lib/types/earning-provider';
-import type { LiquidiumMarket, LiquidiumPortfolio } from '$lib/types/liquidium';
+import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import {
@@ -41,6 +41,30 @@ export const liquidiumSupplyMarkets: Readable<LiquidiumMarket[]> = derived(
 					(reserve) => reserve.poolId === poolId && reserve.borrowed > ZERO
 				)
 		)
+);
+
+export const liquidiumBorrowMarkets: Readable<LiquidiumMarket[]> = derived(
+	[liquidiumMarkets, liquidiumPortfolio],
+	([markets, portfolio]) =>
+		markets.filter(
+			({ available, poolId }) =>
+				available &&
+				!(portfolio?.reserves ?? []).some(
+					(reserve) => reserve.poolId === poolId && reserve.deposited > ZERO
+				)
+		)
+);
+
+// Positions the user can withdraw from: reserves with a supplied balance.
+export const liquidiumWithdrawReserves: Readable<LiquidiumReserve[]> = derived(
+	liquidiumPortfolio,
+	(portfolio) => (portfolio?.reserves ?? []).filter(({ deposited }) => deposited > ZERO)
+);
+
+// Positions the user can repay: reserves with outstanding debt.
+export const liquidiumRepayReserves: Readable<LiquidiumReserve[]> = derived(
+	liquidiumPortfolio,
+	(portfolio) => (portfolio?.reserves ?? []).filter(({ borrowed }) => borrowed > ZERO)
 );
 
 // SDK USD prices for the borrow form's USD / fiat math.
