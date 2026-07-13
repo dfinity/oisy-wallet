@@ -12,9 +12,12 @@ use crate::state::read_config;
 ///
 /// The guard is enabled in **every** environment, including production. It was
 /// historically disabled on production (`ecdsa_key_name == "key_1"`) because the
-/// delegation-chain verification failed on mainnet's sharded `canister_ranges`
-/// certificate path; once that verification is fixed, production enforces the
-/// same II delegation check as staging and local.
+/// delegation-chain verification only looked up the legacy
+/// `subnet/<subnet_id>/canister_ranges` certificate path, which mainnet no
+/// longer serves on non-root subnets (it moved to the sharded
+/// `canister_ranges/<subnet_id>` tree), producing `canister_ranges-entry not
+/// found`. Now that `ic-signature-verification` handles the sharded path,
+/// production enforces the same II delegation check as staging and local.
 pub(crate) fn read_ii_verification_config() -> (Vec<Principal>, Vec<u8>, bool) {
     read_config(|config| {
         let ii_ids = config.ii_canister_id.map(|id| vec![id]).unwrap_or_default();
