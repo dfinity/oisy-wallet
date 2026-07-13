@@ -10,6 +10,16 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+/**
+ * TEMPORARY override candid for the Chain Fusion Signer.
+ *
+ * This is the pinned v0.3.0 release candid with ONLY `btc_sign_prehash` (and its types) added, so the
+ * bip122 WalletConnect signing flow can call it without adopting the many unrelated breaking changes on
+ * chain-fusion-signer `main` (renamed args, schnorr `aux`, `EthAddressError` shape, etc.). The endpoint
+ * is already deployed on the staging signer canister but is not in any tagged release yet (latest is
+ * v0.5.0). Delete this file and restore the release candid download in `build.signer.sh` once a signer
+ * release exposes `btc_sign_prehash`.
+ */
 export interface Account {
 	owner: Principal;
 	subaccount: [] | [Uint8Array];
@@ -17,6 +27,14 @@ export interface Account {
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type BitcoinAddressType = { P2WPKH: null };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
+export type BtcSignPrehashError =
+	{ InvalidHash: { msg: string } } | { SigningError: string } | { PaymentError: PaymentError };
+export interface BtcSignPrehashRequest {
+	hash: string;
+}
+export interface BtcSignPrehashResponse {
+	signature: string;
+}
 export interface BtcTxOutput {
 	destination_address: string;
 	sent_satoshis: bigint;
@@ -190,6 +208,7 @@ export type Result_6 = { Ok: EthSignPrehashResponse } | { Err: EthAddressError }
 export type Result_7 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
 export type Result_8 = { Ok: [SignWithEcdsaResponse] } | { Err: EthAddressError };
 export type Result_9 = { Ok: [EcdsaPublicKeyResponse] } | { Err: EthAddressError };
+export type Result_BtcSignPrehash = { Ok: BtcSignPrehashResponse } | { Err: BtcSignPrehashError };
 export type SchnorrAlgorithm = { ed25519: null } | { bip340secp256k1: null };
 export interface SchnorrKeyId {
 	algorithm: SchnorrAlgorithm;
@@ -273,6 +292,7 @@ export interface _SERVICE {
 	btc_caller_balance: ActorMethod<[GetBalanceRequest, [] | [PaymentType]], Result_1>;
 	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
 	btc_caller_sign: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_3>;
+	btc_sign_prehash: ActorMethod<[BtcSignPrehashRequest, [] | [PaymentType]], Result_BtcSignPrehash>;
 	config: ActorMethod<[], Config>;
 	eth_address: ActorMethod<[EthAddressRequest, [] | [PaymentType]], Result_4>;
 	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_4>;

@@ -22,10 +22,20 @@ DFX_NETWORK="${DFX_NETWORK:-local}"
 
 SIGNER_RELEASE="v0.3.0"
 SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
-# shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
+
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 WASM_URL="${SIGNER_RELEASE_URL}/signer.wasm.gz"
+
+# TODO(BTC WalletConnect): temporary — the candid is sourced from a committed override instead of the
+# v0.3.0 release candid, because the bip122 WalletConnect `signMessage`/`signPsbt` flow needs
+# `btc_sign_prehash` (signs under the BTC key, unlike `generic_sign_with_ecdsa`), which is not in any
+# tagged signer release yet (latest is v0.5.0). The override is the v0.3.0 candid plus ONLY that method,
+# to avoid adopting the unrelated breaking changes on `main`. The wasm stays on the v0.3.0 release: it
+# is only installed for local `dfx` deploys — on staging and ic the signer is a remote canister that
+# already exposes the method — and BTC WalletConnect is gated off on local (see
+# BTC_WALLET_CONNECT_ENABLED). Once a release exposes `btc_sign_prehash`, delete the override, restore
+# `CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"` + `download candid`, bump SIGNER_RELEASE, and regenerate.
+SIGNER_CANDID_OVERRIDE="scripts/signer.btc_sign_prehash.did"
 
 CANDID_FILE="$(jq -r .canisters.signer.candid dfx.json)"
 WASM_FILE="$(jq -r .canisters.signer.wasm dfx.json)"
@@ -44,8 +54,8 @@ download() {
 }
 
 ####
-# Downloads the candid file, if it does not exist already.
-download candid
+# Copies the candid file from the committed override (see SIGNER_CANDID_OVERRIDE note above).
+cp "$SIGNER_CANDID_OVERRIDE" "$CANDID_FILE"
 
 ####
 # Downloads the Wasm file, if it does not exist already.

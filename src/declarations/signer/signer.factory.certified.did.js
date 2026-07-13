@@ -166,6 +166,17 @@ export const idlFactory = ({ IDL }) => {
 		Ok: SignBtcResponse,
 		Err: SendBtcError
 	});
+	const BtcSignPrehashRequest = IDL.Record({ hash: IDL.Text });
+	const BtcSignPrehashResponse = IDL.Record({ signature: IDL.Text });
+	const BtcSignPrehashError = IDL.Variant({
+		InvalidHash: IDL.Record({ msg: IDL.Text }),
+		SigningError: IDL.Text,
+		PaymentError: PaymentError
+	});
+	const Result_BtcSignPrehash = IDL.Variant({
+		Ok: BtcSignPrehashResponse,
+		Err: BtcSignPrehashError
+	});
 	const Config = IDL.Record({
 		ecdsa_key_name: IDL.Text,
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
@@ -296,6 +307,11 @@ export const idlFactory = ({ IDL }) => {
 		btc_caller_balance: IDL.Func([GetBalanceRequest, IDL.Opt(PaymentType)], [Result_1], []),
 		btc_caller_send: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_2], []),
 		btc_caller_sign: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_3], []),
+		btc_sign_prehash: IDL.Func(
+			[BtcSignPrehashRequest, IDL.Opt(PaymentType)],
+			[Result_BtcSignPrehash],
+			[]
+		),
 		config: IDL.Func([], [Config]),
 		eth_address: IDL.Func([EthAddressRequest, IDL.Opt(PaymentType)], [Result_4], []),
 		eth_address_of_caller: IDL.Func([IDL.Opt(PaymentType)], [Result_4], []),

@@ -395,8 +395,8 @@ describe('btc wallet-connect.services', () => {
 				Uint8Array.from(signerPubkey)
 			);
 
-			vi.spyOn(signerApi, 'genericSignWithEcdsa').mockImplementation(async ({ messageHash }) =>
-				(await signSecp256k1Async(Uint8Array.from(messageHash), privateKey)).toCompactRawBytes()
+			vi.spyOn(signerApi, 'signBtcPrehash').mockImplementation(async ({ hash }) =>
+				(await signSecp256k1Async(Uint8Array.from(hash), privateKey)).toCompactRawBytes()
 			);
 		});
 
@@ -427,7 +427,7 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(modalNext).not.toHaveBeenCalled();
 
 			expect(spyToastsError).toHaveBeenCalledWith({
@@ -462,7 +462,7 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).toHaveBeenCalledOnce();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
 			expect(progress).toHaveBeenCalledWith(ProgressStepsSign.DONE);
 		});
 	});
