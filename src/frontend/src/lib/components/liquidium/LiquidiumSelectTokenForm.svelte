@@ -11,10 +11,11 @@
 	interface Props {
 		onSelectToken: () => void;
 		onClose: () => void;
+		topBanner?: Snippet;
 		children?: Snippet;
 	}
 
-	let { onSelectToken, onClose, children }: Props = $props();
+	let { onSelectToken, onClose, children, topBanner }: Props = $props();
 
 	// No token is chosen yet, so the amount is inert until one is picked; TokenInput
 	// still requires a bindable amount plus its info/balance snippets.
@@ -22,6 +23,8 @@
 </script>
 
 <ContentWithToolbar>
+	{@render topBanner?.()}
+
 	<div class="mb-8">
 		<TokenInput isSelectable onClick={onSelectToken} showTokenNetwork token={undefined} bind:amount>
 			{#snippet title()}{$i18n.core.text.amount}{/snippet}

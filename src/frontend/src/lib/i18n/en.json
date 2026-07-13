@@ -2386,6 +2386,7 @@
 			"action_withdraw": "Withdraw",
 			"transaction_failed": "Transaction failed",
 			"select_supply_token": "Select token to supply",
+			"select_borrow_token": "Select token to borrow",
 			"supply_review": "Review supply",
 			"supply_review_subtitle": "You supply",
 			"supplying": "Supplying",

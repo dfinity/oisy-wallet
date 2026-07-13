@@ -104,7 +104,8 @@ export enum WizardStepsLiquidiumSupply {
 export enum WizardStepsLiquidiumBorrow {
 	BORROW = 'Borrow',
 	REVIEW = 'Review',
-	BORROWING = 'Borrowing'
+	BORROWING = 'Borrowing',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumWithdraw {

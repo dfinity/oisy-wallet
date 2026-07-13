@@ -55,6 +55,10 @@ export const liquidiumBorrowWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumBorrow.BORROWING,
 		title: i18n.liquidium.text.borrowing
+	},
+	{
+		name: WizardStepsLiquidiumBorrow.TOKENS_LIST,
+		title: i18n.liquidium.text.select_borrow_token
 	}
 ];
 
