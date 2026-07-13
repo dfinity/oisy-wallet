@@ -2386,6 +2386,7 @@
 			"action_withdraw": "निकालें",
 			"transaction_failed": "लेन-देन विफल रहा",
 			"select_supply_token": "",
+			"select_borrow_token": "",
 			"supply_review": "जमा की समीक्षा करें",
 			"supply_review_subtitle": "आप जमा कर रहे हैं",
 			"supplying": "जमा हो रहा है",

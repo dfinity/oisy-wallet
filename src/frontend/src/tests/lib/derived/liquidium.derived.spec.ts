@@ -5,6 +5,7 @@ import {
 	liquidiumBorrowData,
 	liquidiumBorrowingPowerUsd,
 	liquidiumBorrowInterestUsd,
+	liquidiumBorrowMarkets,
 	liquidiumEarningData,
 	liquidiumHealthFactorPercent,
 	liquidiumMarkets,
@@ -263,6 +264,49 @@ describe('liquidium derived stores', () => {
 
 		it('is empty by default', () => {
 			expect(get(liquidiumSupplyMarkets)).toEqual([]);
+		});
+	});
+
+	describe('liquidiumBorrowMarkets', () => {
+		it('keeps only available markets', () => {
+			liquidiumStore.set({
+				markets: [market(), market({ poolId: 'pool-eth', available: false })],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumBorrowMarkets)).toEqual([market()]);
+		});
+
+		it('excludes markets the user has supplied', () => {
+			liquidiumStore.set({
+				markets: [market(), market({ poolId: 'pool-eth', asset: 'USDC', chain: 'ETH' })],
+				portfolio: {
+					...portfolio,
+					reserves: [
+						{
+							poolId: 'pool-eth',
+							asset: 'USDC',
+							chain: 'ETH',
+							supplyApy: 3,
+							borrowApy: 0,
+							deposited: 1_000n,
+							depositedDecimals: 6,
+							borrowed: ZERO,
+							borrowedDecimals: 6,
+							suppliedUsd: 2000,
+							borrowedUsd: 0
+						}
+					]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumBorrowMarkets)).toEqual([market()]);
+		});
+
+		it('is empty by default', () => {
+			expect(get(liquidiumBorrowMarkets)).toEqual([]);
 		});
 	});
 

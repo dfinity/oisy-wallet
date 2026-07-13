@@ -43,6 +43,18 @@ export const liquidiumSupplyMarkets: Readable<LiquidiumMarket[]> = derived(
 		)
 );
 
+export const liquidiumBorrowMarkets: Readable<LiquidiumMarket[]> = derived(
+	[liquidiumMarkets, liquidiumPortfolio],
+	([markets, portfolio]) =>
+		markets.filter(
+			({ available, poolId }) =>
+				available &&
+				!(portfolio?.reserves ?? []).some(
+					(reserve) => reserve.poolId === poolId && reserve.deposited > ZERO
+				)
+		)
+);
+
 // SDK USD prices for the borrow form's USD / fiat math.
 export const liquidiumAssetPrices: Readable<AssetPrices> = derived(
 	liquidiumStore,
