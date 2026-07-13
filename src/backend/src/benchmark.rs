@@ -3,29 +3,39 @@
 use std::{collections::BTreeMap, sync::OnceLock};
 
 use canbench_rs::{bench, bench_fn, BenchResult};
-use candid::Principal;
+use candid::{Nat, Principal};
 use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
 use serde_bytes::ByteBuf;
 use shared::{
     http::HttpRequest,
     types::{
+        active_user_transaction::{
+            ActiveUserTransactionData, ActiveUserTransactionStatus,
+            CreateActiveUserTransactionRequest, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest,
+        },
         agreement::{UserAgreement, UserAgreements},
         bitcoin::{PendingTransaction, StoredPendingTransaction},
         contact::{Contact, StoredContacts},
         custom_token::{CustomToken, CustomTokenId, ErcToken, ErcTokenId, Token},
+        exchange::{ExchangeData, ExchangeRate},
         experimental_feature::{ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor},
         network::{NetworkSettings, NetworkSettingsFor},
+        personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        token_id::TokenId,
         user_profile::{StoredUserProfile, UserProfile},
         Stats,
     },
 };
 
 use crate::{
+    active_user_transactions::model as active_user_transactions_model,
     api::admin::http_request,
     bitcoin::pending_tx_model::BtcUserPendingTransactionsModel,
+    personal_notes::service as personal_notes_service,
     state::{mutate_state, read_config, read_state, State},
     token,
-    types::{Candid, StoredPrincipal},
+    types::{Candid, StoredPrincipal, StoredTokenId},
     user_profile::{self, model::UserProfileModel},
 };
 
@@ -664,4 +674,226 @@ fn bench_btc_get_pending_transactions_5() -> BenchResult {
 #[bench(raw)]
 fn bench_btc_get_pending_transactions_200() -> BenchResult {
     bench_btc_get_pending_transactions_with_count(200)
+}
+
+// ---------------------------------------------------------------------------
+// Personal notes
+// ---------------------------------------------------------------------------
+
+const NOTE_CIPHERTEXT_BYTES: usize = 2_000;
+
+fn set_note_request(id: u64) -> SetPersonalNoteRequest {
+    SetPersonalNoteRequest {
+        note_id: format!("note-{id:04}"),
+        encrypted_note: ByteBuf::from(vec![0xAB; NOTE_CIPHERTEXT_BYTES]),
+    }
+}
+
+fn seed_personal_notes(count: u64) {
+    for i in 0..count {
+        personal_notes_service::set_personal_note(set_note_request(i))
+            .expect("bench: seeding personal note failed");
+    }
+}
+
+#[bench]
+fn bench_set_personal_note() {
+    std::hint::black_box(personal_notes_service::set_personal_note(set_note_request(
+        0,
+    )));
+}
+
+fn bench_get_personal_notes_with_count(count: u64) -> BenchResult {
+    seed_personal_notes(count);
+
+    bench_fn(|| {
+        std::hint::black_box(personal_notes_service::get_personal_notes());
+    })
+}
+
+#[bench(raw)]
+fn bench_get_personal_notes_10() -> BenchResult {
+    bench_get_personal_notes_with_count(10)
+}
+
+#[bench(raw)]
+fn bench_get_personal_notes_100() -> BenchResult {
+    bench_get_personal_notes_with_count(100)
+}
+
+#[bench(raw)]
+fn bench_get_personal_notes_count_100() -> BenchResult {
+    seed_personal_notes(100);
+
+    bench_fn(|| {
+        std::hint::black_box(personal_notes_service::get_personal_notes_count());
+    })
+}
+
+#[bench(raw)]
+fn bench_delete_personal_note() -> BenchResult {
+    seed_personal_notes(100);
+
+    bench_fn(|| {
+        std::hint::black_box(personal_notes_service::delete_personal_note(
+            DeletePersonalNoteRequest {
+                note_id: "note-0050".to_string(),
+            },
+        ));
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Active user transactions
+// ---------------------------------------------------------------------------
+
+fn make_active_user_transaction_request(id: u64) -> CreateActiveUserTransactionRequest {
+    CreateActiveUserTransactionRequest {
+        id: format!("bench-tx-{id:04}"),
+        data: ActiveUserTransactionData::OneSecIcpToEvm(OneSecIcpToEvmData {
+            source_token: TokenId::IcpNative,
+            dest_token: TokenId::EvmNative(1),
+            amount: Nat::from(1_000_000_u64 + id),
+            recipient_evm_address: format!("0x{id:040x}"),
+        }),
+        progress_step: Some("submitted".to_string()),
+        external_refs: vec![],
+    }
+}
+
+fn seed_active_user_transactions(count: u64) {
+    let principal = *bench_principal();
+    mutate_state(|s| {
+        for i in 0..count {
+            active_user_transactions_model::create(
+                &mut s.active_user_transactions,
+                principal,
+                make_active_user_transaction_request(i),
+                TS0_NS + i,
+            )
+            .expect("bench: seeding active user transaction failed");
+        }
+    });
+}
+
+#[bench]
+fn bench_create_active_user_transaction() {
+    let principal = *bench_principal();
+    mutate_state(|s| {
+        std::hint::black_box(active_user_transactions_model::create(
+            &mut s.active_user_transactions,
+            principal,
+            make_active_user_transaction_request(0),
+            TS0_NS,
+        ));
+    });
+}
+
+fn bench_get_active_user_transactions_with_count(count: u64) -> BenchResult {
+    seed_active_user_transactions(count);
+    let principal = *bench_principal();
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            active_user_transactions_model::list(&s.active_user_transactions, principal)
+        }));
+    })
+}
+
+#[bench(raw)]
+fn bench_get_active_user_transactions_5() -> BenchResult {
+    bench_get_active_user_transactions_with_count(5)
+}
+
+#[bench(raw)]
+fn bench_get_active_user_transactions_100() -> BenchResult {
+    bench_get_active_user_transactions_with_count(100)
+}
+
+#[bench(raw)]
+fn bench_update_active_user_transaction() -> BenchResult {
+    seed_active_user_transactions(100);
+    let principal = *bench_principal();
+
+    bench_fn(|| {
+        mutate_state(|s| {
+            std::hint::black_box(active_user_transactions_model::update(
+                &mut s.active_user_transactions,
+                principal,
+                UpdateActiveUserTransactionRequest {
+                    id: "bench-tx-0050".to_string(),
+                    status: Some(ActiveUserTransactionStatus::Executing),
+                    progress_step: Some("finalized".to_string()),
+                    external_refs: None,
+                    error: None,
+                },
+                TS1_NS,
+            ));
+        });
+    })
+}
+
+#[bench(raw)]
+fn bench_delete_active_user_transaction() -> BenchResult {
+    seed_active_user_transactions(100);
+    let principal = *bench_principal();
+
+    bench_fn(|| {
+        mutate_state(|s| {
+            std::hint::black_box(active_user_transactions_model::delete(
+                &mut s.active_user_transactions,
+                principal,
+                "bench-tx-0050".to_string(),
+            ));
+        });
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Exchange rates
+// ---------------------------------------------------------------------------
+
+fn seed_exchange_rates(count: u64) {
+    mutate_state(|s| {
+        for i in 0..count {
+            s.exchange_rates.insert(
+                StoredTokenId(TokenId::EvmNative(i)),
+                Candid(ExchangeRate {
+                    usd: ExchangeData {
+                        timestamp_ns: TS0_NS + i,
+                        price: Some(1.23 + f64::from(u32::try_from(i).unwrap_or_default())),
+                        price_24h_change_pct: Some(0.5),
+                        market_cap: Some(1e9),
+                    },
+                }),
+            );
+        }
+    });
+}
+
+#[bench(raw)]
+fn bench_get_exchange_rate() -> BenchResult {
+    seed_exchange_rates(50);
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.exchange_rates
+                .get(&StoredTokenId(TokenId::EvmNative(25)))
+                .map(|c| c.0)
+        }));
+    })
+}
+
+#[bench(raw)]
+fn bench_get_exchange_rates_50() -> BenchResult {
+    seed_exchange_rates(50);
+
+    bench_fn(|| {
+        std::hint::black_box(read_state(|s| {
+            s.exchange_rates
+                .iter()
+                .map(|entry| (entry.key().0.clone(), entry.value().0.clone()))
+                .collect::<Vec<_>>()
+        }));
+    })
 }
