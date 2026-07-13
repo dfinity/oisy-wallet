@@ -41,6 +41,8 @@
 		(isNullish(openIdProviderParam) || nonNullish(openIdProvider));
 
 	let flow = $state<BridgeState>(browser && !validRequest ? 'invalid' : 'idle');
+	// Held so the "redirecting" state can offer a tappable deep link.
+	let callbackUrl = $state<string | undefined>();
 
 	// Sign-in must start from a user gesture: Internet Identity opens in a
 	// popup, and popup blockers only allow it inside a click handler.
@@ -58,16 +60,23 @@
 				...(nonNullish(openIdProvider) ? { openIdProvider } : {})
 			});
 
-			flow = 'redirecting';
-
-			const callbackUrl = buildMobileAuthCallbackUrl({ redirectUri, delegationChainJson });
+			const url = buildMobileAuthCallbackUrl({ redirectUri, delegationChainJson });
 
 			// Defense in depth: the callback URL we just built must round-trip.
-			if (nonNullish(parseMobileAuthCallbackUrl(callbackUrl))) {
-				window.location.href = callbackUrl;
-			} else {
+			if (isNullish(parseMobileAuthCallbackUrl(url))) {
 				flow = 'error';
+				return;
 			}
+
+			callbackUrl = url;
+			flow = 'redirecting';
+
+			// Best-effort automatic hand-off. Browsers (notably iOS Safari and
+			// Chrome Custom Tabs) block programmatic navigation to a custom
+			// scheme when it is not tied to a user gesture — and we are past the
+			// async II round-trip here — so this often no-ops. The tappable link
+			// rendered in the `redirecting` state is the reliable path back.
+			window.location.href = url;
 		} catch (err: unknown) {
 			consoleError('Mobile auth bridge sign-in failed', err);
 			flow = 'error';
@@ -91,7 +100,17 @@
 			{:else if flow === 'error'}
 				<p>{replaceOisyPlaceholders($i18n.mobile_auth.error.error_while_signing_in)}</p>
 			{:else if flow === 'redirecting'}
-				<p>{replaceOisyPlaceholders($i18n.mobile_auth.text.redirecting)}</p>
+				<p class="mb-6">{replaceOisyPlaceholders($i18n.mobile_auth.text.redirecting)}</p>
+
+				<!-- The tap is a user gesture, which the OS honours for the custom-scheme
+				     deep link even when the earlier programmatic navigation was blocked. -->
+				<a
+					class="flex flex-1 justify-center rounded-lg bg-brand-primary px-4 py-3 font-bold text-white no-underline"
+					data-tid="mobile-auth-return"
+					href={callbackUrl}
+				>
+					{replaceOisyPlaceholders($i18n.mobile_auth.text.return_to_app)}
+				</a>
 			{:else}
 				<p class="mb-6">{replaceOisyPlaceholders($i18n.mobile_auth.text.description)}</p>
 

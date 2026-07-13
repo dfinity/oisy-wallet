@@ -226,7 +226,13 @@ interface I18nLock {
 }
 
 interface I18nMobile_auth {
-	text: { title: string; description: string; continue: string; redirecting: string };
+	text: {
+		title: string;
+		description: string;
+		continue: string;
+		redirecting: string;
+		return_to_app: string;
+	};
 	error: { invalid_request: string; error_while_signing_in: string };
 }
 

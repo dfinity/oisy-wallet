@@ -252,7 +252,8 @@
 			"title": "",
 			"description": "",
 			"continue": "",
-			"redirecting": ""
+			"redirecting": "",
+			"return_to_app": ""
 		},
 		"error": {
 			"invalid_request": "",
