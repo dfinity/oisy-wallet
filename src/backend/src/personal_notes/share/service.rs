@@ -39,6 +39,37 @@ fn active_share_count_in(
         .count()
 }
 
+/// Scans one creator's slice of the by-creator index in a single pass,
+/// returning their active (unexpired) share count and the tokens of their
+/// expired shares. The caller removes the expired ones (see
+/// `create_personal_note_share`) so a creator can't mint near-immediate-expiry
+/// shares that stop counting toward the cap on the next call yet linger in
+/// storage until the hourly sweep — which would let one user's stored volume
+/// grow past the active-share cap up to the create rate-limit ceiling. Bounds
+/// work to the one creator, like `active_share_count_in`, and takes the map
+/// directly so it can run inside an existing state borrow.
+fn partition_creator_shares(
+    by_creator: &crate::types::maps::PersonalNoteSharesByCreatorMap,
+    creator: Principal,
+    now_ns: u64,
+) -> (usize, Vec<PersonalNoteShareToken>) {
+    let prefix = StoredPrincipal(creator);
+    let start = PersonalNoteShareCreatorKey(prefix, PersonalNoteShareToken(String::new()));
+    let mut active = 0usize;
+    let mut expired = Vec::new();
+    for entry in by_creator
+        .range(start..)
+        .take_while(|entry| entry.key().0 == prefix)
+    {
+        if entry.value() > now_ns {
+            active += 1;
+        } else {
+            expired.push(entry.key().1.clone());
+        }
+    }
+    (active, expired)
+}
+
 /// Removes a share from both the primary and by-creator maps. Used by
 /// `consume_personal_note_share` (on success, and as opportunistic cleanup
 /// when it finds an already-expired entry) and by the periodic prune sweep.
@@ -69,11 +100,16 @@ pub fn create_personal_note_share(
         if s.personal_note_shares.contains_key(&token) {
             return Err(PersonalNoteShareError::DuplicateToken);
         }
-        if new_share_exceeds_cap(active_share_count_in(
-            &s.personal_note_shares_by_creator,
-            creator,
-            now,
-        )) {
+        // Reclaim the caller's own expired shares before the cap check, so
+        // near-immediate-expiry shares can't accumulate in storage between
+        // creates (they'd evade the active-only count yet linger until the
+        // hourly sweep). Scoped to this one creator, so it stays cheap.
+        let (active_count, expired) =
+            partition_creator_shares(&s.personal_note_shares_by_creator, creator, now);
+        for stale in expired {
+            remove_share(s, &stale, creator);
+        }
+        if new_share_exceeds_cap(active_count) {
             return Err(PersonalNoteShareError::TooManyShares);
         }
 
@@ -225,5 +261,53 @@ mod tests {
         assert_eq!(active_share_count_in(&map, alice, now), 1);
         assert_eq!(active_share_count_in(&map, bob, now), 1);
         assert_eq!(active_share_count_in(&map, test_principal(3), now), 0);
+    }
+
+    #[test]
+    fn partition_returns_active_count_and_only_this_creators_expired_tokens() {
+        let mut map = in_memory_by_creator_map();
+        let alice = test_principal(1);
+        let bob = test_principal(2);
+        let now = 1_000_000_000u64;
+
+        map.insert(
+            PersonalNoteShareCreatorKey(
+                StoredPrincipal(alice),
+                PersonalNoteShareToken("a-active".into()),
+            ),
+            now + 1, // active
+        );
+        map.insert(
+            PersonalNoteShareCreatorKey(
+                StoredPrincipal(alice),
+                PersonalNoteShareToken("a-old1".into()),
+            ),
+            now, // expired (expiry is inclusive: expires_at_ns <= now)
+        );
+        map.insert(
+            PersonalNoteShareCreatorKey(
+                StoredPrincipal(alice),
+                PersonalNoteShareToken("a-old2".into()),
+            ),
+            now - 5, // expired
+        );
+        map.insert(
+            PersonalNoteShareCreatorKey(
+                StoredPrincipal(bob),
+                PersonalNoteShareToken("b-old".into()),
+            ),
+            now - 5, // expired, but a different creator — must not leak into alice's list
+        );
+
+        let (active, expired) = partition_creator_shares(&map, alice, now);
+        assert_eq!(active, 1);
+        let mut tokens: Vec<String> = expired.into_iter().map(|token| token.0).collect();
+        tokens.sort();
+        assert_eq!(tokens, vec!["a-old1".to_string(), "a-old2".to_string()]);
+
+        // A creator with no expired entries yields an empty prune list.
+        let (bob_active, bob_expired) = partition_creator_shares(&map, bob, now);
+        assert_eq!(bob_active, 0);
+        assert_eq!(bob_expired.len(), 1);
     }
 }
