@@ -25,15 +25,9 @@ import type { init, PlausibleRequestPayload, track } from '@plausible-analytics/
 
 let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
 
-const stripUrlFragment = (url: string): string => {
-	try {
-		const parsed = new URL(url);
-		parsed.hash = '';
-		return parsed.toString();
-	} catch (_: unknown) {
-		return url.split('#')[0];
-	}
-};
+// Plain string slicing on purpose: `new URL(...).toString()` would normalize the
+// URL (host casing, percent-encoding, trailing slash) beyond removing the fragment.
+const stripUrlFragment = (url: string): string => url.split('#')[0];
 
 const sanitizePlausiblePayloadUrl = (payload: PlausibleRequestPayload): PlausibleRequestPayload => {
 	const sanitizedUrl = stripUrlFragment(payload.u);
