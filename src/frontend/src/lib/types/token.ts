@@ -4,6 +4,7 @@ import type {
 	TokenCategorySchema,
 	TokenIdSchema,
 	TokenMetadataSchema,
+	TokenMetadataTierSchema,
 	TokenSchema,
 	TokenStandardCodeSchema,
 	TokenStandardSchema
@@ -23,6 +24,8 @@ export type TokenStandard = z.infer<typeof TokenStandardSchema>;
 
 export type TokenCategory = z.infer<typeof TokenCategorySchema>;
 
+export type TokenMetadataTier = z.infer<typeof TokenMetadataTierSchema>;
+
 export type Token = z.infer<typeof TokenSchema>;
 
 export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
@@ -41,7 +44,7 @@ export type NonRequiredProps = TokenAppearance &
 	TokenBuyable &
 	TokenGroup &
 	TokenDeprecated &
-	Pick<Token, 'description'>;
+	Pick<Token, 'description' | 'tier'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
 	T,
