@@ -103,7 +103,7 @@
 								)}
 						/>
 					{:else}
-						<LiquidiumPositionCard reserve={position.reserve} variant="holdings" />
+						<LiquidiumPositionCard reserve={position.reserve} />
 					{/if}
 				</div>
 			{/each}
