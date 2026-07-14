@@ -65,7 +65,14 @@ export const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 			}));
 
 		const contracts = await Promise.all(loadKnownContracts());
-		erc20DefaultTokensStore.set([...ALL_DEFAULT_ERC20_TOKENS, ...contracts.map(mapErc20Token)]);
+		// `metadataOnly` tokens are curated metadata, not shown tokens: they are kept
+		// out of the visible store here but stay in `ALL_DEFAULT_ERC20_TOKENS` so the
+		// manual-import enrichment lookup below still resolves them.
+		erc20DefaultTokensStore.set(
+			[...ALL_DEFAULT_ERC20_TOKENS, ...contracts.map(mapErc20Token)].filter(
+				({ metadataOnly }) => !metadataOnly
+			)
+		);
 	} catch (err: unknown) {
 		erc20DefaultTokensStore.reset();
 
