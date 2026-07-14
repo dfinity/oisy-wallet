@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Cung cấp Bitcoin. Vay stablecoin. Giữ nguyên bản địa.",
 			"health_factor": "Hệ số sức khỏe",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Giá trị ròng",
 			"markets": "Thị trường",
 			"total_supplied": "Tổng đã cung cấp",

@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Dostarcz Bitcoin. Pożycz stablecoiny. Pozostań natywny.",
 			"health_factor": "Wskaźnik zdrowia",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Wartość netto",
 			"markets": "Rynki",
 			"total_supplied": "Łącznie dostarczono",

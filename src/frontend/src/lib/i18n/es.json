@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Suministra Bitcoin. Pide prestadas stablecoins. Mantente nativo.",
 			"health_factor": "Factor de salud",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Valor neto",
 			"markets": "Mercados",
 			"total_supplied": "Total suministrado",

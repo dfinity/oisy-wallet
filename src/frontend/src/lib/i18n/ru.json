@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Предоставь Bitcoin. Займи стейблкоины. Оставайся нативным.",
 			"health_factor": "Коэффициент здоровья",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Чистая стоимость",
 			"markets": "Рынки",
 			"total_supplied": "Всего предоставлено",

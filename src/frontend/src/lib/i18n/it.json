@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Fornisci Bitcoin. Prendi in prestito stablecoin. Resta nativo.",
 			"health_factor": "Fattore di salute",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Valore netto",
 			"markets": "Mercati",
 			"total_supplied": "Totale fornito",
