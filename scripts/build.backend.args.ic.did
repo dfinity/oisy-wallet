@@ -5,7 +5,7 @@
 			allowed_callers = vec { principal "nynz6-haaaa-aaaan-qzqda-cai" };
 			cfs_canister_id = opt principal "grghe-syaaa-aaaar-qabyq-cai";
 			derivation_origin = opt "https://oisy.com";
-			ii_canister_id = opt principal "rdmx6-jaaaa-aaaaa-aaadq-cai";
+			ii_canister_id = opt principal "fgte5-ciaaa-aaaad-aaatq-cai";
 			ic_root_key_der = null
 		}
 	}
