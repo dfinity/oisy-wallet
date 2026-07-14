@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isOnRamperDev } from '$env/rest/onramper.env';
 	import BuyModalContent from '$lib/components/buy/BuyModalContent.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -7,7 +8,7 @@
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
-		{$i18n.buy.text.buy}
+		{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}
 	{/snippet}
 
 	<BuyModalContent />

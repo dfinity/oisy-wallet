@@ -1252,6 +1252,7 @@
 	"buy": {
 		"text": {
 			"buy": "खरीदें",
+			"buy_dev": "खरीदें (Dev एनवायरनमेंट)",
 			"unavailable_title": "टोकन खरीदना अस्थायी रूप से अनुपलब्ध है",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

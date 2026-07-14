@@ -1252,6 +1252,7 @@
 	"buy": {
 		"text": {
 			"buy": "Buy",
+			"buy_dev": "Buy (Dev Environment)",
 			"unavailable_title": "Buying tokens is temporarily unavailable",
 			"unavailable_description_disabled": "We are currently doing maintenance work on our Onramper integration, and will turn it back on very soon.",
 			"unavailable_description_signing_failed": "There seems to be a technical issue with our Onramper integration. We are currently investigating it, and will turn it back on very soon.",

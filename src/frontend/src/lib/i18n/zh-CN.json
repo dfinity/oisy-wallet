@@ -1252,6 +1252,7 @@
 	"buy": {
 		"text": {
 			"buy": "购买",
+			"buy_dev": "购买（开发环境）",
 			"unavailable_title": "购买代币暂时不可用",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

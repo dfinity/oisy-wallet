@@ -4,8 +4,14 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 // production (ic). `STAGING` already covers the test_fe / audit / e2e environments.
 export const ONRAMPER_ENABLED = LOCAL || STAGING;
 
-// Every environment targets the OnRamper production environment; the dev/sandbox
-// (buy.onramper.dev) is never used.
-export const ONRAMPER_BASE_URL = 'https://buy.onramper.com';
+const ONRAMPER_ENV: 'dev' | 'prod' = 'prod';
 
-export const ONRAMPER_API_KEY = import.meta.env.VITE_ONRAMPER_API_KEY_PROD;
+export const isOnRamperDev = ONRAMPER_ENV === 'dev';
+
+export const ONRAMPER_BASE_URL = isOnRamperDev
+	? 'https://buy.onramper.dev'
+	: 'https://buy.onramper.com';
+
+export const ONRAMPER_API_KEY = isOnRamperDev
+	? import.meta.env.VITE_ONRAMPER_API_KEY_DEV
+	: import.meta.env.VITE_ONRAMPER_API_KEY_PROD;
