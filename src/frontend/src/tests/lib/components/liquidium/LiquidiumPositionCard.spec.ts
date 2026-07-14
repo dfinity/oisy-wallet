@@ -44,7 +44,7 @@ describe('LiquidiumPositionCard', () => {
 			props: { reserve: reserve({ suppliedUsd: 0 }) }
 		});
 
-		expect(container).not.toHaveTextContent('/year');
+		expect(container).not.toHaveTextContent('/yr');
 	});
 
 	it('renders the Liquidium provider tag', () => {
