@@ -19,7 +19,11 @@ import {
 import { TokenCategoryTagValue, TokenRiskTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenStandard, TokenStandardCode } from '$lib/types/token';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
-import { mockLedgerCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockIndexCanisterId,
+	mockLedgerCanisterId,
+	mockValidIcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
@@ -76,6 +80,39 @@ describe('icrc.utils', () => {
 				id: token?.id
 			});
 			expect(token?.id.description).toBe(mockToken.symbol);
+		});
+
+		describe('indexCanisterId', () => {
+			it('should backfill the index canister id from icrcCustomTokens when none is provided', () => {
+				const token = mapIcrcToken({
+					...mockParams,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, indexCanisterId: mockIndexCanisterId }
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(mockIndexCanisterId);
+			});
+
+			it('should keep a provided index canister id over the icrcCustomTokens one', () => {
+				const providedIndexCanisterId = mockLedgerCanisterId;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					indexCanisterId: providedIndexCanisterId,
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: { ...mockToken, indexCanisterId: mockIndexCanisterId }
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(providedIndexCanisterId);
+			});
+
+			it('should not set an index canister id when neither is provided nor curated', () => {
+				const token = mapIcrcToken(mockParams);
+
+				expect(token?.indexCanisterId).toBeUndefined();
+			});
 		});
 
 		it('should map a token without icon when the icon is missing form metadata and icrcCustomTokens', () => {

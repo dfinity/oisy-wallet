@@ -119,6 +119,13 @@ export const mapIcrcToken = ({
 		ledgerCanisterId,
 		...metadataToken,
 		...rest,
+		// Backfill the index canister id from the curated environment token when the
+		// import didn't provide one (e.g. a user adds a known ICRC token by ledger id
+		// only). A user-supplied index id always wins.
+		...(isNullish(rest.indexCanisterId) &&
+			nonNullish(customTokenSymbol?.indexCanisterId) && {
+				indexCanisterId: customTokenSymbol.indexCanisterId
+			}),
 		...(nonNullish(mintingAccount) && { mintingAccount })
 	};
 };
