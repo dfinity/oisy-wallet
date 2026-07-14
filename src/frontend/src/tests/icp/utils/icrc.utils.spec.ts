@@ -108,6 +108,21 @@ describe('icrc.utils', () => {
 				expect(token?.indexCanisterId).toBe(providedIndexCanisterId);
 			});
 
+			it('should keep the user-provided index canister id when the curated token has none', () => {
+				const providedIndexCanisterId = mockIndexCanisterId;
+
+				const token = mapIcrcToken({
+					...mockParams,
+					indexCanisterId: providedIndexCanisterId,
+					// mockToken (mockValidIcToken) carries no index canister id.
+					icrcCustomTokens: {
+						[mockToken.ledgerCanisterId]: mockToken
+					}
+				});
+
+				expect(token?.indexCanisterId).toBe(providedIndexCanisterId);
+			});
+
 			it('should not set an index canister id when neither is provided nor curated', () => {
 				const token = mapIcrcToken(mockParams);
 
