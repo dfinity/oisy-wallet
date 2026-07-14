@@ -4,7 +4,9 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 // production (ic). `STAGING` already covers the test_fe / audit / e2e environments.
 export const ONRAMPER_ENABLED = LOCAL || STAGING;
 
-const ONRAMPER_ENV: 'dev' | 'prod' = 'prod';
+// Pinned to production on every environment; kept as the wider union so the
+// `isOnRamperDev` switch below stays intact should we ever need the sandbox again.
+const ONRAMPER_ENV = 'prod' as 'dev' | 'prod';
 
 export const isOnRamperDev = ONRAMPER_ENV === 'dev';
 
