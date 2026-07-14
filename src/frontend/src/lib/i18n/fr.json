@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Fournissez du Bitcoin. Empruntez des stablecoins. Restez natif.",
 			"health_factor": "Facteur de santé",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Valeur nette",
 			"markets": "Marchés",
 			"total_supplied": "Total fourni",

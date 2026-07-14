@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "",
 			"health_factor": "",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",

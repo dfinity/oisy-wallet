@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
@@ -18,9 +19,15 @@
 		widthClass?: string;
 		showHealthFactor?: boolean;
 		showWithShortenedLabel?: boolean;
+		buttons?: Snippet;
 	}
 
-	let { widthClass, showHealthFactor = true, showWithShortenedLabel = false }: Props = $props();
+	let {
+		widthClass,
+		showHealthFactor = true,
+		showWithShortenedLabel = false,
+		buttons
+	}: Props = $props();
 
 	let hasDebt = $derived($liquidiumTotalBorrowedUsd > 0);
 
@@ -31,7 +38,7 @@
 	);
 </script>
 
-<StakeContentCard {widthClass}>
+<StakeContentCard {buttons} {widthClass}>
 	{#snippet content()}
 		<div class="text-sm font-bold">{$i18n.borrow.text.active_loans}</div>
 

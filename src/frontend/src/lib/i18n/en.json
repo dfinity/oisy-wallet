@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
+			"health_no_debt": "No debt",
+			"health_healthy": "Healthy",
+			"health_at_risk": "At risk",
+			"health_critical": "Critical",
 			"net_value": "Net value",
 			"markets": "Markets",
 			"total_supplied": "Total supplied",

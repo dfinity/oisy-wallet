@@ -1904,6 +1904,10 @@ interface I18nLiquidium {
 	text: {
 		description: string;
 		health_factor: string;
+		health_no_debt: string;
+		health_healthy: string;
+		health_at_risk: string;
+		health_critical: string;
 		net_value: string;
 		markets: string;
 		total_supplied: string;

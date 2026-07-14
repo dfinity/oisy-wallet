@@ -2368,6 +2368,10 @@
 		"text": {
 			"description": "提供 Bitcoin。借入稳定币。保持原生。",
 			"health_factor": "健康系数",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "净值",
 			"markets": "市场",
 			"total_supplied": "总供应量",
