@@ -55,7 +55,7 @@ describe('mapIcrcData', () => {
 		expect(result).toEqual({});
 	});
 
-	describe('metadata tier', () => {
+	describe('metadataOnly', () => {
 		beforeEach(() => {
 			vi.resetAllMocks();
 
@@ -65,7 +65,7 @@ describe('mapIcrcData', () => {
 			vi.spyOn(appConstants, 'PROD', 'get').mockImplementation(() => true);
 		});
 
-		it('should preserve the tier property', () => {
+		it('should preserve the metadataOnly property', () => {
 			const result = mapIcrcData({
 				METATOKEN: {
 					ledgerCanisterId: 'dummy-ledger-id',
@@ -73,11 +73,11 @@ describe('mapIcrcData', () => {
 					symbol: 'META',
 					decimals: 8,
 					fee: 1000n,
-					tier: 'metadata'
+					metadataOnly: true
 				}
 			});
 
-			expect(result.METATOKEN.tier).toBe('metadata');
+			expect(result.METATOKEN.metadataOnly).toBeTruthy();
 		});
 	});
 });

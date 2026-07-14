@@ -38,13 +38,13 @@ const ALL_ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
 ).filter(nonNullish);
 
-// Curated/visible additional ICRC tokens: metadata-tier entries are curated
-// metadata only, so they are excluded here (not shown, not suggested).
+// Curated/visible additional ICRC tokens: metadata-only entries are excluded
+// here (not shown, not suggested).
 export const ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = ALL_ADDITIONAL_ICRC_TOKENS.filter(
-	({ tier }) => tier !== 'metadata'
+	({ metadataOnly }) => !metadataOnly
 );
 
 // Enrichment lookup for manually imported tokens: keeps every entry, including
-// metadata-tier ones, so an explicit import still resolves the curated metadata.
+// metadata-only ones, so an explicit import still resolves the curated metadata.
 export const ADDITIONAL_ICRC_TOKENS_INDEXED: Record<LedgerCanisterIdText, IcTokenWithoutId> =
 	buildIndexedIcTokens(ALL_ADDITIONAL_ICRC_TOKENS);

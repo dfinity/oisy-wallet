@@ -65,16 +65,12 @@ export const TokenBuyableSchema = z.object({
 	buy: TokenBuySchema.optional()
 });
 
-// How OISY treats a curated token definition:
-// - 'token' (default): a normal curated token — shown in the wallet, toggleable,
-//   eligible to be suggested/enabled.
-// - 'metadata': curated metadata only — not added to the visible token store and
-//   never suggested, but still used to enrich a token the user imports manually
-//   (name, icon, tags, group membership). See the token-metadata-tier spec.
-export const TokenMetadataTierSchema = z.enum(['token', 'metadata']);
-
-export const TokenTierPropSchema = z.object({
-	tier: TokenMetadataTierSchema.optional()
+// When true, this curated token definition is metadata only: it is NOT added to
+// the visible token store and is never suggested/enabled, but it is still used to
+// enrich a token the user imports manually (name, icon, tags, group membership).
+// Defaults to falsy. See the metadata-only-tokens spec.
+export const TokenMetadataOnlyPropSchema = z.object({
+	metadataOnly: z.boolean().optional()
 });
 
 export const TokenSchema = z.object({
@@ -87,6 +83,6 @@ export const TokenSchema = z.object({
 	...TokenBuyableSchema.shape,
 	...TokenTagsSchema.shape,
 	...TokenGroupPropSchema.shape,
-	...TokenTierPropSchema.shape,
+	...TokenMetadataOnlyPropSchema.shape,
 	...TokenDeprecatedSchema.shape
 });

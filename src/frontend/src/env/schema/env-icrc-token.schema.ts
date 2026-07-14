@@ -1,6 +1,6 @@
 import { OptionalEnvTokenGroupDataSchema } from '$env/schema/env-token-group.schema';
 import { OptionalTokenTagsSchema } from '$lib/schema/token-tag.schema';
-import { TokenTierPropSchema } from '$lib/schema/token.schema';
+import { TokenMetadataOnlyPropSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
 export const EnvIcrcTokenMetadataSchema = z.object({
@@ -28,7 +28,7 @@ export const EnvIcTokenSchema = z.object({
 	icon: z.string().optional(),
 	...OptionalTokenTagsSchema.shape,
 	...OptionalEnvTokenGroupDataSchema.shape,
-	...TokenTierPropSchema.shape
+	...TokenMetadataOnlyPropSchema.shape
 });
 
 const OptionalEnvIcrcTokenMetadataSchema = z.union([
