@@ -129,6 +129,23 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 
 ---
 
+## Tokens
+
+### Curated tokens vs. metadata-only tokens
+
+OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset is enabled by default for new users, and they are selectable elsewhere in the wallet (including as swap destinations).
+
+A definition can instead be marked **metadata-only** (`metadataOnly: true`). A metadata-only token is **not** surfaced by default — it is absent from the manage-tokens list, is never enabled by default, and is not offered as a swap destination. Its curated metadata (name, symbol, decimals, icon, tags, token-group membership) is still used to **enrich a token the user imports manually**: importing that exact ledger / contract address resolves the curated details and places the token in its group, exactly as a curated token would. In short: known to OISY, but surfaced only if the user explicitly adds it.
+
+The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
+
+- On **ICP**, the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`).
+- On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, **GLDT**, and **ICP**.
+
+A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister id / contract address, after which it appears with full metadata and inside its token group.
+
+---
+
 ## Exchange-rate sourcing
 
 OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
