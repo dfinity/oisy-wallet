@@ -32,7 +32,7 @@
 	// It may happen that the user's settings are refreshed before having been updated.
 	// But for that small instant of time, we could still show the dApp.
 	// To avoid this glitch, we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
-	let temporaryHiddenDappsIds = $state<OisyDappDescription['id'][]>([]);
+	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = [];
 
 	let hiddenDappsIds = $derived([
 		...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),

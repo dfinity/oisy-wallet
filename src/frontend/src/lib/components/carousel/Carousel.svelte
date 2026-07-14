@@ -159,7 +159,7 @@
 	 * Clear slide transform timer
 	 */
 	const clearSlideTransformTimer = () => {
-		clearInterval(slideTransformTimer);
+		clearTimeout(slideTransformTimer);
 		slideTransformTimer = undefined;
 	};
 
