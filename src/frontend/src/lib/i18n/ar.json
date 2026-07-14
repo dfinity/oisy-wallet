@@ -1446,7 +1446,6 @@
 			"already_available": "التوكن متاح بالفعل.",
 			"not_toggleable": "لا يمكن تبديل التوكن، لا يمكن إخفاؤه.",
 			"incomplete_metadata": "لا يوجد اسم أو رمز في البيانات الوصفية.",
-			"duplicate_metadata": "توكن بنفس الاسم أو الرمز موجود بالفعل.",
 			"unexpected_undefined": "التوكن غير معرف. هذا غير متوقع.",
 			"unexpected_error_on_token_delete": "حدث خطأ ما أثناء إزالة التوكن.",
 			"unexpected_error_on_token_update": "حدث خطأ ما أثناء تحديث التوكن."

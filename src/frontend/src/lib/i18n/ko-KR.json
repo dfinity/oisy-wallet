@@ -1446,7 +1446,6 @@
 			"already_available": "토큰이 이미 사용 가능합니다.",
 			"not_toggleable": "이 토큰은 전환할 수 없어 숨길 수 없습니다.",
 			"incomplete_metadata": "메타데이터에 이름 또는 심볼이 없습니다.",
-			"duplicate_metadata": "유사한 이름 또는 심볼을 가진 토큰이 이미 존재합니다.",
 			"unexpected_undefined": "토큰이 정의되지 않았습니다. 이는 예상치 못한 상황입니다.",
 			"unexpected_error_on_token_delete": "토큰을 제거하는 중 문제가 발생했습니다.",
 			"unexpected_error_on_token_update": "토큰을 업데이트하는 중 문제가 발생했습니다."

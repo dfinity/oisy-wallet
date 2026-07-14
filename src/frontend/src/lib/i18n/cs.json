@@ -1446,7 +1446,6 @@
 			"already_available": "Token je již k dispozici.",
 			"not_toggleable": "Token nelze přepnout, nelze jej skrýt.",
 			"incomplete_metadata": "V metadatech není uveden žádný název ani symbol.",
-			"duplicate_metadata": "Token s podobným názvem nebo symbolem již existuje.",
 			"unexpected_undefined": "Token je nedefinovaný. To je neočekávané.",
 			"unexpected_error_on_token_delete": "Při odstraňování tokenu došlo k chybě.",
 			"unexpected_error_on_token_update": "Při aktualizaci tokenu došlo k chybě."

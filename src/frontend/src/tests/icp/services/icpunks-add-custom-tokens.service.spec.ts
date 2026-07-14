@@ -92,7 +92,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 			});
 		});
 
-		it('should return error if token already exists', async () => {
+		it('should successfully load a new token even if another token has the same symbol', async () => {
 			const result = await loadAndAssertAddCustomToken({
 				identity: mockIdentity,
 				icPunksTokens: [
@@ -105,11 +105,7 @@ describe('icpunks-add-custom-tokens.service', () => {
 				canisterId: mockCanisterId
 			});
 
-			expect(result).toEqual({ result: 'error' });
-
-			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
-				msg: { text: get(i18n).tokens.error.duplicate_metadata }
-			});
+			expect(result).toStrictEqual({ result: 'success', data: { token: expectedToken } });
 		});
 
 		it('should successfully load a new token', async () => {

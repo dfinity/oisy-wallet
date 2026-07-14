@@ -1446,7 +1446,6 @@
 			"already_available": "Токен уже доступен.",
 			"not_toggleable": "Токен не переключаем, его нельзя скрыть.",
 			"incomplete_metadata": "В метаданных не указаны имя или символ.",
-			"duplicate_metadata": "Токен с похожим именем или символом уже существует.",
 			"unexpected_undefined": "Токен не определен. Это неожиданно.",
 			"unexpected_error_on_token_delete": "При удалении токена произошла ошибка.",
 			"unexpected_error_on_token_update": "При обновлении токена произошла ошибка."

@@ -1446,7 +1446,6 @@
 			"already_available": "トークンはすでに利用可能です。",
 			"not_toggleable": "トークンは切り替え不可であり、非表示にできません。",
 			"incomplete_metadata": "メタデータに名前またはシンボルが提供されていません。",
-			"duplicate_metadata": "同じ名前やシンボルのトークンが既に存在します。",
 			"unexpected_undefined": "トークンが未定義です。これは予期しないエラーです。",
 			"unexpected_error_on_token_delete": "トークンの削除中にエラーが発生しました。",
 			"unexpected_error_on_token_update": "トークンの更新中にエラーが発生しました。"

@@ -1446,7 +1446,6 @@
 			"already_available": "टोकन पहले से उपलब्ध है।",
 			"not_toggleable": "टोकन टॉगलेबल नहीं है, इसे छिपाया नहीं जा सकता।",
 			"incomplete_metadata": "मेटाडेटा में कोई नाम या प्रतीक प्रदान नहीं किया गया है।",
-			"duplicate_metadata": "समान नाम या प्रतीक वाला एक टोकन पहले से मौजूद है।",
 			"unexpected_undefined": "टोकन अपरिभाषित है। यह अप्रत्याशित है।",
 			"unexpected_error_on_token_delete": "टोकन हटाते समय कुछ गलत हो गया।",
 			"unexpected_error_on_token_update": "टोकन अपडेट करते समय कुछ गलत हो गया।"

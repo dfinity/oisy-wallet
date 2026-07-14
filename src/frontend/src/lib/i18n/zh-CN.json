@@ -1446,7 +1446,6 @@
 			"already_available": "代币已存在。",
 			"not_toggleable": "该代币不可切换，无法隐藏。",
 			"incomplete_metadata": "元数据中未提供名称或符号。",
-			"duplicate_metadata": "已存在名称或符号相似的代币。",
 			"unexpected_undefined": "代币未定义。这是异常情况。",
 			"unexpected_error_on_token_delete": "移除代币时发生错误。",
 			"unexpected_error_on_token_update": "更新代币时发生错误。"

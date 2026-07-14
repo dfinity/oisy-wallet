@@ -1446,7 +1446,6 @@
 			"already_available": "Le token est déjà disponible.",
 			"not_toggleable": "Le token n'est pas basculable, il ne peut pas être masqué.",
 			"incomplete_metadata": "Aucun nom ou symbole n'est fourni dans les métadonnées.",
-			"duplicate_metadata": "Un token avec un nom ou un symbole similaire existe déjà.",
 			"unexpected_undefined": "Le token est indéfini. C'est inattendu.",
 			"unexpected_error_on_token_delete": "Quelque chose s'est mal passé lors de la suppression du token.",
 			"unexpected_error_on_token_update": "Quelque chose s'est mal passé lors de la mise à jour du token."

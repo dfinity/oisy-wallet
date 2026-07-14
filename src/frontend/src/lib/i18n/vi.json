@@ -1446,7 +1446,6 @@
 			"already_available": "Token đã có sẵn.",
 			"not_toggleable": "Token không thể chuyển đổi, không thể ẩn.",
 			"incomplete_metadata": "Không có tên hoặc ký hiệu được cung cấp trong metadata.",
-			"duplicate_metadata": "Đã tồn tại một token có tên hoặc ký hiệu tương tự.",
 			"unexpected_undefined": "Token không xác định. Điều này không mong muốn.",
 			"unexpected_error_on_token_delete": "Đã xảy ra lỗi khi xóa token.",
 			"unexpected_error_on_token_update": "Đã xảy ra lỗi khi cập nhật token."
