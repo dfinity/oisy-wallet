@@ -68,9 +68,9 @@ aggregate into `EVM_ERC20_TOKENS` (`tokens-evm/tokens.erc20.env.ts`).
 
 ```ts
 const ALL_DEFAULT_ERC20_TOKENS = [
-  ...ERC20_TWIN_TOKENS,
-  ...EVM_ERC20_TOKENS,
-  ...ADDITIONAL_ERC20_TOKENS
+	...ERC20_TWIN_TOKENS,
+	...EVM_ERC20_TOKENS,
+	...ADDITIONAL_ERC20_TOKENS
 ];
 ```
 
@@ -112,9 +112,12 @@ is built.
 ### ICP / ICRC side (PR1)
 
 - Introduce the shared `tier` type/values (this PR owns the shared definition;
-  the EVM PR reuses it). Add an optional `tier` to the ICRC env-token
-  representation and allow the optional `"tier"` key in `tokens.icrc.json`
-  (update the schema in `env/schema/`).
+  the EVM PR reuses it). The shared home is the base token schema
+  (`TokenMetadataTierSchema` + `TokenTierPropSchema` in `lib/schema/token.schema.ts`,
+  mixed into `TokenSchema`), with `tier` added to `NonRequiredProps`
+  (`lib/types/token.ts`) so the `Required*` token types keep treating it as
+  optional. Also allow the optional `"tier"` key in the ICRC env schema
+  (`EnvIcTokenSchema`) so it survives the `tokens.icrc.json` parse.
 - Filter metadata-tier entries out of the curated/visible derivation
   (`ADDITIONAL_ICRC_TOKENS` in `tokens.icrc.additional.env.ts`), so they are not
   shown/suggested.
