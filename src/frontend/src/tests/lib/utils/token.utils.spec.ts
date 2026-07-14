@@ -487,7 +487,12 @@ describe('token.utils', () => {
 				// Same intent as above for the 1Sec-bridged USDT ICRC ledger on ICP.
 				description: '1Sec USDT ICRC ledger on ICP',
 				token: { ...mockValidIcToken, ledgerCanisterId: 'ij33n-oiaaa-aaaar-qbooa-cai' }
-			}
+			},
+			// 1Sec EVM ICP tokens: demoted to metadata-only and removed from
+			// ERC20_SUGGESTED_TOKENS, so they must not be enabled by default.
+			{ description: '1Sec ICP on Ethereum', token: ICP_ETH_TOKEN },
+			{ description: '1Sec ICP on Arbitrum', token: ICP_ARB_TOKEN },
+			{ description: '1Sec ICP on Base', token: ICP_BASE_TOKEN }
 		])(
 			'Every other random token is only enabled if the user enables it - $description',
 			({ token }) => {
@@ -577,9 +582,6 @@ describe('token.utils', () => {
 			},
 			{ description: 'Suggested ERC20 token USDC', token: USDC_TOKEN },
 			{ description: 'Suggested ERC20 token USDT', token: USDT_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Ethereum', token: ICP_ETH_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Arbitrum', token: ICP_ARB_TOKEN },
-			{ description: 'Suggested ERC20 token ICP on Base', token: ICP_BASE_TOKEN },
 			{ description: 'Suggested ERC20 token USDC on Arbitrum', token: USDC_ARBITRUM_TOKEN },
 			{ description: 'Suggested ERC20 token USDT0 on Arbitrum', token: USDT_ARBITRUM_TOKEN },
 			{ description: 'Suggested ERC20 token USDC on Base', token: USDC_BASE_TOKEN },
