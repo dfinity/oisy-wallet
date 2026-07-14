@@ -569,7 +569,46 @@ describe('ic-send.services', () => {
 				identity: mockIdentity,
 				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
 				to: decodeIcrcAccount(mockPrincipalText2),
-				amount: mockAmount
+				amount: mockAmount,
+				memo: undefined
+			});
+		});
+
+		it('should encode a non-empty memo as UTF-8 bytes', async () => {
+			const memo = 'hello memo';
+
+			await sendIcrc({ ...mockParams, memo });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: new TextEncoder().encode(memo)
+			});
+		});
+
+		it('should treat a whitespace-only memo as undefined', async () => {
+			await sendIcrc({ ...mockParams, memo: '   ' });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: undefined
+			});
+		});
+
+		it('should treat an undefined memo as undefined', async () => {
+			await sendIcrc({ ...mockParams, memo: undefined });
+
+			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
+				identity: mockIdentity,
+				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
+				to: decodeIcrcAccount(mockPrincipalText2),
+				amount: mockAmount,
+				memo: undefined
 			});
 		});
 

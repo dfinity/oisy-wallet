@@ -6,6 +6,7 @@ import type { PartialSpecific } from '$lib/types/utils';
 
 export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 	identity: NullishIdentity;
+	memo?: string;
 	progress?: (step: ProgressStepsSendIc) => void;
 	ckErc20ToErc20MaxCkEthFees?: bigint;
 };
