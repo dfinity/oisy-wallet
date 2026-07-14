@@ -1252,7 +1252,6 @@
 	"buy": {
 		"text": {
 			"buy": "شراء",
-			"buy_dev": "شراء (بيئة تطوير)",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

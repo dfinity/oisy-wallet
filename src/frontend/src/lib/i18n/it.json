@@ -1252,7 +1252,6 @@
 	"buy": {
 		"text": {
 			"buy": "Acquista",
-			"buy_dev": "Acquista (Ambiente di sviluppo)",
 			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

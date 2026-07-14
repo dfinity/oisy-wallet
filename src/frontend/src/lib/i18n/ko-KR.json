@@ -1252,7 +1252,6 @@
 	"buy": {
 		"text": {
 			"buy": "구매",
-			"buy_dev": "구매 (개발 환경)",
 			"unavailable_title": "토큰 구매는 일시적으로 사용할 수 없습니다",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

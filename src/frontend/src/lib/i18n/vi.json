@@ -1252,7 +1252,6 @@
 	"buy": {
 		"text": {
 			"buy": "Mua",
-			"buy_dev": "Mua (Dev Environment)",
 			"unavailable_title": "Mua token tạm thời không khả dụng",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",

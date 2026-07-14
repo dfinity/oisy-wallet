@@ -1252,7 +1252,6 @@
 	"buy": {
 		"text": {
 			"buy": "Kup",
-			"buy_dev": "Kup (środowisko deweloperskie)",
 			"unavailable_title": "Kupowanie tokenów jest tymczasowo niedostępne",
 			"unavailable_description_disabled": "",
 			"unavailable_description_signing_failed": "",
