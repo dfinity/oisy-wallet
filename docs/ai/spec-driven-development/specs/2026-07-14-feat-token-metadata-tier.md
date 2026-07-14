@@ -1,6 +1,6 @@
 This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 
-# Spec: Curated-metadata token tier (`tier: 'token' | 'metadata'`)
+# Spec: Metadata-only token flag (`metadataOnly`)
 
 ## Goal
 
@@ -9,25 +9,24 @@ icon, tags, token-group membership) available for enriching a **manually
 imported** token, without presenting that token as a **curated token** that new
 users see or can toggle on.
 
-Introduce a single optional per-token property:
+Introduce a single optional per-token boolean:
 
 ```ts
-tier?: 'token' | 'metadata'; // optional, defaults to 'token'
+metadataOnly?: boolean; // optional, defaults to falsy
 ```
 
-- `tier: 'token'` (default — every existing token is unaffected): a normal
+- Falsy / absent (default — every existing token is unaffected): a normal
   curated token. Added to the default/visible token store; eligible to be
   suggested/enabled.
-- `tier: 'metadata'`: curated **metadata only**. Not added to the visible store
+- `metadataOnly: true`: curated **metadata only**. Not added to the visible store
   and never suggested, but still present in the data the manual-import path
   searches, so an explicit import resolves the curated metadata and lands the
   token in its group.
 
-This spec covers **only the tier mechanism**. It deliberately does not change any
-token's tier — every token stays `'token'`, so there is no user-visible change
-from this capability alone. The first consumers (demoting the tokens added for
-the 1Sec integration) ship as separate follow-up PRs; see
-[Delivery plan](#delivery-plan).
+This spec covers **only the mechanism**. It deliberately does not flag any real
+token, so there is no user-visible change from this capability alone. The first
+consumers (demoting the tokens added for the 1Sec integration) ship as separate
+follow-up PRs; see [Delivery plan](#delivery-plan).
 
 ## Motivation
 
@@ -41,18 +40,18 @@ The immediate driver is the set of tokens added for the 1Sec (OneSec) swap
 integration, which most users never asked for and which the swap itself does not
 need from OISY's token lists (the swap derives its supported set from the
 `onesec-bridge` SDK). Rather than delete those definitions and lose their curated
-metadata, we want to demote them — which requires this tier first.
+metadata, we want to demote them — which requires this flag first.
 
 This also advances the direction flagged in
 `src/frontend/src/eth/services/erc20.services.ts` — `// TODO(GIX-2740): use
 environment static metadata` — by giving the codebase an explicit
-"static metadata, not a shown token" tier.
+"static metadata, not a shown token" flag.
 
 ## Background — one list serves two roles today
 
 The reason a mechanism is needed at all: today a single list is both the set of
 tokens shown to users and the metadata source used to enrich a manual import.
-This tier splits those two roles.
+This flag splits those two roles.
 
 ### ERC20
 
@@ -104,21 +103,21 @@ Same coupling: both roles trace back to the same JSON entries.
 
 ## Approach
 
-One source of truth per side; the `tier` property decides store inclusion. The
-**manual-import enrichment path does not change** — metadata-tier tokens stay in
-the list enrichment searches; the only change is a filter where the visible store
-is built.
+One source of truth per side; the `metadataOnly` flag decides store inclusion.
+The **manual-import enrichment path does not change** — metadata-only tokens stay
+in the list enrichment searches; the only change is a filter where the visible
+store is built (`filter((t) => !t.metadataOnly)`).
 
 ### ICP / ICRC side (PR1)
 
-- Introduce the shared `tier` type/values (this PR owns the shared definition;
-  the EVM PR reuses it). The shared home is the base token schema
-  (`TokenMetadataTierSchema` + `TokenTierPropSchema` in `lib/schema/token.schema.ts`,
-  mixed into `TokenSchema`), with `tier` added to `NonRequiredProps`
+- Introduce the shared flag (this PR owns the shared definition; the EVM PR
+  reuses it). The shared home is the base token schema
+  (`TokenMetadataOnlyPropSchema` in `lib/schema/token.schema.ts`, mixed into
+  `TokenSchema`), with `metadataOnly` added to `NonRequiredProps`
   (`lib/types/token.ts`) so the `Required*` token types keep treating it as
-  optional. Also allow the optional `"tier"` key in the ICRC env schema
+  optional. Also allow the optional `"metadataOnly"` key in the ICRC env schema
   (`EnvIcTokenSchema`) so it survives the `tokens.icrc.json` parse.
-- Filter metadata-tier entries out of the curated/visible derivation
+- Filter metadata-only entries out of the curated/visible derivation
   (`ADDITIONAL_ICRC_TOKENS` in `tokens.icrc.additional.env.ts`), so they are not
   shown/suggested.
 - Keep all entries in the enrichment map (`ADDITIONAL_ICRC_TOKENS_INDEXED` →
@@ -127,53 +126,52 @@ is built.
 
 ### EVM / ERC20 side (PR2)
 
-- Reuse the shared `tier` type on the ERC20 env token definition (it rides along
-  like `category` / `tags` / `groupData` already do).
-- In `erc20.services.ts`, filter metadata-tier tokens out when setting
+- Reuse the shared flag on the ERC20 env token definition (it rides along like
+  `category` / `tags` / `groupData` already do).
+- In `erc20.services.ts`, filter metadata-only tokens out when setting
   `erc20DefaultTokensStore` (roughly
-  `set(ALL_DEFAULT_ERC20_TOKENS.filter((t) => t.tier !== 'metadata'))`). Leave
-  the manual-import `.find(...)` over `ALL_DEFAULT_ERC20_TOKENS` untouched.
-- Add a guard/assertion that a suggested token can never be metadata-tier, so
-  `ERC20_SUGGESTED_TOKENS` and the tier can't drift.
-
-The property name (`tier`) and enum values are settled here; exact filter
-placement matches neighbouring conventions.
+  `set(ALL_DEFAULT_ERC20_TOKENS.filter((t) => !t.metadataOnly))`). Leave the
+  manual-import `.find(...)` over `ALL_DEFAULT_ERC20_TOKENS` untouched.
+- Add a guard/assertion that a suggested token can never be metadata-only, so
+  `ERC20_SUGGESTED_TOKENS` and the flag can't drift.
 
 ## Scope
 
-**In scope:** the `tier` mechanism on both the ICRC and ERC20 paths, plus tests.
+**In scope:** the `metadataOnly` mechanism on both the ICRC and ERC20 paths, plus
+tests.
 
-**Out of scope (separate follow-up PRs):** changing any real token's tier — in
+**Out of scope (separate follow-up PRs):** flagging any real token — in
 particular demoting the 1Sec tokens (EVM BOB/CHAT/GLDT/ICP and ICRC USDC/USDT on
 ICP). Those, and the resulting PRODUCT.md behaviour change, land in the demotion
 PRs below.
 
 ## Acceptance criteria
 
-1. A token with `tier: 'metadata'` is **absent** from the visible/curated token
+1. A token with `metadataOnly: true` is **absent** from the visible/curated token
    store and is never suggested/enabled by default — on both the ICRC and ERC20
    paths.
-2. A token with `tier: 'metadata'` still **enriches a manual import** of the same
-   ledger/address: the imported token inherits the curated metadata (icon, tags)
-   and token-group membership once loaded, exactly as a curated token would.
-3. A token with no `tier` (or `tier: 'token'`) behaves exactly as today — no
-   regression. This is the default for every existing token, so this PR set
-   changes nothing user-visible on its own.
-4. Because metadata-tier tokens are absent from the store, the manage-tokens
-   search and the import "already available" guard both treat them as not
-   present (the latter is what re-enables importing them).
+2. A token with `metadataOnly: true` still **enriches a manual import** of the
+   same ledger/address: the imported token inherits the curated metadata (icon,
+   tags) and token-group membership once loaded, exactly as a curated token
+   would.
+3. A token without the flag behaves exactly as today — no regression. This is the
+   default for every existing token, so this PR set changes nothing user-visible
+   on its own.
+4. Because metadata-only tokens are absent from the store, the manage-tokens
+   search and the import "already available" guard both treat them as not present
+   (the latter is what re-enables importing them).
 
 ## Testing
 
-- ICRC (PR1) and ERC20 (PR2): unit tests using a **mock/synthetic** metadata-tier
+- ICRC (PR1) and ERC20 (PR2): unit tests using a **mock/synthetic** metadata-only
   token asserting (a) it is excluded from the curated/visible + suggested sets
   and (b) it is present in the enrichment lookup and yields curated metadata +
   group on a simulated manual import.
-- Regression tests confirming default-tier tokens are unaffected.
+- Regression tests confirming default (unflagged) tokens are unaffected.
 - Frontend gates: `npm run format`, `npm run lint`, `npm run check:tests`,
   targeted `npm run test` for the touched areas. (New code ships with tests to
-  satisfy the coverage gate; the mock metadata-tier token exercises the filter
-  before any real token uses the tier.)
+  satisfy the coverage gate; the mock metadata-only token exercises the filter
+  before any real token uses the flag.)
 
 ## PRODUCT.md
 
@@ -187,11 +185,11 @@ distinction between curated tokens and curated metadata and noting the
 
 Two independent stacks:
 
-- **PR1 (`feat`, ICP):** this spec + the ICRC-side tier mechanism.
-- **PR3a (`chore`, stacks on PR1):** set `tier: 'metadata'` on USDC (`53nhb-…`)
+- **PR1 (`feat`, ICP):** this spec + the ICRC-side `metadataOnly` mechanism.
+- **PR3a (`chore`, stacks on PR1):** set `metadataOnly: true` on USDC (`53nhb-…`)
   and USDT (`ij33n-…`) on ICP; update PRODUCT.md.
-- **PR2 (`feat`, EVM):** the ERC20-side tier mechanism.
-- **PR3b (`chore`, stacks on PR2):** set `tier: 'metadata'` on BOB / CHAT / GLDT
+- **PR2 (`feat`, EVM):** the ERC20-side `metadataOnly` mechanism.
+- **PR3b (`chore`, stacks on PR2):** set `metadataOnly: true` on BOB / CHAT / GLDT
   / ICP ERC20 on Ethereum, Arbitrum, Base; remove ICP from
   `ERC20_SUGGESTED_TOKENS`; update PRODUCT.md.
 
@@ -209,11 +207,13 @@ mechanism PR.
 ## Pending decisions (facts clear — need a call)
 
 - _Resolved:_ **Mechanism.** Single source of truth per side with an optional
-  per-token `tier: 'token' | 'metadata'` (default `'token'`); filter only where
-  the visible store is built; enrichment path unchanged.
+  per-token boolean `metadataOnly` (default falsy); filter only where the visible
+  store is built; enrichment path unchanged. (Chosen over a `tier` enum — for a
+  binary distinction a boolean is clearer, and `metadataOnly` reads truthfully
+  and cleanly in the filter.)
 - _Resolved:_ **No "import suggestion" surface exists.** The import flow is
   exact-address / exact-ledger entry with no autocomplete; the only searchable
-  list is the manage-tokens modal, which reads the store. Filtering metadata-tier
+  list is the manage-tokens modal, which reads the store. Filtering metadata-only
   tokens out of the store fully covers "new users don't see them."
 - _Resolved:_ **PR structure.** Two stacks (mechanism → demotion) per side, as in
   the Delivery plan.
