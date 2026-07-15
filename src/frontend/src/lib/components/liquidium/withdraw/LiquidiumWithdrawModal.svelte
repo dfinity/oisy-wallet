@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumWithdrawForm from '$lib/components/liquidium/withdraw/LiquidiumWithdrawForm.svelte';
@@ -145,7 +146,7 @@
 
 		const amountBaseUnits = parsedAmount;
 		const receiver = receiverAddress;
-		const { poolId, asset } = selectedReserve;
+		const { poolId, asset, chain } = selectedReserve;
 
 		modal?.next();
 
@@ -154,6 +155,7 @@
 				identity,
 				ethAddress: $ethAddress,
 				poolId,
+				chain: chain as Chain,
 				asset,
 				amount: amountBaseUnits,
 				receiverAddress: receiver,

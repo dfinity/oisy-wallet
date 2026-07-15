@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -199,6 +200,7 @@
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: reserve.poolId,
+				chain: Chain.ETH,
 				asset: reserve.asset,
 				amount: amountBaseUnits,
 				inflowFee,

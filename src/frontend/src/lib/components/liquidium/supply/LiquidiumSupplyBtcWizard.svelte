@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext } from 'svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
 	import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
@@ -174,6 +175,7 @@
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: market.poolId,
+				chain: Chain.BTC,
 				asset: market.asset,
 				amount: amountBaseUnits,
 				inflowFee,
