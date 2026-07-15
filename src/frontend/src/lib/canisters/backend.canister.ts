@@ -3,9 +3,15 @@ import type {
 	_SERVICE as BackendService,
 	BtcGetFeePercentilesResponse,
 	Contact,
+	CreatePersonalNoteShareRequest,
 	CustomToken,
+	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	PersonalNoteEntry,
+	PersonalNoteShareContent,
+	SignOnramperWidgetUrlRequest,
+	SignOnramperWidgetUrlResponse,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -16,7 +22,8 @@ import {
 	mapBtcAddPendingTransactionError,
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
-	mapGetAllowedCyclesError
+	mapGetAllowedCyclesError,
+	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type {
@@ -39,6 +46,7 @@ import type {
 	SaveUserNetworksSettings,
 	SaveUserTransactionsParams,
 	SetUserShowTestnetsParams,
+	SignOnramperWidgetUrlParams,
 	UpdateActiveUserTransactionParams,
 	UpdateUserExperimentalFeatureSettings,
 	UpdateUserTransactionFilterSettings
@@ -54,7 +62,7 @@ import {
 	Canister,
 	createServices,
 	fromNullable,
-	nonNullish,
+	isNullish,
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
@@ -166,14 +174,12 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcGetPendingTransactions = async ({
 		network,
-		address,
 		iiDelegationChain
 	}: BtcGetPendingTransactionParams): Promise<GetPendingTransactionsOutcome> => {
 		const { btc_get_pending_transactions } = this.caller({ certified: true });
 
 		const response = await btc_get_pending_transactions({
 			network,
-			address,
 			ii_delegation_chain: iiDelegationChain
 		});
 
@@ -227,6 +233,34 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		throw mapGetAllowedCyclesError(response.Err);
+	};
+
+	signOnramperWidgetUrl = async ({
+		wallets,
+		networkWallets,
+		walletAddressTags
+	}: SignOnramperWidgetUrlParams): Promise<SignOnramperWidgetUrlResponse> => {
+		const { sign_onramper_widget_url } = this.caller({ certified: true });
+
+		const request: SignOnramperWidgetUrlRequest = {
+			wallets: wallets.map(({ cryptoId, wallet }) => ({ key: cryptoId, value: wallet })),
+			network_wallets: networkWallets.map(({ networkId, wallet }) => ({
+				key: networkId,
+				value: wallet
+			})),
+			wallet_address_tags: (walletAddressTags ?? []).map(({ cryptoId, tag }) => ({
+				key: cryptoId,
+				value: tag
+			}))
+		};
+
+		const response = await sign_onramper_widget_url(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+
+		throw mapSignOnramperWidgetUrlError(response.Err);
 	};
 
 	allowSigning = async ({
@@ -410,7 +444,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
-		if (!nonNullish(rate)) {
+		if (isNullish(rate)) {
 			return;
 		}
 
@@ -559,6 +593,110 @@ export class BackendCanister extends Canister<BackendService> {
 			return response.Ok.transactions;
 		}
 
+		throw response.Err;
+	};
+
+	setPersonalNote = async (request: PersonalNoteEntry): Promise<void> => {
+		const { set_personal_note } = this.caller({ certified: true });
+		const response = await set_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	deletePersonalNote = async (request: DeletePersonalNoteRequest): Promise<void> => {
+		const { delete_personal_note } = this.caller({ certified: true });
+		const response = await delete_personal_note(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotes = async (): Promise<PersonalNoteEntry[]> => {
+		const { get_personal_notes } = this.caller({ certified: false });
+		const response = await get_personal_notes();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesCount = async (): Promise<bigint> => {
+		const { get_personal_notes_count } = this.caller({ certified: false });
+		const response = await get_personal_notes_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_personal_notes_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_personal_notes_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_personal_notes_vetkey_public_key();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {
+		const { create_personal_note_share } = this.caller({ certified: true });
+		const response = await create_personal_note_share(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable read endpoint (the share recipient has no identity), so
+	// it runs as a non-certified query like the other note reads.
+	getPersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { get_personal_note_share } = this.caller({ certified: false });
+		const response = await get_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	consumePersonalNoteShare = async (token: string): Promise<PersonalNoteShareContent> => {
+		const { consume_personal_note_share } = this.caller({ certified: true });
+		const response = await consume_personal_note_share(token);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getPersonalNoteSharesCount = async (): Promise<bigint> => {
+		const { get_personal_note_shares_count } = this.caller({ certified: false });
+		const response = await get_personal_note_shares_count();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
 		throw response.Err;
 	};
 }

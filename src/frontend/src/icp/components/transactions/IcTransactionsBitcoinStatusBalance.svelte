@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
 	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { updateBalance } from '$icp/services/ckbtc.services';
+	import IconReimbursed from '$lib/components/icons/IconReimbursed.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';

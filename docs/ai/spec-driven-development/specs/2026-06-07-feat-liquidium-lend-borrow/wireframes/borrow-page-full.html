@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>OISY — Borrow page (full)</title>
+		<style>
+			:root {
+				--bg: #e7edfb;
+				--card: #ffffff;
+				--box: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #737e91;
+				--blue: #2f6df6;
+				--blue-soft: #dbe6fd;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+			}
+			body {
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+				min-height: 100vh;
+			}
+			svg {
+				display: block;
+			}
+			.app {
+				display: flex;
+				min-height: 100vh;
+			}
+
+			/* sidebar */
+			.side {
+				width: 266px;
+				flex: 0 0 266px;
+				padding: 22px 16px;
+				display: flex;
+				flex-direction: column;
+			}
+			.brand {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				padding: 0 10px;
+				margin-bottom: 26px;
+			}
+			.brand .mark {
+				width: 38px;
+				height: 38px;
+				border-radius: 50%;
+				background: var(--blue);
+				display: grid;
+				place-items: center;
+			}
+			.brand .mark svg {
+				width: 22px;
+				height: 22px;
+				stroke: #fff;
+				fill: none;
+				stroke-width: 2;
+			}
+			.brand .name {
+				font-weight: 800;
+				letter-spacing: 0.02em;
+				line-height: 1;
+			}
+			.brand .name small {
+				display: block;
+				font-size: 11px;
+				font-weight: 800;
+				color: #16203a;
+			}
+			.nav {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+			.nav a {
+				display: flex;
+				align-items: center;
+				gap: 13px;
+				padding: 11px 12px;
+				border-radius: 12px;
+				color: #54607a;
+				text-decoration: none;
+				font-weight: 600;
+				font-size: 15px;
+			}
+			.nav a svg {
+				width: 21px;
+				height: 21px;
+				stroke: currentColor;
+				fill: none;
+				stroke-width: 1.8;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+			.nav a.on {
+				background: var(--blue-soft);
+				color: var(--blue);
+			}
+			.nav a:hover:not(.on) {
+				background: #eef2fb;
+			}
+			.badge-new {
+				margin-left: 6px;
+				background: #e5484d;
+				color: #fff;
+				font-size: 10px;
+				font-weight: 800;
+				letter-spacing: 0.04em;
+				border-radius: 6px;
+				padding: 2px 6px;
+			}
+			.side .spacer {
+				flex: 1;
+			}
+			.side .social {
+				display: flex;
+				gap: 10px;
+				padding: 0 12px;
+			}
+			.side .social a {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				background: #fff;
+				display: grid;
+				place-items: center;
+				color: #16203a;
+			}
+			.side .social svg {
+				width: 15px;
+				height: 15px;
+				fill: currentColor;
+			}
+
+			/* main */
+			.main {
+				flex: 1;
+				position: relative;
+				padding: 20px 26px 70px;
+			}
+			.topbar {
+				display: flex;
+				justify-content: flex-end;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 6px;
+			}
+			.netpill {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				background: #fff;
+				border: 1px solid var(--line);
+				border-radius: 12px;
+				padding: 9px 14px;
+				font-weight: 600;
+				font-size: 14px;
+				box-shadow: 0 1px 2px rgba(20, 30, 60, 0.05);
+			}
+			.netpill svg {
+				width: 16px;
+				height: 16px;
+				stroke: #16203a;
+				fill: none;
+				stroke-width: 1.8;
+			}
+			.iconbtn {
+				width: 42px;
+				height: 42px;
+				border-radius: 12px;
+				background: #fff;
+				border: 1px solid var(--line);
+				display: grid;
+				place-items: center;
+				box-shadow: 0 1px 2px rgba(20, 30, 60, 0.05);
+				cursor: pointer;
+			}
+			.iconbtn svg {
+				width: 19px;
+				height: 19px;
+				stroke: #16203a;
+				fill: none;
+				stroke-width: 1.8;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+
+			.content {
+				max-width: 600px;
+				margin: 6px auto 0;
+			}
+			.section {
+				background: var(--card);
+				border-radius: 18px;
+				padding: 22px;
+				margin-bottom: 18px;
+				box-shadow: 0 1px 3px rgba(20, 30, 60, 0.05);
+			}
+			.welcome {
+				text-align: center;
+			}
+			.welcome h2 {
+				margin: 0 0 6px;
+				font-size: 21px;
+			}
+			.welcome p {
+				margin: 0 auto 18px;
+				color: var(--muted);
+				font-size: 14px;
+				max-width: 430px;
+			}
+			.link {
+				color: var(--blue);
+				text-decoration: none;
+				font-weight: 600;
+			}
+			.boxes {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 14px;
+			}
+			.box {
+				background: var(--box);
+				border-radius: 14px;
+				padding: 16px;
+				text-align: center;
+			}
+			.box .h {
+				font-size: 13px;
+				font-weight: 700;
+				display: flex;
+				gap: 5px;
+				justify-content: center;
+				align-items: center;
+			}
+			.box .h .q {
+				width: 15px;
+				height: 15px;
+				border-radius: 50%;
+				border: 1px solid var(--muted);
+				color: var(--muted);
+				font-size: 10px;
+				display: inline-grid;
+				place-items: center;
+			}
+			.box .big {
+				font-size: 23px;
+				font-weight: 800;
+				margin-top: 10px;
+			}
+			.box .big.blue {
+				color: var(--blue);
+			}
+			.box .big.cost {
+				color: var(--red);
+			}
+			.box .sub {
+				font-size: 13px;
+				color: #5d6678;
+				margin-top: 3px;
+			}
+			.chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 11.5px;
+				font-weight: 700;
+				border-radius: 999px;
+				padding: 3px 10px;
+				margin-top: 9px;
+			}
+			.chip .d {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+			}
+			.chip.ok {
+				color: var(--green);
+				background: #e6f7ee;
+				border: 1px solid #a8e0c2;
+			}
+			.chip.ok .d {
+				background: var(--green);
+			}
+			h4 {
+				margin: 0 0 14px;
+				font-size: 16px;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 16px;
+			}
+			.pcard {
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				background: #fff;
+			}
+			.top {
+				display: flex;
+				align-items: flex-start;
+				margin-bottom: 12px;
+			}
+			.logo {
+				width: 44px;
+				height: 44px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				background: #9b6cff;
+				color: #fff;
+				font-size: 18px;
+			}
+			.bdg {
+				margin-left: auto;
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				padding: 5px 11px;
+				font-size: 11.5px;
+				white-space: nowrap;
+			}
+			.bdg b {
+				color: var(--amber);
+				margin-left: 3px;
+			}
+			h3 {
+				margin: 0 0 6px;
+				font-size: 19px;
+			}
+			.desc {
+				color: var(--muted);
+				font-size: 13px;
+				margin: 0 0 14px;
+			}
+			.list {
+				display: flex;
+				flex-direction: column;
+				gap: 11px;
+				font-size: 13px;
+				margin-bottom: 16px;
+			}
+			.li {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-top: 1px solid var(--line);
+				padding-top: 11px;
+			}
+			.li:first-child {
+				border-top: 0;
+				padding-top: 0;
+			}
+			.li .k {
+				color: var(--muted);
+			}
+			.li .v {
+				font-weight: 700;
+			}
+			.li .v.cost {
+				color: var(--red);
+			}
+			.icons {
+				display: flex;
+			}
+			.icons span {
+				width: 21px;
+				height: 21px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-size: 10px;
+				font-weight: 700;
+				margin-left: -6px;
+				border: 2px solid #fff;
+				color: #fff;
+			}
+			.icons span:first-child {
+				margin-left: 0;
+			}
+			.btc {
+				background: #f7931a;
+			}
+			.eth {
+				background: #7b88a8;
+			}
+			.usdc {
+				background: #2775ca;
+			}
+			.usdt {
+				background: #26a17b;
+			}
+			.net-eth {
+				background: #3c3c4d;
+			}
+			.cta {
+				margin-top: auto;
+				width: 100%;
+				background: var(--green);
+				color: #fff;
+				border: 0;
+				border-radius: 12px;
+				padding: 13px;
+				font-weight: 700;
+				font-size: 15px;
+				cursor: pointer;
+			}
+			.ghost {
+				border: 1px dashed #c9d2e6;
+				border-radius: 16px;
+				display: grid;
+				place-items: center;
+				color: var(--muted);
+				font-size: 13px;
+				text-align: center;
+				padding: 20px;
+			}
+
+			.footer {
+				position: fixed;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 14px 26px;
+				font-size: 12.5px;
+				color: #5d6678;
+			}
+			.footer .l {
+				display: flex;
+				gap: 10px;
+			}
+			.footer .l a {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				background: #fff;
+				display: grid;
+				place-items: center;
+				color: #16203a;
+			}
+			.footer .l svg {
+				width: 14px;
+				height: 14px;
+				fill: currentColor;
+			}
+			.footer .r {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.footer .r .inf {
+				color: #2f6df6;
+				font-weight: 800;
+			}
+			.footer .r .heart {
+				color: #e5484d;
+			}
+			.footer .r a {
+				color: #2f6df6;
+				text-decoration: none;
+				font-weight: 600;
+			}
+			@media (max-width: 900px) {
+				.side {
+					display: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="app">
+			<!-- SIDEBAR -->
+			<aside class="side">
+				<div class="brand">
+					<span class="mark"
+						><svg viewBox="0 0 24 24">
+							<circle cx="12" cy="12" r="7" />
+							<path d="M9 12a3 3 0 0 1 6 0" /></svg
+					></span>
+					<span class="name">OISY<small>WALLET</small></span>
+				</div>
+				<nav class="nav">
+					<a href="#"
+						><svg viewBox="0 0 24 24">
+							<rect x="3" y="6" width="18" height="13" rx="2.5" />
+							<path d="M3 10h18" />
+							<circle cx="16.5" cy="14" r="1.2" />
+						</svg>
+						Assets</a
+					>
+					<a href="#"
+						><svg viewBox="0 0 24 24">
+							<path d="M3.5 12a8.5 8.5 0 1 0 2.8-6.3" />
+							<path d="M3 4.5V8h3.5" />
+							<path d="M12 8v4.2l3 1.8" />
+						</svg>
+						Activity</a
+					>
+					<a href="#"
+						><svg viewBox="0 0 24 24">
+							<path d="M12 21v-8" />
+							<path d="M12 13c0-3.3 2.2-5.5 5.5-5.5C17.5 10.8 15.3 13 12 13z" />
+							<path d="M12 13c0-3.3-2.2-5.5-5.5-5.5C6.5 10.8 8.7 13 12 13z" />
+						</svg>
+						Earn</a
+					>
+					<a class="on" href="#"
+						><svg viewBox="0 0 24 24">
+							<path d="M12 3v9" />
+							<path d="M8 9l4 4 4-4" />
+							<path d="M4 15v2.5A2.5 2.5 0 0 0 6.5 20h11a2.5 2.5 0 0 0 2.5-2.5V15" />
+						</svg>
+						Borrow <span class="badge-new">NEW</span></a
+					>
+					<a href="#"
+						><svg viewBox="0 0 24 24">
+							<circle cx="12" cy="12" r="8.5" />
+							<path d="M15.5 8.5l-2 5.5-5.5 2 2-5.5z" />
+						</svg>
+						Explore</a
+					>
+				</nav>
+				<div class="spacer"></div>
+				<div class="social">
+					<a href="#" title="X"
+						><svg viewBox="0 0 24 24">
+							<path
+								d="M3 3l7.5 9.8L3.4 21H6l5.6-6.4L16.3 21H21l-7.9-10.3L20.6 3H18l-5.2 5.9L8.4 3z"
+							/></svg
+					></a>
+					<a href="#" title="GitHub"
+						><svg viewBox="0 0 24 24">
+							<path
+								d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.300-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2z"
+							/></svg
+					></a>
+				</div>
+			</aside>
+
+			<!-- MAIN -->
+			<main class="main">
+				<div class="topbar">
+					<span class="netpill"
+						><svg viewBox="0 0 24 24"><path d="M7 7l-3 3 3 3M17 7l3 3-3 3M14 5l-4 14" /></svg> All
+						networks
+						<svg viewBox="0 0 24 24" style="width: 14px; height: 14px; margin-left: 2px">
+							<path d="M6 9l6 6 6-6" /></svg
+					></span>
+					<button class="iconbtn" title="Notifications">
+						<svg viewBox="0 0 24 24">
+							<path d="M6 9a6 6 0 0 1 12 0c0 4.5 2 5.5 2 5.5H4S6 13.5 6 9z" />
+							<path d="M10 19a2 2 0 0 0 4 0" />
+						</svg>
+					</button>
+					<button class="iconbtn" title="Scan">
+						<svg viewBox="0 0 24 24">
+							<path
+								d="M4 8V6.5A2.5 2.5 0 0 1 6.5 4H8M16 4h1.5A2.5 2.5 0 0 1 20 6.5V8M20 16v1.5a2.5 2.5 0 0 1-2.5 2.5H16M8 20H6.5A2.5 2.5 0 0 1 4 17.5V16"
+							/>
+						</svg>
+					</button>
+					<button class="iconbtn" title="Profile &amp; Settings">
+						<svg viewBox="0 0 24 24">
+							<circle cx="12" cy="8.5" r="3.8" />
+							<path d="M4.5 20c0-4 3.7-6 7.5-6s7.5 2 7.5 6" />
+						</svg>
+					</button>
+				</div>
+
+				<div class="content">
+					<div class="section welcome">
+						<h2>Welcome to Borrow!</h2>
+						<p>
+							Access liquidity without selling — borrow stablecoins or BTC against your crypto.
+							<a class="link" href="#">Learn more ↗</a>
+						</p>
+						<div class="boxes">
+							<div class="box">
+								<div class="h">Borrowing power <span class="q">?</span></div>
+								<div class="big blue">$12,019</div>
+								<div class="sub">remaining · best provider</div>
+							</div>
+							<div class="box">
+								<div class="h">Active loans</div>
+								<div class="big cost">− $2,590/year</div>
+								<div class="sub">$35,000 borrowed</div>
+								<div class="chip ok"><span class="d"></span>Healthy · 68%</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="section">
+						<h4>Borrowing options</h4>
+						<div class="grid">
+							<div class="pcard">
+								<div class="top">
+									<span class="logo">L</span>
+									<span class="bdg">Borrow APR from<b>0.94%</b></span>
+								</div>
+								<h3>Liquidium</h3>
+								<p class="desc">Borrow USDC, USDT or BTC against your supplied collateral.</p>
+								<div class="list">
+									<div class="li">
+										<span class="k">Networks</span
+										><span class="v"
+											><span class="icons"
+												><span class="btc">₿</span><span class="net-eth">◆</span></span
+											></span
+										>
+									</div>
+									<div class="li">
+										<span class="k">Borrow assets</span
+										><span class="v"
+											><span class="icons"
+												><span class="btc">B</span><span class="eth">E</span
+												><span class="usdc">U</span><span class="usdt">T</span></span
+											></span
+										>
+									</div>
+									<div class="li">
+										<span class="k">Currently borrowing</span><span class="v cost">− $35,000</span>
+									</div>
+									<div class="li">
+										<span class="k">Interest / year</span><span class="v cost">− $2,590</span>
+									</div>
+								</div>
+								<button class="cta">Borrow</button>
+							</div>
+							<div class="ghost">More borrow providers<br />coming soon</div>
+						</div>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<div class="footer">
+			<div class="l">
+				<a href="#" title="X"
+					><svg viewBox="0 0 24 24">
+						<path
+							d="M3 3l7.5 9.8L3.4 21H6l5.6-6.4L16.3 21H21l-7.9-10.3L20.6 3H18l-5.2 5.9L8.4 3z"
+						/></svg
+				></a>
+				<a href="#" title="GitHub"
+					><svg viewBox="0 0 24 24">
+						<path
+							d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2z"
+						/></svg
+				></a>
+			</div>
+			<div class="r">
+				<span class="inf">∞</span> Incubated with <span class="heart">♥</span> by
+				<a href="#">DFINITY Foundation</a> © 2026
+			</div>
+		</div>
+	</body>
+</html>

@@ -360,7 +360,7 @@ No Rust files change, so backend gates are not required.
 
 ---
 
-## Post-Merge (per workflow Step 6)
+## Post-Merge (per workflow Step 7 — Post-merge cleanup)
 
 - Update `docs/ai/PRODUCT.md` to describe the Settings-page Preferences card and
   the logged-out-only language switcher in the menu. (PRODUCT.md currently has

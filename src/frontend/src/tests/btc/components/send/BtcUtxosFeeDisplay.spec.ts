@@ -1,14 +1,12 @@
 import BtcUtxosFeeDisplay from '$btc/components/send/BtcUtxosFeeDisplay.svelte';
-import {
-	initUtxosFeeStore,
-	UTXOS_FEE_CONTEXT_KEY,
-	type UtxosFeeStore
-} from '$btc/stores/utxos-fee.store';
+import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -25,7 +23,7 @@ describe('BtcUtxosFeeDisplay', () => {
 		utxosFeeStore: UtxosFeeStore;
 		exchangeRate?: number;
 	}) =>
-		new Map([
+		mockContextMap([
 			[
 				SEND_CONTEXT_KEY,
 				{
@@ -38,7 +36,7 @@ describe('BtcUtxosFeeDisplay', () => {
 					sendTokenExchangeRate: readable(exchangeRate)
 				}
 			],
-			[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }]
+			mockUtxosFeeContextEntry(utxosFeeStore)
 		]);
 
 	beforeEach(() => {

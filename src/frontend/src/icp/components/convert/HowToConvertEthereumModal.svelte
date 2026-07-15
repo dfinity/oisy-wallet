@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
 	import HowToConvertEthereumWizardSteps from '$icp/components/convert/HowToConvertEthereumWizardSteps.svelte';
@@ -8,11 +7,13 @@
 		type WizardStepsHowToConvertComplete
 	} from '$icp-eth/config/how-to-convert.config';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { ProgressStepsConvert, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsHowToConvert, WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 

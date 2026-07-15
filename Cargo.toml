@@ -12,12 +12,15 @@ resolver = "2"
 bs58 = "0.5"
 ic-cdk = "0.19.0"
 ic-cdk-timers = "1.0.0"
-canbench-rs = { version = "0.4.0" }
+canbench-rs = { version = "0.6.0" }
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.16.0"
 ic-stable-structures = "0.7"
+# 0.6.0 is the latest ic-vetkeys release that targets ic-cdk ^0.19 (matching the
+# backend); 0.7.0 requires ic-cdk ^0.20.1, which would force an unrelated bump.
+ic-vetkeys = "0.6.0"
 ic-metrics-encoder = "1.1"
 ic-canister-sig-creation = "1.3"
 ic-signature-verification = "0.3"
@@ -28,6 +31,7 @@ serde_bytes = "0.11"
 serde_json = "1"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = "0.4"
+hmac = "0.13"
 sha2 = "0.11"
 lazy_static = "1.5"
 # pocket-ic server 12.0 uses pocket-ic library 12.0
@@ -37,6 +41,7 @@ lazy_static = "1.5"
 pocket-ic = "13.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
+tiny-keccak = { version = "2.0", features = ["keccak"] }
 paste = "1.0"
 # Used for `futures::future::join_all` to run independent HTTP outcalls in
 # parallel (e.g. exchange price providers). Already a transitive dep via the

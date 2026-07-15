@@ -12,7 +12,7 @@ import {
 import { StakeProvider, type StakeProviderConfig, type StakeWizardEntry } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
 import type { Token } from '$lib/types/token';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { WizardSteps } from '$lib/types/wizard';
 
 export const stakeWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<WizardStepsStake> => [
 	{

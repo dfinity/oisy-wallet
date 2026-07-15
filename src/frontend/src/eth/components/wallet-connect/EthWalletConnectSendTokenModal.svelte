@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, onDestroy, setContext } from 'svelte';
@@ -29,6 +28,7 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -41,6 +41,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -204,6 +205,7 @@
 					<EthWalletConnectSendReview
 						{amount}
 						{application}
+						approveDisabled={isNullish($feeStore)}
 						{data}
 						{destination}
 						{erc20Approve}

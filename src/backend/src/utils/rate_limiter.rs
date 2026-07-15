@@ -35,6 +35,43 @@ thread_local! {
     /// Rate-limits `btc_get_pending_transactions`: max 15 calls per caller per minute.
     pub(crate) static BTC_GET_PENDING_TX_RATE_LIMITER: RateLimiter =
         RateLimiter::new(15, 60 * 1_000_000_000);
+
+    /// Rate-limits `sign_onramper_widget_url`: max 30 calls per caller per minute. The widget
+    /// re-signs on reactive input changes, so the limit is generous for legitimate use while still
+    /// bounding abuse of the endpoint as a signing oracle for the shared `OnRamper` secret.
+    pub(crate) static SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `set_personal_note`: max 30 calls per caller per minute.
+    /// Generous — a single `set` covers both add and edit — while bounding write
+    /// abuse of the encrypted store.
+    pub(crate) static SET_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `delete_personal_note`: max 30 calls per caller per minute.
+    pub(crate) static DELETE_PERSONAL_NOTE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
+    /// Rate-limits `create_personal_note_share`: max 20 calls per caller per
+    /// minute. The authenticated creator is a real principal, so this is a
+    /// normal per-caller limit (mirrors `SET_PERSONAL_NOTE_RATE_LIMITER`).
+    pub(crate) static CREATE_PERSONAL_NOTE_SHARE_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Coarse **global** limiter for `consume_personal_note_share`: max 600
+    /// calls total per minute, across *every* anonymous caller. An anonymous
+    /// update call has no distinguishing principal — `msg_caller()` is always
+    /// `Principal::anonymous()` — so `check_caller()` naturally buckets all
+    /// anonymous callers together under this one limiter, capping total
+    /// anonymous update-call volume rather than limiting any single caller
+    /// (which isn't possible here). `get_personal_note_share` is an anonymous
+    /// *query*, not an update: state changes made during query execution are
+    /// not persisted on the IC, so a stateful limiter on it would be a no-op on
+    /// the common (non-certified) query path and is intentionally not used — its
+    /// abuse surface is instead bounded by a cheap O(log n) lookup and the
+    /// token-guessing search space.
+    pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(600, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.

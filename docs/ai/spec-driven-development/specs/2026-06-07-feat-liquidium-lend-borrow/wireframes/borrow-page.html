@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Borrow page — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--card: #ffffff;
+				--box: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--blue: #2f6df6;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+			}
+			.wfbar {
+				max-width: 640px;
+				margin: 14px auto 0;
+				background: #fff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #8a94a8;
+				border: 1px solid #c9d2e6;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wfbar .ctrls {
+				display: flex;
+				gap: 6px;
+				align-items: center;
+				margin-top: 10px;
+				flex-wrap: wrap;
+				padding-top: 9px;
+				border-top: 1px solid #eef1f7;
+			}
+			.wfbar .ctrls button {
+				background: #f4f6fb;
+				border: 1px solid var(--line);
+				color: var(--muted);
+				border-radius: 8px;
+				padding: 4px 10px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.wfbar .ctrls button.on {
+				color: var(--txt);
+				border-color: var(--blue);
+			}
+			.wrap {
+				max-width: 640px;
+				margin: 0 auto;
+				padding: 16px;
+			}
+			.section {
+				background: var(--card);
+				border-radius: 16px;
+				padding: 20px;
+				margin-bottom: 16px;
+				box-shadow: 0 1px 2px rgba(20, 30, 60, 0.04);
+			}
+			.welcome {
+				text-align: center;
+			}
+			.welcome h2 {
+				margin: 0 0 6px;
+				font-size: 20px;
+			}
+			.welcome p {
+				margin: 0 auto 16px;
+				color: var(--muted);
+				font-size: 13.5px;
+				max-width: 440px;
+			}
+			.link {
+				color: var(--blue);
+				text-decoration: none;
+			}
+			.boxes {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 12px;
+			}
+			.box {
+				background: var(--box);
+				border-radius: 12px;
+				padding: 14px;
+				text-align: center;
+			}
+			.box .h {
+				font-size: 13px;
+				font-weight: 600;
+				display: flex;
+				gap: 5px;
+				justify-content: center;
+				align-items: center;
+			}
+			.box .h .q {
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				border: 1px solid var(--muted);
+				color: var(--muted);
+				font-size: 10px;
+				display: inline-grid;
+				place-items: center;
+			}
+			.box .big {
+				font-size: 22px;
+				font-weight: 700;
+				margin-top: 8px;
+			}
+			.box .big.blue {
+				color: var(--blue);
+			}
+			.box .big.cost {
+				color: var(--red);
+			}
+			.box .sub {
+				font-size: 13px;
+				color: var(--muted);
+				margin-top: 2px;
+			}
+			.chip {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 11.5px;
+				font-weight: 600;
+				border-radius: 999px;
+				padding: 2px 9px;
+				margin-top: 8px;
+			}
+			.chip .d {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+			}
+			.chip.ok {
+				color: var(--green);
+				background: #e6f7ee;
+			}
+			.chip.ok .d {
+				background: var(--green);
+			}
+			.chip.amber {
+				color: var(--amber);
+				background: #fbf1de;
+			}
+			.chip.amber .d {
+				background: var(--amber);
+			}
+			.chip.red {
+				color: var(--red);
+				background: #fce8e6;
+			}
+			.chip.red .d {
+				background: var(--red);
+			}
+			h4 {
+				margin: 0 0 14px;
+				font-size: 16px;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 14px;
+			}
+			@media (max-width: 520px) {
+				.boxes,
+				.grid {
+					grid-template-columns: 1fr;
+				}
+			}
+			.pcard {
+				border: 1px solid var(--line);
+				border-radius: 14px;
+				padding: 15px;
+				display: flex;
+				flex-direction: column;
+				background: #fff;
+			}
+			.top {
+				display: flex;
+				align-items: flex-start;
+				margin-bottom: 12px;
+			}
+			.logo {
+				width: 42px;
+				height: 42px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				background: #9b6cff;
+				color: #fff;
+			}
+			.badge {
+				margin-left: auto;
+				border: 1px solid var(--line);
+				border-radius: 999px;
+				padding: 4px 11px;
+				font-size: 11.5px;
+				white-space: nowrap;
+			}
+			.badge b {
+				color: var(--amber);
+				margin-left: 3px;
+			}
+			h3 {
+				margin: 0 0 6px;
+				font-size: 19px;
+			}
+			.desc {
+				color: var(--muted);
+				font-size: 13px;
+				margin: 0 0 14px;
+			}
+			.list {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				font-size: 13px;
+				margin-bottom: 16px;
+			}
+			.li {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-top: 1px solid var(--line);
+				padding-top: 10px;
+			}
+			.li:first-child {
+				border-top: 0;
+				padding-top: 0;
+			}
+			.li .k {
+				color: var(--muted);
+			}
+			.li .v {
+				font-weight: 700;
+			}
+			.li .v.cost {
+				color: var(--red);
+			}
+			.icons {
+				display: flex;
+			}
+			.icons span {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-size: 10px;
+				font-weight: 700;
+				margin-left: -6px;
+				border: 2px solid #fff;
+			}
+			.icons span:first-child {
+				margin-left: 0;
+			}
+			.btc {
+				background: #f7931a;
+				color: #fff;
+			}
+			.eth {
+				background: #8a93b2;
+				color: #fff;
+			}
+			.usdc {
+				background: #2775ca;
+				color: #fff;
+			}
+			.usdt {
+				background: #26a17b;
+				color: #fff;
+			}
+			.net-btc {
+				background: #f7931a;
+				color: #fff;
+			}
+			.net-eth {
+				background: #3c3c4d;
+				color: #fff;
+			}
+			.cta {
+				margin-top: auto;
+				width: 100%;
+				background: var(--green);
+				color: #fff;
+				border: 0;
+				border-radius: 10px;
+				padding: 12px;
+				font-weight: 700;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.ghost {
+				border: 1px dashed #c9d2e6;
+				border-radius: 14px;
+				display: grid;
+				place-items: center;
+				color: var(--muted);
+				font-size: 13px;
+				text-align: center;
+				padding: 20px;
+			}
+			.hide {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag">Wireframe — controls below are not part of the UI</span>
+			<div>
+				The new top-level <b>Borrow</b> page (<code>/borrow/</code>), mirroring the Earn page
+				skeleton. Header boxes: <b>Borrowing power</b> (potential, best provider) and
+				<b>Active loans</b> (total + interest/year + <b>worst health</b> across accounts). Below:
+				the borrow-framed <b>Liquidium card</b> (borrow tokens + rates) → opens
+				<code>/providers/liquidium/</code>.
+			</div>
+			<div class="ctrls">
+				<span>Demo · your state:</span>
+				<button data-s="none" class="on">No loans</button>
+				<button data-s="healthy">Active · healthy</button>
+				<button data-s="atrisk">Active · at risk</button>
+			</div>
+		</div>
+
+		<div class="wrap">
+			<!-- Header section -->
+			<div class="section welcome">
+				<h2>Welcome to Borrow!</h2>
+				<p>
+					Access liquidity without selling — borrow stablecoins or BTC against your crypto.
+					<a class="link" href="#">Learn more ↗</a>
+				</p>
+				<div class="boxes">
+					<div class="box">
+						<div class="h">Borrowing power <span class="q">?</span></div>
+						<div class="big blue" id="power">$47,019</div>
+						<div class="sub" id="powerSub">available · best provider</div>
+					</div>
+					<div class="box">
+						<div class="h">Active loans</div>
+						<div class="big cost" id="loanYr">$0.00</div>
+						<div class="sub" id="loanTot">no active loans</div>
+						<div class="chip ok hide" id="health">
+							<span class="d"></span><span id="healthText">Healthy · 68%</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Opportunities section -->
+			<div class="section">
+				<h4>Borrowing options</h4>
+				<div class="grid">
+					<div class="pcard">
+						<div class="top">
+							<span class="logo">L</span>
+							<span class="badge">Borrow APR from<b>0.94%</b></span>
+						</div>
+						<h3>Liquidium</h3>
+						<p class="desc">Borrow USDC, USDT or BTC against your supplied collateral.</p>
+						<div class="list" id="cardList">
+							<div class="li">
+								<span class="k">Networks</span
+								><span class="v"
+									><span class="icons"
+										><span class="net-btc">₿</span><span class="net-eth">◆</span></span
+									></span
+								>
+							</div>
+							<div class="li">
+								<span class="k">Borrow assets</span
+								><span class="v"
+									><span class="icons"
+										><span class="btc">B</span><span class="eth">E</span><span class="usdc">U</span
+										><span class="usdt">T</span></span
+									></span
+								>
+							</div>
+							<!-- position rows injected -->
+						</div>
+						<button class="cta">Borrow</button>
+					</div>
+
+					<div class="ghost">More borrow providers<br />coming soon</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const data = {
+				none: {
+					power: '$47,019',
+					powerSub: 'available · best provider',
+					loanYr: '$0.00',
+					loanTot: 'no active loans',
+					health: null,
+					rows: ''
+				},
+				healthy: {
+					power: '$12,019',
+					powerSub: 'remaining · best provider',
+					loanYr: '− $2,590/year',
+					loanTot: '$35,000 borrowed',
+					health: { b: 'ok', t: 'Healthy · 68%' },
+					rows: `<div class="li"><span class="k">Currently borrowing</span><span class="v cost">− $35,000</span></div><div class="li"><span class="k">Interest / year</span><span class="v cost">− $2,590</span></div>`
+				},
+				atrisk: {
+					power: '$1,140',
+					powerSub: 'remaining · best provider',
+					loanYr: '− $2,590/year',
+					loanTot: '$35,000 borrowed',
+					health: { b: 'amber', t: 'At risk · 16%' },
+					rows: `<div class="li"><span class="k">Currently borrowing</span><span class="v cost">− $35,000</span></div><div class="li"><span class="k">Interest / year</span><span class="v cost">− $2,590</span></div>`
+				}
+			};
+			const baseRows = document.getElementById('cardList').innerHTML;
+			function render(s) {
+				const d = data[s];
+				document.getElementById('power').textContent = d.power;
+				document.getElementById('powerSub').textContent = d.powerSub;
+				document.getElementById('loanYr').textContent = d.loanYr;
+				document.getElementById('loanTot').textContent = d.loanTot;
+				const h = document.getElementById('health');
+				if (d.health) {
+					h.className = 'chip ' + d.health.b;
+					document.getElementById('healthText').textContent = d.health.t;
+				} else {
+					h.className = 'chip ok hide';
+				}
+				document.getElementById('cardList').innerHTML = baseRows + d.rows;
+			}
+			document.querySelectorAll('.ctrls button').forEach((b) =>
+				b.addEventListener('click', () => {
+					document.querySelectorAll('.ctrls button').forEach((x) => x.classList.remove('on'));
+					b.classList.add('on');
+					render(b.dataset.s);
+				})
+			);
+			render('none');
+		</script>
+	</body>
+</html>

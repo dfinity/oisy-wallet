@@ -1,7 +1,7 @@
 import { scannerWizardSteps } from '$lib/config/scanner.config';
 import { WizardStepsScanner } from '$lib/enums/wizard-steps';
+import type { WizardSteps } from '$lib/types/wizard';
 import en from '$tests/mocks/i18n.mock';
-import type { WizardSteps } from '@dfinity/gix-components';
 
 describe('scanner.config', () => {
 	describe('scannerWizardSteps', () => {

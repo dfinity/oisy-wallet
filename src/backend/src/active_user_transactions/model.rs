@@ -8,7 +8,7 @@ use shared::types::active_user_transaction::{
     MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
     MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
     MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
-    MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
+    MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN, MAX_LIQUIDIUM_POOL_ID_LEN,
 };
 
 use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal};
@@ -222,6 +222,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
                 ));
             }
         }
+        ActiveUserTransactionData::Liquidium(d) => {
+            require_positive_amount(&d.amount)?;
+            require_pool_id(&d.pool_id)?;
+        }
     }
     Ok(())
 }
@@ -230,6 +234,15 @@ fn require_positive_amount(amount: &Nat) -> Result<(), ActiveUserTransactionErro
     if amount.0 == 0u32.into() {
         return Err(ActiveUserTransactionError::InvalidData(
             "amount must be greater than zero".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+fn require_pool_id(pool_id: &str) -> Result<(), ActiveUserTransactionError> {
+    if pool_id.is_empty() || pool_id.len() > MAX_LIQUIDIUM_POOL_ID_LEN {
+        return Err(ActiveUserTransactionError::InvalidData(
+            "pool_id invalid length".to_string(),
         ));
     }
     Ok(())
@@ -288,9 +301,10 @@ mod tests {
     use shared::types::{
         active_user_transaction::{
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-            ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, OneSecEvmToIcpData,
-            OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
-            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, LiquidiumAction,
+            LiquidiumData, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         token_id::TokenId,
     };
@@ -396,6 +410,57 @@ mod tests {
             amount: Nat::from(1u32),
             recipient_evm_address: "not-an-address".to_string(),
         });
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    fn liquidium_data(amount: u64, pool_id: &str) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Liquidium(LiquidiumData {
+            action: LiquidiumAction::Supply,
+            pool_id: pool_id.to_string(),
+            token: TokenId::Icrc(Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").unwrap()),
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn liquidium_create_roundtrip() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("liq-1");
+        req.data = liquidium_data(5_100, "mxzaz-hqaaa-aaaar-qaada-cai");
+        let tx = create(&mut map, principal(), req, 1).expect("create");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+        assert_eq!(
+            tx.data,
+            liquidium_data(5_100, "mxzaz-hqaaa-aaaar-qaada-cai")
+        );
+    }
+
+    #[test]
+    fn liquidium_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("liq-1");
+        req.data = liquidium_data(0, "mxzaz-hqaaa-aaaar-qaada-cai");
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn liquidium_empty_pool_id_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("liq-1");
+        req.data = liquidium_data(5_100, "");
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn liquidium_overlong_pool_id_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("liq-1");
+        // A canister principal text is at most 63 chars; anything longer can
+        // never be a valid pool id.
+        req.data = liquidium_data(5_100, &"a".repeat(MAX_LIQUIDIUM_POOL_ID_LEN + 1));
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Dapps carousel — Liquidium slide (wireframe)</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--card: #ffffff;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #737e91;
+				--brand: #2f6df6;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+				min-height: 100vh;
+			}
+			svg {
+				display: block;
+			}
+			.wfbar {
+				max-width: 520px;
+				margin: 16px auto 0;
+				background: #fff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wfbar .tag {
+				display: inline-block;
+				font-size: 10px;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: #8a94a8;
+				border: 1px solid #c9d2e6;
+				border-radius: 5px;
+				padding: 1px 6px;
+				margin-bottom: 7px;
+			}
+			.wrap {
+				max-width: 520px;
+				margin: 16px auto;
+				padding: 0 16px;
+			}
+			.card {
+				background: var(--card);
+				border: 1px solid var(--line);
+				border-radius: 16px;
+				padding: 16px 18px;
+				box-shadow: 0 1px 3px rgba(20, 30, 60, 0.05);
+			}
+			.slide {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+				min-height: 72px;
+			}
+			.logo {
+				width: 64px;
+				height: 64px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 800;
+				font-size: 22px;
+				margin-right: 16px;
+				flex: 0 0 64px;
+			}
+			.lq {
+				background: #9b6cff;
+				color: #fff;
+			}
+			.ha {
+				background: #1f6f4a;
+				color: #fff;
+			}
+			.air {
+				background: #f4b942;
+				color: #3a2a00;
+			}
+			.mid {
+				flex: 1;
+				min-width: 0;
+			}
+			.mid .text {
+				margin-bottom: 4px;
+			}
+			.cta {
+				background: none;
+				border: 0;
+				padding: 0;
+				color: var(--brand);
+				font-weight: 700;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.close {
+				border: 0;
+				background: none;
+				color: #9aa4b5;
+				cursor: pointer;
+				align-self: flex-start;
+				padding: 2px;
+			}
+			.close svg {
+				width: 20px;
+				height: 20px;
+				stroke: currentColor;
+				fill: none;
+				stroke-width: 2;
+			}
+			.controls {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 14px;
+				margin-top: 14px;
+			}
+			.arrow {
+				width: 30px;
+				height: 30px;
+				border-radius: 50%;
+				border: 1px solid var(--line);
+				background: #fff;
+				display: grid;
+				place-items: center;
+				cursor: pointer;
+			}
+			.arrow svg {
+				width: 15px;
+				height: 15px;
+				stroke: #16203a;
+				fill: none;
+				stroke-width: 2;
+			}
+			.dots {
+				display: flex;
+				gap: 7px;
+			}
+			.dot {
+				width: 7px;
+				height: 7px;
+				border-radius: 50%;
+				background: #cdd6e6;
+				cursor: pointer;
+			}
+			.dot.on {
+				background: var(--brand);
+			}
+			.tag-new {
+				font-size: 10px;
+				font-weight: 700;
+				color: #2f6df6;
+				border: 1px solid #cdddfb;
+				background: #eef4ff;
+				border-radius: 6px;
+				padding: 1px 6px;
+				margin-left: 8px;
+				vertical-align: middle;
+			}
+			.toast {
+				position: fixed;
+				left: 50%;
+				bottom: 18px;
+				transform: translateX(-50%);
+				background: #1f2a44;
+				color: #fff;
+				padding: 9px 14px;
+				border-radius: 9px;
+				font-size: 13px;
+				opacity: 0;
+				transition: 0.25s;
+			}
+			.toast.show {
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wfbar">
+			<span class="tag"
+				>Wireframe — this is real UI (arrows, dots, CTA, close are the actual controls)</span
+			>
+			<div>
+				The dapps carousel with the <b>new Liquidium "Lend &amp; Borrow" slide</b> (synthesized in
+				code, new id) — its CTA navigates internally to <code>/providers/liquidium/</code>, exactly
+				like the Harvest Autopilot slide deep-links to <code>/earn/</code>. (The separate existing
+				<code>"liquidium"</code> dapp-descriptions slide, which opens the explorer/dapp-details
+				modal, is not shown here — it's unchanged.) Use the arrows/dots to move between slides; CTAs
+				show where they'd navigate.
+			</div>
+		</div>
+
+		<div class="wrap">
+			<div class="card">
+				<div class="slide">
+					<div class="logo" id="logo"></div>
+					<div class="mid">
+						<div class="text" id="text"></div>
+						<button class="cta" id="cta"></button>
+					</div>
+					<button class="close" id="close" title="Dismiss">
+						<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+					</button>
+				</div>
+				<div class="controls">
+					<button class="arrow" id="prev">
+						<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+					</button>
+					<div class="dots" id="dots"></div>
+					<button class="arrow" id="next">
+						<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="toast" id="toast"></div>
+
+		<script>
+			const slides = [
+				{
+					logo: 'L',
+					cls: 'lq',
+					text: 'Lend &amp; borrow native BTC against stablecoins.',
+					cta: 'Open Liquidium',
+					target: '/providers/liquidium/',
+					isNew: true
+				},
+				{
+					logo: '🚜',
+					cls: 'ha',
+					text: 'Maximize yield with 1-click autopilot vaults.',
+					cta: 'Go to Autopilot',
+					target: '/earn/'
+				},
+				{
+					logo: '★',
+					cls: 'air',
+					text: 'Use OISY and EARN! Ep. 6 is live.',
+					cta: 'Check status',
+					target: 'rewards modal'
+				}
+			];
+			let i = 0;
+			function toast(m) {
+				const t = document.getElementById('toast');
+				t.textContent = m;
+				t.classList.add('show');
+				setTimeout(() => t.classList.remove('show'), 1700);
+			}
+			function render() {
+				const s = slides[i];
+				const logo = document.getElementById('logo');
+				logo.className = 'logo ' + s.cls;
+				logo.textContent = s.logo;
+				document.getElementById('text').innerHTML =
+					s.text + (s.isNew ? '<span class="tag-new">NEW</span>' : '');
+				document.getElementById('cta').textContent = s.cta + ' →';
+				document.getElementById('dots').innerHTML = slides
+					.map((_, j) => `<span class="dot ${j === i ? 'on' : ''}" data-j="${j}"></span>`)
+					.join('');
+				document.querySelectorAll('.dot').forEach(
+					(d) =>
+						(d.onclick = () => {
+							i = +d.dataset.j;
+							render();
+						})
+				);
+			}
+			document.getElementById('prev').onclick = () => {
+				i = (i - 1 + slides.length) % slides.length;
+				render();
+			};
+			document.getElementById('next').onclick = () => {
+				i = (i + 1) % slides.length;
+				render();
+			};
+			document.getElementById('cta').onclick = () => {
+				const s = slides[i];
+				toast(s.target.startsWith('/') ? '→ navigates to ' + s.target : '→ opens ' + s.target);
+			};
+			document.getElementById('close').onclick = () =>
+				toast('Slide dismissed (hidden for this user)');
+			render();
+		</script>
+	</body>
+</html>

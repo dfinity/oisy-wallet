@@ -5,17 +5,15 @@ import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
-import {
-	UTXOS_FEE_CONTEXT_KEY,
-	initUtxosFeeStore,
-	type UtxosFeeStore
-} from '$btc/stores/utxos-fee.store';
+import { initUtxosFeeStore, type UtxosFeeStore } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo } from '$tests/mocks/btc.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('UtxosFeeLoader', () => {
@@ -26,7 +24,7 @@ describe('UtxosFeeLoader', () => {
 	const mockFeeRateFromPercentiles = 5000n;
 
 	const mockContext = ({ utxosFeeStore }: { utxosFeeStore: UtxosFeeStore }) =>
-		new Map([[UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore }]]);
+		mockContextMap([mockUtxosFeeContextEntry(utxosFeeStore)]);
 
 	const mockBtcReviewResult = {
 		feeSatoshis: 700n,

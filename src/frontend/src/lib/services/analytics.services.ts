@@ -4,8 +4,10 @@ import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
+	type PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
@@ -144,6 +146,47 @@ export const trackTransactionFilter = ({
 			}),
 			source_location: PLAUSIBLE_EVENT_SOURCE_LOCATIONS.ACTIVITY_PAGE,
 			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+		}
+	});
+};
+
+/**
+ * Track the outcome of opening the Onramper buy widget.
+ *
+ * Fired once the open outcome is known: `success` when the signed widget URL
+ * resolves, `error` when signing fails. Replaces the former buy-token event.
+ *
+ * Mirrors {@link trackTransactionFilter}: the selected token is emitted via the
+ * dedicated `token_*` props (network / symbol / name / address) so dashboards
+ * can group cleanly. On failure we additionally carry the error severity, the
+ * failure category (`result_error_type`) and the underlying message, if any.
+ */
+export const trackOnramperOpen = ({
+	token,
+	status,
+	errorType,
+	errorMessage
+}: {
+	token?: { network: string; symbol: string; name: string; address?: string };
+	status: PLAUSIBLE_EVENT_RESULT_STATUSES;
+	errorType?: PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES;
+	errorMessage?: string;
+}) => {
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.ONRAMPER_OPEN,
+		metadata: {
+			...(nonNullish(token) && {
+				token_network: token.network,
+				token_symbol: token.symbol,
+				token_name: token.name,
+				...(nonNullish(token.address) && { token_address: token.address })
+			}),
+			result_status: status,
+			...(status === PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR && {
+				result_error_severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
+				...(nonNullish(errorType) && { result_error_type: errorType }),
+				...(nonNullish(errorMessage) && { result_error_message: errorMessage })
+			})
 		}
 	});
 };

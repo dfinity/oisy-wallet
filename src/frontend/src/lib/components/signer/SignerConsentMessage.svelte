@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Markdown, preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -8,6 +7,7 @@
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Markdown from '$lib/components/ui/Markdown.svelte';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_RESULT_STATUSES,
@@ -19,6 +19,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { mapSignerOriginHost } from '$lib/utils/signer.utils';
 
 	const {

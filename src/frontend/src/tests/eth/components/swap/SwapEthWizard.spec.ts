@@ -42,7 +42,8 @@ import { get, readable, writable, type Writable } from 'svelte/store';
 const mockParseToken = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/utils/parse.utils', () => ({
-	parseToken: mockParseToken
+	parseToken: mockParseToken,
+	tryParseToken: mockParseToken
 }));
 
 mockParseToken.mockReturnValue(ZERO);
@@ -175,10 +176,10 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('You pay')).toBeInTheDocument();
-			expect(getByText('You receive')).toBeInTheDocument();
-			expect(getByText('Review swap')).toBeInTheDocument();
-			expect(getByText('Cancel')).toBeInTheDocument();
+			expect(getByText(en.tokens.text.source_token_title)).toBeInTheDocument();
+			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
+			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
+			expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 		});
 
 		it('renders slippage section', () => {
@@ -189,7 +190,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Max slippage')).toBeInTheDocument();
+			expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 		});
 
 		it('renders swap provider information', () => {
@@ -200,7 +201,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Swap provider')).toBeInTheDocument();
+			expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
 		});
 
 		it('renders fee information', () => {
@@ -211,7 +212,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Total fee')).toBeInTheDocument();
+			expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
 		});
 
 		it('renders token input fields', () => {
@@ -266,7 +267,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Total fee')).toBeInTheDocument();
+			expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
 		});
 
 		it('shows gasless fee when Velora DELTA is selected and permit is supported', () => {
@@ -278,7 +279,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Gasless')).toBeInTheDocument();
+			expect(getByText(en.swap.text.gasless)).toBeInTheDocument();
 		});
 
 		it('does not show gasless fee when Velora MARKET is selected', () => {
@@ -290,7 +291,7 @@ describe('SwapEthWizard', () => {
 
 			const { queryByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(queryByText('Gasless')).not.toBeInTheDocument();
+			expect(queryByText(en.swap.text.gasless)).not.toBeInTheDocument();
 		});
 
 		it('does not show gasless fee when NEAR Intents is selected even with permit support', () => {
@@ -302,7 +303,7 @@ describe('SwapEthWizard', () => {
 
 			const { queryByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(queryByText('Gasless')).not.toBeInTheDocument();
+			expect(queryByText(en.swap.text.gasless)).not.toBeInTheDocument();
 		});
 
 		it('derives isApproveNeeded from selectedProvider, not swaps[0]', () => {
@@ -313,7 +314,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Total fee')).toBeInTheDocument();
+			expect(getByText(en.fee.text.total_fee)).toBeInTheDocument();
 		});
 
 		it('derives isGasless from selectedProvider, not swaps[0]', () => {
@@ -325,7 +326,7 @@ describe('SwapEthWizard', () => {
 
 			const { getByText } = renderWithStep({ step: WizardStepsSwap.SWAP, context: mockContext });
 
-			expect(getByText('Gasless')).toBeInTheDocument();
+			expect(getByText(en.swap.text.gasless)).toBeInTheDocument();
 		});
 	});
 
@@ -450,7 +451,7 @@ describe('SwapEthWizard', () => {
 				await fireEvent.click(getByRole('checkbox'));
 			}
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
@@ -469,7 +470,7 @@ describe('SwapEthWizard', () => {
 				await fireEvent.click(getByRole('checkbox'));
 			}
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(onBack).toHaveBeenCalledOnce();
@@ -495,7 +496,7 @@ describe('SwapEthWizard', () => {
 				await fireEvent.click(getByRole('checkbox'));
 			}
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(toasts.toastsError).not.toHaveBeenCalledWith(
@@ -526,7 +527,7 @@ describe('SwapEthWizard', () => {
 				context: createExecutionContext().ctx
 			});
 
-			const swapButton = getByText('Swap now').closest('button');
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
 
 			expect(swapButton).toBeDisabled();
 

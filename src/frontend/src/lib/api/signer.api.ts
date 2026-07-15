@@ -10,6 +10,7 @@ import { CanisterApi } from '$lib/api/canister.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
@@ -117,6 +118,15 @@ export const signWithSchnorr = async ({
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);
+};
+
+export const genericSignWithEcdsa = async ({
+	identity,
+	...rest
+}: CanisterApiFunctionParams<GenericSignWithEcdsaParams>): Promise<Uint8Array> => {
+	const { genericSignWithEcdsa } = await signerCanister({ identity });
+
+	return await genericSignWithEcdsa(rest);
 };
 
 const signerCanister = async ({

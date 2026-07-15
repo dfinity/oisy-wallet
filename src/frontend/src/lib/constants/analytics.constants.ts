@@ -74,6 +74,13 @@ export const TRACK_COUNT_SWAP_SUBMITTED = 'swap_submitted';
 export const TRACK_COUNT_SWAP_SUCCESS = 'swap_success';
 export const TRACK_COUNT_SWAP_ERROR = 'swap_error';
 
+// Liquidium (lend & borrow). Generic across actions — the action (supply/borrow/
+// …) rides in the event metadata — mirroring the swap submitted/success/error
+// lifecycle: submitted at action time, success/error from the AUT poller.
+export const TRACK_COUNT_LIQUIDIUM_SUBMITTED = 'liquidium_submitted';
+export const TRACK_COUNT_LIQUIDIUM_SUCCESS = 'liquidium_success';
+export const TRACK_COUNT_LIQUIDIUM_ERROR = 'liquidium_error';
+
 // Manage Tokens
 export const TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS = 'manage_tokens_enable_success';
 export const TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS = 'manage_tokens_disable_success';
@@ -168,9 +175,6 @@ export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_fa
 export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
 export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
 
-// Buy
-export const TRACK_BUY_TOKEN = 'buy_token';
-
 // NFTs
 export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
@@ -180,3 +184,4 @@ export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
+export const TRACK_NFT_LOAD_ONCHAIN_IMAGE_URL = 'nft_load_onchain_image_url';

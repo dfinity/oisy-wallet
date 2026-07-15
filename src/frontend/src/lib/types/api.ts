@@ -1,4 +1,3 @@
-import type { BtcAddress } from '$btc/types/address';
 import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
@@ -19,12 +18,14 @@ import type {
 import type { TxId } from '$declarations/kong_backend/kong_backend.did';
 import type {
 	BtcTxOutput,
+	EcdsaKeyId,
 	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address } from '$lib/types/address';
+import type { OnramperCryptoWallet, OnramperId, OnramperNetworkWallet } from '$lib/types/onramper';
 import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
@@ -57,6 +58,17 @@ export interface AllowSigningParams {
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
+export interface OnramperWalletAddressTagEntry {
+	cryptoId: OnramperId;
+	tag: string;
+}
+
+export interface SignOnramperWidgetUrlParams {
+	wallets: OnramperCryptoWallet[];
+	networkWallets: OnramperNetworkWallet[];
+	walletAddressTags?: OnramperWalletAddressTagEntry[];
+}
+
 export interface AllowSigningOutcome {
 	response: AllowSigningResponse;
 	rateLimitInfo?: RateLimitInfo;
@@ -64,7 +76,6 @@ export interface AllowSigningOutcome {
 
 export interface BtcGetPendingTransactionParams {
 	network: BitcoinNetwork;
-	address: BtcAddress;
 	iiDelegationChain: Nullable<IIDelegationChain>;
 }
 
@@ -87,6 +98,12 @@ export interface GetSchnorrPublicKeyParams {
 
 export interface SignWithSchnorrParams extends GetSchnorrPublicKeyParams {
 	message: Uint8Array;
+}
+
+export interface GenericSignWithEcdsaParams {
+	derivationPath: string[];
+	keyId: EcdsaKeyId;
+	messageHash: Uint8Array;
 }
 
 export interface AddUserHiddenDappIdParams {

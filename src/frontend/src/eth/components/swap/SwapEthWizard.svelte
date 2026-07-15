@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -23,6 +22,7 @@
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUBMITTED,
@@ -53,6 +53,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';

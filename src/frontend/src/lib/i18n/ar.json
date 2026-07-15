@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "",
+			"header_description": "",
+			"borrowing_options": "",
+			"borrowing_potential": "",
+			"borrowing_power_hint": "",
+			"available_best_provider": "",
+			"remaining_best_provider": "",
+			"active_loans": "",
+			"no_active_loans": "",
+			"amount_borrowed": "",
+			"apr": "",
+			"borrow_apr_from": ""
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "",
+			"tab_title_short": "",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "إلغاء",
@@ -7,6 +38,8 @@
 			"back": "رجوع",
 			"done": "تم",
 			"close": "إغلاق",
+			"collapse": "طي",
+			"expand": "توسيع",
 			"change": "تغيير",
 			"continue": "",
 			"apply": "تنفيذ",
@@ -73,12 +106,23 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "مكتمل",
+		"in_progress": "قيد التقدم",
+		"failed": "فشل"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "الأصول",
+			"nfts": "المقتنيات",
 			"settings": "الإعدادات",
 			"dapp_explorer": "استكشاف",
 			"activity": "النشاط",
+			"trade": "",
+			"borrow": "",
+			"section_portfolio": "",
+			"section_finance": "",
+			"section_more": "",
 			"airdrops": "المكافآت",
 			"earning": "الكسب والمكافآت",
 			"pay": "",
@@ -96,13 +140,18 @@
 			"hide_balances": "إخفاء الأرصدة",
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
-			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك."
+			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
+			"notes": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
+			"nfts": "فتح عرض المقتنيات",
 			"settings": "افتح إعداداتك",
 			"dapp_explorer": "افتح مستكشف التطبيقات",
 			"activity": "افتح عرض النشاط",
+			"trade": "",
+			"borrow": "",
+			"earning": "",
 			"airdrops": "افتح عرض المكافآت",
 			"pay": "",
 			"wallet_connect": "",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "إنشاء رابط إحالة لصديق",
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
-			"show_balances": "إظهار الأرصدة المخفية"
+			"show_balances": "إظهار الأرصدة المخفية",
+			"notes": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -221,17 +271,17 @@
 			"website": "صورة $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
-			"defi": "التمويل اللامركزي",
+			"aa_new": "مضاف حديثًا",
+			"ab_icp": "ICP",
+			"ai": "الذكاء الاصطناعي",
+			"dex": "DEX",
 			"game": "لعبة",
-			"nft": "",
-			"rwa": "",
-			"social_media": "وسائل التواصل الاجتماعي",
+			"lending": "الإقراض",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "اجتماعي",
 			"staking": "التخزين",
-			"tools": "أدوات",
-			"walletconnect": "WalletConnect"
+			"tools": "أدوات"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": "عرض المزيد"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "تحقق فريد من الهوية للمشاركات الرقمية الجديرة بالثقة.",
-				"call_to_action": "افتح DecideID",
-				"stats": "أكثر من 50,000 طلب استدلال",
-				"description": "Decide ID هو في قلب نظام Decide AI، مما يضمن الثقة والأمان من خلال منهجية إثبات الشخصية (PoP) الفريدة. عند الانضمام، ستمر بعملية تحقق حيث تقدم أدلة متعددة وتكمل تحديًا خاصًا لتأكيد هويتك. هذا يضمن أن كل مستخدم حقيقي وفريد وليس روبوتًا. يتم إنشاء معرفك الأساسي، وهو معرف فريد على السلسلة، خلال هذه العملية. يمكن استخدامه عبر مختلف التطبيقات التي تتطلب شخصية تم التحقق منها، مما يضمن تكاملًا آمنًا وسلسًا في عملية تسجيل الدخول أو الاشتراك في أي تطبيق. بالإضافة إلى ذلك، يعني استخدام براهين المعرفة الصفرية أن بياناتك الخاصة، مثل المعلومات البيومترية، تظل سرية وآمنة.<br/><br/>مع Decide ID، استمتع بطريقة مرنة وآمنة وخصوصية أولاً للتحقق والمشاركة عبر الإنترنت.",
-				"carousel": {
-					"text": "استمتع بطريقة خصوصية أولاً للتحقق والمشاركة عبر الإنترنت",
-					"call_to_action": "مهتم؟"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "انطلق",
 				"description": "Curve Finance هي بورصة لامركزية رائدة وموفر عملات مستقرة ومنصة إقراض على إيثريوم والسلاسل المتوافقة مع EVM. تشتهر بصانعي السوق الآليين المتقدمين للعملات المستقرة والأصول المتقلبة، ونظامها الفريد للتصفية الناعمة للقروض."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "أطلق العنان للإمكانات الكاملة للتمويل اللامركزي والتداول المبسط. قم بتبديل التوكنات، واكسب كمزود للسيولة واستفد من صانع السوق الآلي الرائد في Bitfinity EVM.",
-				"call_to_action": "افتح Sonic",
-				"description": "Sonic، بورصة لامركزية متعددة السلاسل مبنية على بروتوكول Internet Computer (ICP)، تقدم مجموعة واسعة من خدمات التمويل اللامركزي. يمكن للمستخدمين بسهولة تداول التوكنات والعقود الدائمة، وتوفير السيولة، والمشاركة في بيع توكنات LBP. يمكن للمستخدمين المشاركة في حوكمة DAO، وتخزين المكافآت، والتصويت على قرارات المنصة.<br/><br/>على السلسلة بالكامل ومفتوحة المصدر! قم بتبديل التوكنات كالمحترفين، واجمع تلك الرسوم كمزود للسيولة، وانضم إلى أجواء AMM، وكن جزءًا لا يتجزأ من Sonic DAO.",
-				"carousel": {
-					"text": "أطلق العنان للإمكانات الكاملة للتمويل اللامركزي",
-					"call_to_action": "افتح Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "بورصة لامركزية وصانع سوق آلي مبني على بلوكتشين سولانا، يقدم دفتر أوامر مركزي محدود يتيح إجراء تداولات سريعة.",
@@ -369,17 +398,6 @@
 					"text": "",
 					"call_to_action": ""
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -431,11 +449,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -481,6 +490,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1231,7 +1254,8 @@
 			"buy": "شراء",
 			"buy_dev": "شراء (بيئة تطوير)",
 			"unavailable_title": "شراء الرموز غير متاح مؤقتًا",
-			"unavailable_description": "شراء الرموز معطل حاليًا بينما نواصل تحسين أمان هذه العملية من خلال إضافة توقيع عناوين URL. ستتم إعادة تفعيله بمجرد اكتمال العمل.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "في غضون ذلك، لا يزال بإمكانك استلام الرموز عن طريق مشاركة عنوان محفظتك."
 		},
 		"actions": {
@@ -1267,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "التوكنات",
+			"title_short": "التوكنات",
 			"contract_address": "عنوان العقد",
 			"token_address": "عنوان التوكن",
 			"balance": "الرصيد",
@@ -1447,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
 			"title_not_supported": "",
@@ -1577,10 +1604,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "بيانات HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "التطبيقات المتصلة",
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
+			"disconnect_all": "قطع اتصال الكل",
+			"disconnect_app": "قطع الاتصال بـ $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1619,11 +1664,245 @@
 			"request_rejected": "تم رفض طلب WalletConnect",
 			"unknown_parameter": "معلمة غير معروفة.",
 			"wallet_not_initialized": "خطأ غير متوقع. عنوان محفظتك غير مهيأ.",
+			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "",
+			"tab_title_short": "",
+			"intro": "",
+			"learn_more": "",
+			"provider_name": "",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "",
+			"trading_potential": "",
+			"trading_potential_hint": "",
+			"deposited_assets": "",
+			"deposited_all_free": "",
+			"deposited_empty": "",
+			"free": "",
+			"in_orders": "",
+			"in_orders_label": "",
+			"positions": "",
+			"deposit": "",
+			"withdraw": "",
+			"active_orders": "",
+			"active_orders_empty_deposit": "",
+			"active_orders_empty_place": "",
+			"new_order": "",
+			"order_history": ""
+		},
+		"provider_unavailable": {
+			"title": "",
+			"description": ""
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"you_deposit": "",
+			"error_insufficient_balance": "",
+			"to": "",
+			"network": "",
+			"transaction_fee": "",
+			"approval_fee": "",
+			"transfer_fee": "",
+			"info_title": "",
+			"info_description": "",
+			"empty_title": "",
+			"empty_description": "",
+			"approving": "",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "",
+				"deposit_failed": ""
+			}
+		},
+		"withdraw": {
+			"title": "",
+			"review_title": "",
+			"progress_title": "",
+			"amount_label": "",
+			"from": "",
+			"network": "",
+			"transaction_fee": "",
+			"transfer_fee": "",
+			"you_receive": "",
+			"reserved_note": "",
+			"error_insufficient_balance": "",
+			"submit": "",
+			"open": "",
+			"progress_withdraw": "",
+			"progress_done": "",
+			"error": ""
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "",
+			"empty_history": "",
+			"side_sell": "",
+			"side_buy": "",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "",
+			"row_phrase_buy": "",
+			"queue_ahead": "",
+			"status_open": "",
+			"status_pending": "",
+			"status_partial": "",
+			"status_filled": "",
+			"status_canceled": "",
+			"status_expired": "",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "",
+			"description": "",
+			"fact_1_title": "",
+			"fact_1_description": "",
+			"fact_2_title": "",
+			"fact_2_description": "",
+			"fact_3_title": "",
+			"fact_3_description": ""
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -2047,6 +2326,7 @@
 		"text": {
 			"title": "اكسب",
 			"tab_title": "",
+			"tab_title_short": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": "",
@@ -2058,7 +2338,7 @@
 				"description": "",
 				"action": ""
 			},
-			"sprinkles": {
+			"liquidium": {
 				"title": "",
 				"description": "",
 				"action": ""
@@ -2071,6 +2351,8 @@
 			"currentStaked": "",
 			"currentEarning": "",
 			"earningPotential": "",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": ""
 		},
 		"terms": {
@@ -2080,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": ""
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "",
+			"health_factor": "",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "",
+			"markets": "",
+			"total_supplied": "",
+			"no_assets_supplied": "",
+			"supplied": "",
+			"borrowed": "",
+			"borrow_rate": "",
+			"apy_suffix": "",
+			"supply_label": "",
+			"borrow_label": "",
+			"coming_soon": "",
+			"coming_soon_teaser": "",
+			"action_supply": "",
+			"action_borrow": "",
+			"action_repay": "",
+			"action_withdraw": "",
+			"transaction_failed": "",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "",
+			"supply_review_subtitle": "",
+			"supplying": "",
+			"starting_to_supply": "",
+			"supply_started": "",
+			"supply_apy": "",
+			"supply_collateral_info": "",
+			"supply_agreement": "",
+			"provider_fee": "",
+			"transaction_fee": "",
+			"insufficient_funds_for_fee": "",
+			"supply_prices_unavailable": "",
+			"borrow_review": "",
+			"borrow_review_subtitle": "",
+			"borrowing": "",
+			"borrow_apy": "",
+			"resulting_ltv": "",
+			"projected_health_factor": "",
+			"borrowing_power": "",
+			"collateral": "",
+			"minimum_borrow": "",
+			"provider": "",
+			"funds_delivered_to": "",
+			"your_oisy_address": "",
+			"borrow_risk_info": "",
+			"borrow_at_risk_warning": "",
+			"borrow_exceeds_power": "",
+			"borrow_below_minimum": "",
+			"borrow_prices_unavailable": "",
+			"borrow_high_risk_warning": "",
+			"borrow_risk_confirm": "",
+			"starting_to_borrow": "",
+			"borrow_started": "",
+			"withdraw_review": "",
+			"withdraw_review_subtitle": "",
+			"withdrawing": "",
+			"starting_to_withdraw": "",
+			"withdraw_started": "",
+			"supplied_label": "",
+			"withdrawable": "",
+			"reserved_by_debt": "",
+			"withdraw_exceeds_free_collateral": "",
+			"withdraw_exceeds_supplied": "",
+			"withdraw_prices_unavailable": "",
+			"withdraw_risk_info": "",
+			"withdraw_at_risk_warning": "",
+			"withdraw_high_risk_warning": "",
+			"withdraw_risk_confirm": "",
+			"repay_review": "",
+			"repay_review_subtitle": "",
+			"repaying": "",
+			"starting_to_repay": "",
+			"repay_started": "",
+			"current_debt": "",
+			"interest_accrued": "",
+			"debt_after_repay": "",
+			"repay_exceeds_debt": "",
+			"repay_prices_unavailable": ""
+		},
+		"info": {
+			"title": "",
+			"description": "",
+			"fact_1_title": "",
+			"fact_1_description": "",
+			"fact_2_title": "",
+			"fact_2_description": "",
+			"fact_3_title": "",
+			"fact_3_description": ""
 		}
 	},
 	"vaults": {
@@ -2162,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "",
 			"full_history": "",
-			"recent_history": "",
-			"harvest_autopilot_carousel_slide_title": "",
-			"harvest_autopilot_carousel_slide_cta": ""
+			"recent_history": ""
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "",
@@ -2254,6 +2633,83 @@
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",
 			"no_response": "عذرًا، لم أتلق ردًا من LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "",
+			"note": "",
+			"add_title": "",
+			"edit_note": "",
+			"delete_note": "",
+			"delete_confirm_text": "",
+			"back": "",
+			"empty_title": "",
+			"empty_subtitle": "",
+			"empty_add": "",
+			"add_note": "",
+			"note_label": "",
+			"placeholder": "",
+			"search_placeholder": "",
+			"no_results": "",
+			"encrypted_lead": "",
+			"encrypted_info": "",
+			"created": "",
+			"updated": "",
+			"created_updated": "",
+			"too_long": "",
+			"cap_reached": "",
+			"decryption_failed": ""
+		},
+		"alt": {
+			"edit": "",
+			"delete": ""
+		},
+		"error": {
+			"load": "",
+			"save": "",
+			"delete": ""
+		},
+		"share": {
+			"text": {
+				"share_note": "",
+				"snapshot_caption": "",
+				"cap_reached": "",
+				"expires_after": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"single_use": "",
+				"single_use_option": "",
+				"protects_body": "",
+				"create_link": "",
+				"link_ready_title": "",
+				"link_ready_subtitle": "",
+				"link_copied": "",
+				"recap_expires_in": "",
+				"recap_single_use": "",
+				"reminder": "",
+				"done": ""
+			},
+			"error": {
+				"create": ""
+			},
+			"recipient": {
+				"locked_title": "",
+				"reveal": "",
+				"revealed_title": "",
+				"single_use_caveat": "",
+				"copy_note": "",
+				"note_copied": "",
+				"outro_title": "",
+				"outro_subtitle": "",
+				"outro_feature_multichain": "",
+				"outro_feature_onchain": "",
+				"outro_feature_encrypted": "",
+				"discover": "",
+				"unavailable_title": ""
+			}
 		}
 	}
 }

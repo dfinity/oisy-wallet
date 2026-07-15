@@ -1,8 +1,10 @@
+import * as lendBorrowEnv from '$env/lend-borrow';
 import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
+import * as liquidiumDerived from '$lib/derived/liquidium.derived';
 import * as networkTokensUiDerived from '$lib/derived/network-tokens-ui.derived';
 import * as settingsDerived from '$lib/derived/settings.derived';
 import { Currency } from '$lib/enums/currency';
@@ -13,6 +15,7 @@ import { HERO_CONTEXT_KEY, initHeroContext, type HeroContext } from '$lib/stores
 import type { TokenUi } from '$lib/types/token-ui';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as privacyUtils from '$lib/utils/privacy.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -94,7 +97,7 @@ describe('ExchangeBalance', () => {
 		it('should render "Your balance" label when balances are not all zero', () => {
 			const { getByText } = renderComponent();
 
-			expect(getByText('Your balance')).toBeInTheDocument();
+			expect(getByText(en.hero.text.available_balance)).toBeInTheDocument();
 		});
 
 		it('should render "Top up your wallet" label when all balances are zero', () => {
@@ -102,13 +105,13 @@ describe('ExchangeBalance', () => {
 
 			const { getByText } = renderComponent();
 
-			expect(getByText('Top up your wallet to start using it!')).toBeInTheDocument();
+			expect(getByText(en.hero.text.top_up)).toBeInTheDocument();
 		});
 
 		it('should render "hidden balance" message when hideBalance is true', () => {
 			const { getByText } = renderComponent({ hideBalance: true });
 
-			expect(getByText('Your balance is hidden')).toBeInTheDocument();
+			expect(getByText(en.hero.text.hidden_balance)).toBeInTheDocument();
 		});
 	});
 
@@ -380,6 +383,39 @@ describe('ExchangeBalance', () => {
 			const { getByText } = renderComponent();
 
 			expect(getByText('$0.00')).toBeInTheDocument();
+		});
+	});
+
+	describe('Liquidium net value', () => {
+		beforeEach(() => {
+			mockHeroContext.loading.set(false);
+		});
+
+		it('should add supplied-minus-borrowed net value to the total when enabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$835.00')).toBeInTheDocument();
+		});
+
+		it('should deduct a negative net value (net debt) from the total when enabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(true);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(-100));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$235.00')).toBeInTheDocument();
+		});
+
+		it('should ignore Liquidium net value when the feature is disabled', () => {
+			vi.spyOn(lendBorrowEnv, 'anyLendBorrowProviderEnabled', 'get').mockReturnValue(false);
+			vi.spyOn(liquidiumDerived, 'liquidiumNetValueUsd', 'get').mockReturnValue(staticStore(500));
+
+			const { getByText } = renderComponent();
+
+			expect(getByText('$335.00')).toBeInTheDocument();
 		});
 	});
 });

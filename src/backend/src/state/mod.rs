@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use ic_cdk::management_canister::{VetKDCurve, VetKDKeyId};
+use ic_vetkeys::{encrypted_maps::EncryptedMaps, types::AccessRights};
 use shared::types::{
     api_keys::ApiKeys,
     backend_config::{Config, InitArg},
@@ -7,19 +9,23 @@ use shared::types::{
 };
 
 use crate::{
+    personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR,
     state::memory::{
         ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
         BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, TOKEN_ACTIVITY_MEMORY_ID,
-        USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID,
-        USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
+        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID,
+        USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
+        USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
             ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
             BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
-            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
-            UserTransactionsMap,
+            PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TokenActivityMap, UserProfileMap,
+            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -49,6 +55,25 @@ pub(crate) struct State {
     /// Per-user in-flight high-level operations (swaps, converts, …). Survives
     /// canister upgrades; the FE polls and updates these records.
     pub(crate) active_user_transactions: ActiveUserTransactionsMap,
+    /// Per-user end-to-end-encrypted personal notes (vetKeys `EncryptedMaps`).
+    ///
+    /// `None` until the store is first accessed (see [`with_personal_notes`] /
+    /// [`with_personal_notes_mut`]): it needs the vetKD key name from `config`,
+    /// available only once the config has been set. Initialising it lazily —
+    /// rather than eagerly in `init` / `post_upgrade` — keeps canisters that never
+    /// touch notes (the vast majority of tests) from allocating its four
+    /// stable-memory regions. The underlying data lives in stable memory
+    /// (ids 14–17) and survives upgrades regardless of this field;
+    /// [`EncryptedMaps::init`] re-attaches to it on first access.
+    pub(crate) personal_notes: Option<EncryptedMaps<AccessRights>>,
+    /// Publicly-readable, token-keyed store of personal-note shares. Unlike
+    /// `personal_notes` above, this is a plain `StableBTreeMap` (the value is
+    /// already client-side ciphertext under a per-share key, so there is no
+    /// vetKD derivation and no lazy init needed).
+    pub(crate) personal_note_shares: PersonalNoteShareMap,
+    /// By-creator index over `personal_note_shares`, used only to enforce the
+    /// per-user active-share cap without scanning the primary map.
+    pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
 }
 
 impl From<&State> for Stats {
@@ -63,6 +88,11 @@ impl From<&State> for Stats {
             user_transactions_count: state.user_transactions.len(),
             agreement_history_count: state.agreement_history.len(),
             active_user_transactions_count: state.active_user_transactions.len(),
+            personal_notes_count: state
+                .personal_notes
+                .as_ref()
+                .map_or(0, |em| em.mapkey_vals.len()),
+            personal_note_shares_count: state.personal_note_shares.len(),
         }
     }
 }
@@ -86,8 +116,74 @@ thread_local! {
             user_transactions: UserTransactionsMap::init(mm.borrow().get(USER_TRANSACTIONS_MEMORY_ID)),
             agreement_history: AgreementHistoryMap::init(mm.borrow().get(AGREEMENT_HISTORY_MEMORY_ID)),
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
+            // Initialised lazily on first access (see `ensure_personal_notes`).
+            personal_notes: None,
+            personal_note_shares: PersonalNoteShareMap::init(mm.borrow().get(PERSONAL_NOTE_SHARES_MEMORY_ID)),
+            personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap::init(
+                mm.borrow().get(PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID),
+            ),
         })
     );
+}
+
+/// Initialises the personal-notes [`EncryptedMaps`] store.
+///
+/// Called lazily on first access via [`ensure_personal_notes`], once the config
+/// (and therefore the vetKD key name) is available. The vetKD key name reuses
+/// `config.ecdsa_key_name` — across every OISY environment the threshold-key
+/// names line up (`dfx_test_key` locally, `test_key_1` on staging, `key_1` on
+/// mainnet), so no separate config field or deployment change is needed.
+/// `EncryptedMaps::init` re-attaches to the existing stable memory, so notes
+/// written before an upgrade are seen on the next access.
+fn init_personal_notes() {
+    let key_id = VetKDKeyId {
+        curve: VetKDCurve::Bls12_381_G2,
+        name: read_config(|c| c.ecdsa_key_name.clone()),
+    };
+
+    let encrypted_maps = MEMORY_MANAGER.with(|mm| {
+        let mm = mm.borrow();
+        EncryptedMaps::init(
+            PERSONAL_NOTES_DOMAIN_SEPARATOR,
+            key_id,
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID),
+            mm.get(PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID),
+        )
+    });
+
+    mutate_state(|s| s.personal_notes = Some(encrypted_maps));
+}
+
+/// Ensures the personal-notes store is initialised, creating it on first use.
+pub(crate) fn ensure_personal_notes() {
+    if read_state(|s| s.personal_notes.is_none()) {
+        init_personal_notes();
+    }
+}
+
+/// Runs `f` against the personal-notes store, initialising it on first access.
+pub(crate) fn with_personal_notes<R>(f: impl FnOnce(&EncryptedMaps<AccessRights>) -> R) -> R {
+    ensure_personal_notes();
+    read_state(|s| {
+        f(s.personal_notes
+            .as_ref()
+            .expect("personal notes store initialised by ensure_personal_notes"))
+    })
+}
+
+/// Runs `f` against the mutable personal-notes store, initialising it on first
+/// access.
+pub(crate) fn with_personal_notes_mut<R>(
+    f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R,
+) -> R {
+    ensure_personal_notes();
+    mutate_state(|s| {
+        f(s.personal_notes
+            .as_mut()
+            .expect("personal notes store initialised by ensure_personal_notes"))
+    })
 }
 
 pub(crate) fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {

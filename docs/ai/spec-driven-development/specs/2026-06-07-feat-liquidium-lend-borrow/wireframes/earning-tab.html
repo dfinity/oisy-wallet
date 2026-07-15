@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Assets · Earning tab — wireframe</title>
+		<style>
+			:root {
+				--bg: #e9eefb;
+				--panel: #ffffff;
+				--panel2: #f4f6fb;
+				--line: #e5e9f2;
+				--txt: #16203a;
+				--muted: #6b7787;
+				--accent: #2f6df6;
+				--green: #15a35b;
+				--amber: #d8890a;
+				--red: #df4a3c;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--txt);
+				font:
+					14px/1.5 -apple-system,
+					Segoe UI,
+					Roboto,
+					Arial,
+					sans-serif;
+			}
+			.note {
+				max-width: 520px;
+				margin: 14px auto 0;
+				background: #ffffff;
+				border: 1px dashed #b9c4dd;
+				border-radius: 10px;
+				padding: 10px 14px;
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.wrap {
+				max-width: 520px;
+				margin: 0 auto;
+				padding: 14px 18px 28px;
+			}
+			.hero {
+				padding: 6px 2px 14px;
+			}
+			.hero .lbl {
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.hero .tot {
+				font-size: 30px;
+				font-weight: 700;
+			}
+			.tabs {
+				display: flex;
+				gap: 18px;
+				border-bottom: 1px solid var(--line);
+				margin: 6px 0 16px;
+			}
+			.tabs a {
+				position: relative;
+				color: var(--muted);
+				text-decoration: none;
+				padding: 9px 0;
+				font-weight: 600;
+				border-bottom: 2px solid transparent;
+				font-size: 14px;
+				cursor: pointer;
+			}
+			.tabs a.on {
+				color: var(--txt);
+				border-bottom-color: var(--accent);
+			}
+			.tabdot {
+				position: absolute;
+				top: 4px;
+				right: -9px;
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				box-shadow: 0 0 0 2px var(--bg);
+			}
+			.tabdot.amber {
+				background: var(--amber);
+			}
+			.tabdot.red {
+				background: var(--red);
+			}
+			.sec {
+				font-weight: 600;
+				margin: 4px 0 10px;
+				color: var(--muted);
+				font-size: 13px;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+			}
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 13px;
+				padding: 13px 14px;
+				margin-bottom: 10px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				cursor: pointer;
+			}
+			.card:hover {
+				border-color: var(--accent);
+			}
+			.left {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.coin {
+				width: 34px;
+				height: 34px;
+				border-radius: 50%;
+				display: grid;
+				place-items: center;
+				font-weight: 700;
+				font-size: 13px;
+			}
+			.btc {
+				background: #f7931a;
+				color: #0e1218;
+			}
+			.eth {
+				background: #8a93b2;
+				color: #0e1218;
+			}
+			.usdc {
+				background: #2775ca;
+				color: #fff;
+			}
+			.icp {
+				background: #e3318f;
+				color: #fff;
+			}
+			.name {
+				font-weight: 600;
+			}
+			.prov {
+				font-size: 11.5px;
+				color: var(--muted);
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				margin-top: 2px;
+			}
+			.dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+			}
+			.dot.l {
+				background: #9b6cff;
+			}
+			.dot.h {
+				background: #3ecf8e;
+			}
+			.right {
+				text-align: right;
+			}
+			.amt {
+				font-weight: 600;
+			}
+			.apy {
+				font-size: 12px;
+				color: var(--green);
+				margin-top: 2px;
+			}
+			.fiat {
+				font-size: 12px;
+				color: var(--muted);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="note">
+			Wireframe — Assets page, <b>Earning</b> tab ("My assets"). Generalised from autopilot-only to
+			all yield-bearing positions across providers. Cards are grouped by type, each labelled with
+			its provider. Liquidium supplies sit next to Harvest Autopilot stakes. Click "Liabilities" to
+			see the sibling tab. Note the status dot on the <b>Liabilities</b> tab — shown here as an
+			example (amber) to demonstrate that the risk indicator is visible even when that tab is not
+			selected.
+		</div>
+		<div class="wrap">
+			<div class="hero">
+				<div class="lbl">Net worth</div>
+				<div class="tot">$112,438.20</div>
+			</div>
+			<div class="tabs">
+				<a>Tokens</a><a>NFTs</a><a class="on">Earning</a>
+				<a onclick="location.href = 'liabilities-tab.html'"
+					>Liabilities<span class="tabdot amber" title="A borrow provider is at risk"></span
+				></a>
+			</div>
+
+			<div class="sec">My assets</div>
+
+			<div class="card">
+				<div class="left">
+					<div class="coin btc">B</div>
+					<div>
+						<div class="name">BTC</div>
+						<div class="prov"><span class="dot l"></span>Liquidium · Supplied</div>
+					</div>
+				</div>
+				<div class="right">
+					<div class="amt">1.00 BTC</div>
+					<div class="apy">1.94% APY</div>
+					<div class="fiat">$67,170.00</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="left">
+					<div class="coin usdc">U</div>
+					<div>
+						<div class="name">USDC</div>
+						<div class="prov"><span class="dot l"></span>Liquidium · Supplied</div>
+					</div>
+				</div>
+				<div class="right">
+					<div class="amt">12,000 USDC</div>
+					<div class="apy">5.20% APY</div>
+					<div class="fiat">$12,000.00</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="left">
+					<div class="coin icp">I</div>
+					<div>
+						<div class="name">ICP</div>
+						<div class="prov"><span class="dot h"></span>Harvest Autopilot · Staked</div>
+					</div>
+				</div>
+				<div class="right">
+					<div class="amt">2,400 ICP</div>
+					<div class="apy">8.10% APY</div>
+					<div class="fiat">$28,800.00</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="left">
+					<div class="coin eth">E</div>
+					<div>
+						<div class="name">ETH</div>
+						<div class="prov"><span class="dot h"></span>Harvest Autopilot · Staked</div>
+					</div>
+				</div>
+				<div class="right">
+					<div class="amt">1.2 ETH</div>
+					<div class="apy">3.40% APY</div>
+					<div class="fiat">$4,468.20</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

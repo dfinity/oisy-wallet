@@ -211,7 +211,17 @@ export const findMatchingOneSecTransfer = ({
 	data: ActiveUserTransactionData;
 }): Transfer | undefined => {
 	const isIcpToEvm = 'OneSecIcpToEvm' in data;
-	const amount = isIcpToEvm ? data.OneSecIcpToEvm.amount : data.OneSecEvmToIcp.amount;
+	const isEvmToIcp = 'OneSecEvmToIcp' in data;
+
+	const amount = isIcpToEvm
+		? data.OneSecIcpToEvm.amount
+		: isEvmToIcp
+			? data.OneSecEvmToIcp.amount
+			: undefined;
+
+	if (isNullish(amount)) {
+		return undefined;
+	}
 
 	return transfers.find((t) => {
 		if (isNullish(t.source.amount) || t.source.amount !== amount) {

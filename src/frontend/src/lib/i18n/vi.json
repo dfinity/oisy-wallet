@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Chào mừng đến với Vay!",
+			"header_description": "Tiếp cận thanh khoản mà không cần bán. Vay stablecoin bằng cách thế chấp BTC, ICP và nhiều tài sản khác của bạn.",
+			"borrowing_options": "Tùy chọn vay",
+			"borrowing_potential": "Tiềm năng vay",
+			"borrowing_power_hint": "Ước tính số tiền bạn có thể vay nếu thế chấp tài sản của mình, theo mức lãi suất tốt nhất hiện có.",
+			"available_best_provider": "khả dụng · nhà cung cấp tốt nhất",
+			"remaining_best_provider": "còn lại · nhà cung cấp tốt nhất",
+			"active_loans": "Khoản vay đang hoạt động",
+			"no_active_loans": "không có khoản vay đang hoạt động",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "APR vay từ"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Khoản vay",
+			"tab_title_short": "Vay",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Hủy",
@@ -7,6 +38,8 @@
 			"back": "Quay lại",
 			"done": "Hoàn thành",
 			"close": "Đóng",
+			"collapse": "Thu gọn",
+			"expand": "Mở rộng",
 			"change": "Thay đổi",
 			"continue": "",
 			"apply": "Áp dụng",
@@ -42,7 +75,7 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": "",
+			"learn_more": "Tìm hiểu thêm",
 			"sorting": "Sắp xếp",
 			"unlimited": "",
 			"info": "",
@@ -64,7 +97,7 @@
 			"switch_currency": "Chuyển đổi tiền tệ",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "Theo liên kết để tìm hiểu thêm",
 			"up_one_level": "Đi lên một cấp"
 		},
 		"warning": {
@@ -73,12 +106,23 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Hoàn tất",
+		"in_progress": "Đang xử lý",
+		"failed": "Thất bại"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Tài sản",
+			"nfts": "Vật phẩm sưu tầm",
 			"settings": "Cài đặt",
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
+			"trade": "Giao dịch",
+			"borrow": "Vay",
+			"section_portfolio": "Danh mục",
+			"section_finance": "Tài chính",
+			"section_more": "Thêm",
 			"airdrops": "Phần thưởng",
 			"earning": "Kiếm tiền",
 			"pay": "",
@@ -96,13 +140,18 @@
 			"hide_balances": "Ẩn số dư",
 			"show_balances": "Hiện số dư",
 			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
-			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn."
+			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn.",
+			"notes": "Ghi chú"
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
+			"nfts": "Mở chế độ xem vật phẩm sưu tầm",
 			"settings": "Mở cài đặt của bạn",
 			"dapp_explorer": "Mở trình khám phá ứng dụng",
 			"activity": "Mở chế độ xem hoạt động",
+			"trade": "Mở chế độ xem giao dịch",
+			"borrow": "Mở chế độ xem khoản vay",
+			"earning": "Mở chế độ xem kiếm tiền",
 			"airdrops": "Mở chế độ xem Phần thưởng",
 			"pay": "",
 			"wallet_connect": "",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
-			"show_balances": "Hiện số dư bị ẩn"
+			"show_balances": "Hiện số dư bị ẩn",
+			"notes": "Mở ghi chú"
 		},
 		"short": {
 			"documentation": "Tài liệu"
@@ -221,17 +271,17 @@
 			"website": "Hình ảnh của $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Mới thêm",
+			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Trò chơi",
-			"nft": "",
-			"rwa": "",
-			"social_media": "Mạng xã hội",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Mạng xã hội",
 			"staking": "Staking",
-			"tools": "Công cụ",
-			"walletconnect": "WalletConnect"
+			"tools": "Công cụ"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "OpenChat - tin nhắn bảo mật",
 					"call_to_action": "Hiển thị thêm"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Xác minh danh tính duy nhất cho các tương tác kỹ thuật số đáng tin cậy.",
-				"call_to_action": "Mở DecideID",
-				"stats": "Hơn 50.000 yêu cầu",
-				"description": "Decide ID là trung tâm của hệ thống Decide AI, đảm bảo sự tin cậy và bảo mật thông qua phương pháp Xác minh danh tính - Proof of Personhood (PoP) độc đáo của nó. Khi bạn tham gia, bạn sẽ trải qua một quá trình xác minh trong đó bạn cung cấp nhiều bằng chứng và hoàn thành một thử thách đặc biệt để xác nhận danh tính của mình. Điều này đảm bảo rằng mọi người dùng đều là thật, duy nhất và không phải là bot. ID chính của bạn, một định danh duy nhất trên chuỗi, được tạo trong quá trình này. Nó có thể được sử dụng trên các ứng dụng khác nhau yêu cầu xác minh nhân thân, đảm bảo tích hợp an toàn và liền mạch vào quy trình đăng ký hoặc đăng nhập của bất kỳ ứng dụng nào. Ngoài ra, việc sử dụng các bằng chứng không kiến thức có nghĩa là dữ liệu cá nhân của bạn, như thông tin sinh trắc học, vẫn được bảo mật và an toàn.<br/><br/>Với Decide ID, hãy tận hưởng một cách linh hoạt, an toàn và ưu tiên quyền riêng tư để xác minh và tương tác trực tuyến.",
-				"carousel": {
-					"text": "Tận hưởng xác thực và tương tác online một cách bảo mật",
-					"call_to_action": "Bạn có hứng thú không?"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "Bị cuốn hút",
 				"description": "Curve Finance là một sàn giao dịch phi tập trung, nhà cung cấp stablecoin và nền tảng cho vay hàng đầu trên Ethereum và các chuỗi tương thích với EVM. Nó nổi tiếng với các nhà tạo lập thị trường tự động tiên tiến cho stablecoin và các tài sản biến động, và hệ thống thanh lý mềm độc đáo cho các khoản vay."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Mở khóa toàn bộ tiềm năng của DeFi và giao dịch hợp lý. Hoán đổi token, kiếm tiền với tư cách là nhà cung cấp thanh khoản và khai thác AMM hàng đầu của Bitfinity EVM.",
-				"call_to_action": "Mở Sonic",
-				"description": "Sonic, một sàn giao dịch phi tập trung đa chuỗi được xây dựng trên Giao thức Máy tính Internet (ICP), cung cấp một loạt các dịch vụ DeFi. Người dùng có thể dễ dàng giao dịch token và các hợp đồng vĩnh viễn, cung cấp thanh khoản và tham gia bán token LBP. Người dùng có thể tham gia quản trị DAO, đặt cược để nhận phần thưởng và bỏ phiếu cho các quyết định của nền tảng.<br/><br/>Hoàn toàn trên chuỗi và mã nguồn mở! Hoán đổi token như một chuyên gia, tích lũy các khoản phí đó với tư cách là nhà cung cấp thanh khoản, tham gia vào không khí AMM và trở thành một phần không thể thiếu của Sonic DAO.",
-				"carousel": {
-					"text": "Mở khóa toàn bộ tiềm năng của Defi",
-					"call_to_action": "Mở Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX và nhà tạo lập thị trường tự động được xây dựng trên chuỗi khối Solana, cung cấp một sổ lệnh giới hạn trung tâm cho phép giao dịch nhanh chóng.",
@@ -369,17 +398,6 @@
 					"text": "Xin chào, internet tự viết",
 					"call_to_action": "Tìm hiểu thêm"
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -431,11 +449,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -481,6 +490,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1231,7 +1254,8 @@
 			"buy": "Mua",
 			"buy_dev": "Mua (Dev Environment)",
 			"unavailable_title": "Mua token tạm thời không khả dụng",
-			"unavailable_description": "Việc mua token hiện đang tắt trong khi chúng tôi tiếp tục cải thiện bảo mật cho quy trình này bằng cách giới thiệu ký URL. Nó sẽ được bật lại ngay khi công việc hoàn tất.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Trong thời gian chờ đợi, bạn vẫn có thể nhận token bằng cách chia sẻ địa chỉ ví của mình."
 		},
 		"actions": {
@@ -1267,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Token",
+			"title_short": "Token",
 			"contract_address": "Địa chỉ hợp đồng",
 			"token_address": "Địa chỉ token",
 			"balance": "Số dư",
@@ -1447,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
 			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
 			"title_not_supported": "",
@@ -1577,10 +1604,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Ứng dụng đã kết nối",
 			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
+			"disconnect_all": "Ngắt kết nối tất cả",
+			"disconnect_app": "Ngắt kết nối $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1619,11 +1664,245 @@
 			"request_rejected": "Yêu cầu WalletConnect bị từ chối",
 			"unknown_parameter": "Tham số không xác định.",
 			"wallet_not_initialized": "Lỗi không mong muốn. Địa chỉ ví của bạn chưa được khởi tạo.",
+			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Đang giao dịch",
+			"tab_title_short": "Giao dịch",
+			"intro": "",
+			"learn_more": "Tìm hiểu thêm",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "Đặt lệnh giới hạn trực tiếp từ ví của bạn. Tiền của bạn luôn nằm trong các hợp đồng thông minh do chính bạn kiểm soát, không bao giờ thuộc về một bên tập trung.",
+			"trading_potential": "Tiềm năng giao dịch",
+			"trading_potential_hint": "Trong ví của bạn, không phải trên sàn",
+			"deposited_assets": "Tài sản đã nạp",
+			"deposited_all_free": "Tất cả khả dụng",
+			"deposited_empty": "Chưa có gì được nạp",
+			"free": "$amount khả dụng",
+			"in_orders": "$amount trong lệnh",
+			"in_orders_label": "trong lệnh",
+			"positions": "Vị thế của tôi",
+			"deposit": "Nạp tiền",
+			"withdraw": "Rút tiền",
+			"active_orders": "Lệnh đang hoạt động",
+			"active_orders_empty_deposit": "Nạp token từ ví của bạn để bắt đầu đặt lệnh giới hạn trên OISY Trade.",
+			"active_orders_empty_place": "Các lệnh giới hạn đang mở và đang chờ của bạn sẽ hiện ở đây khi bạn đặt một lệnh.",
+			"new_order": "Lệnh mới",
+			"order_history": "Lịch sử lệnh"
+		},
+		"provider_unavailable": {
+			"title": "Giao dịch tạm thời không khả dụng",
+			"description": "Hiện không có nhà cung cấp giao dịch nào khả dụng. Số dư của bạn vẫn an toàn và sẽ hoạt động trở lại khi nhà cung cấp trực tuyến lại."
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "Nạp tiền",
+			"review_title": "Xem lại khoản nạp",
+			"progress_title": "Đang nạp tiền",
+			"you_deposit": "Bạn nạp",
+			"error_insufficient_balance": "Số tiền vượt quá số dư trong ví của bạn",
+			"to": "Đến",
+			"network": "Mạng",
+			"transaction_fee": "Tổng phí ước tính",
+			"approval_fee": "Phí chấp thuận",
+			"transfer_fee": "Phí mạng",
+			"info_title": "OISY Trade: sổ lệnh on-chain",
+			"info_description": "Tiền đã nạp được giữ bởi canister OISY Trade và dùng để đặt lệnh giới hạn, được bảo vệ bởi hợp đồng thông minh on-chain.",
+			"empty_title": "Chưa có gì để nạp",
+			"empty_description": "OISY Trade cho phép bạn tạo lệnh cho các token này. Thêm một trong số đó vào ví của bạn, sau đó nạp vào đây để bắt đầu giao dịch.",
+			"approving": "Đang phê duyệt",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "Đang nạp tiền",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "Không thể xác định phí sổ cái cho token này. Tiền của bạn vẫn còn trong ví. Vui lòng thử lại sau ít phút.",
+				"deposit_failed": "Khoản nạp chưa hoàn tất. Tiền của bạn vẫn còn trong ví. Vui lòng thử lại hoặc kiểm tra trạng thái mạng."
+			}
+		},
+		"withdraw": {
+			"title": "Rút tiền",
+			"review_title": "Xem lại khoản rút",
+			"progress_title": "Đang rút tiền",
+			"amount_label": "Bạn rút",
+			"from": "Từ",
+			"network": "Mạng",
+			"transaction_fee": "",
+			"transfer_fee": "Phí rút tiền",
+			"you_receive": "Bạn nhận",
+			"reserved_note": "$amount được giữ lại · bị khóa bởi lệnh đang mở",
+			"error_insufficient_balance": "Số tiền vượt quá số dư khả dụng của bạn",
+			"submit": "Rút tiền",
+			"open": "",
+			"progress_withdraw": "Đang gửi $symbol đến ví của bạn",
+			"progress_done": "",
+			"error": "Khoản rút của bạn chưa hoàn tất. Tiền của bạn vẫn còn trên OISY Trade. Vui lòng thử lại sau ít phút."
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "Không có lệnh đang hoạt động",
+			"empty_history": "",
+			"side_sell": "Bán",
+			"side_buy": "Mua",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "lấy $quote @ $price",
+			"row_phrase_buy": "bằng $quote @ $price",
+			"queue_ahead": "$percentage% xếp trước trong hàng đợi",
+			"status_open": "Đang mở",
+			"status_pending": "Đang chờ xử lý",
+			"status_partial": "Khớp một phần",
+			"status_filled": "Đã khớp",
+			"status_canceled": "Đã hủy",
+			"status_expired": "Đã hết hạn",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "OISY Trade là gì",
+			"description": "OISY Trade là một sàn giao dịch sổ lệnh hoàn toàn on-chain, được tích hợp trực tiếp vào ví của bạn. Đặt giá mua hoặc bán, lệnh của bạn sẽ được thanh toán on-chain ngay khi thị trường chạm mức giá đó, kể cả khi bạn đã đăng xuất.",
+			"fact_1_title": "Mua hoặc bán theo giá của bạn",
+			"fact_1_description": "Đặt chính xác mức giá bạn muốn mua hoặc bán một token. Lệnh giới hạn của bạn sẽ nằm trong sổ lệnh cho đến khi thị trường chạm mức giá đó.",
+			"fact_2_title": "Vẫn khớp lệnh dù bạn vắng mặt",
+			"fact_2_description": "Sau khi đặt, lệnh của bạn tồn tại on-chain. Sàn giao dịch sẽ khớp lệnh ngay khi xuất hiện lệnh phù hợp, bất kể bạn có đăng nhập hay không.",
+			"fact_3_title": "Hoàn toàn on-chain",
+			"fact_3_description": "Các lệnh được khớp và thanh toán bên trong một canister trên Internet Computer, do NNS quản lý, không qua bất kỳ sàn giao dịch tập trung nào."
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -2047,6 +2326,7 @@
 		"text": {
 			"title": "Kiếm tiền",
 			"tab_title": "Đang kiếm tiền",
+			"tab_title_short": "Kiếm tiền",
 			"earning_opportunities": "Cơ hội kiếm tiền",
 			"header_title": "Chào mừng đến với Kiếm tiền!",
 			"header_description": "Phát triển danh mục tài sản kỹ thuật số của bạn bằng cách phân bổ token vào các cơ hội kiếm tiền.",
@@ -2058,10 +2338,10 @@
 				"description": "Hiệu quả sinh lời tối đa với các vault Autopilot chỉ một cú nhấp chuột.",
 				"action": "Đi đến Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Dùng OISY và KIẾM TIỀN! Tập 6 đã ra mắt 🎉",
-				"action": "Kiểm tra trạng thái"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2071,6 +2351,8 @@
 			"currentStaked": "Đang staking",
 			"currentEarning": "Đang kiếm được",
 			"earningPotential": "Tiềm năng kiếm tiền",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Điều khoản"
 		},
 		"terms": {
@@ -2080,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": "Kiếm tiền với Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Cung cấp Bitcoin. Vay stablecoin. Giữ nguyên bản địa.",
+			"health_factor": "Hệ số sức khỏe",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "Giá trị ròng",
+			"markets": "Thị trường",
+			"total_supplied": "Tổng đã cung cấp",
+			"no_assets_supplied": "chưa có tài sản nào được cung cấp",
+			"supplied": "Đã cung cấp",
+			"borrowed": "Đã vay",
+			"borrow_rate": "Lãi suất vay",
+			"apy_suffix": "APY",
+			"supply_label": "Cung cấp",
+			"borrow_label": "Vay",
+			"coming_soon": "Sắp ra mắt",
+			"coming_soon_teaser": "Sắp ra mắt…",
+			"action_supply": "Cung cấp",
+			"action_borrow": "Vay",
+			"action_repay": "Hoàn trả",
+			"action_withdraw": "Rút tiền",
+			"transaction_failed": "Giao dịch thất bại",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "Xem lại khoản cung cấp",
+			"supply_review_subtitle": "Bạn cung cấp",
+			"supplying": "Đang cung cấp",
+			"starting_to_supply": "Đang gửi vị thế của bạn…",
+			"supply_started": "Vị thế của bạn hiện đang được kích hoạt.",
+			"supply_apy": "APY cung cấp",
+			"supply_collateral_info": "Tài sản đã cung cấp cũng đóng vai trò là tài sản thế chấp mà bạn có thể vay dựa trên đó.",
+			"supply_agreement": "Tôi hiểu rằng tài sản của tôi sẽ được cung cấp cho giao thức Liquidium và chịu rủi ro hợp đồng thông minh on-chain.",
+			"provider_fee": "Phí mạng",
+			"transaction_fee": "Phí giao dịch",
+			"insufficient_funds_for_fee": "Số dư không đủ để trang trải số tiền và phí.",
+			"supply_prices_unavailable": "Giá tạm thời không khả dụng. Việc cung cấp bị vô hiệu hóa cho đến khi giá được tải.",
+			"borrow_review": "Xem lại khoản vay",
+			"borrow_review_subtitle": "Bạn vay",
+			"borrowing": "Đang xử lý khoản vay",
+			"borrow_apy": "APY vay",
+			"resulting_ltv": "LTV kết quả",
+			"projected_health_factor": "Hệ số sức khỏe dự kiến",
+			"borrowing_power": "Hạn mức vay",
+			"collateral": "Tài sản thế chấp",
+			"minimum_borrow": "Khoản vay tối thiểu",
+			"provider": "Nhà cung cấp",
+			"funds_delivered_to": "Tiền được gửi đến",
+			"your_oisy_address": "Địa chỉ $oisy_short của bạn",
+			"borrow_risk_info": "Vay tiền làm giảm hệ số sức khỏe của bạn. Nếu giảm quá thấp, tài sản thế chấp của bạn có thể bị thanh lý.",
+			"borrow_at_risk_warning": "Khoản vay này làm giảm đáng kể hệ số sức khỏe của bạn.",
+			"borrow_exceeds_power": "Số tiền vượt quá hạn mức vay của bạn.",
+			"borrow_below_minimum": "Số tiền thấp hơn khoản vay tối thiểu.",
+			"borrow_prices_unavailable": "Giá tạm thời không khả dụng. Việc vay bị vô hiệu hóa cho đến khi giá được tải.",
+			"borrow_high_risk_warning": "Khoản vay này đưa vị thế của bạn đến gần mức thanh lý.",
+			"borrow_risk_confirm": "Tôi hiểu rằng khoản vay này làm tăng rủi ro thanh lý của tôi.",
+			"starting_to_borrow": "Đang gửi khoản vay của bạn…",
+			"borrow_started": "Khoản vay của bạn hiện đang được kích hoạt.",
+			"withdraw_review": "Xem lại khoản rút",
+			"withdraw_review_subtitle": "Bạn rút",
+			"withdrawing": "Đang rút tiền",
+			"starting_to_withdraw": "Đang gửi khoản rút của bạn…",
+			"withdraw_started": "Khoản rút của bạn hiện đang được xử lý.",
+			"supplied_label": "Đã cung cấp",
+			"withdrawable": "",
+			"reserved_by_debt": "Được giữ lại do khoản nợ chưa thanh toán",
+			"withdraw_exceeds_free_collateral": "Bạn không thể rút nhiều hơn tài sản thế chấp tự do trong khi vẫn còn khoản nợ chưa thanh toán.",
+			"withdraw_exceeds_supplied": "Số tiền vượt quá số dư đã cung cấp của bạn.",
+			"withdraw_prices_unavailable": "Giá tạm thời không khả dụng. Việc rút tiền bị vô hiệu hóa cho đến khi giá được tải.",
+			"withdraw_risk_info": "Rút tài sản thế chấp làm giảm hệ số sức khỏe của bạn. Nếu giảm quá thấp, tài sản thế chấp còn lại của bạn có thể bị thanh lý.",
+			"withdraw_at_risk_warning": "Khoản rút này làm giảm đáng kể hệ số sức khỏe của bạn.",
+			"withdraw_high_risk_warning": "Khoản rút này đưa vị thế của bạn đến gần mức thanh lý.",
+			"withdraw_risk_confirm": "Tôi hiểu rằng khoản rút này làm tăng rủi ro thanh lý của tôi.",
+			"repay_review": "Xem lại khoản hoàn trả",
+			"repay_review_subtitle": "Bạn hoàn trả",
+			"repaying": "Đang hoàn trả",
+			"starting_to_repay": "Đang gửi khoản hoàn trả của bạn…",
+			"repay_started": "Khoản hoàn trả của bạn hiện đang được xử lý.",
+			"current_debt": "Khoản nợ hiện tại",
+			"interest_accrued": "Lãi phát sinh",
+			"debt_after_repay": "Khoản nợ sau khi hoàn trả",
+			"repay_exceeds_debt": "Số tiền vượt quá khoản nợ chưa thanh toán của bạn.",
+			"repay_prices_unavailable": "Giá tạm thời không khả dụng. Việc hoàn trả bị vô hiệu hóa cho đến khi giá được tải."
+		},
+		"info": {
+			"title": "Liquidium là gì",
+			"description": "Liquidium là một giao thức cho vay phi tập trung, không lưu ký, cho phép bạn cung cấp hoặc vay trên nhiều mạng blockchain. Được xây dựng trên Internet Computer, nó cho phép cho vay xuyên chuỗi mà không cần cầu nối tập trung hay token bọc (wrapped).",
+			"fact_1_title": "Kiếm lời từ BTC của bạn",
+			"fact_1_description": "Cho vay Bitcoin của bạn để kiếm lợi suất từ các khoản vay có thế chấp vượt mức.",
+			"fact_2_title": "Không lưu ký",
+			"fact_2_description": "Khoản tiền gửi được bảo vệ bởi hợp đồng thông minh on-chain, không có sự kiểm soát tập trung.",
+			"fact_3_title": "Bản địa, xuyên chuỗi",
+			"fact_3_description": "Tài sản vẫn ở trên chuỗi gốc của chúng, vì vậy bạn có thể cung cấp trên một chuỗi và vay trên chuỗi khác."
 		}
 	},
 	"vaults": {
@@ -2162,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "Có vẻ như bạn chưa staking token nào",
 			"full_history": "Xem toàn bộ lịch sử",
-			"recent_history": "Đóng toàn bộ lịch sử",
-			"harvest_autopilot_carousel_slide_title": "Kiếm tiền trong OISY với Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Tìm hiểu thêm"
+			"recent_history": "Đóng toàn bộ lịch sử"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Đã xảy ra lỗi khi rút token.",
@@ -2254,6 +2633,83 @@
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
 			"no_response": "Xin lỗi, tôi không nhận được phản hồi từ LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Ghi chú",
+			"note": "Ghi chú",
+			"add_title": "Thêm ghi chú mới",
+			"edit_note": "Chỉnh sửa ghi chú",
+			"delete_note": "Xóa ghi chú",
+			"delete_confirm_text": "Thao tác này sẽ xóa ghi chú '$note'. Không thể hoàn tác hành động này.",
+			"back": "Quay lại",
+			"empty_title": "Bạn chưa có ghi chú nào",
+			"empty_subtitle": "Tạo ghi chú riêng tư, được mã hóa để giữ an toàn cho thông tin quan trọng bên cạnh ví của bạn.",
+			"empty_add": "Thêm ghi chú mới",
+			"add_note": "Thêm ghi chú",
+			"note_label": "Ghi chú",
+			"placeholder": "Viết ghi chú…",
+			"search_placeholder": "Tìm ghi chú",
+			"no_results": "Không có ghi chú nào khớp với tìm kiếm của bạn.",
+			"encrypted_lead": "Mã hóa đầu cuối.",
+			"encrypted_info": "Chỉ bạn mới có thể đọc ghi chú của mình.",
+			"created": "Đã tạo $date",
+			"updated": "Đã cập nhật $date",
+			"created_updated": "Đã tạo $created · Đã cập nhật $updated",
+			"too_long": "Ghi chú phải có tối đa $maxCharacters ký tự.",
+			"cap_reached": "Bạn đã đạt giới hạn tối đa $max ghi chú đã lưu. Hãy xóa một ghi chú để thêm ghi chú mới.",
+			"decryption_failed": "Không thể giải mã ghi chú này"
+		},
+		"alt": {
+			"edit": "Chỉnh sửa ghi chú",
+			"delete": "Xóa ghi chú"
+		},
+		"error": {
+			"load": "Không thể tải ghi chú của bạn. Vui lòng thử lại.",
+			"save": "Không thể lưu ghi chú của bạn. Vui lòng thử lại.",
+			"delete": "Không thể xóa ghi chú của bạn. Vui lòng thử lại."
+		},
+		"share": {
+			"text": {
+				"share_note": "Chia sẻ ghi chú",
+				"snapshot_caption": "Chia sẻ một bản sao của ghi chú ở trạng thái hiện tại. Việc chỉnh sửa hoặc xóa ghi chú sau này sẽ không thay đổi liên kết này.",
+				"cap_reached": "Bạn đã đạt giới hạn tối đa $max liên kết chia sẻ đang hoạt động. Chúng sẽ được giải phóng khi hết hạn hoặc được sử dụng.",
+				"expires_after": "Liên kết hết hạn sau",
+				"expiry_1h": "1 giờ",
+				"expiry_24h": "24 giờ",
+				"expiry_7d": "7 ngày",
+				"expiry_30d": "30 ngày",
+				"single_use": "Dùng một lần",
+				"single_use_option": "Liên kết chỉ có thể được sử dụng một lần",
+				"protects_body": "Chỉ người nhận được liên kết này mới có thể đọc ghi chú của bạn.",
+				"create_link": "Tạo liên kết",
+				"link_ready_title": "Liên kết chia sẻ đã sẵn sàng",
+				"link_ready_subtitle": "Bất kỳ ai có liên kết này đều có thể đọc ghi chú",
+				"link_copied": "Đã sao chép liên kết!",
+				"recap_expires_in": "Hết hạn sau $duration",
+				"recap_single_use": "dùng một lần",
+				"reminder": "$oisy_short không thể khôi phục hoặc thu hồi liên kết này sau khi đã chia sẻ. Liên kết sẽ ngừng hoạt động sau khi được sử dụng hoặc hết hạn.",
+				"done": "Xong"
+			},
+			"error": {
+				"create": "Không thể tạo liên kết chia sẻ. Vui lòng thử lại."
+			},
+			"recipient": {
+				"locked_title": "Có người đã chia sẻ một ghi chú với bạn",
+				"reveal": "Hiện ghi chú",
+				"revealed_title": "Ghi chú được chia sẻ",
+				"single_use_caveat": "Liên kết dùng một lần — ngay khi bạn đóng hoặc tải lại trang này, ghi chú sẽ biến mất vĩnh viễn. Hãy sao chép ngay nếu bạn cần.",
+				"copy_note": "Sao chép ghi chú",
+				"note_copied": "Đã sao chép ghi chú!",
+				"outro_title": "Nó cũng bảo vệ tài sản của bạn an toàn không kém",
+				"outro_subtitle": "$oisy_short là ví tự quản lý, hoàn toàn on-chain dành cho Bitcoin, Ethereum, Solana, ICP và nhiều loại tài sản khác.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana & ICP trong một nơi",
+				"outro_feature_onchain": "100% on-chain — không cần tiện ích mở rộng, không cần cụm từ khôi phục",
+				"outro_feature_encrypted": "Khóa và dữ liệu của bạn được mã hóa đầu cuối",
+				"discover": "Khám phá OISY",
+				"unavailable_title": "Liên kết này đã hết hạn hoặc đã được sử dụng"
+			}
 		}
 	}
 }

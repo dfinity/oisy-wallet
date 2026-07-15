@@ -15,6 +15,9 @@ docs/ai/
 ├── README.md                            ← you are here
 ├── governance.md                        Truth hierarchy, boundaries, capabilities, meta-update rule
 ├── pr-and-ci.md                         PR title regex, body template, CI cheatsheet, local gates
+├── integrations/                        Third-party APIs/services: what data we fetch & where
+│   ├── README.md                        Provider index (Alchemy, Infura, Etherscan, OnRamper, …)
+│   └── <provider>.md                    One reference doc per provider
 ├── frontend/
 │   ├── README.md                        Frontend bootstrap (start here for any FE change)
 │   ├── structure.md                     Folder taxonomy, chain split, naming, aliases

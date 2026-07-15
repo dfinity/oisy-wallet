@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -32,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenId } from '$lib/types/token';
 	import type { Vault } from '$lib/types/vaults';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';

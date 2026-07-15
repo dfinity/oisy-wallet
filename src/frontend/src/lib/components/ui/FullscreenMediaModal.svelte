@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Backdrop } from '@dfinity/gix-components';
 	import type { Nullish } from '@dfinity/zod-schemas';
 	import { onMount, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import UnsupportedMediaType from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import Video from '$lib/components/ui/Video.svelte';
@@ -57,5 +57,5 @@
 			<Spinner />
 		{/if}
 	</div>
-	<Backdrop on:nnsClose={() => modalStore.close()} />
+	<Backdrop onClose={() => modalStore.close()} />
 </div>

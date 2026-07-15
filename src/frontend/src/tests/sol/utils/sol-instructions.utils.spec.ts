@@ -9,7 +9,7 @@ import {
 } from '$sol/constants/sol.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolRpcInstruction } from '$sol/types/sol-instructions';
+import type { SolInstruction, SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
 import * as solInstructionsAtaUtils from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
@@ -29,14 +29,23 @@ import { assertNonNullish } from '@dfinity/utils';
 import {
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getCreateAssociatedTokenIdempotentInstruction,
+	getCreateAssociatedTokenInstruction,
 	getTransferCheckedInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
+	getApproveInstruction as getToken2022ApproveInstruction,
 	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
 } from '@solana-program/token-2022';
-import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import {
+	address,
+	createNoopSigner,
+	type Base58EncodedBytes,
+	type Rpc,
+	type SolanaRpcApi
+} from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$sol/providers/sol-rpc.providers', () => ({
@@ -871,7 +880,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
 		});
 
-		it('should map a valid Compute Budget instruction', () => {
+		it('should ignore a Compute Budget instruction without parsing it', () => {
 			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
 				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
 			);
@@ -884,19 +893,21 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
 			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
 
-			expect(parseSolComputeBudgetInstruction).toHaveBeenCalledTimes(2);
-			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
-			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
 
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
-			);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a malformed Compute Budget instruction instead of throwing', () => {
+			const malformedInstruction: SolInstruction = {
+				programAddress: address(COMPUTE_BUDGET_PROGRAM_ADDRESS)
+			};
+
+			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should map a valid System instruction', () => {
@@ -936,8 +947,14 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
 
 			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
 			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
@@ -954,7 +971,7 @@ describe('sol-instructions.utils', () => {
 			);
 		});
 
-		it('should forward the delegate as destination for an `Approve` instruction', () => {
+		it('should forward the delegate as destination and flag an `Approve` instruction as an approval', () => {
 			const instruction = getApproveInstruction({
 				source: address(mockSolAddress),
 				delegate: address(mockSolAddress2),
@@ -965,7 +982,8 @@ describe('sol-instructions.utils', () => {
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: 100n,
 				source: mockSolAddress,
-				destination: mockSolAddress2
+				destination: mockSolAddress2,
+				isApproval: true
 			});
 		});
 
@@ -987,7 +1005,7 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate as destination and surface the mint for an `ApproveChecked` instruction', () => {
+		it('should forward the delegate as destination, surface the mint and flag an `ApproveChecked` instruction as an approval', () => {
 			const instruction = getApproveCheckedInstruction({
 				source: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address),
@@ -1001,7 +1019,8 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				tokenAddress: JUP_TOKEN.address
+				tokenAddress: JUP_TOKEN.address,
+				isApproval: true
 			});
 		});
 
@@ -1023,7 +1042,23 @@ describe('sol-instructions.utils', () => {
 			});
 		});
 
-		it('should forward the delegate and surface the mint for a Token-2022 `ApproveChecked` instruction', () => {
+		it('should forward the delegate and flag a Token-2022 `Approve` instruction as an approval', () => {
+			const instruction = getToken2022ApproveInstruction({
+				source: address(mockSolAddress),
+				delegate: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: 100n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				isApproval: true
+			});
+		});
+
+		it('should forward the delegate, surface the mint and flag a Token-2022 `ApproveChecked` instruction as an approval', () => {
 			const instruction = getToken2022ApproveCheckedInstruction({
 				source: address(mockSolAddress),
 				mint: address(JUP_TOKEN.address),
@@ -1037,8 +1072,37 @@ describe('sol-instructions.utils', () => {
 				amount: 100n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				tokenAddress: JUP_TOKEN.address
+				tokenAddress: JUP_TOKEN.address,
+				isApproval: true
 			});
+		});
+
+		it('should ignore a Create Associated Token instruction', () => {
+			const instruction = getCreateAssociatedTokenInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				ata: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should ignore a Create Associated Token Idempotent instruction', () => {
+			const instruction = getCreateAssociatedTokenIdempotentInstruction({
+				payer: createNoopSigner(address(mockSolAddress)),
+				ata: address(mockSolAddress2),
+				owner: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolAtaInstruction).toHaveBeenCalledExactlyOnceWith(instruction);
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should return undefined for unrecognized instruction', () => {
@@ -1056,7 +1120,10 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction2).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				unreviewed: true
+			});
 
 			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
 			expect(parseSolSystemInstruction).not.toHaveBeenCalled();
