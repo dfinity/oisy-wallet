@@ -477,7 +477,12 @@ mod tests {
         });
 
         let err = create(&mut map, principal(), req, 1).unwrap_err();
-        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "recipient_principal must not be anonymous".to_string()
+            )
+        );
     }
 
     #[test]
