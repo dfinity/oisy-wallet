@@ -522,6 +522,7 @@ describe('btc wallet-connect.services', () => {
 			rejectRequest: vi.fn(),
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
 			disconnect: vi.fn()
 		} as WalletConnectListener;
 
@@ -561,8 +562,10 @@ describe('btc wallet-connect.services', () => {
 			vi.spyOn(btcWalletConnectUtils, 'deriveBtcPublicKey').mockReturnValue(mockPublicKey);
 			vi.spyOn(btcWalletConnectUtils, 'encodeRecoverableSignature').mockReturnValue(mockSignature);
 
-			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow').mockImplementation(() => undefined);
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError').mockImplementation(() => undefined);
+			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow').mockImplementation(() => Symbol('toast'));
+			spyToastsError = vi
+				.spyOn(toastsStore, 'toastsError')
+				.mockImplementation(() => Symbol('toast'));
 		});
 
 		it('should reject the request when the BTC address is nullish', async () => {
