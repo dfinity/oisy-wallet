@@ -59,6 +59,10 @@ describe('mapUtxosFeeErrorToMessage', () => {
 			expected: en.fee.assertion.insufficient_funds_for_fee
 		},
 		{
+			error: BtcPrepareSendError.MinimumBalance,
+			expected: en.send.assertion.minimum_btc_amount
+		},
+		{
 			error: BtcPrepareSendError.UtxoLocked,
 			expected: en.send.assertion.btc_utxo_locked
 		},

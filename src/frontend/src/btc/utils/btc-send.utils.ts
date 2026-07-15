@@ -38,6 +38,8 @@ export const mapUtxosFeeErrorToMessage = ({
 			return i18n.send.assertion.insufficient_funds_verbose_btc;
 		case BtcPrepareSendError.InsufficientBalanceForFee:
 			return i18n.fee.assertion.insufficient_funds_for_fee;
+		case BtcPrepareSendError.MinimumBalance:
+			return i18n.send.assertion.minimum_btc_amount;
 		case BtcPrepareSendError.UtxoLocked:
 			return i18n.send.assertion.btc_utxo_locked;
 		case BtcPrepareSendError.PendingTransactionsNotAvailable:
