@@ -1,5 +1,13 @@
-import { convertNumberToSatoshis, convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+import { BtcPrepareSendError } from '$btc/types/btc-send';
+import {
+	convertNumberToSatoshis,
+	convertSatoshisToBtc,
+	isInvalidUtxosFee,
+	mapUtxosFeeErrorToMessage
+} from '$btc/utils/btc-send.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import { mockUtxosFee } from '$tests/mocks/btc.mock';
+import en from '$tests/mocks/i18n.mock';
 
 describe('convertNumberToSatoshis', () => {
 	it('converts number to Satoshis correctly', () => {
@@ -21,5 +29,56 @@ describe('convertSatoshisToBtc', () => {
 		expect(convertSatoshisToBtc(ZERO)).toEqual('0');
 		expect(convertSatoshisToBtc(4000n)).toEqual('0.00004');
 		expect(convertSatoshisToBtc(1n)).toEqual('0.00000001');
+	});
+});
+
+describe('isInvalidUtxosFee', () => {
+	it('returns false for a usable UTXO selection', () => {
+		expect(isInvalidUtxosFee(mockUtxosFee)).toBeFalsy();
+	});
+
+	it('returns true when the selection reported an error', () => {
+		expect(
+			isInvalidUtxosFee({ ...mockUtxosFee, error: BtcPrepareSendError.InsufficientBalance })
+		).toBeTruthy();
+	});
+
+	it('returns true when no UTXOs were selected', () => {
+		expect(isInvalidUtxosFee({ feeSatoshis: ZERO, utxos: [] })).toBeTruthy();
+	});
+});
+
+describe('mapUtxosFeeErrorToMessage', () => {
+	it.each([
+		{
+			error: BtcPrepareSendError.InsufficientBalance,
+			expected: en.send.assertion.insufficient_funds_verbose_btc
+		},
+		{
+			error: BtcPrepareSendError.InsufficientBalanceForFee,
+			expected: en.fee.assertion.insufficient_funds_for_fee
+		},
+		{
+			error: BtcPrepareSendError.MinimumBalance,
+			expected: en.send.assertion.minimum_btc_amount
+		},
+		{
+			error: BtcPrepareSendError.UtxoLocked,
+			expected: en.send.assertion.btc_utxo_locked
+		},
+		{
+			error: BtcPrepareSendError.PendingTransactionsNotAvailable,
+			expected: en.send.assertion.pending_transactions_not_available
+		}
+	])('maps $error to its message', ({ error, expected }) => {
+		expect(mapUtxosFeeErrorToMessage({ utxosFee: { ...mockUtxosFee, error }, i18n: en })).toBe(
+			expected
+		);
+	});
+
+	it('falls back to the no-available-UTXOs message', () => {
+		expect(
+			mapUtxosFeeErrorToMessage({ utxosFee: { feeSatoshis: ZERO, utxos: [] }, i18n: en })
+		).toBe(en.send.info.no_available_utxos);
 	});
 });
