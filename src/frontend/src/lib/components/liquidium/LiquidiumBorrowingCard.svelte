@@ -2,33 +2,25 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import LiquidiumProviderTag from '$lib/components/liquidium/LiquidiumProviderTag.svelte';
-	import LiquidiumRepayModal from '$lib/components/liquidium/repay/LiquidiumRepayModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { modalLiquidiumRepay } from '$lib/derived/modal.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
+		// Assets → Borrowings tab row; no action, clicks through to the provider page.
 		reserve: LiquidiumReserve;
-		// 'provider': provider-page row with a Repay action (default).
-		// 'holdings': Assets → Borrowings tab row; no action, clicks through to the provider page.
-		variant?: 'provider' | 'holdings';
 	}
 
-	let { reserve, variant = 'provider' }: Props = $props();
-
-	const modalId = Symbol();
+	let { reserve }: Props = $props();
 
 	const goToProvider = () => {
 		void goto(AppPath.ProvidersLiquidium);
@@ -50,29 +42,12 @@
 	);
 </script>
 
-{#snippet repayAction()}
-	<span class="ml-2 flex">
-		<Button
-			colorStyle="secondary-light"
-			onclick={() => modalStore.openLiquidiumRepay(modalId)}
-			paddingSmall
-		>
-			{$i18n.liquidium.text.action_repay}
-		</Button>
-	</span>
-{/snippet}
-
 {#snippet providerTag()}
 	<LiquidiumProviderTag />
 {/snippet}
 
 <div class="flex w-full flex-col">
-	<LogoButton
-		action={variant === 'provider' ? repayAction : undefined}
-		hover={variant === 'holdings'}
-		onClick={variant === 'holdings' ? goToProvider : undefined}
-		subtitle={variant === 'holdings' ? providerTag : undefined}
-	>
+	<LogoButton onClick={goToProvider} subtitle={providerTag}>
 		{#snippet logo()}
 			<span class="mr-2 flex">
 				{#if nonNullish(token)}
@@ -109,9 +84,4 @@
 			</span>
 		{/snippet}
 	</LogoButton>
-
-	<!-- Outside LogoButton's <button> to keep valid HTML. -->
-	{#if variant === 'provider' && $modalLiquidiumRepay && $modalStore?.id === modalId}
-		<LiquidiumRepayModal {reserve} />
-	{/if}
 </div>

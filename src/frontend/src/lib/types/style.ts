@@ -7,7 +7,8 @@ export type ButtonColorStyle =
 	| 'tertiary-alt'
 	| 'muted'
 	| 'error'
-	| 'success';
+	| 'success'
+	| 'success-light';
 
 export type BadgeVariant =
 	| 'default'
