@@ -7,7 +7,7 @@ import { executeLiquidiumSupply } from '$lib/services/liquidium-supply.services'
 import * as liquidiumServices from '$lib/services/liquidium.services';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { NativeAddressSupplyTarget, SupplyFlow, SupplyTarget } from '@liquidium/client';
+import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
@@ -28,8 +28,7 @@ describe('liquidium-supply.services', () => {
 		activeUserTransactionsServices.createActiveUserTransaction
 	);
 
-	const nativeTarget: NativeAddressSupplyTarget = {
-		type: 'nativeAddress',
+	const nativeTarget: SupplyTarget = {
 		poolId,
 		asset: 'BTC',
 		chain: 'BTC',
@@ -54,6 +53,7 @@ describe('liquidium-supply.services', () => {
 			identity: mockIdentity,
 			ethAddress,
 			poolId,
+			chain: 'BTC',
 			asset: 'BTC',
 			amount: 100_000_000n,
 			inflowFee: 50n,
@@ -77,7 +77,12 @@ describe('liquidium-supply.services', () => {
 
 		await run();
 
-		expect(supply).toHaveBeenCalledExactlyOnceWith({ profileId, poolId, action: 'deposit' });
+		expect(supply).toHaveBeenCalledExactlyOnceWith({
+			profileId,
+			poolId,
+			chain: 'BTC',
+			action: 'deposit'
+		});
 		// Gross transfer = net supply (100_000_000) + provider inflow fee (50).
 		expect(broadcast).toHaveBeenCalledExactlyOnceWith({
 			target: nativeTarget,
@@ -155,24 +160,5 @@ describe('liquidium-supply.services', () => {
 		expect(externalRefs).toEqual(
 			expect.arrayContaining([{ key: LIQUIDIUM_EXTERNAL_REF_KEYS.TXID, value: '0xhash' }])
 		);
-	});
-
-	it('rejects an icrcAccount target and registers nothing', async () => {
-		supply.mockResolvedValue(
-			buildFlow({
-				type: 'icrcAccount',
-				poolId,
-				asset: 'BTC',
-				chain: 'BTC',
-				action: 'deposit',
-				owner: 'aaaaa-aa',
-				subaccount: new Uint8Array(),
-				account: 'icrc-account-text'
-			})
-		);
-
-		await expect(run()).rejects.toThrow('unsupported');
-		expect(broadcast).not.toHaveBeenCalled();
-		expect(createActiveUserTransaction).not.toHaveBeenCalled();
 	});
 });
