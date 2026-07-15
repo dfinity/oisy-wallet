@@ -33,8 +33,8 @@ export const estimateLiquidiumInflowFee = async ({
 	asset: Asset;
 	chain: Chain;
 }): Promise<bigint> => {
-	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported
-	// pairs, so narrow to the correlated `AssetIdentifier` union at this single boundary.
+	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
+	// We type-assert to the correlated `AssetIdentifier` shape at this boundary to satisfy the SDK's typing.
 	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
 		asset,
 		chain
