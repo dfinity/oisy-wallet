@@ -88,7 +88,7 @@
 				{/snippet}
 
 				{#snippet content()}
-					<div class="flex w-full flex-col gap-4">
+					<div class="flex w-full flex-col">
 						{#each supplyReserves as reserve (reserve.poolId)}
 							<LiquidiumSuppliedRow {reserve} />
 						{/each}
@@ -119,7 +119,7 @@
 				{/snippet}
 
 				{#snippet content()}
-					<div class="flex w-full flex-col gap-4">
+					<div class="flex w-full flex-col">
 						{#each borrowReserves as reserve (reserve.poolId)}
 							<LiquidiumBorrowedRow {reserve} />
 						{/each}
