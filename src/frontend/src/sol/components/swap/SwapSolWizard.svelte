@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -36,6 +35,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { Collapsible, Backdrop, BottomSheet } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -46,7 +48,7 @@
 
 	{#if expanded}
 		<div class="fixed inset-0 z-14">
-			<BottomSheet transition>
+			<BottomSheetContainer transition>
 				{#snippet header()}
 					<div class="w-full p-4">
 						<ButtonIcon
@@ -77,8 +79,8 @@
 						{/if}
 					</div>
 				{/snippet}
-			</BottomSheet>
-			<Backdrop on:nnsClose={() => (expanded = false)} />
+			</BottomSheetContainer>
+			<Backdrop onClose={() => (expanded = false)} />
 		</div>
 	{/if}
 </Responsive>

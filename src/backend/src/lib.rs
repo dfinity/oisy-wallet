@@ -6,6 +6,7 @@ use ic_cdk::{
     management_canister::{HttpRequestResult, TransformArgs},
     post_upgrade,
 };
+use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
     std_canister_status,
@@ -28,14 +29,20 @@ use shared::{
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         notification::AddDismissedNotificationRequest,
         onramper::SignOnramperWidgetUrlRequest,
+        personal_note::{DeletePersonalNoteRequest, SetPersonalNoteRequest},
+        personal_note_share::CreatePersonalNoteShareRequest,
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CreateContactResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult,
+            ConsumePersonalNoteShareResult, CreateContactResult, CreatePersonalNoteShareResult,
             CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
-            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
-            GetContactResult, GetContactsResult, GetUserProfileResult, GetUserTransactionsResult,
-            SaveUserTransactionsResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
+            DeletePersonalNoteResult, GetActiveUserTransactionsResult, GetAgreementHistoryResult,
+            GetAllowedCyclesResult, GetContactResult, GetContactsResult,
+            GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
+            GetPersonalNotesCountResult, GetPersonalNotesResult, GetUserProfileResult,
+            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
+            SetPersonalNoteResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
             UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
             UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
             UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
@@ -52,7 +59,7 @@ use shared::{
     },
 };
 
-use crate::state::{read_state, set_config};
+use crate::state::{ensure_personal_notes, read_state, set_config};
 
 mod active_user_transactions;
 mod api;
@@ -61,6 +68,7 @@ mod contacts;
 mod delegation;
 mod exchange;
 mod onramper;
+mod personal_notes;
 mod signer;
 mod state;
 mod status;
@@ -105,6 +113,12 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+
+    // Attach the personal-notes store eagerly so `stats()` (a query, which
+    // cannot run the lazy init) reports the persisted count after an upgrade.
+    // Fresh installs (`init`) stay lazy to avoid allocating its memory regions
+    // in canisters that never use notes.
+    ensure_personal_notes();
 
     // Initialize the Bitcoin fee percentiles cache
     bitcoin::api::init_fee_percentiles_cache();

@@ -252,6 +252,7 @@ describe('wallet-connect.services', () => {
 			rejectRequest: vi.fn(),
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
 			disconnect: vi.fn()
 		} as WalletConnectListener;
 		const mockTransaction = { mock: 'mock-transaction' };

@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Benvenuto nei Prestiti!",
+			"header_description": "Accedi a liquidità senza vendere. Prendi in prestito stablecoin contro i tuoi BTC, ICP e altro.",
+			"borrowing_options": "Opzioni di prestito",
+			"borrowing_potential": "Potenziale di prestito",
+			"borrowing_power_hint": "Una stima di quanto potresti prendere in prestito se fornissi i tuoi asset come garanzia, al miglior tasso disponibile.",
+			"available_best_provider": "disponibile · miglior fornitore",
+			"remaining_best_provider": "residuo · miglior fornitore",
+			"active_loans": "Prestiti attivi",
+			"no_active_loans": "nessun prestito attivo",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "APR prestito da"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Prestiti",
+			"tab_title_short": "Prestiti",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Annulla",
@@ -7,10 +38,12 @@
 			"back": "Indietro",
 			"done": "Fatto",
 			"close": "Chiudi",
+			"collapse": "Comprimi",
+			"expand": "Espandi",
 			"change": "Cambia",
 			"continue": "",
 			"apply": "Applica",
-			"retry": "",
+			"retry": "Riprova",
 			"refresh": "Aggiorna",
 			"name": "Nome",
 			"symbol": "Simbolo",
@@ -42,7 +75,7 @@
 			"more": "",
 			"less": "",
 			"ellipsis": "",
-			"learn_more": "",
+			"learn_more": "Scopri di più",
 			"sorting": "",
 			"unlimited": "",
 			"info": "",
@@ -64,7 +97,7 @@
 			"switch_currency": "Cambia valuta",
 			"more": "",
 			"less": "",
-			"learn_more": "",
+			"learn_more": "Segui il link per saperne di più",
 			"up_one_level": "Sali di un livello"
 		},
 		"warning": {
@@ -73,12 +106,23 @@
 			"video_not_supported": ""
 		}
 	},
+	"progress": {
+		"completed": "Completato",
+		"in_progress": "In corso",
+		"failed": "Non riuscito"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Risorse",
+			"nfts": "Oggetti da collezione",
 			"settings": "Impostazioni",
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
+			"trade": "Negozia",
+			"borrow": "Prendi in prestito",
+			"section_portfolio": "Portafoglio",
+			"section_finance": "Finanza",
+			"section_more": "Altro",
 			"airdrops": "Ricompense",
 			"earning": "Guadagna",
 			"pay": "",
@@ -96,13 +140,18 @@
 			"hide_balances": "Nascondi saldi",
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
-			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi."
+			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
+			"notes": "Note"
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
+			"nfts": "Apri la vista degli oggetti da collezione",
 			"settings": "Apri le tue impostazioni",
 			"dapp_explorer": "Apri l'esploratore di app",
 			"activity": "Apri la vista attività",
+			"trade": "Apri la vista Trading",
+			"borrow": "Apri la vista Prestiti",
+			"earning": "Apri la vista Guadagni",
 			"airdrops": "Apri la vista Ricompense",
 			"pay": "",
 			"wallet_connect": "",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "Genera un link di riferimento per un amico",
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
-			"show_balances": "Mostra i saldi nascosti"
+			"show_balances": "Mostra i saldi nascosti",
+			"notes": "Apri le note"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -221,17 +271,17 @@
 			"website": "Immagine di $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
-			"ai": "",
-			"defi": "DeFi",
+			"aa_new": "Aggiunti di recente",
+			"ab_icp": "ICP",
+			"ai": "IA",
+			"dex": "DEX",
 			"game": "Gioco",
-			"nft": "",
-			"rwa": "",
-			"social_media": "Social Media",
+			"lending": "Lending",
+			"nft": "NFT",
+			"rwa": "RWA",
+			"social": "Social",
 			"staking": "Staking",
-			"tools": "Strumenti",
-			"walletconnect": "WalletConnect"
+			"tools": "Strumenti"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "",
 					"call_to_action": "Mostra di più"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Verifica dell'identità unica per interazioni digitali affidabili.",
-				"call_to_action": "Apri DecideID",
-				"stats": "50.000+ richieste di inferenza",
-				"description": "Decide ID è al centro del sistema Decide AI, garantendo fiducia e sicurezza attraverso la sua metodologia unica di Proof of Personhood (PoP). Quando ti unisci, passerai attraverso un processo di verifica in cui fornisci più prove e completi una sfida speciale per confermare la tua identità. Questo assicura che ogni utente sia reale, unico e non un bot. Il tuo Principal ID, un identificatore on-chain unico, viene creato durante questo processo. Può essere utilizzato in varie applicazioni che richiedono una personalità verificata, garantendo un'integrazione sicura e senza soluzione di continuità in qualsiasi processo di iscrizione o accesso dell'app. Inoltre, l'uso di prove a conoscenza zero significa che i tuoi dati privati, come le informazioni biometriche, rimangono confidenziali e sicuri.<br/><br/>Con Decide ID, goditi un modo flessibile, sicuro e incentrato sulla privacy per verificare e interagire online.",
-				"carousel": {
-					"text": "Goditi un modo incentrato sulla privacy per verificare e interagire online",
-					"call_to_action": "Interessato?"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "Entra nel warp",
 				"description": "Curve Finance è un DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM. È noto per i suoi market maker automatizzati avanzati per stablecoin e asset volatili e per il suo sistema unico di liquidazione soft per i prestiti."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Sblocca il pieno potenziale della DeFi e del trading semplificato. Scambia token, guadagna come fornitore di liquidità e sfrutta l'AMM leader di Bitfinity EVM.",
-				"call_to_action": "Apri Sonic",
-				"description": "Sonic, un exchange decentralizzato multichain costruito su Internet Computer Protocol (ICP), offre una vasta gamma di servizi DeFi. Gli utenti possono scambiare facilmente token e perpetual, fornire liquidità e partecipare alla vendita di token LBP. Gli utenti possono partecipare alla governance della DAO, mettere in stake per ricompense e votare sulle decisioni della piattaforma.<br/><br/>Completamente on-chain e open-source! Scambia token come un professionista, accumula commissioni come fornitore di liquidità, unisciti all'atmosfera AMM e sii parte integrante della Sonic DAO.",
-				"carousel": {
-					"text": "Sblocca il pieno potenziale della Defi",
-					"call_to_action": "Apri Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX e market maker automatizzato costruito sulla blockchain di Solana, che offre un order book a limite centrale che consente scambi veloci.",
@@ -369,17 +398,6 @@
 					"text": "",
 					"call_to_action": ""
 				}
-			},
-			"beam": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
-			},
-			"axie_infinity": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
 			},
 			"mobox": {
 				"name": "",
@@ -431,11 +449,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -481,6 +490,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -1231,7 +1254,8 @@
 			"buy": "Acquista",
 			"buy_dev": "Acquista (Ambiente di sviluppo)",
 			"unavailable_title": "L'acquisto di token è temporaneamente non disponibile",
-			"unavailable_description": "L'acquisto di token è attualmente disattivato mentre continuiamo a migliorare la sicurezza di questo processo introducendo la firma degli URL. Verrà riattivato non appena il lavoro sarà completato.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Nel frattempo, puoi comunque ricevere token condividendo l'indirizzo del tuo portafoglio."
 		},
 		"actions": {
@@ -1267,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Token",
+			"title_short": "Token",
 			"contract_address": "Indirizzo del contratto",
 			"token_address": "Indirizzo del token",
 			"balance": "Saldo",
@@ -1447,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "I tuoi NFT appariranno qui",
 			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
 			"title_not_supported": "",
@@ -1577,11 +1604,28 @@
 			"network": "",
 			"amount": "",
 			"hex_data": "Dati HEX",
+			"unreviewed_instructions": "",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",
+			"sign_psbt": "",
 			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "App connesse",
 			"no_connected_apps": "Attualmente non ci sono app connesse.",
+			"disconnect_all": "Disconnetti tutte",
+			"disconnect_app": "Disconnetti $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1620,11 +1664,245 @@
 			"request_rejected": "Richiesta WalletConnect rifiutata",
 			"unknown_parameter": "Parametro sconosciuto.",
 			"wallet_not_initialized": "Errore inaspettato. L'indirizzo del tuo wallet non è inizializzato.",
+			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "L'indirizzo di origine richiesto per la transazione non è l'indirizzo di questo wallet.",
 			"unknown_destination": "Indirizzo di destinazione sconosciuto.",
 			"ambiguous_transaction": "Questa transazione sposta fondi tra più indirizzi e non può essere mostrata in modo accurato per la revisione. Per la tua sicurezza, non è stata firmata.",
 			"request_not_defined": "Errore inaspettato: la richiesta non è definita, pertanto non può essere elaborata.",
 			"unexpected_processing_request": "Errore inaspettato durante l'elaborazione della richiesta con WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Trading",
+			"tab_title_short": "Negozia",
+			"intro": "",
+			"learn_more": "Scopri di più",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "Piazza ordini limite direttamente dal tuo wallet. I tuoi fondi restano in smart contract che controlli tu, mai presso una parte centrale.",
+			"trading_potential": "Potenziale di trading",
+			"trading_potential_hint": "Nel tuo wallet, non sull'exchange",
+			"deposited_assets": "Asset depositati",
+			"deposited_all_free": "Tutto disponibile",
+			"deposited_empty": "Ancora nulla depositato",
+			"free": "$amount disponibile",
+			"in_orders": "$amount in ordini",
+			"in_orders_label": "in ordini",
+			"positions": "Le mie posizioni",
+			"deposit": "Deposita",
+			"withdraw": "Preleva",
+			"active_orders": "Ordini attivi",
+			"active_orders_empty_deposit": "Deposita token dal tuo wallet per iniziare a piazzare ordini limite su OISY Trade.",
+			"active_orders_empty_place": "I tuoi ordini limite aperti e in sospeso appariranno qui non appena ne piazzerai uno.",
+			"new_order": "Nuovo ordine",
+			"order_history": "Cronologia ordini"
+		},
+		"provider_unavailable": {
+			"title": "Il trading è temporaneamente non disponibile",
+			"description": "Al momento non è disponibile alcun provider di trading. I tuoi saldi sono al sicuro e torneranno utilizzabili non appena un provider sarà di nuovo online."
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "Deposita",
+			"review_title": "Rivedi il deposito",
+			"progress_title": "Deposito in corso",
+			"you_deposit": "Depositi",
+			"error_insufficient_balance": "L'importo supera il tuo saldo nel wallet",
+			"to": "A",
+			"network": "Rete",
+			"transaction_fee": "Fee totale stimata",
+			"approval_fee": "Fee di approvazione",
+			"transfer_fee": "Fee di rete",
+			"info_title": "OISY Trade: libro degli ordini onchain",
+			"info_description": "I fondi depositati sono detenuti dal canister di OISY Trade e usati per piazzare ordini limite, protetti da smart contract onchain.",
+			"empty_title": "Ancora nulla da depositare",
+			"empty_description": "OISY Trade ti permette di creare ordini per questi token. Aggiungine uno al tuo wallet, poi depositalo qui per iniziare a fare trading.",
+			"approving": "Approvazione in corso",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "Deposito in corso",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "Non è stato possibile determinare la commissione del ledger per questo token. I tuoi fondi sono rimasti nel tuo wallet. Riprova tra un momento.",
+				"deposit_failed": "Il deposito non si è completato. I tuoi fondi sono rimasti nel tuo wallet. Riprova o controlla lo stato della rete."
+			}
+		},
+		"withdraw": {
+			"title": "Preleva",
+			"review_title": "Rivedi il prelievo",
+			"progress_title": "Prelievo in corso",
+			"amount_label": "Prelevi",
+			"from": "Da",
+			"network": "Rete",
+			"transaction_fee": "",
+			"transfer_fee": "Commissione di prelievo",
+			"you_receive": "Ricevi",
+			"reserved_note": "$amount riservato · bloccato da ordini aperti",
+			"error_insufficient_balance": "L'importo supera il tuo saldo disponibile",
+			"submit": "Preleva",
+			"open": "",
+			"progress_withdraw": "Invio di $symbol al tuo wallet",
+			"progress_done": "",
+			"error": "Il tuo prelievo non si è completato. I tuoi fondi sono rimasti su OISY Trade. Riprova tra un momento."
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "Nessun ordine attivo",
+			"empty_history": "",
+			"side_sell": "Vendita",
+			"side_buy": "Acquisto",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "per $quote @ $price",
+			"row_phrase_buy": "con $quote @ $price",
+			"queue_ahead": "$percentage% davanti in coda",
+			"status_open": "Aperto",
+			"status_pending": "In sospeso",
+			"status_partial": "Parziale",
+			"status_filled": "Eseguito",
+			"status_canceled": "Annullato",
+			"status_expired": "Scaduto",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "Cos'è OISY Trade",
+			"description": "OISY Trade è un exchange a libro degli ordini completamente onchain, integrato direttamente nel tuo wallet. Imposta un prezzo di acquisto o vendita e il tuo ordine si regola onchain nel momento in cui il mercato lo raggiunge, anche da disconnesso.",
+			"fact_1_title": "Compra o vendi al tuo prezzo",
+			"fact_1_description": "Imposta il prezzo esatto a cui vuoi comprare o vendere un token. Il tuo ordine limite resta nel libro ordini finché il mercato non lo raggiunge.",
+			"fact_2_title": "Si esegue anche mentre sei assente",
+			"fact_2_description": "Una volta piazzato, il tuo ordine vive onchain. L'exchange lo esegue non appena appare un ordine corrispondente, che tu sia connesso o meno.",
+			"fact_3_title": "Completamente onchain",
+			"fact_3_description": "Gli ordini vengono abbinati e regolati all'interno di un canister su Internet Computer, governato dall'NNS, senza alcun exchange centralizzato di mezzo."
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -2048,6 +2326,7 @@
 		"text": {
 			"title": "Guadagnare",
 			"tab_title": "Guadagnando",
+			"tab_title_short": "Guadagna",
 			"earning_opportunities": "Opportunità di guadagno",
 			"header_title": "Benvenuto in Guadagnare!",
 			"header_description": "Fai crescere il tuo portafoglio di asset digitali allocando i tuoi token in opportunità di guadagno.",
@@ -2059,10 +2338,10 @@
 				"description": "Massima efficienza di rendimento con vault in Autopilot con un solo clic.",
 				"action": "Vai all'Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Usa OISY e GUADAGNA! L'episodio 6 è in diretta 🎉",
-				"action": "Controlla stato"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2072,6 +2351,8 @@
 			"currentStaked": "In staking",
 			"currentEarning": "Guadagno attuale",
 			"earningPotential": "Potenziale di guadagno",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Condizioni"
 		},
 		"terms": {
@@ -2081,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": "Guadagna con Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Fornisci Bitcoin. Prendi in prestito stablecoin. Resta nativo.",
+			"health_factor": "Fattore di salute",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "Valore netto",
+			"markets": "Mercati",
+			"total_supplied": "Totale fornito",
+			"no_assets_supplied": "nessun asset fornito",
+			"supplied": "Fornito",
+			"borrowed": "Preso in prestito",
+			"borrow_rate": "Tasso di prestito",
+			"apy_suffix": "APY",
+			"supply_label": "Fornitura",
+			"borrow_label": "Prestito",
+			"coming_soon": "Prossimamente",
+			"coming_soon_teaser": "Prossimamente…",
+			"action_supply": "Fornitura",
+			"action_borrow": "Prestito",
+			"action_repay": "Rimborsa",
+			"action_withdraw": "Preleva",
+			"transaction_failed": "Transazione non riuscita",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "Rivedi fornitura",
+			"supply_review_subtitle": "Fornisci",
+			"supplying": "Fornitura in corso",
+			"starting_to_supply": "Invio della tua posizione…",
+			"supply_started": "La tua posizione è ora in fase di attivazione.",
+			"supply_apy": "APY di fornitura",
+			"supply_collateral_info": "Gli asset forniti fungono anche da garanzia contro cui puoi prendere in prestito.",
+			"supply_agreement": "Comprendo che i miei asset saranno forniti al protocollo Liquidium e sono soggetti al rischio degli smart contract onchain.",
+			"provider_fee": "Commissione di rete",
+			"transaction_fee": "Commissione di transazione",
+			"insufficient_funds_for_fee": "Saldo insufficiente per coprire l'importo e le commissioni.",
+			"supply_prices_unavailable": "I prezzi non sono temporaneamente disponibili. La fornitura è disabilitata finché non vengono caricati.",
+			"borrow_review": "Rivedi prestito",
+			"borrow_review_subtitle": "Prendi in prestito",
+			"borrowing": "Richiesta prestito in corso",
+			"borrow_apy": "APY di prestito",
+			"resulting_ltv": "LTV risultante",
+			"projected_health_factor": "Fattore di salute previsto",
+			"borrowing_power": "Capacità di prestito",
+			"collateral": "Garanzia",
+			"minimum_borrow": "Prestito minimo",
+			"provider": "Fornitore",
+			"funds_delivered_to": "Fondi inviati a",
+			"your_oisy_address": "Il tuo indirizzo $oisy_short",
+			"borrow_risk_info": "Prendere in prestito riduce il tuo fattore di salute. Se scende troppo, la tua garanzia può essere liquidata.",
+			"borrow_at_risk_warning": "Questo prestito riduce notevolmente il tuo fattore di salute.",
+			"borrow_exceeds_power": "L'importo supera la tua capacità di prestito.",
+			"borrow_below_minimum": "L'importo è inferiore al prestito minimo.",
+			"borrow_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il prestito è disabilitato finché non vengono caricati.",
+			"borrow_high_risk_warning": "Questo prestito avvicina la tua posizione alla liquidazione.",
+			"borrow_risk_confirm": "Comprendo che questo prestito aumenta il mio rischio di liquidazione.",
+			"starting_to_borrow": "Invio del tuo prestito…",
+			"borrow_started": "Il tuo prestito è ora in fase di attivazione.",
+			"withdraw_review": "Rivedi prelievo",
+			"withdraw_review_subtitle": "Prelevi",
+			"withdrawing": "Prelievo in corso",
+			"starting_to_withdraw": "Invio del tuo prelievo…",
+			"withdraw_started": "Il tuo prelievo è in fase di elaborazione.",
+			"supplied_label": "Fornito",
+			"withdrawable": "",
+			"reserved_by_debt": "Riservato per debito aperto",
+			"withdraw_exceeds_free_collateral": "Non puoi prelevare più della tua garanzia libera finché è aperto un debito.",
+			"withdraw_exceeds_supplied": "L'importo supera il tuo saldo fornito.",
+			"withdraw_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il prelievo è disabilitato finché non vengono caricati.",
+			"withdraw_risk_info": "Prelevare la garanzia riduce il tuo fattore di salute. Se scende troppo, la garanzia rimanente può essere liquidata.",
+			"withdraw_at_risk_warning": "Questo prelievo riduce notevolmente il tuo fattore di salute.",
+			"withdraw_high_risk_warning": "Questo prelievo avvicina la tua posizione alla liquidazione.",
+			"withdraw_risk_confirm": "Comprendo che questo prelievo aumenta il mio rischio di liquidazione.",
+			"repay_review": "Rivedi rimborso",
+			"repay_review_subtitle": "Rimborsi",
+			"repaying": "Rimborso in corso",
+			"starting_to_repay": "Invio del tuo rimborso…",
+			"repay_started": "Il tuo rimborso è in fase di elaborazione.",
+			"current_debt": "Debito attuale",
+			"interest_accrued": "Interessi maturati",
+			"debt_after_repay": "Debito dopo il rimborso",
+			"repay_exceeds_debt": "L'importo supera il tuo debito residuo.",
+			"repay_prices_unavailable": "I prezzi non sono temporaneamente disponibili. Il rimborso è disabilitato finché non vengono caricati."
+		},
+		"info": {
+			"title": "Cos'è Liquidium",
+			"description": "Liquidium è un protocollo di prestito decentralizzato e non-custodial in cui puoi fornire o prendere in prestito su più reti blockchain. Costruito su Internet Computer, consente prestiti cross-chain senza bridge centralizzati o token wrapped.",
+			"fact_1_title": "Guadagna sul tuo BTC",
+			"fact_1_description": "Presta il tuo Bitcoin per ottenere rendimento da prestiti sovracollateralizzati.",
+			"fact_2_title": "Non-Custodial",
+			"fact_2_description": "I depositi sono protetti da smart contract onchain, senza controllo centralizzato.",
+			"fact_3_title": "Nativo, Cross-Chain",
+			"fact_3_description": "Gli asset restano sulla loro chain nativa, quindi puoi fornire su una e prendere in prestito su un'altra."
 		}
 	},
 	"vaults": {
@@ -2163,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "Sembra che tu non abbia ancora messo in staking nessun token",
 			"full_history": "Mostra cronologia completa",
-			"recent_history": "Chiudi cronologia completa",
-			"harvest_autopilot_carousel_slide_title": "Guadagna in OISY con Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Scopri di più"
+			"recent_history": "Chiudi cronologia completa"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Si è verificato un errore durante il prelievo dei token.",
@@ -2255,6 +2633,83 @@
 		"errors": {
 			"unknown": "",
 			"no_response": ""
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Note",
+			"note": "Nota",
+			"add_title": "Aggiungi nuova nota",
+			"edit_note": "Modifica nota",
+			"delete_note": "Elimina nota",
+			"delete_confirm_text": "Questo eliminerà la nota '$note'. Questa azione non può essere annullata.",
+			"back": "Indietro",
+			"empty_title": "Non hai ancora nessuna nota",
+			"empty_subtitle": "Crea note private e crittografate per tenere al sicuro i dettagli accanto al tuo wallet.",
+			"empty_add": "Aggiungi nuova nota",
+			"add_note": "Aggiungi nota",
+			"note_label": "Nota",
+			"placeholder": "Scrivi una nota…",
+			"search_placeholder": "Cerca nota",
+			"no_results": "Nessuna nota corrisponde alla tua ricerca.",
+			"encrypted_lead": "Crittografato end-to-end.",
+			"encrypted_info": "Solo tu puoi leggere le tue note.",
+			"created": "Creata il $date",
+			"updated": "Aggiornata il $date",
+			"created_updated": "Creata $created · Aggiornata $updated",
+			"too_long": "La nota deve avere al massimo $maxCharacters caratteri.",
+			"cap_reached": "Hai raggiunto il massimo di $max note salvate. Eliminane una per aggiungerne una nuova.",
+			"decryption_failed": "Impossibile decrittografare questa nota"
+		},
+		"alt": {
+			"edit": "Modifica nota",
+			"delete": "Elimina nota"
+		},
+		"error": {
+			"load": "Impossibile caricare le tue note. Riprova.",
+			"save": "Impossibile salvare la tua nota. Riprova.",
+			"delete": "Impossibile eliminare la tua nota. Riprova."
+		},
+		"share": {
+			"text": {
+				"share_note": "Condividi nota",
+				"snapshot_caption": "Condivide una copia della nota così com'è ora. Modificarla o eliminarla in seguito non cambierà questo link.",
+				"cap_reached": "Hai raggiunto il massimo di $max link di condivisione attivi. Si liberano quando scadono o vengono usati.",
+				"expires_after": "Il link scade dopo",
+				"expiry_1h": "1 ora",
+				"expiry_24h": "24 ore",
+				"expiry_7d": "7 giorni",
+				"expiry_30d": "30 giorni",
+				"single_use": "Uso singolo",
+				"single_use_option": "Il link può essere usato una sola volta",
+				"protects_body": "Solo chi riceve questo link può leggere la tua nota.",
+				"create_link": "Crea link",
+				"link_ready_title": "Link di condivisione pronto",
+				"link_ready_subtitle": "Chiunque abbia questo link può leggere la nota",
+				"link_copied": "Link copiato!",
+				"recap_expires_in": "Scade tra $duration",
+				"recap_single_use": "uso singolo",
+				"reminder": "$oisy_short non può recuperare né revocare questo link una volta condiviso. Smette di funzionare non appena viene usato o scade.",
+				"done": "Fatto"
+			},
+			"error": {
+				"create": "Impossibile creare il link di condivisione. Riprova."
+			},
+			"recipient": {
+				"locked_title": "Qualcuno ha condiviso una nota con te",
+				"reveal": "Mostra nota",
+				"revealed_title": "Nota condivisa",
+				"single_use_caveat": "Link a uso singolo: non appena chiudi o ricarichi questa pagina, la nota sparisce per sempre. Copiala ora se ti serve.",
+				"copy_note": "Copia nota",
+				"note_copied": "Nota copiata!",
+				"outro_title": "Protegge i tuoi asset con la stessa sicurezza",
+				"outro_subtitle": "$oisy_short è un wallet completamente onchain e self-custody per Bitcoin, Ethereum, Solana, ICP e altro.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana e ICP in un unico posto",
+				"outro_feature_onchain": "100% onchain — nessuna estensione, nessuna seed phrase",
+				"outro_feature_encrypted": "Le tue chiavi e i tuoi dati, crittografati end-to-end",
+				"discover": "Scopri OISY",
+				"unavailable_title": "Questo link è scaduto o è già stato usato"
+			}
 		}
 	}
 }

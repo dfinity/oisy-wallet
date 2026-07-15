@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -9,8 +8,10 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

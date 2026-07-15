@@ -6,7 +6,9 @@ use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use super::rate_limiter::ALLOW_SIGNING_RATE_LIMITER;
 use crate::{
-    api, signer,
+    api,
+    personal_notes::share::service::prune_expired_shares,
+    signer,
     token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
     types::StoredPrincipal,
 };
@@ -140,6 +142,7 @@ pub(crate) fn start_periodic_housekeeping_timers() {
 /// Runs hourly housekeeping tasks:
 /// - Top up the cycles ledger.
 /// - Evict `token_activity` entries older than [`TOKEN_ACTIVITY_RETENTION_SEC`].
+/// - Prune expired `personal_note_shares` entries.
 async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
@@ -154,6 +157,11 @@ async fn hourly_housekeeping_tasks() {
     let evicted = evict_inactive_tokens(TOKEN_ACTIVITY_RETENTION_SEC);
     if evicted > 0 {
         ic_cdk::println!("Evicted {evicted} stale token_activity entries");
+    }
+
+    let pruned = prune_expired_shares();
+    if pruned > 0 {
+        ic_cdk::println!("Pruned {pruned} expired personal_note_shares entries");
     }
 }
 

@@ -6,6 +6,8 @@ pub mod contacts;
 pub mod custom_tokens;
 pub mod exchange;
 pub mod onramper;
+pub mod personal_note_shares;
+pub mod personal_notes;
 pub mod signer;
 pub mod transactions;
 pub mod user_profile;

@@ -5,7 +5,10 @@ use ic_cdk::{
     api::msg_caller,
     bitcoin_canister::Network as BitcoinNetwork,
     call::Call,
-    management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
+    management_canister::{
+        ecdsa_public_key, schnorr_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs,
+        SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
+    },
 };
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -19,6 +22,7 @@ use shared::types::signer::{
     },
     AllowSigningError, GetAllowedCyclesError,
 };
+use tiny_keccak::{Hasher, Keccak};
 
 use super::canister_ids::{CYCLES_LEDGER, SIGNER};
 use crate::state::read_config;
@@ -186,19 +190,34 @@ pub fn principal2account(principal: &Principal) -> ByteBuf {
         .into()
 }
 
-/// Computes the public key of the specified principal.
+/// The caller's default-subaccount ICP account identifier as a lowercase hex string — the form
+/// `OnRamper` expects and the one the frontend shows as `$icpAccountIdentifierText`. Returns the
+/// hex directly, avoiding the hex → bytes → hex round-trip (and its panic surface) of
+/// [`principal2account`].
+pub fn principal_to_account_identifier_hex(principal: &Principal) -> String {
+    ic_ledger_types::AccountIdentifier::new(principal, &SUB_ACCOUNT_ZERO).to_hex()
+}
+
+// Chain-fusion-signer derivation-path schema bytes — the first path element that namespaces a
+// principal's key per chain, mirrored so reproducing the path via the management canister (with
+// `canister_id = cfs_canister_id`) yields the same key the signer derives.
+// ECDSA schemas: see <https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L6>.
+const SCHEMA_BTC: u8 = 0x00;
+const SCHEMA_ETH: u8 = 0x01;
+// Schnorr (Ed25519) schema used for Solana, mirrored from the frontend's offline derivation
+// (`src/frontend/src/lib/ic-pub-key/src/cli.ts`, `deriveSolAddress`).
+const SCHEMA_SOL: u8 = 0xfe;
+
+/// Computes the secp256k1 public key the chain-fusion signer would derive for `principal` under the
+/// given `schema` (`SCHEMA_BTC` / `SCHEMA_ETH`), via the management canister — a public-key read,
+/// not a signing call, so it does not consume the signer's signing allowance.
 // TODO: Cache CFS pubkey and derive it offline as in [ckBTC minter](https://github.com/dfinity/ic/blob/35153c7cb7b9d1da60472ca7e94c693e418f87bd/rs/bitcoin/ckbtc/minter/src/address.rs#L101-L101)
-async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+async fn cfs_ecdsa_pubkey_of(principal: &Principal, schema: u8) -> Result<Vec<u8>, String> {
     let (ecdsa_key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    // As set in [CFS](https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L6)
-    // 0 is for BTC
-    // 1 is for Eth
-    // 0xff is generic
-    let btc_schema = vec![0_u8];
-    let derivation_path = vec![btc_schema, principal.as_slice().to_vec()];
+    let derivation_path = vec![vec![schema], principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
-    if let Ok(key) = ecdsa_public_key(&EcdsaPublicKeyArgs {
+    let key = ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id: Some(cfs_canister_id),
         derivation_path,
         key_id: EcdsaKeyId {
@@ -207,11 +226,34 @@ async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
         },
     })
     .await
-    {
-        Ok(key.public_key)
-    } else {
-        Err("Failed to get ecdsa public key".to_string())
-    }
+    .map_err(|_| "Failed to get ecdsa public key".to_string())?;
+    Ok(key.public_key)
+}
+
+/// Computes the Ed25519 public key the chain-fusion signer would derive for `principal` on the
+/// Solana mainnet path, via the management canister `schnorr_public_key` (a public-key read, not a
+/// signing call). Mirrors the signer's path: `[SCHEMA_SOL, principal, "SOL", "mainnet"]`.
+async fn cfs_ed25519_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+    let (key_name, maybe_cfs_canister_id) =
+        read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
+    let derivation_path = vec![
+        vec![SCHEMA_SOL],
+        principal.as_slice().to_vec(),
+        b"SOL".to_vec(),
+        b"mainnet".to_vec(),
+    ];
+    let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
+    let key = schnorr_public_key(&SchnorrPublicKeyArgs {
+        canister_id: Some(cfs_canister_id),
+        derivation_path,
+        key_id: SchnorrKeyId {
+            algorithm: SchnorrAlgorithm::Ed25519,
+            name: key_name,
+        },
+    })
+    .await
+    .map_err(|_| "Failed to get schnorr public key".to_string())?;
+    Ok(key.public_key)
 }
 
 fn transform_network(network: BitcoinNetwork) -> Network {
@@ -230,12 +272,98 @@ pub async fn btc_principal_to_p2wpkh_address(
     network: BitcoinNetwork,
     principal: &Principal,
 ) -> Result<String, String> {
-    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal).await?;
+    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal, SCHEMA_BTC).await?;
     if let Ok(compressed_public_key) = CompressedPublicKey::from_slice(&ecdsa_pubkey) {
         Ok(Address::p2wpkh(&compressed_public_key, transform_network(network)).to_string())
     } else {
         Err("Error getting P2WPKH from public key".to_string())
     }
+}
+
+/// Derives the caller's Ethereum address from their principal, reproducing the chain-fusion
+/// signer's key via the management canister (no signer call).
+///
+/// # Errors
+/// - The signer public key could not be retrieved, or the bytes are not a valid secp256k1 key.
+pub async fn eth_principal_to_address(principal: &Principal) -> Result<String, String> {
+    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal, SCHEMA_ETH).await?;
+    eth_address_from_ecdsa_pubkey(&ecdsa_pubkey)
+}
+
+/// Derives the caller's Solana (mainnet) address from their principal, reproducing the chain-fusion
+/// signer's Ed25519 key via the management canister (no signer call).
+///
+/// # Errors
+/// - The signer public key could not be retrieved, or it is not a 32-byte Ed25519 key.
+pub async fn sol_principal_to_address(principal: &Principal) -> Result<String, String> {
+    let ed25519_pubkey = cfs_ed25519_pubkey_of(principal).await?;
+    sol_address_from_ed25519_pubkey(&ed25519_pubkey)
+}
+
+/// Keccak-256 of `data`. This is Ethereum's hash function — the original Keccak, **not** the
+/// NIST-standardized SHA-3 (they differ in padding). Used for both the address derivation and the
+/// EIP-55 checksum below.
+fn keccak256(data: &[u8]) -> [u8; 32] {
+    let mut hasher = Keccak::v256();
+    let mut output = [0u8; 32];
+    hasher.update(data);
+    hasher.finalize(&mut output);
+    output
+}
+
+/// Encodes a 20-byte address as an EIP-55 mixed-case checksum string (with `0x` prefix): a hex
+/// letter is uppercased when the corresponding nibble of the Keccak-256 of the lowercase hex is `>=
+/// 8`. See <https://eips.ethereum.org/EIPS/eip-55>. Takes a fixed `[u8; 20]` so the `hash[i / 2]`
+/// indexing below can never run past the 32-byte Keccak output (40 hex chars → max index 19).
+fn to_eip55_checksum(address: &[u8; 20]) -> String {
+    let hex_addr = hex::encode(address);
+    let hash = keccak256(hex_addr.as_bytes());
+    let mut out = String::with_capacity(2 + hex_addr.len());
+    out.push_str("0x");
+    for (i, c) in hex_addr.char_indices() {
+        let nibble = if i % 2 == 0 {
+            hash[i / 2] >> 4
+        } else {
+            hash[i / 2] & 0x0f
+        };
+        if c.is_ascii_alphabetic() && nibble >= 8 {
+            out.push(c.to_ascii_uppercase());
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
+
+/// Derives the EIP-55-checksummed Ethereum address from a SEC1 secp256k1 public key (compressed or
+/// uncompressed). The address is the last 20 bytes of the Keccak-256 of the 64-byte uncompressed
+/// public key, excluding the leading `0x04` SEC1 tag.
+///
+/// # Errors
+/// - The bytes are not a valid secp256k1 public key.
+pub(crate) fn eth_address_from_ecdsa_pubkey(pubkey: &[u8]) -> Result<String, String> {
+    let public_key = bitcoin::secp256k1::PublicKey::from_slice(pubkey)
+        .map_err(|e| format!("Invalid secp256k1 public key: {e}"))?;
+    let uncompressed = public_key.serialize_uncompressed();
+    let hash = keccak256(&uncompressed[1..]);
+    let mut address = [0u8; 20];
+    address.copy_from_slice(&hash[12..]);
+    Ok(to_eip55_checksum(&address))
+}
+
+/// Derives the Solana address — base58 of the 32-byte Ed25519 public key — from a raw Ed25519
+/// public key.
+///
+/// # Errors
+/// - The public key is not exactly 32 bytes.
+pub(crate) fn sol_address_from_ed25519_pubkey(pubkey: &[u8]) -> Result<String, String> {
+    if pubkey.len() != 32 {
+        return Err(format!(
+            "Invalid Ed25519 public key length: expected 32, got {}",
+            pubkey.len()
+        ));
+    }
+    Ok(bs58::encode(pubkey).into_string())
 }
 
 /// Tops up the backend canister account on the cycles ledger.
@@ -335,5 +463,90 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             topped_up: Nat::from(0u32),
         })
         .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use candid::Principal;
+    use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
+    use pretty_assertions::assert_eq;
+
+    use super::{
+        eth_address_from_ecdsa_pubkey, principal_to_account_identifier_hex,
+        sol_address_from_ed25519_pubkey,
+    };
+
+    // secp256k1 private key `1` — a canonical known-answer vector. Its public key derives the
+    // Ethereum address 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf (widely published).
+    const PRIV_KEY_ONE_COMPRESSED_PUBKEY: &str =
+        "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+    const PRIV_KEY_ONE_UNCOMPRESSED_PUBKEY: &str = "0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8";
+    const PRIV_KEY_ONE_ETH_ADDRESS: &str = "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf";
+
+    fn hex_to_bytes(s: &str) -> Vec<u8> {
+        hex::decode(s).expect("valid hex test vector")
+    }
+
+    #[test]
+    fn eth_address_from_compressed_pubkey_matches_known_vector() {
+        let address =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_COMPRESSED_PUBKEY)).unwrap();
+
+        // The address is correctly derived AND EIP-55 checksummed (mixed case).
+        assert_eq!(address, PRIV_KEY_ONE_ETH_ADDRESS);
+    }
+
+    #[test]
+    fn eth_address_is_independent_of_pubkey_sec1_encoding() {
+        let from_compressed =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_COMPRESSED_PUBKEY)).unwrap();
+        let from_uncompressed =
+            eth_address_from_ecdsa_pubkey(&hex_to_bytes(PRIV_KEY_ONE_UNCOMPRESSED_PUBKEY)).unwrap();
+
+        assert_eq!(from_compressed, from_uncompressed);
+    }
+
+    #[test]
+    fn eth_address_rejects_invalid_pubkey() {
+        assert!(eth_address_from_ecdsa_pubkey(&[0x00, 0x01, 0x02]).is_err());
+    }
+
+    #[test]
+    fn principal_to_account_identifier_hex_uses_the_default_subaccount() {
+        let principal =
+            Principal::from_text("xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae")
+                .expect("valid principal");
+
+        let account_id = principal_to_account_identifier_hex(&principal);
+
+        assert_eq!(
+            account_id,
+            AccountIdentifier::new(&principal, &DEFAULT_SUBACCOUNT).to_hex()
+        );
+    }
+
+    #[test]
+    fn sol_address_of_zero_pubkey_is_the_known_base58_string() {
+        // base58 of 32 zero bytes is 32 '1's — the Solana System Program id.
+        let address = sol_address_from_ed25519_pubkey(&[0u8; 32]).unwrap();
+
+        assert_eq!(address, "1".repeat(32));
+    }
+
+    #[test]
+    fn sol_address_base58_round_trips_to_the_pubkey() {
+        let pubkey: [u8; 32] = core::array::from_fn(|i| u8::try_from(i).unwrap());
+
+        let address = sol_address_from_ed25519_pubkey(&pubkey).unwrap();
+        let decoded = bs58::decode(&address).into_vec().unwrap();
+
+        assert_eq!(decoded, pubkey);
+    }
+
+    #[test]
+    fn sol_address_rejects_wrong_length_pubkey() {
+        assert!(sol_address_from_ed25519_pubkey(&[0u8; 31]).is_err());
+        assert!(sol_address_from_ed25519_pubkey(&[0u8; 33]).is_err());
     }
 }

@@ -8,6 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 bitcoin = { workspace = true }
+bs58 = { workspace = true }
 canbench-rs = { workspace = true, optional = true }
 candid = { workspace = true }
 futures = { workspace = true }
@@ -21,6 +22,7 @@ ic-cycles-ledger-client = { workspace = true }
 ic-ledger-types = { workspace = true }
 ic-signature-verification = { workspace = true }
 ic-stable-structures = { workspace = true }
+ic-vetkeys = { workspace = true }
 lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
@@ -28,6 +30,7 @@ serde_bytes = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 shared = { path = "../shared" }
+tiny-keccak = { workspace = true }
 
 [dev-dependencies]
 candid_parser = { workspace = true }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
@@ -16,6 +16,6 @@
 	ariaLabel={checked ? $i18n.settings.text.disable_network : $i18n.settings.text.enable_network}
 	{checked}
 	{disabled}
+	{onToggle}
 	{testId}
-	on:nnsToggle={onToggle}
 />

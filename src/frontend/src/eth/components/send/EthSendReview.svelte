@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
@@ -7,6 +6,7 @@
 	import { isEthAddress } from '$eth/utils/account.utils';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';

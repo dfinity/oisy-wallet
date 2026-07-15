@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';

@@ -1,7 +1,7 @@
 import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 import type { WizardStepsParams } from '$lib/types/steps';
+import type { WizardSteps } from '$lib/types/wizard';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { WizardSteps } from '@dfinity/gix-components';
 
 export interface ConvertWizardStepsParams extends WizardStepsParams {
 	sourceToken: string;
@@ -9,8 +9,7 @@ export interface ConvertWizardStepsParams extends WizardStepsParams {
 }
 
 export type WizardStepsConvertComplete =
-	| Exclude<WizardStepsConvert, 'QR_CODE_SCAN'>
-	| WizardStepsSend.QR_CODE_SCAN;
+	Exclude<WizardStepsConvert, 'QR_CODE_SCAN'> | WizardStepsSend.QR_CODE_SCAN;
 
 export const convertWizardSteps = ({
 	i18n,

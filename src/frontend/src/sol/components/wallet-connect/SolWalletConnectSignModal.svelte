@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onDestroy, untrack } from 'svelte';
@@ -9,6 +8,7 @@
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import {
 		solAddressDevnet,
@@ -22,6 +22,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
@@ -74,9 +75,10 @@
 	let destination = $state<OptionSolAddress>();
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
+	let unreviewed = $state<boolean | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress, isApproval } = await decodeService({
+		({ amount, destination, tokenAddress, isApproval, unreviewed } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
@@ -188,6 +190,7 @@
 				onReject={reject}
 				source={address ?? ''}
 				token={reviewToken}
+				unreviewed={unreviewed ?? false}
 			/>
 		{/if}
 	{/key}

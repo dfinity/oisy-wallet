@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import UtxosFeeLoader from '$btc/components/fee/UtxosFeeLoader.svelte';
@@ -32,6 +31,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdBTCRegtest,

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import IcConvertForm from '$icp/components/convert/IcConvertForm.svelte';
@@ -47,6 +46,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';

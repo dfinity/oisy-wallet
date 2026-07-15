@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -36,6 +35,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
@@ -266,13 +266,11 @@
 				});
 			}
 
-			if (
-				!(
-					isSwapError(err) &&
-					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-				)
-			) {
+			if (!(
+				isSwapError(err) &&
+				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+			)) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {

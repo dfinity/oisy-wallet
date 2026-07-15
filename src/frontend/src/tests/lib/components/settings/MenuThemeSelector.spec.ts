@@ -1,6 +1,7 @@
 import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
 import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
-import { Theme, themeStore } from '@dfinity/gix-components';
+import { themeStore } from '$lib/stores/theme.store';
+import { Theme } from '$lib/types/theme';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 

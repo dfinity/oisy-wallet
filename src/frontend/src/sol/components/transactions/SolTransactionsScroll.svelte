@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';

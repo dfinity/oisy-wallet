@@ -185,7 +185,7 @@
 			"name": "GOLDAO",
 			"symbol": "GOLDAO",
 			"fee": {
-				"__bigint__": "100000"
+				"__bigint__": "1000000000"
 			},
 			"alternativeName": "Gold DAO",
 			"url": "https://www.gold-dao.org"

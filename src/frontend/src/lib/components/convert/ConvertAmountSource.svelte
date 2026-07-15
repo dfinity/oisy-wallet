@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -15,6 +14,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 

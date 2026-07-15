@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import ButtonsSignIn from '$lib/components/auth/ButtonsSignIn.svelte';
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';

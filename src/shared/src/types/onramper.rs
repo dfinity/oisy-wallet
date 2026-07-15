@@ -30,6 +30,19 @@ pub struct SignOnramperWidgetUrlRequest {
     pub wallet_address_tags: Vec<OnramperSignedEntry>,
 }
 
+/// Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
+/// canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
+/// re-deriving it (which risks diverging from what was HMAC'd and silently breaking the signature).
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct SignOnramperWidgetUrlResponse {
+    /// Hex-encoded HMAC-SHA256 over `signed_query`, appended to the widget URL as `&signature=…`.
+    pub signature: String,
+    /// The canonical signed parameter string (e.g. `networkWallets=bitcoin:bc1…&wallets=btc:…`).
+    /// This is a valid un-encoded URL query fragment; the frontend appends it as `&<signed_query>`
+    /// when non-empty. Empty when no sensitive parameters were supplied.
+    pub signed_query: String,
+}
+
 /// Errors returned by `sign_onramper_widget_url`.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SignOnramperWidgetUrlError {
@@ -41,4 +54,13 @@ pub enum SignOnramperWidgetUrlError {
     /// arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
     /// signing oracle.
     RateLimited(RateLimitError),
+    /// A wallet address supplied by the caller did not match the address the backend derives for
+    /// that network from the caller's principal. The backend signs only addresses the caller
+    /// provably owns, so a mismatch (a derivation-parity bug or a tampering attempt) fails the
+    /// whole request rather than signing an address the caller may not control.
+    AddressMismatch,
+    /// The backend could not derive one of the caller's addresses (e.g. a threshold public-key
+    /// read failed), so the supplied address could not be verified. The request is rejected
+    /// rather than signing an unverified address.
+    AddressDerivationFailed,
 }

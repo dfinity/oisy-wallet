@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconImage from '$lib/components/icons/lucide/IconImage.svelte';
 	import IconPencil from '$lib/components/icons/lucide/IconPencil.svelte';
 	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import {
 		CONTACT_POPOVER_TRIGGER,
 		CONTACT_POPOVER_MENU,

@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Withdraw Flow</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-success: #3b6d11;
+				--color-border-warning: #854f0b;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: #f0efeb;
+				padding: 1.5rem;
+			}
+			.scene {
+				background: var(--color-background-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem;
+				max-width: 480px;
+				margin: 0 auto;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 1.25rem;
+				align-items: center;
+			}
+			.step-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: rgba(0, 0, 0, 0.2);
+			}
+			.step-dot.active {
+				background: var(--color-text-primary);
+			}
+			.step-dot.done {
+				background: var(--color-text-secondary);
+			}
+			.step-label {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-left: 4px;
+			}
+			.modal {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem;
+				max-width: 380px;
+				margin: 0 auto;
+			}
+			.modal-title {
+				font-size: 15px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin-bottom: 1.25rem;
+			}
+			.field {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-bottom: 10px;
+			}
+			.field-label {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				margin-bottom: 6px;
+			}
+			.field-main {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.amt-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: none;
+				border: none;
+				outline: none;
+				flex: 1;
+				font-family: var(--font-sans);
+			}
+			.amt-fiat {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 3px;
+			}
+			.tok-locked {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 20px;
+				padding: 4px 10px 4px 6px;
+				flex-shrink: 0;
+			}
+			.tok-dot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+			}
+			.tok-sym {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.bal-row {
+				display: flex;
+				justify-content: space-between;
+				font-size: 11px;
+				margin-top: 5px;
+			}
+			.bal-free {
+				color: var(--color-text-info);
+				cursor: pointer;
+				text-decoration: underline;
+				text-underline-offset: 2px;
+			}
+			.bal-reserved {
+				color: var(--color-text-tertiary);
+				cursor: help;
+				text-decoration: underline;
+				text-decoration-style: dotted;
+			}
+			.expandable {
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.expandable.no-border {
+				border-bottom: none;
+			}
+			.expandable-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				cursor: pointer;
+				font-size: 13px;
+			}
+			.expandable-label {
+				color: var(--color-text-secondary);
+			}
+			.expandable-right {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.expandable-value {
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.expand-icon {
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+				transition: transform 0.2s;
+			}
+			.expand-icon.open {
+				transform: rotate(180deg);
+			}
+			.fee-item {
+				display: flex;
+				justify-content: space-between;
+				padding: 5px 0 5px 12px;
+				font-size: 12px;
+			}
+			.fee-item-label {
+				color: var(--color-text-tertiary);
+			}
+			.fee-item-value {
+				color: var(--color-text-secondary);
+			}
+			.modal-value {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 13px;
+			}
+			.modal-value.no-border {
+				border-bottom: none;
+			}
+			.mv-label {
+				color: var(--color-text-secondary);
+			}
+			.mv-value {
+				font-weight: 500;
+				color: var(--color-text-primary);
+				text-align: right;
+			}
+			.mv-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				text-align: right;
+			}
+			.hero-token {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 0.75rem 0 1rem;
+			}
+			.hero-dot {
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				margin-bottom: 8px;
+			}
+			.hero-amount {
+				font-size: 28px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-top: 2px;
+			}
+			.progress-steps {
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+				padding: 1rem 0;
+			}
+			.prog-step {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.prog-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				flex-shrink: 0;
+			}
+			.prog-dot.done {
+				background: var(--color-background-success);
+				border-color: var(--color-border-success);
+				color: var(--color-text-success);
+			}
+			.prog-dot.active {
+				background: var(--color-background-warning);
+				border-color: var(--color-border-warning);
+				color: var(--color-text-warning);
+			}
+			.prog-label {
+				font-size: 13px;
+				color: var(--color-text-primary);
+			}
+			.prog-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.btn-group {
+				display: flex;
+				gap: 8px;
+				margin-top: 12px;
+			}
+			.btn {
+				flex: 1;
+				padding: 10px;
+				border-radius: var(--border-radius-md);
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+				font-family: var(--font-sans);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-primary);
+			}
+			.btn-primary {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			:root {
+				--accent: #0b57f5;
+				--accent-soft: #e9efff;
+			}
+			.amt-input {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 6px;
+				padding: 4px 8px;
+				min-width: 0;
+			}
+			.amt-input:focus {
+				border-color: var(--color-text-primary);
+			}
+			.btn {
+				padding: 13px;
+				border-radius: var(--border-radius-lg);
+				font-size: 15px;
+				font-weight: 600;
+				border: none;
+				background: var(--accent-soft);
+				color: var(--accent);
+			}
+			.btn-primary {
+				background: var(--accent);
+				color: #ffffff;
+			}
+			.btn-primary:disabled {
+				background: var(--color-background-tertiary);
+				color: var(--color-text-tertiary);
+			}
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: -1.25rem -1.25rem 1.25rem;
+				padding: 14px 16px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.modal-head-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--color-text-primary);
+			}
+			.modal-x {
+				position: absolute;
+				right: 16px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 16px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.seg-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.seg-net {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+			}
+			.net-ico {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-tertiary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.sub-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			.amt-fiat {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				margin-top: 0;
+			}
+			.sw-ico {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.maxlink {
+				font-size: 11px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				cursor: pointer;
+			}
+			.wd-reserved {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 6px;
+			}
+			.hero-card {
+				background: var(--color-background-info);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem 1rem;
+				text-align: center;
+				margin-bottom: 1rem;
+			}
+			.hero-label {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin: 8px 0 2px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="scene">
+			<div class="steps">
+				<div class="step-dot active" id="dot-1"></div>
+				<div class="step-dot" id="dot-2"></div>
+				<div class="step-dot" id="dot-3"></div>
+				<span class="step-label" id="step-label">Form</span>
+			</div>
+			<div id="screen-form">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Withdraw</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="field">
+						<div class="seg-head">
+							<span class="field-label">You withdraw</span>
+							<span class="seg-net"
+								>On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
+							></span>
+						</div>
+						<div class="field-main">
+							<input class="amt-input" type="text" value="150" id="amt" oninput="onAmt()" />
+							<div class="tok-locked">
+								<div class="tok-dot">ICP</div>
+								<span class="tok-sym">ICP</span>
+							</div>
+						</div>
+						<div class="sub-row">
+							<span class="amt-fiat"
+								><i class="ti ti-arrows-up-down sw-ico"></i> <span id="wd-fiat">$403.50</span></span
+							>
+							<span class="maxlink" id="wd-max" onclick="maxWithdraw()">Max: 250 ICP</span>
+						</div>
+						<div class="wd-reserved">100 ICP reserved · locked by open orders</div>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">From</span><span class="mv-value">OISY TRADE</span>
+					</div>
+					<div class="expandable">
+						<div class="expandable-header" onclick="toggleFees('f')">
+							<span class="expandable-label">Transaction fee</span>
+							<div class="expandable-right">
+								<span class="expandable-value">&lt;$0.01</span
+								><i class="ti ti-chevron-down expand-icon" id="fee-icon-f"></i>
+							</div>
+						</div>
+						<div id="fee-items-f" style="display: none">
+							<div class="fee-item" style="padding-bottom: 6px">
+								<span class="fee-item-label">Transfer fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+						</div>
+					</div>
+					<div class="modal-value no-border">
+						<span class="mv-label">You receive</span>
+						<div>
+							<div class="mv-value" id="wd-recv">149.9999 ICP</div>
+							<div class="mv-sub" id="wd-recv-fiat">$403.50</div>
+						</div>
+					</div>
+					<div class="btn-group">
+						<button class="btn">Cancel</button
+						><button class="btn btn-primary" onclick="showStep('review')">Review</button>
+					</div>
+				</div>
+			</div>
+			<div id="screen-review" style="display: none">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Review withdrawal</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="hero-card">
+						<div class="hero-dot">ICP</div>
+						<div class="hero-label">You withdraw</div>
+						<div class="hero-amount" id="r-amt">150 ICP</div>
+						<div class="hero-fiat" id="r-fiat">$403.50</div>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">Network</span
+						><span class="mv-value" style="display: inline-flex; align-items: center; gap: 6px"
+							>Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
+						></span>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">From</span><span class="mv-value">OISY TRADE</span>
+					</div>
+					<div class="expandable">
+						<div class="expandable-header" onclick="toggleFees('r')">
+							<span class="expandable-label">Transaction fee</span>
+							<div class="expandable-right">
+								<span class="expandable-value">&lt;$0.01</span
+								><i class="ti ti-chevron-down expand-icon" id="fee-icon-r"></i>
+							</div>
+						</div>
+						<div id="fee-items-r" style="display: none">
+							<div class="fee-item" style="padding-bottom: 6px">
+								<span class="fee-item-label">Transfer fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+						</div>
+					</div>
+					<div class="modal-value no-border">
+						<span class="mv-label">You receive</span>
+						<div>
+							<div class="mv-value" id="r-recv">149.9999 ICP</div>
+							<div class="mv-sub" id="r-recv-fiat">$403.50</div>
+						</div>
+					</div>
+					<div class="btn-group">
+						<button class="btn" onclick="showStep('form')">
+							<i class="ti ti-arrow-left"></i> Back</button
+						><button class="btn btn-primary" onclick="showStep('progress')">Withdraw</button>
+					</div>
+				</div>
+			</div>
+			<div id="screen-progress" style="display: none">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title" id="prog-title">Withdrawing</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="progress-steps">
+						<div class="prog-step">
+							<div class="prog-dot active" id="p1">
+								<i class="ti ti-loader-2" style="animation: spin 1s linear infinite"></i>
+							</div>
+							<div>
+								<div class="prog-label">Withdrawing</div>
+								<div class="prog-sub">Transferring ICP to your wallet</div>
+							</div>
+						</div>
+						<div class="prog-step">
+							<div
+								class="prog-dot"
+								id="p2"
+								style="
+									background: var(--color-background-secondary);
+									color: var(--color-text-tertiary);
+								"
+							>
+								<i class="ti ti-check"></i>
+							</div>
+							<div>
+								<div class="prog-label" id="p2-label" style="color: var(--color-text-tertiary)">
+									Done
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			function toggleFees(id) {
+				const el = document.getElementById('fee-items-' + id),
+					icon = document.getElementById('fee-icon-' + id);
+				const open = el.style.display === 'none';
+				el.style.display = open ? 'block' : 'none';
+				icon.className = 'ti ti-chevron-down expand-icon' + (open ? ' open' : '');
+			}
+			function showStep(step) {
+				['form', 'review', 'progress'].forEach(
+					(s) => (document.getElementById('screen-' + s).style.display = 'none')
+				);
+				document.getElementById('screen-' + step).style.display = 'block';
+				if (step === 'review') {
+					var rv = parseFloat(document.getElementById('amt').value) || 0;
+					var rr = Math.max(0, rv - WD_FEE);
+					document.getElementById('r-amt').textContent = wdFmt(rv) + ' ICP';
+					document.getElementById('r-fiat').textContent = '$' + (rv * WD_PRICE).toFixed(2);
+					document.getElementById('r-recv').textContent = wdFmt(rr) + ' ICP';
+					document.getElementById('r-recv-fiat').textContent = '$' + (rr * WD_PRICE).toFixed(2);
+				}
+				const nums = { form: 1, review: 2, progress: 3 },
+					labels = { form: 'Form', review: 'Review', progress: 'Withdrawing' };
+				document.getElementById('step-label').textContent = labels[step];
+				[1, 2, 3].forEach((i) => {
+					const n = nums[step];
+					document.getElementById('dot-' + i).className =
+						'step-dot' + (i === n ? ' active' : i < n ? ' done' : '');
+				});
+				if (step === 'progress')
+					setTimeout(() => {
+						document.getElementById('p1').className = 'prog-dot done';
+						document.getElementById('p1').innerHTML = '<i class="ti ti-check"></i>';
+						document.getElementById('p2').className = 'prog-dot done';
+						document.getElementById('p2-label').style.color = 'var(--color-text-success)';
+						document.getElementById('prog-title').textContent = 'Withdrawn';
+					}, 2000);
+			}
+			// withdraw is gross: Max is the full free balance; you receive amount − transfer fee
+			var WD_PRICE = 2.69,
+				WD_FEE = 0.0001,
+				WD_FREE = 250;
+			function wdFmt(v) {
+				return (Math.round(v * 1e6) / 1e6).toString();
+			}
+			function onAmt() {
+				var v = parseFloat(document.getElementById('amt').value) || 0;
+				document.getElementById('wd-fiat').textContent = '$' + (v * WD_PRICE).toFixed(2);
+				var recv = Math.max(0, v - WD_FEE);
+				document.getElementById('wd-recv').textContent = wdFmt(recv) + ' ICP';
+				document.getElementById('wd-recv-fiat').textContent = '$' + (recv * WD_PRICE).toFixed(2);
+			}
+			function maxWithdraw() {
+				document.getElementById('amt').value = WD_FREE;
+				onAmt();
+			}
+			onAmt();
+		</script>
+	</body>
+</html>

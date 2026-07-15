@@ -71,8 +71,7 @@ export interface EcdsaPublicKeyResponse {
 	chain_code: Uint8Array;
 }
 export type EthAddressError =
-	| { SigningError: [RejectionCode_1, string] }
-	| { PaymentError: PaymentError };
+	{ SigningError: [RejectionCode_1, string] } | { PaymentError: PaymentError };
 export interface EthAddressRequest {
 	principal: [] | [Principal];
 }

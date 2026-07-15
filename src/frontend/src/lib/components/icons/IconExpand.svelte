@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 
 	interface Props {
 		size?: string;

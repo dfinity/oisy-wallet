@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { getContext, type Snippet } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertReview from '$lib/components/convert/ConvertReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
