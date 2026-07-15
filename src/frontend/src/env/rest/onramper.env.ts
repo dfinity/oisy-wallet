@@ -5,7 +5,7 @@ import { LOCAL, STAGING } from '$lib/constants/app.constants';
 export const ONRAMPER_ENABLED = LOCAL || STAGING;
 
 // Set it to 'dev' to use OnRamper Sandbox
-const ONRAMPER_ENV = 'prod';
+const ONRAMPER_ENV = 'dev';
 
 export const isOnRamperDev = (ONRAMPER_ENV as 'dev' | 'prod') === 'dev';
 
