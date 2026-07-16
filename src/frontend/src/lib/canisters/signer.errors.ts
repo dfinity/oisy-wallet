@@ -56,10 +56,7 @@ export const mapSignerCanisterGetEthAddressError = (
 	err: EthAddressError
 ): CanisterInternalError => {
 	if ('SigningError' in err) {
-		const [code, addOns] = err.SigningError;
-		return new CanisterInternalError(
-			`Signing error: ${JSON.stringify(code, jsonReplacer)} ${addOns}`
-		);
+		return new CanisterInternalError(`Signing error: ${err.SigningError}`);
 	}
 
 	if ('PaymentError' in err) {
