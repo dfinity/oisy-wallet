@@ -93,6 +93,15 @@ export const signPrehash = async ({
 	return signPrehash({ hash });
 };
 
+export const signBtcPrehash = async ({
+	identity,
+	hash
+}: CanisterApiFunctionParams<{ hash: Uint8Array }>): Promise<Uint8Array> => {
+	const { signBtcPrehash } = await signerCanister({ identity });
+
+	return signBtcPrehash({ hash });
+};
+
 export const sendBtc = async ({
 	identity,
 	...params

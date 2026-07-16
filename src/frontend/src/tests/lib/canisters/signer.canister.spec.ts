@@ -13,7 +13,7 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { jsonReplacer } from '@dfinity/utils';
+import { hexStringToUint8Array, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -504,6 +504,48 @@ describe('signer.canister', () => {
 			const res = signPrehash(signPrehashParams);
 
 			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('signBtcPrehash', () => {
+		const hash = Uint8Array.from([1, 2, 3, 4]);
+		const signatureHex = 'aabbccdd';
+
+		it('signs a prehash under the BTC key', async () => {
+			service.btc_sign_prehash.mockResolvedValue({ Ok: { signature: signatureHex } });
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await signBtcPrehash({ hash });
+
+			expect(res).toEqual(hexStringToUint8Array(signatureHex));
+			expect(service.btc_sign_prehash).toHaveBeenCalledWith({ hash: uint8ArrayToHexString(hash) }, [
+				SIGNER_PAYMENT_TYPE
+			]);
+		});
+
+		it('should throw an error if btc_sign_prehash throws', async () => {
+			service.btc_sign_prehash.mockImplementation(() => {
+				throw mockResponseError;
+			});
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(signBtcPrehash({ hash })).rejects.toThrow(mockResponseError);
+		});
+
+		it('maps an Err response to a signer error', async () => {
+			service.btc_sign_prehash.mockResolvedValue({ Err: { InvalidHash: { msg: 'bad hash' } } });
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(signBtcPrehash({ hash })).rejects.toThrow('bad hash');
 		});
 	});
 
