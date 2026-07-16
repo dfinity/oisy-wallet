@@ -5,6 +5,7 @@
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
+	import LiquidiumSupplyIcrcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyIcrcWizard.svelte';
 	import LiquidiumSupplyTokensList from '$lib/components/liquidium/supply/LiquidiumSupplyTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -146,6 +147,19 @@
 			</LiquidiumSelectTokenForm>
 		{:else if selectedMarket.chain === 'BTC'}
 			<LiquidiumSupplyBtcWizard
+				{currentStep}
+				{inflowFee}
+				{inflowFeeUnavailable}
+				market={selectedMarket}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSelectToken={enterTokensList}
+				bind:amount
+				bind:supplyProgressStep
+			/>
+		{:else if selectedMarket.chain === 'ICP'}
+			<LiquidiumSupplyIcrcWizard
 				{currentStep}
 				{inflowFee}
 				{inflowFeeUnavailable}
