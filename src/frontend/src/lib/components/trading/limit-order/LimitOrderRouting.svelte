@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
@@ -20,7 +20,7 @@
 
 	// Relative spread only: (ask − bid) / mid × 100.
 	const spreadPercent = $derived.by((): number | null => {
-		if (!nonNullish(bid) || !nonNullish(ask)) {
+		if (isNullish(bid) || isNullish(ask)) {
 			return null;
 		}
 		const mid = (ask + bid) / 2;
@@ -60,13 +60,13 @@
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-error-primary"
 			>
-				<span>{$i18n.trading.limit_order.lowest_ask}</span>
+				<span>{$i18n.trading.limit_order.best_ask}</span>
 				<span>{nonNullish(ask) ? `${ask} ${quote}` : '-'}</span>
 			</div>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-success-primary"
 			>
-				<span>{$i18n.trading.limit_order.highest_bid}</span>
+				<span>{$i18n.trading.limit_order.best_bid}</span>
 				<span>{nonNullish(bid) ? `${bid} ${quote}` : '-'}</span>
 			</div>
 			<div

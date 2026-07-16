@@ -1,19 +1,20 @@
 <script lang="ts">
 	import type { Identity } from '@icp-sdk/core/agent';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
-	import { TRACK_NOTE_SHARE_CREATED } from '$lib/constants/analytics.constants';
 	import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_CAP_MESSAGE,
 		NOTES_SHARE_CREATE_BUTTON,
@@ -21,13 +22,16 @@
 		NOTES_SHARE_LINK_COPY,
 		NOTES_SHARE_SINGLE_USE_CHECKBOX
 	} from '$lib/constants/test-ids.constants';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { createNoteShare, getActiveShareCount } from '$lib/services/personal-note-share.services';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { PersonalNoteUi } from '$lib/types/personal-note';
+	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { personalNotePreviewParts } from '$lib/utils/personal-note.utils';
+	import { copyText } from '$lib/utils/share.utils';
 
 	interface Props {
 		note: PersonalNoteUi;
@@ -52,6 +56,22 @@
 	let busy = $state(false);
 	let createdLink = $state<string | undefined>();
 	let atCap = $state(false);
+	let copied = $state(false);
+	let copiedTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	// Confirm the copy inline on the control itself: a floating toast would be
+	// hidden behind the mobile share bottom sheet.
+	const onCopyLink = async () => {
+		if (createdLink === undefined) {
+			return;
+		}
+		await copyText(createdLink);
+		copied = true;
+		clearTimeout(copiedTimeout);
+		copiedTimeout = setTimeout(() => (copied = false), 2000);
+	};
+
+	onDestroy(() => clearTimeout(copiedTimeout));
 
 	// The count query gates the UI; the backend `TooManyShares` rejection stays
 	// authoritative. A failed count is non-fatal — leave the action enabled and
@@ -68,6 +88,15 @@
 		$i18n.notes.share.text[
 			(EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]).labelKey
 		]
+	);
+
+	// Locale-independent expiry label for analytics (e.g. `7d`) — the option key,
+	// never the localized text, so no locale leaks into metadata.
+	const expiryLabel = $derived(
+		(EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]).labelKey.replace(
+			'expiry_',
+			''
+		)
 	);
 
 	const recap = $derived(
@@ -89,16 +118,22 @@
 				singleUse
 			});
 			createdLink = link;
-			trackEvent({
-				name: TRACK_NOTE_SHARE_CREATED,
-				metadata: {
-					expiry: (
-						EXPIRY_OPTIONS.find(({ ms }) => ms === durationMs) ?? EXPIRY_OPTIONS[1]
-					).labelKey.replace('expiry_', ''),
-					singleUse: `${singleUse}`
-				}
+			trackPersonalNoteShare({
+				step: 'create',
+				side: 'creator',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				singleUse,
+				expiry: expiryLabel
 			});
 		} catch (err: unknown) {
+			trackPersonalNoteShare({
+				step: 'create',
+				side: 'creator',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				singleUse,
+				expiry: expiryLabel,
+				error: replaceIcErrorFields(err)
+			});
 			// Lost a race to the cap since mount (e.g. another tab): reflect it in
 			// the UI instead of only toasting a generic failure.
 			if (err !== null && typeof err === 'object' && 'TooManyShares' in err) {
@@ -112,7 +147,7 @@
 	};
 </script>
 
-<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-4 overflow-y-auto">
+<ContentWithToolbar styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto">
 	{#if createdLink === undefined}
 		<!-- State A — configure -->
 		{#if atCap}
@@ -122,21 +157,25 @@
 				})}
 			</p>
 		{/if}
-		<div class="flex flex-col gap-1 rounded-lg border border-brand-subtle-20 p-3">
-			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
-				{preview.title}
-			</span>
-			{#if preview.body !== ''}
-				<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-sm text-tertiary">
-					{preview.body}
+		<!-- Box + caption are one group: the caption describes the snapshot above it,
+			so it hugs the box (gap-2) and the group keeps the section rhythm (gap-6). -->
+		<div class="flex flex-col gap-2">
+			<div class="flex flex-col gap-2 rounded-lg border border-brand-subtle-20 p-4">
+				<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
+					{preview.title}
 				</span>
-			{/if}
+				{#if preview.body !== ''}
+					<span style="overflow-wrap: anywhere;" class="line-clamp-2 text-tertiary">
+						{preview.body}
+					</span>
+				{/if}
+			</div>
+			<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
 		</div>
-		<span class="text-xs text-tertiary">{$i18n.notes.share.text.snapshot_caption}</span>
 
 		<div class="flex flex-col gap-2">
-			<span class="text-sm font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
-			<div class="flex flex-wrap gap-2">
+			<span class="font-bold text-primary">{$i18n.notes.share.text.expires_after}</span>
+			<div class="flex flex-wrap gap-2 [&_button]:text-sm">
 				{#each EXPIRY_OPTIONS as option (option.ms)}
 					<PillButton onClick={() => (durationMs = option.ms)} selected={durationMs === option.ms}>
 						{$i18n.notes.share.text[option.labelKey]}
@@ -145,52 +184,71 @@
 			</div>
 		</div>
 
-		<Checkbox
-			checked={singleUse}
-			inputId="share-single-use"
-			onChange={() => (singleUse = !singleUse)}
-			testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
-			text="block"
-		>
-			<div class="flex flex-col">
-				<span class="text-sm text-primary">{$i18n.notes.share.text.destroy_after_viewing}</span>
-				<span class="text-xs text-tertiary"
-					>{$i18n.notes.share.text.destroy_after_viewing_hint}</span
+		<div class="flex flex-col gap-2">
+			<span class="font-bold text-primary">{$i18n.notes.share.text.single_use}</span>
+			<!-- `--checkbox-label-order: 1` puts the box before the label (leading, like
+				 the transaction-filter panels); `flex-start` top-aligns the box in case
+				 the label wraps on a narrow viewport. -->
+			<div style="--checkbox-label-order: 1; --checkbox-align-items: flex-start;">
+				<Checkbox
+					checked={singleUse}
+					inputId="share-single-use"
+					onChange={() => (singleUse = !singleUse)}
+					testId={NOTES_SHARE_SINGLE_USE_CHECKBOX}
+					text="block"
 				>
+					<span class="text-primary">{$i18n.notes.share.text.single_use_option}</span>
+				</Checkbox>
 			</div>
-		</Checkbox>
+		</div>
 
-		<MessageBox icon={shieldIcon} level="info" styleClass="w-full text-left">
+		<!-- A soft grey callout (secondary surface) matching the editor's privacy box
+			(NotesPrivacyInfoBox). -->
+		<MessageBox icon={shieldIcon} level="plain" styleClass="w-full bg-secondary! text-left">
 			<strong>{`${$i18n.notes.text.encrypted_lead} `}</strong
 			>{`${$i18n.notes.share.text.protects_body.trimEnd()} `}<ExternalLink
 				ariaLabel={$i18n.core.text.learn_more}
 				color="blue"
-				href={OISY_DOCS_URL}
+				href={OISY_NOTES_DOCS_URL}
 				iconVisible={false}
 			>
 				{$i18n.core.text.learn_more}
 			</ExternalLink>
 		</MessageBox>
 	{:else}
-		<!-- State B — link ready -->
-		<div class="flex flex-col gap-1">
+		<!-- State B — link ready. A bold label with a grey subtitle per section
+			(gap-2), the two sections separated by the container's gap-4. -->
+		<div class="flex flex-col gap-2">
 			<span class="font-bold text-primary">{$i18n.notes.share.text.link_ready_title}</span>
-			<span class="text-sm text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+			<span class="text-tertiary">{$i18n.notes.share.text.link_ready_subtitle}</span>
+
+			<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-2 pr-1 pl-3">
+				<span class="min-w-0 flex-1 truncate text-secondary">{createdLink}</span>
+				{#if copied}
+					<span class="shrink-0 text-xs text-success-primary" aria-live="polite" role="status">
+						{$i18n.notes.share.text.link_copied}
+					</span>
+				{/if}
+				<ButtonIcon
+					ariaLabel={`${$i18n.core.text.copy}: ${createdLink}`}
+					onclick={onCopyLink}
+					testId={NOTES_SHARE_LINK_COPY}
+				>
+					{#snippet icon()}
+						{#if copied}
+							<span class="text-success-primary"><IconCircleCheck /></span>
+						{:else}
+							<IconCopy />
+						{/if}
+					{/snippet}
+				</ButtonIcon>
+			</div>
 		</div>
 
-		<div class="flex items-center gap-2 rounded-lg border border-brand-subtle-20 py-1 pr-1 pl-3">
-			<span class="min-w-0 flex-1 truncate font-mono text-xs text-secondary">{createdLink}</span>
-			<Copy
-				testId={NOTES_SHARE_LINK_COPY}
-				text={$i18n.notes.share.text.link_copied}
-				value={createdLink}
-			/>
+		<div class="flex flex-col gap-2">
+			<span class="font-bold text-primary">{recap}</span>
+			<span class="text-tertiary">{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span>
 		</div>
-
-		<span class="text-sm text-primary">{recap}</span>
-		<span class="text-xs text-tertiary"
-			>{replaceOisyPlaceholders($i18n.notes.share.text.reminder)}</span
-		>
 	{/if}
 
 	{#snippet toolbar()}

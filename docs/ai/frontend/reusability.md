@@ -19,7 +19,7 @@
 
 | Layer                                | Path                                                                 | What goes there                                                                                                                    |
 | ------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives. Also reach for `@dfinity/gix-components` for many primitives (Modal, Toast, BottomSheet, Spinner, …).        |
+| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives, incl. the vendored ones (Modal, Toast, BottomSheet, LoaderSpinner, Popover, Input, …).                       |
 | **App-wide presentational**          | `$lib/components/common/`                                            | Tiny shared blocks: `List`, `ListItem`, `ListItemButton`, `Divider`, `MaxBalanceButton`, `ModalHero`, `ModalListItem`, `QrButton`. |
 | **Feature components (cross-chain)** | `$lib/components/<feature>/`                                         | Cross-chain feature surfaces (auth, send, receive, swap, contact, hero, ai-assistant, settings, …). See list below.                |
 | **Chain-specific components**        | `$btc / $eth / $evm / $icp / $sol / $icp-eth /components/<feature>/` | UI specific to a chain.                                                                                                            |
@@ -52,15 +52,16 @@
 
 ### Common building blocks
 
-| Component                            | Where                      | Use it for                                     |
-| ------------------------------------ | -------------------------- | ---------------------------------------------- |
-| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                       |
-| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border. |
-| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                 |
-| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.            |
-| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                  |
-| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.       |
-| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                            |
+| Component                            | Where                      | Use it for                                                                                                        |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                                                                                          |
+| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border.                                                                    |
+| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                                                                                    |
+| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.                                                                               |
+| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                                                                                     |
+| `GoToButton`                         | `$lib/components/common/`  | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`. |
+| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.                                                                          |
+| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                                                                                               |
 
 ### Cross-chain feature folders
 

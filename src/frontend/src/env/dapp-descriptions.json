@@ -64,11 +64,7 @@
 		"usesInternetIdentity": false,
 		"stats": "",
 		"logo": "/images/dapps/liquidium-logo.webp",
-		"screenshots": ["/images/dapps/liquidium-screenshot.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.liquidium.carousel.text",
-			"callToAction": "dapps.descriptions.liquidium.carousel.call_to_action"
-		}
+		"screenshots": ["/images/dapps/liquidium-screenshot.webp"]
 	},
 	{
 		"id": "openchat",

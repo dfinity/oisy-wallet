@@ -1,8 +1,10 @@
 import LiquidiumSummary from '$lib/components/liquidium/LiquidiumSummary.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { modalStore } from '$lib/stores/modal.store';
 import type { LiquidiumPortfolio } from '$lib/types/liquidium';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('LiquidiumSummary', () => {
 	const portfolio: LiquidiumPortfolio = {
@@ -29,60 +31,124 @@ describe('LiquidiumSummary', () => {
 		healthFactorPercent: 73
 	};
 
-	it('renders the health factor, net value and net APY labels', () => {
+	it('renders the total supplied, active loans and net value blocks', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio } });
 
-		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
+		expect(container).toHaveTextContent(en.borrow.text.active_loans);
 		expect(container).toHaveTextContent(en.liquidium.text.net_value);
-		expect(container).toHaveTextContent(en.liquidium.text.net_apy);
 	});
 
-	it('renders the portfolio health factor percentage', () => {
+	it('labels the yearly supply earnings with the APY suffix', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio } });
 
-		expect(container).toHaveTextContent('73%');
+		expect(container).toHaveTextContent(en.liquidium.text.apy_suffix);
 	});
 
-	it('defaults to 100% health when there is no portfolio', () => {
+	it('still renders the block labels when there is no portfolio', () => {
 		const { container } = render(LiquidiumSummary, { props: { portfolio: null } });
 
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
+		expect(container).toHaveTextContent(en.liquidium.text.net_value);
+	});
+
+	it('shows the empty supplied text instead of the APY line when nothing is supplied', () => {
+		const { container } = render(LiquidiumSummary, { props: { portfolio: null } });
+
+		expect(container).toHaveTextContent(en.liquidium.text.no_assets_supplied);
+	});
+
+	it('signs the net interest from net interest, not net value', () => {
+		const netNegative: LiquidiumPortfolio = {
+			...portfolio,
+			reserves: [
+				{ ...portfolio.reserves[0], suppliedUsd: 1000, supplyApy: 1 },
+				{
+					...portfolio.reserves[0],
+					poolId: 'pool-eth',
+					suppliedUsd: 0,
+					borrowedUsd: 1000,
+					borrowApy: 5
+				}
+			],
+			totalSuppliedUsd: 1000,
+			totalBorrowedUsd: 1000,
+			// Positive on purpose: the sign must follow net interest, not this.
+			netValueUsd: 200
+		};
+
+		const { container } = render(LiquidiumSummary, { props: { portfolio: netNegative } });
+
+		// Net interest = (1000·1 − 1000·5) / 100 = −$40/yr.
+		expect(container).toHaveTextContent('−$40.00');
+		expect(container).not.toHaveTextContent('+$40.00');
+	});
+
+	it('always shows the health factor, with a "No debt" status when there is no debt', () => {
+		const noDebt: LiquidiumPortfolio = {
+			...portfolio,
+			totalBorrowedUsd: 0,
+			healthFactorPercent: 100
+		};
+
+		const { container } = render(LiquidiumSummary, { props: { portfolio: noDebt } });
+
+		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.liquidium.text.health_no_debt);
 		expect(container).toHaveTextContent('100%');
 	});
 
-	it('renders a negative net APY with a minus sign', () => {
-		const negativeApy: LiquidiumPortfolio = {
+	it('shows the health factor with a status badge when there is debt', () => {
+		const withDebt: LiquidiumPortfolio = {
 			...portfolio,
-			reserves: [
-				{
-					...portfolio.reserves[0],
-					supplyApy: 1,
-					borrowApy: 20,
-					borrowedUsd: 900
-				}
-			],
-			totalBorrowedUsd: 900,
-			netValueUsd: 100
+			totalBorrowedUsd: 500,
+			netValueUsd: 500,
+			// 42% falls in the at-risk band (15%–50%).
+			healthFactorPercent: 42
 		};
 
-		const { container } = render(LiquidiumSummary, { props: { portfolio: negativeApy } });
+		const { container } = render(LiquidiumSummary, { props: { portfolio: withDebt } });
 
-		// Weighted (1000·1 − 900·20) / 100 < 0 → shown with a minus sign.
-		expect(container).toHaveTextContent('−');
+		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent('42%');
+		expect(container).toHaveTextContent(en.liquidium.text.health_at_risk);
 	});
 
-	it('renders an at-risk health factor (amber band)', () => {
-		const { container } = render(LiquidiumSummary, {
-			props: { portfolio: { ...portfolio, healthFactorPercent: 30 } }
-		});
+	it('shows the net value with a neutral yearly chip when there is no interest', () => {
+		const { container } = render(LiquidiumSummary, { props: { portfolio: null } });
 
-		expect(container).toHaveTextContent('30%');
+		expect(container).toHaveTextContent(en.liquidium.text.net_value);
+		// No net interest → neutral "$0.00/yr" chip, no sign.
+		expect(container).not.toHaveTextContent('+$0.00');
+		expect(container).not.toHaveTextContent('−$0.00');
 	});
 
-	it('renders a critical health factor (red band)', () => {
-		const { container } = render(LiquidiumSummary, {
-			props: { portfolio: { ...portfolio, healthFactorPercent: 8 } }
+	describe('action buttons', () => {
+		beforeEach(() => {
+			modalStore.close();
 		});
 
-		expect(container).toHaveTextContent('8%');
+		it('renders Supply and Borrow buttons even in the empty state', () => {
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio: null } });
+
+			expect(getByRole('button', { name: en.liquidium.text.action_supply })).toBeInTheDocument();
+			expect(getByRole('button', { name: en.liquidium.text.action_borrow })).toBeInTheDocument();
+		});
+
+		it('opens the neutral supply modal from the Supply button', async () => {
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio } });
+
+			await fireEvent.click(getByRole('button', { name: en.liquidium.text.action_supply }));
+
+			expect(get(modalStore)?.type).toBe('liquidium-supply');
+		});
+
+		it('opens the neutral borrow modal from the Borrow button', async () => {
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio } });
+
+			await fireEvent.click(getByRole('button', { name: en.liquidium.text.action_borrow }));
+
+			expect(get(modalStore)?.type).toBe('liquidium-borrow');
+		});
 	});
 });

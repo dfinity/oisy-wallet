@@ -8,6 +8,7 @@ export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
 export const NAVIGATION_MENU_PRIVACY_MODE_BUTTON = 'navigation-menu-privacy-mode-button';
+export const NAVIGATION_MENU_SETTINGS_BUTTON = 'navigation-menu-settings-button';
 export const NAVIGATION_MENU_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const NAVIGATION_MENU_DOC_BUTTON = 'navigation-documentation-button';
 export const NAVIGATION_MENU_SUPPORT_BUTTON = 'navigation-support-button';
@@ -391,17 +392,17 @@ export const STAKE_DISSOLVE_EVENTS_WITHDRAW_BUTTON = 'stake-dissolve-events-with
 
 // Trading
 export const TRADING_LIST_SKELETON = 'trading-list-skeleton';
-export const TRADING_ASSETS_DEPOSIT_BUTTON = 'trading-assets-deposit-button';
-export const TRADING_ASSET_WITHDRAW_BUTTON = 'trading-asset-withdraw-button';
-export const TRADING_ONBOARDING_DEPOSIT_BUTTON = 'trading-onboarding-deposit-button';
+export const TRADING_GOTO_BUTTON = 'trading-goto-button';
 export const TRADING_DEPOSIT_FORM_REVIEW_BUTTON = 'trading-deposit-form-review-button';
 export const TRADING_DEPOSIT_REVIEW_CONFIRM_BUTTON = 'trading-deposit-review-confirm-button';
-export const TRADING_DEPOSIT_CONSENT_CHECKBOX = 'trading-deposit-consent-checkbox';
 export const TRADING_WITHDRAW_OPEN_BUTTON = 'trading-withdraw-open-button';
 export const TRADING_WITHDRAW_FORM_REVIEW_BUTTON = 'trading-withdraw-form-review-button';
 export const TRADING_WITHDRAW_REVIEW_BUTTON = 'trading-withdraw-review-button';
 export const TRADING_ORDER_DETAIL_CANCEL_BUTTON = 'trading-order-detail-cancel-button';
 export const TRADING_ORDER_CANCEL_CONFIRM_BUTTON = 'trading-order-cancel-confirm-button';
+
+// Borrowings
+export const BORROWINGS_GOTO_BUTTON = 'borrowings-goto-button';
 
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';

@@ -11,6 +11,7 @@
 			"active_loans": "",
 			"no_active_loans": "",
 			"amount_borrowed": "",
+			"apr": "",
 			"borrow_apr_from": ""
 		},
 		"cards": {
@@ -24,7 +25,9 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "",
-			"no_borrowings": ""
+			"tab_title_short": "",
+			"no_borrowings": "",
+			"go_to_borrow": ""
 		}
 	},
 	"core": {
@@ -459,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -1292,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "التوكنات",
+			"title_short": "التوكنات",
 			"contract_address": "عنوان العقد",
 			"token_address": "عنوان التوكن",
 			"balance": "الرصيد",
@@ -1679,9 +1679,30 @@
 	"trading": {
 		"text": {
 			"tab_title": "",
+			"tab_title_short": "",
 			"intro": "",
 			"learn_more": "",
-			"provider_name": ""
+			"provider_name": "",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "",
+			"trading_potential": "",
+			"trading_potential_hint": "",
+			"deposited_assets": "",
+			"deposited_all_free": "",
+			"deposited_empty": "",
+			"free": "",
+			"in_orders": "",
+			"in_orders_label": "",
+			"positions": "",
+			"deposit": "",
+			"withdraw": "",
+			"active_orders": "",
+			"active_orders_empty_deposit": "",
+			"active_orders_empty_place": "",
+			"new_order": "",
+			"order_history": ""
 		},
 		"provider_unavailable": {
 			"title": "",
@@ -1698,10 +1719,6 @@
 		},
 		"assets": {
 			"title": "",
-			"deposit": "",
-			"withdraw": "",
-			"available": "",
-			"available_label": "",
 			"empty": ""
 		},
 		"deposit": {
@@ -1709,12 +1726,12 @@
 			"review_title": "",
 			"progress_title": "",
 			"you_deposit": "",
+			"error_insufficient_balance": "",
 			"to": "",
 			"network": "",
 			"transaction_fee": "",
 			"approval_fee": "",
 			"transfer_fee": "",
-			"consent": "",
 			"info_title": "",
 			"info_description": "",
 			"empty_title": "",
@@ -1741,6 +1758,7 @@
 			"transfer_fee": "",
 			"you_receive": "",
 			"reserved_note": "",
+			"error_insufficient_balance": "",
 			"submit": "",
 			"open": "",
 			"progress_withdraw": "",
@@ -1758,12 +1776,28 @@
 			"side_buy": "",
 			"row_sell": "",
 			"row_buy": "",
+			"row_phrase_sell": "",
+			"row_phrase_buy": "",
+			"queue_ahead": "",
 			"status_open": "",
 			"status_pending": "",
 			"status_partial": "",
 			"status_filled": "",
 			"status_canceled": "",
-			"status_expired": ""
+			"status_expired": "",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "",
+			"description": "",
+			"fact_1_title": "",
+			"fact_1_description": "",
+			"fact_2_title": "",
+			"fact_2_description": "",
+			"fact_3_title": "",
+			"fact_3_description": ""
 		},
 		"order_detail": {
 			"title": "",
@@ -1786,8 +1820,8 @@
 			"placing_title": "",
 			"sell": "",
 			"buy": "",
-			"select_base_token": "",
-			"select_quote_token": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1841,8 +1875,8 @@
 			"fok_help": "",
 			"routing_name": "",
 			"routing_tag": "",
-			"lowest_ask": "",
-			"highest_bid": "",
+			"best_ask": "",
+			"best_bid": "",
 			"spread": "",
 			"spread_value": "",
 			"maker_fee": "",
@@ -2292,6 +2326,7 @@
 		"text": {
 			"title": "اكسب",
 			"tab_title": "",
+			"tab_title_short": "",
 			"earning_opportunities": "",
 			"header_title": "",
 			"header_description": "",
@@ -2333,9 +2368,14 @@
 		"text": {
 			"description": "",
 			"health_factor": "",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "",
-			"net_apy": "",
 			"markets": "",
+			"total_supplied": "",
+			"no_assets_supplied": "",
 			"supplied": "",
 			"borrowed": "",
 			"borrow_rate": "",
@@ -2343,11 +2383,16 @@
 			"supply_label": "",
 			"borrow_label": "",
 			"coming_soon": "",
+			"coming_soon_teaser": "",
 			"action_supply": "",
 			"action_borrow": "",
 			"action_repay": "",
 			"action_withdraw": "",
 			"transaction_failed": "",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "",
 			"supply_review_subtitle": "",
 			"supplying": "",
@@ -2357,6 +2402,7 @@
 			"supply_collateral_info": "",
 			"supply_agreement": "",
 			"provider_fee": "",
+			"transaction_fee": "",
 			"insufficient_funds_for_fee": "",
 			"supply_prices_unavailable": "",
 			"borrow_review": "",
@@ -2405,6 +2451,16 @@
 			"debt_after_repay": "",
 			"repay_exceeds_debt": "",
 			"repay_prices_unavailable": ""
+		},
+		"info": {
+			"title": "",
+			"description": "",
+			"fact_1_title": "",
+			"fact_1_description": "",
+			"fact_2_title": "",
+			"fact_2_description": "",
+			"fact_3_title": "",
+			"fact_3_description": ""
 		}
 	},
 	"vaults": {
@@ -2624,8 +2680,8 @@
 				"expiry_24h": "",
 				"expiry_7d": "",
 				"expiry_30d": "",
-				"destroy_after_viewing": "",
-				"destroy_after_viewing_hint": "",
+				"single_use": "",
+				"single_use_option": "",
 				"protects_body": "",
 				"create_link": "",
 				"link_ready_title": "",
@@ -2646,7 +2702,6 @@
 				"single_use_caveat": "",
 				"copy_note": "",
 				"note_copied": "",
-				"outro_eyebrow": "",
 				"outro_title": "",
 				"outro_subtitle": "",
 				"outro_feature_multichain": "",

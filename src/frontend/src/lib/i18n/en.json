@@ -2,7 +2,7 @@
 	"borrow": {
 		"text": {
 			"header_title": "Welcome to Borrow!",
-			"header_description": "Access liquidity without selling — borrow stablecoins or BTC against your crypto.",
+			"header_description": "Access liquidity without selling. Borrow stablecoins against your BTC, ICP, and more.",
 			"borrowing_options": "Borrowing options",
 			"borrowing_potential": "Borrowing potential",
 			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
@@ -11,6 +11,7 @@
 			"active_loans": "Active loans",
 			"no_active_loans": "no active loans",
 			"amount_borrowed": "$amount borrowed",
+			"apr": "APR",
 			"borrow_apr_from": "Borrow APR from"
 		},
 		"cards": {
@@ -24,7 +25,9 @@
 	"borrowings": {
 		"text": {
 			"tab_title": "Borrowing",
-			"no_borrowings": "It looks like you haven't borrowed any tokens yet."
+			"tab_title_short": "Borrow",
+			"no_borrowings": "You don't have any active loans yet",
+			"go_to_borrow": "Go to Borrow"
 		}
 	},
 	"core": {
@@ -448,7 +451,7 @@
 			},
 			"binaryx": {
 				"name": "BinaryX",
-				"one_liner": "Here’s a compact, image‑length–style description for Binaryx, designed to fit the same format and brevity as your image example",
+				"one_liner": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties.",
 				"description": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties. Investors can buy into legally structured DAO-LLCs representing rental or off-plan real estate starting from just $50. Yield is distributed from rental income or asset appreciation, and properties can be traded on a secondary marketplace."
 			},
 			"parcl": {
@@ -459,11 +462,7 @@
 			"liquidium": {
 				"name": "Liquidium",
 				"one_liner": "Borrow & lend native Bitcoin against USDT.",
-				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes.",
-				"carousel": {
-					"text": "Borrow & lend native Bitcoin against USDT",
-					"call_to_action": "Learn more"
-				}
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			},
 			"icpindex": {
 				"name": "ICP Index",
@@ -1292,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
+			"title_short": "Tokens",
 			"contract_address": "Contract address",
 			"token_address": "Token address",
 			"balance": "Balance",
@@ -1679,17 +1679,38 @@
 	"trading": {
 		"text": {
 			"tab_title": "Trading",
+			"tab_title_short": "Trade",
 			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
 			"learn_more": "Learn more",
-			"provider_name": "OISY TRADE"
+			"provider_name": "OISY Trade",
+			"go_to_trade": "Go to Trade"
+		},
+		"page": {
+			"tagline": "Place limit orders right from your wallet. Your funds stay in smart contracts you control, never with a central party.",
+			"trading_potential": "Trading potential",
+			"trading_potential_hint": "In your wallet, not on the exchange",
+			"deposited_assets": "Deposited assets",
+			"deposited_all_free": "All free",
+			"deposited_empty": "Nothing deposited yet",
+			"free": "$amount free",
+			"in_orders": "$amount in orders",
+			"in_orders_label": "in orders",
+			"positions": "My positions",
+			"deposit": "Deposit",
+			"withdraw": "Withdraw",
+			"active_orders": "Active orders",
+			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY Trade.",
+			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
+			"new_order": "New order",
+			"order_history": "Order history"
 		},
 		"provider_unavailable": {
 			"title": "Trading is temporarily unavailable",
 			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
 		},
 		"onboarding": {
-			"title": "Trade on-chain with OISY TRADE",
-			"description": "OISY TRADE is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"title": "Trade on-chain with OISY Trade",
+			"description": "OISY Trade is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
 			"step_deposit": "Deposit a supported token",
 			"step_order": "Place a limit order",
 			"step_withdraw": "Withdraw anytime",
@@ -1697,11 +1718,7 @@
 			"deposit": "Deposit"
 		},
 		"assets": {
-			"title": "My assets",
-			"deposit": "+ Deposit",
-			"withdraw": "Withdraw",
-			"available": "Available: $amount",
-			"available_label": "Available:",
+			"title": "My positions",
 			"empty": "No assets deposited yet"
 		},
 		"deposit": {
@@ -1709,21 +1726,21 @@
 			"review_title": "Review deposit",
 			"progress_title": "Depositing",
 			"you_deposit": "You deposit",
+			"error_insufficient_balance": "Amount exceeds your wallet balance",
 			"to": "To",
 			"network": "Network",
 			"transaction_fee": "Total estimated fee",
 			"approval_fee": "Approval fee",
 			"transfer_fee": "Network fee",
-			"consent": "I understand my tokens will be held by the OISY TRADE canister and are subject to on-chain smart contract risk.",
-			"info_title": "OISY TRADE: on-chain order book",
-			"info_description": "Deposited funds are held by the OISY TRADE canister and used to place limit orders, secured by on-chain smart contracts.",
+			"info_title": "OISY Trade: onchain order book",
+			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by onchain smart contracts.",
 			"empty_title": "Nothing to deposit yet",
-			"empty_description": "OISY TRADE lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
+			"empty_description": "OISY Trade lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
 			"approving": "Approving",
 			"approved": "Approved",
-			"approve_description": "OISY TRADE authorised to transfer $symbol",
+			"approve_description": "OISY Trade authorised to transfer $symbol",
 			"depositing": "Depositing",
-			"deposit_description": "Transferring $symbol to OISY TRADE",
+			"deposit_description": "Transferring $symbol to OISY Trade",
 			"done": "Done",
 			"error": {
 				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
@@ -1741,11 +1758,12 @@
 			"transfer_fee": "Transfer fee",
 			"you_receive": "You receive",
 			"reserved_note": "$amount reserved · locked by open orders",
+			"error_insufficient_balance": "Amount exceeds your free balance",
 			"submit": "Withdraw",
 			"open": "Withdraw",
 			"progress_withdraw": "Sending $symbol to your wallet",
 			"progress_done": "Done",
-			"error": "Your withdrawal didn't complete. Your funds stayed on OISY TRADE. Try again in a moment."
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY Trade. Try again in a moment."
 		},
 		"orders": {
 			"title": "Orders",
@@ -1758,12 +1776,28 @@
 			"side_buy": "Buy",
 			"row_sell": "$quantity $base for $quote at $price",
 			"row_buy": "$base with $quote_amount $quote at $price",
+			"row_phrase_sell": "for $quote @ $price",
+			"row_phrase_buy": "with $quote @ $price",
+			"queue_ahead": "$percentage% ahead in queue",
 			"status_open": "Open",
 			"status_pending": "Pending",
 			"status_partial": "Partial",
 			"status_filled": "Filled",
 			"status_canceled": "Canceled",
-			"status_expired": "Expired"
+			"status_expired": "Expired",
+			"count_filled": "$count filled",
+			"count_expired": "$count expired",
+			"count_canceled": "$count canceled"
+		},
+		"info": {
+			"title": "What is OISY Trade",
+			"description": "OISY Trade is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
+			"fact_1_title": "Buy or sell at your price",
+			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
+			"fact_2_title": "Fills even while away",
+			"fact_2_description": "Your order lives onchain once placed. The exchange fills it as soon as a matching order appears, whether or not you're signed in.",
+			"fact_3_title": "Fully onchain",
+			"fact_3_description": "Orders are matched and settled inside a canister on the Internet Computer, governed by the NNS, with no centralized exchange in the middle."
 		},
 		"order_detail": {
 			"title": "Order details",
@@ -1786,8 +1820,8 @@
 			"placing_title": "Placing order",
 			"sell": "Sell",
 			"buy": "Buy",
-			"select_base_token": "Select token to sell",
-			"select_quote_token": "Select a token to trade against",
+			"select_sell_token": "Select token to sell",
+			"select_buy_token": "Select token to buy",
 			"you_sell": "You sell",
 			"you_buy": "You buy",
 			"hero_prefix": "You",
@@ -1812,9 +1846,9 @@
 			"price_label_fok_sell": "Fill in full now, at 1 $base ≥",
 			"price_label_fok_buy": "Fill in full now, at 1 $base ≤",
 			"price_label_default": "Limit price",
-			"preset_bid": "Bid",
-			"preset_ask": "Ask",
-			"preset_market": "0%",
+			"preset_bid": "Best bid",
+			"preset_ask": "Best ask",
+			"preset_market": "Current value",
 			"preset_sell_1": "+1%",
 			"preset_sell_5": "+5%",
 			"preset_buy_1": "−1%",
@@ -1841,8 +1875,8 @@
 			"fok_help": "Fill the whole order now at your price or better, or cancel it — nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
 			"routing_name": "Routed via $provider",
 			"routing_tag": "best execution",
-			"lowest_ask": "Lowest ask",
-			"highest_bid": "Highest bid",
+			"best_ask": "Best ask",
+			"best_bid": "Best bid",
 			"spread": "Spread",
 			"spread_value": "$value%",
 			"maker_fee": "Maker fee",
@@ -1866,7 +1900,7 @@
 			"market_moved_sell": "Market moved: best bid is now $price. At this price your fill-or-kill order would be canceled. Go back and lower your price.",
 			"market_moved_buy": "Market moved: best ask is now $price. At this price your fill-or-kill order would be canceled. Go back and raise your price.",
 			"placing_initializing": "Submitting order",
-			"placing_sub": "Sending limit order to OISY TRADE",
+			"placing_sub": "Sending limit order to OISY Trade",
 			"placing_done": "Order placed",
 			"place_error": "Could not place the order. Please try again."
 		}
@@ -2292,6 +2326,7 @@
 		"text": {
 			"title": "Earn",
 			"tab_title": "Earning",
+			"tab_title_short": "Earn",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your digital assets portfolio by allocating your tokens to earning opportunities.",
@@ -2331,11 +2366,16 @@
 	},
 	"liquidium": {
 		"text": {
-			"description": "Lend & borrow native BTC, ETH, USDC and USDT. Lending logic runs on Liquidium's canisters; $oisy_short provides the UX.",
+			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
+			"health_no_debt": "No debt",
+			"health_healthy": "Healthy",
+			"health_at_risk": "At risk",
+			"health_critical": "Critical",
 			"net_value": "Net value",
-			"net_apy": "Net APY",
 			"markets": "Markets",
+			"total_supplied": "Total supplied",
+			"no_assets_supplied": "no assets supplied",
 			"supplied": "Supplied",
 			"borrowed": "Borrowed",
 			"borrow_rate": "Borrow rate",
@@ -2343,11 +2383,16 @@
 			"supply_label": "Supply",
 			"borrow_label": "Borrow",
 			"coming_soon": "Coming soon",
+			"coming_soon_teaser": "Coming soon...",
 			"action_supply": "Supply",
 			"action_borrow": "Borrow",
 			"action_repay": "Repay",
 			"action_withdraw": "Withdraw",
 			"transaction_failed": "Transaction failed",
+			"select_supply_token": "Select token to supply",
+			"select_borrow_token": "Select token to borrow",
+			"select_withdraw_token": "Select token to withdraw",
+			"select_repay_token": "Select token to repay",
 			"supply_review": "Review supply",
 			"supply_review_subtitle": "You supply",
 			"supplying": "Supplying",
@@ -2356,8 +2401,9 @@
 			"supply_apy": "Supply APY",
 			"supply_collateral_info": "Supplied assets also serve as collateral you can borrow against.",
 			"supply_agreement": "I understand my assets will be supplied to the Liquidium protocol and are subject to on-chain smart-contract risk.",
-			"provider_fee": "Provider fee",
-			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the provider fee.",
+			"provider_fee": "Network fee",
+			"transaction_fee": "Transaction fee",
+			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the fees.",
 			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
 			"borrow_review": "Review borrow",
 			"borrow_review_subtitle": "You borrow",
@@ -2405,6 +2451,16 @@
 			"debt_after_repay": "Debt after repay",
 			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
 			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
+		},
+		"info": {
+			"title": "What is Liquidium",
+			"description": "Liquidium is a decentralized, non-custodial lending protocol where you can supply or borrow across multiple blockchain networks. Built on the Internet Computer, it enables cross-chain lending without centralized bridges or wrapped tokens.",
+			"fact_1_title": "Earn on Your BTC",
+			"fact_1_description": "Lend your Bitcoin to earn yield from over-collateralized loans.",
+			"fact_2_title": "Non-Custodial",
+			"fact_2_description": "Deposits are secured by on-chain smart contracts, with no centralized control.",
+			"fact_3_title": "Native, Cross-Chain",
+			"fact_3_description": "Assets stay on their native chains, so you can supply on one and borrow on another."
 		}
 	},
 	"vaults": {
@@ -2624,8 +2680,8 @@
 				"expiry_24h": "24 hours",
 				"expiry_7d": "7 days",
 				"expiry_30d": "30 days",
-				"destroy_after_viewing": "Destroy after viewing",
-				"destroy_after_viewing_hint": "The link works once, then stops opening.",
+				"single_use": "Single use",
+				"single_use_option": "Link can only be used once",
 				"protects_body": "Only the recipient of this link can read your note.",
 				"create_link": "Create link",
 				"link_ready_title": "Share link ready",
@@ -2646,11 +2702,10 @@
 				"single_use_caveat": "Single-use link — once you close or reload this page, the note is gone for good. Copy it now if you need it.",
 				"copy_note": "Copy note",
 				"note_copied": "Note copied!",
-				"outro_eyebrow": "You just opened a note kept private by $oisy_short",
-				"outro_title": "It keeps your assets just as safe",
+				"outro_title": "$oisy_short kept this note private, and keeps your assets just as safe",
 				"outro_subtitle": "$oisy_short is a fully onchain, self-custody wallet for Bitcoin, Ethereum, Solana, ICP and more.",
 				"outro_feature_multichain": "Bitcoin, Ethereum, Solana & ICP in one place",
-				"outro_feature_onchain": "100% onchain — no extension, no seed phrase",
+				"outro_feature_onchain": "100% onchain, no extension, no seed phrase",
 				"outro_feature_encrypted": "Your keys and your data, encrypted end-to-end",
 				"discover": "Discover OISY",
 				"unavailable_title": "This link has expired or already been used"

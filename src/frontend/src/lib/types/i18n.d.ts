@@ -14,13 +14,14 @@ interface I18nBorrow {
 		active_loans: string;
 		no_active_loans: string;
 		amount_borrowed: string;
+		apr: string;
 		borrow_apr_from: string;
 	};
 	cards: { liquidium: { title: string; description: string; action: string } };
 }
 
 interface I18nBorrowings {
-	text: { tab_title: string; no_borrowings: string };
+	text: { tab_title: string; tab_title_short: string; no_borrowings: string; go_to_borrow: string };
 }
 
 interface I18nCore {
@@ -313,12 +314,7 @@ interface I18nDapps {
 		sanctum: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: {
-			name: string;
-			one_liner: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
+		liquidium: { name: string; one_liner: string; description: string };
 		icpindex: {
 			name: string;
 			one_liner: string;
@@ -1010,6 +1006,7 @@ interface I18nPay {
 interface I18nTokens {
 	text: {
 		title: string;
+		title_short: string;
 		contract_address: string;
 		token_address: string;
 		balance: string;
@@ -1355,7 +1352,33 @@ interface I18nWallet_connect {
 }
 
 interface I18nTrading {
-	text: { tab_title: string; intro: string; learn_more: string; provider_name: string };
+	text: {
+		tab_title: string;
+		tab_title_short: string;
+		intro: string;
+		learn_more: string;
+		provider_name: string;
+		go_to_trade: string;
+	};
+	page: {
+		tagline: string;
+		trading_potential: string;
+		trading_potential_hint: string;
+		deposited_assets: string;
+		deposited_all_free: string;
+		deposited_empty: string;
+		free: string;
+		in_orders: string;
+		in_orders_label: string;
+		positions: string;
+		deposit: string;
+		withdraw: string;
+		active_orders: string;
+		active_orders_empty_deposit: string;
+		active_orders_empty_place: string;
+		new_order: string;
+		order_history: string;
+	};
 	provider_unavailable: { title: string; description: string };
 	onboarding: {
 		title: string;
@@ -1366,25 +1389,18 @@ interface I18nTrading {
 		supported_tokens: string;
 		deposit: string;
 	};
-	assets: {
-		title: string;
-		deposit: string;
-		withdraw: string;
-		available: string;
-		available_label: string;
-		empty: string;
-	};
+	assets: { title: string; empty: string };
 	deposit: {
 		title: string;
 		review_title: string;
 		progress_title: string;
 		you_deposit: string;
+		error_insufficient_balance: string;
 		to: string;
 		network: string;
 		transaction_fee: string;
 		approval_fee: string;
 		transfer_fee: string;
-		consent: string;
 		info_title: string;
 		info_description: string;
 		empty_title: string;
@@ -1408,6 +1424,7 @@ interface I18nTrading {
 		transfer_fee: string;
 		you_receive: string;
 		reserved_note: string;
+		error_insufficient_balance: string;
 		submit: string;
 		open: string;
 		progress_withdraw: string;
@@ -1425,12 +1442,28 @@ interface I18nTrading {
 		side_buy: string;
 		row_sell: string;
 		row_buy: string;
+		row_phrase_sell: string;
+		row_phrase_buy: string;
+		queue_ahead: string;
 		status_open: string;
 		status_pending: string;
 		status_partial: string;
 		status_filled: string;
 		status_canceled: string;
 		status_expired: string;
+		count_filled: string;
+		count_expired: string;
+		count_canceled: string;
+	};
+	info: {
+		title: string;
+		description: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
 	};
 	order_detail: {
 		title: string;
@@ -1453,8 +1486,8 @@ interface I18nTrading {
 		placing_title: string;
 		sell: string;
 		buy: string;
-		select_base_token: string;
-		select_quote_token: string;
+		select_sell_token: string;
+		select_buy_token: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;
@@ -1508,8 +1541,8 @@ interface I18nTrading {
 		fok_help: string;
 		routing_name: string;
 		routing_tag: string;
-		lowest_ask: string;
-		highest_bid: string;
+		best_ask: string;
+		best_bid: string;
 		spread: string;
 		spread_value: string;
 		maker_fee: string;
@@ -1842,6 +1875,7 @@ interface I18nEarning {
 	text: {
 		title: string;
 		tab_title: string;
+		tab_title_short: string;
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
@@ -1870,9 +1904,14 @@ interface I18nLiquidium {
 	text: {
 		description: string;
 		health_factor: string;
+		health_no_debt: string;
+		health_healthy: string;
+		health_at_risk: string;
+		health_critical: string;
 		net_value: string;
-		net_apy: string;
 		markets: string;
+		total_supplied: string;
+		no_assets_supplied: string;
 		supplied: string;
 		borrowed: string;
 		borrow_rate: string;
@@ -1880,11 +1919,16 @@ interface I18nLiquidium {
 		supply_label: string;
 		borrow_label: string;
 		coming_soon: string;
+		coming_soon_teaser: string;
 		action_supply: string;
 		action_borrow: string;
 		action_repay: string;
 		action_withdraw: string;
 		transaction_failed: string;
+		select_supply_token: string;
+		select_borrow_token: string;
+		select_withdraw_token: string;
+		select_repay_token: string;
 		supply_review: string;
 		supply_review_subtitle: string;
 		supplying: string;
@@ -1894,6 +1938,7 @@ interface I18nLiquidium {
 		supply_collateral_info: string;
 		supply_agreement: string;
 		provider_fee: string;
+		transaction_fee: string;
 		insufficient_funds_for_fee: string;
 		supply_prices_unavailable: string;
 		borrow_review: string;
@@ -1942,6 +1987,16 @@ interface I18nLiquidium {
 		debt_after_repay: string;
 		repay_exceeds_debt: string;
 		repay_prices_unavailable: string;
+	};
+	info: {
+		title: string;
+		description: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
 	};
 }
 
@@ -2150,8 +2205,8 @@ interface I18nNotes {
 			expiry_24h: string;
 			expiry_7d: string;
 			expiry_30d: string;
-			destroy_after_viewing: string;
-			destroy_after_viewing_hint: string;
+			single_use: string;
+			single_use_option: string;
 			protects_body: string;
 			create_link: string;
 			link_ready_title: string;
@@ -2170,7 +2225,6 @@ interface I18nNotes {
 			single_use_caveat: string;
 			copy_note: string;
 			note_copied: string;
-			outro_eyebrow: string;
 			outro_title: string;
 			outro_subtitle: string;
 			outro_feature_multichain: string;

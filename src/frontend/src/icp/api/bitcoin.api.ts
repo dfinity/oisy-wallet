@@ -1,7 +1,7 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NullishIdentity } from '$lib/types/identity';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { BitcoinCanister, type BitcoinDid, type BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
@@ -28,7 +28,7 @@ export const getUtxosQuery = async ({
 	return getUtxosQuery({
 		address,
 		network,
-		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
+		...(nonNullish(minConfirmations) && { filter: { minConfirmations } })
 	});
 };
 

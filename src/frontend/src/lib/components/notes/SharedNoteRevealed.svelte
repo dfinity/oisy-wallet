@@ -5,7 +5,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		NOTES_SHARE_RECIPIENT_COPY,
 		NOTES_SHARE_RECIPIENT_DONE_BUTTON,
@@ -13,6 +13,7 @@
 		NOTES_SHARE_RECIPIENT_REVEALED,
 		NOTES_SHARE_RECIPIENT_SINGLE_USE_CAVEAT
 	} from '$lib/constants/test-ids.constants';
+	import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
@@ -26,6 +27,7 @@
 
 	const onCopy = async () => {
 		await copyToClipboard({ value: note, text: $i18n.notes.share.recipient.note_copied });
+		trackPersonalNoteShare({ step: 'copy', side: 'recipient' });
 	};
 </script>
 
@@ -51,7 +53,7 @@
 		>{`${$i18n.notes.text.encrypted_info.trimEnd()} `}<ExternalLink
 			ariaLabel={$i18n.core.text.learn_more}
 			color="blue"
-			href={OISY_DOCS_URL}
+			href={OISY_NOTES_DOCS_URL}
 			iconVisible={false}
 		>
 			{$i18n.core.text.learn_more}

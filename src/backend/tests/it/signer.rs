@@ -987,7 +987,7 @@ fn test_allow_signing_requires_delegation_chain() {
 }
 
 #[test]
-fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
+fn test_allow_signing_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -995,11 +995,11 @@ fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
     assert!(
-        !matches!(
+        matches!(
             result,
             Err(AllowSigningError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {result:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {result:?}"
     );
 }
 

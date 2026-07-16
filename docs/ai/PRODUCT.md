@@ -23,7 +23,7 @@ The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that
 On **desktop** every section is laid out at once under a non-interactive heading (**Portfolio** / **Finance** / **More**); nothing is hidden behind a tap and there is no "menu-open" state. There is exactly **one** "current page" signal and it is blue; it always lands on the actual page the user is on, never on two things at once.
 
 - **NFTs is a first-class destination.** It has its own page (`/nfts/`) reached from a dedicated nav item, and is **no longer** a tab inside Assets. As a standalone page it shows **no Tokens / Earning / Trading tab bar** — only its own header (search, refresh, sort, settings) — while the other Assets pages keep their tabs. On that page the hero shows a **total NFT count** (e.g. "12 NFTs") with **per-network count pills** (e.g. "ICP · 8") instead of a fiat balance — an NFT portfolio has no single fiat figure — and the total matches the rendered list. Privacy mode does not hide these counts.
-- **Finance destinations.** **Trade** (`/trading/`) and **Earn** (`/earn/`) are standalone destinations, distinct from the Trading / Earning tabs inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag. Borrow currently routes to the Liquidium provider page (`/providers/liquidium/`); Trade and Earn each appear only while their feature flag is on.
+- **Finance destinations.** **Earn** (`/earn/`) is a standalone destination, distinct from the Earning tab inside Assets. **Trade** and **Borrow** carry a **`NEW`** tag and — since each has a single provider today — route **directly to that provider's page**, skipping the intermediate category page: Trade to the **OISY TRADE** provider page (`/providers/oisy-trade/`), Borrow to the Liquidium provider page (`/providers/liquidium/`). The Assets **Trading** tab (`/trading/`) remains a distinct surface. Trade and Earn each appear only while their feature flag is on.
 - **Notes** is reachable directly from the navigation (in addition to the user menu). For now it opens the Notes modal rather than a page, so it never takes the blue "current page" treatment (a Notes page is a planned follow-up).
 - **Rewards** is no longer a top-level item; it lives in the More group, while its content also lives inside the Earn page.
 
@@ -37,7 +37,7 @@ The desktop sidebar's logo header and social-links footer remain a follow-up.
 
 OISY uses [Plausible](https://plausible.io/) for privacy-friendly, cookieless analytics. Plausible is initialized once at app boot via the `@plausible-analytics/tracker` npm package. All events are fired through the central `trackEvent()` function in `src/frontend/src/lib/services/analytics.services.ts`, which wraps the tracker in a try/catch so analytics never disrupts the user flow.
 
-The event schema is documented in the [Plausible Events Confluence page](https://dfinity.atlassian.net/wiki/spaces/OISY/pages/2534572046/Plausible+Events). Common attributes include `event_context`, `event_key`, `event_value`, `source_location`, `source_sublocation`, and the derived `source_path`.
+The event schema and conventions are documented in [`docs/ai/frontend/analytics.md`](frontend/analytics.md) — the canonical reference — alongside the `PLAUSIBLE_*` enums in `src/frontend/src/lib/enums/plausible.ts`. Common attributes include `event_context`, `event_key`, `event_value`, `source_location`, `source_sublocation`, and the derived `source_path`.
 
 ### "Learn More" Link Tracking
 
@@ -71,13 +71,61 @@ The event payload is built via the `buildLearnMoreEvent()` factory helper in `sr
 | SignerSignIn                         | `signer`          | —                         |
 | RewardsRequirements                  | `rewards`         | `requirements`            |
 | TransactionsFilterContactsEmptyState | `transactions`    | —                         |
+| LiquidiumInfoBox                     | `liquidium`       | —                         |
 
-**Excluded:** `HarvestAutopilotOverview` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
+**Excluded:** `HarvestAutopilotOverview` / `LiquidiumProviderHero` (scroll anchor, not an external link), `DappsCarouselSlide` / `DappCard` (buttons with no href), `RewardModal` / `RewardStateModal` / `Rewards.svelte` (tracked separately with custom reward event names).
 
 **Deferred to a follow-up:**
 
 - `Erc20Icp` — uses a custom `IconInfo` and a scoped white-text style block that `ExternalLink` cannot represent without a custom-icon slot.
 - "Learn more" / "Read more" links embedded as raw `<a>` tags inside i18n strings rendered via `<Html text={...}>` / `{@html}` — they cannot be wired through `ExternalLink.trackEvent` without an i18n refactor (split the string at a placeholder and render the link separately) or a delegated click handler. Known cases: `activity.info.hidden_micro_transactions`, `core.warning.standalone_mode`, `tokens.warning.trust_token`.
+
+### Personal notes tracking
+
+The [Personal notes](#personal-notes) feature emits two structured Plausible events, both under `event_context: personal_notes` and content-free — no event ever carries the note text, a note id, the share token, the share key, or PII. Both follow the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`) described in [`analytics.md`](frontend/analytics.md).
+
+**`personal_note`** — the note lifecycle. Every event also carries `source_location: notes`.
+
+| `event_modifier` | Fires when             | `result_status`     | Extra                                                                         |
+| ---------------- | ---------------------- | ------------------- | ----------------------------------------------------------------------------- |
+| `create`         | a note is created      | `success` / `error` | `event_value: first_note` on the user's first note; `result_error` on failure |
+| `edit`           | a note is edited       | `success` / `error` | `result_error` on failure                                                     |
+| `delete`         | a note is deleted      | `success` / `error` | `result_error` on failure                                                     |
+| `open`           | the Notes modal opens  | `success`           | —                                                                             |
+| `view`           | a note's preview opens | `success`           | —                                                                             |
+
+**`personal_note_share`** — the [share](#sharing-a-note) funnel, a single event covering both the creator and the recipient, under `event_subcontext: share`. The step rides in `event_modifier`; `source_location` is `share_dialog` for creator steps and `recipient_page` for recipient steps.
+
+| `event_modifier` | Side      | Fires when                         | Extra                                                                          |
+| ---------------- | --------- | ---------------------------------- | ------------------------------------------------------------------------------ |
+| `open`           | creator   | the share dialog opens             | —                                                                              |
+| `open`           | recipient | the link page opens                | —                                                                              |
+| `create`         | creator   | a share link is created            | `single_use`, `expiry` (e.g. `7d`), `result_status`, `result_error` on failure |
+| `reveal`         | recipient | the note is revealed               | `single_use`                                                                   |
+| `copy`           | recipient | the revealed note is copied        | —                                                                              |
+| `close`          | recipient | the revealed note is dismissed     | —                                                                              |
+| `unavailable`    | recipient | the link is dead / expired / used  | —                                                                              |
+| `discover`       | recipient | the "Discover OISY" CTA is clicked | `source_detail` (`outro` / `unavailable`)                                      |
+
+Recipient-side steps fire on the logged-out public share page and stay anonymous. This consolidates six former flat `note_share_*` events into one; dashboards filter the funnel by `event_modifier` / `source_location`.
+
+### Trading tracking
+
+The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible events, both under `event_context: trading` with `event_provider: OISY Trade`, following the domain-service pattern (the action in `event_modifier`, the outcome in `result_status`). They carry only public chain data — token symbols, amounts, limit prices, and USD values — never a principal or PII. USD values are exact (`amount × exchange-rate price`), consistent with the `swap_offer` (Velora) event.
+
+**`limit_order`** — placing and cancelling a limit order.
+
+| `event_modifier` | Fires when           | `result_status`                 | Properties                                                                                                                                                                                        |
+| ---------------- | -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create`         | an order is placed   | `executing` → `success`/`error` | `token_symbol`/`token2_symbol` (base/quote), `side`, `order_type`, `token_amount`, `price`, `token_usd_price`/`token2_usd_price`, `token_usd_value`/`token2_usd_value`; `result_error` on failure |
+| `cancel`         | an order is canceled | `executing` → `success`/`error` | same block minus `order_type` (the order view carries no time-in-force)                                                                                                                           |
+
+**`deposit_withdraw`** — moving assets in and out of a trading venue's custody account. Venue-agnostic: `event_provider` names the venue.
+
+| `event_modifier` | Fires when          | `result_status`                 | Properties                                                                                      |
+| ---------------- | ------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `deposit`        | funds are deposited | `executing` → `success`/`error` | `token_symbol`, `token_amount`, `token_usd_price`, `token_usd_value`; `result_error` on failure |
+| `withdraw`       | funds are withdrawn | `executing` → `success`/`error` | same                                                                                            |
 
 ---
 
@@ -135,6 +183,8 @@ A note is a free-standing memo — it is **not** attached to any transaction, ad
 
 The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
+The lifecycle (create / edit / delete, opening the surface, and opening a note's preview) is tracked via the `personal_note` Plausible event — see [Analytics → Personal notes tracking](#personal-notes-tracking).
+
 ### Sharing a note
 
 From an open note, the user can create a **share link** that lets anyone holding the link read that one note — no OISY account required. Sharing is always initiated by the user, per note.
@@ -145,6 +195,8 @@ From an open note, the user can create a **share link** that lets anyone holding
 - **Expiry and single-use.** The creator picks how long the link stays valid — **1 hour, 24 hours, 7 days, or 30 days** — and can optionally make it **single-use**, so it stops opening after it has been viewed once. Expiry is enforced by the backend.
 - **No revocation.** Once shared, OISY cannot recall or revoke a link; it simply stops working after it expires or, for a single-use link, after its first view.
 - **Limit.** A user may hold up to **100 active share links** at a time. At the cap the Share dialog disables link creation and explains that links free up as they expire or are used; existing shares are never evicted.
+
+The share funnel — dialog open, link created, and the recipient's open / reveal / copy / close / unavailable / discover steps — is tracked via the `personal_note_share` Plausible event; see [Analytics → Personal notes tracking](#personal-notes-tracking).
 
 ---
 
@@ -163,6 +215,16 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 OISY supports **several dApp connections at once**, each independently manageable. Connecting a new dApp leaves the already-connected ones in place, and the "Connected Apps" list shows every live session. Each row's close button disconnects only that dApp; a "Disconnect all" control tears every connection down in one tap. When a dApp ends its own session, only that entry is removed and the others keep working. Incoming sign/send requests route to the correct session by topic across all open connections. Previously connected sessions are restored after a page refresh.
 
 Requests are still handled **one at a time**: while a request from one dApp is under review, a request arriving from another is rejected with a "request skipped" notice. Session proposals are likewise reviewed one at a time — the user adds connections sequentially (scan/paste → review → approve, then repeat).
+
+---
+
+## Ethereum
+
+### Transaction fees
+
+When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
+
+A transaction is never submitted without a resolved fee: every Ethereum send path refuses to proceed until the fee is available.
 
 ---
 

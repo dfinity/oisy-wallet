@@ -9,12 +9,12 @@ import {
 	liquidiumMaxLtv,
 	liquidiumMaxSupplyApy,
 	liquidiumMinBorrowApy,
-	liquidiumNetApy,
 	liquidiumNetInterestUsd,
 	liquidiumProjectedHealthAfterRepayPercent,
 	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
 	liquidiumResultingLtvPercent,
+	liquidiumSupplyInterestUsd,
 	mapLiquidiumMarket,
 	mapLiquidiumPortfolio,
 	mapLiquidiumReserve
@@ -53,6 +53,7 @@ const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
 	lendingIndex: ZERO,
 	borrowIndex: ZERO,
 	sameAssetBorrowing: false,
+	sameAssetBorrowingDustThreshold: ZERO,
 	...overrides
 });
 
@@ -514,88 +515,6 @@ describe('liquidium.utils', () => {
 		});
 	});
 
-	describe('liquidiumNetApy', () => {
-		const buildReserve = (overrides: Partial<LiquidiumReserve>): LiquidiumReserve => ({
-			poolId: 'p',
-			asset: 'BTC',
-			chain: 'BTC',
-			supplyApy: 0,
-			borrowApy: 0,
-			deposited: ZERO,
-			depositedDecimals: 8,
-			borrowed: ZERO,
-			borrowedDecimals: 8,
-			suppliedUsd: 0,
-			borrowedUsd: 0,
-			...overrides
-		});
-
-		it('equals the supply APY when there is no debt', () => {
-			expect(
-				liquidiumNetApy({
-					reserves: [buildReserve({ suppliedUsd: 1000, supplyApy: 5 })],
-					totalSuppliedUsd: 1000,
-					totalBorrowedUsd: 0,
-					netValueUsd: 1000,
-					availableBorrowsUsd: 0,
-					weightedLiquidationThresholdBps: 8000,
-					healthFactorPercent: 100
-				})
-			).toBeCloseTo(5);
-		});
-
-		it('is the spread between weighted supply APY and weighted borrow APY', () => {
-			expect(
-				liquidiumNetApy({
-					reserves: [
-						buildReserve({ suppliedUsd: 1000, supplyApy: 5 }),
-						buildReserve({ borrowedUsd: 800, borrowApy: 8 })
-					],
-					totalSuppliedUsd: 1000,
-					totalBorrowedUsd: 800,
-					netValueUsd: 200,
-					availableBorrowsUsd: 0,
-					weightedLiquidationThresholdBps: 8000,
-					healthFactorPercent: 40
-				})
-				// net supply APY (5%) − net borrow APY (8%) = −3%, independent of net value.
-			).toBeCloseTo(5 - 8);
-		});
-
-		it('value-weights each side across reserves', () => {
-			expect(
-				liquidiumNetApy({
-					reserves: [
-						buildReserve({ suppliedUsd: 1080, supplyApy: 0 }),
-						buildReserve({ suppliedUsd: 960, supplyApy: 0.44 }),
-						buildReserve({ borrowedUsd: 1000, borrowApy: 2.26 })
-					],
-					totalSuppliedUsd: 2040,
-					totalBorrowedUsd: 1000,
-					netValueUsd: 1040,
-					availableBorrowsUsd: 0,
-					weightedLiquidationThresholdBps: 7400,
-					healthFactorPercent: 33.6
-				})
-				// (1080·0 + 960·0.44)/2040 − (1000·2.26)/1000 = 0.207% − 2.26% ≈ −2.05%.
-			).toBeCloseTo(-2.05, 2);
-		});
-
-		it('is null when there are no positions', () => {
-			expect(
-				liquidiumNetApy({
-					reserves: [],
-					totalSuppliedUsd: 0,
-					totalBorrowedUsd: 0,
-					netValueUsd: 0,
-					availableBorrowsUsd: 0,
-					weightedLiquidationThresholdBps: 8000,
-					healthFactorPercent: 100
-				})
-			).toBeNull();
-		});
-	});
-
 	describe('liquidiumNetInterestUsd', () => {
 		const buildReserve = (overrides: Partial<LiquidiumReserve>): LiquidiumReserve => ({
 			poolId: 'p',
@@ -686,6 +605,53 @@ describe('liquidium.utils', () => {
 					])
 				)
 			).toBeCloseTo((2000 * 8 + 500 * 10) / 100);
+		});
+	});
+
+	describe('liquidiumSupplyInterestUsd', () => {
+		const buildReserve = (overrides: Partial<LiquidiumReserve>): LiquidiumReserve => ({
+			poolId: 'p',
+			asset: 'BTC',
+			chain: 'BTC',
+			supplyApy: 0,
+			borrowApy: 0,
+			deposited: ZERO,
+			depositedDecimals: 8,
+			borrowed: ZERO,
+			borrowedDecimals: 8,
+			suppliedUsd: 0,
+			borrowedUsd: 0,
+			...overrides
+		});
+
+		const buildPortfolio = (reserves: LiquidiumReserve[]): LiquidiumPortfolio => ({
+			reserves,
+			totalSuppliedUsd: 0,
+			totalBorrowedUsd: 0,
+			netValueUsd: 0,
+			availableBorrowsUsd: 0,
+			weightedLiquidationThresholdBps: 8000,
+			healthFactorPercent: 100
+		});
+
+		it('is 0 when there is no portfolio', () => {
+			expect(liquidiumSupplyInterestUsd(null)).toBe(0);
+		});
+
+		it('is 0 when there are no reserves', () => {
+			expect(liquidiumSupplyInterestUsd(buildPortfolio([]))).toBe(0);
+		});
+
+		it('sums supply earnings across reserves, ignoring borrows', () => {
+			expect(
+				liquidiumSupplyInterestUsd(
+					buildPortfolio([
+						buildReserve({ suppliedUsd: 1000, supplyApy: 5 }),
+						buildReserve({ suppliedUsd: 2000, supplyApy: 3 }),
+						buildReserve({ borrowedUsd: 500, borrowApy: 10 })
+					])
+				)
+			).toBeCloseTo((1000 * 5 + 2000 * 3) / 100);
 		});
 	});
 

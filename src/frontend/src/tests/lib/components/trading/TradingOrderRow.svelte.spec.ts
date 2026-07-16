@@ -1,6 +1,7 @@
 import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 import type { IcToken } from '$icp/types/ic-token';
 import TradingOrderRow from '$lib/components/trading/TradingOrderRow.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -41,7 +42,8 @@ const order: OisyTradeOrderView = {
 	quantity: 10,
 	price: 2.5,
 	filledQuantity: 0,
-	status: 'Open'
+	status: 'Open',
+	createdAt: ZERO
 };
 
 // Half the ask volume (the 2.4 level) is priced better than the 2.5 sell price.
@@ -84,7 +86,7 @@ describe('TradingOrderRow', () => {
 		// tag wraps with the text instead of dropping to its own flex line.
 		const textBlock = getByText('Sell').parentElement;
 
-		expect(textBlock).toHaveTextContent('OISY TRADE');
+		expect(textBlock).toHaveTextContent('OISY Trade');
 	});
 
 	it('opens the order-detail modal with the order on click', async () => {

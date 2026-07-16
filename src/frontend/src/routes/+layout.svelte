@@ -225,7 +225,7 @@
 {/await}
 
 <Banner />
-<Toasts maxVisible={3} />
+<Toasts elevated={nonNullish($modalStore?.type)} maxVisible={3} />
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />

@@ -20,6 +20,7 @@ import type {
 } from '$lib/types/oisy-trade';
 import type { BadgeVariant } from '$lib/types/style';
 import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	normalizeTextFilter,
@@ -78,6 +79,11 @@ export const mapOisyTradeAssets = ({
 // the hero net-worth total.
 export const sumOisyTradeAssetsUsd = (assets: OisyTradeAsset[]): number =>
 	assets.reduce((acc, { totalUsd }) => acc + (totalUsd ?? 0), 0);
+
+// Total fiat value of the free (unreserved) portion of DEX-deposited balances —
+// the "$X free" figure on the provider page's Deposited box.
+export const sumOisyTradeAssetsFreeUsd = (assets: OisyTradeAsset[]): number =>
+	assets.reduce((acc, { freeUsd }) => acc + (freeUsd ?? 0), 0);
 
 // The OISY tokens the user can deposit: DEX-supported tokens (matched by symbol)
 // that the user holds in their wallet. The first token per symbol wins (the
@@ -360,8 +366,10 @@ export const validateAmount = ({
 		return { ok: false };
 	}
 
+	// A sell spends the base amount outright, so its balance can be checked before a
+	// price is set; a buy's spend is the quote cost, which is only known once priced.
 	const spend = spendAmount({ side, baseAmount, price });
-	if (price > 0 && spend > freeBalance + 1e-9) {
+	if ((side === 'sell' || price > 0) && spend > freeBalance + 1e-9) {
 		return { ok: false, errorKind: 'balance' };
 	}
 
@@ -458,6 +466,20 @@ export const maxSpendBaseAmount = ({
 // ---------------------------------------------------------------------------
 
 export type PricePreset = 'book' | 0 | 1 | 5;
+
+// The presets' fair-value anchor: the cross of the two legs' USD exchange-rate
+// prices (base ÷ quote). Deliberately independent of the DEX order-book mid — the
+// book can be stale or one-sided on a thin market, whereas the USD feed is a
+// stable reference. Returns 0 when either price is missing or the quote price is
+// non-positive, which leaves the percentage presets inert until the feed loads.
+export const referenceRate = ({
+	baseUsd,
+	quoteUsd
+}: {
+	baseUsd: number | undefined;
+	quoteUsd: number | undefined;
+}): number =>
+	nonNullish(baseUsd) && nonNullish(quoteUsd) && quoteUsd > 0 ? baseUsd / quoteUsd : 0;
 
 const snapToTick = ({ price, tickSize }: { price: number; tickSize: number }): number =>
 	parseFloat((Math.round(price / tickSize) * tickSize).toFixed(decimalsOfStep(tickSize)));
@@ -674,7 +696,7 @@ export const mapOisyTradeOrder = ({
 		return undefined;
 	}
 
-	const { side, price, quantity, filled_quantity, status } = order;
+	const { side, price, quantity, filled_quantity, status, created_at } = order;
 
 	return {
 		id,
@@ -686,7 +708,8 @@ export const mapOisyTradeOrder = ({
 		quantity: Number(quantity) / 10 ** base.decimals,
 		filledQuantity: Number(filled_quantity) / 10 ** base.decimals,
 		price: Number(price) / 10 ** quote.decimals,
-		status: orderStatusKey(status)
+		status: orderStatusKey(status),
+		createdAt: created_at
 	};
 };
 
@@ -700,6 +723,30 @@ export const mapOisyTradeOrders = ({
 	tokens: IcToken[];
 }): OisyTradeOrderView[] =>
 	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+
+// Terminal-order breakdown for the Order-history header, e.g. "2 filled · 1
+// canceled". Only non-zero buckets appear; an all-empty history yields "".
+export const oisyTradeHistoryCountLabel = ({
+	orders,
+	i18n
+}: {
+	orders: OisyTradeOrderView[];
+	i18n: I18n;
+}): string => {
+	const count = (status: OisyTradeOrderStatus): number =>
+		orders.filter((order) => order.status === status).length;
+
+	return (
+		[
+			{ n: count('Filled'), key: i18n.trading.orders.count_filled },
+			{ n: count('Expired'), key: i18n.trading.orders.count_expired },
+			{ n: count('Canceled'), key: i18n.trading.orders.count_canceled }
+		] as const
+	)
+		.filter(({ n }) => n > 0)
+		.map(({ n, key }) => replacePlaceholders(key, { $count: `${n}` }))
+		.join(' · ');
+};
 
 // Status → display: the i18n label key (under `trading.orders.status`) and the
 // An Open order that has already filled some quantity is shown as the derived

@@ -3,13 +3,14 @@
 	import Decimal from 'decimal.js';
 	import type { TradingPairInfo } from '$declarations/oisy_trade/oisy_trade.did';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
+	import IconTrash from '$lib/components/icons/lucide/IconTrash.svelte';
 	import TradingCancelOrderConfirm from '$lib/components/trading/TradingCancelOrderConfirm.svelte';
 	import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
 	import LimitOrderPriceSummary from '$lib/components/trading/limit-order/LimitOrderPriceSummary.svelte';
 	import LimitOrderTermsList from '$lib/components/trading/limit-order/LimitOrderTermsList.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -20,16 +21,16 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import {
 		cancelLimitOrder,
 		loadOisyTrade,
 		loadOrderBook
 	} from '$lib/services/oisy-trade.services';
-	import { trackTrading } from '$lib/services/trading-analytics.services';
+	import {
+		trackLimitOrder,
+		type TrackLimitOrderParams
+	} from '$lib/services/trading-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -48,6 +49,7 @@
 		priceLevelToHuman,
 		queuePositionDisplay,
 		queuePositionFraction,
+		referenceRate,
 		toPairView,
 		toTradingPair,
 		valueDifferencePercent
@@ -120,12 +122,13 @@
 		return nonNullish(level) && nonNullish(pairView) ? toHuman(level).price : null;
 	});
 
-	const currentValue = $derived.by((): number => {
-		if (nonNullish(bid) && nonNullish(ask)) {
-			return (bid + ask) / 2;
-		}
-		return bid ?? ask ?? 0;
-	});
+	// "Current value" anchors on the cross of the two legs' USD exchange-rate
+	// prices (base ÷ quote), NOT the DEX order-book mid — mirroring the reference
+	// the limit-order creation flow uses (see `referenceRate`). The book bid/ask
+	// still drive the crossing check below.
+	const baseUsdPrice = $derived($exchanges?.[base.id]?.usd);
+	const quoteUsdPrice = $derived($exchanges?.[quote.id]?.usd);
+	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
 
 	const crossing = $derived(crossesBook({ side, price, bid, ask }));
 	const valueDiff = $derived(valueDifferencePercent({ side, price, currentValue }));
@@ -219,31 +222,37 @@
 
 	const confirmCancel = async () => {
 		canceling = true;
-		// Order volume is the base-token quantity. `quantity` is a JS number, so stringify it
-		// via Decimal to get a plain decimal string (no `1e-7`/float artifacts).
-		const orderFields = {
+		// `quantity` and `price` are JS numbers, so stringify them via Decimal to get plain
+		// decimal strings (no `1e-7`/float artifacts). The order view carries no time-in-force,
+		// so `order_type` is omitted on cancel.
+		const orderFields: Omit<TrackLimitOrderParams, 'action' | 'resultStatus' | 'error'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
-			volume: new Decimal(quantity).toFixed()
+			baseAmount: new Decimal(quantity).toFixed(),
+			price: new Decimal(price).toFixed(),
+			baseUsdPrice,
+			quoteUsdPrice,
+			baseUsdValue: nonNullish(baseUsdPrice) ? baseUsdPrice * quantity : undefined,
+			quoteUsdValue: nonNullish(quoteUsdPrice) ? quoteUsdPrice * quoteAmount : undefined
 		};
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+		trackLimitOrder({
+			action: 'cancel',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 			...orderFields
 		});
 		try {
 			await cancelLimitOrder({ identity: $authIdentity, orderId: order.id });
 			await loadOisyTrade({ identity: $authIdentity });
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			trackLimitOrder({
+				action: 'cancel',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				...orderFields
 			});
 			close();
 		} catch (err: unknown) {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.CANCEL_ORDER,
+			trackLimitOrder({
+				action: 'cancel',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				...orderFields,
 				error: replaceIcErrorFields(err)
@@ -299,19 +308,26 @@
 			</ModalValue>
 		{/if}
 
-		{#snippet toolbar()}
-			<ButtonGroup>
-				<Button colorStyle="secondary-light" onclick={close}>{$i18n.core.text.close}</Button>
-				{#if active}
+		{#snippet outerContent()}
+			{#if active}
+				<div class="flex justify-start px-3 py-2 sm:px-6 sm:py-3">
 					<Button
+						alignLeft
+						ariaLabel={$i18n.trading.order_detail.cancel_order}
 						colorStyle="error"
 						onclick={() => (showCancelConfirm = true)}
 						testId={TRADING_ORDER_DETAIL_CANCEL_BUTTON}
+						transparent
 					>
+						<span aria-hidden="true"><IconTrash /></span>
 						{$i18n.trading.order_detail.cancel_order}
 					</Button>
-				{/if}
-			</ButtonGroup>
+				</div>
+			{/if}
+		{/snippet}
+
+		{#snippet toolbar()}
+			<ButtonCloseModal isPrimary />
 		{/snippet}
 	</ContentWithToolbar>
 </Modal>

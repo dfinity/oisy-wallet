@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -10,7 +10,6 @@
 		formatTradeAmount,
 		type LimitOrderPairView,
 		type LimitOrderSide,
-		isPresetSelected,
 		presetTargetPrice,
 		type PricePreset,
 		queuePositionDisplay,
@@ -92,20 +91,8 @@
 		);
 	});
 
-	const presetSelected = (preset: PricePreset): boolean =>
-		active &&
-		isPresetSelected({
-			preset,
-			price: priceNum,
-			side,
-			currentValue,
-			bid,
-			ask,
-			tickSize: pairView?.tickSize ?? 0
-		});
-
 	const setPreset = (preset: PricePreset) => {
-		if (!nonNullish(pairView)) {
+		if (isNullish(pairView)) {
 			return;
 		}
 		const target = presetTargetPrice({
@@ -197,52 +184,49 @@
 	const bidAskLabel = $derived(
 		side === 'sell' ? $i18n.trading.limit_order.preset_bid : $i18n.trading.limit_order.preset_ask
 	);
+	const pricePresets = $derived<{ preset: PricePreset; label: string }[]>([
+		{ preset: 0, label: $i18n.trading.limit_order.preset_market },
+		{ preset: 1, label: presetLabel1 },
+		{ preset: 5, label: presetLabel5 }
+	]);
 </script>
+
+<!-- Border marks the latched preset; it clears on a manual price edit
+	 (which nulls `activePreset`) and follows the market while latched. -->
+{#snippet presetButton({ preset, label }: { preset: PricePreset; label: string })}
+	<button
+		class="rounded border px-1 py-0.5 transition-colors"
+		class:border-brand-primary={activePreset === preset}
+		class:border-transparent={activePreset !== preset}
+		class:font-semibold={activePreset === preset}
+		class:text-brand-primary={activePreset !== preset}
+		class:text-primary={activePreset === preset}
+		class:underline={activePreset !== preset}
+		aria-pressed={activePreset === preset}
+		onclick={() => setPreset(preset)}
+		type="button">{label}</button
+	>
+{/snippet}
 
 <div
 	class="rounded-lg border bg-secondary px-3 py-2.5"
-	class:border-disabled={!nonNullish(warningText)}
+	class:border-disabled={isNullish(warningText)}
 	class:border-error-primary={nonNullish(warningText) && warningText.danger}
 	class:border-warning-primary={nonNullish(warningText) && !warningText.danger}
 >
 	<div class="flex items-center justify-between gap-2">
 		<span class="text-xs text-secondary">{label}</span>
 		<div class="flex items-center gap-1.5 text-xs">
-			<button
-				class="underline"
-				class:font-semibold={presetSelected('book')}
-				class:text-brand-primary={!presetSelected('book')}
-				class:text-primary={presetSelected('book')}
-				onclick={() => setPreset('book')}
-				type="button">{bidAskLabel}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(0)}
-				class:text-brand-primary={!presetSelected(0)}
-				class:text-primary={presetSelected(0)}
-				onclick={() => setPreset(0)}
-				type="button">{$i18n.trading.limit_order.preset_market}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(1)}
-				class:text-brand-primary={!presetSelected(1)}
-				class:text-primary={presetSelected(1)}
-				onclick={() => setPreset(1)}
-				type="button">{presetLabel1}</button
-			>
-			<span class="text-tertiary">·</span>
-			<button
-				class="underline"
-				class:font-semibold={presetSelected(5)}
-				class:text-brand-primary={!presetSelected(5)}
-				class:text-primary={presetSelected(5)}
-				onclick={() => setPreset(5)}
-				type="button">{presetLabel5}</button
-			>
+			{@render presetButton({ preset: 'book', label: bidAskLabel })}
+			<span class="text-tertiary" aria-hidden="true">|</span>
+			<div class="flex items-center gap-0.5">
+				{#each pricePresets as { preset, label }, i (preset)}
+					{#if i > 0}
+						<span class="text-tertiary" aria-hidden="true">·</span>
+					{/if}
+					{@render presetButton({ preset, label })}
+				{/each}
+			</div>
 		</div>
 	</div>
 
