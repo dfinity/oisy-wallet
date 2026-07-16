@@ -181,10 +181,10 @@
 			"authenticate": "Open or Create",
 			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
-			"asset_types": "Crypto, stocks, commodities and encrypted notes",
+			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Private and tamperproof. Invisible, if you need it to be.",
-			"move_swap_grow": "Earn, borrow and trade, with an AI assistant built in"
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
+			"move_swap_grow": "Move, swap, and grow your assets across networks"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
