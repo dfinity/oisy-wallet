@@ -538,14 +538,53 @@ describe('signer.canister', () => {
 			await expect(signBtcPrehash({ hash })).rejects.toThrow(mockResponseError);
 		});
 
-		it('maps an Err response to a signer error', async () => {
+		it('should throw an error if btc_sign_prehash returns an InvalidHash error', async () => {
 			service.btc_sign_prehash.mockResolvedValue({ Err: { InvalidHash: { msg: 'bad hash' } } });
 
 			const { signBtcPrehash } = await createSignerCanister({
 				serviceOverride: service
 			});
 
-			await expect(signBtcPrehash({ hash })).rejects.toThrow('bad hash');
+			await expect(signBtcPrehash({ hash })).rejects.toThrow(new CanisterInternalError('bad hash'));
+		});
+
+		it('should throw an error if btc_sign_prehash returns a SigningError', async () => {
+			const SigningError = 'test';
+
+			service.btc_sign_prehash.mockResolvedValue({ Err: { SigningError } });
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(signBtcPrehash({ hash })).rejects.toThrow(
+				new CanisterInternalError(`Signing error: ${SigningError}`)
+			);
+		});
+
+		it('should throw a SignerCanisterPaymentError if btc_sign_prehash returns a payment error', async () => {
+			service.btc_sign_prehash.mockResolvedValue(paymentErrorResponse);
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(signBtcPrehash({ hash })).rejects.toThrow(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
+
+		it('should throw an error if btc_sign_prehash returns an unknown error variant', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_sign_prehash.mockResolvedValue(genericErrorResponse);
+
+			const { signBtcPrehash } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(signBtcPrehash({ hash })).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcSignPrehashError')
+			);
 		});
 	});
 
