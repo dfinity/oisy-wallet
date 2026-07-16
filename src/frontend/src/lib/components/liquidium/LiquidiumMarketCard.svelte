@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
@@ -16,14 +15,11 @@
 
 	let { market }: Props = $props();
 
-	// Hard-coded teaser row (e.g. ICP) advertises the asset with disabled rates.
-	let isTeaser = $derived(market.teaser === true);
-
-	let token = $derived(isTeaser ? ICP_TOKEN : LIQUIDIUM_ASSET_TOKENS[market.asset]);
+	let token = $derived(LIQUIDIUM_ASSET_TOKENS[market.asset]);
 
 	// Actions live in the hero / section headers, so markets rows are informational only:
-	// a teaser or an unavailable pool (frozen / cap) shows "Coming soon" instead of rates.
-	let comingSoon = $derived(isTeaser || !market.available);
+	// an unavailable pool (frozen / cap) shows "Coming soon" instead of rates.
+	let comingSoon = $derived(!market.available);
 </script>
 
 {#snippet rates()}
