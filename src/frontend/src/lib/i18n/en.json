@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Welcome to Borrow!",
+			"header_description": "Access liquidity without selling. Borrow stablecoins against your BTC, ICP, and more.",
+			"borrowing_options": "Borrowing options",
+			"borrowing_potential": "Borrowing potential",
+			"borrowing_power_hint": "An estimate of how much you could borrow if you supplied your assets as collateral, at the best available rate.",
+			"available_best_provider": "available · best provider",
+			"remaining_best_provider": "remaining · best provider",
+			"active_loans": "Active loans",
+			"no_active_loans": "no active loans",
+			"amount_borrowed": "$amount borrowed",
+			"apr": "APR",
+			"borrow_apr_from": "Borrow APR from"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "Liquidium",
+				"description": "Borrow USDC, USDT or BTC against your supplied collateral.",
+				"action": "Borrow"
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Borrowing",
+			"tab_title_short": "Borrow",
+			"no_borrowings": "You don't have any active loans yet",
+			"go_to_borrow": "Go to Borrow"
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Cancel",
@@ -7,6 +38,8 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"collapse": "Collapse",
+			"expand": "Expand",
 			"change": "Change",
 			"continue": "Continue",
 			"apply": "Apply",
@@ -73,12 +106,23 @@
 			"video_not_supported": "Your browser does not support video playback."
 		}
 	},
+	"progress": {
+		"completed": "Completed",
+		"in_progress": "In progress",
+		"failed": "Failed"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Assets",
+			"nfts": "Collectibles",
 			"settings": "Settings",
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
+			"trade": "Trade",
+			"borrow": "Borrow",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "More",
 			"airdrops": "Rewards",
 			"earning": "Earn",
 			"pay": "$oisy_short PAY",
@@ -96,13 +140,18 @@
 			"hide_balances": "Hide balances",
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
-			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances."
+			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
+			"notes": "Notes"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
+			"nfts": "Open the Collectibles view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
+			"trade": "Open the Trade view",
+			"borrow": "Open the Borrow view",
+			"earning": "Open the Earn view",
 			"airdrops": "Open the Rewards view",
 			"pay": "Open the $oisy_short PAY",
 			"wallet_connect": "Open the WalletConnect",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
-			"show_balances": "Show the hidden balances"
+			"show_balances": "Show the hidden balances",
+			"notes": "Open notes"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -224,14 +274,14 @@
 			"aa_new": "Recently added",
 			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Game",
+			"lending": "Lending",
 			"nft": "NFT",
 			"rwa": "RWA",
-			"social_media": "Social Media",
+			"social": "Social",
 			"staking": "Staking",
-			"tools": "Tools",
-			"walletconnect": "WalletConnect"
+			"tools": "Tools"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "OpenChat - privacy messenger",
 					"call_to_action": "Show more"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Unique Identity Verification for Trustworthy Digital Engagements.",
-				"call_to_action": "Open DecideID",
-				"stats": "50,000+ inference requests",
-				"description": "Decide ID is at the heart of the Decide AI system, ensuring trust and security through its unique Proof of Personhood (PoP) methodology. When you join, you'll go through a verification process where you provide multiple proofs and complete a special challenge to confirm your identity. This makes sure that every user is real, unique, and not a bot. Your Principal ID, a unique on-chain identifier, is created during this process. It can be used across various applications that require verified personhood, ensuring a secure and seamless integration into any app’s sign-up or login process. Plus, the use of Zero-Knowledge proofs means your private data, like biometric information, remains confidential and safe.<br/><br/>With Decide ID, enjoy a flexible, secure, and privacy-first way to verify and engage online.",
-				"carousel": {
-					"text": "Enjoy a privacy-first way to verify and engage online",
-					"call_to_action": "Interested?"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "Get warped",
 				"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
-				"call_to_action": "Open Sonic",
-				"description": "Sonic, a multichain decentralized exchange built on the Internet Computer Protocol (ICP), offers a wide range of DeFi services. Users can easily trade tokens and perpetuals, provide liquidity, and participate in the LBP token sale. Users can engage in DAO governance, stake for rewards, and vote on platform decisions.<br/><br/>Fully on-chain & open-source! Swap tokens like a pro, stack those fees as a liquidity provider, join the AMM vibe, and be an integral part of the Sonic DAO.",
-				"carousel": {
-					"text": "Unlock the full potential of Defi",
-					"call_to_action": "Open Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX and automated market maker built on the Solana blockchain, offering a central limit order book that enables fast trades.",
@@ -363,23 +392,12 @@
 			},
 			"caffeine": {
 				"name": "Caffeine",
-				"one_liner": "Create the future internet, one app at a time. Chat with AI on Caffeine to create apps and websites.",
+				"one_liner": "Caffeine is an AI-powered platform that lets you build fully functional web applications just by describing what you want. No coding experience needed, simply chat with Caffeine and watch your ideas come to life.",
 				"description": "Chat with AI on Caffeine to create apps and websites. Our AI builds on a new open tech stack designed to power apps that are self-writing, which grants them incredible security and resilience, and provides a guarantee that a mistake during a software update cannot cause data loss. AI writes your backend software using Motoko, the first programming language for AI, and runs your apps on the revolutionary Internet Computer network (ICP).",
 				"carousel": {
-					"text": "Chat to create!",
+					"text": "AIware apps on-demand",
 					"call_to_action": "Learn more"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
-				"call_to_action": "Get involved",
-				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
-				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -431,14 +449,9 @@
 				"one_liner": "A Solana-native liquid staking protocol with instant swaps between LSTs and tools for launching your own.",
 				"description": "Sanctum is a liquid staking infrastructure protocol on Solana enabling instant, slippage-free swaps between liquid staking tokens (LSTs). It supports ecosystem growth by allowing new LSTs to tap into shared liquidity, and offers tools for issuing branded tokens with automated minting and redemption. The platform’s Infinity pool, Router, and Reserve systems help deliver deep liquidity, composability, and safety across the staking landscape."
 			},
-			"sphere_finance": {
-				"name": "Sphere Finance",
-				"one_liner": "A meta‑governance DeFi protocol focused on governance acquisition, treasury yield farming, and building linked yield‑generating tools around the $SPHERE token.",
-				"description": "Sphere Finance is a DeFi meta-governance protocol that acquires governance tokens and builds tools to maximize protocol revenue around its native token, $SPHERE. It automates capital allocation across partner protocols and uses its treasury to generate yield. Governance is earned through veTETU-style staking, aligning incentives with long-term protocol health."
-			},
 			"binaryx": {
 				"name": "BinaryX",
-				"one_liner": "Here’s a compact, image‑length–style description for Binaryx, designed to fit the same format and brevity as your image example",
+				"one_liner": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties.",
 				"description": "BinaryX is a tokenized real estate investment platform offering fractional ownership and passive income from global properties. Investors can buy into legally structured DAO-LLCs representing rental or off-plan real estate starting from just $50. Yield is distributed from rental income or asset appreciation, and properties can be traded on a secondary marketplace."
 			},
 			"parcl": {
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "Liquidium",
 				"one_liner": "Borrow & lend native Bitcoin against USDT.",
-				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes.",
-				"carousel": {
-					"text": "Borrow & lend native Bitcoin against USDT",
-					"call_to_action": "Learn more"
-				}
+				"description": "Liquidium is a decentralized cross-chain lending protocol. Today it supports Bitcoin collateral and USDT on Ethereum, with Ethereum and Solana support coming soon. Unlike traditional DeFi protocols, Liquidium lets you use collateral on one chain to borrow on another—without centralized bridges or wrapping. Chain Fusion handles cross-chain operations securely behind the scenes."
 			},
 			"icpindex": {
 				"name": "ICP Index",
@@ -461,7 +470,7 @@
 				"description": "ICP Index is a fully on-chain analytics and trading dashboard built entirely on the Internet Computer. It's a comprehensive dashboard which helps you track everything related to the Internet Computer. Tokens, on-chain statistics, and much more to come!",
 				"carousel": {
 					"text": "Extensive token index and analytics on ICP",
-					"call_to_action": "Learn mode"
+					"call_to_action": "Learn more"
 				}
 			},
 			"icexplorer": {
@@ -484,6 +493,20 @@
 				"name": "icp-flags",
 				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
 				"description": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions. Control over each position is determined exclusively by deterministic smart contract logic. There is no administrator discretion, no off-chain settlement layer, and no manual intervention.<br/>Each flag represents a single, indivisible on-chain position controlled by exactly one principal at a time. Control is transferred only through a valid higher bid that satisfies the contract’s escalation formula."
+			},
+			"cloud_engines": {
+				"name": "Cloud Engines",
+				"one_liner": "Provision your own sovereign cloud. Deploy applications without managing servers, choose your infrastructure, and enable teams and AI agents to build securely.",
+				"description": "Provision Cloud Engines: a frontier cloud platform on the Internet Computer built for AI agents and humans. Tamperproof execution, safe upgrades, and horizontal auto-scaling provide the foundation for agents to create, operate, and evolve enterprise-grade applications on sovereign infrastructure.",
+				"carousel": {
+					"text": "Create frontier clouds and let your agents build",
+					"call_to_action": "Learn more"
+				}
+			},
+			"hyperliquid": {
+				"name": "Hyperliquid",
+				"one_liner": "Hyperliquid is the top perps DEX, giving traders centralized-exchange speed and tools while keeping self-custody of funds.",
+				"description": "Hyperliquid is the leading decentralized perpetual-futures exchange, offering traders centralized-exchange-level speed and a fully on-chain order book with up to 50x leverage. It supports the advanced tooling active traders expect — limit orders, stop-loss and take-profit, plus cross-margin and isolated-margin modes for flexible risk management — all collateralized in USDC. Crucially, traders execute directly from their own wallets without KYC and never give up custody of their funds, combining CEX performance with the self-custody and transparency of DeFi."
 			}
 		}
 	},
@@ -767,6 +790,7 @@
 		"text": {
 			"title": "Settings",
 			"general": "General",
+			"preferences": "Preferences",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
@@ -1044,6 +1068,20 @@
 			"burn_review_subtitle": "You burn"
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "Active transactions",
+			"open_aria_label": "Open active transactions",
+			"empty": "You have no active transactions.",
+			"section_in_progress": "In progress",
+			"section_failed": "Failed",
+			"section_previous": "Previous",
+			"dismiss_aria_label": "Dismiss this transaction"
+		},
+		"error": {
+			"dismiss_failed": "Could not dismiss the transaction."
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Scan QR Code",
@@ -1160,6 +1198,8 @@
 			"executing_transaction": "Executing transaction...",
 			"initializing": "Initializing transaction...",
 			"swapping": "Swapping...",
+			"starting_to_swap": "Submitting your swap...",
+			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1176,7 +1216,6 @@
 			"select_token": "Select token",
 			"select_network_filter": "Select network",
 			"withdrawing": "Withdrawing...",
-			"bridging": "Bridging... (Please be patient, this can take up to 2 minutes.)",
 			"network_cost": "Network cost",
 			"gasless": "Gasless",
 			"swap_fees": "Swap Fees",
@@ -1206,7 +1245,8 @@
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
-			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again."
+			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
+			"swap_refunded": "The swap transaction was refunded."
 		}
 	},
 	"buy": {
@@ -1214,7 +1254,8 @@
 			"buy": "Buy",
 			"buy_dev": "Buy (Dev Environment)",
 			"unavailable_title": "Buying tokens is temporarily unavailable",
-			"unavailable_description": "Buying tokens is currently turned off while we further improve the security of this process by introducing URL signing. It will be turned back on as soon as the work is complete.",
+			"unavailable_description_disabled": "We are currently doing maintenance work on our Onramper integration, and will turn it back on very soon.",
+			"unavailable_description_signing_failed": "There seems to be a technical issue with our Onramper integration. We are currently investigating it, and will turn it back on very soon.",
 			"unavailable_fallback_hint": "In the meantime, you can still receive tokens by sharing your wallet address."
 		},
 		"actions": {
@@ -1250,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
+			"title_short": "Tokens",
 			"contract_address": "Contract address",
 			"token_address": "Token address",
 			"balance": "Balance",
@@ -1430,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "$count NFT",
+			"count_other": "$count NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
 			"title_not_supported": "NFTs are not yet supported on the selected network",
@@ -1560,10 +1604,28 @@
 			"network": "Network",
 			"amount": "Amount",
 			"hex_data": "HEX Data",
+			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
+			"sign_psbt": "Sign Transaction",
+			"signing_address": "Signing address",
+			"fee": "Fee",
+			"btc_symbol": "BTC",
+			"psbt_inputs": "Inputs",
+			"psbt_outputs": "Outputs",
+			"psbt_total_signed_inputs": "Total signed input value",
+			"psbt_unknown_address": "Unknown address",
+			"psbt_unknown_value": "Unknown",
+			"psbt_fee_unknown": "Unknown",
+			"psbt_signed_by_wallet": "your address",
+			"psbt_broadcast": "Broadcast",
+			"psbt_broadcast_enabled": "Yes",
+			"psbt_broadcast_disabled": "No",
+			"psbt_broadcast_unsupported_note": "This request asks the wallet to broadcast the transaction, which is not supported. For your security, it cannot be approved. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
 			"connected_apps": "Connected Apps",
 			"no_connected_apps": "No apps are currently connected.",
+			"disconnect_all": "Disconnect all",
+			"disconnect_app": "Disconnect $name",
 			"wallet_connect": "WalletConnect"
 		},
 		"alt": {
@@ -1602,11 +1664,245 @@
 			"request_rejected": "WalletConnect request rejected",
 			"unknown_parameter": "Unknown parameter.",
 			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
+			"btc_broadcast_not_supported": "Broadcasting the signed transaction is not supported yet. Request the transaction with \"broadcast: false\" to receive the signed PSBT and broadcast it yourself.",
+			"btc_non_mainnet_sign_not_supported": "Signing Bitcoin transactions is only supported on mainnet. For your security, this request was not signed.",
+			"btc_psbt_decode": "This transaction could not be decoded for review. For your security, it was not signed.",
+			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
+			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
-			"ambiguous_transaction": "This transaction moves funds between several addresses and can't be shown accurately for review. For your security, it was not signed.",
+			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Trading",
+			"tab_title_short": "Trade",
+			"intro": "Place and manage limit orders on-chain, directly from your wallet.",
+			"learn_more": "Learn more",
+			"provider_name": "OISY Trade",
+			"go_to_trade": "Go to Trade"
+		},
+		"page": {
+			"tagline": "Place limit orders right from your wallet. Your funds stay in smart contracts you control, never with a central party.",
+			"trading_potential": "Trading potential",
+			"trading_potential_hint": "In your wallet, not on the exchange",
+			"deposited_assets": "Deposited assets",
+			"deposited_all_free": "All free",
+			"deposited_empty": "Nothing deposited yet",
+			"free": "$amount free",
+			"in_orders": "$amount in orders",
+			"in_orders_label": "in orders",
+			"positions": "My positions",
+			"deposit": "Deposit",
+			"withdraw": "Withdraw",
+			"active_orders": "Active orders",
+			"active_orders_empty_deposit": "Deposit tokens from your wallet to start placing limit orders on OISY Trade.",
+			"active_orders_empty_place": "Your open and pending limit orders will appear here once you place one.",
+			"new_order": "New order",
+			"order_history": "Order history"
+		},
+		"provider_unavailable": {
+			"title": "Trading is temporarily unavailable",
+			"description": "No trading provider is available right now. Your balances are safe and will be actionable again once a provider is back online."
+		},
+		"onboarding": {
+			"title": "Trade on-chain with OISY Trade",
+			"description": "OISY Trade is an on-chain order-book exchange. Place limit orders right from your wallet, with your funds held in smart contracts you control, never with a central party.",
+			"step_deposit": "Deposit a supported token",
+			"step_order": "Place a limit order",
+			"step_withdraw": "Withdraw anytime",
+			"supported_tokens": "Supported tokens",
+			"deposit": "Deposit"
+		},
+		"assets": {
+			"title": "My positions",
+			"empty": "No assets deposited yet"
+		},
+		"deposit": {
+			"title": "Deposit",
+			"review_title": "Review deposit",
+			"progress_title": "Depositing",
+			"you_deposit": "You deposit",
+			"error_insufficient_balance": "Amount exceeds your wallet balance",
+			"to": "To",
+			"network": "Network",
+			"transaction_fee": "Total estimated fee",
+			"approval_fee": "Approval fee",
+			"transfer_fee": "Network fee",
+			"info_title": "OISY Trade: onchain order book",
+			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by onchain smart contracts.",
+			"empty_title": "Nothing to deposit yet",
+			"empty_description": "OISY Trade lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
+			"approving": "Approving",
+			"approved": "Approved",
+			"approve_description": "OISY Trade authorised to transfer $symbol",
+			"depositing": "Depositing",
+			"deposit_description": "Transferring $symbol to OISY Trade",
+			"done": "Done",
+			"error": {
+				"unknown_fee": "The ledger fee for this token couldn't be determined. Your funds stayed in your wallet. Try again in a moment.",
+				"deposit_failed": "The deposit didn't complete. Your funds stayed in your wallet. Try again or check the network status."
+			}
+		},
+		"withdraw": {
+			"title": "Withdraw",
+			"review_title": "Review withdrawal",
+			"progress_title": "Withdrawing",
+			"amount_label": "You withdraw",
+			"from": "From",
+			"network": "Network",
+			"transaction_fee": "Transaction fee",
+			"transfer_fee": "Transfer fee",
+			"you_receive": "You receive",
+			"reserved_note": "$amount reserved · locked by open orders",
+			"error_insufficient_balance": "Amount exceeds your free balance",
+			"submit": "Withdraw",
+			"open": "Withdraw",
+			"progress_withdraw": "Sending $symbol to your wallet",
+			"progress_done": "Done",
+			"error": "Your withdrawal didn't complete. Your funds stayed on OISY Trade. Try again in a moment."
+		},
+		"orders": {
+			"title": "Orders",
+			"add_limit_order": "+ Limit order",
+			"tab_active": "Active",
+			"tab_history": "History",
+			"empty_active": "No active orders",
+			"empty_history": "No past orders",
+			"side_sell": "Sell",
+			"side_buy": "Buy",
+			"row_sell": "$quantity $base for $quote at $price",
+			"row_buy": "$base with $quote_amount $quote at $price",
+			"row_phrase_sell": "for $quote @ $price",
+			"row_phrase_buy": "with $quote @ $price",
+			"queue_ahead": "$percentage% ahead in queue",
+			"status_open": "Open",
+			"status_pending": "Pending",
+			"status_partial": "Partial",
+			"status_filled": "Filled",
+			"status_canceled": "Canceled",
+			"status_expired": "Expired",
+			"count_filled": "$count filled",
+			"count_expired": "$count expired",
+			"count_canceled": "$count canceled"
+		},
+		"info": {
+			"title": "What is OISY Trade",
+			"description": "OISY Trade is a fully onchain order-book exchange, integrated right into your wallet. Set a price to buy or sell at, and your order settles onchain the moment the market meets it, even while you're signed out.",
+			"fact_1_title": "Buy or sell at your price",
+			"fact_1_description": "Set the exact price you want to buy or sell a token at. Your limit order rests on the book until the market reaches it.",
+			"fact_2_title": "Fills even while away",
+			"fact_2_description": "Your order lives onchain once placed. The exchange fills it as soon as a matching order appears, whether or not you're signed in.",
+			"fact_3_title": "Fully onchain",
+			"fact_3_description": "Orders are matched and settled inside a canister on the Internet Computer, governed by the NNS, with no centralized exchange in the middle."
+		},
+		"order_detail": {
+			"title": "Order details",
+			"status": "Status",
+			"filled": "Filled",
+			"cancel_order": "Cancel order",
+			"cancel_error": "The order couldn't be canceled — it stays active. Try again in a moment.",
+			"confirm_title": "Cancel this limit order?",
+			"confirm_description": "The reserved funds return to your free balance. This can't be undone. You can place a new order anytime.",
+			"confirm_order": "Order",
+			"confirm_price": "Price",
+			"confirm_returns_to_free": "Returns to free",
+			"confirm_keep": "Keep order",
+			"confirm_order_sell": "Sell $base for $quote",
+			"confirm_order_buy": "Buy $base with $quote"
+		},
+		"limit_order": {
+			"title": "Limit order",
+			"review_title": "Review limit order",
+			"placing_title": "Placing order",
+			"sell": "Sell",
+			"buy": "Buy",
+			"select_sell_token": "Select token to sell",
+			"select_buy_token": "Select token to buy",
+			"you_sell": "You sell",
+			"you_buy": "You buy",
+			"hero_prefix": "You",
+			"you_get_at_least": "You get at least",
+			"you_pay_at_most": "You pay at most",
+			"connector_for": "for",
+			"connector_with": "with",
+			"network": "On Internet Computer",
+			"amount_placeholder": "Amount",
+			"price_placeholder": "Price",
+			"max": "Max",
+			"max_with_amount": "Max: $amount $symbol",
+			"set_price_first": "Set a price first",
+			"balance": "$amount $symbol",
+			"pick_token_to_begin": "Pick a token to begin",
+			"pick_token_to_price": "Pick a token to price $base against",
+			"pick_token_to_trade_against": "Pick the token to trade against $quote",
+			"price_label_sell_resting": "When 1 $base reaches",
+			"price_label_buy_resting": "When 1 $base drops to",
+			"price_label_sell_crossing": "Sell now, while 1 $base ≥",
+			"price_label_buy_crossing": "Buy now, while 1 $base ≤",
+			"price_label_fok_sell": "Fill in full now, at 1 $base ≥",
+			"price_label_fok_buy": "Fill in full now, at 1 $base ≤",
+			"price_label_default": "Limit price",
+			"preset_bid": "Best bid",
+			"preset_ask": "Best ask",
+			"preset_market": "Current value",
+			"preset_sell_1": "+1%",
+			"preset_sell_5": "+5%",
+			"preset_buy_1": "−1%",
+			"preset_buy_5": "−5%",
+			"value_difference": "$value%",
+			"value_difference_label": "Value difference",
+			"queue_position": "Queue position: $position",
+			"queue_position_row": "Queue position",
+			"front_of_book": "Front of book",
+			"are_ahead": "$percentage% are ahead",
+			"warning_crossing_sell": "This price crosses the order book: your order will fill almost immediately, below current value.",
+			"warning_crossing_buy": "This price crosses the order book: your order will fill almost immediately, above current value.",
+			"warning_fok_sell": "Fill-or-kill: fills in full now, below current value.",
+			"warning_fok_buy": "Fill-or-kill: fills in full now, above current value.",
+			"warning_fok_blocked_sell": "A fill-or-kill order can't execute at this price right now; it would be canceled. Lower the price to cross the book (best bid $price).",
+			"warning_fok_blocked_buy": "A fill-or-kill order can't execute at this price right now; it would be canceled. Raise the price to cross the book (best ask $price).",
+			"error_balance_sell": "Exceeds your free balance: $amount $symbol available",
+			"error_balance_buy": "Costs $cost $symbol, only $available free",
+			"error_lot_multiple": "Amount must be a multiple of $step $symbol",
+			"error_tick_multiple": "Price must be a multiple of $step",
+			"error_min_notional": "Order value must be at least $amount $symbol",
+			"error_max_notional": "Order value can't exceed $amount $symbol",
+			"fok_title": "Fill or kill",
+			"fok_help": "Fill the whole order now at your price or better, or cancel it — nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
+			"routing_name": "Routed via $provider",
+			"routing_tag": "best execution",
+			"best_ask": "Best ask",
+			"best_bid": "Best bid",
+			"spread": "Spread",
+			"spread_value": "$value%",
+			"maker_fee": "Maker fee",
+			"taker_fee": "Taker fee",
+			"no_fee": "No fee",
+			"fee_percent": "$value%",
+			"review_button": "Review",
+			"place_order_button": "Place order",
+			"limit_price": "Limit price",
+			"limit_price_value": "$price $quote / $base",
+			"current_value": "Current value",
+			"current_value_feed": "$price $quote / $base",
+			"dex": "DEX",
+			"order_type": "Order type",
+			"order_type_gtc": "Good until canceled",
+			"order_type_fok": "Fill or kill",
+			"fee_maker_taker": "Fee (maker / taker)",
+			"fee_taker": "Fee (taker)",
+			"fee_maker_taker_value": "$maker / $taker",
+			"give_up_confirm": "I understand this order will fill immediately at a price worse than market.",
+			"market_moved_sell": "Market moved: best bid is now $price. At this price your fill-or-kill order would be canceled. Go back and lower your price.",
+			"market_moved_buy": "Market moved: best ask is now $price. At this price your fill-or-kill order would be canceled. Go back and raise your price.",
+			"placing_initializing": "Submitting order",
+			"placing_sub": "Sending limit order to OISY Trade",
+			"placing_done": "Order placed",
+			"place_error": "Could not place the order. Please try again."
 		}
 	},
 	"transaction": {
@@ -2030,6 +2326,7 @@
 		"text": {
 			"title": "Earn",
 			"tab_title": "Earning",
+			"tab_title_short": "Earn",
 			"earning_opportunities": "Earning opportunities",
 			"header_title": "Welcome to Earn!",
 			"header_description": "Grow your digital assets portfolio by allocating your tokens to earning opportunities.",
@@ -2041,10 +2338,10 @@
 				"description": "Maximized yield efficiency with 1-click autopilot vaults.",
 				"action": "Go to Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Use OISY and EARN! Ep. 6 is live 🎉",
-				"action": "Check status"
+			"liquidium": {
+				"title": "Liquidium",
+				"description": "Lend your assets to earn yield, or borrow against them.",
+				"action": "Lend & Borrow"
 			}
 		},
 		"card_fields": {
@@ -2054,6 +2351,8 @@
 			"currentStaked": "Staked",
 			"currentEarning": "Currently earning",
 			"earningPotential": "Earning potential",
+			"currentBorrowing": "Currently borrowing",
+			"interestPerYear": "Interest / year",
 			"terms": "Terms"
 		},
 		"terms": {
@@ -2063,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": "Earn with Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
+			"health_factor": "Health factor",
+			"health_no_debt": "No debt",
+			"health_healthy": "Healthy",
+			"health_at_risk": "At risk",
+			"health_critical": "Critical",
+			"net_value": "Net value",
+			"markets": "Markets",
+			"total_supplied": "Total supplied",
+			"no_assets_supplied": "no assets supplied",
+			"supplied": "Supplied",
+			"borrowed": "Borrowed",
+			"borrow_rate": "Borrow rate",
+			"apy_suffix": "APY",
+			"supply_label": "Supply",
+			"borrow_label": "Borrow",
+			"coming_soon": "Coming soon",
+			"coming_soon_teaser": "Coming soon...",
+			"action_supply": "Supply",
+			"action_borrow": "Borrow",
+			"action_repay": "Repay",
+			"action_withdraw": "Withdraw",
+			"transaction_failed": "Transaction failed",
+			"select_supply_token": "Select token to supply",
+			"select_borrow_token": "Select token to borrow",
+			"select_withdraw_token": "Select token to withdraw",
+			"select_repay_token": "Select token to repay",
+			"supply_review": "Review supply",
+			"supply_review_subtitle": "You supply",
+			"supplying": "Supplying",
+			"starting_to_supply": "Submitting your position...",
+			"supply_started": "The position is now being activated.",
+			"supply_apy": "Supply APY",
+			"supply_collateral_info": "Supplied assets also serve as collateral you can borrow against.",
+			"supply_agreement": "I understand my assets will be supplied to the Liquidium protocol and are subject to on-chain smart-contract risk.",
+			"provider_fee": "Network fee",
+			"transaction_fee": "Transaction fee",
+			"insufficient_funds_for_fee": "Insufficient balance to cover the amount and the fees.",
+			"supply_prices_unavailable": "Prices are temporarily unavailable. Supplying is disabled until they load.",
+			"borrow_review": "Review borrow",
+			"borrow_review_subtitle": "You borrow",
+			"borrowing": "Borrowing",
+			"borrow_apy": "Borrow APY",
+			"resulting_ltv": "Resulting LTV",
+			"projected_health_factor": "Projected health factor",
+			"borrowing_power": "Borrowing power",
+			"collateral": "Collateral",
+			"minimum_borrow": "Minimum borrow",
+			"provider": "Provider",
+			"funds_delivered_to": "Funds delivered to",
+			"your_oisy_address": "Your $oisy_short address",
+			"borrow_risk_info": "Borrowing reduces your health factor. If it falls too far your collateral can be liquidated.",
+			"borrow_at_risk_warning": "This borrow noticeably lowers your health factor.",
+			"borrow_exceeds_power": "Amount exceeds your borrowing power.",
+			"borrow_below_minimum": "Amount is below the minimum borrow.",
+			"borrow_prices_unavailable": "Prices are temporarily unavailable. Borrowing is disabled until they load.",
+			"borrow_high_risk_warning": "This borrow puts your position close to liquidation.",
+			"borrow_risk_confirm": "I understand this borrow increases my liquidation risk.",
+			"starting_to_borrow": "Submitting your loan...",
+			"borrow_started": "The loan is now being activated.",
+			"withdraw_review": "Review withdraw",
+			"withdraw_review_subtitle": "You withdraw",
+			"withdrawing": "Withdrawing",
+			"starting_to_withdraw": "Submitting your withdrawal...",
+			"withdraw_started": "The withdrawal is now being processed.",
+			"supplied_label": "Supplied",
+			"withdrawable": "Withdrawable",
+			"reserved_by_debt": "Reserved by open debt",
+			"withdraw_exceeds_free_collateral": "Cannot withdraw more than your free collateral while debt is open.",
+			"withdraw_exceeds_supplied": "Amount exceeds your supplied balance.",
+			"withdraw_prices_unavailable": "Prices are temporarily unavailable. Withdrawing is disabled until they load.",
+			"withdraw_risk_info": "Withdrawing collateral lowers your health factor. If it falls too far your remaining collateral can be liquidated.",
+			"withdraw_at_risk_warning": "This withdrawal noticeably lowers your health factor.",
+			"withdraw_high_risk_warning": "This withdrawal puts your position close to liquidation.",
+			"withdraw_risk_confirm": "I understand this withdrawal increases my liquidation risk.",
+			"repay_review": "Review repay",
+			"repay_review_subtitle": "You repay",
+			"repaying": "Repaying",
+			"starting_to_repay": "Submitting your repayment...",
+			"repay_started": "The repayment is now being processed.",
+			"current_debt": "Current debt",
+			"interest_accrued": "Interest accrued",
+			"debt_after_repay": "Debt after repay",
+			"repay_exceeds_debt": "Amount exceeds your outstanding debt.",
+			"repay_prices_unavailable": "Prices are temporarily unavailable. Repaying is disabled until they load."
+		},
+		"info": {
+			"title": "What is Liquidium",
+			"description": "Liquidium is a decentralized, non-custodial lending protocol where you can supply or borrow across multiple blockchain networks. Built on the Internet Computer, it enables cross-chain lending without centralized bridges or wrapped tokens.",
+			"fact_1_title": "Earn on Your BTC",
+			"fact_1_description": "Lend your Bitcoin to earn yield from over-collateralized loans.",
+			"fact_2_title": "Non-Custodial",
+			"fact_2_description": "Deposits are secured by on-chain smart contracts, with no centralized control.",
+			"fact_3_title": "Native, Cross-Chain",
+			"fact_3_description": "Assets stay on their native chains, so you can supply on one and borrow on another."
 		}
 	},
 	"vaults": {
@@ -2145,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "It looks like you haven't staked any tokens yet",
 			"full_history": "Show full history",
-			"recent_history": "Close full history",
-			"harvest_autopilot_carousel_slide_title": "Earn in OISY with Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Learn more"
+			"recent_history": "Close full history"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Something went wrong while withdrawing tokens.",
@@ -2237,6 +2633,83 @@
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
 			"no_response": "Sorry, I didn't get a response from the LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Notes",
+			"note": "Note",
+			"add_title": "Add new note",
+			"edit_note": "Edit note",
+			"delete_note": "Delete note",
+			"delete_confirm_text": "This will delete the note '$note'. This action cannot be undone.",
+			"back": "Back",
+			"empty_title": "Your notes are empty",
+			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
+			"empty_add": "Add new note",
+			"add_note": "Add note",
+			"note_label": "Note",
+			"placeholder": "Write a note…",
+			"search_placeholder": "Search note",
+			"no_results": "No notes match your search.",
+			"encrypted_lead": "End-to-end encrypted.",
+			"encrypted_info": "Only you can read your notes.",
+			"created": "Created $date",
+			"updated": "Updated $date",
+			"created_updated": "Created $created · Updated $updated",
+			"too_long": "Note must be $maxCharacters characters or fewer.",
+			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
+			"decryption_failed": "Couldn't decrypt this note"
+		},
+		"alt": {
+			"edit": "Edit note",
+			"delete": "Delete note"
+		},
+		"error": {
+			"load": "Couldn't load your notes. Please try again.",
+			"save": "Couldn't save your note. Please try again.",
+			"delete": "Couldn't delete your note. Please try again."
+		},
+		"share": {
+			"text": {
+				"share_note": "Share note",
+				"snapshot_caption": "Shares a copy of the note as it is now. Editing or deleting the note later won't change this link.",
+				"cap_reached": "You've reached the maximum of $max active share links. They free up as they expire or are used.",
+				"expires_after": "Link expires after",
+				"expiry_1h": "1 hour",
+				"expiry_24h": "24 hours",
+				"expiry_7d": "7 days",
+				"expiry_30d": "30 days",
+				"single_use": "Single use",
+				"single_use_option": "Link can only be used once",
+				"protects_body": "Only the recipient of this link can read your note.",
+				"create_link": "Create link",
+				"link_ready_title": "Share link ready",
+				"link_ready_subtitle": "Anyone with this link can read the note",
+				"link_copied": "Link copied!",
+				"recap_expires_in": "Expires in $duration",
+				"recap_single_use": "single-use",
+				"reminder": "$oisy_short can't recover or revoke this link once shared. It stops working after it's used or expires.",
+				"done": "Done"
+			},
+			"error": {
+				"create": "Couldn't create the share link. Please try again."
+			},
+			"recipient": {
+				"locked_title": "A note was shared with you",
+				"reveal": "Reveal note",
+				"revealed_title": "Shared note",
+				"single_use_caveat": "Single-use link — once you close or reload this page, the note is gone for good. Copy it now if you need it.",
+				"copy_note": "Copy note",
+				"note_copied": "Note copied!",
+				"outro_title": "$oisy_short kept this note private, and keeps your assets just as safe",
+				"outro_subtitle": "$oisy_short is a fully onchain, self-custody wallet for Bitcoin, Ethereum, Solana, ICP and more.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana & ICP in one place",
+				"outro_feature_onchain": "100% onchain, no extension, no seed phrase",
+				"outro_feature_encrypted": "Your keys and your data, encrypted end-to-end",
+				"discover": "Discover OISY",
+				"unavailable_title": "This link has expired or already been used"
+			}
 		}
 	}
 }

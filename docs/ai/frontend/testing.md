@@ -34,6 +34,11 @@ src/frontend/src/btc/services/btc-send.services.ts
 
 - Reusable mocks → `src/frontend/src/tests/mocks/<thing>.mock.ts`.
 - Reusable test utilities → `src/frontend/src/tests/utils/<thing>.test-utils.ts`.
+- Reusable Svelte-context factories →
+  `src/frontend/src/tests/utils/<area>.context.test-utils.ts`. Each exports a
+  `mock<Area>ContextEntry(...)` returning a `[key, value]` tuple; assemble them
+  with `mockContextMap([...])` from `$tests/utils/context.test-utils` instead of
+  hand-rolling a `new Map()` per spec.
 - Reusable fixtures → `src/frontend/src/tests/fixtures/<area>/`.
 - Test-only types → `src/frontend/src/tests/types/`.
 
@@ -188,9 +193,7 @@ import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 describe('MaxBalanceButton', () => {
 	it('renders the max action label', () => {
 		render(MaxBalanceButton, {
-			props: {
-				/* … */
-			}
+			props: {/* … */}
 		});
 		expect(screen.getByRole('button', { name: get(i18n).core.text.max })).toBeInTheDocument();
 	});

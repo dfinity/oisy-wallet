@@ -1,3 +1,8 @@
+import type {
+	ActiveUserTransaction,
+	ActiveUserTransactionData,
+	ActiveUserTransactionStatus
+} from '$declarations/backend/backend.did';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { send } from '$eth/services/send.services';
 import type { IcToken } from '$icp/types/ic-token';
@@ -6,6 +11,12 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import {
+	applyActiveUserTransactionPollUpdate,
+	createActiveUserTransaction,
+	updateActiveUserTransaction
+} from '$lib/services/active-user-transactions.services';
+import { ONESEC_EXTERNAL_REF_KEYS, type OneSecExternalRefKey } from '$lib/types/onesec-swap';
+import {
 	SwapProvider,
 	type EvmQuoteParams,
 	type IcpBridgeQuoteParams,
@@ -13,18 +24,152 @@ import {
 	type OneSecIcpToEvmParams,
 	type SwapMappedResult
 } from '$lib/types/swap';
+import type { Token } from '$lib/types/token';
+import {
+	advanceStatus,
+	isTerminalActiveUserTransactionStatus
+} from '$lib/utils/active-user-transactions.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-import { computeReceiveAmount, ICP_LEDGER_TO_TOKEN } from '$lib/utils/onesec-swap.utils';
+import {
+	computeReceiveAmount,
+	findMatchingOneSecTransfer,
+	ICP_LEDGER_TO_TOKEN,
+	oneSecStatusError,
+	toActiveUserTransactionStatus,
+	toOneSecDisplayRefs,
+	toOneSecEvmToIcpData,
+	toOneSecExternalRefs,
+	toOneSecIcpToEvmData
+} from '$lib/utils/onesec-swap.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import {
 	EvmToIcpBridgeBuilder,
+	getTransfers,
 	IcpToEvmBridgeBuilder,
+	oneSecForwarding,
 	type BridgingPlan,
-	type EvmChain
+	type EvmChain,
+	type Step,
+	type Transfer,
+	type TransferId
 } from 'onesec-bridge';
 import { get } from 'svelte/store';
+
+const stepFailureMessage = ({
+	result,
+	fallback
+}: {
+	result: { verbose?: string; error?: { message?: string } } | undefined;
+	fallback: string;
+}): string => result?.verbose ?? result?.error?.message ?? fallback;
+
+// SDK typing gap: `StepStatus.transferId` is never populated; the id lives on
+// the concrete step subclass instance.
+const getStepTransferId = (step: Step): TransferId | undefined => {
+	if (
+		'getTransferId' in step &&
+		typeof (step as { getTransferId: unknown }).getTransferId === 'function'
+	) {
+		return (step as Step & { getTransferId: () => TransferId | undefined }).getTransferId();
+	}
+
+	return undefined;
+};
+
+// Snapshot of the most-recently-completed forwarding id taken before the new
+// deposit. Persisted as a baseline so the poller can reject stale `done` ids.
+const getStepLastTransferId = (step: Step): TransferId | undefined => {
+	if (
+		'getLastTransferId' in step &&
+		typeof (step as { getLastTransferId: unknown }).getLastTransferId === 'function'
+	) {
+		return (step as Step & { getLastTransferId: () => TransferId | undefined }).getLastTransferId();
+	}
+	return undefined;
+};
+
+// Runs detached. Writes the terminal status at the end and persists
+// `TRANSFER_ID` for EVM→ICP rows the first time a step exposes it.
+const finishOneSecBridgingInSession = async ({
+	identity,
+	id,
+	plan,
+	initialRefs
+}: {
+	identity: Identity;
+	id: string;
+	plan: BridgingPlan;
+	initialRefs: Partial<Record<OneSecExternalRefKey, string>>;
+}): Promise<void> => {
+	const writeTerminal = async (params: {
+		status: ActiveUserTransactionStatus;
+		error?: string;
+	}): Promise<void> => {
+		try {
+			await updateActiveUserTransaction({ identity, id, ...params });
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+	};
+
+	let refs: Partial<Record<OneSecExternalRefKey, string>> = { ...initialRefs };
+	let transferIdPersisted = nonNullish(refs[ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID]);
+
+	try {
+		let step;
+
+		while (nonNullish((step = plan.nextStepToRun()))) {
+			const result = await step.run();
+
+			if (!transferIdPersisted) {
+				const stepTransferId = getStepTransferId(step);
+				if (nonNullish(stepTransferId)) {
+					refs = {
+						...refs,
+						[ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID]: stepTransferId.id.toString()
+					};
+					try {
+						await updateActiveUserTransaction({
+							identity,
+							id,
+							externalRefs: toOneSecExternalRefs(refs)
+						});
+					} catch (err: unknown) {
+						consoleError(err);
+					}
+					transferIdPersisted = true;
+				}
+			}
+
+			if (result.state === 'failed' || result.state === 'refunded') {
+				break;
+			}
+		}
+
+		// Refunded plans must land as Failed, not Succeeded.
+		const latest = plan.latestStep()?.status();
+		if (latest?.state === 'failed' || latest?.state === 'refunded') {
+			await writeTerminal({
+				status: { Failed: null },
+				error: stepFailureMessage({
+					result: latest,
+					fallback: 'OneSec bridge did not deliver the destination tokens'
+				})
+			});
+			return;
+		}
+
+		await writeTerminal({ status: { Succeeded: null } });
+	} catch (_: unknown) {
+		await writeTerminal({
+			status: { Failed: null },
+			error: 'OneSec bridge step failed unexpectedly'
+		});
+	}
+};
 
 const resolveQuoteFromPlan = async ({
 	plan,
@@ -60,10 +205,6 @@ const resolveQuoteFromPlan = async ({
 	};
 };
 
-/**
- * Fetches a OneSec bridge quote for the EVM → ICP direction.
- * Called from evmSwapProviders when the source is EVM and destination is an ICP token.
- */
 export const fetchOneSecEvmToIcpQuote = async ({
 	sourceToken,
 	destinationToken,
@@ -91,10 +232,6 @@ export const fetchOneSecEvmToIcpQuote = async ({
 	}
 };
 
-/**
- * Fetches a OneSec bridge quote for the ICP → EVM direction.
- * Called from icpBridgeProviders when source is an ICP token and destination is EVM.
- */
 export const fetchOneSecIcpToEvmQuote = async ({
 	sourceToken,
 	destinationToken,
@@ -133,13 +270,56 @@ export const fetchOneSecIcpToEvmQuote = async ({
 	}
 };
 
-/**
- * Executes an ICP → EVM bridge via OneSec.
- *
- * Rebuilds the bridging plan (re-validating fees) and runs all steps in sequence,
- * reporting progress through the provided callback. Throws on failure; callers are
- * responsible for enabling the destination token and triggering a wallet refresh.
- */
+// Creates the AUT row and detaches the closer that writes the terminal status.
+const createAutAndDetachCloser = async ({
+	identity,
+	swapId,
+	data,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	extraRefs,
+	plan
+}: {
+	identity: Identity;
+	swapId: string;
+	data: ActiveUserTransactionData;
+	sourceToken: Token;
+	destinationToken: Token;
+	swapAmount: string | number;
+	extraRefs: Partial<Record<OneSecExternalRefKey, string>>;
+	plan: BridgingPlan;
+}): Promise<void> => {
+	const initialRefs: Partial<Record<OneSecExternalRefKey, string>> = {
+		...toOneSecDisplayRefs({
+			sourceToken,
+			destinationToken,
+			amount: `${swapAmount}`
+		}),
+		...extraRefs
+	};
+
+	// AUT persistence is best-effort: a failed `createActiveUserTransaction`
+	// must NOT abort the plan. The user has already committed funds (point of
+	// no return), so the closer is the only path that completes the bridge —
+	// it always runs, persisted row or not.
+	try {
+		await createActiveUserTransaction({
+			identity,
+			id: swapId,
+			data,
+			externalRefs: toOneSecExternalRefs(initialRefs)
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+
+	finishOneSecBridgingInSession({ identity, id: swapId, plan, initialRefs });
+};
+
+// Foreground resolves once the ICP-side transfer is initiated (point of no
+// return); the row is born with `TRANSFER_ID` and the closer runs detached.
+// Foreground failures throw without creating an AUT row.
 export const executeOneSecIcpToEvmBridge = async ({
 	identity,
 	progress,
@@ -147,7 +327,8 @@ export const executeOneSecIcpToEvmBridge = async ({
 	destinationToken,
 	swapAmount,
 	userEthAddress,
-	setFailedProgressStep
+	setFailedProgressStep,
+	swapId
 }: OneSecIcpToEvmParams): Promise<void> => {
 	const entry = ICP_LEDGER_TO_TOKEN[sourceToken.ledgerCanisterId];
 
@@ -172,31 +353,55 @@ export const executeOneSecIcpToEvmBridge = async ({
 		.amountInUnits(parsedAmount)
 		.build();
 
+	let transferId: TransferId | undefined;
 	let step;
-	while ((step = plan.nextStepToRun()) !== undefined) {
-		// Step 0 is the fee-check step — keep the UI at INITIALIZATION.
-		// Step 1+ are the actual bridge operations (approve, transfer, wait for EVM tx).
+
+	while (isNullish(transferId) && nonNullish((step = plan.nextStepToRun()))) {
+		// Step 0 is the fee check; step 1+ are the actual bridge operations.
 		if (step.index() >= 1) {
 			progress(ProgressStepsSwap.SWAP);
 		}
 
 		const result = await step.run();
 
-		if (result.state === 'failed') {
+		if (result.state === 'failed' || result.state === 'refunded') {
 			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
-			throw new Error(result.error?.message ?? 'OneSec bridge step failed unexpectedly');
+			throw new Error(
+				stepFailureMessage({ result, fallback: 'OneSec bridge step failed unexpectedly' })
+			);
 		}
+
+		transferId = getStepTransferId(step);
 	}
+
+	if (isNullish(transferId)) {
+		if (plan.latestStep()?.status().state === 'failed') {
+			throw new Error('OneSec bridge plan did not initiate a transfer');
+		}
+
+		return;
+	}
+
+	await createAutAndDetachCloser({
+		identity,
+		swapId,
+		data: toOneSecIcpToEvmData({
+			sourceToken,
+			destinationToken,
+			amount: parsedAmount,
+			recipientEvmAddress: userEthAddress
+		}),
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		extraRefs: { [ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID]: transferId.id.toString() },
+		plan
+	});
 };
 
-/**
- * Executes an EVM → ICP bridge via OneSec using a forwarding address.
- *
- * Builds a forwarding plan, retrieves the deterministic forwarding address, sends the
- * EVM tokens to that address using OISY's send service, then runs the remaining SDK
- * steps (notify, validate, wait for ICP tx). Throws on failure; callers are responsible
- * for enabling the destination token and triggering a wallet refresh.
- */
+// Foreground runs fee check + forwarding-address + EVM send; the row is born
+// with `FORWARDING_ADDRESS` + `BASELINE_TRANSFER_ID` after `send()` resolves.
+// Foreground failures throw without creating an AUT row.
 export const executeOneSecEvmToIcpBridge = async ({
 	identity,
 	progress,
@@ -207,7 +412,8 @@ export const executeOneSecEvmToIcpBridge = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	setFailedProgressStep
+	setFailedProgressStep,
+	swapId
 }: OneSecEvmToIcpParams): Promise<void> => {
 	const entry = ICP_LEDGER_TO_TOKEN[destinationToken.ledgerCanisterId];
 	if (isNullish(entry)) {
@@ -224,17 +430,15 @@ export const executeOneSecEvmToIcpBridge = async ({
 		.amountInUnits(parsedAmount)
 		.forward();
 
-	// Step 0: fee validation
 	let step = plan.nextStepToRun();
 	if (nonNullish(step)) {
 		const result = await step.run();
 		if (result.state === 'failed') {
 			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
-			throw new Error(result.error?.message ?? 'OneSec fee check failed');
+			throw new Error(stepFailureMessage({ result, fallback: 'OneSec fee check failed' }));
 		}
 	}
 
-	// Step 1: compute forwarding address
 	step = plan.nextStepToRun();
 	if (isNullish(step)) {
 		throw new Error('OneSec bridge plan is missing the forwarding address step');
@@ -244,17 +448,22 @@ export const executeOneSecEvmToIcpBridge = async ({
 	if (addressResult.state === 'failed' || isNullish(addressResult.forwardingAddress)) {
 		setFailedProgressStep?.(ProgressStepsSwap.SWAP);
 		throw new Error(
-			addressResult.error?.message ?? 'Failed to compute the OneSec forwarding address'
+			stepFailureMessage({
+				result: addressResult,
+				fallback: 'Failed to compute the OneSec forwarding address'
+			})
 		);
 	}
 
-	// Send EVM tokens to the forwarding address
+	const { forwardingAddress } = addressResult;
+	const baselineTransferId = getStepLastTransferId(step);
+
 	progress(ProgressStepsSwap.SWAP);
 	await send({
 		identity,
 		token: sourceToken,
 		from: userEthAddress,
-		to: addressResult.forwardingAddress,
+		to: forwardingAddress,
 		amount: parsedAmount,
 		sourceNetwork: sourceToken.network,
 		gas,
@@ -262,12 +471,230 @@ export const executeOneSecEvmToIcpBridge = async ({
 		maxPriorityFeePerGas
 	});
 
-	// Run remaining steps: notify OneSec, validate receipt, wait for ICP tx
-	while ((step = plan.nextStepToRun()) !== undefined) {
-		const result = await step.run();
-		if (result.state === 'failed') {
-			setFailedProgressStep?.(ProgressStepsSwap.SWAP);
-			throw new Error(result.error?.message ?? 'OneSec bridge step failed unexpectedly');
-		}
+	await createAutAndDetachCloser({
+		identity,
+		swapId,
+		data: toOneSecEvmToIcpData({
+			sourceToken,
+			destinationToken,
+			amount: parsedAmount,
+			recipientPrincipal: identity.getPrincipal()
+		}),
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		extraRefs: {
+			[ONESEC_EXTERNAL_REF_KEYS.FORWARDING_ADDRESS]: forwardingAddress,
+			[ONESEC_EXTERNAL_REF_KEYS.BASELINE_TRANSFER_ID]: nonNullish(baselineTransferId)
+				? baselineTransferId.id.toString()
+				: '0'
+		},
+		plan
+	});
+};
+
+// --- AUT polling --------------------------------------------------------
+
+const TRANSFERS_FETCH_COUNT = 50;
+
+const findTransferIdRef = (tx: ActiveUserTransaction): TransferId | undefined => {
+	const ref = tx.external_refs.find(({ key }) => key === ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID);
+
+	if (isNullish(ref)) {
+		return undefined;
 	}
+
+	try {
+		return { id: BigInt(ref.value) };
+	} catch {
+		return undefined;
+	}
+};
+
+const findForwardingAddressRef = (tx: ActiveUserTransaction): string | undefined =>
+	tx.external_refs.find(({ key }) => key === ONESEC_EXTERNAL_REF_KEYS.FORWARDING_ADDRESS)?.value;
+
+// Used by the discovery path to reject stale `done` ids from prior swaps.
+const findBaselineTransferIdRef = (tx: ActiveUserTransaction): bigint | undefined => {
+	const ref = tx.external_refs.find(
+		({ key }) => key === ONESEC_EXTERNAL_REF_KEYS.BASELINE_TRANSFER_ID
+	);
+
+	if (isNullish(ref)) {
+		return undefined;
+	}
+
+	try {
+		return BigInt(ref.value);
+	} catch {
+		return undefined;
+	}
+};
+
+const evmChainFromChainId = (chainId: bigint): EvmChain | undefined => {
+	switch (chainId) {
+		case 1n:
+			return 'Ethereum';
+		case 8453n:
+			return 'Base';
+		case 42161n:
+			return 'Arbitrum';
+		default:
+			return undefined;
+	}
+};
+
+// Discovers TRANSFER_ID for cross-session EVM→ICP rows via `getForwardingStatus`.
+// Forwarding addresses are deterministic per principal, so `response.done` can
+// point at a *prior* swap's id; we require `done.id > BASELINE_TRANSFER_ID` and
+// skip discovery entirely when the baseline ref is missing.
+const tryDiscoverEvmToIcpTransferId = async ({
+	tx,
+	identity
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+}): Promise<TransferId | undefined> => {
+	if (!('OneSecEvmToIcp' in tx.data)) {
+		return undefined;
+	}
+
+	const forwardingAddress = findForwardingAddressRef(tx);
+	if (isNullish(forwardingAddress)) {
+		return undefined;
+	}
+
+	const baseline = findBaselineTransferIdRef(tx);
+	if (isNullish(baseline)) {
+		return undefined;
+	}
+
+	const data = tx.data.OneSecEvmToIcp;
+
+	if (!('Icrc' in data.dest_token) || !('Erc20' in data.source_token)) {
+		return undefined;
+	}
+
+	const oneSecToken = ICP_LEDGER_TO_TOKEN[data.dest_token.Icrc.toText()]?.token;
+	if (isNullish(oneSecToken)) {
+		return undefined;
+	}
+
+	const chain = evmChainFromChainId(data.source_token.Erc20[1]);
+	if (isNullish(chain)) {
+		return undefined;
+	}
+
+	try {
+		const response = await oneSecForwarding().getForwardingStatus(
+			oneSecToken,
+			chain,
+			forwardingAddress,
+			{ owner: data.recipient_principal }
+		);
+
+		if (isNullish(response.done) || response.done.id <= baseline) {
+			return undefined;
+		}
+
+		// Sort to match `toOneSecExternalRefs`'s deterministic ordering.
+		const mergedRefs = [
+			...tx.external_refs.filter(({ key }) => key !== ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID),
+			{
+				key: ONESEC_EXTERNAL_REF_KEYS.TRANSFER_ID,
+				value: response.done.id.toString()
+			}
+		].sort((a, b) => a.key.localeCompare(b.key));
+
+		await updateActiveUserTransaction({
+			identity,
+			id: tx.id,
+			externalRefs: mergedRefs
+		});
+
+		return response.done;
+	} catch (err: unknown) {
+		consoleError(err);
+		return undefined;
+	}
+};
+
+// `getTransfers` doesn't expose ids (SDK gap), so the listing-match fallback
+// is only allowed to advance Pending → Executing; terminal writes require an
+// exact `getTransfer(transferId)` lookup.
+const pollOneSecActiveUserTransaction = async ({
+	tx,
+	identity,
+	fetchTransfersOnce
+}: {
+	tx: ActiveUserTransaction;
+	identity: Identity;
+	fetchTransfersOnce: () => Promise<Transfer[]>;
+}): Promise<void> => {
+	try {
+		const transferIdRef =
+			findTransferIdRef(tx) ?? (await tryDiscoverEvmToIcpTransferId({ tx, identity }));
+
+		const transfer: Transfer | undefined = nonNullish(transferIdRef)
+			? await oneSecForwarding().getTransfer(transferIdRef)
+			: findMatchingOneSecTransfer({
+					transfers: await fetchTransfersOnce(),
+					data: tx.data
+				});
+
+		if (isNullish(transfer) || isNullish(transfer.status)) {
+			return;
+		}
+
+		const candidate = toActiveUserTransactionStatus(transfer.status);
+
+		if (isNullish(candidate)) {
+			return;
+		}
+
+		const next = advanceStatus({ current: tx.status, candidate });
+
+		if (isNullish(next)) {
+			return;
+		}
+
+		// Terminal verdicts require an exact `getTransfer(transferId)` lookup.
+		if (isNullish(transferIdRef) && isTerminalActiveUserTransactionStatus(next)) {
+			return;
+		}
+
+		const error = oneSecStatusError(transfer.status);
+
+		await applyActiveUserTransactionPollUpdate({
+			identity,
+			tx,
+			update: {
+				status: next,
+				...(nonNullish(error) ? { error } : {})
+			}
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
+// Shares a single `getTransfers` round-trip across the batch via promise memo.
+export const pollOneSecActiveUserTransactions = async ({
+	identity,
+	transactions
+}: {
+	identity: Identity;
+	transactions: ActiveUserTransaction[];
+}): Promise<void> => {
+	if (transactions.length === 0) {
+		return;
+	}
+
+	let transfersPromise: Promise<Transfer[]> | undefined;
+	const fetchTransfersOnce = (): Promise<Transfer[]> =>
+		(transfersPromise ??= getTransfers(identity.getPrincipal(), { count: TRANSFERS_FETCH_COUNT }));
+
+	await Promise.all(
+		transactions.map((tx) => pollOneSecActiveUserTransaction({ tx, identity, fetchTransfersOnce }))
+	);
 };

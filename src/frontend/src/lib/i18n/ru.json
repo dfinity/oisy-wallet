@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Добро пожаловать в раздел Займы!",
+			"header_description": "Получай ликвидность, не продавая активы. Занимай стейблкоины под залог своих BTC, ICP и других активов.",
+			"borrowing_options": "Варианты займа",
+			"borrowing_potential": "Потенциал займа",
+			"borrowing_power_hint": "Приблизительная оценка того, сколько ты сможешь занять, если предоставишь свои активы в качестве залога, по лучшей доступной ставке.",
+			"available_best_provider": "доступно · лучший поставщик",
+			"remaining_best_provider": "остаток · лучший поставщик",
+			"active_loans": "Активные займы",
+			"no_active_loans": "нет активных займов",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "APR займа от"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Займы",
+			"tab_title_short": "Займы",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Отмена",
@@ -7,6 +38,8 @@
 			"back": "Назад",
 			"done": "Готово",
 			"close": "Закрыть",
+			"collapse": "Свернуть",
+			"expand": "Развернуть",
 			"change": "Изменить",
 			"continue": "Продолжить",
 			"apply": "Применить",
@@ -73,12 +106,23 @@
 			"video_not_supported": "Ваш браузер не поддерживает воспроизведение видео."
 		}
 	},
+	"progress": {
+		"completed": "Завершено",
+		"in_progress": "В процессе",
+		"failed": "Ошибка"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Активы",
+			"nfts": "Коллекционные предметы",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
+			"trade": "Торговать",
+			"borrow": "Брать в долг",
+			"section_portfolio": "Портфель",
+			"section_finance": "Финансы",
+			"section_more": "Ещё",
 			"airdrops": "Награды",
 			"earning": "Зарабатывать",
 			"pay": "",
@@ -96,13 +140,18 @@
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
-			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы."
+			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
+			"notes": "Заметки"
 		},
 		"alt": {
 			"tokens": "Активы",
+			"nfts": "Открыть коллекционные предметы",
 			"settings": "Настройки",
 			"dapp_explorer": "Приложения",
 			"activity": "Просмотр активности",
+			"trade": "Просмотр трейда",
+			"borrow": "Просмотр займов",
+			"earning": "Просмотр заработка",
 			"airdrops": "Просмотр наград",
 			"pay": "",
 			"wallet_connect": "",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "Реферальная ссылка для друга",
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
-			"show_balances": "Показать скрытые балансы"
+			"show_balances": "Показать скрытые балансы",
+			"notes": "Открыть заметки"
 		},
 		"short": {
 			"documentation": "Документы"
@@ -221,17 +271,17 @@
 			"website": "Изображение $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Недавно добавленные",
+			"ab_icp": "ICP",
 			"ai": "ИИ",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Игра",
+			"lending": "Лендинг",
 			"nft": "NFT",
-			"rwa": "",
-			"social_media": "Социальные сети",
+			"rwa": "RWA",
+			"social": "Социальные",
 			"staking": "Стейкинг",
-			"tools": "Инструменты",
-			"walletconnect": "WalletConnect"
+			"tools": "Инструменты"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "OpenChat — где общается web3",
 					"call_to_action": "Показать больше"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Проверка личности для безопасных цифровых взаимодействий",
-				"call_to_action": "Открыть DecideID",
-				"stats": "50,000+ запросов на вывод",
-				"description": "Decide ID — это система проверки личности, которая обеспечивает доверие и безопасность. При регистрации вы проходите верификацию: предоставляете доказательства и выполняете задание для подтверждения личности. Это гарантирует, что каждый пользователь — реальный человек, а не бот. <br/><br/>Ваш Principal ID создается в процессе и может использоваться в разных приложениях для безопасного входа. Ваши личные данные остаются конфиденциальными благодаря технологии с нулевым разглашением.",
-				"carousel": {
-					"text": "Безопасная проверка личности с защитой конфиденциальности",
-					"call_to_action": "Заинтересованы?"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "Исказитесь",
 				"description": "Curve Finance — ведущая децентрализованная биржа для стейблкоинов и кредитования на Ethereum и совместимых блокчейнах. Известна передовыми AMM для стейблкоинов и уникальной системой мягкой ликвидации."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Раскройте потенциал DeFi — торгуйте, зарабатывайте, управляйте",
-				"call_to_action": "Открыть Sonic",
-				"description": "Sonic — мультичейн децентрализованная биржа на Internet Computer. Предлагает торговлю токенами, бессрочными контрактами, предоставление ликвидности и участие в DAO. <br/><br/>Полностью ончейн и открытый код! Торгуйте как профессионал, зарабатывайте комиссии как поставщик ликвидности, участвуйте в управлении Sonic DAO.",
-				"carousel": {
-					"text": "Раскройте весь потенциал DeFi",
-					"call_to_action": "Открыть Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX и AMM на Solana с быстрыми сделками",
@@ -369,17 +398,6 @@
 					"text": "Меняйте токены на DEX",
 					"call_to_action": "Попробовать KongSwap"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "Суверенный L1-блокчейн, который создаёт, инвестирует и ускоряет передовые технологии — особенно Web3-гейминг через финансирование и поддержку экосистем в сети Beam.",
-				"call_to_action": "Принять участие!",
-				"description": "Beam — это суверенный блокчейн первого уровня, предназначенный для финансирования и ускорения развития высокоэффективных технологий в игровой индустрии Web3 и передовых инновациях. Благодаря собственной казначейской системе и экосистеме грантов, Beam инвестирует напрямую в команды и инфраструктуру. Блокчейн поддерживает масштабируемые децентрализованные приложения с помощью нативных инструментов и тесного сотрудничества основателей."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "Блокчейн-игра в стиле Pokémon, в которой игроки собирают, разводят, сражаются с NFT-существами (Axies) и зарабатывают токены (AXS, SLP) в экономике принадлежащей игроку на сайдчейне Ronin.",
-				"description": "Axie Infinity — это блокчейн-игра, в которой игроки собирают, разводят и сражаются с NFT-существами, называемыми Axie. Созданная на основе сайдчейна Ronin, игра вознаграждает игроков токенами $AXS и $SLP, создавая замкнутую экономику владения и конкуренции. Axie стала пионером модели P2E и одним из первых успешных проектов Web3 в сфере массовых игр."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -431,11 +449,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -481,6 +490,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -767,6 +790,7 @@
 		"text": {
 			"title": "Настройки",
 			"general": "Общие",
+			"preferences": "Параметры",
 			"principal": "Ваш Principal",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",
@@ -1044,6 +1068,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Сканировать QR-код",
@@ -1160,6 +1198,8 @@
 			"executing_transaction": "Выполнение транзакции...",
 			"initializing": "Инициализация транзакции...",
 			"swapping": "Обмен...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
 			"swap_provider_website": "Веб-сайт",
@@ -1176,7 +1216,6 @@
 			"select_token": "Выбрать токен",
 			"select_network_filter": "Выбрать сеть",
 			"withdrawing": "Вывод",
-			"bridging": "Выполняется бридж... (Пожалуйста, подождите — это может занять до 2 минут.)",
 			"network_cost": "Комиссия за транзакцию",
 			"gasless": "Без комиссии за газ",
 			"swap_fees": "Комиссия за обмен",
@@ -1206,7 +1245,8 @@
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
 			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1214,7 +1254,8 @@
 			"buy": "Купить",
 			"buy_dev": "Купить (среда разработки)",
 			"unavailable_title": "Покупка токенов временно недоступна",
-			"unavailable_description": "Покупка токенов сейчас отключена, пока мы продолжаем повышать безопасность этого процесса, внедряя подписание URL. Она будет снова включена, как только работа будет завершена.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Тем временем вы по-прежнему можете получать токены, поделившись адресом своего кошелька."
 		},
 		"actions": {
@@ -1250,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Токены",
+			"title_short": "Токены",
 			"contract_address": "Адрес контракта",
 			"token_address": "Адрес токена",
 			"balance": "Баланс",
@@ -1430,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFT",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
 			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",
@@ -1560,10 +1604,28 @@
 			"network": "Сеть",
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
+			"unreviewed_instructions": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Подключённые приложения",
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
+			"disconnect_all": "Отключить все",
+			"disconnect_app": "Отключить $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1602,11 +1664,245 @@
 			"request_rejected": "Запрос WalletConnect отклонен",
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
+			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Торговля",
+			"tab_title_short": "Торговля",
+			"intro": "",
+			"learn_more": "Узнать больше",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "Размещай лимитные ордера прямо из своего кошелька. Твои средства остаются в смарт-контрактах, которые контролируешь ты, а не централизованная сторона.",
+			"trading_potential": "Торговый потенциал",
+			"trading_potential_hint": "В твоём кошельке, а не на бирже",
+			"deposited_assets": "Внесённые активы",
+			"deposited_all_free": "Всё доступно",
+			"deposited_empty": "Пока ничего не внесено",
+			"free": "$amount доступно",
+			"in_orders": "$amount в ордерах",
+			"in_orders_label": "в ордерах",
+			"positions": "Мои позиции",
+			"deposit": "Внести",
+			"withdraw": "Вывести",
+			"active_orders": "Активные ордера",
+			"active_orders_empty_deposit": "Внеси токены со своего кошелька, чтобы начать размещать лимитные ордера на OISY Trade.",
+			"active_orders_empty_place": "Твои открытые и ожидающие лимитные ордера появятся здесь, как только ты разместишь хотя бы один.",
+			"new_order": "Новый ордер",
+			"order_history": "История ордеров"
+		},
+		"provider_unavailable": {
+			"title": "Торговля временно недоступна",
+			"description": "Сейчас нет доступных поставщиков торговли. Твои балансы в безопасности и снова станут доступны, как только поставщик вернётся в сеть."
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "Внести",
+			"review_title": "Проверить внесение",
+			"progress_title": "Внесение в процессе",
+			"you_deposit": "Ты вносишь",
+			"error_insufficient_balance": "Сумма превышает твой баланс в кошельке",
+			"to": "Куда",
+			"network": "Сеть",
+			"transaction_fee": "Общая расчетная комиссия",
+			"approval_fee": "Комиссия за одобрение",
+			"transfer_fee": "Сетевая комиссия",
+			"info_title": "OISY Trade: ончейн книга ордеров",
+			"info_description": "Внесённые средства хранятся в канистере OISY Trade и используются для размещения лимитных ордеров, защищённых ончейн смарт-контрактами.",
+			"empty_title": "Пока нечего вносить",
+			"empty_description": "OISY Trade позволяет создавать ордера для этих токенов. Добавь любой из них в свой кошелёк, а затем внеси его сюда, чтобы начать торговлю.",
+			"approving": "Подтверждение в процессе",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "Внесение в процессе",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "Не удалось определить комиссию леджера для этого токена. Твои средства остались в кошельке. Попробуй ещё раз через мгновение.",
+				"deposit_failed": "Внесение не завершилось. Твои средства остались в кошельке. Попробуй ещё раз или проверь статус сети."
+			}
+		},
+		"withdraw": {
+			"title": "Вывести",
+			"review_title": "Проверить вывод",
+			"progress_title": "Вывод в процессе",
+			"amount_label": "Ты выводишь",
+			"from": "Откуда",
+			"network": "Сеть",
+			"transaction_fee": "",
+			"transfer_fee": "Комиссия за вывод",
+			"you_receive": "Ты получишь",
+			"reserved_note": "$amount зарезервировано · заблокировано открытыми ордерами",
+			"error_insufficient_balance": "Сумма превышает твой доступный баланс",
+			"submit": "Вывести",
+			"open": "",
+			"progress_withdraw": "Отправка $symbol в твой кошелёк",
+			"progress_done": "",
+			"error": "Твой вывод не завершился. Твои средства остались на OISY Trade. Попробуй ещё раз через мгновение."
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "Нет активных ордеров",
+			"empty_history": "",
+			"side_sell": "Продажа",
+			"side_buy": "Покупка",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "за $quote @ $price",
+			"row_phrase_buy": "за $quote @ $price",
+			"queue_ahead": "$percentage% впереди в очереди",
+			"status_open": "Открыт",
+			"status_pending": "Ожидание",
+			"status_partial": "Частично",
+			"status_filled": "Исполнен",
+			"status_canceled": "Отменён",
+			"status_expired": "Истёк",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "Что такое OISY Trade",
+			"description": "OISY Trade — это полностью ончейн-биржа с книгой ордеров, встроенная прямо в твой кошелёк. Установи цену покупки или продажи, и твой ордер исполнится ончейн в тот момент, когда рынок её достигнет, даже если ты вышел из аккаунта.",
+			"fact_1_title": "Покупай или продавай по своей цене",
+			"fact_1_description": "Установи точную цену, по которой хочешь купить или продать токен. Твой лимитный ордер остаётся в книге ордеров, пока рынок её не достигнет.",
+			"fact_2_title": "Исполняется даже в твоё отсутствие",
+			"fact_2_description": "После размещения ордер существует ончейн. Биржа исполнит его, как только появится подходящий встречный ордер — независимо от того, в системе ты или нет.",
+			"fact_3_title": "Полностью ончейн",
+			"fact_3_description": "Ордера сопоставляются и исполняются внутри канистера на Internet Computer, управляемого NNS, без централизованной биржи посередине."
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -2030,6 +2326,7 @@
 		"text": {
 			"title": "Заработок",
 			"tab_title": "Зарабатываю",
+			"tab_title_short": "Зарабатываю",
 			"earning_opportunities": "Возможности заработка",
 			"header_title": "Добро пожаловать в раздел Заработок!",
 			"header_description": "Развивайте свой портфель цифровых активов, распределяя токены по возможностям заработка.",
@@ -2041,10 +2338,10 @@
 				"description": "Максимальная эффективность доходности с автопилотными хранилищами в один клик.",
 				"action": "Перейти к Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Используйте OISY и ЗАРАБАТЫВАЙТЕ! Эпизод 6 уже в эфире 🎉",
-				"action": "Проверить статус"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2054,6 +2351,8 @@
 			"currentStaked": "В стейкинге",
 			"currentEarning": "Сейчас зарабатываю",
 			"earningPotential": "Потенциал заработка",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Условия"
 		},
 		"terms": {
@@ -2063,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": "Зарабатывайте с Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Предоставь Bitcoin. Займи стейблкоины. Оставайся нативным.",
+			"health_factor": "Коэффициент здоровья",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "Чистая стоимость",
+			"markets": "Рынки",
+			"total_supplied": "Всего предоставлено",
+			"no_assets_supplied": "нет предоставленных активов",
+			"supplied": "Предоставлено",
+			"borrowed": "Занято",
+			"borrow_rate": "Ставка по займу",
+			"apy_suffix": "APY",
+			"supply_label": "Одолжить",
+			"borrow_label": "Занять",
+			"coming_soon": "Скоро",
+			"coming_soon_teaser": "Скоро…",
+			"action_supply": "Одолжить",
+			"action_borrow": "Занять",
+			"action_repay": "Погасить",
+			"action_withdraw": "Вывести",
+			"transaction_failed": "Транзакция не удалась",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "Проверить предоставление",
+			"supply_review_subtitle": "Ты предоставляешь",
+			"supplying": "Предоставление в процессе",
+			"starting_to_supply": "Отправка твоей позиции…",
+			"supply_started": "Твоя позиция сейчас активируется.",
+			"supply_apy": "APY предоставления",
+			"supply_collateral_info": "Предоставленные активы также служат залогом, под который ты можешь занимать.",
+			"supply_agreement": "Я понимаю, что мои активы будут предоставлены протоколу Liquidium и подвержены риску ончейн смарт-контрактов.",
+			"provider_fee": "Комиссия сети",
+			"transaction_fee": "Комиссия за транзакцию",
+			"insufficient_funds_for_fee": "Недостаточно средств для покрытия суммы и комиссий.",
+			"supply_prices_unavailable": "Цены временно недоступны. Предоставление отключено, пока они не загрузятся.",
+			"borrow_review": "Проверить займ",
+			"borrow_review_subtitle": "Ты занимаешь",
+			"borrowing": "Оформление займа",
+			"borrow_apy": "APY займа",
+			"resulting_ltv": "Итоговый LTV",
+			"projected_health_factor": "Прогнозируемый коэффициент здоровья",
+			"borrowing_power": "Кредитный лимит",
+			"collateral": "Залог",
+			"minimum_borrow": "Минимальный займ",
+			"provider": "Поставщик",
+			"funds_delivered_to": "Средства будут отправлены на",
+			"your_oisy_address": "Твой адрес $oisy_short",
+			"borrow_risk_info": "Заём снижает твой коэффициент здоровья. Если он упадёт слишком низко, твой залог может быть ликвидирован.",
+			"borrow_at_risk_warning": "Этот заём заметно снижает твой коэффициент здоровья.",
+			"borrow_exceeds_power": "Сумма превышает твой кредитный лимит.",
+			"borrow_below_minimum": "Сумма ниже минимального займа.",
+			"borrow_prices_unavailable": "Цены временно недоступны. Займы отключены, пока они не загрузятся.",
+			"borrow_high_risk_warning": "Этот заём приближает твою позицию к ликвидации.",
+			"borrow_risk_confirm": "Я понимаю, что этот заём увеличивает мой риск ликвидации.",
+			"starting_to_borrow": "Отправка твоего займа…",
+			"borrow_started": "Твой займ сейчас активируется.",
+			"withdraw_review": "Проверить вывод",
+			"withdraw_review_subtitle": "Ты выводишь",
+			"withdrawing": "Вывод в процессе",
+			"starting_to_withdraw": "Отправка твоего вывода…",
+			"withdraw_started": "Твой вывод сейчас обрабатывается.",
+			"supplied_label": "Предоставлено",
+			"withdrawable": "",
+			"reserved_by_debt": "Зарезервировано из-за открытого долга",
+			"withdraw_exceeds_free_collateral": "Ты не можешь вывести больше своего свободного залога, пока открыт долг.",
+			"withdraw_exceeds_supplied": "Сумма превышает твой предоставленный баланс.",
+			"withdraw_prices_unavailable": "Цены временно недоступны. Вывод отключён, пока они не загрузятся.",
+			"withdraw_risk_info": "Вывод залога снижает твой коэффициент здоровья. Если он упадёт слишком низко, оставшийся залог может быть ликвидирован.",
+			"withdraw_at_risk_warning": "Этот вывод заметно снижает твой коэффициент здоровья.",
+			"withdraw_high_risk_warning": "Этот вывод приближает твою позицию к ликвидации.",
+			"withdraw_risk_confirm": "Я понимаю, что этот вывод увеличивает мой риск ликвидации.",
+			"repay_review": "Проверить погашение",
+			"repay_review_subtitle": "Ты погашаешь",
+			"repaying": "Погашение в процессе",
+			"starting_to_repay": "Отправка твоего погашения…",
+			"repay_started": "Твоё погашение сейчас обрабатывается.",
+			"current_debt": "Текущий долг",
+			"interest_accrued": "Начисленные проценты",
+			"debt_after_repay": "Долг после погашения",
+			"repay_exceeds_debt": "Сумма превышает твой непогашенный долг.",
+			"repay_prices_unavailable": "Цены временно недоступны. Погашение отключено, пока они не загрузятся."
+		},
+		"info": {
+			"title": "Что такое Liquidium",
+			"description": "Liquidium — это децентрализованный некастодиальный кредитный протокол, в котором ты можешь предоставлять активы или занимать средства в разных блокчейн-сетях. Построен на Internet Computer и позволяет кредитование между сетями без централизованных мостов или обёрнутых токенов.",
+			"fact_1_title": "Зарабатывай на своих BTC",
+			"fact_1_description": "Одалживай свой Bitcoin, чтобы получать доход от переобеспеченных займов.",
+			"fact_2_title": "Некастодиальный",
+			"fact_2_description": "Депозиты защищены ончейн смарт-контрактами, без централизованного контроля.",
+			"fact_3_title": "Нативный, кросс-чейн",
+			"fact_3_description": "Активы остаются в своей нативной сети, поэтому ты можешь предоставить их в одной сети, а занять — в другой."
 		}
 	},
 	"vaults": {
@@ -2145,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "Похоже, вы ещё не стейкировали ни одного токена",
 			"full_history": "Показать полную историю",
-			"recent_history": "Закрыть полную историю",
-			"harvest_autopilot_carousel_slide_title": "Зарабатывайте в OISY с Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Узнать больше"
+			"recent_history": "Закрыть полную историю"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "При выводе токенов произошла ошибка.",
@@ -2237,6 +2633,83 @@
 		"errors": {
 			"unknown": "Извините, что-то пошло не так с получением ответа от помощника.",
 			"no_response": "Извините, я не получил ответа от помощника."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Заметки",
+			"note": "Заметка",
+			"add_title": "Добавить новую заметку",
+			"edit_note": "Редактировать заметку",
+			"delete_note": "Удалить заметку",
+			"delete_confirm_text": "Это удалит заметку '$note'. Это действие нельзя отменить.",
+			"back": "Назад",
+			"empty_title": "У тебя пока нет заметок",
+			"empty_subtitle": "Создавай приватные, зашифрованные заметки, чтобы хранить важные детали рядом со своим кошельком.",
+			"empty_add": "Добавить новую заметку",
+			"add_note": "Добавить заметку",
+			"note_label": "Заметка",
+			"placeholder": "Напиши заметку…",
+			"search_placeholder": "Поиск заметки",
+			"no_results": "Нет заметок, соответствующих твоему запросу.",
+			"encrypted_lead": "Сквозное шифрование.",
+			"encrypted_info": "Только ты можешь читать свои заметки.",
+			"created": "Создано $date",
+			"updated": "Обновлено $date",
+			"created_updated": "Создано $created · Обновлено $updated",
+			"too_long": "Заметка должна содержать не более $maxCharacters символов.",
+			"cap_reached": "Ты достиг(ла) максимума в $max сохранённых заметок. Удали одну, чтобы добавить новую.",
+			"decryption_failed": "Не удалось расшифровать эту заметку"
+		},
+		"alt": {
+			"edit": "Редактировать заметку",
+			"delete": "Удалить заметку"
+		},
+		"error": {
+			"load": "Не удалось загрузить твои заметки. Попробуй ещё раз.",
+			"save": "Не удалось сохранить твою заметку. Попробуй ещё раз.",
+			"delete": "Не удалось удалить твою заметку. Попробуй ещё раз."
+		},
+		"share": {
+			"text": {
+				"share_note": "Поделиться заметкой",
+				"snapshot_caption": "Делится копией заметки в её текущем виде. Последующее редактирование или удаление заметки не изменит эту ссылку.",
+				"cap_reached": "Ты достиг(ла) максимума в $max активных ссылок для доступа. Они освобождаются после истечения срока действия или использования.",
+				"expires_after": "Ссылка истекает через",
+				"expiry_1h": "1 час",
+				"expiry_24h": "24 часа",
+				"expiry_7d": "7 дней",
+				"expiry_30d": "30 дней",
+				"single_use": "Одноразовая",
+				"single_use_option": "Ссылку можно использовать только один раз",
+				"protects_body": "Только получатель этой ссылки сможет прочитать твою заметку.",
+				"create_link": "Создать ссылку",
+				"link_ready_title": "Ссылка для доступа готова",
+				"link_ready_subtitle": "Любой, у кого есть эта ссылка, может прочитать заметку",
+				"link_copied": "Ссылка скопирована!",
+				"recap_expires_in": "Истекает через $duration",
+				"recap_single_use": "одноразовая",
+				"reminder": "$oisy_short не может восстановить или отозвать эту ссылку после того, как ею поделились. Она перестаёт работать после использования или истечения срока действия.",
+				"done": "Готово"
+			},
+			"error": {
+				"create": "Не удалось создать ссылку для доступа. Попробуй ещё раз."
+			},
+			"recipient": {
+				"locked_title": "С тобой поделились заметкой",
+				"reveal": "Показать заметку",
+				"revealed_title": "Заметка, которой поделились",
+				"single_use_caveat": "Одноразовая ссылка — как только ты закроешь или перезагрузишь эту страницу, заметка исчезнет навсегда. Скопируй её сейчас, если она тебе нужна.",
+				"copy_note": "Скопировать заметку",
+				"note_copied": "Заметка скопирована!",
+				"outro_title": "Точно так же надёжно он защищает и твои активы",
+				"outro_subtitle": "$oisy_short — это полностью ончейн-кошелёк с самостоятельным хранением для Bitcoin, Ethereum, Solana, ICP и других активов.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana и ICP в одном месте",
+				"outro_feature_onchain": "100% ончейн — без расширений, без seed-фразы",
+				"outro_feature_encrypted": "Твои ключи и данные — со сквозным шифрованием",
+				"discover": "Узнать про OISY",
+				"unavailable_title": "Срок действия этой ссылки истёк или она уже была использована"
+			}
 		}
 	}
 }

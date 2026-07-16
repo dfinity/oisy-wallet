@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import { updateUserTransactionFilterSettings } from '$lib/api/backend.api';
@@ -8,10 +7,12 @@
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsExportData from '$lib/components/settings/SettingsExportData.svelte';
+	import SettingsPreferences from '$lib/components/settings/SettingsPreferences.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { OISY_HIDE_MICRO_TRANSACTIONS_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
@@ -130,7 +131,7 @@
 					: $i18n.settings.text.enable_hide_micro_transactions}
 				checked={$hideMicroTransactions}
 				disabled={filterLoading}
-				on:nnsToggle={toggleMicroTransactions}
+				onToggle={toggleMicroTransactions}
 			/>
 		{/snippet}
 
@@ -153,6 +154,8 @@
 		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
+
+<SettingsPreferences />
 
 <SettingsCard>
 	{#snippet title()}{$i18n.settings.text.networks}{/snippet}

@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Without `inherit_errexit`, a failing dfx call inside `VAR="$(dfx ...)"` silently leaves VAR
+# empty and the script keeps going, ultimately producing a broken symlink to a never-written
+# .did file that downstream cargo tests fail on much later with a confusing `Cannot open ...`
+# panic. `clap.bash` (sourced below) already requires bash 4.4+ via `@Q`, so this `shopt` is
+# safe on every shell that can run this script at all.
+shopt -s inherit_errexit
 
 SOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
@@ -17,15 +23,23 @@ clap.define short=d long=dir desc="The output directory" variable=DID_DIR defaul
 # Source the output file ----------------------------------------------------------
 source "$(clap.build)"
 
-# Get the deployed commit
-DEPLOYED_COMMIT="$(dfx canister metadata "$CANISTER" git:commit --network "$DFX_NETWORK")"
+# Use the anonymous identity for both metadata reads. They're read-only queries that don't
+# need a signed call, so we avoid requiring CI runners (and developers) to provision a
+# securely-stored mainnet identity — newer dfx versions refuse `--network ic` with the default
+# plaintext identity and would otherwise fail this script with a misleading
+# `Failed to create AgentEnvironment` error.
+DFX_METADATA=(dfx canister metadata "$CANISTER")
+DFX_NETWORK_OPTS=(--identity anonymous --network "$DFX_NETWORK")
 
-# Download the did file for that commit, if we don't have it already
-# Note: A quick test showed download the candid taking 5 seconds, while getting the commit took under a second,
-# so some simple caching pays off.
+# Get the deployed commit.
+DEPLOYED_COMMIT="$("${DFX_METADATA[@]}" git:commit "${DFX_NETWORK_OPTS[@]}")"
+
+# Download the did file for that commit, if we don't have it already.
+# A quick test showed downloading the candid takes ~5 seconds while getting the commit takes
+# well under a second, so this caching by commit is worth the extra metadata call.
 DID_FILE="$DID_DIR/$CANISTER.$DEPLOYED_COMMIT.did"
 mkdir -p "$DID_DIR"
-test -e "$DID_FILE" || dfx canister metadata "$CANISTER" candid:service --network "$DFX_NETWORK" >"$DID_FILE"
+test -e "$DID_FILE" || "${DFX_METADATA[@]}" candid:service "${DFX_NETWORK_OPTS[@]}" >"$DID_FILE"
 
 # Create a symlink to the did file
 DID_LINK="$DID_DIR/$CANISTER.$DFX_NETWORK.did"

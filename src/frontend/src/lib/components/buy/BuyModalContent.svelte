@@ -11,7 +11,7 @@
 		</div>
 	</div>
 {:else}
-	<BuyUnavailableNotice />
+	<BuyUnavailableNotice reason="disabled" />
 {/if}
 
 <style lang="scss">

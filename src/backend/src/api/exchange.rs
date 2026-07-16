@@ -24,7 +24,7 @@ use crate::{
 /// background refresh timer keeps them warm. If any cached price is
 /// missing or older than [`crate::exchange::PRICE_STALENESS_THRESHOLD_SEC`]
 /// seconds, the endpoint kicks off a refresh for that subset **in the
-/// background** (via `ic_cdk::futures::spawn`) and returns the current cache
+/// background** (via `ic_cdk::futures::spawn_migratory`) and returns the current cache
 /// snapshot immediately. Entries that are still missing or stale at the
 /// moment of the call are returned as `None`; subsequent calls will pick up
 /// the refreshed values once the spawned fetch lands.
@@ -75,7 +75,7 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         // and the next call will pick up the fresh values. This deduplicates
         // outcalls under concurrent load (e.g. many users calling on a cold
         // cache).
-        ic_cdk::futures::spawn(async move {
+        ic_cdk::futures::spawn_migratory(async move {
             let outcome = fetch_and_update_prices(&stale).await;
             release_refresh_lock(lock);
             if let Err(err) = outcome {
@@ -117,4 +117,17 @@ pub fn exchange_rate_enabled() -> bool {
 #[update(guard = "caller_is_controller")]
 pub fn set_exchange_rate_enabled(enabled: bool) {
     mutate_api_keys(|keys| keys.exchange_rate_enabled = Some(enabled));
+}
+
+/// Sets whether exchange-rate HTTP outcalls are sent replicated, without touching the stored API
+/// keys.
+///
+/// Sets `exchange_rate_replicated` to `Some(replicated)`. `true` sends the outcalls through
+/// consensus (every replica issues the request); `false` sends them non-replicated (a single
+/// replica). See [`crate::exchange::is_exchange_rate_replicated`].
+///
+/// Restricted to canister controllers only.
+#[update(guard = "caller_is_controller")]
+pub fn set_exchange_rate_replicated(replicated: bool) {
+    mutate_api_keys(|keys| keys.exchange_rate_replicated = Some(replicated));
 }

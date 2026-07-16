@@ -6,7 +6,9 @@ use shared::types::signer::topup::TopUpCyclesLedgerResult;
 
 use super::rate_limiter::ALLOW_SIGNING_RATE_LIMITER;
 use crate::{
-    api, signer,
+    api,
+    personal_notes::share::service::prune_expired_shares,
+    signer,
     token::{evict_inactive_tokens, TOKEN_ACTIVITY_RETENTION_SEC},
     types::StoredPrincipal,
 };
@@ -58,7 +60,7 @@ fn spawn_housekeeping_if_idle() {
 
     HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = Some(now));
 
-    ic_cdk::futures::spawn(async {
+    ic_cdk::futures::spawn_migratory(async {
         hourly_housekeeping_tasks().await;
         HOUSEKEEPING_STARTED_AT.with(|cell| *cell.borrow_mut() = None);
     });
@@ -113,7 +115,7 @@ pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincip
         return;
     }
 
-    ic_cdk::futures::spawn(async move {
+    ic_cdk::futures::spawn_migratory(async move {
         if let Err(e) = signer::allow_signing().await {
             ic_cdk::println!(
                 "Error enabling signing for user {}: {:?}",
@@ -130,16 +132,17 @@ pub(crate) fn spawn_allow_signing_if_below_limit(stored_principal: StoredPrincip
 pub(crate) fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, spawn_housekeeping_if_idle);
+    set_timer(immediate, async { spawn_housekeeping_if_idle() });
 
     // Then periodically:
     let hour = Duration::from_hours(1);
-    let _ = set_timer_interval(hour, spawn_housekeeping_if_idle);
+    let _ = set_timer_interval(hour, || async { spawn_housekeeping_if_idle() });
 }
 
 /// Runs hourly housekeeping tasks:
 /// - Top up the cycles ledger.
 /// - Evict `token_activity` entries older than [`TOKEN_ACTIVITY_RETENTION_SEC`].
+/// - Prune expired `personal_note_shares` entries.
 async fn hourly_housekeeping_tasks() {
     // Tops up the account on the cycles ledger
     {
@@ -154,6 +157,11 @@ async fn hourly_housekeeping_tasks() {
     let evicted = evict_inactive_tokens(TOKEN_ACTIVITY_RETENTION_SEC);
     if evicted > 0 {
         ic_cdk::println!("Evicted {evicted} stale token_activity entries");
+    }
+
+    let pruned = prune_expired_shares();
+    if pruned > 0 {
+        ic_cdk::println!("Pruned {pruned} expired personal_note_shares entries");
     }
 }
 

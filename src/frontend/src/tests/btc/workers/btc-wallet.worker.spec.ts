@@ -127,8 +127,8 @@ describe('btc-wallet.worker', () => {
 		const provider = AuthClientProvider.getInstance();
 		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
-		let mockBlockHeight = 1000;
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
+		const mockBlockHeight = 1000;
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight);
 
 		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 

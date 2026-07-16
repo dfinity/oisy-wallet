@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 	import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
@@ -8,6 +7,7 @@
 	import type { Dip721CustomToken } from '$icp/types/dip721-custom-token';
 	import type { ExtCustomToken } from '$icp/types/ext-custom-token';
 	import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { MANAGE_TOKENS_MODAL_TOKEN_TOGGLE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -60,8 +60,8 @@
 	<Toggle
 		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}
+		onToggle={toggle}
 		testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 		bind:checked
-		on:nnsToggle={toggle}
 	/>
 </div>

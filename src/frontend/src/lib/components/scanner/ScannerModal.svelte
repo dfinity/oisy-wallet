@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { assertNever, isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext, untrack } from 'svelte';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
@@ -9,6 +8,7 @@
 	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
 	import ScannerInfo from '$lib/components/scanner/ScannerInfo.svelte';
 	import ScannerModalPayDataLoader from '$lib/components/scanner/ScannerModalPayDataLoader.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectSessionWizard from '$lib/components/wallet-connect/WalletConnectSessionWizard.svelte';
 	import { scannerWizardSteps } from '$lib/config/scanner.config';
 	import { modalUniversalScannerData } from '$lib/derived/modal.derived';
@@ -25,6 +25,7 @@
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
 	import { ScannerResults } from '$lib/types/scanner';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { getOpenCryptoPayBaseTrackingParams } from '$lib/utils/open-crypto-pay.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 

@@ -1,4 +1,35 @@
 {
+	"borrow": {
+		"text": {
+			"header_title": "Vítejte u půjček!",
+			"header_description": "Získej likviditu, aniž bys musel(a) prodávat. Půjč si stablecoiny oproti svým BTC, ICP a dalším aktivům.",
+			"borrowing_options": "Možnosti půjček",
+			"borrowing_potential": "Potenciál půjčky",
+			"borrowing_power_hint": "Odhad toho, kolik by sis mohl(a) půjčit, kdybys své assety poskytl(a) jako zajištění, za nejlepší dostupnou sazbu.",
+			"available_best_provider": "dostupné · nejlepší poskytovatel",
+			"remaining_best_provider": "zbývající · nejlepší poskytovatel",
+			"active_loans": "Aktivní půjčky",
+			"no_active_loans": "žádné aktivní půjčky",
+			"amount_borrowed": "",
+			"apr": "APR",
+			"borrow_apr_from": "APR půjčky od"
+		},
+		"cards": {
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		}
+	},
+	"borrowings": {
+		"text": {
+			"tab_title": "Půjčky",
+			"tab_title_short": "Půjčky",
+			"no_borrowings": "",
+			"go_to_borrow": ""
+		}
+	},
 	"core": {
 		"text": {
 			"cancel": "Zrušit",
@@ -7,6 +38,8 @@
 			"back": "Zpět",
 			"done": "Hotovo",
 			"close": "Zavřít",
+			"collapse": "Sbalit",
+			"expand": "Rozbalit",
 			"change": "Změnit",
 			"continue": "Pokračovat",
 			"apply": "Použít",
@@ -73,12 +106,23 @@
 			"video_not_supported": "Váš prohlížeč nepodporuje přehrávání videa."
 		}
 	},
+	"progress": {
+		"completed": "Dokončeno",
+		"in_progress": "Probíhá",
+		"failed": "Selhalo"
+	},
 	"navigation": {
 		"text": {
 			"tokens": "Digitální Aktiva",
+			"nfts": "Sběratelské předměty",
 			"settings": "Nastavení",
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
+			"trade": "Obchodovat",
+			"borrow": "Půjčit si",
+			"section_portfolio": "Portfolio",
+			"section_finance": "Finance",
+			"section_more": "Více",
 			"airdrops": "Odměny",
 			"earning": "Vydělávat",
 			"pay": "",
@@ -96,13 +140,18 @@
 			"hide_balances": "Skrýt zůstatky",
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
-			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků."
+			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
+			"notes": "Poznámky"
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
+			"nfts": "Otevřít zobrazení sběratelských předmětů",
 			"settings": "Otevřít nastavení",
 			"dapp_explorer": "Otevřít průzkumník aplikací",
 			"activity": "Otevřít zobrazení aktivity",
+			"trade": "Otevřít zobrazení obchodu",
+			"borrow": "Otevřít zobrazení půjček",
+			"earning": "Otevřít zobrazení vydělávání",
 			"airdrops": "Otevřít zobrazení odměn",
 			"pay": "",
 			"wallet_connect": "",
@@ -115,7 +164,8 @@
 			"refer_a_friend": "Vygenerovat pozvánku pro přítele",
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
-			"show_balances": "Zobrazit skryté zůstatky"
+			"show_balances": "Zobrazit skryté zůstatky",
+			"notes": "Otevřít poznámky"
 		},
 		"short": {
 			"documentation": "Dokumentace"
@@ -221,17 +271,17 @@
 			"website": "Obrázek $dAppName"
 		},
 		"categories": {
-			"aa_new": "",
-			"ab_icp": "",
+			"aa_new": "Nedávno přidané",
+			"ab_icp": "ICP",
 			"ai": "AI",
-			"defi": "DeFi",
+			"dex": "DEX",
 			"game": "Hra",
+			"lending": "Lending",
 			"nft": "NFT",
-			"rwa": "",
-			"social_media": "Sociální média",
+			"rwa": "RWA",
+			"social": "Sociální",
 			"staking": "Staking",
-			"tools": "Nářadí",
-			"walletconnect": "WalletConnect"
+			"tools": "Nářadí"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -252,17 +302,6 @@
 				"carousel": {
 					"text": "OpenChat - kde web3 komunikuje",
 					"call_to_action": "Zobrazit více"
-				}
-			},
-			"decideid": {
-				"name": "DecideID",
-				"one_liner": "Unikátní ověření identity pro důvěryhodné digitální interakce.",
-				"call_to_action": "Otevřít DecideID",
-				"stats": "50 000+ žádostí o odvození",
-				"description": "Decide ID je srdcem systému Decide AI, který zajišťuje důvěru a bezpečnost prostřednictvím své jedinečné metodiky Proof of Personhood (PoP). Po připojení projdete ověřovacím procesem, kde poskytnete několik důkazů a dokončíte speciální výzvu k potvrzení vaší identity. Tím je zajištěno, že každý uživatel je skutečný, jedinečný a není bot. Během tohoto procesu je vytvořeno vaše Hlavní ID, jedinečný on-chain identifikátor. Lze jej použít v různých aplikacích, které vyžadují ověřenou osobnost, což zajišťuje bezpečnou a bezproblémovou integraci do jakéhokoli procesu registrace nebo přihlášení aplikace. Navíc použití důkazů s nulovou znalostí znamená, že vaše soukromé údaje, jako jsou biometrické informace, zůstávají důvěrné a v bezpečí.<br/><br/>S Decide ID si užijte flexibilní, bezpečný a soukromí-na-prvním-místě způsob ověřování a interakce online.",
-				"carousel": {
-					"text": "Užijte si soukromí na prvním místě způsob ověřování a interakce online",
-					"call_to_action": "Máte zájem?"
 				}
 			},
 			"icpswap": {
@@ -313,16 +352,6 @@
 				"call_to_action": "Nechte se warpovat",
 				"description": "Curve Finance je přední decentralizovaná burza, poskytovatel stablecoinů a úvěrová platforma na Ethereu a řetězcích kompatibilních s EVM. Je známá svými pokročilými automatizovanými tvůrci trhu pro stablecoiny a volatilní aktiva a svým jedinečným systémem měkké likvidace pro půjčky."
 			},
-			"sonic": {
-				"name": "Sonic",
-				"one_liner": "Uvolněte plný potenciál DeFi a zjednodušeného obchodování. Vyměňujte tokeny, vydělávejte jako poskytovatel likvidity a využívejte přední AMM Bitfinity EVM.",
-				"call_to_action": "Otevřít Sonic",
-				"description": "Sonic, multichainová decentralizovaná burza postavená na protokolu Internet Computer (ICP), nabízí širokou škálu služeb DeFi. Uživatelé mohou snadno obchodovat s tokeny a perpetualy, poskytovat likviditu a účastnit se prodeje tokenů LBP. Uživatelé se mohou zapojit do správy DAO, stakovat za odměny a hlasovat o rozhodnutích platformy.<br/><br/>Plně on-chain a open-source! Vyměňujte tokeny jako profesionál, sbírejte poplatky jako poskytovatel likvidity, připojte se k atmosféře AMM a staňte se nedílnou součástí Sonic DAO.",
-				"carousel": {
-					"text": "Uvolněte plný potenciál Defi",
-					"call_to_action": "Otevřít Sonic"
-				}
-			},
 			"raydium": {
 				"name": "Raydium",
 				"one_liner": "DEX a automatizovaný tvůrce trhu postavený na blockchainu Solana, který nabízí centrální knihu limitních objednávek umožňující rychlé obchody.",
@@ -369,17 +398,6 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Zjistit více"
 				}
-			},
-			"beam": {
-				"name": "Beam",
-				"one_liner": "Suverénní L1 blockchain, který buduje, investuje do a urychluje průlomové technologie — zejména Web3 hry — financováním a podporou ekosystémů v síti Beam.",
-				"call_to_action": "Zapojit se",
-				"description": "Beam je suverénní blockchain vrstvy 1 navržený k financování a urychlování vysoce dopadových technologií v oblasti her, Web3 a inovací. Díky on-chain pokladně a grantovému ekosystému Beam přímo investuje do týmů a infrastruktury."
-			},
-			"axie_infinity": {
-				"name": "Axie Infinity",
-				"one_liner": "Blockchainová hra ve stylu Pokémonů, kde hráči sbírají, chovají a bojují s NFT bytostmi (Axies) a vydělávají tokeny (AXS, SLP) v ekonomice vlastněné hráči.",
-				"description": "Axie Infinity je play-to-earn blockchainová hra postavená na síti Ronin, která odměňuje hráče tokeny $AXS a $SLP a vytváří hráči vlastněnou ekonomiku."
 			},
 			"mobox": {
 				"name": "Mobox",
@@ -431,11 +449,6 @@
 				"one_liner": "",
 				"description": ""
 			},
-			"sphere_finance": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"binaryx": {
 				"name": "",
 				"one_liner": "",
@@ -449,11 +462,7 @@
 			"liquidium": {
 				"name": "",
 				"one_liner": "",
-				"description": "",
-				"carousel": {
-					"text": "",
-					"call_to_action": ""
-				}
+				"description": ""
 			},
 			"icpindex": {
 				"name": "",
@@ -481,6 +490,20 @@
 				"description": ""
 			},
 			"icp_flags": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cloud_engines": {
+				"name": "",
+				"one_liner": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
+			},
+			"hyperliquid": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -767,6 +790,7 @@
 		"text": {
 			"title": "Nastavení",
 			"general": "Obecné",
+			"preferences": "Předvolby",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -1044,6 +1068,20 @@
 			"burn_review_subtitle": ""
 		}
 	},
+	"active_user_transactions": {
+		"text": {
+			"button_label": "",
+			"open_aria_label": "",
+			"empty": "",
+			"section_in_progress": "",
+			"section_failed": "",
+			"section_previous": "",
+			"dismiss_aria_label": ""
+		},
+		"error": {
+			"dismiss_failed": ""
+		}
+	},
 	"scanner": {
 		"text": {
 			"scan_qr_code": "Naskenovat QR kód",
@@ -1160,6 +1198,8 @@
 			"executing_transaction": "Provádění transakce...",
 			"initializing": "Inicializace transakce...",
 			"swapping": "Výměna...",
+			"starting_to_swap": "",
+			"starting_to_bridge": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
 			"swap_provider_website": "Webové stránky",
@@ -1176,7 +1216,6 @@
 			"select_token": "Vyberte token",
 			"select_network_filter": "Vybrat síť",
 			"withdrawing": "Stažení...",
-			"bridging": "Probíhá přemostění... (Prosíme o trpělivost, může to trvat až 2 minuty.)",
 			"network_cost": "Náklady sítě",
 			"gasless": "Gasless",
 			"swap_fees": "Poplatky za swap",
@@ -1206,7 +1245,8 @@
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
 			"swap_completed_close_failed": "",
-			"cannot_save_provider_agreement": ""
+			"cannot_save_provider_agreement": "",
+			"swap_refunded": ""
 		}
 	},
 	"buy": {
@@ -1214,7 +1254,8 @@
 			"buy": "Koupit",
 			"buy_dev": "Koupit (vývojové prostředí)",
 			"unavailable_title": "Nákup tokenů je dočasně nedostupný",
-			"unavailable_description": "Nákup tokenů je momentálně vypnutý, zatímco dále vylepšujeme zabezpečení tohoto procesu zavedením podepisování URL. Bude znovu zapnut, jakmile bude práce dokončena.",
+			"unavailable_description_disabled": "",
+			"unavailable_description_signing_failed": "",
 			"unavailable_fallback_hint": "Mezitím můžete stále přijímat tokeny sdílením adresy své peněženky."
 		},
 		"actions": {
@@ -1250,6 +1291,7 @@
 	"tokens": {
 		"text": {
 			"title": "Tokeny",
+			"title_short": "Tokeny",
 			"contract_address": "Adresa smlouvy",
 			"token_address": "Adresa tokenu",
 			"balance": "Zůstatek",
@@ -1430,6 +1472,8 @@
 	"nfts": {
 		"text": {
 			"title": "NFTs",
+			"count_one": "",
+			"count_other": "",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
 			"title_not_supported": "NFT zatím nejsou na vybrané síti podporovány",
@@ -1560,10 +1604,28 @@
 			"network": "Síť",
 			"amount": "Částka",
 			"hex_data": "HEX data",
+			"unreviewed_instructions": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
+			"sign_psbt": "",
+			"signing_address": "",
+			"fee": "",
+			"btc_symbol": "",
+			"psbt_inputs": "",
+			"psbt_outputs": "",
+			"psbt_total_signed_inputs": "",
+			"psbt_unknown_address": "",
+			"psbt_unknown_value": "",
+			"psbt_fee_unknown": "",
+			"psbt_signed_by_wallet": "",
+			"psbt_broadcast": "",
+			"psbt_broadcast_enabled": "",
+			"psbt_broadcast_disabled": "",
+			"psbt_broadcast_unsupported_note": "",
 			"connected_apps": "Připojené aplikace",
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
+			"disconnect_all": "Odpojit vše",
+			"disconnect_app": "Odpojit $name",
 			"wallet_connect": ""
 		},
 		"alt": {
@@ -1602,11 +1664,245 @@
 			"request_rejected": "Požadavek WalletConnect byl zamítnut",
 			"unknown_parameter": "Neznámý parametr.",
 			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
+			"btc_broadcast_not_supported": "",
+			"btc_non_mainnet_sign_not_supported": "",
+			"btc_psbt_decode": "",
+			"btc_psbt_input_not_segwit": "",
+			"btc_psbt_input_not_owned": "",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
+		}
+	},
+	"trading": {
+		"text": {
+			"tab_title": "Obchod",
+			"tab_title_short": "Obchod",
+			"intro": "",
+			"learn_more": "Zjistit více",
+			"provider_name": "OISY Trade",
+			"go_to_trade": ""
+		},
+		"page": {
+			"tagline": "Zadávej limitní pokyny přímo ze své peněženky. Tvé prostředky zůstávají ve smart kontraktech, které ovládáš ty – nikdy ne centrální strana.",
+			"trading_potential": "Obchodní potenciál",
+			"trading_potential_hint": "Ve tvé peněžence, ne na burze",
+			"deposited_assets": "Vložená aktiva",
+			"deposited_all_free": "Vše volné",
+			"deposited_empty": "Zatím nic vloženo",
+			"free": "$amount volné",
+			"in_orders": "$amount v pokynech",
+			"in_orders_label": "v pokynech",
+			"positions": "Moje pozice",
+			"deposit": "Vložit",
+			"withdraw": "Vybrat",
+			"active_orders": "Aktivní pokyny",
+			"active_orders_empty_deposit": "Vlož tokeny ze své peněženky, abys mohl(a) začít zadávat limitní pokyny na OISY Trade.",
+			"active_orders_empty_place": "Tvé otevřené a čekající limitní pokyny se zobrazí zde, jakmile nějaký zadáš.",
+			"new_order": "Nový pokyn",
+			"order_history": "Historie pokynů"
+		},
+		"provider_unavailable": {
+			"title": "Obchodování je dočasně nedostupné",
+			"description": "Momentálně není k dispozici žádný poskytovatel obchodování. Tvé zůstatky jsou v bezpečí a budou opět dostupné, jakmile bude poskytovatel zpět online."
+		},
+		"onboarding": {
+			"title": "",
+			"description": "",
+			"step_deposit": "",
+			"step_order": "",
+			"step_withdraw": "",
+			"supported_tokens": "",
+			"deposit": ""
+		},
+		"assets": {
+			"title": "",
+			"empty": ""
+		},
+		"deposit": {
+			"title": "Vložit",
+			"review_title": "Zkontrolovat vklad",
+			"progress_title": "Probíhá vklad",
+			"you_deposit": "Vkládáš",
+			"error_insufficient_balance": "Částka přesahuje zůstatek ve tvé peněžence",
+			"to": "Na",
+			"network": "Síť",
+			"transaction_fee": "Celkový odhadovaný poplatek",
+			"approval_fee": "Schvalovací poplatek",
+			"transfer_fee": "Síťový poplatek",
+			"info_title": "OISY Trade: onchain kniha objednávek",
+			"info_description": "Vložené prostředky drží canister OISY Trade a používá je k zadávání limitních pokynů, zajištěných onchain smart kontrakty.",
+			"empty_title": "Zatím není co vložit",
+			"empty_description": "OISY Trade ti umožňuje vytvářet pokyny pro tyto tokeny. Přidej si některý z nich do peněženky a pak ho sem vlož, abys mohl(a) začít obchodovat.",
+			"approving": "Probíhá schválení",
+			"approved": "",
+			"approve_description": "",
+			"depositing": "Probíhá vklad",
+			"deposit_description": "",
+			"done": "",
+			"error": {
+				"unknown_fee": "Poplatek ledgeru pro tento token se nepodařilo zjistit. Tvé prostředky zůstaly v peněžence. Zkus to za chvíli znovu.",
+				"deposit_failed": "Vklad se nedokončil. Tvé prostředky zůstaly v peněžence. Zkus to znovu nebo zkontroluj stav sítě."
+			}
+		},
+		"withdraw": {
+			"title": "Vybrat",
+			"review_title": "Zkontrolovat výběr",
+			"progress_title": "Probíhá výběr",
+			"amount_label": "Vybíráš",
+			"from": "Z",
+			"network": "Síť",
+			"transaction_fee": "",
+			"transfer_fee": "Poplatek za výběr",
+			"you_receive": "Obdržíš",
+			"reserved_note": "$amount rezervováno · blokováno otevřenými pokyny",
+			"error_insufficient_balance": "Částka přesahuje tvůj volný zůstatek",
+			"submit": "Vybrat",
+			"open": "",
+			"progress_withdraw": "$symbol se odesílá do tvé peněženky",
+			"progress_done": "",
+			"error": "Tvůj výběr se nedokončil. Tvé prostředky zůstaly na OISY Trade. Zkus to za chvíli znovu."
+		},
+		"orders": {
+			"title": "",
+			"add_limit_order": "",
+			"tab_active": "",
+			"tab_history": "",
+			"empty_active": "Žádné aktivní pokyny",
+			"empty_history": "",
+			"side_sell": "Prodej",
+			"side_buy": "Nákup",
+			"row_sell": "",
+			"row_buy": "",
+			"row_phrase_sell": "za $quote @ $price",
+			"row_phrase_buy": "s $quote @ $price",
+			"queue_ahead": "$percentage % ve frontě před tebou",
+			"status_open": "Otevřeno",
+			"status_pending": "Čekající",
+			"status_partial": "Částečné",
+			"status_filled": "Vypořádáno",
+			"status_canceled": "Zrušeno",
+			"status_expired": "Vypršelo",
+			"count_filled": "",
+			"count_expired": "",
+			"count_canceled": ""
+		},
+		"info": {
+			"title": "Co je OISY Trade",
+			"description": "OISY Trade je plně onchain burza s knihou objednávek, integrovaná přímo do tvé peněženky. Nastav cenu, za kterou chceš nakoupit nebo prodat, a tvůj pokyn se onchain vypořádá ve chvíli, kdy ho trh dosáhne – i když jsi odhlášen(a).",
+			"fact_1_title": "Nakupuj nebo prodávej za svou cenu",
+			"fact_1_description": "Nastav přesnou cenu, za kterou chceš token koupit nebo prodat. Tvůj limitní pokyn zůstává v knize objednávek, dokud ho trh nedosáhne.",
+			"fact_2_title": "Vypořádá se i v tvé nepřítomnosti",
+			"fact_2_description": "Jakmile pokyn zadáš, existuje onchain. Burza ho vypořádá, jakmile se objeví odpovídající pokyn – bez ohledu na to, zda jsi přihlášen(a).",
+			"fact_3_title": "Plně onchain",
+			"fact_3_description": "Pokyny jsou spárovány a vypořádány uvnitř canisteru na Internet Computeru, spravovaného NNS, bez centralizované burzy uprostřed."
+		},
+		"order_detail": {
+			"title": "",
+			"status": "",
+			"filled": "",
+			"cancel_order": "",
+			"cancel_error": "",
+			"confirm_title": "",
+			"confirm_description": "",
+			"confirm_order": "",
+			"confirm_price": "",
+			"confirm_returns_to_free": "",
+			"confirm_keep": "",
+			"confirm_order_sell": "",
+			"confirm_order_buy": ""
+		},
+		"limit_order": {
+			"title": "",
+			"review_title": "",
+			"placing_title": "",
+			"sell": "",
+			"buy": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
+			"you_sell": "",
+			"you_buy": "",
+			"hero_prefix": "",
+			"you_get_at_least": "",
+			"you_pay_at_most": "",
+			"connector_for": "",
+			"connector_with": "",
+			"network": "",
+			"amount_placeholder": "",
+			"price_placeholder": "",
+			"max": "",
+			"max_with_amount": "",
+			"set_price_first": "",
+			"balance": "",
+			"pick_token_to_begin": "",
+			"pick_token_to_price": "",
+			"pick_token_to_trade_against": "",
+			"price_label_sell_resting": "",
+			"price_label_buy_resting": "",
+			"price_label_sell_crossing": "",
+			"price_label_buy_crossing": "",
+			"price_label_fok_sell": "",
+			"price_label_fok_buy": "",
+			"price_label_default": "",
+			"preset_bid": "",
+			"preset_ask": "",
+			"preset_market": "",
+			"preset_sell_1": "",
+			"preset_sell_5": "",
+			"preset_buy_1": "",
+			"preset_buy_5": "",
+			"value_difference": "",
+			"value_difference_label": "",
+			"queue_position": "",
+			"queue_position_row": "",
+			"front_of_book": "",
+			"are_ahead": "",
+			"warning_crossing_sell": "",
+			"warning_crossing_buy": "",
+			"warning_fok_sell": "",
+			"warning_fok_buy": "",
+			"warning_fok_blocked_sell": "",
+			"warning_fok_blocked_buy": "",
+			"error_balance_sell": "",
+			"error_balance_buy": "",
+			"error_lot_multiple": "",
+			"error_tick_multiple": "",
+			"error_min_notional": "",
+			"error_max_notional": "",
+			"fok_title": "",
+			"fok_help": "",
+			"routing_name": "",
+			"routing_tag": "",
+			"best_ask": "",
+			"best_bid": "",
+			"spread": "",
+			"spread_value": "",
+			"maker_fee": "",
+			"taker_fee": "",
+			"no_fee": "",
+			"fee_percent": "",
+			"review_button": "",
+			"place_order_button": "",
+			"limit_price": "",
+			"limit_price_value": "",
+			"current_value": "",
+			"current_value_feed": "",
+			"dex": "",
+			"order_type": "",
+			"order_type_gtc": "",
+			"order_type_fok": "",
+			"fee_maker_taker": "",
+			"fee_taker": "",
+			"fee_maker_taker_value": "",
+			"give_up_confirm": "",
+			"market_moved_sell": "",
+			"market_moved_buy": "",
+			"placing_initializing": "",
+			"placing_sub": "",
+			"placing_done": "",
+			"place_error": ""
 		}
 	},
 	"transaction": {
@@ -2030,6 +2326,7 @@
 		"text": {
 			"title": "Vydělávat",
 			"tab_title": "Vydělávání",
+			"tab_title_short": "Vydělávat",
 			"earning_opportunities": "Příležitosti k výdělku",
 			"header_title": "Vítejte v sekci Vydělávat!",
 			"header_description": "Rozšiřujte své portfolio digitálních aktiv přidělováním tokenů do výdělečných příležitostí.",
@@ -2041,10 +2338,10 @@
 				"description": "Maximální výnosová efektivita s automatickými trezory na jeden klik.",
 				"action": "Přejít na Autopilot"
 			},
-			"sprinkles": {
-				"title": "OISY Sprinkles",
-				"description": "Používejte OISY a VYDĚLÁVEJTE! Ep. 6 je živě 🎉",
-				"action": "Zkontrolovat stav"
+			"liquidium": {
+				"title": "",
+				"description": "",
+				"action": ""
 			}
 		},
 		"card_fields": {
@@ -2054,6 +2351,8 @@
 			"currentStaked": "Stakováno",
 			"currentEarning": "Aktuálně vyděláváno",
 			"earningPotential": "Výdělečný potenciál",
+			"currentBorrowing": "",
+			"interestPerYear": "",
 			"terms": "Podmínky"
 		},
 		"terms": {
@@ -2063,6 +2362,105 @@
 			"goldDaoStaking": {
 				"cardTitle": "Vydělávejte s Gold DAO"
 			}
+		}
+	},
+	"liquidium": {
+		"text": {
+			"description": "Poskytni Bitcoin. Půjč si stablecoiny. Zůstaň nativní.",
+			"health_factor": "Faktor zdraví",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
+			"net_value": "Čistá hodnota",
+			"markets": "Trhy",
+			"total_supplied": "Celkem poskytnuto",
+			"no_assets_supplied": "žádná poskytnutá aktiva",
+			"supplied": "Poskytnuto",
+			"borrowed": "Vypůjčeno",
+			"borrow_rate": "Úroková sazba půjčky",
+			"apy_suffix": "APY",
+			"supply_label": "Poskytnout",
+			"borrow_label": "Půjčit si",
+			"coming_soon": "Již brzy",
+			"coming_soon_teaser": "Již brzy…",
+			"action_supply": "Poskytnout",
+			"action_borrow": "Půjčit si",
+			"action_repay": "Splatit",
+			"action_withdraw": "Vybrat",
+			"transaction_failed": "Transakce se nezdařila",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
+			"supply_review": "Zkontrolovat poskytnutí",
+			"supply_review_subtitle": "Poskytuješ",
+			"supplying": "Probíhá poskytnutí",
+			"starting_to_supply": "Tvá pozice se odesílá…",
+			"supply_started": "Tvá pozice se nyní aktivuje.",
+			"supply_apy": "APY za poskytnutí",
+			"supply_collateral_info": "Poskytnutá aktiva slouží také jako zajištění, proti kterému si můžeš půjčit.",
+			"supply_agreement": "Rozumím, že má aktiva budou poskytnuta protokolu Liquidium a podléhají riziku onchain smart kontraktů.",
+			"provider_fee": "Síťový poplatek",
+			"transaction_fee": "Transakční poplatek",
+			"insufficient_funds_for_fee": "Zůstatek nestačí na pokrytí částky a poplatků.",
+			"supply_prices_unavailable": "Ceny jsou dočasně nedostupné. Poskytování je deaktivováno, dokud se nenačtou.",
+			"borrow_review": "Zkontrolovat půjčku",
+			"borrow_review_subtitle": "Půjčuješ si",
+			"borrowing": "Probíhá půjčka",
+			"borrow_apy": "APY za půjčku",
+			"resulting_ltv": "Výsledné LTV",
+			"projected_health_factor": "Předpokládaný faktor zdraví",
+			"borrowing_power": "Úvěrový rámec",
+			"collateral": "Zajištění",
+			"minimum_borrow": "Minimální výše půjčky",
+			"provider": "Poskytovatel",
+			"funds_delivered_to": "Prostředky budou odeslány na",
+			"your_oisy_address": "Tvá adresa $oisy_short",
+			"borrow_risk_info": "Půjčka snižuje tvůj faktor zdraví. Pokud klesne příliš nízko, tvé zajištění může být zlikvidováno.",
+			"borrow_at_risk_warning": "Tato půjčka citelně sníží tvůj faktor zdraví.",
+			"borrow_exceeds_power": "Částka přesahuje tvůj úvěrový rámec.",
+			"borrow_below_minimum": "Částka je nižší než minimální výše půjčky.",
+			"borrow_prices_unavailable": "Ceny jsou dočasně nedostupné. Půjčování je deaktivováno, dokud se nenačtou.",
+			"borrow_high_risk_warning": "Tato půjčka přibližuje tvou pozici k likvidaci.",
+			"borrow_risk_confirm": "Rozumím, že tato půjčka zvyšuje mé riziko likvidace.",
+			"starting_to_borrow": "Tvá půjčka se odesílá…",
+			"borrow_started": "Tvá půjčka se nyní aktivuje.",
+			"withdraw_review": "Zkontrolovat výběr",
+			"withdraw_review_subtitle": "Vybíráš",
+			"withdrawing": "Probíhá výběr",
+			"starting_to_withdraw": "Tvůj výběr se odesílá…",
+			"withdraw_started": "Tvůj výběr se nyní zpracovává.",
+			"supplied_label": "Poskytnuto",
+			"withdrawable": "",
+			"reserved_by_debt": "Rezervováno kvůli otevřenému dluhu",
+			"withdraw_exceeds_free_collateral": "Dokud máš otevřený dluh, nemůžeš vybrat více než své volné zajištění.",
+			"withdraw_exceeds_supplied": "Částka přesahuje tvůj poskytnutý zůstatek.",
+			"withdraw_prices_unavailable": "Ceny jsou dočasně nedostupné. Výběr je deaktivován, dokud se nenačtou.",
+			"withdraw_risk_info": "Výběr zajištění snižuje tvůj faktor zdraví. Pokud klesne příliš nízko, tvé zbývající zajištění může být zlikvidováno.",
+			"withdraw_at_risk_warning": "Tento výběr citelně sníží tvůj faktor zdraví.",
+			"withdraw_high_risk_warning": "Tento výběr přibližuje tvou pozici k likvidaci.",
+			"withdraw_risk_confirm": "Rozumím, že tento výběr zvyšuje mé riziko likvidace.",
+			"repay_review": "Zkontrolovat splátku",
+			"repay_review_subtitle": "Splácíš",
+			"repaying": "Probíhá splácení",
+			"starting_to_repay": "Tvá splátka se odesílá…",
+			"repay_started": "Tvá splátka se nyní zpracovává.",
+			"current_debt": "Aktuální dluh",
+			"interest_accrued": "Narostlý úrok",
+			"debt_after_repay": "Dluh po splacení",
+			"repay_exceeds_debt": "Částka přesahuje tvůj nesplacený dluh.",
+			"repay_prices_unavailable": "Ceny jsou dočasně nedostupné. Splácení je deaktivováno, dokud se nenačtou."
+		},
+		"info": {
+			"title": "Co je Liquidium",
+			"description": "Liquidium je decentralizovaný, non-custodial lending protokol, ve kterém můžeš poskytovat nebo si půjčovat napříč více blockchainovými sítěmi. Je postaven na Internet Computeru a umožňuje cross-chain lending bez centralizovaných bridge nebo wrapped tokenů.",
+			"fact_1_title": "Vydělávej na svém BTC",
+			"fact_1_description": "Půjčuj svůj Bitcoin a získávej výnos z nadměrně zajištěných půjček.",
+			"fact_2_title": "Non-Custodial",
+			"fact_2_description": "Vklady jsou zajištěny onchain smart kontrakty, bez centralizované kontroly.",
+			"fact_3_title": "Nativní, Cross-Chain",
+			"fact_3_description": "Aktiva zůstávají na své nativní síti, takže můžeš poskytnout na jedné a půjčit si na druhé."
 		}
 	},
 	"vaults": {
@@ -2145,9 +2543,7 @@
 			"title_empty_3": "",
 			"description_empty": "Zdá se, že jste zatím nestakovali žádné tokeny",
 			"full_history": "Zobrazit celou historii",
-			"recent_history": "Zavřít celou historii",
-			"harvest_autopilot_carousel_slide_title": "Vydělávejte v OISY s Harvest Autopilot Yield Farming",
-			"harvest_autopilot_carousel_slide_cta": "Zjistit více"
+			"recent_history": "Zavřít celou historii"
 		},
 		"error": {
 			"unexpected_error_on_withdraw": "Při výběru tokenů došlo k chybě.",
@@ -2237,6 +2633,83 @@
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
 			"no_response": "Omlouvám se, nedostal jsem odpověď od LLM."
+		}
+	},
+	"notes": {
+		"text": {
+			"title": "Poznámky",
+			"note": "Poznámka",
+			"add_title": "Přidat novou poznámku",
+			"edit_note": "Upravit poznámku",
+			"delete_note": "Smazat poznámku",
+			"delete_confirm_text": "Tímto smažeš poznámku '$note'. Tuto akci nelze vrátit zpět.",
+			"back": "Zpět",
+			"empty_title": "Nemáš zatím žádné poznámky",
+			"empty_subtitle": "Vytvoř si soukromé, šifrované poznámky, abys měl(a) důležité informace v bezpečí vedle své peněženky.",
+			"empty_add": "Přidat novou poznámku",
+			"add_note": "Přidat poznámku",
+			"note_label": "Poznámka",
+			"placeholder": "Napiš poznámku…",
+			"search_placeholder": "Hledat poznámku",
+			"no_results": "Žádné poznámky neodpovídají tvému hledání.",
+			"encrypted_lead": "End-to-end šifrováno.",
+			"encrypted_info": "Poznámky si můžeš přečíst jen ty.",
+			"created": "Vytvořeno $date",
+			"updated": "Upraveno $date",
+			"created_updated": "Vytvořeno $created · Upraveno $updated",
+			"too_long": "Poznámka může mít nejvýše $maxCharacters znaků.",
+			"cap_reached": "Dosáhl(a) jsi maxima $max uložených poznámek. Jednu smaž, abys mohl(a) přidat novou.",
+			"decryption_failed": "Tuto poznámku se nepodařilo dešifrovat"
+		},
+		"alt": {
+			"edit": "Upravit poznámku",
+			"delete": "Smazat poznámku"
+		},
+		"error": {
+			"load": "Poznámky se nepodařilo načíst. Zkus to prosím znovu.",
+			"save": "Poznámku se nepodařilo uložit. Zkus to prosím znovu.",
+			"delete": "Poznámku se nepodařilo smazat. Zkus to prosím znovu."
+		},
+		"share": {
+			"text": {
+				"share_note": "Sdílet poznámku",
+				"snapshot_caption": "Sdílí kopii poznámky v jejím aktuálním stavu. Pozdější úprava nebo smazání poznámky tento odkaz nezmění.",
+				"cap_reached": "Dosáhl(a) jsi maxima $max aktivních sdílených odkazů. Uvolní se, jakmile vyprší nebo budou použity.",
+				"expires_after": "Odkaz vyprší po",
+				"expiry_1h": "1 hodině",
+				"expiry_24h": "24 hodinách",
+				"expiry_7d": "7 dnech",
+				"expiry_30d": "30 dnech",
+				"single_use": "Jednorázové",
+				"single_use_option": "Odkaz lze použít jen jednou",
+				"protects_body": "Tvou poznámku si může přečíst jen ten, kdo dostane tento odkaz.",
+				"create_link": "Vytvořit odkaz",
+				"link_ready_title": "Odkaz ke sdílení je připraven",
+				"link_ready_subtitle": "Kdokoli s tímto odkazem si může poznámku přečíst",
+				"link_copied": "Odkaz zkopírován!",
+				"recap_expires_in": "Vyprší za $duration",
+				"recap_single_use": "jednorázové",
+				"reminder": "$oisy_short nemůže tento odkaz po sdílení obnovit ani zneplatnit. Přestane fungovat, jakmile bude použit nebo vyprší.",
+				"done": "Hotovo"
+			},
+			"error": {
+				"create": "Sdílený odkaz se nepodařilo vytvořit. Zkus to prosím znovu."
+			},
+			"recipient": {
+				"locked_title": "Někdo s tebou sdílel poznámku",
+				"reveal": "Zobrazit poznámku",
+				"revealed_title": "Sdílená poznámka",
+				"single_use_caveat": "Jednorázový odkaz – jakmile tuto stránku zavřeš nebo znovu načteš, poznámka je navždy pryč. Pokud ji potřebuješ, zkopíruj si ji hned.",
+				"copy_note": "Kopírovat poznámku",
+				"note_copied": "Poznámka zkopírována!",
+				"outro_title": "Stejně tak v bezpečí drží i tvá aktiva",
+				"outro_subtitle": "$oisy_short je plně onchain peněženka s vlastní úschovou pro Bitcoin, Ethereum, Solanu, ICP a další.",
+				"outro_feature_multichain": "Bitcoin, Ethereum, Solana a ICP na jednom místě",
+				"outro_feature_onchain": "100% onchain – žádné rozšíření, žádná seed fráze",
+				"outro_feature_encrypted": "Tvé klíče a data, šifrované end-to-end",
+				"discover": "Objevit OISY",
+				"unavailable_title": "Tento odkaz vypršel nebo už byl použit"
+			}
 		}
 	}
 }

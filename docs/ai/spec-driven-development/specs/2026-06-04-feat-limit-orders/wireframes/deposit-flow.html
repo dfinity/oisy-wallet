@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Deposit Flow</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f5f5f3;
+				--color-background-tertiary: #eeede9;
+				--color-background-info: #e6f1fb;
+				--color-background-success: #eaf3de;
+				--color-background-warning: #faeeda;
+				--color-background-danger: #fcebeb;
+				--color-text-primary: #1a1a18;
+				--color-text-secondary: #5f5e5a;
+				--color-text-tertiary: #888780;
+				--color-text-info: #185fa5;
+				--color-text-success: #3b6d11;
+				--color-text-warning: #854f0b;
+				--color-text-danger: #a32d2d;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.25);
+				--color-border-info: #185fa5;
+				--accent: #0b57f5;
+				--accent-soft: #e9efff;
+				--color-border-success: #3b6d11;
+				--color-border-warning: #854f0b;
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--font-sans: system-ui, -apple-system, sans-serif;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family: var(--font-sans);
+				background: #f0efeb;
+				padding: 1.5rem;
+			}
+			.scene {
+				background: var(--color-background-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.5rem;
+				max-width: 480px;
+				margin: 0 auto;
+			}
+			.steps {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 1.25rem;
+				align-items: center;
+			}
+			.step-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: rgba(0, 0, 0, 0.2);
+			}
+			.step-dot.active {
+				background: var(--color-text-primary);
+			}
+			.step-dot.done {
+				background: var(--color-text-secondary);
+			}
+			.step-label {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-left: 4px;
+			}
+			.modal {
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem;
+				max-width: 380px;
+				margin: 0 auto;
+			}
+			.modal-title {
+				font-size: 15px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin-bottom: 1.25rem;
+			}
+			.field {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin-bottom: 10px;
+			}
+			.field-label {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				margin-bottom: 6px;
+			}
+			.field-main {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.amt-input {
+				font-size: 20px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 6px;
+				outline: none;
+				flex: 1;
+				min-width: 0;
+				padding: 4px 8px;
+				font-family: var(--font-sans);
+			}
+			.amt-input:focus {
+				border-color: var(--color-text-primary);
+			}
+			.amt-fiat {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 3px;
+			}
+			.bal-hint {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+				margin-top: 5px;
+			}
+			.tok-pill {
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				background: var(--color-background-primary);
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: 20px;
+				padding: 4px 8px 4px 6px;
+				cursor: pointer;
+				flex-shrink: 0;
+			}
+			.tok-dot {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 9px;
+				font-weight: 500;
+				color: var(--color-text-info);
+			}
+			.tok-sym {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.expandable {
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.expandable-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				cursor: pointer;
+				font-size: 13px;
+			}
+			.expandable-label {
+				color: var(--color-text-secondary);
+			}
+			.expandable-right {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+			}
+			.expandable-value {
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.expand-icon {
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+				transition: transform 0.2s;
+			}
+			.expand-icon.open {
+				transform: rotate(180deg);
+			}
+			.fee-item {
+				display: flex;
+				justify-content: space-between;
+				padding: 5px 0 5px 12px;
+				font-size: 12px;
+			}
+			.fee-item-label {
+				color: var(--color-text-tertiary);
+			}
+			.fee-item-value {
+				color: var(--color-text-secondary);
+			}
+			.agreement {
+				display: flex;
+				align-items: flex-start;
+				gap: 10px;
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 10px 12px;
+				margin: 10px 0 12px;
+				cursor: pointer;
+			}
+			.agreement.checked .checkbox {
+				background: var(--accent);
+				border-color: var(--accent);
+				color: #ffffff;
+			}
+			.checkbox {
+				width: 18px;
+				height: 18px;
+				border-radius: 4px;
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+				margin-top: 1px;
+				font-size: 12px;
+				color: var(--color-text-success);
+			}
+			.agreement-text {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				line-height: 1.5;
+			}
+			.agreement.checked .agreement-text {
+				color: var(--color-text-secondary);
+			}
+			.modal-value {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 9px 0;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 13px;
+			}
+			.mv-label {
+				color: var(--color-text-secondary);
+			}
+			.mv-value {
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-token {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 0.75rem 0 1rem;
+			}
+			.hero-dot {
+				width: 36px;
+				height: 36px;
+				border-radius: 50%;
+				background: var(--color-background-info);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				margin-bottom: 8px;
+			}
+			.hero-amount {
+				font-size: 28px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.hero-fiat {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				margin-top: 2px;
+			}
+			.progress-steps {
+				display: flex;
+				flex-direction: column;
+				gap: 14px;
+				padding: 1rem 0;
+			}
+			.prog-step {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.prog-dot {
+				width: 28px;
+				height: 28px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 13px;
+				flex-shrink: 0;
+			}
+			.prog-dot.done {
+				background: var(--color-background-success);
+				border-color: var(--color-border-success);
+				color: var(--color-text-success);
+			}
+			.prog-dot.active {
+				background: var(--color-background-warning);
+				border-color: var(--color-border-warning);
+				color: var(--color-text-warning);
+			}
+			.prog-dot.pending {
+				background: var(--color-background-secondary);
+				color: var(--color-text-tertiary);
+			}
+			.prog-label {
+				font-size: 13px;
+				color: var(--color-text-primary);
+			}
+			.prog-sub {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.btn-group {
+				display: flex;
+				gap: 8px;
+				margin-top: 12px;
+			}
+			.btn {
+				flex: 1;
+				padding: 13px;
+				border-radius: var(--border-radius-lg);
+				font-size: 15px;
+				font-weight: 600;
+				cursor: pointer;
+				font-family: var(--font-sans);
+				border: none;
+				background: var(--accent-soft);
+				color: var(--accent);
+			}
+			.btn-primary {
+				background: var(--accent);
+				color: #ffffff;
+			}
+			.btn-primary:disabled {
+				background: var(--color-background-tertiary);
+				color: var(--color-text-tertiary);
+				cursor: default;
+			}
+			@keyframes spin {
+				from {
+					transform: rotate(0deg);
+				}
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			.state-toggle {
+				display: flex;
+				gap: 6px;
+				max-width: 480px;
+				margin: 0 auto 1rem;
+			}
+			.toggle-btn {
+				font-size: 12px;
+				padding: 5px 12px;
+				border-radius: var(--border-radius-md);
+				border: 0.5px solid var(--color-border-secondary);
+				background: var(--color-background-primary);
+				color: var(--color-text-secondary);
+				cursor: pointer;
+				font-family: var(--font-sans);
+			}
+			.toggle-btn.active {
+				background: var(--color-text-primary);
+				color: var(--color-background-primary);
+				border-color: transparent;
+			}
+			.empty-wrap {
+				padding: 0.5rem 0 1.25rem;
+			}
+			.empty-title {
+				font-size: 15px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+				margin-bottom: 8px;
+			}
+			.empty-body {
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				line-height: 1.5;
+				margin-bottom: 14px;
+			}
+			.empty-tokens {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			.token-chip {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 4px 11px 4px 5px;
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: 20px;
+				background: var(--color-background-secondary);
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+			}
+			.modal-head {
+				position: relative;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: -1.25rem -1.25rem 1.25rem;
+				padding: 14px 16px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+			}
+			.modal-head-title {
+				font-size: 16px;
+				font-weight: 700;
+				color: var(--color-text-primary);
+			}
+			.modal-x {
+				position: absolute;
+				right: 16px;
+				top: 50%;
+				transform: translateY(-50%);
+				font-size: 16px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.seg-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.seg-net {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 12px;
+				color: var(--color-text-tertiary);
+			}
+			.net-ico {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				border: 0.5px solid var(--color-border-tertiary);
+				background: var(--color-background-primary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 11px;
+				color: var(--color-text-secondary);
+			}
+			.sub-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-top: 6px;
+			}
+			.amt-fiat {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+			}
+			.sw-ico {
+				font-size: 11px;
+				color: var(--color-text-tertiary);
+			}
+			.maxlink {
+				font-size: 11px;
+				font-weight: 500;
+				color: var(--color-text-info);
+				cursor: pointer;
+			}
+			.dep-err {
+				font-size: 11px;
+				color: var(--color-text-danger);
+				margin-top: 6px;
+				display: none;
+			}
+			.field.invalid {
+				border-color: var(--color-text-danger);
+			}
+			.hero-card {
+				background: var(--color-background-info);
+				border-radius: var(--border-radius-lg);
+				padding: 1.25rem 1rem;
+				text-align: center;
+				margin-bottom: 1rem;
+			}
+			.hero-label {
+				font-size: 13px;
+				font-weight: 500;
+				color: var(--color-text-primary);
+				margin: 8px 0 2px;
+			}
+			.info-card {
+				background: var(--color-background-secondary);
+				border: 0.5px solid var(--color-border-tertiary);
+				border-radius: var(--border-radius-md);
+				padding: 12px;
+				margin-top: 12px;
+			}
+			.info-head {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+			}
+			.info-title {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 13px;
+				font-weight: 600;
+				color: var(--color-text-primary);
+			}
+			.info-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 3px;
+				font-size: 12px;
+				color: var(--color-text-info);
+				cursor: pointer;
+				white-space: nowrap;
+			}
+			.info-body {
+				font-size: 12px;
+				color: var(--color-text-secondary);
+				line-height: 1.5;
+				margin-top: 8px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="state-toggle">
+			<button class="toggle-btn active" id="tb-normal" onclick="setMode('normal')">
+				Has tokens
+			</button>
+			<button class="toggle-btn" id="tb-dust" onclick="setMode('dust')">Low balance (≤ fee)</button>
+			<button class="toggle-btn" id="tb-empty" onclick="setMode('empty')">
+				Nothing to deposit
+			</button>
+		</div>
+		<div class="scene">
+			<div class="steps">
+				<div class="step-dot active" id="dot-1"></div>
+				<div class="step-dot" id="dot-2"></div>
+				<div class="step-dot" id="dot-3"></div>
+				<span class="step-label" id="step-label">Form</span>
+			</div>
+			<div id="screen-form">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Deposit</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="field" id="dep-field">
+						<div class="seg-head">
+							<span class="field-label">You deposit</span>
+							<span class="seg-net"
+								>On Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
+							></span>
+						</div>
+						<div class="field-main">
+							<input class="amt-input" id="dep-amt" type="text" value="100" oninput="onDepAmt()" />
+							<div class="tok-pill">
+								<div class="tok-dot">ICP</div>
+								<span class="tok-sym">ICP</span
+								><i
+									class="ti ti-chevron-down"
+									style="font-size: 12px; color: var(--color-text-tertiary)"
+								></i>
+							</div>
+						</div>
+						<div class="dep-err" id="dep-err"></div>
+						<div class="sub-row">
+							<span class="amt-fiat"
+								><i class="ti ti-arrows-up-down sw-ico"></i>
+								<span id="dep-fiat">$269.00</span></span
+							>
+							<span class="maxlink" id="dep-max" onclick="maxDeposit()">Max: 499.9998 ICP</span>
+						</div>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">To</span><span class="mv-value">OISY TRADE</span>
+					</div>
+					<div class="expandable">
+						<div class="expandable-header" onclick="toggleFees('f')">
+							<span class="expandable-label">Transaction fee</span>
+							<div class="expandable-right">
+								<span class="expandable-value">&lt;$0.01</span
+								><i class="ti ti-chevron-down expand-icon" id="fee-icon-f"></i>
+							</div>
+						</div>
+						<div id="fee-items-f" style="display: none">
+							<div class="fee-item">
+								<span class="fee-item-label">Approval fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+							<div class="fee-item" style="padding-bottom: 6px">
+								<span class="fee-item-label">Transfer fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+						</div>
+					</div>
+					<div class="agreement" id="agreement" onclick="toggleAgreement()">
+						<div class="checkbox" id="checkbox"></div>
+						<span class="agreement-text"
+							>I understand my tokens will be held by the OISY TRADE canister and are subject to
+							on-chain smart contract risk.</span
+						>
+					</div>
+					<div class="info-card">
+						<div class="info-head">
+							<span class="info-title"
+								><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span
+							>
+							<span class="info-link">Learn more <i class="ti ti-external-link"></i></span>
+						</div>
+						<div class="info-body">
+							Deposited funds are held by the OISY TRADE canister and used to place limit orders and
+							swaps, secured by on-chain smart contracts.
+						</div>
+					</div>
+					<div class="btn-group">
+						<button class="btn">Cancel</button
+						><button class="btn btn-primary" id="review-btn" disabled onclick="showStep('review')">
+							Review
+						</button>
+					</div>
+				</div>
+			</div>
+			<div id="screen-review" style="display: none">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Review deposit</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="hero-card">
+						<div class="hero-dot">ICP</div>
+						<div class="hero-label">You deposit</div>
+						<div class="hero-amount" id="r-dep-amt">100 ICP</div>
+						<div class="hero-fiat" id="r-dep-fiat">$269.00</div>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">Network</span
+						><span class="mv-value" style="display: inline-flex; align-items: center; gap: 6px"
+							>Internet Computer<span class="net-ico"><i class="ti ti-infinity"></i></span
+						></span>
+					</div>
+					<div class="modal-value">
+						<span class="mv-label">To</span><span class="mv-value">OISY TRADE</span>
+					</div>
+					<div class="expandable" style="border: none">
+						<div class="expandable-header" onclick="toggleFees('r')">
+							<span class="expandable-label">Transaction fee</span>
+							<div class="expandable-right">
+								<span class="expandable-value">&lt;$0.01</span
+								><i class="ti ti-chevron-down expand-icon" id="fee-icon-r"></i>
+							</div>
+						</div>
+						<div id="fee-items-r" style="display: none">
+							<div class="fee-item">
+								<span class="fee-item-label">Approval fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+							<div class="fee-item" style="padding-bottom: 6px">
+								<span class="fee-item-label">Transfer fee</span
+								><span class="fee-item-value">0.0001 ICP</span>
+							</div>
+						</div>
+					</div>
+					<div class="info-card">
+						<div class="info-head">
+							<span class="info-title"
+								><i class="ti ti-arrows-exchange"></i> OISY TRADE: on-chain order book</span
+							>
+							<span class="info-link">Learn more <i class="ti ti-external-link"></i></span>
+						</div>
+						<div class="info-body">
+							Deposited funds are held by the OISY TRADE canister and used to place limit orders and
+							swaps, secured by on-chain smart contracts.
+						</div>
+					</div>
+					<div class="btn-group">
+						<button class="btn" onclick="showStep('form')">
+							<i class="ti ti-arrow-left"></i> Back</button
+						><button class="btn btn-primary" onclick="showStep('progress')">Deposit</button>
+					</div>
+				</div>
+			</div>
+			<div id="screen-progress" style="display: none">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title" id="prog-title">Depositing</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="progress-steps">
+						<div class="prog-step">
+							<div class="prog-dot done" id="p1"><i class="ti ti-check"></i></div>
+							<div>
+								<div class="prog-label">Approved</div>
+								<div class="prog-sub">OISY TRADE authorised to transfer ICP</div>
+							</div>
+						</div>
+						<div class="prog-step">
+							<div class="prog-dot active" id="p2">
+								<i class="ti ti-loader-2" style="animation: spin 1s linear infinite"></i>
+							</div>
+							<div>
+								<div class="prog-label">Depositing</div>
+								<div class="prog-sub">Transferring ICP to OISY TRADE</div>
+							</div>
+						</div>
+						<div class="prog-step">
+							<div class="prog-dot pending" id="p3"><i class="ti ti-check"></i></div>
+							<div>
+								<div class="prog-label" id="p3-label" style="color: var(--color-text-tertiary)">
+									Done
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="screen-empty" style="display: none">
+				<div class="modal">
+					<div class="modal-head">
+						<span class="modal-head-title">Deposit</span>
+						<i class="ti ti-x modal-x"></i>
+					</div>
+					<div class="empty-wrap">
+						<div class="empty-title">Nothing to deposit yet</div>
+						<div class="empty-body">
+							OISY TRADE lets you create orders for these tokens. Add any of them to your wallet,
+							then deposit it here to start trading.
+						</div>
+						<div class="empty-tokens" id="empty-tokens"></div>
+					</div>
+					<div class="btn-group"><button class="btn">Close</button></div>
+				</div>
+			</div>
+		</div>
+		<script>
+			let agreed = false;
+			function toggleAgreement() {
+				agreed = !agreed;
+				document.getElementById('checkbox').textContent = agreed ? '✓' : '';
+				document.getElementById('agreement').className = 'agreement' + (agreed ? ' checked' : '');
+				validateDeposit();
+			}
+			function toggleFees(id) {
+				const el = document.getElementById('fee-items-' + id),
+					icon = document.getElementById('fee-icon-' + id);
+				const open = el.style.display === 'none';
+				el.style.display = open ? 'block' : 'none';
+				icon.className = 'ti ti-chevron-down expand-icon' + (open ? ' open' : '');
+			}
+			function showStep(step) {
+				['form', 'review', 'progress'].forEach(
+					(s) => (document.getElementById('screen-' + s).style.display = 'none')
+				);
+				document.getElementById('screen-' + step).style.display = 'block';
+				if (step === 'review') {
+					var amt = parseFloat(document.getElementById('dep-amt').value) || 0;
+					document.getElementById('r-dep-amt').textContent = amt + ' ICP';
+					document.getElementById('r-dep-fiat').textContent = '$' + (amt * DEP_PRICE).toFixed(2);
+				}
+				const nums = { form: 1, review: 2, progress: 3 };
+				const labels = { form: 'Form', review: 'Review', progress: 'Depositing' };
+				document.getElementById('step-label').textContent = labels[step];
+				[1, 2, 3].forEach((i) => {
+					const n = nums[step];
+					document.getElementById('dot-' + i).className =
+						'step-dot' + (i === n ? ' active' : i < n ? ' done' : '');
+				});
+				if (step === 'progress')
+					setTimeout(() => {
+						document.getElementById('p2').className = 'prog-dot done';
+						document.getElementById('p2').innerHTML = '<i class="ti ti-check"></i>';
+						document.getElementById('p3').className = 'prog-dot done';
+						document.getElementById('p3-label').style.color = 'var(--color-text-success)';
+						document.getElementById('prog-title').textContent = 'Deposited';
+					}, 2000);
+			}
+
+			// supported tokens = distinct union of all base + quote tokens across the trading pairs (dynamic)
+			const DEPOSIT_PAIRS = [
+				['ICP', 'ckUSDC'],
+				['ICP', 'ckUSDT'],
+				['ICP', 'ckBTC'],
+				['ckBTC', 'ckUSDC']
+			];
+			const SUPPORTED = [...new Set(DEPOSIT_PAIRS.flat())];
+			function renderSupported() {
+				document.getElementById('empty-tokens').innerHTML = SUPPORTED.map(
+					(t) => '<span class="token-chip"><span class="tok-dot"></span>' + t + '</span>'
+				).join('');
+			}
+			// toggle between the normal deposit flow and the empty (nothing-to-deposit) state
+			function setMode(mode) {
+				const empty = mode === 'empty';
+				document.querySelector('.steps').style.display = empty ? 'none' : 'flex';
+				['form', 'review', 'progress'].forEach(
+					(scr) => (document.getElementById('screen-' + scr).style.display = 'none')
+				);
+				document.getElementById('screen-empty').style.display = empty ? 'block' : 'none';
+				if (!empty) showStep('form');
+				// scenario balances: dust = a balance at/below the fee (Max clamps to 0)
+				DEP_BAL = mode === 'dust' ? 0.0001 : 500;
+				document.getElementById('dep-amt').value = mode === 'dust' ? '' : '100';
+				refreshDeposit();
+				document.getElementById('tb-normal').className =
+					'toggle-btn' + (mode === 'normal' ? ' active' : '');
+				document.getElementById('tb-dust').className =
+					'toggle-btn' + (mode === 'dust' ? ' active' : '');
+				document.getElementById('tb-empty').className =
+					'toggle-btn' + (mode === 'empty' ? ' active' : '');
+			}
+			renderSupported();
+
+			// deposit demo model — Max is wallet balance minus the expected ledger fees (approval + transfer),
+			// since deposit fees sit on top of the entered amount.
+			var DEP_PRICE = 2.69,
+				DEP_FEE = 0.0002,
+				DEP_BAL = 500;
+			function depMax() {
+				return Math.max(0, DEP_BAL - DEP_FEE);
+			}
+			function maxDeposit() {
+				document.getElementById('dep-amt').value = depMax().toFixed(4);
+				validateDeposit();
+			}
+			// affordability: amount + fee must fit the balance; otherwise show the error and disable Review
+			function validateDeposit() {
+				var amt = parseFloat(document.getElementById('dep-amt').value) || 0;
+				document.getElementById('dep-fiat').textContent = '$' + (amt * DEP_PRICE).toFixed(2);
+				var bad = amt > 0 && amt + DEP_FEE > DEP_BAL + 1e-12;
+				var err = document.getElementById('dep-err');
+				err.textContent = bad
+					? DEP_BAL <= DEP_FEE
+						? 'Balance too low to cover the network fee'
+						: 'Amount + fee exceeds your ' + DEP_BAL + ' ICP balance'
+					: '';
+				err.style.display = bad ? 'block' : 'none';
+				document.getElementById('dep-field').className = 'field' + (bad ? ' invalid' : '');
+				document.getElementById('review-btn').disabled = !(agreed && amt > 0 && !bad);
+			}
+			function onDepAmt() {
+				validateDeposit();
+			}
+			function refreshDeposit() {
+				document.getElementById('dep-max').textContent = 'Max: ' + depMax().toFixed(4) + ' ICP';
+				validateDeposit();
+			}
+			refreshDeposit();
+		</script>
+	</body>
+</html>

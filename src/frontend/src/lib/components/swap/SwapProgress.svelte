@@ -9,7 +9,7 @@
 		sendWithApproval?: boolean;
 		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
-		swapWithBridging?: boolean;
+		swapWithActiveTransaction?: boolean;
 		failedSteps?: string[];
 	}
 
@@ -19,7 +19,7 @@
 		sendWithApproval = false,
 		sendWithTransfer = false,
 		swapWithWithdrawing = false,
-		swapWithBridging = false
+		swapWithActiveTransaction = false
 	}: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
@@ -53,7 +53,7 @@
 			: []),
 		{
 			step: ProgressStepsSwap.SWAP,
-			text: swapWithBridging ? $i18n.swap.text.bridging : $i18n.swap.text.swapping,
+			text: swapWithActiveTransaction ? $i18n.swap.text.starting_to_swap : $i18n.swap.text.swapping,
 			state: 'next'
 		},
 		...(swapWithWithdrawing
@@ -67,7 +67,9 @@
 			: []),
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
-			text: $i18n.swap.text.refreshing_ui,
+			text: swapWithActiveTransaction
+				? $i18n.swap.text.starting_to_bridge
+				: $i18n.swap.text.refreshing_ui,
 			state: 'next'
 		}
 	]);

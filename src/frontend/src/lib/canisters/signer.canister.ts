@@ -21,6 +21,7 @@ import {
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
 import type {
+	GenericSignWithEcdsaParams,
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,
 	SignWithSchnorrParams
@@ -281,5 +282,30 @@ export class SignerCanister extends Canister<SignerService> {
 
 		// TODO: map error like the other methods when SchnorrSignError is exposed in the Signer repo
 		throw response.Err;
+	};
+
+	genericSignWithEcdsa = async ({
+		derivationPath,
+		keyId,
+		messageHash
+	}: GenericSignWithEcdsaParams): Promise<Uint8Array> => {
+		const { generic_sign_with_ecdsa } = this.caller({
+			certified: true
+		});
+
+		// Note: the candid signature is `(opt PaymentType, SignWithEcdsaArgument)`, so the
+		// payment type is the first argument here (unlike the other signer methods).
+		const response = await generic_sign_with_ecdsa([SIGNER_PAYMENT_TYPE], {
+			key_id: keyId,
+			derivation_path: mapDerivationPath(derivationPath),
+			message_hash: messageHash
+		});
+
+		if ('Ok' in response) {
+			const { signature } = fromDefinedNullable(response.Ok);
+			return signature;
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 }

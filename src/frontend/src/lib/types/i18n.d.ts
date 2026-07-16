@@ -2,6 +2,28 @@
  * Auto-generated definitions file ("npm run i18n")
  */
 
+interface I18nBorrow {
+	text: {
+		header_title: string;
+		header_description: string;
+		borrowing_options: string;
+		borrowing_potential: string;
+		borrowing_power_hint: string;
+		available_best_provider: string;
+		remaining_best_provider: string;
+		active_loans: string;
+		no_active_loans: string;
+		amount_borrowed: string;
+		apr: string;
+		borrow_apr_from: string;
+	};
+	cards: { liquidium: { title: string; description: string; action: string } };
+}
+
+interface I18nBorrowings {
+	text: { tab_title: string; tab_title_short: string; no_borrowings: string; go_to_borrow: string };
+}
+
 interface I18nCore {
 	text: {
 		cancel: string;
@@ -10,6 +32,8 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		collapse: string;
+		expand: string;
 		change: string;
 		continue: string;
 		apply: string;
@@ -70,12 +94,24 @@ interface I18nCore {
 	warning: { do_not_close: string; standalone_mode: string; video_not_supported: string };
 }
 
+interface I18nProgress {
+	completed: string;
+	in_progress: string;
+	failed: string;
+}
+
 interface I18nNavigation {
 	text: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		section_portfolio: string;
+		section_finance: string;
+		section_more: string;
 		airdrops: string;
 		earning: string;
 		pay: string;
@@ -94,12 +130,17 @@ interface I18nNavigation {
 		show_balances: string;
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
+		notes: string;
 	};
 	alt: {
 		tokens: string;
+		nfts: string;
 		settings: string;
 		dapp_explorer: string;
 		activity: string;
+		trade: string;
+		borrow: string;
+		earning: string;
 		airdrops: string;
 		pay: string;
 		wallet_connect: string;
@@ -113,6 +154,7 @@ interface I18nNavigation {
 		address_book: string;
 		hide_balances: string;
 		show_balances: string;
+		notes: string;
 	};
 	short: { documentation: string };
 }
@@ -210,14 +252,14 @@ interface I18nDapps {
 		aa_new: string;
 		ab_icp: string;
 		ai: string;
-		defi: string;
+		dex: string;
 		game: string;
+		lending: string;
 		nft: string;
 		rwa: string;
-		social_media: string;
+		social: string;
 		staking: string;
 		tools: string;
-		walletconnect: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -234,14 +276,6 @@ interface I18nDapps {
 			stats: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		decideid: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			stats: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		icpswap: { name: string; one_liner: string; call_to_action: string; description: string };
 		nnsdapp: { name: string; one_liner: string; call_to_action: string; description: string };
 		uniswap: { name: string; one_liner: string; call_to_action: string; description: string };
@@ -255,13 +289,6 @@ interface I18nDapps {
 		aave: { name: string; one_liner: string; call_to_action: string; description: string };
 		eigenlayer: { name: string; one_liner: string; call_to_action: string; description: string };
 		curve_finance: { name: string; one_liner: string; call_to_action: string; description: string };
-		sonic: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
@@ -275,8 +302,6 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		beam: { name: string; one_liner: string; call_to_action: string; description: string };
-		axie_infinity: { name: string; one_liner: string; description: string };
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
@@ -287,15 +312,9 @@ interface I18nDapps {
 		kamino: { name: string; one_liner: string; description: string };
 		helium: { name: string; one_liner: string; description: string };
 		sanctum: { name: string; one_liner: string; description: string };
-		sphere_finance: { name: string; one_liner: string; description: string };
 		binaryx: { name: string; one_liner: string; description: string };
 		parcl: { name: string; one_liner: string; description: string };
-		liquidium: {
-			name: string;
-			one_liner: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
+		liquidium: { name: string; one_liner: string; description: string };
 		icpindex: {
 			name: string;
 			one_liner: string;
@@ -306,6 +325,13 @@ interface I18nDapps {
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
 		icp_flags: { name: string; one_liner: string; description: string };
+		cloud_engines: {
+			name: string;
+			one_liner: string;
+			description: string;
+			carousel: { text: string; call_to_action: string };
+		};
+		hyperliquid: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -505,6 +531,7 @@ interface I18nSettings {
 	text: {
 		title: string;
 		general: string;
+		preferences: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -770,6 +797,19 @@ interface I18nBurn {
 	text: { burn: string; burning: string; burn_review_subtitle: string };
 }
 
+interface I18nActive_user_transactions {
+	text: {
+		button_label: string;
+		open_aria_label: string;
+		empty: string;
+		section_in_progress: string;
+		section_failed: string;
+		section_previous: string;
+		dismiss_aria_label: string;
+	};
+	error: { dismiss_failed: string };
+}
+
 interface I18nScanner {
 	text: {
 		scan_qr_code: string;
@@ -877,6 +917,8 @@ interface I18nSwap {
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
+		starting_to_swap: string;
+		starting_to_bridge: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -893,7 +935,6 @@ interface I18nSwap {
 		select_token: string;
 		select_network_filter: string;
 		withdrawing: string;
-		bridging: string;
 		network_cost: string;
 		gasless: string;
 		swap_fees: string;
@@ -924,6 +965,7 @@ interface I18nSwap {
 		swap_sucess_manually_withdraw_success: string;
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
+		swap_refunded: string;
 	};
 }
 
@@ -932,7 +974,8 @@ interface I18nBuy {
 		buy: string;
 		buy_dev: string;
 		unavailable_title: string;
-		unavailable_description: string;
+		unavailable_description_disabled: string;
+		unavailable_description_signing_failed: string;
 		unavailable_fallback_hint: string;
 	};
 	actions: { close: string };
@@ -963,6 +1006,7 @@ interface I18nPay {
 interface I18nTokens {
 	text: {
 		title: string;
+		title_short: string;
 		contract_address: string;
 		token_address: string;
 		balance: string;
@@ -1112,6 +1156,8 @@ interface I18nToken_tag {
 interface I18nNfts {
 	text: {
 		title: string;
+		count_one: string;
+		count_other: string;
 		title_empty: string;
 		description_empty: string;
 		title_not_supported: string;
@@ -1234,10 +1280,28 @@ interface I18nWallet_connect {
 		network: string;
 		amount: string;
 		hex_data: string;
+		unreviewed_instructions: string;
 		raw_copied: string;
 		sign_message: string;
+		sign_psbt: string;
+		signing_address: string;
+		fee: string;
+		btc_symbol: string;
+		psbt_inputs: string;
+		psbt_outputs: string;
+		psbt_total_signed_inputs: string;
+		psbt_unknown_address: string;
+		psbt_unknown_value: string;
+		psbt_fee_unknown: string;
+		psbt_signed_by_wallet: string;
+		psbt_broadcast: string;
+		psbt_broadcast_enabled: string;
+		psbt_broadcast_disabled: string;
+		psbt_broadcast_unsupported_note: string;
 		connected_apps: string;
 		no_connected_apps: string;
+		disconnect_all: string;
+		disconnect_app: string;
 		wallet_connect: string;
 	};
 	alt: { connect_input: string };
@@ -1274,11 +1338,237 @@ interface I18nWallet_connect {
 		request_rejected: string;
 		unknown_parameter: string;
 		wallet_not_initialized: string;
+		btc_broadcast_not_supported: string;
+		btc_non_mainnet_sign_not_supported: string;
+		btc_psbt_decode: string;
+		btc_psbt_input_not_segwit: string;
+		btc_psbt_input_not_owned: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
+	};
+}
+
+interface I18nTrading {
+	text: {
+		tab_title: string;
+		tab_title_short: string;
+		intro: string;
+		learn_more: string;
+		provider_name: string;
+		go_to_trade: string;
+	};
+	page: {
+		tagline: string;
+		trading_potential: string;
+		trading_potential_hint: string;
+		deposited_assets: string;
+		deposited_all_free: string;
+		deposited_empty: string;
+		free: string;
+		in_orders: string;
+		in_orders_label: string;
+		positions: string;
+		deposit: string;
+		withdraw: string;
+		active_orders: string;
+		active_orders_empty_deposit: string;
+		active_orders_empty_place: string;
+		new_order: string;
+		order_history: string;
+	};
+	provider_unavailable: { title: string; description: string };
+	onboarding: {
+		title: string;
+		description: string;
+		step_deposit: string;
+		step_order: string;
+		step_withdraw: string;
+		supported_tokens: string;
+		deposit: string;
+	};
+	assets: { title: string; empty: string };
+	deposit: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		you_deposit: string;
+		error_insufficient_balance: string;
+		to: string;
+		network: string;
+		transaction_fee: string;
+		approval_fee: string;
+		transfer_fee: string;
+		info_title: string;
+		info_description: string;
+		empty_title: string;
+		empty_description: string;
+		approving: string;
+		approved: string;
+		approve_description: string;
+		depositing: string;
+		deposit_description: string;
+		done: string;
+		error: { unknown_fee: string; deposit_failed: string };
+	};
+	withdraw: {
+		title: string;
+		review_title: string;
+		progress_title: string;
+		amount_label: string;
+		from: string;
+		network: string;
+		transaction_fee: string;
+		transfer_fee: string;
+		you_receive: string;
+		reserved_note: string;
+		error_insufficient_balance: string;
+		submit: string;
+		open: string;
+		progress_withdraw: string;
+		progress_done: string;
+		error: string;
+	};
+	orders: {
+		title: string;
+		add_limit_order: string;
+		tab_active: string;
+		tab_history: string;
+		empty_active: string;
+		empty_history: string;
+		side_sell: string;
+		side_buy: string;
+		row_sell: string;
+		row_buy: string;
+		row_phrase_sell: string;
+		row_phrase_buy: string;
+		queue_ahead: string;
+		status_open: string;
+		status_pending: string;
+		status_partial: string;
+		status_filled: string;
+		status_canceled: string;
+		status_expired: string;
+		count_filled: string;
+		count_expired: string;
+		count_canceled: string;
+	};
+	info: {
+		title: string;
+		description: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
+	};
+	order_detail: {
+		title: string;
+		status: string;
+		filled: string;
+		cancel_order: string;
+		cancel_error: string;
+		confirm_title: string;
+		confirm_description: string;
+		confirm_order: string;
+		confirm_price: string;
+		confirm_returns_to_free: string;
+		confirm_keep: string;
+		confirm_order_sell: string;
+		confirm_order_buy: string;
+	};
+	limit_order: {
+		title: string;
+		review_title: string;
+		placing_title: string;
+		sell: string;
+		buy: string;
+		select_sell_token: string;
+		select_buy_token: string;
+		you_sell: string;
+		you_buy: string;
+		hero_prefix: string;
+		you_get_at_least: string;
+		you_pay_at_most: string;
+		connector_for: string;
+		connector_with: string;
+		network: string;
+		amount_placeholder: string;
+		price_placeholder: string;
+		max: string;
+		max_with_amount: string;
+		set_price_first: string;
+		balance: string;
+		pick_token_to_begin: string;
+		pick_token_to_price: string;
+		pick_token_to_trade_against: string;
+		price_label_sell_resting: string;
+		price_label_buy_resting: string;
+		price_label_sell_crossing: string;
+		price_label_buy_crossing: string;
+		price_label_fok_sell: string;
+		price_label_fok_buy: string;
+		price_label_default: string;
+		preset_bid: string;
+		preset_ask: string;
+		preset_market: string;
+		preset_sell_1: string;
+		preset_sell_5: string;
+		preset_buy_1: string;
+		preset_buy_5: string;
+		value_difference: string;
+		value_difference_label: string;
+		queue_position: string;
+		queue_position_row: string;
+		front_of_book: string;
+		are_ahead: string;
+		warning_crossing_sell: string;
+		warning_crossing_buy: string;
+		warning_fok_sell: string;
+		warning_fok_buy: string;
+		warning_fok_blocked_sell: string;
+		warning_fok_blocked_buy: string;
+		error_balance_sell: string;
+		error_balance_buy: string;
+		error_lot_multiple: string;
+		error_tick_multiple: string;
+		error_min_notional: string;
+		error_max_notional: string;
+		fok_title: string;
+		fok_help: string;
+		routing_name: string;
+		routing_tag: string;
+		best_ask: string;
+		best_bid: string;
+		spread: string;
+		spread_value: string;
+		maker_fee: string;
+		taker_fee: string;
+		no_fee: string;
+		fee_percent: string;
+		review_button: string;
+		place_order_button: string;
+		limit_price: string;
+		limit_price_value: string;
+		current_value: string;
+		current_value_feed: string;
+		dex: string;
+		order_type: string;
+		order_type_gtc: string;
+		order_type_fok: string;
+		fee_maker_taker: string;
+		fee_taker: string;
+		fee_maker_taker_value: string;
+		give_up_confirm: string;
+		market_moved_sell: string;
+		market_moved_buy: string;
+		placing_initializing: string;
+		placing_sub: string;
+		placing_done: string;
+		place_error: string;
 	};
 }
 
@@ -1585,6 +1875,7 @@ interface I18nEarning {
 	text: {
 		title: string;
 		tab_title: string;
+		tab_title_short: string;
 		earning_opportunities: string;
 		header_title: string;
 		header_description: string;
@@ -1592,7 +1883,7 @@ interface I18nEarning {
 	};
 	cards: {
 		harvest_autopilot: { title: string; description: string; action: string };
-		sprinkles: { title: string; description: string; action: string };
+		liquidium: { title: string; description: string; action: string };
 	};
 	card_fields: {
 		apy: string;
@@ -1601,10 +1892,112 @@ interface I18nEarning {
 		currentStaked: string;
 		currentEarning: string;
 		earningPotential: string;
+		currentBorrowing: string;
+		interestPerYear: string;
 		terms: string;
 	};
 	terms: { flexible: string };
 	providers: { goldDaoStaking: { cardTitle: string } };
+}
+
+interface I18nLiquidium {
+	text: {
+		description: string;
+		health_factor: string;
+		health_no_debt: string;
+		health_healthy: string;
+		health_at_risk: string;
+		health_critical: string;
+		net_value: string;
+		markets: string;
+		total_supplied: string;
+		no_assets_supplied: string;
+		supplied: string;
+		borrowed: string;
+		borrow_rate: string;
+		apy_suffix: string;
+		supply_label: string;
+		borrow_label: string;
+		coming_soon: string;
+		coming_soon_teaser: string;
+		action_supply: string;
+		action_borrow: string;
+		action_repay: string;
+		action_withdraw: string;
+		transaction_failed: string;
+		select_supply_token: string;
+		select_borrow_token: string;
+		select_withdraw_token: string;
+		select_repay_token: string;
+		supply_review: string;
+		supply_review_subtitle: string;
+		supplying: string;
+		starting_to_supply: string;
+		supply_started: string;
+		supply_apy: string;
+		supply_collateral_info: string;
+		supply_agreement: string;
+		provider_fee: string;
+		transaction_fee: string;
+		insufficient_funds_for_fee: string;
+		supply_prices_unavailable: string;
+		borrow_review: string;
+		borrow_review_subtitle: string;
+		borrowing: string;
+		borrow_apy: string;
+		resulting_ltv: string;
+		projected_health_factor: string;
+		borrowing_power: string;
+		collateral: string;
+		minimum_borrow: string;
+		provider: string;
+		funds_delivered_to: string;
+		your_oisy_address: string;
+		borrow_risk_info: string;
+		borrow_at_risk_warning: string;
+		borrow_exceeds_power: string;
+		borrow_below_minimum: string;
+		borrow_prices_unavailable: string;
+		borrow_high_risk_warning: string;
+		borrow_risk_confirm: string;
+		starting_to_borrow: string;
+		borrow_started: string;
+		withdraw_review: string;
+		withdraw_review_subtitle: string;
+		withdrawing: string;
+		starting_to_withdraw: string;
+		withdraw_started: string;
+		supplied_label: string;
+		withdrawable: string;
+		reserved_by_debt: string;
+		withdraw_exceeds_free_collateral: string;
+		withdraw_exceeds_supplied: string;
+		withdraw_prices_unavailable: string;
+		withdraw_risk_info: string;
+		withdraw_at_risk_warning: string;
+		withdraw_high_risk_warning: string;
+		withdraw_risk_confirm: string;
+		repay_review: string;
+		repay_review_subtitle: string;
+		repaying: string;
+		starting_to_repay: string;
+		repay_started: string;
+		current_debt: string;
+		interest_accrued: string;
+		debt_after_repay: string;
+		repay_exceeds_debt: string;
+		repay_prices_unavailable: string;
+	};
+	info: {
+		title: string;
+		description: string;
+		fact_1_title: string;
+		fact_1_description: string;
+		fact_2_title: string;
+		fact_2_description: string;
+		fact_3_title: string;
+		fact_3_description: string;
+	};
 }
 
 interface I18nVaults {
@@ -1686,8 +2079,6 @@ interface I18nStake {
 		description_empty: string;
 		full_history: string;
 		recent_history: string;
-		harvest_autopilot_carousel_slide_title: string;
-		harvest_autopilot_carousel_slide_cta: string;
 	};
 	error: {
 		unexpected_error_on_withdraw: string;
@@ -1776,9 +2167,81 @@ interface I18nAi_assistant {
 	errors: { unknown: string; no_response: string };
 }
 
+interface I18nNotes {
+	text: {
+		title: string;
+		note: string;
+		add_title: string;
+		edit_note: string;
+		delete_note: string;
+		delete_confirm_text: string;
+		back: string;
+		empty_title: string;
+		empty_subtitle: string;
+		empty_add: string;
+		add_note: string;
+		note_label: string;
+		placeholder: string;
+		search_placeholder: string;
+		no_results: string;
+		encrypted_lead: string;
+		encrypted_info: string;
+		created: string;
+		updated: string;
+		created_updated: string;
+		too_long: string;
+		cap_reached: string;
+		decryption_failed: string;
+	};
+	alt: { edit: string; delete: string };
+	error: { load: string; save: string; delete: string };
+	share: {
+		text: {
+			share_note: string;
+			snapshot_caption: string;
+			cap_reached: string;
+			expires_after: string;
+			expiry_1h: string;
+			expiry_24h: string;
+			expiry_7d: string;
+			expiry_30d: string;
+			single_use: string;
+			single_use_option: string;
+			protects_body: string;
+			create_link: string;
+			link_ready_title: string;
+			link_ready_subtitle: string;
+			link_copied: string;
+			recap_expires_in: string;
+			recap_single_use: string;
+			reminder: string;
+			done: string;
+		};
+		error: { create: string };
+		recipient: {
+			locked_title: string;
+			reveal: string;
+			revealed_title: string;
+			single_use_caveat: string;
+			copy_note: string;
+			note_copied: string;
+			outro_title: string;
+			outro_subtitle: string;
+			outro_feature_multichain: string;
+			outro_feature_onchain: string;
+			outro_feature_encrypted: string;
+			discover: string;
+			unavailable_title: string;
+		};
+	};
+}
+
 interface I18n {
 	lang: Languages;
+	borrow: I18nBorrow;
+	borrowings: I18nBorrowings;
 	core: I18nCore;
+	progress: I18nProgress;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
 	lock: I18nLock;
@@ -1795,6 +2258,7 @@ interface I18n {
 	send: I18nSend;
 	mint: I18nMint;
 	burn: I18nBurn;
+	active_user_transactions: I18nActive_user_transactions;
 	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;
@@ -1806,6 +2270,7 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	trading: I18nTrading;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
@@ -1822,9 +2287,11 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	liquidium: I18nLiquidium;
 	vaults: I18nVaults;
 	stake: I18nStake;
 	get_token: I18nGet_token;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
+	notes: I18nNotes;
 }

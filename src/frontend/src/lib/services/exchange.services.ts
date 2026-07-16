@@ -4,6 +4,7 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { COINGECKO_PROVIDER_ENABLED } from '$env/rest/coingecko.env';
 import { ICPSWAP_PROVIDER_ENABLED } from '$env/rest/icpswap.env';
 import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -72,6 +73,10 @@ export const exchangeRateUsdToCurrency = async (
 		return { rate: 1, fx24hChangeMultiplier: 1 };
 	}
 
+	if (!COINGECKO_PROVIDER_ENABLED) {
+		return;
+	}
+
 	const prices = await simplePrice({
 		ids: 'bitcoin',
 		vs_currencies: `${Currency.USD},${currency}`,
@@ -103,52 +108,64 @@ export const exchangeRateUsdToCurrency = async (
 };
 
 export const exchangeRateETHToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'ethereum',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'ethereum',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRateBTCToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'bitcoin',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'bitcoin',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRateICPToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'internet-computer',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'internet-computer',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'solana',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'solana',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'binancecoin',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'binancecoin',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRatePOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
-	simplePrice({
-		ids: 'polygon-ecosystem-token',
-		vs_currencies: Currency.USD,
-		include_24hr_change: true
-	});
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'polygon-ecosystem-token',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
 
 export const exchangeRateERC20ToUsd = async ({
 	coingeckoPlatformId: id,
 	contractAddresses
 }: CoingeckoErc20PriceParams): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	if (contractAddresses.length === 0) {
+	if (!COINGECKO_PROVIDER_ENABLED || contractAddresses.length === 0) {
 		return {};
 	}
 
@@ -172,16 +189,19 @@ const icrcFallbackProviders = [
 	}
 ];
 
-export const exchangeRateICRCToUsd = async (
-	ledgerCanisterIds: LedgerCanisterIdText[]
-): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	if (ledgerCanisterIds.length === 0) {
-		return {};
-	}
-
-	const coingeckoPrices = await fetchIcrcPricesFromCoingecko(ledgerCanisterIds);
-
-	return icrcFallbackProviders.reduce<Promise<CoingeckoSimpleTokenPriceResponse>>(
+/**
+ * Cascades through the flag-gated ICPSwap/Kong fallback providers, filling only
+ * the requested ledger canister ids still missing from `initialPrices`. Exported
+ * as the CoinGecko-free entry point used by the backend-mode price fill.
+ */
+export const fillIcrcPricesFromFallbackProviders = ({
+	ledgerCanisterIds,
+	initialPrices = {}
+}: {
+	ledgerCanisterIds: LedgerCanisterIdText[];
+	initialPrices?: CoingeckoSimpleTokenPriceResponse;
+}): Promise<CoingeckoSimpleTokenPriceResponse> =>
+	icrcFallbackProviders.reduce<Promise<CoingeckoSimpleTokenPriceResponse>>(
 		async (pricesPromise, { enabled, fetchPrices }) => {
 			const prices = await pricesPromise;
 
@@ -205,14 +225,27 @@ export const exchangeRateICRCToUsd = async (
 				...providerPrices
 			};
 		},
-		Promise.resolve(coingeckoPrices)
+		Promise.resolve(initialPrices)
 	);
+
+export const exchangeRateICRCToUsd = async (
+	ledgerCanisterIds: LedgerCanisterIdText[]
+): Promise<CoingeckoSimpleTokenPriceResponse> => {
+	if (ledgerCanisterIds.length === 0) {
+		return {};
+	}
+
+	const coingeckoPrices = COINGECKO_PROVIDER_ENABLED
+		? await fetchIcrcPricesFromCoingecko(ledgerCanisterIds)
+		: {};
+
+	return fillIcrcPricesFromFallbackProviders({ ledgerCanisterIds, initialPrices: coingeckoPrices });
 };
 
 export const exchangeRateSPLToUsd = async (
 	tokenAddresses: SplTokenAddress[]
 ): Promise<CoingeckoSimpleTokenPriceResponse> => {
-	if (tokenAddresses.length === 0) {
+	if (!COINGECKO_PROVIDER_ENABLED || tokenAddresses.length === 0) {
 		return {};
 	}
 

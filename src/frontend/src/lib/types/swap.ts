@@ -229,7 +229,7 @@ export interface FormatSlippageParams {
 
 export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
 
-export interface GetQuoteParams extends QuoteParams<'all'> {
+export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
 }
 
@@ -269,6 +269,15 @@ export interface OneSecIcpToEvmParams {
 	swapAmount: Amount;
 	userEthAddress: EthAddress;
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+	/**
+	 * FE-generated UUID. The swap lifecycle is mirrored to the backend's
+	 * active-user-transactions store so the FE can resume polling across
+	 * logout / tab close. Terminal-state side-effects (wallet refresh,
+	 * telemetry) are wired off the AUT store, not via callbacks — they fire
+	 * whether the swap settles in this session or after a refresh via the
+	 * poller.
+	 */
+	swapId: string;
 }
 
 export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
@@ -279,6 +288,10 @@ export interface OneSecEvmToIcpParams extends RequiredTransactionFeeData {
 	swapAmount: Amount;
 	userEthAddress: EthAddress;
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
+	/**
+	 * FE-generated UUID. See {@link OneSecIcpToEvmParams.swapId}.
+	 */
+	swapId: string;
 }
 
 export interface IcpBridgeQuoteParams {

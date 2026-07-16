@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Html, IconClose } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import {
 		AGREEMENTS_WARNING_BANNER,
@@ -48,7 +49,7 @@
 			data-tid={AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON}
 			onclick={close}
 		>
-			<IconClose />
+			<IconCloseThin />
 		</button>
 	</WarningBanner>
 {/if}

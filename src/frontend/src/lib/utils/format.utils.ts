@@ -214,6 +214,49 @@ export const formatTimestampToDaysDifference = ({
 	return getRelativeTimeFormatter(language).format(daysDifference, 'day');
 };
 
+/** Formats a past nanosecond timestamp as a short narrow relative time
+ * (e.g. "20m ago", "3h ago", "2d ago").
+ *
+ * The largest unit that fits is picked (seconds < 60s, minutes < 60m,
+ * hours < 24h, otherwise days). Future timestamps (clock skew) clamp to
+ * the current moment to avoid emitting "in X" for a "created at" field.
+ */
+export const formatNanosecondsToShortRelativeTime = ({
+	nanoseconds,
+	currentDate,
+	language
+}: {
+	nanoseconds: bigint;
+	currentDate?: Date;
+	language?: Languages;
+}): string => {
+	const nowMs = currentDate?.getTime() ?? Date.now();
+	const elapsedMs = Math.max(0, nowMs - Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
+
+	const formatter = new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, {
+		numeric: 'always',
+		style: 'narrow'
+	});
+
+	const seconds = Math.floor(elapsedMs / 1000);
+	if (seconds < 60) {
+		return formatter.format(-seconds, 'second');
+	}
+
+	const minutes = Math.floor(seconds / 60);
+	if (minutes < 60) {
+		return formatter.format(-minutes, 'minute');
+	}
+
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) {
+		return formatter.format(-hours, 'hour');
+	}
+
+	const days = Math.floor(hours / 24);
+	return formatter.format(-days, 'day');
+};
+
 export const formatCurrency = ({
 	value,
 	currency,

@@ -1171,18 +1171,24 @@ mod tests {
         use super::StoredUserProfile;
         use crate::types::agreement::{UserAgreement, UserAgreements};
 
+        fn profile_with_user_agreements(agreements: UserAgreements) -> StoredUserProfile {
+            let mut profile = StoredUserProfile::from_timestamp(1_000);
+            let mut stored_agreements = profile.agreements.clone().unwrap_or_default();
+            stored_agreements.agreements = agreements;
+            profile.agreements = Some(stored_agreements);
+            profile
+        }
+
         #[test]
         fn test_untouched_accepted_agreement_preserves_timestamp() {
-            let mut profile = StoredUserProfile::from_timestamp(1_000);
-
-            // Pre-populate: license accepted at ts=1_000
-            let mut agreements = profile.agreements.clone().unwrap_or_default();
-            agreements.agreements.license_agreement = UserAgreement {
-                accepted: Some(true),
-                last_accepted_at_ns: Some(1_000),
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    ..Default::default()
+                },
                 ..Default::default()
-            };
-            profile.agreements = Some(agreements);
+            });
 
             // Update only terms_of_use; license is not touched
             let request = UserAgreements {
@@ -1209,6 +1215,50 @@ mod tests {
             assert_eq!(a.license_agreement.last_accepted_at_ns, Some(1_000));
             // terms_of_use was newly accepted, so it gets the new timestamp
             assert_eq!(a.terms_of_use.last_accepted_at_ns, Some(5_000));
+        }
+
+        #[test]
+        fn test_untouched_agreement_preserves_metadata() {
+            let license_text_sha256 = "a".repeat(64);
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    last_updated_at_ms: Some(1_700_000_000_000),
+                    text_sha256: Some(license_text_sha256.clone()),
+                },
+                ..Default::default()
+            });
+
+            let request = UserAgreements {
+                terms_of_use: UserAgreement {
+                    accepted: Some(true),
+                    last_updated_at_ms: Some(1_800_000_000_000),
+                    text_sha256: Some("b".repeat(64)),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 5_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(
+                agreements.license_agreement,
+                UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    last_updated_at_ms: Some(1_700_000_000_000),
+                    text_sha256: Some(license_text_sha256),
+                }
+            );
+            assert_eq!(agreements.terms_of_use.last_accepted_at_ns, Some(5_000));
+            assert_eq!(
+                agreements.terms_of_use.last_updated_at_ms,
+                Some(1_800_000_000_000)
+            );
         }
     }
 }

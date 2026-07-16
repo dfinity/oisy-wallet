@@ -9,8 +9,10 @@
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
+	import LoaderActiveUserTransactions from '$lib/components/loaders/LoaderActiveUserTransactions.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderHarvest from '$lib/components/loaders/LoaderHarvest.svelte';
+	import LoaderLiquidium from '$lib/components/loaders/LoaderLiquidium.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
 	import LoaderSwapTokens from '$lib/components/loaders/LoaderSwapTokens.svelte';
 	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
@@ -50,11 +52,15 @@
 
 		<LoaderContacts />
 
+		<LoaderActiveUserTransactions />
+
 		<TransactionsIdbSetter />
 
 		<BalancesIdbSetter />
 
 		<LoaderHarvest />
+
+		<LoaderLiquidium />
 
 		<LoaderSwapTokens />
 

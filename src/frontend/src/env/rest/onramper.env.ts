@@ -1,11 +1,13 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 
-// TODO: Enable (or remove this flag?) when OnRamper is functional again
-export const ONRAMPER_ENABLED = false as boolean;
+// Feature flag: the OnRamper buy widget is enabled only on local and staging — not on beta nor
+// production (ic). `STAGING` already covers the test_fe / audit / e2e environments.
+export const ONRAMPER_ENABLED = LOCAL || STAGING;
 
-const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
+// Set it to 'dev' to use OnRamper Sandbox
+const ONRAMPER_ENV = 'prod';
 
-export const isOnRamperDev = ONRAMPER_ENV === 'dev';
+export const isOnRamperDev = (ONRAMPER_ENV as 'dev' | 'prod') === 'dev';
 
 export const ONRAMPER_BASE_URL = isOnRamperDev
 	? 'https://buy.onramper.dev'

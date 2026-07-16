@@ -27,6 +27,25 @@ Claude-specific runtime layer. Anything not contradicted here defers to
 
 ---
 
+## Workflows
+
+### Spec-driven development
+
+oisy has a spec-driven development workflow for new features,
+improvements, and bugfixes — see
+[`docs/ai/spec-driven-development/workflow.md`](./docs/ai/spec-driven-development/workflow.md).
+A spec is authored in Cowork first, then implemented in Claude Code on
+a branch / PR.
+
+**Always ask before using it.** When the user describes a feature,
+improvement, or bugfix without naming the workflow, acknowledge that the
+workflow exists and ask whether to use it. Only follow the workflow
+after the user agrees. If they decline (or the change is clearly too
+small to warrant a spec, e.g. a one-line typo), implement directly —
+still following the rest of CLAUDE.md and AGENTS.md.
+
+---
+
 ## Coding rules (Claude-specific addenda)
 
 These are on top of the [10 commandments](./AGENTS.md#2-the-10-commandments-read-before-every-change):

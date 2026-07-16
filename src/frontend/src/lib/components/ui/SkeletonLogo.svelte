@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
+	import { isIOS } from '$lib/utils/device.utils';
 
 	interface Props {
 		size?: 'small' | 'big';

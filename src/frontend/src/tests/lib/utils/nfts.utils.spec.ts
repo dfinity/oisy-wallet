@@ -4,11 +4,13 @@ import {
 	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { MediaStatusEnum } from '$lib/enums/media-status';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft } from '$lib/types/nft';
@@ -22,6 +24,8 @@ import {
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	getNftCountsByNetwork,
+	getNftSendCloseRedirectUrl,
 	getNftSendRedirectUrl,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -267,6 +271,57 @@ describe('nfts.utils', () => {
 			expect(result).toBe(
 				`${AppPath.Nfts}?collection=${mockNft1.collection.address}&network=${mockNft1.collection.network.id.description}`
 			);
+		});
+	});
+
+	describe('getNftSendCloseRedirectUrl', () => {
+		const sentNft = mockValidErc721Nft;
+		const remainingNft = { ...mockValidErc721Nft, id: parseNftId('173564') };
+
+		const detailSendDone = {
+			isNftsPage: true,
+			routeNft: sentNft.id,
+			sendProgressStep: ProgressStepsSend.DONE,
+			selectedNft: sentNft
+		};
+
+		it('returns the collection URL after a completed NFT detail-page send with siblings left', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBe(
+				`${AppPath.Nfts}?collection=${sentNft.collection.address}&network=${sentNft.collection.network.id.description}`
+			);
+		});
+
+		it('returns the NFT root URL after a completed NFT detail-page send of the last item', () => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					collectionNfts: [sentNft]
+				})
+			).toBe(AppPath.Nfts);
+		});
+
+		it.each([
+			{ description: 'is not on the NFTs page', override: { isNftsPage: false } },
+			{ description: 'has no NFT route parameter', override: { routeNft: undefined } },
+			{ description: 'has an empty NFT route parameter', override: { routeNft: '' } },
+			{
+				description: 'has not completed the send',
+				override: { sendProgressStep: ProgressStepsSend.INITIALIZATION }
+			},
+			{ description: 'has no selected NFT', override: { selectedNft: undefined } }
+		])('returns undefined when the modal $description', ({ override }) => {
+			expect(
+				getNftSendCloseRedirectUrl({
+					...detailSendDone,
+					...override,
+					collectionNfts: [sentNft, remainingNft]
+				})
+			).toBeUndefined();
 		});
 	});
 
@@ -557,6 +612,44 @@ describe('nfts.utils', () => {
 			});
 
 			expect(res).toEqual([custom]);
+		});
+
+		it('keeps nameless NFTs in empty-filter results', () => {
+			const nameless = {
+				...nftAzuki1,
+				name: undefined,
+				id: parseNftId('42'),
+				collection: {
+					...nftAzuki1.collection,
+					name: undefined
+				}
+			};
+
+			const res = filterSortByCollection({
+				items: [nameless],
+				filter: ''
+			});
+
+			expect(res).toEqual([nameless]);
+		});
+
+		it('filters nameless NFTs by nft.id', () => {
+			const nameless = {
+				...nftAzuki1,
+				name: undefined,
+				id: parseNftId('424242'),
+				collection: {
+					...nftAzuki1.collection,
+					name: undefined
+				}
+			};
+
+			const res = filterSortByCollection({
+				items: [nameless, nftDeGods],
+				filter: '424242'
+			});
+
+			expect(res).toEqual([nameless]);
 		});
 
 		it('filters collection UIs by collection.name', () => {
@@ -1065,5 +1158,29 @@ describe('nfts.utils', () => {
 
 			expect(global.fetch).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe('getNftCountsByNetwork', () => {
+	const ethNft: Nft = {
+		...mockValidErc721Nft,
+		collection: { ...mockValidErc721Nft.collection, network: ETHEREUM_NETWORK }
+	};
+	const icpNft: Nft = {
+		...mockValidErc721Nft,
+		collection: { ...mockValidErc721Nft.collection, network: ICP_NETWORK }
+	};
+
+	it('returns a zero total and no networks for an empty list', () => {
+		expect(getNftCountsByNetwork([])).toEqual({ total: 0, byNetwork: [] });
+	});
+
+	it('totals the NFTs and groups them per network, ordered by count descending', () => {
+		const { total, byNetwork } = getNftCountsByNetwork([ethNft, icpNft, ethNft]);
+
+		expect(total).toBe(3);
+		expect(byNetwork).toHaveLength(2);
+		expect(byNetwork[0]).toEqual({ network: ETHEREUM_NETWORK, count: 2 });
+		expect(byNetwork[1]).toEqual({ network: ICP_NETWORK, count: 1 });
 	});
 });

@@ -11,6 +11,7 @@ import * as toasts from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockOneSecProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
@@ -103,28 +104,28 @@ describe('SwapIcpWizard', () => {
 	it('renders SwapIcpForm on SWAP step', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText('You pay')).toBeInTheDocument();
-		expect(getByText('You receive')).toBeInTheDocument();
-		expect(getByText('Review swap')).toBeInTheDocument();
-		expect(getByText('Cancel')).toBeInTheDocument();
+		expect(getByText(en.tokens.text.source_token_title)).toBeInTheDocument();
+		expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
+		expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
+		expect(getByText(en.core.text.cancel)).toBeInTheDocument();
 	});
 
 	it('renders slippage section', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText('Max slippage')).toBeInTheDocument();
+		expect(getByText(en.swap.text.max_slippage)).toBeInTheDocument();
 	});
 
 	it('renders swap provider information', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText('Swap provider')).toBeInTheDocument();
+		expect(getByText(en.swap.text.swap_provider)).toBeInTheDocument();
 	});
 
 	it('renders fee information', () => {
 		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
 
-		expect(getByText('Total estimated fee')).toBeInTheDocument();
+		expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 	});
 
 	it('renders token input fields', () => {
@@ -189,7 +190,7 @@ describe('SwapIcpWizard', () => {
 				await fireEvent.click(getByRole('checkbox'));
 			}
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(mockSwapFn).toHaveBeenCalledOnce();
@@ -207,7 +208,7 @@ describe('SwapIcpWizard', () => {
 				await fireEvent.click(getByRole('checkbox'));
 			}
 
-			await fireEvent.click(getByText('Swap now'));
+			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
@@ -231,7 +232,7 @@ describe('SwapIcpWizard', () => {
 				context: errorContext
 			});
 
-			const swapButton = getByText('Swap now').closest('button');
+			const swapButton = getByText(en.swap.text.swap_button).closest('button');
 
 			expect(swapButton).toBeDisabled();
 
@@ -272,7 +273,7 @@ describe('SwapIcpWizard', () => {
 					await fireEvent.click(valueDifferenceCheckbox);
 				}
 
-				await fireEvent.click(getByText('Swap now'));
+				await fireEvent.click(getByText(en.swap.text.swap_button));
 				await vi.runOnlyPendingTimersAsync();
 
 				expect(mockOneSecFn).toHaveBeenCalledExactlyOnceWith(
@@ -297,7 +298,7 @@ describe('SwapIcpWizard', () => {
 					await fireEvent.click(valueDifferenceCheckbox);
 				}
 
-				await fireEvent.click(getByText('Swap now'));
+				await fireEvent.click(getByText(en.swap.text.swap_button));
 				await vi.runOnlyPendingTimersAsync();
 
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
@@ -315,7 +316,7 @@ describe('SwapIcpWizard', () => {
 					await fireEvent.click(valueDifferenceCheckbox);
 				}
 
-				await fireEvent.click(getByText('Swap now'));
+				await fireEvent.click(getByText(en.swap.text.swap_button));
 				await vi.runOnlyPendingTimersAsync();
 
 				expect(mockOneSecFn).not.toHaveBeenCalled();
@@ -333,7 +334,7 @@ describe('SwapIcpWizard', () => {
 					await fireEvent.click(valueDifferenceCheckbox);
 				}
 
-				await fireEvent.click(getByText('Swap now'));
+				await fireEvent.click(getByText(en.swap.text.swap_button));
 				await vi.runOnlyPendingTimersAsync();
 
 				expect(mockOneSecFn).not.toHaveBeenCalled();

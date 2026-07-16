@@ -1,9 +1,11 @@
 import {
 	walletConnectListenerStore,
-	walletConnectProposalStore
+	walletConnectProposalStore,
+	walletConnectSessionsStore
 } from '$lib/stores/wallet-connect.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import type { WalletKitTypes } from '@reown/walletkit';
+import type { SessionTypes } from '@walletconnect/types';
 import { get } from 'svelte/store';
 
 describe('wallet-connect.store', () => {
@@ -17,6 +19,7 @@ describe('wallet-connect.store', () => {
 			rejectRequest: vi.fn(),
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
 			disconnect: vi.fn()
 		};
 
@@ -29,6 +32,7 @@ describe('wallet-connect.store', () => {
 			rejectRequest: vi.fn(),
 			getActiveSessions: vi.fn(),
 			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
 			disconnect: vi.fn()
 		};
 
@@ -105,6 +109,39 @@ describe('wallet-connect.store', () => {
 
 				expect(get(walletConnectProposalStore)).toStrictEqual(mockProposal2);
 				expect(get(walletConnectProposalStore)).not.toStrictEqual(mockProposal1);
+			});
+		});
+	});
+
+	describe('walletConnectSessionsStore', () => {
+		const mockSession1 = { topic: 'topic-1' } as unknown as SessionTypes.Struct;
+		const mockSession2 = { topic: 'topic-2' } as unknown as SessionTypes.Struct;
+
+		it('should initialize with an empty array', () => {
+			expect(get(walletConnectSessionsStore)).toEqual([]);
+		});
+
+		describe('set', () => {
+			it('should set the sessions', () => {
+				walletConnectSessionsStore.set([mockSession1, mockSession2]);
+
+				expect(get(walletConnectSessionsStore)).toStrictEqual([mockSession1, mockSession2]);
+
+				walletConnectSessionsStore.set([mockSession2]);
+
+				expect(get(walletConnectSessionsStore)).toStrictEqual([mockSession2]);
+			});
+		});
+
+		describe('reset', () => {
+			it('should reset the value to an empty array', () => {
+				walletConnectSessionsStore.set([mockSession1]);
+
+				expect(get(walletConnectSessionsStore)).toStrictEqual([mockSession1]);
+
+				walletConnectSessionsStore.reset();
+
+				expect(get(walletConnectSessionsStore)).toEqual([]);
 			});
 		});
 	});

@@ -522,10 +522,10 @@ describe('ic-transactions.services', () => {
 		const mockTransactions: IcTransactionUi[] = createMockIcTransactionsUi(17).map(
 			(transaction, index) => ({
 				...transaction,
-				timestamp: timestampBuffer + BigInt(index)
+				timestamp: timestampBuffer + BigInt(17 - index)
 			})
 		);
-		const [expectedOldestTransaction] = mockTransactions;
+		const expectedOldestTransaction = mockTransactions[mockTransactions.length - 1];
 		const { id: mockLastId } = expectedOldestTransaction;
 
 		const mockParams = {
@@ -594,7 +594,37 @@ describe('ic-transactions.services', () => {
 				...transaction,
 				timestamp: undefined
 			}));
-			const lastId = transactions[0].id;
+			const lastId = transactions[transactions.length - 1].id;
+
+			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
+
+			expect(result).toEqual({ success: true });
+
+			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
+				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: false
+			});
+			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
+				start: BigInt(lastId),
+				owner: mockIdentity.getPrincipal(),
+				identity: mockIdentity,
+				maxResults: WALLET_PAGINATION,
+				certified: true
+			});
+		});
+
+		it('should use the last transaction cursor if oldest timestamps are tied', async () => {
+			const transactions = mockTransactions.map((transaction) => ({
+				...transaction,
+				timestamp: timestampBuffer
+			}));
+			const lastId = transactions[transactions.length - 1].id;
 
 			const result = await loadNextIcTransactionsByOldest({ ...mockParams, transactions });
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
@@ -25,6 +24,7 @@
 		showHiddenStore,
 		showSpamStore
 	} from '$lib/stores/settings.store';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
 	let visible = $state(false);
 
@@ -78,9 +78,9 @@
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="muted"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
-	styleClass={visible ? 'active' : ''}
 	bind:button
 >
 	{#snippet icon()}

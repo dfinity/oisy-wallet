@@ -94,6 +94,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     ///   present or not. Partial presence could happen if the utxos of a pending transaction were
     ///   not really used in the transaction. We don't remove in partial presence because, in the
     ///   end, partial presence will be temporary for one hour.
+    ///
+    /// An empty `current_utxos` set is treated as "no confirmation information available", not as
+    /// "all utxos confirmed". Such transactions are only freed by the 1-hour age rule, so a caller
+    /// that fetches utxos for an address with no available utxos cannot wipe its non-expired
+    /// pending reservations.
     pub fn prune_pending_transactions(
         &mut self,
         principal: Principal,
@@ -116,10 +121,11 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             transactions.retain(|pending_transaction| {
                 let is_old = pending_transaction.created_at_timestamp_ns + HOUR_IN_NS < now_ns;
 
-                let none_of_tx_utxos_are_still_present = pending_transaction
-                    .utxos
-                    .iter()
-                    .all(|utxo| !current_utxos.contains(utxo));
+                let none_of_tx_utxos_are_still_present = !current_utxos.is_empty()
+                    && pending_transaction
+                        .utxos
+                        .iter()
+                        .all(|utxo| !current_utxos.contains(utxo));
 
                 !is_old && !none_of_tx_utxos_are_still_present
             });
@@ -515,6 +521,57 @@ mod tests {
 
         let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
         assert_eq!(pending_txs.len(), 2);
+    }
+
+    // Regression: an empty `current_utxos` means "no confirmation information available", not
+    // "all utxos confirmed". A caller fetching utxos for an address with none must not be able
+    // to wipe their non-expired pending reservations.
+    #[test]
+    fn test_empty_current_utxos_retains_non_expired() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let now_ns = 1_000_000_000_000;
+
+        let pending = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone(), (*UTXO_2).clone()],
+            created_at_timestamp_ns: now_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), pending.clone())
+            .unwrap();
+
+        model.prune_pending_transactions(principal, &[], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert_eq!(pending_txs.len(), 1);
+        assert_eq!(pending_txs[0], pending);
+    }
+
+    #[test]
+    fn test_empty_current_utxos_still_prunes_expired() {
+        let (mut map, _mm) = setup();
+        let mut model = BtcUserPendingTransactionsModel::new(&mut map, None, None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let yesterday_ns = 1_000_000;
+        let now_ns = yesterday_ns + HOUR_IN_NS + 1;
+
+        let expired = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![(*UTXO_1).clone()],
+            created_at_timestamp_ns: yesterday_ns,
+        };
+        model
+            .add_pending_transaction(principal, ADDRESS_1.to_string(), expired)
+            .unwrap();
+
+        model.prune_pending_transactions(principal, &[], now_ns);
+
+        let pending_txs = model.get_pending_transactions(&principal, ADDRESS_1);
+        assert!(pending_txs.is_empty());
     }
 
     #[test]

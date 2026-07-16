@@ -15,8 +15,6 @@ use crate::utils::{
     pocketic::{controller, setup, setup_with_ii, setup_with_production_config, PicCanisterTrait},
 };
 
-const MOCK_ADDRESS: &str = "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33";
-
 const UTXO_1: Utxo = Utxo {
     outpoint: Outpoint {
         txid: vec![],
@@ -58,7 +56,7 @@ fn test_add_pending_transaction_requires_delegation_chain() {
 }
 
 #[test]
-fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disabled() {
+fn test_add_pending_transaction_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -80,11 +78,11 @@ fn test_add_pending_transaction_without_delegation_chain_passes_when_guard_disab
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             add_response,
             Err(BtcAddPendingTransactionError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {add_response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {add_response:?}"
     );
 }
 
@@ -108,7 +106,6 @@ fn test_get_pending_transactions_returns_empty_for_new_user() {
     pic_setup.ensure_user_profile(caller);
 
     let read_request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: Some(delegation_chain),
     };
@@ -207,7 +204,6 @@ fn test_get_pending_transactions_requires_delegation_chain() {
     pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -230,13 +226,12 @@ fn test_get_pending_transactions_requires_delegation_chain() {
 }
 
 #[test]
-fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disabled() {
+fn test_get_pending_transactions_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -250,11 +245,11 @@ fn test_get_pending_transactions_without_delegation_chain_passes_when_guard_disa
         .expect("Canister call failed");
 
     assert!(
-        !matches!(
+        matches!(
             response,
             Err(BtcGetPendingTransactionsError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {response:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {response:?}"
     );
 }
 
@@ -264,7 +259,6 @@ fn test_get_pending_transactions_controller_bypasses_delegation_check() {
     pic_setup.ensure_user_profile(controller());
 
     let request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };
@@ -307,7 +301,6 @@ fn test_get_pending_transactions_with_valid_delegation() {
     pic_setup.ensure_user_profile(caller);
 
     let request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: Some(delegation_chain),
     };
@@ -388,7 +381,6 @@ fn call_btc_get_pending_transactions(
     caller: Principal,
 ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
     let request = BtcGetPendingTransactionsRequest {
-        address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
         ii_delegation_chain: None,
     };

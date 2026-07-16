@@ -309,7 +309,6 @@ describe('btc-open-crypto-pay.services', () => {
 			expect(backendApi.addPendingBtcTransaction).toHaveBeenCalledWith(
 				expect.objectContaining({
 					identity: mockIdentity,
-					address: mockBtcAddress,
 					utxos: mockValidatedData.utxosFee.utxos
 				})
 			);

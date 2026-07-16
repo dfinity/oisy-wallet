@@ -106,11 +106,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}
 
 	private async loadBtcPendingTransactionsData({
-		btcAddress,
 		identity,
 		bitcoinNetwork
 	}: {
-		btcAddress: BtcAddress;
 		identity: Identity;
 		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<{
@@ -121,7 +119,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			const pendingTransactions = await getPendingBtcTransactions({
 				identity,
 				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(bitcoinNetwork),
-				address: btcAddress,
 				iiDelegationChain: extractIIDelegationChain(identity)
 			});
 
@@ -256,7 +253,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			shouldFetchTransactions &&
 			!certified
 				? await this.loadBtcPendingTransactionsData({
-						btcAddress,
 						identity,
 						bitcoinNetwork
 					})

@@ -1,28 +1,23 @@
 import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
-import { initUtxosFeeStore, UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
 import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
 import { balancesStore } from '$lib/stores/balances.store';
-import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockContextMap } from '$tests/utils/context.test-utils';
+import { mockUtxosFeeContextEntry } from '$tests/utils/fee.context.test-utils';
+import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('BtcSendAmount', () => {
-	const createMockContext = () => {
-		const mockContext = new Map([]);
-		mockContext.set(
-			SEND_CONTEXT_KEY,
-			initSendContext({
-				token: BTC_MAINNET_TOKEN
-			})
-		);
-		mockContext.set(UTXOS_FEE_CONTEXT_KEY, { store: initUtxosFeeStore() });
-		return mockContext;
-	};
+	const createMockContext = () =>
+		mockContextMap([
+			mockSendContextEntry({ token: BTC_MAINNET_TOKEN }),
+			mockUtxosFeeContextEntry()
+		]);
 
 	const props = {
 		amount: 1000,

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { BottomSheet, Backdrop } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
+	import Backdrop from '$lib/components/ui/Backdrop.svelte';
+	import BottomSheetContainer from '$lib/components/ui/BottomSheetContainer.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
@@ -33,12 +34,17 @@
 
 	$effect(() => {
 		bottomSheetOpenStore.set(visible);
+
+		// Reset on teardown: modal-driven sheets (e.g. PayDialog) are unmounted on
+		// close rather than toggled via visible, so the effect never re-runs with
+		// false — without this the store stays true and hides the mobile nav bar.
+		return () => bottomSheetOpenStore.set(false);
 	});
 </script>
 
 {#if visible}
 	<div class="fixed inset-0 z-14" data-tid={testId}>
-		<BottomSheet transition>
+		<BottomSheetContainer transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon
@@ -61,7 +67,7 @@
 					{@render footer()}
 				</div>
 			{/if}
-		</BottomSheet>
-		<Backdrop on:nnsClose={handleClose} />
+		</BottomSheetContainer>
+		<Backdrop onClose={handleClose} />
 	</div>
 {/if}

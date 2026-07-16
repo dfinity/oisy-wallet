@@ -58,13 +58,15 @@ impl From<CoinGeckoPrice> for ExchangeData {
 pub struct CoinGeckoClient {
     base_url: String,
     api_key: String,
+    replicated: bool,
 }
 
 impl CoinGeckoClient {
-    pub fn new(api_key: String) -> Self {
+    pub fn new(api_key: String, replicated: bool) -> Self {
         Self {
             base_url: DEFAULT_BASE_URL.to_string(),
             api_key,
+            replicated,
         }
     }
 
@@ -85,7 +87,13 @@ impl CoinGeckoClient {
         url: &str,
         max_response_bytes: u64,
     ) -> Result<HashMap<String, ExchangeData>, String> {
-        let response = get(url, vec![self.auth_header()], max_response_bytes).await?;
+        let response = get(
+            url,
+            vec![self.auth_header()],
+            max_response_bytes,
+            self.replicated,
+        )
+        .await?;
 
         let prices: HashMap<String, CoinGeckoPrice> = serde_json::from_slice(&response.body)
             .map_err(|e| format!("Failed to parse CoinGecko response: {e}"))?;

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -18,6 +17,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -35,6 +35,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
@@ -182,7 +183,8 @@
 					destinationToken: $destinationToken,
 					swapAmount,
 					userEthAddress: $ethAddress,
-					setFailedProgressStep
+					setFailedProgressStep,
+					swapId: crypto.randomUUID()
 				});
 			} else {
 				await swapService[$swapAmountsStore.selectedProvider.provider]({
@@ -210,8 +212,15 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// For OneSec swaps, the foreground completes once the user's funds have
+			// left their wallet; success/failure of the background phase is tracked
+			// separately via the AUT store. Other providers (ICPSwap, KongSwap) still
+			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name:
+					$swapAmountsStore.selectedProvider.provider === SwapProvider.ONE_SEC
+						? TRACK_COUNT_SWAP_SUBMITTED
+						: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -257,13 +266,11 @@
 				});
 			}
 
-			if (
-				!(
-					isSwapError(err) &&
-					(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
-						err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
-				)
-			) {
+			if (!(
+				isSwapError(err) &&
+				(err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS ||
+					err.code === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED)
+			)) {
 				trackEvent({
 					name: TRACK_COUNT_SWAP_ERROR,
 					metadata: {
@@ -301,7 +308,8 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
-				swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+				swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
+					SwapProvider.ONE_SEC}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 				bind:failedSteps={swapFailedProgressSteps}

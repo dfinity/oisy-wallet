@@ -41,9 +41,9 @@
 <ButtonIcon
 	ariaLabel={$i18n.navigation.alt.menu}
 	colorStyle="muted"
+	expanded={visible}
 	link={false}
 	onclick={() => (visible = true)}
-	styleClass={visible ? 'active' : ''}
 	bind:button
 >
 	{#snippet icon()}

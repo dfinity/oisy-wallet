@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
+	import InfiniteScroll from '$lib/components/ui/InfiniteScroll.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';

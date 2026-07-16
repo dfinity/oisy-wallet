@@ -6,6 +6,19 @@ const ZERO_BIGINT_RESTRICTION = {
 	message: 'Use the shared constant `ZERO` instead of `0n`.'
 };
 
+// `!nonNullish(x)` and `!isNullish(x)` are double negatives that read backwards;
+// each has a direct, positive counterpart in `@dfinity/utils`.
+const NULLISH_NEGATION_RESTRICTIONS = [
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='nonNullish']",
+		message: 'Use `isNullish(x)` instead of `!nonNullish(x)`.'
+	},
+	{
+		selector: "UnaryExpression[operator='!'] > CallExpression[callee.name='isNullish']",
+		message: 'Use `nonNullish(x)` instead of `!isNullish(x)`.'
+	}
+];
+
 export default [
 	...vitestConfig,
 	...svelteConfig,
@@ -23,6 +36,16 @@ export default [
 	},
 
 	{
+		// eslint 10's `no-useless-assignment` misreads Svelte 5 runes — e.g. `$bindable()`
+		// defaults in `$props()` destructuring and `$state` reassigned in an `$effect` — as
+		// dead assignments. Disable it for components; it still applies to plain .ts files.
+		files: ['**/*.svelte'],
+		rules: {
+			'no-useless-assignment': 'off'
+		}
+	},
+
+	{
 		files: ['src/frontend/src/**/*'],
 		rules: {
 			'local-rules/no-relative-imports': 'error'
@@ -31,7 +54,7 @@ export default [
 
 	{
 		rules: {
-			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION]
+			'no-restricted-syntax': ['error', ZERO_BIGINT_RESTRICTION, ...NULLISH_NEGATION_RESTRICTIONS]
 		}
 	},
 
@@ -42,6 +65,7 @@ export default [
 			'no-restricted-syntax': [
 				'error',
 				ZERO_BIGINT_RESTRICTION,
+				...NULLISH_NEGATION_RESTRICTIONS,
 				{
 					selector: "MemberExpression[object.name='console'][property.name='error']",
 					message:
@@ -70,6 +94,7 @@ export default [
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',
+			'.claude',
 			'build',
 			'.dfx',
 			'.svelte-kit',

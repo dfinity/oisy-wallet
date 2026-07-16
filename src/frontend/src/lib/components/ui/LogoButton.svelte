@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { IconCheck } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import IconGixCheck from '$lib/components/icons/IconGixCheck.svelte';
 
 	interface Props {
 		selectable?: boolean;
@@ -14,6 +14,8 @@
 		rounded?: boolean;
 		condensed?: boolean;
 		styleClass?: string;
+		titleStyleClass?: string;
+		subtitleStyleClass?: string;
 		testId?: string;
 		logo?: Snippet;
 		title?: Snippet;
@@ -43,7 +45,9 @@
 		descriptionEnd,
 		action,
 		onClick,
-		fullWidth = false
+		fullWidth = false,
+		titleStyleClass = '',
+		subtitleStyleClass = ''
 	}: Props = $props();
 </script>
 
@@ -70,7 +74,7 @@
 				{#if selectable}
 					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
 						{#if selected}
-							<IconCheck size="16px" />
+							<IconGixCheck size="16px" />
 						{/if}
 					</span>
 				{/if}
@@ -81,7 +85,7 @@
 					<span class="flex min-w-0 items-center truncate text-nowrap">
 						{#if nonNullish(title)}
 							<span
-								class="text-lg font-bold text-nowrap text-primary"
+								class={`text-lg font-bold text-nowrap text-primary ${titleStyleClass}`}
 								class:min-w-0={isNullish(subtitle)}
 								class:truncate={isNullish(subtitle)}
 							>
@@ -92,7 +96,7 @@
 							{#if dividers}
 								<span class="text-tertiary"><Divider /></span>
 							{/if}
-							<span class="truncate text-base text-nowrap text-tertiary">
+							<span class={`truncate text-base text-nowrap text-tertiary ${subtitleStyleClass}`}>
 								{@render subtitle()}
 							</span>
 						{/if}

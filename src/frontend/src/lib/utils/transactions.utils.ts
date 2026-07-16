@@ -31,6 +31,7 @@ import type {
 	EthAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
+import { last } from '$lib/utils/array.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	isNetworkIdBTCMainnet,
@@ -96,7 +97,11 @@ const findDuplicateEthNativeTransactions = (
 
 				if (hasNonNative) {
 					for (const tx of group) {
-						if (isTokenEthereumNative(tx.token)) {
+						// Only the zero-value native entry is a duplicate: the gas/fee companion that
+						// block explorers return alongside an ERC-20 transfer. A native entry that moved
+						// value is a real leg — e.g. the native input of a native→token swap — and must
+						// stay next to the token leg instead of being collapsed into it.
+						if (isTokenEthereumNative(tx.token) && tx.transaction.value === ZERO) {
 							duplicates.add(tx);
 						}
 					}
@@ -314,21 +319,45 @@ const isMicroTransaction = ({
 	return false;
 };
 
+// Ranks transaction types for the same-timestamp tie-breaker in `sortTransactions`: the received
+// leg of a pair sorts above the sent one; any other type keeps a stable position after them.
+const sameTimestampTypeRank = (type: AnyTransactionUi['type']): number => {
+	if (type === 'receive') {
+		return 0;
+	}
+
+	if (type === 'send') {
+		return 1;
+	}
+
+	return 2;
+};
+
 export const sortTransactions = ({
-	transactionA: { timestamp: timestampA },
-	transactionB: { timestamp: timestampB }
+	transactionA: { timestamp: timestampA, type: typeA },
+	transactionB: { timestamp: timestampB, type: typeB }
 }: {
 	transactionA: AnyTransactionUi;
 	transactionB: AnyTransactionUi;
 }): number => {
 	if (nonNullish(timestampA) && nonNullish(timestampB)) {
-		return (
+		const bySeconds =
 			Number(normalizeTimestampToSeconds(timestampB)) -
-			Number(normalizeTimestampToSeconds(timestampA))
-		);
+			Number(normalizeTimestampToSeconds(timestampA));
+
+		// The two legs of one operation (a swap, or a self-transfer) share the same block timestamp
+		// and tie here. Break the tie deterministically — received leg above the sent one — so these
+		// pairs render consistently instead of in an arbitrary insertion order.
+		return bySeconds !== 0
+			? bySeconds
+			: sameTimestampTypeRank(typeA) - sameTimestampTypeRank(typeB);
 	}
 
-	return nonNullish(timestampA) ? -1 : 1;
+	if (nonNullish(timestampA)) {
+		return -1;
+	}
+
+	return nonNullish(timestampB) ? 1 : 0;
 };
 
 export const isTransactionsStoreInitialized = ({
@@ -409,20 +438,11 @@ export const getKnownDestinations = (
 	);
 
 /**
- * Finds the oldest transaction by timestamp in a list of transactions.
+ * Finds the oldest transaction in a newest-first transaction store.
  *
  * @param transactions - The list of transactions to search through.
  * @returns The last transaction or undefined if no transactions are provided.
  */
 export const findOldestTransaction = <T extends IcTransactionUi | SolTransactionUi>(
 	transactions: T[]
-): T | undefined =>
-	transactions.length >= 0
-		? transactions.reduce<T>(
-				(min, transaction) =>
-					(Number(transaction.timestamp) ?? Infinity) < (Number(min.timestamp) ?? Infinity)
-						? transaction
-						: min,
-				transactions[0]
-			)
-		: undefined;
+): T | undefined => last(transactions);

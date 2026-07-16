@@ -132,7 +132,9 @@ describe('btc-send.services', () => {
 				.mockReturnValue(new Uint8Array());
 			const onProgressSpy = vi.spyOn(defaultParams, 'onProgress');
 
-			await sendBtc(defaultParams);
+			const result = await sendBtc(defaultParams);
+
+			expect(result).toBe(txid);
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
@@ -156,7 +158,6 @@ describe('btc-send.services', () => {
 			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
-				address: defaultParams.source,
 				txId: new Uint8Array(),
 				utxos: defaultParams.utxosFee.utxos,
 				iiDelegationChain: []

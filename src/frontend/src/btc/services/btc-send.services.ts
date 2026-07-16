@@ -128,13 +128,13 @@ export const validateBtcSend = async ({
 	}
 	for (const utxo of utxos) {
 		if (
-			!nonNullish(utxo.outpoint) ||
-			!nonNullish(utxo.outpoint.txid) ||
+			isNullish(utxo.outpoint) ||
+			isNullish(utxo.outpoint.txid) ||
 			utxo.outpoint.txid.length === 0 ||
 			utxo.outpoint.vout === undefined ||
-			!nonNullish(utxo.value) ||
+			isNullish(utxo.value) ||
 			BigInt(utxo.value) <= ZERO ||
-			!nonNullish(utxo.height) ||
+			isNullish(utxo.height) ||
 			utxo.height < 0
 		) {
 			throw new BtcValidationError(BtcSendValidationError.InvalidUtxoData);
@@ -232,17 +232,16 @@ export const signBtc = async ({
 export const sendBtc = async ({
 	utxosFee,
 	network,
-	source,
+	source: _source,
 	identity,
 	onProgress,
 	...rest
-}: SendBtcParams): Promise<void> => {
+}: SendBtcParams): Promise<string> => {
 	const { txid } = await send({ onProgress, utxosFee, network, identity, ...rest });
 
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
-		address: source,
 		txId: txidStringToUint8Array(txid),
 		utxos: utxosFee.utxos,
 		iiDelegationChain: extractIIDelegationChain(identity)
@@ -251,6 +250,8 @@ export const sendBtc = async ({
 	onProgress?.();
 
 	await waitAndTriggerWallet();
+
+	return txid;
 };
 
 const send = async ({

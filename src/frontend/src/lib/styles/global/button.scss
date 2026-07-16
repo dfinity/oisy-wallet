@@ -32,6 +32,7 @@ a.as-button {
 	&.tertiary-main-card,
 	&.muted,
 	&.success,
+	&.success-light,
 	&.error {
 		justify-content: center;
 
@@ -55,6 +56,7 @@ a.as-button {
 	&.tertiary-main-card,
 	&.muted,
 	&.success,
+	&.success-light,
 	&.error {
 		font-weight: var(--font-weight-bold);
 
@@ -207,6 +209,45 @@ a.as-button {
 		@apply bg-brand-subtle-10;
 	}
 
+	// SUCCESS LIGHT
+	&.success-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-success-primary;
+
+		&:not(.transparent) {
+			@apply bg-success-subtle-10;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-success-primary;
+			@apply bg-success-subtle-20;
+		}
+
+		&:active {
+			@apply text-success-primary;
+			@apply bg-success-subtle-30;
+		}
+
+		&:focus-visible {
+			@apply text-success-primary;
+			@apply bg-success-subtle-10;
+		}
+	}
+
+	&.success-light.disabled:not(.loading):not(.link),
+	&.success-light[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.success-light.loading {
+		@apply text-success-primary;
+		@apply bg-success-subtle-10;
+	}
+
 	// TERTIARY
 	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary;
@@ -272,6 +313,14 @@ a.as-button {
 			@apply text-primary;
 			@apply bg-primary;
 		}
+
+		// Keep the active background while the linked popover is open, the way
+		// the network switcher dropdown does. Placed last so it also wins over
+		// the focus-visible reset when opened via keyboard.
+		&.opened {
+			@apply text-brand-primary-alt;
+			@apply bg-brand-subtle-30;
+		}
 	}
 
 	&.tertiary-alt.disabled:not(.loading):not(.link),
@@ -333,13 +382,20 @@ a.as-button {
 			@apply bg-primary;
 		}
 
-		&:active,
-		&.active {
+		&:active {
 			@apply text-secondary;
 			@apply bg-disabled;
 		}
 
 		&:focus-visible {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+
+		// Keep the active background while the linked popover/input is open, the
+		// same way tertiary-alt does. Placed last so it also wins over the
+		// focus-visible reset when opened via keyboard.
+		&.opened {
 			@apply text-secondary;
 			@apply bg-disabled;
 		}

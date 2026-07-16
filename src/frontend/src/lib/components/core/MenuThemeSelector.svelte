@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Theme, themeStore, type ThemeStoreData } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import ThemeSelectorButton from '$lib/components/core/ThemeSelectorButton.svelte';
 	import IconDuoTone from '$lib/components/icons/IconDuoTone.svelte';
@@ -8,11 +7,12 @@
 	import IconSunMoon from '$lib/components/icons/IconSunMoon.svelte';
 	import { THEME_SELECTOR_CARD } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { themeStore, type ThemeStoreData } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
+	import { LOCALSTORAGE_THEME_KEY } from '$lib/utils/theme.utils';
 
 	const THEME_VALUES = [...Object.values(Theme)];
 
-	// TODO: use variable exposed from gix-components when it will be exposed.
-	const THEME_KEY = 'nnsTheme';
 	const THEME_SYSTEM = 'system';
 
 	const selectTheme = (theme: Theme | typeof THEME_SYSTEM) => {
@@ -29,7 +29,7 @@
 
 	// Here we just update the local variable above to update the selected card
 	const updateSelectedCard = (themeStore: ThemeStoreData) => {
-		selectedCard = isNullish(localStorage.getItem(THEME_KEY))
+		selectedCard = isNullish(localStorage.getItem(LOCALSTORAGE_THEME_KEY))
 			? THEME_SYSTEM
 			: (themeStore ?? THEME_SYSTEM);
 	};

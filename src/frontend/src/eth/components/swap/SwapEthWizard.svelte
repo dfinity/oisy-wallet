@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -23,8 +22,10 @@
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
+		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -52,6 +53,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -358,7 +360,8 @@
 					userEthAddress: $ethAddress,
 					gas,
 					maxFeePerGas,
-					maxPriorityFeePerGas
+					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID()
 				});
 			} else {
 				toastsError({
@@ -373,8 +376,15 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// For OneSec swaps, the foreground completes once the user's funds have
+			// left their wallet; success/failure of the background phase is tracked
+			// separately via the AUT store. Other providers (Velora, Near) still
+			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name:
+					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+						? TRACK_COUNT_SWAP_SUBMITTED
+						: TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -473,7 +483,8 @@
 					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithBridging={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
+						SwapProvider.ONE_SEC}
 				/>
 			{/if}
 		{/key}

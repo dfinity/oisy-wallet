@@ -471,8 +471,9 @@ describe('transactions.utils', () => {
 			};
 
 			it('should keep the ERC-20 transaction when native and ERC-20 share the same hash on the same network', () => {
+				// A real ERC-20 transfer's native companion moved no value (it is only the gas/fee entry).
 				const nativeTx: EthCertifiedTransaction = {
-					data: { ...mockEthTransaction, hash: duplicateHash },
+					data: { ...mockEthTransaction, hash: duplicateHash, value: ZERO },
 					certified: false
 				};
 				const erc20Tx: EthCertifiedTransaction = {
@@ -491,6 +492,31 @@ describe('transactions.utils', () => {
 
 				expect(result).toHaveLength(1);
 				expect(result[0].token).toBe(PEPE_TOKEN);
+			});
+
+			it('should keep the native leg when it moved value (e.g. a native→ERC-20 swap) sharing the hash', () => {
+				// The native input of a swap shares its hash with the received-token transfer, but it is
+				// a real transfer (non-zero value), so both legs must remain in the activity list.
+				const nativeSwapLeg: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+				const erc20ReceiveLeg: EthCertifiedTransaction = {
+					data: { ...mockEthTransaction, hash: duplicateHash },
+					certified: false
+				};
+
+				const result = mapAllTransactionsUi({
+					tokens: [ETHEREUM_TOKEN, USDC_TOKEN],
+					$ethTransactions: {
+						[ETHEREUM_TOKEN_ID]: [nativeSwapLeg],
+						[USDC_TOKEN_ID]: [erc20ReceiveLeg]
+					},
+					...rest
+				});
+
+				expect(result).toHaveLength(2);
+				expect(result.map(({ token }) => token)).toEqual([ETHEREUM_TOKEN, USDC_TOKEN]);
 			});
 
 			it('should keep both transactions when they have different hashes', () => {
@@ -570,7 +596,7 @@ describe('transactions.utils', () => {
 			it('should keep all non-native transactions and only remove the native one when multiple ERC-20 transfers share the same hash', () => {
 				const sharedHash = duplicateHash;
 				const nativeTx: EthCertifiedTransaction = {
-					data: { ...mockEthTransaction, hash: sharedHash },
+					data: { ...mockEthTransaction, hash: sharedHash, value: ZERO },
 					certified: false
 				};
 				const pepeTx: EthCertifiedTransaction = {
@@ -783,6 +809,27 @@ describe('transactions.utils', () => {
 			);
 
 			expect(result).toEqual([transaction2, transaction1, transactionWithNullTimestamp]);
+		});
+
+		it('should place the received leg above the sent leg when timestamps tie', () => {
+			const sent = { timestamp: 5, type: 'send' } as AnyTransactionUi;
+			const received = { timestamp: 5, type: 'receive' } as AnyTransactionUi;
+
+			// Deterministic regardless of input order: the received leg always ends up above the sent one.
+			expect(
+				[sent, received].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+			).toEqual([received, sent]);
+			expect(
+				[received, sent].sort((a, b) => sortTransactions({ transactionA: a, transactionB: b }))
+			).toEqual([received, sent]);
+		});
+
+		it('should return 0 when both timestamps are nullish', () => {
+			const a = { timestamp: undefined } as AnyTransactionUi;
+			const b = { timestamp: undefined } as AnyTransactionUi;
+
+			expect(sortTransactions({ transactionA: a, transactionB: b })).toBe(0);
+			expect(sortTransactions({ transactionA: b, transactionB: a })).toBe(0);
 		});
 	});
 
@@ -1730,9 +1777,9 @@ describe('transactions.utils', () => {
 		);
 
 		const mockTransactions: (IcTransactionUi | SolTransactionUi)[] = [
-			...icTransactions,
-			...solTransactions
-		].sort(() => Math.random() - 0.5);
+			...[...solTransactions].reverse(),
+			...[...icTransactions].reverse()
+		];
 
 		const [expectedOldestTransaction] = icTransactions;
 
@@ -1740,18 +1787,20 @@ describe('transactions.utils', () => {
 			expect(findOldestTransaction([])).toBeUndefined();
 		});
 
-		it('should return the oldest transaction', () => {
+		it('should return the last transaction in the newest-first list', () => {
 			expect(findOldestTransaction(mockTransactions)).toStrictEqual(expectedOldestTransaction);
 		});
 
-		it('should return the first transaction in the list if they have the same timestamp', () => {
-			const newTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
+		it('should return the last transaction in the list if oldest timestamps are tied', () => {
+			const tiedOldestTransactions: IcTransactionUi[] = icTransactions.map((transaction) => ({
 				...transaction,
-				id: `${transaction.id}-new`
+				id: `${transaction.id}-new`,
+				timestamp: expectedOldestTransaction.timestamp
 			}));
+			const expectedCursor = tiedOldestTransactions[tiedOldestTransactions.length - 1];
 
-			expect(findOldestTransaction([...mockTransactions, ...newTransactions])).toStrictEqual(
-				expectedOldestTransaction
+			expect(findOldestTransaction([...mockTransactions, ...tiedOldestTransactions])).toStrictEqual(
+				expectedCursor
 			);
 		});
 
@@ -1769,7 +1818,7 @@ describe('transactions.utils', () => {
 				})
 			);
 
-			const [expectedTransaction] = transactionsWithNumber;
+			const expectedTransaction = transactionsWitUndefined[transactionsWitUndefined.length - 1];
 
 			expect(
 				findOldestTransaction([

@@ -3,12 +3,14 @@ import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { MediaStatusEnum } from '$lib/enums/media-status';
 import { MediaType } from '$lib/enums/media-type';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
 import { extractMediaTypeAndSize } from '$lib/services/url.services';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
-import type { NetworkId, OptionNetworkId } from '$lib/types/network';
+import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
+import type { OptionString } from '$lib/types/string';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { nftsUrl } from '$lib/utils/nav.utils';
 import { getNftIdentifier } from '$lib/utils/nft.utils';
@@ -50,6 +52,34 @@ export const findNftsByNetwork = ({
 	nonNullish(networkId)
 		? nfts.filter((nft) => nft.collection.network.id === networkId)
 		: nfts.filter((nft) => nft.collection.network.env !== 'testnet');
+
+export interface NftNetworkCount {
+	network: Network;
+	count: number;
+}
+
+// Total NFT count plus a per-network breakdown, ordered by count descending,
+// for the NFTs page hero.
+export const getNftCountsByNetwork = (
+	nfts: Nft[]
+): { total: number; byNetwork: NftNetworkCount[] } => {
+	const counts = new Map<NetworkId, NftNetworkCount>();
+
+	nfts.forEach(({ collection: { network } }) => {
+		const existing = counts.get(network.id);
+
+		if (nonNullish(existing)) {
+			existing.count += 1;
+		} else {
+			counts.set(network.id, { network, count: 1 });
+		}
+	});
+
+	return {
+		total: nfts.length,
+		byNetwork: Array.from(counts.values()).sort((a, b) => b.count - a.count)
+	};
+};
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
@@ -327,6 +357,26 @@ export const getNftSendRedirectUrl = ({
 
 	return hasRemaining ? nftsUrl({ collection: sentNft.collection }) : AppPath.Nfts;
 };
+
+export const getNftSendCloseRedirectUrl = ({
+	isNftsPage,
+	routeNft,
+	sendProgressStep,
+	selectedNft,
+	collectionNfts
+}: {
+	isNftsPage: boolean;
+	routeNft: OptionString;
+	sendProgressStep: ProgressStepsSend;
+	selectedNft: Nft | undefined;
+	collectionNfts: Nft[];
+}): string | undefined =>
+	isNftsPage &&
+	notEmptyString(routeNft) &&
+	sendProgressStep === ProgressStepsSend.DONE &&
+	nonNullish(selectedNft)
+		? getNftSendRedirectUrl({ sentNft: selectedNft, collectionNfts })
+		: undefined;
 
 export const findNonFungibleToken = ({
 	tokens,

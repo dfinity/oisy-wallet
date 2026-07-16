@@ -1,12 +1,11 @@
 import * as navModule from '$app/navigation';
-import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import EarningOpportunitiesPage from '$lib/components/earning/Earning.svelte';
 import * as earningDerived from '$lib/derived/earning.derived';
 import * as earningRegistry from '$lib/providers/earning.providers';
 import { i18n } from '$lib/stores/i18n.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
-import { mockHarvestProvider, mockRewardsProvider } from '$tests/mocks/earning-providers.mock';
+import { mockHarvestProvider } from '$tests/mocks/earning-providers.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { render, screen } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
@@ -39,12 +38,7 @@ describe('EarningOpportunitiesPage', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
-		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
-
-		vi.spyOn(earningRegistry, 'earningProviders', 'get').mockReturnValue([
-			mockRewardsProvider,
-			mockHarvestProvider
-		]);
+		vi.spyOn(earningRegistry, 'earningProviders', 'get').mockReturnValue([mockHarvestProvider]);
 
 		vi.spyOn(navModule, 'goto').mockResolvedValue();
 
@@ -72,7 +66,6 @@ describe('EarningOpportunitiesPage', () => {
 
 		expect(screen.getByText(get(i18n).earning.text.earning_opportunities)).toBeInTheDocument();
 
-		expect(screen.getByText('mock.rewards.title')).toBeInTheDocument();
 		expect(screen.getByText('mock.harvest.title')).toBeInTheDocument();
 	});
 });
