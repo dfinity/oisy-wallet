@@ -1,6 +1,6 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	SignBtcResponse

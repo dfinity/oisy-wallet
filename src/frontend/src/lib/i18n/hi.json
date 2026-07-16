@@ -489,11 +489,6 @@
 				"call_to_action": "",
 				"description": ""
 			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"cloud_engines": {
 				"name": "",
 				"one_liner": "",
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Bitcoin जमा करें। स्टेबलकॉइन उधार लें। नेटिव बने रहें।",
 			"health_factor": "स्वास्थ्य कारक",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "नेट वैल्यू",
 			"markets": "मार्केट्स",
 			"total_supplied": "कुल जमा",

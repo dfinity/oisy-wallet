@@ -489,11 +489,6 @@
 				"call_to_action": "",
 				"description": ""
 			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"cloud_engines": {
 				"name": "",
 				"one_liner": "",
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Poskytni Bitcoin. Půjč si stablecoiny. Zůstaň nativní.",
 			"health_factor": "Faktor zdraví",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Čistá hodnota",
 			"markets": "Trhy",
 			"total_supplied": "Celkem poskytnuto",

@@ -53,6 +53,7 @@ const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
 	lendingIndex: ZERO,
 	borrowIndex: ZERO,
 	sameAssetBorrowing: false,
+	sameAssetBorrowingDustThreshold: ZERO,
 	...overrides
 });
 

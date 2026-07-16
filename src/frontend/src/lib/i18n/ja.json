@@ -489,11 +489,6 @@
 				"call_to_action": "",
 				"description": ""
 			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"cloud_engines": {
 				"name": "",
 				"one_liner": "",
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Bitcoinを供給。ステーブルコインを借入。ネイティブのまま。",
 			"health_factor": "ヘルスファクター",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "純資産価値",
 			"markets": "マーケット",
 			"total_supplied": "合計供給額",

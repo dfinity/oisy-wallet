@@ -4,20 +4,29 @@ import * as btcUtxosService from '$btc/services/btc-utxos.service';
 import { allUtxosStore } from '$btc/stores/all-utxos.store';
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import {
+	BtcPrepareSendError,
+	BtcSendValidationError,
+	BtcValidationError
+} from '$btc/types/btc-send';
 import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
+import { ZERO } from '$lib/constants/app.constants';
+import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addressesStore from '$lib/derived/address.derived';
 import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
+import * as liquidiumSupplyServices from '$lib/services/liquidium-supply.services';
 import type { WizardStep } from '$lib/types/wizard';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockContextMap } from '$tests/utils/context.test-utils';
 import { mockSendContextEntry } from '$tests/utils/send.context.test-utils';
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('LiquidiumSupplyBtcWizard', () => {
@@ -102,6 +111,95 @@ describe('LiquidiumSupplyBtcWizard', () => {
 		});
 
 		expect(container).toHaveTextContent(en.liquidium.text.starting_to_supply);
+	});
+
+	describe('confirm gating', () => {
+		const populateStores = () => {
+			allUtxosStore.setAllUtxos({ allUtxos: [mockUtxo] });
+			feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 1000n });
+			btcPendingSentTransactionsStore.setPendingTransactions({
+				address: mockBtcAddress,
+				pendingTransactions: []
+			});
+		};
+
+		beforeEach(() => {
+			populateStores();
+
+			vi.spyOn(addressesStore, 'ethAddress', 'get').mockImplementation(() =>
+				readable(mockEthAddress)
+			);
+			vi.spyOn(liquidiumSupplyServices, 'executeLiquidiumSupply').mockResolvedValue(undefined);
+		});
+
+		const renderReview = ({ onNext = () => {}, onBack = () => {} } = {}) =>
+			render(LiquidiumSupplyBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: step(WizardStepsLiquidiumSupply.REVIEW),
+					onNext,
+					onBack
+				},
+				context: context()
+			});
+
+		const clickConfirm = async (getByTestId: (id: string) => HTMLElement) => {
+			await waitFor(() => {
+				expect(btcUtxosService.prepareBtcSend).toHaveBeenCalled();
+			});
+
+			await fireEvent.click(getByTestId(STAKE_REVIEW_FORM_BUTTON));
+		};
+
+		it('does not supply when the UTXO selection failed', async () => {
+			// A selection error (e.g. balance only in unconfirmed UTXOs) means the prepared
+			// UTXOs cannot fund the broadcast — the signer would reject the transaction.
+			vi.spyOn(btcUtxosService, 'prepareBtcSend').mockReturnValue({
+				feeSatoshis: ZERO,
+				utxos: [],
+				error: BtcPrepareSendError.UtxoLocked
+			});
+
+			const onNext = vi.fn();
+
+			const { getByTestId } = renderReview({ onNext });
+
+			await clickConfirm(getByTestId);
+
+			expect(onNext).not.toHaveBeenCalled();
+			expect(liquidiumSupplyServices.executeLiquidiumSupply).not.toHaveBeenCalled();
+		});
+
+		it('validates the prepared UTXOs before supplying', async () => {
+			const { getByTestId } = renderReview();
+
+			await clickConfirm(getByTestId);
+
+			await waitFor(() => {
+				expect(btcSendServices.validateBtcSend).toHaveBeenCalledWith(
+					expect.objectContaining({ utxosFee: mockUtxosFee })
+				);
+				expect(liquidiumSupplyServices.executeLiquidiumSupply).toHaveBeenCalledOnce();
+			});
+		});
+
+		it('aborts the supply when the send validation fails', async () => {
+			vi.spyOn(btcSendServices, 'validateBtcSend').mockRejectedValue(
+				new BtcValidationError(BtcSendValidationError.UtxoLocked)
+			);
+
+			const onBack = vi.fn();
+
+			const { getByTestId } = renderReview({ onBack });
+
+			await clickConfirm(getByTestId);
+
+			await waitFor(() => {
+				expect(onBack).toHaveBeenCalledOnce();
+			});
+
+			expect(liquidiumSupplyServices.executeLiquidiumSupply).not.toHaveBeenCalled();
+		});
 	});
 
 	it('selects UTXOs for the gross transfer (supply amount + inflow fee)', async () => {

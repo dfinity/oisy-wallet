@@ -1,7 +1,6 @@
 import type {
 	EthAddressResponse,
 	EthSignTransactionRequest,
-	RejectionCode_1,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
@@ -333,39 +332,19 @@ describe('signer.canister', () => {
 			await expect(getEthAddress()).rejects.toThrow(mockResponseError);
 		});
 
-		const signingErrors = [
-			'NoError',
-			'CanisterError',
-			'SysTransient',
-			'DestinationInvalid',
-			'Unknown',
-			'SysFatal',
-			'CanisterReject'
-		];
+		it('should throw an error if eth_address throws a SigningError', async () => {
+			const SigningError = 'test';
 
-		it.each(signingErrors)(
-			'should throw an error if eth_address throws a SigningError for %s',
-			async (error) => {
-				const rejectionCode: RejectionCode_1 = {
-					[`${error}`]: null
-				} as RejectionCode_1;
+			service.eth_address.mockResolvedValue({ Err: { SigningError } });
 
-				const addOns = 'test';
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
 
-				const SigningError: [RejectionCode_1, string] = [rejectionCode, addOns];
-				const response = { SigningError };
-
-				service.eth_address.mockResolvedValue({ Err: response });
-
-				const { getEthAddress } = await createSignerCanister({
-					serviceOverride: service
-				});
-
-				await expect(getEthAddress()).rejects.toThrow(
-					new CanisterInternalError(`Signing error: ${JSON.stringify(rejectionCode)} ${addOns}`)
-				);
-			}
-		);
+			await expect(getEthAddress()).rejects.toThrow(
+				new CanisterInternalError(`Signing error: ${SigningError}`)
+			);
+		});
 
 		it('should throw a SignerCanisterPaymentError for UnsupportedPaymentType error', async () => {
 			service.eth_address.mockResolvedValue(paymentErrorResponse);
@@ -864,6 +843,7 @@ describe('signer.canister', () => {
 			expect(res).toEqual(signature);
 			expect(service.schnorr_sign).toHaveBeenCalledWith(
 				{
+					aux: [],
 					key_id: SOLANA_KEY_ID,
 					derivation_path: mapDerivationPath(['test']),
 					message

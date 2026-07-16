@@ -1,22 +1,29 @@
-// TEMPORARY override candid for the Chain Fusion Signer.
-//
-// This is the pinned v0.3.0 release candid with ONLY `btc_sign_prehash` (and its types) added, so the
-// bip122 WalletConnect signing flow can call it without adopting the many unrelated breaking changes on
-// chain-fusion-signer `main` (renamed args, schnorr `aux`, `EthAddressError` shape, etc.). The endpoint
-// is already deployed on the staging signer canister but is not in any tagged release yet (latest is
-// v0.5.0). Delete this file and restore the release candid download in `build.signer.sh` once a signer
-// release exposes `btc_sign_prehash`.
 type Account = record { owner : principal; subaccount : opt blob };
 type Arg = variant { Upgrade; Init : InitArg };
+// # Bip341 variant of Schnorr Aux.
+type Bip341 = record {
+	// Merkle tree root hash.
+	merkle_root_hash : blob
+};
 type BitcoinAddressType = variant { P2WPKH };
-type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type BtcSignPrehashError = variant {
+	// The supplied hash was not valid hex or was not a 32-byte digest.
 	InvalidHash : record { msg : text };
+	// An inter-canister call error from the threshold signature API.
 	SigningError : text;
+	// Payment failed.
 	PaymentError : PaymentError
 };
-type BtcSignPrehashRequest = record { hash : text };
-type BtcSignPrehashResponse = record { signature : text };
+type BtcSignPrehashRequest = record {
+	// Hex-encoded 32-byte digest to sign under the caller's Bitcoin key.
+	hash : text
+};
+type BtcSignPrehashResponse = record {
+	// Hex-encoded 64-byte ECDSA signature (`r || s`), as returned by the management canister.
+	// The caller recovers the recovery id (and any encoding it needs) from the known public
+	// key.
+	signature : text
+};
 type BtcTxOutput = record { destination_address : text; sent_satoshis : nat64 };
 type BuildP2wpkhTxError = variant {
 	NotEnoughFunds : record { available : nat64; required : nat64 };
@@ -26,6 +33,7 @@ type BuildP2wpkhTxError = variant {
 	InvalidSourceAddress : GetAddressResponse
 };
 type CallerPaysIcrc2Tokens = record { ledger : principal };
+// Copy of the synonymous Rosetta type.
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -37,12 +45,27 @@ type CanisterStatusResultV2 = record {
 	idle_cycles_burned_per_day : nat;
 	module_hash : opt blob
 };
-type CanisterStatusType = variant { stopped; stopping; running };
+// # Canister Status Type
+//
+// Status of a canister.
+//
+// See [`CanisterStatusResult::status`].
+type CanisterStatusType = variant {
+	// The canister is stopped.
+	stopped;
+	// The canister is stopping.
+	stopping;
+	// The canister is running.
+	running
+};
 type Config = record {
 	ecdsa_key_name : text;
+	// Root of trust for checking canister signatures.
 	ic_root_key_raw : opt blob;
+	// Payment canister ID.
 	cycles_ledger : principal
 };
+// Copy of synonymous Rosetta type.
 type DefiniteCanisterSettingsArgs = record {
 	controller : principal;
 	freezing_threshold : nat;
@@ -50,20 +73,54 @@ type DefiniteCanisterSettingsArgs = record {
 	memory_allocation : nat;
 	compute_allocation : nat
 };
-type EcdsaCurve = variant { secp256k1 };
-type EcdsaKeyId = record { name : text; curve : EcdsaCurve };
-type EcdsaPublicKeyArgument = record {
+// # ECDSA Curve.
+type EcdsaCurve = variant {
+	// secp256k1
+	secp256k1
+};
+// # ECDSA Key ID.
+//
+// See [`EcdsaPublicKeyArgs::key_id`] and [`SignWithEcdsaArgs::key_id`].
+type EcdsaKeyId = record {
+	// Name of the key.
+	name : text;
+	// Curve of the key.
+	curve : EcdsaCurve
+};
+// # ECDSA Public Key Args.
+//
+// Argument type of [`ecdsa_public_key`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key).
+type EcdsaPublicKeyArgs = record {
+	// The key ID.
 	key_id : EcdsaKeyId;
+	// Canister id, default to the canister id of the caller if `None`.
 	canister_id : opt principal;
+	// A vector of variable length byte strings.
 	derivation_path : vec blob
 };
-type EcdsaPublicKeyResponse = record { public_key : blob; chain_code : blob };
+// # ECDSA Public Key Result.
+//
+// Result type of [`ecdsa_public_key`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key).
+type EcdsaPublicKeyResult = record {
+	// An ECDSA public key encoded in SEC1 compressed form.
+	public_key : blob;
+	// Can be used to deterministically derive child keys of the [`public_key`](Self::public_key).
+	chain_code : blob
+};
 type EthAddressError = variant {
-	SigningError : record { RejectionCode_1; text };
+	// An inter-canister call error from the threshold signature API.
+	SigningError : text;
+	// Payment failed.
 	PaymentError : PaymentError
 };
-type EthAddressRequest = record { "principal" : opt principal };
-type EthAddressResponse = record { address : text };
+type EthAddressRequest = record {
+	// The principal owning the Ethereum address.  Default: The caller.
+	"principal" : opt principal
+};
+type EthAddressResponse = record {
+	// The Ethereum address.
+	address : text
+};
 type EthPersonalSignRequest = record { message : text };
 type EthPersonalSignResponse = record { signature : text };
 type EthSignPrehashRequest = record { hash : text };
@@ -83,20 +140,26 @@ type GetAddressError = variant {
 	PaymentError : PaymentError
 };
 type GetAddressRequest = record {
-	network : BitcoinNetwork;
+	network : Network;
 	address_type : BitcoinAddressType
 };
 type GetAddressResponse = record { address : text };
 type GetBalanceRequest = record {
-	network : BitcoinNetwork;
+	network : Network;
 	address_type : BitcoinAddressType;
 	min_confirmations : opt nat32
 };
 type GetBalanceResponse = record { balance : nat64 };
 type HttpRequest = record {
+	// The requested path and query string, for example `/some/path?foo=bar`.
+	//
+	// Note: This does NOT contain the domain, port or protocol.
 	url : text;
+	// The HTTP method of the request, such as `GET` or `POST`.
 	method : text;
+	// The complete body of the HTTP request
 	body : blob;
+	// The HTTP request headers
 	headers : vec record { text; text }
 };
 type HttpResponse = record {
@@ -106,10 +169,27 @@ type HttpResponse = record {
 };
 type InitArg = record {
 	ecdsa_key_name : text;
+	// Root of trust for checking canister signatures.
 	ic_root_key_der : opt blob;
+	// Payment canister ID.
 	cycles_ledger : opt principal
 };
-type Outpoint = record { txid : blob; vout : nat32 };
+type Network = variant {
+	// Bitcoin Mainnet.
+	mainnet;
+	// Bitcoin Regtest.
+	regtest;
+	// Bitcoin Testnet4.
+	testnet
+};
+// A reference to a transaction output.
+type OutPoint = record {
+	// A cryptographic hash of the transaction.
+	// A transaction can output multiple UTXOs.
+	txid : blob;
+	// The index of the output within the transaction.
+	vout : nat32
+};
 type PatronPaysIcrc2Tokens = record { ledger : principal; patron : Account };
 type PaymentError = variant {
 	LedgerWithdrawFromError : record {
@@ -123,13 +203,23 @@ type PaymentError = variant {
 		ledger : principal
 	};
 	UnsupportedPaymentType;
-	InsufficientFunds : record { needed : nat64; available : nat64 }
+	InsufficientFunds : record { needed : nat; available : nat }
 };
+// How a caller states that they will pay.
 type PaymentType = variant {
+	// A patron is paying, on behalf of the caller, from an account on the specified ledger.
 	PatronPaysIcrc2Tokens : PatronPaysIcrc2Tokens;
+	// The caller is paying with cycles attached to the call.
+	//
+	// Note: This is available to inter-canister aclls only; not to ingress messages.
+	//
+	// Note: The API does not require additional arguments to support this payment type.
 	AttachedCycles;
+	// The caller is paying with cycles from their main account on the cycles ledger.
 	CallerPaysIcrc2Cycles;
+	// The caller is paying with tokens from their main account on the specified ledger.
 	CallerPaysIcrc2Tokens : CallerPaysIcrc2Tokens;
+	// A patron is paying with cycles on behalf of the caller.
 	PatronPaysIcrc2Cycles : Account
 };
 type RejectionCode = variant {
@@ -141,47 +231,60 @@ type RejectionCode = variant {
 	SysFatal;
 	CanisterReject
 };
-type RejectionCode_1 = variant {
-	NoError;
-	CanisterError;
-	SysTransient;
-	DestinationInvalid;
-	Unknown;
-	SysFatal;
-	CanisterReject
-};
 type Result = variant { Ok : GetAddressResponse; Err : GetAddressError };
-type Result_BtcSignPrehash = variant {
-	Ok : BtcSignPrehashResponse;
-	Err : BtcSignPrehashError
-};
 type Result_1 = variant { Ok : GetBalanceResponse; Err : GetAddressError };
 type Result_10 = variant {
-	Ok : record { SignWithEcdsaResponse };
+	Ok : record { EcdsaPublicKeyResult };
+	Err : EthAddressError
+};
+type Result_11 = variant {
+	Ok : record { SignWithEcdsaResult };
 	Err : EthAddressError
 };
 type Result_2 = variant { Ok : SendBtcResponse; Err : SendBtcError };
 type Result_3 = variant { Ok : SignBtcResponse; Err : SendBtcError };
-type Result_4 = variant { Ok : EthAddressResponse; Err : EthAddressError };
-type Result_5 = variant { Ok : EthPersonalSignResponse; Err : EthAddressError };
-type Result_6 = variant { Ok : EthSignPrehashResponse; Err : EthAddressError };
-type Result_7 = variant {
-	Ok : record { EcdsaPublicKeyResponse };
-	Err : EthAddressError
+type Result_4 = variant {
+	Ok : BtcSignPrehashResponse;
+	Err : BtcSignPrehashError
 };
+type Result_5 = variant { Ok : EthAddressResponse; Err : EthAddressError };
+type Result_6 = variant { Ok : EthPersonalSignResponse; Err : EthAddressError };
+type Result_7 = variant { Ok : EthSignPrehashResponse; Err : EthAddressError };
 type Result_8 = variant {
-	Ok : record { SignWithEcdsaResponse };
+	Ok : record { EcdsaPublicKeyResult };
 	Err : EthAddressError
 };
 type Result_9 = variant {
-	Ok : record { EcdsaPublicKeyResponse };
+	Ok : record { SignWithEcdsaResult };
 	Err : EthAddressError
 };
-type SchnorrAlgorithm = variant { ed25519; bip340secp256k1 };
-type SchnorrKeyId = record { algorithm : SchnorrAlgorithm; name : text };
-type SchnorrPublicKeyArgument = record {
+// # Schnorr Algorithm.
+//
+// See [`SchnorrKeyId::algorithm`].
+type SchnorrAlgorithm = variant {
+	// ed25519.
+	ed25519;
+	// BIP-340 secp256k1.
+	bip340secp256k1
+};
+// # Schnorr Aux.
+type SchnorrAux = variant { bip341 : Bip341 };
+// # Schnorr Key ID.
+type SchnorrKeyId = record {
+	// Algorithm of the key.
+	algorithm : SchnorrAlgorithm;
+	// Name of the key.
+	name : text
+};
+// # Schnorr Public Key Args.
+//
+// Argument type of [`schnorr_public_key`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-schnorr_public_key).
+type SchnorrPublicKeyArgs = record {
+	// The key ID.
 	key_id : SchnorrKeyId;
+	// Canister id, default to the canister id of the caller if `None`.
 	canister_id : opt principal;
+	// A vector of variable length byte strings.
 	derivation_path : vec blob
 };
 type SendBtcError = variant {
@@ -191,22 +294,42 @@ type SendBtcError = variant {
 };
 type SendBtcRequest = record {
 	fee_satoshis : opt nat64;
-	network : BitcoinNetwork;
+	network : Network;
 	utxos_to_spend : vec Utxo;
 	address_type : BitcoinAddressType;
 	outputs : vec BtcTxOutput
 };
 type SendBtcResponse = record { txid : text };
 type SignBtcResponse = record { txid : text; signed_transaction_hex : text };
-type SignWithEcdsaArgument = record {
+// # Sign With ECDSA Args.
+//
+// Argument type of [`sign_with_ecdsa`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa).
+type SignWithEcdsaArgs = record {
+	// The key ID.
 	key_id : EcdsaKeyId;
+	// A vector of variable length byte strings.
 	derivation_path : vec blob;
+	// Hash of the message with length of 32 bytes.
 	message_hash : blob
 };
-type SignWithEcdsaResponse = record { signature : blob };
-type SignWithSchnorrArgument = record {
+// # Sign With ECDSA Result.
+//
+// Result type of [`sign_with_ecdsa`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa).
+type SignWithEcdsaResult = record {
+	// Encoded as the concatenation of the SEC1 encodings of the two values `r` and `s`.
+	signature : blob
+};
+// # Sign With Schnorr Args.
+//
+// Argument type of [`sign_with_schnorr`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_schnorr).
+type SignWithSchnorrArgs = record {
+	// Schnorr auxiliary inputs.
+	aux : opt SchnorrAux;
+	// The key ID.
 	key_id : SchnorrKeyId;
+	// A vector of variable length byte strings.
 	derivation_path : vec blob;
+	// Message to be signed.
 	message : blob
 };
 type TransferFromError = variant {
@@ -220,7 +343,8 @@ type TransferFromError = variant {
 	TooOld;
 	InsufficientFunds : record { balance : nat }
 };
-type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
+// An unspent transaction output.
+type Utxo = record { height : nat32; value : nat64; outpoint : OutPoint };
 type WithdrawFromError = variant {
 	GenericError : record { message : text; error_code : nat };
 	TemporarilyUnavailable;
@@ -231,7 +355,7 @@ type WithdrawFromError = variant {
 	TooOld;
 	FailedToWithdrawFrom : record {
 		withdraw_from_block : opt nat;
-		rejection_code : RejectionCode_1;
+		rejection_code : RejectionCode;
 		refund_block : opt nat;
 		approval_refund_block : opt nat;
 		rejection_reason : text
@@ -239,32 +363,254 @@ type WithdrawFromError = variant {
 	InsufficientFunds : record { balance : nat }
 };
 service : (Arg) -> {
+	// Returns the Bitcoin address of the caller.
+	//
+	// # Details
+	// - Gets the principal's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to a P2WPKH address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
 	btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
+	// Returns the Bitcoin balance of the caller's address.
+	//
+	// > This method is DEPRECATED. Canister developers are advised to call `bitcoin_get_balance()` on
+	// > the Bitcoin (mainnet or testnet) canister.
+	//
+	// # Details
+	// - Gets the principal's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to a P2WPKH address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Gets the Bitcoin balance from [the deprecated system Bitcoin API](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance)
+	// - Costs: See [Bitcoin API fees and pricing](https://internetcomputer.org/docs/current/references/bitcoin-how-it-works#api-fees-and-pricing)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
 	btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
+	// Creates, signs and sends a BTC transaction from the caller's address.
+	//
+	// # Details
+	// - Gets the principal's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to a P2WPKH address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - For every transaction input:
+	// - Calls `sign_with_ecdsa(..)` on that input.
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	// - Sends the transaction with `bitcoin_api::send_transaction(..)`
+	// - Costs: See [Bitcoin API fees and pricing](https://internetcomputer.org/docs/current/references/bitcoin-how-it-works#api-fees-and-pricing)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
 	btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
+	// Creates and signs a BTC transaction from the caller's address without broadcasting it.
+	//
+	// # Details
+	// - Gets the principal's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to a P2WPKH address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - For every transaction input:
+	// - Calls `sign_with_ecdsa(..)` on that input.
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
 	btc_caller_sign : (SendBtcRequest, opt PaymentType) -> (Result_3);
-	btc_sign_prehash : (BtcSignPrehashRequest, opt PaymentType) -> (
-		Result_BtcSignPrehash
-	);
+	// Signs a precomputed 32-byte digest under the caller's Bitcoin key.
+	//
+	// # Details
+	// This is the Bitcoin counterpart of `eth_sign_prehash`: it signs an arbitrary hash with the
+	// caller's BTC key (schema `Btc`), so the signature verifies against the caller's P2WPKH address.
+	// Unlike `btc_caller_sign`, which builds and signs a transaction from supplied UTXOs, this signs
+	// any digest, which is what arbitrary message / PSBT signing (e.g. `WalletConnect` `signMessage` /
+	// `signPsbt`) requires. `generic_sign_with_ecdsa` cannot serve this: it derives a different
+	// (schema `Generic`) key whose signatures do not match the BTC address.
+	//
+	// - Signs the message hash with `management_canister::ecdsa::sign_with_ecdsa(..)`
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// Returns the raw 64-byte ECDSA signature (`r || s`) as hex; the caller recovers the recovery id
+	// from the known public key.
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	btc_sign_prehash : (BtcSignPrehashRequest, opt PaymentType) -> (Result_4);
+	// Show the canister configuration.
 	config : () -> (Config) query;
-	eth_address : (EthAddressRequest, opt PaymentType) -> (Result_4);
-	eth_address_of_caller : (opt PaymentType) -> (Result_4);
-	eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_5);
-	eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_6);
+	// Returns the Ethereum address of a specified user.
+	//
+	// If no user is specified, the caller's address is returned.
+	//
+	// # Details
+	// - Gets the specified user's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to an Ethereum address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	eth_address : (EthAddressRequest, opt PaymentType) -> (Result_5);
+	// Returns the Ethereum address of the caller.
+	//
+	// # Details
+	// - Gets the caller's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Converts the public key to an Ethereum address.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	eth_address_of_caller : (opt PaymentType) -> (Result_5);
+	// Computes an Ethereum signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
+	//
+	// # Details
+	// - Formats the message as `\x19Ethereum Signed Message:\n<length><message>`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Hashes the message.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Gets the caller's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Signs the message hash with `management_canister::ecdsa::sign_with_ecdsa(..)`
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	eth_personal_sign : (EthPersonalSignRequest, opt PaymentType) -> (Result_6);
+	// Computes an Ethereum signature for a precomputed hash.
+	//
+	// # Details
+	// Note: This is the same as `eth_personal_sign` but with a precomputed hash, so ingress message
+	// size is small regardless of the message length.
+	//
+	// - Gets the caller's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Signs the message hash with `management_canister::ecdsa::sign_with_ecdsa(..)`
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	eth_sign_prehash : (EthSignPrehashRequest, opt PaymentType) -> (Result_7);
+	// Computes an Ethereum signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
+	//
+	// # Details
+	// - Formats the transaction as an `Eip1559TransactionRequest`.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Hashes the transaction.
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Gets the caller's public key with `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	// - Signs the transaction with `management_canister::ecdsa::sign_with_ecdsa(..)`
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
 	eth_sign_transaction : (EthSignTransactionRequest, opt PaymentType) -> (
-		Result_6
+		Result_7
 	);
-	generic_caller_ecdsa_public_key : (
-		EcdsaPublicKeyArgument,
-		opt PaymentType
-	) -> (Result_7);
-	generic_sign_with_ecdsa : (opt PaymentType, SignWithEcdsaArgument) -> (
+	// Returns the generic ECDSA public key of the caller.
+	//
+	// Note: This is an exact dual of the canister [`ecdsa_public_key`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key) method.  The argument and response types are also the same.
+	//
+	// # Warnings
+	// - The user supplied derivation path is used as-is.  The caller is responsible for ensuring that
+	// unintended sub-keys are not requested.
+	//
+	// # Details
+	// - Calls `management_canister::ecdsa::ecdsa_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	generic_caller_ecdsa_public_key : (EcdsaPublicKeyArgs, opt PaymentType) -> (
 		Result_8
 	);
+	// Signs a message using the caller's ECDSA key.
+	//
+	// Note: This is an exact dual of the canister [`sign_with_ecdsa`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa) method.  The argument and response types are also the same.
+	//
+	// # Warnings
+	// - The user supplied derivation path is used as-is.  The caller is responsible for ensuring that
+	// unintended sub-keys are not requested.
+	//
+	// # Details
+	// - Calls `management_canister::ecdsa::sign_with_ecdsa(..)`
+	// - Costs: See [Fees for the t-ECDSA production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-ecdsa-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	generic_sign_with_ecdsa : (opt PaymentType, SignWithEcdsaArgs) -> (Result_9);
+	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
+	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
-	schnorr_public_key : (SchnorrPublicKeyArgument, opt PaymentType) -> (
-		Result_9
-	);
-	schnorr_sign : (SignWithSchnorrArgument, opt PaymentType) -> (Result_10)
+	// Returns the Schnorr public key of the caller or specified principal.
+	//
+	// Note: This is an exact dual of the canister [`schnorr_public_key`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-schnorr_public_key) method.  The argument and response types are also the same.
+	//
+	// # Arguments
+	// - `arg`: The same `SchnorrPublicKeyArgs` as the management canister argument.  The semantics are
+	// identical but the meaning of the fields in the new context deserve some explanation.
+	// - `arg.canister_id`: The principal of the canister or user for which the Chain Fusion Signer
+	// has issued the public key.  If `None`, the caller's public key is returned.
+	// - `arg.derivation_path`: The derivation path to the public key.  The caller is responsible for
+	// ensuring that the derivation path is used to namespace appropriately and to ensure that
+	// unintended sub-keys are not requested.  At minimum, it is recommended to use `vec!["NAME OF
+	// YOUR APP".into_bytes()]`.  The maximum derivation path length is 254, one less than when
+	// calling the management canister.
+	// - `arg.key_id`: The ID of the root threshold key to use.  E.g. `key_1` or `test_key_1`.  See <https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#key-derivation>
+	// for details.
+	// - `payment`: The payment type to use.  If omitted or `None`, it will be assumed that cycles have
+	// been attached.
+	//
+	// # Warnings
+	// - The user supplied derivation path is used as-is.  The caller is responsible for ensuring that
+	// derivation paths are used to namespace appropriately and to ensure that unintended sub-keys
+	// are not requested.
+	// - It is recommended that, at minimum, the derivation path should be `vec!["NAME OF YOUR
+	// APP".into_bytes()]`
+	//
+	// # Details
+	// - Calls `management_canister::schnorr::schnorr_public_key(..)`
+	// - Costs: [Execution cycles](https://internetcomputer.org/docs/current/developer-docs/gas-cost#execution)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	schnorr_public_key : (SchnorrPublicKeyArgs, opt PaymentType) -> (Result_10);
+	// Signs a message using the caller's Schnorr key.
+	//
+	// Note: This is an exact dual of the canister [`sign_with_schnorr`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_schnorr) method.  The argument and response types are also the same.
+	//
+	// # Arguments
+	// - `arg`: The same `SignWithSchnorrArgs` as the management canister argument.  The semantics are
+	// identical but the meaning of the fields in the new context deserve some explanation.
+	// - `arg.message`: The data to sign.  Note that if you have a large amount of data, you are
+	// probably better off hashing the data and then signing the hash.
+	// - `arg.derivation_path`: The derivation path to the public key.  The caller is responsible for
+	// ensuring that the derivation path is used to namespace appropriately and to ensure that
+	// unintended sub-keys are not requested.  At minimum, it is recommended to use `vec!["NAME OF
+	// YOUR APP".into_bytes()]`.  The maximum derivation path length is 254, one less than when
+	// calling the management canister.
+	// - `arg.key_id`: The ID of the root threshold key to use.  E.g. `key_1` or `test_key_1`.  See <https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#key-derivation>
+	// for details.
+	// - `payment`: The payment type to use.  If omitted or `None`, it will be assumed that cycles have
+	// been attached.
+	//
+	// # Warnings
+	// - The user supplied derivation path is used as-is.  The caller is responsible for ensuring that
+	// derivation paths are used to namespace appropriately and to ensure that unintended sub-keys
+	// are not requested.
+	// - It is recommended that, at minimum, the derivation path should be `vec!["NAME OF YOUR
+	// APP".into_bytes()]`
+	//
+	// # Details
+	// - Calls `management_canister::schnorr::sign_with_schnorr(..)`
+	// - Costs: See [Fees for the t-Schnorr production key](https://internetcomputer.org/docs/current/references/t-sigs-how-it-works#fees-for-the-t-schnorr-production-key)
+	//
+	// # Panics
+	// - If the caller is the anonymous user.
+	schnorr_sign : (SignWithSchnorrArgs, opt PaymentType) -> (Result_11)
 }

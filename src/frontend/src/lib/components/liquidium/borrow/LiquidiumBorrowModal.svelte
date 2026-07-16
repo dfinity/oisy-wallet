@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumBorrowForm from '$lib/components/liquidium/borrow/LiquidiumBorrowForm.svelte';
@@ -7,7 +8,6 @@
 	import LiquidiumBorrowReview from '$lib/components/liquidium/borrow/LiquidiumBorrowReview.svelte';
 	import LiquidiumBorrowSummary from '$lib/components/liquidium/borrow/LiquidiumBorrowSummary.svelte';
 	import LiquidiumBorrowTokensList from '$lib/components/liquidium/borrow/LiquidiumBorrowTokensList.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumBorrowWizardSteps } from '$lib/config/lend-borrow.config';
 	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
@@ -145,7 +145,7 @@
 
 		const amountBaseUnits = parsedAmount;
 		const receiver = receiverAddress;
-		const { poolId, asset } = selectedMarket;
+		const { poolId, asset, chain } = selectedMarket;
 
 		modal?.next();
 
@@ -154,6 +154,7 @@
 				identity,
 				ethAddress: $ethAddress,
 				poolId,
+				chain: chain as Chain,
 				asset,
 				amount: amountBaseUnits,
 				receiverAddress: receiver,
@@ -194,10 +195,6 @@
 					<LiquidiumBorrowSummary portfolio={$liquidiumPortfolio} />
 				{/if}
 			{/snippet}
-
-			<MessageBox styleClass="sm:text-sm !items-center">
-				{$i18n.liquidium.text.borrow_risk_info}
-			</MessageBox>
 		</LiquidiumSelectTokenForm>
 	{:else if nonNullish($liquidiumPortfolio) && nonNullish(preview)}
 		{#if currentStep?.name === WizardStepsLiquidiumBorrow.REVIEW}

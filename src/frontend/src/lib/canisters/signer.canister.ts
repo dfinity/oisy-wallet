@@ -1,6 +1,6 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	BtcSignPrehashRequest,
 	EthAddressRequest,
 	EthPersonalSignRequest,
@@ -299,6 +299,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await schnorr_sign(
 			{
+				aux: [],
 				key_id: keyId,
 				derivation_path: mapDerivationPath(derivationPath),
 				message

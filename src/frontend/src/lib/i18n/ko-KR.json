@@ -489,11 +489,6 @@
 				"call_to_action": "",
 				"description": ""
 			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
-			},
 			"cloud_engines": {
 				"name": "",
 				"one_liner": "",
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Bitcoin 공급. 스테이블코인 대출. 네이티브 유지.",
 			"health_factor": "건강 지수",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "순자산 가치",
 			"markets": "마켓",
 			"total_supplied": "총 공급액",

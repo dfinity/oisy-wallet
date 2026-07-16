@@ -10,8 +10,8 @@ export const SESSION_REQUEST_BTC_ADDRESSES_CHANGED = 'bip122_addressesChanged';
 // BIP-84 path of the address OISY advertises to dApps via `getAccountAddresses`. OISY uses the
 // first external Native SegWit (P2WPKH) address. The BIP-44 coin type is network-aware: `0'` for
 // Bitcoin mainnet and `1'` for any test network (testnet/regtest), per SLIP-44. This is only the
-// descriptor surfaced to the dApp; the actual key derivation on the signer uses
-// `BTC_ECDSA_DERIVATION_PATH` (the value here is not the signer input).
+// descriptor surfaced to the dApp; the signer derives the key itself from the caller principal in
+// `btc_sign_prehash` (the value here is not a signer input).
 const BTC_WALLET_CONNECT_DERIVATION_PATH_MAINNET = "m/84'/0'/0'/0/0";
 const BTC_WALLET_CONNECT_DERIVATION_PATH_TESTNET = "m/84'/1'/0'/0/0";
 
