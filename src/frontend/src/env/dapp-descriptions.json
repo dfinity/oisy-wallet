@@ -42,7 +42,7 @@
 		"oneLiner": "dapps.descriptions.nnsdapp.one_liner",
 		"callToAction": "dapps.descriptions.nnsdapp.call_to_action",
 		"website": "https://nns.internetcomputer.org/",
-		"github": "https://github.com/dfinity/nns-dapp",
+		"github": "https://github.com/dfinity/governance-app",
 		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
 		"stats": "",
 		"usesInternetIdentity": true,
