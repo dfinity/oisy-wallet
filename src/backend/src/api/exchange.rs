@@ -54,7 +54,10 @@ pub fn get_exchange_rates() -> Vec<(TokenId, Option<ExchangeRate>)> {
         return Vec::new();
     }
 
-    token::mark_tokens_active(&custom_tokens_to_mark(&tokens));
+    let tokens_to_mark = custom_tokens_to_mark(&tokens);
+    if !tokens_to_mark.is_empty() {
+        token::mark_tokens_active(&tokens_to_mark);
+    }
 
     let (snapshot, stale) = snapshot_and_stale(tokens);
     let refresh_lock = if stale.is_empty() || !is_exchange_rate_refresh_enabled() {
