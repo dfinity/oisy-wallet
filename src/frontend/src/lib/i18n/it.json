@@ -181,10 +181,10 @@
 			"authenticate": "Accedi o Crea",
 			"sign_in_or_sign_up": "Accedi o registrati",
 			"internet_identity": "",
-			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
+			"asset_types": "Cripto, azioni, materie prime, oggetti da collezione e note crittografate.",
 			"instant_and_private": "Assistente AI integrato con privacy come standard",
-			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
-			"move_swap_grow": "Sposta, scambia e fai crescere i tuoi asset tra le reti"
+			"advanced_cryptography": "Privato e a prova di manomissione. Invisibile, se ti serve.",
+			"move_swap_grow": "Guadagna, prendi in prestito e fai trading, con un assistente AI integrato."
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile",

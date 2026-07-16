@@ -181,10 +181,10 @@
 			"authenticate": "열기 또는 만들기",
 			"sign_in_or_sign_up": "로그인 또는 회원가입",
 			"internet_identity": "",
-			"asset_types": "비트코인, 솔라나, 이더리움, ICP 등 다양한 자산 관리",
+			"asset_types": "암호화폐, 주식, 원자재, 수집품, 암호화된 노트.",
 			"instant_and_private": "개인정보 보호가 기본인 내장 AI 어시스턴트",
-			"advanced_cryptography": "고급 암호화 기술로 보호 - 100% 온체인",
-			"move_swap_grow": "네트워크 전반에서 자산을 이동, 스왑하고 성장시키세요"
+			"advanced_cryptography": "비공개이며 변조 불가능. 원하면 보이지 않게.",
+			"move_swap_grow": "내장 AI 어시스턴트로 벌고, 빌리고, 거래하세요."
 		},
 		"alt": {
 			"preview": "데스크탑과 모바일에서 로그인 후 $oisy_name의 미리보기",

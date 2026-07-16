@@ -181,10 +181,10 @@
 			"authenticate": "Anmelden",
 			"sign_in_or_sign_up": "Anmelden oder registrieren",
 			"internet_identity": "",
-			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
+			"asset_types": "Krypto, Aktien, Rohstoffe, Sammlerstücke und verschlüsselte Notizen.",
 			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
-			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
-			"move_swap_grow": "Verschiebe, tausche und vermehre deine Assets netzwerkübergreifend"
+			"advanced_cryptography": "Privat und manipulationssicher. Unsichtbar, wenn du es brauchst.",
+			"move_swap_grow": "Verdiene, leihe und handle, mit integriertem KI-Assistenten."
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil",
