@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumBorrowForm from '$lib/components/liquidium/borrow/LiquidiumBorrowForm.svelte';
 	import LiquidiumBorrowProgress from '$lib/components/liquidium/borrow/LiquidiumBorrowProgress.svelte';
@@ -81,9 +82,14 @@
 			: undefined
 	);
 
-	// Borrowed asset is delivered to the user's own oisy address on the pool's chain.
+	// Borrowed asset is delivered to the user's own oisy address on the pool's chain:
+	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
 	let receiverAddress = $derived(
-		selectedMarket?.chain === 'BTC' ? $btcAddressMainnet : $ethAddress
+		selectedMarket?.chain === 'BTC'
+			? $btcAddressMainnet
+			: selectedMarket?.chain === 'ICP'
+				? $icrcAccountIdentifierText
+				: $ethAddress
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumBorrow) => {

@@ -1,4 +1,5 @@
 import type {
+	BtcSignPrehashError,
 	EthAddressError,
 	PaymentError,
 	GetAddressError as SignerCanisterBtcError,
@@ -50,6 +51,21 @@ export const mapSignerCanisterSendBtcError = (
 		return new CanisterInternalError(JSON.stringify(err.BuildP2wpkhError, jsonReplacer));
 	}
 	return new CanisterInternalError('Unknown SignerCanisterSendBtcError');
+};
+
+export const mapSignerCanisterBtcSignPrehashError = (
+	err: BtcSignPrehashError
+): CanisterInternalError => {
+	if ('InvalidHash' in err) {
+		return new CanisterInternalError(err.InvalidHash.msg);
+	}
+	if ('SigningError' in err) {
+		return new CanisterInternalError(`Signing error: ${err.SigningError}`);
+	}
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
+	}
+	return new CanisterInternalError('Unknown BtcSignPrehashError');
 };
 
 export const mapSignerCanisterGetEthAddressError = (

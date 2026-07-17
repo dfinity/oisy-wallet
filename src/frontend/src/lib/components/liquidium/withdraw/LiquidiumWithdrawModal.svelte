@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumWithdrawForm from '$lib/components/liquidium/withdraw/LiquidiumWithdrawForm.svelte';
 	import LiquidiumWithdrawProgress from '$lib/components/liquidium/withdraw/LiquidiumWithdrawProgress.svelte';
@@ -83,8 +84,14 @@
 			: undefined
 	);
 
+	// Withdrawn asset is delivered to the user's own oisy address on the pool's chain:
+	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
 	let receiverAddress = $derived(
-		selectedReserve?.chain === 'BTC' ? $btcAddressMainnet : $ethAddress
+		selectedReserve?.chain === 'BTC'
+			? $btcAddressMainnet
+			: selectedReserve?.chain === 'ICP'
+				? $icrcAccountIdentifierText
+				: $ethAddress
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumWithdraw) => {

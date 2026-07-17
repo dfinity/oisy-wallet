@@ -1,3 +1,4 @@
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
@@ -10,7 +11,6 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { OptionCanisterIdText } from '$lib/types/canister';
-import type { LiquidiumMarket } from '$lib/types/liquidium';
 import type { Token } from '$lib/types/token';
 
 // Provider id for the earning-provider registry.
@@ -22,30 +22,19 @@ export const LIQUIDIUM_ASSET_TOKENS: Record<string, Token> = {
 	BTC: BTC_MAINNET_TOKEN,
 	ETH: ETHEREUM_TOKEN,
 	USDC: USDC_TOKEN,
-	USDT: USDT_TOKEN
+	USDT: USDT_TOKEN,
+	ICP: ICP_TOKEN
 };
 
-// Hard-coded ICP teaser appended to the Markets box until Liquidium lists ICP.
-// Advertises the asset with disabled actions; carries its own token for the logo so
-// it stays out of the shared asset/network icon sets. TODO: remove once ICP is live.
-export const LIQUIDIUM_ICP_TEASER_MARKET: LiquidiumMarket = {
-	poolId: 'icp-teaser',
-	asset: ICP_TOKEN.symbol,
-	// SDK-chain-style id (cf. 'BTC'/'ETH'); inert here since the teaser never opens a modal.
-	chain: 'ICP',
-	supplyApy: 0,
-	borrowApy: 0,
-	frozen: false,
-	available: true,
-	teaser: true
-};
-
-// ck-ledger backing each asset, for the AUT's backend `TokenId`.
+// ck-ledger backing each asset, for the AUT's backend `TokenId`. Keyed by symbol: the
+// ck twin is the same regardless of transfer chain (native BTC and ckBTC both settle on
+// the ckBTC ledger); ICP maps to its own ledger.
 export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterIdText> = {
 	BTC: IC_CKBTC_LEDGER_CANISTER_ID,
 	ETH: IC_CKETH_LEDGER_CANISTER_ID,
 	USDC: IC_CKUSDC_LEDGER_CANISTER_ID,
-	USDT: IC_CKUSDT_LEDGER_CANISTER_ID
+	USDT: IC_CKUSDT_LEDGER_CANISTER_ID,
+	ICP: ICP_LEDGER_CANISTER_ID
 };
 
 // Display bands — Liquidium publishes no discrete cut-offs, so oisy picks its own

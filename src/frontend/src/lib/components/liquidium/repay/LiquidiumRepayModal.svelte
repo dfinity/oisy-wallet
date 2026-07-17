@@ -5,6 +5,7 @@
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumRepayBtcWizard from '$lib/components/liquidium/repay/LiquidiumRepayBtcWizard.svelte';
 	import LiquidiumRepayEthWizard from '$lib/components/liquidium/repay/LiquidiumRepayEthWizard.svelte';
+	import LiquidiumRepayIcrcWizard from '$lib/components/liquidium/repay/LiquidiumRepayIcrcWizard.svelte';
 	import LiquidiumRepayTokensList from '$lib/components/liquidium/repay/LiquidiumRepayTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
@@ -160,6 +161,21 @@
 		{:else if nonNullish($liquidiumPortfolio)}
 			{#if selectedReserve.chain === 'BTC'}
 				<LiquidiumRepayBtcWizard
+					{currentStep}
+					{inflowFee}
+					{inflowFeeUnavailable}
+					{maxRepay}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSelectToken={enterTokensList}
+					portfolio={$liquidiumPortfolio}
+					reserve={selectedReserve}
+					bind:amount
+					bind:repayProgressStep
+				/>
+			{:else if selectedReserve.chain === 'ICP'}
+				<LiquidiumRepayIcrcWizard
 					{currentStep}
 					{inflowFee}
 					{inflowFeeUnavailable}

@@ -1,6 +1,7 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
 	Network as BitcoinNetwork,
+	BtcSignPrehashRequest,
 	EthAddressRequest,
 	EthPersonalSignRequest,
 	EthSignPrehashRequest,
@@ -17,6 +18,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import {
 	mapSignerCanisterBtcError,
+	mapSignerCanisterBtcSignPrehashError,
 	mapSignerCanisterGetEthAddressError,
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
@@ -28,7 +30,14 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
+import {
+	Canister,
+	createServices,
+	fromDefinedNullable,
+	hexStringToUint8Array,
+	toNullable,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -175,6 +184,28 @@ export class SignerCanister extends Canister<SignerService> {
 		}
 
 		throw mapSignerCanisterGetEthAddressError(response.Err);
+	};
+
+	signBtcPrehash = async ({ hash }: { hash: Uint8Array }): Promise<Uint8Array> => {
+		const { btc_sign_prehash } = this.caller({
+			certified: true
+		});
+
+		// The signer signs the digest under the caller's BTC key (schema `0x00`), matching the
+		// advertised P2WPKH address — unlike `generic_sign_with_ecdsa`, which signs under a generic
+		// key. The response is a raw `r || s`; the caller recovers the recovery id from the known
+		// public key (see `encodeRecoverableSignature`).
+		const request: BtcSignPrehashRequest = { hash: uint8ArrayToHexString(hash) };
+		const response = await btc_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
+
+		if ('Ok' in response) {
+			const {
+				Ok: { signature }
+			} = response;
+			return hexStringToUint8Array(signature);
+		}
+
+		throw mapSignerCanisterBtcSignPrehashError(response.Err);
 	};
 
 	sendBtc = async ({
