@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "Transactions with very small values are typically spam and intend to trick a user into copying their sender address instead of a valid one. Hiding them in transaction lists is recommended.",
 			"enable_hide_micro_transactions": "Enable hiding of transactions with very small values",
 			"disable_hide_micro_transactions": "Disable hiding of transactions with very small values",
+			"show_token_standard_filter": "Show token standard filter",
+			"show_token_standard_filter_description": "Adds a token standard filter to the manage tokens modal, so you can narrow the list by standard (e.g. ICRC, ERC20, EXT v2).",
+			"enable_show_token_standard_filter": "Enable the token standard filter",
+			"disable_show_token_standard_filter": "Disable the token standard filter",
 			"save_spam_filter_success": "Your spam filter settings have been updated.",
 			"export_data": "Export data",
 			"export_data_description": "Download your tokens and transactions as CSV — Basic for the essentials, Extended for additional attributes.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "Hide asset types",
 			"asset_type": "Asset type in $oisy_name",
 			"asset_type_all": "All asset types",
+			"standard_all": "All standards",
 			"no_tokens_for_asset_type": "There are no $asset_type in your wallet",
 			"no_tokens_for_asset_type_zero_tokens": "There are no $asset_type in the selected network",
 			"no_tokens_for_asset_type_description": "Choose from <strong>$count supported tokens</strong> to customize your portfolio view."

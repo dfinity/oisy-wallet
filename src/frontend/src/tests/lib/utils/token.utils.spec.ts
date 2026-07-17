@@ -35,7 +35,10 @@ import {
 	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
-	sumUsdBalances
+	sumUsdBalances,
+	tokenStandardKey,
+	tokenStandardLabel,
+	tokenStandardsEqual
 } from '$lib/utils/token.utils';
 import { bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
@@ -680,6 +683,64 @@ describe('token.utils', () => {
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
 
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
+		});
+	});
+
+	describe('tokenStandardKey', () => {
+		it('returns the bare code for a versionless standard', () => {
+			expect(tokenStandardKey({ code: 'icrc' })).toBe('icrc|');
+		});
+
+		it('includes the version after the separator', () => {
+			expect(tokenStandardKey({ code: 'ext', version: 'v2' })).toBe('ext|v2');
+		});
+
+		it('treats undefined and missing version identically', () => {
+			expect(tokenStandardKey({ code: 'ext', version: undefined })).toBe(
+				tokenStandardKey({ code: 'ext' })
+			);
+		});
+	});
+
+	describe('tokenStandardsEqual', () => {
+		it('returns true when both code and version match', () => {
+			expect(
+				tokenStandardsEqual({
+					a: { code: 'ext', version: 'v1.5' },
+					b: { code: 'ext', version: 'v1.5' }
+				})
+			).toBeTruthy();
+		});
+
+		it('returns false when the code differs', () => {
+			expect(
+				tokenStandardsEqual({ a: { code: 'ext', version: 'v2' }, b: { code: 'icrc7' } })
+			).toBeFalsy();
+		});
+
+		it('returns false when only the version differs', () => {
+			expect(
+				tokenStandardsEqual({
+					a: { code: 'ext', version: 'v1' },
+					b: { code: 'ext', version: 'v2' }
+				})
+			).toBeFalsy();
+		});
+
+		it('treats undefined and missing version as equal', () => {
+			expect(
+				tokenStandardsEqual({ a: { code: 'icrc' }, b: { code: 'icrc', version: undefined } })
+			).toBeTruthy();
+		});
+	});
+
+	describe('tokenStandardLabel', () => {
+		it('returns the uppercase code when no version is set', () => {
+			expect(tokenStandardLabel({ code: 'erc20' })).toBe('ERC20');
+		});
+
+		it('appends the version separated by a space', () => {
+			expect(tokenStandardLabel({ code: 'ext', version: 'v1.5' })).toBe('EXT v1.5');
 		});
 	});
 });

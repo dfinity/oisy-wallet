@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "बहुत छोटे मूल्यों वाले लेनदेन आमतौर पर स्पैम होते हैं और उपयोगकर्ता को वैध पते के बजाय प्रेषक के पते को कॉपी करने के लिए धोखा देने का इरादा रखते हैं। इन्हें लेनदेन सूचियों में छिपाने की अनुशंसा की जाती है।",
 			"enable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना सक्षम करें",
 			"disable_hide_micro_transactions": "बहुत छोटे मूल्यों वाले लेनदेन को छिपाना अक्षम करें",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "आपकी स्पैम फ़िल्टर सेटिंग्स अपडेट कर दी गई हैं।",
 			"export_data": "डेटा निर्यात करें",
 			"export_data_description": "अपने टोकन और लेन-देन को CSV के रूप में डाउनलोड करें — आवश्यक जानकारी के लिए Basic, अतिरिक्त विशेषताओं के लिए Extended।",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "असेट प्रकार छुपाएं",
 			"asset_type": "$oisy_name में असेट प्रकार",
 			"asset_type_all": "सभी असेट प्रकार",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "आपके वॉलेट में कोई $asset_type नहीं है",
 			"no_tokens_for_asset_type_zero_tokens": "चयनित नेटवर्क में कोई $asset_type नहीं है",
 			"no_tokens_for_asset_type_description": "अपना पोर्टफोलियो दृश्य अनुकूलित करने के लिए <strong>$count समर्थित टोकन</strong> में से चुनें।"

@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "Các giao dịch có giá trị rất nhỏ thường là spam và nhằm mục đích lừa người dùng sao chép địa chỉ người gửi thay vì địa chỉ hợp lệ. Khuyến nghị ẩn chúng trong danh sách giao dịch.",
 			"enable_hide_micro_transactions": "Bật ẩn các giao dịch có giá trị rất nhỏ",
 			"disable_hide_micro_transactions": "Tắt ẩn các giao dịch có giá trị rất nhỏ",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Cài đặt bộ lọc spam của bạn đã được cập nhật.",
 			"export_data": "Xuất dữ liệu",
 			"export_data_description": "Tải xuống token và giao dịch của bạn dưới dạng CSV — Basic cho thông tin cơ bản, Extended cho các thuộc tính bổ sung.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "Ẩn loại tài sản",
 			"asset_type": "Loại tài sản trong $oisy_name",
 			"asset_type_all": "Tất cả loại tài sản",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "Ví của bạn không có $asset_type nào",
 			"no_tokens_for_asset_type_zero_tokens": "Không có $asset_type nào trong mạng đã chọn",
 			"no_tokens_for_asset_type_description": "Chọn từ <strong>$count token được hỗ trợ</strong> để tùy chỉnh chế độ xem danh mục đầu tư của bạn."

@@ -556,6 +556,10 @@ interface I18nSettings {
 		hide_micro_transactions_description: string;
 		enable_hide_micro_transactions: string;
 		disable_hide_micro_transactions: string;
+		show_token_standard_filter: string;
+		show_token_standard_filter_description: string;
+		enable_show_token_standard_filter: string;
+		disable_show_token_standard_filter: string;
 		save_spam_filter_success: string;
 		export_data: string;
 		export_data_description: string;
@@ -1035,6 +1039,7 @@ interface I18nTokens {
 		hide_asset_types: string;
 		asset_type: string;
 		asset_type_all: string;
+		standard_all: string;
 		no_tokens_for_asset_type: string;
 		no_tokens_for_asset_type_zero_tokens: string;
 		no_tokens_for_asset_type_description: string;

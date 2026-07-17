@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "Transakce s velmi malými hodnotami jsou obvykle spam a mají za cíl uživatele oklamat, aby zkopíroval adresu odesílatele místo platné adresy. Doporučujeme je v seznamech transakcí skrýt.",
 			"enable_hide_micro_transactions": "Povolit skrývání transakcí s velmi malými hodnotami",
 			"disable_hide_micro_transactions": "Zakázat skrývání transakcí s velmi malými hodnotami",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Nastavení filtru spamu bylo aktualizováno.",
 			"export_data": "Exportovat data",
 			"export_data_description": "Stáhněte si své tokeny a transakce jako CSV — Basic pro to nejdůležitější, Extended pro další atributy.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "Skrýt typy aktiv",
 			"asset_type": "Typ aktiva v $oisy_name",
 			"asset_type_all": "Všechny typy aktiv",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "Ve tvé peněžence nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "V vybrané síti nejsou žádné $asset_type",
 			"no_tokens_for_asset_type_description": "Vyber z <strong>$count podporovaných tokenů</strong> a přizpůsob si zobrazení portfolia."

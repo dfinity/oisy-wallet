@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "عادةً ما تكون المعاملات ذات القيم الصغيرة جدًا بريدًا عشوائيًا وتهدف إلى خداع المستخدم لنسخ عنوان المُرسِل بدلاً من عنوان صالح. يُوصى بإخفائها في قوائم المعاملات.",
 			"enable_hide_micro_transactions": "تمكين إخفاء المعاملات ذات القيم الصغيرة جدًا",
 			"disable_hide_micro_transactions": "تعطيل إخفاء المعاملات ذات القيم الصغيرة جدًا",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "تم تحديث إعدادات مرشح البريد العشوائي الخاصة بك.",
 			"export_data": "تصدير البيانات",
 			"export_data_description": "قم بتنزيل الرموز والمعاملات الخاصة بك كملف CSV — Basic للأساسيات، Extended للسمات الإضافية.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "",
 			"asset_type": "",
 			"asset_type_all": "",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "",
 			"no_tokens_for_asset_type_zero_tokens": "",
 			"no_tokens_for_asset_type_description": ""

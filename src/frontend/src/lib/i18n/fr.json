@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "Les transactions de très petites valeurs sont généralement du spam et visent à tromper l'utilisateur pour qu'il copie l'adresse de l'expéditeur au lieu d'une adresse valide. Il est recommandé de les masquer dans les listes de transactions.",
 			"enable_hide_micro_transactions": "Activer le masquage des transactions de très petites valeurs",
 			"disable_hide_micro_transactions": "Désactiver le masquage des transactions de très petites valeurs",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Les paramètres de votre filtre anti-spam ont été mis à jour.",
 			"export_data": "Exporter les données",
 			"export_data_description": "Téléchargez vos tokens et transactions au format CSV — Basic pour l'essentiel, Extended pour des attributs supplémentaires.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "Masquer les types d'actifs",
 			"asset_type": "Type d'actif dans $oisy_name",
 			"asset_type_all": "Tous les types d'actifs",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "Il n'y a pas de $asset_type dans votre portefeuille",
 			"no_tokens_for_asset_type_zero_tokens": "Il n'y a pas de $asset_type dans le réseau sélectionné",
 			"no_tokens_for_asset_type_description": "Choisissez parmi <strong>$count tokens pris en charge</strong> pour personnaliser votre vue de portefeuille."

@@ -6,7 +6,7 @@ import { tokensToPin } from '$lib/derived/tokens.derived';
 import type { TokenCategoryTagValue } from '$lib/enums/token-tag';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 import type { TokenUi } from '$lib/types/token-ui';
 import {
 	filterTokensForSelectedNetwork,
@@ -26,6 +26,7 @@ export interface ModalTokensListData {
 	filterNetworksIds?: NetworkId[];
 	filterNfts?: boolean;
 	filterCategoryTag?: TokenCategoryTagValue;
+	filterStandard?: TokenStandard;
 }
 
 export const initModalTokensListContext = (
@@ -42,6 +43,7 @@ export const initModalTokensListContext = (
 	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
 	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 	const filterCategoryTag = derived([data], ([{ filterCategoryTag }]) => filterCategoryTag);
+	const filterStandard = derived([data], ([{ filterStandard }]) => filterStandard);
 
 	const filteredTokens = derived(
 		[
@@ -123,6 +125,7 @@ export const initModalTokensListContext = (
 		filterQuery,
 		filterNetwork,
 		filterCategoryTag,
+		filterStandard,
 		filteredTokens,
 		setTokens: (tokens: Token[]) =>
 			update((state) => ({
@@ -149,6 +152,11 @@ export const initModalTokensListContext = (
 				...state,
 				filterCategoryTag: categoryTag
 			})),
+		setFilterStandard: (standard: TokenStandard | undefined) =>
+			update((state) => ({
+				...state,
+				filterStandard: standard
+			})),
 		resetFilters: () => {
 			update((state) => ({
 				...state,
@@ -158,7 +166,8 @@ export const initModalTokensListContext = (
 				sortByBalance: undefined,
 				filterNetworksIds: undefined,
 				filterNfts: undefined,
-				filterCategoryTag: undefined
+				filterCategoryTag: undefined,
+				filterStandard: undefined
 			}));
 		}
 	};
@@ -168,12 +177,14 @@ export interface ModalTokensListContext {
 	filterQuery: Readable<string | undefined>;
 	filterNetwork: Readable<Network | undefined>;
 	filterCategoryTag: Readable<TokenCategoryTagValue | undefined>;
+	filterStandard: Readable<TokenStandard | undefined>;
 	filteredTokens: Readable<TokenUi[]>;
 	setTokens: (tokens: Token[]) => void;
 	setFilterQuery: (query: string) => void;
 	setFilterNetwork: (network: Network | undefined) => void;
 	setFilterNetworksIds: (networksIds: NetworkId[] | undefined) => void;
 	setFilterCategoryTag: (categoryTag: TokenCategoryTagValue | undefined) => void;
+	setFilterStandard: (standard: TokenStandard | undefined) => void;
 	resetFilters: () => void;
 }
 

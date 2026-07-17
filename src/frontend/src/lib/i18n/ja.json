@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "非常に小さな価値のトランザクションは通常スパムであり、ユーザーを騙して有効なアドレスではなく送信者のアドレスをコピーさせることを目的としています。トランザクション一覧で非表示にすることを推奨します。",
 			"enable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を有効にする",
 			"disable_hide_micro_transactions": "非常に小さな価値のトランザクションの非表示を無効にする",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "スパムフィルターの設定が更新されました。",
 			"export_data": "データをエクスポート",
 			"export_data_description": "トークンと取引をCSVとしてダウンロード — 基本情報には Basic、追加項目には Extended をご利用ください。",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "アセットタイプを非表示",
 			"asset_type": "$oisy_nameのアセットタイプ",
 			"asset_type_all": "すべてのアセットタイプ",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "ウォレットに$asset_typeはありません",
 			"no_tokens_for_asset_type_zero_tokens": "選択したネットワークに $asset_type はありません",
 			"no_tokens_for_asset_type_description": "<strong>$count種類の対応トークン</strong>から選択してポートフォリオ表示をカスタマイズしてください。"

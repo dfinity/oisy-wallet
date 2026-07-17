@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "Transaktionen mit sehr kleinen Werten sind typischerweise Spam und sollen Benutzer dazu verleiten, die Adresse des Absenders anstelle einer gültigen Adresse zu kopieren. Es wird empfohlen, sie in Transaktionslisten auszublenden.",
 			"enable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten aktivieren",
 			"disable_hide_micro_transactions": "Ausblenden von Transaktionen mit sehr kleinen Werten deaktivieren",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "Ihre Spam-Filter-Einstellungen wurden aktualisiert.",
 			"export_data": "Daten exportieren",
 			"export_data_description": "Lade deine Tokens und Transaktionen als CSV herunter — Basic für das Wesentliche, Extended für zusätzliche Attribute.",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "Anlageklassen ausblenden",
 			"asset_type": "Anlageklasse in $oisy_name",
 			"asset_type_all": "Alle Anlageklassen",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "Es gibt keine $asset_type in deiner Wallet",
 			"no_tokens_for_asset_type_zero_tokens": "Es gibt keine $asset_type im ausgewählten Netzwerk",
 			"no_tokens_for_asset_type_description": "Wähle aus <strong>$count unterstützten Token</strong>, um deine Portfolioansicht anzupassen."

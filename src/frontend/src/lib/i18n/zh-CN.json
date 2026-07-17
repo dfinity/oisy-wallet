@@ -811,6 +811,10 @@
 			"hide_micro_transactions_description": "价值非常小的交易通常是垃圾信息，目的是诱骗用户复制发送方地址而不是有效地址。建议在交易列表中隐藏它们。",
 			"enable_hide_micro_transactions": "启用隐藏价值非常小的交易",
 			"disable_hide_micro_transactions": "禁用隐藏价值非常小的交易",
+			"show_token_standard_filter": "",
+			"show_token_standard_filter_description": "",
+			"enable_show_token_standard_filter": "",
+			"disable_show_token_standard_filter": "",
 			"save_spam_filter_success": "您的垃圾信息过滤器设置已更新。",
 			"export_data": "导出数据",
 			"export_data_description": "将您的代币和交易下载为 CSV — Basic 包含基础信息，Extended 包含更多属性。",
@@ -1316,6 +1320,7 @@
 			"hide_asset_types": "隐藏资产类型",
 			"asset_type": "$oisy_name 中的资产类型",
 			"asset_type_all": "所有资产类型",
+			"standard_all": "",
 			"no_tokens_for_asset_type": "您的钱包中没有 $asset_type",
 			"no_tokens_for_asset_type_zero_tokens": "所选网络中没有 $asset_type",
 			"no_tokens_for_asset_type_description": "从 <strong>$count 个支持的代币</strong>中选择，自定义您的投资组合视图。"
