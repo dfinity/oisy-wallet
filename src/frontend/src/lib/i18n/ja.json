@@ -181,10 +181,9 @@
 			"authenticate": "ログイン/新規作成",
 			"sign_in_or_sign_up": "ログインまたは新規登録",
 			"internet_identity": "",
-			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
-			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
-			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで",
-			"move_swap_grow": "ネットワークをまたいで資産を移動・スワップ・成長"
+			"asset_types": "暗号資産、株式、コモディティ、コレクティブル、暗号化されたノート。",
+			"advanced_cryptography": "プライベートで改ざん不可。必要なときは非表示に。",
+			"move_swap_grow": "AIアシスタント搭載で、稼ぐ・借りる・取引する。"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー",
