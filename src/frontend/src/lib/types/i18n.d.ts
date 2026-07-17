@@ -170,7 +170,6 @@ interface I18nAuth {
 		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
-		instant_and_private: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
 	};
