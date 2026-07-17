@@ -1,6 +1,6 @@
-import { BTC_ECDSA_KEY_ID } from '$btc/constants/wallet-connect.constants';
 import type {
 	Network as BitcoinNetwork,
+	EcdsaKeyId,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	SignBtcResponse
@@ -455,9 +455,10 @@ describe('signer.api', () => {
 	});
 
 	describe('genericSignWithEcdsa', () => {
+		const keyId: EcdsaKeyId = { curve: { secp256k1: null }, name: 'key_1' };
 		const rest: GenericSignWithEcdsaParams = {
 			derivationPath: ['test'],
-			keyId: BTC_ECDSA_KEY_ID,
+			keyId,
 			messageHash: Uint8Array.from([7, 8, 9])
 		};
 
