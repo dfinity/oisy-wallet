@@ -181,10 +181,9 @@
 			"authenticate": "Ouvrir ou Créer",
 			"sign_in_or_sign_up": "Connectez-vous ou inscrivez-vous",
 			"internet_identity": "",
-			"asset_types": "Gérez vos actifs sur BTC, SOL, ETH, ICP et bien plus",
-			"instant_and_private": "Assistant IA intégré — Confidentialité en standard",
-			"advanced_cryptography": "Sécurisé par cryptographie avancée — 100% onchain",
-			"move_swap_grow": "Déplacez, échangez et faites fructifier vos actifs entre les réseaux"
+			"asset_types": "Crypto, actions, matières premières, objets de collection et notes chiffrées.",
+			"advanced_cryptography": "Privé et inviolable. Invisible, si vous le souhaitez.",
+			"move_swap_grow": "Gagnez, empruntez et échangez, avec un assistant IA intégré."
 		},
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile",
