@@ -61,7 +61,7 @@ describe('cketh-transactions.utils', () => {
 		});
 
 		describe('mint transactions', () => {
-			it('should map a regular mint as twin_token_converted', () => {
+			it('should map a regular mint as a plain receive', () => {
 				const fromAddress = new Uint8Array(20).fill(0xab);
 				const txHash = new Uint8Array(32).fill(0xcd);
 				const convertMemo = new Uint8Array(
@@ -75,7 +75,7 @@ describe('cketh-transactions.utils', () => {
 					env: 'mainnet'
 				});
 
-				expect(result.typeLabel).toBe('transaction.label.twin_token_converted');
+				expect(result.typeLabel).toBe('receive.text.receive');
 				expect(result.status).toBe('executed');
 				expect(result.from).toBeDefined();
 				expect(result.fromExplorerUrl).toContain(ETHEREUM_EXPLORER_URL);
@@ -112,7 +112,7 @@ describe('cketh-transactions.utils', () => {
 				expect(result.status).toBe('reimbursed');
 			});
 
-			it('should set fromLabel to twin_network when memo decoding fails', () => {
+			it('should fall back to a plain receive when memo decoding fails', () => {
 				const invalidMemo = new Uint8Array([0xff, 0xff]);
 
 				const result = mapCkEthereumTransaction({
@@ -122,11 +122,11 @@ describe('cketh-transactions.utils', () => {
 					env: 'mainnet'
 				});
 
-				expect(result.fromLabel).toBe('transaction.label.twin_network');
-				expect(result.typeLabel).toBe('transaction.label.twin_token_converted');
+				expect(result.fromLabel).toBeUndefined();
+				expect(result.typeLabel).toBe('receive.text.receive');
 			});
 
-			it('should set fromLabel to twin_network for a mint without memo', () => {
+			it('should fall back to a plain receive for a mint without memo', () => {
 				const result = mapCkEthereumTransaction({
 					transaction: createMockIcrcMintTransaction({ id: 504n }),
 					identity: undefined,
@@ -134,8 +134,8 @@ describe('cketh-transactions.utils', () => {
 					env: 'mainnet'
 				});
 
-				expect(result.fromLabel).toBe('transaction.label.twin_network');
-				expect(result.typeLabel).toBe('transaction.label.twin_token_converted');
+				expect(result.fromLabel).toBeUndefined();
+				expect(result.typeLabel).toBe('receive.text.receive');
 				expect(result.status).toBe('executed');
 			});
 
