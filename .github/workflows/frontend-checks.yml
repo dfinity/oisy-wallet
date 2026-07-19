@@ -232,10 +232,13 @@ jobs:
         continue-on-error: true
         run: |
           FILE="ic-domain.$NETWORK.txt"
-          echo "" > "$FILE"
-          dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null && \
-            cat build/.well-known/ic-domains > "$FILE" && \
-            echo " $NETWORK" >> "$FILE"
+          : > "$FILE"
+          if dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null; then
+            while IFS= read -r domain || [[ -n "$domain" ]]; do
+              [[ -z "$domain" ]] && continue
+              echo "$domain $NETWORK" >> "$FILE"
+            done <build/.well-known/ic-domains
+          fi
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
