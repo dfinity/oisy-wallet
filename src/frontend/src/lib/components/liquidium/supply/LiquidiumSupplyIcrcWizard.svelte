@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { Chain } from '@liquidium/client';
 	import { getContext } from 'svelte';
-	import { sendIcp } from '$icp/services/ic-send.services';
+	import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 	import { getTokenFee } from '$icp/utils/token.utils';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import LiquidiumSupplyForm from '$lib/components/liquidium/supply/LiquidiumSupplyForm.svelte';
@@ -84,7 +84,7 @@
 			return;
 		}
 
-		// The ICP pool settles on the ICP ledger (ICP-chain transfer).
+		// ICP-chain assets (ICP / ckBTC / ckUSDC / ckUSDT) settle on their ICRC ledger.
 		const ledgerCanisterId = LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS[market.asset];
 
 		if (isNullish(ledgerCanisterId)) {
@@ -94,6 +94,8 @@
 
 		const amountBaseUnits = parsedAmount;
 		const identity = $authIdentity;
+		// ICP settles through the ICP ledger's transfer; ck assets through the generic ICRC ledger.
+		const transfer = market.asset === 'ICP' ? sendIcp : sendIcrc;
 
 		onNext();
 
@@ -109,7 +111,7 @@
 				displayAmount: `${amount}`,
 				progress: (step) => (supplyProgressStep = step),
 				broadcast: async ({ target, amount: transferAmount }) => {
-					const blockIndex = await sendIcp({
+					const blockIndex = await transfer({
 						identity,
 						ledgerCanisterId,
 						to: target.address,

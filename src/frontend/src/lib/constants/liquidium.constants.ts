@@ -16,15 +16,16 @@ import type { Token } from '$lib/types/token';
 // Provider id for the earning-provider registry.
 export const LIQUIDIUM_PROVIDER_ID = 'liquidium';
 
-// Market asset symbol → oisy token (for logo/label); unmapped future assets fall
-// back to symbol-only.
-export const LIQUIDIUM_ASSET_TOKENS: Record<string, Token> = {
-	BTC: BTC_MAINNET_TOKEN,
-	ETH: ETHEREUM_TOKEN,
-	USDC: USDC_TOKEN,
-	USDT: USDT_TOKEN,
-	ICP: ICP_TOKEN
-};
+// Advertised v1 asset set, for the Earn-card Networks/Assets icon rows only (a static
+// marketing summary, distinct from the live per-market display token which is resolved
+// by (chain, asset) via `liquidiumMarketToken`).
+export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
+	BTC_MAINNET_TOKEN,
+	ETHEREUM_TOKEN,
+	USDC_TOKEN,
+	USDT_TOKEN,
+	ICP_TOKEN
+];
 
 // ck-ledger backing each asset, for the AUT's backend `TokenId`. Keyed by symbol: the
 // ck twin is the same regardless of transfer chain (native BTC and ckBTC both settle on

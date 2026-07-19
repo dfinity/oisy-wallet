@@ -138,7 +138,7 @@
 
 				{#snippet content()}
 					<div class="flex w-full flex-col">
-						{#each $liquidiumMarkets as market (market.poolId)}
+						{#each $liquidiumMarkets as market (`${market.poolId}-${market.chain}`)}
 							<LiquidiumMarketCard {market} />
 						{/each}
 					</div>
