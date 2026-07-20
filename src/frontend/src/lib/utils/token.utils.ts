@@ -1,3 +1,4 @@
+import { USD1_SYMBOL } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { ICRC_SUGGESTED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
@@ -28,6 +29,10 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 
 const ERC20_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
 const SPL_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(SPL_SUGGESTED_TOKENS.map(({ id }) => id));
+
+// USD1 (World Liberty Financial USD) is the same token across all its networks (Ethereum,
+// BNB Smart Chain, Solana), so we identify it by symbol to show its dedicated hero image.
+export const isUSD1Token = (token: Token): boolean => token.symbol === USD1_SYMBOL;
 
 /**
  * Calculates the maximum amount for a transaction.
