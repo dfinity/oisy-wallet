@@ -210,6 +210,10 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 
+### Starting a pairing from the scanner
+
+A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is ignored and never treated as a pairing.
+
 ### Multiple simultaneous connections
 
 OISY supports **several dApp connections at once**, each independently manageable. Connecting a new dApp leaves the already-connected ones in place, and the "Connected Apps" list shows every live session. Each row's close button disconnects only that dApp; a "Disconnect all" control tears every connection down in one tap. When a dApp ends its own session, only that entry is removed and the others keep working. Incoming sign/send requests route to the correct session by topic across all open connections. Previously connected sessions are restored after a page refresh.
