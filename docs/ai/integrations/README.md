@@ -12,6 +12,14 @@ provider gets its own file so the docs scale as more integrations are added.
 | [QuickNode](./quicknode.md) | `@solana/kit` WSS + HTTP JSON-RPC     | Solana       | Solana WS tx confirmation (mainnet) + SPL token metadata (`getAsset`)              |
 | [OnRamper](./onramper.md)   | Backend HMAC signing                  | —            | Buy-widget URL signing (backend runbook)                                           |
 
+> **Every provider must be behind a kill-switch flag.** Each external provider on
+> the frontend is gated by a hardcoded boolean flag (e.g. `*_PROVIDER_ENABLED` /
+> `*_<FEATURE>_ENABLED` in `$env/rest/*.env.ts`) — or a per-capability map when a
+> provider has independently-killable capabilities (withdraw / deposit / trade) —
+> so it can be blocked in code during an incident, and a multi-provider feature
+> degrades gracefully when all are off. See
+> [`../frontend/stack-and-patterns.md#external-providers--kill-switch-flags`](../frontend/stack-and-patterns.md#external-providers--kill-switch-flags).
+
 ## Future work
 
 > Status: ideas only — not started. Captured here because they span more than one

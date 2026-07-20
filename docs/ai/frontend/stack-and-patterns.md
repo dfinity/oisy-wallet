@@ -170,6 +170,97 @@ export const exchangeRateUsdToCurrency = async (
 };
 ```
 
+## External providers — kill-switch flags
+
+**Every external provider must be behind a boolean kill-switch flag.** Any
+feature that talks to a third-party / external data source (price oracle, swap
+DEX, RPC, indexer, on-ramp, order book, …) must be able to drop that provider
+**in code**, without a config migration, candid change, or redeploy dance — so
+that in an emergency (provider outage, abuse, pricing incident, a vendor
+sunsetting) we can flip the flag in a PR and ship.
+
+This is already the convention; new providers must follow it. Existing examples:
+
+- `ICPSWAP_PROVIDER_ENABLED`, `KONGSWAP_PROVIDER_ENABLED`,
+  `COINGECKO_PROVIDER_ENABLED` in
+  [`$env/rest/*.env.ts`](../../../src/frontend/src/env/rest/) — price providers.
+- `NEAR_INTENTS_SWAP_ENABLED`, `ONESEC_SWAP_ENABLED` — swap providers.
+- `swapProviders` ([`$lib/providers/swap.providers.ts`](../../../src/frontend/src/lib/providers/swap.providers.ts))
+  carries an `isEnabled` per provider, wired from those flags.
+
+### Rules
+
+1. **Define the flag in `$env`, next to the provider's other env.** Put it in
+   the provider's `$env/rest/<provider>.env.ts` (or the relevant `$env/*.env.ts`)
+   as a plain hardcoded `const` — **not** an env-parsed value, **not** runtime
+   config. It is flipped by editing code in a PR.
+2. **Name it like its neighbours.** `<PROVIDER>_PROVIDER_ENABLED` for a
+   data/price provider; match the existing `<PROVIDER>_<FEATURE>_ENABLED` shape
+   where a feature already uses it (e.g. `*_SWAP_ENABLED`). Default to `true`;
+   `false` only means "blocked right now". Add a `//` comment with the _why_ when
+   it is off (see `kongswap.env.ts`).
+3. **Gate every path that reaches the provider.** All call sites — service, rest,
+   worker, and any component branch that renders that provider — must check the
+   flag. A disabled provider issues **no** network request and renders **no**
+   provider-specific UI (see the `SwapProvider.svelte` `{#if … && *_ENABLED}`
+   branches).
+4. **Fail soft.** When disabled, short-circuit to the existing "no data" shape
+   (`{}` / `undefined` / empty `Vec`), never throw. Other providers in the same
+   feature must keep working.
+
+### Per-capability flags (when a provider does more than one thing)
+
+A plain boolean is the right shape only when the provider is **all-or-nothing**.
+When a provider exposes **independently-killable capabilities** — the order-book
+case, where users must still be able to **withdraw** even while **deposits** and
+**trades** are halted — model the flag as a **capability map**, not a boolean, so
+each capability can be flipped on its own:
+
+```ts
+export const OISY_TRADE_PROVIDER_ENABLED = {
+	withdraw: true,
+	deposit: false,
+	trade: false
+};
+```
+
+- **The UI checks the specific capability it needs**, never a blanket "provider
+  on". A degraded provider keeps serving safe paths (withdrawals) while blocking
+  risky ones (orders / deposits).
+- **Pick the shape up front.** A provider that may ever need partial control
+  starts as a capability map, so adding a capability later is a non-breaking
+  extension rather than a rename across call sites. Single-capability providers
+  stay a plain boolean — don't over-structure them speculatively.
+
+> **Future:** these flags are hardcoded `const`s today. The shape above is also
+> meant to be servable from a backend endpoint later (a **controller** call —
+> provider status is non-critical, so it needs no candid/stable-state
+> guarantees), letting ops toggle capabilities live without a deploy. Not in
+> scope yet; the const is the baseline.
+
+### Multi-provider features — the parent flag
+
+When a feature has **more than one** provider, derive a single feature-level
+availability from the **OR** of the per-provider flags (the feature is available
+as long as _any_ provider is enabled). With capability maps, do this **per
+capability** — e.g. "is _trade_ available anywhere":
+
+```ts
+const SWAP_AVAILABLE = KONGSWAP_PROVIDER_ENABLED || ICPSWAP_PROVIDER_ENABLED;
+const TRADE_AVAILABLE = OISY_TRADE_PROVIDER_ENABLED.trade; // || other order books
+```
+
+When a (capability's) parent is `false` everywhere, that surface must degrade
+gracefully. **How** is a per-feature decision the spec owns — pick one:
+
+- **Show a placeholder / empty state** (e.g. "temporarily unavailable") if the
+  surrounding surface should stay visible, or
+- **Hide the feature entirely** (entry point, route, card) if a dead surface is
+  worse than its absence.
+
+Don't leave a feature that silently renders nothing or errors when its providers
+are off. Decide the degradation explicitly and note it in the spec.
+
 ## Stores, derived, runes — when to use which
 
 | Need                                           | Use                                                                                                                                                | Where it lives                                                         |
@@ -243,3 +334,8 @@ component uses. Never re-implement an icon that already exists.
 - `{@html …}` without sanitisation.
 - `console.log` left in committed code (and `console.error` / `.warn` are
   ESLint errors — use `consoleError` / `consoleWarn`).
+- An external provider with **no** kill-switch flag, or a flag that only gates
+  _some_ of its call sites — see [External providers — kill-switch flags](#external-providers--kill-switch-flags).
+- A multi-provider feature that breaks (renders nothing / throws) when all its
+  providers (or a needed capability) are disabled, instead of an explicit
+  placeholder-or-hide decision.
