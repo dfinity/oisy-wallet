@@ -15,6 +15,9 @@ starting point. Read it once per session.
 - [ ] My code follows [`stack-and-patterns.md`](./stack-and-patterns.md)
       (Svelte 5 runes for new code, Svelte stores for cross-route state, TS
       with no `any`).
+- [ ] Any external provider I add/use is behind a boolean kill-switch flag,
+      and a multi-provider feature degrades (placeholder or hide) when all are
+      off — [`stack-and-patterns.md`](./stack-and-patterns.md#external-providers--kill-switch-flags).
 - [ ] No hard-coded user-visible strings; a11y attributes set —
       [`i18n-and-a11y.md`](./i18n-and-a11y.md).
 - [ ] User-visible copy, colours, and icons follow brand rules —
