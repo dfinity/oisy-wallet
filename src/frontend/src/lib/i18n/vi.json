@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Mã/liên kết không hợp lệ",
+			"link_domain_mismatch": "Liên kết này dành cho một tên miền khác",
 			"data_is_incompleted": "Dữ liệu nhận được không đầy đủ. Thiếu một số thông tin bắt buộc."
 		}
 	},

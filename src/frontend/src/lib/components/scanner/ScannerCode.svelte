@@ -34,6 +34,7 @@
 	import { ScannerResults } from '$lib/types/scanner';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { extractWalletConnectUri } from '$lib/utils/scanner.utils';
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
@@ -46,15 +47,13 @@
 
 	let { onNext, onOpenInfo }: Props = $props();
 
-	const WALLET_CONNECT_URI_PREFIX = 'wc:';
-
 	const MOBILE_ERROR_BANNER_DURATION = 3500;
 
 	let openBottomSheet = $state(false);
 	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
-	let showMobileError = $state(false);
+	let mobileError = $state('');
 	let mobileErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 	let isEmptyUri = $derived(isEmptyString(uri));
 
@@ -91,9 +90,29 @@
 		}
 	};
 
+	// Mobile surfaces errors as a transient banner, desktop as an inline input
+	// error — the two are intentionally separate so the message never shows twice.
+	const showError = (message: string) => {
+		if (isMobile()) {
+			mobileError = message;
+			clearTimeout(mobileErrorTimeout);
+			mobileErrorTimeout = setTimeout(() => {
+				mobileError = '';
+			}, MOBILE_ERROR_BANNER_DURATION);
+		} else {
+			error = message;
+		}
+	};
+
 	const processCode = async (code: string) => {
-		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
-			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+		const walletConnect = extractWalletConnectUri(code);
+		if (nonNullish(walletConnect)) {
+			if (walletConnect.type === 'wrong-domain') {
+				showError($i18n.scanner.error.link_domain_mismatch);
+				return;
+			}
+
+			onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnect.uri });
 			return;
 		}
 
@@ -147,15 +166,7 @@
 
 			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
-			if (isMobile()) {
-				showMobileError = true;
-				clearTimeout(mobileErrorTimeout);
-				mobileErrorTimeout = setTimeout(() => {
-					showMobileError = false;
-				}, MOBILE_ERROR_BANNER_DURATION);
-			} else {
-				error = $i18n.scanner.error.code_link_is_not_valid;
-			}
+			showError($i18n.scanner.error.code_link_is_not_valid);
 		} finally {
 			busy.stop();
 		}
@@ -176,7 +187,7 @@
 	$effect(() => {
 		if (isEmptyUri) {
 			error = '';
-			showMobileError = false;
+			mobileError = '';
 		}
 	});
 
@@ -186,12 +197,15 @@
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	{#if showMobileError}
+	{#if notEmptyString(mobileError)}
 		<div
 			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			aria-atomic="true"
+			aria-live="assertive"
+			role="alert"
 			transition:slide={SLIDE_DURATION}
 		>
-			{$i18n.scanner.error.code_link_is_not_valid}
+			{mobileError}
 		</div>
 	{/if}
 

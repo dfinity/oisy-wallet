@@ -847,7 +847,11 @@ interface I18nScanner {
 		learn_more_about_pay: string;
 		scanner: string;
 	};
-	error: { code_link_is_not_valid: string; data_is_incompleted: string };
+	error: {
+		code_link_is_not_valid: string;
+		link_domain_mismatch: string;
+		data_is_incompleted: string;
+	};
 }
 
 interface I18nConvert {
