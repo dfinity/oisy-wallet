@@ -401,9 +401,7 @@ describe('ScannerCode.svelte', () => {
 			expect(screen.getByText(en.scanner.error.link_domain_mismatch)).toBeInTheDocument();
 		});
 
-		expect(mockOnNext).not.toHaveBeenCalledWith(
-			expect.objectContaining({ results: ScannerResults.WALLET_CONNECT })
-		);
+		expect(mockOnNext).not.toHaveBeenCalled();
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
 	});
 
