@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatStakeApyNumber } from '$lib/utils/format.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		market: LiquidiumMarket;
@@ -16,14 +17,13 @@
 
 	let { market }: Props = $props();
 
-	// Hard-coded teaser row (e.g. ICP) advertises the asset with disabled rates.
-	let isTeaser = $derived(market.teaser === true);
-
-	let token = $derived(isTeaser ? ICP_TOKEN : LIQUIDIUM_ASSET_TOKENS[market.asset]);
+	let token = $derived(
+		liquidiumMarketToken({ chain: market.chain, asset: market.asset, tokens: $tokens })
+	);
 
 	// Actions live in the hero / section headers, so markets rows are informational only:
-	// a teaser or an unavailable pool (frozen / cap) shows "Coming soon" instead of rates.
-	let comingSoon = $derived(isTeaser || !market.available);
+	// an unavailable pool (frozen / cap) shows "Coming soon" instead of rates.
+	let comingSoon = $derived(!market.available);
 </script>
 
 {#snippet rates()}
@@ -60,7 +60,9 @@
 	{/snippet}
 
 	{#snippet title()}
-		<span class="text-sm font-bold sm:text-base">{market.asset}</span>
+		<span class="text-sm font-bold sm:text-base"
+			>{nonNullish(token) ? getTokenDisplaySymbol(token) : market.asset}</span
+		>
 	{/snippet}
 
 	{#snippet description()}

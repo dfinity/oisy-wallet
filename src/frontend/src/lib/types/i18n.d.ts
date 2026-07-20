@@ -170,7 +170,6 @@ interface I18nAuth {
 		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
-		instant_and_private: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
 	};
@@ -324,7 +323,6 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
-		icp_flags: { name: string; one_liner: string; description: string };
 		cloud_engines: {
 			name: string;
 			one_liner: string;
