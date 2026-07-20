@@ -52,7 +52,11 @@
 	import { Theme } from '$lib/types/theme';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import { getTokenDisplayName, isUSD1Token as isUSD1TokenUtil, mapTokenUi } from '$lib/utils/token.utils';
+	import {
+		getTokenDisplayName,
+		isUSD1Token as isUSD1TokenUtil,
+		mapTokenUi
+	} from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(
@@ -155,7 +159,10 @@
 	class:bg-gradient-to-r={isGradientToRight}
 	class:bg-icp-token-hero-gradient={isIcpHero}
 	class:bg-linear-105={isGradientToBottomRight}
-	class:bg-linear-to-b={!isIcpHero && !isGradientToRight && !isGradientToBottomRight && !isUsd1Token}
+	class:bg-linear-to-b={!isIcpHero &&
+		!isGradientToRight &&
+		!isGradientToBottomRight &&
+		!isUsd1Token}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
 	class:bg-size-200={!isTrumpToken && !isUsd1Token}
 	class:bg-top-right={isVchfToken}
