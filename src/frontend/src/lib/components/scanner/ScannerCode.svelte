@@ -200,6 +200,9 @@
 	{#if notEmptyString(mobileError)}
 		<div
 			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
+			aria-atomic="true"
+			aria-live="assertive"
+			role="alert"
 			transition:slide={SLIDE_DURATION}
 		>
 			{mobileError}
