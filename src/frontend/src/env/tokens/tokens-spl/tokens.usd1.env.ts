@@ -1,6 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { USD1_TOKEN_GROUP } from '$env/tokens/groups/groups.usd1.env';
-import usd1 from '$eth/assets/usd1.png';
+import usd1 from '$eth/assets/usd1.webp';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
