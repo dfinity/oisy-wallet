@@ -75,7 +75,7 @@ Re-running the example (default 50%): 80 TC balance, 40 TC reserve → `availabl
 
 ### Not changed
 
-- The **threshold** check (when to trigger a top-up, based on the *ledger* balance) is independent of the reserve logic and stays as-is.
+- The **threshold** check (when to trigger a top-up, based on the _ledger_ balance) is independent of the reserve logic and stays as-is.
 - The default threshold (50T) and default percentage (50%) constants in `src/shared/src/types/signer.rs` are unchanged; only the base the percentage is applied to changes.
 - `TopUpCyclesLedgerResponse` fields are unchanged (`backend_cycles` still reports the retained amount).
 
