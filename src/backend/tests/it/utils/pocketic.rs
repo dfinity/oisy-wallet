@@ -327,7 +327,12 @@ impl BackendBuilder {
     /// deterministically (percentage of the full balance) regardless of `PocketIC`'s cost model.
     fn zero_freezing_threshold(&mut self, pic: &PocketIc) {
         let canister_id = self.canister_id(pic);
-        let controller = self.controllers.first().copied();
+        let controller = Some(
+            *self
+                .controllers
+                .first()
+                .expect("Test setup error: BackendBuilder must have at least one controller"),
+        );
         pic.update_canister_settings(
             canister_id,
             controller,
