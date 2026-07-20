@@ -1117,7 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Il codice/link non è valido",
-			"link_domain_mismatch": "",
+			"link_domain_mismatch": "Questo link è per un altro dominio",
 			"data_is_incompleted": "I dati ricevuti sono incompleti. Mancano alcuni dettagli necessari."
 		}
 	},

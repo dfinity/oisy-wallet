@@ -1117,7 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",
-			"link_domain_mismatch": "",
+			"link_domain_mismatch": "이 링크는 다른 도메인용입니다",
 			"data_is_incompleted": "수신된 데이터가 불완전합니다. 일부 필수 세부 정보가 누락되었습니다."
 		}
 	},

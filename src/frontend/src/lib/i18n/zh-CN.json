@@ -1117,7 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "代码 / 链接无效",
-			"link_domain_mismatch": "",
+			"link_domain_mismatch": "此链接指向其他域名",
 			"data_is_incompleted": "接收到的数据不完整，缺少部分必需信息。"
 		}
 	},
