@@ -4,14 +4,12 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcPunksCustomToken } from '$icp/types/icpunks-custom-token';
 import type { IcPunksToken, IcPunksTokenWithoutId } from '$icp/types/icpunks-token';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
-import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { toggleableTokenGuard } from '$lib/utils/token-guards.utils';
 
 export const isTokenIcPunks = (token: Partial<IcToken>): token is IcPunksToken =>
 	token.standard?.code === 'icpunks';
 
-export const isTokenIcPunksCustomToken = (token: Token): token is IcPunksCustomToken =>
-	isTokenIcPunks(token) && isTokenToggleable(token);
+export const isTokenIcPunksCustomToken = toggleableTokenGuard<IcPunksCustomToken>(isTokenIcPunks);
 
 export const mapIcPunksToken = ({
 	canisterId,
