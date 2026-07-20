@@ -53,7 +53,7 @@
 	let openInfoBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
-	let showMobileError = $state(false);
+	let mobileError = $state('');
 	let mobileErrorTimeout: ReturnType<typeof setTimeout> | undefined;
 	let isEmptyUri = $derived(isEmptyString(uri));
 
@@ -90,10 +90,29 @@
 		}
 	};
 
+	// Mobile surfaces errors as a transient banner, desktop as an inline input
+	// error — the two are intentionally separate so the message never shows twice.
+	const showError = (message: string) => {
+		if (isMobile()) {
+			mobileError = message;
+			clearTimeout(mobileErrorTimeout);
+			mobileErrorTimeout = setTimeout(() => {
+				mobileError = '';
+			}, MOBILE_ERROR_BANNER_DURATION);
+		} else {
+			error = message;
+		}
+	};
+
 	const processCode = async (code: string) => {
-		const walletConnectUri = extractWalletConnectUri(code);
-		if (nonNullish(walletConnectUri)) {
-			onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnectUri });
+		const walletConnect = extractWalletConnectUri(code);
+		if (nonNullish(walletConnect)) {
+			if (walletConnect.type === 'wrong-domain') {
+				showError($i18n.scanner.error.link_domain_mismatch);
+				return;
+			}
+
+			onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnect.uri });
 			return;
 		}
 
@@ -147,15 +166,7 @@
 
 			onNext({ results: ScannerResults.PAY });
 		} catch (_: unknown) {
-			if (isMobile()) {
-				showMobileError = true;
-				clearTimeout(mobileErrorTimeout);
-				mobileErrorTimeout = setTimeout(() => {
-					showMobileError = false;
-				}, MOBILE_ERROR_BANNER_DURATION);
-			} else {
-				error = $i18n.scanner.error.code_link_is_not_valid;
-			}
+			showError($i18n.scanner.error.code_link_is_not_valid);
 		} finally {
 			busy.stop();
 		}
@@ -176,7 +187,7 @@
 	$effect(() => {
 		if (isEmptyUri) {
 			error = '';
-			showMobileError = false;
+			mobileError = '';
 		}
 	});
 
@@ -186,12 +197,12 @@
 <div class="relative flex w-full flex-col bg-tertiary">
 	<QrCodeScanner onScan={handleScan} universalScanner />
 
-	{#if showMobileError}
+	{#if notEmptyString(mobileError)}
 		<div
 			class="absolute top-4 right-0 left-0 mx-auto w-[90%] rounded-lg border border-error-solid bg-error-subtle-10 p-3 text-center text-sm font-bold text-error-primary"
 			transition:slide={SLIDE_DURATION}
 		>
-			{$i18n.scanner.error.code_link_is_not_valid}
+			{mobileError}
 		</div>
 	{/if}
 

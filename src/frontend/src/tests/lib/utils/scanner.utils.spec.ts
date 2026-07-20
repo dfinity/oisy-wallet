@@ -14,25 +14,36 @@ describe('scanner.utils', () => {
 			`https://${host ?? OISY_URL_HOSTNAME}${path ?? '/wc/'}?${param ?? `uri=${encodeURIComponent(walletConnectUri)}`}`;
 
 		it('returns a bare wc: URI unchanged', () => {
-			expect(extractWalletConnectUri(walletConnectUri)).toBe(walletConnectUri);
+			expect(extractWalletConnectUri(walletConnectUri)).toEqual({
+				type: 'uri',
+				uri: walletConnectUri
+			});
 		});
 
 		it('unwraps an OISY WalletConnect deep-link URL to its inner wc: URI', () => {
-			expect(extractWalletConnectUri(deepLink())).toBe(walletConnectUri);
+			expect(extractWalletConnectUri(deepLink())).toEqual({ type: 'uri', uri: walletConnectUri });
 		});
 
 		it('percent-decodes the uri param', () => {
 			const encoded = `https://${OISY_URL_HOSTNAME}/wc/?uri=wc%3Aabc123%402%3Frelay-protocol%3Dirn`;
 
-			expect(extractWalletConnectUri(encoded)).toBe('wc:abc123@2?relay-protocol=irn');
+			expect(extractWalletConnectUri(encoded)).toEqual({
+				type: 'uri',
+				uri: 'wc:abc123@2?relay-protocol=irn'
+			});
 		});
 
 		it('accepts the /wc path without a trailing slash', () => {
-			expect(extractWalletConnectUri(deepLink({ path: '/wc' }))).toBe(walletConnectUri);
+			expect(extractWalletConnectUri(deepLink({ path: '/wc' }))).toEqual({
+				type: 'uri',
+				uri: walletConnectUri
+			});
 		});
 
-		it('returns undefined for a non-OISY host', () => {
-			expect(extractWalletConnectUri(deepLink({ host: 'evil.example' }))).toBeUndefined();
+		it('flags a well-formed deep link on a non-OISY host as wrong-domain', () => {
+			expect(extractWalletConnectUri(deepLink({ host: 'evil.example' }))).toEqual({
+				type: 'wrong-domain'
+			});
 		});
 
 		it('returns undefined for an OISY URL on a different path', () => {
@@ -48,6 +59,12 @@ describe('scanner.utils', () => {
 				extractWalletConnectUri(
 					deepLink({ param: `uri=${encodeURIComponent('https://oisy.com')}` })
 				)
+			).toBeUndefined();
+		});
+
+		it('returns undefined for a non-wc deep link on a non-OISY host', () => {
+			expect(
+				extractWalletConnectUri(`https://evil.example/wc/?uri=${encodeURIComponent('https://x')}`)
 			).toBeUndefined();
 		});
 

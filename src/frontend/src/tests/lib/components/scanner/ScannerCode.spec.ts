@@ -383,13 +383,9 @@ describe('ScannerCode.svelte', () => {
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
 	});
 
-	it('should not treat a non-OISY-host wc deep-link URL as WalletConnect', async () => {
+	it('should show a domain-mismatch error for a wc deep-link URL on a non-OISY host', async () => {
 		const walletConnectUri = 'wc:abc123@2?relay-protocol=irn';
 		const deepLink = `https://evil.example/wc/?uri=${encodeURIComponent(walletConnectUri)}`;
-
-		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(
-			new Error('invalid')
-		);
 
 		renderWithContext();
 
@@ -402,12 +398,13 @@ describe('ScannerCode.svelte', () => {
 		await fireEvent.click(button);
 
 		await waitFor(() => {
-			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledWith(deepLink);
+			expect(screen.getByText(en.scanner.error.link_domain_mismatch)).toBeInTheDocument();
 		});
 
 		expect(mockOnNext).not.toHaveBeenCalledWith(
 			expect.objectContaining({ results: ScannerResults.WALLET_CONNECT })
 		);
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
 	});
 
 	it('should call onNext with SOL_SEND result for a bare Solana address', async () => {
