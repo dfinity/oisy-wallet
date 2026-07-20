@@ -5,13 +5,14 @@
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumSupplyBtcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyBtcWizard.svelte';
 	import LiquidiumSupplyEthWizard from '$lib/components/liquidium/supply/LiquidiumSupplyEthWizard.svelte';
+	import LiquidiumSupplyIcrcWizard from '$lib/components/liquidium/supply/LiquidiumSupplyIcrcWizard.svelte';
 	import LiquidiumSupplyTokensList from '$lib/components/liquidium/supply/LiquidiumSupplyTokensList.svelte';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 	import { estimateLiquidiumInflowFee } from '$lib/services/liquidium-supply.services';
@@ -25,6 +26,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -39,7 +41,13 @@
 	let selectedMarket = $state<LiquidiumMarket | undefined>(market);
 
 	let token = $derived(
-		nonNullish(selectedMarket) ? LIQUIDIUM_ASSET_TOKENS[selectedMarket.asset] : undefined
+		nonNullish(selectedMarket)
+			? liquidiumMarketToken({
+					chain: selectedMarket.chain,
+					asset: selectedMarket.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });
@@ -146,6 +154,19 @@
 			</LiquidiumSelectTokenForm>
 		{:else if selectedMarket.chain === 'BTC'}
 			<LiquidiumSupplyBtcWizard
+				{currentStep}
+				{inflowFee}
+				{inflowFeeUnavailable}
+				market={selectedMarket}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSelectToken={enterTokensList}
+				bind:amount
+				bind:supplyProgressStep
+			/>
+		{:else if selectedMarket.chain === 'ICP'}
+			<LiquidiumSupplyIcrcWizard
 				{currentStep}
 				{inflowFee}
 				{inflowFeeUnavailable}

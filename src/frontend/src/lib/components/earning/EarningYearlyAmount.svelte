@@ -20,6 +20,7 @@
 		showAsSuccess?: boolean;
 		showWithShortenedLabel?: boolean;
 		fallback?: Snippet;
+		children?: Snippet;
 	}
 
 	const {
@@ -31,7 +32,8 @@
 		showAsSuccess = false,
 		showAsError = false,
 		showWithShortenedLabel = false,
-		fallback
+		fallback,
+		children
 	}: Props = $props();
 
 	let formattedCurrency = $derived(
@@ -73,6 +75,7 @@
 		class:text-tertiary={!positiveAmount}
 		in:fade
 	>
+		{@render children?.()}
 		{`${showPlusSign && positiveAmount ? '+' : showMinusSign && hasAmount ? '−' : ''}${yearlyAmount}`}
 	</span>
 {:else if nonNullish(fallback)}

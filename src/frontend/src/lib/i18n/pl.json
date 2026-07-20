@@ -181,10 +181,9 @@
 			"authenticate": "Otwórz lub Utwórz",
 			"sign_in_or_sign_up": "Zaloguj się lub zarejestruj",
 			"internet_identity": "",
-			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
-			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
-			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"move_swap_grow": "Przenoś, wymieniaj i pomnażaj swoje aktywa między sieciami"
+			"asset_types": "Krypto, akcje, surowce, przedmioty kolekcjonerskie i zaszyfrowane notatki.",
+			"advanced_cryptography": "Prywatne i odporne na manipulacje. Niewidoczne, gdy tego potrzebujesz.",
+			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI."
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -2368,6 +2362,10 @@
 		"text": {
 			"description": "Dostarcz Bitcoin. Pożycz stablecoiny. Pozostań natywny.",
 			"health_factor": "Wskaźnik zdrowia",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Wartość netto",
 			"markets": "Rynki",
 			"total_supplied": "Łącznie dostarczono",

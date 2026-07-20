@@ -181,10 +181,9 @@
 			"authenticate": "Открыть или создать",
 			"sign_in_or_sign_up": "Войти или зарегистрироваться",
 			"internet_identity": "",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP и другие",
-			"instant_and_private": "Приватный доступ в любой момент",
-			"advanced_cryptography": "Защищено передовой криптографией - 100% onchain",
-			"move_swap_grow": "Перемещайте, обменивайте и приумножайте активы в разных сетях"
+			"asset_types": "Криптовалюты, акции, сырьевые товары, коллекционные предметы и зашифрованные заметки.",
+			"advanced_cryptography": "Приватно и защищено от подмены. Невидимо, когда нужно.",
+			"move_swap_grow": "Зарабатывайте, занимайте и торгуйте со встроенным ИИ-ассистентом."
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -2368,6 +2362,10 @@
 		"text": {
 			"description": "Предоставь Bitcoin. Займи стейблкоины. Оставайся нативным.",
 			"health_factor": "Коэффициент здоровья",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Чистая стоимость",
 			"markets": "Рынки",
 			"total_supplied": "Всего предоставлено",

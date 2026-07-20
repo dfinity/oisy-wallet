@@ -181,10 +181,9 @@
 			"authenticate": "Otevřít nebo vytvořit",
 			"sign_in_or_sign_up": "Přihlásit se nebo se zaregistrovat",
 			"internet_identity": "",
-			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
-			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
-			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain",
-			"move_swap_grow": "Přesouvejte, směňujte a zhodnocujte svá aktiva napříč sítěmi"
+			"asset_types": "Krypto, akcie, komodity, sběratelské předměty a šifrované poznámky.",
+			"advanced_cryptography": "Soukromé a odolné proti manipulaci. Neviditelné, když potřebujete.",
+			"move_swap_grow": "Vydělávejte, půjčujte si a obchodujte s vestavěným AI asistentem."
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -2368,6 +2362,10 @@
 		"text": {
 			"description": "Poskytni Bitcoin. Půjč si stablecoiny. Zůstaň nativní.",
 			"health_factor": "Faktor zdraví",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Čistá hodnota",
 			"markets": "Trhy",
 			"total_supplied": "Celkem poskytnuto",
