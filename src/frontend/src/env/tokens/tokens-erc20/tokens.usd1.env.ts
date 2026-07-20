@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USD1_TOKEN_GROUP } from '$env/tokens/groups/groups.usd1.env';
-import usd1 from '$eth/assets/usd1.svg';
+import usd1 from '$eth/assets/usd1.png';
 import type { RequiredAdditionalErc20Token } from '$eth/types/erc20';
 import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { TokenId } from '$lib/types/token';
