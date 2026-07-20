@@ -11,10 +11,10 @@
 	import LiquidiumBorrowTokensList from '$lib/components/liquidium/borrow/LiquidiumBorrowTokensList.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumBorrowWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumAssetPrices, liquidiumPortfolio } from '$lib/derived/liquidium.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumBorrow } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumBorrow } from '$lib/enums/wizard-steps';
 	import {
@@ -32,6 +32,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -61,7 +62,13 @@
 	);
 
 	let borrowToken = $derived(
-		nonNullish(selectedMarket) ? LIQUIDIUM_ASSET_TOKENS[selectedMarket.asset] : undefined
+		nonNullish(selectedMarket)
+			? liquidiumMarketToken({
+					chain: selectedMarket.chain,
+					asset: selectedMarket.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 	let borrowPrice = $derived(
 		nonNullish(selectedMarket) ? ($liquidiumAssetPrices[selectedMarket.asset] ?? 0) : 0

@@ -11,8 +11,8 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumSupplyWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumSupply } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumSupply } from '$lib/enums/wizard-steps';
 	import { estimateLiquidiumInflowFee } from '$lib/services/liquidium-supply.services';
@@ -26,6 +26,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -40,7 +41,13 @@
 	let selectedMarket = $state<LiquidiumMarket | undefined>(market);
 
 	let token = $derived(
-		nonNullish(selectedMarket) ? LIQUIDIUM_ASSET_TOKENS[selectedMarket.asset] : undefined
+		nonNullish(selectedMarket)
+			? liquidiumMarketToken({
+					chain: selectedMarket.chain,
+					asset: selectedMarket.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });

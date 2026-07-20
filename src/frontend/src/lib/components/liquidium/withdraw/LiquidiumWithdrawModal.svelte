@@ -10,10 +10,10 @@
 	import LiquidiumWithdrawTokensList from '$lib/components/liquidium/withdraw/LiquidiumWithdrawTokensList.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumWithdrawWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumAssetPrices, liquidiumPortfolio } from '$lib/derived/liquidium.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumWithdraw } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumWithdraw } from '$lib/enums/wizard-steps';
 	import {
@@ -31,6 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -60,7 +61,13 @@
 	);
 
 	let withdrawToken = $derived(
-		nonNullish(selectedReserve) ? LIQUIDIUM_ASSET_TOKENS[selectedReserve.asset] : undefined
+		nonNullish(selectedReserve)
+			? liquidiumMarketToken({
+					chain: selectedReserve.chain,
+					asset: selectedReserve.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 	let withdrawPrice = $derived(
 		nonNullish(selectedReserve) ? ($liquidiumAssetPrices[selectedReserve.asset] ?? 0) : 0

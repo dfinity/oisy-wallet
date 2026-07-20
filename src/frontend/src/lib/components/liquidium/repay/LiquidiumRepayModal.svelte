@@ -10,10 +10,10 @@
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumRepayWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumPortfolio } from '$lib/derived/liquidium.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumRepay } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumRepay } from '$lib/enums/wizard-steps';
 	import { getLiquidiumMaxRepayAmount } from '$lib/services/liquidium-repay.services';
@@ -28,6 +28,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
@@ -43,7 +44,13 @@
 	let selectedReserve = $state<LiquidiumReserve | undefined>(reserve);
 
 	let token = $derived(
-		nonNullish(selectedReserve) ? LIQUIDIUM_ASSET_TOKENS[selectedReserve.asset] : undefined
+		nonNullish(selectedReserve)
+			? liquidiumMarketToken({
+					chain: selectedReserve.chain,
+					asset: selectedReserve.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });
