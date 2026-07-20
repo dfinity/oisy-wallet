@@ -392,7 +392,7 @@ fn cycles_to_send(backend_cycles: &Nat, frozen_reserve: &Nat, percentage: u8) ->
         return Nat::from(0u32);
     }
     let available_above_reserve = backend_cycles.clone() - frozen_reserve.clone();
-    available_above_reserve / Nat::from(100u32) * Nat::from(percentage)
+    available_above_reserve * Nat::from(percentage) / Nat::from(100u32)
 }
 
 /// Tops up the backend canister account on the cycles ledger.
