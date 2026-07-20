@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
+			"link_domain_mismatch": "This link is for a different domain",
 			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
