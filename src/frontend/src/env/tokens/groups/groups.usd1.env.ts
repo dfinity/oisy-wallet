@@ -1,4 +1,4 @@
-import usd1 from '$eth/assets/usd1.png';
+import usd1 from '$eth/assets/usd1.webp';
 import type { TokenGroupData, TokenGroupId } from '$lib/types/token-group';
 import { parseTokenGroupId } from '$lib/validation/token-group.validation';
 
