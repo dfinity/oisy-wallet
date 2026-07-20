@@ -447,8 +447,9 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
     // If the ledger balance is low, send cycles:
     if ledger_balance < request.threshold() {
         // The canister must never spend into its frozen reserve: sending a fraction of the *total*
-        // balance can push a canister with a large freezing threshold (some run at ~40T) to or below
-        // its freeze line.  Base the send on the balance available *above* the reserve instead.
+        // balance can push a canister with a large freezing threshold (some run at ~40T) to or
+        // below its freeze line.  Base the send on the balance available *above* the
+        // reserve instead.
         //
         // `freezing_threshold` from the management canister is a duration in seconds, not a cycle
         // amount, so the reserve in cycles is derived from the idle burn rate — the same way the IC
