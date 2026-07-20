@@ -92,12 +92,24 @@ In both cases the scanner passes the resolved `wc:` URI to the existing
 `ScannerResults.WALLET_CONNECT` → `startWalletConnect` → `connectListener` path.
 Nothing downstream changes.
 
+### Wrong-domain error
+
+When the scanned code is a **well-formed** OISY WalletConnect deep-link URL
+(path `/wc/`, `uri` param is a `wc:` URI) but its host is **not** the running
+environment's OISY host, the pairing content is valid — only the domain is off.
+Rather than the generic "Code/link is not valid" message, the scanner shows a
+dedicated error, `scanner.error.link_domain_mismatch` ("This link is for a
+different domain"), and does not pair. This uses the same surfaces as the
+existing invalid-code error: an inline input error on desktop, a transient
+banner on mobile.
+
 ### Negative guarantees (what it does _not_ do)
 
 - **Does not** unwrap a `uri` param from a non-OISY host. A URL like
-  `https://evil.example/wc/?uri=wc:...` is **not** treated as WalletConnect; it
-  falls through to the existing handlers (and ultimately the invalid-code path),
-  exactly as today.
+  `https://evil.example/wc/?uri=wc:...` is **not** paired; a well-formed one
+  surfaces the [wrong-domain error](#wrong-domain-error) above, and anything not
+  matching the `/wc/?uri=<wc: uri>` shape falls through to the existing handlers
+  (and ultimately the invalid-code path), exactly as today.
 - **Does not** treat an OISY URL on a different path (e.g.
   `https://oisy.com/tokens/?uri=wc:...`) as a pairing.
 - **Does not** treat an OISY `/wc/` URL whose `uri` param is absent or is not a
@@ -113,7 +125,8 @@ Nothing downstream changes.
 ### 1. New util — `src/frontend/src/lib/utils/scanner.utils.ts`
 
 A single pure, easily-testable function that owns WalletConnect detection for the
-scanner:
+scanner. It returns a small discriminated result so the caller can tell a usable
+URI apart from a valid-but-wrong-domain deep link:
 
 ```ts
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
@@ -122,26 +135,17 @@ import { isNullish } from '@dfinity/utils';
 
 const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
-/**
- * Resolves a scanned/pasted code to a WalletConnect URI, or `undefined` if it is
- * not one. Accepts a bare `wc:` URI, or an OISY WalletConnect deep-link URL
- * (`<OISY origin>/wc/?uri=<url-encoded wc: uri>`). The URL form is only unwrapped
- * when its host is OISY's own domain, so a `uri` param from any other origin is
- * ignored.
- */
-export const extractWalletConnectUri = (code: string): string | undefined => {
+export type ScannedWalletConnectUri = { type: 'uri'; uri: string } | { type: 'wrong-domain' };
+
+export const extractWalletConnectUri = (code: string): ScannedWalletConnectUri | undefined => {
 	if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
-		return code;
+		return { type: 'uri', uri: code };
 	}
 
 	let url: URL;
 	try {
 		url = new URL(code);
 	} catch (_: unknown) {
-		return undefined;
-	}
-
-	if (url.hostname !== OISY_URL_HOSTNAME) {
 		return undefined;
 	}
 
@@ -157,45 +161,73 @@ export const extractWalletConnectUri = (code: string): string | undefined => {
 		return undefined;
 	}
 
-	return uri;
+	if (url.hostname !== OISY_URL_HOSTNAME) {
+		return { type: 'wrong-domain' };
+	}
+
+	return { type: 'uri', uri };
 };
 ```
+
+The host check moves **after** the path / `uri` checks so that a well-formed
+deep link on the wrong host resolves to `wrong-domain` (rather than `undefined`,
+which would fall through to the invalid-code path).
 
 ### 2. Wire it into `ScannerCode.svelte`
 
 Replace the inline `wc:` prefix branch (and the local
-`WALLET_CONNECT_URI_PREFIX` constant) with the util:
+`WALLET_CONNECT_URI_PREFIX` constant) with the util, handling the wrong-domain
+outcome with the dedicated error:
 
 ```ts
-const walletConnectUri = extractWalletConnectUri(code);
-if (nonNullish(walletConnectUri)) {
-	onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnectUri });
+const walletConnect = extractWalletConnectUri(code);
+if (nonNullish(walletConnect)) {
+	if (walletConnect.type === 'wrong-domain') {
+		showError($i18n.scanner.error.link_domain_mismatch);
+		return;
+	}
+
+	onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnect.uri });
 	return;
 }
 ```
 
-The rest of `processCode` (trim → SOL → BTC → IC → OpenCryptoPay) is untouched.
+`showError` is a small helper that routes a message to the right surface (mobile
+banner vs. desktop inline error) — the same logic the OpenCryptoPay `catch`
+already used inline, now shared. The mobile banner state changes from a boolean
+(`showMobileError`) to a message string (`mobileError`) so it can carry either
+error text. The rest of `processCode` (trim → SOL → BTC → IC → OpenCryptoPay) is
+untouched.
 
-### 3. Tests
+### 3. i18n
+
+Add `scanner.error.link_domain_mismatch` to `src/frontend/src/lib/i18n/en.json`
+("This link is for a different domain") and run `npm run i18n` to sync the key
+structure across the other locales (empty placeholders, per the repo's
+sync-only workflow) and regenerate `i18n.d.ts`.
+
+### 4. Tests
 
 - New `src/frontend/src/tests/lib/utils/scanner.utils.spec.ts` for
   `extractWalletConnectUri`: bare `wc:` passthrough; OISY `/wc/?uri=` URL (the
   example above) → inner `wc:`; percent-encoded `uri` decoded; `/wc` without
-  trailing slash accepted; wrong host rejected; wrong path rejected; missing
-  `uri` rejected; non-`wc:` `uri` rejected; non-URL garbage rejected. Build valid
-  URLs from `OISY_URL_HOSTNAME` (imported from the constant) so the test is
-  independent of the resolved domain.
+  trailing slash accepted; wrong host → `wrong-domain`; wrong path rejected;
+  missing `uri` rejected; non-`wc:` `uri` rejected; non-URL garbage rejected.
+  Build valid URLs from `OISY_URL_HOSTNAME` (imported from the constant) so the
+  test is independent of the resolved domain.
 - Extend `src/frontend/src/tests/lib/components/scanner/ScannerCode.spec.ts`:
   scanning an OISY `/wc/?uri=` URL calls `onNext` with `WALLET_CONNECT` and the
-  **decoded inner** `wc:` URI; a non-OISY-host wrapper URL does **not** route to
-  WalletConnect.
+  **decoded inner** `wc:` URI; a non-OISY-host wrapper URL shows
+  `scanner.error.link_domain_mismatch` and does **not** route to WalletConnect
+  or call OpenCryptoPay.
 
-### 4. `PRODUCT.md`
+### 5. `PRODUCT.md`
 
 Add a short note to the WalletConnect section that a pairing can be started by
 scanning either a bare `wc:` URI or an OISY WalletConnect deep-link URL
-(`<OISY host>/wc/?uri=…`), and that the URL form is only accepted for OISY's own
-host.
+(`<OISY host>/wc/?uri=…`), that the URL form is only accepted for OISY's own
+host, and that a valid deep link on a different host shows a dedicated
+domain-mismatch error.
 
 ---
 
