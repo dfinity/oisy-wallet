@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
@@ -356,6 +357,57 @@ describe('ScannerCode.svelte', () => {
 		});
 
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should unwrap an OISY WalletConnect deep-link URL to its inner wc: URI', async () => {
+		const walletConnectUri = 'wc:abc123@2?relay-protocol=irn&symKey=deadbeef';
+		const deepLink = `https://${OISY_URL_HOSTNAME}/wc/?uri=${encodeURIComponent(walletConnectUri)}`;
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: deepLink } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.WALLET_CONNECT,
+				code: walletConnectUri
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should not treat a non-OISY-host wc deep-link URL as WalletConnect', async () => {
+		const walletConnectUri = 'wc:abc123@2?relay-protocol=irn';
+		const deepLink = `https://evil.example/wc/?uri=${encodeURIComponent(walletConnectUri)}`;
+
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(
+			new Error('invalid')
+		);
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: deepLink } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(openCryptoPayServices.processOpenCryptoPayCode).toHaveBeenCalledWith(deepLink);
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalledWith(
+			expect.objectContaining({ results: ScannerResults.WALLET_CONNECT })
+		);
 	});
 
 	it('should call onNext with SOL_SEND result for a bare Solana address', async () => {

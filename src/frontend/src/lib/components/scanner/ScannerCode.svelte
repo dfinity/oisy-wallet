@@ -34,6 +34,7 @@
 	import { ScannerResults } from '$lib/types/scanner';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { prepareBasePayableTokens } from '$lib/utils/open-crypto-pay.utils';
+	import { extractWalletConnectUri } from '$lib/utils/scanner.utils';
 	import { AVAILABLE_SCREENS, filterScreens, MIN_SCREEN } from '$lib/utils/screens.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 	import { waitReady } from '$lib/utils/timeout.utils';
@@ -45,8 +46,6 @@
 	}
 
 	let { onNext, onOpenInfo }: Props = $props();
-
-	const WALLET_CONNECT_URI_PREFIX = 'wc:';
 
 	const MOBILE_ERROR_BANNER_DURATION = 3500;
 
@@ -92,8 +91,9 @@
 	};
 
 	const processCode = async (code: string) => {
-		if (code.startsWith(WALLET_CONNECT_URI_PREFIX)) {
-			onNext({ results: ScannerResults.WALLET_CONNECT, code });
+		const walletConnectUri = extractWalletConnectUri(code);
+		if (nonNullish(walletConnectUri)) {
+			onNext({ results: ScannerResults.WALLET_CONNECT, code: walletConnectUri });
 			return;
 		}
 
