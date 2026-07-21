@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
@@ -355,6 +356,52 @@ describe('ScannerCode.svelte', () => {
 			});
 		});
 
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should unwrap an OISY WalletConnect deep-link URL to its inner wc: URI', async () => {
+		const walletConnectUri = 'wc:abc123@2?relay-protocol=irn&symKey=deadbeef';
+		const deepLink = `https://${OISY_URL_HOSTNAME}/wc/?uri=${encodeURIComponent(walletConnectUri)}`;
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: deepLink } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(mockOnNext).toHaveBeenCalledExactlyOnceWith({
+				results: ScannerResults.WALLET_CONNECT,
+				code: walletConnectUri
+			});
+		});
+
+		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
+	});
+
+	it('should show a domain-mismatch error for a wc deep-link URL on a non-OISY host', async () => {
+		const walletConnectUri = 'wc:abc123@2?relay-protocol=irn';
+		const deepLink = `https://evil.example/wc/?uri=${encodeURIComponent(walletConnectUri)}`;
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+		await fireEvent.input(input, { target: { value: deepLink } });
+
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(screen.getByText(en.scanner.error.link_domain_mismatch)).toBeInTheDocument();
+		});
+
+		expect(mockOnNext).not.toHaveBeenCalled();
 		expect(openCryptoPayServices.processOpenCryptoPayCode).not.toHaveBeenCalled();
 	});
 

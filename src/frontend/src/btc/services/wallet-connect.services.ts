@@ -1,7 +1,3 @@
-import {
-	BTC_ECDSA_DERIVATION_PATH,
-	BTC_ECDSA_KEY_ID
-} from '$btc/constants/wallet-connect.constants';
 import type { OptionBtcAddress } from '$btc/types/address';
 import type {
 	WalletConnectBtcDecodedPsbt,
@@ -16,7 +12,7 @@ import {
 } from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
 import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks/networks.btc.env';
-import { genericSignWithEcdsa } from '$lib/api/signer.api';
+import { signBtcPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSign } from '$lib/enums/progress-steps';
@@ -210,11 +206,9 @@ export const sign = ({
 
 				const messageHash = bitcoinSignedMessageHash(message);
 
-				const rawSignature = await genericSignWithEcdsa({
+				const rawSignature = await signBtcPrehash({
 					identity,
-					derivationPath: BTC_ECDSA_DERIVATION_PATH,
-					keyId: BTC_ECDSA_KEY_ID,
-					messageHash
+					hash: messageHash
 				});
 
 				const publicKey = deriveBtcPublicKey({ principal: identity.getPrincipal() });
@@ -446,11 +440,9 @@ export const signPsbt = ({
 				const signer = {
 					publicKey,
 					sign: async (hash: Buffer): Promise<Buffer> => {
-						const rawSignature = await genericSignWithEcdsa({
+						const rawSignature = await signBtcPrehash({
 							identity,
-							derivationPath: BTC_ECDSA_DERIVATION_PATH,
-							keyId: BTC_ECDSA_KEY_ID,
-							messageHash: Uint8Array.from(hash)
+							hash: Uint8Array.from(hash)
 						});
 
 						return Buffer.from(rawSignature);

@@ -181,10 +181,9 @@
 			"authenticate": "Open or Create",
 			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
-			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
-			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
-			"move_swap_grow": "Move, swap, and grow your assets across networks"
+			"asset_types": "Crypto, stocks, commodities, collectibles and encrypted notes.",
+			"advanced_cryptography": "Private and tamperproof. Invisible, if you need it to be.",
+			"move_swap_grow": "Earn, borrow and trade, with an AI assistant built in."
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
@@ -488,11 +487,6 @@
 				"one_liner": "The hunt has begun in search of the elusive Motoko Tokyo and the Nightscroller Syndicate can use your help...",
 				"call_to_action": "Come find me when you're ready...",
 				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
-			},
-			"icp_flags": {
-				"name": "icp-flags",
-				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
-				"description": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions. Control over each position is determined exclusively by deterministic smart contract logic. There is no administrator discretion, no off-chain settlement layer, and no manual intervention.<br/>Each flag represents a single, indivisible on-chain position controlled by exactly one principal at a time. Control is transferred only through a valid higher bid that satisfies the contract’s escalation formula."
 			},
 			"cloud_engines": {
 				"name": "Cloud Engines",
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
+			"link_domain_mismatch": "This link is for a different domain",
 			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
+			"health_no_debt": "No debt",
+			"health_healthy": "Healthy",
+			"health_at_risk": "At risk",
+			"health_critical": "Critical",
 			"net_value": "Net value",
 			"markets": "Markets",
 			"total_supplied": "Total supplied",
