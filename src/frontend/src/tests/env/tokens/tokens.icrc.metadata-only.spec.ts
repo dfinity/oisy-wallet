@@ -15,6 +15,7 @@ describe('1Sec ICRC stablecoins on ICP are metadata-only', () => {
 		const token = additionalIcrcTokens[symbol];
 
 		expect(token?.ledgerCanisterId).toBe(ledgerCanisterId);
-		expect(token?.metadataOnly).toBeTruthy();
+		// Strict boolean check: a non-boolean truthy value must not satisfy the pin.
+		expect(token?.metadataOnly === true).toBeTruthy();
 	});
 });
