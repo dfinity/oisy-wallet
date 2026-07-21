@@ -14,7 +14,7 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 Every WalletConnect message-signing path signs with OISY's own key for the network resolved from the request's chain id, and **none of them checks the account the dApp actually asked to sign with**:
 
 - `eip155` — `signMessage` in `src/frontend/src/eth/services/wallet-connect.services.ts` (handles `personal_sign` / `eth_sign` / `eth_signTypedData_v4` / `eth_signTypedData`) signs with the loaded ETH key and never inspects the address param.
-- `solana` — `signMessage` in `src/frontend/src/sol/services/wallet-connect.services.ts` (added in PR #13549) never reads `params.pubkey`.
+- `solana` — `signMessage` in `src/frontend/src/sol/services/wallet-connect.services.ts` (added in #13549, now merged to `main`) never reads `params.pubkey`.
 - `bip122` — `sign` in `src/frontend/src/btc/services/wallet-connect.services.ts` reads only `params.message`, not the requested account.
 
 Two concrete downsides when the requested account does not match OISY's loaded address for that network:
@@ -78,11 +78,8 @@ Each chain ships its own regression test (mismatch → early reject, no signer c
 
 ## 7. Sequencing note
 
-The Solana `signMessage` service this spec amends is introduced by PR #13549 and is **not yet on `main`**. The Solana portion of the implementation therefore depends on #13549 landing (or on rebasing this work onto it); the `eip155` and `bip122` portions do not.
+PR #13549 — which introduced the Solana `signMessage` service this spec amends — has **merged**, so all three `signMessage` services (`eip155`, `solana`, `bip122`) are now on `main`. There is no cross-PR dependency left.
 
-**Recommended stacking.** Because `eip155` and `bip122` already exist on `main` while `solana` does not:
-
-- **Step 1 — `eip155` + `bip122` assertion** (this branch, off `main`): implement the account assertion for the ETH and BTC `signMessage` paths plus their tests. No dependency on #13549, so it can proceed immediately.
-- **Step 2 — `solana` assertion** (stacked on Step 1, once #13549 has merged — or rebased onto it): add the `params.pubkey` assertion to the Solana `signMessage` service.
-
-This keeps each PR atomic and lets the eth/btc work land without waiting on the Solana feature. A single combined PR (all three after #13549 merges) is the fallback if stacking overhead isn't worth it for a change this small. Either way, land the shared error-copy decision (§6) once and reuse it across chains.
+- **Do all three in one PR.** The change is the same small guard per service and the motivation is identical across chains. Split per chain only if the diff grows unexpectedly (e.g. the bip122 field wiring turns out non-trivial) — for size, not for sequencing.
+- **Rebase / update this branch onto `main` first.** It was cut before #13549 merged, so the Solana service is not present on it yet; update it (rebase, or GitHub "Update branch") before implementing.
+- Land the shared error-copy decision (§6) once and reuse it across chains.
