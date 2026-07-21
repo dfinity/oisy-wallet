@@ -79,3 +79,10 @@ Each chain ships its own regression test (mismatch → early reject, no signer c
 ## 7. Sequencing note
 
 The Solana `signMessage` service this spec amends is introduced by PR #13549 and is **not yet on `main`**. The Solana portion of the implementation therefore depends on #13549 landing (or on rebasing this work onto it); the `eip155` and `bip122` portions do not.
+
+**Recommended stacking.** Because `eip155` and `bip122` already exist on `main` while `solana` does not:
+
+- **Step 1 — `eip155` + `bip122` assertion** (this branch, off `main`): implement the account assertion for the ETH and BTC `signMessage` paths plus their tests. No dependency on #13549, so it can proceed immediately.
+- **Step 2 — `solana` assertion** (stacked on Step 1, once #13549 has merged — or rebased onto it): add the `params.pubkey` assertion to the Solana `signMessage` service.
+
+This keeps each PR atomic and lets the eth/btc work land without waiting on the Solana feature. A single combined PR (all three after #13549 merges) is the fallback if stacking overhead isn't worth it for a change this small. Either way, land the shared error-copy decision (§6) once and reuse it across chains.
