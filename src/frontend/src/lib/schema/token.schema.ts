@@ -69,6 +69,7 @@ export const TokenBuyableSchema = z.object({
 // the visible token store and is never suggested/enabled, but it is still used to
 // enrich a token the user imports manually (name, icon, tags, group membership).
 // Defaults to falsy. See docs/ai/spec-driven-development/specs/2026-07-14-feat-token-metadata-tier.md.
+export const TokenMetadataOnlyPropSchema = z.object({
 	metadataOnly: z.boolean().optional()
 });
 
