@@ -1,4 +1,4 @@
-import { USD1_SYMBOL } from '$env/tokens/tokens-erc20/tokens.usd1.env';
+import { USD1_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.usd1.env';
 import { ICRC_SUGGESTED_LEDGER_CANISTER_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.additional.env';
 import {
 	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
