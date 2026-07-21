@@ -30,9 +30,9 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 const ERC20_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(ERC20_SUGGESTED_TOKENS.map(({ id }) => id));
 const SPL_SUGGESTED_TOKEN_IDS: Set<TokenId> = new Set(SPL_SUGGESTED_TOKENS.map(({ id }) => id));
 
-// USD1 (World Liberty Financial USD) is the same token across all its networks (Ethereum,
-// BNB Smart Chain, Solana), so we identify it by symbol to show its dedicated hero image.
-export const isUSD1Token = (token: Token): boolean => token.symbol === USD1_SYMBOL;
+// USD1 (World Liberty Financial USD) is grouped under USD1_TOKEN_GROUP across supported networks, so we
+// identify it by its token group id to avoid collisions with user-imported tokens that reuse the symbol.
+export const isUSD1Token = (token: Token): boolean => token.groupData?.id === USD1_TOKEN_GROUP_ID;
 
 /**
  * Calculates the maximum amount for a transaction.
