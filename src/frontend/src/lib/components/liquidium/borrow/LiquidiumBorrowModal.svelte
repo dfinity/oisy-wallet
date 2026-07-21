@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Chain } from '@liquidium/client';
 	import { setContext } from 'svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import LiquidiumSelectTokenForm from '$lib/components/liquidium/LiquidiumSelectTokenForm.svelte';
 	import LiquidiumBorrowForm from '$lib/components/liquidium/borrow/LiquidiumBorrowForm.svelte';
 	import LiquidiumBorrowProgress from '$lib/components/liquidium/borrow/LiquidiumBorrowProgress.svelte';
 	import LiquidiumBorrowReview from '$lib/components/liquidium/borrow/LiquidiumBorrowReview.svelte';
 	import LiquidiumBorrowSummary from '$lib/components/liquidium/borrow/LiquidiumBorrowSummary.svelte';
 	import LiquidiumBorrowTokensList from '$lib/components/liquidium/borrow/LiquidiumBorrowTokensList.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { liquidiumBorrowWizardSteps } from '$lib/config/lend-borrow.config';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { liquidiumAssetPrices, liquidiumPortfolio } from '$lib/derived/liquidium.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLiquidiumBorrow } from '$lib/enums/progress-steps';
 	import { WizardStepsLiquidiumBorrow } from '$lib/enums/wizard-steps';
 	import {
@@ -31,6 +32,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -60,7 +62,13 @@
 	);
 
 	let borrowToken = $derived(
-		nonNullish(selectedMarket) ? LIQUIDIUM_ASSET_TOKENS[selectedMarket.asset] : undefined
+		nonNullish(selectedMarket)
+			? liquidiumMarketToken({
+					chain: selectedMarket.chain,
+					asset: selectedMarket.asset,
+					tokens: $tokens
+				})
+			: undefined
 	);
 	let borrowPrice = $derived(
 		nonNullish(selectedMarket) ? ($liquidiumAssetPrices[selectedMarket.asset] ?? 0) : 0
@@ -81,9 +89,14 @@
 			: undefined
 	);
 
-	// Borrowed asset is delivered to the user's own oisy address on the pool's chain.
+	// Borrowed asset is delivered to the user's own oisy address on the pool's chain:
+	// native BTC address for a BTC pool, ICRC account for an ICP-chain pool, else ETH.
 	let receiverAddress = $derived(
-		selectedMarket?.chain === 'BTC' ? $btcAddressMainnet : $ethAddress
+		selectedMarket?.chain === 'BTC'
+			? $btcAddressMainnet
+			: selectedMarket?.chain === 'ICP'
+				? $icrcAccountIdentifierText
+				: $ethAddress
 	);
 
 	const goToStep = (stepName: WizardStepsLiquidiumBorrow) => {
@@ -145,7 +158,7 @@
 
 		const amountBaseUnits = parsedAmount;
 		const receiver = receiverAddress;
-		const { poolId, asset } = selectedMarket;
+		const { poolId, asset, chain } = selectedMarket;
 
 		modal?.next();
 
@@ -154,6 +167,7 @@
 				identity,
 				ethAddress: $ethAddress,
 				poolId,
+				chain: chain as Chain,
 				asset,
 				amount: amountBaseUnits,
 				receiverAddress: receiver,
@@ -194,10 +208,6 @@
 					<LiquidiumBorrowSummary portfolio={$liquidiumPortfolio} />
 				{/if}
 			{/snippet}
-
-			<MessageBox styleClass="sm:text-sm !items-center">
-				{$i18n.liquidium.text.borrow_risk_info}
-			</MessageBox>
 		</LiquidiumSelectTokenForm>
 	{:else if nonNullish($liquidiumPortfolio) && nonNullish(preview)}
 		{#if currentStep?.name === WizardStepsLiquidiumBorrow.REVIEW}

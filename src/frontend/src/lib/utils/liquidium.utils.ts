@@ -1,4 +1,9 @@
 import type { TokenId } from '$declarations/backend/backend.did';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
@@ -7,9 +12,17 @@ import {
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import type { Token } from '$lib/types/token';
+import { findTwinToken } from '$lib/utils/token.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
-import type { Pool, UserPositionSummary, UserReserve } from '@liquidium/client';
+import {
+	Chain,
+	isAssetIdentifier,
+	type Pool,
+	type UserPositionSummary,
+	type UserReserve
+} from '@liquidium/client';
 
 // Backend `TokenId` for a Liquidium AUT record — the ck-asset ledger backing the asset.
 export const liquidiumAssetTokenId = (asset: string): TokenId => {
@@ -18,6 +31,54 @@ export const liquidiumAssetTokenId = (asset: string): TokenId => {
 	assertNonNullish(ledgerCanisterId, `No ICRC ledger configured for Liquidium asset ${asset}`);
 
 	return { Icrc: Principal.fromText(ledgerCanisterId) };
+};
+
+// Display token (logo/label) for a Liquidium market/reserve. Keyed by (chain, asset)
+// because the same symbol maps to a different oisy token per chain: native BTC vs
+// ckBTC, ERC-20 USDC/USDT vs their ck twins. ICP-chain ck assets resolve from the
+// runtime token list via their twin symbol; native/ERC assets and ICP are static.
+export const liquidiumMarketToken = ({
+	chain,
+	asset,
+	tokens
+}: {
+	chain: string;
+	asset: string;
+	tokens: Token[];
+}): Token | undefined => {
+	if (chain === 'ICP') {
+		switch (asset) {
+			case 'ICP':
+				return ICP_TOKEN;
+			case 'BTC':
+				return findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens });
+			case 'USDC':
+				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
+			case 'USDT':
+				return findTwinToken({ tokenToPair: USDT_TOKEN, tokens });
+			default:
+				return undefined;
+		}
+	}
+
+	if (chain === 'BTC' && asset === 'BTC') {
+		return BTC_MAINNET_TOKEN;
+	}
+
+	if (chain === 'ETH') {
+		switch (asset) {
+			case 'ETH':
+				return ETHEREUM_TOKEN;
+			case 'USDC':
+				return USDC_TOKEN;
+			case 'USDT':
+				return USDT_TOKEN;
+			default:
+				return undefined;
+		}
+	}
+
+	return undefined;
 };
 
 // Scaled protocol rate → percentage.
@@ -190,6 +251,25 @@ export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
 	frozen: pool.frozen,
 	available: !pool.frozen && isUnderSupplyCap(pool)
 });
+
+// Transfer rails a pool asset supports: its native/ERC chain plus the ICP (ck-ledger)
+// rail where the protocol offers one. A single lending pool is shared across rails (e.g.
+// ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
+// choice, not separate pools. Derived from the SDK's own identifier guard so it stays
+// correct if the protocol adds pairs.
+export const liquidiumSupportedRails = (asset: string): string[] =>
+	Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }));
+
+// Expands one pool into a market per supported transfer rail (`market.chain` is the rail,
+// not the pool's backing chain). Both rails of an asset carry identical pool economics
+// (APY / LTV / availability) and share `poolId`; they differ only by transfer chain, which
+// drives the display token, the supply/repay transfer rail and the borrow/withdraw
+// delivery chain. Holdings stay per-pool — this expansion is for the market/entry surface only.
+export const mapLiquidiumMarketRails = (pool: Pool): LiquidiumMarket[] => {
+	const base = mapLiquidiumMarket(pool);
+
+	return liquidiumSupportedRails(pool.asset).map((chain) => ({ ...base, chain }));
+};
 
 export const mapLiquidiumReserve = ({
 	position,

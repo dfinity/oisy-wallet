@@ -1,7 +1,12 @@
+import type { CustomToken } from '$declarations/backend/backend.did';
 import type * as TokensErc20Env from '$env/tokens/tokens.erc20.env';
 import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
 import type { InfuraErc20Provider } from '$eth/providers/infura-erc20.providers';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const METADATA_ONLY_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
 /**
  * A metadata-only ERC20 token must be kept out of the visible default-tokens
@@ -12,6 +17,10 @@ import { get } from 'svelte/store';
 vi.mock('$eth/providers/infura-erc20.providers', () => ({
 	InfuraErc20Provider: vi.fn(class {}),
 	infuraErc20Providers: vi.fn()
+}));
+
+vi.mock('$lib/api/backend.api', () => ({
+	listCustomTokens: vi.fn()
 }));
 
 vi.mock('$env/tokens/tokens.erc20.env', async (importOriginal) => {
@@ -60,6 +69,49 @@ describe('erc20.services - metadataOnly', () => {
 		expect(tokens.some(({ symbol }) => symbol === 'METAONLY')).toBeFalsy();
 		// sanity: the store is populated with the non-metadata-only defaults
 		expect(tokens.length).toBeGreaterThan(0);
+	});
+
+	it('still enriches a manually imported custom token at the metadata-only address', async () => {
+		vi.resetModules();
+
+		const infuraProviders = await import('$eth/providers/infura-erc20.providers');
+		const metadataMock = vi.fn().mockResolvedValue({ name: 'X', symbol: 'X', decimals: 18 });
+		vi.mocked(infuraProviders.infuraErc20Providers).mockReturnValue({
+			metadata: metadataMock
+		} as unknown as InfuraErc20Provider);
+
+		const { ETHEREUM_NETWORK } = await import('$env/networks/networks.eth.env');
+		const { listCustomTokens } = await import('$lib/api/backend.api');
+		const customToken: CustomToken = {
+			token: {
+				Erc20: {
+					chain_id: ETHEREUM_NETWORK.chainId,
+					token_address: METADATA_ONLY_ADDRESS
+				}
+			},
+			enabled: true,
+			version: toNullable(),
+			section: toNullable(),
+			allow_external_content_source: toNullable(),
+			allowed_external_content_source_urls: toNullable()
+		};
+		vi.mocked(listCustomTokens).mockResolvedValue([customToken]);
+
+		const { mockAuthStore } = await import('$tests/mocks/auth.mock');
+		mockAuthStore();
+
+		const { loadCustomTokens } = await import('$eth/services/erc20.services');
+		const { erc20CustomTokensStore } = await import('$eth/stores/erc20-custom-tokens.store');
+		erc20CustomTokensStore.resetAll();
+
+		await loadCustomTokens({ identity: mockIdentity });
+
+		const customTokens = get(erc20CustomTokensStore) ?? [];
+
+		// The metadata-only token is resolved from the curated defaults (its symbol),
+		// and Infura is not queried for its address.
+		expect(customTokens.some(({ data }) => data.symbol === 'METAONLY')).toBeTruthy();
+		expect(metadataMock).not.toHaveBeenCalledWith({ address: METADATA_ONLY_ADDRESS });
 	});
 });
 
