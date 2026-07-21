@@ -140,9 +140,11 @@ A definition can instead be marked **metadata-only** (`metadataOnly: true`). A m
 The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
 
 - On **ICP**, the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`).
-- On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, **GLDT**, and **ICP**.
+- On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, and **GLDT**.
 
 A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
+
+ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and a metadata-only token is dropped from the custom-token list, which would hide an existing balance. ICP stays curated and suggested there.
 
 ---
 

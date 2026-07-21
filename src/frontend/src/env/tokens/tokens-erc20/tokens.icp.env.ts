@@ -23,6 +23,5 @@ export const ICP_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: ICP_DECIMALS,
 	icon: icpLight,
 	address: '0x00f3C42833C3170159af4E92dbb451Fb3F708917',
-	groupData: ICP_TOKEN_GROUP,
-	metadataOnly: true
+	groupData: ICP_TOKEN_GROUP
 };
