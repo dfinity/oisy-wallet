@@ -68,8 +68,7 @@ export const TokenBuyableSchema = z.object({
 // When true, this curated token definition is metadata only: it is NOT added to
 // the visible token store and is never suggested/enabled, but it is still used to
 // enrich a token the user imports manually (name, icon, tags, group membership).
-// Defaults to falsy. See the metadata-only-tokens spec.
-export const TokenMetadataOnlyPropSchema = z.object({
+// Defaults to falsy. See docs/ai/spec-driven-development/specs/2026-07-14-feat-token-metadata-tier.md.
 	metadataOnly: z.boolean().optional()
 });
 
