@@ -99,6 +99,10 @@ export const mapIcrcToken = ({
 			? getIcrcAccount(Principal.fromText(rest.minterCanisterId))
 			: undefined);
 
+	// Backfill the index canister id from the curated environment token when the
+	// import didn't provide one (a user-supplied index id still wins).
+	const indexCanisterId = rest.indexCanisterId ?? customTokenSymbol?.indexCanisterId;
+
 	return {
 		id: parseTokenId(symbol),
 		network: mapIcNetwork(ledgerCanisterId),
@@ -119,13 +123,7 @@ export const mapIcrcToken = ({
 		ledgerCanisterId,
 		...metadataToken,
 		...rest,
-		// Backfill the index canister id from the curated environment token when the
-		// import didn't provide one (e.g. a user adds a known ICRC token by ledger id
-		// only). A user-supplied index id always wins.
-		...(isNullish(rest.indexCanisterId) &&
-			nonNullish(customTokenSymbol?.indexCanisterId) && {
-				indexCanisterId: customTokenSymbol.indexCanisterId
-			}),
+		...(nonNullish(indexCanisterId) && { indexCanisterId }),
 		...(nonNullish(mintingAccount) && { mintingAccount })
 	};
 };
