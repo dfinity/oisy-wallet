@@ -1,5 +1,6 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
 import type { WithoutWorkerId, WorkerData, WorkerId } from '$lib/types/worker';
+import { workerPoolSize } from '$lib/utils/device.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 type MessageHandler = (ev: MessageEvent) => void;
@@ -7,29 +8,33 @@ type MessageHandler = (ev: MessageEvent) => void;
 export abstract class AppWorker {
 	readonly #worker: Worker;
 	readonly #workerId: WorkerId;
-	readonly #isSingleton: boolean;
+	readonly #poolIndex: number | undefined;
 	readonly #queue: WorkerQueue;
 	// TODO: use generics directly in the class so that we can use type WorkerListener
 	#listener: ((ev: MessageEvent) => void) | undefined;
 	#isTerminated = false;
 
-	static #singletonWorker?: Worker;
-	static #singletonRefCount = 0;
+	// Shared worker pool. Wallet workers opt in via `getInstance({ pooled: true })` and are sharded
+	// across a small number of realms (keyed by a stable token id) instead of one realm per token.
+	// The map holds the in-flight creation promise so concurrent callers share a single realm.
+	static #pool = new Map<number, Promise<Worker>>();
+	static #poolRefCounts = new Map<number, number>();
+	static #poolSize: number | undefined;
 
 	// Every underlying Worker ever spawned and not yet terminated, so that all
 	// threads can be torn down at once when the page unloads.
 	static #liveWorkers = new Set<Worker>();
 
 	protected constructor(workerData: WorkerData) {
-		const { worker, isSingleton } = workerData;
+		const { worker, poolIndex } = workerData;
 
 		this.#worker = worker;
 		this.#workerId = crypto.randomUUID();
-		this.#isSingleton = isSingleton;
+		this.#poolIndex = poolIndex;
 		this.#queue = new WorkerQueue(worker);
 
-		if (this.#isSingleton) {
-			AppWorker.#singletonRefCount++;
+		if (nonNullish(poolIndex)) {
+			AppWorker.#poolRefCounts.set(poolIndex, (AppWorker.#poolRefCounts.get(poolIndex) ?? 0) + 1);
 		}
 	}
 
@@ -40,21 +45,65 @@ export abstract class AppWorker {
 		return worker;
 	};
 
-	static #getInstanceAsSingleton = async (): Promise<Worker> => {
-		if (isNullish(this.#singletonWorker)) {
-			this.#singletonWorker = await this.#newInstance();
-			this.#singletonRefCount = 0;
+	static #resolvedPoolSize = (): number => {
+		if (isNullish(this.#poolSize)) {
+			this.#poolSize = workerPoolSize();
 		}
 
-		return this.#singletonWorker;
+		return this.#poolSize;
 	};
 
-	static getInstance = async (
-		{ asSingleton = false }: { asSingleton?: boolean } = { asSingleton: false }
-	): Promise<WorkerData> => {
-		const worker = asSingleton ? await this.#getInstanceAsSingleton() : await this.#newInstance();
+	// Stable, non-negative hash so a given token always maps to the same pool worker across
+	// stop/start cycles — the scheduler on that worker holds per-token delta state.
+	static #hashKey = (key: string): number => {
+		let hash = 0;
 
-		return { worker, isSingleton: asSingleton };
+		for (let i = 0; i < key.length; i++) {
+			hash = (hash * 31 + key.charCodeAt(i)) | 0;
+		}
+
+		return Math.abs(hash);
+	};
+
+	static #poolIndexForKey = (key: string | undefined): number => {
+		const size = this.#resolvedPoolSize();
+
+		if (size <= 1 || isNullish(key)) {
+			return 0;
+		}
+
+		return this.#hashKey(key) % size;
+	};
+
+	static #getPooledWorker = (index: number): Promise<Worker> => {
+		const existing = this.#pool.get(index);
+
+		if (nonNullish(existing)) {
+			return existing;
+		}
+
+		// Store the in-flight promise (not the resolved worker) so concurrent callers targeting the
+		// same index share one realm instead of racing to create duplicates.
+		const created = this.#newInstance();
+
+		this.#pool.set(index, created);
+		this.#poolRefCounts.set(index, 0);
+
+		return created;
+	};
+
+	static getInstance = async ({
+		pooled = false,
+		poolKey
+	}: { pooled?: boolean; poolKey?: string } = {}): Promise<WorkerData> => {
+		if (!pooled) {
+			return { worker: await this.#newInstance() };
+		}
+
+		const poolIndex = this.#poolIndexForKey(poolKey);
+		const worker = await this.#getPooledWorker(poolIndex);
+
+		return { worker, poolIndex };
 	};
 
 	#addMessageListener = (listener: MessageHandler) => {
@@ -72,13 +121,11 @@ export abstract class AppWorker {
 		this.#listener = undefined;
 	};
 
-	#setOnMessageAsSingleton = (listener: MessageHandler) => {
-		this.#addMessageListener(listener);
-	};
-
 	protected setOnMessage = (listener: MessageHandler) => {
-		if (this.#isSingleton) {
-			this.#setOnMessageAsSingleton(listener);
+		// A pooled worker is shared by several wrappers, so each registers its own message listener
+		// and filters by `ref`. A dedicated worker can own the single `onmessage` handler.
+		if (nonNullish(this.#poolIndex)) {
+			this.#addMessageListener(listener);
 			return;
 		}
 
@@ -98,7 +145,7 @@ export abstract class AppWorker {
 
 		this.#isTerminated = true;
 
-		if (!this.#isSingleton) {
+		if (isNullish(this.#poolIndex)) {
 			this.#worker.terminate();
 
 			this.#worker.onmessage = null;
@@ -108,18 +155,21 @@ export abstract class AppWorker {
 			return;
 		}
 
-		// If it's a singleton, multiple `AppWorker` wrappers share the same underlying Worker.
-		// We track wrapper instances (ref count) and terminate the singleton Worker when the last one is destroyed.
+		// A pooled worker is shared: drop this wrapper's listener and only terminate the underlying
+		// Worker once the last wrapper on that pool index is gone.
 		this.#removeListener();
 
-		AppWorker.#singletonRefCount--;
+		const remaining = (AppWorker.#poolRefCounts.get(this.#poolIndex) ?? 1) - 1;
 
-		if (AppWorker.#singletonRefCount <= 0 && nonNullish(AppWorker.#singletonWorker)) {
-			AppWorker.#singletonWorker.terminate();
-			AppWorker.#liveWorkers.delete(AppWorker.#singletonWorker);
-			AppWorker.#singletonWorker = undefined;
-			AppWorker.#singletonRefCount = 0;
+		if (remaining <= 0) {
+			this.#worker.terminate();
+			AppWorker.#liveWorkers.delete(this.#worker);
+			AppWorker.#pool.delete(this.#poolIndex);
+			AppWorker.#poolRefCounts.delete(this.#poolIndex);
+			return;
 		}
+
+		AppWorker.#poolRefCounts.set(this.#poolIndex, remaining);
 	};
 
 	/**
@@ -135,8 +185,8 @@ export abstract class AppWorker {
 		AppWorker.#liveWorkers.forEach((worker) => worker.terminate());
 		AppWorker.#liveWorkers.clear();
 
-		AppWorker.#singletonWorker = undefined;
-		AppWorker.#singletonRefCount = 0;
+		AppWorker.#pool.clear();
+		AppWorker.#poolRefCounts.clear();
 	};
 
 	protected abstract stopTimer(): void;
@@ -159,11 +209,9 @@ export abstract class AppWorker {
 	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
 	 */
 	static resetForTesting() {
-		if (nonNullish(this.#singletonWorker)) {
-			this.#singletonWorker.terminate();
-			this.#singletonWorker = undefined;
-		}
-		this.#singletonRefCount = 0;
+		this.#pool.clear();
+		this.#poolRefCounts.clear();
+		this.#poolSize = undefined;
 		this.#liveWorkers.clear();
 	}
 }

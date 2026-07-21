@@ -16,7 +16,6 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '$lib/utils/device.utils';
 
 export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
@@ -75,7 +74,7 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<Dip20WalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		const worker = await AppWorker.getInstance({ pooled: true, poolKey: canisterId });
 		return new Dip20WalletWorker(worker, tokenId, canisterId);
 	}
 

@@ -52,3 +52,21 @@ export const isPWAStandalone = () => {
 
 	return window.matchMedia('(display-mode: standalone)').matches;
 };
+
+// Upper bound for the shared wallet-worker pool on desktop. Wallet sync is I/O-bound, so a small
+// pool is enough to parallelize the CPU-heavy candid decode / mapping across cores while keeping
+// memory far below one dedicated worker per token. Raising it trades memory for first-load CPU
+// throughput.
+const WORKER_POOL_MAX_SIZE = 4;
+
+// Size of the shared worker pool. iOS keeps a single shared worker (memory-constrained); desktop
+// scales with available cores while leaving headroom for the main thread and the other workers.
+export const workerPoolSize = (): number => {
+	if (isIOS()) {
+		return 1;
+	}
+
+	const cores = navigator.hardwareConcurrency;
+
+	return cores >= 2 ? Math.min(cores - 1, WORKER_POOL_MAX_SIZE) : 1;
+};
