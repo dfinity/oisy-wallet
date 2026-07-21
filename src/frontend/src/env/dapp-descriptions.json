@@ -264,7 +264,7 @@
 		"description": "dapps.descriptions.icpixel.description",
 		"usesInternetIdentity": true,
 		"stats": "",
-		"logo": "/images/dapps/icpixel-logo.svg",
+		"logo": "/images/dapps/icpixel-logo.webp",
 		"screenshots": ["/images/dapps/icpixel-screenshot.webp"]
 	},
 	{
