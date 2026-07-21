@@ -20,7 +20,7 @@ import {
 } from '$lib/utils/liquidium.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
-import { SupplyAction, type NativeAddressSupplyTarget } from '@liquidium/client';
+import { SupplyAction, type Chain, type SupplyTarget } from '@liquidium/client';
 
 export interface LiquidiumRepayPreview {
 	projectedHealthPercent: number;
@@ -82,19 +82,21 @@ export const computeLiquidiumRepayPreview = ({
 // Broadcasts `amount` base units (gross = repay + provider fee) to the native target and returns
 // the txid the AUT poller correlates on. Implemented by the wizard (per-chain fee/UTXO machinery).
 export type LiquidiumRepayBroadcast = (params: {
-	target: NativeAddressSupplyTarget;
+	target: SupplyTarget;
 	amount: bigint;
 }) => Promise<string>;
 
 // Repays `amount` (base units) of `asset`'s debt: resolve profile → broadcast the transfer →
 // record an AUT so the modal can close before settlement. Repaying is an inflow on the supply
-// path (`SupplyAction.repayment`), so this mirrors `executeLiquidiumSupply` exactly — the only
-// rail v1 assets return is `nativeAddress`, and the protocol deducts its inflow fee from the
-// inflow, so we transfer `amount + inflowFee` to credit the net `amount` against the debt.
+// path (`SupplyAction.repayment`), so this mirrors `executeLiquidiumSupply` exactly — we drive
+// the transfer rail and broadcast to the flat `SupplyTarget` address, and the protocol deducts
+// its inflow fee from the inflow, so we transfer `amount + inflowFee` to credit the net `amount`
+// against the debt.
 export const executeLiquidiumRepay = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	inflowFee,
@@ -106,6 +108,7 @@ export const executeLiquidiumRepay = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	inflowFee: bigint;
@@ -121,14 +124,9 @@ export const executeLiquidiumRepay = async ({
 	const flow = await liquidiumClient({ identity }).lending.supply({
 		profileId,
 		poolId,
+		chain,
 		action: SupplyAction.repayment
 	});
-
-	if (flow.target.type !== 'nativeAddress') {
-		throw new Error(
-			`Liquidium repay: unsupported "${flow.target.type}" target for ${asset} (only nativeAddress is supported)`
-		);
-	}
 
 	progress?.(ProgressStepsLiquidiumRepay.TRANSFER);
 
