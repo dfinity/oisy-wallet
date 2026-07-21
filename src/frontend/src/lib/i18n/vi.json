@@ -181,10 +181,9 @@
 			"authenticate": "Mở hoặc Tạo",
 			"sign_in_or_sign_up": "Đăng nhập hoặc đăng ký",
 			"internet_identity": "",
-			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
-			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
-			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain",
-			"move_swap_grow": "Di chuyển, hoán đổi và tăng trưởng tài sản của bạn trên nhiều mạng"
+			"asset_types": "Tiền mã hoá, cổ phiếu, hàng hoá, vật phẩm sưu tầm và ghi chú được mã hoá.",
+			"advanced_cryptography": "Riêng tư và chống giả mạo. Vô hình, khi bạn cần.",
+			"move_swap_grow": "Kiếm lời, vay và giao dịch, với trợ lý AI tích hợp."
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Mã/liên kết không hợp lệ",
+			"link_domain_mismatch": "Liên kết này dành cho một tên miền khác",
 			"data_is_incompleted": "Dữ liệu nhận được không đầy đủ. Thiếu một số thông tin bắt buộc."
 		}
 	},
@@ -2368,6 +2363,10 @@
 		"text": {
 			"description": "Cung cấp Bitcoin. Vay stablecoin. Giữ nguyên bản địa.",
 			"health_factor": "Hệ số sức khỏe",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "Giá trị ròng",
 			"markets": "Thị trường",
 			"total_supplied": "Tổng đã cung cấp",

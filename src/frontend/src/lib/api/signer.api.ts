@@ -1,6 +1,6 @@
 import type { BtcAddress } from '$btc/types/address';
 import type {
-	BitcoinNetwork,
+	Network as BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	SignBtcResponse
@@ -91,6 +91,15 @@ export const signPrehash = async ({
 	const { signPrehash } = await signerCanister({ identity });
 
 	return signPrehash({ hash });
+};
+
+export const signBtcPrehash = async ({
+	hash,
+	identity
+}: CanisterApiFunctionParams<{ hash: Uint8Array }>): Promise<Uint8Array> => {
+	const { signBtcPrehash } = await signerCanister({ identity });
+
+	return signBtcPrehash({ hash });
 };
 
 export const sendBtc = async ({
