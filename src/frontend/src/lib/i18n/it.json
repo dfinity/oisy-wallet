@@ -181,10 +181,9 @@
 			"authenticate": "Accedi o Crea",
 			"sign_in_or_sign_up": "Accedi o registrati",
 			"internet_identity": "",
-			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
-			"instant_and_private": "Assistente AI integrato con privacy come standard",
-			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain",
-			"move_swap_grow": "Sposta, scambia e fai crescere i tuoi asset tra le reti"
+			"asset_types": "Cripto, azioni, materie prime, oggetti da collezione e note crittografate.",
+			"advanced_cryptography": "Privato e a prova di manomissione. Invisibile, se ti serve.",
+			"move_swap_grow": "Guadagna, prendi in prestito e fai trading, con un assistente AI integrato."
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Il codice/link non è valido",
+			"link_domain_mismatch": "Questo link è per un altro dominio",
 			"data_is_incompleted": "I dati ricevuti sono incompleti. Mancano alcuni dettagli necessari."
 		}
 	},

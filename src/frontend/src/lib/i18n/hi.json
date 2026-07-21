@@ -181,10 +181,9 @@
 			"authenticate": "खोलें या बनाएँ",
 			"sign_in_or_sign_up": "लॉग इन करें या साइन अप करें",
 			"internet_identity": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"move_swap_grow": "नेटवर्कों पर अपनी संपत्तियाँ मूव, स्वैप और बढ़ाएँ"
+			"asset_types": "क्रिप्टो, स्टॉक, कमोडिटी, कलेक्टिबल्स और एन्क्रिप्टेड नोट्स।",
+			"advanced_cryptography": "निजी और छेड़छाड़-रोधी। ज़रूरत हो तो अदृश्य।",
+			"move_swap_grow": "कमाएँ, उधार लें और ट्रेड करें, अंतर्निर्मित AI असिस्टेंट के साथ।"
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "कोड/लिंक मान्य नहीं है",
+			"link_domain_mismatch": "यह लिंक किसी अन्य डोमेन के लिए है",
 			"data_is_incompleted": "प्राप्त डेटा अपूर्ण है। कुछ आवश्यक विवरण गायब हैं।"
 		}
 	},

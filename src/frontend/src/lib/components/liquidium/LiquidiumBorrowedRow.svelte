@@ -4,14 +4,15 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LiquidiumReserve } from '$lib/types/liquidium';
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
+	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
 
 	interface Props {
 		reserve: LiquidiumReserve;
@@ -19,7 +20,9 @@
 
 	let { reserve }: Props = $props();
 
-	let token = $derived(LIQUIDIUM_ASSET_TOKENS[reserve.asset]);
+	let token = $derived(
+		liquidiumMarketToken({ chain: reserve.chain, asset: reserve.asset, tokens: $tokens })
+	);
 
 	let borrowedAmount = $derived(
 		formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })

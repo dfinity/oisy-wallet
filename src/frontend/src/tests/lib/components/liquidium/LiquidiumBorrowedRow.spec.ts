@@ -1,6 +1,6 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import LiquidiumBorrowedRow from '$lib/components/liquidium/LiquidiumBorrowedRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -25,7 +25,7 @@ describe('LiquidiumBorrowedRow', () => {
 
 	it('renders the symbol, token name and network', () => {
 		const { container } = render(LiquidiumBorrowedRow, { props: { reserve: reserve() } });
-		const usdc = LIQUIDIUM_ASSET_TOKENS.USDC;
+		const usdc = USDC_TOKEN;
 
 		expect(container).toHaveTextContent('USDC');
 		expect(container).toHaveTextContent(usdc.name);

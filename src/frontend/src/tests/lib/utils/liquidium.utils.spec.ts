@@ -1,3 +1,7 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
@@ -6,6 +10,7 @@ import {
 	liquidiumFreeCollateralUsd,
 	liquidiumHealthFactorPercent,
 	liquidiumHealthLevel,
+	liquidiumMarketToken,
 	liquidiumMaxLtv,
 	liquidiumMaxSupplyApy,
 	liquidiumMinBorrowApy,
@@ -15,7 +20,9 @@ import {
 	liquidiumProjectedHealthPercent,
 	liquidiumResultingLtvPercent,
 	liquidiumSupplyInterestUsd,
+	liquidiumSupportedRails,
 	mapLiquidiumMarket,
+	mapLiquidiumMarketRails,
 	mapLiquidiumPortfolio,
 	mapLiquidiumReserve
 } from '$lib/utils/liquidium.utils';
@@ -53,6 +60,7 @@ const buildPool = (overrides: Partial<Pool> = {}): Pool => ({
 	lendingIndex: ZERO,
 	borrowIndex: ZERO,
 	sameAssetBorrowing: false,
+	sameAssetBorrowingDustThreshold: ZERO,
 	...overrides
 });
 
@@ -103,6 +111,44 @@ describe('liquidium.utils', () => {
 			expect(
 				mapLiquidiumMarket(buildPool({ totalSupply: 50n, supplyCap: 100n })).available
 			).toBeTruthy();
+		});
+	});
+
+	describe('liquidiumSupportedRails', () => {
+		it('offers the native + ICP (ck) rails for BTC', () => {
+			expect(liquidiumSupportedRails('BTC')).toEqual(['BTC', 'ICP']);
+		});
+
+		it('offers the ERC-20 + ICP (ck) rails for the stablecoins', () => {
+			expect(liquidiumSupportedRails('USDC')).toEqual(['ETH', 'ICP']);
+			expect(liquidiumSupportedRails('USDT')).toEqual(['ETH', 'ICP']);
+		});
+
+		it('offers only the ICP rail for ICP', () => {
+			expect(liquidiumSupportedRails('ICP')).toEqual(['ICP']);
+		});
+	});
+
+	describe('mapLiquidiumMarketRails', () => {
+		it('expands a pool into one market per transfer rail, sharing pool economics + poolId', () => {
+			const markets = mapLiquidiumMarketRails(buildPool());
+
+			expect(markets.map(({ chain }) => chain)).toEqual(['BTC', 'ICP']);
+			expect(
+				markets.every(({ poolId, asset }) => poolId === 'pool-btc' && asset === 'BTC')
+			).toBeTruthy();
+			// Same pool → identical rates/availability across rails; only the transfer chain differs.
+			expect(markets[0].supplyApy).toBe(markets[1].supplyApy);
+			expect(markets[0].available).toBe(markets[1].available);
+		});
+
+		it('leaves a single-rail asset (ICP) as one market', () => {
+			const markets = mapLiquidiumMarketRails(
+				buildPool({ id: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			);
+
+			expect(markets).toHaveLength(1);
+			expect(markets[0].chain).toBe('ICP');
 		});
 	});
 
@@ -689,6 +735,35 @@ describe('liquidium.utils', () => {
 			// Health is derived from the bps fields: (1 − 4000/8000) × 100 = 50%.
 			expect(portfolio.healthFactorPercent).toBeCloseTo(50);
 			expect(portfolio.reserves).toHaveLength(1);
+		});
+	});
+
+	describe('liquidiumMarketToken', () => {
+		it('resolves native BTC on the BTC chain', () => {
+			expect(liquidiumMarketToken({ chain: 'BTC', asset: 'BTC', tokens: [] })).toBe(
+				BTC_MAINNET_TOKEN
+			);
+		});
+
+		it('resolves ERC-20 stablecoins on the ETH chain', () => {
+			expect(liquidiumMarketToken({ chain: 'ETH', asset: 'USDC', tokens: [] })).toBe(USDC_TOKEN);
+			expect(liquidiumMarketToken({ chain: 'ETH', asset: 'USDT', tokens: [] })).toBe(USDT_TOKEN);
+		});
+
+		it('resolves native ICP on the ICP chain', () => {
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'ICP', tokens: [] })).toBe(ICP_TOKEN);
+		});
+
+		it('does not collapse a ck asset onto its native/ERC token — needs the twin from the list', () => {
+			// The same symbol on the ICP chain is a ck twin, never the native BTC / ERC-20 token; with
+			// no twin in the list it resolves to nothing rather than the wrong (native/ERC) token.
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'BTC', tokens: [] })).toBeUndefined();
+			expect(liquidiumMarketToken({ chain: 'ICP', asset: 'USDC', tokens: [] })).toBeUndefined();
+		});
+
+		it('returns undefined for an unsupported (chain, asset) pair', () => {
+			expect(liquidiumMarketToken({ chain: 'BTC', asset: 'USDC', tokens: [] })).toBeUndefined();
+			expect(liquidiumMarketToken({ chain: 'SOL', asset: 'SOL', tokens: [] })).toBeUndefined();
 		});
 	});
 });

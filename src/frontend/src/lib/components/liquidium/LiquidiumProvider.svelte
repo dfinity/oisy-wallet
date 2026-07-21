@@ -15,10 +15,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 	import { ZERO } from '$lib/constants/app.constants';
-	import {
-		LIQUIDIUM_ICP_TEASER_MARKET,
-		LIQUIDIUM_POLL_INTERVAL_MILLIS
-	} from '$lib/constants/liquidium.constants';
+	import { LIQUIDIUM_POLL_INTERVAL_MILLIS } from '$lib/constants/liquidium.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -88,7 +85,7 @@
 				{/snippet}
 
 				{#snippet content()}
-					<div class="flex w-full flex-col gap-4">
+					<div class="flex w-full flex-col">
 						{#each supplyReserves as reserve (reserve.poolId)}
 							<LiquidiumSuppliedRow {reserve} />
 						{/each}
@@ -119,7 +116,7 @@
 				{/snippet}
 
 				{#snippet content()}
-					<div class="flex w-full flex-col gap-4">
+					<div class="flex w-full flex-col">
 						{#each borrowReserves as reserve (reserve.poolId)}
 							<LiquidiumBorrowedRow {reserve} />
 						{/each}
@@ -141,7 +138,7 @@
 
 				{#snippet content()}
 					<div class="flex w-full flex-col">
-						{#each [...$liquidiumMarkets, LIQUIDIUM_ICP_TEASER_MARKET] as market (market.poolId)}
+						{#each $liquidiumMarkets as market (`${market.poolId}-${market.chain}`)}
 							<LiquidiumMarketCard {market} />
 						{/each}
 					</div>

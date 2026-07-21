@@ -181,10 +181,9 @@
 			"authenticate": "فتح أو إنشاء",
 			"sign_in_or_sign_up": "تسجيل الدخول أو إنشاء حساب",
 			"internet_identity": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
+			"asset_types": "العملات المشفّرة والأسهم والسلع والمقتنيات والملاحظات المشفّرة.",
+			"advanced_cryptography": "خاص وغير قابل للعبث. غير مرئي عند الحاجة.",
+			"move_swap_grow": "اربح واقترض وتداول، مع مساعد ذكاء اصطناعي مدمج."
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "الرمز/الرابط غير صالح",
+			"link_domain_mismatch": "",
 			"data_is_incompleted": "البيانات المستلمة غير مكتملة. بعض التفاصيل المطلوبة مفقودة."
 		}
 	},

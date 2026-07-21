@@ -1,6 +1,6 @@
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import LiquidiumSuppliedRow from '$lib/components/liquidium/LiquidiumSuppliedRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
-import { LIQUIDIUM_ASSET_TOKENS } from '$lib/constants/liquidium.constants';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -25,7 +25,7 @@ describe('LiquidiumSuppliedRow', () => {
 
 	it('renders the symbol, token name and network', () => {
 		const { container } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
-		const btc = LIQUIDIUM_ASSET_TOKENS.BTC;
+		const btc = BTC_MAINNET_TOKEN;
 
 		expect(container).toHaveTextContent('BTC');
 		expect(container).toHaveTextContent(btc.name);
