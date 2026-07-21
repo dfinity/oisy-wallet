@@ -142,7 +142,7 @@ The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
 - On **ICP**, the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`).
 - On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, **GLDT**, and **ICP**.
 
-A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister id / contract address, after which it appears with full metadata and inside its token group.
+A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
 
 ---
 
