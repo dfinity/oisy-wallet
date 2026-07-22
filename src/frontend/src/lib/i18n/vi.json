@@ -2654,7 +2654,8 @@
 			"created_updated": "Đã tạo $created · Đã cập nhật $updated",
 			"too_long": "Ghi chú phải có tối đa $maxCharacters ký tự.",
 			"cap_reached": "Bạn đã đạt giới hạn tối đa $max ghi chú đã lưu. Hãy xóa một ghi chú để thêm ghi chú mới.",
-			"decryption_failed": "Không thể giải mã ghi chú này"
+			"decryption_failed": "Không thể giải mã ghi chú này",
+			"unavailable_title": "Ghi chú tạm thời không khả dụng"
 		},
 		"alt": {
 			"edit": "Chỉnh sửa ghi chú",
@@ -2663,7 +2664,8 @@
 		"error": {
 			"load": "Không thể tải ghi chú của bạn. Vui lòng thử lại.",
 			"save": "Không thể lưu ghi chú của bạn. Vui lòng thử lại.",
-			"delete": "Không thể xóa ghi chú của bạn. Vui lòng thử lại."
+			"delete": "Không thể xóa ghi chú của bạn. Vui lòng thử lại.",
+			"rate_limited": "Bạn đã đạt giới hạn yêu cầu. Vui lòng đợi một chút và thử lại."
 		},
 		"share": {
 			"text": {

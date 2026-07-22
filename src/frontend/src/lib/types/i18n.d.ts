@@ -2194,9 +2194,10 @@ interface I18nNotes {
 		too_long: string;
 		cap_reached: string;
 		decryption_failed: string;
+		unavailable_title: string;
 	};
 	alt: { edit: string; delete: string };
-	error: { load: string; save: string; delete: string };
+	error: { load: string; save: string; delete: string; rate_limited: string };
 	share: {
 		text: {
 			share_note: string;
