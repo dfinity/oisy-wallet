@@ -1,4 +1,4 @@
-# impr: Harden personal-notes vetKey access
+# Spec: Harden personal-notes vetKey access
 
 This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 
