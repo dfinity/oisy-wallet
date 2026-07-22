@@ -45,6 +45,11 @@ jobs:
           VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY_MOBILE || secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}
           VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE || secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE || secrets.VITE_QUICKNODE_API_KEY_STAGING }}
+          # QuickNode tokens are bound to their endpoint subdomain: when the
+          # mobile token is used, its endpoint hosts must be injected too
+          # (empty when unset -> code falls back to the default hosts).
+          VITE_QUICKNODE_API_URL_MAINNET: ${{ secrets.VITE_QUICKNODE_API_URL_MAINNET_MOBILE }}
+          VITE_QUICKNODE_API_URL_DEVNET: ${{ secrets.VITE_QUICKNODE_API_URL_DEVNET_MOBILE }}
           VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE || secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_MOBILE || secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_MOBILE || secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
@@ -108,6 +113,11 @@ jobs:
           VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY_MOBILE || secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}
           VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE || secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE || secrets.VITE_QUICKNODE_API_KEY_STAGING }}
+          # QuickNode tokens are bound to their endpoint subdomain: when the
+          # mobile token is used, its endpoint hosts must be injected too
+          # (empty when unset -> code falls back to the default hosts).
+          VITE_QUICKNODE_API_URL_MAINNET: ${{ secrets.VITE_QUICKNODE_API_URL_MAINNET_MOBILE }}
+          VITE_QUICKNODE_API_URL_DEVNET: ${{ secrets.VITE_QUICKNODE_API_URL_DEVNET_MOBILE }}
           VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE || secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_MOBILE || secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_MOBILE || secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
