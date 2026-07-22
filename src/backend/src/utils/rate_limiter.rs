@@ -110,19 +110,36 @@ thread_local! {
 pub(crate) struct RateLimiter {
     max_calls: u32,
     window_ns: u64,
+    /// Once the tracked-principal map exceeds this many entries, the next
+    /// mutating call sweeps out principals with no calls left inside the window
+    /// (see [`Self::prune_idle`]).
+    tracking_cap: usize,
     calls: RefCell<HashMap<Principal, VecDeque<u64>>>,
 }
 
 impl RateLimiter {
+    /// Default idle-sweep threshold. It is a sweep trigger, **not** a hard cap:
+    /// genuinely-active principals are never evicted, so the map may sit above
+    /// it under real load. At this size the map is on the order of ~1 MB.
+    const MAX_TRACKED_CALLERS: usize = 10_000;
+
     /// Creates a new rate limiter.
     ///
     /// - `max_calls`: maximum number of calls allowed within the window.
     /// - `window_ns`: sliding window duration in **nanoseconds**.
     #[must_use]
     pub fn new(max_calls: u32, window_ns: u64) -> Self {
+        Self::with_tracking_cap(max_calls, window_ns, Self::MAX_TRACKED_CALLERS)
+    }
+
+    /// Like [`Self::new`] but with an explicit idle-sweep threshold. Exposed so
+    /// tests can drive the sweep with a small cap.
+    #[must_use]
+    pub fn with_tracking_cap(max_calls: u32, window_ns: u64, tracking_cap: usize) -> Self {
         Self {
             max_calls,
             window_ns,
+            tracking_cap,
             calls: RefCell::new(HashMap::new()),
         }
     }
@@ -149,6 +166,7 @@ impl RateLimiter {
     /// Exposed for testability so callers can inject controlled timestamps.
     pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
         let mut calls = self.calls.borrow_mut();
+        self.prune_idle(&mut calls, now_ns);
         let caller_calls = calls.entry(caller).or_default();
 
         let window_start = now_ns.saturating_sub(self.window_ns);
@@ -202,6 +220,7 @@ impl RateLimiter {
     /// [`Self::check_only`] has confirmed the tier is within limits.
     pub fn record(&self, caller: Principal, now_ns: u64) {
         let mut calls = self.calls.borrow_mut();
+        self.prune_idle(&mut calls, now_ns);
         let caller_calls = calls.entry(caller).or_default();
 
         let window_start = now_ns.saturating_sub(self.window_ns);
@@ -214,6 +233,23 @@ impl RateLimiter {
         }
 
         caller_calls.push_back(now_ns);
+    }
+
+    /// Bounds heap growth: once the tracked-principal map exceeds
+    /// `tracking_cap`, drop every principal whose most recent call has aged out
+    /// of the window. Idle-only — a principal with an in-window call is kept, so
+    /// this never changes a rate-limit decision; it only reclaims dead entries.
+    fn prune_idle(&self, calls: &mut HashMap<Principal, VecDeque<u64>>, now_ns: u64) {
+        if calls.len() <= self.tracking_cap {
+            return;
+        }
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        calls.retain(|_, timestamps| timestamps.back().is_some_and(|&last| last > window_start));
+    }
+
+    #[cfg(test)]
+    fn tracked_callers(&self) -> usize {
+        self.calls.borrow().len()
     }
 }
 
@@ -664,5 +700,33 @@ mod tests {
         assert!(rl.check_at(caller, later).is_ok());
         let err = rl.check_at(caller, later).unwrap_err();
         assert_eq!(err.max_calls, 2);
+    }
+
+    #[test]
+    fn prunes_idle_callers_once_over_the_cap() {
+        // Sweep threshold of 1: a third distinct caller tips the map over it.
+        let rl = RateLimiter::with_tracking_cap(1, 10 * ONE_SEC, 1);
+
+        rl.record(test_principal(1), ONE_SEC);
+        rl.record(test_principal(2), ONE_SEC);
+
+        // t=100s is past the 10s window, so callers 1 and 2 are idle and pruned;
+        // only the caller recorded now remains.
+        rl.record(test_principal(3), 100 * ONE_SEC);
+
+        assert_eq!(rl.tracked_callers(), 1);
+    }
+
+    #[test]
+    fn does_not_prune_active_callers() {
+        let rl = RateLimiter::with_tracking_cap(5, 10 * ONE_SEC, 1);
+
+        // Three callers each with an in-window timestamp — over the cap of 1,
+        // but none is idle, so the sweep evicts nothing.
+        rl.record(test_principal(1), ONE_SEC);
+        rl.record(test_principal(2), ONE_SEC);
+        rl.record(test_principal(3), ONE_SEC);
+
+        assert_eq!(rl.tracked_callers(), 3);
     }
 }
