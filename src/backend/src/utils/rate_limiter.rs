@@ -225,7 +225,7 @@ impl RateLimiter {
 /// rejected call leaves no state: a per-caller rejection never touches the
 /// global counters, and a call the global tier rejects never creates a
 /// per-caller `HashMap` entry. The global tiers bucket every caller under one
-/// fixed key (`Principal::anonymous`, never a real registered caller on these
+/// fixed key (`Principal::anonymous()`, never a real registered caller on these
 /// endpoints), capping aggregate load against a many-principals flood the
 /// per-caller tiers cannot see.
 pub(crate) struct VetKeyRateLimiters {
