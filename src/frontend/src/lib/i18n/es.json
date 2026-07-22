@@ -2655,7 +2655,7 @@
 			"too_long": "La nota debe tener $maxCharacters caracteres o menos.",
 			"cap_reached": "Has alcanzado el máximo de $max notas guardadas. Elimina una para añadir una nueva.",
 			"decryption_failed": "No se pudo descifrar esta nota",
-			"unavailable_title": ""
+			"unavailable_title": "Las notas no están disponibles temporalmente"
 		},
 		"alt": {
 			"edit": "Editar nota",
@@ -2665,7 +2665,7 @@
 			"load": "No se pudieron cargar tus notas. Inténtalo de nuevo.",
 			"save": "No se pudo guardar tu nota. Inténtalo de nuevo.",
 			"delete": "No se pudo eliminar tu nota. Inténtalo de nuevo.",
-			"rate_limited": ""
+			"rate_limited": "Has alcanzado el límite de solicitudes. Espera un momento e inténtalo de nuevo."
 		},
 		"share": {
 			"text": {

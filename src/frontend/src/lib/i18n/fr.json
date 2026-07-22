@@ -2655,7 +2655,7 @@
 			"too_long": "La note ne doit pas dépasser $maxCharacters caractères.",
 			"cap_reached": "Vous avez atteint la limite de $max notes enregistrées. Supprimez-en une pour en ajouter une nouvelle.",
 			"decryption_failed": "Impossible de déchiffrer cette note",
-			"unavailable_title": ""
+			"unavailable_title": "Les notes sont temporairement indisponibles"
 		},
 		"alt": {
 			"edit": "Modifier la note",
@@ -2665,7 +2665,7 @@
 			"load": "Impossible de charger vos notes. Veuillez réessayer.",
 			"save": "Impossible d'enregistrer votre note. Veuillez réessayer.",
 			"delete": "Impossible de supprimer votre note. Veuillez réessayer.",
-			"rate_limited": ""
+			"rate_limited": "Vous avez atteint la limite de requêtes. Veuillez patienter un instant et réessayer."
 		},
 		"share": {
 			"text": {

@@ -2655,7 +2655,7 @@
 			"too_long": "메모는 최대 $maxCharacters자까지 작성할 수 있습니다.",
 			"cap_reached": "저장 가능한 메모 최대 개수($max개)에 도달했습니다. 새 메모를 추가하려면 하나를 삭제하세요.",
 			"decryption_failed": "이 메모를 복호화할 수 없습니다",
-			"unavailable_title": ""
+			"unavailable_title": "메모를 일시적으로 사용할 수 없습니다"
 		},
 		"alt": {
 			"edit": "메모 수정",
@@ -2665,7 +2665,7 @@
 			"load": "메모를 불러올 수 없습니다. 다시 시도해 주세요.",
 			"save": "메모를 저장할 수 없습니다. 다시 시도해 주세요.",
 			"delete": "메모를 삭제할 수 없습니다. 다시 시도해 주세요.",
-			"rate_limited": ""
+			"rate_limited": "요청 한도에 도달했습니다. 잠시 기다린 후 다시 시도해 주세요."
 		},
 		"share": {
 			"text": {

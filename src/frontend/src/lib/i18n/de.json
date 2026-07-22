@@ -2655,7 +2655,7 @@
 			"too_long": "Die Notiz darf höchstens $maxCharacters Zeichen lang sein.",
 			"cap_reached": "Du hast das Maximum von $max gespeicherten Notizen erreicht. Lösche eine, um eine neue Notiz hinzuzufügen.",
 			"decryption_failed": "Diese Notiz konnte nicht entschlüsselt werden",
-			"unavailable_title": ""
+			"unavailable_title": "Notizen sind vorübergehend nicht verfügbar"
 		},
 		"alt": {
 			"edit": "Notiz bearbeiten",
@@ -2665,7 +2665,7 @@
 			"load": "Deine Notizen konnten nicht geladen werden. Bitte versuche es erneut.",
 			"save": "Deine Notiz konnte nicht gespeichert werden. Bitte versuche es erneut.",
 			"delete": "Deine Notiz konnte nicht gelöscht werden. Bitte versuche es erneut.",
-			"rate_limited": ""
+			"rate_limited": "Du hast das Anfragelimit erreicht. Bitte warte einen Moment und versuche es erneut."
 		},
 		"share": {
 			"text": {

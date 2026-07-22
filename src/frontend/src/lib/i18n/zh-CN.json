@@ -2655,7 +2655,7 @@
 			"too_long": "笔记不得超过 $maxCharacters 个字符。",
 			"cap_reached": "您已达到最多保存 $max 条笔记的上限。请删除一条以添加新笔记。",
 			"decryption_failed": "无法解密此笔记",
-			"unavailable_title": ""
+			"unavailable_title": "笔记暂时不可用"
 		},
 		"alt": {
 			"edit": "编辑笔记",
@@ -2665,7 +2665,7 @@
 			"load": "无法加载您的笔记。请重试。",
 			"save": "无法保存您的笔记。请重试。",
 			"delete": "无法删除您的笔记。请重试。",
-			"rate_limited": ""
+			"rate_limited": "您已达到请求限制。请稍等片刻后重试。"
 		},
 		"share": {
 			"text": {

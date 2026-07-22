@@ -2655,7 +2655,7 @@
 			"too_long": "Notatka może mieć maksymalnie $maxCharacters znaków.",
 			"cap_reached": "Osiągnięto maksymalną liczbę $max zapisanych notatek. Usuń jedną, aby dodać nową.",
 			"decryption_failed": "Nie udało się odszyfrować tej notatki",
-			"unavailable_title": ""
+			"unavailable_title": "Notatki są tymczasowo niedostępne"
 		},
 		"alt": {
 			"edit": "Edytuj notatkę",
@@ -2665,7 +2665,7 @@
 			"load": "Nie udało się wczytać twoich notatek. Spróbuj ponownie.",
 			"save": "Nie udało się zapisać twojej notatki. Spróbuj ponownie.",
 			"delete": "Nie udało się usunąć twojej notatki. Spróbuj ponownie.",
-			"rate_limited": ""
+			"rate_limited": "Osiągnięto limit żądań. Poczekaj chwilę i spróbuj ponownie."
 		},
 		"share": {
 			"text": {

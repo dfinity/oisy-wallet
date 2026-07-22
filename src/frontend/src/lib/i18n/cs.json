@@ -2655,7 +2655,7 @@
 			"too_long": "Poznámka může mít nejvýše $maxCharacters znaků.",
 			"cap_reached": "Dosáhl(a) jsi maxima $max uložených poznámek. Jednu smaž, abys mohl(a) přidat novou.",
 			"decryption_failed": "Tuto poznámku se nepodařilo dešifrovat",
-			"unavailable_title": ""
+			"unavailable_title": "Poznámky jsou dočasně nedostupné"
 		},
 		"alt": {
 			"edit": "Upravit poznámku",
@@ -2665,7 +2665,7 @@
 			"load": "Poznámky se nepodařilo načíst. Zkus to prosím znovu.",
 			"save": "Poznámku se nepodařilo uložit. Zkus to prosím znovu.",
 			"delete": "Poznámku se nepodařilo smazat. Zkus to prosím znovu.",
-			"rate_limited": ""
+			"rate_limited": "Dosáhl(a) jsi limitu požadavků. Počkej chvíli a zkus to prosím znovu."
 		},
 		"share": {
 			"text": {
