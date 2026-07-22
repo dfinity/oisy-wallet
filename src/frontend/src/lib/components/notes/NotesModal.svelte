@@ -15,6 +15,7 @@
 	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
 	import NotesUnavailable from '$lib/components/notes/NotesUnavailable.svelte';
+	import NotesUnlocking from '$lib/components/notes/NotesUnlocking.svelte';
 	import ShareNoteBottomSheet from '$lib/components/notes/ShareNoteBottomSheet.svelte';
 	import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -25,7 +26,6 @@
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
 		NOTES_ADD_BUTTON,
@@ -375,7 +375,7 @@
 			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
 		>
 			{#if showSkeleton}
-				<SkeletonCards rows={3} />
+				<NotesUnlocking />
 			{:else if hasLoadError}
 				<NotesUnavailable onRetry={load} rateLimited={loadRateLimited} />
 			{:else if isEmpty}

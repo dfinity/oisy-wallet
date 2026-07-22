@@ -281,6 +281,7 @@ export const ADDRESS_EDIT_SAVE_BUTTON = 'address-edit-save-button';
 export const ADDRESS_BOOK_FALLBACK_MESSAGE = 'address-book-fallback-message';
 
 export const NOTES_MODAL = 'notes-modal';
+export const NOTES_UNLOCKING = 'notes-unlocking';
 export const NOTES_SEARCH_INPUT = 'notes-search-input';
 export const NOTES_NO_RESULTS = 'notes-no-results';
 export const NOTES_LIST = 'notes-list';
