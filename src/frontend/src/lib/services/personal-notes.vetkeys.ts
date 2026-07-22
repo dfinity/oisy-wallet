@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import {
 	getPersonalNotesEncryptedVetkey,
 	getPersonalNotesVetkeyPublicKey
@@ -5,14 +6,14 @@ import {
 import type { PersonalNoteEnvelope } from '$lib/types/personal-note';
 import { nonNullish } from '@dfinity/utils';
 import {
-	DerivedKeyMaterial,
 	DerivedPublicKey,
 	EncryptedVetKey,
-	TransportSecretKey
+	TransportSecretKey,
+	type DerivedKeyMaterial
 } from '@dfinity/vetkeys';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
-import { get, set } from 'idb-keyval';
+import { clear } from 'idb-keyval';
 
 // These MUST match the backend (`personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR`
 // and `PERSONAL_NOTES_MAP_NAME`). They are bound into the vetKD key derivation,
@@ -43,19 +44,18 @@ const vetkdInput = (principal: Principal): Uint8Array => {
 	return input;
 };
 
-const idbCacheKey = (principal: Principal): string => `personal-notes-vetkey-${principal.toText()}`;
-
 // Per-session, per-principal cache of the derived key material so repeated
-// encrypt/decrypt calls don't hit IndexedDB each time.
+// encrypt/decrypt calls reuse it without re-deriving. Held in memory only —
+// never persisted — so it is discarded on reload and on sign-out.
 const sessionCache = new Map<string, Promise<DerivedKeyMaterial>>();
 
 const toUint8Array = (value: Uint8Array | number[]): Uint8Array =>
 	value instanceof Uint8Array ? value : Uint8Array.from(value);
 
 /**
- * Derives (or loads) the caller's per-user symmetric key material. The
- * non-extractable `CryptoKey` is cached in IndexedDB so the vetKD round-trip
- * happens at most once per device, and in memory for the session.
+ * Derives the caller's per-user symmetric key material via vetKD and caches it
+ * in memory for the session. Repeated encrypt/decrypt calls reuse it; a full
+ * page reload re-derives it. The key is never persisted to disk.
  */
 export const deriveKeyMaterial = ({
 	identity
@@ -71,20 +71,6 @@ export const deriveKeyMaterial = ({
 	}
 
 	const promise = (async (): Promise<DerivedKeyMaterial> => {
-		let storedCryptoKey: CryptoKey | undefined;
-		try {
-			storedCryptoKey = await get<CryptoKey>(idbCacheKey(principal));
-		} catch {
-			storedCryptoKey = undefined;
-		}
-		if (nonNullish(storedCryptoKey)) {
-			try {
-				return DerivedKeyMaterial.fromCryptoKey(storedCryptoKey);
-			} catch {
-				// Treat an unreadable/stale cached key as a cache miss and re-derive.
-			}
-		}
-
 		const transportSecretKey = TransportSecretKey.random();
 		const [encryptedVetkey, verificationKey] = await Promise.all([
 			getPersonalNotesEncryptedVetkey({
@@ -100,13 +86,7 @@ export const deriveKeyMaterial = ({
 			vetkdInput(principal)
 		);
 
-		const derivedKeyMaterial = await vetKey.asDerivedKeyMaterial();
-		try {
-			await set(idbCacheKey(principal), derivedKeyMaterial.getCryptoKey());
-		} catch {
-			// IndexedDB caching is best-effort; encryption/decryption should still work this session.
-		}
-		return derivedKeyMaterial;
+		return vetKey.asDerivedKeyMaterial();
 	})();
 
 	sessionCache.set(cacheKey, promise);
@@ -173,3 +153,26 @@ export const decryptPersonalNote = async ({
 
 /** Clears the in-memory key cache (e.g. on sign-out). */
 export const resetPersonalNotesKeyCache = (): void => sessionCache.clear();
+
+// Bumped if a future change needs the one-time wipe to run again.
+const LEGACY_VETKEY_CACHE_PURGE_FLAG = 'personal-notes-vetkey-legacy-purge-v1';
+
+/**
+ * One-time wipe of idb-keyval's default store, where earlier versions persisted
+ * the derived `CryptoKey`. The key is now held in memory only; this removes any
+ * key material a prior version left on disk, for every principal on the device.
+ * The default store is used exclusively by this cache — every other idb-keyval
+ * consumer uses a dedicated `createStore` — so clearing it wholesale is safe.
+ * Guarded by a `localStorage` flag so it runs at most once per device.
+ */
+export const purgeLegacyPersonalNotesVetkeyCache = async (): Promise<void> => {
+	if (!browser || localStorage.getItem(LEGACY_VETKEY_CACHE_PURGE_FLAG) === 'true') {
+		return;
+	}
+	try {
+		await clear();
+		localStorage.setItem(LEGACY_VETKEY_CACHE_PURGE_FLAG, 'true');
+	} catch {
+		// Best-effort: leave the flag unset so the next load retries the wipe.
+	}
+};
