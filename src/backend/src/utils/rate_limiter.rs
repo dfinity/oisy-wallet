@@ -72,6 +72,18 @@ thread_local! {
     /// token-guessing search space.
     pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(600, 60 * 1_000_000_000);
+
+    /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
+    /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
+    /// global (20/min, 100/hour). See [`VetKeyRateLimiters`].
+    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
+        VetKeyRateLimiters::new();
+
+    /// Rate-limits `get_personal_notes_vetkey_public_key`, with the same tiers
+    /// as the encrypted endpoint but its own independent counters. See
+    /// [`VetKeyRateLimiters`].
+    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
+        VetKeyRateLimiters::new();
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -162,6 +174,62 @@ impl RateLimiter {
     }
 }
 
+/// Two-tier rate limiter for a vetKey endpoint: a per-caller limit plus a
+/// shared global limit, each over a short (per-minute) and a long (per-hour)
+/// window, backed by four [`RateLimiter`]s.
+///
+/// The per-caller tiers are checked **before** the global tiers, so a call
+/// rejected by the caller's own limit never increments the global counters — a
+/// single caller cannot exhaust the global budget and deny the endpoint to
+/// everyone else. The global tiers bucket every caller under one fixed key
+/// (`Principal::anonymous`, never a real registered caller on these endpoints),
+/// capping aggregate load against a many-principals flood the per-caller tiers
+/// cannot see.
+pub(crate) struct VetKeyRateLimiters {
+    caller_minute: RateLimiter,
+    caller_hour: RateLimiter,
+    global_minute: RateLimiter,
+    global_hour: RateLimiter,
+}
+
+impl VetKeyRateLimiters {
+    const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
+    const MINUTE_NS: u64 = 60 * 1_000_000_000;
+
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            caller_minute: RateLimiter::new(2, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(10, Self::HOUR_NS),
+            global_minute: RateLimiter::new(20, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(100, Self::HOUR_NS),
+        }
+    }
+
+    /// Checks every tier for the current IC caller at the current IC time.
+    pub fn check_caller(&self) -> Result<(), RateLimitError> {
+        self.check_at(msg_caller(), ic_cdk::api::time())
+    }
+
+    /// Checks every tier for `caller` at `now_ns` — per-caller tiers first, then
+    /// the global tiers — returning on the first tier that rejects. Exposed for
+    /// testability (inject the caller and timestamp).
+    pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
+        self.caller_minute.check_at(caller, now_ns)?;
+        self.caller_hour.check_at(caller, now_ns)?;
+        self.global_minute
+            .check_at(Principal::anonymous(), now_ns)?;
+        self.global_hour.check_at(Principal::anonymous(), now_ns)?;
+        Ok(())
+    }
+}
+
+impl Default for VetKeyRateLimiters {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use candid::Principal;
@@ -171,7 +239,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::RateLimiter;
+    use super::{RateLimiter, VetKeyRateLimiters};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -405,5 +473,79 @@ mod tests {
         assert_eq!(e.max_calls, 1);
         assert_eq!(e.window_ns, 60 * ONE_SEC);
         assert_eq!(e.caller, caller);
+    }
+
+    #[test]
+    fn vetkey_per_caller_minute_limit() {
+        let rl = VetKeyRateLimiters::new();
+        let caller = test_principal(1);
+
+        assert!(rl.check_at(caller, ONE_SEC).is_ok());
+        assert!(rl.check_at(caller, 2 * ONE_SEC).is_ok());
+
+        let err = rl.check_at(caller, 3 * ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 2);
+        assert_eq!(err.window_ns, 60 * ONE_SEC);
+    }
+
+    #[test]
+    fn vetkey_per_caller_hour_limit() {
+        let rl = VetKeyRateLimiters::new();
+        let caller = test_principal(1);
+
+        // 61s apart so the per-minute tier (2/min) never trips; the per-hour
+        // tier (10/hour) then rejects the 11th call.
+        for i in 0..10u64 {
+            let t = ONE_SEC + i * 61 * ONE_SEC;
+            assert!(rl.check_at(caller, t).is_ok(), "call {i} should pass");
+        }
+
+        let err = rl
+            .check_at(caller, ONE_SEC + 10 * 61 * ONE_SEC)
+            .unwrap_err();
+        assert_eq!(err.max_calls, 10);
+        assert_eq!(err.window_ns, 60 * 60 * ONE_SEC);
+    }
+
+    #[test]
+    fn vetkey_global_minute_limit_across_callers() {
+        let rl = VetKeyRateLimiters::new();
+
+        // 20 distinct callers, one call each — the global per-minute cap is 20.
+        for id in 1..=20u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        let err = rl.check_at(test_principal(21), ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 20);
+        assert_eq!(err.window_ns, 60 * ONE_SEC);
+    }
+
+    #[test]
+    fn vetkey_per_caller_rejection_does_not_consume_global() {
+        let rl = VetKeyRateLimiters::new();
+        let heavy = test_principal(1);
+
+        // Heavy caller: 2 pass (2 global slots used); the 3rd is rejected by the
+        // per-caller minute tier and must NOT touch the global counter.
+        assert!(rl.check_at(heavy, ONE_SEC).is_ok());
+        assert!(rl.check_at(heavy, ONE_SEC).is_ok());
+        assert!(rl.check_at(heavy, ONE_SEC).is_err());
+
+        // 18 more distinct callers must still fit (global left = 20 - 2 = 18); if
+        // the rejected 3rd call had consumed a global slot, only 17 would fit.
+        for id in 2..=19u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        // Global is now at 20 → the next distinct caller trips the global tier.
+        let err = rl.check_at(test_principal(20), ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 20);
     }
 }
