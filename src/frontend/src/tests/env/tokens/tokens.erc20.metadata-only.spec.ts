@@ -19,9 +19,9 @@ import { ERC20_SUGGESTED_TOKENS } from '$env/tokens/tokens.erc20.env';
  * manual import. Pinned here so an accidental un-demotion trips an assertion.
  *
  * ICP is intentionally excluded from this demotion: unlike BOB/CHAT/GLDT,
- * users may already hold a balance in the EVM ICP twin tokens, and
- * metadata-only tokens are dropped from the custom-token list, which would
- * hide an existing balance from them. ICP therefore stays curated/suggested.
+ * users may already hold a balance in the EVM ICP twin tokens, and marking
+ * them metadata-only would remove them from the default ERC20 token set,
+ * potentially hiding that balance unless the user explicitly imports them; ICP therefore stays curated/suggested.
  */
 describe('1Sec EVM tokens are metadata-only', () => {
 	it.each([
