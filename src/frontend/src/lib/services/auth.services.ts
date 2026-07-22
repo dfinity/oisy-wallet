@@ -48,13 +48,23 @@ export const signIn = async (
 ): Promise<{ success: 'ok' | 'cancelled' | 'error'; err?: unknown }> => {
 	// Inside the Capacitor shell the popup/postMessage flow cannot work (no
 	// WebAuthn, no `window.opener`): sign-in goes through the system browser
-	// and the auth bridge instead. The flow completes asynchronously via the
-	// deep-link callback — see auth-mobile.services.ts.
+	// and the auth bridge instead. The promise settles only once the deep-link
+	// callback has been validated and persisted — see auth-mobile.services.ts.
 	if (isNativePlatform()) {
 		try {
-			await signInMobile({ openIdProvider: params.openIdProvider });
+			const result = await signInMobile({ openIdProvider: params.openIdProvider });
 
-			return { success: 'ok' };
+			if (result.status === 'ok') {
+				return { success: 'ok' };
+			}
+
+			if (result.status === 'superseded') {
+				// A newer sign-in attempt replaced this one — report as cancelled.
+				return { success: 'cancelled' };
+			}
+
+			// The callback handler already surfaced the error to the user.
+			return { success: 'error', err: result.err };
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: get(i18n).auth.error.error_while_signing_in },

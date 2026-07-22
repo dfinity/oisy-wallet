@@ -21,6 +21,23 @@ import { KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
 
+export type MobileSignInResult =
+	{ status: 'ok' } | { status: 'error'; err?: unknown } | { status: 'superseded' };
+
+// Resolver of the in-flight `signInMobile` promise. The deep-link callback
+// settles it; a new sign-in attempt supersedes it. Deliberately NOT a timeout:
+// the user may legitimately spend minutes in the system browser, and an
+// unsettled promise never reports a false success. If the OS recycles the
+// WebView while the user authenticates, this whole JS context — promise
+// included — is gone, and the cold-start path in `initMobileAuthListener`
+// completes the login independently.
+let pendingSignInResolver: ((result: MobileSignInResult) => void) | undefined;
+
+const settlePendingSignIn = (result: MobileSignInResult) => {
+	pendingSignInResolver?.(result);
+	pendingSignInResolver = undefined;
+};
+
 /**
  * Native (Capacitor) sign-in — POC.
  *
@@ -31,11 +48,23 @@ import { get } from 'svelte/store';
  * chain is persisted exactly where the auth client expects it, so the rest of
  * the app (stores, services, workers) is unchanged.
  *
+ * The returned promise settles only once the deep-link callback has been
+ * validated and persisted (or has failed) — callers can safely treat a
+ * resolved `{ status: 'ok' }` as "authenticated now".
+ *
  * See docs/ai/spec-driven-development/specs/2026-07-10-feat-mobile-app-poc.md.
  */
 export const signInMobile = async ({
 	openIdProvider
-}: { openIdProvider?: OpenIdProvider } = {}): Promise<void> => {
+}: { openIdProvider?: OpenIdProvider } = {}): Promise<MobileSignInResult> => {
+	// Supersede any in-flight attempt and claim the resolver slot BEFORE the
+	// first await, so two rapid calls can never race for it.
+	settlePendingSignIn({ status: 'superseded' });
+
+	const result = new Promise<MobileSignInResult>((resolve) => {
+		pendingSignInResolver = resolve;
+	});
+
 	const sessionKey = Ed25519KeyIdentity.generate();
 
 	const { storage } = AuthClientProvider.getInstance();
@@ -62,7 +91,15 @@ export const signInMobile = async ({
 		...(nonNullish(openIdProvider) ? { openIdProvider } : {})
 	});
 
-	await Browser.open({ url });
+	try {
+		await Browser.open({ url });
+	} catch (err: unknown) {
+		// The system browser never opened — no callback can ever arrive.
+		pendingSignInResolver = undefined;
+		throw err;
+	}
+
+	return await result;
 };
 
 const toastCallbackError = (err?: unknown) => {
@@ -70,6 +107,8 @@ const toastCallbackError = (err?: unknown) => {
 		msg: { text: replaceOisyPlaceholders(get(i18n).mobile_auth.error.error_while_signing_in) },
 		err
 	});
+
+	settlePendingSignIn({ status: 'error', err });
 };
 
 const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void> => {
@@ -150,6 +189,8 @@ const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void>
 		// storage, then sync the store through the regular path.
 		await AuthClientProvider.getInstance().createAuthClient({ forceRecreate: true });
 		await authStore.forceSync();
+
+		settlePendingSignIn({ status: 'ok' });
 	} catch (err: unknown) {
 		toastCallbackError(err);
 	}
