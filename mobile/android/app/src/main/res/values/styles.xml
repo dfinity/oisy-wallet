@@ -13,6 +13,12 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- The WebView is inset to the system bars (edge-to-edge margins), so
+             the bars sit on the theme's window background. Declare its
+             brightness so the system picks readable icon colors: dark icons on
+             the light background here, light icons in values-night. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 
