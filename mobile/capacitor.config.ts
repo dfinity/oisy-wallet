@@ -8,7 +8,14 @@ const config: CapacitorConfig = {
 	webDir: '../build',
 	android: {
 		// The wallet talks to IC boundary nodes over HTTPS only; cleartext stays off.
-		allowMixedContent: false
+		allowMixedContent: false,
+		// Android 15 (target SDK 35) enforces edge-to-edge, laying the WebView
+		// out under the status and gesture bars — and Android's WebView reports
+		// `env(safe-area-inset-*)` as 0, so the web app cannot compensate in
+		// CSS. Let Capacitor add the margins so the viewport stops at the system
+		// bars. ('auto' is a no-op on devices that don't enforce edge-to-edge,
+		// and becomes the default in Capacitor 8.)
+		adjustMarginsForEdgeToEdge: 'auto'
 	},
 	server: {
 		// Serve the WebView from an https origin so web crypto and IndexedDB
