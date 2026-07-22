@@ -927,6 +927,7 @@ describe('sol-instructions.utils', () => {
 			});
 			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
 				amount: 2039280n,
+				destination: 'DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
 			});
 

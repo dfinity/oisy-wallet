@@ -33,9 +33,10 @@ describe('sol-transactions.utils', () => {
 			expect(mapSolTransactionMessage(mockSolParsedTransactionMessage)).toStrictEqual({
 				amount: 2044380n,
 				unreviewed: true,
-				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
+				destination: 'DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+				ambiguous: true
 			});
 		});
 
@@ -370,6 +371,25 @@ describe('sol-transactions.utils', () => {
 				amount: 10n,
 				source: mockSolAddress,
 				destination: mockAtaAddress,
+				ambiguous: true
+			});
+		});
+
+		it('should flag account creation hidden behind a benign trailing transfer as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 9n, payer: mockSolAddress, destination: mockSolAddress2 })
+				.mockReturnValueOnce({ amount: 1n, source: mockSolAddress, destination: mockAtaAddress });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({
+				amount: 10n,
+				source: mockSolAddress,
+				destination: mockAtaAddress,
+				payer: mockSolAddress,
 				ambiguous: true
 			});
 		});
