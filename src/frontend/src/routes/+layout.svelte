@@ -24,6 +24,7 @@
 	import { initMobileAuthListener } from '$lib/services/auth-mobile.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
+	import { purgeLegacyPersonalNotesVetkeyCache } from '$lib/services/personal-notes.vetkeys';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
@@ -59,6 +60,7 @@
 			syncAuthStore(),
 			initPlausibleAnalytics(),
 			i18n.init(),
+			purgeLegacyPersonalNotesVetkeyCache(),
 			// Registers the deep-link handler for the auth-bridge callback in the Capacitor shell.
 			...(browser && isNativePlatform() ? [initMobileAuthListener()] : [])
 		]);
