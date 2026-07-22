@@ -46,6 +46,8 @@ jobs:
           VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE || secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE || secrets.VITE_QUICKNODE_API_KEY_STAGING }}
           VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE || secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
+          VITE_ONRAMPER_API_KEY_DEV: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_MOBILE || secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
+          VITE_ONRAMPER_API_KEY_PROD: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_MOBILE || secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
 
       # The post-process step emits .gz siblings for the IC asset canister;
       # Android's asset merger treats foo and foo.gz as duplicate resources,
@@ -107,6 +109,8 @@ jobs:
           VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE || secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE || secrets.VITE_QUICKNODE_API_KEY_STAGING }}
           VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE || secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
+          VITE_ONRAMPER_API_KEY_DEV: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_MOBILE || secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
+          VITE_ONRAMPER_API_KEY_PROD: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_MOBILE || secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
 
       - name: Strip precompressed assets
         run: find build -name '*.gz' -delete
