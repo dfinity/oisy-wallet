@@ -258,6 +258,52 @@ describe('_worker.services', () => {
 
 				expect(next.worker).not.toBe(worker.worker);
 			});
+
+			it('should keep the shared worker alive when the last wrapper is destroyed while another wrapper is still initializing', async () => {
+				const { instance: first, worker } = await createTestWorkerPooled('a');
+
+				// Not awaited on purpose: the ref-count reservation must happen synchronously on the
+				// getInstance call, before the worker promise resolves.
+				const pending = AppWorker.getInstance({ pooled: true, poolKey: 'a' });
+
+				first.destroy();
+
+				expect(worker.worker.terminate).not.toHaveBeenCalled();
+
+				const workerData = await pending;
+
+				expect(workerData.worker).toBe(worker.worker);
+
+				const second = new TestWorker(workerData);
+
+				second.destroy();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
+			});
+
+			it('should retry the worker creation after a failed one instead of caching the rejection', async () => {
+				class FailingWorker {
+					constructor() {
+						throw new Error('chunk load failed');
+					}
+				}
+
+				vi.stubGlobal('Worker', FailingWorker as unknown as typeof Worker);
+
+				await expect(AppWorker.getInstance({ pooled: true, poolKey: 'a' })).rejects.toThrow(
+					'chunk load failed'
+				);
+
+				vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+
+				const { instance, worker } = await createTestWorkerPooled('a');
+
+				expect(worker.worker).toBeInstanceOf(MockWorker);
+
+				instance.destroy();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
+			});
 		});
 
 		describe('terminateAllWorkers', () => {

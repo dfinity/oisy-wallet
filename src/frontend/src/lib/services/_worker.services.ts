@@ -17,6 +17,8 @@ export abstract class AppWorker {
 	// Shared worker pool. Wallet workers opt in via `getInstance({ pooled: true })` and are sharded
 	// across a small number of realms (keyed by a stable token id) instead of one realm per token.
 	// The map holds the in-flight creation promise so concurrent callers share a single realm.
+	// Ref counts are reserved synchronously in `getInstance` (not on wrapper construction) so a
+	// destroy of the last sibling wrapper racing an in-flight init cannot tear the realm down early.
 	static #pool = new Map<number, Promise<Worker>>();
 	static #poolRefCounts = new Map<number, number>();
 	static #poolSize: number | undefined;
@@ -32,10 +34,6 @@ export abstract class AppWorker {
 		this.#workerId = crypto.randomUUID();
 		this.#poolIndex = poolIndex;
 		this.#queue = new WorkerQueue(worker);
-
-		if (nonNullish(poolIndex)) {
-			AppWorker.#poolRefCounts.set(poolIndex, (AppWorker.#poolRefCounts.get(poolIndex) ?? 0) + 1);
-		}
 	}
 
 	static #newInstance = async (): Promise<Worker> => {
@@ -101,9 +99,27 @@ export abstract class AppWorker {
 		}
 
 		const poolIndex = this.#poolIndexForKey(poolKey);
-		const worker = await this.#getPooledWorker(poolIndex);
+		const created = this.#getPooledWorker(poolIndex);
 
-		return { worker, poolIndex };
+		// Reserve this wrapper's reference before awaiting: a concurrent destroy of the last sibling
+		// wrapper must not see a ref count of zero — it would terminate the realm and this wrapper
+		// would silently attach to a dead Worker.
+		this.#poolRefCounts.set(poolIndex, (this.#poolRefCounts.get(poolIndex) ?? 0) + 1);
+
+		try {
+			return { worker: await created, poolIndex };
+		} catch (err: unknown) {
+			// A failed realm creation (e.g. a stale chunk after a redeploy) must not poison the pool
+			// slot: drop the cached rejection so the next caller retries with a fresh worker. No
+			// wrapper was ever constructed on this realm, so the whole slot bookkeeping goes with it —
+			// unless another caller already cleaned up and recreated the slot.
+			if (this.#pool.get(poolIndex) === created) {
+				this.#pool.delete(poolIndex);
+				this.#poolRefCounts.delete(poolIndex);
+			}
+
+			throw err;
+		}
 	};
 
 	#addMessageListener = (listener: MessageHandler) => {
