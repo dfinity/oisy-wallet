@@ -31,6 +31,15 @@ case "$DFX_NETWORK" in
   ic_root_key_der="null"
   DERIVATION_ORIGIN="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io"
   ;;
+"audit")
+  # The audit environment runs on mainnet with the staging key tier. Without
+  # this case a (re)install would fall through to the local defaults below
+  # (dfx_test_key + localhost derivation origin), which don't exist on mainnet.
+  ECDSA_KEY_NAME="test_key_1"
+  # For security reasons, mainnet root key will be hardcoded in the backend canister.
+  ic_root_key_der="null"
+  DERIVATION_ORIGIN="https://vadl6-diaaa-aaaah-arayq-cai.icp0.io"
+  ;;
 "ic" | "beta")
   ECDSA_KEY_NAME="key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
