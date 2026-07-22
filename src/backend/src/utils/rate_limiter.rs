@@ -721,7 +721,7 @@ mod tests {
 
     #[test]
     fn prunes_idle_callers_once_over_the_cap() {
-        // Sweep threshold of 1: a third distinct caller tips the map over it.
+        // Sweep threshold of 1: caller 2 pushes the map over it; caller 3 triggers the sweep.
         let rl = RateLimiter::with_tracking_cap(1, 10 * ONE_SEC, 1);
 
         rl.record(test_principal(1), ONE_SEC);
