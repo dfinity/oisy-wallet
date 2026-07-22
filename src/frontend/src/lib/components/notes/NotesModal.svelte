@@ -88,9 +88,10 @@
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
 	let loading = $state(!$personalNotesLoaded);
-	// True only while the vetKey is actually being derived (notes present). Drives
-	// the "unlocking" screen so it isn't flashed during the quick fetch or on an
-	// empty list, where no derivation happens.
+	// Set when loadPersonalNotes enters the expensive key-derivation + decryption
+	// phase (notes present); stays set until the load resolves. Drives the
+	// "unlocking" screen so it isn't flashed during the quick fetch or on an empty
+	// list, where no derivation happens.
 	let deriving = $state(false);
 	let busy = $state(false);
 	// Set when a load fails; drives the inline "unavailable" panel (with Retry)
