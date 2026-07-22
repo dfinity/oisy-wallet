@@ -2654,7 +2654,8 @@
 			"created_updated": "Creada $created · Actualizada $updated",
 			"too_long": "La nota debe tener $maxCharacters caracteres o menos.",
 			"cap_reached": "Has alcanzado el máximo de $max notas guardadas. Elimina una para añadir una nueva.",
-			"decryption_failed": "No se pudo descifrar esta nota"
+			"decryption_failed": "No se pudo descifrar esta nota",
+			"unavailable_title": ""
 		},
 		"alt": {
 			"edit": "Editar nota",
@@ -2663,7 +2664,8 @@
 		"error": {
 			"load": "No se pudieron cargar tus notas. Inténtalo de nuevo.",
 			"save": "No se pudo guardar tu nota. Inténtalo de nuevo.",
-			"delete": "No se pudo eliminar tu nota. Inténtalo de nuevo."
+			"delete": "No se pudo eliminar tu nota. Inténtalo de nuevo.",
+			"rate_limited": ""
 		},
 		"share": {
 			"text": {

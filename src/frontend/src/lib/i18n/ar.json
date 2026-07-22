@@ -2654,7 +2654,8 @@
 			"created_updated": "",
 			"too_long": "",
 			"cap_reached": "",
-			"decryption_failed": ""
+			"decryption_failed": "",
+			"unavailable_title": ""
 		},
 		"alt": {
 			"edit": "",
@@ -2663,7 +2664,8 @@
 		"error": {
 			"load": "",
 			"save": "",
-			"delete": ""
+			"delete": "",
+			"rate_limited": ""
 		},
 		"share": {
 			"text": {

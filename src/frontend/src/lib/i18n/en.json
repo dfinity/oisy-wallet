@@ -2654,7 +2654,8 @@
 			"created_updated": "Created $created · Updated $updated",
 			"too_long": "Note must be $maxCharacters characters or fewer.",
 			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
-			"decryption_failed": "Couldn't decrypt this note"
+			"decryption_failed": "Couldn't decrypt this note",
+			"unavailable_title": "Notes are temporarily unavailable"
 		},
 		"alt": {
 			"edit": "Edit note",
@@ -2663,7 +2664,8 @@
 		"error": {
 			"load": "Couldn't load your notes. Please try again.",
 			"save": "Couldn't save your note. Please try again.",
-			"delete": "Couldn't delete your note. Please try again."
+			"delete": "Couldn't delete your note. Please try again.",
+			"rate_limited": "You've reached the request limit. Please wait a moment and try again."
 		},
 		"share": {
 			"text": {

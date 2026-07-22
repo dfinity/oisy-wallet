@@ -1,3 +1,4 @@
+import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
 import NotesModal from '$lib/components/notes/NotesModal.svelte';
 import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 import {
@@ -8,6 +9,8 @@ import {
 	NOTES_NO_RESULTS,
 	NOTES_SAVE_BUTTON,
 	NOTES_SEARCH_INPUT,
+	NOTES_UNAVAILABLE,
+	NOTES_UNAVAILABLE_RETRY_BUTTON,
 	NOTES_VIEW,
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
@@ -74,6 +77,35 @@ describe('NotesModal', () => {
 		const { getAllByTestId } = render(NotesModal);
 
 		expect(getAllByTestId(NOTES_LIST_ITEM)).toHaveLength(2);
+	});
+
+	it('shows the unavailable panel with the rate-limited message when the load is rate-limited', async () => {
+		vi.spyOn(notesServices, 'loadPersonalNotes').mockRejectedValue(
+			new PersonalNotesRateLimitedError('rate limited')
+		);
+
+		const { getByTestId } = render(NotesModal);
+
+		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
+
+		expect(getByTestId(NOTES_UNAVAILABLE)).toHaveTextContent(en.notes.error.rate_limited);
+	});
+
+	it('shows the generic unavailable message on a non-rate-limit failure and retries on click', async () => {
+		const loadSpy = vi
+			.spyOn(notesServices, 'loadPersonalNotes')
+			.mockRejectedValue(new Error('boom'));
+
+		const { getByTestId } = render(NotesModal);
+
+		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
+
+		expect(getByTestId(NOTES_UNAVAILABLE)).toHaveTextContent(en.notes.error.load);
+
+		loadSpy.mockClear();
+		await fireEvent.click(getByTestId(NOTES_UNAVAILABLE_RETRY_BUTTON));
+
+		expect(loadSpy).toHaveBeenCalled();
 	});
 
 	it('disables "Add note" at the per-user cap', () => {
@@ -190,19 +222,15 @@ describe('NotesModal', () => {
 		});
 	});
 
-	it('falls back to the empty state when the initial load fails', async () => {
+	it('shows the unavailable panel, not the empty state, when the initial load fails', async () => {
 		// No setLoaded → onMount runs the initial load, which rejects; the skeleton
-		// must clear rather than stay stuck.
-		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-		vi.spyOn(console, 'debug').mockImplementation(() => {});
+		// must clear to the unavailable panel rather than fall through to empty.
 		vi.spyOn(notesServices, 'loadPersonalNotes').mockRejectedValue(new Error('load failed'));
 
-		const { getByText } = render(NotesModal);
+		const { getByTestId, queryByText } = render(NotesModal);
 
-		await waitFor(() => {
-			expect(getByText(en.notes.text.empty_title)).toBeInTheDocument();
-		});
+		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
 
-		expect(errorSpy).toHaveBeenCalled();
+		expect(queryByText(en.notes.text.empty_title)).toBeNull();
 	});
 });

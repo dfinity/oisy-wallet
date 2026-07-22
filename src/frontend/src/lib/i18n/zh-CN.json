@@ -2654,7 +2654,8 @@
 			"created_updated": "创建于 $created · 更新于 $updated",
 			"too_long": "笔记不得超过 $maxCharacters 个字符。",
 			"cap_reached": "您已达到最多保存 $max 条笔记的上限。请删除一条以添加新笔记。",
-			"decryption_failed": "无法解密此笔记"
+			"decryption_failed": "无法解密此笔记",
+			"unavailable_title": ""
 		},
 		"alt": {
 			"edit": "编辑笔记",
@@ -2663,7 +2664,8 @@
 		"error": {
 			"load": "无法加载您的笔记。请重试。",
 			"save": "无法保存您的笔记。请重试。",
-			"delete": "无法删除您的笔记。请重试。"
+			"delete": "无法删除您的笔记。请重试。",
+			"rate_limited": ""
 		},
 		"share": {
 			"text": {
