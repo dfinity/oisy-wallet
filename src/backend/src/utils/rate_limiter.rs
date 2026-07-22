@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::{HashMap, VecDeque},
 };
 
@@ -114,6 +114,10 @@ pub(crate) struct RateLimiter {
     /// mutating call sweeps out principals with no calls left inside the window
     /// (see [`Self::prune_idle`]).
     tracking_cap: usize,
+    /// Timestamp of the last idle sweep. The sweep is throttled to at most once
+    /// per `window_ns` so it can't run on every call while the map sits above
+    /// the cap (see [`Self::prune_idle`]).
+    last_prune_ns: Cell<u64>,
     calls: RefCell<HashMap<Principal, VecDeque<u64>>>,
 }
 
@@ -140,6 +144,7 @@ impl RateLimiter {
             max_calls,
             window_ns,
             tracking_cap,
+            last_prune_ns: Cell::new(0),
             calls: RefCell::new(HashMap::new()),
         }
     }
@@ -239,10 +244,22 @@ impl RateLimiter {
     /// `tracking_cap`, drop every principal whose most recent call has aged out
     /// of the window. Idle-only — a principal with an in-window call is kept, so
     /// this never changes a rate-limit decision; it only reclaims dead entries.
+    ///
+    /// The `retain` sweep is throttled to at most once per `window_ns`: above
+    /// the cap it would otherwise run on every mutating call, and since active
+    /// principals are never evicted, a map that is legitimately above the cap
+    /// stays there and re-sweeps on every call while reclaiming nothing. The
+    /// throttle bounds that cost without weakening reclamation — a principal
+    /// idle at a skipped sweep was already idle at the previous one, so it is
+    /// still dropped within one window of going idle.
     fn prune_idle(&self, calls: &mut HashMap<Principal, VecDeque<u64>>, now_ns: u64) {
         if calls.len() <= self.tracking_cap {
             return;
         }
+        if now_ns.saturating_sub(self.last_prune_ns.get()) < self.window_ns {
+            return;
+        }
+        self.last_prune_ns.set(now_ns);
         let window_start = now_ns.saturating_sub(self.window_ns);
         calls.retain(|_, timestamps| timestamps.back().is_some_and(|&last| last > window_start));
     }
@@ -721,12 +738,40 @@ mod tests {
     fn does_not_prune_active_callers() {
         let rl = RateLimiter::with_tracking_cap(5, 10 * ONE_SEC, 1);
 
-        // Three callers each with an in-window timestamp — over the cap of 1,
-        // but none is idle, so the sweep evicts nothing.
-        rl.record(test_principal(1), ONE_SEC);
-        rl.record(test_principal(2), ONE_SEC);
-        rl.record(test_principal(3), ONE_SEC);
+        // Three callers, all active (in-window at t=100s). The third record
+        // tips the map over the cap of 1 and triggers a sweep, but nothing is
+        // idle so it evicts nothing.
+        rl.record(test_principal(1), 100 * ONE_SEC);
+        rl.record(test_principal(2), 100 * ONE_SEC);
+        rl.record(test_principal(3), 100 * ONE_SEC);
 
         assert_eq!(rl.tracked_callers(), 3);
+    }
+
+    #[test]
+    fn sweep_runs_at_most_once_per_window() {
+        // Cap of 2, 10s window.
+        let rl = RateLimiter::with_tracking_cap(2, 10 * ONE_SEC, 2);
+
+        // Four callers whose most recent calls all fall inside the window at
+        // t=100s, so the first over-cap sweep keeps them all and the map stays
+        // above the cap.
+        rl.record(test_principal(1), 92 * ONE_SEC);
+        rl.record(test_principal(2), 93 * ONE_SEC);
+        rl.record(test_principal(3), 100 * ONE_SEC);
+        rl.record(test_principal(4), 100 * ONE_SEC); // triggers sweep #1 (t=100s)
+        assert_eq!(rl.tracked_callers(), 4);
+
+        // By t=103s caller 1 (last call t=92s) has aged out of the window, but
+        // only 3s have passed since sweep #1 (< the 10s window), so the sweep is
+        // skipped and the now-idle caller is not reclaimed.
+        rl.record(test_principal(5), 103 * ONE_SEC);
+        assert_eq!(rl.tracked_callers(), 5);
+
+        // t=111s is a full window past sweep #1, so the sweep runs again and
+        // drops every caller now idle (1, 2, 3, 4), leaving only the in-window
+        // callers.
+        rl.record(test_principal(6), 111 * ONE_SEC);
+        assert_eq!(rl.tracked_callers(), 2);
     }
 }
