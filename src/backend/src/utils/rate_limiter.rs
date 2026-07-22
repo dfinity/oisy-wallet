@@ -217,9 +217,21 @@ impl VetKeyRateLimiters {
     pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
         self.caller_minute.check_at(caller, now_ns)?;
         self.caller_hour.check_at(caller, now_ns)?;
+        // The global tiers bucket every caller under a fixed key; remap the
+        // error's `caller` to the real caller so a global-tier rejection is not
+        // reported as anonymous.
         self.global_minute
-            .check_at(Principal::anonymous(), now_ns)?;
-        self.global_hour.check_at(Principal::anonymous(), now_ns)?;
+            .check_at(Principal::anonymous(), now_ns)
+            .map_err(|mut e| {
+                e.caller = caller;
+                e
+            })?;
+        self.global_hour
+            .check_at(Principal::anonymous(), now_ns)
+            .map_err(|mut e| {
+                e.caller = caller;
+                e
+            })?;
         Ok(())
     }
 }
@@ -522,6 +534,9 @@ mod tests {
         let err = rl.check_at(test_principal(21), ONE_SEC).unwrap_err();
         assert_eq!(err.max_calls, 20);
         assert_eq!(err.window_ns, 60 * ONE_SEC);
+        // The global tier buckets under `Principal::anonymous()` internally, but
+        // the error must report the real caller, not the bucket key.
+        assert_eq!(err.caller, test_principal(21));
     }
 
     #[test]
