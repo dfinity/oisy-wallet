@@ -36,6 +36,7 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
+import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -446,6 +447,29 @@ describe('exchange.derived', () => {
 			expect(result?.[icpErc20Ethereum.id]).toEqual(icpPrice);
 			expect(result?.[icpErc20Base.id]).toEqual(icpPrice);
 			expect(result?.[icpErc20Arbitrum.id]).toEqual(icpPrice);
+		});
+
+		it('should price the legacy wrapped-ICP custom token on Ethereum at the native ICP rate', () => {
+			// The legacy wrapped-ICP token was removed from the curated list, so a surviving
+			// copy in a user's custom-token list carries no ICP group data. It is still pegged
+			// to the native ICP price by `isErc20Icp` (symbol + address + Ethereum network).
+			erc20CustomTokensStore.setAll([
+				{
+					data: {
+						...mockErc20DefaultToken,
+						symbol: ERC20_ICP_SYMBOL,
+						address: ERC20_ICP_ADDRESS,
+						network: ETHEREUM_NETWORK,
+						groupData: undefined,
+						enabled: true
+					},
+					certified: false
+				}
+			]);
+
+			exchangeStore.set([{ 'internet-computer': icpPrice }]);
+
+			expect(get(exchanges)?.[mockErc20DefaultToken.id]).toEqual(icpPrice);
 		});
 
 		it('should return values for ICRC tokens', () => {

@@ -31,6 +31,7 @@ import {
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -99,8 +100,10 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 			// per-contract: the token shares one contract address across Ethereum/Base/Arbitrum
 			// (so an address-keyed price would collide), and not every chain is listed on the
 			// price provider (e.g. Arbitrum). Pegging to ICP is chain- and provider-independent.
+			// `isErc20Icp` additionally covers the legacy wrapped-ICP token on Ethereum, which
+			// predates the token group and may still exist in a user's custom-token list.
 			...$erc20Tokens
-				.filter(({ groupData }) => groupData?.id === ICP_TOKEN_GROUP_ID)
+				.filter((token) => isErc20Icp(token) || token.groupData?.id === ICP_TOKEN_GROUP_ID)
 				.reduce(
 					(acc, { id }) => ({
 						...acc,
