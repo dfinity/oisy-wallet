@@ -26,6 +26,7 @@
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { MAX_PERSONAL_NOTES_PER_USER } from '$lib/constants/app.constants';
 	import {
 		NOTES_ADD_BUTTON,
@@ -87,6 +88,10 @@
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
 	let loading = $state(!$personalNotesLoaded);
+	// True only while the vetKey is actually being derived (notes present). Drives
+	// the "unlocking" screen so it isn't flashed during the quick fetch or on an
+	// empty list, where no derivation happens.
+	let deriving = $state(false);
 	let busy = $state(false);
 	// Set when a load fails; drives the inline "unavailable" panel (with Retry)
 	// instead of falling through to the empty state.
@@ -165,15 +170,17 @@
 			return;
 		}
 		loading = true;
+		deriving = false;
 		loadError = undefined;
 		try {
-			await loadPersonalNotes($authIdentity);
+			await loadPersonalNotes({ identity: $authIdentity, onDeriveStart: () => (deriving = true) });
 		} catch (err: unknown) {
 			// Surface a persistent inline panel (with Retry) instead of a toast that
 			// vanishes over a misleading empty state.
 			loadError = err;
 		} finally {
 			loading = false;
+			deriving = false;
 		}
 	};
 
@@ -375,7 +382,11 @@
 			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
 		>
 			{#if showSkeleton}
-				<NotesUnlocking />
+				{#if deriving}
+					<NotesUnlocking />
+				{:else}
+					<SkeletonCards rows={3} />
+				{/if}
 			{:else if hasLoadError}
 				<NotesUnavailable onRetry={load} rateLimited={loadRateLimited} />
 			{:else if isEmpty}

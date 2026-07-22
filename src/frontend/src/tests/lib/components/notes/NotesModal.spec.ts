@@ -11,6 +11,7 @@ import {
 	NOTES_SEARCH_INPUT,
 	NOTES_UNAVAILABLE,
 	NOTES_UNAVAILABLE_RETRY_BUTTON,
+	NOTES_UNLOCKING,
 	NOTES_VIEW,
 	NOTES_VIEW_DELETE_BUTTON,
 	NOTES_VIEW_EDIT_BUTTON
@@ -232,5 +233,43 @@ describe('NotesModal', () => {
 		await waitFor(() => expect(getByTestId(NOTES_UNAVAILABLE)).toBeInTheDocument());
 
 		expect(queryByText(en.notes.text.empty_title)).toBeNull();
+	});
+
+	it('shows the unlocking screen while the vetKey is being derived', async () => {
+		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(async ({ onDeriveStart }) => {
+			// Enter the derivation phase, then stay pending so it stays observable.
+			onDeriveStart?.();
+			await new Promise(() => {});
+		});
+
+		const { getByTestId } = render(NotesModal);
+
+		await waitFor(() => expect(getByTestId(NOTES_UNLOCKING)).toBeInTheDocument());
+	});
+
+	it('shows the skeleton, not the unlocking screen, during the initial fetch', async () => {
+		// Load in progress but derivation has not started (onDeriveStart not called).
+		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(() => new Promise(() => {}));
+
+		const { queryByTestId, queryByText } = render(NotesModal);
+
+		await tick();
+
+		expect(queryByTestId(NOTES_UNLOCKING)).toBeNull();
+		// Still loading: neither the empty state nor a list yet.
+		expect(queryByText(en.notes.text.empty_title)).toBeNull();
+	});
+
+	it('never shows the unlocking screen for an empty load (no derivation)', async () => {
+		vi.spyOn(notesServices, 'loadPersonalNotes').mockImplementation(() => {
+			setLoadedNotes({ entries: [], count: 0 });
+			return Promise.resolve();
+		});
+
+		const { getByText, queryByTestId } = render(NotesModal);
+
+		await waitFor(() => expect(getByText(en.notes.text.empty_title)).toBeInTheDocument());
+
+		expect(queryByTestId(NOTES_UNLOCKING)).toBeNull();
 	});
 });
