@@ -2642,6 +2642,8 @@
 			"empty_title": "Bạn chưa có ghi chú nào",
 			"empty_subtitle": "Tạo ghi chú riêng tư, được mã hóa để giữ an toàn cho thông tin quan trọng bên cạnh ví của bạn.",
 			"empty_add": "Thêm ghi chú mới",
+			"unlocking_title": "Đang mở khóa ghi chú của bạn",
+			"unlocking_subtitle": "Đang thiết lập khóa mã hóa riêng tư của bạn — chỉ mất một chút thời gian.",
 			"add_note": "Thêm ghi chú",
 			"note_label": "Ghi chú",
 			"placeholder": "Viết ghi chú…",

@@ -2642,6 +2642,8 @@
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
 			"empty_add": "Add new note",
+			"unlocking_title": "Unlocking your notes",
+			"unlocking_subtitle": "Setting up your private encryption key — this only takes a moment.",
 			"add_note": "Add note",
 			"note_label": "Note",
 			"placeholder": "Write a note…",

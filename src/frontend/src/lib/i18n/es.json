@@ -2642,6 +2642,8 @@
 			"empty_title": "Aún no tienes notas",
 			"empty_subtitle": "Crea notas privadas y cifradas para guardar detalles importantes junto a tu wallet.",
 			"empty_add": "Añadir nueva nota",
+			"unlocking_title": "Desbloqueando tus notas",
+			"unlocking_subtitle": "Configurando tu clave de cifrado privada; solo tardará un momento.",
 			"add_note": "Añadir nota",
 			"note_label": "Nota",
 			"placeholder": "Escribe una nota…",

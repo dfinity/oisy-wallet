@@ -15,6 +15,7 @@
 	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
 	import NotesUnavailable from '$lib/components/notes/NotesUnavailable.svelte';
+	import NotesUnlocking from '$lib/components/notes/NotesUnlocking.svelte';
 	import ShareNoteBottomSheet from '$lib/components/notes/ShareNoteBottomSheet.svelte';
 	import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -87,6 +88,11 @@
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
 	let loading = $state(!$personalNotesLoaded);
+	// Set when loadPersonalNotes enters the expensive key-derivation + decryption
+	// phase (notes present); stays set until the load resolves. Drives the
+	// "unlocking" screen so it isn't flashed during the quick fetch or on an empty
+	// list, where no derivation happens.
+	let deriving = $state(false);
 	let busy = $state(false);
 	// Set when a load fails; drives the inline "unavailable" panel (with Retry)
 	// instead of falling through to the empty state.
@@ -165,15 +171,17 @@
 			return;
 		}
 		loading = true;
+		deriving = false;
 		loadError = undefined;
 		try {
-			await loadPersonalNotes($authIdentity);
+			await loadPersonalNotes({ identity: $authIdentity, onDeriveStart: () => (deriving = true) });
 		} catch (err: unknown) {
 			// Surface a persistent inline panel (with Retry) instead of a toast that
 			// vanishes over a misleading empty state.
 			loadError = err;
 		} finally {
 			loading = false;
+			deriving = false;
 		}
 	};
 
@@ -375,7 +383,11 @@
 			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
 		>
 			{#if showSkeleton}
-				<SkeletonCards rows={3} />
+				{#if deriving}
+					<NotesUnlocking />
+				{:else}
+					<SkeletonCards rows={3} />
+				{/if}
 			{:else if hasLoadError}
 				<NotesUnavailable onRetry={load} rateLimited={loadRateLimited} />
 			{:else if isEmpty}

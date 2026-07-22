@@ -2642,6 +2642,8 @@
 			"empty_title": "Nemáš zatím žádné poznámky",
 			"empty_subtitle": "Vytvoř si soukromé, šifrované poznámky, abys měl(a) důležité informace v bezpečí vedle své peněženky.",
 			"empty_add": "Přidat novou poznámku",
+			"unlocking_title": "Odemykání tvých poznámek",
+			"unlocking_subtitle": "Nastavujeme tvůj soukromý šifrovací klíč – bude to jen chvilka.",
 			"add_note": "Přidat poznámku",
 			"note_label": "Poznámka",
 			"placeholder": "Napiš poznámku…",

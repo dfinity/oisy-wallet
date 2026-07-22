@@ -2642,6 +2642,8 @@
 			"empty_title": "Du hast noch keine Notizen",
 			"empty_subtitle": "Erstelle private, verschlüsselte Notizen, um Details sicher neben deiner Wallet aufzubewahren.",
 			"empty_add": "Neue Notiz hinzufügen",
+			"unlocking_title": "Deine Notizen werden entsperrt",
+			"unlocking_subtitle": "Dein privater Verschlüsselungsschlüssel wird eingerichtet – das dauert nur einen Moment.",
 			"add_note": "Notiz hinzufügen",
 			"note_label": "Notiz",
 			"placeholder": "Notiz schreiben…",
