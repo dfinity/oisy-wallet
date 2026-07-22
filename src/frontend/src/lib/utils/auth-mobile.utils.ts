@@ -1,6 +1,7 @@
 import {
 	MOBILE_AUTH_ALLOWED_REDIRECT_URIS,
 	MOBILE_AUTH_BRIDGE_PATH,
+	MOBILE_AUTH_CALLBACK_URI,
 	MOBILE_AUTH_DELEGATION_PARAM,
 	MOBILE_AUTH_OPENID_PROVIDER_PARAM,
 	MOBILE_AUTH_REDIRECT_URI_PARAM,
@@ -55,6 +56,22 @@ export const buildMobileAuthCallbackUrl = ({
 	delegationChainJson: string;
 }): string =>
 	`${redirectUri}#${MOBILE_AUTH_DELEGATION_PARAM}=${encodeURIComponent(delegationChainJson)}`;
+
+// Exact scheme + host match against the callback URI. A `startsWith` check
+// would accept prefix lookalikes such as `oisy://auth-callback.evil/#…`, so
+// we parse and compare the authority components instead — mirroring the
+// exact-match allowlist used on the bridge side.
+export const isMobileAuthCallbackUrl = (url: string): boolean => {
+	let parsed: URL;
+	try {
+		parsed = new URL(url);
+	} catch (_err: unknown) {
+		return false;
+	}
+
+	const expected = new URL(MOBILE_AUTH_CALLBACK_URI);
+	return parsed.protocol === expected.protocol && parsed.host === expected.host;
+};
 
 export const parseMobileAuthCallbackUrl = (url: string): string | undefined => {
 	let hash: string;

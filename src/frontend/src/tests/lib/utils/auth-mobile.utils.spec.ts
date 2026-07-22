@@ -9,6 +9,7 @@ import {
 	buildMobileAuthBridgeUrl,
 	buildMobileAuthCallbackUrl,
 	isAllowedMobileAuthRedirectUri,
+	isMobileAuthCallbackUrl,
 	isOpenIdProvider,
 	isValidHexPublicKey,
 	parseMobileAuthCallbackUrl
@@ -57,6 +58,27 @@ describe('auth-mobile utils', () => {
 				expect(isOpenIdProvider(provider)).toBeFalsy();
 			}
 		);
+	});
+
+	describe('isMobileAuthCallbackUrl', () => {
+		it.each([
+			MOBILE_AUTH_CALLBACK_URI,
+			`${MOBILE_AUTH_CALLBACK_URI}#delegation=abc`,
+			`${MOBILE_AUTH_CALLBACK_URI}/`
+		])('should accept %s', (url) => {
+			expect(isMobileAuthCallbackUrl(url)).toBeTruthy();
+		});
+
+		it.each([
+			'not a url',
+			'',
+			'https://oisy.com/auth-callback',
+			'oisy://auth-callback.evil/#delegation=abc',
+			'oisy://evil-auth-callback#delegation=abc',
+			'evil://auth-callback#delegation=abc'
+		])('should reject the lookalike/foreign URL %s', (url) => {
+			expect(isMobileAuthCallbackUrl(url)).toBeFalsy();
+		});
 	});
 
 	describe('buildMobileAuthBridgeUrl', () => {

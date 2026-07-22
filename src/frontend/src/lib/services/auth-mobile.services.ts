@@ -8,7 +8,11 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OpenIdProvider } from '$lib/types/auth';
-import { buildMobileAuthBridgeUrl, parseMobileAuthCallbackUrl } from '$lib/utils/auth-mobile.utils';
+import {
+	buildMobileAuthBridgeUrl,
+	isMobileAuthCallbackUrl,
+	parseMobileAuthCallbackUrl
+} from '$lib/utils/auth-mobile.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
@@ -34,13 +38,20 @@ export const signInMobile = async ({
 }: { openIdProvider?: OpenIdProvider } = {}): Promise<void> => {
 	const sessionKey = Ed25519KeyIdentity.generate();
 
+	const { storage } = AuthClientProvider.getInstance();
+
+	// Clear any prior delegation (and its cached expiration) BEFORE persisting
+	// the new session key. Otherwise a cancelled or never-returning sign-in
+	// would leave a fresh key paired with a stale delegation that targets a
+	// different public key — the ECDSA/delegation mismatch that
+	// `AuthClientProvider.safeCreateAuthClient` documents.
+	await storage.remove(KEY_STORAGE_DELEGATION);
+	localStorage.removeItem(MOBILE_AUTH_SESSION_EXPIRATION_STORAGE_KEY);
+
 	// Persist the session key before leaving the app: the OS may recycle the
 	// WebView while the user authenticates in the system browser, so the
 	// callback handler must be able to restore the key from storage.
-	await AuthClientProvider.getInstance().storage.set(
-		KEY_STORAGE_KEY,
-		JSON.stringify(sessionKey.toJSON())
-	);
+	await storage.set(KEY_STORAGE_KEY, JSON.stringify(sessionKey.toJSON()));
 
 	const url = buildMobileAuthBridgeUrl({
 		baseUrl: OISY_URL,
@@ -62,7 +73,7 @@ const toastCallbackError = (err?: unknown) => {
 };
 
 const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void> => {
-	if (!url.startsWith(MOBILE_AUTH_CALLBACK_URI)) {
+	if (!isMobileAuthCallbackUrl(url)) {
 		return;
 	}
 
