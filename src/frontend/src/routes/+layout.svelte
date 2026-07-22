@@ -23,6 +23,7 @@
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
+	import { purgeLegacyPersonalNotesVetkeyCache } from '$lib/services/personal-notes.vetkeys';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
@@ -54,7 +55,12 @@
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
 		 */
-		await Promise.allSettled([syncAuthStore(), initPlausibleAnalytics(), i18n.init()]);
+		await Promise.allSettled([
+			syncAuthStore(),
+			initPlausibleAnalytics(),
+			i18n.init(),
+			purgeLegacyPersonalNotesVetkeyCache()
+		]);
 	};
 
 	const syncAuthStore = async () => {
