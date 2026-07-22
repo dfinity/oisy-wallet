@@ -42,7 +42,7 @@ const identityProviderUrl = ({ openIdProvider }: { openIdProvider?: OpenIdProvid
 	nonNullish(openIdProvider)
 		? `https://${InternetIdentityDomain.VERSION_2_0}/authorize`
 		: nonNullish(INTERNET_IDENTITY_CANISTER_ID)
-			? /apple/i.test(navigator?.vendor)
+			? /apple/i.test(globalThis.navigator?.vendor ?? '')
 				? `http://localhost:4943/authorize?canisterId=${INTERNET_IDENTITY_CANISTER_ID}`
 				: `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943/authorize`
 			: `https://${InternetIdentityDomain.VERSION_1_0}/authorize`;

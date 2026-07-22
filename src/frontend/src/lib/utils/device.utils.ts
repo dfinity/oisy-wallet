@@ -47,8 +47,15 @@ export const isMobile = (): boolean => {
 export const isDesktop = () => !isMobile();
 
 // True when running inside the Capacitor shell (Android / iOS app), false in
-// any browser — including the mobile browser and installed PWAs.
-export const isNativePlatform = (): boolean => Capacitor.isNativePlatform();
+// any browser — including the mobile browser and installed PWAs. Guards the
+// Node/SSR path (no Capacitor bridge) like `isIOS()` / `isIPad()`.
+export const isNativePlatform = (): boolean => {
+	if (isNode()) {
+		return false;
+	}
+
+	return Capacitor.isNativePlatform();
+};
 
 export const isPWAStandalone = () => {
 	if ('standalone' in navigator && nonNullish(navigator.standalone)) {

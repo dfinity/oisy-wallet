@@ -105,7 +105,15 @@ const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void>
 		// key is useless at best and an injection attempt at worst.
 		const sessionKey = Ed25519KeyIdentity.fromJSON(storedKey);
 		const sessionPublicKeyDerHex = uint8ArrayToHexString(sessionKey.getPublicKey().toDer());
-		const lastDelegation = chain.delegations[chain.delegations.length - 1];
+		const lastDelegation = chain.delegations.at(-1);
+
+		// A chain with no delegations can't be bound to our key — reject rather
+		// than dereference `undefined`.
+		if (isNullish(lastDelegation)) {
+			toastCallbackError();
+			return;
+		}
+
 		const delegatedToHex = uint8ArrayToHexString(lastDelegation.delegation.pubkey);
 
 		if (delegatedToHex !== sessionPublicKeyDerHex) {
