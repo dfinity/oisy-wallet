@@ -30,7 +30,11 @@
 		<span class="text-tertiary">{subtitle}</span>
 	</div>
 
-	<Button onclick={onRetry} testId={NOTES_UNAVAILABLE_RETRY_BUTTON}>
-		{$i18n.core.text.retry}
-	</Button>
+	<!-- Wrap so the button's default `flex-1` doesn't stretch it to fill this
+		centered (flex-1) panel; full-width matches the sibling unavailable panels. -->
+	<div class="w-full">
+		<Button fullWidth onclick={onRetry} testId={NOTES_UNAVAILABLE_RETRY_BUTTON}>
+			{$i18n.core.text.retry}
+		</Button>
+	</div>
 </div>
