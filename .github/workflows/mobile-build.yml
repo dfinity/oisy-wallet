@@ -29,6 +29,11 @@ jobs:
         run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          # Bake the audit environment into the bundled assets so the native
+          # login bridge opens `https://audit.oisy.com/mobile-auth` (OISY_URL =
+          # VITE_OISY_DOMAIN, resolved from this network). Without a network the
+          # build would default to `local` and point login at localhost.
+          DFX_NETWORK: audit
 
       # The post-process step emits .gz siblings for the IC asset canister;
       # Android's asset merger treats foo and foo.gz as duplicate resources,
@@ -73,6 +78,11 @@ jobs:
         run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          # Bake the audit environment into the bundled assets so the native
+          # login bridge opens `https://audit.oisy.com/mobile-auth` (OISY_URL =
+          # VITE_OISY_DOMAIN, resolved from this network). Without a network the
+          # build would default to `local` and point login at localhost.
+          DFX_NETWORK: audit
 
       - name: Strip precompressed assets
         run: find build -name '*.gz' -delete

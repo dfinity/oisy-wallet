@@ -23,8 +23,10 @@ Prerequisites: repo dependencies installed (`npm ci` at the root), plus
 Android Studio / SDK for Android and Xcode + CocoaPods for iOS (macOS only).
 
 ```bash
-# 1. Build the web app (repo root)
-npm run build
+# 1. Build the web app (repo root). DFX_NETWORK picks the canonical origin the
+#    login bridge opens: `audit` bakes `https://audit.oisy.com/mobile-auth`.
+#    Omitting it defaults to `local`, which points login at localhost.
+DFX_NETWORK=audit npm run build
 
 # 1b. Drop the .gz siblings emitted for the IC asset canister — the Android
 #     asset merger rejects them as duplicates and the WebView never uses them
