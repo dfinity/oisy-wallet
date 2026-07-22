@@ -137,7 +137,14 @@ OISY ships a curated set of token definitions. Most are **curated tokens**: they
 
 A definition can instead be marked **metadata-only** (`metadataOnly: true`). A metadata-only token is **not** surfaced by default — it is absent from the manage-tokens list, is never enabled by default, and is not offered as a swap destination. Its curated metadata (name, symbol, decimals, icon, tags, token-group membership) is still used to **enrich a token the user imports manually**: importing that exact ledger / contract address resolves the curated details and places the token in its group, exactly as a curated token would. In short: known to OISY, but surfaced only if the user explicitly adds it.
 
-The tokens added for the 1Sec (OneSec) swap integration are metadata-only. On ICP this covers the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`): a new user does not see them in the wallet, and a user who wants one imports it by its ledger canister ID, after which it appears with full metadata and inside its token group.
+The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
+
+- On **ICP**, the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`).
+- On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, and **GLDT**.
+
+A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
+
+ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
 
 ---
 
