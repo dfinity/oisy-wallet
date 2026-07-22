@@ -11,9 +11,11 @@ import {
 	isAllowedMobileAuthRedirectUri,
 	isMobileAuthCallbackUrl,
 	isOpenIdProvider,
-	isValidHexPublicKey,
+	isValidEd25519DerPublicKey,
 	parseMobileAuthCallbackUrl
 } from '$lib/utils/auth-mobile.utils';
+import { uint8ArrayToHexString } from '@dfinity/utils';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 
 describe('auth-mobile utils', () => {
 	describe('isAllowedMobileAuthRedirectUri', () => {
@@ -34,17 +36,42 @@ describe('auth-mobile utils', () => {
 		});
 	});
 
-	describe('isValidHexPublicKey', () => {
-		it('should accept an even-length hex string', () => {
-			expect(isValidHexPublicKey('302a300506032b6570032100ab')).toBeTruthy();
+	describe('isValidEd25519DerPublicKey', () => {
+		it('should accept a DER-encoded Ed25519 public key', () => {
+			const derHex = uint8ArrayToHexString(Ed25519KeyIdentity.generate().getPublicKey().toDer());
+
+			expect(isValidEd25519DerPublicKey(derHex)).toBeTruthy();
 		});
 
-		it.each([null, undefined, '', 'abc', 'zz11', '0x1234', 'deadbeef '])(
-			'should reject %s',
-			(key) => {
-				expect(isValidHexPublicKey(key)).toBeFalsy();
-			}
-		);
+		it('should accept an uppercase DER hex', () => {
+			const derHex = uint8ArrayToHexString(
+				Ed25519KeyIdentity.generate().getPublicKey().toDer()
+			).toUpperCase();
+
+			expect(isValidEd25519DerPublicKey(derHex)).toBeTruthy();
+		});
+
+		it.each([
+			null,
+			undefined,
+			'',
+			'abc',
+			'zz11',
+			'0x1234',
+			'deadbeef ',
+			// Even-length hex without the Ed25519 DER prefix.
+			'deadbeef',
+			// Prefix alone, key bytes missing.
+			'302a300506032b6570032100',
+			// Prefix with a truncated key.
+			`302a300506032b6570032100${'ab'.repeat(31)}`,
+			// Prefix with an oversized key.
+			`302a300506032b6570032100${'ab'.repeat(33)}`,
+			// secp256k1 SubjectPublicKeyInfo prefix instead of Ed25519.
+			`3056301006072a8648ce3d020106052b8104000a034200${'ab'.repeat(33)}`
+		])('should reject %s', (key) => {
+			expect(isValidEd25519DerPublicKey(key)).toBeFalsy();
+		});
 	});
 
 	describe('isOpenIdProvider', () => {

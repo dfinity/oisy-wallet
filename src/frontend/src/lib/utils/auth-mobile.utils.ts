@@ -20,10 +20,15 @@ export const isOpenIdProvider = (value: Nullish<string>): value is OpenIdProvide
 export const isAllowedMobileAuthRedirectUri = (redirectUri: Nullish<string>): boolean =>
 	notEmptyString(redirectUri) && MOBILE_AUTH_ALLOWED_REDIRECT_URIS.includes(redirectUri);
 
-const HEX_REGEX = /^(?:[0-9a-fA-F]{2})+$/;
+// DER-encoded Ed25519 public key (RFC 8410): the fixed 12-byte
+// SubjectPublicKeyInfo prefix (OID 1.3.101.112) followed by the 32-byte raw
+// key. The session key is always generated with `Ed25519KeyIdentity`, so any
+// other shape is a malformed request — reject it up front instead of letting
+// it fail later inside the sign-in flow.
+const ED25519_DER_PUBLIC_KEY_REGEX = /^302a300506032b6570032100[0-9a-f]{64}$/i;
 
-export const isValidHexPublicKey = (publicKey: Nullish<string>): boolean =>
-	notEmptyString(publicKey) && HEX_REGEX.test(publicKey);
+export const isValidEd25519DerPublicKey = (publicKey: Nullish<string>): boolean =>
+	notEmptyString(publicKey) && ED25519_DER_PUBLIC_KEY_REGEX.test(publicKey);
 
 export const buildMobileAuthBridgeUrl = ({
 	baseUrl,

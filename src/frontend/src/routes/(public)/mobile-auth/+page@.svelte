@@ -14,7 +14,7 @@
 		buildMobileAuthCallbackUrl,
 		isAllowedMobileAuthRedirectUri,
 		isOpenIdProvider,
-		isValidHexPublicKey,
+		isValidEd25519DerPublicKey,
 		parseMobileAuthCallbackUrl
 	} from '$lib/utils/auth-mobile.utils';
 	import { consoleError } from '$lib/utils/console.utils';
@@ -36,7 +36,7 @@
 	const openIdProvider = isOpenIdProvider(openIdProviderParam) ? openIdProviderParam : undefined;
 
 	const validRequest =
-		isValidHexPublicKey(sessionPublicKeyDerHex) &&
+		isValidEd25519DerPublicKey(sessionPublicKeyDerHex) &&
 		isAllowedMobileAuthRedirectUri(redirectUri) &&
 		(isNullish(openIdProviderParam) || nonNullish(openIdProvider));
 
