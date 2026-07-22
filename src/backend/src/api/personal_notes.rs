@@ -12,7 +12,11 @@ use crate::{
     personal_notes::service,
     utils::{
         guards::{caller_is_not_anonymous, caller_is_registered_user},
-        rate_limiter::{self, DELETE_PERSONAL_NOTE_RATE_LIMITER, SET_PERSONAL_NOTE_RATE_LIMITER},
+        rate_limiter::{
+            self, VetKeyRateLimiters, DELETE_PERSONAL_NOTE_RATE_LIMITER,
+            GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER,
+            GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER, SET_PERSONAL_NOTE_RATE_LIMITER,
+        },
     },
 };
 
@@ -78,6 +82,11 @@ pub fn get_personal_notes_count() -> GetPersonalNotesCountResult {
 pub async fn get_personal_notes_encrypted_vetkey(
     transport_key: ByteBuf,
 ) -> PersonalNotesVetkeyResult {
+    if let Err(e) =
+        GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller)
+    {
+        return PersonalNotesVetkeyResult::Err(PersonalNoteError::RateLimited(e));
+    }
     service::get_encrypted_vetkey(transport_key).await.into()
 }
 
@@ -91,5 +100,10 @@ pub async fn get_personal_notes_encrypted_vetkey(
 /// Errors are enumerated by `PersonalNoteError`.
 #[update(guard = "caller_is_registered_user")]
 pub async fn get_personal_notes_vetkey_public_key() -> PersonalNotesVetkeyResult {
+    if let Err(e) =
+        GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller)
+    {
+        return PersonalNotesVetkeyResult::Err(PersonalNoteError::RateLimited(e));
+    }
     service::get_vetkey_public_key().await.into()
 }
