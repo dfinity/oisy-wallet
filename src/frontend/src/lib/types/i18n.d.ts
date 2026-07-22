@@ -2181,6 +2181,8 @@ interface I18nNotes {
 		empty_title: string;
 		empty_subtitle: string;
 		empty_add: string;
+		unlocking_title: string;
+		unlocking_subtitle: string;
 		add_note: string;
 		note_label: string;
 		placeholder: string;

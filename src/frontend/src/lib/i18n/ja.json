@@ -2642,6 +2642,8 @@
 			"empty_title": "メモはまだありません",
 			"empty_subtitle": "ウォレットと一緒に大切な情報を安全に保管できる、プライベートで暗号化されたメモを作成しましょう。",
 			"empty_add": "新しいメモを追加",
+			"unlocking_title": "",
+			"unlocking_subtitle": "",
 			"add_note": "メモを追加",
 			"note_label": "メモ",
 			"placeholder": "メモを入力…",

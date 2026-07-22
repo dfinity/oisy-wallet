@@ -2642,6 +2642,8 @@
 			"empty_title": "आपके पास अभी कोई नोट नहीं है",
 			"empty_subtitle": "अपने वॉलेट के साथ विवरण सुरक्षित रखने के लिए निजी, एन्क्रिप्टेड नोट बनाएं।",
 			"empty_add": "नया नोट जोड़ें",
+			"unlocking_title": "",
+			"unlocking_subtitle": "",
 			"add_note": "नोट जोड़ें",
 			"note_label": "नोट",
 			"placeholder": "एक नोट लिखें…",

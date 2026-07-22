@@ -2642,6 +2642,8 @@
 			"empty_title": "Ainda não tens notas",
 			"empty_subtitle": "Cria notas privadas e encriptadas para manter informações importantes seguras junto à tua carteira.",
 			"empty_add": "Adicionar nova nota",
+			"unlocking_title": "",
+			"unlocking_subtitle": "",
 			"add_note": "Adicionar nota",
 			"note_label": "Nota",
 			"placeholder": "Escreve uma nota…",

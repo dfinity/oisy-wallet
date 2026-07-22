@@ -2642,6 +2642,8 @@
 			"empty_title": "Vous n'avez pas encore de notes",
 			"empty_subtitle": "Créez des notes privées et chiffrées pour garder vos informations en sécurité aux côtés de votre wallet.",
 			"empty_add": "Ajouter une nouvelle note",
+			"unlocking_title": "",
+			"unlocking_subtitle": "",
 			"add_note": "Ajouter une note",
 			"note_label": "Note",
 			"placeholder": "Écrivez une note…",
