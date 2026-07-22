@@ -1,5 +1,8 @@
 import * as exchangeEnv from '$env/exchange.env';
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_TOKEN_GROUP } from '$env/tokens/groups/groups.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
@@ -33,7 +36,6 @@ import {
 	SOLANA_LOCAL_TOKEN_ID,
 	SOLANA_TOKEN_ID
 } from '$env/tokens/tokens.sol.env';
-import { ERC20_ICP_ADDRESS, ERC20_ICP_SYMBOL } from '$eth/constants/erc20-icp.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc4626CustomTokensStore } from '$eth/stores/erc4626-custom-tokens.store';
@@ -405,33 +407,45 @@ describe('exchange.derived', () => {
 			expect(result?.[mockValidErc4626Token.id]).toEqual(mockErc4626TokenPrice);
 		});
 
-		it('should return values for ERC20 token ICP', () => {
+		it('should price ERC20 ICP tokens at the native ICP rate on every chain, independently of a per-contract price', () => {
+			// The ERC20 ICP token shares one contract address across Ethereum, Base and
+			// Arbitrum and is grouped under the ICP token group. It must resolve to the native
+			// ICP price even though no price is set under its contract address in the store
+			// (mirroring chains the price provider does not list, e.g. Arbitrum).
+			const sharedAddress = '0x00f3C42833C3170159af4E92dbb451Fb3F708917';
+
+			const icpErc20Ethereum: Erc20Token = {
+				...mockValidErc20Token,
+				id: parseTokenId('Erc20IcpEthereumId'),
+				symbol: 'ICP',
+				address: sharedAddress,
+				network: ETHEREUM_NETWORK,
+				groupData: ICP_TOKEN_GROUP
+			};
+			const icpErc20Base: Erc20Token = {
+				...icpErc20Ethereum,
+				id: parseTokenId('Erc20IcpBaseId'),
+				network: BASE_NETWORK
+			};
+			const icpErc20Arbitrum: Erc20Token = {
+				...icpErc20Ethereum,
+				id: parseTokenId('Erc20IcpArbitrumId'),
+				network: ARBITRUM_MAINNET_NETWORK
+			};
+
 			erc20CustomTokensStore.setAll([
-				{
-					data: {
-						...mockErc20DefaultToken,
-						symbol: ERC20_ICP_SYMBOL,
-						address: ERC20_ICP_ADDRESS,
-						network: ETHEREUM_NETWORK,
-						enabled: true
-					},
-					certified: false
-				}
+				{ data: { ...icpErc20Ethereum, enabled: true }, certified: false },
+				{ data: { ...icpErc20Base, enabled: true }, certified: false },
+				{ data: { ...icpErc20Arbitrum, enabled: true }, certified: false }
 			]);
 
-			exchangeStore.set([
-				{ ethereum: ethPrice },
-				{ bitcoin: btcPrice },
-				{ 'internet-computer': icpPrice },
-				{ solana: solPrice },
-				{ binancecoin: bnbPrice },
-				{ 'polygon-ecosystem-token': polPrice }
-			]);
+			exchangeStore.set([{ 'internet-computer': icpPrice }]);
 
-			expect(get(exchanges)).toStrictEqual({
-				...expectedExchanges,
-				[mockErc20DefaultToken.id]: icpPrice
-			});
+			const result = get(exchanges);
+
+			expect(result?.[icpErc20Ethereum.id]).toEqual(icpPrice);
+			expect(result?.[icpErc20Base.id]).toEqual(icpPrice);
+			expect(result?.[icpErc20Arbitrum.id]).toEqual(icpPrice);
 		});
 
 		it('should return values for ICRC tokens', () => {
