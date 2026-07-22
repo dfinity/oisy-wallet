@@ -52,7 +52,11 @@
 	import { Theme } from '$lib/types/theme';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import { getTokenDisplayName, mapTokenUi } from '$lib/utils/token.utils';
+	import {
+		getTokenDisplayName,
+		isUSD1Token as isUSD1TokenUtil,
+		mapTokenUi
+	} from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
 	let pageTokenUi = $derived(
@@ -122,20 +126,27 @@
 
 	let isVeurToken = $derived(nonNullish($pageToken) && isVEURTokenUtil($pageToken));
 
+	let isUsd1Token = $derived(nonNullish($pageToken) && isUSD1TokenUtil($pageToken));
+
 	let isIcpHero = $derived(nonNullish($pageToken) && isTokenIcp($pageToken));
 
 	let isDarkTheme = $derived($themeStore === Theme.DARK);
 
-	let isGradientToRight = $derived($networkSolana && !isTrumpToken);
+	let isGradientToRight = $derived($networkSolana && !isTrumpToken && !isUsd1Token);
 
-	let isGradientToBottomRight = $derived(isGLDTToken || $networkBsc);
+	let isGradientToBottomRight = $derived((isGLDTToken || $networkBsc) && !isUsd1Token);
 
 	let rateChangeBackground = $derived.by(() => {
 		if (isIcpHero) {
 			return isDarkTheme ? ('dark' as const) : ('light' as const);
 		}
 
-		return $networkBase || $networkPolygon || $networkArbitrum || isTrumpToken || isVeurToken
+		return $networkBase ||
+			$networkPolygon ||
+			$networkArbitrum ||
+			isTrumpToken ||
+			isVeurToken ||
+			isUsd1Token
 			? ('dark' as const)
 			: ('light' as const);
 	});
@@ -143,16 +154,20 @@
 
 <div
 	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center transition-[background-position,background-size] duration-500 ease-in-out md:rounded-[28px] md:p-5"
-	class:bg-center={isVeurToken}
-	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
+	class:bg-center={isVeurToken || isUsd1Token}
+	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken || isUsd1Token}
 	class:bg-gradient-to-r={isGradientToRight}
 	class:bg-icp-token-hero-gradient={isIcpHero}
 	class:bg-linear-105={isGradientToBottomRight}
-	class:bg-linear-to-b={!isIcpHero && !isGradientToRight && !isGradientToBottomRight}
+	class:bg-linear-to-b={!isIcpHero &&
+		!isGradientToRight &&
+		!isGradientToBottomRight &&
+		!isUsd1Token}
 	class:bg-pos-100={!$pseudoNetworkChainFusion}
-	class:bg-size-200={!isTrumpToken}
+	class:bg-size-200={!isTrumpToken && !isUsd1Token}
 	class:bg-top-right={isVchfToken}
 	class:bg-trump-token-hero-image={isTrumpToken}
+	class:bg-usd1-token-hero-image={isUsd1Token}
 	class:bg-vchf-token-hero-image={isVchfToken}
 	class:bg-veur-token-hero-image={isVeurToken}
 	class:from-arbitrum-0={$networkArbitrum}

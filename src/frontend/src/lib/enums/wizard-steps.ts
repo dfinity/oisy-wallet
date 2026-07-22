@@ -97,25 +97,29 @@ export enum WizardStepsTradingWithdraw {
 export enum WizardStepsLiquidiumSupply {
 	SUPPLY = 'Supply',
 	REVIEW = 'Review',
-	SUPPLYING = 'Supplying'
+	SUPPLYING = 'Supplying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumBorrow {
 	BORROW = 'Borrow',
 	REVIEW = 'Review',
-	BORROWING = 'Borrowing'
+	BORROWING = 'Borrowing',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumWithdraw {
 	WITHDRAW = 'Withdraw',
 	REVIEW = 'Review',
-	WITHDRAWING = 'Withdrawing'
+	WITHDRAWING = 'Withdrawing',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsLiquidiumRepay {
 	REPAY = 'Repay',
 	REVIEW = 'Review',
-	REPAYING = 'Repaying'
+	REPAYING = 'Repaying',
+	TOKENS_LIST = 'Tokens List'
 }
 
 export enum WizardStepsClaimStakingReward {

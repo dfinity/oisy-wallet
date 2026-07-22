@@ -34,6 +34,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isIOS, isNativePlatform } from '$lib/utils/device.utils';
+	import { initWorkerCleanupOnPageUnload } from '$lib/utils/page-unload.utils';
 
 	interface Props {
 		children: Snippet;
@@ -98,6 +99,8 @@
 	let worker = $state<AuthWorker | undefined>();
 
 	onMount(async () => (worker = await AuthWorker.init()));
+
+	onMount(initWorkerCleanupOnPageUnload);
 	onDestroy(() => worker?.destroy());
 
 	$effect(() => {

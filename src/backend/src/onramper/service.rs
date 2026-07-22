@@ -9,6 +9,8 @@
 //! the signing oracle), and a frontend/backend derivation mismatch fails loudly instead of
 //! producing a URL that pays an unspendable address.
 
+use std::collections::HashMap;
+
 use candid::Principal;
 use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
 use shared::types::onramper::{
@@ -62,11 +64,26 @@ async fn verify_caller_network_wallets(
     principal: &Principal,
     provided: &[OnramperSignedEntry],
 ) -> Result<Vec<OnramperSignedEntry>, SignOnramperWidgetUrlError> {
+    // Memoize each network's derivation for the duration of the request. `provided` is an
+    // unbounded, un-deduplicated caller-supplied vector, and deriving BTC/ETH/SOL addresses makes
+    // management-canister public-key reads. Without this cache an authenticated caller could repeat
+    // the same network thousands of times in one rate-limited request and amplify it into that many
+    // inter-canister reads (cycle drain). Distinct networks are bounded — only four are recognized
+    // and any other resolves to `None` and fails fast — so caching by normalized id caps the reads
+    // at one per supported network regardless of vector length, while preserving the exact
+    // per-entry signed output (duplicates are still emitted as supplied).
+    let mut derived_cache: HashMap<String, Option<String>> = HashMap::new();
     let mut verified = Vec::with_capacity(provided.len());
     for entry in provided {
-        let derived = derive_network_address(&entry.key, principal)
-            .await
-            .ok_or(SignOnramperWidgetUrlError::AddressDerivationFailed)?;
+        let network_id = entry.key.to_lowercase();
+        let derived = if let Some(cached) = derived_cache.get(&network_id) {
+            cached.clone()
+        } else {
+            let freshly_derived = derive_network_address(&network_id, principal).await;
+            derived_cache.insert(network_id, freshly_derived.clone());
+            freshly_derived
+        }
+        .ok_or(SignOnramperWidgetUrlError::AddressDerivationFailed)?;
         if derived != entry.value {
             return Err(SignOnramperWidgetUrlError::AddressMismatch);
         }
@@ -79,9 +96,9 @@ async fn verify_caller_network_wallets(
 }
 
 /// Derives the caller's own address for a given `OnRamper` network id, or `None` when the network
-/// is unknown or its derivation failed (both treated as "cannot verify").
-async fn derive_network_address(network_id: &str, principal: &Principal) -> Option<String> {
-    let id = network_id.to_lowercase();
+/// is unknown or its derivation failed (both treated as "cannot verify"). `network_id` must already
+/// be normalized to lowercase by the caller (which also keys the per-request derivation cache).
+async fn derive_network_address(id: &str, principal: &Principal) -> Option<String> {
     if id == ONRAMPER_NETWORK_BITCOIN {
         signer::btc_principal_to_p2wpkh_address(BitcoinNetwork::Mainnet, principal)
             .await

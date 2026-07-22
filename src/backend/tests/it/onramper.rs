@@ -128,6 +128,63 @@ fn sign_onramper_widget_url_signs_the_callers_verified_icp_address() {
 }
 
 #[test]
+fn sign_onramper_widget_url_signs_repeated_networks_without_altering_output() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    // Locks the output invariant behind the request-amplification fix:
+    // `verify_caller_network_wallets` now derives each distinct network at most once, but must
+    // still emit one verified entry per supplied entry, so a repeated network produces the same
+    // signed content as before the cache. ICP is used because it derives locally (no signer):
+    // this asserts output-preservation, not the derivation-count reduction itself — that is
+    // enforced by the memoization and cannot be observed here without wiring up the BTC/ETH/SOL
+    // threshold-key derivation this suite intentionally omits.
+    let repeated = vec![entry("icp", &icp_address); 50];
+    let result = sign(&pic_setup, caller, network_wallets_request(repeated));
+
+    let response = match result {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
+        SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+    };
+    // Every supplied entry is still emitted (the cache dedups derivation, not the signed output).
+    let expected_pairs = vec![format!("icp:{icp_address}"); 50].join(",");
+    assert_eq!(
+        response.signed_query,
+        format!("networkWallets={expected_pairs}")
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_does_not_sign_unverified_wallet_fields() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    let result = sign(
+        &pic_setup,
+        caller,
+        SignOnramperWidgetUrlRequest {
+            wallets: vec![entry("btc", "attacker-btc-address")],
+            network_wallets: vec![entry("icp", &icp_address)],
+            wallet_address_tags: vec![entry("btc", "attacker-tag")],
+        },
+    );
+
+    let response = match result {
+        SignOnramperWidgetUrlResult::Ok(response) => response,
+        SignOnramperWidgetUrlResult::Err(err) => panic!("expected Ok response but got {err:?}"),
+    };
+    assert_eq!(
+        response.signed_query,
+        format!("networkWallets=icp:{icp_address}"),
+        "only backend-verified networkWallets may be signed"
+    );
+}
+
+#[test]
 fn sign_onramper_widget_url_rejects_address_not_owned_by_caller() {
     let pic_setup = setup();
     provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
@@ -164,6 +221,29 @@ fn sign_onramper_widget_url_rejects_address_for_underivable_network() {
     assert_eq!(
         result,
         SignOnramperWidgetUrlResult::Err(SignOnramperWidgetUrlError::AddressDerivationFailed)
+    );
+}
+
+#[test]
+fn sign_onramper_widget_url_rejects_mixed_request_when_any_network_is_underivable() {
+    let pic_setup = setup();
+    provision_signing_secret(&pic_setup, TEST_SIGNING_SECRET);
+    let caller = Principal::from_text(CALLER).expect("valid caller principal");
+    let icp_address = caller_icp_account_id(caller);
+
+    let result = sign(
+        &pic_setup,
+        caller,
+        network_wallets_request(vec![
+            entry("icp", &icp_address),
+            entry("dogecoin", "DOGEaddress"),
+        ]),
+    );
+
+    assert_eq!(
+        result,
+        SignOnramperWidgetUrlResult::Err(SignOnramperWidgetUrlError::AddressDerivationFailed),
+        "one unverifiable networkWallets entry must reject the whole signing request"
     );
 }
 

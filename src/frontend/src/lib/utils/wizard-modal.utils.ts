@@ -5,6 +5,10 @@ import type {
 	WizardStepsConvert,
 	WizardStepsHowToConvert,
 	WizardStepsLimitOrder,
+	WizardStepsLiquidiumBorrow,
+	WizardStepsLiquidiumRepay,
+	WizardStepsLiquidiumSupply,
+	WizardStepsLiquidiumWithdraw,
 	WizardStepsReceive,
 	WizardStepsScanner,
 	WizardStepsSend,
@@ -28,7 +32,11 @@ type StepName =
 	| WizardStepsScanner
 	| WizardStepsTradingDeposit
 	| WizardStepsTradingWithdraw
-	| WizardStepsLimitOrder;
+	| WizardStepsLimitOrder
+	| WizardStepsLiquidiumSupply
+	| WizardStepsLiquidiumBorrow
+	| WizardStepsLiquidiumWithdraw
+	| WizardStepsLiquidiumRepay;
 
 export const goToWizardStep = <T extends StepName>({
 	modal,

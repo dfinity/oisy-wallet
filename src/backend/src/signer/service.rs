@@ -6,8 +6,8 @@ use ic_cdk::{
     bitcoin_canister::Network as BitcoinNetwork,
     call::Call,
     management_canister::{
-        ecdsa_public_key, schnorr_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs,
-        SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
+        canister_status, ecdsa_public_key, schnorr_public_key, CanisterStatusArgs, EcdsaCurve,
+        EcdsaKeyId, EcdsaPublicKeyArgs, SchnorrAlgorithm, SchnorrKeyId, SchnorrPublicKeyArgs,
     },
 };
 use ic_cycles_ledger_client::{
@@ -366,6 +366,35 @@ pub(crate) fn sol_address_from_ed25519_pubkey(pubkey: &[u8]) -> Result<String, S
     Ok(bs58::encode(pubkey).into_string())
 }
 
+/// Seconds in a day, used to convert the freezing threshold (a duration) and the idle burn rate
+/// (per day) into a cycle amount.
+const SECONDS_PER_DAY: u32 = 86_400;
+
+/// The canister's frozen reserve, in cycles.
+///
+/// The management canister reports `freezing_threshold` as a duration in seconds, not a cycle
+/// amount.  The reserve in cycles is what the canister would burn while idle over that duration:
+/// `freezing_threshold_secs * idle_cycles_burned_per_day / 86_400` — the same computation the IC
+/// uses to decide when a canister is frozen.
+fn frozen_reserve_cycles(freezing_threshold_secs: &Nat, idle_cycles_burned_per_day: &Nat) -> Nat {
+    freezing_threshold_secs.clone() * idle_cycles_burned_per_day.clone()
+        / Nat::from(SECONDS_PER_DAY)
+}
+
+/// How many cycles to send to the cycles ledger: `percentage`% of the balance available *above* the
+/// frozen reserve.
+///
+/// Returns zero when the canister is at or below its frozen reserve — a canister must never spend
+/// into the reserve, so in that case it sends nothing at all.  Because the result is at most
+/// `backend_cycles - frozen_reserve`, the canister always retains at least `frozen_reserve`.
+fn cycles_to_send(backend_cycles: &Nat, frozen_reserve: &Nat, percentage: u8) -> Nat {
+    if backend_cycles <= frozen_reserve {
+        return Nat::from(0u32);
+    }
+    let available_above_reserve = backend_cycles.clone() - frozen_reserve.clone();
+    available_above_reserve * Nat::from(percentage) / Nat::from(100u32)
+}
+
 /// Tops up the backend canister account on the cycles ledger.
 ///
 /// # Context
@@ -417,8 +446,45 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
     // If the ledger balance is low, send cycles:
     if ledger_balance < request.threshold() {
+        // The canister must never spend into its frozen reserve: sending a fraction of the *total*
+        // balance can push a canister with a large freezing threshold (some run at ~40T) to or
+        // below its freeze line.  Base the send on the balance available *above* the
+        // reserve instead.
+        //
+        // `freezing_threshold` from the management canister is a duration in seconds, not a cycle
+        // amount, so the reserve in cycles is derived from the idle burn rate — the same way the IC
+        // itself computes it.
+        let status = match canister_status(&CanisterStatusArgs {
+            canister_id: ic_cdk::api::canister_self(),
+        })
+        .await
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+            available: backend_cycles.clone(),
+            tried_to_send: Nat::from(0u32),
+        }) {
+            Ok(status) => status,
+            Err(err) => return TopUpCyclesLedgerResult::Err(err),
+        };
+        let frozen_reserve = frozen_reserve_cycles(
+            &status.settings.freezing_threshold,
+            &status.idle_cycles_burned_per_day,
+        );
+
         // Decide how many cycles to keep and how many to send to the cycles ledger.
-        let to_send = backend_cycles.clone() / Nat::from(100u32) * Nat::from(request.percentage());
+        let to_send = cycles_to_send(&backend_cycles, &frozen_reserve, request.percentage());
+
+        // At or below the frozen reserve there is nothing safe to send; skip the deposit entirely
+        // rather than making a zero-cycle inter-canister call.
+        let zero = Nat::from(0u32);
+        if to_send == zero {
+            return Ok(TopUpCyclesLedgerResponse {
+                ledger_balance,
+                backend_cycles,
+                topped_up: zero,
+            })
+            .into();
+        }
+
         let to_retain = backend_cycles.clone() - to_send.clone();
 
         // Top up the cycles ledger.
@@ -468,9 +534,17 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
 
 #[cfg(test)]
 mod tests {
+    use candid::{Nat, Principal};
+    use ic_ledger_types::{AccountIdentifier, DEFAULT_SUBACCOUNT};
     use pretty_assertions::assert_eq;
 
-    use super::{eth_address_from_ecdsa_pubkey, sol_address_from_ed25519_pubkey};
+    use super::{
+        cycles_to_send, eth_address_from_ecdsa_pubkey, frozen_reserve_cycles,
+        principal_to_account_identifier_hex, sol_address_from_ed25519_pubkey,
+    };
+
+    /// 1 trillion cycles (1T), the unit the examples are written in.
+    const T: u128 = 1_000_000_000_000;
 
     // secp256k1 private key `1` — a canonical known-answer vector. Its public key derives the
     // Ethereum address 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf (widely published).
@@ -508,6 +582,20 @@ mod tests {
     }
 
     #[test]
+    fn principal_to_account_identifier_hex_uses_the_default_subaccount() {
+        let principal =
+            Principal::from_text("xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae")
+                .expect("valid principal");
+
+        let account_id = principal_to_account_identifier_hex(&principal);
+
+        assert_eq!(
+            account_id,
+            AccountIdentifier::new(&principal, &DEFAULT_SUBACCOUNT).to_hex()
+        );
+    }
+
+    #[test]
     fn sol_address_of_zero_pubkey_is_the_known_base58_string() {
         // base58 of 32 zero bytes is 32 '1's — the Solana System Program id.
         let address = sol_address_from_ed25519_pubkey(&[0u8; 32]).unwrap();
@@ -529,5 +617,62 @@ mod tests {
     fn sol_address_rejects_wrong_length_pubkey() {
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 31]).is_err());
         assert!(sol_address_from_ed25519_pubkey(&[0u8; 33]).is_err());
+    }
+
+    #[test]
+    fn frozen_reserve_is_burn_rate_scaled_by_threshold_days() {
+        // 30-day threshold at a burn rate of 2T/day → 60T reserve.
+        let reserve = frozen_reserve_cycles(&Nat::from(30u32 * 86_400), &Nat::from(2u128 * T));
+        assert_eq!(reserve, Nat::from(60u128 * T));
+    }
+
+    #[test]
+    fn frozen_reserve_is_zero_when_threshold_or_burn_rate_is_zero() {
+        assert_eq!(
+            frozen_reserve_cycles(&Nat::from(0u32), &Nat::from(2u128 * T)),
+            Nat::from(0u32)
+        );
+        assert_eq!(
+            frozen_reserve_cycles(&Nat::from(30u32 * 86_400), &Nat::from(0u32)),
+            Nat::from(0u32)
+        );
+    }
+
+    #[test]
+    fn to_send_uses_only_the_balance_above_the_reserve() {
+        // The motivating example: 80T balance, 40T reserve, default 50%.
+        // Old behaviour sent 40T (50% of total); now it sends 20T (50% of the 40T surplus).
+        let to_send = cycles_to_send(&Nat::from(80u128 * T), &Nat::from(40u128 * T), 50);
+        assert_eq!(to_send, Nat::from(20u128 * T));
+    }
+
+    #[test]
+    fn to_send_always_leaves_at_least_the_reserve() {
+        let backend_cycles = Nat::from(80u128 * T);
+        let reserve = Nat::from(40u128 * T);
+        let to_send = cycles_to_send(&backend_cycles, &reserve, 50);
+        let retained = backend_cycles - to_send;
+        assert!(retained >= reserve);
+    }
+
+    #[test]
+    fn to_send_is_zero_at_or_below_the_reserve() {
+        // Exactly at the reserve.
+        assert_eq!(
+            cycles_to_send(&Nat::from(40u128 * T), &Nat::from(40u128 * T), 50),
+            Nat::from(0u32)
+        );
+        // Below the reserve.
+        assert_eq!(
+            cycles_to_send(&Nat::from(30u128 * T), &Nat::from(40u128 * T), 50),
+            Nat::from(0u32)
+        );
+    }
+
+    #[test]
+    fn to_send_just_above_the_reserve_sends_a_fraction_of_the_small_surplus() {
+        // 40T + 10T surplus, 50% → 5T sent, reserve fully retained.
+        let to_send = cycles_to_send(&Nat::from(50u128 * T), &Nat::from(40u128 * T), 50);
+        assert_eq!(to_send, Nat::from(5u128 * T));
     }
 }

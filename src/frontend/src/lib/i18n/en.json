@@ -181,10 +181,9 @@
 			"authenticate": "Open or Create",
 			"sign_in_or_sign_up": "Log in or sign up",
 			"internet_identity": "Internet Identity",
-			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
-			"instant_and_private": "Built-in AI Assistant with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain",
-			"move_swap_grow": "Move, swap, and grow your assets across networks"
+			"asset_types": "Crypto, stocks, commodities, collectibles and encrypted notes.",
+			"advanced_cryptography": "Private and tamperproof. Invisible, if you need it to be.",
+			"move_swap_grow": "Earn, borrow and trade, with an AI assistant built in."
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile",
@@ -501,11 +500,6 @@
 				"one_liner": "The hunt has begun in search of the elusive Motoko Tokyo and the Nightscroller Syndicate can use your help...",
 				"call_to_action": "Come find me when you're ready...",
 				"description": "Where in the World is Motoko Tokyo is a global, blockchain‑powered puzzle adventure built on the Internet Computer Protocol (ICP). Join an exclusive agency and collaborate with players worldwide to unravel a series of cryptic riddles. Every successful solution brings you one step closer to tracking down Motoko Tokyo. In each round, the first player to solve all riddles claims the bounty and secures a coveted spot on the leaderboard."
-			},
-			"icp_flags": {
-				"name": "icp-flags",
-				"one_liner": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions.",
-				"description": "Fully on-chain competitive auction protocol governing 250 exclusive digital flag positions. Control over each position is determined exclusively by deterministic smart contract logic. There is no administrator discretion, no off-chain settlement layer, and no manual intervention.<br/>Each flag represents a single, indivisible on-chain position controlled by exactly one principal at a time. Control is transferred only through a valid higher bid that satisfies the contract’s escalation formula."
 			},
 			"cloud_engines": {
 				"name": "Cloud Engines",
@@ -1136,6 +1130,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
+			"link_domain_mismatch": "This link is for a different domain",
 			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
@@ -1745,9 +1740,8 @@
 			"transaction_fee": "Total estimated fee",
 			"approval_fee": "Approval fee",
 			"transfer_fee": "Network fee",
-			"consent": "I understand my tokens will be held by the OISY Trade canister and are subject to on-chain smart contract risk.",
-			"info_title": "OISY Trade: on-chain order book",
-			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by on-chain smart contracts.",
+			"info_title": "OISY Trade: onchain order book",
+			"info_description": "Deposited funds are held by the OISY Trade canister and used to place limit orders, secured by onchain smart contracts.",
 			"empty_title": "Nothing to deposit yet",
 			"empty_description": "OISY Trade lets you create orders for these tokens. Add any of them to your wallet, then deposit it here to start trading.",
 			"approving": "Approving",
@@ -1834,8 +1828,8 @@
 			"placing_title": "Placing order",
 			"sell": "Sell",
 			"buy": "Buy",
-			"select_base_token": "Select token to sell",
-			"select_quote_token": "Select a token to trade against",
+			"select_sell_token": "Select token to sell",
+			"select_buy_token": "Select token to buy",
 			"you_sell": "You sell",
 			"you_buy": "You buy",
 			"hero_prefix": "You",
@@ -2382,6 +2376,10 @@
 		"text": {
 			"description": "Supply Bitcoin. Borrow Stablecoins. Stay Native.",
 			"health_factor": "Health factor",
+			"health_no_debt": "No debt",
+			"health_healthy": "Healthy",
+			"health_at_risk": "At risk",
+			"health_critical": "Critical",
 			"net_value": "Net value",
 			"markets": "Markets",
 			"total_supplied": "Total supplied",
@@ -2399,6 +2397,10 @@
 			"action_repay": "Repay",
 			"action_withdraw": "Withdraw",
 			"transaction_failed": "Transaction failed",
+			"select_supply_token": "Select token to supply",
+			"select_borrow_token": "Select token to borrow",
+			"select_withdraw_token": "Select token to withdraw",
+			"select_repay_token": "Select token to repay",
 			"supply_review": "Review supply",
 			"supply_review_subtitle": "You supply",
 			"supplying": "Supplying",

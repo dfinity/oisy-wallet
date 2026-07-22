@@ -203,5 +203,43 @@ describe('_worker.services', () => {
 				);
 			});
 		});
+
+		describe('terminateAllWorkers', () => {
+			beforeEach(() => {
+				AppWorker.resetForTesting();
+			});
+
+			it('should terminate every spawned worker', async () => {
+				const { worker: first } = await createTestWorker();
+				const { worker: second } = await createTestWorker();
+
+				AppWorker.terminateAllWorkers();
+
+				expect(first.worker.terminate).toHaveBeenCalledOnce();
+				expect(second.worker.terminate).toHaveBeenCalledOnce();
+			});
+
+			it('should terminate the singleton worker and reset it', async () => {
+				const { worker } = await createTestWorkerSingleton();
+
+				AppWorker.terminateAllWorkers();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
+
+				const next = await AppWorker.getInstance({ asSingleton: true });
+
+				expect(next.worker).not.toBe(worker.worker);
+			});
+
+			it('should not terminate again a worker that was already destroyed', async () => {
+				const { instance, worker } = await createTestWorker();
+
+				instance.destroy();
+
+				AppWorker.terminateAllWorkers();
+
+				expect(worker.worker.terminate).toHaveBeenCalledOnce();
+			});
+		});
 	});
 });

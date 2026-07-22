@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Chain } from '@liquidium/client';
 	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -44,6 +45,7 @@
 		inflowFee?: bigint;
 		inflowFeeUnavailable?: boolean;
 		currentStep?: WizardStep;
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -56,6 +58,7 @@
 		inflowFee,
 		inflowFeeUnavailable,
 		currentStep,
+		onSelectToken,
 		onClose,
 		onNext,
 		onBack
@@ -180,6 +183,7 @@
 				identity: $authIdentity,
 				ethAddress: $ethAddress,
 				poolId: market.poolId,
+				chain: Chain.ETH,
 				asset: market.asset,
 				amount: amountBaseUnits,
 				inflowFee,
@@ -250,6 +254,7 @@
 				{onClose}
 				onCustomErrorValidate={validateSupplyAmount}
 				{onNext}
+				{onSelectToken}
 				totalFee={$maxGasFee}
 				bind:amount
 			/>

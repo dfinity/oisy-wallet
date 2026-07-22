@@ -16,6 +16,10 @@ export abstract class AppWorker {
 	static #singletonWorker?: Worker;
 	static #singletonRefCount = 0;
 
+	// Every underlying Worker ever spawned and not yet terminated, so that all
+	// threads can be torn down at once when the page unloads.
+	static #liveWorkers = new Set<Worker>();
+
 	protected constructor(workerData: WorkerData) {
 		const { worker, isSingleton } = workerData;
 
@@ -31,7 +35,9 @@ export abstract class AppWorker {
 
 	static #newInstance = async (): Promise<Worker> => {
 		const Workers = await import('$lib/workers/workers?worker');
-		return new Workers.default();
+		const worker = new Workers.default();
+		AppWorker.#liveWorkers.add(worker);
+		return worker;
 	};
 
 	static #getInstanceAsSingleton = async (): Promise<Worker> => {
@@ -97,6 +103,8 @@ export abstract class AppWorker {
 
 			this.#worker.onmessage = null;
 
+			AppWorker.#liveWorkers.delete(this.#worker);
+
 			return;
 		}
 
@@ -108,9 +116,27 @@ export abstract class AppWorker {
 
 		if (AppWorker.#singletonRefCount <= 0 && nonNullish(AppWorker.#singletonWorker)) {
 			AppWorker.#singletonWorker.terminate();
+			AppWorker.#liveWorkers.delete(AppWorker.#singletonWorker);
 			AppWorker.#singletonWorker = undefined;
 			AppWorker.#singletonRefCount = 0;
 		}
+	};
+
+	/**
+	 * Terminates every worker thread spawned through this class, regardless of
+	 * which service owns its wrapper.
+	 *
+	 * Meant for page unload: without it, the old document's worker threads stay
+	 * resident while the next document boots its own, roughly doubling memory
+	 * right after a reload. Termination is blunt (no per-service `destroy()`
+	 * bookkeeping) because the document is going away anyway.
+	 */
+	static terminateAllWorkers = () => {
+		AppWorker.#liveWorkers.forEach((worker) => worker.terminate());
+		AppWorker.#liveWorkers.clear();
+
+		AppWorker.#singletonWorker = undefined;
+		AppWorker.#singletonRefCount = 0;
 	};
 
 	protected abstract stopTimer(): void;
@@ -138,5 +164,6 @@ export abstract class AppWorker {
 			this.#singletonWorker = undefined;
 		}
 		this.#singletonRefCount = 0;
+		this.#liveWorkers.clear();
 	}
 }

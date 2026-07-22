@@ -264,7 +264,8 @@
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg"
+		"icon": "/icons/icrc/53nhb-haaaa-aaaar-qbn5q-cai.svg",
+		"metadataOnly": true
 	},
 	"USDT": {
 		"ledgerCanisterId": "ij33n-oiaaa-aaaar-qbooa-cai",
@@ -283,6 +284,7 @@
 		"fee": {
 			"__bigint__": "10000"
 		},
-		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg"
+		"icon": "/icons/icrc/ij33n-oiaaa-aaaar-qbooa-cai.svg",
+		"metadataOnly": true
 	}
 }

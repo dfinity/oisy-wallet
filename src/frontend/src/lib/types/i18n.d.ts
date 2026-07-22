@@ -170,7 +170,6 @@ interface I18nAuth {
 		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
-		instant_and_private: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
 	};
@@ -335,7 +334,6 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
-		icp_flags: { name: string; one_liner: string; description: string };
 		cloud_engines: {
 			name: string;
 			one_liner: string;
@@ -860,7 +858,11 @@ interface I18nScanner {
 		learn_more_about_pay: string;
 		scanner: string;
 	};
-	error: { code_link_is_not_valid: string; data_is_incompleted: string };
+	error: {
+		code_link_is_not_valid: string;
+		link_domain_mismatch: string;
+		data_is_incompleted: string;
+	};
 }
 
 interface I18nConvert {
@@ -1412,7 +1414,6 @@ interface I18nTrading {
 		transaction_fee: string;
 		approval_fee: string;
 		transfer_fee: string;
-		consent: string;
 		info_title: string;
 		info_description: string;
 		empty_title: string;
@@ -1498,8 +1499,8 @@ interface I18nTrading {
 		placing_title: string;
 		sell: string;
 		buy: string;
-		select_base_token: string;
-		select_quote_token: string;
+		select_sell_token: string;
+		select_buy_token: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;
@@ -1916,6 +1917,10 @@ interface I18nLiquidium {
 	text: {
 		description: string;
 		health_factor: string;
+		health_no_debt: string;
+		health_healthy: string;
+		health_at_risk: string;
+		health_critical: string;
 		net_value: string;
 		markets: string;
 		total_supplied: string;
@@ -1933,6 +1938,10 @@ interface I18nLiquidium {
 		action_repay: string;
 		action_withdraw: string;
 		transaction_failed: string;
+		select_supply_token: string;
+		select_borrow_token: string;
+		select_withdraw_token: string;
+		select_repay_token: string;
 		supply_review: string;
 		supply_review_subtitle: string;
 		supplying: string;

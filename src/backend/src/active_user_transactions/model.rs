@@ -302,8 +302,9 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
             ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, LiquidiumAction,
-            LiquidiumData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
-            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            LiquidiumData, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
+            MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         token_id::TokenId,
     };
@@ -462,6 +463,26 @@ mod tests {
         req.data = liquidium_data(5_100, &"a".repeat(MAX_LIQUIDIUM_POOL_ID_LEN + 1));
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn evm_to_icp_rejects_anonymous_recipient() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("id-1");
+        req.data = ActiveUserTransactionData::OneSecEvmToIcp(OneSecEvmToIcpData {
+            source_token: TokenId::EvmNative(1),
+            dest_token: TokenId::IcpNative,
+            amount: Nat::from(1u32),
+            recipient_principal: Principal::anonymous(),
+        });
+
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert_eq!(
+            err,
+            ActiveUserTransactionError::InvalidData(
+                "recipient_principal must not be anonymous".to_string()
+            )
+        );
     }
 
     #[test]

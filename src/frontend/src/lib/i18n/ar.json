@@ -181,10 +181,9 @@
 			"authenticate": "فتح أو إنشاء",
 			"sign_in_or_sign_up": "تسجيل الدخول أو إنشاء حساب",
 			"internet_identity": "",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": "",
-			"move_swap_grow": "انقل أصولك وبدّلها ونمِّها عبر الشبكات"
+			"asset_types": "العملات المشفّرة والأسهم والسلع والمقتنيات والملاحظات المشفّرة.",
+			"advanced_cryptography": "خاص وغير قابل للعبث. غير مرئي عند الحاجة.",
+			"move_swap_grow": "اربح واقترض وتداول، مع مساعد ذكاء اصطناعي مدمج."
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال",
@@ -500,11 +499,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1136,6 +1130,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "الرمز/الرابط غير صالح",
+			"link_domain_mismatch": "",
 			"data_is_incompleted": "البيانات المستلمة غير مكتملة. بعض التفاصيل المطلوبة مفقودة."
 		}
 	},
@@ -1745,7 +1740,6 @@
 			"transaction_fee": "",
 			"approval_fee": "",
 			"transfer_fee": "",
-			"consent": "",
 			"info_title": "",
 			"info_description": "",
 			"empty_title": "",
@@ -1834,8 +1828,8 @@
 			"placing_title": "",
 			"sell": "",
 			"buy": "",
-			"select_base_token": "",
-			"select_quote_token": "",
+			"select_sell_token": "",
+			"select_buy_token": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -2382,6 +2376,10 @@
 		"text": {
 			"description": "",
 			"health_factor": "",
+			"health_no_debt": "",
+			"health_healthy": "",
+			"health_at_risk": "",
+			"health_critical": "",
 			"net_value": "",
 			"markets": "",
 			"total_supplied": "",
@@ -2399,6 +2397,10 @@
 			"action_repay": "",
 			"action_withdraw": "",
 			"transaction_failed": "",
+			"select_supply_token": "",
+			"select_borrow_token": "",
+			"select_withdraw_token": "",
+			"select_repay_token": "",
 			"supply_review": "",
 			"supply_review_subtitle": "",
 			"supplying": "",
