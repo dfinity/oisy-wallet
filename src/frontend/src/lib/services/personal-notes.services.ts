@@ -4,6 +4,7 @@ import {
 	getPersonalNotesCount,
 	setPersonalNote as setPersonalNoteApi
 } from '$lib/api/backend.api';
+import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
 import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import { trackPersonalNote } from '$lib/services/personal-notes-analytics.services';
 import {
@@ -59,6 +60,14 @@ const refreshCount = async ({
  * blanking the whole list (per-note isolation).
  */
 export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
+	// !!! DO NOT MERGE — simulator: force a vetKey rate-limit so the Notes modal
+	// always renders the "temporarily unavailable" panel (for screenshots). Flip
+	// the thrown error to `new Error(...)` to preview the generic (non-rate-limited) copy.
+	const SIMULATE_UNAVAILABLE = true as boolean;
+	if (SIMULATE_UNAVAILABLE) {
+		throw new PersonalNotesRateLimitedError('SIMULATED rate limit — DO NOT MERGE');
+	}
+
 	const owner = ownerPrincipal(identity);
 	// Only blank the cache when the owner changes; a same-owner refresh keeps the
 	// last-known-good list so a failed reload (e.g. the decryption-failure Retry)
