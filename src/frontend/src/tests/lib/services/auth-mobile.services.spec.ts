@@ -4,6 +4,7 @@ import { initMobileAuthListener, signInMobile } from '$lib/services/auth-mobile.
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { buildMobileAuthCallbackUrl } from '$lib/utils/auth-mobile.utils';
+import { App } from '@capacitor/app';
 import { assertNonNullish } from '@dfinity/utils';
 import { KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { DelegationChain, Ed25519KeyIdentity } from '@icp-sdk/core/identity';
@@ -82,7 +83,6 @@ describe('auth-mobile services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		storageMap.clear();
-		appUrlOpenListener = undefined;
 
 		vi.spyOn(AuthClientProvider, 'getInstance').mockReturnValue({
 			storage: storageMock,
@@ -90,6 +90,14 @@ describe('auth-mobile services', () => {
 		} as unknown as AuthClientProvider);
 
 		vi.spyOn(authStore, 'forceSync').mockResolvedValue(undefined);
+	});
+
+	it('should register the deep-link listener only once', async () => {
+		await initMobileAuthListener();
+		await initMobileAuthListener();
+
+		expect(App.addListener).toHaveBeenCalledOnce();
+		expect(appUrlOpenListener).toBeDefined();
 	});
 
 	it('should not settle before the deep-link callback arrives', async () => {

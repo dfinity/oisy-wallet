@@ -105,20 +105,20 @@ influences derivation.
 
 ## Changes (grounded in real files)
 
-| Area           | File(s)                                                                  | Change                                                                                                                              |
-| -------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Bridge route   | `src/frontend/src/routes/(public)/mobile-auth/+page.svelte` + `+page.ts` | New public page running the bridge sign-in                                                                                          |
-| Bridge service | `src/frontend/src/lib/services/auth-mobile-bridge.services.ts`           | Bridge sign-in: `PartialIdentity` + in-memory storage + deep-link redirect                                                          |
-| Native service | `src/frontend/src/lib/services/auth-mobile.services.ts`                  | Session key generation, system-browser launch, `appUrlOpen` callback handling, storage handoff                                      |
-| Utils          | `src/frontend/src/lib/utils/auth-mobile.utils.ts`                        | Pure helpers: hex codecs, redirect-URI allowlist check, callback URL parsing                                                        |
-| Constants      | `src/frontend/src/lib/constants/mobile.constants.ts`                     | Deep-link scheme, allowlist, bridge route path, mobile session TTL                                                                  |
-| Sign-in branch | `src/frontend/src/lib/services/auth.services.ts`                         | On native platform, route sign-in through the mobile flow                                                                           |
-| App boot       | `src/frontend/src/routes/+layout.svelte`                                 | Register the deep-link listener on native platforms                                                                                 |
-| i18n           | `src/frontend/src/lib/i18n/en.json`                                      | Bridge page copy (`mobile_auth.*`)                                                                                                  |
-| Capacitor      | `capacitor.config.ts`, `mobile/android/`, `mobile/ios/`                  | App shell config + generated native projects                                                                                        |
-| CI             | `.github/workflows/mobile-build.yml`                                     | Manual/PR workflow producing a debug APK and an unsigned iOS build as artifacts                                                     |
-| Deps           | `package.json`                                                           | `@capacitor/core`, `@capacitor/app`, `@capacitor/browser` (runtime), `@capacitor/cli`, `@capacitor/android`, `@capacitor/ios` (dev) |
-| Docs           | `docs/ai/PRODUCT.md`                                                     | Mobile app POC section                                                                                                              |
+| Area           | File(s)                                                                   | Change                                                                                                                              |
+| -------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Bridge route   | `src/frontend/src/routes/(public)/mobile-auth/+page@.svelte` + `+page.ts` | New public page running the bridge sign-in                                                                                          |
+| Bridge service | `src/frontend/src/lib/services/auth-mobile-bridge.services.ts`            | Bridge sign-in: `PartialIdentity` + in-memory storage + deep-link redirect                                                          |
+| Native service | `src/frontend/src/lib/services/auth-mobile.services.ts`                   | Session key generation, system-browser launch, `appUrlOpen` callback handling, storage handoff                                      |
+| Utils          | `src/frontend/src/lib/utils/auth-mobile.utils.ts`                         | Pure helpers: hex codecs, redirect-URI allowlist check, callback URL parsing                                                        |
+| Constants      | `src/frontend/src/lib/constants/mobile-auth.constants.ts`                 | Deep-link scheme, allowlist, bridge route path, mobile session TTL                                                                  |
+| Sign-in branch | `src/frontend/src/lib/services/auth.services.ts`                          | On native platform, route sign-in through the mobile flow                                                                           |
+| App boot       | `src/frontend/src/routes/+layout.svelte`                                  | Register the deep-link listener on native platforms                                                                                 |
+| i18n           | `src/frontend/src/lib/i18n/en.json`                                       | Bridge page copy (`mobile_auth.*`)                                                                                                  |
+| Capacitor      | `mobile/capacitor.config.ts`, `mobile/android/`, `mobile/ios/`            | App shell config + generated native projects                                                                                        |
+| CI             | `.github/workflows/mobile-build.yml`                                      | Manual/PR workflow producing a debug APK and an unsigned iOS build as artifacts                                                     |
+| Deps           | `package.json`                                                            | `@capacitor/core`, `@capacitor/app`, `@capacitor/browser` (runtime), `@capacitor/cli`, `@capacitor/android`, `@capacitor/ios` (dev) |
+| Docs           | `docs/ai/PRODUCT.md`                                                      | Mobile app POC section                                                                                                              |
 
 ## Acceptance criteria
 

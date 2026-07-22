@@ -196,12 +196,21 @@ const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void>
 	}
 };
 
+let mobileAuthListenerRegistered = false;
+
 /**
- * Registers the deep-link listener for the auth-bridge callback. Must be
- * called once at app boot on native platforms — covers both the warm case
- * (app alive in background) and the cold start (app launched by the link).
+ * Registers the deep-link listener for the auth-bridge callback. Called at
+ * app boot on native platforms — covers both the warm case (app alive in
+ * background) and the cold start (app launched by the link). Idempotent: a
+ * second call (HMR, accidental double-init) is a no-op, so a callback can
+ * never be processed twice.
  */
 export const initMobileAuthListener = async (): Promise<void> => {
+	if (mobileAuthListenerRegistered) {
+		return;
+	}
+	mobileAuthListenerRegistered = true;
+
 	await App.addListener('appUrlOpen', ({ url }) => {
 		void handleMobileAuthCallback({ url });
 	});
