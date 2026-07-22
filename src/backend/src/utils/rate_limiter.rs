@@ -172,19 +172,62 @@ impl RateLimiter {
         caller_calls.push_back(now_ns);
         Ok(())
     }
+
+    /// Checks the limit for `caller` at `now_ns` **without recording** the call
+    /// and without creating a `HashMap` entry for a previously-unseen caller.
+    /// Lets a caller peek a tier before any tier records, so a rejected call
+    /// leaves no state behind.
+    pub fn check_only(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
+        let calls = self.calls.borrow();
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        let in_window = calls.get(&caller).map_or(0, |caller_calls| {
+            caller_calls
+                .iter()
+                .filter(|&&timestamp| timestamp > window_start)
+                .count()
+        });
+
+        if in_window >= self.max_calls as usize {
+            return Err(RateLimitError {
+                max_calls: self.max_calls,
+                window_ns: self.window_ns,
+                caller,
+            });
+        }
+        Ok(())
+    }
+
+    /// Records a call for `caller` at `now_ns`, pruning timestamps that have
+    /// aged out of the window. Does not enforce the limit — call only after
+    /// [`Self::check_only`] has confirmed the tier is within limits.
+    pub fn record(&self, caller: Principal, now_ns: u64) {
+        let mut calls = self.calls.borrow_mut();
+        let caller_calls = calls.entry(caller).or_default();
+
+        let window_start = now_ns.saturating_sub(self.window_ns);
+        while let Some(&front) = caller_calls.front() {
+            if front <= window_start {
+                caller_calls.pop_front();
+            } else {
+                break;
+            }
+        }
+
+        caller_calls.push_back(now_ns);
+    }
 }
 
 /// Two-tier rate limiter for a vetKey endpoint: a per-caller limit plus a
 /// shared global limit, each over a short (per-minute) and a long (per-hour)
 /// window, backed by four [`RateLimiter`]s.
 ///
-/// The per-caller tiers are checked **before** the global tiers, so a call
-/// rejected by the caller's own limit never increments the global counters — a
-/// single caller cannot exhaust the global budget and deny the endpoint to
-/// everyone else. The global tiers bucket every caller under one fixed key
-/// (`Principal::anonymous`, never a real registered caller on these endpoints),
-/// capping aggregate load against a many-principals flood the per-caller tiers
-/// cannot see.
+/// Every tier is peeked before any tier records (see [`Self::check_at`]), so a
+/// rejected call leaves no state: a per-caller rejection never touches the
+/// global counters, and a call the global tier rejects never creates a
+/// per-caller `HashMap` entry. The global tiers bucket every caller under one
+/// fixed key (`Principal::anonymous`, never a real registered caller on these
+/// endpoints), capping aggregate load against a many-principals flood the
+/// per-caller tiers cannot see.
 pub(crate) struct VetKeyRateLimiters {
     caller_minute: RateLimiter,
     caller_hour: RateLimiter,
@@ -211,27 +254,38 @@ impl VetKeyRateLimiters {
         self.check_at(msg_caller(), ic_cdk::api::time())
     }
 
-    /// Checks every tier for `caller` at `now_ns` — per-caller tiers first, then
-    /// the global tiers — returning on the first tier that rejects. Exposed for
-    /// testability (inject the caller and timestamp).
+    /// Checks every tier for `caller` at `now_ns`. All tiers are peeked with
+    /// [`RateLimiter::check_only`] first and only recorded once every tier
+    /// passes, so a rejected call records nothing — no per-caller entry is
+    /// created for a call the global tier rejects, and a per-caller rejection
+    /// never touches the global counters. Exposed for testability (inject the
+    /// caller and timestamp).
     pub fn check_at(&self, caller: Principal, now_ns: u64) -> Result<(), RateLimitError> {
-        self.caller_minute.check_at(caller, now_ns)?;
-        self.caller_hour.check_at(caller, now_ns)?;
-        // The global tiers bucket every caller under a fixed key; remap the
-        // error's `caller` to the real caller so a global-tier rejection is not
-        // reported as anonymous.
+        let global_bucket = Principal::anonymous();
+
+        // Peek every tier without recording. The global tiers bucket under a
+        // fixed key, so remap a global rejection's `caller` back to the real
+        // caller (otherwise it reports as anonymous).
+        self.caller_minute.check_only(caller, now_ns)?;
+        self.caller_hour.check_only(caller, now_ns)?;
         self.global_minute
-            .check_at(Principal::anonymous(), now_ns)
+            .check_only(global_bucket, now_ns)
             .map_err(|mut e| {
                 e.caller = caller;
                 e
             })?;
         self.global_hour
-            .check_at(Principal::anonymous(), now_ns)
+            .check_only(global_bucket, now_ns)
             .map_err(|mut e| {
                 e.caller = caller;
                 e
             })?;
+
+        // Every tier is within limits — record the call.
+        self.caller_minute.record(caller, now_ns);
+        self.caller_hour.record(caller, now_ns);
+        self.global_minute.record(global_bucket, now_ns);
+        self.global_hour.record(global_bucket, now_ns);
         Ok(())
     }
 }
@@ -562,5 +616,53 @@ mod tests {
         // Global is now at 20 → the next distinct caller trips the global tier.
         let err = rl.check_at(test_principal(20), ONE_SEC).unwrap_err();
         assert_eq!(err.max_calls, 20);
+    }
+
+    #[test]
+    fn check_only_does_not_record() {
+        let rl = RateLimiter::new(1, 10 * ONE_SEC);
+        let caller = test_principal(1);
+
+        // Repeated peeks never trip the limit — nothing is recorded.
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+        assert!(rl.check_only(caller, ONE_SEC).is_ok());
+    }
+
+    #[test]
+    fn record_then_check_only_reflects_the_recorded_call() {
+        let rl = RateLimiter::new(1, 10 * ONE_SEC);
+        let caller = test_principal(1);
+
+        rl.record(caller, ONE_SEC);
+
+        let err = rl.check_only(caller, 2 * ONE_SEC).unwrap_err();
+        assert_eq!(err.max_calls, 1);
+        assert_eq!(err.caller, caller);
+    }
+
+    #[test]
+    fn vetkey_global_rejection_does_not_consume_caller_budget() {
+        let rl = VetKeyRateLimiters::new();
+
+        // Saturate the global minute tier with 20 distinct callers.
+        for id in 1..=20u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id}"
+            );
+        }
+
+        // A fresh caller is rejected by the global tier — and records nothing.
+        let caller = test_principal(21);
+        assert!(rl.check_at(caller, ONE_SEC).is_err());
+
+        // A minute later the global window has slid; the caller still has its
+        // full per-minute budget (the rejected attempt consumed nothing).
+        let later = 61 * ONE_SEC;
+        assert!(rl.check_at(caller, later).is_ok());
+        assert!(rl.check_at(caller, later).is_ok());
+        let err = rl.check_at(caller, later).unwrap_err();
+        assert_eq!(err.max_calls, 2);
     }
 }
