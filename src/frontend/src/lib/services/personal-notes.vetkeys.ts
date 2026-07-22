@@ -166,9 +166,20 @@ const LEGACY_VETKEY_CACHE_PURGE_FLAG = 'personal-notes-vetkey-legacy-purge-v1';
  * Guarded by a `localStorage` flag so it runs at most once per device.
  */
 export const purgeLegacyPersonalNotesVetkeyCache = async (): Promise<void> => {
-	if (!browser || localStorage.getItem(LEGACY_VETKEY_CACHE_PURGE_FLAG) === 'true') {
+	if (!browser) {
 		return;
 	}
+
+	let alreadyPurged = false;
+	try {
+		alreadyPurged = localStorage.getItem(LEGACY_VETKEY_CACHE_PURGE_FLAG) === 'true';
+	} catch {
+		// `localStorage` may be blocked; fall through and attempt the wipe anyway.
+	}
+	if (alreadyPurged) {
+		return;
+	}
+
 	try {
 		await clear();
 		localStorage.setItem(LEGACY_VETKEY_CACHE_PURGE_FLAG, 'true');
