@@ -34,6 +34,19 @@ jobs:
           # VITE_OISY_DOMAIN, resolved from this network). Without a network the
           # build would default to `local` and point login at localhost.
           DFX_NETWORK: audit
+          # Client-side provider keys, baked into the bundle like any frontend
+          # deploy. Dedicated *_MOBILE secrets (temporary, rate-capped) so they
+          # can be rotated/revoked independently of the staging keys. NOTE:
+          # artifacts on this public repo are downloadable by anyone — these
+          # keys are public by design; never reuse a privileged key here.
+          VITE_COINGECKO_API_KEY: ${{ secrets.VITE_COINGECKO_API_KEY_MOBILE }}
+          VITE_ETHERSCAN_API_KEY: ${{ secrets.VITE_ETHERSCAN_API_KEY_MOBILE }}
+          VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY_MOBILE }}
+          VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE }}
+          # Optional — empty until the corresponding secrets exist: Solana RPC
+          # and WalletConnect pairing stay disabled without them.
+          VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE }}
+          VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE }}
 
       # The post-process step emits .gz siblings for the IC asset canister;
       # Android's asset merger treats foo and foo.gz as duplicate resources,
@@ -83,6 +96,19 @@ jobs:
           # VITE_OISY_DOMAIN, resolved from this network). Without a network the
           # build would default to `local` and point login at localhost.
           DFX_NETWORK: audit
+          # Client-side provider keys, baked into the bundle like any frontend
+          # deploy. Dedicated *_MOBILE secrets (temporary, rate-capped) so they
+          # can be rotated/revoked independently of the staging keys. NOTE:
+          # artifacts on this public repo are downloadable by anyone — these
+          # keys are public by design; never reuse a privileged key here.
+          VITE_COINGECKO_API_KEY: ${{ secrets.VITE_COINGECKO_API_KEY_MOBILE }}
+          VITE_ETHERSCAN_API_KEY: ${{ secrets.VITE_ETHERSCAN_API_KEY_MOBILE }}
+          VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY_MOBILE }}
+          VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY_MOBILE }}
+          # Optional — empty until the corresponding secrets exist: Solana RPC
+          # and WalletConnect pairing stay disabled without them.
+          VITE_QUICKNODE_API_KEY: ${{ secrets.VITE_QUICKNODE_API_KEY_MOBILE }}
+          VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_MOBILE }}
 
       - name: Strip precompressed assets
         run: find build -name '*.gz' -delete
