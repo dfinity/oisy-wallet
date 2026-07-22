@@ -11,7 +11,7 @@
 	to the privacy reassurance below. -->
 <div class="flex flex-col items-center gap-8 text-center" data-tid={NOTES_UNLOCKING}>
 	<div
-		class="flex h-16 w-16 animate-pulse items-center justify-center rounded-2xl bg-brand-subtle-10 text-brand-primary"
+		class="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-subtle-10 text-brand-primary motion-safe:animate-pulse"
 	>
 		<IconShieldCheck size="28" />
 	</div>
