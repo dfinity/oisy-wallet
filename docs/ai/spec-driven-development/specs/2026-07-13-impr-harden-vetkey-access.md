@@ -38,15 +38,15 @@ _Delivered by PR #13571._
 
 ## Part 2 — Frontend: in-memory-only key cache
 
-**Where:** `src/frontend/src/lib/services/personal-notes.vetkeys.ts`, `personal-notes.services.ts` (`resetPersonalNotesSession`), `routes/+layout.svelte`.
+**Where:** `src/frontend/src/lib/services/personal-notes.vetkeys.ts`, `src/frontend/src/lib/services/personal-notes.services.ts` (`resetPersonalNotesSession`), `src/frontend/src/routes/+layout.svelte`.
 
 - Drop the idb-keyval persistence (remove the `get` / `set` calls and the `idbCacheKey` helper); keep the in-memory `sessionCache` map. The key re-derives after a full page reload — one vetKD round-trip, covered by the existing load skeleton.
 - One-time cleanup on app init (guarded by a versioned flag): `clear()` idb-keyval's default store. That store is used exclusively by this cache — the repo's other idb-keyval users (`idb-balances`, `idb-tokens`, `idb-transactions`) each use a dedicated `createStore` store — so a wholesale `clear()` is safe and removes any key persisted by the prior version, for every principal on the device.
-- Update `personal-notes.vetkeys.spec.ts` accordingly.
+- Update `src/frontend/src/tests/lib/services/personal-notes.vetkeys.spec.ts` accordingly.
 
 ## Part 3 — Frontend: restricted-access UI
 
-**Where:** `src/frontend/src/lib/canisters/backend.canister.ts` (+ `backend.errors.ts`), `NotesModal.svelte`, i18n.
+**Where:** `src/frontend/src/lib/canisters/backend.canister.ts` (+ `src/frontend/src/lib/canisters/backend.errors.ts`), `src/frontend/src/lib/components/notes/NotesModal.svelte`, i18n.
 
 - The vetKey wrapper currently throws the raw `Err`. Route it through the `mapRateLimitError` pattern in `backend.errors.ts` so the UI can distinguish a rate-limited response (it carries `window_ns`).
 - In `NotesModal.svelte`, on a rate-limited or failed load show a persistent inline info + Retry state (reusing the existing info-box pattern) rather than falling through to `EmptyNotes`.
