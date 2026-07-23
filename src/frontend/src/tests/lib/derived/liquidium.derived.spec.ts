@@ -212,6 +212,27 @@ describe('liquidium derived stores', () => {
 		it('is empty by default', () => {
 			expect(get(liquidiumMarkets)).toEqual([]);
 		});
+
+		it('orders the native ICP market right after ckBTC', () => {
+			// SDK returns the ICP pool last; the store keeps the raw order, the derived groups it.
+			liquidiumStore.set({
+				markets: [
+					market(),
+					market({ asset: 'BTC', chain: 'ICP' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumMarkets).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'ICP-ICP',
+				'ETH-ETH'
+			]);
+		});
 	});
 
 	describe('liquidiumPortfolio', () => {

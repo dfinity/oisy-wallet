@@ -271,6 +271,26 @@ export const mapLiquidiumMarketRails = (pool: Pool): LiquidiumMarket[] => {
 	return liquidiumSupportedRails(pool.asset).map((chain) => ({ ...base, chain }));
 };
 
+const isCkBtcMarket = ({ chain, asset }: LiquidiumMarket): boolean =>
+	chain === 'ICP' && asset === 'BTC';
+const isNativeIcpMarket = ({ chain, asset }: LiquidiumMarket): boolean =>
+	chain === 'ICP' && asset === 'ICP';
+
+// Groups the native ICP market right after ckBTC (the ICP rail of the BTC pool). The SDK
+// otherwise returns the ICP pool last and nothing re-orders it. Stable: only the ICP market
+// moves, every other market keeps its relative order; no-op if either ckBTC or ICP is absent.
+export const orderLiquidiumMarkets = (markets: LiquidiumMarket[]): LiquidiumMarket[] => {
+	const icpMarket = markets.find(isNativeIcpMarket);
+	const rest = markets.filter((market) => !isNativeIcpMarket(market));
+	const ckBtcIndex = rest.findIndex(isCkBtcMarket);
+
+	if (isNullish(icpMarket) || ckBtcIndex < 0) {
+		return markets;
+	}
+
+	return [...rest.slice(0, ckBtcIndex + 1), icpMarket, ...rest.slice(ckBtcIndex + 1)];
+};
+
 export const mapLiquidiumReserve = ({
 	position,
 	pool,

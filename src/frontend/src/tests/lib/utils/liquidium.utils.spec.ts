@@ -3,7 +3,7 @@ import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import {
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumBorrowInterestUsd,
@@ -24,7 +24,8 @@ import {
 	mapLiquidiumMarket,
 	mapLiquidiumMarketRails,
 	mapLiquidiumPortfolio,
-	mapLiquidiumReserve
+	mapLiquidiumReserve,
+	orderLiquidiumMarkets
 } from '$lib/utils/liquidium.utils';
 import {
 	RATE_SCALE,
@@ -149,6 +150,71 @@ describe('liquidium.utils', () => {
 
 			expect(markets).toHaveLength(1);
 			expect(markets[0].chain).toBe('ICP');
+		});
+	});
+
+	describe('orderLiquidiumMarkets', () => {
+		const buildMarket = (overrides: Partial<LiquidiumMarket> = {}): LiquidiumMarket => ({
+			poolId: 'pool-btc',
+			asset: 'BTC',
+			chain: 'BTC',
+			supplyApy: 5,
+			borrowApy: 9,
+			frozen: false,
+			available: true,
+			...overrides
+		});
+
+		// Display token per market, keyed `${asset}-${chain}` (ckBTC = BTC-ICP, native ICP = ICP-ICP).
+		const nativeBtc = buildMarket();
+		const ckBtc = buildMarket({ chain: 'ICP' });
+		const eth = buildMarket({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' });
+		const usdc = buildMarket({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' });
+		const ckUsdc = buildMarket({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' });
+		const icp = buildMarket({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' });
+
+		const keys = (markets: LiquidiumMarket[]): string[] =>
+			markets.map(({ asset, chain }) => `${asset}-${chain}`);
+
+		it('moves the native ICP market to right after ckBTC, keeping the rest in order', () => {
+			// SDK order: ICP pool last.
+			const markets = [nativeBtc, ckBtc, eth, usdc, ckUsdc, icp];
+
+			expect(keys(orderLiquidiumMarkets(markets))).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'ICP-ICP',
+				'ETH-ETH',
+				'USDC-ETH',
+				'USDC-ICP'
+			]);
+		});
+
+		it('is a no-op when ICP already follows ckBTC', () => {
+			const markets = [nativeBtc, ckBtc, icp, eth];
+
+			expect(keys(orderLiquidiumMarkets(markets))).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'ICP-ICP',
+				'ETH-ETH'
+			]);
+		});
+
+		it('leaves the list unchanged when ckBTC is absent', () => {
+			const markets = [eth, usdc, icp];
+
+			expect(orderLiquidiumMarkets(markets)).toEqual(markets);
+		});
+
+		it('leaves the list unchanged when the native ICP market is absent', () => {
+			const markets = [nativeBtc, ckBtc, eth];
+
+			expect(orderLiquidiumMarkets(markets)).toEqual(markets);
+		});
+
+		it('handles an empty list', () => {
+			expect(orderLiquidiumMarkets([])).toEqual([]);
 		});
 	});
 
