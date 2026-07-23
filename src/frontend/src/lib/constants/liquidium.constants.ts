@@ -27,9 +27,9 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ICP_TOKEN
 ];
 
-// Display order for the Markets list, applied as a stable sort on top of the order Liquidium
-// returns (see `orderLiquidiumMarkets`). Primary key: the lending pool, by asset symbol. Assets
-// not listed keep their received order, after the listed ones.
+// Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
+// top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
+// by asset symbol. Assets not listed keep their received order, after the listed ones.
 export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
 
 // Transfer-network order, the final tiebreaker after "native rail first" — so extra networks
