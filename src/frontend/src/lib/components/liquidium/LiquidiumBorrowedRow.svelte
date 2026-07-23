@@ -2,10 +2,14 @@
 	import { nonNullish } from '@dfinity/utils';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenNameAndNetwork from '$lib/components/tokens/TokenNameAndNetwork.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import {
+		liquidiumAssetNetworkIcons,
+		liquidiumAssetNetworkNames
+	} from '$lib/derived/liquidium.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,6 +17,7 @@
 	import { isMobile } from '$lib/utils/device.utils';
 	import { formatCurrency, formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 	import { liquidiumMarketToken } from '$lib/utils/liquidium.utils';
+	import { getTokenDisplayName } from '$lib/utils/token.utils';
 
 	interface Props {
 		reserve: LiquidiumReserve;
@@ -23,6 +28,12 @@
 	let token = $derived(
 		liquidiumMarketToken({ chain: reserve.chain, asset: reserve.asset, tokens: $tokens })
 	);
+
+	// Icons for every rail the asset trades on (e.g. USDC → Ethereum + ICP), not just this row's chain.
+	let networkIcons = $derived($liquidiumAssetNetworkIcons[reserve.asset] ?? []);
+
+	// Matching rail names, exposed as the accessible label for the icon-only line-up.
+	let networkNames = $derived($liquidiumAssetNetworkNames[reserve.asset] ?? []);
 
 	let borrowedAmount = $derived(
 		formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })
@@ -43,14 +54,18 @@
 
 <LogoButton hover={false}>
 	{#snippet logo()}
-		<span class="sm:mr-2 flex">
+		<span class="sm:mr-2 flex items-end">
 			{#if nonNullish(token)}
-				<TokenLogo
-					badge={{ type: 'network' }}
-					color="white"
-					data={token}
-					logoSize={isMobile() ? 'sm' : 'lg'}
-				/>
+				<TokenLogo color="white" data={token} logoSize={isMobile() ? 'sm' : 'lg'} />
+			{/if}
+			{#if networkIcons.length > 0}
+				<!-- Start the rail line-up where the single network badge used to sit (bottom-right of
+				     the logo): pull the first icon back onto the logo by its width less the badge's 4px
+				     offset, then let the rest extend to the right. role="img" + aria-label exposes the
+				     rail names to assistive tech, since the icon alts are only URLs. -->
+				<span class="-ml-[18px]" aria-label={networkNames.join(', ')} role="img">
+					<OverlappedLogos icons={networkIcons} invertColor />
+				</span>
 			{/if}
 		</span>
 	{/snippet}
@@ -66,7 +81,7 @@
 
 	{#snippet description()}
 		{#if nonNullish(token)}
-			<TokenNameAndNetwork data={token} />
+			<span class="text-primary">{getTokenDisplayName(token)}</span>
 		{/if}
 	{/snippet}
 

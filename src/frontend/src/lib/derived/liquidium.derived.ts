@@ -4,6 +4,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_ADVERTISED_TOKENS } from '$lib/constants/liquidium.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { EarningProviderData } from '$lib/types/earning-provider';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
@@ -15,6 +16,7 @@ import {
 	liquidiumMaxSupplyApy as computeMaxSupplyApy,
 	liquidiumMinBorrowApy as computeMinBorrowApy,
 	liquidiumBorrowingPowerPotentialUsd,
+	liquidiumMarketToken,
 	liquidiumNetInterestUsd,
 	liquidiumReserveRails,
 	orderLiquidiumRails
@@ -150,6 +152,57 @@ const liquidiumCardIcons = (pick: (token: Token) => string | undefined): string[
 
 export const liquidiumNetworkIcons = liquidiumCardIcons((token) => token.network.icon);
 export const liquidiumAssetIcons = liquidiumCardIcons((token) => token.icon);
+
+// Per-asset network values for every rail the asset is offered on across all markets, keyed
+// by asset symbol and deduped. `pick` selects the value (icon, name, …) from each rail's
+// display token; unresolved rails are skipped.
+const liquidiumAssetRailValues = ({
+	markets,
+	tokens: allTokens,
+	pick
+}: {
+	markets: LiquidiumMarket[];
+	tokens: Token[];
+	pick: (token: Token) => string | undefined;
+}): Record<string, string[]> => {
+	const byAsset = markets.reduce<Map<string, Set<string>>>((acc, { asset, chain }) => {
+		const token = liquidiumMarketToken({ chain, asset, tokens: allTokens });
+		const value = nonNullish(token) ? pick(token) : undefined;
+
+		if (nonNullish(value)) {
+			const set = acc.get(asset) ?? new Set<string>();
+			set.add(value);
+			acc.set(asset, set);
+		}
+
+		return acc;
+	}, new Map());
+
+	return Object.fromEntries([...byAsset.entries()].map(([asset, set]) => [asset, [...set]]));
+};
+
+// Network icons for every rail an asset is offered on (e.g. USDC on both Ethereum and ICP),
+// so a per-reserve row shows the full rail line-up instead of pinning to its own chain.
+export const liquidiumAssetNetworkIcons: Readable<Record<string, string[]>> = derived(
+	[liquidiumMarkets, tokens],
+	([$liquidiumMarkets, $tokens]) =>
+		liquidiumAssetRailValues({
+			markets: $liquidiumMarkets,
+			tokens: $tokens,
+			pick: (token) => token.network.icon
+		})
+);
+
+// Network names for the same rails, used as the accessible label for the icon-only line-up.
+export const liquidiumAssetNetworkNames: Readable<Record<string, string[]>> = derived(
+	[liquidiumMarkets, tokens],
+	([$liquidiumMarkets, $tokens]) =>
+		liquidiumAssetRailValues({
+			markets: $liquidiumMarkets,
+			tokens: $tokens,
+			pick: (token) => token.network.name
+		})
+);
 
 // Earn-page provider card data (mirrors the Harvest card); action → provider page.
 export const liquidiumEarningData: Readable<EarningProviderData> = derived(
