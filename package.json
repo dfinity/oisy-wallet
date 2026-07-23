@@ -97,7 +97,7 @@
 		"dompurify": "^3.4.12",
 		"ethers": "^6.16.0",
 		"idb-keyval": "6.2.5",
-		"marked": "^9.1.0",
+		"marked": "^18.0.5",
 		"onesec-bridge": "^0.12.0",
 		"qr-creator": "^1.0.0",
 		"svelte-confetti": "^2.3.2",
