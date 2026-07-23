@@ -1,7 +1,12 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
 import { ZERO } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
+	liquidiumAssetNetworkIcons,
 	liquidiumBorrowData,
 	liquidiumBorrowingPowerUsd,
 	liquidiumBorrowInterestUsd,
@@ -237,6 +242,34 @@ describe('liquidium derived stores', () => {
 				'USDC-ETH',
 				'USDC-ICP'
 			]);
+		});
+	});
+
+	describe('liquidiumAssetNetworkIcons', () => {
+		it('is empty by default', () => {
+			expect(get(liquidiumAssetNetworkIcons)).toEqual({});
+		});
+
+		it('maps each asset to the network icons of its rails, deduped across markets', () => {
+			liquidiumStore.set({
+				markets: [
+					market(),
+					// Same asset on the same rail again: the icon must not be duplicated.
+					market({ poolId: 'pool-btc-2', asset: 'BTC', chain: 'BTC' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumAssetNetworkIcons)).toEqual({
+				BTC: [BTC_MAINNET_TOKEN.network.icon],
+				ETH: [ETHEREUM_TOKEN.network.icon],
+				USDC: [USDC_TOKEN.network.icon],
+				ICP: [ICP_TOKEN.network.icon]
+			});
 		});
 	});
 

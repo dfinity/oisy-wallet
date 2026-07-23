@@ -4,6 +4,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { LIQUIDIUM_ADVERTISED_TOKENS } from '$lib/constants/liquidium.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens-ui.derived';
+import { tokens } from '$lib/derived/tokens.derived';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { EarningProviderData } from '$lib/types/earning-provider';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
@@ -15,6 +16,7 @@ import {
 	liquidiumMaxSupplyApy as computeMaxSupplyApy,
 	liquidiumMinBorrowApy as computeMinBorrowApy,
 	liquidiumBorrowingPowerPotentialUsd,
+	liquidiumMarketToken,
 	liquidiumNetInterestUsd,
 	orderLiquidiumMarkets
 } from '$lib/utils/liquidium.utils';
@@ -135,6 +137,23 @@ const liquidiumCardIcons = (pick: (token: Token) => string | undefined): string[
 
 export const liquidiumNetworkIcons = liquidiumCardIcons((token) => token.network.icon);
 export const liquidiumAssetIcons = liquidiumCardIcons((token) => token.icon);
+
+// Per-asset network icons for every rail the asset is offered on across all markets, keyed
+// by asset symbol. Lets a per-reserve row show the full rail line-up (e.g. USDC on both
+// Ethereum and ICP) instead of pinning to the single chain of that reserve.
+export const liquidiumAssetNetworkIcons: Readable<Record<string, string[]>> = derived(
+	[liquidiumMarkets, tokens],
+	([$liquidiumMarkets, $tokens]) =>
+		$liquidiumMarkets.reduce<Record<string, string[]>>((acc, { asset, chain }) => {
+			const icon = liquidiumMarketToken({ chain, asset, tokens: $tokens })?.network.icon;
+
+			if (nonNullish(icon) && !(acc[asset] ?? []).includes(icon)) {
+				acc[asset] = [...(acc[asset] ?? []), icon];
+			}
+
+			return acc;
+		}, {})
+);
 
 // Earn-page provider card data (mirrors the Harvest card); action → provider page.
 export const liquidiumEarningData: Readable<EarningProviderData> = derived(
