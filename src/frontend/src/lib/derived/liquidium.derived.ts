@@ -16,7 +16,8 @@ import {
 	liquidiumMinBorrowApy as computeMinBorrowApy,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumNetInterestUsd,
-	liquidiumReserveRails
+	liquidiumReserveRails,
+	orderLiquidiumMarkets
 } from '$lib/utils/liquidium.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { AssetPrices } from '@liquidium/client';
@@ -24,7 +25,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
 	liquidiumStore,
-	({ markets }) => markets
+	({ markets }) => orderLiquidiumMarkets(markets)
 );
 
 export const liquidiumPortfolio: Readable<LiquidiumPortfolio | null> = derived(
