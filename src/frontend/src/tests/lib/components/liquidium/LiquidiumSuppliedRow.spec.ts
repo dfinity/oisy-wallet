@@ -1,4 +1,7 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import LiquidiumSuppliedRow from '$lib/components/liquidium/LiquidiumSuppliedRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import { liquidiumStore } from '$lib/stores/liquidium.store';
@@ -6,6 +9,7 @@ import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('LiquidiumSuppliedRow', () => {
@@ -25,8 +29,24 @@ describe('LiquidiumSuppliedRow', () => {
 		...overrides
 	});
 
+	// Seed the ckBTC twin so the BTC ICP rail resolves via `findTwinToken`.
+	const seedCkBtcTwin = () => {
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...mockValidIcCkToken,
+					symbol: 'ckBTC',
+					network: ICP_TOKEN.network,
+					enabled: true
+				} as IcrcCustomToken,
+				certified: false
+			}
+		]);
+	};
+
 	beforeEach(() => {
 		liquidiumStore.reset();
+		icrcCustomTokensStore.resetAll();
 	});
 
 	it('renders the symbol and token name without the network suffix', () => {
@@ -55,8 +75,9 @@ describe('LiquidiumSuppliedRow', () => {
 		expect(queryByText(en.liquidium.text.action_withdraw)).not.toBeInTheDocument();
 	});
 
-	it('lines up the network icons of the rails the asset trades on', () => {
+	it('lines up an icon for every rail the asset trades on', () => {
 		const btc = BTC_MAINNET_TOKEN;
+		seedCkBtcTwin();
 		liquidiumStore.set({
 			markets: [
 				{
@@ -67,15 +88,28 @@ describe('LiquidiumSuppliedRow', () => {
 					borrowApy: 9,
 					frozen: false,
 					available: true
+				},
+				{
+					poolId: 'pool-btc-icp',
+					asset: 'BTC',
+					chain: 'ICP',
+					supplyApy: 5,
+					borrowApy: 9,
+					frozen: false,
+					available: true
 				}
 			],
 			portfolio: null,
 			assetPrices: {}
 		});
 
-		const { getByAltText } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
+		const { getAllByAltText, getByAltText } = render(LiquidiumSuppliedRow, {
+			props: { reserve: reserve() }
+		});
 
+		// Native rail first, then the ICP rail — both icons render (alts are `<url>-<index>`).
 		expect(getByAltText(`${btc.network.icon}-0`)).toBeInTheDocument();
+		expect(getAllByAltText(/-\d+$/)).toHaveLength(2);
 	});
 
 	it('exposes the rail network names as an accessible label for the icon stack', () => {
