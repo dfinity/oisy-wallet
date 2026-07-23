@@ -152,7 +152,12 @@ describe('LiquidiumSummary', () => {
 		});
 
 		it('disables the Borrow button when there is no supply position', () => {
-			const noSupply: LiquidiumPortfolio = { ...portfolio, totalSuppliedUsd: 0 };
+			const noSupply: LiquidiumPortfolio = {
+				...portfolio,
+				reserves: portfolio.reserves.map((reserve) => ({ ...reserve, suppliedUsd: 0 })),
+				totalSuppliedUsd: 0,
+				netValueUsd: 0
+			};
 
 			const { getByRole } = render(LiquidiumSummary, { props: { portfolio: noSupply } });
 
