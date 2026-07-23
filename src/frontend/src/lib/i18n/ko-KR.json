@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "코드/링크가 유효하지 않습니다",
+			"link_domain_mismatch": "이 링크는 다른 도메인용입니다",
 			"data_is_incompleted": "수신된 데이터가 불완전합니다. 일부 필수 세부 정보가 누락되었습니다."
 		}
 	},
@@ -2641,6 +2642,8 @@
 			"empty_title": "아직 메모가 없습니다",
 			"empty_subtitle": "지갑과 함께 중요한 정보를 안전하게 보관할 수 있는 비공개 암호화 메모를 만들어보세요.",
 			"empty_add": "새 메모 추가",
+			"unlocking_title": "메모 잠금을 해제하고 있습니다",
+			"unlocking_subtitle": "개인 암호화 키를 설정하고 있습니다. 잠시만 기다려 주세요.",
 			"add_note": "메모 추가",
 			"note_label": "메모",
 			"placeholder": "메모를 입력하세요…",
@@ -2653,7 +2656,8 @@
 			"created_updated": "작성 $created · 수정 $updated",
 			"too_long": "메모는 최대 $maxCharacters자까지 작성할 수 있습니다.",
 			"cap_reached": "저장 가능한 메모 최대 개수($max개)에 도달했습니다. 새 메모를 추가하려면 하나를 삭제하세요.",
-			"decryption_failed": "이 메모를 복호화할 수 없습니다"
+			"decryption_failed": "이 메모를 복호화할 수 없습니다",
+			"unavailable_title": "메모를 일시적으로 사용할 수 없습니다"
 		},
 		"alt": {
 			"edit": "메모 수정",
@@ -2662,7 +2666,8 @@
 		"error": {
 			"load": "메모를 불러올 수 없습니다. 다시 시도해 주세요.",
 			"save": "메모를 저장할 수 없습니다. 다시 시도해 주세요.",
-			"delete": "메모를 삭제할 수 없습니다. 다시 시도해 주세요."
+			"delete": "메모를 삭제할 수 없습니다. 다시 시도해 주세요.",
+			"rate_limited": "요청 한도에 도달했습니다. 잠시 기다린 후 다시 시도해 주세요."
 		},
 		"share": {
 			"text": {

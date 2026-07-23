@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "الرمز/الرابط غير صالح",
+			"link_domain_mismatch": "",
 			"data_is_incompleted": "البيانات المستلمة غير مكتملة. بعض التفاصيل المطلوبة مفقودة."
 		}
 	},
@@ -2641,6 +2642,8 @@
 			"empty_title": "",
 			"empty_subtitle": "",
 			"empty_add": "",
+			"unlocking_title": "",
+			"unlocking_subtitle": "",
 			"add_note": "",
 			"note_label": "",
 			"placeholder": "",
@@ -2653,7 +2656,8 @@
 			"created_updated": "",
 			"too_long": "",
 			"cap_reached": "",
-			"decryption_failed": ""
+			"decryption_failed": "",
+			"unavailable_title": "الملاحظات غير متاحة مؤقتًا"
 		},
 		"alt": {
 			"edit": "",
@@ -2662,7 +2666,8 @@
 		"error": {
 			"load": "",
 			"save": "",
-			"delete": ""
+			"delete": "",
+			"rate_limited": "لقد وصلت إلى الحد الأقصى للطلبات. يرجى الانتظار لحظة والمحاولة مرة أخرى."
 		},
 		"share": {
 			"text": {

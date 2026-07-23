@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "コード/リンクが無効です",
+			"link_domain_mismatch": "このリンクは別のドメイン向けです",
 			"data_is_incompleted": "受信したデータが不完全です。必要な情報の一部が欠けています。"
 		}
 	},
@@ -2641,6 +2642,8 @@
 			"empty_title": "メモはまだありません",
 			"empty_subtitle": "ウォレットと一緒に大切な情報を安全に保管できる、プライベートで暗号化されたメモを作成しましょう。",
 			"empty_add": "新しいメモを追加",
+			"unlocking_title": "メモのロックを解除しています",
+			"unlocking_subtitle": "プライベートな暗号化キーを設定しています。少しだけお待ちください。",
 			"add_note": "メモを追加",
 			"note_label": "メモ",
 			"placeholder": "メモを入力…",
@@ -2653,7 +2656,8 @@
 			"created_updated": "作成: $created · 更新: $updated",
 			"too_long": "メモは$maxCharacters文字以内にしてください。",
 			"cap_reached": "保存できるメモの上限（$max件）に達しました。新しいメモを追加するには、1件削除してください。",
-			"decryption_failed": "このメモを復号できませんでした"
+			"decryption_failed": "このメモを復号できませんでした",
+			"unavailable_title": "メモは一時的にご利用いただけません"
 		},
 		"alt": {
 			"edit": "メモを編集",
@@ -2662,7 +2666,8 @@
 		"error": {
 			"load": "メモを読み込めませんでした。もう一度お試しください。",
 			"save": "メモを保存できませんでした。もう一度お試しください。",
-			"delete": "メモを削除できませんでした。もう一度お試しください。"
+			"delete": "メモを削除できませんでした。もう一度お試しください。",
+			"rate_limited": "リクエストの上限に達しました。しばらく待ってからもう一度お試しください。"
 		},
 		"share": {
 			"text": {

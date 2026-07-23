@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "El código/enlace no es válido",
+			"link_domain_mismatch": "Este enlace es para otro dominio",
 			"data_is_incompleted": "Los datos recibidos están incompletos. Faltan algunos datos obligatorios."
 		}
 	},
@@ -2641,6 +2642,8 @@
 			"empty_title": "Aún no tienes notas",
 			"empty_subtitle": "Crea notas privadas y cifradas para guardar detalles importantes junto a tu wallet.",
 			"empty_add": "Añadir nueva nota",
+			"unlocking_title": "Desbloqueando tus notas",
+			"unlocking_subtitle": "Configurando tu clave de cifrado privada; solo tardará un momento.",
 			"add_note": "Añadir nota",
 			"note_label": "Nota",
 			"placeholder": "Escribe una nota…",
@@ -2653,7 +2656,8 @@
 			"created_updated": "Creada $created · Actualizada $updated",
 			"too_long": "La nota debe tener $maxCharacters caracteres o menos.",
 			"cap_reached": "Has alcanzado el máximo de $max notas guardadas. Elimina una para añadir una nueva.",
-			"decryption_failed": "No se pudo descifrar esta nota"
+			"decryption_failed": "No se pudo descifrar esta nota",
+			"unavailable_title": "Las notas no están disponibles temporalmente"
 		},
 		"alt": {
 			"edit": "Editar nota",
@@ -2662,7 +2666,8 @@
 		"error": {
 			"load": "No se pudieron cargar tus notas. Inténtalo de nuevo.",
 			"save": "No se pudo guardar tu nota. Inténtalo de nuevo.",
-			"delete": "No se pudo eliminar tu nota. Inténtalo de nuevo."
+			"delete": "No se pudo eliminar tu nota. Inténtalo de nuevo.",
+			"rate_limited": "Has alcanzado el límite de solicitudes. Espera un momento e inténtalo de nuevo."
 		},
 		"share": {
 			"text": {

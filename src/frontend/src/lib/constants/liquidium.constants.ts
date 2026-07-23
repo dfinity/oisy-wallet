@@ -27,6 +27,15 @@ export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
 	ICP_TOKEN
 ];
 
+// Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
+// top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
+// by asset symbol. Assets not listed keep their received order, after the listed ones.
+export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+
+// Transfer-network order, the final tiebreaker after "native rail first" — so extra networks
+// slot in predictably if the protocol adds them.
+export const LIQUIDIUM_NETWORK_ORDER: string[] = ['BTC', 'ETH', 'ICP'];
+
 // ck-ledger backing each asset, for the AUT's backend `TokenId`. Keyed by symbol: the
 // ck twin is the same regardless of transfer chain (native BTC and ckBTC both settle on
 // the ckBTC ledger); ICP maps to its own ledger.

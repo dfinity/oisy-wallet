@@ -37,6 +37,9 @@
 	let healthFactorPercent = $derived(portfolio?.healthFactorPercent ?? 100);
 
 	let totalSuppliedUsd = $derived(portfolio?.totalSuppliedUsd ?? 0);
+	// Borrowing power comes from supplied collateral, so without any supply there is
+	// nothing to borrow against — gate the action until the user supplies something.
+	let hasSupply = $derived(totalSuppliedUsd > 0);
 	let formattedTotalSupplied = $derived(
 		formatCurrency({
 			value: totalSuppliedUsd,
@@ -163,7 +166,7 @@
 
 	<ActiveLoansCard showHealthFactor={false} showWithShortenedLabel widthClass="sm:w-1/2">
 		{#snippet buttons()}
-			<Button onclick={() => modalStore.openLiquidiumBorrow(borrowModalId)}>
+			<Button disabled={!hasSupply} onclick={() => modalStore.openLiquidiumBorrow(borrowModalId)}>
 				{$i18n.liquidium.text.action_borrow}
 			</Button>
 		{/snippet}

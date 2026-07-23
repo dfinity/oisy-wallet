@@ -1117,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid",
+			"link_domain_mismatch": "This link is for a different domain",
 			"data_is_incompleted": "The received data is incomplete. Some required details are missing."
 		}
 	},
@@ -2641,6 +2642,8 @@
 			"empty_title": "Your notes are empty",
 			"empty_subtitle": "Create private, encrypted notes to keep details safe alongside your wallet.",
 			"empty_add": "Add new note",
+			"unlocking_title": "Unlocking your notes",
+			"unlocking_subtitle": "Setting up your private encryption key — this only takes a moment.",
 			"add_note": "Add note",
 			"note_label": "Note",
 			"placeholder": "Write a note…",
@@ -2653,7 +2656,8 @@
 			"created_updated": "Created $created · Updated $updated",
 			"too_long": "Note must be $maxCharacters characters or fewer.",
 			"cap_reached": "You've reached the maximum of $max saved notes. Delete one to add a new note.",
-			"decryption_failed": "Couldn't decrypt this note"
+			"decryption_failed": "Couldn't decrypt this note",
+			"unavailable_title": "Notes are temporarily unavailable"
 		},
 		"alt": {
 			"edit": "Edit note",
@@ -2662,7 +2666,8 @@
 		"error": {
 			"load": "Couldn't load your notes. Please try again.",
 			"save": "Couldn't save your note. Please try again.",
-			"delete": "Couldn't delete your note. Please try again."
+			"delete": "Couldn't delete your note. Please try again.",
+			"rate_limited": "You've reached the request limit. Please wait a moment and try again."
 		},
 		"share": {
 			"text": {

@@ -32,8 +32,14 @@
 				token: liquidiumMarketToken({ chain: reserve.chain, asset: reserve.asset, tokens: $tokens })
 			}))
 			.filter(
+				// Exclude only the currently-selected rail, keyed by (poolId, chain): a pool now
+				// yields one entry per rail, so keying on poolId alone would hide the other rail too.
 				(entry): entry is { reserve: LiquidiumReserve; token: Token } =>
-					nonNullish(entry.token) && entry.reserve.poolId !== selectedReserve?.poolId
+					nonNullish(entry.token) &&
+					!(
+						entry.reserve.poolId === selectedReserve?.poolId &&
+						entry.reserve.chain === selectedReserve?.chain
+					)
 			)
 	);
 

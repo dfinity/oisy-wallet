@@ -49,7 +49,7 @@ describe('personal-notes.services', () => {
 					: Promise.resolve({ note: 'hello', created_at_ns: '100', updated_at_ns: '100' })
 			);
 
-			await loadPersonalNotes(mockIdentity);
+			await loadPersonalNotes({ identity: mockIdentity });
 
 			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
 
@@ -71,7 +71,7 @@ describe('personal-notes.services', () => {
 			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
 			vi.spyOn(vetkeys, 'deriveKeyMaterial').mockRejectedValue(new Error('vetKD down'));
 
-			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('vetKD down');
+			await expect(loadPersonalNotes({ identity: mockIdentity })).rejects.toThrow('vetKD down');
 		});
 
 		it('does not repopulate the store when an old load resolves after reset', async () => {
@@ -91,7 +91,7 @@ describe('personal-notes.services', () => {
 				updated_at_ns: '100'
 			});
 
-			const loadPromise = loadPersonalNotes(mockIdentity);
+			const loadPromise = loadPersonalNotes({ identity: mockIdentity });
 
 			personalNotesStore.reset();
 			if (resolveEntries === undefined) {
@@ -107,6 +107,46 @@ describe('personal-notes.services', () => {
 				count: 0,
 				loaded: false
 			});
+		});
+
+		it('signals onDeriveStart before deriving the key when notes are present', async () => {
+			vi.spyOn(backendApi, 'getPersonalNotes').mockResolvedValue([
+				{ note_id: 'a', encrypted_note: new Uint8Array([1]) }
+			]);
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
+			const deriveSpy = vi
+				.spyOn(vetkeys, 'deriveKeyMaterial')
+				.mockResolvedValue({} as DerivedKeyMaterial);
+			vi.spyOn(vetkeys, 'decryptPersonalNoteWithKey').mockResolvedValue({
+				note: 'hello',
+				created_at_ns: '100',
+				updated_at_ns: '100'
+			});
+
+			const onDeriveStart = vi.fn(() => {
+				// Fires before the actual derivation, not after.
+				expect(deriveSpy).not.toHaveBeenCalled();
+			});
+
+			await loadPersonalNotes({ identity: mockIdentity, onDeriveStart });
+
+			expect(onDeriveStart).toHaveBeenCalledOnce();
+			expect(deriveSpy).toHaveBeenCalledOnce();
+		});
+
+		it('never signals onDeriveStart for an empty list (no derivation)', async () => {
+			vi.spyOn(backendApi, 'getPersonalNotes').mockResolvedValue([]);
+			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(ZERO);
+			const deriveSpy = vi
+				.spyOn(vetkeys, 'deriveKeyMaterial')
+				.mockResolvedValue({} as DerivedKeyMaterial);
+
+			const onDeriveStart = vi.fn();
+
+			await loadPersonalNotes({ identity: mockIdentity, onDeriveStart });
+
+			expect(onDeriveStart).not.toHaveBeenCalled();
+			expect(deriveSpy).not.toHaveBeenCalled();
 		});
 
 		it('keeps the cached notes when a same-owner reload fails', async () => {
@@ -128,7 +168,7 @@ describe('personal-notes.services', () => {
 			vi.spyOn(backendApi, 'getPersonalNotes').mockRejectedValue(new Error('network down'));
 			vi.spyOn(backendApi, 'getPersonalNotesCount').mockResolvedValue(1n);
 
-			await expect(loadPersonalNotes(mockIdentity)).rejects.toThrow('network down');
+			await expect(loadPersonalNotes({ identity: mockIdentity })).rejects.toThrow('network down');
 
 			expect((get(personalNotesList) ?? []).map(({ id }) => id)).toEqual(['cached']);
 			expect(get(personalNotesStore).ownerPrincipal).toBe(mockPrincipalText);
