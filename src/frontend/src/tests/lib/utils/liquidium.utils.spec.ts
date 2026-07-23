@@ -18,6 +18,7 @@ import {
 	liquidiumProjectedHealthAfterRepayPercent,
 	liquidiumProjectedHealthAfterWithdrawPercent,
 	liquidiumProjectedHealthPercent,
+	liquidiumReserveRails,
 	liquidiumResultingLtvPercent,
 	liquidiumSupplyInterestUsd,
 	liquidiumSupportedRails,
@@ -149,6 +150,53 @@ describe('liquidium.utils', () => {
 
 			expect(markets).toHaveLength(1);
 			expect(markets[0].chain).toBe('ICP');
+		});
+	});
+
+	describe('liquidiumReserveRails', () => {
+		const buildReserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
+			poolId: 'pool-usdc',
+			asset: 'USDC',
+			chain: 'ETH',
+			supplyApy: 5,
+			borrowApy: 9,
+			deposited: 1_000n,
+			depositedDecimals: 6,
+			borrowed: ZERO,
+			borrowedDecimals: 6,
+			suppliedUsd: 1000,
+			borrowedUsd: 0,
+			...overrides
+		});
+
+		it('expands a position into one entry per transfer rail, keeping poolId + balances', () => {
+			const rails = liquidiumReserveRails(buildReserve());
+
+			expect(rails.map(({ chain }) => chain)).toEqual(['ETH', 'ICP']);
+			// Same pool balance across rails; only the transfer chain differs.
+			expect(
+				rails.every(
+					({ poolId, asset, deposited }) =>
+						poolId === 'pool-usdc' && asset === 'USDC' && deposited === 1_000n
+				)
+			).toBeTruthy();
+		});
+
+		it('offers the native + ck (ICP) rails for BTC', () => {
+			expect(
+				liquidiumReserveRails(buildReserve({ poolId: 'pool-btc', asset: 'BTC' })).map(
+					({ chain }) => chain
+				)
+			).toEqual(['BTC', 'ICP']);
+		});
+
+		it('leaves a single-rail position (ICP) as one entry', () => {
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			);
+
+			expect(rails).toHaveLength(1);
+			expect(rails[0].chain).toBe('ICP');
 		});
 	});
 

@@ -292,6 +292,16 @@ export const mapLiquidiumReserve = ({
 	borrowedUsd: scaledUsdToNumber({ value: borrowedUsd, decimals: usdDecimals })
 });
 
+// Expands one position into an entry per supported transfer rail, so the withdraw/repay
+// pickers can offer both the native rail and the ICP (ck-ledger) rail for the same pool
+// balance — the position-surface counterpart of `mapLiquidiumMarketRails`. The entries share
+// `poolId` and all position economics (deposited / borrowed / USD); they differ only by
+// `chain`, which drives the display token, the repay transfer rail and the withdraw delivery
+// chain. A single-rail asset (ICP) yields one unchanged entry. Kept picker-only — the mapped
+// portfolio reserves stay one-per-pool so dashboard rows and USD totals never double-count.
+export const liquidiumReserveRails = (reserve: LiquidiumReserve): LiquidiumReserve[] =>
+	liquidiumSupportedRails(reserve.asset).map((chain) => ({ ...reserve, chain }));
+
 export const mapLiquidiumPortfolio = ({
 	reserves,
 	summary
