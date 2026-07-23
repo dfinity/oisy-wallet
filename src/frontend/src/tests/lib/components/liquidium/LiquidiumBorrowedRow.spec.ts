@@ -74,4 +74,27 @@ describe('LiquidiumBorrowedRow', () => {
 
 		expect(getByAltText(`${usdc.network.icon}-0`)).toBeInTheDocument();
 	});
+
+	it('exposes the rail network names as an accessible label for the icon stack', () => {
+		const usdc = USDC_TOKEN;
+		liquidiumStore.set({
+			markets: [
+				{
+					poolId: 'pool-usdc',
+					asset: 'USDC',
+					chain: 'ETH',
+					supplyApy: 3,
+					borrowApy: 4,
+					frozen: false,
+					available: true
+				}
+			],
+			portfolio: null,
+			assetPrices: {}
+		});
+
+		const { getByRole } = render(LiquidiumBorrowedRow, { props: { reserve: reserve() } });
+
+		expect(getByRole('img', { name: usdc.network.name })).toBeInTheDocument();
+	});
 });

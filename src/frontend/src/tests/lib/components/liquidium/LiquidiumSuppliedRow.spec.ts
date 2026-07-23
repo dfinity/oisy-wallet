@@ -77,4 +77,27 @@ describe('LiquidiumSuppliedRow', () => {
 
 		expect(getByAltText(`${btc.network.icon}-0`)).toBeInTheDocument();
 	});
+
+	it('exposes the rail network names as an accessible label for the icon stack', () => {
+		const btc = BTC_MAINNET_TOKEN;
+		liquidiumStore.set({
+			markets: [
+				{
+					poolId: 'pool-btc',
+					asset: 'BTC',
+					chain: 'BTC',
+					supplyApy: 5,
+					borrowApy: 9,
+					frozen: false,
+					available: true
+				}
+			],
+			portfolio: null,
+			assetPrices: {}
+		});
+
+		const { getByRole } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
+
+		expect(getByRole('img', { name: btc.network.name })).toBeInTheDocument();
+	});
 });

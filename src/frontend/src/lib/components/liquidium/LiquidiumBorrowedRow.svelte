@@ -6,7 +6,10 @@
 	import OverlappedLogos from '$lib/components/ui/OverlappedLogos.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { liquidiumAssetNetworkIcons } from '$lib/derived/liquidium.derived';
+	import {
+		liquidiumAssetNetworkIcons,
+		liquidiumAssetNetworkNames
+	} from '$lib/derived/liquidium.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,6 +31,9 @@
 
 	// Icons for every rail the asset trades on (e.g. USDC → Ethereum + ICP), not just this row's chain.
 	let networkIcons = $derived($liquidiumAssetNetworkIcons[reserve.asset] ?? []);
+
+	// Matching rail names, exposed as the accessible label for the icon-only line-up.
+	let networkNames = $derived($liquidiumAssetNetworkNames[reserve.asset] ?? []);
 
 	let borrowedAmount = $derived(
 		formatToken({ value: reserve.borrowed, unitName: reserve.borrowedDecimals })
@@ -55,8 +61,11 @@
 			{#if networkIcons.length > 0}
 				<!-- Start the rail line-up where the single network badge used to sit (bottom-right of
 				     the logo): pull the first icon back onto the logo by its width less the badge's 4px
-				     offset, then let the rest extend to the right. -->
-				<OverlappedLogos icons={networkIcons} invertColor styleClass="-ml-[18px]" />
+				     offset, then let the rest extend to the right. role="img" + aria-label exposes the
+				     rail names to assistive tech, since the icon alts are only URLs. -->
+				<span class="-ml-[18px]" aria-label={networkNames.join(', ')} role="img">
+					<OverlappedLogos icons={networkIcons} invertColor />
+				</span>
 			{/if}
 		</span>
 	{/snippet}

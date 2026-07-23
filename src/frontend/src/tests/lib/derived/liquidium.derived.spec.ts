@@ -7,6 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
 	liquidiumAssetNetworkIcons,
+	liquidiumAssetNetworkNames,
 	liquidiumBorrowData,
 	liquidiumBorrowingPowerUsd,
 	liquidiumBorrowInterestUsd,
@@ -269,6 +270,34 @@ describe('liquidium derived stores', () => {
 				ETH: [ETHEREUM_TOKEN.network.icon],
 				USDC: [USDC_TOKEN.network.icon],
 				ICP: [ICP_TOKEN.network.icon]
+			});
+		});
+	});
+
+	describe('liquidiumAssetNetworkNames', () => {
+		it('is empty by default', () => {
+			expect(get(liquidiumAssetNetworkNames)).toEqual({});
+		});
+
+		it('maps each asset to the network names of its rails, deduped across markets', () => {
+			liquidiumStore.set({
+				markets: [
+					market(),
+					// Same asset on the same rail again: the name must not be duplicated.
+					market({ poolId: 'pool-btc-2', asset: 'BTC', chain: 'BTC' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumAssetNetworkNames)).toEqual({
+				BTC: [BTC_MAINNET_TOKEN.network.name],
+				ETH: [ETHEREUM_TOKEN.network.name],
+				USDC: [USDC_TOKEN.network.name],
+				ICP: [ICP_TOKEN.network.name]
 			});
 		});
 	});
