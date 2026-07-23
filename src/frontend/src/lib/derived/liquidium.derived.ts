@@ -16,7 +16,8 @@ import {
 	liquidiumMinBorrowApy as computeMinBorrowApy,
 	liquidiumBorrowingPowerPotentialUsd,
 	liquidiumNetInterestUsd,
-	orderLiquidiumMarkets
+	liquidiumReserveRails,
+	orderLiquidiumRails
 } from '$lib/utils/liquidium.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { AssetPrices } from '@liquidium/client';
@@ -24,7 +25,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const liquidiumMarkets: Readable<LiquidiumMarket[]> = derived(
 	liquidiumStore,
-	({ markets }) => orderLiquidiumMarkets(markets)
+	({ markets }) => orderLiquidiumRails(markets)
 );
 
 export const liquidiumPortfolio: Readable<LiquidiumPortfolio | null> = derived(
@@ -56,16 +57,30 @@ export const liquidiumBorrowMarkets: Readable<LiquidiumMarket[]> = derived(
 		)
 );
 
-// Positions the user can withdraw from: reserves with a supplied balance.
+// Positions the user can withdraw from: reserves with a supplied balance, expanded per
+// transfer rail so a BTC/USDC/USDT position offers both native and ck (ICP) delivery, ordered
+// like the Markets list (pool, then native rail first).
 export const liquidiumWithdrawReserves: Readable<LiquidiumReserve[]> = derived(
 	liquidiumPortfolio,
-	(portfolio) => (portfolio?.reserves ?? []).filter(({ deposited }) => deposited > ZERO)
+	(portfolio) =>
+		orderLiquidiumRails(
+			(portfolio?.reserves ?? [])
+				.filter(({ deposited }) => deposited > ZERO)
+				.flatMap(liquidiumReserveRails)
+		)
 );
 
-// Positions the user can repay: reserves with outstanding debt.
+// Positions the user can repay: reserves with outstanding debt, expanded per transfer rail
+// so a BTC/USDC/USDT debt can be repaid with either the native asset or its ck twin, ordered
+// like the Markets list (pool, then native rail first).
 export const liquidiumRepayReserves: Readable<LiquidiumReserve[]> = derived(
 	liquidiumPortfolio,
-	(portfolio) => (portfolio?.reserves ?? []).filter(({ borrowed }) => borrowed > ZERO)
+	(portfolio) =>
+		orderLiquidiumRails(
+			(portfolio?.reserves ?? [])
+				.filter(({ borrowed }) => borrowed > ZERO)
+				.flatMap(liquidiumReserveRails)
+		)
 );
 
 // SDK USD prices for the borrow form's USD / fiat math.
