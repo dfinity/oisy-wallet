@@ -1,6 +1,7 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import LiquidiumBorrowedRow from '$lib/components/liquidium/LiquidiumBorrowedRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -23,13 +24,17 @@ describe('LiquidiumBorrowedRow', () => {
 		...overrides
 	});
 
-	it('renders the symbol, token name and network', () => {
+	beforeEach(() => {
+		liquidiumStore.reset();
+	});
+
+	it('renders the symbol and token name without the network', () => {
 		const { container } = render(LiquidiumBorrowedRow, { props: { reserve: reserve() } });
 		const usdc = USDC_TOKEN;
 
 		expect(container).toHaveTextContent('USDC');
 		expect(container).toHaveTextContent(usdc.name);
-		expect(container).toHaveTextContent(usdc.network.name);
+		expect(container).not.toHaveTextContent(usdc.network.name);
 	});
 
 	it('renders the borrow APR and the yearly cost as a negative amount', () => {
@@ -45,5 +50,28 @@ describe('LiquidiumBorrowedRow', () => {
 		const { queryByText } = render(LiquidiumBorrowedRow, { props: { reserve: reserve() } });
 
 		expect(queryByText(en.liquidium.text.action_repay)).not.toBeInTheDocument();
+	});
+
+	it('lines up the network icons of the rails the asset trades on', () => {
+		const usdc = USDC_TOKEN;
+		liquidiumStore.set({
+			markets: [
+				{
+					poolId: 'pool-usdc',
+					asset: 'USDC',
+					chain: 'ETH',
+					supplyApy: 3,
+					borrowApy: 4,
+					frozen: false,
+					available: true
+				}
+			],
+			portfolio: null,
+			assetPrices: {}
+		});
+
+		const { getByAltText } = render(LiquidiumBorrowedRow, { props: { reserve: reserve() } });
+
+		expect(getByAltText(`${usdc.network.icon}-0`)).toBeInTheDocument();
 	});
 });

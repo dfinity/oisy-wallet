@@ -1,8 +1,10 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import LiquidiumSuppliedRow from '$lib/components/liquidium/LiquidiumSuppliedRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
@@ -23,13 +25,19 @@ describe('LiquidiumSuppliedRow', () => {
 		...overrides
 	});
 
-	it('renders the symbol, token name and network', () => {
+	beforeEach(() => {
+		liquidiumStore.reset();
+	});
+
+	it('renders the symbol and token name without the network suffix', () => {
 		const { container } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
 		const btc = BTC_MAINNET_TOKEN;
 
 		expect(container).toHaveTextContent('BTC');
 		expect(container).toHaveTextContent(btc.name);
-		expect(container).toHaveTextContent(btc.network.name);
+		expect(container).not.toHaveTextContent(
+			replacePlaceholders(en.tokens.text.on_network, { $network: btc.network.name })
+		);
 	});
 
 	it('renders the supply APY and yearly earning', () => {
@@ -45,5 +53,28 @@ describe('LiquidiumSuppliedRow', () => {
 		const { queryByText } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
 
 		expect(queryByText(en.liquidium.text.action_withdraw)).not.toBeInTheDocument();
+	});
+
+	it('lines up the network icons of the rails the asset trades on', () => {
+		const btc = BTC_MAINNET_TOKEN;
+		liquidiumStore.set({
+			markets: [
+				{
+					poolId: 'pool-btc',
+					asset: 'BTC',
+					chain: 'BTC',
+					supplyApy: 5,
+					borrowApy: 9,
+					frozen: false,
+					available: true
+				}
+			],
+			portfolio: null,
+			assetPrices: {}
+		});
+
+		const { getByAltText } = render(LiquidiumSuppliedRow, { props: { reserve: reserve() } });
+
+		expect(getByAltText(`${btc.network.icon}-0`)).toBeInTheDocument();
 	});
 });
