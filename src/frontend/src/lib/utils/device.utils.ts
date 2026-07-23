@@ -1,5 +1,5 @@
 import { isNode } from '$lib/utils/env.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 interface UserAgentData {
 	mobile?: boolean;
@@ -66,7 +66,11 @@ export const workerPoolSize = (): number => {
 		return 1;
 	}
 
-	const cores = navigator.hardwareConcurrency;
+	const cores: number | undefined = navigator.hardwareConcurrency;
+
+	if (isNullish(cores)) {
+		return WORKER_POOL_MAX_SIZE;
+	}
 
 	return cores >= 2 ? Math.min(cores - 1, WORKER_POOL_MAX_SIZE) : 1;
 };
