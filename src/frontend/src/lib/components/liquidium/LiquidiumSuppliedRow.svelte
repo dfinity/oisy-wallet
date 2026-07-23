@@ -48,12 +48,15 @@
 
 <LogoButton hover={false}>
 	{#snippet logo()}
-		<span class="sm:mr-2 flex items-center gap-1">
+		<span class="sm:mr-2 flex items-end">
 			{#if nonNullish(token)}
 				<TokenLogo color="white" data={token} logoSize={isMobile() ? 'sm' : 'lg'} />
 			{/if}
 			{#if networkIcons.length > 0}
-				<OverlappedLogos icons={networkIcons} invertColor />
+				<!-- Start the rail line-up where the single network badge used to sit (bottom-right of
+				     the logo): pull the first icon back onto the logo by its width less the badge's 4px
+				     offset, then let the rest extend to the right. -->
+				<OverlappedLogos icons={networkIcons} invertColor styleClass="-ml-[18px]" />
 			{/if}
 		</span>
 	{/snippet}
