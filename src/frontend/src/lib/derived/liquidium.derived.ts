@@ -143,16 +143,24 @@ export const liquidiumAssetIcons = liquidiumCardIcons((token) => token.icon);
 // Ethereum and ICP) instead of pinning to the single chain of that reserve.
 export const liquidiumAssetNetworkIcons: Readable<Record<string, string[]>> = derived(
 	[liquidiumMarkets, tokens],
-	([$liquidiumMarkets, $tokens]) =>
-		$liquidiumMarkets.reduce<Record<string, string[]>>((acc, { asset, chain }) => {
-			const icon = liquidiumMarketToken({ chain, asset, tokens: $tokens })?.network.icon;
+	([$liquidiumMarkets, $tokens]) => {
+		const iconsByAsset = $liquidiumMarkets.reduce<Map<string, Set<string>>>(
+			(acc, { asset, chain }) => {
+				const icon = liquidiumMarketToken({ chain, asset, tokens: $tokens })?.network.icon;
 
-			if (nonNullish(icon) && !(acc[asset] ?? []).includes(icon)) {
-				acc[asset] = [...(acc[asset] ?? []), icon];
-			}
+				if (nonNullish(icon)) {
+					const set = acc.get(asset) ?? new Set<string>();
+					set.add(icon);
+					acc.set(asset, set);
+				}
 
-			return acc;
-		}, {})
+				return acc;
+			},
+			new Map()
+		);
+
+		return Object.fromEntries([...iconsByAsset.entries()].map(([asset, set]) => [asset, [...set]]));
+	}
 );
 
 // Earn-page provider card data (mirrors the Harvest card); action → provider page.
