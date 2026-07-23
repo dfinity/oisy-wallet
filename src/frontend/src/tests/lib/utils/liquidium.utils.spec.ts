@@ -26,7 +26,7 @@ import {
 	mapLiquidiumMarketRails,
 	mapLiquidiumPortfolio,
 	mapLiquidiumReserve,
-	orderLiquidiumMarkets
+	orderLiquidiumRails
 } from '$lib/utils/liquidium.utils';
 import {
 	RATE_SCALE,
@@ -199,9 +199,20 @@ describe('liquidium.utils', () => {
 			expect(rails).toHaveLength(1);
 			expect(rails[0].chain).toBe('ICP');
 		});
+
+		it('falls back to the native chain when no rails are configured for the asset', () => {
+			// An asset the SDK guard does not recognize yields no supported rails; the position must
+			// still be withdrawable/repayable on its own (native) chain rather than vanishing.
+			const rails = liquidiumReserveRails(
+				buildReserve({ poolId: 'pool-foo', asset: 'FOO', chain: 'ETH' })
+			);
+
+			expect(rails).toHaveLength(1);
+			expect(rails[0].chain).toBe('ETH');
+		});
 	});
 
-	describe('orderLiquidiumMarkets', () => {
+	describe('orderLiquidiumRails', () => {
 		const buildMarket = (overrides: Partial<LiquidiumMarket> = {}): LiquidiumMarket => ({
 			poolId: 'pool-btc',
 			asset: 'BTC',
@@ -230,7 +241,7 @@ describe('liquidium.utils', () => {
 			// Received in a scrambled pool order to prove the sort re-orders it.
 			const markets = [usdc, ckUsdc, ckBtc, nativeBtc, usdt, ckUsdt, icp, eth];
 
-			expect(keys(orderLiquidiumMarkets(markets))).toEqual([
+			expect(keys(orderLiquidiumRails(markets))).toEqual([
 				'BTC-BTC',
 				'BTC-ICP',
 				'ETH-ETH',
@@ -243,15 +254,15 @@ describe('liquidium.utils', () => {
 		});
 
 		it('puts the native rail before its ck rail within a pool', () => {
-			expect(keys(orderLiquidiumMarkets([ckBtc, nativeBtc]))).toEqual(['BTC-BTC', 'BTC-ICP']);
-			expect(keys(orderLiquidiumMarkets([ckUsdc, usdc]))).toEqual(['USDC-ETH', 'USDC-ICP']);
+			expect(keys(orderLiquidiumRails([ckBtc, nativeBtc]))).toEqual(['BTC-BTC', 'BTC-ICP']);
+			expect(keys(orderLiquidiumRails([ckUsdc, usdc]))).toEqual(['USDC-ETH', 'USDC-ICP']);
 		});
 
 		it('breaks ties between same-pool native rails by network order', () => {
 			// Two native rails (neither is the ICP ck rail) → decided by LIQUIDIUM_NETWORK_ORDER.
 			const btcOnEth = buildMarket({ chain: 'ETH' });
 
-			expect(keys(orderLiquidiumMarkets([btcOnEth, nativeBtc]))).toEqual(['BTC-BTC', 'BTC-ETH']);
+			expect(keys(orderLiquidiumRails([btcOnEth, nativeBtc]))).toEqual(['BTC-BTC', 'BTC-ETH']);
 		});
 
 		it('keeps assets outside the pool order last, in their received order and grouped', () => {
@@ -259,7 +270,7 @@ describe('liquidium.utils', () => {
 			const fooIcp = buildMarket({ poolId: 'pool-foo', asset: 'FOO', chain: 'ICP' });
 			const barEth = buildMarket({ poolId: 'pool-bar', asset: 'BAR', chain: 'ETH' });
 
-			expect(keys(orderLiquidiumMarkets([barEth, fooEth, nativeBtc, fooIcp, icp]))).toEqual([
+			expect(keys(orderLiquidiumRails([barEth, fooEth, nativeBtc, fooIcp, icp]))).toEqual([
 				'BTC-BTC',
 				'ICP-ICP',
 				'BAR-ETH',
@@ -270,13 +281,31 @@ describe('liquidium.utils', () => {
 
 		it('does not mutate the input array', () => {
 			const markets = [icp, nativeBtc];
-			orderLiquidiumMarkets(markets);
+			orderLiquidiumRails(markets);
 
 			expect(keys(markets)).toEqual(['ICP-ICP', 'BTC-BTC']);
 		});
 
 		it('handles an empty list', () => {
-			expect(orderLiquidiumMarkets([])).toEqual([]);
+			expect(orderLiquidiumRails([])).toEqual([]);
+		});
+
+		it('orders position reserves the same way (generic over asset + chain)', () => {
+			// Same sort drives the withdraw/repay pickers: reserve-shaped entries order by pool then
+			// native rail first, identically to the markets above.
+			const reserves = [
+				{ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' },
+				{ poolId: 'pool-btc', asset: 'BTC', chain: 'ICP' },
+				{ poolId: 'pool-btc', asset: 'BTC', chain: 'BTC' },
+				{ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }
+			];
+
+			expect(orderLiquidiumRails(reserves).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'USDC-ETH',
+				'USDC-ICP'
+			]);
 		});
 	});
 

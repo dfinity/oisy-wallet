@@ -400,6 +400,22 @@ describe('liquidium derived stores', () => {
 			]);
 		});
 
+		it('orders the picker across pools (BTC before USDC), native rail first', () => {
+			// USDC seeded before BTC to prove the picker re-orders rather than following portfolio order.
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }), reserve()]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual(
+				['BTC-BTC', 'BTC-ICP', 'USDC-ETH', 'USDC-ICP']
+			);
+		});
+
 		it('is empty by default', () => {
 			expect(get(liquidiumWithdrawReserves)).toEqual([]);
 		});
@@ -448,6 +464,25 @@ describe('liquidium derived stores', () => {
 
 			expect(get(liquidiumRepayReserves)).toEqual([
 				reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			]);
+		});
+
+		it('orders the picker across pools (BTC before USDC), native rail first', () => {
+			// USDC seeded before BTC to prove the picker re-orders rather than following portfolio order.
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve(), reserve({ poolId: 'pool-btc', asset: 'BTC', chain: 'BTC' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumRepayReserves).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'USDC-ETH',
+				'USDC-ICP'
 			]);
 		});
 

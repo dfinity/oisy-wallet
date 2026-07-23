@@ -274,18 +274,22 @@ export const mapLiquidiumMarketRails = (pool: Pool): LiquidiumMarket[] => {
 };
 
 // The ck (non-native) rail is the ICP-chain rail of a non-ICP asset; every other rail is native.
-const isNativeRail = ({ chain, asset }: LiquidiumMarket): boolean =>
+const isNativeRail = ({ chain, asset }: { chain: string; asset: string }): boolean =>
 	chain !== 'ICP' || asset === 'ICP';
 
-// Stable display order for the Markets list, layered on the order Liquidium returns:
+// Stable display order for a list of Liquidium rail entries (markets or position reserves),
+// layered on the order Liquidium returns:
 //  1. pool, by asset, per LIQUIDIUM_POOL_ORDER — unlisted assets keep their received order, last;
 //  2. native rail before the ck rail within a pool (BTC before ckBTC, USDC before ckUSDC);
 //  3. transfer-network order (LIQUIDIUM_NETWORK_ORDER) as the final tiebreaker.
-// Markets that tie on every key keep their received order (Array.sort is stable).
-export const orderLiquidiumMarkets = (markets: LiquidiumMarket[]): LiquidiumMarket[] => {
+// Entries that tie on every key keep their received order (Array.sort is stable). Shared by the
+// Markets list and the withdraw/repay pickers so positions and markets order identically.
+export const orderLiquidiumRails = <T extends { asset: string; chain: string }>(
+	entries: T[]
+): T[] => {
 	// Unlisted assets rank after the listed ones, keeping their first-seen (received) order so
 	// each pool's rails stay grouped.
-	const receivedAssets = [...new Set(markets.map(({ asset }) => asset))];
+	const receivedAssets = [...new Set(entries.map(({ asset }) => asset))];
 
 	const poolRank = (asset: string): number => {
 		const known = LIQUIDIUM_POOL_ORDER.indexOf(asset);
@@ -297,7 +301,7 @@ export const orderLiquidiumMarkets = (markets: LiquidiumMarket[]): LiquidiumMark
 		return known >= 0 ? known : LIQUIDIUM_NETWORK_ORDER.length;
 	};
 
-	return [...markets].sort(
+	return [...entries].sort(
 		(a, b) =>
 			poolRank(a.asset) - poolRank(b.asset) ||
 			Number(isNativeRail(b)) - Number(isNativeRail(a)) ||
@@ -333,8 +337,14 @@ export const mapLiquidiumReserve = ({
 // `chain`, which drives the display token, the repay transfer rail and the withdraw delivery
 // chain. A single-rail asset (ICP) yields one unchanged entry. Kept picker-only — the mapped
 // portfolio reserves stay one-per-pool so dashboard rows and USD totals never double-count.
-export const liquidiumReserveRails = (reserve: LiquidiumReserve): LiquidiumReserve[] =>
-	liquidiumSupportedRails(reserve.asset).map((chain) => ({ ...reserve, chain }));
+export const liquidiumReserveRails = (reserve: LiquidiumReserve): LiquidiumReserve[] => {
+	// Fall back to the reserve's own (native) chain if the SDK guard reports no rails for the
+	// asset, so a position can never silently drop out of the withdraw/repay picker. Rail
+	// display order is applied downstream by `orderLiquidiumRails`, not here.
+	const rails = liquidiumSupportedRails(reserve.asset);
+
+	return (rails.length > 0 ? rails : [reserve.chain]).map((chain) => ({ ...reserve, chain }));
+};
 
 export const mapLiquidiumPortfolio = ({
 	reserves,
