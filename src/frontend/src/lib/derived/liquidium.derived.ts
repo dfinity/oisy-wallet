@@ -15,7 +15,8 @@ import {
 	liquidiumMaxSupplyApy as computeMaxSupplyApy,
 	liquidiumMinBorrowApy as computeMinBorrowApy,
 	liquidiumBorrowingPowerPotentialUsd,
-	liquidiumNetInterestUsd
+	liquidiumNetInterestUsd,
+	liquidiumReserveRails
 } from '$lib/utils/liquidium.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { AssetPrices } from '@liquidium/client';
@@ -55,16 +56,24 @@ export const liquidiumBorrowMarkets: Readable<LiquidiumMarket[]> = derived(
 		)
 );
 
-// Positions the user can withdraw from: reserves with a supplied balance.
+// Positions the user can withdraw from: reserves with a supplied balance, expanded per
+// transfer rail so a BTC/USDC/USDT position offers both native and ck (ICP) delivery.
 export const liquidiumWithdrawReserves: Readable<LiquidiumReserve[]> = derived(
 	liquidiumPortfolio,
-	(portfolio) => (portfolio?.reserves ?? []).filter(({ deposited }) => deposited > ZERO)
+	(portfolio) =>
+		(portfolio?.reserves ?? [])
+			.filter(({ deposited }) => deposited > ZERO)
+			.flatMap(liquidiumReserveRails)
 );
 
-// Positions the user can repay: reserves with outstanding debt.
+// Positions the user can repay: reserves with outstanding debt, expanded per transfer rail
+// so a BTC/USDC/USDT debt can be repaid with either the native asset or its ck twin.
 export const liquidiumRepayReserves: Readable<LiquidiumReserve[]> = derived(
 	liquidiumPortfolio,
-	(portfolio) => (portfolio?.reserves ?? []).filter(({ borrowed }) => borrowed > ZERO)
+	(portfolio) =>
+		(portfolio?.reserves ?? [])
+			.filter(({ borrowed }) => borrowed > ZERO)
+			.flatMap(liquidiumReserveRails)
 );
 
 // SDK USD prices for the borrow form's USD / fiat math.

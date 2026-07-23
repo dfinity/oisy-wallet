@@ -328,7 +328,7 @@ describe('liquidium derived stores', () => {
 			...overrides
 		});
 
-		it('keeps only reserves with a supplied balance', () => {
+		it('keeps only positions with a supplied balance, expanded per rail', () => {
 			liquidiumStore.set({
 				markets: [],
 				portfolio: {
@@ -338,7 +338,40 @@ describe('liquidium derived stores', () => {
 				assetPrices: {}
 			});
 
-			expect(get(liquidiumWithdrawReserves)).toEqual([reserve()]);
+			// The zero-balance USDC position is dropped; the BTC position stays and expands into
+			// its native (BTC) and ck (ICP → ckBTC) rails.
+			expect(get(liquidiumWithdrawReserves)).toEqual([reserve(), reserve({ chain: 'ICP' })]);
+		});
+
+		it('expands a stablecoin position into its native and ck (ICP) rails', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves)).toEqual([
+				reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+				reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' })
+			]);
+		});
+
+		it('leaves a single-rail position (ICP) as one entry', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves)).toEqual([
+				reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			]);
 		});
 
 		it('is empty by default', () => {
@@ -362,7 +395,7 @@ describe('liquidium derived stores', () => {
 			...overrides
 		});
 
-		it('keeps only reserves with outstanding debt', () => {
+		it('keeps only positions with outstanding debt, expanded per rail', () => {
 			liquidiumStore.set({
 				markets: [],
 				portfolio: {
@@ -372,7 +405,24 @@ describe('liquidium derived stores', () => {
 				assetPrices: {}
 			});
 
-			expect(get(liquidiumRepayReserves)).toEqual([reserve()]);
+			// The zero-debt BTC position is dropped; the USDC debt stays and expands into its
+			// native (ETH → USDC) and ck (ICP → ckUSDC) rails.
+			expect(get(liquidiumRepayReserves)).toEqual([reserve(), reserve({ chain: 'ICP' })]);
+		});
+
+		it('leaves a single-rail position (ICP) as one entry', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumRepayReserves)).toEqual([
+				reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			]);
 		});
 
 		it('is empty by default', () => {
