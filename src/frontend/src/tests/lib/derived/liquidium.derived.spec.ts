@@ -213,12 +213,15 @@ describe('liquidium derived stores', () => {
 			expect(get(liquidiumMarkets)).toEqual([]);
 		});
 
-		it('orders the native ICP market right after ckBTC', () => {
-			// SDK returns the ICP pool last; the store keeps the raw order, the derived groups it.
+		it('sorts markets by pool (native rail first), placing ICP after the ETH pool', () => {
+			// Store keeps the raw order; the derived applies the display sort. USDC seeded before
+			// ETH to prove the derived re-orders rather than passing the store through.
 			liquidiumStore.set({
 				markets: [
 					market(),
 					market({ asset: 'BTC', chain: 'ICP' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' }),
 					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
 					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
 				],
@@ -229,8 +232,10 @@ describe('liquidium derived stores', () => {
 			expect(get(liquidiumMarkets).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
 				'BTC-BTC',
 				'BTC-ICP',
+				'ETH-ETH',
 				'ICP-ICP',
-				'ETH-ETH'
+				'USDC-ETH',
+				'USDC-ICP'
 			]);
 		});
 	});

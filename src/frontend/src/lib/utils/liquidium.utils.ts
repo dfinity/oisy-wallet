@@ -9,6 +9,8 @@ import {
 	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
 	LIQUIDIUM_HEALTH_AT_RISK_PERCENT,
 	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
+	LIQUIDIUM_NETWORK_ORDER,
+	LIQUIDIUM_POOL_ORDER,
 	type LiquidiumHealthLevel
 } from '$lib/constants/liquidium.constants';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
@@ -271,24 +273,36 @@ export const mapLiquidiumMarketRails = (pool: Pool): LiquidiumMarket[] => {
 	return liquidiumSupportedRails(pool.asset).map((chain) => ({ ...base, chain }));
 };
 
-const isCkBtcMarket = ({ chain, asset }: LiquidiumMarket): boolean =>
-	chain === 'ICP' && asset === 'BTC';
-const isNativeIcpMarket = ({ chain, asset }: LiquidiumMarket): boolean =>
-	chain === 'ICP' && asset === 'ICP';
+// The ck (non-native) rail is the ICP-chain rail of a non-ICP asset; every other rail is native.
+const isNativeRail = ({ chain, asset }: LiquidiumMarket): boolean =>
+	chain !== 'ICP' || asset === 'ICP';
 
-// Groups the native ICP market right after ckBTC (the ICP rail of the BTC pool). The SDK
-// otherwise returns the ICP pool last and nothing re-orders it. Stable: only the ICP market
-// moves, every other market keeps its relative order; no-op if either ckBTC or ICP is absent.
+// Stable display order for the Markets list, layered on the order Liquidium returns:
+//  1. pool, by asset, per LIQUIDIUM_POOL_ORDER — unlisted assets keep their received order, last;
+//  2. native rail before the ck rail within a pool (BTC before ckBTC, USDC before ckUSDC);
+//  3. transfer-network order (LIQUIDIUM_NETWORK_ORDER) as the final tiebreaker.
+// Markets that tie on every key keep their received order (Array.sort is stable).
 export const orderLiquidiumMarkets = (markets: LiquidiumMarket[]): LiquidiumMarket[] => {
-	const icpMarket = markets.find(isNativeIcpMarket);
-	const rest = markets.filter((market) => !isNativeIcpMarket(market));
-	const ckBtcIndex = rest.findIndex(isCkBtcMarket);
+	// Unlisted assets rank after the listed ones, keeping their first-seen (received) order so
+	// each pool's rails stay grouped.
+	const receivedAssets = [...new Set(markets.map(({ asset }) => asset))];
 
-	if (isNullish(icpMarket) || ckBtcIndex < 0) {
-		return markets;
-	}
+	const poolRank = (asset: string): number => {
+		const known = LIQUIDIUM_POOL_ORDER.indexOf(asset);
+		return known >= 0 ? known : LIQUIDIUM_POOL_ORDER.length + receivedAssets.indexOf(asset);
+	};
 
-	return [...rest.slice(0, ckBtcIndex + 1), icpMarket, ...rest.slice(ckBtcIndex + 1)];
+	const networkRank = (chain: string): number => {
+		const known = LIQUIDIUM_NETWORK_ORDER.indexOf(chain);
+		return known >= 0 ? known : LIQUIDIUM_NETWORK_ORDER.length;
+	};
+
+	return [...markets].sort(
+		(a, b) =>
+			poolRank(a.asset) - poolRank(b.asset) ||
+			Number(isNativeRail(b)) - Number(isNativeRail(a)) ||
+			networkRank(a.chain) - networkRank(b.chain)
+	);
 };
 
 export const mapLiquidiumReserve = ({
