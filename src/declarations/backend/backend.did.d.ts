@@ -53,6 +53,14 @@ export type ActiveUserTransactionData =
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
 	| {
 			/**
+			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
+			 * source/destination leg (EVM and Solana); the deposit address, its
+			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
+			 */
+			NearIntents: NearIntentsData;
+	  }
+	| {
+			/**
 			 * Liquidium lend/borrow flow. A single variant covers all four actions
 			 * (supply, borrow, repay, withdraw).
 			 */
@@ -1139,6 +1147,21 @@ export interface LiquidiumData {
 	 * Amount in the token's base units.
 	 */
 	amount: bigint;
+}
+/**
+ * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
+ * off-chain by polling the 1Click status endpoint keyed by the deposit
+ * address, so that address (and its optional memo, plus learned-mid-flow tx
+ * hashes) lives in `external_refs`; only the canonical immutable trio is
+ * captured here.
+ */
+export interface NearIntentsData {
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
 }
 /**
  * Bitcoin Network.
