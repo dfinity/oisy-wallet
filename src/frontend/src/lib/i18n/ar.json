@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "لعبة",
 			"lending": "الإقراض",
-			"nft": "NFT",
+			"nft": "المقتنيات",
 			"rwa": "RWA",
 			"social": "اجتماعي",
 			"staking": "التخزين",
@@ -1466,11 +1466,11 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "المقتنيات",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "ستظهر NFTs الخاصة بك هنا",
-			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_empty": "ستظهر مقتنياتك هنا",
+			"description_empty": "يبدو أنك لم تتلق بعد أي مقتنيات",
 			"title_not_supported": "",
 			"description_not_supported": "",
 			"grouping": "",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "لا توجد NFTs بعد",
+			"placeholder_image": "لا توجد مقتنيات بعد",
 			"card": {
-				"image": "صورة NFT مع معرف التوكن: $tokenId"
+				"image": "صورة المقتنى مع معرف التوكن: $tokenId"
 			},
 			"copy_address": "",
 			"review_preference": "",

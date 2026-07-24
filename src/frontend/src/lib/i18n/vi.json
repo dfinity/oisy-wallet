@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Trò chơi",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Vật phẩm sưu tầm",
 			"rwa": "RWA",
 			"social": "Mạng xã hội",
 			"staking": "Staking",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
 			"send_review_subtitle": "Bạn gửi",
-			"no_nfts_found": "Không NFT nào được tìm thấy",
-			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm NFT",
-			"select_nft": "Chọn NFT"
+			"no_nfts_found": "Không vật phẩm sưu tầm nào được tìm thấy",
+			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm vật phẩm sưu tầm",
+			"select_nft": "Chọn vật phẩm sưu tầm"
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
 			"select_network": "Chọn mạng",
-			"search_nfts": "Tìm kiếm NFT"
+			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
 			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
 			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
-			"no_nft_selected": "Không NFT đã được chọn để gửi"
+			"no_nft_selected": "Không vật phẩm sưu tầm nào đã được chọn để gửi"
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi khi gửi giao dịch.",
@@ -1466,11 +1466,11 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Vật phẩm sưu tầm",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
-			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
+			"title_empty": "Vật phẩm sưu tầm của bạn sẽ xuất hiện ở đây",
+			"description_empty": "Có vẻ như bạn chưa nhận được vật phẩm sưu tầm nào",
 			"title_not_supported": "",
 			"description_not_supported": "",
 			"grouping": "Nhóm",
@@ -1488,7 +1488,7 @@
 			"quantity": "Số lượng",
 			"item_traits": "Đặc điểm vật phẩm",
 			"collection_not_loaded": "Không thể hiển thị bộ sưu tập do chưa được tải",
-			"nft_not_loaded": "Không thể hiển thị NFT do chưa được tải",
+			"nft_not_loaded": "Không thể hiển thị vật phẩm sưu tầm do chưa được tải",
 			"collections": "Các bộ sưu tập",
 			"all_assets": "Tất cả tài sản",
 			"address_copied": "Đã sao chép địa chỉ $address",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Chưa có NFT nào",
+			"placeholder_image": "Chưa có vật phẩm sưu tầm nào",
 			"card": {
-				"image": "Hình ảnh NFT với ID token: $tokenId"
+				"image": "Hình ảnh vật phẩm sưu tầm với ID token: $tokenId"
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
 			"review_preference": "Thay đổi tùy chọn hiển thị",

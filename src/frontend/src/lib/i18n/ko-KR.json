@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "게임",
 			"lending": "렌딩",
-			"nft": "NFT",
+			"nft": "컬렉터블",
 			"rwa": "RWA",
 			"social": "소셜",
 			"staking": "스테이킹",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "연락처가 여기에 표시됩니다",
 			"contacts_empty_state_description": "아직 연락처를 추가하지 않으셨습니다",
 			"send_review_subtitle": "전송 금액",
-			"no_nfts_found": "NFT를 찾을 수 없습니다",
-			"no_nfts_found_desc": "검색어나 네트워크를 조정하여 NFT를 찾아보세요",
-			"select_nft": "NFT 선택"
+			"no_nfts_found": "컬렉터블을 찾을 수 없습니다",
+			"no_nfts_found_desc": "검색어나 네트워크를 조정하여 컬렉터블을 찾아보세요",
+			"select_nft": "컬렉터블 선택"
 		},
 		"placeholder": {
 			"enter_eth_address": "공개 주소 (0x), 이름 또는 별칭 입력",
 			"enter_recipient_address": "수신자 주소, 이름 또는 별칭 입력",
 			"enter_wallet_address": "지갑 주소, 이름 또는 별칭 입력",
 			"select_network": "네트워크 선택",
-			"search_nfts": "NFT 검색"
+			"search_nfts": "컬렉터블 검색"
 		},
 		"info": {
 			"ckbtc_certified": "ckBTC 파라미터가 인증될 때까지 기다려 주세요.",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "비트코인 자금이 대기 중인 트랜잭션에 의해 잠겨 있습니다",
 			"btc_invalid_fee_calculation": "비트코인 트랜잭션 수수료 검증에 실패했습니다",
 			"pending_transactions_not_available": "대기 중인 트랜잭션 서비스를 현재 이용할 수 없습니다. 나중에 다시 시도해 주세요.",
-			"no_nft_selected": "전송할 NFT가 선택되지 않았습니다."
+			"no_nft_selected": "전송할 컬렉터블이 선택되지 않았습니다."
 		},
 		"error": {
 			"unexpected": "트랜잭션을 전송하는 중에 오류가 발생했습니다.",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "토큰 가져오기",
-				"title_nft": "NFT 컬렉션 가져오기",
+				"title_nft": "컬렉션 가져오기",
 				"review": "검토",
 				"saving": "저장 중...",
 				"updating": "토큰 목록 업데이트 중",
@@ -1368,7 +1368,7 @@
 				"unexpected_ledger": "레저 캐니스터를 검증하는 중 문제가 발생했습니다.",
 				"unexpected_index": "인덱스 캐니스터를 검증하는 중 문제가 발생했습니다.",
 				"unexpected_index_ledger": "인덱스 캐니스터와 관련된 레저 ID를 불러오는 중 문제가 발생했습니다.",
-				"unrecognized_nft_canister_id_standard": "NFT 컬렉션 캐니스터 ID 표준을 감지할 수 없습니다. 제공된 캐니스터 ID를 확인하고 다시 시도해 주세요. 문제가 지속되면 지원팀에 문의하세요.",
+				"unrecognized_nft_canister_id_standard": "컬렉션 캐니스터 ID 표준을 감지할 수 없습니다. 제공된 캐니스터 ID를 확인하고 다시 시도해 주세요. 문제가 지속되면 지원팀에 문의하세요.",
 				"invalid_ledger_id": "레저 ID가 인덱스 캐니스터와 관련이 없습니다.",
 				"missing_ledger_id": "레저 ID가 없습니다. 값을 입력하셨나요?",
 				"missing_canister_id": "캐니스터 ID가 없습니다. 값을 입력하셨나요?",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "토큰 관리",
-				"title_nft": "NFT 컬렉션 관리",
+				"title_nft": "컬렉션 관리",
 				"manage_list": "토큰 관리",
-				"manage_list_nft": "NFT 관리",
+				"manage_list_nft": "컬렉터블 관리",
 				"list_settings": "목록 설정",
 				"import_token": "토큰 가져오기",
-				"import_nft": "NFT 컬렉션 가져오기",
+				"import_nft": "컬렉션 가져오기",
 				"network": "네트워크",
 				"all_tokens_zero_balance": "모든 토큰의 잔액이 0입니다.",
 				"enable_more_assets": "더 많은 토큰 활성화"
@@ -1466,13 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "컬렉터블",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "NFT가 여기에 표시됩니다",
-			"description_empty": "아직 받은 NFT가 없는 것 같습니다",
-			"title_not_supported": "선택한 네트워크에서는 아직 NFT를 지원하지 않습니다",
-			"description_not_supported": "해당 주소로 NFT를 보내지 마세요",
+			"title_empty": "컬렉터블이 여기에 표시됩니다",
+			"description_empty": "아직 받은 컬렉터블이 없는 것 같습니다",
+			"title_not_supported": "선택한 네트워크에서는 아직 컬렉터블을 지원하지 않습니다",
+			"description_not_supported": "해당 주소로 컬렉터블을 보내지 마세요",
 			"grouping": "그룹화",
 			"as_plain_list": "목록으로 표시",
 			"by_collection": "컬렉션별 그룹화",
@@ -1488,7 +1488,7 @@
 			"quantity": "수량",
 			"item_traits": "아이템 특성",
 			"collection_not_loaded": "컬렉션이 아직 로드되지 않아 표시할 수 없습니다",
-			"nft_not_loaded": "NFT가 아직 로드되지 않아 표시할 수 없습니다",
+			"nft_not_loaded": "컬렉터블이 아직 로드되지 않아 표시할 수 없습니다",
 			"collections": "컬렉션",
 			"all_assets": "모든 자산",
 			"address_copied": "$address 주소가 복사되었습니다",
@@ -1497,12 +1497,12 @@
 			"spam": "스팸",
 			"not_spam": "스팸 아님",
 			"spam_warning": "'$collection'을 스팸으로 이동하시겠습니까?",
-			"spam_warning_text": "<b>$collection</b>의 모든 NFT가 스팸으로 이동됩니다. 기본 보기에서 숨겨지지만 나중에 언제든지 찾아 복원할 수 있습니다.",
+			"spam_warning_text": "<b>$collection</b>의 모든 컬렉터블이 스팸으로 이동됩니다. 기본 보기에서 숨겨지지만 나중에 언제든지 찾아 복원할 수 있습니다.",
 			"hide": "숨기기",
 			"unhide": "숨기기 해제",
 			"hidden": "숨겨진 항목",
 			"hide_warning": "'$collection'을 숨기시겠습니까?",
-			"hide_warning_text": "<b>$collection</b>과 관련된 모든 NFT가 기본 보기에서 숨겨지지만 나중에 언제든지 찾아 복원할 수 있습니다.",
+			"hide_warning_text": "<b>$collection</b>과 관련된 모든 컬렉터블이 기본 보기에서 숨겨지지만 나중에 언제든지 찾아 복원할 수 있습니다.",
 			"open_explorer": "블록체인 탐색기에서 이 컨트랙트 열기",
 			"img_consent_disabled": "이 컬렉션의 이미지를 비활성화했습니다",
 			"img_consent_none": "보안상의 이유로 이미지가 비활성화되었습니다",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": "미디어가 다른 위치에 저장된 것으로 보입니다. 접근하려면 신중히 검토한 후 이 링크를 사용하세요:"
 		},
 		"alt": {
-			"placeholder_image": "아직 NFT가 없습니다",
+			"placeholder_image": "아직 컬렉터블이 없습니다",
 			"card": {
-				"image": "토큰 ID: $tokenId의 NFT 이미지"
+				"image": "토큰 ID: $tokenId의 컬렉터블 이미지"
 			},
 			"copy_address": "이 주소를 클립보드에 복사",
 			"review_preference": "표시 설정 변경",

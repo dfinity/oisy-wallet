@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Jeu",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Objets de collection",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "Vos contacts apparaîtront ici",
 			"contacts_empty_state_description": "Il semble que vous n'ayez pas encore ajouté de contacts",
 			"send_review_subtitle": "Vous envoyez",
-			"no_nfts_found": "Aucun NFT trouvé",
-			"no_nfts_found_desc": "Ajustez votre recherche ou votre réseau pour trouver vos NFT",
-			"select_nft": "Sélectionner un NFT"
+			"no_nfts_found": "Aucun objet de collection trouvé",
+			"no_nfts_found_desc": "Ajustez votre recherche ou votre réseau pour trouver vos objets de collection",
+			"select_nft": "Sélectionner un objet de collection"
 		},
 		"placeholder": {
 			"enter_eth_address": "Saisir l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Saisir l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Saisir l'adresse du portefeuille, le nom ou l'alias",
 			"select_network": "Sélectionner le réseau",
-			"search_nfts": "Rechercher des NFT"
+			"search_nfts": "Rechercher des objets de collection"
 		},
 		"info": {
 			"ckbtc_certified": "Veuillez patienter jusqu'à ce que les paramètres ckBTC aient été certifiés.",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
 			"btc_invalid_fee_calculation": "La validation des frais de transaction Bitcoin a échoué",
 			"pending_transactions_not_available": "Le service de transaction en attente n'est actuellement pas disponible. Veuillez réessayer plus tard.",
-			"no_nft_selected": "Aucun NFT n'a été sélectionné pour l'envoi."
+			"no_nft_selected": "Aucun objet de collection n'a été sélectionné pour l'envoi."
 		},
 		"error": {
 			"unexpected": "Une erreur s'est produite lors de l'envoi de la transaction.",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "Importer un token",
-				"title_nft": "Importer une collection NFT",
+				"title_nft": "Importer une collection",
 				"review": "Vérifier",
 				"saving": "Enregistrement...",
 				"updating": "Mise à jour de la liste des tokens",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "Gérer les tokens",
-				"title_nft": "Gérer les collections NFT",
+				"title_nft": "Gérer les collections",
 				"manage_list": "Gérer les tokens",
-				"manage_list_nft": "Gérer les NFT",
+				"manage_list_nft": "Gérer les objets de collection",
 				"list_settings": "Paramètres de la liste",
 				"import_token": "Importer un token",
-				"import_nft": "Importer une collection NFT",
+				"import_nft": "Importer une collection",
 				"network": "Réseau",
 				"all_tokens_zero_balance": "Tous les tokens ont un solde nul.",
 				"enable_more_assets": "Activer plus de tokens"
@@ -1466,13 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Objets de collection",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Vos NFTs apparaîtront ici",
-			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT",
-			"title_not_supported": "Les NFT ne sont pas encore pris en charge sur le réseau sélectionné",
-			"description_not_supported": "Veuillez ne pas envoyer de NFT à votre adresse",
+			"title_empty": "Vos objets de collection apparaîtront ici",
+			"description_empty": "Il semble que vous n'ayez pas encore reçu d'objets de collection",
+			"title_not_supported": "Les objets de collection ne sont pas encore pris en charge sur le réseau sélectionné",
+			"description_not_supported": "Veuillez ne pas envoyer d'objets de collection à votre adresse",
 			"grouping": "Regroupement",
 			"as_plain_list": "Afficher en liste simple",
 			"by_collection": "Grouper par collection",
@@ -1488,7 +1488,7 @@
 			"quantity": "Quantité",
 			"item_traits": "Caractéristiques de l'élément",
 			"collection_not_loaded": "La collection n'a pas pu être affichée car elle n'a pas encore été chargée",
-			"nft_not_loaded": "Le NFT n'a pas pu être affiché car il n'a pas encore été chargé",
+			"nft_not_loaded": "L'objet de collection n'a pas pu être affiché car il n'a pas encore été chargé",
 			"collections": "Collections",
 			"all_assets": "Tous les actifs",
 			"address_copied": "Adresse $address copiée",
@@ -1497,12 +1497,12 @@
 			"spam": "Spam",
 			"not_spam": "Non spam",
 			"spam_warning": "Déplacer '$collection' vers les spams ?",
-			"spam_warning_text": "Cela déplacera tous les NFT de <b>$collection</b> vers les spams. Ils seront masqués de votre vue principale, mais vous pourrez toujours les retrouver et les restaurer plus tard.",
+			"spam_warning_text": "Cela déplacera tous les objets de collection de <b>$collection</b> vers les spams. Ils seront masqués de votre vue principale, mais vous pourrez toujours les retrouver et les restaurer plus tard.",
 			"hide": "Masquer",
 			"unhide": "Afficher",
 			"hidden": "Masqué",
 			"hide_warning": "Masquer '$collection' ?",
-			"hide_warning_text": "Cela masquera <b>$collection</b> et tous les NFT associés de votre vue principale, mais vous pourrez toujours les retrouver et les restaurer plus tard.",
+			"hide_warning_text": "Cela masquera <b>$collection</b> et tous les objets de collection associés de votre vue principale, mais vous pourrez toujours les retrouver et les restaurer plus tard.",
 			"open_explorer": "Ouvrir ce contrat dans l'explorateur de blockchain",
 			"img_consent_disabled": "Vous avez désactivé les images de cette collection",
 			"img_consent_none": "Image désactivée pour des raisons de sécurité",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": "Le média semble être stocké à un emplacement différent. Pour y accéder, vous pouvez utiliser ce lien, après l'avoir soigneusement examiné :"
 		},
 		"alt": {
-			"placeholder_image": "Pas encore de NFT",
+			"placeholder_image": "Pas encore d'objets de collection",
 			"card": {
-				"image": "Image du NFT avec l'ID de token : $tokenId"
+				"image": "Image de l'objet de collection avec l'ID de token : $tokenId"
 			},
 			"copy_address": "Copier cette adresse dans le presse-papiers",
 			"review_preference": "Changer la préférence d'affichage",

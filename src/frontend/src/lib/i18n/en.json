@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Game",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Collectibles",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
-			"no_nfts_found": "No NFTs found",
-			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
-			"select_nft": "Select NFT"
+			"no_nfts_found": "No Collectibles found",
+			"no_nfts_found_desc": "Adjust your search or network to find your Collectibles",
+			"select_nft": "Select Collectible"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network",
-			"search_nfts": "Search NFTs"
+			"search_nfts": "Search Collectibles"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
 			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later.",
-			"no_nft_selected": "No NFT has been selected for sending."
+			"no_nft_selected": "No Collectible has been selected for sending."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "Import token",
-				"title_nft": "Import NFT collection",
+				"title_nft": "Import collection",
 				"review": "Review",
 				"saving": "Saving...",
 				"updating": "Updating token list",
@@ -1368,7 +1368,7 @@
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
-				"unrecognized_nft_canister_id_standard": "We couldn't detect the NFT collection canister ID standard. Please check the provided canister ID and try again. Or contact support if the issue persists.",
+				"unrecognized_nft_canister_id_standard": "We couldn't detect the collection canister ID standard. Please check the provided canister ID and try again. Or contact support if the issue persists.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_canister_id": "The Canister ID is missing. Did you provide a value?",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"title_nft": "Manage NFT collections",
+				"title_nft": "Manage collections",
 				"manage_list": "Manage tokens",
-				"manage_list_nft": "Manage NFTs",
+				"manage_list_nft": "Manage Collectibles",
 				"list_settings": "List settings",
 				"import_token": "Import token",
-				"import_nft": "Import NFT collection",
+				"import_nft": "Import collection",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
 				"enable_more_assets": "Enable more tokens"
@@ -1466,13 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
-			"count_one": "$count NFT",
-			"count_other": "$count NFTs",
-			"title_empty": "Your NFTs will appear here",
-			"description_empty": "It looks like you haven't received NFTs yet",
-			"title_not_supported": "NFTs are not yet supported on the selected network",
-			"description_not_supported": "Please do not send NTFs to your address",
+			"title": "Collectibles",
+			"count_one": "$count Collectible",
+			"count_other": "$count Collectibles",
+			"title_empty": "Your Collectibles will appear here",
+			"description_empty": "It looks like you haven't received Collectibles yet",
+			"title_not_supported": "Collectibles are not yet supported on the selected network",
+			"description_not_supported": "Please do not send Collectibles to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",
@@ -1488,7 +1488,7 @@
 			"quantity": "Quantity",
 			"item_traits": "Item traits",
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
-			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"nft_not_loaded": "The Collectible could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
@@ -1497,12 +1497,12 @@
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"spam_warning": "Move '$collection' to spam?",
-			"spam_warning_text": "This will move all NFTs in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
+			"spam_warning_text": "This will move all Collectibles in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
 			"hide": "Hide",
 			"unhide": "Unhide",
 			"hidden": "Hidden",
 			"hide_warning": "Hide '$collection'?",
-			"hide_warning_text": "This will hide <b>$collection</b> and all associated NFTs from your main view, but you can always find and restore them later.",
+			"hide_warning_text": "This will hide <b>$collection</b> and all associated Collectibles from your main view, but you can always find and restore them later.",
 			"open_explorer": "Open this contract in blockchain explorer",
 			"img_consent_disabled": "You disabled images from this collection",
 			"img_consent_none": "Image disabled for security reasons",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": "The Media appears to be stored at a different location. To access it, you can use this link, after carefully reviewing it:"
 		},
 		"alt": {
-			"placeholder_image": "No NFTs yet",
+			"placeholder_image": "No Collectibles yet",
 			"card": {
-				"image": "Image of NFT with token ID: $tokenId"
+				"image": "Image of Collectible with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
 			"review_preference": "Change display preference",
