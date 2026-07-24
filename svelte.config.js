@@ -48,6 +48,7 @@ const config = {
 			$evm: './src/frontend/src/evm',
 			$icp: './src/frontend/src/icp',
 			$sol: './src/frontend/src/sol',
+			$xrp: './src/frontend/src/xrp',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env',
 			$routes: './src/frontend/src/routes'
