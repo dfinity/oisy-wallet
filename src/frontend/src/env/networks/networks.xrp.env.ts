@@ -4,15 +4,23 @@ import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import xrpMainnetIcon from '$lib/assets/networks/xrp-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { XrpNetwork } from '$xrp/types/network';
 
-// XRP Ledger support is built incrementally and ships disabled by default. It is
-// turned on explicitly per environment via VITE_XRP_MAINNET_ENABLED once the full
-// send / receive / balance integration has landed, so no half-built chain is ever
-// exposed to users.
-export const XRP_MAINNET_ENABLED = parseBoolEnvVar(import.meta.env.VITE_XRP_MAINNET_ENABLED);
+// XRP Ledger uses the same enablement convention as every other chain — the
+// `VITE_XRP_MAINNET_DISABLED` env var, which defaults to *enabled*.
+//
+// TEMPORARY: while the integration is in progress this override force-disables XRP
+// regardless of the env var, so the half-built chain never ships. Remove this override
+// (and the `!… &&` below) in the final "enable" PR — XRP then behaves exactly like
+// BTC/ETH/SOL. To test a build meanwhile, flip this to `false` on the branch; no
+// deploy or CI env change is needed (XRP is then enabled by default like the others).
+const XRP_MAINNET_DISABLED_OVERRIDE = true as boolean;
+
+export const XRP_MAINNET_ENABLED =
+	!XRP_MAINNET_DISABLED_OVERRIDE &&
+	parseEnabledMainnetBoolEnvVar(import.meta.env.VITE_XRP_MAINNET_DISABLED);
 
 export const XRP_MAINNET_NETWORK_SYMBOL = 'XRP';
 

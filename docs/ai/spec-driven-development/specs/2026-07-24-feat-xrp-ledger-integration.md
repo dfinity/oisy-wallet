@@ -369,14 +369,19 @@ to review independently.
 There is **no external Phase 0** — the chain-fusion-signer already exposes
 everything needed (verified §2.1), so the whole effort lives in this repo.
 
-**Rollout safety — disabled by default.** Every PR ships XRP behind the
-`VITE_XRP_MAINNET_ENABLED` flag, which defaults to **disabled**
-(`parseBoolEnvVar` → `false` when unset). While disabled, `SUPPORTED_XRP_NETWORKS`
-/ `SUPPORTED_XRP_TOKENS` resolve to empty arrays, so XRP is absent from every
-enabled-network/token derivation and the UI — zero behavioural change and zero
-impact on existing tests. The flag is flipped on only in the final PR, once
-send / receive / balance all work. So each PR merges to `main` safely without
-exposing a half-built chain.
+**Rollout safety — disabled by a temporary override, not a bespoke flag.** XRP
+uses the **same enablement convention as every other chain** —
+`VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While the integration is in
+progress, a **temporary in-code override** (`XRP_MAINNET_DISABLED_OVERRIDE` in
+`networks.xrp.env.ts`) force-disables it regardless of the env var, so
+`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays and XRP
+is absent from every enabled-network/token derivation and the UI — zero
+behavioural change, zero impact on existing tests. Enabling XRP is simply
+**removing the override** (final PR), after which it behaves exactly like
+BTC/ETH/SOL. Enablement stays entirely in code — **no CI/deploy env plumbing** —
+so each PR merges to `main` safely without exposing a half-built chain. To test
+a build meanwhile, flip the override to `false` on the branch (XRP is then
+enabled by default like the other chains — no env-override needed).
 
 **Mainnet first.** The initial PRs are **mainnet-only**; XRPL **testnet** (plus
 a Bithomp testnet explorer + faucet) is a deliberate fast-follow, not part of
@@ -387,7 +392,7 @@ these PRs.
 | 1     | `feat/frontend/xrp-network-and-address` | —          | **This PR.** `$xrp` folder + alias, network + native-XRP token catalog (mainnet-only), Ed25519 address derivation (`deriveXrpAddress` in `cli.ts` + `$xrp/services/xrp-address.services.ts`) via existing `getSchnorrPublicKey`, `ripple-address-codec` dependency, address validation, unit tests against an authoritative XRPL vector. Ships disabled. |
 | 2     | `feat/frontend/xrp-balance-receive`     | Phase 1    | Address store + loading orchestration (`addresses.services`, `Loader.svelte`), receive-modal display (+ i18n, test-ids), XRPL JSON-RPC client (`$xrp/rest/`, QuickNode) + `docs/ai/integrations/xrpl.md` + CSP allowlist, native balance with base-reserve awareness                                                                                     |
 | 3     | `feat/frontend/xrp-send`                | Phase 2    | Tx serialization (`ripple-binary-codec`) + signing via existing `signWithSchnorr`, send flow incl. destination-tag UI and reserve-aware max-amount, transaction history from `account_tx`                                                                                                                                                                |
-| 4     | `feat/frontend/xrp-enable`              | Phase 3    | Exchange-rate/price lookup, flip `VITE_XRP_MAINNET_ENABLED` on, `PRODUCT.md` update                                                                                                                                                                                                                                                                      |
+| 4     | `feat/frontend/xrp-enable`              | Phase 3    | Remove the temporary `XRP_MAINNET_DISABLED_OVERRIDE` (so `VITE_XRP_MAINNET_DISABLED` governs XRP like every other chain), exchange-rate/price lookup, `PRODUCT.md` update                                                                                                                                                                                |
 
 Test coverage lands **inside each phase's PR**, not deferred to a follow-up —
 per the repo's `test-coverage` CI gate, every new component/derived needs
