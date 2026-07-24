@@ -400,8 +400,8 @@
 			},
 			"mobox": {
 				"name": "Mobox",
-				"one_liner": "GameFi platforma na síti BNB Chain, která propojuje free-to-play hry, DeFi výnosy a mechaniky sběratelských předmětů.",
-				"description": "MOBOX kombinuje DeFi, sběratelské předměty a hraní her do jednoho ekosystému, kde hráči získávají tokeny MBOX prostřednictvím hraní a stakingu."
+				"one_liner": "GameFi platforma na síti BNB Chain, která propojuje free-to-play hry, DeFi výnosy a NFT mechaniky.",
+				"description": "MOBOX kombinuje DeFi, NFT a hraní her do jednoho ekosystému, kde hráči získávají tokeny MBOX prostřednictvím hraní a stakingu."
 			},
 			"cyql": {
 				"name": "cyql.io",
@@ -415,8 +415,8 @@
 			},
 			"opensea": {
 				"name": "OpenSea",
-				"one_liner": "Největší tržiště sběratelských předmětů na světě pro objevování, nákup a prodej digitálních aktiv.",
-				"description": "OpenSea je globální tržiště se sběratelskými předměty, kde mohou uživatelé vytvářet, obchodovat a objevovat jedinečná digitální aktiva."
+				"one_liner": "Největší NFT tržiště na světě pro objevování, nákup a prodej digitálních aktiv.",
+				"description": "OpenSea je globální tržiště s NFT, kde mohou uživatelé vytvářet, obchodovat a objevovat jedinečná digitální aktiva."
 			},
 			"pacifica": {
 				"name": "Pacifica",
@@ -425,8 +425,8 @@
 			},
 			"magic_eden": {
 				"name": "Magic Eden",
-				"one_liner": "Multichainové tržiště sběratelských předmětů pro tvůrce a sběratele.",
-				"description": "Magic Eden je tržiště sběratelských předmětů podporující více blockchainů s důrazem na jednoduchost a nízké poplatky."
+				"one_liner": "Multichainové NFT tržiště pro tvůrce a sběratele.",
+				"description": "Magic Eden je NFT tržiště podporující více blockchainů s důrazem na jednoduchost a nízké poplatky."
 			},
 			"solayer": {
 				"name": "Solayer",

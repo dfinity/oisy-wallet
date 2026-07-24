@@ -400,8 +400,8 @@
 			},
 			"mobox": {
 				"name": "Mobox",
-				"one_liner": "Une plateforme GameFi sur la BNB Chain qui fusionne le jeu Free-to-Play, le yield farming DeFi et les mécaniques d'objets de collection — propulsée par le play-to-earn et la gouvernance communautaire.",
-				"description": "MOBOX est une plateforme GameFi sur la BNB Chain qui fusionne le yield farming DeFi, les écosystèmes d'objets de collection et le jeu free-to-play. Les joueurs gagnent des tokens MBOX grâce au jeu, au staking d'objets de collection et au yield farming, tout en participant à la gouvernance décentralisée. Avec ses objets de collection MOMO et son utilité cross-game, MOBOX vise à créer une économie entièrement gamifiée."
+				"one_liner": "Une plateforme GameFi sur la BNB Chain qui fusionne le jeu Free-to-Play, le yield farming DeFi et les mécaniques NFT — propulsée par le play-to-earn et la gouvernance communautaire.",
+				"description": "MOBOX est une plateforme GameFi sur la BNB Chain qui fusionne le yield farming DeFi, les écosystèmes NFT et le jeu free-to-play. Les joueurs gagnent des tokens MBOX grâce au jeu, au staking de NFT et au yield farming, tout en participant à la gouvernance décentralisée. Avec ses MOMO NFT et son utilité cross-game, MOBOX vise à créer une économie entièrement gamifiée."
 			},
 			"cyql": {
 				"name": "cyql.io",
@@ -415,8 +415,8 @@
 			},
 			"opensea": {
 				"name": "OpenSea",
-				"one_liner": "OpenSea, échangez tout — trading de tokens et marché d'objets de collection. Bienvenue au meilleur endroit pour découvrir, échanger et créer onchain.",
-				"description": "OpenSea est le plus grand marché décentralisé au monde pour les jetons non fongibles (objets de collection), où les utilisateurs peuvent créer, acheter, vendre et échanger des actifs numériques uniques comme de l'art, des objets de collection et des objets virtuels. Fondé en 2017, il opère sur plusieurs blockchains et permet aux utilisateurs de connecter un portefeuille de cryptomonnaies pour gérer leurs actifs numériques."
+				"one_liner": "OpenSea, échangez tout — trading de tokens et marché NFT. Bienvenue au meilleur endroit pour découvrir, échanger et créer onchain.",
+				"description": "OpenSea est le plus grand marché décentralisé au monde pour les jetons non fongibles (NFT), où les utilisateurs peuvent créer, acheter, vendre et échanger des actifs numériques uniques comme de l'art, des objets de collection et des objets virtuels. Fondé en 2017, il opère sur plusieurs blockchains et permet aux utilisateurs de connecter un portefeuille de cryptomonnaies pour gérer leurs actifs numériques."
 			},
 			"pacifica": {
 				"name": "Pacifica",
@@ -425,8 +425,8 @@
 			},
 			"magic_eden": {
 				"name": "Magic Eden",
-				"one_liner": "Magic Eden est un marché d'objets de collection multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (objets de collection) sur différentes blockchains.",
-				"description": "Magic Eden est un marché d'objets de collection multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (objets de collection) sur différentes blockchains. Il est connu pour son interface conviviale, ses faibles frais de transaction et divers outils pour les créateurs et les collectionneurs."
+				"one_liner": "Magic Eden est un marché NFT multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (NFT) sur différentes blockchains.",
+				"description": "Magic Eden est un marché NFT multi-chaînes qui permet aux utilisateurs de créer, acheter, vendre et échanger des jetons non fongibles (NFT) sur différentes blockchains. Il est connu pour son interface conviviale, ses faibles frais de transaction et divers outils pour les créateurs et les collectionneurs."
 			},
 			"solayer": {
 				"name": "Solayer",
