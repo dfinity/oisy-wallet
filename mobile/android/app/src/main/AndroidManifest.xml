@@ -48,4 +48,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- QR scanning (send-to-address, WalletConnect pairing) via the WebView camera. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Required on Android 13+ to post any (local or push) notification. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

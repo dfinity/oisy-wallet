@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<!-- Init theme as fast as possible -->
+		<script theme-loader>
+			try {
+				const isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				const currentTheme =
+					localStorage.nnsTheme === null ||
+					localStorage.nnsTheme === undefined ||
+					localStorage.nnsTheme === ''
+						? undefined
+						: JSON.parse(localStorage.nnsTheme);
+
+				document.documentElement.setAttribute(
+					'theme',
+					currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
+				);
+			} catch (error) {
+				console.error('Error initializing theme', error);
+			}
+		</script>
+
+		<!-- Init language as fast as possible -->
+		<script language-loader>
+			try {
+				const currentLanguage =
+					localStorage.lang === null || localStorage.lang === undefined || localStorage.lang === ''
+						? undefined
+						: JSON.parse(localStorage.lang);
+
+				document.documentElement.setAttribute('lang', currentLanguage ?? 'en');
+			} catch (error) {
+				console.error('Error initializing language', error);
+			}
+		</script>
+
+		<style>
+			:root {
+				&,
+				#app-background-container {
+					background: #e8f1ff;
+				}
+				color: #000;
+			}
+			:root[theme='dark'] {
+				&,
+				#app-background-container {
+					background: #070f1c;
+				}
+				color: #f4f6fa;
+			}
+		</style>
+
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'none';
+        connect-src 'self' https: wss:;
+        img-src 'self' https: ipfs: data:;
+        frame-src 'self' https://verify.walletconnect.com https://verify.walletconnect.org https://buy.onramper.dev https://buy.onramper.com;
+        manifest-src 'self';
+        script-src 'unsafe-inline' 'strict-dynamic' 'wasm-unsafe-eval' 'sha256-Q0FgbpUVauusWLtyGNoCKfaFaC6ESDL89D//4vs0hqI=' 'sha256-nFFnqsFhIhz1BjTi60vtlL387fMm/j5/ktTuPRYVeIo=' 'sha256-ebeshBtMW5eAkndQ56ZTLrPhzxJXRazlZZ2s2OCv13w=' 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'sha256-i1pRBZV0fanq+nJev/437aOatMKcFZ7DwZNzo/bxQRg=';
+        base-uri 'self';
+        form-action 'none';
+        style-src 'self' 'unsafe-inline';
+        font-src 'self';
+        upgrade-insecure-requests;"
+		/>
+
+		<meta charset="utf-8" />
+		<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
+
+		<title>OISY Wallet</title>
+		<link href="https://audit.oisy.com" rel="canonical" />
+		<meta
+			content="OISY Wallet offers a seamless on-chain experience for managing Ethereum, BTC, Solana, and ICP assets. Designed for the modern multi-chain wallet user, it leverages native web technologies and advanced cryptography to eliminate the need for browser extensions or mobile apps. Accessing the wallet is simple and secure, with passkeys available on both computers and mobile devices."
+			name="description"
+		/>
+		<meta content="OISY Wallet" property="og:title" />
+		<meta
+			content="OISY Wallet offers a seamless on-chain experience for managing Ethereum, BTC, Solana, and ICP assets. Designed for the modern multi-chain wallet user, it leverages native web technologies and advanced cryptography to eliminate the need for browser extensions or mobile apps. Accessing the wallet is simple and secure, with passkeys available on both computers and mobile devices."
+			property="og:description"
+		/>
+		<meta content="website" property="og:type" />
+		<meta content="https://audit.oisy.com" property="og:url" />
+		<meta content="https://audit.oisy.com/images/share-image.webp" property="og:image" />
+		<meta content="summary_large_image" name="twitter:card" />
+		<meta content="OISY Wallet" name="twitter:title" />
+		<meta
+			content="OISY Wallet offers a seamless on-chain experience for managing Ethereum, BTC, Solana, and ICP assets. Designed for the modern multi-chain wallet user, it leverages native web technologies and advanced cryptography to eliminate the need for browser extensions or mobile apps. Accessing the wallet is simple and secure, with passkeys available on both computers and mobile devices."
+			name="twitter:description"
+		/>
+		<meta content="https://audit.oisy.com/images/share-image.webp" name="twitter:image" />
+		<meta content="@dfinity" name="twitter:creator" />
+
+		<link crossorigin="anonymous" href="/manifest.webmanifest" rel="manifest" />
+
+		<!-- Favicon -->
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+
+		<!-- iOS meta tags & icons -->
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="#016DFC" />
+		<meta name="apple-mobile-web-app-title" content="OISY Wallet" />
+		<link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png" />
+		<link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#016DFC" />
+
+		<!-- MS -->
+		<meta name="msapplication-TileColor" content="#016DFC" />
+		<meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+
+		<meta content="#FFFFFF" name="theme-color" />
+		<link href="/_app/immutable/entry/start.BfLHUhKE.js" rel="modulepreload" />
+		<link href="/_app/immutable/chunks/BBU3wvEQ.js" rel="modulepreload" />
+		<link href="/_app/immutable/chunks/jLveNQ09.js" rel="modulepreload" />
+		<link href="/_app/immutable/chunks/Cof7Nn-_.js" rel="modulepreload" />
+		<link href="/_app/immutable/entry/app.BVoHYaJr.js" rel="modulepreload" />
+		<link href="/_app/immutable/nodes/0.BK9jsOq5.js" rel="modulepreload" />
+
+		<link href="/_app/immutable/assets/index.BczKW0E6.css" rel="stylesheet" />
+
+		<style>
+			#app-spinner {
+				--spinner-size: 30px;
+
+				width: 30px;
+				height: 30px;
+				border: 3px solid rgb(0, 102, 255);
+				border-top-color: transparent;
+				border-radius: 50%;
+				animation: spin 0.75s ease-in-out 40; /* limit to 40*0.75 to avoid gpu leaks, shouldnt take longer than 30s */
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: rotate(0deg);
+				margin-left: -15px;
+				margin-top: -15px;
+				box-sizing: border-box;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			#app-background-container {
+				contain: paint;
+				pointer-events: none;
+
+				position: fixed;
+				top: 0;
+				left: 50%;
+
+				transform: translateX(-50%);
+
+				width: 100%;
+				height: 100%;
+
+				z-index: -1;
+
+				overflow: hidden;
+			}
+
+			#app-background-light,
+			#app-background-dark,
+			#app-background-landing-light,
+			#app-background-landing-dark {
+				contain: paint;
+				pointer-events: none;
+
+				width: 100%;
+				height: 100%;
+				min-width: 1728px;
+
+				object-fit: cover;
+			}
+
+			/* Default background: landing page artwork (shown pre-hydration and on the signed-out landing screen). */
+			#app-background-light,
+			#app-background-dark,
+			#app-background-landing-light,
+			#app-background-landing-dark {
+				display: none;
+			}
+
+			:root[theme='light'] #app-background-landing-light {
+				display: block;
+			}
+
+			:root[theme='dark'] #app-background-landing-dark {
+				display: block;
+			}
+
+			/* In-app views (signed-in routes, lock page) opt out via [data-app-view] and fall back to the classic OISY background. */
+			:root[theme='light'] body:has([data-app-view]) #app-background-landing-light,
+			:root[theme='dark'] body:has([data-app-view]) #app-background-landing-dark {
+				display: none;
+			}
+
+			:root[theme='light'] body:has([data-app-view]) #app-background-light {
+				display: block;
+			}
+
+			:root[theme='dark'] body:has([data-app-view]) #app-background-dark {
+				display: block;
+			}
+		</style>
+
+		<script sveltekit-preloader>
+			const links = [];
+			for (const link of links) {
+				const preloadLink = document.createElement('link');
+				preloadLink.href = link;
+				preloadLink.rel = 'preload';
+				preloadLink.as = 'script';
+				document.head.appendChild(preloadLink);
+			}
+		</script>
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div id="app-background-container">
+			<img
+				id="app-background-light"
+				src="/images/oisy_bg_light.webp"
+				alt="OISY Background light theme"
+				decoding="sync"
+			/>
+			<img
+				id="app-background-dark"
+				src="/images/oisy_bg_dark.webp"
+				alt="OISY Background dark theme"
+				decoding="sync"
+			/>
+			<img
+				id="app-background-landing-light"
+				src="/images/landing_bg_light.webp"
+				alt="OISY Background light theme"
+				fetchpriority="high"
+				decoding="sync"
+			/>
+			<img
+				id="app-background-landing-dark"
+				src="/images/landing_bg_dark.webp"
+				alt="OISY Background dark theme"
+				fetchpriority="high"
+				decoding="sync"
+			/>
+		</div>
+
+		<div style="display: contents">
+			<script></script>
+		</div>
+
+		<!-- All resources required to boot the dapp can take some times to be downloaded on the IC. -->
+		<!-- That's why we are displaying a spinner while the dapp is starting. -->
+		<!-- Spinner which is then removed as soon as the authentication is initialized (regardless if sign-in or sign-out) -->
+		<div id="app-spinner" aria-hidden="true" data-tid="spinner"></div>
+
+		<script sveltekit-loader>
+			const loader = document.createElement('script');
+			loader.type = 'module';
+			loader.src = '/main.js';
+			document.head.appendChild(loader);
+		</script>
+	</body>
+</html>

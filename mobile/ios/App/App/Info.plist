@@ -59,5 +59,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>OISY uses the camera to scan QR codes, e.g. recipient addresses or WalletConnect pairing codes.</string>
 </dict>
 </plist>
