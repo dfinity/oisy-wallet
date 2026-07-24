@@ -66,6 +66,12 @@ export const workerPoolSize = (): number => {
 		return 1;
 	}
 
+	// No browser context (SSR / non-browser runtime) — reading `navigator` would throw. The worker
+	// pool is never actually exercised there; return the full pool so any caller gets a valid size.
+	if (typeof navigator === 'undefined') {
+		return WORKER_POOL_MAX_SIZE;
+	}
+
 	const cores: number | undefined = navigator.hardwareConcurrency;
 
 	if (isNullish(cores)) {

@@ -225,9 +225,10 @@ export abstract class AppWorker {
 	 * This is notably useful for testing purposes to ensure that each test starts with a clean state.
 	 */
 	static resetForTesting() {
-		this.#pool.clear();
-		this.#poolRefCounts.clear();
+		// Mirror terminateAllWorkers: terminate live threads before dropping the tracking set —
+		// #liveWorkers is the only handle that can stop them, so clearing it first leaks the threads
+		// and makes them unreachable for any later teardown.
+		AppWorker.terminateAllWorkers();
 		this.#poolSize = undefined;
-		this.#liveWorkers.clear();
 	}
 }
