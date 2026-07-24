@@ -33,8 +33,10 @@
 
 <div class="inline-flex gap-0.5 rounded-full bg-secondary p-1" data-tid={NFT_GROUP_TOGGLE}>
 	<button
-		class="rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+		class="rounded-full px-3 py-1.5 text-sm transition-colors"
 		class:bg-primary={!$nftGroupByCollection}
+		class:font-medium={$nftGroupByCollection}
+		class:font-semibold={!$nftGroupByCollection}
 		class:shadow-sm={!$nftGroupByCollection}
 		class:text-primary={!$nftGroupByCollection}
 		class:text-secondary={$nftGroupByCollection}
@@ -46,8 +48,10 @@
 	</button>
 
 	<button
-		class="rounded-full px-3 py-1.5 text-sm font-medium transition-colors"
+		class="rounded-full px-3 py-1.5 text-sm transition-colors"
 		class:bg-primary={$nftGroupByCollection}
+		class:font-medium={!$nftGroupByCollection}
+		class:font-semibold={$nftGroupByCollection}
 		class:shadow-sm={$nftGroupByCollection}
 		class:text-primary={$nftGroupByCollection}
 		class:text-secondary={!$nftGroupByCollection}
