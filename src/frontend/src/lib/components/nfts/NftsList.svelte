@@ -120,11 +120,7 @@
 		{:else if isEmptyList}
 			<EmptyNftsList />
 		{:else}
-			<NftCollectionList
-				nftCollections={commonCollections}
-				testId={NFT_COLLECTION_LIST_COMMON}
-				title={$i18n.nfts.text.collections}
-			/>
+			<NftCollectionList nftCollections={commonCollections} testId={NFT_COLLECTION_LIST_COMMON} />
 
 			{#if $showHidden}
 				<NftCollectionList
@@ -155,12 +151,7 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList
-			asMainSection
-			nfts={commonNfts}
-			testId={NFT_LIST_COMMON}
-			title={$i18n.nfts.text.all_assets}
-		>
+		<NftList asMainSection nfts={commonNfts} testId={NFT_LIST_COMMON}>
 			{#snippet nftListItem({ nft })}
 				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" withCollectionLabel />
 			{/snippet}
