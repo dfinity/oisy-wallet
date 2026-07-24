@@ -764,7 +764,8 @@
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
-			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
+			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL.",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {

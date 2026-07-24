@@ -764,7 +764,8 @@
 			"allow_signing": "Wystąpił problem podczas konfigurowania portfela do podpisywania. Zostałeś wylogowany. Jeśli problem będzie się powtarzał, skontaktuj się z pomocą techniczną.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Błąd podczas ładowania informacji o portfelu BTC.",
-			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL."
+			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL.",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {

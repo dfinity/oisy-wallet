@@ -20,6 +20,8 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import type { XrpAddress } from '$xrp/types/address';
+import type { XrpNetworkType } from '$xrp/types/network';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import * as z from 'zod';
 
@@ -43,6 +45,9 @@ export const POST_MESSAGE_REQUESTS = [
 	'startSolWalletTimer',
 	'triggerBtcWalletTimer',
 	'triggerSolWalletTimer',
+	'stopXrpWalletTimer',
+	'startXrpWalletTimer',
+	'triggerXrpWalletTimer',
 	'stopBtcStatusesTimer',
 	'startBtcStatusesTimer',
 	'triggerBtcStatusesTimer',
@@ -122,10 +127,17 @@ export const PostMessageDataRequestSolSchema = z.object({
 	tokenOwnerAddress: z.custom<SolAddress>().optional()
 });
 
+export const PostMessageDataRequestXrpSchema = z.object({
+	// TODO: generate zod schema for CertifiedData
+	address: z.custom<CertifiedData<XrpAddress>>(),
+	xrpNetwork: z.custom<XrpNetworkType>()
+});
+
 export const PostMessageResponseStatusSchema = z.enum([
 	'syncIcWalletStatus',
 	'syncBtcWalletStatus',
 	'syncSolWalletStatus',
+	'syncXrpWalletStatus',
 	'syncBtcStatusesStatus',
 	'syncCkMinterInfoStatus',
 	'syncCkBTCUpdateBalanceStatus'
@@ -138,6 +150,7 @@ export const PostMessageErrorResponseSchema = z.enum([
 	'syncDip20WalletError',
 	'syncBtcWalletError',
 	'syncSolWalletError',
+	'syncXrpWalletError',
 	'syncBtcStatusesError',
 	'syncCkMinterInfoError'
 ]);
@@ -151,6 +164,7 @@ export const PostMessageResponseSchema = z.enum([
 	'syncDip20Wallet',
 	'syncBtcWallet',
 	'syncSolWallet',
+	'syncXrpWallet',
 	'syncIcpWalletCleanUp',
 	'syncIcrcWalletCleanUp',
 	'syncDip20WalletCleanUp',

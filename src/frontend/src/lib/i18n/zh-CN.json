@@ -764,7 +764,8 @@
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
 			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
-			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
+			"sol_wallet_error": "加载 SOL 钱包信息时出错。",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {
