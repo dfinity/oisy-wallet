@@ -667,6 +667,14 @@ interface I18nReceive {
 			display_solana_address_qr: string;
 		};
 	};
+	xrp: {
+		text: {
+			xrp_address: string;
+			xrp_address_title: string;
+			xrp_address_copied: string;
+			display_xrp_address_qr: string;
+		};
+	};
 }
 
 interface I18nSend {

@@ -929,6 +929,14 @@
 				"solana_address_copied": "Solana address copied to clipboard",
 				"display_solana_address_qr": "Display Solana address as QR code"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "XRP Address",
+				"xrp_address_title": "XRP Ledger wallet address",
+				"xrp_address_copied": "XRP address copied to clipboard",
+				"display_xrp_address_qr": "Display XRP address as QR code"
+			}
 		}
 	},
 	"send": {
