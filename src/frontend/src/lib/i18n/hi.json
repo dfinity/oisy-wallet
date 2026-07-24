@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "गेम",
 			"lending": "लेंडिंग",
-			"nft": "NFT",
+			"nft": "संग्रहणीय वस्तुएं",
 			"rwa": "RWA",
 			"social": "सोशल",
 			"staking": "स्टेकिंग",
@@ -1466,11 +1466,11 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "संग्रहणीय वस्तुएं",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
-			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title_empty": "आपकी संग्रहणीय वस्तुएं यहाँ दिखाई देंगी",
+			"description_empty": "ऐसा लगता है कि आपने अभी तक संग्रहणीय वस्तुएं प्राप्त नहीं की हैं",
 			"title_not_supported": "",
 			"description_not_supported": "",
 			"grouping": "समूहीकरण",
@@ -1488,7 +1488,7 @@
 			"quantity": "मात्रा",
 			"item_traits": "आइटम विशेषताएँ",
 			"collection_not_loaded": "संग्रह प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
-			"nft_not_loaded": "NFT प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
+			"nft_not_loaded": "संग्रहणीय वस्तु प्रदर्शित नहीं की जा सकी क्योंकि यह अभी तक लोड नहीं हुई है",
 			"collections": "संग्रह",
 			"all_assets": "सभी एसेट्स",
 			"address_copied": "पता $address कॉपी किया गया",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "अभी तक कोई NFTs नहीं",
+			"placeholder_image": "अभी तक कोई संग्रहणीय वस्तुएं नहीं",
 			"card": {
-				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
+				"image": "टोकन आईडी के साथ संग्रहणीय वस्तु की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
 			"review_preference": "",

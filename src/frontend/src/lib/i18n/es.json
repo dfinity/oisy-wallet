@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Juego",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Coleccionables",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "Tus contactos aparecerán aquí",
 			"contacts_empty_state_description": "Parece que aún no has añadido contactos",
 			"send_review_subtitle": "Tú envías",
-			"no_nfts_found": "No se encontraron NFTs",
-			"no_nfts_found_desc": "Ajusta tu búsqueda o red para encontrar tus NFTs",
-			"select_nft": "Seleccionar NFT"
+			"no_nfts_found": "No se encontraron Coleccionables",
+			"no_nfts_found_desc": "Ajusta tu búsqueda o red para encontrar tus Coleccionables",
+			"select_nft": "Seleccionar Coleccionable"
 		},
 		"placeholder": {
 			"enter_eth_address": "Introduce dirección pública (0x), nombre o alias",
 			"enter_recipient_address": "Introduce la dirección, nombre o alias del destinatario",
 			"enter_wallet_address": "Introduce la dirección de la billetera, nombre o alias",
 			"select_network": "Seleccionar red",
-			"search_nfts": "Buscar NFTs"
+			"search_nfts": "Buscar Coleccionables"
 		},
 		"info": {
 			"ckbtc_certified": "Por favor, espera hasta que los parámetros de ckBTC hayan sido certificados.",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "Los fondos de Bitcoin están bloqueados por transacciones pendientes",
 			"btc_invalid_fee_calculation": "La validación de la comisión de la transacción de Bitcoin falló",
 			"pending_transactions_not_available": "El servicio de transacciones pendientes no está disponible actualmente. Por favor, inténtalo de nuevo más tarde.",
-			"no_nft_selected": "No se ha seleccionado ningún NFT para enviar."
+			"no_nft_selected": "No se ha seleccionado ningún Coleccionable para enviar."
 		},
 		"error": {
 			"unexpected": "Algo salió mal al enviar la transacción.",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "Importar token",
-				"title_nft": "Importar colección de NFT",
+				"title_nft": "Importar colección",
 				"review": "Revisar",
 				"saving": "Guardando...",
 				"updating": "Actualizando lista de tokens",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "Gestionar tokens",
-				"title_nft": "Gestionar colecciones de NFT",
+				"title_nft": "Gestionar colecciones",
 				"manage_list": "Gestionar tokens",
 				"manage_list_nft": "",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
-				"import_nft": "Importar colección de NFT",
+				"import_nft": "Importar colección",
 				"network": "Red",
 				"all_tokens_zero_balance": "Todos los tokens tienen saldo cero.",
 				"enable_more_assets": "Habilitar más tokens"
@@ -1466,11 +1466,11 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Coleccionables",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Tus NFTs aparecerán aquí",
-			"description_empty": "Parece que todavía no has recibido NFTs",
+			"title_empty": "Tus Coleccionables aparecerán aquí",
+			"description_empty": "Parece que todavía no has recibido Coleccionables",
 			"title_not_supported": "",
 			"description_not_supported": "",
 			"grouping": "Agrupación",
@@ -1488,7 +1488,7 @@
 			"quantity": "Cantidad",
 			"item_traits": "Atributos del artículo",
 			"collection_not_loaded": "La colección no se pudo mostrar ya que aún no se ha cargado",
-			"nft_not_loaded": "El NFT no se pudo mostrar ya que aún no se ha cargado",
+			"nft_not_loaded": "El Coleccionable no se pudo mostrar ya que aún no se ha cargado",
 			"collections": "Colecciones",
 			"all_assets": "Todos los activos",
 			"address_copied": "Dirección $address copiada",
@@ -1497,12 +1497,12 @@
 			"spam": "Spam",
 			"not_spam": "No es spam",
 			"spam_warning": "¿Mover '$collection' a spam?",
-			"spam_warning_text": "Esto moverá todos los NFTs en <b>$collection</b> a la carpeta de spam. Se ocultarán de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
+			"spam_warning_text": "Esto moverá todos los Coleccionables en <b>$collection</b> a la carpeta de spam. Se ocultarán de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
 			"hide": "Ocultar",
 			"unhide": "Mostrar",
 			"hidden": "Oculto",
 			"hide_warning": "¿Ocultar '$collection'?",
-			"hide_warning_text": "Esto ocultará <b>$collection</b> y todos los NFTs asociados de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
+			"hide_warning_text": "Esto ocultará <b>$collection</b> y todos los Coleccionables asociados de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
 			"open_explorer": "Abrir este contrato en el explorador de blockchain",
 			"img_consent_disabled": "Has desactivado las imágenes de esta colección",
 			"img_consent_none": "Imagen desactivada por razones de seguridad",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Aún no hay NFTs",
+			"placeholder_image": "Aún no hay Coleccionables",
 			"card": {
-				"image": "Imagen de NFT con ID de token: $tokenId"
+				"image": "Imagen de Coleccionable con ID de token: $tokenId"
 			},
 			"copy_address": "Copiar esta dirección al portapapeles",
 			"review_preference": "Cambiar preferencia de visualización",
