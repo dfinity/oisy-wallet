@@ -246,6 +246,19 @@
 			"learn_more": "자세히 알아보기"
 		}
 	},
+	"mobile_auth": {
+		"text": {
+			"title": "",
+			"description": "",
+			"continue": "",
+			"redirecting": "",
+			"return_to_app": ""
+		},
+		"error": {
+			"invalid_request": "",
+			"error_while_signing_in": ""
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "모든 앱",
