@@ -51,6 +51,11 @@ export abstract class IcWalletScheduler<
 	}
 
 	async trigger(data: PostMessageDataRequest | undefined) {
+		// A scheduler created by a `trigger` (no prior `start`) would otherwise keep `ref` undefined
+		// and silently drop every sync result via the `isNullish(this.ref)` guard in the postMessage
+		// helpers — the same fix BtcWalletScheduler/SolWalletScheduler already carry.
+		this.setRef(data);
+
 		await this.timer.trigger<PostMessageDataRequest>({
 			job: this.syncWallet,
 			data
