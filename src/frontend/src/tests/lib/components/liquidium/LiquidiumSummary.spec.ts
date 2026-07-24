@@ -150,5 +150,30 @@ describe('LiquidiumSummary', () => {
 
 			expect(get(modalStore)?.type).toBe('liquidium-borrow');
 		});
+
+		it('disables the Borrow button when there is no supply position', () => {
+			const noSupply: LiquidiumPortfolio = {
+				...portfolio,
+				reserves: portfolio.reserves.map((reserve) => ({ ...reserve, suppliedUsd: 0 })),
+				totalSuppliedUsd: 0,
+				netValueUsd: 0
+			};
+
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio: noSupply } });
+
+			expect(getByRole('button', { name: en.liquidium.text.action_borrow })).toBeDisabled();
+		});
+
+		it('disables the Borrow button in the empty state', () => {
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio: null } });
+
+			expect(getByRole('button', { name: en.liquidium.text.action_borrow })).toBeDisabled();
+		});
+
+		it('enables the Borrow button when there is a supply position', () => {
+			const { getByRole } = render(LiquidiumSummary, { props: { portfolio } });
+
+			expect(getByRole('button', { name: en.liquidium.text.action_borrow })).toBeEnabled();
+		});
 	});
 });

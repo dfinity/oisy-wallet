@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
+	import { PersonalNotesRateLimitedError } from '$lib/canisters/errors';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
@@ -13,6 +14,8 @@
 	import NoteListItem from '$lib/components/notes/NoteListItem.svelte';
 	import NoteView from '$lib/components/notes/NoteView.svelte';
 	import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
+	import NotesUnavailable from '$lib/components/notes/NotesUnavailable.svelte';
+	import NotesUnlocking from '$lib/components/notes/NotesUnlocking.svelte';
 	import ShareNoteBottomSheet from '$lib/components/notes/ShareNoteBottomSheet.svelte';
 	import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -85,13 +88,23 @@
 	let pendingShareNote = $state<PersonalNoteUi | undefined>();
 
 	let loading = $state(!$personalNotesLoaded);
+	// Set when loadPersonalNotes enters the expensive key-derivation + decryption
+	// phase (notes present); stays set until the load resolves. Drives the
+	// "unlocking" screen so it isn't flashed during the quick fetch or on an empty
+	// list, where no derivation happens.
+	let deriving = $state(false);
 	let busy = $state(false);
+	// Set when a load fails; drives the inline "unavailable" panel (with Retry)
+	// instead of falling through to the empty state.
+	let loadError = $state<unknown>(undefined);
 
 	let searchTerm = $state('');
 
 	const notes = $derived($personalNotesList);
 	const showSkeleton = $derived(loading);
-	const isEmpty = $derived(!showSkeleton && (notes?.length ?? 0) === 0);
+	const hasLoadError = $derived(!showSkeleton && nonNullish(loadError));
+	const loadRateLimited = $derived(loadError instanceof PersonalNotesRateLimitedError);
+	const isEmpty = $derived(!showSkeleton && !hasLoadError && (notes?.length ?? 0) === 0);
 
 	// Client-side search: case-insensitive substring over the full (decrypted) note
 	// text — no backend call (the canister only holds ciphertext). Failed-to-decrypt
@@ -158,12 +171,17 @@
 			return;
 		}
 		loading = true;
+		deriving = false;
+		loadError = undefined;
 		try {
-			await loadPersonalNotes($authIdentity);
+			await loadPersonalNotes({ identity: $authIdentity, onDeriveStart: () => (deriving = true) });
 		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.notes.error.load }, err });
+			// Surface a persistent inline panel (with Retry) instead of a toast that
+			// vanishes over a misleading empty state.
+			loadError = err;
 		} finally {
 			loading = false;
+			deriving = false;
 		}
 	};
 
@@ -365,7 +383,13 @@
 			styleClass="flex min-h-0 flex-col items-stretch gap-6 overflow-y-auto pb-0!"
 		>
 			{#if showSkeleton}
-				<SkeletonCards rows={3} />
+				{#if deriving}
+					<NotesUnlocking />
+				{:else}
+					<SkeletonCards rows={3} />
+				{/if}
+			{:else if hasLoadError}
+				<NotesUnavailable onRetry={load} rateLimited={loadRateLimited} />
 			{:else if isEmpty}
 				<EmptyNotes onAddNote={() => openEditor()} />
 			{:else}

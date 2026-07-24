@@ -11,6 +11,22 @@ import {
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { fireEvent, render } from '@testing-library/svelte';
 
+// ck twins so the ICP (ck) rail resolves a display token in the picker; the native rails
+// resolve statically and need no token list.
+vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
+	const { readable } = await import('svelte/store');
+	const { mockValidIcCkToken } = await import('$tests/mocks/ic-tokens.mock');
+	const { parseTokenId } = await import('$lib/validation/token.validation');
+
+	return {
+		...(await importOriginal<Record<string, unknown>>()),
+		tokens: readable([
+			{ ...mockValidIcCkToken, id: parseTokenId('ckBTC'), symbol: 'ckBTC' },
+			{ ...mockValidIcCkToken, id: parseTokenId('ckUSDC'), symbol: 'ckUSDC' }
+		])
+	};
+});
+
 describe('LiquidiumWithdrawTokensList', () => {
 	const btcReserve: LiquidiumReserve = {
 		poolId: 'pool-btc',
@@ -125,5 +141,30 @@ describe('LiquidiumWithdrawTokensList', () => {
 
 		expect(getByText(BTC_MAINNET_TOKEN.symbol)).toBeInTheDocument();
 		expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+	});
+
+	it('offers both the native and the ck (ICP) rail for a multi-rail position', () => {
+		liquidiumStore.set({ markets: [], portfolio: portfolio([btcReserve]), assetPrices: {} });
+
+		const { getByText } = render(LiquidiumWithdrawTokensList, {
+			props: { onSelectReserve: () => {}, onClose: () => {} },
+			context
+		});
+
+		expect(getByText(BTC_MAINNET_TOKEN.symbol)).toBeInTheDocument();
+		expect(getByText('ckBTC')).toBeInTheDocument();
+	});
+
+	it('excludes only the selected rail, keeping the other rail of the same pool', () => {
+		liquidiumStore.set({ markets: [], portfolio: portfolio([btcReserve]), assetPrices: {} });
+
+		const { getByText, queryByText } = render(LiquidiumWithdrawTokensList, {
+			// The native BTC rail is selected → hidden; its ck (ICP → ckBTC) rail must remain.
+			props: { selectedReserve: btcReserve, onSelectReserve: () => {}, onClose: () => {} },
+			context
+		});
+
+		expect(queryByText(BTC_MAINNET_TOKEN.symbol)).toBeNull();
+		expect(getByText('ckBTC')).toBeInTheDocument();
 	});
 });

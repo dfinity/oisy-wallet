@@ -2655,6 +2655,8 @@
 			"empty_title": "Nie masz jeszcze żadnych notatek",
 			"empty_subtitle": "Twórz prywatne, zaszyfrowane notatki, aby bezpiecznie przechowywać ważne informacje obok swojego portfela.",
 			"empty_add": "Dodaj nową notatkę",
+			"unlocking_title": "Odblokowywanie Twoich notatek",
+			"unlocking_subtitle": "Konfigurujemy Twój prywatny klucz szyfrowania – to zajmie tylko chwilę.",
 			"add_note": "Dodaj notatkę",
 			"note_label": "Notatka",
 			"placeholder": "Napisz notatkę…",
@@ -2667,7 +2669,8 @@
 			"created_updated": "Utworzono $created · Zaktualizowano $updated",
 			"too_long": "Notatka może mieć maksymalnie $maxCharacters znaków.",
 			"cap_reached": "Osiągnięto maksymalną liczbę $max zapisanych notatek. Usuń jedną, aby dodać nową.",
-			"decryption_failed": "Nie udało się odszyfrować tej notatki"
+			"decryption_failed": "Nie udało się odszyfrować tej notatki",
+			"unavailable_title": "Notatki są tymczasowo niedostępne"
 		},
 		"alt": {
 			"edit": "Edytuj notatkę",
@@ -2676,7 +2679,8 @@
 		"error": {
 			"load": "Nie udało się wczytać twoich notatek. Spróbuj ponownie.",
 			"save": "Nie udało się zapisać twojej notatki. Spróbuj ponownie.",
-			"delete": "Nie udało się usunąć twojej notatki. Spróbuj ponownie."
+			"delete": "Nie udało się usunąć twojej notatki. Spróbuj ponownie.",
+			"rate_limited": "Osiągnięto limit żądań. Poczekaj chwilę i spróbuj ponownie."
 		},
 		"share": {
 			"text": {

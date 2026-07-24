@@ -58,7 +58,16 @@ const refreshCount = async ({
  * store. A single note that fails to decrypt becomes a failure entry rather than
  * blanking the whole list (per-note isolation).
  */
-export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
+export const loadPersonalNotes = async ({
+	identity,
+	// Invoked right before the vetKey derivation starts — and only when there are
+	// notes to decrypt. Lets the caller show a key-setup state for the (~5s)
+	// derivation without flashing it on an empty list, which never derives.
+	onDeriveStart
+}: {
+	identity: Identity;
+	onDeriveStart?: () => void;
+}): Promise<void> => {
 	const owner = ownerPrincipal(identity);
 	// Only blank the cache when the owner changes; a same-owner refresh keeps the
 	// last-known-good list so a failed reload (e.g. the decryption-failure Retry)
@@ -78,6 +87,7 @@ export const loadPersonalNotes = async (identity: Identity): Promise<void> => {
 	// loads without a needless round-trip.
 	let decrypted: PersonalNoteEntryUi[] = [];
 	if (entries.length > 0) {
+		onDeriveStart?.();
 		const keyMaterial = await deriveKeyMaterial({ identity });
 		decrypted = await Promise.all(
 			entries.map(async ({ note_id, encrypted_note }) => {

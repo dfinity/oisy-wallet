@@ -2655,6 +2655,8 @@
 			"empty_title": "Nemáš zatím žádné poznámky",
 			"empty_subtitle": "Vytvoř si soukromé, šifrované poznámky, abys měl(a) důležité informace v bezpečí vedle své peněženky.",
 			"empty_add": "Přidat novou poznámku",
+			"unlocking_title": "Odemykání tvých poznámek",
+			"unlocking_subtitle": "Nastavujeme tvůj soukromý šifrovací klíč – bude to jen chvilka.",
 			"add_note": "Přidat poznámku",
 			"note_label": "Poznámka",
 			"placeholder": "Napiš poznámku…",
@@ -2667,7 +2669,8 @@
 			"created_updated": "Vytvořeno $created · Upraveno $updated",
 			"too_long": "Poznámka může mít nejvýše $maxCharacters znaků.",
 			"cap_reached": "Dosáhl(a) jsi maxima $max uložených poznámek. Jednu smaž, abys mohl(a) přidat novou.",
-			"decryption_failed": "Tuto poznámku se nepodařilo dešifrovat"
+			"decryption_failed": "Tuto poznámku se nepodařilo dešifrovat",
+			"unavailable_title": "Poznámky jsou dočasně nedostupné"
 		},
 		"alt": {
 			"edit": "Upravit poznámku",
@@ -2676,7 +2679,8 @@
 		"error": {
 			"load": "Poznámky se nepodařilo načíst. Zkus to prosím znovu.",
 			"save": "Poznámku se nepodařilo uložit. Zkus to prosím znovu.",
-			"delete": "Poznámku se nepodařilo smazat. Zkus to prosím znovu."
+			"delete": "Poznámku se nepodařilo smazat. Zkus to prosím znovu.",
+			"rate_limited": "Dosáhl(a) jsi limitu požadavků. Počkej chvíli a zkus to prosím znovu."
 		},
 		"share": {
 			"text": {

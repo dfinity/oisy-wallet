@@ -2655,6 +2655,8 @@
 			"empty_title": "Vous n'avez pas encore de notes",
 			"empty_subtitle": "Créez des notes privées et chiffrées pour garder vos informations en sécurité aux côtés de votre wallet.",
 			"empty_add": "Ajouter une nouvelle note",
+			"unlocking_title": "Déverrouillage de vos notes",
+			"unlocking_subtitle": "Configuration de votre clé de chiffrement privée — cela ne prendra qu'un instant.",
 			"add_note": "Ajouter une note",
 			"note_label": "Note",
 			"placeholder": "Écrivez une note…",
@@ -2667,7 +2669,8 @@
 			"created_updated": "Créée $created · Mise à jour $updated",
 			"too_long": "La note ne doit pas dépasser $maxCharacters caractères.",
 			"cap_reached": "Vous avez atteint la limite de $max notes enregistrées. Supprimez-en une pour en ajouter une nouvelle.",
-			"decryption_failed": "Impossible de déchiffrer cette note"
+			"decryption_failed": "Impossible de déchiffrer cette note",
+			"unavailable_title": "Les notes sont temporairement indisponibles"
 		},
 		"alt": {
 			"edit": "Modifier la note",
@@ -2676,7 +2679,8 @@
 		"error": {
 			"load": "Impossible de charger vos notes. Veuillez réessayer.",
 			"save": "Impossible d'enregistrer votre note. Veuillez réessayer.",
-			"delete": "Impossible de supprimer votre note. Veuillez réessayer."
+			"delete": "Impossible de supprimer votre note. Veuillez réessayer.",
+			"rate_limited": "Vous avez atteint la limite de requêtes. Veuillez patienter un instant et réessayer."
 		},
 		"share": {
 			"text": {

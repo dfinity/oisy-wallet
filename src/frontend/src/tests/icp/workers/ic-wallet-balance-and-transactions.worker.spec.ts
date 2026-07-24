@@ -481,6 +481,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 			});
 
+			it('should stamp the ref and emit the wallet payload when triggered without a prior start', async () => {
+				// A trigger with no preceding start must still set `ref`; otherwise postMessageWallet
+				// drops every payload (isNullish(this.ref) guard) and the manual refresh syncs nothing.
+				await scheduler.trigger(startData);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			});
+
 			it('should trigger syncWallet periodically calling the loader', async () => {
 				await scheduler.start(startData);
 
@@ -1066,6 +1075,15 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				// query + update = 2
 				expect(spyGetTransactions).toHaveBeenCalledTimes(2);
 				expect(spyGetBalance).toHaveBeenCalledTimes(2);
+			});
+
+			it('should stamp the ref and emit the wallet payload when triggered without a prior start', async () => {
+				// Covers the `canisterId` branch of walletDataRef: a trigger with no preceding start
+				// must still set `ref`, else postMessageWallet drops every payload.
+				await scheduler.trigger(startData);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
 			});
 
 			it('should trigger syncWallet periodically calling both loaders', async () => {
