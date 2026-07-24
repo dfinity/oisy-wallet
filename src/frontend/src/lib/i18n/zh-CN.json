@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "游戏",
 			"lending": "借贷",
-			"nft": "NFT",
+			"nft": "收藏品",
 			"rwa": "RWA",
 			"social": "社交",
 			"staking": "质押",
@@ -400,8 +400,8 @@
 			},
 			"mobox": {
 				"name": "Mobox",
-				"one_liner": "一个基于 BNB Chain 的 GameFi 平台，融合了免费游玩（Free-to-Play）游戏、DeFi 收益挖矿和 NFT 机制——由边玩边赚和社区治理驱动。",
-				"description": "MOBOX 是一个构建在 BNB Chain 上的 GameFi 平台，融合了 DeFi 收益挖矿、NFT 生态系统和免费游玩游戏。玩家可以通过游戏、NFT 质押和收益挖矿赚取 MBOX 代币，并参与去中心化治理。凭借其 MOMO NFT 及跨游戏的实用性，MOBOX 致力于打造一个完全游戏化的经济体系。"
+				"one_liner": "一个基于 BNB Chain 的 GameFi 平台，融合了免费游玩（Free-to-Play）游戏、DeFi 收益挖矿和收藏品机制——由边玩边赚和社区治理驱动。",
+				"description": "MOBOX 是一个构建在 BNB Chain 上的 GameFi 平台，融合了 DeFi 收益挖矿、收藏品生态系统和免费游玩游戏。玩家可以通过游戏、收藏品质押和收益挖矿赚取 MBOX 代币，并参与去中心化治理。凭借其 MOMO 收藏品及跨游戏的实用性，MOBOX 致力于打造一个完全游戏化的经济体系。"
 			},
 			"cyql": {
 				"name": "cyql.io",
@@ -415,8 +415,8 @@
 			},
 			"opensea": {
 				"name": "OpenSea",
-				"one_liner": "OpenSea，万物皆可交易 —— 代币交易与 NFT 市场。欢迎来到发现、交易和创建链上资产的最佳场所。",
-				"description": "OpenSea 是全球最大的去中心化非同质化代币（NFT）市场，用户可以在此创建、购买、出售和交易艺术品、收藏品和虚拟物品等独特数字资产。该平台成立于 2017 年，支持多条区块链，并允许用户连接加密钱包来管理其数字资产。"
+				"one_liner": "OpenSea，万物皆可交易 —— 代币交易与收藏品市场。欢迎来到发现、交易和创建链上资产的最佳场所。",
+				"description": "OpenSea 是全球最大的去中心化非同质化代币（收藏品）市场，用户可以在此创建、购买、出售和交易艺术品、收藏品和虚拟物品等独特数字资产。该平台成立于 2017 年，支持多条区块链，并允许用户连接加密钱包来管理其数字资产。"
 			},
 			"pacifica": {
 				"name": "Pacifica",
@@ -425,8 +425,8 @@
 			},
 			"magic_eden": {
 				"name": "Magic Eden",
-				"one_liner": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。",
-				"description": "Magic Eden 是一个多链 NFT 市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（NFT）。它以用户友好的界面、低交易费用以及为创作者和收藏者提供的多种工具而闻名。"
+				"one_liner": "Magic Eden 是一个多链收藏品市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（收藏品）。",
+				"description": "Magic Eden 是一个多链收藏品市场，允许用户在不同区块链上创建、购买、出售和交易非同质化代币（收藏品）。它以用户友好的界面、低交易费用以及为创作者和收藏者提供的多种工具而闻名。"
 			},
 			"solayer": {
 				"name": "Solayer",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
 			"send_review_subtitle": "你将发送",
-			"no_nfts_found": "未找到 NFT",
-			"no_nfts_found_desc": "请调整搜索条件或网络以查找你的 NFT",
-			"select_nft": "选择 NFT"
+			"no_nfts_found": "未找到收藏品",
+			"no_nfts_found_desc": "请调整搜索条件或网络以查找你的收藏品",
+			"select_nft": "选择收藏品"
 		},
 		"placeholder": {
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
 			"select_network": "选择网络",
-			"search_nfts": "搜索 NFT"
+			"search_nfts": "搜索收藏品"
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
 			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
 			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。",
-			"no_nft_selected": "尚未选择要发送的 NFT。"
+			"no_nft_selected": "尚未选择要发送的收藏品。"
 		},
 		"error": {
 			"unexpected": "发送交易时出现错误。",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "导入代币",
-				"title_nft": "导入 NFT 集合",
+				"title_nft": "导入集合",
 				"review": "审核",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "管理代币",
-				"title_nft": "管理 NFT 集合",
+				"title_nft": "管理集合",
 				"manage_list": "管理代币",
-				"manage_list_nft": "管理 NFT",
+				"manage_list_nft": "管理收藏品",
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
-				"import_nft": "导入 NFT 集合",
+				"import_nft": "导入集合",
 				"network": "网络",
 				"all_tokens_zero_balance": "所有代币余额均为零。",
 				"enable_more_assets": "启用更多代币"
@@ -1466,13 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "收藏品",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "你的 NFT 将显示在这里",
-			"description_empty": "看起来你还没有收到 NFT",
-			"title_not_supported": "所选网络尚不支持 NFT",
-			"description_not_supported": "请不要向该地址发送 NFT",
+			"title_empty": "你的收藏品将显示在这里",
+			"description_empty": "看起来你还没有收到收藏品",
+			"title_not_supported": "所选网络尚不支持收藏品",
+			"description_not_supported": "请不要向该地址发送收藏品",
 			"grouping": "分组方式",
 			"as_plain_list": "以普通列表显示",
 			"by_collection": "按集合分组",
@@ -1488,7 +1488,7 @@
 			"quantity": "数量",
 			"item_traits": "项目属性",
 			"collection_not_loaded": "该集合尚未加载，无法显示",
-			"nft_not_loaded": "该 NFT 尚未加载，无法显示",
+			"nft_not_loaded": "该收藏品尚未加载，无法显示",
 			"collections": "集合",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
@@ -1497,12 +1497,12 @@
 			"spam": "垃圾内容",
 			"not_spam": "非垃圾内容",
 			"spam_warning": "将“$collection”移至垃圾内容？",
-			"spam_warning_text": "这将把 <b>$collection</b> 中的所有 NFT 移至垃圾内容。它们将从主视图中隐藏，但你仍可随时找到并恢复。",
+			"spam_warning_text": "这将把 <b>$collection</b> 中的所有收藏品移至垃圾内容。它们将从主视图中隐藏，但你仍可随时找到并恢复。",
 			"hide": "隐藏",
 			"unhide": "取消隐藏",
 			"hidden": "已隐藏",
 			"hide_warning": "隐藏“$collection”？",
-			"hide_warning_text": "这将从你的主视图中隐藏 <b>$collection</b> 及其所有关联的 NFT，但你仍可随时找到并恢复。",
+			"hide_warning_text": "这将从你的主视图中隐藏 <b>$collection</b> 及其所有关联的收藏品，但你仍可随时找到并恢复。",
 			"open_explorer": "在区块链浏览器中打开此合约",
 			"img_consent_disabled": "你已禁用来自该集合的图片",
 			"img_consent_none": "出于安全原因，图片已被禁用",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": "媒体似乎存储在不同的位置。如需访问，请在仔细审核后使用以下链接："
 		},
 		"alt": {
-			"placeholder_image": "暂无 NFT",
+			"placeholder_image": "暂无收藏品",
 			"card": {
-				"image": "代币 ID 为 $tokenId 的 NFT 图片"
+				"image": "代币 ID 为 $tokenId 的收藏品图片"
 			},
 			"copy_address": "将此地址复制到剪贴板",
 			"review_preference": "更改显示偏好",
