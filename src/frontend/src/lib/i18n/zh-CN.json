@@ -929,6 +929,14 @@
 				"solana_address_copied": "Solana 地址已复制到剪贴板",
 				"display_solana_address_qr": "将 Solana 地址显示为二维码"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {

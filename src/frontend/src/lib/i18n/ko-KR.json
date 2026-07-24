@@ -929,6 +929,14 @@
 				"solana_address_copied": "솔라나 주소가 클립보드에 복사되었습니다",
 				"display_solana_address_qr": "솔라나 주소를 QR 코드로 표시"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {

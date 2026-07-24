@@ -929,6 +929,14 @@
 				"solana_address_copied": "Adresa Solana zkopírována do schránky",
 				"display_solana_address_qr": "Zobrazit adresu Solana jako QR kód"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
