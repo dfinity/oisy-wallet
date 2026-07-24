@@ -16,6 +16,23 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        debug {
+            // Shared debug keystore (CI injects it from the
+            // ANDROID_DEBUG_KEYSTORE_BASE64 secret; gitignored locally): keeps
+            // the debug signature stable across builds so a new APK installs
+            // over the previous one instead of failing with
+            // INSTALL_FAILED_UPDATE_INCOMPATIBLE. Absent file -> Gradle's
+            // default per-machine debug keystore, as before.
+            def sharedDebugKeystore = file('oisy-debug.keystore')
+            if (sharedDebugKeystore.exists()) {
+                storeFile sharedDebugKeystore
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false

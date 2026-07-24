@@ -70,6 +70,22 @@ jobs:
         working-directory: mobile
         run: npx cap sync android
 
+      # Stable debug signature across CI builds, so a new APK installs over the
+      # previous one instead of failing with INSTALL_FAILED_UPDATE_INCOMPATIBLE.
+      # Kept as a secret (not committed): in a public repo the key would let
+      # anyone craft an APK that update-installs over testers' builds and
+      # inherits their app data. Missing secret -> runner's random debug key.
+      - name: Install shared debug keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            printf '%s' "$KEYSTORE_B64" | base64 -d > mobile/android/app/oisy-debug.keystore
+            echo "Shared debug keystore installed."
+          else
+            echo "No ANDROID_DEBUG_KEYSTORE_BASE64 secret - using the runner's default debug key."
+          fi
+
       - name: Build debug APK
         working-directory: mobile/android
         run: ./gradlew assembleDebug --no-daemon
