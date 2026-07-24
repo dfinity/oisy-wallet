@@ -842,6 +842,7 @@
 		"title": "Mạng hiện tại. Truy cập để lựa chọn.",
 		"test_networks": "Mạng thử nghiệm",
 		"chain_fusion": "Tất cả các mạng",
+		"evm_networks": "Mạng EVM",
 		"network": "Mạng",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled trong số $numNetworksTotal được bật",
@@ -987,7 +988,8 @@
 			"unknown_destination": "Bạn chưa tương tác với địa chỉ này trước đây. Vui lòng đảm bảo bạn biết người nhận.",
 			"fee_info": "Phí sẽ được thanh toán bằng $feeSymbol. Khả dụng: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
-			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
+			"scanned_address_only_destination_single_token": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!",
+			"scanned_address_only_destination_multi_network": "Mã đã quét chỉ chứa địa chỉ đích. Hãy đảm bảo bạn chọn đúng mạng và token, nhập đúng số lượng và kiểm tra cẩn thận địa chỉ đích!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Địa chỉ ví không hợp lệ",

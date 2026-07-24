@@ -842,6 +842,7 @@
 		"title": "현재 네트워크. 선택 화면으로 이동.",
 		"test_networks": "테스트 네트워크",
 		"chain_fusion": "모든 네트워크",
+		"evm_networks": "EVM 네트워크",
 		"network": "네트워크",
 		"testnet": "테스트넷",
 		"number_of_enabled": "$numNetworksTotal개 중 $numNetworksEnabled개 활성화됨",
@@ -987,7 +988,8 @@
 			"unknown_destination": "이 주소와 이전에 거래한 적이 없습니다. 수신자를 확인해 주세요.",
 			"fee_info": "수수료는 $feeSymbol로 지불됩니다. 사용 가능: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!",
-			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!"
+			"scanned_address_only_destination_single_token": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 정확한 금액을 입력하고, 수신 주소를 주의 깊게 확인해 주세요!",
+			"scanned_address_only_destination_multi_network": "스캔된 코드에는 수신 주소만 포함되어 있습니다. 올바른 네트워크와 토큰을 선택하고, 정확한 금액을 입력한 후, 수신 주소를 주의 깊게 확인해 주세요!"
 		},
 		"assertion": {
 			"invalid_destination_address": "유효하지 않은 수신 주소",

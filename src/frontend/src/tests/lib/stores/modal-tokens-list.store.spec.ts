@@ -231,6 +231,63 @@ describe('modalTokensListStore', () => {
 		});
 	});
 
+	describe('filterNetworksLabel', () => {
+		it('should have undefined filterNetworksLabel by default', () => {
+			const { filterNetworksLabel } = initModalTokensListContext({
+				tokens: [mockToken1, mockToken2]
+			});
+
+			expect(get(filterNetworksLabel)).toBeUndefined();
+		});
+
+		it('should reflect the initial filterNetworksLabel value', () => {
+			const { filterNetworksLabel } = initModalTokensListContext({
+				tokens: [mockToken1, mockToken2],
+				filterNetworksLabel: 'EVM Networks'
+			});
+
+			expect(get(filterNetworksLabel)).toBe('EVM Networks');
+		});
+
+		it('should update filterNetworksLabel via setFilterNetworksLabel', () => {
+			const { filterNetworksLabel, setFilterNetworksLabel } = initModalTokensListContext({
+				tokens: [mockToken1, mockToken2]
+			});
+
+			expect(get(filterNetworksLabel)).toBeUndefined();
+
+			setFilterNetworksLabel('EVM Networks');
+
+			expect(get(filterNetworksLabel)).toBe('EVM Networks');
+		});
+
+		it('should clear filterNetworksLabel when setFilterNetworksLabel is called with undefined', () => {
+			const { filterNetworksLabel, setFilterNetworksLabel } = initModalTokensListContext({
+				tokens: [mockToken1, mockToken2],
+				filterNetworksLabel: 'EVM Networks'
+			});
+
+			expect(get(filterNetworksLabel)).toBe('EVM Networks');
+
+			setFilterNetworksLabel(undefined);
+
+			expect(get(filterNetworksLabel)).toBeUndefined();
+		});
+
+		it('should clear filterNetworksLabel when resetFilters is called', () => {
+			const { filterNetworksLabel, resetFilters } = initModalTokensListContext({
+				tokens: [mockToken1, mockToken2],
+				filterNetworksLabel: 'EVM Networks'
+			});
+
+			expect(get(filterNetworksLabel)).toBe('EVM Networks');
+
+			resetFilters();
+
+			expect(get(filterNetworksLabel)).toBeUndefined();
+		});
+	});
+
 	describe('modalTokensListStore - filterNetworksIds', () => {
 		const ethExchangeValue = 3;
 		const ethBalance = bn1Bi;

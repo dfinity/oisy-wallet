@@ -842,6 +842,7 @@
 		"title": "当前网络。点击可更换选择。",
 		"test_networks": "测试网络",
 		"chain_fusion": "所有网络",
+		"evm_networks": "EVM 网络",
 		"network": "网络",
 		"testnet": "测试网",
 		"number_of_enabled": "$numNetworksTotal 个网络中已启用 $numNetworksEnabled 个",
@@ -987,7 +988,8 @@
 			"unknown_destination": "你之前未与该地址交互，请确认你认识收款人。",
 			"fee_info": "手续费将以 $feeSymbol 支付。可用余额：<strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "扫描的内容仅包含接收地址。请确保选择正确的代币、输入正确的金额，并仔细核对接收地址！",
-			"scanned_address_only_destination_single_token": "扫描的内容仅包含接收地址。请确保输入正确的金额，并仔细核对接收地址！"
+			"scanned_address_only_destination_single_token": "扫描的内容仅包含接收地址。请确保输入正确的金额，并仔细核对接收地址！",
+			"scanned_address_only_destination_multi_network": "扫描的内容仅包含接收地址。请确保选择正确的网络和代币、输入正确的金额，并仔细核对接收地址！"
 		},
 		"assertion": {
 			"invalid_destination_address": "目标地址无效",

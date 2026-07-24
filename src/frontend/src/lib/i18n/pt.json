@@ -842,6 +842,7 @@
 		"title": "Rede atual. Acesso à seleção.",
 		"test_networks": "Redes de teste",
 		"chain_fusion": "Todas as redes",
+		"evm_networks": "Redes EVM",
 		"network": "Rede",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled de $numNetworksTotal habilitadas",
@@ -987,7 +988,8 @@
 			"unknown_destination": "Você ainda não interagiu com este endereço. Por favor, certifique-se de conhecer o destinatário.",
 			"fee_info": "A taxa será paga em $feeSymbol. Disponível: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar o token correto, inserir o valor certo e revisar o endereço de destino com atenção!",
-			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!"
+			"scanned_address_only_destination_single_token": "O código escaneado continha apenas um endereço de destino. Certifique-se de inserir o valor certo e revisar o endereço de destino com atenção!",
+			"scanned_address_only_destination_multi_network": "O código escaneado continha apenas um endereço de destino. Certifique-se de selecionar a rede e o token corretos, inserir o valor certo e revisar o endereço de destino com atenção!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Endereço de destino inválido",

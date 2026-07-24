@@ -1,3 +1,7 @@
+<script lang="ts" module>
+	export type ScannedPlainAddressNoticeVariant = 'multi-token' | 'single-token' | 'multi-network';
+</script>
+
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -7,18 +11,24 @@
 
 	interface Props {
 		styleClass?: string;
-		singleToken?: boolean;
+		variant?: ScannedPlainAddressNoticeVariant;
 	}
 
-	let { styleClass, singleToken = false }: Props = $props();
+	let { styleClass, variant = 'multi-token' }: Props = $props();
 
 	const show = getContext<boolean>(SCANNED_PLAIN_ADDRESS_SEND_CONTEXT_KEY) ?? false;
+
+	let copy = $derived(
+		variant === 'single-token'
+			? $i18n.send.info.scanned_address_only_destination_single_token
+			: variant === 'multi-network'
+				? $i18n.send.info.scanned_address_only_destination_multi_network
+				: $i18n.send.info.scanned_address_only_destination
+	);
 </script>
 
 {#if show}
 	<MessageBox level="warning" {styleClass} testId={SEND_SCANNED_PLAIN_ADDRESS_NOTICE}>
-		{singleToken
-			? $i18n.send.info.scanned_address_only_destination_single_token
-			: $i18n.send.info.scanned_address_only_destination}
+		{copy}
 	</MessageBox>
 {/if}

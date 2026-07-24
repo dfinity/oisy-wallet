@@ -44,6 +44,7 @@
 	const {
 		filteredTokens,
 		filterNetwork,
+		filterNetworksLabel,
 		filterQuery,
 		setFilterQuery,
 		filterCategoryTag,
@@ -93,11 +94,11 @@
 
 	<div class="flex items-center gap-2">
 		<ModalFilterButton
-			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+			ariaLabel={$filterNetwork?.name ?? $filterNetworksLabel ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
 			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter?.()}
 		>
-			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+			{$filterNetwork?.name ?? $filterNetworksLabel ?? $i18n.networks.chain_fusion}
 		</ModalFilterButton>
 
 		{#if $showTokenCategoryFilter}

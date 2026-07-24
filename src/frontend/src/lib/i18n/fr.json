@@ -842,6 +842,7 @@
 		"title": "Réseau actuel. Accès à la sélection.",
 		"test_networks": "Réseaux de test",
 		"chain_fusion": "Tous les réseaux",
+		"evm_networks": "Réseaux EVM",
 		"network": "Réseau",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled sur $numNetworksTotal activés",
@@ -987,7 +988,8 @@
 			"unknown_destination": "Vous n'avez pas interagi avec cette adresse auparavant. Veuillez vous assurer de connaître le destinataire.",
 			"fee_info": "Les frais seront payés en $feeSymbol. Disponible : <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de sélectionner le bon token, de saisir le bon montant et de vérifier attentivement l'adresse de destination !",
-			"scanned_address_only_destination_single_token": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de saisir le bon montant et de vérifier attentivement l'adresse de destination !"
+			"scanned_address_only_destination_single_token": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de saisir le bon montant et de vérifier attentivement l'adresse de destination !",
+			"scanned_address_only_destination_multi_network": "Le code scanné ne contenait qu'une adresse de destination. Assurez-vous de sélectionner le bon réseau et le bon token, de saisir le bon montant et de vérifier attentivement l'adresse de destination !"
 		},
 		"assertion": {
 			"invalid_destination_address": "Adresse de destination invalide",
