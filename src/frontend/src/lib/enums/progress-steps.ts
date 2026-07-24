@@ -82,6 +82,15 @@ export enum ProgressStepsSendSol {
 	DONE = 'done'
 }
 
+export enum ProgressStepsSendXrp {
+	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
+	SEND = 'send',
+	CONFIRM = 'confirm',
+	RELOAD = 'reload',
+	DONE = 'done'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',

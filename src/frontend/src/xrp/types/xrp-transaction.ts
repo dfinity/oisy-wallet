@@ -19,3 +19,8 @@ export interface XrpSubmitResult {
 	txHash?: string;
 	accepted: boolean;
 }
+
+export interface XrpAccountInfo {
+	balance: bigint;
+	sequence: number;
+}
