@@ -400,8 +400,8 @@
 			},
 			"mobox": {
 				"name": "Mobox",
-				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and Collectible mechanics—powered by play‑to‑earn and community governance.",
-				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, Collectible ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, Collectible staking, and yield farming, while participating in decentralized governance. With its MOMO Collectibles and cross-game utility, MOBOX aims to create a fully gamified economy."
+				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
+				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
 			},
 			"cyql": {
 				"name": "cyql.io",
@@ -415,8 +415,8 @@
 			},
 			"opensea": {
 				"name": "OpenSea",
-				"one_liner": "OpenSea, exchange everything — token trading and Collectible marketplace. Welcome to the best place to discover, trade, and create onchain.",
-				"description": "OpenSea is the world's largest decentralized marketplace for non-fungible tokens (Collectibles), where users can create, buy, sell, and trade unique digital assets like art, collectibles, and virtual items. Founded in 2017, it operates on multiple blockchains and allows users to connect a cryptocurrency wallet to manage their digital assets."
+				"one_liner": "OpenSea, exchange everything — token trading and NFT marketplace. Welcome to the best place to discover, trade, and create onchain.",
+				"description": "OpenSea is the world's largest decentralized marketplace for non-fungible tokens (NFTs), where users can create, buy, sell, and trade unique digital assets like art, collectibles, and virtual items. Founded in 2017, it operates on multiple blockchains and allows users to connect a cryptocurrency wallet to manage their digital assets."
 			},
 			"pacifica": {
 				"name": "Pacifica",
@@ -425,8 +425,8 @@
 			},
 			"magic_eden": {
 				"name": "Magic Eden",
-				"one_liner": "Magic Eden is a multi-chain Collectible marketplace that allows users to create, buy, sell, and trade non-fungible tokens (Collectibles) across different blockchains.",
-				"description": "Magic Eden is a multi-chain Collectible marketplace that allows users to create, buy, sell, and trade non-fungible tokens (Collectibles) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
+				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
+				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
 			},
 			"solayer": {
 				"name": "Solayer",
