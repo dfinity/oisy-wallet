@@ -510,6 +510,7 @@ interface I18nInit {
 		waiting_for_allowed_cycles_aborted: string;
 		btc_wallet_error: string;
 		sol_wallet_error: string;
+		xrp_wallet_error: string;
 	};
 }
 
