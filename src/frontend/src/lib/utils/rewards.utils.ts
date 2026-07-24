@@ -11,7 +11,6 @@ import type {
 	MinTransactionsCriterion,
 	MinTransactionsInNetworkCriterion
 } from '$lib/types/reward';
-import { fromNullable } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -53,8 +52,8 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			available: eligibility.available,
 			eligible: eligibility.eligible,
 			criteria,
-			probabilityMultiplierEnabled: fromNullable(eligibility.probability_multiplier_enabled),
-			probabilityMultiplier: fromNullable(eligibility.probability_multiplier)
+			probabilityMultiplierEnabled: eligibility.probability_multiplier_enabled,
+			probabilityMultiplier: eligibility.probability_multiplier
 		};
 	});
 

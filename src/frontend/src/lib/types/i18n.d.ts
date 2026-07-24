@@ -124,6 +124,8 @@ interface I18nNavigation {
 		confirm_navigate: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
+		gift_code: string;
+		gift_code_list: string;
 		refer_a_friend: string;
 		address_book: string;
 		hide_balances: string;
@@ -150,6 +152,8 @@ interface I18nNavigation {
 		open_twitter: string;
 		vip_qr_code: string;
 		binance_qr_code: string;
+		gift_code: string;
+		gift_code_list: string;
 		refer_a_friend: string;
 		address_book: string;
 		hide_balances: string;
@@ -1738,6 +1742,70 @@ interface I18nReferral {
 	};
 }
 
+interface I18nGift_code {
+	create: {
+		text: {
+			title: string;
+			enter_amount: string;
+			select_token: string;
+			token_amount: string;
+			no_tokens: string;
+			select_expiry: string;
+			expiry_1h: string;
+			expiry_24h: string;
+			expiry_7d: string;
+			expiry_30d: string;
+			review_title: string;
+			review_token: string;
+			review_amount: string;
+			review_expiry: string;
+			review_fee: string;
+			confirm: string;
+			approving: string;
+			creating: string;
+			success_title: string;
+			success_description: string;
+			link_copied: string;
+			share_link: string;
+		};
+	};
+	redeem: {
+		text: {
+			success_title: string;
+			success_description: string;
+			failed_title: string;
+			invalid_code: string;
+			already_redeemed: string;
+			expired: string;
+			cancelled: string;
+			self_redeem: string;
+			transfer_failed: string;
+		};
+	};
+	list: {
+		text: {
+			title: string;
+			empty: string;
+			status_valid: string;
+			status_used: string;
+			status_expired: string;
+			status_cancelled: string;
+			created: string;
+			expires: string;
+			cancel_confirm: string;
+			cancel_success: string;
+			show_qr: string;
+		};
+	};
+	error: {
+		creating: string;
+		redeeming: string;
+		cancelling: string;
+		loading: string;
+		insufficient_allowance: string;
+	};
+}
+
 interface I18nAddress_book {
 	text: {
 		title: string;
@@ -2281,6 +2349,7 @@ interface I18n {
 	about: I18nAbout;
 	vip: I18nVip;
 	referral: I18nReferral;
+	gift_code: I18nGift_code;
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;

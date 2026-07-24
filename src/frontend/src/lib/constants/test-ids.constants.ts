@@ -3,6 +3,7 @@ export const NAVIGATION_MENU = 'navigation-menu';
 export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
+export const NAVIGATION_MENU_GIFT_CODE_BUTTON = 'navigation-menu-gift-code-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';

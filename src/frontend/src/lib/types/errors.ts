@@ -34,3 +34,17 @@ export class InvalidTokenUri extends NftError {}
 export class InvalidMetadataImageUrl extends NftError {}
 
 export class AuthClientNotInitializedError extends Error {}
+
+export class GiftCodeInvalidError extends Error {}
+
+export class GiftCodeExpiredError extends Error {}
+
+export class GiftCodeAlreadyRedeemedError extends Error {}
+
+export class GiftCodeCancelledError extends Error {}
+
+export class GiftCodeSelfRedeemError extends Error {}
+
+export class GiftCodeTransferFailedError extends Error {}
+
+export class GiftCodeInsufficientAllowanceError extends Error {}

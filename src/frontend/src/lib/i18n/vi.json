@@ -135,6 +135,8 @@
 			"confirm_navigate": "Bạn có chắc chắn muốn rời khỏi trang không?",
 			"vip_qr_code": "Mã QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Giới thiệu bạn bè của bạn",
 			"address_book": "Sổ địa chỉ",
 			"hide_balances": "Ẩn số dư",
@@ -161,6 +163,8 @@
 			"open_twitter": "Mở X/Twitter của DFINITY",
 			"vip_qr_code": "Tạo liên kết mời",
 			"binance_qr_code": "Tạo liên kết Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Tạo liên kết giới thiệu cho bạn bè",
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "Lỗi khi tải thông tin người giới thiệu",
 				"setting_referrer": "Lỗi khi đặt người giới thiệu"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

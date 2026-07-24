@@ -51,6 +51,23 @@ export interface AccountSnapshot_Spl {
 	amount: bigint;
 }
 /**
+ * / Allowance details for a token with insufficient ICRC2 approval.
+ */
+export interface AllowanceDetail {
+	/**
+	 * / The amount needed (transfer amount + fee).
+	 */
+	needed: bigint;
+	/**
+	 * / The ledger canister.
+	 */
+	ledger: Principal;
+	/**
+	 * / The current allowance.
+	 */
+	current: bigint;
+}
+/**
  * / A network on which a token can be found.
  */
 export interface AnyNetwork {
@@ -75,11 +92,11 @@ export interface CampaignEligibility {
 	/**
 	 * /
 	 */
-	probability_multiplier_enabled: [] | [boolean];
+	probability_multiplier_enabled: boolean;
 	/**
 	 * /
 	 */
-	probability_multiplier: [] | [number];
+	probability_multiplier: number;
 	/**
 	 * /
 	 */
@@ -93,6 +110,40 @@ export interface CampaignEligibility {
 	 */
 	criteria: Array<CriterionEligibility>;
 }
+/**
+ * / Response from cancelling a QR gift code.
+ */
+export type CancelQrGiftCodeResponse =
+	| {
+			/**
+			 * / Code cancelled successfully.
+			 */
+			Success: null;
+	  }
+	| {
+			/**
+			 * / The code is invalid or not found.
+			 */
+			InvalidCode: null;
+	  }
+	| {
+			/**
+			 * / Only the creator can cancel the code.
+			 */
+			NotOwner: null;
+	  }
+	| {
+			/**
+			 * / The code has already been redeemed.
+			 */
+			AlreadyRedeemed: null;
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 /**
  * / A span of time.
  */
@@ -151,6 +202,59 @@ export interface Config {
 	 */
 	s1e4_referral_config: [] | [S1E4ReferralConfig];
 }
+/**
+ * / Request to create a new QR gift code.
+ */
+export interface CreateQrGiftCodeRequest {
+	/**
+	 * / How long the code is valid, in seconds. Must be > 0.
+	 */
+	expiry_seconds: bigint;
+	/**
+	 * / The tokens to include in this transfer code.
+	 */
+	tokens: Array<QrGiftToken>;
+}
+/**
+ * / Response from creating a QR gift code.
+ */
+export type CreateQrGiftCodeResponse =
+	| {
+			/**
+			 * / Expiry seconds must be > 0.
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * / One or more tokens have insufficient ICRC2 allowance.
+			 */
+			InsufficientAllowance: { details: Array<AllowanceDetail> };
+	  }
+	| {
+			/**
+			 * / Code created successfully.
+			 */
+			Success: { code: string };
+	  }
+	| {
+			/**
+			 * / No tokens specified or an amount is zero.
+			 */
+			InvalidTokens: null;
+	  }
+	| {
+			/**
+			 * / Failed to query a ledger canister.
+			 */
+			LedgerQueryFailed: { ledger: Principal };
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 /**
  * / A requirement that a user must satisfy to be eligible for an airdrop.
  */
@@ -411,6 +515,152 @@ export interface PublicSprinkleInfo {
 	 */
 	ledger: Principal;
 }
+/**
+ * / A single QR gift code created by the caller, with full details.
+ */
+export interface QrGiftCodeEntry {
+	/**
+	 * / Current validity state.
+	 */
+	validity: QrGiftCodeValidity;
+	/**
+	 * / The hex-encoded code string.
+	 */
+	code: string;
+	/**
+	 * / When the code was created (nanoseconds since epoch).
+	 */
+	created_at: bigint;
+	/**
+	 * / The tokens that will be transferred when redeemed.
+	 */
+	tokens: Array<QrGiftToken>;
+	/**
+	 * / When the code expires (nanoseconds since epoch).
+	 */
+	expiry_date: bigint;
+}
+/**
+ * / Public information about a QR gift code.
+ */
+export interface QrGiftCodeInfoResponse {
+	/**
+	 * / Current validity state.
+	 */
+	validity: QrGiftCodeValidity;
+	/**
+	 * / The tokens that will be transferred when redeemed.
+	 */
+	tokens: Array<QrGiftToken>;
+	/**
+	 * / When the code expires (nanoseconds since epoch).
+	 */
+	expiry_date: bigint;
+}
+/**
+ * / Aggregate stats for QR gifts.
+ */
+export interface QrGiftCodeStats {
+	/**
+	 * / Total redemption attempts that failed at transfer time.
+	 */
+	total_failed: number;
+	/**
+	 * / Total codes cancelled.
+	 */
+	total_cancelled: number;
+	/**
+	 * / Total codes created.
+	 */
+	total_created: number;
+	/**
+	 * / Total codes successfully redeemed.
+	 */
+	total_redeemed: number;
+}
+/**
+ * / Validity state of a QR gift code.
+ */
+export type QrGiftCodeValidity =
+	| { Invalid: null }
+	| { Used: null }
+	| { Cancelled: null }
+	| { Valid: null }
+	| { Expired: null };
+/**
+ * / A single token and amount for a QR gift code.
+ */
+export interface QrGiftToken {
+	/**
+	 * / The ledger canister that manages the token.
+	 */
+	ledger: Principal;
+	/**
+	 * / The amount of tokens to transfer.
+	 */
+	amount: bigint;
+}
+/**
+ * / Request to redeem a QR gift code.
+ */
+export interface RedeemQrGiftCodeRequest {
+	/**
+	 * / The hex-encoded code string.
+	 */
+	code: string;
+}
+/**
+ * / Response from redeeming a QR gift code.
+ */
+export type RedeemQrGiftCodeResponse =
+	| {
+			/**
+			 * / The creator cannot redeem their own code.
+			 */
+			SelfRedeem: null;
+	  }
+	| {
+			/**
+			 * / Transfer completed successfully.
+			 */
+			Success: null;
+	  }
+	| {
+			/**
+			 * / The code is invalid or not found.
+			 */
+			InvalidCode: null;
+	  }
+	| {
+			/**
+			 * / The code has already been redeemed.
+			 */
+			AlreadyRedeemed: null;
+	  }
+	| {
+			/**
+			 * / The code was cancelled by its creator.
+			 */
+			Cancelled: null;
+	  }
+	| {
+			/**
+			 * / The token transfer failed.
+			 */
+			TransferFailed: { reason: string };
+	  }
+	| {
+			/**
+			 * / The code has expired.
+			 */
+			Expired: null;
+	  }
+	| {
+			/**
+			 * / The caller is anonymous.
+			 */
+			AnonymousCaller: null;
+	  };
 export interface RefereeConfig {
 	referees_per_referrer: number;
 	awards: Array<TokenConfig>;
@@ -556,6 +806,13 @@ export interface SetSprinkleTimestampArg {
 	 */
 	ledger_config: LedgerConfig;
 }
+export interface SetVipCampaignExpiryRequest {
+	expiry_date: bigint;
+	campaign_id: string;
+}
+export type SetVipCampaignExpiryResponse =
+	| { CampaignNotFound: null }
+	| { Success: { codes_updated: number } };
 export interface SprinkleEvent {
 	/**
 	 * / The number of users that were successfully sprinkled
@@ -661,6 +918,15 @@ export interface Transaction_Spl {
 	timestamp: bigint;
 	amount: bigint;
 }
+export interface UploadVipCodesRequest {
+	codes: Array<bigint>;
+	campaign_id: string;
+	vip_id: Principal;
+}
+export type UploadVipCodesResponse =
+	| { CampaignNotFound: null }
+	| { Success: { codes_overwritten: number; codes_created: number } }
+	| { VipNotInCampaign: null };
 export interface UsageAndHolding {
 	/**
 	 * Time of account creation or first recorded activity.
@@ -681,7 +947,7 @@ export interface UsageAwardConfig {
 	 * / Rules for probability multipliers based on satisfied criteria.
 	 * / Maps multiplier values to lists of criterion names that must be satisfied.
 	 */
-	probability_multiplier_rules: [] | [Array<[number, Array<CriterionName>]>];
+	probability_multiplier_rules: Array<[number, Array<CriterionName>]>;
 	awards: Array<UsageAwardEvent>;
 	eligibility_criteria: UsageCriteria;
 	/**
@@ -800,6 +1066,16 @@ export interface UserSnapshot {
 	accounts: Array<AccountSnapshotFor>;
 	timestamp: [] | [bigint];
 }
+export interface VipCodeInfoResponse {
+	validity: VipCodeValidity;
+	expiry_date: bigint;
+	campaign_id: string;
+}
+export type VipCodeValidity =
+	| { Invalid: null }
+	| { Used: null }
+	| { Valid: null }
+	| { Expired: null };
 export interface VipConfig {
 	code_validity_duration: bigint;
 	vips: Array<Principal>;
@@ -817,6 +1093,10 @@ export interface VipStats {
 	total_issued: number;
 }
 export interface _SERVICE {
+	/**
+	 * / QR Gift Code: Cancels a transfer code (creator only).
+	 */
+	cancel_qr_gift_code: ActorMethod<[string], CancelQrGiftCodeResponse>;
 	/**
 	 * / Pays usage rewards.  This is normally called internally after the random timing & user selection
 	 * / has taken place.  For testing, it can be convenient to call it directly.
@@ -847,6 +1127,10 @@ export interface _SERVICE {
 	 */
 	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
 	/**
+	 * / QR Gift Code: Creates a new transfer code.
+	 */
+	create_qr_gift_code: ActorMethod<[CreateQrGiftCodeRequest], CreateQrGiftCodeResponse>;
+	/**
 	 * / Eligibility of the caller or specified principal for airdrops.
 	 */
 	eligible: ActorMethod<[[] | [Principal]], EligibilityResponse>;
@@ -868,9 +1152,25 @@ export interface _SERVICE {
 		LastActivityHistogramResponse
 	>;
 	/**
+	 * / QR Gift Code: Returns all codes created by the caller.
+	 */
+	my_qr_gift_codes: ActorMethod<[], Array<QrGiftCodeEntry>>;
+	/**
 	 * / Gets a VIP reward token for a given campaign ID.
 	 */
 	new_vip_reward: ActorMethod<[[] | [ClaimedVipReward]], NewVipRewardResponse>;
+	/**
+	 * / QR Gift Code: Gets information about a transfer code.
+	 */
+	qr_gift_code_info: ActorMethod<[string], [] | [QrGiftCodeInfoResponse]>;
+	/**
+	 * / QR Gift Code: Gets overall stats (admin only).
+	 */
+	qr_gift_code_stats: ActorMethod<[], QrGiftCodeStats>;
+	/**
+	 * / QR Gift Code: Redeems a transfer code.
+	 */
+	redeem_qr_gift_code: ActorMethod<[RedeemQrGiftCodeRequest], RedeemQrGiftCodeResponse>;
 	/**
 	 * / Get or create referrer info for the caller.
 	 */
@@ -889,6 +1189,10 @@ export interface _SERVICE {
 	 * / Sets the caller's referrer.
 	 */
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
+	/**
+	 * VIP Rewards: Sets expiry date for all codes in a campaign.
+	 */
+	set_vip_campaign_expiry: ActorMethod<[SetVipCampaignExpiryRequest], SetVipCampaignExpiryResponse>;
 	stats_by: ActorMethod<[StatsKeyType], StatsResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
 	/**
@@ -900,6 +1204,10 @@ export interface _SERVICE {
 	 * / to trigger an event directly when testing.
 	 */
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
+	/**
+	 * VIP Rewards: Uploads a batch of VIP codes.
+	 */
+	upload_vip_codes: ActorMethod<[UploadVipCodesRequest], UploadVipCodesResponse>;
 	/**
 	 * / Aggregate usage stats.
 	 */
@@ -920,6 +1228,10 @@ export interface _SERVICE {
 	 * / Stats for an individual user
 	 */
 	user_stats: ActorMethod<[Principal], UsageAwardState>;
+	/**
+	 * VIP Rewards: Gets information about a VIP code.
+	 */
+	vip_code_info: ActorMethod<[string], [] | [VipCodeInfoResponse]>;
 	/**
 	 * / Gets rewards stats
 	 */

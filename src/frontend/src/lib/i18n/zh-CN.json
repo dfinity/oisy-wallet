@@ -135,6 +135,8 @@
 			"confirm_navigate": "你确定要离开当前页面吗？",
 			"vip_qr_code": "VIP 二维码",
 			"binance_qr_code": "Binance Clubhouse 二维码",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "邀请你的朋友",
 			"address_book": "联系人",
 			"hide_balances": "隐藏余额",
@@ -161,6 +163,8 @@
 			"open_twitter": "打开 DFINITY 的 X/Twitter 动态",
 			"vip_qr_code": "生成一个邀请链接",
 			"binance_qr_code": "生成一个 Binance Clubhouse 链接",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "为朋友生成一个推荐链接",
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "加载推荐人信息时出错",
 				"setting_referrer": "设置推荐人时出错"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

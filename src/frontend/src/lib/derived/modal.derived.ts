@@ -2,6 +2,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
+import type { GiftCodeRedeemStateData } from '$lib/types/gift-code';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
@@ -392,4 +393,26 @@ export const modalUniversalScannerData: Readable<UniversalScannerData | undefine
 export const modalPayDialogOpen: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'pay-dialog'
+);
+
+export const modalGiftCodeCreate: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-create'
+);
+
+export const modalGiftCodeList: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-list'
+);
+
+export const modalGiftCodeRedeemResult: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gift-code-redeem-result'
+);
+export const modalGiftCodeRedeemResultData: Readable<GiftCodeRedeemStateData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'gift-code-redeem-result'
+			? ($modalStore?.data as GiftCodeRedeemStateData)
+			: undefined
 );

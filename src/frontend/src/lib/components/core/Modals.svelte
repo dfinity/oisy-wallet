@@ -5,6 +5,8 @@
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
+	import GiftCodeCreateModal from '$lib/components/gift-code/GiftCodeCreateModal.svelte';
+	import GiftCodeListModal from '$lib/components/gift-code/GiftCodeListModal.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
 	import NotesModal from '$lib/components/notes/NotesModal.svelte';
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
@@ -20,6 +22,8 @@
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
 		modalDAppDetails,
+		modalGiftCodeCreate,
+		modalGiftCodeList,
 		modalHideToken,
 		modalIcHideToken,
 		modalSolHideToken,
@@ -77,6 +81,10 @@
 		<FullscreenMediaModal mediaSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
 		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
+	{:else if $modalGiftCodeCreate}
+		<GiftCodeCreateModal />
+	{:else if $modalGiftCodeList}
+		<GiftCodeListModal />
 	{:else if $modalPayDialogOpen}
 		<PayDialog />
 	{:else if $modalSend && nonNullish($modalSendData)}
