@@ -369,14 +369,19 @@ to review independently.
 There is **no external Phase 0** — the chain-fusion-signer already exposes
 everything needed (verified §2.1), so the whole effort lives in this repo.
 
-**Rollout safety — disabled by default.** Every PR ships XRP behind the
-`VITE_XRP_MAINNET_ENABLED` flag, which defaults to **disabled**
-(`parseBoolEnvVar` → `false` when unset). While disabled, `SUPPORTED_XRP_NETWORKS`
-/ `SUPPORTED_XRP_TOKENS` resolve to empty arrays, so XRP is absent from every
-enabled-network/token derivation and the UI — zero behavioural change and zero
-impact on existing tests. The flag is flipped on only in the final PR, once
-send / receive / balance all work. So each PR merges to `main` safely without
-exposing a half-built chain.
+**Rollout safety — disabled by a temporary override, not a bespoke flag.** XRP
+uses the **same enablement convention as every other chain** —
+`VITE_XRP_MAINNET_DISABLED` (defaults to _enabled_). While the integration is in
+progress, a **temporary in-code override** (`XRP_MAINNET_DISABLED_OVERRIDE` in
+`networks.xrp.env.ts`) force-disables it regardless of the env var, so
+`SUPPORTED_XRP_NETWORKS` / `SUPPORTED_XRP_TOKENS` resolve to empty arrays and XRP
+is absent from every enabled-network/token derivation and the UI — zero
+behavioural change, zero impact on existing tests. Enabling XRP is simply
+**removing the override** (final PR), after which it behaves exactly like
+BTC/ETH/SOL. Enablement stays entirely in code — **no CI/deploy env plumbing** —
+so each PR merges to `main` safely without exposing a half-built chain. To test
+a build meanwhile, flip the override to `false` on the branch (XRP is then
+enabled by default like the other chains — no env-override needed).
 
 **Mainnet first.** The initial PRs are **mainnet-only**; XRPL **testnet** (plus
 a Bithomp testnet explorer + faucet) is a deliberate fast-follow, not part of
@@ -392,7 +397,7 @@ these PRs.
 | 6     | `feat/frontend/xrp-send-orchestration`  | Phase 5    | `sendXrp` pipeline (fetch sequence/fee/ledger → build → sign → submit → confirm), the fee/sequence/ledger/confirm API fetches, reserve-aware `getXrpMaxAmount` + `isInvalidDestinationXrp`, reserve/fee/ledger constants, `ProgressStepsSendXrp` + send analytics. Tested logic; no UI.                                                                                     |
 | 7     | `feat/frontend/xrp-send-ui`             | Phase 6    | **This PR.** Send flow UI — wizard + form + reserve-aware amount + destination + **destination-tag input** + review + fee context/display, wired to `sendXrp`; send-modal (`SendWizard`) and destination-step (`SendDestinationWizardStep`) routing, `sendXrpDestinationTag` in the send context. XRP address-book contacts are out of scope (need a backend address type). |
 | 8     | `feat/frontend/xrp-transactions`        | Phase 7    | Transaction history from `account_tx`                                                                                                                                                                                                                                                                                                                                       |
-| 9     | `feat/frontend/xrp-enable`              | Phase 8    | Exchange-rate/price lookup, flip `VITE_XRP_MAINNET_ENABLED` on, `PRODUCT.md` update                                                                                                                                                                                                                                                                                         |
+| 9     | `feat/frontend/xrp-enable`              | Phase 8    | Remove the temporary `XRP_MAINNET_DISABLED_OVERRIDE` (so `VITE_XRP_MAINNET_DISABLED` governs XRP like every other chain), exchange-rate/price lookup, `PRODUCT.md` update                                                                                                                                                                                                   |
 
 Test coverage lands **inside each phase's PR**, not deferred to a follow-up —
 per the repo's `test-coverage` CI gate, every new component/derived needs
