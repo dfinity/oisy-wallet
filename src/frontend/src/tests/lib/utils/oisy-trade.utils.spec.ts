@@ -671,6 +671,20 @@ describe('oisy-trade.utils — orders', () => {
 
 	const tokens = [baseToken, quoteToken];
 
+	const supported = ({
+		ledgerId,
+		symbol,
+		decimals
+	}: {
+		ledgerId: string;
+		symbol: string;
+		decimals: number;
+	}): OisyTradeToken =>
+		({
+			id: { ledger_id: Principal.fromText(ledgerId) },
+			metadata: { symbol, decimals }
+		}) as OisyTradeToken;
+
 	const buildOrder = ({
 		id = 'order-1',
 		side,
@@ -749,6 +763,31 @@ describe('oisy-trade.utils — orders', () => {
 			expect(view?.status).toBe('Pending');
 		});
 
+		it('falls back to DEX supported-token metadata when a wallet token is disabled', () => {
+			const view = mapOisyTradeOrder({
+				order: buildOrder({
+					side: 'Buy',
+					quantity: 50n * 100_000_000n,
+					price: 2_600_000n,
+					status: 'Open'
+				}),
+				tokens: [baseToken],
+				supportedTokens: [
+					supported({ ledgerId: baseLedgerId, symbol: 'ICP', decimals: 8 }),
+					supported({ ledgerId: quoteLedgerId, symbol: 'ckUSDC', decimals: 6 })
+				]
+			});
+
+			expect(view?.base).toBe(baseToken);
+			expect(view?.quote).toMatchObject({
+				symbol: 'ckUSDC',
+				name: 'ckUSDC',
+				decimals: 6,
+				ledgerCanisterId: quoteLedgerId
+			});
+			expect(view?.price).toBe(2.6);
+		});
+
 		it('drops an order whose base ledger cannot be resolved', () => {
 			const view = mapOisyTradeOrder({
 				order: buildOrder({
@@ -798,6 +837,24 @@ describe('oisy-trade.utils — orders', () => {
 			const views = mapOisyTradeOrders({ orders, tokens });
 
 			expect(views.map(({ id }) => id)).toEqual(['a', 'c']);
+		});
+
+		it('keeps supported-token orders even when one leg is missing from enabled wallet tokens', () => {
+			const orders = [
+				buildOrder({ id: 'a', side: 'Sell', quantity: 100n, price: 1n, status: 'Open' })
+			];
+
+			const views = mapOisyTradeOrders({
+				orders,
+				tokens: [baseToken],
+				supportedTokens: [
+					supported({ ledgerId: baseLedgerId, symbol: 'ICP', decimals: 8 }),
+					supported({ ledgerId: quoteLedgerId, symbol: 'ckUSDC', decimals: 6 })
+				]
+			});
+
+			expect(views.map(({ id }) => id)).toEqual(['a']);
+			expect(views[0].quote.symbol).toBe('ckUSDC');
 		});
 	});
 
