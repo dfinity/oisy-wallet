@@ -41,6 +41,7 @@ import {
 	SUPPORTED_SOLANA_NETWORKS,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { CKBTC_LEDGER_CANISTER_TESTNET_IDS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -70,7 +71,10 @@ import {
 	isNetworkIdSOLMainnet,
 	isNetworkIdSepolia,
 	isNetworkIdSolana,
+	isNetworkIdXRPMainnet,
+	isNetworkIdXrp,
 	isNetworkSolana,
+	isNetworkXrp,
 	isPseudoNetworkIdIcpTestnet,
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapNetworkIdToBitcoinNetwork
@@ -123,6 +127,18 @@ describe('network utils', () => {
 
 		it('should return false for non-ICP network', () => {
 			expect(isNetworkSolana(ETHEREUM_NETWORK)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkXrp', () => {
+		// XRP is disabled by default, so the id-list predicate is inert; assert the negative.
+		it('should return false for a non-XRP network', () => {
+			expect(isNetworkXrp(ETHEREUM_NETWORK)).toBeFalsy();
+			expect(isNetworkXrp(SOLANA_MAINNET_NETWORK)).toBeFalsy();
+		});
+
+		it('should return false for an undefined network', () => {
+			expect(isNetworkXrp(undefined)).toBeFalsy();
 		});
 	});
 
@@ -333,6 +349,31 @@ describe('network utils', () => {
 		it('should return false for non-SOL mainnet ID', () => {
 			expect(isNetworkIdSOLMainnet(SOLANA_DEVNET_NETWORK_ID)).toBeFalsy();
 			expect(isNetworkIdSOLMainnet(SOLANA_LOCAL_NETWORK_ID)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdXrp', () => {
+		// XRP is disabled by default (empty supported-id list), so this predicate is inert.
+		it('should return false for non-XRP network IDs', () => {
+			expect(isNetworkIdXrp(ICP_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXrp(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXrp(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('should return false for undefined network ID', () => {
+			expect(isNetworkIdXrp(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkIdXRPMainnet', () => {
+		it('should return true for XRP mainnet ID', () => {
+			expect(isNetworkIdXRPMainnet(XRP_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('should return false for non-XRP mainnet ID', () => {
+			expect(isNetworkIdXRPMainnet(SOLANA_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXRPMainnet(ETHEREUM_NETWORK_ID)).toBeFalsy();
+			expect(isNetworkIdXRPMainnet(undefined)).toBeFalsy();
 		});
 	});
 

@@ -3,6 +3,7 @@ import type { EthAddress } from '$eth/types/address';
 import type { Address } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import type { SolAddress } from '$sol/types/address';
+import type { XrpAddress } from '$xrp/types/address';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { writable, type Readable } from 'svelte/store';
 
@@ -34,3 +35,5 @@ export const ethAddressStore = initAddressStore<EthAddress>();
 export const solAddressMainnetStore = initAddressStore<SolAddress>();
 export const solAddressDevnetStore = initAddressStore<SolAddress>();
 export const solAddressLocalnetStore = initAddressStore<SolAddress>();
+
+export const xrpAddressMainnetStore = initAddressStore<XrpAddress>();

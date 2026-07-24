@@ -1,10 +1,12 @@
 import { XRP_KEY_ID } from '$env/networks/networks.xrp.env';
 import * as signerApi from '$lib/api/signer.api';
+import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { XRP_DERIVATION_PATH_PREFIX } from '$xrp/constants/xrp.constants';
-import { getXrpAddressMainnet } from '$xrp/services/xrp-address.services';
+import { getXrpAddressMainnet, loadXrpAddressMainnet } from '$xrp/services/xrp-address.services';
 import { XrpNetworks } from '$xrp/types/network';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('xrp-address.services', () => {
@@ -19,6 +21,7 @@ describe('xrp-address.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		xrpAddressMainnetStore.reset();
 
 		authStore.setForTesting(mockIdentity);
 
@@ -39,6 +42,16 @@ describe('xrp-address.services', () => {
 			identity: mockIdentity,
 			keyId: XRP_KEY_ID,
 			derivationPath: [XRP_DERIVATION_PATH_PREFIX, XrpNetworks.mainnet]
+		});
+	});
+
+	it('loads the mainnet address into the store', async () => {
+		const result = await loadXrpAddressMainnet();
+
+		expect(result).toEqual({ success: true });
+		expect(get(xrpAddressMainnetStore)).toEqual({
+			data: expectedAddress,
+			certified: true
 		});
 	});
 });
