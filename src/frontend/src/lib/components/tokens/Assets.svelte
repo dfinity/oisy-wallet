@@ -12,6 +12,7 @@
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
+	import NftGroupToggle from '$lib/components/nfts/NftGroupToggle.svelte';
 	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
 	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
@@ -74,11 +75,11 @@
 					     tab row's natural width on narrow viewports (see the
 					     matching note in SlidingInput.svelte). -->
 					<div class="relative flex min-w-0 grow-1 justify-between">
-						<TokensFilter>
-							{#snippet overflowableContent()}
-								<!-- NFTs is its own nav destination now, so the standalone NFTs page
-								     shows no Tokens/Earning/Trading tab bar. -->
-								{#if tab !== TokenTypes.NFTS}
+						{#if tab === TokenTypes.NFTS}
+							<NftGroupToggle />
+						{:else}
+							<TokensFilter>
+								{#snippet overflowableContent()}
 									<Tabs
 										styleClass="mt-2 mb-6"
 										tabVariant="menu"
@@ -123,9 +124,9 @@
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
 									/>
-								{/if}
-							{/snippet}
-						</TokensFilter>
+								{/snippet}
+							</TokensFilter>
+						{/if}
 					</div>
 					{#if tab === TokenTypes.TOKENS}
 						<div class="flex">
