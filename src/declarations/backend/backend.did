@@ -799,6 +799,7 @@ type NetworkSettingsFor = variant {
 	ArbitrumMainnet;
 	InternetComputer;
 	BaseSepolia;
+	XrpMainnet;
 	PolygonMainnet;
 	BitcoinRegtest;
 	SolanaDevnet;

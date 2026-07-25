@@ -404,6 +404,7 @@ export const idlFactory = ({ IDL }) => {
 		ArbitrumMainnet: IDL.Null,
 		InternetComputer: IDL.Null,
 		BaseSepolia: IDL.Null,
+		XrpMainnet: IDL.Null,
 		PolygonMainnet: IDL.Null,
 		BitcoinRegtest: IDL.Null,
 		SolanaDevnet: IDL.Null,
