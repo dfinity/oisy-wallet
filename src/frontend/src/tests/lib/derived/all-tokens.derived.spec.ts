@@ -185,11 +185,11 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				XRP_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,
@@ -273,6 +273,7 @@ describe('all-tokens.derived', () => {
 				SEPOLIA_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
@@ -280,8 +281,7 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
-				XRP_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 
@@ -305,6 +305,7 @@ describe('all-tokens.derived', () => {
 				SOLANA_TOKEN.id.description,
 				SOLANA_DEVNET_TOKEN.id.description,
 				SOLANA_LOCAL_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BASE_SEPOLIA_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
@@ -312,8 +313,7 @@ describe('all-tokens.derived', () => {
 				POL_MAINNET_TOKEN.id.description,
 				POL_AMOY_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description,
-				XRP_TOKEN.id.description
+				ARBITRUM_SEPOLIA_ETH_TOKEN.id.description
 			]);
 		});
 	});
@@ -358,11 +358,11 @@ describe('all-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
 				ARBITRUM_ETH_TOKEN.id.description,
-				XRP_TOKEN.id.description,
 				mockErc20Token.id.description,
 				mockErc4626Token.id.description,
 				mockIcrcToken.id.description,

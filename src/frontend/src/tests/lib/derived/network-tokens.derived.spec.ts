@@ -108,11 +108,11 @@ describe('network-tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN,
-				XRP_TOKEN
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -215,11 +215,11 @@ describe('network-tokens.derived', () => {
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
 					SOLANA_TOKEN,
+					XRP_TOKEN,
 					BASE_ETH_TOKEN,
 					BNB_MAINNET_TOKEN,
 					POL_MAINNET_TOKEN,
 					ARBITRUM_ETH_TOKEN,
-					XRP_TOKEN,
 					mockErc20CustomToken,
 					mockSplCustomToken
 				]);

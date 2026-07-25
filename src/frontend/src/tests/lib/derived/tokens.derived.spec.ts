@@ -250,11 +250,11 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				XRP_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
@@ -275,11 +275,11 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN,
-				XRP_TOKEN
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -291,10 +291,10 @@ describe('tokens.derived', () => {
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				POL_MAINNET_TOKEN,
-				ARBITRUM_ETH_TOKEN,
-				XRP_TOKEN
+				ARBITRUM_ETH_TOKEN
 			]);
 		});
 
@@ -310,6 +310,7 @@ describe('tokens.derived', () => {
 				SEPOLIA_TOKEN,
 				SOLANA_TOKEN,
 				SOLANA_DEVNET_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BASE_SEPOLIA_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
@@ -317,8 +318,7 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				POL_AMOY_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				ARBITRUM_SEPOLIA_ETH_TOKEN,
-				XRP_TOKEN
+				ARBITRUM_SEPOLIA_ETH_TOKEN
 			]);
 		});
 
@@ -337,6 +337,7 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				SOLANA_DEVNET_TOKEN,
 				SOLANA_LOCAL_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BASE_SEPOLIA_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
@@ -344,8 +345,7 @@ describe('tokens.derived', () => {
 				POL_MAINNET_TOKEN,
 				POL_AMOY_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				ARBITRUM_SEPOLIA_ETH_TOKEN,
-				XRP_TOKEN
+				ARBITRUM_SEPOLIA_ETH_TOKEN
 			]);
 		});
 	});
@@ -371,11 +371,11 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN,
-				XRP_TOKEN,
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
@@ -396,9 +396,9 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN.symbol,
 				ETHEREUM_TOKEN.symbol,
 				SOLANA_TOKEN.symbol,
+				XRP_TOKEN.symbol,
 				BNB_MAINNET_TOKEN.symbol,
-				POL_MAINNET_TOKEN.symbol,
-				XRP_TOKEN.symbol
+				POL_MAINNET_TOKEN.symbol
 			]);
 		});
 	});
@@ -492,6 +492,7 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				ARBITRUM_ETH_TOKEN
 			]);
