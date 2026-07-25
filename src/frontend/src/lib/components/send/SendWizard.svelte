@@ -20,10 +20,12 @@
 		isNetworkIdICP,
 		isNetworkIdBitcoin,
 		isNetworkIdSolana,
+		isNetworkIdXrp,
 		isNetworkIdEvm,
 		isNetworkEthereum
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
+	import XrpSendTokenWizard from '$xrp/components/send/XrpSendTokenWizard.svelte';
 
 	interface Props {
 		destination: string;
@@ -125,6 +127,19 @@
 	</UtxosFeeContexts>
 {:else if isNetworkIdSolana($sendToken.network.id)}
 	<SolSendTokenWizard
+		{currentStep}
+		{destination}
+		{onBack}
+		{onClose}
+		{onNext}
+		{onSendBack}
+		{onTokensList}
+		{selectedContact}
+		bind:amount
+		bind:sendProgressStep
+	/>
+{:else if isNetworkIdXrp($sendToken.network.id)}
+	<XrpSendTokenWizard
 		{currentStep}
 		{destination}
 		{onBack}
