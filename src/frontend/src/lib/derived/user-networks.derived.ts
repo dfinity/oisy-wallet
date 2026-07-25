@@ -31,6 +31,7 @@ import {
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID
 } from '$env/networks/networks.sol.env';
+import { XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userSettingsNetworks } from '$lib/derived/user-profile.derived';
 import type { NetworkId } from '$lib/types/network';
@@ -111,6 +112,9 @@ export const userNetworks: Readable<UserNetworks> = derived(
 			}
 			if ('ArbitrumSepolia' in key) {
 				return ARBITRUM_SEPOLIA_NETWORK_ID;
+			}
+			if ('XrpMainnet' in key) {
+				return XRP_MAINNET_NETWORK_ID;
 			}
 
 			assertNever(key, `Unknown network key: ${key}`);
