@@ -1663,6 +1663,12 @@ export type TokenId =
 	  }
 	| {
 			/**
+			 * Native XRP on mainnet
+			 */
+			XrpNativeMainnet: null;
+	  }
+	| {
+			/**
 			 * Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 			 */
 			EvmNative: bigint;
