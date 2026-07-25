@@ -77,6 +77,10 @@ pub enum ActiveUserTransactionData {
     /// Liquidium lend/borrow flow. A single variant covers all four actions
     /// (supply, borrow, repay, withdraw).
     Liquidium(LiquidiumData),
+    /// NEAR Intents (1Click) cross-chain swap. A single variant covers every
+    /// source/destination leg (EVM and Solana); the deposit address, its
+    /// optional memo, and origin/destination tx hashes ride in `external_refs`.
+    NearIntents(NearIntentsData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -112,6 +116,19 @@ pub struct LiquidiumData {
     /// The asset moved by this action (supplied, borrowed, repaid, withdrawn).
     pub token: TokenId,
     /// Amount in the token's base units.
+    pub amount: Nat,
+}
+
+/// NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
+/// off-chain by polling the 1Click status endpoint keyed by the deposit
+/// address, so that address (and its optional memo, plus learned-mid-flow tx
+/// hashes) lives in `external_refs`; only the canonical immutable trio is
+/// captured here.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct NearIntentsData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
     pub amount: Nat,
 }
 
@@ -181,8 +198,8 @@ mod tests {
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
-        GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, OneSecEvmToIcpData,
-        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
+        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
     };
     use crate::types::token_id::TokenId;
 
@@ -242,6 +259,16 @@ mod tests {
             pool_id: "mxzaz-hqaaa-aaaar-qaada-cai".to_string(),
             token: TokenId::Icrc(Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").unwrap()),
             amount: Nat::from(5_100u64),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn near_intents_variant_roundtrips() {
+        let original = ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(8453),
+            dest_token: TokenId::SolNativeMainnet,
+            amount: Nat::from(250_000u64),
         });
         assert_eq!(roundtrip(&original), original);
     }
