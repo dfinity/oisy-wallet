@@ -1,3 +1,4 @@
+import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_MAINNET_NETWORKS_IDS,
 	SUPPORTED_TESTNET_NETWORK_IDS
@@ -108,6 +109,42 @@ describe('user-networks.derived', () => {
 				[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
 				[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
 			});
+		});
+
+		// The backend can learn a network before the frontend supports it, and the two deploy
+		// independently, so an unmapped settings key must not take the whole mapping down.
+		it('should ignore an unknown network key and keep mapping the known ones', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					settings: toNullable({
+						...mockUserSettings,
+						networks: {
+							...mockNetworksSettings,
+							networks: [
+								[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
+								// A variant this frontend does not know yet.
+								[
+									{ FutureNetworkMainnet: null } as unknown as NetworkSettingsFor,
+									{ enabled: true, is_testnet: false }
+								]
+							]
+						}
+					})
+				}
+			});
+
+			expect(() => get(userNetworks)).not.toThrow();
+
+			expect(get(userNetworks)).toEqual({
+				...mockUserNetworksOnlyMainnetsComplete,
+				[SOLANA_MAINNET_NETWORK_ID]: { enabled: true, isTestnet: false },
+				[ICP_NETWORK_ID]: { enabled: true, isTestnet: false },
+				[ICP_PSEUDO_TESTNET_NETWORK_ID]: { enabled: true, isTestnet: true }
+			});
+
+			expect(console.warn).toHaveBeenCalledWith('Unknown network key: FutureNetworkMainnet');
 		});
 	});
 });
