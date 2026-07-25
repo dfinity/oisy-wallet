@@ -1196,6 +1196,7 @@ export type NetworkSettingsFor =
 	| { ArbitrumMainnet: null }
 	| { InternetComputer: null }
 	| { BaseSepolia: null }
+	| { XrpMainnet: null }
 	| { PolygonMainnet: null }
 	| { BitcoinRegtest: null }
 	| { SolanaDevnet: null }
@@ -1659,6 +1660,12 @@ export type TokenId =
 			 * ICRC token on ICP
 			 */
 			Icrc: Principal;
+	  }
+	| {
+			/**
+			 * Native XRP on mainnet
+			 */
+			XrpNativeMainnet: null;
 	  }
 	| {
 			/**

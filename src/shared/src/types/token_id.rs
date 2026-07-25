@@ -44,6 +44,8 @@ pub enum TokenId {
     IcPunks(CanisterId) = 15,
     /// ICRC-7 NFT collection on the Internet Computer
     Icrc7(CanisterId) = 16,
+    /// Native XRP on mainnet
+    XrpNativeMainnet = 17,
 }
 
 impl From<&Token> for TokenId {
