@@ -1,3 +1,4 @@
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { xrpAddressMainnetStore } from '$lib/stores/address.store';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -19,14 +20,23 @@ describe('XrpLoaderWallets', () => {
 		vi.spyOn(XrpWalletWorker, 'init');
 	});
 
-	// XRP ships disabled by default (VITE_XRP_MAINNET_ENABLED unset), so no XRP token is
-	// enabled and no wallet worker is started — even once an address is available.
-	it('does not initialize a wallet worker while XRP is disabled', () => {
+	it('enables the native XRP token', () => {
+		expect(get(enabledXrpTokens)).toEqual([XRP_TOKEN]);
+	});
+
+	it('initializes a wallet worker once the address is available', async () => {
 		xrpAddressMainnetStore.set({ data: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', certified: true });
 
 		render(XrpLoaderWallets);
 
-		expect(get(enabledXrpTokens)).toHaveLength(0);
+		await vi.waitFor(() => {
+			expect(XrpWalletWorker.init).toHaveBeenCalledWith({ token: XRP_TOKEN });
+		});
+	});
+
+	it('does not initialize a wallet worker before an address is available', () => {
+		render(XrpLoaderWallets);
+
 		expect(XrpWalletWorker.init).not.toHaveBeenCalled();
 	});
 });

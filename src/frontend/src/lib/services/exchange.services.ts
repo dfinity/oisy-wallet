@@ -318,6 +318,10 @@ const SOL_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { SolNativeMainnet: null },
 	coingeckoKey: 'solana'
 };
+const XRP_NATIVE_ENTRY: NativeTokenEntry = {
+	tokenId: { XrpNativeMainnet: null },
+	coingeckoKey: 'ripple'
+};
 const BNB_NATIVE_ENTRY: NativeTokenEntry = {
 	tokenId: { EvmNative: BSC_MAINNET_NETWORK.chainId },
 	coingeckoKey: 'binancecoin'
@@ -355,6 +359,7 @@ export const fetchExchangeRatesFromBackend = async ({
 	currentBtcPrice: CoingeckoSimplePriceResponse | undefined;
 	currentIcpPrice: CoingeckoSimplePriceResponse | undefined;
 	currentSolPrice: CoingeckoSimplePriceResponse | undefined;
+	currentXrpPrice: CoingeckoSimplePriceResponse | undefined;
 	currentBnbPrice: CoingeckoSimplePriceResponse | undefined;
 	currentPolPrice: CoingeckoSimplePriceResponse | undefined;
 	currentArbitrumEthPrice: CoingeckoSimplePriceResponse | undefined;
@@ -394,6 +399,7 @@ export const fetchExchangeRatesFromBackend = async ({
 		currentBtcPrice: nativePrice({ ...BTC_NATIVE_ENTRY, coingeckoRates }),
 		currentIcpPrice: nativePrice({ ...ICP_NATIVE_ENTRY, coingeckoRates }),
 		currentSolPrice: nativePrice({ ...SOL_NATIVE_ENTRY, coingeckoRates }),
+		currentXrpPrice: nativePrice({ ...XRP_NATIVE_ENTRY, coingeckoRates }),
 		currentBnbPrice: nativePrice({ ...BNB_NATIVE_ENTRY, coingeckoRates }),
 		currentPolPrice: nativePrice({ ...POL_NATIVE_ENTRY, coingeckoRates }),
 		currentArbitrumEthPrice: nativePrice({ ...ARBITRUM_ETH_NATIVE_ENTRY, coingeckoRates }),

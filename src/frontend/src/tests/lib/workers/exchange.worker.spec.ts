@@ -1261,6 +1261,7 @@ describe('exchange.worker', () => {
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
 						[{ SolNativeMainnet: null }, mockExchangeRate],
+						[{ XrpNativeMainnet: null }, mockExchangeRate],
 						[{ EvmNative: 56n }, mockExchangeRate],
 						[{ EvmNative: 137n }, mockExchangeRate]
 					)
@@ -1518,6 +1519,7 @@ describe('exchange.worker', () => {
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
 						[{ SolNativeMainnet: null }, mockExchangeRate],
+						[{ XrpNativeMainnet: null }, mockExchangeRate],
 						[{ EvmNative: 56n }, mockExchangeRate],
 						[{ EvmNative: 137n }, mockExchangeRate],
 						[{ EvmNative: 42161n }, mockExchangeRate],
@@ -1667,15 +1669,8 @@ describe('exchange.worker', () => {
 
 						await onExchangeMessage(mockEvent);
 
-						// Backend priced every native it knows about, so the only native CoinGecko
-						// call left is XRP: the frontend does not yet read an XRP price out of the
-						// backend response (that needs the generated `XrpNativeMainnet` token id), so
-						// XRP always resolves through the provider fallback for now.
-						expect(simplePrice).toHaveBeenCalledExactlyOnceWith({
-							ids: 'ripple',
-							vs_currencies: Currency.USD,
-							include_24hr_change: true
-						});
+						// No native CoinGecko calls — backend priced all natives, XRP included.
+						expect(simplePrice).not.toHaveBeenCalled();
 
 						// Only the missing ERC-20 (0xmissing), missing ICRC (icrc1) and missing SPL (spl1).
 						expect(simpleTokenPrice).toHaveBeenCalledWith({
