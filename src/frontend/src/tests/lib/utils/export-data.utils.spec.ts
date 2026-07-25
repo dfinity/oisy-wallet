@@ -3,6 +3,7 @@ import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { ZERO } from '$lib/constants/app.constants';
@@ -28,6 +29,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcAccount } from '$tests/mocks/identity.mock';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { signature } from '@solana/kit';
 
@@ -1115,6 +1117,39 @@ describe('export-data.utils', () => {
 			// would render as 1970-01-01.
 			expect(row.timestamp_iso).toBe(TIMESTAMP_ISO);
 			expect(row.tx_id).toMatch(/^[A-HJ-NP-Za-km-z1-9]{87,88}$/);
+		});
+
+		it('renders an XRP send with fee in XRP (6 decimals) and an XRPScan explorer URL', () => {
+			const xrpTx = {
+				id: 'XRPHASH1',
+				type: 'send',
+				status: 'confirmed',
+				from: 'rSenderAddress',
+				to: 'rReceiverAddress',
+				value: 2_000_000n,
+				fee: 12n,
+				timestamp: 1n,
+				blockNumber: 42
+			} as unknown as XrpTransactionUi;
+
+			const [row] = buildTransactionRows({
+				transactions: [{ component: 'xrp', transaction: xrpTx, token: XRP_TOKEN }],
+				userAddresses,
+				nativeSymbolByNetworkId,
+				contacts: [],
+				exportedAt
+			});
+
+			expect(row.network).toBe(XRP_TOKEN.network.name);
+			expect(row.amount).toBe('2.0');
+			expect(row.fee).toBe('0.000012');
+			expect(row.fee_token).toBe('XRP');
+			expect(row.direction).toBe('out');
+			expect(row.from).toBe('rSenderAddress');
+			expect(row.to).toBe('rReceiverAddress');
+			expect(row.tx_id).toBe('XRPHASH1');
+			// XRPScan's base URL carries no `$args` placeholder, so the path is appended.
+			expect(row.explorer_url).toBe(`${XRP_TOKEN.network.explorerUrl}/tx/XRPHASH1`);
 		});
 
 		it('constructs the Solana explorer URL from the network template when txExplorerUrl is missing', () => {

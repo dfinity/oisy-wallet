@@ -51,6 +51,10 @@ const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] =>
 		const { transaction } = transactionUi;
 		collected.push(transaction.fromOwner ?? transaction.from);
 		collected.push(transaction.toOwner ?? transaction.to);
+	} else if (transactionUi.component === 'xrp') {
+		const { transaction } = transactionUi;
+		collected.push(transaction.from);
+		collected.push(transaction.to);
 	} else {
 		assertNever(
 			transactionUi,
