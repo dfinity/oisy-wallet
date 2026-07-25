@@ -50,6 +50,9 @@ export const TRACK_COUNT_IC_LOADING_NFTS_FROM_COLLECTION_ERROR =
 // Solana
 export const TRACK_COUNT_SOL_SEND_SUCCESS = 'sol_send_success';
 export const TRACK_COUNT_SOL_SEND_ERROR = 'sol_send_error';
+
+export const TRACK_COUNT_XRP_SEND_SUCCESS = 'xrp_send_success';
+export const TRACK_COUNT_XRP_SEND_ERROR = 'xrp_send_error';
 export const TRACK_COUNT_WC_SOL_SEND_SUCCESS = 'wc_sol_send_success';
 export const TRACK_COUNT_WC_SOL_SEND_ERROR = 'wc_sol_send_error';
 
