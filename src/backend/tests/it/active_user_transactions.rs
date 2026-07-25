@@ -6,7 +6,7 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
-        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        NearIntentsData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
     },
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
@@ -175,6 +175,45 @@ fn create_and_get_roundtrip() {
             assert_eq!(response.transactions[0].id, TX_ID);
         }
         GetActiveUserTransactionsResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+}
+
+#[test]
+fn create_near_intents_variant_roundtrip() {
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::NearIntents(NearIntentsData {
+        source_token: TokenId::EvmNative(8453),
+        dest_token: TokenId::SolNativeMainnet,
+        amount: Nat::from(250_000u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                id: TX_ID.to_string(),
+                data: data.clone(),
+                progress_step: Some("initialization".to_string()),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "deposit_address".to_string(),
+                    value: "0x00000000000000000000000000000000000000ff".to_string(),
+                }],
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
 }
 
