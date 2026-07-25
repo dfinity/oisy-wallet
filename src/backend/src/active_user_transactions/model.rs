@@ -226,6 +226,9 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_positive_amount(&d.amount)?;
             require_pool_id(&d.pool_id)?;
         }
+        ActiveUserTransactionData::NearIntents(d) => {
+            require_positive_amount(&d.amount)?;
+        }
     }
     Ok(())
 }
@@ -302,7 +305,7 @@ mod tests {
         active_user_transaction::{
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
             ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, LiquidiumAction,
-            LiquidiumData, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            LiquidiumData, NearIntentsData, OneSecEvmToIcpData, OneSecIcpToEvmData,
             UpdateActiveUserTransactionRequest, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
             MAX_LIQUIDIUM_POOL_ID_LEN,
         },
@@ -461,6 +464,33 @@ mod tests {
         // A canister principal text is at most 63 chars; anything longer can
         // never be a valid pool id.
         req.data = liquidium_data(5_100, &"a".repeat(MAX_LIQUIDIUM_POOL_ID_LEN + 1));
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    fn near_intents_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::EvmNative(8453),
+            dest_token: TokenId::SolNativeMainnet,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn near_intents_create_roundtrip() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("near-1");
+        req.data = near_intents_data(250_000);
+        let tx = create(&mut map, principal(), req, 1).expect("create");
+        assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+        assert_eq!(tx.data, near_intents_data(250_000));
+    }
+
+    #[test]
+    fn near_intents_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("near-1");
+        req.data = near_intents_data(0);
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }
