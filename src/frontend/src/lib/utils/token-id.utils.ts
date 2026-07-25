@@ -40,6 +40,10 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
 		return 'SolNativeMainnet';
 	}
 
+	if ('XrpNativeMainnet' in id) {
+		return 'XrpNativeMainnet';
+	}
+
 	if (
 		'ExtV2' in id ||
 		'SolNativeDevnet' in id ||
