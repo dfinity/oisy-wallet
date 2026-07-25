@@ -220,6 +220,7 @@ export const idlFactory = ({ IDL }) => {
 		ExtV2: IDL.Principal,
 		SolNativeDevnet: IDL.Null,
 		Icrc: IDL.Principal,
+		XrpNativeMainnet: IDL.Null,
 		EvmNative: IDL.Nat64,
 		Icrc7: IDL.Principal,
 		BtcNativeMainnet: IDL.Null,
