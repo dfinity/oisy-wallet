@@ -929,6 +929,14 @@
 				"solana_address_copied": "Địa chỉ Solana đã được sao chép vào khay nhớ tạm",
 				"display_solana_address_qr": "Hiển thị địa chỉ Solana dưới dạng mã QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {

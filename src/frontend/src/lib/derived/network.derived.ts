@@ -11,6 +11,7 @@ import {
 	isNetworkIdICP,
 	isNetworkIdPolygon,
 	isNetworkIdSolana,
+	isNetworkIdXrp,
 	isPseudoNetworkIdIcpTestnet
 } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -67,6 +68,10 @@ export const networkArbitrum: Readable<boolean> = derived([networkId], ([$networ
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdSolana($networkId)
+);
+
+export const networkXrp: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdXrp($networkId)
 );
 
 export const pseudoNetworkChainFusion: Readable<boolean> = derived(

@@ -11,6 +11,7 @@ import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
+	xrpAddressMainnetStore,
 	type AddressStoreData
 } from '$lib/stores/address.store';
 import {
@@ -21,49 +22,56 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSOLLocal,
-	isNetworkIdSOLMainnet
+	isNetworkIdSOLMainnet,
+	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import type { SolAddress } from '$sol/types/address';
+import type { XrpAddress } from '$xrp/types/address';
 import { derived, type Readable } from 'svelte/store';
 
-export const networkAddressStore: Readable<AddressStoreData<BtcAddress | EthAddress | SolAddress>> =
-	derived(
-		[
-			networkId,
-			btcAddressMainnetStore,
-			btcAddressTestnetStore,
-			btcAddressRegtestStore,
-			ethAddressStore,
-			solAddressMainnetStore,
-			solAddressDevnetStore,
-			solAddressLocalnetStore
-		],
-		([
-			$networkId,
-			$btcAddressMainnetStore,
-			$btcAddressTestnetStore,
-			$btcAddressRegtestStore,
-			$ethAddressStore,
-			$solAddressMainnetStore,
-			$solAddressDevnetStore,
-			$solAddressLocalnetStore
-		]) =>
-			isNetworkIdBTCMainnet($networkId)
-				? $btcAddressMainnetStore
-				: isNetworkIdBTCTestnet($networkId)
-					? $btcAddressTestnetStore
-					: isNetworkIdBTCRegtest($networkId)
-						? $btcAddressRegtestStore
-						: isNetworkIdEthereum($networkId) || isNetworkIdEvm($networkId)
-							? $ethAddressStore
-							: isNetworkIdSOLMainnet($networkId)
-								? $solAddressMainnetStore
-								: isNetworkIdSOLDevnet($networkId)
-									? $solAddressDevnetStore
-									: isNetworkIdSOLLocal($networkId)
-										? $solAddressLocalnetStore
+export const networkAddressStore: Readable<
+	AddressStoreData<BtcAddress | EthAddress | SolAddress | XrpAddress>
+> = derived(
+	[
+		networkId,
+		btcAddressMainnetStore,
+		btcAddressTestnetStore,
+		btcAddressRegtestStore,
+		ethAddressStore,
+		solAddressMainnetStore,
+		solAddressDevnetStore,
+		solAddressLocalnetStore,
+		xrpAddressMainnetStore
+	],
+	([
+		$networkId,
+		$btcAddressMainnetStore,
+		$btcAddressTestnetStore,
+		$btcAddressRegtestStore,
+		$ethAddressStore,
+		$solAddressMainnetStore,
+		$solAddressDevnetStore,
+		$solAddressLocalnetStore,
+		$xrpAddressMainnetStore
+	]) =>
+		isNetworkIdBTCMainnet($networkId)
+			? $btcAddressMainnetStore
+			: isNetworkIdBTCTestnet($networkId)
+				? $btcAddressTestnetStore
+				: isNetworkIdBTCRegtest($networkId)
+					? $btcAddressRegtestStore
+					: isNetworkIdEthereum($networkId) || isNetworkIdEvm($networkId)
+						? $ethAddressStore
+						: isNetworkIdSOLMainnet($networkId)
+							? $solAddressMainnetStore
+							: isNetworkIdSOLDevnet($networkId)
+								? $solAddressDevnetStore
+								: isNetworkIdSOLLocal($networkId)
+									? $solAddressLocalnetStore
+									: isNetworkIdXRPMainnet($networkId)
+										? $xrpAddressMainnetStore
 										: undefined
-	);
+);
 
 export const networkAddress: Readable<OptionEthAddress | string> = derived(
 	[ethAddress, icrcAccountIdentifierText, networkICP],

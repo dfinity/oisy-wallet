@@ -929,6 +929,14 @@
 				"solana_address_copied": "Adres Solana skopiowany do schowka",
 				"display_solana_address_qr": "Wyświetl adres Solana jako kod QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {

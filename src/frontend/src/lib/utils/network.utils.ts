@@ -19,11 +19,13 @@ import {
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
+import { SUPPORTED_XRP_NETWORK_IDS, XRP_MAINNET_NETWORK_ID } from '$env/networks/networks.xrp.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
+import type { XrpNetwork } from '$xrp/types/network';
 import { nonNullish } from '@dfinity/utils';
 import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 
@@ -44,6 +46,9 @@ export const isNetworkICP = (network: Network | undefined): boolean => isNetwork
 
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
 	isNetworkIdSolana(network?.id);
+
+export const isNetworkXrp = (network: Network | undefined): network is XrpNetwork =>
+	isNetworkIdXrp(network?.id);
 
 export const isPseudoNetworkIdIcpTestnet: IsNetworkIdUtil = (id) =>
 	nonNullish(id) && id === ICP_PSEUDO_TESTNET_NETWORK_ID;
@@ -94,6 +99,12 @@ export const isNetworkIdSOLDevnet: IsNetworkIdUtil = (networkId) =>
 
 export const isNetworkIdSOLLocal: IsNetworkIdUtil = (networkId) =>
 	SOLANA_LOCAL_NETWORK_ID === networkId;
+
+export const isNetworkIdXrp: IsNetworkIdUtil = (networkId) =>
+	nonNullish(networkId) && SUPPORTED_XRP_NETWORK_IDS.includes(networkId);
+
+export const isNetworkIdXRPMainnet: IsNetworkIdUtil = (networkId) =>
+	XRP_MAINNET_NETWORK_ID === networkId;
 
 const mapper: Record<symbol, BitcoinNetwork> = {
 	[BTC_MAINNET_NETWORK_ID]: 'mainnet',

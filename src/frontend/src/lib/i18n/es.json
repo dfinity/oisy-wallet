@@ -929,6 +929,14 @@
 				"solana_address_copied": "Dirección de Solana copiada al portapapeles",
 				"display_solana_address_qr": "Mostrar dirección de Solana como código QR"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
