@@ -143,6 +143,16 @@ export const exchangeRateSOLToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 			})
 		: Promise.resolve({});
 
+// XRP's CoinGecko coin id is `ripple`, not `xrp`.
+export const exchangeRateXRPToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
+	COINGECKO_PROVIDER_ENABLED
+		? simplePrice({
+				ids: 'ripple',
+				vs_currencies: Currency.USD,
+				include_24hr_change: true
+			})
+		: Promise.resolve({});
+
 export const exchangeRateBNBToUsd = (): Promise<CoingeckoSimplePriceResponse> =>
 	COINGECKO_PROVIDER_ENABLED
 		? simplePrice({
@@ -402,6 +412,7 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 				data.currentBtcPrice,
 				data.currentIcpPrice,
 				data.currentSolPrice,
+				data.currentXrpPrice,
 				data.currentBnbPrice,
 				data.currentPolPrice,
 				data.currentArbitrumEthPrice,

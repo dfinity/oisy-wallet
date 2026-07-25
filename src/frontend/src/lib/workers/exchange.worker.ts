@@ -18,6 +18,7 @@ import {
 	exchangeRateSOLToUsd,
 	exchangeRateSPLToUsd,
 	exchangeRateUsdToCurrency,
+	exchangeRateXRPToUsd,
 	fetchExchangeRatesFromBackend,
 	fillIcrcPricesFromFallbackProviders
 } from '$lib/services/exchange.services';
@@ -144,6 +145,7 @@ const syncExchangeFromBackend = async ({
 			currentIcpPrice: undefined,
 			currentIcrcPrices: {},
 			currentSolPrice: undefined,
+			currentXrpPrice: undefined,
 			currentSplPrices: {},
 			currentErc4626Prices: {},
 			currentBnbPrice: undefined,
@@ -256,6 +258,7 @@ const syncExchangeFromProviders = async ({
 		exchangeRateICPToUsd(),
 		exchangeRateICRCToUsd(icrcLedgerCanisterIds),
 		exchangeRateSOLToUsd(),
+		exchangeRateXRPToUsd(),
 		exchangeRateSPLToUsd(splTokenAddresses),
 		exchangeRateBNBToUsd(),
 		exchangeRatePOLToUsd()
@@ -274,6 +277,7 @@ const syncExchangeFromProviders = async ({
 		currentIcpPriceResult,
 		currentIcrcPricesResult,
 		currentSolPriceResult,
+		currentXrpPriceResult,
 		currentSplPricesResult,
 		currentBnbPriceResult,
 		currentPolPriceResult
@@ -291,6 +295,8 @@ const syncExchangeFromProviders = async ({
 		currentIcrcPricesResult.status === 'fulfilled' ? currentIcrcPricesResult.value : undefined;
 	const currentSolPrice =
 		currentSolPriceResult.status === 'fulfilled' ? currentSolPriceResult.value : undefined;
+	const currentXrpPrice =
+		currentXrpPriceResult.status === 'fulfilled' ? currentXrpPriceResult.value : undefined;
 	const currentSplPrices =
 		currentSplPricesResult.status === 'fulfilled' ? currentSplPricesResult.value : undefined;
 	const currentBnbPrice =
@@ -315,6 +321,7 @@ const syncExchangeFromProviders = async ({
 		currentIcpPrice,
 		currentIcrcPrices: currentIcrcPrices ?? {},
 		currentSolPrice,
+		currentXrpPrice,
 		currentSplPrices: currentSplPrices ?? {},
 		currentErc4626Prices,
 		currentBnbPrice,
@@ -353,6 +360,7 @@ const fetchProviderFallbackPrices = async ({
 	const missingBtc = isNullish(backendData.currentBtcPrice);
 	const missingIcp = isNullish(backendData.currentIcpPrice);
 	const missingSol = isNullish(backendData.currentSolPrice);
+	const missingXrp = isNullish(backendData.currentXrpPrice);
 	const missingBnb = isNullish(backendData.currentBnbPrice);
 	const missingPol = isNullish(backendData.currentPolPrice);
 	const missingArbitrumEth = isNullish(backendData.currentArbitrumEthPrice);
@@ -372,6 +380,7 @@ const fetchProviderFallbackPrices = async ({
 	const fillBtc = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBtc;
 	const fillIcp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingIcp;
 	const fillSol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingSol;
+	const fillXrp = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingXrp;
 	const fillBnb = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingBnb;
 	const fillPol = COINGECKO_FALLBACK_PROVIDER_ENABLED && missingPol;
 
@@ -410,6 +419,7 @@ const fetchProviderFallbackPrices = async ({
 		btcPriceResult,
 		icpPriceResult,
 		solPriceResult,
+		xrpPriceResult,
 		bnbPriceResult,
 		polPriceResult
 	] = await Promise.all([
@@ -427,6 +437,7 @@ const fetchProviderFallbackPrices = async ({
 		fillBtc ? exchangeRateBTCToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillIcp ? exchangeRateICPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillSol ? exchangeRateSOLToUsd().catch(logFallbackError) : Promise.resolve(undefined),
+		fillXrp ? exchangeRateXRPToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillBnb ? exchangeRateBNBToUsd().catch(logFallbackError) : Promise.resolve(undefined),
 		fillPol ? exchangeRatePOLToUsd().catch(logFallbackError) : Promise.resolve(undefined)
 	]);
@@ -456,6 +467,7 @@ const fetchProviderFallbackPrices = async ({
 		btcPrice: btcPriceResult,
 		icpPrice: icpPriceResult,
 		solPrice: solPriceResult,
+		xrpPrice: xrpPriceResult,
 		bnbPrice: bnbPriceResult,
 		polPrice: polPriceResult,
 		arbitrumEthPrice: missingArbitrumEth ? ethPrice : undefined,
