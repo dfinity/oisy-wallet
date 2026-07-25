@@ -78,6 +78,7 @@ fn native_token_ids() -> Vec<StoredTokenId> {
         StoredTokenId(TokenId::IcpNative),
         StoredTokenId(TokenId::SolNativeMainnet),
         StoredTokenId(TokenId::BtcNativeMainnet),
+        StoredTokenId(TokenId::XrpNativeMainnet),
     ]
 }
 
