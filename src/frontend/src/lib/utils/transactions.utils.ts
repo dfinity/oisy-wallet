@@ -39,10 +39,12 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSepolia,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isNetworkIdXRPMainnet
 } from '$lib/utils/network.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { XrpCertifiedTransactionsData } from '$xrp/stores/xrp-transactions.store';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
@@ -134,6 +136,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore,
 	$ethAddress,
 	$solTransactions,
+	$xrpTransactions,
 	$btcStatuses,
 	$icTransactionsStore,
 	$ckBtcPendingUtxosStore,
@@ -146,6 +149,7 @@ export const mapAllTransactionsUi = ({
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
 	$solTransactions: SolCertifiedTransactionsData;
+	$xrpTransactions?: XrpCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
 	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
@@ -256,6 +260,21 @@ export const mapAllTransactionsUi = ({
 					transaction,
 					token,
 					component: 'solana' as const
+				}))
+			];
+		}
+
+		if (isNetworkIdXRPMainnet(networkId)) {
+			if (isNullish($xrpTransactions)) {
+				return acc;
+			}
+
+			return [
+				...acc,
+				...($xrpTransactions[tokenId] ?? []).map(({ data: transaction }) => ({
+					transaction,
+					token,
+					component: 'xrp' as const
 				}))
 			];
 		}

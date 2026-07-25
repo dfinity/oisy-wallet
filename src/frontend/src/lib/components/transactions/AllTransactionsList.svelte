@@ -48,6 +48,7 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 
 	let allTransactions = $derived(
 		mapAllTransactionsUi({
@@ -58,6 +59,7 @@
 			$ethAddress,
 			$btcStatuses: $btcStatusesStore,
 			$solTransactions: $solTransactionsStore,
+			$xrpTransactions: $xrpTransactionsStore,
 			$icTransactionsStore,
 			$ckBtcMinterInfoStore,
 			$icPendingTransactionsStore,
