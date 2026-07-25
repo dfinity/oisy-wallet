@@ -764,7 +764,8 @@
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
-			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL."
+			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL.",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {
