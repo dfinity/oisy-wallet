@@ -62,6 +62,11 @@ export const transactionsStoreWithTokens: Readable<TransactionsStoreCheckParams[
 			transactionsStoreData: $solTransactionsStore,
 			tokens: [...$enabledSolanaTokens, ...$enabledSplTokens]
 		},
-		{ transactionsStoreData: $xrpTransactionsStore, tokens: $enabledXrpTokens }
+		// Only participate in the loading check once XRP is actually enabled. While it is
+		// disabled nothing ever writes the store, so its permanently nullish data would
+		// count as "still loading" and keep the activity skeletons up forever.
+		...($enabledXrpTokens.length > 0
+			? [{ transactionsStoreData: $xrpTransactionsStore, tokens: $enabledXrpTokens }]
+			: [])
 	]
 );
