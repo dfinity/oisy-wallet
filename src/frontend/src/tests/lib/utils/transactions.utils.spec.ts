@@ -29,6 +29,7 @@ import {
 } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN, SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN, XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import type {
 	EthCertifiedTransaction,
 	EthCertifiedTransactionsData
@@ -63,6 +64,7 @@ import {
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 
 describe('transactions.utils', () => {
 	describe('mapAllTransactionsUi', () => {
@@ -1828,5 +1830,48 @@ describe('transactions.utils', () => {
 				])
 			).toStrictEqual(expectedTransaction);
 		});
+	});
+});
+
+describe('mapAllTransactionsUi - XRP', () => {
+	const rest = {
+		$btcTransactions: undefined,
+		$ethTransactions: {},
+		$ckEthMinterInfo: {},
+		$ethAddress: undefined,
+		$solTransactions: {},
+		$btcStatuses: undefined,
+		$ckBtcPendingUtxosStore: undefined,
+		$icPendingTransactionsStore: undefined,
+		$ckBtcMinterInfoStore: undefined,
+		$icTransactionsStore: undefined
+	};
+
+	const mockXrpTransaction: XrpTransactionUi = {
+		id: 'HASH1',
+		type: 'receive',
+		status: 'confirmed',
+		value: 5_000_000n,
+		from: 'rSender',
+		to: 'rReceiver',
+		timestamp: 1n
+	};
+
+	it('maps XRP transactions tagged with the xrp component', () => {
+		const result = mapAllTransactionsUi({
+			tokens: [XRP_TOKEN],
+			$xrpTransactions: { [XRP_TOKEN_ID]: [{ data: mockXrpTransaction, certified: false }] },
+			...rest
+		});
+
+		expect(result).toEqual([
+			{ transaction: mockXrpTransaction, token: XRP_TOKEN, component: 'xrp' }
+		]);
+	});
+
+	it('returns an empty array when the XRP transactions store is not initialized', () => {
+		expect(
+			mapAllTransactionsUi({ tokens: [XRP_TOKEN], $xrpTransactions: undefined, ...rest })
+		).toEqual([]);
 	});
 });

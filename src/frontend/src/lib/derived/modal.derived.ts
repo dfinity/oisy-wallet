@@ -206,6 +206,10 @@ export const modalSolTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-transaction'
 );
+export const modalXrpTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'xrp-transaction'
+);
 export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'

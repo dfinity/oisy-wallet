@@ -165,6 +165,8 @@ export const REFERRAL_CODE_LEARN_MORE = 'referral-code-learn-more';
 
 export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
+export const XRP_TRANSACTION_SKELETON_PREFIX = 'xrp-txn';
+
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
 export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
 export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';

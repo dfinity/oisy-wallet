@@ -5,6 +5,7 @@ import {
 	loadXrpBalance,
 	loadXrpLedgerIndex,
 	loadXrpOpenLedgerFee,
+	loadXrpTransactions,
 	submitXrpTransaction
 } from '$xrp/api/xrpl.api';
 import { XrpNetworks } from '$xrp/types/network';
@@ -196,6 +197,90 @@ describe('xrpl.api', () => {
 			await expect(
 				isXrpTransactionValidated({ hash: 'H', network: XrpNetworks.mainnet })
 			).resolves.toBeFalsy();
+		});
+	});
+
+	describe('loadXrpTransactions', () => {
+		const entry = {
+			tx: {
+				TransactionType: 'Payment',
+				Account: 'rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe',
+				Destination: address,
+				Amount: '5000000',
+				Fee: '10',
+				hash: 'HASH1',
+				ledger_index: 42,
+				date: 1
+			},
+			meta: { TransactionResult: 'tesSUCCESS', delivered_amount: '5000000' },
+			validated: true
+		};
+
+		it('returns the transactions and the pagination marker', async () => {
+			mockFetchResponse({
+				body: { result: { transactions: [entry], marker: { ledger: 42, seq: 1 } } }
+			});
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([entry]);
+			expect(page.marker).toEqual({ ledger: 42, seq: 1 });
+		});
+
+		it('returns an empty list when the account has no transactions', async () => {
+			mockFetchResponse({ body: { result: {} } });
+
+			const page = await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			expect(page.transactions).toEqual([]);
+			expect(page.marker).toBeUndefined();
+		});
+
+		it('sends an account_tx request over the full ledger range, newest first', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({ address, network: XrpNetworks.mainnet, limit: 10 });
+
+			const [[, options]] = fetchMock.mock.calls;
+
+			expect(JSON.parse(options.body as string)).toEqual({
+				method: 'account_tx',
+				params: [
+					{
+						account: address,
+						ledger_index_min: -1,
+						ledger_index_max: -1,
+						limit: 10,
+						forward: false
+					}
+				]
+			});
+		});
+
+		it('forwards the pagination marker when provided', async () => {
+			const fetchMock = vi.fn().mockResolvedValue({
+				ok: true,
+				status: 200,
+				json: () => Promise.resolve({ result: { transactions: [] } })
+			});
+			vi.stubGlobal('fetch', fetchMock);
+
+			await loadXrpTransactions({
+				address,
+				network: XrpNetworks.mainnet,
+				limit: 10,
+				marker: { ledger: 42, seq: 1 }
+			});
+
+			const [[, options]] = fetchMock.mock.calls;
+			const { params } = JSON.parse(options.body as string);
+
+			expect(params[0].marker).toEqual({ ledger: 42, seq: 1 });
 		});
 	});
 });
