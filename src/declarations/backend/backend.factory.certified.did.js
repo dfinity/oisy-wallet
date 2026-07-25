@@ -246,6 +246,11 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const NearIntentsData = IDL.Record({
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const LiquidiumAction = IDL.Variant({
 		Withdraw: IDL.Null,
 		Repay: IDL.Null,
@@ -261,6 +266,7 @@ export const idlFactory = ({ IDL }) => {
 	const ActiveUserTransactionData = IDL.Variant({
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
+		NearIntents: NearIntentsData,
 		Liquidium: LiquidiumData
 	});
 	const CreateActiveUserTransactionRequest = IDL.Record({
