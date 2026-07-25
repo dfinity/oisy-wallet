@@ -25,6 +25,7 @@ import {
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -249,6 +250,7 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
@@ -256,14 +258,14 @@ describe('tokens.derived', () => {
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
-				{ ...mockIcrcCustomToken, id: result[12].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
+				{ ...mockIcrcCustomToken, id: result[13].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken,
-				{ ...mockErc721CustomToken, id: result[15].id },
-				{ ...mockErc1155CustomToken, id: result[16].id },
-				{ ...mockExtCustomToken, id: result[17].id },
-				{ ...mockIcPunksCustomToken, id: result[18].id }
+				{ ...mockErc721CustomToken, id: result[16].id },
+				{ ...mockErc1155CustomToken, id: result[17].id },
+				{ ...mockExtCustomToken, id: result[18].id },
+				{ ...mockIcPunksCustomToken, id: result[19].id }
 			]);
 		});
 
@@ -273,6 +275,7 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
@@ -288,6 +291,7 @@ describe('tokens.derived', () => {
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				POL_MAINNET_TOKEN,
 				ARBITRUM_ETH_TOKEN
@@ -306,6 +310,7 @@ describe('tokens.derived', () => {
 				SEPOLIA_TOKEN,
 				SOLANA_TOKEN,
 				SOLANA_DEVNET_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BASE_SEPOLIA_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
@@ -332,6 +337,7 @@ describe('tokens.derived', () => {
 				SOLANA_TOKEN,
 				SOLANA_DEVNET_TOKEN,
 				SOLANA_LOCAL_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BASE_SEPOLIA_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
@@ -365,6 +371,7 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
@@ -372,8 +379,8 @@ describe('tokens.derived', () => {
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20CustomToken,
 				mockErc4626CustomToken,
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
-				{ ...mockIcrcCustomToken, id: result[12].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
+				{ ...mockIcrcCustomToken, id: result[13].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -389,6 +396,7 @@ describe('tokens.derived', () => {
 				BTC_MAINNET_TOKEN.symbol,
 				ETHEREUM_TOKEN.symbol,
 				SOLANA_TOKEN.symbol,
+				XRP_TOKEN.symbol,
 				BNB_MAINNET_TOKEN.symbol,
 				POL_MAINNET_TOKEN.symbol
 			]);
@@ -484,6 +492,7 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				ARBITRUM_ETH_TOKEN
 			]);

@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
@@ -21,6 +22,7 @@ import {
 	IntersectionObserverOnce,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
@@ -40,6 +42,7 @@ describe('AllTransactionsList', () => {
 		ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
+		xrpTransactionsStore.reset(XRP_TOKEN_ID);
 
 		Object.defineProperty(window, 'IntersectionObserver', {
 			writable: true,
@@ -66,6 +69,7 @@ describe('AllTransactionsList', () => {
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 		});
 
 		it('should render the placeholder', () => {
@@ -100,6 +104,7 @@ describe('AllTransactionsList', () => {
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,
@@ -129,6 +134,7 @@ describe('AllTransactionsList', () => {
 			});
 
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 		});
 
 		it('should not render the placeholder', () => {
@@ -195,6 +201,7 @@ describe('AllTransactionsList', () => {
 			ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 			icTransactionsStore.reset(ICP_TOKEN_ID);
 			solTransactionsStore.reset(SOLANA_TOKEN_ID);
+			xrpTransactionsStore.reset(XRP_TOKEN_ID);
 
 			btcTransactionsStore.append({
 				tokenId: BTC_MAINNET_TOKEN_ID,

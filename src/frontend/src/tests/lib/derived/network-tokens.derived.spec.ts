@@ -45,6 +45,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
@@ -107,6 +108,7 @@ describe('network-tokens.derived', () => {
 				BTC_MAINNET_TOKEN,
 				ETHEREUM_TOKEN,
 				SOLANA_TOKEN,
+				XRP_TOKEN,
 				BASE_ETH_TOKEN,
 				BNB_MAINNET_TOKEN,
 				POL_MAINNET_TOKEN,
@@ -213,6 +215,7 @@ describe('network-tokens.derived', () => {
 					BTC_MAINNET_TOKEN,
 					ETHEREUM_TOKEN,
 					SOLANA_TOKEN,
+					XRP_TOKEN,
 					BASE_ETH_TOKEN,
 					BNB_MAINNET_TOKEN,
 					POL_MAINNET_TOKEN,

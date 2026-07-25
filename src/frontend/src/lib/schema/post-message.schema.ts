@@ -189,6 +189,7 @@ export const PostMessageDataResponseExchangeSchema = PostMessageDataResponseSche
 	currentIcpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentIcrcPrices: z.custom<CoingeckoSimpleTokenPriceResponse>(),
 	currentSolPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
+	currentXrpPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),
 	currentSplPrices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentErc4626Prices: z.custom<CoingeckoSimpleTokenPriceResponse>().optional(),
 	currentBnbPrice: z.custom<CoingeckoSimplePriceResponse>().optional(),

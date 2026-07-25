@@ -11,6 +11,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as tokensIcEnv from '$env/tokens/tokens.ic.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN } from '$env/tokens/tokens.xrp.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -135,6 +136,7 @@ describe('all-network-tokens.derived', () => {
 				BTC_MAINNET_TOKEN.id.description,
 				ETHEREUM_TOKEN.id.description,
 				SOLANA_TOKEN.id.description,
+				XRP_TOKEN.id.description,
 				BASE_ETH_TOKEN.id.description,
 				BNB_MAINNET_TOKEN.id.description,
 				POL_MAINNET_TOKEN.id.description,
