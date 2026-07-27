@@ -46,11 +46,9 @@ import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
-import {
-	pollNearIntentsStatus,
-	submitNearIntentsDepositTx
-} from '$lib/services/near-intents.services';
+import { submitNearIntentsDepositTx } from '$lib/services/near-intents.services';
 import {
 	executeOneSecEvmToIcpBridge,
 	executeOneSecIcpToEvmBridge
@@ -64,7 +62,10 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
-import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import {
+	NEAR_INTENTS_EXTERNAL_REF_KEYS,
+	type NearIntentsQuoteResponse
+} from '$lib/types/near-intents';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
@@ -90,6 +91,11 @@ import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
+import {
+	toNearIntentsData,
+	toNearIntentsDisplayRefs,
+	toNearIntentsExternalRefs
+} from '$lib/utils/near-intents-active-tx.utils';
 import { isNetworkIdICP, isNetworkIdSOLDevnet, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -705,16 +711,25 @@ export const fetchIcpSwap = async ({
 	await waitAndTriggerWallet();
 };
 
+// Foreground resolves once the deposit is submitted (point of no return); the
+// swap then settles in the background, tracked by the AUT poller
+// (`pollNearIntentsActiveUserTransactions`) which drives the row to a terminal
+// state from 1Click's `/status`. The success wallet refresh is wired off the AUT
+// terminal side-effect in `LoaderActiveUserTransactions`, not from here.
 const executeNearIntentsSwap = async ({
+	identity,
 	progress,
 	sourceToken,
+	destinationToken,
 	swapAmount,
 	swapDetails,
 	sendTransaction,
 	enableDestinationToken
 }: {
+	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: Token;
+	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
 	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
@@ -739,16 +754,40 @@ const executeNearIntentsSwap = async ({
 		depositMemo: depositMemo ?? undefined
 	});
 
-	await pollNearIntentsStatus({
-		depositAddress,
-		depositMemo: depositMemo ?? undefined
-	});
+	// Register the swap as an Active User Transaction so settlement is tracked by
+	// the global poller (survives modal close, tab close, refresh, logout).
+	// Best-effort: the funds have already left the wallet (point of no return), so
+	// a failed create must NOT surface as a swap failure — mirrors OneSec's
+	// `createAutAndDetachCloser`.
+	try {
+		const data = toNearIntentsData({
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (nonNullish(data)) {
+			await createActiveUserTransaction({
+				identity,
+				id: crypto.randomUUID(),
+				data,
+				externalRefs: toNearIntentsExternalRefs({
+					...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
+					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
+					...(nonNullish(depositMemo)
+						? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
+						: {})
+				})
+			});
+		}
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// Keep the destination token visible while the swap settles in the background.
 	await enableDestinationToken?.();
-
-	await waitAndTriggerWallet();
 };
 
 export const fetchNearIntentsEvmSwap = async ({
@@ -765,8 +804,10 @@ export const fetchNearIntentsEvmSwap = async ({
 	swapDetails
 }: SwapNearIntentsEvmParams): Promise<void> => {
 	await executeNearIntentsSwap({
+		identity,
 		progress,
 		sourceToken,
+		destinationToken,
 		swapAmount,
 		swapDetails,
 		sendTransaction: async ({ amount, depositAddress }) => {
@@ -797,8 +838,10 @@ export const fetchNearIntentsSolSwap = async ({
 	swapDetails
 }: SwapNearIntentsSolParams): Promise<void> => {
 	await executeNearIntentsSwap({
+		identity,
 		progress,
 		sourceToken,
+		destinationToken,
 		swapAmount,
 		swapDetails,
 		sendTransaction: async ({ amount, depositAddress }) =>
