@@ -157,22 +157,6 @@ pub async fn approve_signing() -> Result<(), AllowSigningError> {
     Ok(())
 }
 
-/// Enables the user to sign transactions.
-///
-/// Checks the current allowance first; if already at or above
-/// [`SUFFICIENT_CYCLES_THRESHOLD`], returns immediately without making an
-/// `icrc_2_approve` call.  Otherwise delegates to [`approve_signing`].
-///
-/// # Errors
-/// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    if has_sufficient_allowance().await.is_some() {
-        return Ok(());
-    }
-
-    approve_signing().await
-}
-
 const SUB_ACCOUNT_ZERO: Subaccount = Subaccount([0; 32]);
 #[must_use]
 pub fn principal2account(principal: &Principal) -> ByteBuf {
