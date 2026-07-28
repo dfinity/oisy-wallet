@@ -229,6 +229,9 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
         ActiveUserTransactionData::NearIntents(d) => {
             require_positive_amount(&d.amount)?;
         }
+        ActiveUserTransactionData::Velora(d) => {
+            require_positive_amount(&d.amount)?;
+        }
     }
     Ok(())
 }
@@ -306,9 +309,10 @@ mod tests {
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
             ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, LiquidiumAction,
             LiquidiumData, NearIntentsData, OneSecEvmToIcpData, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER,
-            MAX_LIQUIDIUM_POOL_ID_LEN,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
         },
+        custom_token::ErcTokenId,
         token_id::TokenId,
     };
 
@@ -493,6 +497,46 @@ mod tests {
         req.data = near_intents_data(0);
         let err = create(&mut map, principal(), req, 1).unwrap_err();
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    fn velora_data(amount: u64, mode: VeloraSwapMode) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::Velora(VeloraData {
+            mode,
+            source_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                1,
+            ),
+            dest_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000def".to_string()),
+                1,
+            ),
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn velora_create_roundtrip() {
+        // Both modes share one variant, so both must survive create unchanged —
+        // the mode is what the FE poller routes on.
+        for mode in [VeloraSwapMode::Delta, VeloraSwapMode::Market] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("velora-1");
+            req.data = velora_data(7_500, mode.clone());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, velora_data(7_500, mode));
+        }
+    }
+
+    #[test]
+    fn velora_zero_amount_rejected() {
+        for mode in [VeloraSwapMode::Delta, VeloraSwapMode::Market] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("velora-1");
+            req.data = velora_data(0, mode);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
     }
 
     #[test]
