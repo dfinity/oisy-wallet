@@ -28,7 +28,11 @@
 	testId={NFT_HERO_CHECK_NEW_BUTTON}
 >
 	{#snippet icon()}
-		<IconRetry size="24" />
+		<!-- Keep the 24px box the other hero icons reserve, so the smaller glyph stays
+		     centred on the same spot and the label does not shift up. -->
+		<span class="flex size-6 items-center justify-center">
+			<IconRetry size="20" />
+		</span>
 	{/snippet}
 	{#snippet label()}
 		<span class="sm:hidden">{$i18n.nfts.text.check_new_short}</span>
