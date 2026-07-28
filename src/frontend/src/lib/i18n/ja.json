@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "コレクションはまだ読み込まれていないため表示できません。",
 			"nft_not_loaded": "コレクティブルはまだ読み込まれていないため表示できません。",
 			"collections": "コレクション",
+			"check_new": "新規を確認",
+			"check_new_short": "確認",
 			"ungrouped": "未グループ化",
 			"address_copied": "アドレス $address をコピーしました。",
 			"collection_name_copied": "コレクション名をコピーしました。",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "このアドレスをクリップボードにコピー",
 			"review_preference": "表示設定を変更",
-			"go_to_collection": "コレクションページを開く"
+			"go_to_collection": "コレクションページを開く",
+			"check_new": "新しいコレクティブルを確認"
 		}
 	},
 	"fee": {

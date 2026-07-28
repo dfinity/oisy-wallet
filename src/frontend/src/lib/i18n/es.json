@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "La colección no se pudo mostrar ya que aún no se ha cargado",
 			"nft_not_loaded": "El Coleccionable no se pudo mostrar ya que aún no se ha cargado",
 			"collections": "Colecciones",
+			"check_new": "Buscar nuevos",
+			"check_new_short": "Buscar",
 			"ungrouped": "Sin agrupar",
 			"address_copied": "Dirección $address copiada",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Copiar esta dirección al portapapeles",
 			"review_preference": "Cambiar preferencia de visualización",
-			"go_to_collection": "Abrir la página de la colección"
+			"go_to_collection": "Abrir la página de la colección",
+			"check_new": "Buscar nuevos coleccionables"
 		}
 	},
 	"fee": {

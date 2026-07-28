@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
+			"check_new": "Cerca nuovi",
+			"check_new_short": "Cerca",
 			"ungrouped": "Non raggruppati",
 			"address_copied": "",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Cerca nuovi oggetti da collezione"
 		}
 	},
 	"fee": {

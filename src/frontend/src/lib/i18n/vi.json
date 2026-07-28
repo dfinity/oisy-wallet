@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "Không thể hiển thị bộ sưu tập do chưa được tải",
 			"nft_not_loaded": "Không thể hiển thị vật phẩm sưu tầm do chưa được tải",
 			"collections": "Các bộ sưu tập",
+			"check_new": "Tìm mới",
+			"check_new_short": "Tìm",
 			"ungrouped": "Không nhóm",
 			"address_copied": "Đã sao chép địa chỉ $address",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
 			"review_preference": "Thay đổi tùy chọn hiển thị",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Kiểm tra vật phẩm sưu tầm mới"
 		}
 	},
 	"fee": {
