@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
-	import IconSearchFill from '$lib/components/icons/IconSearchFill.svelte';
+	import IconRetry from '$lib/components/icons/IconRetry.svelte';
 	import { NFT_HERO_CHECK_NEW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,7 +28,7 @@
 	testId={NFT_HERO_CHECK_NEW_BUTTON}
 >
 	{#snippet icon()}
-		<IconSearchFill size="24" />
+		<IconRetry size="24" />
 	{/snippet}
 	{#snippet label()}
 		<span class="sm:hidden">{$i18n.nfts.text.check_new_short}</span>
