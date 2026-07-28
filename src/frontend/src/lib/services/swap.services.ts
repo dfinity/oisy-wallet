@@ -748,11 +748,18 @@ const executeNearIntentsSwap = async ({
 
 	progress(ProgressStepsSwap.SWAP);
 
-	await submitNearIntentsDepositTx({
-		depositAddress,
-		txHash,
-		depositMemo: depositMemo ?? undefined
-	});
+	// Optional SDK call: notifies the 1Click service that a deposit has been sent
+	// to the specified address, using the blockchain transaction hash. This step can
+	// speed up swap processing by allowing the system to preemptively verify the deposit.
+	try {
+		await submitNearIntentsDepositTx({
+			depositAddress,
+			txHash,
+			depositMemo: depositMemo ?? undefined
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
 
 	// Register the swap as an Active User Transaction so settlement is tracked by
 	// the global poller (survives modal close, tab close, refresh, logout).
