@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Gra",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Przedmioty kolekcjonerskie",
 			"rwa": "RWA",
 			"social": "Społecznościowe",
 			"staking": "Staking",
@@ -1466,16 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "Przedmioty kolekcjonerskie",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Twoje NFT pojawią się tutaj",
-			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych NFT",
+			"title_empty": "Twoje przedmioty kolekcjonerskie pojawią się tutaj",
+			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych przedmiotów kolekcjonerskich",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "Grupowanie",
-			"as_plain_list": "Pokaż jako zwykłą listę",
-			"by_collection": "Grupuj według kolekcji",
 			"show_spam": "Pokaż spam",
 			"show_hidden": "Pokaż ukryte",
 			"recents_first": "Najnowsze najpierw",
@@ -1488,9 +1485,11 @@
 			"quantity": "Ilość",
 			"item_traits": "Cechy przedmiotu",
 			"collection_not_loaded": "Kolekcja nie mogła zostać wyświetlona, ponieważ nie została jeszcze załadowana",
-			"nft_not_loaded": "NFT nie mógł zostać wyświetlony, ponieważ nie został jeszcze załadowany",
+			"nft_not_loaded": "Przedmiot kolekcjonerski nie mógł zostać wyświetlony, ponieważ nie został jeszcze załadowany",
 			"collections": "Kolekcje",
-			"all_assets": "Wszystkie aktywa",
+			"check_new": "Sprawdź nowe",
+			"check_new_short": "Sprawdź",
+			"ungrouped": "Bez grupowania",
 			"address_copied": "Adres $address skopiowany",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1529,13 +1528,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Jeszcze brak NFT",
+			"placeholder_image": "Jeszcze brak przedmiotów kolekcjonerskich",
 			"card": {
-				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
+				"image": "Obraz przedmiotu kolekcjonerskiego z identyfikatorem tokena: $tokenId"
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Sprawdź nowe kolekcje"
 		}
 	},
 	"fee": {

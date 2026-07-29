@@ -47,23 +47,36 @@ export const initCertifiedCustomTokensStore = <
 
 	return {
 		setAll: (tokens: CertifiedData<CustomToken<T>>[]) =>
-			update((state) => [
-				...(state ?? []).filter(
-					({ data }) => !tokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))
-				),
-				...tokens.map(({ data, certified }) => ({
-					certified,
-					data: {
-						...data,
-						// We are using Symbols as key IDs for the tokens, which is ideal for our use case due to their uniqueness. This ensures that even if two coins fetched dynamically have the same symbol or name, they will be used correctly.
-						// However, this approach presents a challenge with ERC20 tokens, which need to be loaded twice - once with a query and once with an update. When they are loaded the second time, the existing Symbol should be reused to ensure they are identified as the same token.
-						id:
-							(state ?? []).find(
-								({ data: stateData }) => getIdentifier(stateData) === getIdentifier(data)
-							)?.data.id ?? data.id
-					}
-				}))
-			]),
+			update((state) => {
+				// A single incoming batch can itself contain more than one entry for the same
+				// identifier - e.g. a curated `metadataOnly` token enriching two saved custom-token
+				// records that only differ by address casing collapses both onto the same curated
+				// definition. Keeping every entry as-is would push two records sharing the exact
+				// same `id` Symbol into the store, which breaks any keyed `{#each}` rendering it.
+				// Last one per identifier wins, mirroring the semantics of two sequential `setAll` calls.
+				const dedupedTokens = Array.from(
+					new Map(tokens.map((token) => [getIdentifier(token.data), token])).values()
+				);
+
+				return [
+					...(state ?? []).filter(
+						({ data }) =>
+							!dedupedTokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))
+					),
+					...dedupedTokens.map(({ data, certified }) => ({
+						certified,
+						data: {
+							...data,
+							// We are using Symbols as key IDs for the tokens, which is ideal for our use case due to their uniqueness. This ensures that even if two coins fetched dynamically have the same symbol or name, they will be used correctly.
+							// However, this approach presents a challenge with ERC20 tokens, which need to be loaded twice - once with a query and once with an update. When they are loaded the second time, the existing Symbol should be reused to ensure they are identified as the same token.
+							id:
+								(state ?? []).find(
+									({ data: stateData }) => getIdentifier(stateData) === getIdentifier(data)
+								)?.data.id ?? data.id
+						}
+					}))
+				];
+			}),
 		reset: (tokenId: TokenId) =>
 			update((state) => [...(state ?? []).filter(({ data: { id } }) => id !== tokenId)]),
 		resetByIdentifier: (identifier: Identifier) =>
