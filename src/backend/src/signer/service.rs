@@ -57,8 +57,8 @@ const fn per_user_cycles_allowance() -> u64 {
 
 /// Minimum cycles allowance below which a new approve is warranted.
 ///
-/// If the caller already has at least this many cycles, `allow_signing`
-/// skips the `icrc_2_approve` call.  This avoids:
+/// If the caller already has at least this many cycles, the `allow_signing`
+/// endpoint skips the `icrc_2_approve` call.  This avoids:
 /// - Unnecessary inter-canister calls when the user still has plenty of cycles.
 /// - Accidentally **reducing** an existing higher allowance, since `icrc_2_approve` *sets* (not
 ///   adds) the value.
@@ -124,7 +124,7 @@ pub async fn has_sufficient_allowance() -> Option<Nat> {
 ///
 /// Callers that want the "check first, approve only if needed" behaviour
 /// should call [`has_sufficient_allowance`] beforehand, or use
-/// [`allow_signing`] which does both.
+/// [`crate::api::signer::allow_signing`], which does both.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
