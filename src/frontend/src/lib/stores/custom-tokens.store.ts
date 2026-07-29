@@ -61,9 +61,7 @@ export const initCertifiedCustomTokensStore = <
 				return [
 					...(state ?? []).filter(
 						({ data }) =>
-							!dedupedTokens
-								.map(({ data }) => getIdentifier(data))
-								.includes(getIdentifier(data))
+							!dedupedTokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))
 					),
 					...dedupedTokens.map(({ data, certified }) => ({
 						certified,
