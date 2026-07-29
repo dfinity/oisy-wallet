@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "Die Kollektion konnte nicht angezeigt werden weil sie noch nicht geladen wurde",
 			"nft_not_loaded": "Das Sammlerstück konnte nicht angezeigt werden weil es noch nicht geladen wurde",
 			"collections": "Kollektionen",
+			"check_new": "Neue suchen",
+			"check_new_short": "Suchen",
 			"ungrouped": "Ungruppiert",
 			"address_copied": "Adresse $address kopiert",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Diese Adresse in die Zwischenablage kopieren",
 			"review_preference": "Anzeigeeinstellung anpassen",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Nach neuen Sammelobjekten suchen"
 		}
 	},
 	"fee": {

@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "La collection n'a pas pu être affichée car elle n'a pas encore été chargée",
 			"nft_not_loaded": "L'objet de collection n'a pas pu être affiché car il n'a pas encore été chargé",
 			"collections": "Collections",
+			"check_new": "Chercher",
+			"check_new_short": "Chercher",
 			"ungrouped": "Non groupées",
 			"address_copied": "Adresse $address copiée",
 			"collection_name_copied": "Nom de la collection copié",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Copier cette adresse dans le presse-papiers",
 			"review_preference": "Changer la préférence d'affichage",
-			"go_to_collection": "Ouvrir la page de la collection"
+			"go_to_collection": "Ouvrir la page de la collection",
+			"check_new": "Rechercher de nouveaux objets de collection"
 		}
 	},
 	"fee": {

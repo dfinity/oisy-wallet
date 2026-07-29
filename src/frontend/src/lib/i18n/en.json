@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
 			"nft_not_loaded": "The Collectible could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
+			"check_new": "Check for new",
+			"check_new_short": "Check",
 			"ungrouped": "Ungrouped",
 			"address_copied": "Address $address copied",
 			"collection_name_copied": "Collection name copied",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Copy this address to clipboard",
 			"review_preference": "Change display preference",
-			"go_to_collection": "Open the collection page"
+			"go_to_collection": "Open the collection page",
+			"check_new": "Check for new collectibles"
 		}
 	},
 	"fee": {

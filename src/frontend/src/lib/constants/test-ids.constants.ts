@@ -134,6 +134,7 @@ export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const NFT_HERO_COUNT = 'nft-hero-count';
 export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
+export const NFT_HERO_CHECK_NEW_BUTTON = 'nft-hero-check-new-button';
 
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';

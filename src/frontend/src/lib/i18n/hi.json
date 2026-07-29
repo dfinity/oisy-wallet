@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "संग्रह प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
 			"nft_not_loaded": "संग्रहणीय वस्तु प्रदर्शित नहीं की जा सकी क्योंकि यह अभी तक लोड नहीं हुई है",
 			"collections": "संग्रह",
+			"check_new": "नए देखें",
+			"check_new_short": "देखें",
 			"ungrouped": "असमूहीकृत",
 			"address_copied": "पता $address कॉपी किया गया",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "नए संग्रहणीय आइटम जाँचें"
 		}
 	},
 	"fee": {

@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "Kolekcja nie mogła zostać wyświetlona, ponieważ nie została jeszcze załadowana",
 			"nft_not_loaded": "Przedmiot kolekcjonerski nie mógł zostać wyświetlony, ponieważ nie został jeszcze załadowany",
 			"collections": "Kolekcje",
+			"check_new": "Sprawdź nowe",
+			"check_new_short": "Sprawdź",
 			"ungrouped": "Bez grupowania",
 			"address_copied": "Adres $address skopiowany",
 			"collection_name_copied": "",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Sprawdź nowe kolekcje"
 		}
 	},
 	"fee": {

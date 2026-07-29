@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "컬렉션이 아직 로드되지 않아 표시할 수 없습니다",
 			"nft_not_loaded": "컬렉터블이 아직 로드되지 않아 표시할 수 없습니다",
 			"collections": "컬렉션",
+			"check_new": "새 항목 확인",
+			"check_new_short": "확인",
 			"ungrouped": "그룹화 안 함",
 			"address_copied": "$address 주소가 복사되었습니다",
 			"collection_name_copied": "컬렉션 이름이 복사되었습니다",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "이 주소를 클립보드에 복사",
 			"review_preference": "표시 설정 변경",
-			"go_to_collection": "컬렉션 페이지 열기"
+			"go_to_collection": "컬렉션 페이지 열기",
+			"check_new": "새 컬렉터블 확인"
 		}
 	},
 	"fee": {

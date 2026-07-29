@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "该集合尚未加载，无法显示",
 			"nft_not_loaded": "该收藏品尚未加载，无法显示",
 			"collections": "集合",
+			"check_new": "检查新增",
+			"check_new_short": "检查",
 			"ungrouped": "未分组",
 			"address_copied": "地址 $address 已复制",
 			"collection_name_copied": "集合名称已复制",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "将此地址复制到剪贴板",
 			"review_preference": "更改显示偏好",
-			"go_to_collection": "打开集合页面"
+			"go_to_collection": "打开集合页面",
+			"check_new": "检查是否有新的收藏品"
 		}
 	},
 	"fee": {

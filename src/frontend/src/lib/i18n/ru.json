@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "Коллекция не загружена",
 			"nft_not_loaded": "Коллекционный предмет не загружен",
 			"collections": "Коллекции",
+			"check_new": "Найти новые",
+			"check_new_short": "Найти",
 			"ungrouped": "Без группировки",
 			"address_copied": "Адрес скопирован",
 			"collection_name_copied": "Название коллекции скопировано",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Скопировать адрес",
 			"review_preference": "Изменить настройки отображения",
-			"go_to_collection": "Перейти к коллекции"
+			"go_to_collection": "Перейти к коллекции",
+			"check_new": "Проверить наличие новых коллекционных предметов"
 		}
 	},
 	"fee": {

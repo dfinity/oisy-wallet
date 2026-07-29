@@ -1487,6 +1487,8 @@
 			"collection_not_loaded": "Kolekci nelze zobrazit, protože ještě nebyla načtena",
 			"nft_not_loaded": "Sběratelský předmět nelze zobrazit, protože ještě nebyl načten",
 			"collections": "Kolekce",
+			"check_new": "Zjistit nové",
+			"check_new_short": "Zjistit",
 			"ungrouped": "Neseskupené",
 			"address_copied": "Adresa $address zkopírována",
 			"collection_name_copied": "Název kolekce zkopírován",
@@ -1532,7 +1534,8 @@
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
 			"review_preference": "Změnit předvolbu zobrazení",
-			"go_to_collection": "Otevřít stránku kolekce"
+			"go_to_collection": "Otevřít stránku kolekce",
+			"check_new": "Zkontrolovat nové sběratelské předměty"
 		}
 	},
 	"fee": {
