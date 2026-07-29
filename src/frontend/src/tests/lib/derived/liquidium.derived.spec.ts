@@ -32,23 +32,26 @@ import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { liquidiumNetInterestUsd } from '$lib/utils/liquidium.utils';
-import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIndexCanisterId, mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
 
 // Seed the ck twins so the `chain: 'ICP'` rails resolve via `findTwinToken` (native/ERC rails
 // resolve statically). Network set to ICP so the rail icon/name is the ICP network's.
 const seedIcpTwins = () => {
-	const twin = (symbol: string): IcrcCustomToken =>
+	// Each twin needs its own ledgerCanisterId: the custom-tokens store identifies ICRC tokens
+	// by ledgerCanisterId, and a single `setAll` batch collapses entries that share one.
+	const twin = (symbol: string, ledgerCanisterId: string): IcrcCustomToken =>
 		({
 			...mockValidIcCkToken,
 			symbol,
+			ledgerCanisterId,
 			network: ICP_TOKEN.network,
 			enabled: true
 		}) as IcrcCustomToken;
 
 	icrcCustomTokensStore.setAll([
-		{ data: twin('ckBTC'), certified: false },
-		{ data: twin('ckUSDC'), certified: false }
+		{ data: twin('ckBTC', mockValidIcCkToken.ledgerCanisterId), certified: false },
+		{ data: twin('ckUSDC', mockIndexCanisterId), certified: false }
 	]);
 };
 
