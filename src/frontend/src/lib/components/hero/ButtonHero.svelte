@@ -15,12 +15,18 @@
 	let { icon, label, onclick, disabled = false, testId, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
+
+	// Every call site derives `disabled` from its own booleans, so it always hands Button an
+	// explicit true/false and Button's `disabled ?? initialising` fallback never fires. Fold
+	// the skeleton state in here, otherwise a hero button stays clickable while it renders
+	// as a skeleton.
+	let isDisabled = $derived(disabled || $loading);
 </script>
 
 <Button
 	{ariaLabel}
 	colorStyle="tertiary-main-card"
-	{disabled}
+	disabled={isDisabled}
 	initialising={$loading}
 	{onclick}
 	paddingSmall
