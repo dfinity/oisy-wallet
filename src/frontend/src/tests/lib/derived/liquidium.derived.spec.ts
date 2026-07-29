@@ -40,7 +40,13 @@ import { get } from 'svelte/store';
 const seedIcpTwins = () => {
 	// Each twin needs its own ledgerCanisterId: the custom-tokens store identifies ICRC tokens
 	// by ledgerCanisterId, and a single `setAll` batch collapses entries that share one.
-	const twin = (symbol: string, ledgerCanisterId: string): IcrcCustomToken =>
+	const twin = ({
+		symbol,
+		ledgerCanisterId
+	}: {
+		symbol: string;
+		ledgerCanisterId: string;
+	}): IcrcCustomToken =>
 		({
 			...mockValidIcCkToken,
 			symbol,
@@ -50,8 +56,11 @@ const seedIcpTwins = () => {
 		}) as IcrcCustomToken;
 
 	icrcCustomTokensStore.setAll([
-		{ data: twin('ckBTC', mockValidIcCkToken.ledgerCanisterId), certified: false },
-		{ data: twin('ckUSDC', mockIndexCanisterId), certified: false }
+		{
+			data: twin({ symbol: 'ckBTC', ledgerCanisterId: mockValidIcCkToken.ledgerCanisterId }),
+			certified: false
+		},
+		{ data: twin({ symbol: 'ckUSDC', ledgerCanisterId: mockIndexCanisterId }), certified: false }
 	]);
 };
 
