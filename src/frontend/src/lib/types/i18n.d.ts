@@ -170,7 +170,6 @@ interface I18nAuth {
 		sign_in_or_sign_up: string;
 		internet_identity: string;
 		asset_types: string;
-		instant_and_private: string;
 		advanced_cryptography: string;
 		move_swap_grow: string;
 	};
@@ -324,7 +323,6 @@ interface I18nDapps {
 		icexplorer: { name: string; one_liner: string; description: string };
 		icpixel: { name: string; one_liner: string; description: string };
 		motoko_tokyo: { name: string; one_liner: string; call_to_action: string; description: string };
-		icp_flags: { name: string; one_liner: string; description: string };
 		cloud_engines: {
 			name: string;
 			one_liner: string;
@@ -849,7 +847,11 @@ interface I18nScanner {
 		learn_more_about_pay: string;
 		scanner: string;
 	};
-	error: { code_link_is_not_valid: string; data_is_incompleted: string };
+	error: {
+		code_link_is_not_valid: string;
+		link_domain_mismatch: string;
+		data_is_incompleted: string;
+	};
 }
 
 interface I18nConvert {
@@ -2179,6 +2181,8 @@ interface I18nNotes {
 		empty_title: string;
 		empty_subtitle: string;
 		empty_add: string;
+		unlocking_title: string;
+		unlocking_subtitle: string;
 		add_note: string;
 		note_label: string;
 		placeholder: string;
@@ -2192,9 +2196,10 @@ interface I18nNotes {
 		too_long: string;
 		cap_reached: string;
 		decryption_failed: string;
+		unavailable_title: string;
 	};
 	alt: { edit: string; delete: string };
-	error: { load: string; save: string; delete: string };
+	error: { load: string; save: string; delete: string; rate_limited: string };
 	share: {
 		text: {
 			share_note: string;

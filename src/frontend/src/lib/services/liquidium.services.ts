@@ -4,7 +4,7 @@ import { liquidiumWalletAdapter } from '$lib/services/liquidium-wallet-adapter.s
 import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { NullishIdentity } from '$lib/types/identity';
 import { consoleError } from '$lib/utils/console.utils';
-import { mapLiquidiumMarket, mapLiquidiumPortfolio } from '$lib/utils/liquidium.utils';
+import { mapLiquidiumMarketRails, mapLiquidiumPortfolio } from '$lib/utils/liquidium.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Chain, type AssetPrices } from '@liquidium/client';
@@ -60,7 +60,7 @@ export const loadLiquidium = async ({
 				return {};
 			})
 		]);
-		const markets = pools.map(mapLiquidiumMarket);
+		const markets = pools.flatMap(mapLiquidiumMarketRails);
 
 		const profileId = nonNullish(ethAddress) ? await accounts.getProfileId(ethAddress) : null;
 

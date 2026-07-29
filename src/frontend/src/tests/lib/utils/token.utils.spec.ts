@@ -1,5 +1,6 @@
 import { ICP_TOKEN as ICP_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.icp.env';
 import { LINK_TOKEN } from '$env/tokens/tokens-erc20/tokens.link.env';
+import { USD1_TOKEN as USD1_ETH_TOKEN } from '$env/tokens/tokens-erc20/tokens.usd1.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_ARB_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.icp.env';
@@ -7,6 +8,7 @@ import { USDC_TOKEN as USDC_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens
 import { USDT_TOKEN as USDT_ARBITRUM_TOKEN } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens-erc20/tokens.usdt.env';
 import { ICP_TOKEN as ICP_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.icp.env';
 import { USDC_TOKEN as USDC_BASE_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
+import { USD1_TOKEN as USD1_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usd1.env';
 import { USDC_TOKEN as USDC_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdc.env';
 import { USDT_TOKEN as USDT_BSC_TOKEN } from '$env/tokens/tokens-evm/tokens-bsc/tokens-bep20/tokens.usdt.env';
 import { USDC_TOKEN as USDC_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
@@ -14,6 +16,7 @@ import { USDT_TOKEN as USDT_POLYGON_TOKEN } from '$env/tokens/tokens-evm/tokens-
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import * as tokensIcrcCkEnv from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
+import { USD1_TOKEN as USD1_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usd1.env';
 import { USDC_TOKEN as USDC_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { USDT_TOKEN as USDT_SOL_TOKEN } from '$env/tokens/tokens-spl/tokens.usdt.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
@@ -33,6 +36,7 @@ import {
 	getMaxTransactionAmount,
 	getTokenDisplayName,
 	getTokenDisplaySymbol,
+	isUSD1Token,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
 	sumUsdBalances
@@ -680,6 +684,20 @@ describe('token.utils', () => {
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
 
 			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
+		});
+	});
+
+	describe('isUSD1Token', () => {
+		it('should return true for USD1 on all its networks', () => {
+			expect(isUSD1Token(USD1_ETH_TOKEN)).toBeTruthy();
+			expect(isUSD1Token(USD1_BSC_TOKEN)).toBeTruthy();
+			expect(isUSD1Token(USD1_SOL_TOKEN)).toBeTruthy();
+		});
+
+		it('should return false for other tokens', () => {
+			expect(isUSD1Token(USDC_TOKEN)).toBeFalsy();
+			expect(isUSD1Token(USDT_TOKEN)).toBeFalsy();
+			expect(isUSD1Token(ICP_TOKEN)).toBeFalsy();
 		});
 	});
 });

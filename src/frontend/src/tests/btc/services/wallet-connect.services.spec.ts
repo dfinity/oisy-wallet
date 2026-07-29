@@ -1,8 +1,4 @@
-import {
-	BTC_ECDSA_DERIVATION_PATH,
-	BTC_ECDSA_KEY_ID,
-	SESSION_REQUEST_BTC_SIGN_MESSAGE
-} from '$btc/constants/wallet-connect.constants';
+import { SESSION_REQUEST_BTC_SIGN_MESSAGE } from '$btc/constants/wallet-connect.constants';
 import {
 	decodeMessage,
 	decodePsbt,
@@ -407,8 +403,8 @@ describe('btc wallet-connect.services', () => {
 				Uint8Array.from(signerPubkey)
 			);
 
-			vi.spyOn(signerApi, 'genericSignWithEcdsa').mockImplementation(async ({ messageHash }) =>
-				(await signSecp256k1Async(Uint8Array.from(messageHash), privateKey)).toCompactRawBytes()
+			vi.spyOn(signerApi, 'signBtcPrehash').mockImplementation(async ({ hash }) =>
+				(await signSecp256k1Async(Uint8Array.from(hash), privateKey)).toCompactRawBytes()
 			);
 		});
 
@@ -439,7 +435,7 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(modalNext).not.toHaveBeenCalled();
 
 			expect(spyToastsError).toHaveBeenCalledWith({
@@ -474,7 +470,7 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).toHaveBeenCalledOnce();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
 			expect(progress).toHaveBeenCalledWith(ProgressStepsSign.DONE);
 		});
 	});
@@ -558,7 +554,7 @@ describe('btc wallet-connect.services', () => {
 			vi.restoreAllMocks();
 			vi.clearAllMocks();
 
-			vi.spyOn(signerApi, 'genericSignWithEcdsa').mockResolvedValue(mockRawSignature);
+			vi.spyOn(signerApi, 'signBtcPrehash').mockResolvedValue(mockRawSignature);
 			vi.spyOn(btcWalletConnectUtils, 'deriveBtcPublicKey').mockReturnValue(mockPublicKey);
 			vi.spyOn(btcWalletConnectUtils, 'encodeRecoverableSignature').mockReturnValue(mockSignature);
 
@@ -574,7 +570,7 @@ describe('btc wallet-connect.services', () => {
 			const result = await sign({ ...params, address: null });
 
 			expect(result).toEqual({ success: false });
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(params.modalNext).not.toHaveBeenCalled();
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
 			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
@@ -593,7 +589,7 @@ describe('btc wallet-connect.services', () => {
 			const result = await sign(params);
 
 			expect(result).toEqual({ success: false });
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(params.modalNext).not.toHaveBeenCalled();
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
 			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
@@ -612,7 +608,7 @@ describe('btc wallet-connect.services', () => {
 			const result = await sign({ ...params, identity: null });
 
 			expect(result).toEqual({ success: false });
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(params.modalNext).not.toHaveBeenCalled();
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
 			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
@@ -632,11 +628,9 @@ describe('btc wallet-connect.services', () => {
 			const result = await sign(params);
 
 			expect(result).toStrictEqual({ success: true });
-			expect(signerApi.genericSignWithEcdsa).toHaveBeenCalledExactlyOnceWith({
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				derivationPath: BTC_ECDSA_DERIVATION_PATH,
-				keyId: BTC_ECDSA_KEY_ID,
-				messageHash
+				hash: messageHash
 			});
 			expect(btcWalletConnectUtils.deriveBtcPublicKey).toHaveBeenCalledExactlyOnceWith({
 				principal: mockIdentity.getPrincipal()
@@ -671,7 +665,7 @@ describe('btc wallet-connect.services', () => {
 			const params = createMockParams();
 			const mockError = new Error('mock-sign-error');
 
-			vi.mocked(signerApi.genericSignWithEcdsa).mockRejectedValueOnce(mockError);
+			vi.mocked(signerApi.signBtcPrehash).mockRejectedValueOnce(mockError);
 
 			const result = await sign(params);
 

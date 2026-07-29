@@ -1,7 +1,15 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { ZERO } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
 import {
+	liquidiumAssetNetworkIcons,
+	liquidiumAssetNetworkNames,
 	liquidiumBorrowData,
 	liquidiumBorrowingPowerUsd,
 	liquidiumBorrowInterestUsd,
@@ -24,7 +32,25 @@ import { liquidiumStore } from '$lib/stores/liquidium.store';
 import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { liquidiumNetInterestUsd } from '$lib/utils/liquidium.utils';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { get } from 'svelte/store';
+
+// Seed the ck twins so the `chain: 'ICP'` rails resolve via `findTwinToken` (native/ERC rails
+// resolve statically). Network set to ICP so the rail icon/name is the ICP network's.
+const seedIcpTwins = () => {
+	const twin = (symbol: string): IcrcCustomToken =>
+		({
+			...mockValidIcCkToken,
+			symbol,
+			network: ICP_TOKEN.network,
+			enabled: true
+		}) as IcrcCustomToken;
+
+	icrcCustomTokensStore.setAll([
+		{ data: twin('ckBTC'), certified: false },
+		{ data: twin('ckUSDC'), certified: false }
+	]);
+};
 
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({ goto: (...args: unknown[]) => mockGoto(...args) }));
@@ -199,6 +225,7 @@ describe('liquidium derived stores', () => {
 
 	beforeEach(() => {
 		liquidiumStore.reset();
+		icrcCustomTokensStore.resetAll();
 	});
 
 	describe('liquidiumMarkets', () => {
@@ -211,6 +238,96 @@ describe('liquidium derived stores', () => {
 
 		it('is empty by default', () => {
 			expect(get(liquidiumMarkets)).toEqual([]);
+		});
+
+		it('sorts markets by pool (native rail first), placing ICP after the ETH pool', () => {
+			// Store keeps the raw order; the derived applies the display sort. USDC seeded before
+			// ETH to prove the derived re-orders rather than passing the store through.
+			liquidiumStore.set({
+				markets: [
+					market(),
+					market({ asset: 'BTC', chain: 'ICP' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumMarkets).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'ETH-ETH',
+				'ICP-ICP',
+				'USDC-ETH',
+				'USDC-ICP'
+			]);
+		});
+	});
+
+	describe('liquidiumAssetNetworkIcons', () => {
+		it('is empty by default', () => {
+			expect(get(liquidiumAssetNetworkIcons)).toEqual({});
+		});
+
+		it('aggregates every rail of an asset (incl. the ICP twin) and dedupes across markets', () => {
+			seedIcpTwins();
+			liquidiumStore.set({
+				markets: [
+					market(),
+					// Same asset on the same rail again: the icon must not be duplicated.
+					market({ poolId: 'pool-btc-2', asset: 'BTC', chain: 'BTC' }),
+					// Same asset on a different (ICP twin) rail: both rail icons must appear.
+					market({ poolId: 'pool-btc-icp', asset: 'BTC', chain: 'ICP' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc-icp', asset: 'USDC', chain: 'ICP' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumAssetNetworkIcons)).toEqual({
+				BTC: [BTC_MAINNET_TOKEN.network.icon, ICP_TOKEN.network.icon],
+				ETH: [ETHEREUM_TOKEN.network.icon],
+				USDC: [USDC_TOKEN.network.icon, ICP_TOKEN.network.icon],
+				ICP: [ICP_TOKEN.network.icon]
+			});
+		});
+	});
+
+	describe('liquidiumAssetNetworkNames', () => {
+		it('is empty by default', () => {
+			expect(get(liquidiumAssetNetworkNames)).toEqual({});
+		});
+
+		it('aggregates every rail name of an asset (incl. the ICP twin) and dedupes across markets', () => {
+			seedIcpTwins();
+			liquidiumStore.set({
+				markets: [
+					market(),
+					// Same asset on the same rail again: the name must not be duplicated.
+					market({ poolId: 'pool-btc-2', asset: 'BTC', chain: 'BTC' }),
+					// Same asset on a different (ICP twin) rail: both rail names must appear.
+					market({ poolId: 'pool-btc-icp', asset: 'BTC', chain: 'ICP' }),
+					market({ poolId: 'pool-eth', asset: 'ETH', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+					market({ poolId: 'pool-usdc-icp', asset: 'USDC', chain: 'ICP' }),
+					market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+				],
+				portfolio: null,
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumAssetNetworkNames)).toEqual({
+				BTC: [BTC_MAINNET_TOKEN.network.name, ICP_TOKEN.network.name],
+				ETH: [ETHEREUM_TOKEN.network.name],
+				USDC: [USDC_TOKEN.network.name, ICP_TOKEN.network.name],
+				ICP: [ICP_TOKEN.network.name]
+			});
 		});
 	});
 
@@ -328,7 +445,7 @@ describe('liquidium derived stores', () => {
 			...overrides
 		});
 
-		it('keeps only reserves with a supplied balance', () => {
+		it('keeps only positions with a supplied balance, expanded per rail', () => {
 			liquidiumStore.set({
 				markets: [],
 				portfolio: {
@@ -338,7 +455,56 @@ describe('liquidium derived stores', () => {
 				assetPrices: {}
 			});
 
-			expect(get(liquidiumWithdrawReserves)).toEqual([reserve()]);
+			// The zero-balance USDC position is dropped; the BTC position stays and expands into
+			// its native (BTC) and ck (ICP → ckBTC) rails.
+			expect(get(liquidiumWithdrawReserves)).toEqual([reserve(), reserve({ chain: 'ICP' })]);
+		});
+
+		it('expands a stablecoin position into its native and ck (ICP) rails', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves)).toEqual([
+				reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }),
+				reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ICP' })
+			]);
+		});
+
+		it('leaves a single-rail position (ICP) as one entry', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves)).toEqual([
+				reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			]);
+		});
+
+		it('orders the picker across pools (BTC before USDC), native rail first', () => {
+			// USDC seeded before BTC to prove the picker re-orders rather than following portfolio order.
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-usdc', asset: 'USDC', chain: 'ETH' }), reserve()]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumWithdrawReserves).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual(
+				['BTC-BTC', 'BTC-ICP', 'USDC-ETH', 'USDC-ICP']
+			);
 		});
 
 		it('is empty by default', () => {
@@ -362,7 +528,7 @@ describe('liquidium derived stores', () => {
 			...overrides
 		});
 
-		it('keeps only reserves with outstanding debt', () => {
+		it('keeps only positions with outstanding debt, expanded per rail', () => {
 			liquidiumStore.set({
 				markets: [],
 				portfolio: {
@@ -372,7 +538,43 @@ describe('liquidium derived stores', () => {
 				assetPrices: {}
 			});
 
-			expect(get(liquidiumRepayReserves)).toEqual([reserve()]);
+			// The zero-debt BTC position is dropped; the USDC debt stays and expands into its
+			// native (ETH → USDC) and ck (ICP → ckUSDC) rails.
+			expect(get(liquidiumRepayReserves)).toEqual([reserve(), reserve({ chain: 'ICP' })]);
+		});
+
+		it('leaves a single-rail position (ICP) as one entry', () => {
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumRepayReserves)).toEqual([
+				reserve({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' })
+			]);
+		});
+
+		it('orders the picker across pools (BTC before USDC), native rail first', () => {
+			// USDC seeded before BTC to prove the picker re-orders rather than following portfolio order.
+			liquidiumStore.set({
+				markets: [],
+				portfolio: {
+					...portfolio,
+					reserves: [reserve(), reserve({ poolId: 'pool-btc', asset: 'BTC', chain: 'BTC' })]
+				},
+				assetPrices: {}
+			});
+
+			expect(get(liquidiumRepayReserves).map(({ asset, chain }) => `${asset}-${chain}`)).toEqual([
+				'BTC-BTC',
+				'BTC-ICP',
+				'USDC-ETH',
+				'USDC-ICP'
+			]);
 		});
 
 		it('is empty by default', () => {

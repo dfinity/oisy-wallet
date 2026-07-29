@@ -14,6 +14,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -21,7 +22,7 @@ import * as solSendServices from '$sol/services/sol-send.services';
 import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
-import { decode, sign } from '$sol/services/wallet-connect.services';
+import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
@@ -46,6 +47,7 @@ import {
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { SignatureBytes } from '@solana/keys';
 import {
+	getBase58Decoder,
 	getBase58Encoder,
 	isTransactionMessageWithBlockhashLifetime,
 	type Rpc,
@@ -742,6 +744,168 @@ describe('wallet-connect.services', () => {
 					id: mockRequest.id,
 					error: UNEXPECTED_ERROR
 				});
+			});
+		});
+	});
+
+	describe('decodeMessage', () => {
+		it('should decode a base58-encoded UTF-8 message to readable text', () => {
+			const text = 'Sign in with Solana';
+			const base58Message = getBase58Decoder().decode(new TextEncoder().encode(text));
+
+			const request = {
+				params: { request: { params: { message: base58Message } } }
+			} as unknown as WalletKitTypes.SessionRequest;
+
+			expect(decodeMessage(request)).toBe(text);
+		});
+
+		it('should return an empty string when the message is missing', () => {
+			const request = {
+				params: { request: { params: {} } }
+			} as unknown as WalletKitTypes.SessionRequest;
+
+			expect(decodeMessage(request)).toBe('');
+		});
+
+		it('should fall back to the raw value when the message is not valid base58', () => {
+			const message = 'not valid base58 !!!';
+
+			const request = {
+				params: { request: { params: { message } } }
+			} as unknown as WalletKitTypes.SessionRequest;
+
+			expect(decodeMessage(request)).toBe(message);
+		});
+	});
+
+	describe('signMessage', () => {
+		const mockListener = {
+			pair: vi.fn(),
+			approveSession: vi.fn(),
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn(),
+			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
+			disconnect: vi.fn()
+		} as unknown as WalletConnectListener;
+
+		const messageText = 'Sign in with Solana';
+		const base58Message = getBase58Decoder().decode(new TextEncoder().encode(messageText));
+
+		const mockRequest = {
+			id: 1,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_SOL_SIGN_MESSAGE,
+					params: { message: base58Message, pubkey: mockSolAddress }
+				}
+			}
+		} as unknown as WalletKitTypes.SessionRequest;
+
+		const mockParams = {
+			address: mockSolAddress,
+			networkId: SOLANA_MAINNET_NETWORK_ID,
+			modalNext: vi.fn(),
+			progress: vi.fn(),
+			identity: mockIdentity,
+			request: mockRequest,
+			listener: mockListener
+		};
+
+		const mockMessageSignatureBytes = Uint8Array.from([10, 20, 30]);
+
+		beforeEach(() => {
+			vi.spyOn(solSignUtils, 'signMessage').mockResolvedValue(mockMessageSignatureBytes);
+		});
+
+		it('should show an error and reject when the address is nullish', async () => {
+			const result = await signMessage({ ...mockParams, address: null });
+
+			expect(result).toEqual({ success: false });
+
+			expect(solSignUtils.signMessage).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledOnce();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.wallet_not_initialized }
+			});
+		});
+
+		it('should show an error and reject when the message is missing', async () => {
+			const request = {
+				id: 1,
+				topic: 'mock-topic',
+				params: {
+					request: { method: SESSION_REQUEST_SOL_SIGN_MESSAGE, params: {} }
+				}
+			} as unknown as WalletKitTypes.SessionRequest;
+
+			const result = await signMessage({ ...mockParams, request });
+
+			expect(result).toEqual({ success: false });
+
+			expect(solSignUtils.signMessage).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.unknown_parameter }
+			});
+		});
+
+		it('should sign the decoded message and approve with a base58 signature', async () => {
+			const result = await signMessage(mockParams);
+
+			expect(result).toStrictEqual({ success: true });
+
+			expect(solSignUtils.signMessage).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				network: 'mainnet',
+				message: Uint8Array.from(getBase58Encoder().encode(base58Message))
+			});
+
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: mockRequest.id,
+				topic: mockRequest.topic,
+				message: { signature: getBase58Decoder().decode(mockMessageSignatureBytes) }
+			});
+
+			expect(mockParams.modalNext).toHaveBeenCalledOnce();
+
+			expect(mockParams.progress).toHaveBeenCalledTimes(3);
+			expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSign.SIGN);
+			expect(mockParams.progress).toHaveBeenNthCalledWith(
+				2,
+				ProgressStepsSign.APPROVE_WALLET_CONNECT
+			);
+			expect(mockParams.progress).toHaveBeenNthCalledWith(3, ProgressStepsSign.DONE);
+
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: en.wallet_connect.info.sign_executed,
+				level: 'info',
+				duration: 2000
+			});
+			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		it('should reject over WalletConnect and surface the error when signing fails', async () => {
+			const mockError = new Error('mock-sign-error');
+
+			vi.spyOn(solSignUtils, 'signMessage').mockRejectedValueOnce(mockError);
+
+			const result = await signMessage(mockParams);
+
+			expect(result).toStrictEqual({ success: false, err: mockError });
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: mockRequest.topic,
+				id: mockRequest.id,
+				error: UNEXPECTED_ERROR
 			});
 		});
 	});

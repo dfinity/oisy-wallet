@@ -181,10 +181,9 @@
 			"authenticate": "Otwórz lub Utwórz",
 			"sign_in_or_sign_up": "Zaloguj się lub zarejestruj",
 			"internet_identity": "",
-			"asset_types": "Zarządzaj aktywami w BTC, SOL, ETH, ICP i innych kryptowalutach",
-			"instant_and_private": "Wbudowany asystent AI z ochroną prywatności w standardzie",
-			"advanced_cryptography": "Zabezpieczone zaawansowaną kryptografią - 100% onchain",
-			"move_swap_grow": "Przenoś, wymieniaj i pomnażaj swoje aktywa między sieciami"
+			"asset_types": "Krypto, akcje, surowce, przedmioty kolekcjonerskie i zaszyfrowane notatki.",
+			"advanced_cryptography": "Prywatne i odporne na manipulacje. Niewidoczne, gdy tego potrzebujesz.",
+			"move_swap_grow": "Zarabiaj, pożyczaj i handluj z wbudowanym asystentem AI."
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Kod/link jest nieprawidłowy",
+			"link_domain_mismatch": "Ten link dotyczy innej domeny",
 			"data_is_incompleted": "Otrzymane dane są niekompletne. Brakuje niektórych wymaganych informacji."
 		}
 	},
@@ -2647,6 +2642,8 @@
 			"empty_title": "Nie masz jeszcze żadnych notatek",
 			"empty_subtitle": "Twórz prywatne, zaszyfrowane notatki, aby bezpiecznie przechowywać ważne informacje obok swojego portfela.",
 			"empty_add": "Dodaj nową notatkę",
+			"unlocking_title": "Odblokowywanie Twoich notatek",
+			"unlocking_subtitle": "Konfigurujemy Twój prywatny klucz szyfrowania – to zajmie tylko chwilę.",
 			"add_note": "Dodaj notatkę",
 			"note_label": "Notatka",
 			"placeholder": "Napisz notatkę…",
@@ -2659,7 +2656,8 @@
 			"created_updated": "Utworzono $created · Zaktualizowano $updated",
 			"too_long": "Notatka może mieć maksymalnie $maxCharacters znaków.",
 			"cap_reached": "Osiągnięto maksymalną liczbę $max zapisanych notatek. Usuń jedną, aby dodać nową.",
-			"decryption_failed": "Nie udało się odszyfrować tej notatki"
+			"decryption_failed": "Nie udało się odszyfrować tej notatki",
+			"unavailable_title": "Notatki są tymczasowo niedostępne"
 		},
 		"alt": {
 			"edit": "Edytuj notatkę",
@@ -2668,7 +2666,8 @@
 		"error": {
 			"load": "Nie udało się wczytać twoich notatek. Spróbuj ponownie.",
 			"save": "Nie udało się zapisać twojej notatki. Spróbuj ponownie.",
-			"delete": "Nie udało się usunąć twojej notatki. Spróbuj ponownie."
+			"delete": "Nie udało się usunąć twojej notatki. Spróbuj ponownie.",
+			"rate_limited": "Osiągnięto limit żądań. Poczekaj chwilę i spróbuj ponownie."
 		},
 		"share": {
 			"text": {

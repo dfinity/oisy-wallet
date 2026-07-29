@@ -181,10 +181,9 @@
 			"authenticate": "Anmelden",
 			"sign_in_or_sign_up": "Anmelden oder registrieren",
 			"internet_identity": "",
-			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
-			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
-			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain",
-			"move_swap_grow": "Verschiebe, tausche und vermehre deine Assets netzwerkübergreifend"
+			"asset_types": "Krypto, Aktien, Rohstoffe, Sammlerstücke und verschlüsselte Notizen.",
+			"advanced_cryptography": "Privat und manipulationssicher. Unsichtbar, wenn du es brauchst.",
+			"move_swap_grow": "Verdiene, leihe und handle, mit integriertem KI-Assistenten."
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil",
@@ -487,11 +486,6 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
-			},
-			"icp_flags": {
-				"name": "",
-				"one_liner": "",
 				"description": ""
 			},
 			"cloud_engines": {
@@ -1123,6 +1117,7 @@
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/URL ist nicht gültig",
+			"link_domain_mismatch": "Dieser Link ist für eine andere Domain",
 			"data_is_incompleted": "Die erhaltenen Daten sind unvollständig. Bitte versuche es erneut."
 		}
 	},
@@ -2647,6 +2642,8 @@
 			"empty_title": "Du hast noch keine Notizen",
 			"empty_subtitle": "Erstelle private, verschlüsselte Notizen, um Details sicher neben deiner Wallet aufzubewahren.",
 			"empty_add": "Neue Notiz hinzufügen",
+			"unlocking_title": "Deine Notizen werden entsperrt",
+			"unlocking_subtitle": "Dein privater Verschlüsselungsschlüssel wird eingerichtet – das dauert nur einen Moment.",
 			"add_note": "Notiz hinzufügen",
 			"note_label": "Notiz",
 			"placeholder": "Notiz schreiben…",
@@ -2659,7 +2656,8 @@
 			"created_updated": "Erstellt $created · Aktualisiert $updated",
 			"too_long": "Die Notiz darf höchstens $maxCharacters Zeichen lang sein.",
 			"cap_reached": "Du hast das Maximum von $max gespeicherten Notizen erreicht. Lösche eine, um eine neue Notiz hinzuzufügen.",
-			"decryption_failed": "Diese Notiz konnte nicht entschlüsselt werden"
+			"decryption_failed": "Diese Notiz konnte nicht entschlüsselt werden",
+			"unavailable_title": "Notizen sind vorübergehend nicht verfügbar"
 		},
 		"alt": {
 			"edit": "Notiz bearbeiten",
@@ -2668,7 +2666,8 @@
 		"error": {
 			"load": "Deine Notizen konnten nicht geladen werden. Bitte versuche es erneut.",
 			"save": "Deine Notiz konnte nicht gespeichert werden. Bitte versuche es erneut.",
-			"delete": "Deine Notiz konnte nicht gelöscht werden. Bitte versuche es erneut."
+			"delete": "Deine Notiz konnte nicht gelöscht werden. Bitte versuche es erneut.",
+			"rate_limited": "Du hast das Anfragelimit erreicht. Bitte warte einen Moment und versuche es erneut."
 		},
 		"share": {
 			"text": {

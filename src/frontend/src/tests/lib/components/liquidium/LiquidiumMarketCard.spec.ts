@@ -41,11 +41,13 @@ describe('LiquidiumMarketCard', () => {
 		expect(container).not.toHaveTextContent(en.liquidium.text.supply_label);
 	});
 
-	it('shows "Coming soon" for the teaser row', () => {
+	it('renders an ICP-chain market with its rates', () => {
 		const { container } = render(LiquidiumMarketCard, {
-			props: { market: market({ teaser: true, asset: 'ICP', chain: 'ICP' }) }
+			props: { market: market({ poolId: 'pool-icp', asset: 'ICP', chain: 'ICP' }) }
 		});
 
-		expect(container).toHaveTextContent(en.liquidium.text.coming_soon_teaser);
+		expect(container).toHaveTextContent('ICP');
+		expect(container).toHaveTextContent(en.liquidium.text.supply_label);
+		expect(container).not.toHaveTextContent(en.liquidium.text.coming_soon_teaser);
 	});
 });

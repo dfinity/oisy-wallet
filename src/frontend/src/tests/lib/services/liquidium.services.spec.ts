@@ -12,7 +12,7 @@ vi.mock('$lib/api/liquidium.api', () => ({
 }));
 
 vi.mock('$lib/utils/liquidium.utils', () => ({
-	mapLiquidiumMarket: vi.fn(),
+	mapLiquidiumMarketRails: vi.fn(),
 	mapLiquidiumPortfolio: vi.fn()
 }));
 
@@ -46,7 +46,7 @@ describe('liquidium.services', () => {
 			market: { listPools, getAssetPrices },
 			positions: { getUserReserves, getUserPositionSummary }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-		vi.mocked(liquidiumUtils.mapLiquidiumMarket).mockReturnValue(market);
+		vi.mocked(liquidiumUtils.mapLiquidiumMarketRails).mockReturnValue([market]);
 		vi.mocked(liquidiumUtils.mapLiquidiumPortfolio).mockReturnValue(portfolio);
 		getAssetPrices.mockResolvedValue({});
 	});

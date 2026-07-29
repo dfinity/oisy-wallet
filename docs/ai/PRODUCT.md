@@ -129,6 +129,25 @@ The [OISY Trade](#finance-destinations) DEX flows emit two structured Plausible 
 
 ---
 
+## Tokens
+
+### Curated tokens vs. metadata-only tokens
+
+OISY ships a curated set of token definitions. Most are **curated tokens**: they appear in the manage-tokens list (so a user can enable them), a subset is enabled by default for new users, and they are selectable elsewhere in the wallet (including as swap destinations).
+
+A definition can instead be marked **metadata-only** (`metadataOnly: true`). A metadata-only token is **not** surfaced by default — it is absent from the manage-tokens list, is never enabled by default, and is not offered as a swap destination. Its curated metadata (name, symbol, decimals, icon, tags, token-group membership) is still used to **enrich a token the user imports manually**: importing that exact ledger / contract address resolves the curated details and places the token in its group, exactly as a curated token would. In short: known to OISY, but surfaced only if the user explicitly adds it.
+
+The tokens added for the 1Sec (OneSec) swap integration are metadata-only:
+
+- On **ICP**, the 1Sec-bridged **USDC** (`53nhb-haaaa-aaaar-qbn5q-cai`) and **USDT** (`ij33n-oiaaa-aaaar-qbooa-cai`).
+- On the **EVM** chains (Ethereum, Arbitrum, Base), **BOB**, **CHAT**, and **GLDT**.
+
+A new user does not see any of these in the wallet; a user who wants one imports it by its ledger canister ID / contract address, after which it appears with full metadata and inside its token group.
+
+ICP on the same EVM chains is intentionally **not** metadata-only: some users may already hold a balance in it, and marking it metadata-only would remove it from the default curated token set (potentially hiding that balance unless they explicitly import it). ICP stays curated and suggested there.
+
+---
+
 ## Exchange-rate sourcing
 
 OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
@@ -174,12 +193,12 @@ Signed-in users have a private list of free-text **personal notes**, reached fro
 
 A note is a free-standing memo — it is **not** attached to any transaction, address, token, or network. Each note is body text plus created/updated timestamps; there is no **stored** title (the list and read-only view show the note's first line in bold as a de-facto title), and no rich text, attachments, tags, or folders.
 
-- **End-to-end encrypted via vetKeys.** Notes are encrypted in the browser before they leave the device and decrypted in the browser on read, so the canister and the node providers only ever store and see **ciphertext**. A per-user symmetric key is derived via vetKD (one key per principal) and cached as a non-extractable `CryptoKey` in IndexedDB, so it is derived once per device. One user cannot read or write another user's notes.
+- **End-to-end encrypted via vetKeys.** Notes are encrypted in the browser before they leave the device and decrypted in the browser on read, so the canister and the node providers only ever store and see **ciphertext**. A per-user symmetric key is derived via vetKD (one key per principal) and cached as a non-extractable `CryptoKey` in memory for the session only — never persisted to disk — so it is derived once per session and discarded on reload or sign-out. One user cannot read or write another user's notes.
 - **Lazy loading.** Nothing loads at wallet startup. The notes (and the per-user key) are fetched, derived, and decrypted on the **first** open of the Notes modal; the decrypted notes are cached for the session, so re-opening is instant.
 - **Limits.** A note holds up to **2,000 characters** (counted in Unicode code points, so any language / script / emoji is supported), enforced client-side; the backend independently rejects oversized ciphertext. Empty or whitespace-only notes cannot be saved. A user may keep up to **1,000 notes**; at the cap, creating a new note is refused (and the UI disables "Add note") while editing and deleting existing notes still work — no note is ever evicted.
 - **Timestamps** are stored as UTC and displayed in the user's local timezone: a never-edited note reads "Created …", an edited note "Updated …" (and rises to the top, since the list sorts by last update).
 - **Safe rendering.** Note text is rendered as plain text (auto-escaped, never as HTML), with line breaks handled by CSS and bidi/control characters neutralized on display, so a note cannot execute scripts or reorder surrounding UI. In the read-only view, `http`/`https` URLs become safe links that open in a new tab (`rel="noopener noreferrer"`); no other scheme is linkified.
-- **Delete asks for confirmation** (the same pattern as deleting a contact): a "Delete note" prompt naming the note (its first ~15 characters, bold) and warning "This action cannot be undone.", shown as a dialog on desktop and a bottom sheet on mobile, with Cancel / Delete note. A single note that fails to decrypt shows an inline error with a Retry action without affecting the others.
+- **Delete asks for confirmation** (the same pattern as deleting a contact): a "Delete note" prompt naming the note (its first ~15 characters, bold) and warning "This action cannot be undone.", shown as a dialog on desktop and a bottom sheet on mobile, with Cancel / Delete note. A single note that fails to decrypt shows an inline error with a Retry action without affecting the others. If the whole list cannot be loaded — e.g. the encryption-key service is temporarily rate-limited — the modal shows a "temporarily unavailable" state with a Retry action rather than an empty list.
 
 The editor step deliberately has **no (X) and ignores backdrop clicks** — only Cancel or Save exits it — so unsaved text cannot be lost to an accidental dismissal; the list and empty states close normally via X, Close, or the backdrop.
 
@@ -205,10 +224,14 @@ The share funnel — dialog open, link created, and the recipient's open / revea
 OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dApp proposes a session, OISY advertises one namespace per chain family for which the signed-in user has a loaded address, so each connection can span Ethereum, Solana, and Bitcoin at once. Multiple dApp connections can be open simultaneously (see [Multiple simultaneous connections](#multiple-simultaneous-connections)).
 
 - **Ethereum (`eip155`)** — supports `eth_sendTransaction`, `eth_sign`, `personal_sign`, `eth_signTypedData_v4`, and `eth_signTypedData` (legacy).
-- **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility).
+- **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility). For `solana_signMessage`, OISY decodes the base58 message and shows the decoded text for review when possible (falling back to the raw value if decoding fails), then returns the base58-encoded Ed25519 signature.
 - **Bitcoin (`bip122`)** — supports `getAccountAddresses`, `signMessage`, and `signPsbt`. The namespace is advertised whenever any BTC address (mainnet, testnet, or regtest) is loaded, with one `bip122:<genesis>` chain and matching `bip122:<genesis>:<address>` account per present network, and the `bip122_addressesChanged` event.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
+
+### Starting a pairing from the scanner
+
+A WalletConnect pairing is started from the universal scanner by scanning (or pasting) a pairing code. The scanner accepts two forms: a bare `wc:` URI, and an OISY WalletConnect deep-link URL that wraps it — `<OISY host>/wc/?uri=<url-encoded wc: uri>`. When a deep-link URL is scanned, OISY unwraps the inner `uri` and pairs with it. The URL form is only unwrapped when its host is **OISY's own domain** for the running environment (`oisy.com` in production); a `uri` param carried by any other host is never treated as a pairing. A well-formed WalletConnect deep-link URL whose host is a different domain shows a dedicated "this link is for a different domain" error rather than the generic invalid-code message, so the user understands the link was valid but pointed elsewhere.
 
 ### Multiple simultaneous connections
 

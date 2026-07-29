@@ -23,6 +23,7 @@
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { resetPersonalNotesSession } from '$lib/services/personal-notes.services';
+	import { purgeLegacyPersonalNotesVetkeyCache } from '$lib/services/personal-notes.vetkeys';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
@@ -33,6 +34,7 @@
 	import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { isIOS } from '$lib/utils/device.utils';
+	import { initWorkerCleanupOnPageUnload } from '$lib/utils/page-unload.utils';
 
 	interface Props {
 		children: Snippet;
@@ -53,7 +55,12 @@
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
 		 */
-		await Promise.allSettled([syncAuthStore(), initPlausibleAnalytics(), i18n.init()]);
+		await Promise.allSettled([
+			syncAuthStore(),
+			initPlausibleAnalytics(),
+			i18n.init(),
+			purgeLegacyPersonalNotesVetkeyCache()
+		]);
 	};
 
 	const syncAuthStore = async () => {
@@ -91,6 +98,8 @@
 	let worker = $state<AuthWorker | undefined>();
 
 	onMount(async () => (worker = await AuthWorker.init()));
+
+	onMount(initWorkerCleanupOnPageUnload);
 	onDestroy(() => worker?.destroy());
 
 	$effect(() => {

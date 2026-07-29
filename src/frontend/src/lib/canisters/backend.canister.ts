@@ -23,6 +23,7 @@ import {
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapGetAllowedCyclesError,
+	mapPersonalNotesVetkeyError,
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
@@ -645,7 +646,7 @@ export class BackendCanister extends Canister<BackendService> {
 		if ('Ok' in response) {
 			return response.Ok;
 		}
-		throw response.Err;
+		throw mapPersonalNotesVetkeyError(response.Err);
 	};
 
 	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
@@ -655,7 +656,7 @@ export class BackendCanister extends Canister<BackendService> {
 		if ('Ok' in response) {
 			return response.Ok;
 		}
-		throw response.Err;
+		throw mapPersonalNotesVetkeyError(response.Err);
 	};
 
 	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {

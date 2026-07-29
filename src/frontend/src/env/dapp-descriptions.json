@@ -42,7 +42,7 @@
 		"oneLiner": "dapps.descriptions.nnsdapp.one_liner",
 		"callToAction": "dapps.descriptions.nnsdapp.call_to_action",
 		"website": "https://nns.internetcomputer.org/",
-		"github": "https://github.com/dfinity/nns-dapp",
+		"github": "https://github.com/dfinity/governance-app",
 		"tags": ["dapps.categories.staking", "dapps.categories.ab_icp", "dapps.categories.aa_new"],
 		"stats": "",
 		"usesInternetIdentity": true,
@@ -296,19 +296,6 @@
 		"stats": "",
 		"logo": "/images/dapps/icpanda-message-logo.svg",
 		"screenshots": ["/images/dapps/icpanda-message-screenshot.webp"]
-	},
-	{
-		"id": "icp-flags",
-		"name": "dapps.descriptions.icp_flags.name",
-		"oneLiner": "dapps.descriptions.icp_flags.one_liner",
-		"website": "https://icp-flags.fans/",
-		"openChat": "https://oc.app/community/uhnd7-niaaa-aaaac-becgq-cai/channel/1043641175/?ref=meaay-cyaaa-aaaar-azo3a-cai",
-		"tags": ["dapps.categories.ab_icp", "dapps.categories.social"],
-		"stats": "",
-		"description": "dapps.descriptions.icp_flags.description",
-		"usesInternetIdentity": true,
-		"logo": "/images/dapps/icp-flags-logo.svg",
-		"screenshots": ["/images/dapps/icp-flags-screenshot.webp"]
 	},
 	{
 		"id": "cyql",

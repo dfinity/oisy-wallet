@@ -8,6 +8,7 @@ import { send } from '$eth/services/send.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { getAgent } from '$lib/actors/agents.ic';
+import { ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { authIdentity } from '$lib/derived/auth.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import {
@@ -91,8 +92,10 @@ const getStepLastTransferId = (step: Step): TransferId | undefined => {
 	return undefined;
 };
 
-// Runs detached. Writes the terminal status at the end and persists
-// `TRANSFER_ID` for EVM→ICP rows the first time a step exposes it.
+// Runs detached. Writes the terminal status when the plan completes (or a step
+// reports failed/refunded) and persists `TRANSFER_ID` for EVM→ICP rows the
+// first time a step exposes it. Unexpected throws leave the row pending so the
+// cross-session AUT poller can finish the job.
 const finishOneSecBridgingInSession = async ({
 	identity,
 	id,
@@ -163,11 +166,13 @@ const finishOneSecBridgingInSession = async ({
 		}
 
 		await writeTerminal({ status: { Succeeded: null } });
-	} catch (_: unknown) {
-		await writeTerminal({
-			status: { Failed: null },
-			error: 'OneSec bridge step failed unexpectedly'
-		});
+	} catch (err: unknown) {
+		// The plan threw unexpectedly (network blip, canister unreachable) — the
+		// bridge outcome is unknown, and the user's funds are already committed.
+		// A terminal Failed here would drop the row from the pending poll set and
+		// permanently disable cross-session recovery, so leave it pending: the AUT
+		// poller resumes tracking (and re-notifies OneSec for EVM→ICP deposits).
+		consoleError(err);
 	}
 };
 
@@ -544,7 +549,34 @@ const evmChainFromChainId = (chainId: bigint): EvmChain | undefined => {
 	}
 };
 
-// Discovers TRANSFER_ID for cross-session EVM→ICP rows via `getForwardingStatus`.
+// `forward_evm_to_icp` is the only trigger that makes OneSec sweep a
+// forwarding address — if the in-session closer dies between the EVM deposit
+// and its notify step, no read-only poll will ever move the funds. The poller
+// therefore re-notifies pending EVM→ICP rows, throttled per row because
+// notifying is an update call while the poller ticks every few seconds
+// (between notifications it falls back to the read-only status lookup).
+const lastForwardingNotifyMs = new Map<string, number>();
+
+const shouldNotifyForwarding = (txId: string): boolean => {
+	const now = Date.now();
+	const last = lastForwardingNotifyMs.get(txId);
+
+	if (nonNullish(last) && now - last < ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS) {
+		return false;
+	}
+
+	lastForwardingNotifyMs.set(txId, now);
+
+	return true;
+};
+
+export const resetOneSecForwardingNotifyThrottle = (): void => {
+	lastForwardingNotifyMs.clear();
+};
+
+// Discovers TRANSFER_ID for cross-session EVM→ICP rows via the forwarding
+// status, re-notifying OneSec (see `shouldNotifyForwarding`) so a deposit
+// stranded at the forwarding address is picked up again.
 // Forwarding addresses are deterministic per principal, so `response.done` can
 // point at a *prior* swap's id; we require `done.id > BASELINE_TRANSFER_ID` and
 // skip discovery entirely when the baseline ref is missing.
@@ -586,12 +618,12 @@ const tryDiscoverEvmToIcpTransferId = async ({
 	}
 
 	try {
-		const response = await oneSecForwarding().getForwardingStatus(
-			oneSecToken,
-			chain,
-			forwardingAddress,
-			{ owner: data.recipient_principal }
-		);
+		const forwarding = oneSecForwarding();
+		const receiver = { owner: data.recipient_principal };
+
+		const response = shouldNotifyForwarding(tx.id)
+			? await forwarding.forwardEvmToIcp(oneSecToken, chain, forwardingAddress, receiver)
+			: await forwarding.getForwardingStatus(oneSecToken, chain, forwardingAddress, receiver);
 
 		if (isNullish(response.done) || response.done.id <= baseline) {
 			return undefined;
@@ -611,6 +643,8 @@ const tryDiscoverEvmToIcpTransferId = async ({
 			id: tx.id,
 			externalRefs: mergedRefs
 		});
+
+		lastForwardingNotifyMs.delete(tx.id);
 
 		return response.done;
 	} catch (err: unknown) {

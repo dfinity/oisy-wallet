@@ -34,15 +34,22 @@ import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
-import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';
+import {
+	createSigner,
+	signMessage as signMessageBytes,
+	signTransaction,
+	type CreateSignerParams
+} from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { WalletKitTypes } from '@reown/walletkit';
 import {
 	getBase58Decoder,
+	getBase58Encoder,
 	getBase64Decoder,
 	getTransactionEncoder,
 	isTransactionMessageWithBlockhashLifetime,
@@ -93,6 +100,27 @@ export const decode = async ({
 	});
 
 	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+};
+
+/**
+ * Decode a Reown Solana `signMessage` request into the human-readable text shown in the review.
+ *
+ * Reown sends `params.message` as a base58-encoded byte string; we decode it to bytes and read it
+ * as UTF-8 (Solana sign-in messages are UTF-8 text). A malformed (non-base58) value falls back to
+ * the raw string so the review screen still renders instead of throwing.
+ */
+export const decodeMessage = (request: WalletKitTypes.SessionRequest): string => {
+	const { message } = request.params.request.params as { message?: string };
+
+	if (isNullish(message)) {
+		return '';
+	}
+
+	try {
+		return new TextDecoder().decode(Uint8Array.from(getBase58Encoder().encode(message)));
+	} catch (_: unknown) {
+		return message;
+	}
 };
 
 const resolveSplTokenAddress = async ({
@@ -354,4 +382,96 @@ export const sign = ({
 		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
 			$method: params.request.params.request.method
 		})
+	});
+
+type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
+	listener: OptionWalletConnectListener;
+	address: OptionSolAddress;
+	networkId: NetworkId;
+	modalNext: () => void;
+	progress: (step: ProgressStepsSign) => void;
+	identity: NullishIdentity;
+};
+
+export const signMessage = ({
+	address,
+	networkId,
+	modalNext,
+	progress,
+	identity,
+	...params
+}: WalletConnectSignMessageParams): Promise<ResultSuccess> =>
+	execute({
+		params,
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
+			const { id, topic } = request;
+
+			const { message } = request.params.request.params as { message?: string };
+
+			if (isNullish(address)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.wallet_not_initialized }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			if (isNullish(message)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unknown_parameter }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			if (isNullish(identity)) {
+				toastsError({
+					msg: { text: get(i18n).auth.error.no_internet_identity }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			modalNext();
+
+			try {
+				progress(ProgressStepsSign.SIGN);
+
+				// Ed25519 signs the raw message bytes; the WC param is base58-encoded, and the response
+				// signature is base58 too (per the Reown Solana RPC reference).
+				const signatureBytes = await signMessageBytes({
+					identity,
+					network: safeMapNetworkIdToNetwork(networkId),
+					message: Uint8Array.from(getBase58Encoder().encode(message))
+				});
+
+				const signature = getBase58Decoder().decode(signatureBytes);
+
+				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
+
+				await listener.approveRequest({
+					id,
+					topic,
+					message: { signature }
+				});
+
+				progress(ProgressStepsSign.DONE);
+
+				return { success: true };
+			} catch (err: unknown) {
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				throw err;
+			}
+		},
+		toastMsg: get(i18n).wallet_connect.info.sign_executed
 	});

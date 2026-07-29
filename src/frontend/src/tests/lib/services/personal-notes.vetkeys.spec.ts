@@ -4,6 +4,7 @@ import {
 	decryptPersonalNoteWithKey,
 	encryptPersonalNote,
 	encryptPersonalNoteWithKey,
+	purgeLegacyPersonalNotesVetkeyCache,
 	resetPersonalNotesKeyCache
 } from '$lib/services/personal-notes.vetkeys';
 import type { PersonalNoteEnvelope } from '$lib/types/personal-note';
@@ -36,6 +37,8 @@ vi.mock(import('@dfinity/vetkeys'), async (importOriginal) => {
 		}
 	} as unknown as typeof actual;
 });
+
+vi.mock('$app/environment', () => ({ browser: true }));
 
 describe('personal-notes.vetkeys', () => {
 	const envelope: PersonalNoteEnvelope = {
@@ -90,16 +93,12 @@ describe('personal-notes.vetkeys', () => {
 	});
 
 	describe('key derivation (encrypt/decrypt with vetKD)', () => {
-		const cacheKey = `personal-notes-vetkey-${mockIdentity.getPrincipal().toText()}`;
-
 		beforeEach(() => {
 			vi.restoreAllMocks();
 			resetPersonalNotesKeyCache();
 		});
 
 		it('derives the key via vetKD on first use, then round-trips encrypt → decrypt', async () => {
-			vi.spyOn(idbKeyval, 'get').mockResolvedValue(undefined);
-			const setSpy = vi.spyOn(idbKeyval, 'set').mockResolvedValue(undefined);
 			const publicKeySpy = vi
 				.spyOn(backendApi, 'getPersonalNotesVetkeyPublicKey')
 				.mockResolvedValue(new Uint8Array([4, 5, 6]));
@@ -115,13 +114,9 @@ describe('personal-notes.vetkeys', () => {
 			expect(decrypted).toEqual(envelope);
 			expect(publicKeySpy).toHaveBeenCalledOnce();
 			expect(vetkeySpy).toHaveBeenCalledOnce();
-			// The derived material is persisted to IndexedDB for reuse across sessions.
-			expect(setSpy).toHaveBeenCalledWith(cacheKey, expect.anything());
 		});
 
 		it('reuses the in-session cache without re-deriving', async () => {
-			vi.spyOn(idbKeyval, 'get').mockResolvedValue(undefined);
-			vi.spyOn(idbKeyval, 'set').mockResolvedValue(undefined);
 			const publicKeySpy = vi
 				.spyOn(backendApi, 'getPersonalNotesVetkeyPublicKey')
 				.mockResolvedValue(new Uint8Array([4]));
@@ -135,27 +130,7 @@ describe('personal-notes.vetkeys', () => {
 			expect(publicKeySpy).toHaveBeenCalledOnce();
 		});
 
-		it('loads the cached key from IndexedDB without a vetKD round-trip', async () => {
-			const raw = new Uint8Array(32).fill(7);
-			const storedKey = await globalThis.crypto.subtle.importKey('raw', raw, 'HKDF', false, [
-				'deriveKey'
-			]);
-			vi.spyOn(idbKeyval, 'get').mockResolvedValue(storedKey);
-
-			const publicKeySpy = vi.spyOn(backendApi, 'getPersonalNotesVetkeyPublicKey');
-			const vetkeySpy = vi.spyOn(backendApi, 'getPersonalNotesEncryptedVetkey');
-
-			const encrypted = await encryptPersonalNote({ envelope, noteId, identity: mockIdentity });
-			const decrypted = await decryptPersonalNote({ encrypted, noteId, identity: mockIdentity });
-
-			expect(decrypted).toEqual(envelope);
-			expect(publicKeySpy).not.toHaveBeenCalled();
-			expect(vetkeySpy).not.toHaveBeenCalled();
-		});
-
 		it('evicts a failed derivation so the next call retries', async () => {
-			vi.spyOn(idbKeyval, 'get').mockResolvedValue(undefined);
-			vi.spyOn(idbKeyval, 'set').mockResolvedValue(undefined);
 			vi.spyOn(backendApi, 'getPersonalNotesVetkeyPublicKey').mockResolvedValue(
 				new Uint8Array([4])
 			);
@@ -173,6 +148,36 @@ describe('personal-notes.vetkeys', () => {
 
 			expect(encrypted).toBeInstanceOf(Uint8Array);
 			expect(vetkeySpy).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('purgeLegacyPersonalNotesVetkeyCache', () => {
+		// The test env's `localStorage` is Node's (non-functional) built-in, which
+		// shadows jsdom's — stub a minimal in-memory one so the flag round-trips.
+		let store: Map<string, string>;
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+			store = new Map<string, string>();
+			vi.stubGlobal('localStorage', {
+				getItem: (key: string): string | null => store.get(key) ?? null,
+				setItem: (...[key, value]: [string, string]): void => {
+					store.set(key, value);
+				}
+			});
+		});
+
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it('wipes the legacy default store once, then not again (flag remembered)', async () => {
+			const clearSpy = vi.spyOn(idbKeyval, 'clear').mockResolvedValue(undefined);
+
+			await purgeLegacyPersonalNotesVetkeyCache();
+			await purgeLegacyPersonalNotesVetkeyCache();
+
+			expect(clearSpy).toHaveBeenCalledOnce();
 		});
 	});
 });
