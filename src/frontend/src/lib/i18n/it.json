@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Gioco",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Oggetti da collezione",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -1466,11 +1466,11 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "Oggetti da collezione",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "I tuoi NFT appariranno qui",
-			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"title_empty": "I tuoi oggetti da collezione appariranno qui",
+			"description_empty": "Sembra che tu non abbia ancora ricevuto oggetti da collezione",
 			"title_not_supported": "",
 			"description_not_supported": "",
 			"grouping": "",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Nessun NFT per adesso",
+			"placeholder_image": "Nessun oggetto da collezione per adesso",
 			"card": {
-				"image": "Immagine dell'NFT con token ID: $tokenId"
+				"image": "Immagine dell'oggetto da collezione con token ID: $tokenId"
 			},
 			"copy_address": "",
 			"review_preference": "",

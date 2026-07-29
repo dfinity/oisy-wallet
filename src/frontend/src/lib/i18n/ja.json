@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "ゲーム",
 			"lending": "レンディング",
-			"nft": "NFT",
+			"nft": "コレクティブル",
 			"rwa": "RWA",
 			"social": "ソーシャル",
 			"staking": "ステーキング",
@@ -968,16 +968,16 @@
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます。",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです。",
 			"send_review_subtitle": "以下の内容を送信します。",
-			"no_nfts_found": "NFTが見つかりません。",
-			"no_nfts_found_desc": "NFTを見つけるには、検索条件またはネットワークを調整してください。",
-			"select_nft": "送信するNFTを選択"
+			"no_nfts_found": "コレクティブルが見つかりません。",
+			"no_nfts_found_desc": "コレクティブルを見つけるには、検索条件またはネットワークを調整してください。",
+			"select_nft": "送信するコレクティブルを選択"
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
 			"select_network": "ネットワークを選択",
-			"search_nfts": "NFTを検索"
+			"search_nfts": "コレクティブルを検索"
 		},
 		"info": {
 			"ckbtc_certified": "ckBTCパラメーターが認証されるまでお待ちください。",
@@ -1022,7 +1022,7 @@
 			"btc_utxo_locked": "保留中のトランザクションによりBitcoin資金がロックされています。",
 			"btc_invalid_fee_calculation": "Bitcoinトランザクション手数料の検証に失敗しました。",
 			"pending_transactions_not_available": "保留中のトランザクションサービスは現在利用できません。後でもう一度お試しください。",
-			"no_nft_selected": "送信するNFTが選択されていません。"
+			"no_nft_selected": "送信するコレクティブルが選択されていません。"
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中にエラーが発生しました。",
@@ -1344,7 +1344,7 @@
 		"import": {
 			"text": {
 				"title": "トークンをインポート",
-				"title_nft": "NFTコレクションをインポート",
+				"title_nft": "コレクションをインポート",
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
@@ -1383,12 +1383,12 @@
 		"manage": {
 			"text": {
 				"title": "トークンの管理",
-				"title_nft": "NFTコレクションの管理",
+				"title_nft": "コレクションの管理",
 				"manage_list": "トークンの管理",
-				"manage_list_nft": "NFTの管理",
+				"manage_list_nft": "コレクティブルの管理",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
-				"import_nft": "NFTコレクションをインポート",
+				"import_nft": "コレクションをインポート",
 				"network": "ネットワーク",
 				"all_tokens_zero_balance": "すべてのトークンの残高がゼロです。",
 				"enable_more_assets": "さらに多くのトークンを有効にする"
@@ -1466,13 +1466,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "コレクティブル",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "あなたのNFTがここに表示されます。",
-			"description_empty": "まだNFTを受け取っていないようです。",
-			"title_not_supported": "選択されたネットワークではNFTはまだサポートされていません。",
-			"description_not_supported": "このアドレスにNFTを送信しないでください。",
+			"title_empty": "あなたのコレクティブルがここに表示されます。",
+			"description_empty": "まだコレクティブルを受け取っていないようです。",
+			"title_not_supported": "選択されたネットワークではコレクティブルはまだサポートされていません。",
+			"description_not_supported": "このアドレスにコレクティブルを送信しないでください。",
 			"grouping": "グループ化",
 			"as_plain_list": "リスト表示",
 			"by_collection": "コレクションでグループ化",
@@ -1488,7 +1488,7 @@
 			"quantity": "数量",
 			"item_traits": "アイテムの特性",
 			"collection_not_loaded": "コレクションはまだ読み込まれていないため表示できません。",
-			"nft_not_loaded": "NFTはまだ読み込まれていないため表示できません。",
+			"nft_not_loaded": "コレクティブルはまだ読み込まれていないため表示できません。",
 			"collections": "コレクション",
 			"all_assets": "すべての資産",
 			"address_copied": "アドレス $address をコピーしました。",
@@ -1497,12 +1497,12 @@
 			"spam": "スパム",
 			"not_spam": "スパムではない",
 			"spam_warning": "'$collection'をスパムに移動しますか?",
-			"spam_warning_text": "<b>$collection</b>のすべてのNFTがスパムに移動されます。メインビューからは非表示になりますが、いつでも検索して復元できます。",
+			"spam_warning_text": "<b>$collection</b>のすべてのコレクティブルがスパムに移動されます。メインビューからは非表示になりますが、いつでも検索して復元できます。",
 			"hide": "非表示",
 			"unhide": "再表示",
 			"hidden": "非表示",
 			"hide_warning": "'$collection'を非表示にしますか?",
-			"hide_warning_text": "<b>$collection</b>と関連するすべてのNFTがメインビューから非表示になりますが、いつでも検索して復元できます。",
+			"hide_warning_text": "<b>$collection</b>と関連するすべてのコレクティブルがメインビューから非表示になりますが、いつでも検索して復元できます。",
 			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
 			"img_consent_disabled": "このコレクションの画像を無効にしました。",
 			"img_consent_none": "セキュリティ上の理由で画像が無効になっています。",
@@ -1529,9 +1529,9 @@
 			"media_stored_at_different_location": "メディアは別の場所に保存されているようです。アクセスするには、このリンクを慎重に確認した上でご利用ください。:"
 		},
 		"alt": {
-			"placeholder_image": "まだNFTがありません",
+			"placeholder_image": "まだコレクティブルがありません",
 			"card": {
-				"image": "トークンIDが$tokenIdのNFTの画像"
+				"image": "トークンIDが$tokenIdのコレクティブルの画像"
 			},
 			"copy_address": "このアドレスをクリップボードにコピー",
 			"review_preference": "表示設定を変更",
