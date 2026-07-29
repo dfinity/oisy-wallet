@@ -24,6 +24,10 @@ describe('BuyButton', () => {
 
 		mockContextStore = initHeroContext();
 
+		// initHeroContext starts as loading, which now disables the button; these cases are
+		// about a hero that has finished loading.
+		mockContextStore.loading.set(false);
+
 		mockContextStore.inflowActionsDisabled.set(false);
 
 		vi.spyOn(onramperEnv, 'ONRAMPER_API_KEY', 'get').mockImplementation(
