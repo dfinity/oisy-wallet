@@ -147,48 +147,56 @@ describe('tokens.derived', () => {
 
 	const erc721EnabledNoSection = {
 		...mockErc721CustomToken,
+		address: `${mockErc721CustomToken.address}1`,
 		enabled: true,
 		section: undefined
 	};
 
 	const erc721DisabledNoSection = {
 		...mockErc721CustomToken,
+		address: `${mockErc721CustomToken.address}2`,
 		enabled: false,
 		section: undefined
 	};
 
 	const erc1155EnabledNoSection = {
 		...mockErc1155CustomToken,
+		address: `${mockErc1155CustomToken.address}1`,
 		enabled: true,
 		section: undefined
 	};
 
 	const erc1155DisabledNoSection = {
 		...mockErc1155CustomToken,
+		address: `${mockErc1155CustomToken.address}2`,
 		enabled: false,
 		section: undefined
 	};
 
 	const erc721EnabledSpam = {
 		...mockErc721CustomToken,
+		address: `${mockErc721CustomToken.address}3`,
 		enabled: true,
 		section: CustomTokenSection.SPAM
 	};
 
 	const erc721DisabledSpam = {
 		...mockErc721CustomToken,
+		address: `${mockErc721CustomToken.address}4`,
 		enabled: false,
 		section: CustomTokenSection.SPAM
 	};
 
 	const erc1155EnabledHidden = {
 		...mockErc1155CustomToken,
+		address: `${mockErc1155CustomToken.address}3`,
 		enabled: true,
 		section: CustomTokenSection.HIDDEN
 	};
 
 	const erc1155DisabledHidden = {
 		...mockErc1155CustomToken,
+		address: `${mockErc1155CustomToken.address}4`,
 		enabled: false,
 		section: CustomTokenSection.HIDDEN
 	};
