@@ -40,6 +40,7 @@
 		class:shadow-sm={!$nftGroupByCollection}
 		class:text-primary={!$nftGroupByCollection}
 		class:text-secondary={$nftGroupByCollection}
+		aria-pressed={!$nftGroupByCollection}
 		data-tid={NFT_GROUP_TOGGLE_UNGROUPED}
 		onclick={() => setGrouping(false)}
 		type="button"
@@ -55,6 +56,7 @@
 		class:shadow-sm={$nftGroupByCollection}
 		class:text-primary={$nftGroupByCollection}
 		class:text-secondary={!$nftGroupByCollection}
+		aria-pressed={$nftGroupByCollection}
 		data-tid={NFT_GROUP_TOGGLE_COLLECTIONS}
 		onclick={() => setGrouping(true)}
 		type="button"
