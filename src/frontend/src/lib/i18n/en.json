@@ -968,9 +968,9 @@
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
-			"no_nfts_found": "No Collectibles found",
-			"no_nfts_found_desc": "Adjust your search or network to find your Collectibles",
-			"select_nft": "Select Collectible"
+			"no_nfts_found": "No collectibles found",
+			"no_nfts_found_desc": "Adjust your search or network to find your collectibles",
+			"select_nft": "Select collectible"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
