@@ -3,7 +3,7 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { ercFungibleTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
+	import { ercTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
@@ -11,7 +11,8 @@
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
 		decodeErc20AbiData,
-		findErcFungibleTransfer,
+		findErcTransfer,
+		formatErcTransferAsset,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer,
 		isMaxUint256,
@@ -121,10 +122,10 @@
 	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
 	let ercTransfer = $derived(
 		isSend && value === ZERO && nonNullish(token) && isTokenEthereumNative(token)
-			? findErcFungibleTransfer({
+			? findErcTransfer({
 					hash,
 					networkId: token.network.id,
-					transfers: $ercFungibleTransfersByNetworkAndHash
+					transfers: $ercTransfersByNetworkAndHash
 				})
 			: undefined
 	);
@@ -139,6 +140,16 @@
 			: nonNullish(transferToken)
 				? dataValue
 				: undefined
+	);
+
+	let transferAssetText = $derived(
+		nonNullish(transferToken)
+			? formatErcTransferAsset({
+					token: transferToken,
+					value: transferValue,
+					tokenId: ercTransfer?.transaction.tokenId
+				})
+			: undefined
 	);
 
 	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
@@ -271,13 +282,8 @@
 								displayDecimals: displayToken.decimals
 							})}
 							{displayToken.symbol}
-						{:else if nonNullish(transferValue)}
-							{formatToken({
-								value: transferValue,
-								unitName: displayToken.decimals,
-								displayDecimals: displayToken.decimals
-							})}
-							{displayToken.symbol}
+						{:else if nonNullish(transferAssetText)}
+							{transferAssetText}
 						{/if}
 					</output>
 				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
