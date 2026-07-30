@@ -6,6 +6,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { getTokenDisplayName } from '$lib/utils/token.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
 	createMockEthTransactionsUi,
@@ -21,6 +22,19 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 		disconnect: async () => {}
 	})
 }));
+
+vi.mock(import('$eth/derived/erc721.derived'), async (importOriginal) => {
+	const { readable } = await import('svelte/store');
+	const { mockValidErc721Token } = await import('$tests/mocks/erc721-tokens.mock');
+
+	const mockToken = { ...mockValidErc721Token, enabled: true };
+
+	return {
+		...importOriginal,
+		erc721Tokens: readable([mockToken]),
+		enabledErc721Tokens: readable([mockToken])
+	};
+});
 
 vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
 	const { readable } = await import('svelte/store');
@@ -403,6 +417,27 @@ describe('EthTransactionModal', () => {
 
 			afterEach(() => {
 				ethTransactionsStore.reset(USDC_TOKEN.id);
+			});
+
+			it('should describe a non-fungible transfer by collection and token id', () => {
+				// Only the NFT transfer may share the hash, or it would resolve to nothing.
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{ data: { ...mockErc20Transfer, value: 1n, tokenId: 123 }, certified: false }
+					]
+				});
+
+				const { getByText } = render(EthTransactionModal, {
+					transaction: mockRouterTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(`${getTokenDisplayName(mockValidErc721Token)} #123`)).toBeInTheDocument();
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
 			});
 
 			it('should display amount and recipient of the loaded transfer', () => {
