@@ -8,7 +8,8 @@
 		isTransactionPending,
 		isMaxUint256,
 		decodeErc20AbiData,
-		isErc20TransactionDeposit
+		isErc20TransactionDeposit,
+		isErc20TransactionTransfer
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -50,8 +51,10 @@
 
 	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
 
+	let isErc20Transfer = $derived(type === 'send' && isErc20TransactionTransfer(data));
+
 	let { to: dataTo, value: dataValue } = $derived(
-		(isApprove || isErc20Deposit) && nonNullish(data)
+		(isApprove || isErc20Deposit || isErc20Transfer) && nonNullish(data)
 			? decodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
@@ -76,8 +79,10 @@
 			: undefined
 	);
 
-	let approveToken = $derived(
-		isApprove && nonNullish(to)
+	// Both `approve` and ERC20 `transfer` transactions are addressed to the ERC20 contract, so the
+	// transaction `to` identifies the token the transaction is about - not the spender or the recipient.
+	let contractToken = $derived(
+		(isApprove || isErc20Transfer) && nonNullish(to)
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: to, networkId }) &&
@@ -85,6 +90,13 @@
 				)
 			: undefined
 	);
+
+	let approveToken = $derived(isApprove ? contractToken : undefined);
+
+	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
+	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
+	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
+	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -116,11 +128,27 @@
 		return symbolText;
 	});
 
+	let transferAmountText = $derived(
+		nonNullish(transferToken) && nonNullish(dataValue)
+			? `${formatToken({
+					value: dataValue,
+					displayDecimals: transferToken.decimals,
+					unitName: transferToken.decimals
+				})} ${getTokenDisplaySymbol(transferToken)}`
+			: undefined
+	);
+
 	let label = $derived.by(() => {
 		if (type === 'send') {
 			if (isErc20Deposit && nonNullish(depositToken) && nonNullish(depositValue)) {
 				return replacePlaceholders($i18n.send.text.send_token, {
 					$token: `${depositValue} ${depositToken.symbol}`
+				});
+			}
+
+			if (nonNullish(transferAmountText)) {
+				return replacePlaceholders($i18n.send.text.send_token, {
+					$token: transferAmountText
 				});
 			}
 
@@ -178,7 +206,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit
+		isApprove || isErc20Deposit || nonNullish(transferToken)
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined
