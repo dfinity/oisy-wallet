@@ -125,12 +125,12 @@ export const groupEthTransactionsByNetworkAndHash = <T>({
 };
 
 /**
- * Finds the ERC transfer that a transaction hash belongs to.
+ * Finds every ERC transfer that a transaction hash produced.
  *
- * A swap or a batch send emits several transfers under the same hash. None of them describes the
- * transaction on its own, so an ambiguous hash resolves to nothing rather than to an arbitrary leg.
+ * More than one means the transaction moved several assets - a swap, a batch send, a token that
+ * splits a transfer - so no single transfer describes it.
  */
-export const findErcTransfer = ({
+export const findErcTransfers = ({
 	hash,
 	networkId,
 	transfers
@@ -138,14 +138,22 @@ export const findErcTransfer = ({
 	hash: string | undefined;
 	networkId: NetworkId;
 	transfers: Map<NetworkId, Map<string, ErcTransfer[]>>;
+}): ErcTransfer[] => (isNullish(hash) ? [] : (transfers.get(networkId)?.get(hash) ?? []));
+
+/**
+ * Finds the ERC transfer that a transaction hash belongs to.
+ *
+ * A swap or a batch send emits several transfers under the same hash. None of them describes the
+ * transaction on its own, so an ambiguous hash resolves to nothing rather than to an arbitrary leg.
+ */
+export const findErcTransfer = (params: {
+	hash: string | undefined;
+	networkId: NetworkId;
+	transfers: Map<NetworkId, Map<string, ErcTransfer[]>>;
 }): ErcTransfer | undefined => {
-	if (isNullish(hash)) {
-		return;
-	}
+	const matches = findErcTransfers(params);
 
-	const matches = transfers.get(networkId)?.get(hash);
-
-	return matches?.length === 1 ? matches[0] : undefined;
+	return matches.length === 1 ? matches[0] : undefined;
 };
 
 /**

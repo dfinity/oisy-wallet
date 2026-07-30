@@ -551,6 +551,61 @@ describe('EthTransaction', () => {
 				ethTransactionsStore.reset(mockValidErc721Token.id);
 			});
 
+			it('should read as a fee when several transfers share the hash', () => {
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{ data: { ...mockErc20Transfer, value: 1n, tokenId: 123 }, certified: false }
+					]
+				});
+
+				const { container, getByTestId } = render(EthTransaction, {
+					props: {
+						transaction: mockRouterTx,
+						token: ETHEREUM_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					get(i18n).fee.text.fee
+				);
+
+				const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+				assertNonNullish(amountElement);
+
+				expect(amountElement.textContent).toBe(expectedFeeAmount);
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
+			});
+
+			it('should still name the asset when the calldata describes a split transfer', () => {
+				ethTransactionsStore.set({
+					tokenId: USDC_TOKEN.id,
+					transactions: [
+						{ data: mockErc20Transfer, certified: false },
+						{ data: { ...mockErc20Transfer, value: 500000n }, certified: false }
+					]
+				});
+
+				const { getByTestId } = render(EthTransaction, {
+					props: {
+						transaction: mockTransferTx,
+						token: ETHEREUM_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					replacePlaceholders(get(i18n).send.text.send_token, {
+						$token: `${formatToken({
+							value: 10000000n,
+							displayDecimals: USDC_TOKEN.decimals,
+							unitName: USDC_TOKEN.decimals
+						})} ${getTokenDisplaySymbol(USDC_TOKEN)}`
+					})
+				);
+			});
+
 			it('should ignore the loaded transfer when rendering the transfer for its own token', () => {
 				const { getByTestId } = render(EthTransaction, {
 					props: {

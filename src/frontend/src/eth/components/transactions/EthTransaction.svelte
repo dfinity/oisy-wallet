@@ -10,7 +10,7 @@
 		isTransactionPending,
 		isMaxUint256,
 		decodeErc20AbiData,
-		findErcTransfer,
+		findErcTransfers,
 		formatErcTransferAsset,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer
@@ -101,17 +101,23 @@
 	let approveToken = $derived(isApprove ? contractToken : undefined);
 
 	// A zero-value native send is the fee entry of a token transfer: the transfer itself moved no
-	// native value. Its loaded counterpart is the `Transfer` event, so it describes a direct transfer,
-	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
-	let ercTransfer = $derived(
+	// native value. Its loaded counterparts are the `Transfer` events, so they describe a direct
+	// transfer, a router send and a `transferFrom` alike - unlike the calldata, which covers the first.
+	let ercTransfers = $derived(
 		type === 'send' && value === ZERO && isTokenEthereumNative(token)
-			? findErcTransfer({
+			? findErcTransfers({
 					hash,
 					networkId: token.network.id,
 					transfers: $ercTransfersByNetworkAndHash
 				})
-			: undefined
+			: []
 	);
+
+	let ercTransfer = $derived(ercTransfers.length === 1 ? ercTransfers[0] : undefined);
+
+	// Several transfers under one hash - a swap, a batch send - and the entry describes none of them.
+	// All it accounts for is the fee that paid for them, so that is what it reads as.
+	let isCombinedFee = $derived(ercTransfers.length > 1);
 
 	// Falls back to the calldata when the transferred token is not loaded, so that the entry does not
 	// change label once an unrelated token list finishes loading.
@@ -181,6 +187,12 @@
 				});
 			}
 
+			// Checked after the calldata, which still names the asset when a single transfer is split
+			// into several - a fee-on-transfer token, for instance.
+			if (isCombinedFee) {
+				return $i18n.fee.text.fee;
+			}
+
 			return $i18n.send.text.send;
 		}
 
@@ -235,7 +247,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit || nonNullish(transferToken)
+		isApprove || isErc20Deposit || nonNullish(transferToken) || isCombinedFee
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined
