@@ -335,15 +335,15 @@
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
-					isGasless: $isSourceTokenPermitSupported ?? false,
-					destinationNetwork: $destinationToken.network,
-					swapDetails: selectedProvider.swapDetails
+					isGasless: $isSourceTokenPermitSupported ?? false
 				};
 
+				// `swapDetails` is spread inside each branch so that `type` narrows it to the quote
+				// shape of the matching mode.
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
-					await fetchVeloraDeltaSwap(params);
+					await fetchVeloraDeltaSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				} else {
-					await fetchVeloraMarketSwap(params);
+					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {

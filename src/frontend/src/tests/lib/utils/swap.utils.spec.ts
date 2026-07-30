@@ -60,7 +60,7 @@ import {
 } from '$tests/mocks/near-intents.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
-	mockVeloraBridgeSwapResponse,
+	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaSwapResponse
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
@@ -406,7 +406,7 @@ describe('swap utils', () => {
 	});
 
 	describe('mapVeloraSwapResult', () => {
-		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
+		it('should map a same-chain DeltaPrice result correctly', () => {
 			const mockDeltaSwap: DeltaSwapResponse = {
 				...mockVeloraDeltaSwapResponse
 			};
@@ -414,21 +414,22 @@ describe('swap utils', () => {
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(900n);
+			expect(result.receiveAmount).toBe(900000000n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 
-		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: DeltaSwapResponse = {
-				...mockVeloraBridgeSwapResponse
+		it('should read the destination step of a cross-chain route, not the origin one', () => {
+			const mockCrossChainSwap: DeltaSwapResponse = {
+				...mockVeloraCrossChainSwapResponse
 			};
 
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockCrossChainSwap);
 
-			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
+			// The origin step is denominated in the 18-decimal source token; only the destination
+			// step carries the amount in the 6-decimal destination token.
+			expect(result.receiveAmount).toBe(99976241n);
+			expect(result.swapDetails).toBe(mockCrossChainSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});
