@@ -3,12 +3,15 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { ercFungibleTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
 		decodeErc20AbiData,
+		findErcFungibleTransfer,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer,
 		isMaxUint256,
@@ -26,6 +29,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -60,6 +64,7 @@
 		to,
 		type,
 		approveSpender,
+		transferRecipient,
 		data,
 		gasUsed,
 		gasPrice
@@ -111,12 +116,32 @@
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
-	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
-	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
-	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
-	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
+	// A zero-value native send is the fee entry of a token transfer: the transfer itself moved no
+	// native value. Its loaded counterpart is the `Transfer` event, so it describes a direct transfer,
+	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
+	let ercTransfer = $derived(
+		isSend && value === ZERO && nonNullish(token) && isTokenEthereumNative(token)
+			? findErcFungibleTransfer({
+					hash,
+					networkId: token.network.id,
+					transfers: $ercFungibleTransfersByNetworkAndHash
+				})
+			: undefined
+	);
 
-	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
+	// Falls back to the calldata when the transferred token is not loaded, so that the hero does not
+	// change once an unrelated token list finishes loading.
+	let transferToken = $derived(ercTransfer?.token ?? (isErc20Transfer ? contractToken : undefined));
+
+	let transferValue = $derived(
+		nonNullish(ercTransfer)
+			? ercTransfer.transaction.value
+			: nonNullish(transferToken)
+				? dataValue
+				: undefined
+	);
+
+	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
 
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
 
@@ -130,6 +155,10 @@
 
 	let toExplorerUrl: string | undefined = $derived(
 		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
+	);
+
+	let recipientExplorerUrl: string | undefined = $derived(
+		notEmptyString(recipient) ? `${explorerBaseUrl}/address/${recipient}` : undefined
 	);
 
 	let approveSpenderExplorerUrl = $derived(
@@ -274,13 +303,13 @@
 				{onSaveAddressComplete}
 				type="approve"
 			/>
-		{:else if nonNullish(to) && nonNullish(from)}
+		{:else if nonNullish(recipient) && nonNullish(from)}
 			<TransactionContactCard
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
-				{to}
-				{toExplorerUrl}
+				to={recipient}
+				toExplorerUrl={recipientExplorerUrl}
 				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}

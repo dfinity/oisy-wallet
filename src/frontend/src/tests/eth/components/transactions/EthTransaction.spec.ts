@@ -6,10 +6,11 @@ import {
 	ERC20_DEPOSIT_HASH,
 	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { createMockEthTransactionsUi } from '$tests/mocks/eth-transactions.mock';
@@ -298,12 +299,16 @@ describe('EthTransaction', () => {
 		const mockGasUsed = 21000n;
 		const mockGasPrice = 1000000000n;
 
-		// As listed among the native token transactions: no value, addressed to the ERC20 contract.
+		const mockTransferRecipient = '0x1234567890AbcdEF1234567890aBcdef12345678';
+
+		// As listed among the native token transactions: no value, addressed to the ERC20 contract,
+		// with the recipient decoded from the calldata by `mapEthTransactionUi`.
 		const mockTransferTx = {
 			...mockTrx,
 			type: 'send' as const,
 			value: ZERO,
 			to: USDC_TOKEN.address,
+			transferRecipient: mockTransferRecipient,
 			data: mockTransferData,
 			gasUsed: mockGasUsed,
 			gasPrice: mockGasPrice
@@ -408,6 +413,106 @@ describe('EthTransaction', () => {
 					showPlusSign: true
 				})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`
 			);
+		});
+
+		it('should render the recipient of the transfer instead of the token contract', () => {
+			const { getByText, queryByText } = render(EthTransaction, {
+				props: {
+					transaction: mockTransferTx,
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: mockTransferRecipient }))
+			).toBeInTheDocument();
+
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }))
+			).not.toBeInTheDocument();
+		});
+
+		describe('with the transfer loaded for its own token', () => {
+			// A router send: the calldata is not a plain `transfer`, so only the loaded transfer describes it.
+			const mockRouterTx = {
+				...mockTransferTx,
+				to: mockEthAddress2,
+				transferRecipient: undefined,
+				data: '0xabcdef'
+			};
+
+			const mockErc20Transfer = {
+				...mockTrx,
+				hash: mockRouterTx.hash,
+				to: mockTransferRecipient,
+				value: 20000000n
+			};
+
+			beforeEach(() => {
+				ethTransactionsStore.set({
+					tokenId: USDC_TOKEN.id,
+					transactions: [{ data: mockErc20Transfer, certified: false }]
+				});
+			});
+
+			afterEach(() => {
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+			});
+
+			it('should render label, amount and recipient of the loaded transfer', () => {
+				const { container, getByTestId, getByText } = render(EthTransaction, {
+					props: {
+						transaction: mockRouterTx,
+						token: ETHEREUM_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					replacePlaceholders(get(i18n).send.text.send_token, {
+						$token: `${formatToken({
+							value: 20000000n,
+							displayDecimals: USDC_TOKEN.decimals,
+							unitName: USDC_TOKEN.decimals
+						})} ${getTokenDisplaySymbol(USDC_TOKEN)}`
+					})
+				);
+
+				const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+				assertNonNullish(amountElement);
+
+				expect(amountElement.textContent).toBe(expectedFeeAmount);
+
+				expect(
+					getByText(shortenWithMiddleEllipsis({ text: mockTransferRecipient }))
+				).toBeInTheDocument();
+			});
+
+			it('should ignore the loaded transfer for a native transaction that moved value', () => {
+				const { getByTestId } = render(EthTransaction, {
+					props: {
+						transaction: { ...mockRouterTx, value: 123450000000000n },
+						token: ETHEREUM_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					get(i18n).send.text.send
+				);
+			});
+
+			it('should ignore the loaded transfer when rendering the transfer for its own token', () => {
+				const { getByTestId } = render(EthTransaction, {
+					props: {
+						transaction: { ...mockErc20Transfer, type: 'send' as const, id: mockErc20Transfer.id },
+						token: USDC_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					get(i18n).send.text.send
+				);
+			});
 		});
 	});
 });
