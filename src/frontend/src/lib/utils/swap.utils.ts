@@ -38,8 +38,7 @@ import {
 	type ProviderFee,
 	type Slippage,
 	type SwapMappedResult,
-	type SwapProvidersConfig,
-	type VeloraSwapDetails
+	type SwapProvidersConfig
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -189,26 +188,20 @@ export const formatReceiveOutMinimum = ({
 	});
 };
 
-export const mapVeloraSwapResult = (swap: DeltaSwapResponse): SwapMappedResult => ({
+export const mapVeloraSwapResult = ({ delta }: DeltaSwapResponse): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
-	receiveAmount:
-		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).
-		// For example, if we request a swap from USDC-BSC (18 digits) to USDC-BASE (6 digits), the destination amount is returned as if it has 18 digits instead of 6.
-		// This causes issues in the normal formatting of our code, since we expect each amount to be strictly related to its reference token.
-		// To avoid this issue, we could use the `bridgeInfo` data that Velora adds for this specific cases: it specify the correct amount to look at when the bridge is treating tokens with scaling factor.
-		// This is not documented anywhere in Velora documentation, it was the result of a direct conversations with them.
-		// TODO: remove this disclaimer where Velora fixes this issue on their side.
-		'bridgeInfo' in swap.delta
-			? BigInt(swap.delta.bridgeInfo.destAmountAfterBridge)
-			: BigInt(swap.delta.destAmount),
-	swapDetails: swap.delta as VeloraSwapDetails,
+	// The destination step of the route is already denominated in the destination token, on the
+	// destination chain. Reading it here also covers cross-chain quotes whose two tokens have
+	// different decimals — the bridge scaling factor is applied by Velora before we see it.
+	receiveAmount: BigInt(delta.route.destination.output.amount),
+	swapDetails: delta,
 	type: VeloraSwapTypes.DELTA
 });
 
 export const mapVeloraMarketSwapResult = (swap: OptimalRate): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount: BigInt(swap.destAmount),
-	swapDetails: swap as VeloraSwapDetails,
+	swapDetails: swap,
 	type: VeloraSwapTypes.MARKET
 });
 
