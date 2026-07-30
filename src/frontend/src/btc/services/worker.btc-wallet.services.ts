@@ -13,7 +13,11 @@ import {
 } from '$lib/stores/address.store';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataRequestBtc } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestBtc,
+	PostMessageScheduler
+} from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
 import {
@@ -34,8 +38,14 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 		super(worker);
 
 		this.setOnMessage(
-			({ data: dataMsg }: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
-				const { msg, data } = dataMsg;
+			({ data: dataMsg }: MessageEvent<PostMessageScheduler<BtcPostMessageDataResponseWallet>>) => {
+				const { ref, msg, data } = dataMsg;
+
+				// A pooled worker is shared by several BTC tokens, so drop any message meant for
+				// another token. The scheduler stamps `ref` with the Bitcoin address.
+				if (ref !== this.data.btcAddress.data) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncBtcWallet':
@@ -97,13 +107,14 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 
 		const hideToast = isRegtestNetwork || isTestnetNetwork || (isMainnetNetwork && !STAGING);
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({ pooled: true, poolKey: data.btcAddress.data });
 		return new BtcWalletWorker(worker, tokenId, data, hideToast);
 	}
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopBtcWalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestBtc>>({
+			msg: 'stopBtcWalletTimer',
+			data: this.data
 		});
 	};
 

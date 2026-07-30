@@ -37,8 +37,8 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			({ data: dataMsg }: MessageEvent<PostMessageScheduler<SolPostMessageDataResponseWallet>>) => {
 				const { ref, msg, data } = dataMsg;
 
-				// This is an additional guard because it may happen that the worker is initialised as a singleton.
-				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				// A pooled worker is shared by several Solana tokens, so drop any message meant for
+				// another token. The scheduler stamps `ref` with the token address + network.
 				if (ref !== `${this.data.tokenAddress ?? SOLANA_TOKEN.symbol}-${this.data.solanaNetwork}`) {
 					return;
 				}
@@ -99,13 +99,17 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 			tokenOwnerAddress
 		};
 
-		const worker = await AppWorker.getInstance();
+		const worker = await AppWorker.getInstance({
+			pooled: true,
+			poolKey: `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
+		});
 		return new SolWalletWorker(worker, tokenId, data);
 	}
 
 	protected override stopTimer = () => {
-		this.postMessage({
-			msg: 'stopSolWalletTimer'
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
+			msg: 'stopSolWalletTimer',
+			data: this.data
 		});
 	};
 

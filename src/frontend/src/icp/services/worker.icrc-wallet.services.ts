@@ -16,7 +16,6 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '$lib/utils/device.utils';
 import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
@@ -85,7 +84,7 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		const worker = await AppWorker.getInstance({ pooled: true, poolKey: ledgerCanisterId });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}
 

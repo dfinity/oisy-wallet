@@ -4,6 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import { mockIndexCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
@@ -23,6 +24,15 @@ class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
 	terminate: () => void = vi.fn();
+	// A pooled worker registers its listener via addEventListener; route it onto `onmessage` so the
+	// existing `workerInstance.onmessage?.(...)` triggers below drive the pooled listener.
+	addEventListener = vi.fn((...args: [string, (event: MessageEvent) => void]) => {
+		const [, listener] = args;
+		this.onmessage = listener;
+	});
+	removeEventListener = vi.fn(() => {
+		this.onmessage = null;
+	});
 }
 
 vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
@@ -64,6 +74,7 @@ describe('worker.icrc-wallet.services', () => {
 
 			beforeEach(async () => {
 				vi.clearAllMocks();
+				AppWorker.resetForTesting();
 
 				worker = await IcrcWalletWorker.init(mockToken);
 			});
@@ -248,6 +259,7 @@ describe('worker.icrc-wallet.services', () => {
 
 			beforeEach(async () => {
 				vi.clearAllMocks();
+				AppWorker.resetForTesting();
 
 				worker = await IcrcWalletWorker.init(mockToken);
 			});

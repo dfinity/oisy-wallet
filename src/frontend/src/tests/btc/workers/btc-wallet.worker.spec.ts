@@ -229,6 +229,18 @@ describe('btc-wallet.worker', () => {
 					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 				});
 
+				it('should post the wallet data when triggered without a prior start', async () => {
+					// A trigger can reach a freshly created scheduler (the worker-side dispatch creates one
+					// when the key is unknown), so the ref must be set by trigger itself — otherwise the
+					// sync runs but its result is silently dropped.
+					await scheduler.trigger(startData);
+
+					await awaitJobExecution();
+
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+				});
+
 				it('should stop the scheduler', () => {
 					scheduler.stop();
 

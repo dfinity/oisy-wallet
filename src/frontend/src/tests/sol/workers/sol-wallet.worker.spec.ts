@@ -1,19 +1,28 @@
 import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
-import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
-import { createMockEvent, excludeValidMessageEvents } from '$tests/mocks/workers.mock';
+import { excludeValidMessageEvents } from '$tests/mocks/workers.mock';
 
-vi.mock(import('$sol/schedulers/sol-wallet.scheduler'), async (importOriginal) => {
-	const actual = await importOriginal();
-	const scheduler = actual.SolWalletScheduler;
-	scheduler.prototype.start = vi.fn();
-	scheduler.prototype.stop = vi.fn();
-	scheduler.prototype.trigger = vi.fn();
-	return {
-		...actual,
-		SolWalletScheduler: scheduler
-	};
+const hoisted = vi.hoisted(() => {
+	const schedulerInstances: {
+		start: ReturnType<typeof vi.fn>;
+		stop: ReturnType<typeof vi.fn>;
+		trigger: ReturnType<typeof vi.fn>;
+	}[] = [];
+
+	return { schedulerInstances };
 });
+
+vi.mock('$sol/schedulers/sol-wallet.scheduler', () => ({
+	SolWalletScheduler: class {
+		start = vi.fn();
+		stop = vi.fn();
+		trigger = vi.fn();
+
+		constructor() {
+			hoisted.schedulerInstances.push(this);
+		}
+	}
+}));
 
 describe('sol-wallet.worker', () => {
 	describe('onSolWalletMessage', () => {
@@ -23,67 +32,82 @@ describe('sol-wallet.worker', () => {
 			'triggerSolWalletTimer'
 		]);
 
-		const mockStart = vi.fn();
-		const mockStop = vi.fn();
-		const mockTrigger = vi.fn();
+		// Only `tokenAddress` + `solanaNetwork` drive the scheduler key. Distinct token addresses per
+		// test keep the module-level scheduler map free of cross-test interference.
+		const solData = (tokenAddress?: string): PostMessageDataRequestSol =>
+			({ solanaNetwork: 'mainnet', tokenAddress }) as unknown as PostMessageDataRequestSol;
 
-		const createEvent = (msg: string) =>
-			createMockEvent(msg) as unknown as MessageEvent<PostMessage<PostMessageDataRequestSol>>;
+		const createEvent = ({
+			msg,
+			data
+		}: {
+			msg: string;
+			data?: PostMessageDataRequestSol;
+		}): MessageEvent<PostMessage<PostMessageDataRequestSol>> =>
+			({ data: { msg, data } }) as unknown as MessageEvent<PostMessage<PostMessageDataRequestSol>>;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-
-			SolWalletScheduler.prototype.start = mockStart;
-			SolWalletScheduler.prototype.stop = mockStop;
-			SolWalletScheduler.prototype.trigger = mockTrigger;
+			hoisted.schedulerInstances.length = 0;
 		});
 
-		it('should stop the scheduler when message is stopSolWalletTimer', async () => {
-			const event = createEvent('stopSolWalletTimer');
+		it('should start a scheduler for the token key', async () => {
+			const data = solData('mint-start');
 
-			await onSolWalletMessage(event);
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));
 
-			expect(mockStop).toHaveBeenCalledOnce();
-
-			expect(mockStart).not.toHaveBeenCalled();
-			expect(mockTrigger).not.toHaveBeenCalled();
+			expect(hoisted.schedulerInstances).toHaveLength(1);
+			expect(hoisted.schedulerInstances[0].start).toHaveBeenCalledExactlyOnceWith(data);
 		});
 
-		it('should start the scheduler when message is startSolWalletTimer', async () => {
-			const event = createEvent('startSolWalletTimer');
+		it('should trigger a scheduler for the token key', async () => {
+			const data = solData('mint-trigger');
 
-			await onSolWalletMessage(event);
+			await onSolWalletMessage(createEvent({ msg: 'triggerSolWalletTimer', data }));
 
-			expect(mockStart).toHaveBeenCalledOnce();
-			expect(mockStart).toHaveBeenNthCalledWith(1, event.data.data);
-
-			expect(mockStop).not.toHaveBeenCalled();
-			expect(mockTrigger).not.toHaveBeenCalled();
+			expect(hoisted.schedulerInstances).toHaveLength(1);
+			expect(hoisted.schedulerInstances[0].trigger).toHaveBeenCalledExactlyOnceWith(data);
 		});
 
-		it('should trigger the scheduler when message is triggerSolWalletTimer', async () => {
-			const event = createEvent('triggerSolWalletTimer');
+		it('should stop the scheduler previously started for the key', async () => {
+			const data = solData('mint-stop');
 
-			await onSolWalletMessage(event);
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));
+			await onSolWalletMessage(createEvent({ msg: 'stopSolWalletTimer', data }));
 
-			expect(mockTrigger).toHaveBeenCalledOnce();
-			expect(mockTrigger).toHaveBeenNthCalledWith(1, event.data.data);
-
-			expect(mockStart).not.toHaveBeenCalled();
-			expect(mockStop).not.toHaveBeenCalled();
+			expect(hoisted.schedulerInstances).toHaveLength(1);
+			expect(hoisted.schedulerInstances[0].stop).toHaveBeenCalledOnce();
 		});
 
-		it.each(invalidMessages)(
-			'should not call any scheduler method when message is %s',
-			async (msg) => {
-				const event = createEvent(msg);
+		it('should keep a separate scheduler per token key without clobbering', async () => {
+			const dataA = solData('mint-a');
+			const dataB = solData('mint-b');
 
-				await onSolWalletMessage(event);
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data: dataA }));
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data: dataB }));
 
-				expect(mockStart).not.toHaveBeenCalled();
-				expect(mockStop).not.toHaveBeenCalled();
-				expect(mockTrigger).not.toHaveBeenCalled();
-			}
-		);
+			expect(hoisted.schedulerInstances).toHaveLength(2);
+			expect(hoisted.schedulerInstances[0].start).toHaveBeenCalledExactlyOnceWith(dataA);
+			expect(hoisted.schedulerInstances[1].start).toHaveBeenCalledExactlyOnceWith(dataB);
+			// Starting token B must not stop token A's scheduler.
+			expect(hoisted.schedulerInstances[0].stop).not.toHaveBeenCalled();
+		});
+
+		it('should restart the scheduler for a key, stopping the previous one', async () => {
+			const data = solData('mint-restart');
+
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));
+			await onSolWalletMessage(createEvent({ msg: 'startSolWalletTimer', data }));
+
+			expect(hoisted.schedulerInstances).toHaveLength(2);
+			expect(hoisted.schedulerInstances[0].stop).toHaveBeenCalledOnce();
+			expect(hoisted.schedulerInstances[1].start).toHaveBeenCalledExactlyOnceWith(data);
+		});
+
+		it.each(invalidMessages)('should not touch any scheduler when message is %s', async (msg) => {
+			await onSolWalletMessage(createEvent({ msg, data: solData('mint-invalid') }));
+
+			expect(hoisted.schedulerInstances).toHaveLength(0);
+		});
 	});
 });
