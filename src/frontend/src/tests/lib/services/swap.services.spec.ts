@@ -1067,6 +1067,30 @@ describe('swap.services', () => {
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 		});
+
+		it('rounds the slippage to integer basis points when building the order', async () => {
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				// 0.29 * 100 === 28.999999999999996 in IEEE-754 — must reach the SDK as 29
+				slippageValue: '0.29',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails
+			});
+
+			expect(mockDeltaContractBuildDeltaOrder).toHaveBeenCalledWith(
+				expect.objectContaining({ slippage: 29 })
+			);
+		});
 	});
 
 	describe('fetchVeloraMarketSwap', () => {
@@ -1186,6 +1210,28 @@ describe('swap.services', () => {
 
 			expect(mockSwapGetSpender).toHaveBeenCalled();
 			expect(mockSwapBuildTx).toHaveBeenCalled();
+		});
+
+		it('rounds the slippage to integer basis points when building the transaction', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				// 0.29 * 100 === 28.999999999999996 in IEEE-754 — must reach the SDK as 29
+				slippageValue: '0.29',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			});
+
+			expect(mockSwapBuildTx).toHaveBeenCalledWith(expect.objectContaining({ slippage: 29 }));
 		});
 	});
 
