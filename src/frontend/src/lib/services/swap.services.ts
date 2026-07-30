@@ -1141,11 +1141,12 @@ export const fetchVeloraDeltaSwap = async ({
 	let builtOrder;
 
 	// The quoted route carries the tokens, the amounts and the destination chain, so the order is
-	// built server-side from it; slippage is expressed in basis points rather than as a floor amount.
+	// built server-side from it; slippage is expressed in basis points, which must be an integer —
+	// rounding guards against IEEE-754 noise in the percent conversion (0.29 * 100 === 28.999…).
 	const deltaOrderBaseParams: BuildDeltaOrderParams = {
 		route: swapDetails.route,
 		side: SWAP_SIDE,
-		slippage: Number(slippageValue) * 100,
+		slippage: Math.round(Number(slippageValue) * 100),
 		owner: userAddress,
 		partner: OISY_URL_HOSTNAME
 	};
@@ -1301,7 +1302,8 @@ export const fetchVeloraMarketSwap = async ({
 		srcToken: geSwapEthTokenAddress(sourceToken),
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcAmount: swapDetails.srcAmount,
-		slippage: Number(slippageValue) * 100,
+		// Basis points must be an integer — see the rounding note in fetchVeloraDeltaSwap.
+		slippage: Math.round(Number(slippageValue) * 100),
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
