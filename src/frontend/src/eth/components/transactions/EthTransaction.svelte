@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
+	import { ercFungibleTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
+	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
 		isTransactionPending,
 		isMaxUint256,
 		decodeErc20AbiData,
+		findErcFungibleTransfer,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
@@ -42,6 +46,8 @@
 		from,
 		tokenId,
 		approveSpender,
+		transferRecipient,
+		hash,
 		data,
 		gasUsed,
 		gasPrice
@@ -93,10 +99,32 @@
 
 	let approveToken = $derived(isApprove ? contractToken : undefined);
 
-	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
-	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
-	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
-	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
+	// A zero-value native send is the fee entry of a token transfer: the transfer itself moved no
+	// native value. Its loaded counterpart is the `Transfer` event, so it describes a direct transfer,
+	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
+	let ercTransfer = $derived(
+		type === 'send' && value === ZERO && isTokenEthereumNative(token)
+			? findErcFungibleTransfer({
+					hash,
+					networkId: token.network.id,
+					transfers: $ercFungibleTransfersByNetworkAndHash
+				})
+			: undefined
+	);
+
+	// Falls back to the calldata when the transferred token is not loaded, so that the entry does not
+	// change label once an unrelated token list finishes loading.
+	let transferToken = $derived(ercTransfer?.token ?? (isErc20Transfer ? contractToken : undefined));
+
+	let transferValue = $derived(
+		nonNullish(ercTransfer)
+			? ercTransfer.transaction.value
+			: nonNullish(transferToken)
+				? dataValue
+				: undefined
+	);
+
+	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -129,9 +157,9 @@
 	});
 
 	let transferAmountText = $derived(
-		nonNullish(transferToken) && nonNullish(dataValue)
+		nonNullish(transferToken) && nonNullish(transferValue)
 			? `${formatToken({
-					value: dataValue,
+					value: transferValue,
 					displayDecimals: transferToken.decimals,
 					unitName: transferToken.decimals
 				})} ${getTokenDisplaySymbol(transferToken)}`
@@ -226,7 +254,7 @@
 	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{status}
 	timestamp={transactionDate}
-	{to}
+	to={recipient}
 	token={isApprove ? token : displayToken}
 	{tokenId}
 	{type}
