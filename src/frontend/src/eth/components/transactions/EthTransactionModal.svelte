@@ -10,6 +10,7 @@
 	import {
 		decodeErc20AbiData,
 		isErc20TransactionDeposit,
+		isErc20TransactionTransfer,
 		isMaxUint256,
 		mapAddressToName
 	} from '$eth/utils/transactions.utils';
@@ -72,8 +73,10 @@
 
 	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
 
+	let isErc20Transfer = $derived(isSend && isErc20TransactionTransfer(data));
+
 	let { to: dataTo, value: dataValue } = $derived(
-		(isApprove || isErc20Deposit) && nonNullish(data)
+		(isApprove || isErc20Deposit || isErc20Transfer) && nonNullish(data)
 			? decodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
@@ -90,8 +93,10 @@
 
 	let depositValue = $derived(isErc20Deposit ? dataValue : undefined);
 
-	let approveToken = $derived(
-		isApprove && nonNullish(to) && nonNullish(token)
+	// Both `approve` and ERC20 `transfer` transactions are addressed to the ERC20 contract, so the
+	// transaction `to` identifies the token the transaction is about - not the spender or the recipient.
+	let contractToken = $derived(
+		(isApprove || isErc20Transfer) && nonNullish(to) && nonNullish(token)
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: to, networkId }) &&
@@ -100,11 +105,20 @@
 			: undefined
 	);
 
+	let approveToken = $derived(isApprove ? contractToken : undefined);
+
 	let approveValue = $derived(isApprove ? dataValue : undefined);
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
-	let displayToken = $derived(depositToken ?? approveToken ?? token);
+	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
+	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
+	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
+	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
+
+	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
+
+	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
 
@@ -208,7 +222,7 @@
 			{/snippet}
 
 			{#snippet title()}
-				{#if (isApprove || isErc20Deposit) && nonNullish(displayToken)}
+				{#if (isApprove || isErc20Deposit || nonNullish(transferToken)) && nonNullish(displayToken)}
 					<output>
 						{#if isUnlimitedApprove}
 							{replacePlaceholders($i18n.core.text.unlimited, {
@@ -224,6 +238,13 @@
 						{:else if nonNullish(depositValue)}
 							{formatToken({
 								value: depositValue,
+								unitName: displayToken.decimals,
+								displayDecimals: displayToken.decimals
+							})}
+							{displayToken.symbol}
+						{:else if nonNullish(transferValue)}
+							{formatToken({
+								value: transferValue,
 								unitName: displayToken.decimals,
 								displayDecimals: displayToken.decimals
 							})}
