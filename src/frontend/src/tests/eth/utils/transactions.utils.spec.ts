@@ -4,12 +4,13 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.
 import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { ErcFungibleTransfer } from '$eth/types/eth-transaction';
+import type { ErcTransfer } from '$eth/types/eth-transaction';
 import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
-	findErcFungibleTransfer,
+	findErcTransfer,
+	formatErcTransferAsset,
 	groupEthTransactionsByNetworkAndHash,
 	isErc20TransactionTransfer,
 	isMaxUint256,
@@ -22,12 +23,15 @@ import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
+import { formatToken } from '$lib/utils/format.utils';
+import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import {
 	mockCkEthereumMinterAddress,
 	mockCkMinterInfo,
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
@@ -340,8 +344,42 @@ describe('transactions.utils', () => {
 		});
 	});
 
-	describe('findErcFungibleTransfer', () => {
-		const transfer: ErcFungibleTransfer = {
+	describe('formatErcTransferAsset', () => {
+		it('should format the amount and symbol of a fungible transfer', () => {
+			expect(formatErcTransferAsset({ token: USDC_TOKEN, value: 10000000n })).toBe(
+				`${formatToken({
+					value: 10000000n,
+					displayDecimals: USDC_TOKEN.decimals,
+					unitName: USDC_TOKEN.decimals
+				})} ${getTokenDisplaySymbol(USDC_TOKEN)}`
+			);
+		});
+
+		it('should return undefined for a fungible transfer without a value', () => {
+			expect(formatErcTransferAsset({ token: USDC_TOKEN, value: undefined })).toBeUndefined();
+		});
+
+		it('should describe a non-fungible transfer by collection and token id', () => {
+			expect(formatErcTransferAsset({ token: mockValidErc721Token, value: 1n, tokenId: 123 })).toBe(
+				`${getTokenDisplayName(mockValidErc721Token)} #123`
+			);
+		});
+
+		it('should not format the value of a non-fungible transfer as an amount', () => {
+			expect(
+				formatErcTransferAsset({ token: mockValidErc721Token, value: 1n, tokenId: 123 })
+			).not.toContain(mockValidErc721Token.symbol);
+		});
+
+		it('should fall back to the collection alone without a token id', () => {
+			expect(formatErcTransferAsset({ token: mockValidErc721Token, value: 1n })).toBe(
+				getTokenDisplayName(mockValidErc721Token)
+			);
+		});
+	});
+
+	describe('findErcTransfer', () => {
+		const transfer: ErcTransfer = {
 			transaction: { ...transaction, hash: '0xaaa' },
 			token: USDC_TOKEN
 		};
@@ -359,27 +397,27 @@ describe('transactions.utils', () => {
 
 		it('should find the unique transfer of a hash', () => {
 			expect(
-				findErcFungibleTransfer({ hash: '0xaaa', networkId: ETHEREUM_NETWORK_ID, transfers })
+				findErcTransfer({ hash: '0xaaa', networkId: ETHEREUM_NETWORK_ID, transfers })
 			).toStrictEqual(transfer);
 		});
 
 		it('should return undefined when several transfers share the hash', () => {
 			expect(
-				findErcFungibleTransfer({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
+				findErcTransfer({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
 			).toBeUndefined();
 		});
 
 		it('should return undefined for an unknown hash, network or nullish hash', () => {
 			expect(
-				findErcFungibleTransfer({ hash: '0xccc', networkId: ETHEREUM_NETWORK_ID, transfers })
+				findErcTransfer({ hash: '0xccc', networkId: ETHEREUM_NETWORK_ID, transfers })
 			).toBeUndefined();
 
 			expect(
-				findErcFungibleTransfer({ hash: '0xaaa', networkId: SEPOLIA_NETWORK_ID, transfers })
+				findErcTransfer({ hash: '0xaaa', networkId: SEPOLIA_NETWORK_ID, transfers })
 			).toBeUndefined();
 
 			expect(
-				findErcFungibleTransfer({ hash: undefined, networkId: ETHEREUM_NETWORK_ID, transfers })
+				findErcTransfer({ hash: undefined, networkId: ETHEREUM_NETWORK_ID, transfers })
 			).toBeUndefined();
 		});
 	});

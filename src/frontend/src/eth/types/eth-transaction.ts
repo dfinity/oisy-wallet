@@ -16,13 +16,13 @@ export interface EthTransactionUi extends Omit<Transaction, 'type'> {
 }
 
 /**
- * An ERC fungible token transfer, together with the token it was loaded for.
+ * An ERC token transfer - fungible or not - together with the token it was loaded for.
  *
  * The transaction that performs a token transfer is addressed to the token contract, so it is listed
  * among the transactions of the native token that paid its fee as well. That native entry knows
  * nothing about the token - the hash is all that relates the two - hence this pairing.
  */
-export interface ErcFungibleTransfer {
+export interface ErcTransfer {
 	transaction: Transaction;
 	token: Token;
 }
