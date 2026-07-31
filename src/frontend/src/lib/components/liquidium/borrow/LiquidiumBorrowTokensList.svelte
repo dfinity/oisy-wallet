@@ -5,7 +5,7 @@
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { liquidiumBorrowMarkets } from '$lib/derived/liquidium.derived';
-	import { tokens } from '$lib/derived/tokens.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
@@ -25,15 +25,22 @@
 
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
+	let enabledTokenIds = $derived(new Set($enabledFungibleTokens.map(({ id }) => id)));
+
 	let entries = $derived(
 		$liquidiumBorrowMarkets
 			.map((market) => ({
 				market,
-				token: liquidiumMarketToken({ chain: market.chain, asset: market.asset, tokens: $tokens })
+				token: liquidiumMarketToken({
+					chain: market.chain,
+					asset: market.asset,
+					tokens: $enabledFungibleTokens
+				})
 			}))
 			.filter(
 				(entry): entry is { market: LiquidiumMarket; token: Token } =>
 					nonNullish(entry.token) &&
+					enabledTokenIds.has(entry.token.id) &&
 					!(
 						entry.market.poolId === selectedMarket?.poolId &&
 						entry.market.chain === selectedMarket?.chain
