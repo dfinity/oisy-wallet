@@ -44,6 +44,16 @@ describe('LiquidiumSupplyTokensList', () => {
 		available: true
 	};
 
+	const ethMarket: LiquidiumMarket = {
+		poolId: 'pool-eth',
+		asset: 'ETH',
+		chain: 'ETH',
+		supplyApy: 2,
+		borrowApy: 6,
+		frozen: false,
+		available: true
+	};
+
 	const ckBtcMarket: LiquidiumMarket = {
 		poolId: 'pool-btc',
 		asset: 'BTC',
@@ -110,7 +120,11 @@ describe('LiquidiumSupplyTokensList', () => {
 	});
 
 	it('lists every available token when no market is selected (neutral launch)', () => {
-		liquidiumStore.set({ markets: [btcMarket, usdcMarket], portfolio: null, assetPrices: {} });
+		liquidiumStore.set({
+			markets: [btcMarket, usdcMarket, ethMarket],
+			portfolio: null,
+			assetPrices: {}
+		});
 
 		const { getByText } = render(LiquidiumSupplyTokensList, {
 			props: { onSelectMarket: () => {}, onClose: () => {} },
@@ -119,6 +133,7 @@ describe('LiquidiumSupplyTokensList', () => {
 
 		expect(getByText(BTC_MAINNET_TOKEN.symbol)).toBeInTheDocument();
 		expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+		expect(getByText(ETHEREUM_TOKEN.symbol)).toBeInTheDocument();
 	});
 
 	it('omits the rails of the networks the user disabled, keeping their ck twins', () => {
@@ -140,7 +155,7 @@ describe('LiquidiumSupplyTokensList', () => {
 		});
 
 		liquidiumStore.set({
-			markets: [btcMarket, usdcMarket, ckBtcMarket],
+			markets: [btcMarket, usdcMarket, ethMarket, ckBtcMarket],
 			portfolio: null,
 			assetPrices: {}
 		});
