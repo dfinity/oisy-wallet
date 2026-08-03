@@ -1,4 +1,6 @@
-import { toastsStore } from '$lib/stores/toasts.store';
+import { toastsNetworkUnreachableOr, toastsStore } from '$lib/stores/toasts.store';
+import en from '$tests/mocks/i18n.mock';
+import { HttpFetchErrorCode, TransportError } from '@dfinity/agent';
 import { get } from 'svelte/store';
 
 describe('toasts.store', () => {
@@ -83,5 +85,49 @@ describe('toasts.store', () => {
 		toastsStore.reset([]);
 
 		expect(get(toastsStore)).toHaveLength(0);
+	});
+
+	describe('toastsNetworkUnreachableOr', () => {
+		const networkError = () =>
+			TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')));
+
+		beforeEach(() => {
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+		});
+
+		it('shows the short connection message and skips the fallback', () => {
+			const fallback = vi.fn();
+
+			toastsNetworkUnreachableOr({ err: networkError(), fallback });
+
+			expect(fallback).not.toHaveBeenCalled();
+			expect(get(toastsStore)[0].text).toBe(en.init.error.network_unreachable);
+		});
+
+		// The whole point: agent-js's developer text must not ride along on the message.
+		it('does not append the raw agent-js detail', () => {
+			toastsNetworkUnreachableOr({ err: networkError(), fallback: vi.fn() });
+
+			expect(get(toastsStore)[0].text).not.toContain('Failed to fetch HTTP request');
+			expect(get(toastsStore)[0].text).not.toContain('Load failed');
+		});
+
+		it('defers to the fallback for any other error', () => {
+			const fallback = vi.fn();
+
+			toastsNetworkUnreachableOr({ err: new Error('Boom'), fallback });
+
+			expect(fallback).toHaveBeenCalledOnce();
+			expect(get(toastsStore)).toHaveLength(0);
+		});
+
+		it('logs the error even though it is kept out of the message', () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error');
+			const err = networkError();
+
+			toastsNetworkUnreachableOr({ err, fallback: vi.fn() });
+
+			expect(consoleErrorSpy).toHaveBeenCalledWith(err);
+		});
 	});
 });

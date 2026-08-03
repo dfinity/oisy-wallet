@@ -17,10 +17,16 @@ import {
 	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+} from '$lib/enums/plausible';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { RewardType } from '$lib/enums/reward-type';
+import { trackExceptionalError } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsNetworkUnreachableOr } from '$lib/stores/toasts.store';
 import {
 	AlreadyClaimedError,
 	InvalidCampaignError,
@@ -37,10 +43,43 @@ import type {
 	UserRoleResult
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
+import { isNetworkUnreachableError } from '$lib/utils/error.utils';
 import { INITIAL_REWARD_RESULT, mapEligibilityReport } from '$lib/utils/rewards.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
+
+/**
+ * Reward data is loaded in the background and the wallet works without it, so a failure here
+ * stays a toast — it must never escalate to the full-page error state. An unreachable network
+ * gets one short connection message plus the outage event; anything else keeps the existing
+ * reward-specific message with its error detail, since that detail is the only clue we have.
+ */
+const trackBackgroundLoadFailure = ({
+	subcontext,
+	err
+}: {
+	subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE;
+	err: unknown;
+}) => {
+	if (isNetworkUnreachableError(err)) {
+		trackExceptionalError({
+			subcontext,
+			code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
+			err
+		});
+	}
+
+	toastsNetworkUnreachableOr({
+		err,
+		fallback: () =>
+			toastsError({
+				msg: { text: get(i18n).vip.reward.error.loading_user_data },
+				err
+			})
+	});
+};
 
 const queryEligibilityReport = async (params: {
 	identity: Identity;
@@ -107,9 +146,8 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 	try {
 		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
-		const { vip } = get(i18n);
-		toastsError({
-			msg: { text: vip.reward.error.loading_user_data },
+		trackBackgroundLoadFailure({
+			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_ROLES,
 			err
 		});
 
@@ -162,9 +200,8 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 	try {
 		return await queryRewards({ ...params, certified: false });
 	} catch (err: unknown) {
-		const { vip } = get(i18n);
-		toastsError({
-			msg: { text: vip.reward.error.loading_user_data },
+		trackBackgroundLoadFailure({
+			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
 			err
 		});
 	}

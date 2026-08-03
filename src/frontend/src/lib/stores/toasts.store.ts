@@ -1,8 +1,9 @@
+import { i18n } from '$lib/stores/i18n.store';
 import type { ToastLevel, ToastMsg, ToastMsgUI } from '$lib/types/toast';
 import { consoleError } from '$lib/utils/console.utils';
-import { errorDetailToString } from '$lib/utils/error.utils';
+import { errorDetailToString, isNetworkUnreachableError } from '$lib/utils/error.utils';
 import { nonNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 
 export interface ToastsStore extends Readable<ToastMsgUI[]> {
 	show: (msg: Partial<Pick<ToastMsgUI, 'id'>> & Omit<ToastMsgUI, 'id'>) => symbol;
@@ -81,6 +82,34 @@ export const toastsError = ({ msg: { text, ...rest }, err }: ToastsErrorParams):
 		...rest,
 		level: 'error'
 	});
+};
+
+/**
+ * For a *non-blocking* failure: when the network is unreachable, show one short connection
+ * message; otherwise defer to the caller's own error handling.
+ *
+ * The calm message deliberately omits `err`, so `toastsError` does not append agent-js's
+ * `Failed to fetch HTTP request: Load failed` — developer text that reads like a crash and
+ * tells the user nothing they can act on. The error is still logged to the console.
+ *
+ * Blocking failures must not use this: they belong on `InfrastructureErrorPage`, which can
+ * actually offer a way out. This is for data the wallet works fine without.
+ */
+export const toastsNetworkUnreachableOr = ({
+	err,
+	fallback
+}: {
+	err: unknown;
+	fallback: () => void;
+}): void => {
+	if (isNetworkUnreachableError(err)) {
+		consoleError(err);
+
+		toastsError({ msg: { text: get(i18n).init.error.network_unreachable } });
+		return;
+	}
+
+	fallback();
 };
 
 export const toastsErrorNoTrace = ({ msg, err }: ToastsErrorParams) => {
