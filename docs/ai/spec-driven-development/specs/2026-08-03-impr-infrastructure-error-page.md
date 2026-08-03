@@ -117,9 +117,9 @@ The event fires from the classification point, once per failed operation — not
 
 ## i18n
 
-New keys under the existing `init` block in `src/frontend/src/lib/i18n/en.json` (the failure is init-scoped, and `init.error` already hosts the initialization failures): the page's heading, explanation, details label, reload label and logout label, plus the short connection message used by Part 3.
+New keys under the existing `init` block in `src/frontend/src/lib/i18n/en.json` (the failure is init-scoped, and `init.error` already hosts the initialization failures): an `init.unavailable` sub-block for the page's heading, explanation, details label, reload label and logout label, plus the short connection message for Part 3 in `init.error`.
 
-The 14 other locales (`ar`, `cs`, `de`, `es`, `fr`, `hi`, `it`, `ja`, `ko-KR`, `pl`, `pt`, `ru`, `vi`, `zh-CN`) need real translations in the same PR — the `auto-update-i18n` workflow only syncs structure and does not machine-translate. Keep the copy short: the `compare-sizes` CI gate sums raw + gzipped across all 16 locale chunks, so verbose strings multiply into the bundle budget 16×.
+The 14 other locales (`ar`, `cs`, `de`, `es`, `fr`, `hi`, `it`, `ja`, `ko-KR`, `pl`, `pt`, `ru`, `vi`, `zh-CN`) get the keys synced as empty strings by `npm run i18n`, and `mergeWithFallback` serves the English value for any empty translation — so this PR ships English copy everywhere and a follow-up i18n PR supplies the translations. Keep the copy short regardless: the `compare-sizes` CI gate sums raw + gzipped across all 16 locale chunks, so verbose strings multiply into the bundle budget 16×.
 
 `settings.error.loading_profile` moves to `init.error` as part of this work — the string was never a settings concern (this is the correction that PR #12693 was opened for; see below).
 
@@ -152,6 +152,8 @@ _Both questions originally raised here were resolved while writing the spec; kep
 
 ## Pending decisions (facts are clear — we just need to decide)
 
-- **Error-code property.** Use the already-documented `result_error_code` (analytics doc §4), or introduce `event_code` as PR #13145 does. Recommendation: `result_error_code`, because it is documented today and avoids colliding with #13145's enum while that PR is open.
-- **i18n placement of the page copy.** A new `init.unavailable.*` sub-block, or flat additions to `init.text` / `init.error`. Recommendation: a dedicated sub-block, so the page's copy reads as one unit rather than scattering across two existing blocks.
-- **Whether translations ship in this PR or a follow-up.** Bundling them keeps `main` consistent but makes the diff large and pushes the `compare-sizes` gate; splitting means one PR briefly ships English-only copy. Recommendation: bundle, since the strings are few and short.
+_All three were decided before implementation started._
+
+- **Error-code property.** _Resolved: `result_error_code`._ It is already documented in analytics doc §4, and it avoids introducing `PLAUSIBLE_EVENT_CODES` in a second open branch while #13145 still carries it. If #13145 lands first, migrating this event to `event_code` is a one-line rename.
+- **i18n placement of the page copy.** _Resolved: a dedicated `init.unavailable.*` sub-block_, so the page's copy reads as one unit instead of scattering across `init.text` and `init.error`. The short Part 3 connection message stays in `init.error`, where the other initialization failures live.
+- **Whether translations ship in this PR or a follow-up.** _Resolved: English first, translations in a follow-up i18n PR._ Verified safe: `npm run i18n` syncs the new keys into the 14 other locale files as empty strings, and `mergeWithFallback` (`src/frontend/src/lib/utils/i18n.utils.ts`) substitutes the English value for any nullish-or-empty translation at runtime. So non-English users see English copy — never blank labels — until the follow-up fills them in. This also keeps the `compare-sizes` gate light for this PR.
