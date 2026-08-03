@@ -13,6 +13,7 @@ import { RewardCanister } from '$lib/canisters/reward.canister';
 import { REWARDS_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { RewardClaimApiResponse } from '$lib/types/reward';
+import { simulateInfrastructureFailureIfEnabled } from '$lib/utils/infrastructure-failure-simulator.utils';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 const rewardApi = new CanisterApi<RewardCanister>();
@@ -30,6 +31,11 @@ export const getUserInfo = async ({
 	identity,
 	certified
 }: CanisterApiFunctionParams<QueryParams>): Promise<UserData> => {
+	// DEMO ONLY — see `infrastructure-failure-simulator.utils.ts`. Both background reward loads
+	// (`getUserRoles` and `getRewards`) funnel through here, so this single call site covers the
+	// whole non-blocking path.
+	simulateInfrastructureFailureIfEnabled('rewards');
+
 	const { getUserInfo } = await rewardCanister({ identity });
 
 	return getUserInfo({ certified });
