@@ -766,16 +766,16 @@
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。",
 			"loading_profile": "加载用户资料时出错。请刷新页面以获得完整体验。",
-			"network_unreachable": ""
+			"network_unreachable": "无法连接到网络。部分信息可能无法显示。"
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "无法连接到网络",
+			"description": "$oisy_short 无法连接到 Internet Computer。可能是您的网络连接问题，或是网络的临时故障。您的资产是安全的，未受影响。",
+			"details": "技术详情",
+			"operation": "加载失败：$operation",
+			"reload": "刷新",
+			"logout": "退出登录",
+			"logout_hint": "注销将清除所有缓存数据"
 		}
 	},
 	"hero": {

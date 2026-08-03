@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Error al cargar la información de la billetera BTC.",
 			"sol_wallet_error": "Error al cargar la información de la billetera SOL.",
 			"loading_profile": "Error al cargar el perfil. Por favor, actualiza la página para tener la experiencia completa.",
-			"network_unreachable": ""
+			"network_unreachable": "No se pudo conectar con la red. Puede que falte algo de información."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "No se puede conectar con la red",
+			"description": "$oisy_short no pudo conectarse a Internet Computer. Puede tratarse de tu conexión a internet o de un problema temporal de la red. Tus fondos están seguros y no se han visto afectados.",
+			"details": "Detalles técnicos",
+			"operation": "No se pudo cargar: $operation",
+			"reload": "Actualizar",
+			"logout": "Cerrar sesión",
+			"logout_hint": "Cerrar sesión borrará todos los datos en caché"
 		}
 	},
 	"hero": {

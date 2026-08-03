@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Erreur lors du chargement des informations du portefeuille BTC.",
 			"sol_wallet_error": "Erreur lors du chargement des informations du portefeuille SOL.",
 			"loading_profile": "Erreur lors du chargement du profil. Veuillez actualiser la page pour profiter de l'expérience complète.",
-			"network_unreachable": ""
+			"network_unreachable": "Réseau inaccessible. Certaines informations peuvent être manquantes."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "Réseau inaccessible",
+			"description": "$oisy_short n'a pas pu se connecter à Internet Computer. Cela peut venir de votre connexion internet ou d'un problème temporaire du réseau. Vos fonds sont en sécurité et ne sont pas affectés.",
+			"details": "Détails techniques",
+			"operation": "Échec du chargement : $operation",
+			"reload": "Actualiser",
+			"logout": "Se déconnecter",
+			"logout_hint": "La déconnexion effacera toutes les données mises en cache"
 		}
 	},
 	"hero": {
