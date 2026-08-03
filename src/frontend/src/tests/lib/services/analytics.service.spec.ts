@@ -562,4 +562,85 @@ describe('plausible analytics service', () => {
 
 		consoleDebugSpy.mockRestore();
 	});
+
+	describe('trackExceptionalError', () => {
+		const load = async () => {
+			const services = await import('$lib/services/analytics.services');
+			await services.initPlausibleAnalytics();
+			return services;
+		};
+
+		it('should emit the exceptional_error event with the full metadata', async () => {
+			const { trackExceptionalError } = await load();
+			const { PLAUSIBLE_EVENTS, ...enums } = await import('$lib/enums/plausible');
+
+			trackExceptionalError({
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
+				err: new Error('Failed to fetch HTTP request: Load failed')
+			});
+
+			expect(trackMock).toHaveBeenCalledWith(PLAUSIBLE_EVENTS.EXCEPTIONAL_ERROR, {
+				props: {
+					event_context: enums.PLAUSIBLE_EVENT_CONTEXTS.INFRASTRUCTURE,
+					event_subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+					result_status: enums.PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					result_error_code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+					result_error_severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
+					result_error_text: 'Failed to fetch HTTP request: Load failed'
+				}
+			});
+		});
+
+		it('should omit result_error_text rather than send undefined when no error is given', async () => {
+			const { trackExceptionalError } = await load();
+			const enums = await import('$lib/enums/plausible');
+
+			trackExceptionalError({
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
+			});
+
+			const [[, options]] = trackMock.mock.calls;
+
+			expect(options.props).not.toHaveProperty('result_error_text');
+		});
+
+		// Plausible truncates long values, so we cap it ourselves and keep the useful head.
+		it('should cap a very long error text', async () => {
+			const { trackExceptionalError } = await load();
+			const enums = await import('$lib/enums/plausible');
+
+			trackExceptionalError({
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_ROLES,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
+				err: new Error('x'.repeat(1000))
+			});
+
+			const [[, options]] = trackMock.mock.calls;
+
+			expect(options.props.result_error_text).toHaveLength(300);
+		});
+
+		// Privacy invariant (analytics.md §6): an IC request ID is unique per request and must
+		// never reach a dashboard.
+		it('should strip the IC request ID from the error text', async () => {
+			const { trackExceptionalError } = await load();
+			const enums = await import('$lib/enums/plausible');
+
+			trackExceptionalError({
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
+				err: new Error('Call failed\nRequest ID: 0123456789abcdef\nStatus: rejected')
+			});
+
+			const [[, options]] = trackMock.mock.calls;
+
+			expect(options.props.result_error_text).not.toContain('0123456789abcdef');
+		});
+	});
 });

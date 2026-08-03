@@ -4,6 +4,7 @@ import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	type PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
@@ -12,6 +13,7 @@ import {
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
+	type PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
 import en from '$lib/i18n/en.json';
@@ -19,8 +21,9 @@ import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
 let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
@@ -248,4 +251,49 @@ export const buildLearnMoreEvent = ({
 			source_path
 		}
 	};
+};
+
+// Plausible truncates long property values, and a raw agent-js message can carry a whole
+// headers blob. Cap it so the useful head of the message survives instead of being cut
+// at an arbitrary point by the tracker.
+const MAX_ERROR_TEXT_LENGTH = 300;
+
+/**
+ * Emit the one event that says "OISY could not do its job for reasons outside the user's
+ * control" — an outage, not a rejected operation.
+ *
+ * Deliberately one generic event rather than a counter per failure: an outage is only
+ * otherwise observable as an *absence* of other events, which is exactly when a signal
+ * matters most. `event_subcontext` says what broke and `result_error_severity` says
+ * whether the wallet is unusable (`blocker`) or merely degraded (`major`).
+ *
+ * Privacy (analytics.md §6): the only free text emitted is the sanitised transport error,
+ * which carries no principal, address, amount, or user content.
+ */
+export const trackExceptionalError = ({
+	subcontext,
+	code,
+	severity,
+	err
+}: {
+	subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE;
+	code: PLAUSIBLE_EVENT_ERROR_CODES;
+	severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES;
+	err?: unknown;
+}) => {
+	const errorText = nonNullish(err) ? replaceIcErrorFields(err) : undefined;
+
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.EXCEPTIONAL_ERROR,
+		metadata: {
+			event_context: PLAUSIBLE_EVENT_CONTEXTS.INFRASTRUCTURE,
+			event_subcontext: subcontext,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			result_error_code: code,
+			result_error_severity: severity,
+			...(notEmptyString(errorText) && {
+				result_error_text: errorText.slice(0, MAX_ERROR_TEXT_LENGTH)
+			})
+		}
+	});
 };

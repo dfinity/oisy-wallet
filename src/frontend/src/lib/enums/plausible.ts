@@ -24,11 +24,19 @@ export enum PLAUSIBLE_EVENTS {
 	LIMIT_ORDER = 'limit_order',
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
-	PERSONAL_NOTE_SHARE = 'personal_note_share'
+	PERSONAL_NOTE_SHARE = 'personal_note_share',
+	EXCEPTIONAL_ERROR = 'exceptional_error'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
-	MAJOR = 'major'
+	BLOCKER = 'blocker',
+	CRITICAL = 'critical',
+	MAJOR = 'major',
+	MINOR = 'minor'
+}
+
+export enum PLAUSIBLE_EVENT_ERROR_CODES {
+	NETWORK_UNREACHABLE = 'network_unreachable'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -51,7 +59,15 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NETWORKS = 'networks',
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
-	PERSONAL_NOTES = 'personal_notes'
+	PERSONAL_NOTES = 'personal_notes',
+	INFRASTRUCTURE = 'infrastructure'
+}
+
+// The operation that could not complete, so a dashboard can group an outage by what broke.
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE {
+	USER_PROFILE = 'user_profile',
+	USER_ROLES = 'user_roles',
+	REWARDS = 'rewards'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {
