@@ -168,6 +168,21 @@ describe('loader.services', () => {
 			expect(signOut).toHaveBeenCalledOnce();
 		});
 
+		// The infrastructure error page owns this failure and offers a reload; signing out would
+		// throw the user back to the landing page over what may be a momentarily dropped connection.
+		it('should keep the session when the network is unreachable', async () => {
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'network-unreachable'
+			});
+
+			await initLoader(mockParams);
+
+			expect(signOut).not.toHaveBeenCalled();
+			expect(infoSignOut).not.toHaveBeenCalled();
+			expect(mockProgressAndLoad).not.toHaveBeenCalled();
+		});
+
 		it('should sign out via infoSignOut when signups are closed', async () => {
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({
 				success: false,

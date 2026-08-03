@@ -1,12 +1,20 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
+import {
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+} from '$lib/enums/plausible';
+import { trackExceptionalError } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { isNetworkUnreachableError } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -61,7 +69,7 @@ export const loadCertifiedUserProfile = async ({
 	}
 };
 
-export type LoadUserProfileFailureReason = 'signups-closed' | 'unknown';
+export type LoadUserProfileFailureReason = 'signups-closed' | 'network-unreachable' | 'unknown';
 
 export const loadUserProfile = async ({
 	identity,
@@ -105,13 +113,37 @@ export const loadUserProfile = async ({
 			return { success: false, err: 'signups-closed' };
 		}
 
-		const { settings } = get(i18n);
+		// The profile gates the whole app, so an unreachable network here is not something a
+		// toast can help with: it hands over to `InfrastructureErrorPage` instead, which can
+		// offer a reload. Deliberately no toast and no sign-out — discarding the session over
+		// a dropped connection is hostile when a reload would have fixed it.
+		if (isNetworkUnreachableError(err)) {
+			consoleError('Failed to load the user profile: the network is unreachable.', err);
+
+			infrastructureError.set({
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+				err
+			});
+
+			trackExceptionalError({
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+				code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+				severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
+				err
+			});
+
+			return { success: false, err: 'network-unreachable' };
+		}
+
+		const { init } = get(i18n);
 		toastsError({
-			msg: { text: settings.error.loading_profile },
+			msg: { text: init.error.loading_profile },
 			err
 		});
 		return { success: false, err: 'unknown' };
 	}
+
+	infrastructureError.reset();
 
 	return { success: true };
 };
