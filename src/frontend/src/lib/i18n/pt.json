@@ -764,7 +764,18 @@
 			"allow_signing": "Ocorreu um problema ao configurar sua carteira para assinar. Você foi desconectado. Se o problema persistir, entre em contato com o suporte.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Erro ao carregar informações da carteira BTC.",
-			"sol_wallet_error": "Erro ao carregar informações da carteira SOL."
+			"sol_wallet_error": "Erro ao carregar informações da carteira SOL.",
+			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
+			"network_unreachable": ""
+		},
+		"unavailable": {
+			"title": "",
+			"description": "",
+			"details": "",
+			"operation": "",
+			"reload": "",
+			"logout": "",
+			"logout_hint": ""
 		}
 	},
 	"hero": {
@@ -830,7 +841,6 @@
 			"appearance_system": "Habilita o modo de cor do seu sistema operacional"
 		},
 		"error": {
-			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
 			"export_exchange_rate_unavailable": "As taxas de câmbio ainda estão carregando. Tente novamente em alguns instantes.",
 			"export_failed": "Não foi possível gerar sua exportação. Tente novamente."
 		}

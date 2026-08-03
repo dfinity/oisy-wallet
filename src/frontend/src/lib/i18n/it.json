@@ -764,7 +764,18 @@
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
-			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
+			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL.",
+			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
+			"network_unreachable": ""
+		},
+		"unavailable": {
+			"title": "",
+			"description": "",
+			"details": "",
+			"operation": "",
+			"reload": "",
+			"logout": "",
+			"logout_hint": ""
 		}
 	},
 	"hero": {
@@ -830,7 +841,6 @@
 			"appearance_system": "Abilita la modalità colore del sistema operativo"
 		},
 		"error": {
-			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
 			"export_exchange_rate_unavailable": "I tassi di cambio sono ancora in caricamento. Riprova tra un momento.",
 			"export_failed": "Non siamo riusciti a generare l'esportazione. Riprova."
 		}
