@@ -1,3 +1,4 @@
+import { AgentError, ErrorKindEnum, HttpErrorCode, HttpFetchErrorCode } from '@dfinity/agent';
 import { isEmptyString, isNullish, jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const errorDetailToString = (err: unknown): string | undefined =>
@@ -191,6 +192,40 @@ const IC_VERSION_MISMATCH_MARKER = 'Version mismatch';
 
 export const isVersionMismatchError = (err: unknown): boolean =>
 	err instanceof Error && err.message.includes(IC_VERSION_MISMATCH_MARKER);
+
+const IC_FETCH_FAILURE_MARKER = 'Failed to fetch HTTP request';
+
+// A boundary node that answers with one of these is as unreachable as one that does not
+// answer at all: 5xx is the gateway itself failing, 429 is it refusing to route us.
+const isGatewayFailureStatus = (status: number): boolean => status >= 500 || status === 429;
+
+/**
+ * Whether the Internet Computer could not be reached at all.
+ *
+ * Matching a single error kind is not enough, because the two outage shapes agent-js
+ * produces live in different ones: a rejected `fetch` — offline, DNS failure, refused
+ * connection — arrives as a `Transport` kind carrying `HttpFetchErrorCode`, while a
+ * boundary node answering 502 / 503 / 429 arrives as a `Protocol` kind carrying
+ * `HttpErrorCode`. Checking only the former would miss the most common outage mode.
+ *
+ * A polling timeout (`TimeoutWaitingForResponseErrorCode`) is deliberately excluded: it
+ * is as likely to mean a slow canister as an unreachable network, and treating it as an
+ * outage would take the whole app over on a merely slow call.
+ *
+ * The message marker is a fallback for errors that lost their prototype crossing a
+ * boundary (a worker `postMessage`, or re-wrapping), where `instanceof` no longer holds.
+ */
+export const isNetworkUnreachableError = (err: unknown): boolean => {
+	if (err instanceof AgentError) {
+		if (err.kind === ErrorKindEnum.Transport || err.code instanceof HttpFetchErrorCode) {
+			return true;
+		}
+
+		return err.code instanceof HttpErrorCode && isGatewayFailureStatus(err.code.status);
+	}
+
+	return err instanceof Error && err.message.includes(IC_FETCH_FAILURE_MARKER);
+};
 
 const IC_CALL_CONTEXT_MARKER = 'Call context:';
 const IC_CANISTER_ID_KEY = 'Canister ID';

@@ -1,12 +1,20 @@
 import {
 	errorDetailToString,
 	formatIcCallError,
+	isNetworkUnreachableError,
 	isVersionMismatchError,
 	mapIcErrorMetadata,
 	parseIcErrorMessage,
 	replaceErrorFields,
 	replaceIcErrorFields
 } from '$lib/utils/error.utils';
+import {
+	HttpErrorCode,
+	HttpFetchErrorCode,
+	ProtocolError,
+	TimeoutWaitingForResponseErrorCode,
+	TransportError
+} from '@dfinity/agent';
 
 describe('error.utils', () => {
 	describe('errorDetailToString', () => {
@@ -898,6 +906,76 @@ Call context:
 
 		it('should return false for undefined', () => {
 			expect(isVersionMismatchError(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('isNetworkUnreachableError', () => {
+		it('should return true for a rejected fetch (the Transport kind)', () => {
+			expect(
+				isNetworkUnreachableError(
+					TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
+				)
+			).toBeTruthy();
+		});
+
+		// The shape agent-js produces for a boundary node answering 5xx. It is a Protocol kind,
+		// not a Transport one, so a check on `kind` alone would miss the most common outage.
+		it('should return true for a gateway 5xx (the Protocol kind)', () => {
+			expect(
+				isNetworkUnreachableError(
+					ProtocolError.fromCode(new HttpErrorCode(503, 'Service Unavailable', []))
+				)
+			).toBeTruthy();
+		});
+
+		it('should return true for a gateway 429', () => {
+			expect(
+				isNetworkUnreachableError(
+					ProtocolError.fromCode(new HttpErrorCode(429, 'Too Many Requests', []))
+				)
+			).toBeTruthy();
+		});
+
+		it('should return false for a gateway 4xx that is not a rate limit', () => {
+			expect(
+				isNetworkUnreachableError(ProtocolError.fromCode(new HttpErrorCode(404, 'Not Found', [])))
+			).toBeFalsy();
+		});
+
+		// A timeout is as likely to mean a slow canister as an unreachable network, so it must not
+		// take the whole app over.
+		it('should return false for a polling timeout', () => {
+			expect(
+				isNetworkUnreachableError(
+					ProtocolError.fromCode(new TimeoutWaitingForResponseErrorCode('Request timed out'))
+				)
+			).toBeFalsy();
+		});
+
+		// An error that crossed a worker `postMessage` boundary is a plain Error again, so the
+		// message marker is the only thing left to match on.
+		it('should return true for a plain Error that lost its prototype', () => {
+			expect(
+				isNetworkUnreachableError(new Error('Failed to fetch HTTP request: Load failed'))
+			).toBeTruthy();
+		});
+
+		it('should return false for an unrelated Error', () => {
+			expect(isNetworkUnreachableError(new Error('Some other error'))).toBeFalsy();
+		});
+
+		it('should return false for a canister reject', () => {
+			expect(
+				isNetworkUnreachableError(new Error('Call failed:\n  Reject message: "Anonymous caller"'))
+			).toBeFalsy();
+		});
+
+		it.each([
+			{ label: 'a string', value: 'Failed to fetch HTTP request' },
+			{ label: 'null', value: null },
+			{ label: 'undefined', value: undefined }
+		])('should return false for $label', ({ value }) => {
+			expect(isNetworkUnreachableError(value)).toBeFalsy();
 		});
 	});
 });
