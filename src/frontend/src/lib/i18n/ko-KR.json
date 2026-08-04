@@ -729,7 +729,7 @@
 			"no_infura_erc20_icp_provider": "$network 네트워크에 대한 Infura ERC20 ICP 공급자가 없습니다",
 			"no_infura_erc4626_provider": "$network 네트워크에 대한 Infura ERC4626 공급자가 없습니다",
 			"no_solana_network": "$network 네트워크에 대한 솔라나 네트워크가 없습니다",
-			"loading_address": "$symbol 주소를 불러오는 중 오류가 발생했습니다.",
+			"addresses_unavailable": "",
 			"loading_balance": "$network 네트워크의 $symbol 잔액을 불러오는 중 오류가 발생했습니다.",
 			"erc20_contracts": "ERC20 컨트랙트를 불러오는 중 오류가 발생했습니다.",
 			"spl_tokens": "SPL 토큰을 불러오는 중 오류가 발생했습니다.",

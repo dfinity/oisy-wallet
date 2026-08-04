@@ -729,7 +729,7 @@
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
 			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
-			"loading_address": "Errore durante il caricamento dell'indirizzo $symbol.",
+			"addresses_unavailable": "",
 			"loading_balance": "Errore durante il caricamento del saldo $symbol per la rete $network.",
 			"erc20_contracts": "Errore durante il caricamento dei contratti ERC20.",
 			"spl_tokens": "Errore durante il caricamento dei token SPL.",

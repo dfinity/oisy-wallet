@@ -729,7 +729,7 @@
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
-			"loading_address": "Chyba při načítání adresy $symbol.",
+			"addresses_unavailable": "",
 			"loading_balance": "Chyba při načítání zůstatku $symbol pro síť $network.",
 			"erc20_contracts": "Chyba při načítání smluv ERC20.",
 			"spl_tokens": "Chyba při načítání tokenů SPL.",
