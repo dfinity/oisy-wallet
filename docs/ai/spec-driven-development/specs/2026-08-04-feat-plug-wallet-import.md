@@ -94,9 +94,17 @@ This also rules out a global "some balances failed" banner: with permanently dea
 
 ## Part 2 — PR2: sweep ICP and ICRC
 
-Sign locally with the `Secp256k1KeyIdentity` derived from the phrase and transfer to the user's own OISY account. Per-asset action, so each row can be enabled or disabled independently.
+Sign locally with the `Secp256k1KeyIdentity` derived from the phrase and transfer to the signed-in user's own principal via `icrc1_transfer`. Per-asset action, so each row is enabled or disabled independently.
 
-The fee comes out of the same token for ICRC, so a balance that cannot cover its own transfer fee must render as a disabled row with a reason, not a failing action. This is the most common real-world friction in sweep tools and is worth getting right rather than discovering in QA.
+**The phrase stays in one component.** The sweep service takes the already-derived identity, never the phrase, so the phrase never widens beyond the page component that holds it.
+
+**The fee is deducted from the same token**, and the ledger charges it on top of the transferred amount — so the amount sent is `balance - fee`, and a balance at or below its own fee is not sweepable at all. Such a row renders with a reason rather than an action that could only fail. This is the most common real-world friction in sweep tools.
+
+**A blocked row says why.** Two different causes need different wording: a token on a chain whose key OISY does not control (send from the original wallet instead) versus an IC token too small to cover its fee. A single greyed-out button would conflate them.
+
+**Only ICP and ICRC are sweepable.** DIP20 ledgers have no ICRC transfer, and the other chains' keys live in the source wallet's canister. The guard is a type predicate so the fee field is only read where it exists.
+
+**Irreversibility is confirmed.** Each send goes through the shared `ConfirmButtonWithModal`, naming the amount and symbol, since the transfer cannot be undone. Only one send runs at a time; the row in flight shows a spinner and the others are disabled. On success the account's balances reload so the row reflects reality rather than an optimistic guess.
 
 ## Part 3 — PR3: the other chains
 
