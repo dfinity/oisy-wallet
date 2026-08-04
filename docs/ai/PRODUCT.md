@@ -26,6 +26,18 @@ OISY does **not** automatically retry, poll, or reconnect in either case — rec
 
 Both cases emit the `app_error` Plausible event, so an outage is directly observable rather than only inferable from a drop in other events. It distinguishes a connectivity problem on the user's side from an Internet Computer gateway failure, which are indistinguishable to the user but not to us.
 
+## When a network's address cannot be derived
+
+OISY derives each chain's address in the browser from the user's principal and a known signer public key — local computation, not a network call, in every deployed environment. If that derivation fails for a chain it is therefore deterministic: the same user hits it again on every attempt.
+
+**The wallet stays usable and the user stays signed in.** Only the affected chain is impacted; the others keep working. Earlier behaviour signed the user out whenever any one chain's address failed, which — because the failure repeats on every sign-in — locked them out of the wallet entirely over a single chain.
+
+The affected chain reads as unavailable rather than empty: its tokens **stay listed** (hiding assets a user holds would look like lost funds) and show `n/a` for the balance and `-` for the fiat value, and its receive address shows `n/a` instead of a loading skeleton that would never resolve. Actions that need the address, such as sending, are disabled.
+
+One toast names every affected chain, shown **once per chain** rather than on each internal retry, and it offers no "try again" — nothing the user can do changes a deterministic local failure. A genuinely lost session still signs the user out, which is the one case where signing in again helps.
+
+Known limitation: the total portfolio value in the hero omits an unavailable chain's holdings rather than marking the total as partial.
+
 ---
 
 ## Navigation

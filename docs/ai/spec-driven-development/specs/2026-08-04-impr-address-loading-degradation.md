@@ -105,10 +105,17 @@ and `ConvertEth`.
 What therefore remains for this part is narrow — the surfaces where a missing address is shown
 _directly_ rather than via a balance:
 
-- **Receive** (`ReceiveAddresses.svelte`) — must not present a blank or partial address for a
-  failed chain.
-- **The hero total balance** — confirm a missing chain does not silently depress the total in a way
-  that reads as lost funds. If it does, that is the one place needing an explicit signal.
+- **Receive** (`ReceiveAddress.svelte`) — _confirmed and fixed._ A nullish address rendered a
+  loading **skeleton**, so a permanently failed chain showed an eternal shimmer, which reads as
+  "almost there" rather than "this will not load". Now shows `n/a` (`core.text.not_available`) for a
+  chain in the failed set, and keeps the skeleton for one that is genuinely still loading.
+- **The hero total balance** — _confirmed, deliberately not changed here._
+  `sumTokensUiUsdBalance` treats a nullish `usdBalance` as `0`, so a failed chain's tokens
+  contribute nothing and the total under-reports. Two reasons to leave it: it is pre-existing
+  behaviour for _any_ not-yet-loaded balance, not something this change introduces; and deciding
+  what a partial total should look like (an approximation marker, `n/a`, a footnote) is a product
+  call about the most prominent number in the app. The aggregated toast already tells the user which
+  chain is unavailable. Tracked as a follow-up rather than resolved by guesswork.
 
 **Scope caveat:** the address value stores have 30+ consumers (`wallet-connect.providers.ts`,
 `nft.services.ts`, `EthFeeContext.svelte`, the Liquidium wizards, …). This spec does **not** commit
