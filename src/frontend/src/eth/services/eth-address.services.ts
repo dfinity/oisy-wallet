@@ -2,7 +2,11 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
 import { getEthAddress as getSignerEthAddress } from '$lib/api/signer.api';
 import { deriveEthAddress } from '$lib/ic-pub-key/src/cli';
-import { deriveTokenAddress, loadTokenAddress } from '$lib/services/address.services';
+import {
+	deriveTokenAddress,
+	loadTokenAddress,
+	type LoadTokenAddressFailureReason
+} from '$lib/services/address.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NullishIdentity } from '$lib/types/identity';
@@ -24,7 +28,7 @@ export const getEthAddress = async (identity: NullishIdentity): Promise<EthAddre
 			})
 	});
 
-export const loadEthAddress = (): Promise<ResultSuccess> =>
+export const loadEthAddress = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadTokenAddress<EthAddress>({
 		networkId: ETHEREUM_NETWORK_ID,
 		getAddress: getEthAddress,

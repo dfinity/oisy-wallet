@@ -38,7 +38,11 @@ export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
 // Coarse class of failure — the level a dashboard counts on. Deliberately small and stable;
 // new granularity belongs in PLAUSIBLE_EVENT_ERROR_SUBCODES, not here.
 export enum PLAUSIBLE_EVENT_ERROR_CODES {
-	NETWORK_ERROR = 'network_error'
+	NETWORK_ERROR = 'network_error',
+	// Named for what failed to derive: OISY also derives vetKD keys, so a bare
+	// `derivation_failed` would be ambiguous between the two.
+	ADDRESS_DERIVATION_FAILED = 'address_derivation_failed',
+	SESSION_INVALID = 'session_invalid'
 }
 
 // Finer cause within a code. Splitting `offline` from `gateway_unavailable` is the point: it is
@@ -46,7 +50,10 @@ export enum PLAUSIBLE_EVENT_ERROR_CODES {
 export enum PLAUSIBLE_EVENT_ERROR_SUBCODES {
 	OFFLINE = 'offline',
 	GATEWAY_UNAVAILABLE = 'gateway_unavailable',
-	RATE_LIMITED = 'rate_limited'
+	RATE_LIMITED = 'rate_limited',
+	DERIVE_THREW = 'derive_threw',
+	MALFORMED_PRINCIPAL = 'malformed_principal',
+	IDENTITY_MISSING = 'identity_missing'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -70,14 +77,18 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
-	REWARDS = 'rewards'
+	REWARDS = 'rewards',
+	ADDRESS_DERIVATION = 'address_derivation'
 }
 
 // The operation that could not complete, so a dashboard can group an outage by what broke.
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR {
 	USER_PROFILE = 'user_profile',
 	USER_ROLES = 'user_roles',
-	REWARDS = 'rewards'
+	REWARDS = 'rewards',
+	BTC_ADDRESS = 'btc_address',
+	ETH_ADDRESS = 'eth_address',
+	SOL_ADDRESS = 'sol_address'
 }
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_TOKENS {

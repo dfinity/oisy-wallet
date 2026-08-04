@@ -26,6 +26,22 @@ OISY does **not** automatically retry, poll, or reconnect in either case — rec
 
 Both cases emit the `app_error` Plausible event, so an outage is directly observable rather than only inferable from a drop in other events. It distinguishes a connectivity problem on the user's side from an Internet Computer gateway failure, which are indistinguishable to the user but not to us.
 
+## When a network's address cannot be derived
+
+OISY derives each chain's address in the browser from the user's principal and a known signer public key — local computation, not a network call, in every deployed environment. If that derivation fails for a chain it is therefore deterministic: the same user hits it again on every attempt.
+
+**The wallet stays usable and the user stays signed in.** Only the affected chain is impacted; the others keep working. Earlier behaviour signed the user out whenever any one chain's address failed, which — because the failure repeats on every sign-in — locked them out of the wallet entirely over a single chain.
+
+The affected chain reads as unavailable rather than empty: its tokens **stay listed** (hiding assets a user holds would look like lost funds) and show `n/a` for the balance and `-` for the fiat value, and its receive address shows `n/a` instead of a loading skeleton that would never resolve. This holds even when the chain worked previously — OISY caches balances locally, and a cached figure for an unavailable chain is shown as `n/a` rather than presented as current, since it cannot be refreshed.
+
+Because one derived address can serve several chains, a failure is shown on every chain that depends on it: the Ethereum address is shared by all EVM networks, so a Base or Polygon holding reads as unavailable too.
+
+Actions that need the address — send, swap, buy and the conversions — are **not offered** for that chain, rather than offered and failing partway through. Receive stays available, since showing `n/a` in place of the address tells the user what is wrong. On the Chain Fusion view, where no single chain is selected, the actions remain available: the working chains are still usable.
+
+One toast names every affected chain, shown **once per chain** rather than on each internal retry, and it offers no "try again" — nothing the user can do changes a deterministic local failure. A genuinely lost session still signs the user out, which is the one case where signing in again helps.
+
+Known limitation: where a figure covers several chains at once it is under-reported rather than marked partial — the hero's total portfolio value omits an unavailable chain's holdings, and a multi-chain token group (the same asset across networks) still shows a summed balance that silently excludes the unavailable chain. Marking a partial total is a product decision about the most prominent number in the app, so it is deliberately left open rather than guessed at.
+
 ---
 
 ## Navigation

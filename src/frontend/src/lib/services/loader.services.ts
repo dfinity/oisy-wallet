@@ -137,10 +137,15 @@ export const initLoader = async ({
 		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
 	];
 
-	const { success: addressSuccess } = await loadAddresses(enabledNetworkIds);
+	const { sessionInvalid } = await loadAddresses(enabledNetworkIds);
 
-	if (!addressSuccess) {
-		await signOut({});
+	// A chain whose address could not be derived no longer ends the session. Derivation is local and
+	// deterministic in every deployed environment, so signing the user out would lock them out
+	// permanently — re-logging in reproduces the same failure — over something that need only cost
+	// them that one chain. The failure is surfaced by `failedAddresses` instead, and the wallet
+	// finishes loading with the chains that did derive.
+	if (sessionInvalid) {
+		await nullishSignOut();
 		return;
 	}
 

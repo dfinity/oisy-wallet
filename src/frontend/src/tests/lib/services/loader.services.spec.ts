@@ -31,7 +31,7 @@ vi.mock('$lib/services/load-user-profile.services', () => ({
 }));
 
 vi.mock('$lib/services/addresses.services', () => ({
-	loadAddresses: vi.fn(() => Promise.resolve({ success: true }))
+	loadAddresses: vi.fn(() => Promise.resolve({ sessionInvalid: false, failedNetworkIds: [] }))
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -186,6 +186,34 @@ describe('loader.services', () => {
 
 			expect(signOut).not.toHaveBeenCalled();
 			expect(infoSignOut).not.toHaveBeenCalled();
+			expect(mockProgressAndLoad).not.toHaveBeenCalled();
+		});
+
+		// The core of this change: one chain's local derivation failing must not end the session.
+		// It previously did, and since derivation is deterministic, re-logging in reproduced it —
+		// locking the user out permanently.
+		it('should keep the session when a chain address fails to derive', async () => {
+			vi.mocked(loadAddresses).mockResolvedValueOnce({
+				sessionInvalid: false,
+				failedNetworkIds: [SOLANA_MAINNET_NETWORK_ID]
+			});
+
+			await initLoader(mockParams);
+
+			expect(signOut).not.toHaveBeenCalled();
+			expect(nullishSignOut).not.toHaveBeenCalled();
+			expect(mockProgressAndLoad).toHaveBeenCalledOnce();
+		});
+
+		it('should sign out when the session itself is gone', async () => {
+			vi.mocked(loadAddresses).mockResolvedValueOnce({
+				sessionInvalid: true,
+				failedNetworkIds: []
+			});
+
+			await initLoader(mockParams);
+
+			expect(nullishSignOut).toHaveBeenCalledOnce();
 			expect(mockProgressAndLoad).not.toHaveBeenCalled();
 		});
 

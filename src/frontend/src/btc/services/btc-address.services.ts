@@ -14,6 +14,7 @@ import { deriveBtcAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	deriveTokenAddress,
 	loadTokenAddress,
+	type LoadTokenAddressFailureReason,
 	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import {
@@ -77,26 +78,26 @@ const loadBtcAddress = ({
 }: {
 	networkId: NetworkId;
 	network: BitcoinNetwork;
-}): Promise<ResultSuccess> =>
+}): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadTokenAddress<BtcAddress>({
 		networkId,
 		getAddress: (identity: NullishIdentity) => getBtcAddress({ identity, network }),
 		...bitcoinMapper[network]
 	});
 
-export const loadBtcAddressTestnet = (): Promise<ResultSuccess> =>
+export const loadBtcAddressTestnet = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadBtcAddress({
 		networkId: BTC_TESTNET_NETWORK_ID,
 		network: 'testnet'
 	});
 
-export const loadBtcAddressRegtest = (): Promise<ResultSuccess> =>
+export const loadBtcAddressRegtest = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadBtcAddress({
 		networkId: BTC_REGTEST_NETWORK_ID,
 		network: 'regtest'
 	});
 
-export const loadBtcAddressMainnet = (): Promise<ResultSuccess> =>
+export const loadBtcAddressMainnet = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadBtcAddress({
 		networkId: BTC_MAINNET_NETWORK_ID,
 		network: 'mainnet'

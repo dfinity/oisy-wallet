@@ -1,16 +1,34 @@
 import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_ERROR_SUBCODES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
+} from '$lib/enums/plausible';
+import { trackAppError } from '$lib/services/analytics.services';
+import { recordFailedAddress } from '$lib/services/failed-addresses.services';
 import type { AddressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
+import { failedAddresses } from '$lib/stores/failed-addresses.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { consoleError } from '$lib/utils/console.utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+const addressSubcontext = (networkId: NetworkId): PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR =>
+	networkId === BTC_MAINNET_NETWORK_ID
+		? PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.BTC_ADDRESS
+		: networkId === SOLANA_MAINNET_NETWORK_ID
+			? PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.SOL_ADDRESS
+			: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.ETH_ADDRESS;
 
 export interface LoadTokenAddressParams<T extends Address> {
 	networkId: NetworkId;
@@ -53,29 +71,50 @@ export const deriveTokenAddress = async <T>({
 	return await getSignerAddress();
 };
 
+export type LoadTokenAddressFailureReason = 'session-invalid' | 'derivation-failed';
+
 export const loadTokenAddress = async <T extends Address>({
 	networkId,
 	getAddress,
 	addressStore
-}: LoadTokenAddressParams<T>): Promise<ResultSuccess> => {
-	try {
-		const { identity } = get(authStore);
+}: LoadTokenAddressParams<T>): Promise<ResultSuccess<LoadTokenAddressFailureReason>> => {
+	const { identity } = get(authStore);
 
+	// Checked here rather than inferred from the caught error: `deriveTokenAddress` asserts on a
+	// nullish identity, and recognising that by matching its i18n message would break the moment the
+	// copy changes. The two causes need opposite handling — a lost session should sign the user out,
+	// a derivation bug must not — so they must be distinguishable reliably.
+	if (isNullish(identity)) {
+		addressStore.reset();
+
+		return { success: false, err: 'session-invalid' };
+	}
+
+	try {
 		const address = await getAddress(identity);
 		addressStore.set({ data: address, certified: true });
+
+		// A chain that recovers stops being treated as failed, without needing a reload.
+		failedAddresses.remove(networkId);
 	} catch (err: unknown) {
 		addressStore.reset();
 
-		toastsError({
-			msg: {
-				text: replacePlaceholders(get(i18n).init.error.loading_address, {
-					$symbol: `${networkId.description}`
-				})
-			},
+		consoleError(`Failed to derive the ${networkId.description} address.`, err);
+
+		// No toast here: with two callers and a retry loop, one toast per chain per attempt is what
+		// produced the pile-up. `recordFailedAddress` aggregates and deduplicates instead.
+		recordFailedAddress(networkId);
+
+		trackAppError({
+			context: PLAUSIBLE_EVENT_CONTEXTS.ADDRESS_DERIVATION,
+			subcontext: addressSubcontext(networkId),
+			code: PLAUSIBLE_EVENT_ERROR_CODES.ADDRESS_DERIVATION_FAILED,
+			subcode: PLAUSIBLE_EVENT_ERROR_SUBCODES.DERIVE_THREW,
+			severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
 			err
 		});
 
-		return { success: false };
+		return { success: false, err: 'derivation-failed' };
 	}
 
 	return { success: true };
