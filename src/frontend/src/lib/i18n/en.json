@@ -1867,7 +1867,7 @@
 			"error_min_notional": "Order value must be at least $amount $symbol",
 			"error_max_notional": "Order value can't exceed $amount $symbol",
 			"fok_title": "Fill or kill",
-			"fok_help": "Fill the whole order now at your price or better, or cancel it — nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
+			"fok_help": "Fill the whole order now at your price or better, or cancel it. Nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
 			"routing_name": "Routed via $provider",
 			"routing_tag": "best execution",
 			"best_ask": "Best ask",
