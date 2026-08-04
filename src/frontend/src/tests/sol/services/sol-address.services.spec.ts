@@ -1,5 +1,4 @@
 import { SOLANA_KEY_ID } from '$env/networks/networks.sol.env';
-import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import * as signerApi from '$lib/api/signer.api';
 import {
 	solAddressDevnetStore,
@@ -8,7 +7,6 @@ import {
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
 import {
 	getSolAddressDevnet,
@@ -19,7 +17,6 @@ import {
 	loadSolAddressMainnet
 } from '$sol/services/sol-address.services';
 import { SolanaNetworks } from '$sol/types/network';
-import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { getAddressDecoder } from '@solana/kit';
 import { get } from 'svelte/store';
@@ -107,15 +104,10 @@ describe('sol-address.services', () => {
 
 			const result = await loadSolAddressMainnet();
 
-			expect(result).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: {
-					text: replacePlaceholders(en.init.error.loading_address, {
-						$symbol: SOLANA_TOKEN_ID.description ?? ''
-					})
-				},
-				err: error
-			});
+			// Reports the cause instead of a bare failure, and no longer toasts here: the toast is
+			// aggregated across chains and deduplicated against the retry loop.
+			expect(result).toEqual({ success: false, err: 'derivation-failed' });
+			expect(spyToastsError).not.toHaveBeenCalled();
 		});
 	});
 });

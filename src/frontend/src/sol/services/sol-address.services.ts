@@ -9,6 +9,7 @@ import { deriveSolAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	deriveTokenAddress,
 	loadTokenAddress,
+	type LoadTokenAddressFailureReason,
 	type LoadTokenAddressParams
 } from '$lib/services/address.services';
 import {
@@ -96,25 +97,25 @@ const loadSolAddress = ({
 }: {
 	networkId: NetworkId;
 	network: SolanaNetworkType;
-}): Promise<ResultSuccess> =>
+}): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadTokenAddress<SolAddress>({
 		networkId,
 		...solanaMapper[network]
 	});
 
-export const loadSolAddressMainnet = (): Promise<ResultSuccess> =>
+export const loadSolAddressMainnet = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadSolAddress({
 		networkId: SOLANA_MAINNET_NETWORK_ID,
 		network: SolanaNetworks.mainnet
 	});
 
-export const loadSolAddressDevnet = (): Promise<ResultSuccess> =>
+export const loadSolAddressDevnet = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadSolAddress({
 		networkId: SOLANA_DEVNET_NETWORK_ID,
 		network: SolanaNetworks.devnet
 	});
 
-export const loadSolAddressLocal = (): Promise<ResultSuccess> =>
+export const loadSolAddressLocal = (): Promise<ResultSuccess<LoadTokenAddressFailureReason>> =>
 	loadSolAddress({
 		networkId: SOLANA_LOCAL_NETWORK_ID,
 		network: SolanaNetworks.local

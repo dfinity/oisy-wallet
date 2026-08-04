@@ -2,16 +2,24 @@ import * as addressEnv from '$env/address.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import * as signerConstants from '$lib/constants/signer.constants';
 import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_ERROR_SUBCODES
+} from '$lib/enums/plausible';
+import {
 	deriveTokenAddress,
 	loadTokenAddress,
 	type LoadTokenAddressParams
 } from '$lib/services/address.services';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
+import { failedAddresses } from '$lib/stores/failed-addresses.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {
@@ -27,10 +35,15 @@ describe('address.services', () => {
 
 	const mockIdentity = Ed25519KeyIdentity.generate();
 
+	let trackAppErrorSpy: MockInstance;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
+		failedAddresses.reset();
 		authStore.setForTesting(mockIdentity);
+
+		trackAppErrorSpy = vi.spyOn(analyticsServices, 'trackAppError').mockImplementation(() => {});
 	});
 
 	describe('deriveTokenAddress', () => {
@@ -131,21 +144,61 @@ describe('address.services', () => {
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: 'mock-address', certified: true });
 		});
 
-		it('should reset the address store and show an error if getAddress throws', async () => {
+		it('should reset the store and report a derivation failure if getAddress throws', async () => {
 			mockGetAddress.mockRejectedValueOnce(new Error('Failed to get address'));
 
 			const result = await loadTokenAddress(mockParams);
 
-			expect(result).toEqual({ success: false });
+			expect(result).toEqual({ success: false, err: 'derivation-failed' });
 			expect(mockAddressStore.reset).toHaveBeenCalledOnce();
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: {
-					text: replacePlaceholders(en.init.error.loading_address, {
-						$symbol: `${mockNetworkId.description}`
-					})
-				},
-				err: expect.any(Error)
-			});
+			expect(get(failedAddresses)).toEqual([{ networkId: mockNetworkId, reported: false }]);
+		});
+
+		// The toast moved to the aggregating service: with two callers and a retry loop, one toast
+		// per chain per attempt is exactly the pile-up this change removes.
+		it('should not toast directly', async () => {
+			mockGetAddress.mockRejectedValueOnce(new Error('Failed to get address'));
+
+			await loadTokenAddress(mockParams);
+
+			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		it('should track a major-severity address derivation failure', async () => {
+			mockGetAddress.mockRejectedValueOnce(new Error('Failed to get address'));
+
+			await loadTokenAddress(mockParams);
+
+			expect(trackAppErrorSpy).toHaveBeenCalledWith(
+				expect.objectContaining({
+					context: PLAUSIBLE_EVENT_CONTEXTS.ADDRESS_DERIVATION,
+					code: PLAUSIBLE_EVENT_ERROR_CODES.ADDRESS_DERIVATION_FAILED,
+					subcode: PLAUSIBLE_EVENT_ERROR_SUBCODES.DERIVE_THREW,
+					severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
+				})
+			);
+		});
+
+		// A lost session is ordinary lifecycle, already covered by the sign-out events. Emitting a
+		// fault for it would bury the real signal in routine sign-outs.
+		it('should report a session failure without tracking or recording the chain', async () => {
+			authStore.setForTesting(null as unknown as typeof mockIdentity);
+
+			const result = await loadTokenAddress(mockParams);
+
+			expect(result).toEqual({ success: false, err: 'session-invalid' });
+			expect(mockGetAddress).not.toHaveBeenCalled();
+			expect(get(failedAddresses)).toEqual([]);
+			expect(trackAppErrorSpy).not.toHaveBeenCalled();
+		});
+
+		it('should clear a previously failed chain once its address loads', async () => {
+			failedAddresses.add(mockNetworkId);
+			mockGetAddress.mockResolvedValueOnce('mock-address');
+
+			await loadTokenAddress(mockParams);
+
+			expect(get(failedAddresses)).toEqual([]);
 		});
 	});
 });
