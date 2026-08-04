@@ -4,7 +4,7 @@
 	import PlugImportForm from '$lib/components/plug-import/PlugImportForm.svelte';
 	import { PLUG_IMPORT_ERROR, PLUG_IMPORT_NOTICES } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledIcTokens, nativeTokens } from '$lib/derived/tokens.derived';
+	import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadPlugBalances } from '$lib/services/plug.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { PlugAccount, PlugBalance } from '$lib/types/plug';
@@ -44,23 +44,19 @@
 
 		loading = false;
 
-		const results = await Promise.all(
-			accounts.map(async (account) => ({
-				index: account.index,
-				loaded: await loadPlugBalances({
+		// Loaded per account rather than in one batch, so each account's rows appear as
+		// soon as they resolve instead of waiting on the slowest provider overall.
+		await Promise.all(
+			accounts.map(async (account) => {
+				const loaded = await loadPlugBalances({
 					account,
-					icTokens: $enabledIcTokens,
-					nativeTokens: $nativeTokens,
+					tokens: $enabledFungibleTokens,
 					identity: $authIdentity
-				})
-			}))
+				});
+
+				balances.set(account.index, loaded);
+			})
 		);
-
-		results.forEach(({ index, loaded }) => balances.set(index, loaded));
-
-		if (results.some(({ loaded }) => loaded.some(({ balance }) => balance === undefined))) {
-			error = $i18n.plug_import.error.balances_failed;
-		}
 	};
 </script>
 
@@ -76,7 +72,9 @@
 	</div>
 
 	<div class="mt-2 rounded-lg bg-brand-subtle-10 p-4" data-tid={PLUG_IMPORT_NOTICES}>
-		<span class="font-bold">{$i18n.plug_import.text.not_shown_title}</span>
+		<p class="text-sm text-tertiary">{$i18n.plug_import.text.unavailable_hint}</p>
+
+		<span class="mt-3 flex font-bold">{$i18n.plug_import.text.not_shown_title}</span>
 		<p class="mt-1 text-sm text-tertiary">{$i18n.plug_import.text.not_shown_description}</p>
 
 		<span class="mt-3 flex font-bold">{$i18n.plug_import.text.read_only_title}</span>

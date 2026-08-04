@@ -2260,12 +2260,13 @@ interface I18nPlug_import {
 		balance_loading: string;
 		balance_unavailable: string;
 		empty_account: string;
+		unavailable_hint: string;
 		not_shown_title: string;
 		not_shown_description: string;
 		read_only_title: string;
 		read_only_description: string;
 	};
-	error: { invalid_phrase: string; derivation_failed: string; balances_failed: string };
+	error: { invalid_phrase: string; derivation_failed: string };
 }
 
 interface I18n {

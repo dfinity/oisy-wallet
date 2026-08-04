@@ -2730,6 +2730,7 @@
 			"balance_loading": "Loading\u2026",
 			"balance_unavailable": "Unavailable",
 			"empty_account": "Nothing found on this account.",
+			"unavailable_hint": "A token marked unavailable could not be read \u2014 usually because its ledger or network did not respond. That is not the same as a zero balance.",
 			"not_shown_title": "Not shown here",
 			"not_shown_description": "Plug also supports Dogecoin and Litecoin. OISY does not, so any holdings on those networks are not listed above \u2014 they are still in your Plug wallet.",
 			"read_only_title": "View only for now",
@@ -2737,8 +2738,7 @@
 		},
 		"error": {
 			"invalid_phrase": "That is not a valid seed phrase. Check the words and their order.",
-			"derivation_failed": "Could not derive the Plug accounts from this phrase.",
-			"balances_failed": "Some balances could not be loaded. Try again shortly."
+			"derivation_failed": "Could not derive the accounts from this phrase."
 		}
 	}
 }
