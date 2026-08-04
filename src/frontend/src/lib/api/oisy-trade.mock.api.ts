@@ -48,10 +48,10 @@ export {
 	listSupportedTokens
 } from '$lib/api/oisy-trade.api';
 
-// Free balance seeded per token, in whole token units, keyed by symbol. Values
+// Total balance seeded per token, in whole token units, keyed by symbol. Values
 // are arbitrary but chosen so the fiat totals on the provider page look
 // plausible for both mainnet and the testnet twins staging trades.
-const MOCK_FREE_UNITS: Record<string, string> = {
+const MOCK_TOTAL_UNITS: Record<string, string> = {
 	BTC: '0.42',
 	ckBTC: '0.42',
 	ckSepoliaBTC: '0.42',
@@ -67,10 +67,11 @@ const MOCK_FREE_UNITS: Record<string, string> = {
 	ckUSDT: '12500'
 };
 
-const MOCK_DEFAULT_FREE_UNITS = '250';
+const MOCK_DEFAULT_TOTAL_UNITS = '250';
 
-// Share of the seeded free balance that starts locked in open orders, so the
-// provider page's "$X free / $Y in orders" split is non-trivial.
+// Share of the seeded balance that starts locked in open orders, so the provider
+// page's "$X free / $Y in orders" split is non-trivial. Taken out of the total
+// rather than added on top: on the canister, reserving moves funds out of free.
 const MOCK_RESERVED_DIVISOR = 5n;
 
 // Wallet balance seeded per depositable token, in whole units — only so the
@@ -114,6 +115,9 @@ let state: MockState | undefined;
 // `getMyOrders` calls from `loadOisyTrade`'s `Promise.all` seed only once.
 let seeding: Promise<MockState> | undefined;
 
+// Principal the cached state belongs to.
+let seededFor: string | undefined;
+
 const mockOrderId = (seq: number): OrderId => seq.toString(16).padStart(32, '0');
 
 // The real API asserts the identity before building the actor; mirror that so a
@@ -130,7 +134,8 @@ const owner = ({
 const scaled = ({ value, decimals }: { value: string; decimals: number }): bigint =>
 	parseToken({ value, unitName: decimals });
 
-const freeUnitsFor = (symbol: string): string => MOCK_FREE_UNITS[symbol] ?? MOCK_DEFAULT_FREE_UNITS;
+const totalUnitsFor = (symbol: string): string =>
+	MOCK_TOTAL_UNITS[symbol] ?? MOCK_DEFAULT_TOTAL_UNITS;
 
 // The DEX tokens the wallet can actually render: `mapOisyTradeAssets` and
 // `mapOisyTradeOrders` join on ledger canister id against the user's enabled IC
@@ -151,12 +156,14 @@ const seedBalances = (tokens: Token[]): Map<string, MockBalance> =>
 			metadata: { symbol, decimals }
 		} = token;
 
-		const free = scaled({ value: freeUnitsFor(symbol), decimals });
+		const total = scaled({ value: totalUnitsFor(symbol), decimals });
+
+		const reserved = total / MOCK_RESERVED_DIVISOR;
 
 		acc.set(ledger_id.toText(), {
 			token,
-			free,
-			reserved: free / MOCK_RESERVED_DIVISOR
+			free: total - reserved,
+			reserved
 		});
 
 		return acc;
@@ -234,7 +241,11 @@ const seedWalletBalances = (tokens: Token[]) => {
 
 	assert();
 
-	balancesStore.subscribe(assert);
+	const unsubscribe = balancesStore.subscribe(assert);
+
+	// Without this, every hot replacement of this module leaves its subscription
+	// behind and they pile up re-asserting the same seeds.
+	import.meta.hot?.dispose(unsubscribe);
 };
 
 const seedState = async (params: CanisterApiFunctionParams): Promise<MockState> => {
@@ -262,14 +273,30 @@ const seedState = async (params: CanisterApiFunctionParams): Promise<MockState> 
 	};
 };
 
+// Re-asserts the identity on every call, the way the real API does before it
+// builds an actor — a cached seed must not let a signed-out caller read
+// balances. The state is per-principal: a different caller reseeds rather than
+// inheriting the previous one's positions. A failed seed clears the cached
+// promise so the next call can retry instead of replaying the rejection.
 const mockState = async (params: CanisterApiFunctionParams): Promise<MockState> => {
+	const principal = owner(params).toText();
+
+	if (seededFor !== principal) {
+		state = undefined;
+		seeding = undefined;
+	}
+
 	if (nonNullish(state)) {
 		return state;
 	}
 
-	seeding ??= seedState(params);
+	seeding ??= seedState(params).catch((err: unknown) => {
+		seeding = undefined;
+		throw err;
+	});
 
 	state = await seeding;
+	seededFor = principal;
 
 	return state;
 };
@@ -308,7 +335,10 @@ export const getMyOrders = async (
 ): Promise<UserOrder[]> => {
 	const { orders } = await mockState(params);
 
-	return [...orders].sort(({ order: a }, { order: b }) => Number(b.created_at - a.created_at));
+	// Compared as bigints: `Number(b - a)` would narrow a nanosecond delta.
+	return [...orders].sort(({ order: a }, { order: b }) =>
+		b.created_at === a.created_at ? 0 : b.created_at > a.created_at ? 1 : -1
+	);
 };
 
 export const deposit = async (

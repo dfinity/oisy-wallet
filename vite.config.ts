@@ -142,7 +142,7 @@ const config: UserConfig = {
 	}
 };
 
-export default defineConfig((): UserConfig => {
+export default defineConfig(({ command }): UserConfig => {
 	// Expand environment - .env files - with canister IDs
 	process.env = {
 		...process.env,
@@ -159,7 +159,9 @@ export default defineConfig((): UserConfig => {
 
 	// Read after `loadEnv` so the flag can come either from the shell
 	// (`VITE_TRADE_MOCK=true npm run dev`) or from the network's `.env` file.
-	const mockOisyTrade = process.env.VITE_TRADE_MOCK === 'true';
+	// Gated on `serve` as well, so a stray flag in a build environment can never
+	// bundle the mocks into a real artefact.
+	const mockOisyTrade = command === 'serve' && process.env.VITE_TRADE_MOCK === 'true';
 
 	return {
 		...config,
