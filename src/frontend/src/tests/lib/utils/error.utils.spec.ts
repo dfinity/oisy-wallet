@@ -1,9 +1,11 @@
+import { PLAUSIBLE_EVENT_ERROR_SUBCODES } from '$lib/enums/plausible';
 import {
 	errorDetailToString,
 	formatIcCallError,
 	isNetworkUnreachableError,
 	isVersionMismatchError,
 	mapIcErrorMetadata,
+	networkErrorSubcode,
 	parseIcErrorMessage,
 	replaceErrorFields,
 	replaceIcErrorFields
@@ -906,6 +908,53 @@ Call context:
 
 		it('should return false for undefined', () => {
 			expect(isVersionMismatchError(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('networkErrorSubcode', () => {
+		// The split that matters: `offline` is very likely the user's own connectivity,
+		// `gateway_unavailable` is ours. One value for both makes an outage indistinguishable
+		// from a bad wifi day.
+		it('should report offline for a rejected fetch', () => {
+			expect(
+				networkErrorSubcode(
+					TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
+				)
+			).toBe(PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE);
+		});
+
+		it('should report gateway_unavailable for a 503', () => {
+			expect(
+				networkErrorSubcode(
+					ProtocolError.fromCode(new HttpErrorCode(503, 'Service Unavailable', []))
+				)
+			).toBe(PLAUSIBLE_EVENT_ERROR_SUBCODES.GATEWAY_UNAVAILABLE);
+		});
+
+		it('should report rate_limited for a 429, not gateway_unavailable', () => {
+			expect(
+				networkErrorSubcode(ProtocolError.fromCode(new HttpErrorCode(429, 'Too Many Requests', [])))
+			).toBe(PLAUSIBLE_EVENT_ERROR_SUBCODES.RATE_LIMITED);
+		});
+
+		// A worker boundary is how the error travelled, not what caused it — a dashboard must
+		// not see it as a separate cause.
+		it('should report offline for a lost-prototype error', () => {
+			expect(networkErrorSubcode(new Error('Failed to fetch HTTP request: Load failed'))).toBe(
+				PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE
+			);
+		});
+
+		it.each([
+			{ label: 'a 404', value: ProtocolError.fromCode(new HttpErrorCode(404, 'Not Found', [])) },
+			{
+				label: 'a polling timeout',
+				value: ProtocolError.fromCode(new TimeoutWaitingForResponseErrorCode('Request timed out'))
+			},
+			{ label: 'an unrelated Error', value: new Error('Some other error') },
+			{ label: 'null', value: null }
+		])('should report no subcode for $label', ({ value }) => {
+			expect(networkErrorSubcode(value)).toBeUndefined();
 		});
 	});
 

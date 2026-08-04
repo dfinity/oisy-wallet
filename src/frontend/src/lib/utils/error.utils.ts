@@ -1,3 +1,4 @@
+import { PLAUSIBLE_EVENT_ERROR_SUBCODES } from '$lib/enums/plausible';
 import { AgentError, ErrorKindEnum, HttpErrorCode, HttpFetchErrorCode } from '@dfinity/agent';
 import { isEmptyString, isNullish, jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -195,12 +196,15 @@ export const isVersionMismatchError = (err: unknown): boolean =>
 
 const IC_FETCH_FAILURE_MARKER = 'Failed to fetch HTTP request';
 
+const HTTP_STATUS_TOO_MANY_REQUESTS = 429;
+
 // A boundary node that answers with one of these is as unreachable as one that does not
 // answer at all: 5xx is the gateway itself failing, 429 is it refusing to route us.
-const isGatewayFailureStatus = (status: number): boolean => status >= 500 || status === 429;
+const isGatewayFailureStatus = (status: number): boolean =>
+	status >= 500 || status === HTTP_STATUS_TOO_MANY_REQUESTS;
 
 /**
- * Whether the Internet Computer could not be reached at all.
+ * Which kind of network failure this is, or `undefined` if the Internet Computer was reached.
  *
  * Matching a single error kind is not enough, because the two outage shapes agent-js
  * produces live in different ones: a rejected `fetch` — offline, DNS failure, refused
@@ -208,24 +212,41 @@ const isGatewayFailureStatus = (status: number): boolean => status >= 500 || sta
  * boundary node answering 502 / 503 / 429 arrives as a `Protocol` kind carrying
  * `HttpErrorCode`. Checking only the former would miss the most common outage mode.
  *
+ * The returned subcode is what separates the two operationally: `offline` is very likely the
+ * user's own connectivity, while `gateway_unavailable` is ours. Collapsing them into one value
+ * makes an outage indistinguishable from a bad wifi day on the dashboard.
+ *
  * A polling timeout (`TimeoutWaitingForResponseErrorCode`) is deliberately excluded: it
  * is as likely to mean a slow canister as an unreachable network, and treating it as an
  * outage would take the whole app over on a merely slow call.
  *
  * The message marker is a fallback for errors that lost their prototype crossing a
  * boundary (a worker `postMessage`, or re-wrapping), where `instanceof` no longer holds.
+ * It reports `offline` because that is the cause it carries — the boundary it crossed is
+ * an implementation detail no dashboard should have to know about.
  */
-export const isNetworkUnreachableError = (err: unknown): boolean => {
+export const networkErrorSubcode = (err: unknown): PLAUSIBLE_EVENT_ERROR_SUBCODES | undefined => {
 	if (err instanceof AgentError) {
 		if (err.kind === ErrorKindEnum.Transport || err.code instanceof HttpFetchErrorCode) {
-			return true;
+			return PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE;
 		}
 
-		return err.code instanceof HttpErrorCode && isGatewayFailureStatus(err.code.status);
+		if (err.code instanceof HttpErrorCode && isGatewayFailureStatus(err.code.status)) {
+			return err.code.status === HTTP_STATUS_TOO_MANY_REQUESTS
+				? PLAUSIBLE_EVENT_ERROR_SUBCODES.RATE_LIMITED
+				: PLAUSIBLE_EVENT_ERROR_SUBCODES.GATEWAY_UNAVAILABLE;
+		}
+
+		return undefined;
 	}
 
-	return err instanceof Error && err.message.includes(IC_FETCH_FAILURE_MARKER);
+	return err instanceof Error && err.message.includes(IC_FETCH_FAILURE_MARKER)
+		? PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE
+		: undefined;
 };
+
+export const isNetworkUnreachableError = (err: unknown): boolean =>
+	nonNullish(networkErrorSubcode(err));
 
 const IC_CALL_CONTEXT_MARKER = 'Call context:';
 const IC_CANISTER_ID_KEY = 'Canister ID';
