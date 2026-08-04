@@ -842,6 +842,7 @@
 		"title": "Aktuelles Netzwerk. Zugang zur Auswahl.",
 		"test_networks": "Testnetzwerke",
 		"chain_fusion": "Alle Netzwerke",
+		"evm_networks": "EVM-Netzwerke",
 		"network": "Netzwerk",
 		"testnet": "Testnetz",
 		"number_of_enabled": "$numNetworksEnabled von $numNetworksTotal aktiviert",
@@ -987,7 +988,8 @@
 			"unknown_destination": "Du hast zuvor nicht mit dieser Adresse interagiert. Stelle sicher, dass du den Empfänger kennst.",
 			"fee_info": "Gebühr wird in $feeSymbol bezahlt. Verfügbar: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",
-			"scanned_address_only_destination_single_token": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!"
+			"scanned_address_only_destination_single_token": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!",
+			"scanned_address_only_destination_multi_network": "Der gescannte Code enthielt nur eine Zieladresse. Stelle sicher, dass du das richtige Netzwerk und Token auswählst, den richtigen Betrag eingibst und die Zieladresse sorgfältig überprüfst!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Ungültige Zieladresse",

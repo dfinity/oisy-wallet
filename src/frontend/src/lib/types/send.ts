@@ -28,5 +28,5 @@ export type SendDestinationTab = 'recentlyUsed' | 'contacts';
 
 export interface SendModalData {
 	destination: string;
-	lockedNetworkId: NetworkId;
+	lockedNetworkIds: NetworkId[];
 }

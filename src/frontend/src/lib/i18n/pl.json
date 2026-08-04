@@ -842,6 +842,7 @@
 		"title": "Bieżąca sieć. Dostęp do wyboru.",
 		"test_networks": "Sieci testowe",
 		"chain_fusion": "Wszystkie sieci",
+		"evm_networks": "Sieci EVM",
 		"network": "Sieć",
 		"testnet": "Testnet",
 		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal włączonych",
@@ -987,7 +988,8 @@
 			"unknown_destination": "Nigdy wcześniej nie wchodziłeś w interakcję z tym adresem. Upewnij się, że znasz odbiorcę.",
 			"fee_info": "Opłata zostanie uiszczona w $feeSymbol. Dostępne: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwy token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
-			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
+			"scanned_address_only_destination_single_token": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!",
+			"scanned_address_only_destination_multi_network": "Zeskanowany kod zawierał tylko adres docelowy. Upewnij się, że wybierasz właściwą sieć i token, wpisujesz odpowiednią kwotę i dokładnie sprawdzasz adres docelowy!"
 		},
 		"assertion": {
 			"invalid_destination_address": "Nieprawidłowy adres docelowy",

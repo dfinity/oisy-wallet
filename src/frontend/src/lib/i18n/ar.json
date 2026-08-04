@@ -842,6 +842,7 @@
 		"title": "الشبكة الحالية. الوصول إلى التحديد.",
 		"test_networks": "شبكات الاختبار",
 		"chain_fusion": "جميع الشبكات",
+		"evm_networks": "شبكات EVM",
 		"network": "الشبكة",
 		"testnet": "شبكة اختبار",
 		"number_of_enabled": "$numNetworksEnabled من $numNetworksTotal مفعلة",
@@ -987,7 +988,8 @@
 			"unknown_destination": "لم تتفاعل مع هذا العنوان من قبل. يرجى التأكد من معرفة المستلم.",
 			"fee_info": "سيتم دفع الرسوم بعملة $feeSymbol. متوفر: <strong>$feeBalance $feeSymbol</strong>",
 			"scanned_address_only_destination": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار التوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
-			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
+			"scanned_address_only_destination_single_token": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من إدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!",
+			"scanned_address_only_destination_multi_network": "يحتوي الرمز الممسوح ضوئيًا على عنوان الوجهة فقط. تأكد من اختيار الشبكة الصحيحة والتوكن الصحيح، وإدخال المبلغ المناسب، ومراجعة عنوان الوجهة بعناية!"
 		},
 		"assertion": {
 			"invalid_destination_address": "عنوان الوجهة غير صالح",
