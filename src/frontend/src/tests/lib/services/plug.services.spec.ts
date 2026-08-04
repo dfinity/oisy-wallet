@@ -6,17 +6,19 @@ import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
-import { balance as icrcBalance } from '$icp/api/icrc-ledger.api';
-import { loadPlugBalances } from '$lib/services/plug.services';
+import { balance as icrcBalance, transfer as icrcTransfer } from '$icp/api/icrc-ledger.api';
+import type { IcToken } from '$icp/types/ic-token';
+import { loadPlugBalances, sweepPlugBalance } from '$lib/services/plug.services';
 import type { PlugAccount } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
 import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { Principal } from '@icp-sdk/core/principal';
 import { lamports } from '@solana/kit';
 
-vi.mock('$icp/api/icrc-ledger.api', () => ({ balance: vi.fn() }));
+vi.mock('$icp/api/icrc-ledger.api', () => ({ balance: vi.fn(), transfer: vi.fn() }));
 vi.mock('$icp/api/bitcoin.api', () => ({ getBalanceQuery: vi.fn() }));
 vi.mock('$eth/providers/infura.providers', () => ({ infuraProviders: vi.fn() }));
 vi.mock('$eth/providers/infura-erc20.providers', () => ({ infuraErc20Providers: vi.fn() }));
@@ -279,5 +281,44 @@ describe('loadPlugBalances', () => {
 			'ETH',
 			'SOL'
 		]);
+	});
+});
+
+describe('sweepPlugBalance', () => {
+	const destination = Principal.fromText('aaaaa-aa');
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(icrcTransfer).mockResolvedValue(42n);
+	});
+
+	it('transfers to the signed-in principal with the imported identity', async () => {
+		const blockIndex = await sweepPlugBalance({
+			identity: mockIdentity,
+			token: icrcToken as IcToken,
+			amount: 90_000n,
+			destination
+		});
+
+		expect(blockIndex).toBe(42n);
+		expect(icrcTransfer).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			to: { owner: destination },
+			amount: 90_000n,
+			ledgerCanisterId: 'cngnf-vqaaa-aaaar-qag4q-cai'
+		});
+	});
+
+	it('propagates a ledger failure so the caller can report it', async () => {
+		vi.mocked(icrcTransfer).mockRejectedValue(new Error('InsufficientFunds'));
+
+		await expect(
+			sweepPlugBalance({
+				identity: mockIdentity,
+				token: icrcToken as IcToken,
+				amount: 90_000n,
+				destination
+			})
+		).rejects.toThrow('InsufficientFunds');
 	});
 });
