@@ -1,3 +1,6 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -11,6 +14,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as balancesDerived from '$lib/derived/balances.derived';
 import * as swapDerived from '$lib/derived/swap.derived';
+import { failedAddresses } from '$lib/stores/failed-addresses.store';
 import { HERO_CONTEXT_KEY, initHeroContext } from '$lib/stores/hero.store';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
@@ -160,6 +164,60 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(buyButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	// Without this the user could open Send for a chain with no address, fill in the whole form and
+	// only fail at signing — worse than not being offered the action at all.
+	describe('when the address failed to derive', () => {
+		beforeEach(() => {
+			failedAddresses.reset();
+		});
+
+		afterEach(() => {
+			failedAddresses.reset();
+		});
+
+		it('should hide the send button for the failed chain', () => {
+			setTransactionsPage();
+			mockPage.mockToken(BTC_MAINNET_TOKEN);
+			failedAddresses.add(BTC_MAINNET_NETWORK_ID);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide the swap and buy buttons for the failed chain', () => {
+			setTokensPage();
+			mockPage.mockToken(BTC_MAINNET_TOKEN);
+			failedAddresses.add(BTC_MAINNET_NETWORK_ID);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(swapButtonSelector)).not.toBeInTheDocument();
+			expect(container.querySelector(buyButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should keep the send button for a chain that did not fail', () => {
+			setTransactionsPage();
+			mockPage.mockToken(ETHEREUM_TOKEN);
+			failedAddresses.add(BTC_MAINNET_NETWORK_ID);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).toBeInTheDocument();
+		});
+
+		// The Ethereum address serves every EVM chain, so a Base token cannot transact either.
+		it('should hide the send button for an EVM chain when the Ethereum address failed', () => {
+			setTransactionsPage();
+			mockPage.mockToken(BASE_ETH_TOKEN);
+			failedAddresses.add(ETHEREUM_NETWORK_ID);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 });
