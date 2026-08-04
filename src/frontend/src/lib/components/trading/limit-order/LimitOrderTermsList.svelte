@@ -1,4 +1,5 @@
 <script lang="ts">
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -26,7 +27,13 @@
 
 <ModalValue>
 	{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
-	{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
+	{#snippet mainValue()}
+		<!-- Marked like Swap's provider row, and matching the routing row on the form. -->
+		<span class="flex items-center gap-2">
+			<OisyTradeMark size="16" />
+			{OISY_TRADE_PROVIDER_NAME}
+		</span>
+	{/snippet}
 </ModalValue>
 <ModalValue>
 	{#snippet label()}{$i18n.trading.limit_order.order_type}{/snippet}
