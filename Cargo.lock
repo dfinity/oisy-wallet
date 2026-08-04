@@ -120,7 +120,7 @@ dependencies = [
  "hex",
  "hmac 0.13.0",
  "ic-canister-sig-creation",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ledger-types",
@@ -1338,7 +1338,7 @@ name = "ic-cycles-ledger-client"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-types",
  "serde",
  "serde_bytes",
@@ -1349,7 +1349,7 @@ name = "ic-cycles-ledger-pic"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-types",
  "pocket-ic",
  "serde",
@@ -1361,7 +1361,7 @@ name = "ic-cycles-ledger-types"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "serde",
  "serde_bytes",
 ]
@@ -2820,7 +2820,7 @@ dependencies = [
  "getrandom 0.2.17",
  "hex",
  "ic-canister-sig-creation",
- "ic-cdk 0.19.0",
+ "ic-cdk 0.20.2",
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
  "paste",
@@ -2898,7 +2898,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52d1cfed4120b4d927bf7c0f86d2087a4a7d6027c906d9f9d525a80573b9be51"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
@@ -2917,7 +2917,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "psm",
- "windows-sys 0.61.2",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
