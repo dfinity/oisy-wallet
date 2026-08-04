@@ -267,6 +267,18 @@
 		try {
 			failedSwapError.set(undefined);
 
+			// TEST ONLY (PR #12971 verification): force-fail the EVM swap to validate
+			// that the review page surfaces the error. Magic amounts:
+			//   0.0001 → generic "unexpected" branch (variant: error, toast + MessageBox)
+			//   0.0002 → slippage branch (variant: info, MessageBox only, no toast)
+			// REMOVE before merging the parent fix PR.
+			if (`${swapAmount}` === '0.0001') {
+				throw new Error('Simulated unexpected swap failure');
+			}
+			if (`${swapAmount}` === '0.0002') {
+				throw new Error('Slippage exceeded. Simulated failure.');
+			}
+
 			const baseParams = {
 				identity: $authIdentity,
 				progress: (step: ProgressStep) => (swapProgressStep = step),
