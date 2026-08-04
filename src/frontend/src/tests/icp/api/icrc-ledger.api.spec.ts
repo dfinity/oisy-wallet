@@ -221,6 +221,33 @@ describe('icrc-ledger.api', () => {
 			});
 		});
 
+		it('successfully calls transfer endpoint with memo', async () => {
+			const memo = new Uint8Array([1, 2, 3]);
+
+			const result = await transfer({ ...params, memo });
+
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				created_at_time: createdAt,
+				memo
+			});
+		});
+
+		it('successfully calls transfer endpoint without memo when not provided', async () => {
+			const result = await transfer(params);
+
+			expect(result).toEqual(mockIndex);
+
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
+				amount,
+				to: toAccount,
+				created_at_time: createdAt
+			});
+		});
+
 		it('throws an error if identity is undefined', async () => {
 			await expect(transfer({ ...params, identity: undefined })).rejects.toThrow();
 		});
