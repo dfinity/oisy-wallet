@@ -51,6 +51,11 @@
 		onPriceInput
 	}: Props = $props();
 
+	// The visible title names the field for screen readers: the input has no
+	// `<label>`, and a placeholder is not an accessible name.
+	const uid = $props.id();
+	const labelId = `limit-order-price-label-${uid}`;
+
 	// Drives the shared container's brand focus border, the same way
 	// `TokenInputContent` tracks it for the amount fields.
 	let focused = $state(false);
@@ -236,7 +241,7 @@
 >
 	<!-- Same shape as the token-input boxes above: `text-sm font-bold` title, the
 		 framed field, then the controls. Helper lines below all share `text-xs`. -->
-	<div class="mb-2 text-sm font-bold text-primary">{label}</div>
+	<div id={labelId} class="mb-2 text-sm font-bold text-primary">{label}</div>
 
 	<!-- The shared container, so the field carries the same frame, height and
 		 focus/hover behaviour as the amount inputs — the quote symbol sits where
@@ -245,6 +250,7 @@
 	<TokenInputContainer error={nonNullish(tickError)} {focused} styleClass="h-14 text-xl">
 		<input
 			class="h-full w-full min-w-0 border-none bg-transparent px-3 font-bold text-primary outline-none disabled:cursor-not-allowed disabled:text-tertiary"
+			aria-labelledby={labelId}
 			disabled={!active}
 			onblur={() => (focused = false)}
 			onfocus={() => (focused = true)}
