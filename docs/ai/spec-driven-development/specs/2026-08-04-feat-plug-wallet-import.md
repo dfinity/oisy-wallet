@@ -75,7 +75,11 @@ Every case reuses an existing address-parameterized primitive, so no new balance
 
 **Dispatch is by token standard first, then by network.** An ERC20 and a native coin share a network but not a balance call, so a network-first dispatch would read the wrong thing. Anything the import cannot read is skipped outright rather than reported as a failed lookup — which is how **DIP20** tokens (XTC) are handled: that ledger exposes no `icrc1_balance_of` at all, so querying it can only ever fail.
 
-**Some ledgers are simply dead.** Verified against mainnet: the FUEL and GHOSTNODE ledgers return _"canister contains no Wasm module"_ — they are uninstalled. Such rows can never resolve, which rules out any global "some balances failed" banner: it would be permanently on. The per-row **unavailable** state is the only honest signal, and the page explains what it means.
+**Some ledgers are simply dead, and those rows are dropped.** Verified against mainnet: the FUEL, GHOSTNODE and ICONFUCIUS ledgers all reject with `IC0537` — _"canister contains no Wasm module"_, i.e. uninstalled. A row that can never resolve is permanent noise the user can do nothing about, so it is removed rather than shown.
+
+The distinction is drawn on the IC reject code, not on a string match: `IC0537` (no Wasm module) and `IC0536` (missing method) mean _never_, and their rows are dropped; any other failure is treated as possibly transient and keeps its row in the **unavailable** state. That asymmetry is deliberate — silently hiding a token because an RPC blipped would tell a migrating user they have nothing when they do, which is the worse failure by far.
+
+This also rules out a global "some balances failed" banner: with permanently dead ledgers it was on every single time, so it conveyed nothing. The per-row **unavailable** state is the honest signal, and the page explains what it means.
 
 **UI.**
 
