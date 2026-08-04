@@ -58,11 +58,10 @@ export const initCertifiedCustomTokensStore = <
 					new Map(tokens.map((token) => [getIdentifier(token.data), token])).values()
 				);
 
+				const incomingIdentifiers = new Set(dedupedTokens.map(({ data }) => getIdentifier(data)));
+
 				return [
-					...(state ?? []).filter(
-						({ data }) =>
-							!dedupedTokens.map(({ data }) => getIdentifier(data)).includes(getIdentifier(data))
-					),
+					...(state ?? []).filter(({ data }) => !incomingIdentifiers.has(getIdentifier(data))),
 					...dedupedTokens.map(({ data, certified }) => ({
 						certified,
 						data: {
