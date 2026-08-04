@@ -170,6 +170,65 @@ export const exchangeRateUsdToCurrency = async (
 };
 ```
 
+## External providers — kill-switch flags
+
+**Every external provider must be behind a boolean kill-switch flag.** Any
+feature that talks to a third-party / external data source (price oracle, swap
+DEX, RPC, indexer, on-ramp, …) must be able to drop that provider **in code**,
+without a config migration, candid change, or redeploy dance — so that in an
+emergency (provider outage, abuse, pricing incident, a vendor sunsetting) we can
+flip one `const` to `false` in a PR and ship.
+
+This is already the convention; new providers must follow it. Existing examples:
+
+- `ICPSWAP_PROVIDER_ENABLED`, `KONGSWAP_PROVIDER_ENABLED`,
+  `COINGECKO_PROVIDER_ENABLED` in
+  [`$env/rest/*.env.ts`](../../../src/frontend/src/env/rest/) — price providers.
+- `NEAR_INTENTS_SWAP_ENABLED`, `ONESEC_SWAP_ENABLED` — swap providers.
+- `swapProviders` ([`$lib/providers/swap.providers.ts`](../../../src/frontend/src/lib/providers/swap.providers.ts))
+  carries an `isEnabled` per provider, wired from those flags.
+
+### Rules
+
+1. **Define the flag in `$env`, next to the provider's other env.** Put it in
+   the provider's `$env/rest/<provider>.env.ts` (or the relevant `$env/*.env.ts`)
+   as a plain hardcoded `const` — **not** an env-parsed value, **not** runtime
+   config. It is flipped by editing code in a PR.
+2. **Name it like its neighbours.** `<PROVIDER>_PROVIDER_ENABLED` for a
+   data/price provider; match the existing `<PROVIDER>_<FEATURE>_ENABLED` shape
+   where a feature already uses it (e.g. `*_SWAP_ENABLED`). Default to `true`;
+   `false` only means "blocked right now". Add a `//` comment with the _why_ when
+   it is off (see `kongswap.env.ts`).
+3. **Gate every path that reaches the provider.** All call sites — service, rest,
+   worker, and any component branch that renders that provider — must check the
+   flag. A disabled provider issues **no** network request and renders **no**
+   provider-specific UI (see the `SwapProvider.svelte` `{#if … && *_ENABLED}`
+   branches).
+4. **Fail soft.** When disabled, short-circuit to the existing "no data" shape
+   (`{}` / `undefined` / empty `Vec`), never throw. Other providers in the same
+   feature must keep working.
+
+### Multi-provider features — the parent flag
+
+When a feature has **more than one** provider, derive a single feature-level
+availability from the **OR** of the per-provider flags (the feature is available
+as long as _any_ provider is enabled):
+
+```ts
+const SWAP_AVAILABLE = KONGSWAP_PROVIDER_ENABLED || ICPSWAP_PROVIDER_ENABLED;
+```
+
+When that parent is `false` (all providers disabled), the feature must degrade
+gracefully. **How** is a per-feature decision the spec owns — pick one:
+
+- **Show a placeholder / empty state** (e.g. "temporarily unavailable") if the
+  surrounding surface should stay visible, or
+- **Hide the feature entirely** (entry point, route, card) if a dead surface is
+  worse than its absence.
+
+Don't leave a feature that silently renders nothing or errors when every
+provider is off. Decide the degradation explicitly and note it in the spec.
+
 ## Stores, derived, runes — when to use which
 
 | Need                                           | Use                                                                                                                                                | Where it lives                                                         |
@@ -243,3 +302,7 @@ component uses. Never re-implement an icon that already exists.
 - `{@html …}` without sanitisation.
 - `console.log` left in committed code (and `console.error` / `.warn` are
   ESLint errors — use `consoleError` / `consoleWarn`).
+- An external provider with **no** kill-switch flag, or a flag that only gates
+  _some_ of its call sites — see [External providers — kill-switch flags](#external-providers--kill-switch-flags).
+- A multi-provider feature that breaks (renders nothing / throws) when all its
+  providers are disabled, instead of an explicit placeholder-or-hide decision.
