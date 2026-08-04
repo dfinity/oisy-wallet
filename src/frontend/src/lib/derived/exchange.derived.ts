@@ -1,4 +1,5 @@
 import { EXCHANGE_DISABLED } from '$env/exchange.env';
+import { ICP_TOKEN_GROUP_ID } from '$env/tokens/groups/groups.icp.env';
 import {
 	ARBITRUM_ETH_TOKEN_ID,
 	ARBITRUM_SEPOLIA_ETH_TOKEN_ID
@@ -94,13 +95,22 @@ export const exchanges: Readable<ExchangesData> = derivedMemo(
 					...tokens.reduce((inner, token) => ({ ...inner, [token.id]: currentPrice }), {})
 				};
 			}, {}),
-			...$erc20Tokens.filter(isErc20Icp).reduce(
-				(acc, { id }) => ({
-					...acc,
-					[id]: icpPrice
-				}),
-				{}
-			),
+			// ERC20 representations of ICP are the same asset bridged onto EVM chains, grouped
+			// under the ICP token group. They are priced at the native ICP rate rather than
+			// per-contract: the token shares one contract address across Ethereum/Base/Arbitrum
+			// (so an address-keyed price would collide), and not every chain is listed on the
+			// price provider (e.g. Arbitrum). Pegging to ICP is chain- and provider-independent.
+			// `isErc20Icp` additionally covers the legacy wrapped-ICP token on Ethereum, which
+			// predates the token group and may still exist in a user's custom-token list.
+			...$erc20Tokens
+				.filter((token) => isErc20Icp(token) || token.groupData?.id === ICP_TOKEN_GROUP_ID)
+				.reduce(
+					(acc, { id }) => ({
+						...acc,
+						[id]: icpPrice
+					}),
+					{}
+				),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, ledgerCanisterId, exchangeCoinId } = token;
 
