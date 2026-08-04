@@ -6,16 +6,15 @@ import type { Icrc7CustomToken } from '$icp/types/icrc7-custom-token';
 import type { Icrc7Token, Icrc7TokenWithoutId } from '$icp/types/icrc7-token';
 import { DEFAULT_TOKEN_TAGS } from '$lib/constants/token-tag.constants';
 import type { NftMetadataWithoutId } from '$lib/types/nft';
-import type { Token, TokenMetadata } from '$lib/types/token';
+import type { TokenMetadata } from '$lib/types/token';
 import { mapNftAttributes } from '$lib/utils/nft.utils';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import { toggleableTokenGuard } from '$lib/utils/token-guards.utils';
 import { isNullish, nonNullish, uint8ArrayToBase64 } from '@dfinity/utils';
 
 export const isTokenIcrc7 = (token: Partial<IcToken>): token is Icrc7Token =>
 	token.standard?.code === 'icrc7';
 
-export const isTokenIcrc7CustomToken = (token: Token): token is Icrc7CustomToken =>
-	isTokenIcrc7(token) && isTokenToggleable(token);
+export const isTokenIcrc7CustomToken = toggleableTokenGuard<Icrc7CustomToken>(isTokenIcrc7);
 
 export const mapIcrc7Token = ({
 	canisterId,

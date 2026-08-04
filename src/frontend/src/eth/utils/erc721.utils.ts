@@ -1,14 +1,13 @@
 import type { Erc721Token } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import type { NftCollection } from '$lib/types/nft';
-import type { Token } from '$lib/types/token';
-import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import {
+	collectionStandardGuard,
+	toggleableTokenGuard,
+	tokenStandardGuard
+} from '$lib/utils/token-guards.utils';
 
-export const isTokenErc721 = (token: Token): token is Erc721Token =>
-	token.standard.code === 'erc721';
+export const isTokenErc721 = tokenStandardGuard<Erc721Token>('erc721');
 
-export const isCollectionErc721 = (collection: NftCollection) =>
-	collection.standard.code === 'erc721';
+export const isCollectionErc721 = collectionStandardGuard('erc721');
 
-export const isTokenErc721CustomToken = (token: Token): token is Erc721CustomToken =>
-	isTokenErc721(token) && isTokenToggleable(token);
+export const isTokenErc721CustomToken = toggleableTokenGuard<Erc721CustomToken>(isTokenErc721);
