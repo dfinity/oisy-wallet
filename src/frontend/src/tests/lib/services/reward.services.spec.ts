@@ -12,7 +12,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
 } from '$lib/enums/plausible';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import { RewardType } from '$lib/enums/reward-type';
@@ -45,14 +45,12 @@ import type { MockInstance } from 'vitest';
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward.services', () => {
-	let trackExceptionalErrorSpy: MockInstance;
+	let trackAppErrorSpy: MockInstance;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		trackExceptionalErrorSpy = vi
-			.spyOn(analyticsServices, 'trackExceptionalError')
-			.mockImplementation(() => {});
+		trackAppErrorSpy = vi.spyOn(analyticsServices, 'trackAppError').mockImplementation(() => {});
 	});
 
 	describe('getCampaignEligibilities', () => {
@@ -208,10 +206,10 @@ describe('reward.services', () => {
 
 				await getUserRoles({ identity: mockIdentity });
 
-				expect(trackExceptionalErrorSpy).toHaveBeenCalledWith(
+				expect(trackAppErrorSpy).toHaveBeenCalledWith(
 					expect.objectContaining({
-						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_ROLES,
-						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_ROLES,
+						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
 						severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
 					})
 				);
@@ -228,7 +226,7 @@ describe('reward.services', () => {
 
 				expect(toast.text).toContain(en.vip.reward.error.loading_user_data);
 				expect(toast.text).toContain('Boom');
-				expect(trackExceptionalErrorSpy).not.toHaveBeenCalled();
+				expect(trackAppErrorSpy).not.toHaveBeenCalled();
 			});
 
 			// The wallet works without reward data, so this failure must never take the app over.

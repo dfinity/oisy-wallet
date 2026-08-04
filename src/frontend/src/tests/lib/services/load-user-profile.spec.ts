@@ -3,7 +3,7 @@ import * as backendApi from '$lib/api/backend.api';
 import {
 	PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
 } from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
@@ -28,7 +28,7 @@ const mockProfile: UserProfile = {
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('load-user-profile.services', () => {
-	let trackExceptionalErrorSpy: MockInstance;
+	let trackAppErrorSpy: MockInstance;
 
 	describe('loadUserProfile', () => {
 		beforeEach(() => {
@@ -37,9 +37,7 @@ describe('load-user-profile.services', () => {
 			toastsStore.reset();
 			vi.clearAllMocks();
 
-			trackExceptionalErrorSpy = vi
-				.spyOn(analyticsServices, 'trackExceptionalError')
-				.mockImplementation(() => {});
+			trackAppErrorSpy = vi.spyOn(analyticsServices, 'trackAppError').mockImplementation(() => {});
 		});
 
 		it('should not create a user profile if uncertified profile is found', async () => {
@@ -217,7 +215,7 @@ describe('load-user-profile.services', () => {
 				await loadUserProfile({ identity: mockIdentity });
 
 				expect(get(infrastructureError)).toEqual({
-					operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 					detail: expect.stringContaining('Failed to fetch HTTP request')
 				});
 			});
@@ -236,10 +234,10 @@ describe('load-user-profile.services', () => {
 
 				await loadUserProfile({ identity: mockIdentity });
 
-				expect(trackExceptionalErrorSpy).toHaveBeenCalledWith(
+				expect(trackAppErrorSpy).toHaveBeenCalledWith(
 					expect.objectContaining({
-						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
-						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
 						severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER
 					})
 				);
@@ -247,7 +245,7 @@ describe('load-user-profile.services', () => {
 
 			it('should clear a standing error once the profile loads again', async () => {
 				infrastructureError.set({
-					operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 					err: networkError()
 				});
 				vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({ Ok: mockProfile });

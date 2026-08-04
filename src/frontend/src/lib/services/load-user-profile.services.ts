@@ -1,11 +1,12 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import {
+	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
 } from '$lib/enums/plausible';
-import { trackExceptionalError } from '$lib/services/analytics.services';
+import { trackAppError } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -14,7 +15,7 @@ import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors'
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNetworkUnreachableError } from '$lib/utils/error.utils';
+import { isNetworkUnreachableError, networkErrorSubcode } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -121,13 +122,15 @@ export const loadUserProfile = async ({
 			consoleError('Failed to load the user profile: the network is unreachable.', err);
 
 			infrastructureError.set({
-				operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 				err
 			});
 
-			trackExceptionalError({
-				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
-				code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			trackAppError({
+				context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+				subcode: networkErrorSubcode(err),
 				severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
 				err
 			});

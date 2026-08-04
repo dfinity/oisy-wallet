@@ -105,9 +105,10 @@ The mechanism is a small helper in `src/frontend/src/lib/stores/toasts.store.ts`
 
 Per `docs/ai/frontend/analytics.md` §3 this is an event **family**, not a counter — it has more than two call sites and a severity dimension — so it is a `PLAUSIBLE_EVENTS` member fired through a single typed function (pattern B).
 
-- `PLAUSIBLE_EVENTS.EXCEPTIONAL_ERROR = 'exceptional_error'` — deliberately generic, so future "the app could not do its job" conditions reuse it instead of each minting a counter.
-- A new `PLAUSIBLE_EVENT_CONTEXTS.INFRASTRUCTURE` member.
+- `PLAUSIBLE_EVENTS.APP_ERROR = 'app_error'` — deliberately generic, so future "the app could not do its job" conditions reuse it instead of each minting a counter. Not `infrastructure_error`: the same event is intended to cover purely local faults (address derivation), which that name would misdescribe.
+- `event_context` carries the **problem area** (`backend` for the profile, `rewards` for reward/role data), so "count faults by area" works. It must never be a single hardcoded value.
 - A new subcontext enum for the failing operation (`user_profile`, `user_roles`, `rewards`), so the dashboard can group by what broke.
+- Two error levels: `result_error_code` is the coarse, stable class (`network_error`) and `result_error_subcode` the finer cause (`offline`, `gateway_unavailable`, `rate_limited`). The `offline` vs `gateway_unavailable` split is the one that earns its keep — it separates "our boundary nodes are down" from "these users lost connectivity", which a single code cannot express. `networkErrorSubcode` derives it where the classification decision is already made, rather than computing and discarding it.
 - `PLAUSIBLE_EVENT_ERROR_SEVERITIES` currently has only `MAJOR`, while §4 of the analytics doc already documents `blocker` / `critical` / `major` / `minor`. Add the missing members and use `blocker` for the init failure (user cannot use the wallet) and `major` for the background ones (degraded, still usable).
 - Metadata: `event_context`, `event_subcontext`, `result_status: error`, `result_error` (our own message), `result_error_text` (the sanitised raw text), `result_error_severity`, and an error code identifying the class of failure.
 
@@ -154,6 +155,6 @@ _Both questions originally raised here were resolved while writing the spec; kep
 
 _All three were decided before implementation started._
 
-- **Error-code property.** _Resolved: `result_error_code`._ It is already documented in analytics doc §4, and it avoids introducing `PLAUSIBLE_EVENT_CODES` in a second open branch while #13145 still carries it. If #13145 lands first, migrating this event to `event_code` is a one-line rename.
+- **Error-code property.** _Resolved: `result_error_code`, plus a new `result_error_subcode` for the finer level._ Both are `result_error_*` schema names, which avoids introducing `PLAUSIBLE_EVENT_CODES` in a second open branch while #13145 still carries it. If #13145 lands first, migrating to `event_code` is a rename.
 - **i18n placement of the page copy.** _Resolved: a dedicated `init.unavailable.*` sub-block_, so the page's copy reads as one unit instead of scattering across `init.text` and `init.error`. The short Part 3 connection message stays in `init.error`, where the other initialization failures live.
 - **Whether translations ship in this PR or a follow-up.** _Resolved: English first, translations in a follow-up i18n PR._ Verified safe: `npm run i18n` syncs the new keys into the 14 other locale files as empty strings, and `mergeWithFallback` (`src/frontend/src/lib/utils/i18n.utils.ts`) substitutes the English value for any nullish-or-empty translation at runtime. So non-English users see English copy — never blank labels — until the follow-up fills them in. This also keeps the `compare-sizes` gate light for this PR.

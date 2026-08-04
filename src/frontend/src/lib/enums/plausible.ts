@@ -25,7 +25,7 @@ export enum PLAUSIBLE_EVENTS {
 	DEPOSIT_WITHDRAW = 'deposit_withdraw',
 	PERSONAL_NOTE = 'personal_note',
 	PERSONAL_NOTE_SHARE = 'personal_note_share',
-	EXCEPTIONAL_ERROR = 'exceptional_error'
+	APP_ERROR = 'app_error'
 }
 
 export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
@@ -35,8 +35,18 @@ export enum PLAUSIBLE_EVENT_ERROR_SEVERITIES {
 	MINOR = 'minor'
 }
 
+// Coarse class of failure — the level a dashboard counts on. Deliberately small and stable;
+// new granularity belongs in PLAUSIBLE_EVENT_ERROR_SUBCODES, not here.
 export enum PLAUSIBLE_EVENT_ERROR_CODES {
-	NETWORK_UNREACHABLE = 'network_unreachable'
+	NETWORK_ERROR = 'network_error'
+}
+
+// Finer cause within a code. Splitting `offline` from `gateway_unavailable` is the point: it is
+// what separates "our boundary nodes are down" from "these users lost connectivity".
+export enum PLAUSIBLE_EVENT_ERROR_SUBCODES {
+	OFFLINE = 'offline',
+	GATEWAY_UNAVAILABLE = 'gateway_unavailable',
+	RATE_LIMITED = 'rate_limited'
 }
 
 export enum PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES {
@@ -60,11 +70,11 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	LEARN_MORE = 'learn_more',
 	TRADING = 'trading',
 	PERSONAL_NOTES = 'personal_notes',
-	INFRASTRUCTURE = 'infrastructure'
+	REWARDS = 'rewards'
 }
 
 // The operation that could not complete, so a dashboard can group an outage by what broke.
-export enum PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE {
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR {
 	USER_PROFILE = 'user_profile',
 	USER_ROLES = 'user_roles',
 	REWARDS = 'rewards'

@@ -24,7 +24,7 @@ The user stays signed in. A dropped connection does **not** end the session: ear
 
 OISY does **not** automatically retry, poll, or reconnect in either case — recovery is the user's explicit reload. This is a deliberate exclusion, not an oversight.
 
-Both cases emit the `exceptional_error` Plausible event, so an outage is directly observable rather than only inferable from a drop in other events.
+Both cases emit the `app_error` Plausible event, so an outage is directly observable rather than only inferable from a drop in other events. It distinguishes a connectivity problem on the user's side from an Internet Computer gateway failure, which are indistinguishable to the user but not to us.
 
 ---
 
