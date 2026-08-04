@@ -1,6 +1,7 @@
 import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 import type { LimitOrderPairView, LimitOrderSide, PricePreset } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderPriceSection', () => {
