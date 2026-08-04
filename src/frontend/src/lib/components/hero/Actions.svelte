@@ -18,6 +18,7 @@
 	import Swap from '$lib/components/swap/Swap.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import { allBalancesZero } from '$lib/derived/balances.derived';
+	import { failedAddressNetworkIds } from '$lib/derived/failed-addresses.derived';
 	import {
 		networkEthereum,
 		networkICP,
@@ -34,26 +35,51 @@
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
-	let convertEth = $derived($ethToCkETHEnabled && $erc20CustomTokensInitialized);
-
-	let convertErc20 = $derived($erc20ToCkErc20Enabled && $erc20CustomTokensInitialized);
-
-	let convertCkBtc = $derived(
-		$networkBitcoinMainnetEnabled && $tokenCkBtcLedger && $erc20CustomTokensInitialized
+	// Every action that moves funds needs this network's derived address, so none of them can succeed
+	// while it is unavailable — offering them let the user fill in an entire send form and fail at
+	// signing, which is worse than not offering them at all. Receive is left in place: it shows `n/a`
+	// instead of an address, which at least tells the user what is wrong.
+	//
+	// Nullish on the Chain Fusion view, where no single network is selected, so the actions stay
+	// available there — the other chains still work, and that is the whole point of the degradation.
+	let addressUnavailable = $derived(
+		nonNullish($networkId) && $failedAddressNetworkIds.includes($networkId)
 	);
 
-	let convertBtc = $derived($networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId));
+	// The converts are sends in disguise, so they fail the same way.
+	let convertEth = $derived(
+		$ethToCkETHEnabled && $erc20CustomTokensInitialized && !addressUnavailable
+	);
+
+	let convertErc20 = $derived(
+		$erc20ToCkErc20Enabled && $erc20CustomTokensInitialized && !addressUnavailable
+	);
+
+	let convertCkBtc = $derived(
+		$networkBitcoinMainnetEnabled &&
+			$tokenCkBtcLedger &&
+			$erc20CustomTokensInitialized &&
+			!addressUnavailable
+	);
+
+	let convertBtc = $derived(
+		$networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId) && !addressUnavailable
+	);
 
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) && !isNftsPage
+		(!isTransactionsPage || $isPageTokenSwappable || isNullish($pageToken)) &&
+			!isNftsPage &&
+			!addressUnavailable
 	);
 
-	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
+	let sendAction = $derived((!$allBalancesZero || isTransactionsPage) && !addressUnavailable);
 
-	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
+	let buyAction = $derived(
+		(!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage && !addressUnavailable
+	);
 
 	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
 	// TODO: Remove once Swap/Convert are refactored and merged.

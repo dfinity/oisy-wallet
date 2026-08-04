@@ -87,23 +87,57 @@ The old `init.error.loading_address` key is replaced by a new key taking a `$net
 
 ## Part 4 — Per-chain unavailable UI
 
-**The token list already does the right thing, for free.** `TokenBalance.svelte` renders `n/a`
-(`tokens.balance.error.not_applicable`) whenever `data.balance` is nullish, and
-`TokenExchangeBalance.svelte` renders `-` when the balance or its exchange value is nullish. Both
-key off the **balance**, not off any address state — and since the wallet worker for a chain never
-starts without that chain's address, a failed chain's balance simply stays nullish. So its rows
-already display `n/a` / `-` rather than `$0.00`.
+**The token list does _not_ already do the right thing.** An earlier revision of this spec claimed
+it did, on the grounds that `TokenBalance.svelte` renders `n/a`
+(`tokens.balance.error.not_applicable`) whenever `data.balance` is nullish and
+`TokenExchangeBalance.svelte` renders `-` for a nullish exchange value. Testing the built branch
+showed both halves of that reasoning to be wrong:
 
-This resolves the list-versus-hide question: the tokens **stay listed**, showing `n/a`, with no new
-component state and no new copy. Reuse this existing pattern — do **not** introduce a separate
-"unavailable" wording for the same idea.
+- **`TokenBalance` never gets the chance.** It is wrapped in `TokenBalanceSkeleton.svelte`, which
+  renders a skeleton whenever `data.balance === undefined` and only falls through to the `n/a` branch
+  for `null`. A chain with no address never loads a balance at all, so it stays `undefined` — an
+  eternal shimmer, exactly the "almost there" failure already identified for Receive.
+  `TokenExchangeValueSkeleton.svelte` intercepts the USD column the same way.
+- **A failed chain _can_ have a balance.** Balances are cached in IndexedDB and restored by
+  `syncBalancesFromCache` (`listener.services.ts`) keyed by principal and token, with no reference to
+  whether the address derived. So a chain that previously worked shows a **stale** balance, priced
+  and presented as current, for a chain that cannot transact. This is the worse of the two: the
+  skeleton is merely unhelpful, whereas a stale figure is confidently wrong.
 
-Actions are likewise already guarded: `ethAddressNotLoaded` / `solAddressMainnetNotLoaded` /
-`btcAddressMainnetNotLoaded` disable the relevant controls in `WalletConnectButton`, `SendModal`
-and `ConvertEth`.
+The underlying reason is that the balance cannot express this state: "no balance yet" and "no balance
+ever" are indistinguishable, and a cached balance is indistinguishable from a fresh one. So the
+unavailable state must be read from `failedAddresses` — the single source of truth this change
+already introduces — rather than inferred from the balance.
 
-What therefore remains for this part is narrow — the surfaces where a missing address is shown
-_directly_ rather than via a balance:
+Both skeleton wrappers therefore short-circuit to the established unavailable rendering for a chain
+in the failed set: `n/a` for the amount, `-` for the USD value. Deciding it in the wrapper rather
+than in `TokenBalance` / `TokenExchangeBalance` keeps those two untouched, which matters because
+`TokenExchangeBalance` is shared with the hero.
+
+This still resolves the list-versus-hide question the same way — the tokens **stay listed**, showing
+`n/a`, reusing the existing wording rather than inventing an "unavailable" label. What changed is
+only where that state is decided.
+
+**Token groups are excluded.** A group spanning a failed chain and a working one has a genuinely
+_partial_ balance rather than an absent one, so marking the whole group `n/a` would hide the part
+that is known. This is the same open question as the hero total below, and is left with it.
+
+**The hero actions are not adequately guarded either.** `ethAddressNotLoaded` /
+`solAddressMainnetNotLoaded` / `btcAddressMainnetNotLoaded` do guard `WalletConnectButton`,
+`SendModal` and `ConvertEth` — but those checks sit _inside_ the flows. `EthSendTokenWizard.svelte`
+asserts `isNullish($ethAddress)` only at the point of sending, so a user can open Send, fill in a
+destination and an amount, and fail at signing. `Actions.svelte` gates Send purely on
+`allBalancesZero`, which a stale cached balance makes false.
+
+Every hero action that moves funds — Send, Swap, Buy and the four Converts — needs the selected
+network's derived address, so all of them are now hidden while it is unavailable. Failing late is
+worse than not offering the action: the user does the work twice and learns nothing about why.
+Receive is deliberately kept, because it shows `n/a` in place of the address, which is informative.
+The flag is nullish on the Chain Fusion view, where no single network is selected, so the actions stay
+available there — the other chains still work, which is the entire point of degrading per chain.
+
+What remains for this part is the surfaces where a missing address is shown _directly_ rather than
+via a balance:
 
 - **Receive** (`ReceiveAddress.svelte`) — _confirmed and fixed._ A nullish address rendered a
   loading **skeleton**, so a permanently failed chain showed an eternal shimmer, which reads as
@@ -153,7 +187,7 @@ Describe that a chain whose address cannot be derived is shown as unavailable wh
 
 ## Open questions (facts to confirm)
 
-- Which of the 30+ address consumers would render a **misleading** value (rather than merely disabled/hidden) for a chain in the failed set? Narrowed to two candidates in Part 4 (receive addresses, hero total). To be confirmed during implementation and recorded in the PR.
+- Which of the 30+ address consumers would render a **misleading** value (rather than merely disabled/hidden) for a chain in the failed set? _Resolved: four, not the two originally narrowed to._ Receive addresses and the hero total were found up front; testing the built branch added the token amount and USD columns (an eternal skeleton, or a **stale cached balance** presented as current) and the hero actions (Send offered, then failing at signing). The first three are fixed; the hero total is deliberately left, with token groups, as a product call. The lesson worth keeping: two of the four were missed because the audit reasoned about the components in isolation, and both the `TokenBalanceSkeleton` wrapper and the IndexedDB balance cache sit outside the component that appears to own the decision.
 - Does any worker (`Loader.svelte` → wallet workers) start with a nullish address and fail in a way the user sees, or is it already gated? The `$effect` reads the address before spawning, which suggests gated, but it needs confirming.
 
 ## Pending decisions (facts are clear — we just need to decide)
