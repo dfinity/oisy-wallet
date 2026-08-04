@@ -12,9 +12,10 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// Read-only price rows shared by the limit-order Review and the order-detail
-	// modal: the limit price plus current value, the value-difference (crossing
-	// gate: neutral/amber/red, no green) and — for resting orders — the queue
-	// position. Rendered as `ModalValue` rows, the same key/value style the Swap
+	// modal: the limit price plus current value, the value difference (green when
+	// the order is favourable, amber/red as it gives value up — `valueDifference`
+	// is signed relative to the caller's side) and — for resting orders — the
+	// queue position. Rendered as `ModalValue` rows, the same key/value style the Swap
 	// review uses and that `LimitOrderTermsList` already uses right below.
 	// Values are display strings so both callers format alike.
 	interface Props {
