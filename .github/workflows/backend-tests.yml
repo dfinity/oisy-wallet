@@ -60,6 +60,14 @@ jobs:
     permissions:
       contents: read
     needs: ['docker-build']
+    strategy:
+      # Don't cancel the other shards when one fails — we want the full signal.
+      fail-fast: false
+      matrix:
+        # Shards run in parallel, each on its own runner. nextest's
+        # `--partition` splits the suite across these; keep the divisor in the
+        # `NEXTEST_PARTITION` env below in sync with the number of shards.
+        partition: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -89,9 +97,15 @@ jobs:
         if: steps.changes.outputs.backend == 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
+      - name: Install cargo-nextest
+        if: steps.changes.outputs.backend == 'true'
+        run: curl -LsSf https://get.nexte.st/latest/linux | tar zxf - -C "${CARGO_HOME:-$HOME/.cargo}/bin"
+
       - name: 'Run backend tests'
         if: steps.changes.outputs.backend == 'true'
         working-directory: .
+        env:
+          NEXTEST_PARTITION: 'count:${{ matrix.partition }}/4'
         run: ./scripts/test.backend.sh
 
   breaking-interface:
