@@ -7,7 +7,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
-	import { failedAddressNetworkIds } from '$lib/stores/failed-addresses.store';
+	import { failedAddressNetworkIds } from '$lib/derived/failed-addresses.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';

@@ -1,5 +1,5 @@
 import type { NetworkId } from '$lib/types/network';
-import { derived, writable, type Readable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface FailedAddress {
 	networkId: NetworkId;
@@ -61,15 +61,3 @@ const initFailedAddressesStore = (): FailedAddressesStore => {
 };
 
 export const failedAddresses = initFailedAddressesStore();
-
-/**
- * The chains to present as unavailable rather than still loading.
- *
- * Without this, a permanently failed chain is indistinguishable from a slow one — the receive
- * section keeps showing a loading skeleton forever, which reads as "almost there" instead of
- * "this will not load".
- */
-export const failedAddressNetworkIds: Readable<NetworkId[]> = derived(
-	[failedAddresses],
-	([$failedAddresses]) => $failedAddresses.map(({ networkId }) => networkId)
-);

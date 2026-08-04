@@ -1,14 +1,29 @@
 import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
-import { SUPPORTED_BITCOIN_NETWORK_IDS } from '$env/networks/networks.btc.env';
-import { SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
-import { SUPPORTED_SOLANA_NETWORK_IDS } from '$env/networks/networks.sol.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	SUPPORTED_BITCOIN_NETWORK_IDS
+} from '$env/networks/networks.btc.env';
+import {
+	ETHEREUM_NETWORK_ID,
+	SUPPORTED_ETHEREUM_NETWORK_IDS
+} from '$env/networks/networks.eth.env';
+import {
+	SOLANA_MAINNET_NETWORK_ID,
+	SUPPORTED_SOLANA_NETWORK_IDS
+} from '$env/networks/networks.sol.env';
 import { TOKEN_ACCOUNT_ID_TYPES_CASE_SENSITIVE } from '$lib/constants/token-account-id.constants';
 import type { AddressStoreData } from '$lib/stores/address.store';
 import type { Address, OptionAddress } from '$lib/types/address';
-import type { NetworkId } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
-import { isNetworkIdICP } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBTCMainnet,
+	isNetworkIdEthereum,
+	isNetworkIdEvm,
+	isNetworkIdICP,
+	isNetworkIdSOLMainnet
+} from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const mapAddress = <T extends Address>(
@@ -92,3 +107,44 @@ export const areAddressesPartiallyEqual = <T extends Address>({
 		address2.toLowerCase().includes(address1.toLowerCase())
 	);
 };
+
+// One derived address can serve several networks, so a failure is not confined to the network it
+// was loaded under. The Ethereum address is shared by every EVM network — Base, Polygon, BNB,
+// Arbitrum and the EVM testnets — so naming only "Ethereum" would leave a user with Base assets
+// wondering why those broke too. Bitcoin and Solana mainnet each have their own address, and their
+// testnet counterparts are loaded separately, so a mainnet failure must not implicate them.
+const dependsOnFailedAddress = ({
+	networkId,
+	failedNetworkId
+}: {
+	networkId: NetworkId;
+	failedNetworkId: NetworkId;
+}): boolean =>
+	failedNetworkId === ETHEREUM_NETWORK_ID
+		? isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)
+		: failedNetworkId === BTC_MAINNET_NETWORK_ID
+			? isNetworkIdBTCMainnet(networkId)
+			: failedNetworkId === SOLANA_MAINNET_NETWORK_ID
+				? isNetworkIdSOLMainnet(networkId)
+				: false;
+
+/**
+ * Expand failed addresses to every enabled network that cannot work without them.
+ *
+ * `networks` is passed in rather than read here so the result keeps the network selector's order —
+ * the order the user already recognises, not the order the addresses happened to fail in. ICP never
+ * appears: its address comes from the principal directly rather than from derivation, which is why
+ * the wallet always keeps at least one working network.
+ */
+export const networksDependingOnFailedAddresses = ({
+	networks,
+	failedNetworkIds
+}: {
+	networks: Network[];
+	failedNetworkIds: NetworkId[];
+}): Network[] =>
+	networks.filter(({ id }) =>
+		failedNetworkIds.some((failedNetworkId) =>
+			dependsOnFailedAddress({ networkId: id, failedNetworkId })
+		)
+	);
