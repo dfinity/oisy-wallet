@@ -222,12 +222,14 @@
 		{#if $isPrivacyMode}
 			<IconDots variant="md" />
 		{:else}
-			<span class="text-base font-semibold text-primary"
-				><span class="tabular-nums">{baseAmountSigned}</span> {baseSymbol}</span
-			>
-			<span class="text-sm text-tertiary"
-				><span class="tabular-nums">{quoteAmountSigned}</span> {quoteSymbol}</span
-			>
+			<span class="text-base font-semibold text-primary">
+				<span class="tabular-nums">{baseAmountSigned}</span>
+				{baseSymbol}
+			</span>
+			<span class="text-sm text-tertiary">
+				<span class="tabular-nums">{quoteAmountSigned}</span>
+				{quoteSymbol}
+			</span>
 		{/if}
 	</div>
 </button>
