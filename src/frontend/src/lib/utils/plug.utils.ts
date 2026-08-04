@@ -1,5 +1,7 @@
 import type { BtcAddress } from '$btc/types/address';
 import type { EthAddress } from '$eth/types/address';
+import type { IcToken } from '$icp/types/ic-token';
+import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 import {
 	PLUG_EVM_PATH_DISCRIMINATOR,
 	PLUG_HELPER_CANISTER_ID,
@@ -8,6 +10,7 @@ import {
 } from '$lib/constants/plug.constants';
 import { SIGNER_MASTER_PUB_KEYS } from '$lib/constants/signer.constants';
 import type { PlugAccount } from '$lib/types/plug';
+import type { Token } from '$lib/types/token';
 import type { SolAddress } from '$sol/types/address';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
 import { bip340secp256k1, ed25519 } from '@dfinity/ic-pub-key/schnorr';
@@ -143,3 +146,34 @@ export const derivePlugAccounts = ({
 	depth: number;
 }): PlugAccount[] =>
 	Array.from({ length: depth }, (_, index) => derivePlugAccount({ phrase, index }));
+
+/**
+ * How much of a balance can actually be moved.
+ *
+ * Only ICP and ICRC tokens can be swept: their transfer is signed locally with
+ * the identity the seed phrase controls. Everything else on the page is a
+ * threshold key held by another canister, so it is display-only.
+ *
+ * The fee is deducted from the same token, so a balance that cannot cover its
+ * own fee is not sweepable at all — returning `undefined` here is what lets the
+ * UI disable that row with a reason instead of offering an action that can only
+ * fail.
+ */
+export const isPlugSweepableToken = (token: Token): token is IcToken =>
+	isTokenIcp(token) || isTokenIcrc(token);
+
+export const plugSweepableAmount = ({
+	token,
+	balance
+}: {
+	token: Token;
+	balance: bigint | undefined;
+}): bigint | undefined => {
+	if (isNullish(balance) || !isPlugSweepableToken(token)) {
+		return undefined;
+	}
+
+	const { fee } = token;
+
+	return balance > fee ? balance - fee : undefined;
+};
