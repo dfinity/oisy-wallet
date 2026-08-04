@@ -9,6 +9,7 @@
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { TOKEN_INPUT_SELECT_TOKEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -202,6 +203,7 @@
 			class:hover:border-brand-primary={readOnlyAmount && isSelectable}
 			class:rounded-lg={readOnlyAmount}
 			class:shadow-inner={readOnlyAmount}
+			data-tid={TOKEN_INPUT_SELECT_TOKEN_BUTTON}
 			disabled={!isSelectable}
 			onclick={onClick}
 			type="button"

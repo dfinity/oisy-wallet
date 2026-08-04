@@ -1,5 +1,8 @@
 import LimitOrderTradePairBox from '$lib/components/trading/limit-order/LimitOrderTradePairBox.svelte';
-import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';
+import {
+	TOKEN_INPUT_CURRENCY_TOKEN,
+	TOKEN_INPUT_SELECT_TOKEN_BUTTON
+} from '$lib/constants/test-ids.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
 	formatTradeAmount,
@@ -191,7 +194,7 @@ describe('LimitOrderTradePairBox', () => {
 		// No base yet: the quote list is filtered by the base's markets. The quote
 		// leg keeps Swap's shape — the selector still renders — but it is disabled,
 		// so there is no way to open the picker.
-		const { getAllByRole } = render(LimitOrderTradePairBox, {
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
 			props: {
 				...baseProps,
 				baseSymbol: undefined,
@@ -202,11 +205,15 @@ describe('LimitOrderTradePairBox', () => {
 			}
 		});
 
-		const disabledSelect = getAllByRole('button').find((button) => button.hasAttribute('disabled'));
+		// Both legs' selectors, base first: the previous lookup took the first
+		// disabled button in the tree, which is the gated leg's prompt, not its
+		// selector. Asserting the pair also pins that only the quote leg is gated.
+		const [baseSelect, quoteSelect] = getAllByTestId(TOKEN_INPUT_SELECT_TOKEN_BUTTON);
 
-		expect(disabledSelect).toBeDefined();
+		expect(baseSelect).toBeEnabled();
+		expect(quoteSelect).toBeDisabled();
 
-		await fireEvent.click(disabledSelect as HTMLElement);
+		await fireEvent.click(quoteSelect);
 
 		expect(onSelectQuote).not.toHaveBeenCalled();
 	});
