@@ -5,6 +5,10 @@
 		focused?: boolean;
 		error?: boolean;
 		readOnlyAmount?: boolean;
+		// The field can neither be typed into nor opened: it keeps its frame but
+		// drops the hover affordance, which would otherwise promise an interaction
+		// that isn't there.
+		inert?: boolean;
 		styleClass?: string;
 		children: Snippet;
 	}
@@ -13,6 +17,7 @@
 		focused = false,
 		error = false,
 		readOnlyAmount = false,
+		inert = false,
 		styleClass,
 		children
 	}: Props = $props();
@@ -26,8 +31,9 @@
 	class:border-error-solid={!readOnlyAmount && error}
 	class:border-solid={!readOnlyAmount}
 	class:border-tertiary={!readOnlyAmount && !error && !focused}
-	class:focus-within:border-2={!readOnlyAmount}
-	class:hover:border-brand-primary={!readOnlyAmount && !error}
+	class:cursor-not-allowed={inert}
+	class:focus-within:border-2={!readOnlyAmount && !inert}
+	class:hover:border-brand-primary={!readOnlyAmount && !error && !inert}
 	class:shadow-inner={!readOnlyAmount}
 >
 	{@render children()}

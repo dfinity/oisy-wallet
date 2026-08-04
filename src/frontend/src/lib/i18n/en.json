@@ -1817,6 +1817,8 @@
 			"buy": "Buy",
 			"select_sell_token": "Select token to sell",
 			"select_buy_token": "Select token to buy",
+			"select_sell_token_first": "Select token to sell first",
+			"select_buy_token_first": "Select token to buy first",
 			"you_sell": "You sell",
 			"you_buy": "You buy",
 			"hero_prefix": "You",

@@ -85,6 +85,17 @@
 			: undefined
 	);
 
+	// Until a base is picked the quote field says which leg is blocking it, in
+	// place of the generic "Select token" prompt — the picker it points at carries
+	// the same wording, minus the "first".
+	const selectTokenText = $derived(
+		nonNullish(baseSymbol)
+			? undefined
+			: side === 'sell'
+				? $i18n.trading.limit_order.select_sell_token_first
+				: $i18n.trading.limit_order.select_buy_token_first
+	);
+
 	// The quote can only be chosen once a base is set (the quote list is filtered
 	// by the base's markets), mirroring the previous disabled-pill behaviour.
 	const onSelectQuoteGuarded = () => {
@@ -266,7 +277,10 @@
 		<span class="h-px flex-1 bg-disabled"></span>
 	</div>
 
-	<!-- Quote row: shared token selector with a read-only, non-editable derived amount -->
+	<!-- Quote row: the derived amount in a disabled input. Deliberately not
+		 `readOnlyAmount` — that strips the input's frame and turns the selector into
+		 a pill, whereas Swap renders its computed "You receive" leg as a plain
+		 disabled input. Same shape here keeps the two modals consistent. -->
 	<div class="py-2">
 		<TokenInputContent
 			amount={quoteAmountValue}
@@ -276,7 +290,7 @@
 			isSelectable={nonNullish(baseSymbol)}
 			onClick={onSelectQuoteGuarded}
 			onCustomValidate={onQuoteCustomValidate}
-			readOnlyAmount={true}
+			{selectTokenText}
 			showTokenNetwork
 			token={quoteToken}
 		>
