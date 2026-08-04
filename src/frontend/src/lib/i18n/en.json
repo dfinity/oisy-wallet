@@ -135,6 +135,8 @@
 			"confirm_navigate": "Are you sure you want to navigate away?",
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
+			"gift_code": "Gift code",
+			"gift_code_list": "My gift codes",
 			"refer_a_friend": "Refer your friends",
 			"address_book": "Contacts",
 			"hide_balances": "Hide balances",
@@ -161,6 +163,8 @@
 			"open_twitter": "Open the DFINITY X/Twitter feed",
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
+			"gift_code": "Create a gift code to share tokens",
+			"gift_code_list": "View your created gift codes",
 			"refer_a_friend": "Generate a referral link for a friend",
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "Create gift code",
+				"enter_amount": "How much would you like to gift?",
+				"select_token": "Select a token to send",
+				"token_amount": "≈ {0} {1}",
+				"no_tokens": "You don't have any tokens with a balance to create a gift code. Fund your wallet first.",
+				"select_expiry": "How long should the code be valid?",
+				"expiry_1h": "1 hour",
+				"expiry_24h": "24 hours",
+				"expiry_7d": "7 days",
+				"expiry_30d": "30 days",
+				"review_title": "Review gift code",
+				"review_token": "Token",
+				"review_amount": "Amount",
+				"review_expiry": "Expires in",
+				"review_fee": "Approval fee",
+				"confirm": "Create gift code",
+				"approving": "Approving token transfer...",
+				"creating": "Creating gift code...",
+				"success_title": "Gift code created!",
+				"success_description": "Share this QR code or link with the recipient.",
+				"link_copied": "Gift code link copied to clipboard.",
+				"share_link": "Share link"
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "Gift received!",
+				"success_description": "Tokens have been transferred to your wallet.",
+				"failed_title": "Gift code failed",
+				"invalid_code": "This gift code is invalid or does not exist.",
+				"already_redeemed": "This gift code has already been redeemed.",
+				"expired": "This gift code has expired.",
+				"cancelled": "This gift code was cancelled by the sender.",
+				"self_redeem": "You cannot redeem your own gift code.",
+				"transfer_failed": "Token transfer failed. Please try again later."
+			}
+		},
+		"list": {
+			"text": {
+				"title": "My gift codes",
+				"empty": "You haven't created any gift codes yet.",
+				"status_valid": "Active",
+				"status_used": "Redeemed",
+				"status_expired": "Expired",
+				"status_cancelled": "Cancelled",
+				"created": "Created",
+				"expires": "Expires",
+				"cancel_confirm": "Cancel this gift code?",
+				"cancel_success": "Gift code cancelled.",
+				"show_qr": "Show QR code"
+			}
+		},
+		"error": {
+			"creating": "Error while creating gift code.",
+			"redeeming": "Error while redeeming gift code.",
+			"cancelling": "Error while cancelling gift code.",
+			"loading": "Error while loading gift codes.",
+			"insufficient_allowance": "Insufficient token allowance. Please approve the transfer first."
 		}
 	},
 	"address_book": {

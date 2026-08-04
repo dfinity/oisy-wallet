@@ -135,6 +135,8 @@
 			"confirm_navigate": "Êtes-vous certain de vouloir quitter cette page ?",
 			"vip_qr_code": "Codes QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Parrainer vos amis",
 			"address_book": "Contacts",
 			"hide_balances": "Masquer les soldes",
@@ -161,6 +163,8 @@
 			"open_twitter": "Ouvrir le fil X/Twitter de DFINITY",
 			"vip_qr_code": "Générer un lien d'invitation",
 			"binance_qr_code": "Générer un lien Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Générer un lien de parrainage pour un ami",
 			"address_book": "Ouvrir les contacts",
 			"hide_balances": "Masquer les soldes affichés",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "Erreur lors du chargement des infos du parrain",
 				"setting_referrer": "Erreur lors de la définition du parrain"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

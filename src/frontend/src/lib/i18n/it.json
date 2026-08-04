@@ -135,6 +135,8 @@
 			"confirm_navigate": "Sei sicuro di voler andartene?",
 			"vip_qr_code": "Codici QR VIP",
 			"binance_qr_code": "QR Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Invita i tuoi amici",
 			"address_book": "Contatti",
 			"hide_balances": "Nascondi saldi",
@@ -161,6 +163,8 @@
 			"open_twitter": "Apri il feed X/Twitter di DFINITY",
 			"vip_qr_code": "Genera un link di invito",
 			"binance_qr_code": "Genera un link Binance Clubhouse",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "Genera un link di riferimento per un amico",
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "Errore durante il caricamento delle informazioni di referral.",
 				"setting_referrer": "Errore durante il salvataggio del referrer."
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

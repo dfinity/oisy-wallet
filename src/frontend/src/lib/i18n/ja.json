@@ -135,6 +135,8 @@
 			"confirm_navigate": "ページを離れても良いですか？",
 			"vip_qr_code": "VIP QRコード",
 			"binance_qr_code": "バイナンス クラブハウスQR",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "友達紹介",
 			"address_book": "アドレス帳",
 			"hide_balances": "残高を非表示",
@@ -161,6 +163,8 @@
 			"open_twitter": "DFINITY X/Twitterを開く",
 			"vip_qr_code": "招待リンクを生成",
 			"binance_qr_code": "バイナンスクラブハウスリンクを生成",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "友達の紹介リンクを生成",
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "紹介情報の読み込み中にエラーが発生しました。",
 				"setting_referrer": "紹介者の設定中にエラーが発生しました。"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

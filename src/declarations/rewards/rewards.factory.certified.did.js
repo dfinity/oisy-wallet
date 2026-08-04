@@ -73,7 +73,7 @@ export const idlFactory = ({ IDL }) => {
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
-		probability_multiplier_rules: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName)))),
+		probability_multiplier_rules: IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName))),
 		awards: IDL.Vec(UsageAwardEvent),
 		eligibility_criteria: UsageCriteria,
 		campaign_name: IDL.Opt(IDL.Text)
@@ -108,6 +108,13 @@ export const idlFactory = ({ IDL }) => {
 		oisy_canister: IDL.Opt(IDL.Principal),
 		s1e4_referral_config: IDL.Opt(S1E4ReferralConfig)
 	});
+	const CancelQrGiftCodeResponse = IDL.Variant({
+		Success: IDL.Null,
+		InvalidCode: IDL.Null,
+		NotOwner: IDL.Null,
+		AlreadyRedeemed: IDL.Null,
+		AnonymousCaller: IDL.Null
+	});
 	const VipReward = IDL.Record({ code: IDL.Text });
 	const ClaimVipRewardResponse = IDL.Variant({
 		AlreadyClaimed: IDL.Null,
@@ -115,13 +122,36 @@ export const idlFactory = ({ IDL }) => {
 		InvalidCode: IDL.Null
 	});
 	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
+	const QrGiftToken = IDL.Record({
+		ledger: IDL.Principal,
+		amount: IDL.Nat
+	});
+	const CreateQrGiftCodeRequest = IDL.Record({
+		expiry_seconds: IDL.Nat64,
+		tokens: IDL.Vec(QrGiftToken)
+	});
+	const AllowanceDetail = IDL.Record({
+		needed: IDL.Nat,
+		ledger: IDL.Principal,
+		current: IDL.Nat
+	});
+	const CreateQrGiftCodeResponse = IDL.Variant({
+		InvalidExpiry: IDL.Null,
+		InsufficientAllowance: IDL.Record({
+			details: IDL.Vec(AllowanceDetail)
+		}),
+		Success: IDL.Record({ code: IDL.Text }),
+		InvalidTokens: IDL.Null,
+		LedgerQueryFailed: IDL.Record({ ledger: IDL.Principal }),
+		AnonymousCaller: IDL.Null
+	});
 	const CriterionEligibility = IDL.Record({
 		satisfied: IDL.Bool,
 		criterion: Criterion
 	});
 	const CampaignEligibility = IDL.Record({
-		probability_multiplier_enabled: IDL.Opt(IDL.Bool),
-		probability_multiplier: IDL.Opt(IDL.Nat32),
+		probability_multiplier_enabled: IDL.Bool,
+		probability_multiplier: IDL.Nat32,
 		available: IDL.Bool,
 		eligible: IDL.Bool,
 		criteria: IDL.Vec(CriterionEligibility)
@@ -235,11 +265,47 @@ export const idlFactory = ({ IDL }) => {
 		request: LastActivityHistogramRequest,
 		response: LastActivityHistogram
 	});
+	const QrGiftCodeValidity = IDL.Variant({
+		Invalid: IDL.Null,
+		Used: IDL.Null,
+		Cancelled: IDL.Null,
+		Valid: IDL.Null,
+		Expired: IDL.Null
+	});
+	const QrGiftCodeEntry = IDL.Record({
+		validity: QrGiftCodeValidity,
+		code: IDL.Text,
+		created_at: IDL.Nat64,
+		tokens: IDL.Vec(QrGiftToken),
+		expiry_date: IDL.Nat64
+	});
 	const NewVipRewardResponse = IDL.Variant({
 		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
 		UnknownCampaign: IDL.Null,
 		VipReward: VipReward
+	});
+	const QrGiftCodeInfoResponse = IDL.Record({
+		validity: QrGiftCodeValidity,
+		tokens: IDL.Vec(QrGiftToken),
+		expiry_date: IDL.Nat64
+	});
+	const QrGiftCodeStats = IDL.Record({
+		total_failed: IDL.Nat32,
+		total_cancelled: IDL.Nat32,
+		total_created: IDL.Nat32,
+		total_redeemed: IDL.Nat32
+	});
+	const RedeemQrGiftCodeRequest = IDL.Record({ code: IDL.Text });
+	const RedeemQrGiftCodeResponse = IDL.Variant({
+		SelfRedeem: IDL.Null,
+		Success: IDL.Null,
+		InvalidCode: IDL.Null,
+		AlreadyRedeemed: IDL.Null,
+		Cancelled: IDL.Null,
+		TransferFailed: IDL.Record({ reason: IDL.Text }),
+		Expired: IDL.Null,
+		AnonymousCaller: IDL.Null
 	});
 	const ReferrerInfo = IDL.Record({
 		referral_code: IDL.Nat32,
@@ -255,6 +321,14 @@ export const idlFactory = ({ IDL }) => {
 	const SetReferrerResponse = IDL.Variant({
 		Ok: IDL.Null,
 		Err: SetReferrerError
+	});
+	const SetVipCampaignExpiryRequest = IDL.Record({
+		expiry_date: IDL.Nat64,
+		campaign_id: IDL.Text
+	});
+	const SetVipCampaignExpiryResponse = IDL.Variant({
+		CampaignNotFound: IDL.Null,
+		Success: IDL.Record({ codes_updated: IDL.Nat32 })
 	});
 	const StatsKeyType = IDL.Variant({
 		TokenGroup: IDL.Null,
@@ -277,6 +351,19 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UsageVsHoldingStats = IDL.Record({
 		holdings: IDL.Vec(UsageAndHolding)
+	});
+	const UploadVipCodesRequest = IDL.Record({
+		codes: IDL.Vec(IDL.Nat),
+		campaign_id: IDL.Text,
+		vip_id: IDL.Principal
+	});
+	const UploadVipCodesResponse = IDL.Variant({
+		CampaignNotFound: IDL.Null,
+		Success: IDL.Record({
+			codes_overwritten: IDL.Nat32,
+			codes_created: IDL.Nat32
+		}),
+		VipNotInCampaign: IDL.Null
 	});
 	const UsageAwardStats = IDL.Record({
 		user_count: IDL.Nat64,
@@ -331,6 +418,17 @@ export const idlFactory = ({ IDL }) => {
 		referrer_info: IDL.Opt(ReferrerInfo),
 		s1e4_referrer_info: IDL.Opt(S1E4ReferrerInfo)
 	});
+	const VipCodeValidity = IDL.Variant({
+		Invalid: IDL.Null,
+		Used: IDL.Null,
+		Valid: IDL.Null,
+		Expired: IDL.Null
+	});
+	const VipCodeInfoResponse = IDL.Record({
+		validity: VipCodeValidity,
+		expiry_date: IDL.Nat64,
+		campaign_id: IDL.Text
+	});
 	const VipStats = IDL.Record({
 		total_rejected: IDL.Nat32,
 		total_redeemed: IDL.Nat32,
@@ -338,6 +436,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 
 	return IDL.Service({
+		cancel_qr_gift_code: IDL.Func([IDL.Text], [CancelQrGiftCodeResponse], []),
 		claim_usage_award: IDL.Func([UsageAwardEvent, IDL.Principal], [], []),
 		claim_vip_reward: IDL.Func(
 			[VipReward],
@@ -349,6 +448,7 @@ export const idlFactory = ({ IDL }) => {
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
 		configure_vips: IDL.Func([IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))], [], []),
+		create_qr_gift_code: IDL.Func([CreateQrGiftCodeRequest], [CreateQrGiftCodeResponse], []),
 		eligible: IDL.Func([IDL.Opt(IDL.Principal)], [EligibilityResponse]),
 		grant_usage_award: IDL.Func([UsageAwardEvent, IDL.Opt(IDL.Principal)], [], []),
 		holdings_popcontest: IDL.Func([HoldingsPopcontestRequest], [HoldingsPopcontestResponse]),
@@ -356,7 +456,11 @@ export const idlFactory = ({ IDL }) => {
 			[LastActivityHistogramRequest],
 			[LastActivityHistogramResponse]
 		),
+		my_qr_gift_codes: IDL.Func([], [IDL.Vec(QrGiftCodeEntry)]),
 		new_vip_reward: IDL.Func([IDL.Opt(ClaimedVipReward)], [NewVipRewardResponse], []),
+		qr_gift_code_info: IDL.Func([IDL.Text], [IDL.Opt(QrGiftCodeInfoResponse)]),
+		qr_gift_code_stats: IDL.Func([], [QrGiftCodeStats]),
+		redeem_qr_gift_code: IDL.Func([RedeemQrGiftCodeRequest], [RedeemQrGiftCodeResponse], []),
 		referrer_info: IDL.Func([], [ReferrerInfo], []),
 		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
@@ -366,15 +470,22 @@ export const idlFactory = ({ IDL }) => {
 			[IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(IDL.Principal)))]
 		),
 		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
+		set_vip_campaign_expiry: IDL.Func(
+			[SetVipCampaignExpiryRequest],
+			[SetVipCampaignExpiryResponse],
+			[]
+		),
 		stats_by: IDL.Func([StatsKeyType], [StatsResponse]),
 		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats]),
 		trigger_s1e4_referrer_award_event: IDL.Func([], [], []),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
+		upload_vip_codes: IDL.Func([UploadVipCodesRequest], [UploadVipCodesResponse], []),
 		usage_stats: IDL.Func([], [UsageAwardStats]),
 		usage_winners: IDL.Func([IDL.Opt(UsageWinnersRequest)], [UsageWinnersResponse]),
 		user_info: IDL.Func([], [UserData]),
 		user_info_for: IDL.Func([IDL.Principal], [UserData]),
 		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
+		vip_code_info: IDL.Func([IDL.Text], [IDL.Opt(VipCodeInfoResponse)]),
 		vip_stats: IDL.Func([IDL.Opt(IDL.Text)], [VipStats])
 	});
 };
@@ -446,7 +557,7 @@ export const init = ({ IDL }) => {
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
-		probability_multiplier_rules: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName)))),
+		probability_multiplier_rules: IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName))),
 		awards: IDL.Vec(UsageAwardEvent),
 		eligibility_criteria: UsageCriteria,
 		campaign_name: IDL.Opt(IDL.Text)

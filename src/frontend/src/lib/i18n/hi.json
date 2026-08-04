@@ -135,6 +135,8 @@
 			"confirm_navigate": "क्या आप वाकई बाहर जाना चाहते हैं?",
 			"vip_qr_code": "वीआईपी क्यूआर कोड",
 			"binance_qr_code": "बाइनेंस क्लबहाउस क्यूआर",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "अपने दोस्तों को रेफर करें",
 			"address_book": "संपर्क",
 			"hide_balances": "शेष राशि छुपाएं",
@@ -161,6 +163,8 @@
 			"open_twitter": "DFINITY X/Twitter फ़ीड खोलें",
 			"vip_qr_code": "एक निमंत्रण लिंक जनरेट करें",
 			"binance_qr_code": "एक बाइनेंस क्लबहाउस लिंक जनरेट करें",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "एक दोस्त के लिए रेफरल लिंक जनरेट करें",
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "रेफरल जानकारी लोड करते समय त्रुटि",
 				"setting_referrer": "रेफरर सेट करते समय त्रुटि"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {

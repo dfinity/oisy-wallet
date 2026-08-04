@@ -557,7 +557,7 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.did",
+			"candid": "src/declarations/rewards/rewards.did",
 			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.10/rewards.wasm.gz",
 			"specified_id": "vi6cu-aiaaa-aaaad-aad7q-cai",
 			"remote": {

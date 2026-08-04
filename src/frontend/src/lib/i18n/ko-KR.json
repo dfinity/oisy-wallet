@@ -135,6 +135,8 @@
 			"confirm_navigate": "정말로 이 페이지를 떠나시겠습니까?",
 			"vip_qr_code": "VIP QR 코드",
 			"binance_qr_code": "바이낸스 클럽하우스 QR",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "친구 추천",
 			"address_book": "연락처",
 			"hide_balances": "잔액 숨기기",
@@ -161,6 +163,8 @@
 			"open_twitter": "DFINITY X/트위터 피드 열기",
 			"vip_qr_code": "초대 링크 생성",
 			"binance_qr_code": "바이낸스 클럽하우스 링크 생성",
+			"gift_code": "",
+			"gift_code_list": "",
 			"refer_a_friend": "친구를 위한 추천 링크 생성",
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
@@ -2085,6 +2089,69 @@
 				"loading_referrer_info": "추천 정보를 불러오는 중 오류가 발생했습니다",
 				"setting_referrer": "추천인 설정 중 오류가 발생했습니다"
 			}
+		}
+	},
+	"gift_code": {
+		"create": {
+			"text": {
+				"title": "",
+				"enter_amount": "",
+				"select_token": "",
+				"token_amount": "",
+				"no_tokens": "",
+				"select_expiry": "",
+				"expiry_1h": "",
+				"expiry_24h": "",
+				"expiry_7d": "",
+				"expiry_30d": "",
+				"review_title": "",
+				"review_token": "",
+				"review_amount": "",
+				"review_expiry": "",
+				"review_fee": "",
+				"confirm": "",
+				"approving": "",
+				"creating": "",
+				"success_title": "",
+				"success_description": "",
+				"link_copied": "",
+				"share_link": ""
+			}
+		},
+		"redeem": {
+			"text": {
+				"success_title": "",
+				"success_description": "",
+				"failed_title": "",
+				"invalid_code": "",
+				"already_redeemed": "",
+				"expired": "",
+				"cancelled": "",
+				"self_redeem": "",
+				"transfer_failed": ""
+			}
+		},
+		"list": {
+			"text": {
+				"title": "",
+				"empty": "",
+				"status_valid": "",
+				"status_used": "",
+				"status_expired": "",
+				"status_cancelled": "",
+				"created": "",
+				"expires": "",
+				"cancel_confirm": "",
+				"cancel_success": "",
+				"show_qr": ""
+			}
+		},
+		"error": {
+			"creating": "",
+			"redeeming": "",
+			"cancelling": "",
+			"loading": "",
+			"insufficient_allowance": ""
 		}
 	},
 	"address_book": {
