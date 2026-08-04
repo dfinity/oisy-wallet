@@ -4,21 +4,34 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import type { NetworkId } from '$lib/types/network';
-import type { ResultSuccess } from '$lib/types/utils';
 import { loadSolAddressMainnet } from '$sol/services/sol-address.services';
 
-export const loadAddresses = async (networkIds: NetworkId[]): Promise<ResultSuccess> => {
-	const results = await Promise.all([
-		networkIds.includes(BTC_MAINNET_NETWORK_ID)
-			? loadBtcAddressMainnet()
-			: Promise.resolve({ success: true }),
-		networkIds.includes(ETHEREUM_NETWORK_ID)
-			? loadEthAddress()
-			: Promise.resolve({ success: true }),
-		networkIds.includes(SOLANA_MAINNET_NETWORK_ID)
-			? loadSolAddressMainnet()
-			: Promise.resolve({ success: true })
-	]);
+export interface LoadAddressesResult {
+	// Chains whose address could not be derived. The wallet stays usable without them, so a
+	// non-empty list is not a reason to end the session.
+	failedNetworkIds: NetworkId[];
+	// The session itself is gone, rather than a chain having failed — the one case that still
+	// warrants signing the user out.
+	sessionInvalid: boolean;
+}
 
-	return { success: results.every(({ success }) => success) };
+export const loadAddresses = async (networkIds: NetworkId[]): Promise<LoadAddressesResult> => {
+	const requested = [
+		{ networkId: BTC_MAINNET_NETWORK_ID, load: loadBtcAddressMainnet },
+		{ networkId: ETHEREUM_NETWORK_ID, load: loadEthAddress },
+		{ networkId: SOLANA_MAINNET_NETWORK_ID, load: loadSolAddressMainnet }
+	].filter(({ networkId }) => networkIds.includes(networkId));
+
+	const results = await Promise.all(
+		requested.map(async ({ networkId, load }) => ({ networkId, ...(await load()) }))
+	);
+
+	const failed = results.filter(({ success }) => !success);
+
+	return {
+		sessionInvalid: failed.some(({ err }) => err === 'session-invalid'),
+		failedNetworkIds: failed
+			.filter(({ err }) => err === 'derivation-failed')
+			.map(({ networkId }) => networkId)
+	};
 };
