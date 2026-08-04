@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>OISY — transaction personal note wireframe</title>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css"
+		/>
+		<style>
+			:root {
+				--color-background-primary: #ffffff;
+				--color-background-secondary: #f4f5f7;
+				--color-background-tertiary: #f7f7f5;
+				--color-background-info: #e9eefc;
+				--color-text-primary: #1a1a1a;
+				--color-text-secondary: #5f6470;
+				--color-text-tertiary: #8a8f98;
+				--color-text-info: #1f6feb;
+				--color-text-danger: #d92d20;
+				--color-border-tertiary: rgba(0, 0, 0, 0.12);
+				--color-border-secondary: rgba(0, 0, 0, 0.22);
+				--color-border-info: rgba(31, 111, 235, 0.4);
+				--border-radius-md: 8px;
+				--border-radius-lg: 12px;
+				--border-radius-xl: 16px;
+				--font-sans:
+					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--color-background-primary: #1e1f22;
+					--color-background-secondary: #26272b;
+					--color-background-tertiary: #191a1c;
+					--color-background-info: #1b2740;
+					--color-text-primary: #ececec;
+					--color-text-secondary: #a8adb6;
+					--color-text-tertiary: #7c818b;
+					--color-text-info: #5aa0ff;
+					--color-text-danger: #ff6b5e;
+					--color-border-tertiary: rgba(255, 255, 255, 0.14);
+					--color-border-secondary: rgba(255, 255, 255, 0.26);
+					--color-border-info: rgba(90, 160, 255, 0.45);
+				}
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 28px 16px;
+				font-family: var(--font-sans);
+				background: var(--color-background-tertiary);
+				color: var(--color-text-primary);
+				line-height: 1.5;
+			}
+			.wrap {
+				max-width: 680px;
+				margin: 0 auto;
+			}
+			textarea {
+				font-family: inherit;
+				font-size: 14px;
+				padding: 10px 12px;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				background: var(--color-background-primary);
+				color: var(--color-text-primary);
+			}
+			textarea:focus {
+				outline: none;
+				box-shadow: 0 0 0 2px var(--color-border-info);
+			}
+			button {
+				font-family: inherit;
+			}
+			[data-action='cancel'] {
+				background: transparent;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				padding: 7px 16px;
+				font-size: 14px;
+				color: var(--color-text-primary);
+				cursor: pointer;
+			}
+			.seg {
+				display: inline-flex;
+				border: 0.5px solid var(--color-border-secondary);
+				border-radius: var(--border-radius-md);
+				overflow: hidden;
+			}
+			.seg button {
+				border: none;
+				background: transparent;
+				padding: 7px 16px;
+				font-size: 13px;
+				color: var(--color-text-secondary);
+				cursor: pointer;
+			}
+			.seg button.on {
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				font-weight: 500;
+			}
+			.tx-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 12px 2px;
+				border-bottom: 0.5px solid var(--color-border-tertiary);
+				font-size: 15px;
+			}
+			.tx-lbl {
+				color: var(--color-text-secondary);
+			}
+			.ib {
+				border: none;
+				background: transparent;
+				color: var(--color-text-info);
+				cursor: pointer;
+				padding: 4px;
+				font-size: 18px;
+				line-height: 1;
+			}
+			.note-text {
+				font-size: 15px;
+				color: var(--color-text-primary);
+				white-space: pre-wrap;
+				word-break: break-word;
+				line-height: 1.5;
+				margin-top: 4px;
+			}
+			.linkbtn {
+				border: none;
+				background: transparent;
+				color: var(--color-text-info);
+				cursor: pointer;
+				font-size: 13px;
+				font-weight: 500;
+				padding: 0;
+			}
+			.addmini {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				border: 0.5px solid var(--color-border-secondary);
+				background: transparent;
+				border-radius: var(--border-radius-md);
+				padding: 5px 12px;
+				font-size: 13px;
+				color: var(--color-text-info);
+				cursor: pointer;
+			}
+			.addmini:disabled {
+				color: var(--color-text-tertiary);
+				cursor: not-allowed;
+				opacity: 0.7;
+			}
+			.capmsg {
+				color: var(--color-text-tertiary);
+				font-size: 12px;
+				margin-top: 6px;
+			}
+			.savebtn {
+				background: var(--color-background-info);
+				color: var(--color-text-info);
+				border: 0.5px solid var(--color-border-info);
+				border-radius: var(--border-radius-md);
+				padding: 7px 18px;
+				font-size: 14px;
+				font-weight: 500;
+				cursor: pointer;
+			}
+			.savebtn:disabled {
+				opacity: 0.45;
+				cursor: not-allowed;
+			}
+			.sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				border: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<h1 style="font-size: 18px; font-weight: 500; margin: 0 0 16px">
+				OISY — transaction details: personal note (wireframe)
+			</h1>
+
+			<div
+				style="
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					gap: 16px;
+					flex-wrap: wrap;
+					margin: 0 0 14px;
+				"
+			>
+				<div class="seg" role="group" aria-label="Device">
+					<button id="dev-desktop" class="on" data-dev="desktop">
+						<i class="ti ti-device-desktop" aria-hidden="true"></i>&nbsp; Desktop
+					</button>
+					<button id="dev-mobile" data-dev="mobile">
+						<i class="ti ti-device-mobile" aria-hidden="true"></i>&nbsp; Mobile
+					</button>
+				</div>
+				<label
+					style="
+						display: inline-flex;
+						align-items: center;
+						gap: 6px;
+						font-size: 13px;
+						color: var(--color-text-secondary);
+						cursor: pointer;
+					"
+					><input type="checkbox" id="cap" /> Simulate: at note cap</label
+				>
+			</div>
+
+			<div
+				id="stage"
+				style="
+					position: relative;
+					overflow: hidden;
+					min-height: 660px;
+					background: rgba(0, 0, 0, 0.45);
+					border-radius: var(--border-radius-lg);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					padding: 24px;
+				"
+			>
+				<div
+					id="modal"
+					style="
+						width: 100%;
+						max-width: 420px;
+						background: var(--color-background-primary);
+						border-radius: var(--border-radius-xl);
+						overflow: hidden;
+					"
+				>
+					<div
+						style="
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							position: relative;
+							padding: 18px 20px;
+							border-bottom: 0.5px solid var(--color-border-tertiary);
+						"
+					>
+						<span style="font-size: 18px; font-weight: 500; color: var(--color-text-primary)"
+							>Transaction details</span
+						>
+						<button class="ib" style="position: absolute; right: 14px" aria-label="Close">
+							<i class="ti ti-x"></i>
+						</button>
+					</div>
+
+					<div style="padding: 18px 20px 20px">
+						<div
+							style="
+								background: var(--color-background-info);
+								border-radius: var(--border-radius-lg);
+								padding: 18px;
+								text-align: center;
+								margin-bottom: 16px;
+							"
+						>
+							<div
+								style="
+									width: 52px;
+									height: 52px;
+									border-radius: 50%;
+									background: var(--color-background-primary);
+									border: 0.5px solid var(--color-border-tertiary);
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									margin: 0 auto 8px;
+								"
+							>
+								<i
+									class="ti ti-infinity"
+									style="font-size: 26px; color: var(--color-text-info)"
+									aria-hidden="true"
+								></i>
+							</div>
+							<div style="font-size: 14px; font-weight: 500; color: var(--color-text-primary)">
+								Send
+							</div>
+							<div
+								style="
+									font-size: 26px;
+									font-weight: 500;
+									color: var(--color-text-primary);
+									margin-top: 2px;
+								"
+							>
+								1.75381 ICP
+							</div>
+						</div>
+
+						<div
+							style="
+								display: flex;
+								align-items: center;
+								gap: 12px;
+								background: var(--color-background-secondary);
+								border-radius: var(--border-radius-lg);
+								padding: 12px 14px;
+								margin-bottom: 6px;
+							"
+						>
+							<div
+								style="
+									width: 42px;
+									height: 42px;
+									border-radius: 50%;
+									background: var(--color-background-info);
+									color: var(--color-text-info);
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									font-weight: 500;
+									flex: none;
+								"
+							>
+								WS
+							</div>
+							<div style="min-width: 0; flex: 1">
+								<div style="font-weight: 500; font-size: 15px">To: Waylon Smithers</div>
+								<div
+									style="
+										font-size: 13px;
+										color: var(--color-text-secondary);
+										overflow: hidden;
+										text-overflow: ellipsis;
+										white-space: nowrap;
+									"
+								>
+									da29b27beb16a842882149b5380ff3b20f701c33c…
+								</div>
+							</div>
+							<button class="ib" aria-label="Copy address"><i class="ti ti-copy"></i></button>
+							<button class="ib" aria-label="Open in explorer">
+								<i class="ti ti-external-link"></i>
+							</button>
+						</div>
+
+						<div>
+							<div class="tx-row">
+								<span class="tx-lbl">Network</span
+								><span style="display: inline-flex; align-items: center; gap: 6px"
+									>Internet Computer
+									<i
+										class="ti ti-infinity"
+										style="font-size: 16px; color: var(--color-text-secondary)"
+										aria-hidden="true"
+									></i
+								></span>
+							</div>
+							<div class="tx-row">
+								<span class="tx-lbl">Timestamp</span><span>Dec 1, 2025, 13:30</span>
+							</div>
+							<div class="tx-row">
+								<span class="tx-lbl">Transaction ID</span
+								><span style="display: inline-flex; align-items: center; gap: 4px"
+									>31361658
+									<button class="ib" aria-label="Copy ID"><i class="ti ti-copy"></i></button
+									><button class="ib" aria-label="Open in explorer">
+										<i class="ti ti-external-link"></i></button
+								></span>
+							</div>
+							<div class="tx-row"><span class="tx-lbl">Fee</span><span>0.0001 ICP</span></div>
+							<div
+								class="tx-row"
+								style="flex-direction: column; align-items: stretch; gap: 4px"
+								id="note-area"
+							></div>
+						</div>
+
+						<button
+							style="
+								width: 100%;
+								margin-top: 16px;
+								background: var(--color-background-info);
+								color: var(--color-text-info);
+								border: none;
+								border-radius: var(--border-radius-lg);
+								padding: 14px;
+								font-size: 16px;
+								font-weight: 500;
+								cursor: pointer;
+							"
+						>
+							Close
+						</button>
+					</div>
+				</div>
+
+				<div
+					id="overlay"
+					style="
+						position: absolute;
+						inset: 0;
+						background: rgba(0, 0, 0, 0.35);
+						opacity: 0;
+						pointer-events: none;
+						transition: opacity 0.2s;
+					"
+				></div>
+				<div
+					id="sheet"
+					style="
+						position: absolute;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						background: var(--color-background-primary);
+						border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+						border-top: 0.5px solid var(--color-border-tertiary);
+						padding: 14px 18px 20px;
+						transform: translateY(115%);
+						transition: transform 0.25s;
+					"
+				></div>
+			</div>
+
+			<p style="font-size: 12px; color: var(--color-text-tertiary); margin-top: 14px">
+				Layout/interaction wireframe. Empty state shows a "+ Add" button; once a note exists, the
+				row shows the text with an edit pencil (delete lives inside the edit form). Toggle
+				"Simulate: at note cap" to see the disabled add + cap message. Character limit lowered to 50
+				here to show validation (real limit 500, error-only).
+			</p>
+		</div>
+
+		<script>
+			(function () {
+				var MAX = 50;
+				var CAPMSG =
+					'You’ve reached the maximum of 10,000 saved notes. Delete one to add a new note.';
+				var state = {
+					note: null,
+					mode: 'view',
+					justDeleted: false,
+					cached: null,
+					device: 'desktop',
+					draft: '',
+					atCap: false
+				};
+				var area = document.getElementById('note-area');
+				var modal = document.getElementById('modal');
+				var overlay = document.getElementById('overlay');
+				var sheet = document.getElementById('sheet');
+
+				function esc(s) {
+					return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+				}
+				function rowTop(right) {
+					return (
+						'<div style="display:flex;justify-content:space-between;align-items:center;width:100%"><span class="tx-lbl">Personal note</span><span style="display:inline-flex;align-items:center">' +
+						right +
+						'</span></div>'
+					);
+				}
+				function addBtn() {
+					return '<button class="addmini" data-action="add"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>';
+				}
+				function addBtnDisabled() {
+					return '<button class="addmini" disabled aria-disabled="true"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>';
+				}
+
+				function viewHtml() {
+					if (state.justDeleted) {
+						return (
+							rowTop(addBtn()) +
+							'<div style="display:flex;align-items:center;gap:8px;color:var(--color-text-secondary);font-size:13px;margin-top:2px"><i class="ti ti-trash" aria-hidden="true"></i> Note deleted <button class="linkbtn" data-action="undo">Undo</button></div>'
+						);
+					}
+					if (state.note) {
+						return (
+							rowTop(
+								'<button class="ib" data-action="edit" aria-label="Edit note"><i class="ti ti-pencil"></i></button>'
+							) +
+							'<div class="note-text">' +
+							esc(state.note) +
+							'</div>'
+						);
+					}
+					if (state.atCap) {
+						return rowTop(addBtnDisabled()) + '<div class="capmsg">' + CAPMSG + '</div>';
+					}
+					return rowTop(addBtn());
+				}
+
+				function formHtml() {
+					var tooLong = state.draft.length > MAX;
+					var del = state.note
+						? '<button class="linkbtn" data-action="delete" style="color:var(--color-text-danger);display:inline-flex;align-items:center;gap:6px"><i class="ti ti-trash" aria-hidden="true"></i> Delete</button>'
+						: '<span></span>';
+					return (
+						'<textarea id="note-input" rows="3" placeholder="e.g. Rent, refund to Alice" style="width:100%;resize:vertical">' +
+						esc(state.draft) +
+						'</textarea>' +
+						'<div id="note-error" style="color:var(--color-text-danger);font-size:12px;margin-top:6px;' +
+						(tooLong ? '' : 'display:none') +
+						'">Note must be ' +
+						MAX +
+						' characters or fewer.</div>' +
+						'<div style="color:var(--color-text-tertiary);font-size:12px;margin-top:6px">Private — only you can see this. The other party can’t, and it’s stored only in OISY.</div>' +
+						'<div style="color:var(--color-text-tertiary);font-size:11px;margin-top:4px">Demo limit ' +
+						MAX +
+						' chars to show validation (real limit: 500).</div>' +
+						'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
+						del +
+						'<span style="display:flex;gap:8px"><button data-action="cancel">Cancel</button><button class="savebtn" id="note-save" data-action="save">Save</button></span></div>'
+					);
+				}
+
+				function bindInput() {
+					var ta = document.getElementById('note-input');
+					if (!ta) return;
+					var save = document.getElementById('note-save');
+					var err = document.getElementById('note-error');
+					function upd() {
+						var v = ta.value;
+						state.draft = v;
+						var tl = v.length > MAX;
+						if (err) err.style.display = tl ? 'block' : 'none';
+						if (save) save.disabled = !v.trim() || tl;
+					}
+					ta.addEventListener('input', upd);
+					upd();
+					ta.focus();
+					ta.setSelectionRange(ta.value.length, ta.value.length);
+				}
+
+				function openSheet() {
+					sheet.innerHTML =
+						'<div style="width:36px;height:4px;border-radius:2px;background:var(--color-border-secondary);margin:0 auto 12px"></div>' +
+						'<div style="font-weight:500;margin-bottom:10px">' +
+						(state.note ? 'Edit note' : 'Add a personal note') +
+						'</div>' +
+						formHtml();
+					overlay.style.opacity = '1';
+					overlay.style.pointerEvents = 'auto';
+					sheet.style.transform = 'translateY(0)';
+				}
+				function closeSheet() {
+					overlay.style.opacity = '0';
+					overlay.style.pointerEvents = 'none';
+					sheet.style.transform = 'translateY(115%)';
+					sheet.innerHTML = '';
+				}
+
+				function render() {
+					modal.style.maxWidth = state.device === 'desktop' ? '420px' : '360px';
+					document.getElementById('dev-desktop').classList.toggle('on', state.device === 'desktop');
+					document.getElementById('dev-mobile').classList.toggle('on', state.device === 'mobile');
+					var editing = state.mode === 'edit';
+					if (editing && state.device === 'desktop') {
+						area.innerHTML = rowTop('') + formHtml();
+						closeSheet();
+						bindInput();
+					} else if (editing && state.device === 'mobile') {
+						area.innerHTML = viewHtml();
+						openSheet();
+						bindInput();
+					} else {
+						area.innerHTML = viewHtml();
+						closeSheet();
+					}
+				}
+
+				function commitSave() {
+					var ta = document.getElementById('note-input');
+					if (!ta) return;
+					var v = ta.value.trim();
+					if (!v || v.length > MAX) return;
+					state.note = v;
+					state.mode = 'view';
+					state.justDeleted = false;
+					render();
+				}
+
+				document.getElementById('cap').addEventListener('change', function (e) {
+					state.atCap = e.target.checked;
+					render();
+				});
+				document.addEventListener('click', function (e) {
+					var dev = e.target.closest('[data-dev]');
+					if (dev) {
+						state.device = dev.getAttribute('data-dev');
+						render();
+						return;
+					}
+					var b = e.target.closest('[data-action]');
+					if (!b) return;
+					var a = b.getAttribute('data-action');
+					if (a === 'add') {
+						state.draft = '';
+						state.mode = 'edit';
+						render();
+					} else if (a === 'edit') {
+						state.draft = state.note || '';
+						state.mode = 'edit';
+						render();
+					} else if (a === 'cancel') {
+						state.mode = 'view';
+						render();
+					} else if (a === 'save') {
+						commitSave();
+					} else if (a === 'delete') {
+						state.cached = state.note;
+						state.note = null;
+						state.justDeleted = true;
+						state.mode = 'view';
+						render();
+					} else if (a === 'undo') {
+						state.note = state.cached;
+						state.justDeleted = false;
+						render();
+					}
+				});
+				overlay.addEventListener('click', function () {
+					state.mode = 'view';
+					render();
+				});
+
+				render();
+			})();
+		</script>
+	</body>
+</html>
