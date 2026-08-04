@@ -86,7 +86,11 @@ export const initLoader = async ({
 
 	// The user profile settings will define the enabled/disabled networks.
 	// So we need to load it first to enable/disable the rest of the services.
-	const { success: userProfileSuccess, err: userProfileError } = await loadUserProfile({
+	const {
+		success: userProfileSuccess,
+		err: userProfileError,
+		profileCreated
+	} = await loadUserProfile({
 		identity
 	});
 
@@ -111,7 +115,10 @@ export const initLoader = async ({
 		return;
 	}
 
-	if (FRONTEND_DERIVATION_ENABLED) {
+	// A just-created profile has no signing allowance yet, so it must be awaited even when addresses
+	// are derived in the frontend: the wallet workers started by `progressAndLoad` issue paid signer
+	// calls (e.g. the certified BTC balance) that would otherwise race the approve.
+	if (FRONTEND_DERIVATION_ENABLED && !profileCreated) {
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
 		initSignerAllowance();
 	} else {

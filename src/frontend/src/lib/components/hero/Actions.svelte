@@ -13,6 +13,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
+	import CheckNewCollectionsButton from '$lib/components/nfts/CheckNewCollectionsButton.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import Swap from '$lib/components/swap/Swap.svelte';
@@ -81,6 +82,13 @@
 		(!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage && !addressUnavailable
 	);
 
+	// Only the ICP collection scan (EXT / ICRC-7) is exclusive to this action; the
+	// ERC discovery it also triggers already runs on the collections interval loader.
+	// So we offer it where that scan applies: ICP, and the all-networks view.
+	let checkNewCollectionsAction = $derived(
+		isNftsPage && ($networkICP || $pseudoNetworkChainFusion)
+	);
+
 	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
 	// TODO: Remove once Swap/Convert are refactored and merged.
 	let tooManyButtons = $derived(
@@ -111,6 +119,10 @@
 
 		{#if swapAction}
 			<Swap />
+		{/if}
+
+		{#if checkNewCollectionsAction}
+			<CheckNewCollectionsButton />
 		{/if}
 
 		{#if isTransactionsPage}
