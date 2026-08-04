@@ -67,9 +67,15 @@ Three details that are easy to get wrong and cost real time to rediscover:
 - Arbitrary-account BIP32 derivation needs `@scure/bip32` + `@scure/bip39`, promoted from transitive to **declared** dependencies at the versions already in the lockfile (1.7.0 / 1.6.0). This adds no package and no bundle weight: `@dfinity/identity-secp256k1` already imports both, so they ship the moment the identity class is used. `ethers/wallet` was rejected as the alternative — it pulls in the provider stack (and `ws`), which breaks under vitest and would grow the bundle for no benefit.
 - Account scanning depth is **user-specified, capped below 10**.
 
-**Balance scope.** PR1 itemizes **ICP and ICRC token balances** — precisely the set PR2 sweeps — and shows the **native balance** on BTC, each EVM chain, and SOL. ERC20 and SPL token balances are deliberately deferred to PR3, where they first become actionable; showing a long list of tokens the user cannot yet move adds review surface without adding user value. The row layout is the same either way, so adding them later is additive rather than a rework.
+**Balance scope.** PR1 covers **every enabled fungible token** the import can read: ICP and ICRC by principal, ERC20 by contract on each EVM network, SPL by associated token account, and the native coin on BTC, each EVM network, and SOL.
 
-All four chains have an existing address-parameterized primitive to reuse, so no new balance infrastructure is needed: `balance({ owner })` in `$icp/api/icrc-ledger.api.ts`, `InfuraProvider.balance(address)` in `$eth/providers/infura.providers.ts`, `getBalance` in `$sol/api/solana.api.ts`, and `getUtxosQuery({ address })` in `$icp/api/bitcoin.api.ts` (which reads the IC Bitcoin canister, not OISY's II-guarded backend — so it works for an arbitrary address).
+_Resolved:_ an earlier draft deferred ERC20 and SPL to PR3 on the grounds that a user cannot yet move them. Testing against a real wallet disproved that — the tokens people actually hold (USDC on Base, USDT on Ethereum, USD1 on Solana) are exactly the deferred category, so the page looked broken. They are in PR1.
+
+Every case reuses an existing address-parameterized primitive, so no new balance infrastructure is needed: `balance({ owner })` in `$icp/api/icrc-ledger.api.ts`, `InfuraProvider.balance(address)` and `InfuraErc20Provider.balance({ contract, address })` in `$eth/providers/`, `loadSolLamportsBalance` in `$sol/api/solana.api.ts`, `loadSplTokenBalance` in `$sol/services/spl-accounts.services.ts`, and `getBalanceQuery({ address })` in `$icp/api/bitcoin.api.ts` (which reads the IC Bitcoin canister, not OISY's II-guarded backend — so it works for an arbitrary address).
+
+**Dispatch is by token standard first, then by network.** An ERC20 and a native coin share a network but not a balance call, so a network-first dispatch would read the wrong thing. Anything the import cannot read is skipped outright rather than reported as a failed lookup — which is how **DIP20** tokens (XTC) are handled: that ledger exposes no `icrc1_balance_of` at all, so querying it can only ever fail.
+
+**Some ledgers are simply dead.** Verified against mainnet: the FUEL and GHOSTNODE ledgers return _"canister contains no Wasm module"_ — they are uninstalled. Such rows can never resolve, which rules out any global "some balances failed" banner: it would be permanently on. The per-row **unavailable** state is the only honest signal, and the page explains what it means.
 
 **UI.**
 
