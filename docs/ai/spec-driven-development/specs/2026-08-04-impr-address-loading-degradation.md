@@ -87,11 +87,34 @@ The old `init.error.loading_address` key is replaced by a new key taking a `$net
 
 ## Part 4 — Per-chain unavailable UI
 
-**Where:** `src/frontend/src/lib/derived/address.derived.ts` consumers.
+**The token list already does the right thing, for free.** `TokenBalance.svelte` renders `n/a`
+(`tokens.balance.error.not_applicable`) whenever `data.balance` is nullish, and
+`TokenExchangeBalance.svelte` renders `-` when the balance or its exchange value is nullish. Both
+key off the **balance**, not off any address state — and since the wallet worker for a chain never
+starts without that chain's address, a failed chain's balance simply stays nullish. So its rows
+already display `n/a` / `-` rather than `$0.00`.
 
-The existing `ethAddressNotLoaded` / `solAddressMainnetNotLoaded` / `btcAddressMainnetNotLoaded` deriveds already disable actions in `WalletConnectButton`, `SendModal` and `ConvertEth`. This part extends coverage so an affected chain reads as unavailable rather than empty — in particular the receive and balance surfaces, where a missing address would otherwise render as a zero balance.
+This resolves the list-versus-hide question: the tokens **stay listed**, showing `n/a`, with no new
+component state and no new copy. Reuse this existing pattern — do **not** introduce a separate
+"unavailable" wording for the same idea.
 
-**Scope caveat, to be confirmed during implementation:** the address value stores are consumed by 30+ files (`wallet-connect.providers.ts`, `nft.services.ts`, `EthFeeContext.svelte`, `ReceiveAddresses.svelte`, the Liquidium wizards, …). This spec does **not** commit to auditing every one. The commitment is: no surface renders a _misleading_ value (a zero balance, an empty address) for a chain in the failed set. Where a surface already guards on the `*NotLoaded` deriveds, nothing changes; where it does not and would mislead, it gets a guard. Anything that merely disables or hides is acceptable as-is.
+Actions are likewise already guarded: `ethAddressNotLoaded` / `solAddressMainnetNotLoaded` /
+`btcAddressMainnetNotLoaded` disable the relevant controls in `WalletConnectButton`, `SendModal`
+and `ConvertEth`.
+
+What therefore remains for this part is narrow — the surfaces where a missing address is shown
+_directly_ rather than via a balance:
+
+- **Receive** (`ReceiveAddresses.svelte`) — must not present a blank or partial address for a
+  failed chain.
+- **The hero total balance** — confirm a missing chain does not silently depress the total in a way
+  that reads as lost funds. If it does, that is the one place needing an explicit signal.
+
+**Scope caveat:** the address value stores have 30+ consumers (`wallet-connect.providers.ts`,
+`nft.services.ts`, `EthFeeContext.svelte`, the Liquidium wizards, …). This spec does **not** commit
+to auditing every one. The commitment is: no surface renders a _misleading_ value — a zero balance,
+a blank address — for a chain in the failed set. Surfaces that merely disable or hide are
+acceptable as-is, and the two bullets above are the known candidates to verify.
 
 ## Part 5 — Tracking
 
@@ -123,9 +146,11 @@ Describe that a chain whose address cannot be derived is shown as unavailable wh
 
 ## Open questions (facts to confirm)
 
-- Which of the 30+ address consumers would render a **misleading** value (rather than merely disabled/hidden) for a chain in the failed set? To be answered during implementation and recorded in the PR, per the Part 4 caveat.
+- Which of the 30+ address consumers would render a **misleading** value (rather than merely disabled/hidden) for a chain in the failed set? Narrowed to two candidates in Part 4 (receive addresses, hero total). To be confirmed during implementation and recorded in the PR.
 - Does any worker (`Loader.svelte` → wallet workers) start with a nullish address and fail in a way the user sees, or is it already gated? The `$effect` reads the address before spawning, which suggests gated, but it needs confirming.
 
 ## Pending decisions (facts are clear — we just need to decide)
 
-- **Whether an unavailable chain's tokens stay listed** (with actions disabled) or are hidden from the token list. Listing them is more honest about what the user owns; hiding avoids rows that cannot do anything. Recommendation: keep them listed and disabled, since hiding assets a user holds is the more alarming failure mode.
+_Resolved before implementation._
+
+- **Whether an unavailable chain's tokens stay listed or are hidden.** _Resolved: stay listed._ Hiding assets a user holds is the more alarming failure mode, and the existing nullish-balance path already renders `n/a` / `-` for them (see Part 4), so this needs no new state or copy — only that we reuse the established `n/a` pattern rather than inventing an "unavailable" label for the same idea.
