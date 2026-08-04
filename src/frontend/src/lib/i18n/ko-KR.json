@@ -766,16 +766,16 @@
 			"btc_wallet_error": "BTC 지갑 정보를 불러오는 중 오류가 발생했습니다.",
 			"sol_wallet_error": "SOL 지갑 정보를 불러오는 중 오류가 발생했습니다.",
 			"loading_profile": "프로필을 불러오는 중 오류가 발생했습니다. 전체 경험을 위해 페이지를 새로고침해 주세요.",
-			"network_unreachable": ""
+			"network_unreachable": "네트워크에 연결할 수 없습니다. 일부 정보가 표시되지 않을 수 있습니다."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "네트워크에 연결할 수 없습니다",
+			"description": "$oisy_short이(가) 인터넷 컴퓨터에 연결할 수 없습니다. 인터넷 연결 문제이거나 네트워크의 일시적인 문제일 수 있습니다. 자산은 안전하며 영향을 받지 않았습니다.",
+			"details": "기술 세부 정보",
+			"operation": "불러오기 실패: $operation",
+			"reload": "새로 고침",
+			"logout": "로그아웃",
+			"logout_hint": "로그아웃하면 모든 캐시 데이터가 삭제됩니다"
 		}
 	},
 	"hero": {

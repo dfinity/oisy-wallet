@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Błąd podczas ładowania informacji o portfelu BTC.",
 			"sol_wallet_error": "Błąd podczas ładowania informacji o portfelu SOL.",
 			"loading_profile": "Błąd podczas ładowania profilu. Odśwież stronę, aby uzyskać pełne wrażenia.",
-			"network_unreachable": ""
+			"network_unreachable": "Nie udało się połączyć z siecią. Niektóre informacje mogą być niedostępne."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "Nie można połączyć się z siecią",
+			"description": "$oisy_short nie mógł połączyć się z Internet Computer. Może to być problem z Twoim połączeniem internetowym lub tymczasowy problem sieci. Twoje środki są bezpieczne i nie zostały naruszone.",
+			"details": "Szczegóły techniczne",
+			"operation": "Nie udało się wczytać: $operation",
+			"reload": "Odśwież",
+			"logout": "Wyloguj",
+			"logout_hint": "Wylogowanie usunie wszystkie dane z pamięci podręcznej"
 		}
 	},
 	"hero": {

@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL.",
 			"loading_profile": "Errore durante il caricamento del profilo. Si prega di aggiornare la pagina per avere l'esperienza completa.",
-			"network_unreachable": ""
+			"network_unreachable": "Rete non raggiungibile. Alcune informazioni potrebbero mancare."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "Rete non raggiungibile",
+			"description": "$oisy_short non è riuscito a connettersi a Internet Computer. Potrebbe trattarsi della tua connessione internet o di un problema temporaneo della rete. I tuoi fondi sono al sicuro e non sono stati compromessi.",
+			"details": "Dettagli tecnici",
+			"operation": "Caricamento non riuscito: $operation",
+			"reload": "Aggiorna",
+			"logout": "Esci",
+			"logout_hint": "La disconnessione cancellerà tutti i dati memorizzati nella cache"
 		}
 	},
 	"hero": {

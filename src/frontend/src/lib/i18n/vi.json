@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
 			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL.",
 			"loading_profile": "Lỗi khi tải hồ sơ. Vui lòng làm mới trang để có trải nghiệm đầy đủ.",
-			"network_unreachable": ""
+			"network_unreachable": "Không thể kết nối tới mạng. Một số thông tin có thể bị thiếu."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "Không thể kết nối tới mạng",
+			"description": "$oisy_short không thể kết nối tới Internet Computer. Nguyên nhân có thể là kết nối internet của bạn hoặc sự cố tạm thời của mạng. Tài sản của bạn vẫn an toàn và không bị ảnh hưởng.",
+			"details": "Chi tiết kỹ thuật",
+			"operation": "Không tải được: $operation",
+			"reload": "Làm mới",
+			"logout": "Đăng xuất",
+			"logout_hint": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm"
 		}
 	},
 	"hero": {

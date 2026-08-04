@@ -766,16 +766,16 @@
 			"btc_wallet_error": "Erro ao carregar informações da carteira BTC.",
 			"sol_wallet_error": "Erro ao carregar informações da carteira SOL.",
 			"loading_profile": "Erro ao carregar o perfil. Por favor, atualize a página para ter a experiência completa.",
-			"network_unreachable": ""
+			"network_unreachable": "Não foi possível conectar à rede. Algumas informações podem estar faltando."
 		},
 		"unavailable": {
-			"title": "",
-			"description": "",
-			"details": "",
-			"operation": "",
-			"reload": "",
-			"logout": "",
-			"logout_hint": ""
+			"title": "Não foi possível conectar à rede",
+			"description": "O $oisy_short não conseguiu se conectar ao Internet Computer. Pode ser a sua conexão com a internet ou um problema temporário da rede. Seus fundos estão seguros e não foram afetados.",
+			"details": "Detalhes técnicos",
+			"operation": "Falha ao carregar: $operation",
+			"reload": "Atualizar",
+			"logout": "Sair",
+			"logout_hint": "Saída limpa, mensagem de cache"
 		}
 	},
 	"hero": {
