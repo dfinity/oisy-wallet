@@ -36,7 +36,10 @@ describe('address.services', () => {
 	describe('deriveTokenAddress', () => {
 		const mockMasterPubKey: NonNullable<SignerMasterPubKeys['key_1']> = {
 			ecdsa: { secp256k1: { pubkey: 'ecdsa-pubkey' } },
-			schnorr: { ed25519: { pubkey: 'schnorr-pubkey' } }
+			schnorr: {
+				ed25519: { pubkey: 'schnorr-pubkey' },
+				bip340secp256k1: { pubkey: 'bip340-pubkey' }
+			}
 		};
 
 		const mockDeriveAddress = vi.fn();
