@@ -182,7 +182,8 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 | `result_duration_in_seconds_rounded` | Rounded runtime                 | `2`                                        | number → string                        |
 | `result_error`                       | Our own error text              | `NFT sending failed`                       | sanitised string (§6)                  |
 | `result_error_severity`              | Severity band                   | `blocker` / `critical` / `major` / `minor` | `PLAUSIBLE_EVENT_ERROR_SEVERITIES`     |
-| `result_error_code`                  | Error code                      | `407`, `network_unreachable`               | `PLAUSIBLE_EVENT_ERROR_CODES` / string |
+| `result_error_code`                  | Error class (coarse)            | `407`, `network_error`                     | `PLAUSIBLE_EVENT_ERROR_CODES` / string |
+| `result_error_subcode`               | Finer cause within the code     | `offline`, `gateway_unavailable`           | `PLAUSIBLE_EVENT_ERROR_SUBCODES`       |
 | `result_error_text`                  | Full raw error text we received | `Error parsing …`                          | sanitised string (§6)                  |
 
 > Legacy: `result_error_toast_level` / `result_error_toast_key` are
@@ -281,30 +282,45 @@ inside the helper.
 
 ---
 
-## 5b. Exceptional errors — `exceptional_error`
+## 5b. App faults — `app_error`
 
-Most events describe something the user did. `exceptional_error` describes something that
-happened **to** them: OISY could not do its job for reasons outside their control. Fire it
-via `trackExceptionalError` in
+Most events describe something the user did. `app_error` describes something that happened
+**to** them: OISY could not do its job for reasons outside their control. Fire it via
+`trackAppError` in
 [`analytics.services.ts`](../../../src/frontend/src/lib/services/analytics.services.ts).
 
-Why one generic event rather than a counter per failure: an outage is otherwise observable
+Why one generic event rather than a counter per failure: a fault is otherwise observable
 only as an _absence_ of other events, which is exactly when a signal matters most. Keeping
 it to one name means a single dashboard filter catches every such condition, including ones
-added later.
+added later. The name is deliberately not `infrastructure_error` — the same event covers
+purely local faults (e.g. address derivation), which infrastructure would misdescribe.
 
-The two orthogonal dimensions:
+Four independent dimensions, so a dashboard can count at whichever level a question needs:
 
-- **`event_subcontext`** — _what_ broke (`PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE`:
-  `user_profile`, `user_roles`, `rewards`).
+- **`event_context`** — _where_: the area or dependency that failed. This is the "count
+  outages by problem area" axis, so it must never be hardcoded to a single value.
+- **`event_subcontext`** — _what_ we were trying to do
+  (`PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR`: `user_profile`, `user_roles`, `rewards`).
+- **`result_error_code`** + **`result_error_subcode`** — _why_, at two levels. The code is a
+  small, stable class (`network_error`); the subcode is the finer cause (`offline`,
+  `gateway_unavailable`, `rate_limited`). New granularity belongs in the subcode, so the
+  coarse level stays countable over time.
 - **`result_error_severity`** — _how much it cost the user_. `blocker` means the wallet is
   unusable (a startup failure); `major` means degraded but still usable (background data).
-  These are independent: the same cause can be a blocker in one place and a major in
+  Independent of the code: the same cause can be a blocker in one place and a major in
   another, so do not derive one from the other.
 
-`result_error_code` carries the class of failure (`PLAUSIBLE_EVENT_ERROR_CODES`), and
-`result_error_text` the sanitised raw error, capped and run through `replaceIcErrorFields`
-so no IC request ID reaches the dashboard.
+The `offline` / `gateway_unavailable` split is the one that earns its keep: it separates
+"our boundary nodes are down" from "these users lost connectivity". Collapsing them makes an
+outage indistinguishable from a bad wifi day.
+
+`result_error_text` carries the sanitised raw error, capped and run through
+`replaceIcErrorFields` so no IC request ID reaches the dashboard. It is for **debugging a
+single event only** — it is long and varies for the same cause, so never count on it; that
+is what the code/subcode pair is for.
+
+Polling timeouts are deliberately **not** classified as network faults (see
+`networkErrorSubcode`), so they emit no `app_error` today.
 
 ---
 
