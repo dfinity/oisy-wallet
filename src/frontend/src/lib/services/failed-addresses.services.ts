@@ -1,7 +1,9 @@
+import { networks } from '$lib/derived/networks.derived';
 import { failedAddresses } from '$lib/stores/failed-addresses.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
+import { networksDependingOnFailedAddresses } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { debounce } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -17,17 +19,40 @@ const reportNow = () => {
 		return;
 	}
 
-	const networkIds = pending.map(({ networkId }) => networkId);
+	const pendingNetworkIds = pending.map(({ networkId }) => networkId);
 
 	// Marked before showing, so a retry that fails while this toast is still on screen cannot
 	// queue a duplicate.
-	failedAddresses.markReported(networkIds);
+	failedAddresses.markReported(pendingNetworkIds);
+
+	// Expanded from the *pending* failures only. Expanding the whole store instead would re-list
+	// networks the user was already told about, so a second chain failing later would repeat the
+	// first one's networks.
+	//
+	// Names rather than ids: a user reads "Bitcoin", not "BTC". Ordered like the network selector,
+	// so the list matches what they already recognise.
+	const affected = networksDependingOnFailedAddresses({
+		networks: get(networks),
+		failedNetworkIds: pendingNetworkIds
+	});
+
+	if (affected.length === 0) {
+		return;
+	}
+
+	const { init } = get(i18n);
 
 	toastsError({
 		msg: {
-			text: replacePlaceholders(get(i18n).init.error.addresses_unavailable, {
-				$networks: networkIds.map((networkId) => `${networkId.description}`).join(', ')
-			})
+			// Singular / plural follows the number of failed *addresses*, not networks: the Ethereum
+			// address alone covers five networks, so "your addresses for Ethereum, Base, …" would
+			// claim five addresses where there is one.
+			text: replacePlaceholders(
+				pendingNetworkIds.length === 1
+					? init.error.address_unavailable
+					: init.error.addresses_unavailable,
+				{ $networks: affected.map(({ name }) => name).join(', ') }
+			)
 		}
 	});
 };

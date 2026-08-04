@@ -729,6 +729,7 @@
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
+			"address_unavailable": "",
 			"addresses_unavailable": "",
 			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
 			"erc20_contracts": "Lỗi khi tải các hợp đồng ERC20.",

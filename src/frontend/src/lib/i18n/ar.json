@@ -729,6 +729,7 @@
 			"no_infura_erc20_icp_provider": "لا يوجد مزود Infura ERC20 ICP لشبكة $network",
 			"no_infura_erc4626_provider": "",
 			"no_solana_network": "لا يوجد شبكة Solana لشبكة $network",
+			"address_unavailable": "",
 			"addresses_unavailable": "",
 			"loading_balance": "خطأ أثناء تحميل رصيد $symbol لشبكة $network.",
 			"erc20_contracts": "خطأ أثناء تحميل عقود ERC20.",

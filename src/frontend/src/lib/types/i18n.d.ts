@@ -474,6 +474,7 @@ interface I18nInit {
 		no_infura_erc20_icp_provider: string;
 		no_infura_erc4626_provider: string;
 		no_solana_network: string;
+		address_unavailable: string;
 		addresses_unavailable: string;
 		loading_balance: string;
 		erc20_contracts: string;
