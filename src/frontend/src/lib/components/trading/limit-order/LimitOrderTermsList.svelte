@@ -28,9 +28,13 @@
 <ModalValue>
 	{#snippet label()}{$i18n.trading.limit_order.dex}{/snippet}
 	{#snippet mainValue()}
-		<!-- Marked like Swap's provider row, and matching the routing row on the form. -->
-		<span class="flex items-center gap-2">
-			<OisyTradeMark size="16" />
+		<!-- Marked like Swap's provider row, and matching the routing row on the form.
+			 Decorative: the mark carries its own `aria-label`, which would otherwise be
+			 announced on top of the provider name beside it (same as the deposit form). -->
+		<span class="inline-flex items-center gap-2">
+			<span class="flex" aria-hidden="true">
+				<OisyTradeMark size="16" />
+			</span>
 			{OISY_TRADE_PROVIDER_NAME}
 		</span>
 	{/snippet}

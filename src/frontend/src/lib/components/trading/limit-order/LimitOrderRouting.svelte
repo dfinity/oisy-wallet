@@ -42,7 +42,8 @@
 		onclick={() => (expanded = !expanded)}
 		type="button"
 	>
-		<span class="flex flex-shrink-0 items-center">
+		<!-- Decorative: the row's own text already names the provider. -->
+		<span class="flex flex-shrink-0 items-center" aria-hidden="true">
 			<OisyTradeMark size="16" />
 		</span>
 		<span class="flex-1 text-xs text-secondary">
