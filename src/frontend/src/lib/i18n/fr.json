@@ -729,6 +729,7 @@
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
 			"no_infura_erc4626_provider": "",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
+			"address_unavailable": "",
 			"addresses_unavailable": "",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",
 			"erc20_contracts": "Erreur lors du chargement des contrats ERC20.",
