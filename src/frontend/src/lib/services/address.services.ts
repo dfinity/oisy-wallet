@@ -20,6 +20,7 @@ import type { NullishIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { simulatedAddressFailure } from '$lib/utils/infrastructure-failure-simulator.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -80,17 +81,29 @@ export const loadTokenAddress = async <T extends Address>({
 }: LoadTokenAddressParams<T>): Promise<ResultSuccess<LoadTokenAddressFailureReason>> => {
 	const { identity } = get(authStore);
 
+	// DEMO ONLY — see `infrastructure-failure-simulator.utils.ts`. Derivation is local and
+	// deterministic, so a real failure here needs an actual `ic-pub-key` bug; this is the opt-in
+	// that makes both reasons reproducible. Returns rather than throws because the two are injected
+	// at different points: below for a lost session, inside the `try` for a derive throw.
+	const simulatedFailure = simulatedAddressFailure(networkId);
+
 	// Checked here rather than inferred from the caught error: `deriveTokenAddress` asserts on a
 	// nullish identity, and recognising that by matching its i18n message would break the moment the
 	// copy changes. The two causes need opposite handling — a lost session should sign the user out,
 	// a derivation bug must not — so they must be distinguishable reliably.
-	if (isNullish(identity)) {
+	if (isNullish(identity) || simulatedFailure === 'session-invalid') {
 		addressStore.reset();
 
 		return { success: false, err: 'session-invalid' };
 	}
 
 	try {
+		if (simulatedFailure === 'derive-threw') {
+			// Thrown from inside the `try` so it lands in the real catch below: the failed address is
+			// recorded, the aggregated toast fires, and the `app_error` event is emitted for real.
+			throw new Error(`Simulated ${networkId.description} address derivation failure (demo)`);
+		}
+
 		const address = await getAddress(identity);
 		addressStore.set({ data: address, certified: true });
 
