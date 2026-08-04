@@ -285,4 +285,46 @@ describe('EthTransaction', () => {
 			expect(labelElement.textContent).toBe(get(i18n).send.text.send);
 		});
 	});
+
+	describe('with withdraw transactions', () => {
+		it('should render plain "Receive" label for completed withdraw transactions', () => {
+			const { getByTestId } = render(EthTransaction, {
+				props: {
+					transaction: { ...mockTrx, value: 123450000000000n, type: 'withdraw' },
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const labelElement = getByTestId(TRANSACTION_CHILDREN_CONTAINER);
+
+			assertNonNullish(labelElement);
+
+			expect(labelElement.textContent).toBe(get(i18n).receive.text.receive);
+		});
+
+		it('should render "Converting" label for pending withdraw transactions', () => {
+			const { getByTestId } = render(EthTransaction, {
+				props: {
+					transaction: {
+						...mockTrx,
+						blockNumber: undefined,
+						value: 123450000000000n,
+						type: 'withdraw'
+					},
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const labelElement = getByTestId(TRANSACTION_CHILDREN_CONTAINER);
+
+			assertNonNullish(labelElement);
+
+			expect(labelElement.textContent).toBe(
+				replacePlaceholders(get(i18n).transaction.label.converting_ck_token, {
+					$twinToken: ETHEREUM_TOKEN.symbol,
+					$ckToken: ETHEREUM_TOKEN.twinTokenSymbol ?? ''
+				})
+			);
+		});
+	});
 });
