@@ -22,7 +22,7 @@ describe('nav.derived', () => {
 			url.searchParams.set(COLLECTION_PARAM, '0x206571b68c66E1d112b74d65695043ad2b5F95D5');
 			url.searchParams.set(NETWORK_PARAM, 'BASE');
 
-			mockPage.mock(loadRouteParams({ url } as unknown as LoadEvent));
+			mockPage.mock(loadRouteParams({ url } as LoadEvent));
 
 			expect(get(routeNft)).toBe('10393');
 			expect(get(routeCollection)).toBe('0x206571b68c66E1d112b74d65695043ad2b5F95D5');
@@ -32,7 +32,7 @@ describe('nav.derived', () => {
 			const url = new URL('https://oisy.com/collectibles/');
 			url.searchParams.set(COLLECTION_PARAM, '0x206571b68c66E1d112b74d65695043ad2b5F95D5');
 
-			mockPage.mock(loadRouteParams({ url } as unknown as LoadEvent));
+			mockPage.mock(loadRouteParams({ url } as LoadEvent));
 
 			expect(get(routeNft)).toBeNull();
 		});
