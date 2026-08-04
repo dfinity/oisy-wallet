@@ -79,7 +79,10 @@ export default defineConfig((): UserConfig => ({
 			exclude: [
 				'src/frontend/src/routes/**/+page.ts',
 				'src/frontend/src/tests/**/*',
-				'src/frontend/src/**/*.d.ts'
+				'src/frontend/src/**/*.d.ts',
+				// Dev-only mocks, aliased in only behind an env flag and never built.
+				'src/frontend/src/**/*.mock.api.ts',
+				'src/frontend/src/**/*.mock.services.ts'
 			],
 			// TODO: increase the thresholds slowly up to an acceptable 90% at least
 			thresholds: {

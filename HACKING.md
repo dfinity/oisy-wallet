@@ -8,6 +8,7 @@ This document lists a couple of useful information for development and deploymen
   - [Signer Domains](#signer-domains)
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
+- [Mocking OISY Trade](#mocking-oisy-trade)
 - [Testing](#testing)
 - [Debugging Reactivity](#debugging-reactivity)
 - [Memory Benchmarking](#memory-benchmarking)
@@ -150,6 +151,40 @@ A list of useful faucets:
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 - TESTICP: [TESTICP Faucet](https://nqoci-rqaaa-aaaap-qp53q-cai.icp0.io/)
 - TICRC1: [TICRC1 Faucet](https://pwwqf-yaaaa-aaaap-qp5wq-cai.icp0.io/)
+
+## Mocking OISY Trade
+
+Clicking through the Trade flows normally needs a funded account: deposits,
+limit orders and withdrawals all move real tokens. To exercise the UI without
+that, start the dev server with the mock flag:
+
+```bash
+DFX_NETWORK=staging VITE_TRADE_MOCK=true npm run dev
+```
+
+A dev-only resolver in `vite.config.ts` then redirects two modules to mocks:
+
+| Real module                                 | Mock                                  |
+| ------------------------------------------- | ------------------------------------- |
+| `$lib/api/oisy-trade.api`                   | `oisy-trade.mock.api.ts`              |
+| `$lib/services/oisy-trade.deposit.services` | `oisy-trade.deposit.mock.services.ts` |
+
+What is faked and what is not:
+
+- **Faked** — your DEX balances and orders, and the four writes (`deposit`,
+  `withdraw`, `add_limit_order`, `cancel_limit_order`), which mutate in-memory
+  state instead of calling the canister. Balances move the way the canister
+  would move them: placing an order shifts free → reserved, cancelling releases
+  it, depositing and withdrawing adjust the free balance. A wallet balance is
+  also seeded for the depositable tokens, otherwise the Deposit picker has
+  nothing to offer.
+- **Real** — trading pairs, supported tokens, order-book ticker and depth. Those
+  reads need no funds, so the limit-order form still shows genuine prices and
+  crossing state.
+
+Nothing imports either mock without the flag, so a normal build cannot pick them
+up. The mocks are seeded from the tokens the DEX supports _and_ the wallet has
+enabled — if none overlap, they log a warning and the Trade tab stays empty.
 
 ## Testing
 
