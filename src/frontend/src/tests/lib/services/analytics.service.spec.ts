@@ -563,43 +563,85 @@ describe('plausible analytics service', () => {
 		consoleDebugSpy.mockRestore();
 	});
 
-	describe('trackExceptionalError', () => {
+	describe('trackAppError', () => {
 		const load = async () => {
 			const services = await import('$lib/services/analytics.services');
 			await services.initPlausibleAnalytics();
 			return services;
 		};
 
-		it('should emit the exceptional_error event with the full metadata', async () => {
-			const { trackExceptionalError } = await load();
+		it('should emit the app_error event with the full metadata', async () => {
+			const { trackAppError } = await load();
 			const { PLAUSIBLE_EVENTS, ...enums } = await import('$lib/enums/plausible');
 
-			trackExceptionalError({
-				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
-				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+				subcode: enums.PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE,
 				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
 				err: new Error('Failed to fetch HTTP request: Load failed')
 			});
 
-			expect(trackMock).toHaveBeenCalledWith(PLAUSIBLE_EVENTS.EXCEPTIONAL_ERROR, {
+			expect(trackMock).toHaveBeenCalledWith(PLAUSIBLE_EVENTS.APP_ERROR, {
 				props: {
-					event_context: enums.PLAUSIBLE_EVENT_CONTEXTS.INFRASTRUCTURE,
-					event_subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+					event_context: enums.PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+					event_subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 					result_status: enums.PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
-					result_error_code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+					result_error_code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+					result_error_subcode: enums.PLAUSIBLE_EVENT_ERROR_SUBCODES.OFFLINE,
 					result_error_severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
 					result_error_text: 'Failed to fetch HTTP request: Load failed'
 				}
 			});
 		});
 
-		it('should omit result_error_text rather than send undefined when no error is given', async () => {
-			const { trackExceptionalError } = await load();
+		// The area is what makes "count outages by problem area" possible, so it must not be
+		// hardcoded — the same code/subcode pair can arrive from different dependencies.
+		it('should carry the caller-supplied area, not a fixed one', async () => {
+			const { trackAppError } = await load();
 			const enums = await import('$lib/enums/plausible');
 
-			trackExceptionalError({
-				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
-				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.REWARDS,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+				subcode: enums.PLAUSIBLE_EVENT_ERROR_SUBCODES.GATEWAY_UNAVAILABLE,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
+			});
+
+			const [[, options]] = trackMock.mock.calls;
+
+			expect(options.props.event_context).toBe(enums.PLAUSIBLE_EVENT_CONTEXTS.REWARDS);
+			expect(options.props.result_error_subcode).toBe(
+				enums.PLAUSIBLE_EVENT_ERROR_SUBCODES.GATEWAY_UNAVAILABLE
+			);
+		});
+
+		it('should omit result_error_subcode rather than send undefined', async () => {
+			const { trackAppError } = await load();
+			const enums = await import('$lib/enums/plausible');
+
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER
+			});
+
+			const [[, options]] = trackMock.mock.calls;
+
+			expect(options.props).not.toHaveProperty('result_error_subcode');
+		});
+
+		it('should omit result_error_text rather than send undefined when no error is given', async () => {
+			const { trackAppError } = await load();
+			const enums = await import('$lib/enums/plausible');
+
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.REWARDS,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
 				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
 			});
 
@@ -610,12 +652,13 @@ describe('plausible analytics service', () => {
 
 		// Plausible truncates long values, so we cap it ourselves and keep the useful head.
 		it('should cap a very long error text', async () => {
-			const { trackExceptionalError } = await load();
+			const { trackAppError } = await load();
 			const enums = await import('$lib/enums/plausible');
 
-			trackExceptionalError({
-				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_ROLES,
-				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.REWARDS,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_ROLES,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
 				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
 				err: new Error('x'.repeat(1000))
 			});
@@ -628,12 +671,13 @@ describe('plausible analytics service', () => {
 		// Privacy invariant (analytics.md §6): an IC request ID is unique per request and must
 		// never reach a dashboard.
 		it('should strip the IC request ID from the error text', async () => {
-			const { trackExceptionalError } = await load();
+			const { trackAppError } = await load();
 			const enums = await import('$lib/enums/plausible');
 
-			trackExceptionalError({
-				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
-				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			trackAppError({
+				context: enums.PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+				subcontext: enums.PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				code: enums.PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
 				severity: enums.PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
 				err: new Error('Call failed\nRequest ID: 0123456789abcdef\nStatus: rejected')
 			});
