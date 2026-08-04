@@ -9,6 +9,7 @@ import Actions from '$lib/components/hero/Actions.svelte';
 import { AppPath, ROUTE_ID_GROUP_APP } from '$lib/constants/routes.constants';
 import {
 	BUY_TOKENS_MODAL_OPEN_BUTTON,
+	NFT_HERO_CHECK_NEW_BUTTON,
 	SEND_TOKENS_MODAL_OPEN_BUTTON,
 	SWAP_TOKENS_MODAL_OPEN_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -24,6 +25,7 @@ describe('Actions', () => {
 	const swapButtonSelector = `button[data-tid="${SWAP_TOKENS_MODAL_OPEN_BUTTON}"]`;
 	const sendButtonSelector = `button[data-tid="${SEND_TOKENS_MODAL_OPEN_BUTTON}"]`;
 	const buyButtonSelector = `button[data-tid="${BUY_TOKENS_MODAL_OPEN_BUTTON}"]`;
+	const checkNewCollectionsButtonSelector = `button[data-tid="${NFT_HERO_CHECK_NEW_BUTTON}"]`;
 
 	const heroContext = new Map<symbol, unknown>([[HERO_CONTEXT_KEY, initHeroContext()]]);
 
@@ -218,6 +220,54 @@ describe('Actions', () => {
 			const { container } = renderActions();
 
 			expect(container.querySelector(sendButtonSelector)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('check for new collectibles button visibility', () => {
+		it('should show the button on NFTs page when all networks are selected', () => {
+			setNftsPage();
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).toBeInTheDocument();
+		});
+
+		it('should show the button on NFTs page for the ICP network', () => {
+			setNftsPage();
+			mockPage.mockNetwork(ICP_TOKEN.network.id.description);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).toBeInTheDocument();
+		});
+
+		it.each([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, SOLANA_TOKEN])(
+			'should hide the button on NFTs page for the $network.name network',
+			(token) => {
+				setNftsPage();
+				mockPage.mockNetwork(token.network.id.description);
+
+				const { container } = renderActions();
+
+				expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
+			}
+		);
+
+		it('should hide the button on tokens page', () => {
+			setTokensPage();
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
+		});
+
+		it('should hide the button on transactions page', () => {
+			setTransactionsPage();
+			mockPage.mockToken(ICP_TOKEN);
+
+			const { container } = renderActions();
+
+			expect(container.querySelector(checkNewCollectionsButtonSelector)).not.toBeInTheDocument();
 		});
 	});
 });

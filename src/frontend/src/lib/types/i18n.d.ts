@@ -1172,9 +1172,6 @@ interface I18nNfts {
 		description_empty: string;
 		title_not_supported: string;
 		description_not_supported: string;
-		grouping: string;
-		as_plain_list: string;
-		by_collection: string;
 		show_spam: string;
 		show_hidden: string;
 		recents_first: string;
@@ -1189,7 +1186,9 @@ interface I18nNfts {
 		collection_not_loaded: string;
 		nft_not_loaded: string;
 		collections: string;
-		all_assets: string;
+		check_new: string;
+		check_new_short: string;
+		ungrouped: string;
 		address_copied: string;
 		collection_name_copied: string;
 		id_copied: string;
@@ -1233,6 +1232,7 @@ interface I18nNfts {
 		copy_address: string;
 		review_preference: string;
 		go_to_collection: string;
+		check_new: string;
 	};
 }
 
