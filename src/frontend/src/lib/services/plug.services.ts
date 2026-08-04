@@ -22,12 +22,53 @@ import { loadSolLamportsBalance } from '$sol/api/solana.api';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 interface BalanceLookup {
 	address: string;
 	load: () => Promise<bigint>;
 }
+
+/**
+ * IC reject codes that mean a balance can *never* be read, as opposed to a
+ * lookup that happened to fail now: `IC0537` is a canister with no Wasm module
+ * installed (several long-dead ICRC ledgers are in this state), `IC0536` is a
+ * missing method. Retrying either is pointless.
+ */
+const PERMANENT_REJECT_ERROR_CODES = ['IC0536', 'IC0537'];
+
+/**
+ * Reads `rejectErrorCode` off an agent `RejectError` without casting, since the
+ * error arrives as `unknown`.
+ */
+const rejectErrorCode = (err: unknown): string | undefined => {
+	if (typeof err !== 'object' || isNullish(err) || !('cause' in err)) {
+		return undefined;
+	}
+
+	const { cause } = err;
+
+	if (typeof cause !== 'object' || isNullish(cause) || !('code' in cause)) {
+		return undefined;
+	}
+
+	const { code } = cause;
+
+	if (typeof code !== 'object' || isNullish(code) || !('rejectErrorCode' in code)) {
+		return undefined;
+	}
+
+	const { rejectErrorCode: value } = code;
+
+	return typeof value === 'string' ? value : undefined;
+};
+
+const isPermanentlyUnreadable = (err: unknown): boolean => {
+	const code = rejectErrorCode(err);
+
+	return nonNullish(code) && PERMANENT_REJECT_ERROR_CODES.includes(code);
+};
 
 /**
  * Maps a token to the address it settles on for this account, plus how to read
@@ -133,11 +174,14 @@ const balanceLookup = ({
 /**
  * Balances for one imported account.
  *
- * Every lookup is independent and a failure degrades that single row to an
- * undefined balance rather than failing the page: these networks are reached
- * through several different providers, and one unreachable RPC — or one ledger
- * canister that no longer holds a Wasm module — must not hide the assets the
- * user came to look at.
+ * Every lookup is independent and a transient failure degrades that single row
+ * to an undefined balance rather than failing the page: these networks are
+ * reached through several different providers, and one unreachable RPC must not
+ * hide the assets the user came to look at.
+ *
+ * A lookup that can never succeed — an uninstalled ledger, a missing method —
+ * drops its row entirely instead. Showing it as "unavailable" would be
+ * permanent noise the user can do nothing about.
  */
 export const loadPlugBalances = async ({
 	account,
@@ -147,12 +191,12 @@ export const loadPlugBalances = async ({
 	account: PlugAccount;
 	tokens: Token[];
 	identity: NullishIdentity;
-}): Promise<PlugBalance[]> =>
-	await Promise.all(
-		tokens.reduce<Promise<PlugBalance>[]>((acc, token) => {
+}): Promise<PlugBalance[]> => {
+	const loaded = await Promise.all(
+		tokens.reduce<Promise<PlugBalance | undefined>[]>((acc, token) => {
 			const lookup = balanceLookup({ token, account, identity });
 
-			if (lookup === undefined) {
+			if (isNullish(lookup)) {
 				return acc;
 			}
 
@@ -160,10 +204,14 @@ export const loadPlugBalances = async ({
 
 			return [
 				...acc,
-				(async (): Promise<PlugBalance> => {
+				(async (): Promise<PlugBalance | undefined> => {
 					try {
 						return { token, address, balance: await load() };
 					} catch (err: unknown) {
+						if (isPermanentlyUnreadable(err)) {
+							return undefined;
+						}
+
 						consoleWarn(`Failed to load the imported balance of ${token.symbol}`, err);
 
 						return { token, address, balance: undefined };
@@ -172,3 +220,6 @@ export const loadPlugBalances = async ({
 			];
 		}, [])
 	);
+
+	return loaded.filter(nonNullish);
+};

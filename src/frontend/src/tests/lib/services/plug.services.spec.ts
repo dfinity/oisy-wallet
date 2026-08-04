@@ -211,13 +211,50 @@ describe('loadPlugBalances', () => {
 			expect(results.find(({ token: { symbol } }) => symbol === 'SOL')?.balance).toBeUndefined();
 		});
 
-		it('degrades an uninstalled ICRC ledger without dropping the row', async () => {
-			vi.mocked(icrcBalance).mockRejectedValue(new Error('canister contains no Wasm module'));
+		it('keeps a transient ICRC failure visible as an unreadable row', async () => {
+			vi.mocked(icrcBalance).mockRejectedValue(new Error('boundary node timeout'));
 
 			const results = await call([icrcToken]);
 
 			expect(results).toHaveLength(1);
 			expect(results[0].balance).toBeUndefined();
+		});
+	});
+
+	describe('permanently unreadable ledgers', () => {
+		// The agent surfaces the IC reject code at cause.code.rejectErrorCode.
+		const rejectWith = (rejectErrorCode: string): Error =>
+			Object.assign(new Error('The replica returned a rejection error'), {
+				cause: { kind: 'Reject', code: { rejectCode: 5, rejectErrorCode } }
+			});
+
+		it('drops a row whose ledger has no Wasm module (IC0537)', async () => {
+			vi.mocked(icrcBalance).mockRejectedValue(rejectWith('IC0537'));
+
+			await expect(call([icrcToken])).resolves.toEqual([]);
+		});
+
+		it('drops a row whose ledger is missing the method (IC0536)', async () => {
+			vi.mocked(icrcBalance).mockRejectedValue(rejectWith('IC0536'));
+
+			await expect(call([icrcToken])).resolves.toEqual([]);
+		});
+
+		it('keeps a row for any other reject code, which may be transient', async () => {
+			vi.mocked(icrcBalance).mockRejectedValue(rejectWith('IC0503'));
+
+			const results = await call([icrcToken]);
+
+			expect(results).toHaveLength(1);
+			expect(results[0].balance).toBeUndefined();
+		});
+
+		it('drops only the dead row and keeps the healthy ones', async () => {
+			vi.mocked(icrcBalance).mockRejectedValue(rejectWith('IC0537'));
+
+			const results = await call([icrcToken, nativeBtc, erc20Token]);
+
+			expect(results.map(({ token: { symbol } }) => symbol)).toEqual(['BTC', 'USDC']);
 		});
 	});
 
