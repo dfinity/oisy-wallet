@@ -2730,15 +2730,22 @@
 			"balance_loading": "Loading\u2026",
 			"balance_unavailable": "Unavailable",
 			"empty_account": "Nothing found on this account.",
+			"send_to_wallet": "Send to my wallet",
+			"send_confirm_title": "Send to your OISY wallet",
+			"send_confirm_description": "$amount $symbol will be sent to your OISY wallet. The network fee is deducted from this token, and the transfer cannot be undone.",
+			"send_success": "$symbol sent to your OISY wallet.",
+			"send_only_ic": "Only Internet Computer tokens can be moved from here. For the other networks, send from your original wallet.",
+			"send_below_fee": "Too small to move \u2014 the balance does not cover the $symbol network fee.",
 			"unavailable_hint": "A token marked unavailable could not be read \u2014 usually because its ledger or network did not respond. That is not the same as a zero balance.",
 			"not_shown_title": "Not shown here",
 			"not_shown_description": "Plug also supports Dogecoin and Litecoin. OISY does not, so any holdings on those networks are not listed above \u2014 they are still in your Plug wallet.",
-			"read_only_title": "View only for now",
-			"read_only_description": "This page only shows what the wallet holds. Moving assets to OISY comes next."
+			"read_only_title": "Other networks",
+			"read_only_description": "Only Internet Computer tokens can be moved from this page. For Bitcoin, Ethereum, the other EVM networks and Solana, send from your original wallet to your OISY addresses."
 		},
 		"error": {
 			"invalid_phrase": "That is not a valid seed phrase. Check the words and their order.",
-			"derivation_failed": "Could not derive the accounts from this phrase."
+			"derivation_failed": "Could not derive the accounts from this phrase.",
+			"send_failed": "Could not send $symbol. Nothing was moved."
 		}
 	}
 }

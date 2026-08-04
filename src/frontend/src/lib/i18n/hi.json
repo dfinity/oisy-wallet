@@ -2730,6 +2730,12 @@
 			"balance_loading": "",
 			"balance_unavailable": "",
 			"empty_account": "",
+			"send_to_wallet": "",
+			"send_confirm_title": "",
+			"send_confirm_description": "",
+			"send_success": "",
+			"send_only_ic": "",
+			"send_below_fee": "",
 			"unavailable_hint": "",
 			"not_shown_title": "",
 			"not_shown_description": "",
@@ -2738,7 +2744,8 @@
 		},
 		"error": {
 			"invalid_phrase": "",
-			"derivation_failed": ""
+			"derivation_failed": "",
+			"send_failed": ""
 		}
 	}
 }
