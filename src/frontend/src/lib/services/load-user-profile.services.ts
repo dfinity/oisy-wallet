@@ -72,19 +72,28 @@ export const loadCertifiedUserProfile = async ({
 
 export type LoadUserProfileFailureReason = 'signups-closed' | 'network-unreachable' | 'unknown';
 
+export type LoadUserProfileResult = ResultSuccess<LoadUserProfileFailureReason> & {
+	// `true` only when this call created the profile. Such a user has no signing allowance yet and
+	// nothing else provisions one, so the caller must await `allow_signing` before any paid signer
+	// call. Returning users keep whatever allowance they already hold on the cycles ledger.
+	profileCreated: boolean;
+};
+
 export const loadUserProfile = async ({
 	identity,
 	reload = true
 }: {
 	identity: NullishIdentity;
 	reload?: boolean;
-}): Promise<ResultSuccess<LoadUserProfileFailureReason>> => {
+}): Promise<LoadUserProfileResult> => {
+	let profileCreated = false;
+
 	// We just want to verify that the store is empty, without being interested in the data.
 	// So we fetch it imperatively, instead of passing as parameter.
 	// If it is not empty, and we don't want to reload, we can return early.
 	// In any case, if `reload` is true, we will always fetch the profile.
 	if (nonNullish(get(userProfileStore)) && !reload) {
-		return { success: true };
+		return { success: true, profileCreated };
 	}
 
 	try {
@@ -101,6 +110,7 @@ export const loadUserProfile = async ({
 				throw new Error('Unknown error');
 			}
 			profile = response.Ok;
+			profileCreated = true;
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.
@@ -111,7 +121,7 @@ export const loadUserProfile = async ({
 		}
 	} catch (err: unknown) {
 		if (err instanceof SignupsClosedError) {
-			return { success: false, err: 'signups-closed' };
+			return { success: false, err: 'signups-closed', profileCreated };
 		}
 
 		// The profile gates the whole app, so an unreachable network here is not something a
@@ -135,7 +145,7 @@ export const loadUserProfile = async ({
 				err
 			});
 
-			return { success: false, err: 'network-unreachable' };
+			return { success: false, err: 'network-unreachable', profileCreated };
 		}
 
 		const { init } = get(i18n);
@@ -143,10 +153,10 @@ export const loadUserProfile = async ({
 			msg: { text: init.error.loading_profile },
 			err
 		});
-		return { success: false, err: 'unknown' };
+		return { success: false, err: 'unknown', profileCreated };
 	}
 
 	infrastructureError.reset();
 
-	return { success: true };
+	return { success: true, profileCreated };
 };
