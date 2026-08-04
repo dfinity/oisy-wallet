@@ -45,6 +45,7 @@ import type {
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { BackendExchangeRate } from '$lib/types/exchange';
+import { simulateInfrastructureFailureIfEnabled } from '$lib/utils/infrastructure-failure-simulator.utils';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 const backendApi = new CanisterApi<BackendCanister>();
@@ -100,6 +101,11 @@ export const getUserProfile = async ({
 	identity,
 	certified
 }: CanisterApiFunctionParams<QueryParams>): Promise<GetUserProfileResponse> => {
+	// DEMO ONLY — see `infrastructure-failure-simulator.utils.ts`. This is the load that gates the
+	// whole app, so failing it is what exercises the full-page error state. Only the profile read
+	// is wrapped: every other backend call is left alone, so nothing else changes behaviour.
+	simulateInfrastructureFailureIfEnabled('profile');
+
 	const { getUserProfile } = await backendCanister({ identity });
 
 	return getUserProfile({ certified });
