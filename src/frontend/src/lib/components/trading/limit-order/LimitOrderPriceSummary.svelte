@@ -1,14 +1,22 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
+	import {
+		SWAP_VALUE_DIFFERENCE_ERROR_VALUE,
+		SWAP_VALUE_DIFFERENCE_WARNING_VALUE
+	} from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	// Read-only price card shared by the limit-order Review and the order-detail
-	// modal: the limit-price headline plus current value, the value-difference
-	// (crossing gate: neutral/amber/red, no green) and — for resting orders — the
-	// queue position. Values are display strings so both callers format alike.
+	// Read-only price rows shared by the limit-order Review and the order-detail
+	// modal: the limit price plus current value, the value-difference (crossing
+	// gate: neutral/amber/red, no green) and — for resting orders — the queue
+	// position. Rendered as `ModalValue` rows, the same key/value style the Swap
+	// review uses and that `LimitOrderTermsList` already uses right below.
+	// Values are display strings so both callers format alike.
 	interface Props {
 		priceDisplay: string;
 		baseSymbol: string;
@@ -16,8 +24,6 @@
 		// Formatted current value; `undefined` renders "-".
 		currentValueDisplay?: string;
 		valueDifference: number;
-		// Neutral (informational) while resting; false surfaces the amber/red gate.
-		muted: boolean;
 		queueText?: string;
 	}
 
@@ -27,53 +33,84 @@
 		quoteSymbol,
 		currentValueDisplay,
 		valueDifference,
-		muted,
 		queueText
 	}: Props = $props();
 </script>
 
-<div class="mb-3 rounded-lg border border-disabled px-3.5 py-3">
-	<div class="flex items-baseline justify-between">
-		<span class="text-sm text-secondary">{$i18n.trading.limit_order.limit_price}</span>
-		<span class="text-lg font-semibold text-primary">
-			{replacePlaceholders($i18n.trading.limit_order.limit_price_value, {
-				$price: priceDisplay,
-				$quote: quoteSymbol,
-				$base: baseSymbol
-			})}
-		</span>
-	</div>
-	<div class="mt-2.5 flex flex-col gap-1.5 border-t border-disabled pt-2.5">
-		<div class="flex items-center justify-between text-xs">
-			<span class="text-tertiary">{$i18n.trading.limit_order.current_value}</span>
-			<span class="font-medium text-secondary">
-				{nonNullish(currentValueDisplay)
-					? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
-							$price: currentValueDisplay,
-							$quote: quoteSymbol,
-							$base: baseSymbol
-						})
-					: '-'}
+<div>
+	<ModalValue>
+		{#snippet label()}
+			{$i18n.trading.limit_order.limit_price}
+		{/snippet}
+
+		{#snippet mainValue()}
+			<!-- The one figure the whole screen is about, so it outranks the rows it
+				 sits above — the `ModalValue` row structure is shared, the type scale
+				 is not. -->
+			<span class="text-lg">
+				{replacePlaceholders($i18n.trading.limit_order.limit_price_value, {
+					$price: priceDisplay,
+					$quote: quoteSymbol,
+					$base: baseSymbol
+				})}
 			</span>
+		{/snippet}
+	</ModalValue>
+
+	<ModalValue>
+		{#snippet label()}
+			{$i18n.trading.limit_order.current_value}
+		{/snippet}
+
+		{#snippet mainValue()}
+			{nonNullish(currentValueDisplay)
+				? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
+						$price: currentValueDisplay,
+						$quote: quoteSymbol,
+						$base: baseSymbol
+					})
+				: '-'}
+		{/snippet}
+	</ModalValue>
+
+	{#if nonNullish(currentValueDisplay)}
+		<div class="mb-2" transition:slide>
+			<ModalValue>
+				{#snippet label()}
+					{$i18n.trading.limit_order.value_difference_label}
+				{/snippet}
+
+				{#snippet mainValue()}
+					<!-- Same treatment as the Swap review: shared `ValueDifference`, swap's
+						 own thresholds, and neither `muted` nor `successNeutral` — so the
+						 figure is green when the order is favourable and amber/red with the
+						 warning icon when it gives value up. -->
+					<ValueDifference
+						errorLevel={SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
+						iconPosition="left"
+						value={valueDifference}
+						warningLevel={SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
+					/>
+				{/snippet}
+			</ModalValue>
 		</div>
-		{#if nonNullish(currentValueDisplay)}
-			<div class="flex items-center justify-between text-xs" transition:slide>
-				<span class="text-tertiary">{$i18n.trading.limit_order.value_difference_label}</span>
-				<ValueDifference
-					errorLevel={-5}
-					iconPosition="left"
-					{muted}
-					successNeutral
-					value={valueDifference}
-					warningLevel={0}
-				/>
-			</div>
-		{/if}
-		{#if nonNullish(queueText)}
-			<div class="flex items-center justify-between text-xs" transition:slide>
-				<span class="text-tertiary">{$i18n.trading.limit_order.queue_position_row}</span>
-				<span class="font-medium text-secondary">{queueText}</span>
-			</div>
-		{/if}
-	</div>
+	{/if}
+
+	{#if nonNullish(queueText)}
+		<div class="mb-2" transition:slide>
+			<ModalValue>
+				{#snippet label()}
+					{$i18n.trading.limit_order.queue_position_row}
+				{/snippet}
+
+				{#snippet mainValue()}
+					{queueText}
+				{/snippet}
+			</ModalValue>
+		</div>
+	{/if}
 </div>
+
+<!-- Splits the order's price terms from its execution terms, the grouping the
+	 two cards had before both became `ModalValue` rows. -->
+<Hr spacing="md" />
