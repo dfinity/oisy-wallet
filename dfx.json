@@ -130,7 +130,7 @@
 			"specified_id": "d3nvo-aaaaa-aaaar-qagzq-cai",
 			"remote": {
 				"id": {
-					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_1": "jloto-byaaa-aaaap-anryq-cai",
 					"test_fe_2": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_3": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_4": "d3nvo-aaaaa-aaaar-qagzq-cai",
@@ -198,22 +198,22 @@
 			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity.did",
 			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2026-03-06/internet_identity_dev.wasm.gz",
 			"init_arg": "(opt record { captcha_config = opt record { max_unsolved_captchas= 50:nat64; captcha_trigger = variant {Static = variant {CaptchaDisabled}}}})",
-			"specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+			"specified_id": "fgte5-ciaaa-aaaad-aaatq-cai",
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
-					"test_be_1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_3": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_4": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_5": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"test_fe_6": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"audit": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai",
-					"e2e": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+					"test_be_1": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_1": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_2": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_3": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_4": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_5": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"test_fe_6": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"audit": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"staging": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"beta": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"ic": "fgte5-ciaaa-aaaad-aaatq-cai",
+					"e2e": "fgte5-ciaaa-aaaad-aaatq-cai"
 				}
 			}
 		},
