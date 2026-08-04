@@ -2710,5 +2710,35 @@
 				"unavailable_title": "This link has expired or already been used"
 			}
 		}
+	},
+	"plug_import": {
+		"text": {
+			"title": "Import from Plug",
+			"settings_entry": "Import from Plug",
+			"settings_entry_description": "See what a Plug wallet holds and move it to OISY.",
+			"settings_open": "Open",
+			"intro": "Enter a Plug seed phrase to see the accounts it controls and what they hold. Nothing is saved \u2014 the phrase stays in this tab only, and reloading the page clears it.",
+			"phrase_label": "Plug seed phrase",
+			"phrase_placeholder": "Enter the 12 or 24 words, separated by spaces",
+			"accounts_label": "Accounts to check",
+			"accounts_hint": "Plug numbers its accounts in order. Increase this if you added accounts in Plug.",
+			"submit": "Show accounts",
+			"reset": "Clear",
+			"account": "Account $index",
+			"principal": "Principal",
+			"addresses": "Addresses",
+			"balance_loading": "Loading\u2026",
+			"balance_unavailable": "Unavailable",
+			"empty_account": "Nothing found on this account.",
+			"not_shown_title": "Not shown here",
+			"not_shown_description": "Plug also supports Dogecoin and Litecoin. OISY does not, so any holdings on those networks are not listed above \u2014 they are still in your Plug wallet.",
+			"read_only_title": "View only for now",
+			"read_only_description": "This page only shows what the wallet holds. Moving assets to OISY comes next."
+		},
+		"error": {
+			"invalid_phrase": "That is not a valid seed phrase. Check the words and their order.",
+			"derivation_failed": "Could not derive the Plug accounts from this phrase.",
+			"balances_failed": "Some balances could not be loaded. Try again shortly."
+		}
 	}
 }
