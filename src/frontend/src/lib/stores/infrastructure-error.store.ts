@@ -1,18 +1,18 @@
-import type { PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE } from '$lib/enums/plausible';
+import type { PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR } from '$lib/enums/plausible';
 import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface InfrastructureError {
 	// What could not be loaded. Shown to the user in the expandable details, and mirrored
 	// as the analytics subcontext so a dashboard and a support ticket describe the same thing.
-	operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE;
+	operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR;
 	// Sanitised error text, safe to display: IC request IDs are stripped, since they are
 	// unique per request and only add noise to a screenshot pasted into a support thread.
 	detail?: string;
 }
 
 export interface InfrastructureErrorStore extends Readable<InfrastructureError | undefined> {
-	set: (params: { operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE; err: unknown }) => void;
+	set: (params: { operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR; err: unknown }) => void;
 	reset: () => void;
 }
 

@@ -1,5 +1,5 @@
 import InfrastructureErrorPage from '$lib/components/auth/InfrastructureErrorPage.svelte';
-import { PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE } from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR } from '$lib/enums/plausible';
 import * as authServices from '$lib/services/auth.services';
 import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -15,7 +15,7 @@ describe('InfrastructureErrorPage', () => {
 		vi.clearAllMocks();
 
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			err: networkError()
 		});
 	});
@@ -73,7 +73,7 @@ describe('InfrastructureErrorPage', () => {
 		const { getByText } = render(InfrastructureErrorPage);
 
 		const expected = replacePlaceholders(en.init.unavailable.operation, {
-			$operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE
+			$operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE
 		});
 
 		expect(getByText(expected)).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe('InfrastructureErrorPage', () => {
 
 	it('should render without a detail when the store carries none', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			err: undefined
 		});
 

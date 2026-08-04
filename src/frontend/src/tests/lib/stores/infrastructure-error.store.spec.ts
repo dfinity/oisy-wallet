@@ -1,4 +1,4 @@
-import { PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE } from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR } from '$lib/enums/plausible';
 import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import { HttpFetchErrorCode, TransportError } from '@dfinity/agent';
 import { get } from 'svelte/store';
@@ -14,12 +14,12 @@ describe('infrastructure-error.store', () => {
 
 	it('should record the failing operation and the error detail', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			err: TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
 		});
 
 		expect(get(infrastructureError)).toEqual({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			detail: expect.stringContaining('Failed to fetch HTTP request')
 		});
 	});
@@ -28,7 +28,7 @@ describe('infrastructure-error.store', () => {
 	// identifier in it is noise at best.
 	it('should strip the IC request ID from the detail', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			err: new Error('Call failed\nRequest ID: 0123456789abcdef\nStatus: rejected')
 		});
 
@@ -37,19 +37,19 @@ describe('infrastructure-error.store', () => {
 
 	it('should hold no detail when there is no error to describe', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			err: undefined
 		});
 
 		expect(get(infrastructureError)).toEqual({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			detail: undefined
 		});
 	});
 
 	it('should clear on reset, so a recovered session stops showing the page', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			err: new Error('Boom')
 		});
 
@@ -60,16 +60,16 @@ describe('infrastructure-error.store', () => {
 
 	it('should replace a previous error rather than accumulate', () => {
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_PROFILE,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
 			err: new Error('First')
 		});
 		infrastructureError.set({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			err: new Error('Second')
 		});
 
 		expect(get(infrastructureError)).toEqual({
-			operation: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			detail: 'Second'
 		});
 	});

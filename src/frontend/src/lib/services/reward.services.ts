@@ -18,13 +18,14 @@ import {
 } from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
 import {
+	PLAUSIBLE_EVENT_CONTEXTS,
 	PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
-	PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
 } from '$lib/enums/plausible';
 import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { RewardType } from '$lib/enums/reward-type';
-import { trackExceptionalError } from '$lib/services/analytics.services';
+import { trackAppError } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsNetworkUnreachableOr } from '$lib/stores/toasts.store';
 import {
@@ -43,7 +44,7 @@ import type {
 	UserRoleResult
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNetworkUnreachableError } from '$lib/utils/error.utils';
+import { isNetworkUnreachableError, networkErrorSubcode } from '$lib/utils/error.utils';
 import { INITIAL_REWARD_RESULT, mapEligibilityReport } from '$lib/utils/rewards.utils';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
@@ -59,13 +60,15 @@ const trackBackgroundLoadFailure = ({
 	subcontext,
 	err
 }: {
-	subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE;
+	subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR;
 	err: unknown;
 }) => {
 	if (isNetworkUnreachableError(err)) {
-		trackExceptionalError({
+		trackAppError({
+			context: PLAUSIBLE_EVENT_CONTEXTS.REWARDS,
 			subcontext,
-			code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_UNREACHABLE,
+			code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+			subcode: networkErrorSubcode(err),
 			severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR,
 			err
 		});
@@ -147,7 +150,7 @@ export const getUserRoles = async (params: { identity: Identity }): Promise<User
 		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
 		trackBackgroundLoadFailure({
-			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.USER_ROLES,
+			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_ROLES,
 			err
 		});
 
@@ -201,7 +204,7 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		return await queryRewards({ ...params, certified: false });
 	} catch (err: unknown) {
 		trackBackgroundLoadFailure({
-			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_INFRASTRUCTURE.REWARDS,
+			subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.REWARDS,
 			err
 		});
 	}
