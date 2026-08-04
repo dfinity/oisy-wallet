@@ -7,6 +7,8 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import { failedAddressNetworkIds } from '$lib/stores/failed-addresses.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { OptionString } from '$lib/types/string';
@@ -64,6 +66,10 @@
 						class="flex-1 text-sm break-all"
 						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 						in:fade>{address}</output
+					>
+				{:else if $failedAddressNetworkIds.includes(network.id)}
+					<output class="flex-1 text-sm" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
+						>{$i18n.core.text.not_available}</output
 					>
 				{:else}
 					<span class="w-full"><SkeletonText /></span>
