@@ -1,7 +1,6 @@
 <script lang="ts">
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
@@ -10,7 +9,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { showHidden, showSpam } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
@@ -19,24 +18,12 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		nftGroupByCollectionStore,
-		showHiddenStore,
-		showSpamStore
-	} from '$lib/stores/settings.store';
+	import { showHiddenStore, showSpamStore } from '$lib/stores/settings.store';
 	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
-
-	const setGrouping = (grouping: boolean) => {
-		trackNftSettingsEvent({
-			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
-			event_value: grouping ? 'collection' : 'plain_list'
-		});
-		nftGroupByCollectionStore.set({ key: 'nft-group-by-collection', value: grouping });
-	};
 
 	const toggleShowHidden = () => {
 		trackNftSettingsEvent({
@@ -90,34 +77,7 @@
 
 <ResponsivePopover {button} bind:visible>
 	{#snippet content()}
-		<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
-
-		<List noPadding>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						setGrouping(false);
-					}}
-					selectable
-					selected={!$nftGroupByCollection}
-				>
-					{$i18n.nfts.text.as_plain_list}
-				</ListItemButton>
-			</ListItem>
-			<ListItem>
-				<ListItemButton
-					onclick={() => {
-						setGrouping(true);
-					}}
-					selectable
-					selected={$nftGroupByCollection}
-				>
-					{$i18n.nfts.text.by_collection}
-				</ListItemButton>
-			</ListItem>
-		</List>
-
-		<span class="mt-3 mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+		<span class="mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 
 		<List condensed noPadding>
 			<ListItem>

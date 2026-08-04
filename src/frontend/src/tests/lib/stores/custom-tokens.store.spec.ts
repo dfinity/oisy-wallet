@@ -236,8 +236,7 @@ describe('custom-token.store', () => {
 				expect(get(mockStore)).toEqual(expectedResults);
 			});
 
-			// TODO: solve this test
-			it('should duplicate a token if it is already given as duplicate', () => {
+			it('should not duplicate a token if it is already given as a duplicate within the same call', () => {
 				const tokens = [BTC_MAINNET_TOKEN, BTC_MAINNET_TOKEN];
 				const mockTokens = tokens.map((token) => ({
 					data: { ...token, enabled },
@@ -245,7 +244,24 @@ describe('custom-token.store', () => {
 				}));
 				mockStore.setAll(mockTokens);
 
-				expect(get(mockStore)).toEqual(mockTokens);
+				expect(get(mockStore)).toEqual([mockTokens[0]]);
+			});
+
+			it('should keep only the last entry when two different tokens in the same call share an identifier', () => {
+				const erc20TokenA = { ...mockValidErc20Token, network: BASE_NETWORK, enabled };
+				const erc20TokenB = {
+					...mockValidErc20Token,
+					network: BASE_NETWORK,
+					enabled: false,
+					name: 'Duplicate'
+				};
+
+				mockStore.setAll([
+					{ data: erc20TokenA, certified },
+					{ data: erc20TokenB, certified }
+				]);
+
+				expect(get(mockStore)).toEqual([{ data: erc20TokenB, certified }]);
 			});
 		});
 
