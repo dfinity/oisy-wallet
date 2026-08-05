@@ -1,3 +1,4 @@
+import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -264,20 +265,30 @@ export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string =>
 };
 
 /**
- * Whether the params describe an `eth_signTypedData_v4` request that carries a
- * type-invalid EIP-712 value (e.g. a bool declared as `bool` but sent as the
- * string `"false"`). Used by the confirmation UI to warn and to disable signing,
- * so the preview and the signer enforce the exact same validation.
+ * Whether an `eth_signTypedData_v4` request would fail to sign — i.e. its typed
+ * data cannot be parsed, validated, and hashed. Used by the confirmation UI to
+ * warn and disable approval, so the preview mirrors what the signer would do
+ * (which rejects any such v4 request).
  *
- * Returns `false` for valid typed data and for non-typed-data messages (e.g.
- * `personal_sign`), which are not signed through the typed-data path.
+ * Returns `false` for non-v4 methods (e.g. `personal_sign`), which are signed
+ * differently and stay approvable.
  */
-export const hasInvalidTypedDataParams = (params: string[]): boolean => {
+export const hasInvalidTypedData = ({
+	method,
+	params
+}: {
+	method: string;
+	params: string[];
+}): boolean => {
+	if (method !== SESSION_REQUEST_ETH_SIGN_V4) {
+		return false;
+	}
+
 	try {
 		getSignParamsMessageTypedDataV4Hash(params);
 		return false;
-	} catch (err: unknown) {
-		return err instanceof WalletConnectEthTypedDataError;
+	} catch (_err: unknown) {
+		return true;
 	}
 };
 

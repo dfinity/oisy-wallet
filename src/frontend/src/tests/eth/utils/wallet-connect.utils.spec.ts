@@ -1,8 +1,12 @@
+import {
+	SESSION_REQUEST_ETH_SIGN_V4,
+	SESSION_REQUEST_PERSONAL_SIGN
+} from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import {
 	assertValidEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
-	hasInvalidTypedDataParams,
+	hasInvalidTypedData,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
@@ -143,20 +147,39 @@ describe('wallet-connect.utils', () => {
 		});
 	});
 
-	describe('hasInvalidTypedDataParams', () => {
-		it('is true for a type-invalid permit (bool sent as a string)', () => {
-			expect(hasInvalidTypedDataParams(toParams(daiPermit('false')))).toBeTruthy();
+	describe('hasInvalidTypedData', () => {
+		it('is true for a type-invalid v4 permit (bool sent as a string)', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(daiPermit('false'))
+				})
+			).toBeTruthy();
 		});
 
-		it('is false for a valid permit', () => {
-			expect(hasInvalidTypedDataParams(toParams(daiPermit(true)))).toBeFalsy();
-			expect(hasInvalidTypedDataParams(toParams(erc2612Permit))).toBeFalsy();
-			expect(hasInvalidTypedDataParams(toParams(permit2))).toBeFalsy();
+		it('is false for a valid v4 permit', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(daiPermit(true))
+				})
+			).toBeFalsy();
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(erc2612Permit)
+				})
+			).toBeFalsy();
+			expect(
+				hasInvalidTypedData({ method: SESSION_REQUEST_ETH_SIGN_V4, params: toParams(permit2) })
+			).toBeFalsy();
 		});
 
-		it('is false for a plain (non-typed-data) message', () => {
-			// personal_sign carries a hex string, not typed data, and must not warn.
-			expect(hasInvalidTypedDataParams(['0xdeadbeef'])).toBeFalsy();
+		it('is false for a non-v4 method', () => {
+			// personal_sign is signed differently and must stay approvable.
+			expect(
+				hasInvalidTypedData({ method: SESSION_REQUEST_PERSONAL_SIGN, params: ['0xdeadbeef'] })
+			).toBeFalsy();
 		});
 	});
 
