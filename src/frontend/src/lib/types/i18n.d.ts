@@ -2260,13 +2260,19 @@ interface I18nPlug_import {
 		balance_loading: string;
 		balance_unavailable: string;
 		empty_account: string;
+		send_to_wallet: string;
+		send_confirm_title: string;
+		send_confirm_description: string;
+		send_success: string;
+		send_only_ic: string;
+		send_below_fee: string;
 		unavailable_hint: string;
 		not_shown_title: string;
 		not_shown_description: string;
 		read_only_title: string;
 		read_only_description: string;
 	};
-	error: { invalid_phrase: string; derivation_failed: string };
+	error: { invalid_phrase: string; derivation_failed: string; send_failed: string };
 }
 
 interface I18n {

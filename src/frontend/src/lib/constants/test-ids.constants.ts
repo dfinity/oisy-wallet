@@ -439,3 +439,5 @@ export const PLUG_IMPORT_ERROR = 'plug-import-error';
 export const PLUG_IMPORT_ACCOUNT = 'plug-import-account';
 export const PLUG_IMPORT_SETTINGS_LINK = 'plug-import-settings-link';
 export const PLUG_IMPORT_NOTICES = 'plug-import-notices';
+export const PLUG_IMPORT_SEND_BUTTON = 'plug-import-send-button';
+export const PLUG_IMPORT_SEND_DISABLED = 'plug-import-send-disabled';
