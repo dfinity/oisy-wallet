@@ -148,4 +148,29 @@ describe('sweepPlugEvmBalance', () => {
 			expect(signPlugEthTransaction).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('erc4626', () => {
+		// A vault share is an ERC-20, so it takes the ERC-20 send path on its own
+		// contract — never the native path, which would move ETH instead.
+		const erc4626Token = {
+			...mockValidToken,
+			standard: { code: 'erc4626' },
+			symbol: 'bAutopilot_USDC',
+			network: ETHEREUM_NETWORK,
+			address: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4'
+		} as unknown as Token;
+
+		it('transfers vault shares through the ERC-20 signing method', async () => {
+			await call({ token: erc4626Token, balance: 5_000_000n });
+
+			expect(signPlugErc20Transaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					amount: 5_000_000n,
+					contractAddress: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4',
+					to: DESTINATION
+				})
+			);
+			expect(signPlugEthTransaction).not.toHaveBeenCalled();
+		});
+	});
 });

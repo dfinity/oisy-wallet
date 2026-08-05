@@ -2,7 +2,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Principal } from '@icp-sdk/core/principal';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import PlugImportAccount from '$lib/components/plug-import/PlugImportAccount.svelte';
 	import PlugImportForm from '$lib/components/plug-import/PlugImportForm.svelte';
@@ -22,6 +21,7 @@
 	import {
 		derivePlugAccounts,
 		derivePlugIdentity,
+		isPlugEvmContractToken,
 		isPlugSweepableToken,
 		plugEvmNetwork,
 		plugRowKey
@@ -105,7 +105,7 @@
 		networkId: NetworkId;
 	}): bigint =>
 		(balances.get(account.index) ?? []).find(
-			({ token }) => token.network.id === networkId && !isTokenErc20(token)
+			({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token)
 		)?.balance ?? ZERO;
 
 	const send = async ({

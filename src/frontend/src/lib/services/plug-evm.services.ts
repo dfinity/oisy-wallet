@@ -2,13 +2,18 @@ import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { getErc20FeeData, getEthFeeDataWithProvider } from '$eth/services/fee.services';
 import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { EthereumNetwork } from '$eth/types/network';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { signPlugErc20Transaction, signPlugEthTransaction } from '$lib/api/plug-helper.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
+import { isPlugEvmContractToken } from '$lib/utils/plug.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
+
+// ERC-4626 vault shares transfer through the same ERC-20 `transfer` as a plain
+// token, on their own contract address, so the send path treats the two alike.
+type PlugEvmContractToken = Erc20Token | Erc4626Token;
 
 interface SweepParams {
 	identity: Identity;
@@ -36,7 +41,7 @@ export const sweepPlugEvmBalance = async ({
 	token,
 	...params
 }: SweepParams & { token: Token }): Promise<string> =>
-	isTokenErc20(token)
+	isPlugEvmContractToken(token)
 		? await sweepErc20({ ...params, token })
 		: await sweepNative({ ...params, token });
 
@@ -111,7 +116,7 @@ const sweepErc20 = async ({
 	destination,
 	from,
 	network
-}: SweepParams & { token: Erc20Token }): Promise<string> => {
+}: SweepParams & { token: PlugEvmContractToken }): Promise<string> => {
 	const { maxFeePerGas, maxPriorityFeePerGas, provider, params, nonce } = await feeContext({
 		from,
 		destination,

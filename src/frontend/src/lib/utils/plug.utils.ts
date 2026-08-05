@@ -2,8 +2,11 @@ import type { BtcAddress } from '$btc/types/address';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -185,6 +188,17 @@ export const plugSweepableAmount = ({
 };
 
 /**
+ * An EVM token moved by a contract call rather than as the chain's native coin.
+ *
+ * ERC-4626 vault shares are a superset of ERC-20 — they implement `balanceOf` and
+ * `transfer` — so a vault is read and sent exactly like any ERC-20, on its own
+ * contract address. Treating them together is what stops a vault row from falling
+ * through to the native-balance branch and reporting the account's ETH instead.
+ */
+export const isPlugEvmContractToken = (token: Token): token is Erc20Token | Erc4626Token =>
+	isTokenErc20(token) || isTokenErc4626(token);
+
+/**
  * Identifies a balance row.
  *
  * Symbol alone is not unique and neither is the address: the same token can be
@@ -201,7 +215,8 @@ const plugNativeBalance = ({
 	networkId: NetworkId;
 	balances: PlugBalance[];
 }): bigint | undefined =>
-	balances.find(({ token }) => token.network.id === networkId && !isTokenErc20(token))?.balance;
+	balances.find(({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token))
+		?.balance;
 
 /**
  * Whether an EVM row can be moved.
@@ -225,7 +240,7 @@ export const isPlugEvmSendable = ({
 		return false;
 	}
 
-	if (!isTokenErc20(token)) {
+	if (!isPlugEvmContractToken(token)) {
 		return true;
 	}
 

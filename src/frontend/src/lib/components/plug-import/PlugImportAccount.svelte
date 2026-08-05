@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -17,6 +16,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 	import {
+		isPlugEvmContractToken,
 		isPlugEvmSendable,
 		isPlugSweepableToken,
 		plugRowKey,
@@ -73,8 +73,9 @@
 	};
 
 	const nativeSymbol = (networkId: NetworkId): string | undefined =>
-		(balances ?? []).find(({ token }) => token.network.id === networkId && !isTokenErc20(token))
-			?.token.symbol;
+		(balances ?? []).find(
+			({ token }) => token.network.id === networkId && !isPlugEvmContractToken(token)
+		)?.token.symbol;
 
 	let loaded = $derived(nonNullish(balances));
 
@@ -157,7 +158,7 @@
 								{/snippet}
 
 								<p>
-									{#if isTokenErc20(token)}
+									{#if isPlugEvmContractToken(token)}
 										{replacePlaceholders($i18n.plug_import.text.send_confirm_description_gas, {
 											$amount: formatToken({ value: amount, unitName: token.decimals }),
 											$symbol: token.symbol,
