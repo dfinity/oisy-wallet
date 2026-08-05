@@ -79,12 +79,19 @@ const assertValidInteger = ({
 	// empty for them, so fall back to 256 rather than parsing '' as 0.
 	const digits = type.match(INTEGER_TYPE_REGEX)?.[1] ?? '';
 	const bits = digits === '' ? 256 : Number(digits);
+
+	// Solidity integer types are 8..256 bits in steps of 8. Guard against invalid
+	// sizes (e.g. `uint0`) to avoid runtime errors and to match ethers' behavior.
+	if (!Number.isInteger(bits) || bits < 8 || bits > 256 || bits % 8 !== 0) {
+		return invalidTypedDataValue({ path, type, value });
+	}
+
 	const signed = !type.startsWith('u');
 
 	let parsed: bigint;
 	if (typeof value === 'bigint') {
 		parsed = value;
-	} else if (typeof value === 'number' && Number.isInteger(value)) {
+	} else if (typeof value === 'number' && Number.isSafeInteger(value)) {
 		parsed = BigInt(value);
 	} else if (
 		typeof value === 'string' &&
