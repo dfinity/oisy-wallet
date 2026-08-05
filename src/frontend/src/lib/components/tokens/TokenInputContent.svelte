@@ -9,6 +9,7 @@
 	import TokenInputCurrencyToken from '$lib/components/tokens/TokenInputCurrencyToken.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { TOKEN_INPUT_SELECT_TOKEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
@@ -27,6 +28,9 @@
 		disabled?: boolean;
 		readOnlyAmount?: boolean;
 		placeholder?: string;
+		// Overrides the "Select token" prompt shown while no token is picked — e.g.
+		// to name what has to be chosen first when the picker is still gated.
+		selectTokenText?: string;
 		errorType?: TokenActionErrorType;
 		// TODO: We want to be able to reuse this component in the send forms. Unfortunately, the send forms work with errors instead of error types. For now, this component supports errors and error types but in the future the error handling in the send forms should be reworked.
 		error?: Error;
@@ -54,6 +58,7 @@
 		disabled = false,
 		readOnlyAmount = false,
 		placeholder = '0',
+		selectTokenText,
 		errorType = $bindable(),
 		error = $bindable(),
 		amountSetToMax = $bindable(false),
@@ -69,6 +74,10 @@
 		amountInfo,
 		balance
 	}: Props = $props();
+
+	// Nothing to type into and no picker to open: the field is inert, so it must
+	// not offer a hover border or a pointer cursor.
+	const inert = $derived(disabled && !isSelectable);
 
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
@@ -125,6 +134,7 @@
 <TokenInputContainer
 	error={nonNullish(errorType) || nonNullish(error)}
 	{focused}
+	{inert}
 	{readOnlyAmount}
 	styleClass="h-14 text-3xl"
 >
@@ -166,8 +176,15 @@
 		{:else if readOnlyAmount}
 			<div class="w-full pl-3 font-bold text-disabled">—</div>
 		{:else}
-			<button class="h-full w-full pl-3 text-base" onclick={onClick} type="button"
-				>{$i18n.tokens.text.select_token}</button
+			<!-- Muted and inert when the picker can't be opened yet (e.g. a pair's
+				 second leg before the first is chosen), so the field doesn't invite a
+				 click that does nothing. -->
+			<button
+				class="h-full w-full pl-3 text-base disabled:cursor-not-allowed"
+				class:text-tertiary={!isSelectable}
+				disabled={!isSelectable}
+				onclick={onClick}
+				type="button">{selectTokenText ?? $i18n.tokens.text.select_token}</button
 			>
 		{/if}
 	</div>
@@ -178,7 +195,7 @@
 
 	{#if !readOnlyAmount || isSelectable}
 		<button
-			class="flex h-full items-center gap-1 px-3 transition-colors"
+			class="flex h-full items-center gap-1 px-3 transition-colors disabled:cursor-not-allowed"
 			class:bg-primary={readOnlyAmount}
 			class:border={readOnlyAmount}
 			class:border-solid={readOnlyAmount}
@@ -186,6 +203,7 @@
 			class:hover:border-brand-primary={readOnlyAmount && isSelectable}
 			class:rounded-lg={readOnlyAmount}
 			class:shadow-inner={readOnlyAmount}
+			data-tid={TOKEN_INPUT_SELECT_TOKEN_BUTTON}
 			disabled={!isSelectable}
 			onclick={onClick}
 			type="button"
@@ -194,9 +212,15 @@
 				<TokenLogo data={token} logoSize="xs" />
 				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
 			{:else}
+				<!-- Grey rather than brand while the picker is unavailable: the plus is
+					 the field's only affordance, so leaving it blue reads as actionable. -->
 				<span
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
-					class="flex items-center justify-center rounded-full bg-brand-primary text-primary-inverted"
+					class="flex items-center justify-center rounded-full"
+					class:bg-brand-primary={isSelectable}
+					class:bg-disabled={!isSelectable}
+					class:text-primary-inverted={isSelectable}
+					class:text-tertiary={!isSelectable}
 				>
 					<IconPlus />
 				</span>

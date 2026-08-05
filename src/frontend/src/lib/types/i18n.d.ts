@@ -1490,6 +1490,8 @@ interface I18nTrading {
 		buy: string;
 		select_sell_token: string;
 		select_buy_token: string;
+		select_sell_token_first: string;
+		select_buy_token_first: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;
