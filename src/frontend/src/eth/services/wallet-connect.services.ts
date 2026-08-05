@@ -4,7 +4,8 @@ import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
-	getSignParamsMessageTypedDataV4Hash
+	getSignParamsMessageTypedDataV4Hash,
+	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -225,9 +226,16 @@ export const signMessage = ({
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
-					} catch (_err: unknown) {
-						// If the above failed, it's because JSON.parse throw an exception.
-						// We are assuming that it did so because it tried to parse a string that does not represent an object.
+					} catch (err: unknown) {
+						// A schema-invalid EIP-712 payload must never be downgraded to a raw
+						// message signature: ethers coerces mismatched values instead of
+						// rejecting them, so we reject the request rather than sign a payload
+						// that does not conform to its declared schema.
+						if (err instanceof WalletConnectEthTypedDataError) {
+							throw err;
+						}
+						// Otherwise the payload is not typed data (e.g. personal_sign): JSON.parse
+						// threw because the message does not represent a typed-data object.
 						// Therefore, we continue with a message as hex string.
 						const message = getSignParamsMessageHex(params);
 						return signMessageApi({
