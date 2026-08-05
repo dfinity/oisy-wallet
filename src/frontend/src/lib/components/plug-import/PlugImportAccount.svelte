@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -10,10 +11,17 @@
 		PLUG_IMPORT_SEND_DISABLED
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
 	import type { PlugBalance, PlugAccount } from '$lib/types/plug';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isPlugSweepableToken, plugSweepableAmount } from '$lib/utils/plug.utils';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+	import {
+		isPlugEvmSendable,
+		isPlugSweepableToken,
+		plugRowKey,
+		plugSweepableAmount
+	} from '$lib/utils/plug.utils';
 
 	interface Props {
 		account: PlugAccount;
@@ -24,12 +32,37 @@
 
 	let { account, balances, sending, onsend }: Props = $props();
 
+	const isEvm = ({ token: { network } }: PlugBalance): boolean =>
+		isNetworkIdEthereum(network.id) || isNetworkIdEvm(network.id);
+
+	// How much a row can move, or undefined when it cannot move at all. EVM amounts
+	// are settled at send time against live fee data — gas is not knowable here — so
+	// the row reports the full balance and the service trims the reserve.
+	const sendableAmount = (row: PlugBalance): bigint | undefined => {
+		const { token, balance } = row;
+
+		if (isEvm(row)) {
+			return isPlugEvmSendable({ token, balance, balances: balances ?? [] }) ? balance : undefined;
+		}
+
+		return plugSweepableAmount({ token, balance });
+	};
+
 	// Why a row cannot be moved, or undefined when it can. A reason rather than a
-	// boolean, so a blocked row can say what is wrong instead of only greying out —
-	// "not an IC token" and "smaller than its own fee" need different wording.
-	const blockedReason = ({ token, balance }: PlugBalance): string | undefined => {
+	// boolean, so a blocked row can say what is wrong instead of only greying out:
+	// an unsupported chain, a missing gas balance and a balance below its own fee are
+	// three different problems with three different remedies.
+	const blockedReason = (row: PlugBalance): string | undefined => {
+		const { token, balance } = row;
+
+		if (isEvm(row)) {
+			return replacePlaceholders($i18n.plug_import.text.send_needs_gas, {
+				$symbol: nativeSymbol(token.network.id) ?? token.symbol
+			});
+		}
+
 		if (!isPlugSweepableToken(token)) {
-			return $i18n.plug_import.text.send_only_ic;
+			return $i18n.plug_import.text.send_unsupported_chain;
 		}
 
 		if (isNullish(plugSweepableAmount({ token, balance }))) {
@@ -38,6 +71,10 @@
 
 		return undefined;
 	};
+
+	const nativeSymbol = (networkId: NetworkId): string | undefined =>
+		(balances ?? []).find(({ token }) => token.network.id === networkId && !isTokenErc20(token))
+			?.token.symbol;
 
 	let loaded = $derived(nonNullish(balances));
 
@@ -71,9 +108,10 @@
 		<span class="text-tertiary">{$i18n.plug_import.text.empty_account}</span>
 	{:else}
 		<ul class="flex w-full flex-col gap-2">
-			{#each visible as row (`${row.token.symbol}-${row.address}`)}
+			{#each visible as row (plugRowKey(row))}
 				{@const { token, address, balance } = row}
-				{@const amount = plugSweepableAmount({ token, balance })}
+				{@const rowKey = plugRowKey(row)}
+				{@const amount = sendableAmount(row)}
 				{@const reason = blockedReason(row)}
 
 				<li class="flex w-full flex-row items-center justify-between gap-3">
@@ -99,7 +137,7 @@
 						{#if nonNullish(amount)}
 							<ConfirmButtonWithModal
 								onConfirm={() => onsend({ balance: row, amount })}
-								testId={`${PLUG_IMPORT_SEND_BUTTON}-${token.symbol}`}
+								testId={`${PLUG_IMPORT_SEND_BUTTON}-${rowKey}`}
 							>
 								{#snippet title()}
 									{$i18n.plug_import.text.send_confirm_title}
@@ -108,10 +146,10 @@
 								{#snippet button(onclick)}
 									<Button
 										disabled={nonNullish(sending)}
-										loading={sending === token.symbol}
+										loading={sending === rowKey}
 										{onclick}
 										paddingSmall
-										testId={`${PLUG_IMPORT_SEND_BUTTON}-${token.symbol}`}
+										testId={`${PLUG_IMPORT_SEND_BUTTON}-${rowKey}`}
 										type="button"
 									>
 										{$i18n.plug_import.text.send_to_wallet}
@@ -119,16 +157,24 @@
 								{/snippet}
 
 								<p>
-									{replacePlaceholders($i18n.plug_import.text.send_confirm_description, {
-										$amount: formatToken({ value: amount, unitName: token.decimals }),
-										$symbol: token.symbol
-									})}
+									{#if isTokenErc20(token)}
+										{replacePlaceholders($i18n.plug_import.text.send_confirm_description_gas, {
+											$amount: formatToken({ value: amount, unitName: token.decimals }),
+											$symbol: token.symbol,
+											$native: nativeSymbol(token.network.id) ?? ''
+										})}
+									{:else}
+										{replacePlaceholders($i18n.plug_import.text.send_confirm_description, {
+											$amount: formatToken({ value: amount, unitName: token.decimals }),
+											$symbol: token.symbol
+										})}
+									{/if}
 								</p>
 							</ConfirmButtonWithModal>
 						{:else if nonNullish(reason)}
 							<span
 								class="max-w-48 text-right text-sm text-tertiary"
-								data-tid={`${PLUG_IMPORT_SEND_DISABLED}-${token.symbol}`}>{reason}</span
+								data-tid={`${PLUG_IMPORT_SEND_DISABLED}-${rowKey}`}>{reason}</span
 							>
 						{/if}
 					</span>

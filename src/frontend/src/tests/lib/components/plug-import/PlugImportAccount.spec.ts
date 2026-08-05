@@ -1,3 +1,6 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import PlugImportAccount from '$lib/components/plug-import/PlugImportAccount.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -6,6 +9,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { plugRowKey } from '$lib/utils/plug.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -96,57 +100,134 @@ describe('PlugImportAccount', () => {
 			fee: 10_000n
 		} as unknown as typeof mockValidToken;
 
+		const nativeEth = {
+			...mockValidToken,
+			standard: { code: 'ethereum' },
+			symbol: 'ETH',
+			network: ETHEREUM_NETWORK
+		} as unknown as typeof mockValidToken;
+
+		const erc20 = {
+			...mockValidToken,
+			standard: { code: 'erc20' },
+			symbol: 'USDT',
+			network: ETHEREUM_NETWORK,
+			address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+		} as unknown as typeof mockValidToken;
+
+		const sendButton = (row: PlugBalance) => `${PLUG_IMPORT_SEND_BUTTON}-${plugRowKey(row)}`;
+		const disabledLabel = (row: PlugBalance) => `${PLUG_IMPORT_SEND_DISABLED}-${plugRowKey(row)}`;
+
 		it('offers a send action for an IC balance above its fee', () => {
+			const row = balance({ token: icrc, balance: 100_000n });
+
 			const { getByTestId } = render(PlugImportAccount, {
 				onsend: vi.fn(),
 				account: mockAccount,
-				balances: [balance({ token: icrc, balance: 100_000n })]
+				balances: [row]
 			});
 
-			expect(getByTestId(`${PLUG_IMPORT_SEND_BUTTON}-ckUSDT`)).toBeInTheDocument();
+			expect(getByTestId(sendButton(row))).toBeInTheDocument();
 		});
 
 		it('explains why an IC balance below its fee cannot be sent', () => {
+			const row = balance({ token: icrc, balance: 5_000n });
+
 			const { getByTestId, queryByTestId } = render(PlugImportAccount, {
 				onsend: vi.fn(),
 				account: mockAccount,
-				balances: [balance({ token: icrc, balance: 5_000n })]
+				balances: [row]
 			});
 
-			expect(queryByTestId(`${PLUG_IMPORT_SEND_BUTTON}-ckUSDT`)).toBeNull();
-			expect(getByTestId(`${PLUG_IMPORT_SEND_DISABLED}-ckUSDT`)).toHaveTextContent(
+			expect(queryByTestId(sendButton(row))).toBeNull();
+			expect(getByTestId(disabledLabel(row))).toHaveTextContent(
 				replacePlaceholders(en.plug_import.text.send_below_fee, { $symbol: 'ckUSDT' })
 			);
 		});
 
-		it('explains that a non-IC balance must be sent from the original wallet', () => {
-			// A chain-key address on another chain: OISY can show it but cannot sign for it.
+		it('explains that an unsupported chain must be sent from the original wallet', () => {
+			// A chain-key address whose send path does not exist yet.
 			const btc = {
 				...mockValidToken,
 				standard: { code: 'bitcoin' },
-				symbol: 'BTC'
+				symbol: 'BTC',
+				network: BTC_MAINNET_NETWORK
 			} as unknown as typeof mockValidToken;
+			const row = balance({ token: btc, balance: 100_000n });
 
 			const { getByTestId, queryByTestId } = render(PlugImportAccount, {
 				onsend: vi.fn(),
 				account: mockAccount,
-				balances: [balance({ token: btc, balance: 100_000n })]
+				balances: [row]
 			});
 
-			expect(queryByTestId(`${PLUG_IMPORT_SEND_BUTTON}-BTC`)).toBeNull();
-			expect(getByTestId(`${PLUG_IMPORT_SEND_DISABLED}-BTC`)).toHaveTextContent(
-				en.plug_import.text.send_only_ic
+			expect(queryByTestId(sendButton(row))).toBeNull();
+			expect(getByTestId(disabledLabel(row))).toHaveTextContent(
+				en.plug_import.text.send_unsupported_chain
 			);
 		});
 
 		it('offers no send action for a balance that could not be read', () => {
+			const row = balance({ token: icrc, balance: undefined });
+
 			const { queryByTestId } = render(PlugImportAccount, {
 				onsend: vi.fn(),
 				account: mockAccount,
-				balances: [balance({ token: icrc, balance: undefined })]
+				balances: [row]
 			});
 
-			expect(queryByTestId(`${PLUG_IMPORT_SEND_BUTTON}-ckUSDT`)).toBeNull();
+			expect(queryByTestId(sendButton(row))).toBeNull();
+		});
+
+		it('offers a send action for a native EVM balance', () => {
+			const row = balance({ token: nativeEth, balance: 10n ** 16n });
+
+			const { getByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [row]
+			});
+
+			expect(getByTestId(sendButton(row))).toBeInTheDocument();
+		});
+
+		it('offers a send action for an ERC20 when the account holds gas', () => {
+			const nativeRow = balance({ token: nativeEth, balance: 10n ** 16n });
+			const tokenRow = balance({ token: erc20, balance: 5_000_000n });
+
+			const { getByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [nativeRow, tokenRow]
+			});
+
+			expect(getByTestId(sendButton(tokenRow))).toBeInTheDocument();
+		});
+
+		it('blocks an ERC20 with no native balance to pay gas, naming the coin needed', () => {
+			const nativeRow = balance({ token: nativeEth, balance: ZERO });
+			const tokenRow = balance({ token: erc20, balance: 5_000_000n });
+
+			const { getByTestId, queryByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [nativeRow, tokenRow]
+			});
+
+			expect(queryByTestId(sendButton(tokenRow))).toBeNull();
+			expect(getByTestId(disabledLabel(tokenRow))).toHaveTextContent(
+				replacePlaceholders(en.plug_import.text.send_needs_gas, { $symbol: 'ETH' })
+			);
+		});
+
+		it('distinguishes rows that share a symbol across networks', () => {
+			const onBase = balance({
+				token: { ...erc20, network: BASE_NETWORK } as unknown as typeof mockValidToken,
+				balance: 1_000n
+			});
+			const onEthereum = balance({ token: erc20, balance: 2_000n });
+
+			expect(plugRowKey(onBase)).not.toBe(plugRowKey(onEthereum));
 		});
 	});
 });

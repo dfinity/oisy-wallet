@@ -1,7 +1,12 @@
 import type { BtcAddress } from '$btc/types/address';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import type { EthAddress } from '$eth/types/address';
+import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIcp, isTokenIcrc } from '$icp/utils/icrc.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	PLUG_EVM_PATH_DISCRIMINATOR,
 	PLUG_HELPER_CANISTER_ID,
@@ -9,12 +14,13 @@ import {
 	PLUG_ZERO_CHAIN_CODE
 } from '$lib/constants/plug.constants';
 import { SIGNER_MASTER_PUB_KEYS } from '$lib/constants/signer.constants';
-import type { PlugAccount } from '$lib/types/plug';
+import type { NetworkId } from '$lib/types/network';
+import type { PlugAccount, PlugBalance } from '$lib/types/plug';
 import type { Token } from '$lib/types/token';
 import type { SolAddress } from '$sol/types/address';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
 import { bip340secp256k1, ed25519 } from '@dfinity/ic-pub-key/schnorr';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Secp256k1KeyIdentity } from '@icp-sdk/core/identity/secp256k1';
 import { Principal } from '@icp-sdk/core/principal';
 import { HDKey } from '@scure/bip32';
@@ -177,3 +183,59 @@ export const plugSweepableAmount = ({
 
 	return balance > fee ? balance - fee : undefined;
 };
+
+/**
+ * Identifies a balance row.
+ *
+ * Symbol alone is not unique and neither is the address: the same token can be
+ * enabled on several EVM networks, where every row shares both the symbol and the
+ * derived address. Only the network disambiguates them.
+ */
+export const plugRowKey = ({ token: { symbol, network } }: PlugBalance): string =>
+	`${network.id.toString()}-${symbol}`;
+
+const plugNativeBalance = ({
+	networkId,
+	balances
+}: {
+	networkId: NetworkId;
+	balances: PlugBalance[];
+}): bigint | undefined =>
+	balances.find(({ token }) => token.network.id === networkId && !isTokenErc20(token))?.balance;
+
+/**
+ * Whether an EVM row can be moved.
+ *
+ * Gas is paid in the network's native coin out of the imported account, so a
+ * token transfer is impossible without native coin sitting there — a common state
+ * for someone who only ever received tokens. The exact gas figure needs live fee
+ * data, so this is the cheap gate that keeps an impossible action off the screen;
+ * the send path re-checks against the real fee.
+ */
+export const isPlugEvmSendable = ({
+	token,
+	balance,
+	balances
+}: {
+	token: Token;
+	balance: bigint | undefined;
+	balances: PlugBalance[];
+}): boolean => {
+	if (isNullish(balance) || balance <= ZERO) {
+		return false;
+	}
+
+	if (!isTokenErc20(token)) {
+		return true;
+	}
+
+	const native = plugNativeBalance({ networkId: token.network.id, balances });
+
+	return nonNullish(native) && native > ZERO;
+};
+
+/**
+ * The EVM network for a network id, typed so callers get `chainId` without a cast.
+ */
+export const plugEvmNetwork = (networkId: NetworkId): EthereumNetwork | undefined =>
+	[...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(({ id }) => id === networkId);
