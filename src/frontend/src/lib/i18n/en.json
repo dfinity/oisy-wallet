@@ -2730,7 +2730,7 @@
 			"balance_loading": "Loading\u2026",
 			"balance_unavailable": "Unavailable",
 			"empty_account": "Nothing found on this account.",
-			"send_to_wallet": "Send to my wallet",
+			"send_to_wallet": "Send to OISY",
 			"send_confirm_title": "Send to your OISY wallet",
 			"send_confirm_description": "$amount $symbol will be sent to your OISY wallet. The network fee is deducted from this token, and the transfer cannot be undone.",
 			"send_confirm_description_gas": "$amount $symbol will be sent to your OISY wallet. The network fee is paid in $native from the same account, and the transfer cannot be undone.",
