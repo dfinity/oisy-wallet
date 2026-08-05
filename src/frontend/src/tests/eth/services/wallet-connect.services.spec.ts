@@ -118,6 +118,27 @@ describe('eth wallet-connect.services', () => {
 			});
 		});
 
+		it('rejects a v4 request that fails to hash for a non-validation reason', async () => {
+			// Malformed JSON makes the typed-data hash throw a non-validation error; a
+			// v4 request must still be rejected, never downgraded to raw signing.
+			const request = buildRequest({
+				method: SESSION_REQUEST_ETH_SIGN_V4,
+				params: [HOLDER, '{ not valid json ']
+			});
+
+			const result = await signMessage(buildParams(request));
+
+			expect(result.success).toBeFalsy();
+			expect(signPrehash).not.toHaveBeenCalled();
+			expect(signMessageApi).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: request.topic,
+				id: request.id,
+				error: UNEXPECTED_ERROR
+			});
+		});
+
 		it('falls back to raw message signing for a plain (non-typed-data) message', async () => {
 			const message = '0x48656c6c6f'; // "Hello"
 			const request = buildRequest({
