@@ -38,7 +38,6 @@ export class WalletConnectEthTypedDataError extends Error {}
 const ARRAY_TYPE_REGEX = /^(.+)\[(\d*)\]$/;
 const INTEGER_TYPE_REGEX = /^u?int(\d*)$/;
 const FIXED_BYTES_TYPE_REGEX = /^bytes(\d+)$/;
-const ADDRESS_REGEX = /^0x[0-9a-fA-F]{40}$/;
 const DYNAMIC_BYTES_REGEX = /^0x([0-9a-fA-F]{2})*$/;
 const DECIMAL_INTEGER_REGEX = /^-?\d+$/;
 const HEX_INTEGER_REGEX = /^0x[0-9a-fA-F]+$/;
@@ -172,7 +171,7 @@ const assertValidTypedDataValue = ({
 	}
 
 	if (type === 'address') {
-		if (typeof value !== 'string' || !ADDRESS_REGEX.test(value)) {
+		if (typeof value !== 'string' || !isEthAddress(value)) {
 			invalidTypedDataValue({ path, type, value });
 		}
 		return;
