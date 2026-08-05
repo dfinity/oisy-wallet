@@ -321,7 +321,8 @@ export const sendSol = async ({
 	amount,
 	prioritizationFee,
 	destination,
-	source
+	source,
+	signerOverride
 }: {
 	identity: NullishIdentity;
 	token: Token;
@@ -330,6 +331,10 @@ export const sendSol = async ({
 	destination: SolAddress;
 	source: SolAddress;
 	progress?: (step: ProgressStepsSendSol) => void;
+	// The signer normally derives from the signed-in identity via the OISY signer
+	// canister. The Plug import injects a signer backed by the imported wallet's own
+	// canister, the only party that can sign for its Solana address.
+	signerOverride?: TransactionPartialSigner;
 }): Promise<Signature> => {
 	progress?.(ProgressStepsSendSol.INITIALIZATION);
 
@@ -342,11 +347,13 @@ export const sendSol = async ({
 	const rpc = solanaHttpRpc(solNetwork);
 	const rpcSubscriptions = solanaWebSocketRpc(solNetwork);
 
-	const signer: TransactionPartialSigner = createSigner({
-		identity,
-		address: source,
-		network: solNetwork
-	});
+	const signer: TransactionPartialSigner =
+		signerOverride ??
+		createSigner({
+			identity,
+			address: source,
+			network: solNetwork
+		});
 
 	const transactionMessage = isTokenSpl(token)
 		? await createSplTokenTransactionMessage({
