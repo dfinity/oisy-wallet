@@ -1,6 +1,7 @@
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import PlugImportAccount from '$lib/components/plug-import/PlugImportAccount.svelte';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -113,6 +114,21 @@ describe('PlugImportAccount', () => {
 			symbol: 'USDT',
 			network: ETHEREUM_NETWORK,
 			address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+		} as unknown as typeof mockValidToken;
+
+		const nativeSol = {
+			...mockValidToken,
+			standard: { code: 'solana' },
+			symbol: 'SOL',
+			network: SOLANA_MAINNET_NETWORK
+		} as unknown as typeof mockValidToken;
+
+		const spl = {
+			...mockValidToken,
+			standard: { code: 'spl' },
+			symbol: 'USD1',
+			network: SOLANA_MAINNET_NETWORK,
+			address: 'USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB'
 		} as unknown as typeof mockValidToken;
 
 		const sendButton = (row: PlugBalance) => `${PLUG_IMPORT_SEND_BUTTON}-${plugRowKey(row)}`;
@@ -228,6 +244,47 @@ describe('PlugImportAccount', () => {
 			const onEthereum = balance({ token: erc20, balance: 2_000n });
 
 			expect(plugRowKey(onBase)).not.toBe(plugRowKey(onEthereum));
+		});
+
+		it('offers a send action for a native SOL balance', () => {
+			const row = balance({ token: nativeSol, balance: 10n ** 8n });
+
+			const { getByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [row]
+			});
+
+			expect(getByTestId(sendButton(row))).toBeInTheDocument();
+		});
+
+		it('offers a send action for an SPL token when the account holds SOL', () => {
+			const solRow = balance({ token: nativeSol, balance: 10n ** 8n });
+			const tokenRow = balance({ token: spl, balance: 5_000_000n });
+
+			const { getByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [solRow, tokenRow]
+			});
+
+			expect(getByTestId(sendButton(tokenRow))).toBeInTheDocument();
+		});
+
+		it('blocks an SPL token with no SOL for the fee, naming the coin needed', () => {
+			const solRow = balance({ token: nativeSol, balance: ZERO });
+			const tokenRow = balance({ token: spl, balance: 5_000_000n });
+
+			const { getByTestId, queryByTestId } = render(PlugImportAccount, {
+				onsend: vi.fn(),
+				account: mockAccount,
+				balances: [solRow, tokenRow]
+			});
+
+			expect(queryByTestId(sendButton(tokenRow))).toBeNull();
+			expect(getByTestId(disabledLabel(tokenRow))).toHaveTextContent(
+				replacePlaceholders(en.plug_import.text.send_needs_gas, { $symbol: 'SOL' })
+			);
 		});
 	});
 });
