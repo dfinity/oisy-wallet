@@ -1600,6 +1600,7 @@
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
 			"sign_psbt": "",

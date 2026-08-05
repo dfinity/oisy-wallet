@@ -1600,6 +1600,7 @@
 			"amount": "数量",
 			"hex_data": "HEXデータ",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "",

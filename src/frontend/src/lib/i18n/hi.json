@@ -1600,6 +1600,7 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "",

@@ -1600,6 +1600,7 @@
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",

@@ -1600,6 +1600,7 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "",

@@ -1600,6 +1600,7 @@
 			"amount": "",
 			"hex_data": "Dati HEX",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",
 			"sign_psbt": "",

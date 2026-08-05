@@ -9,6 +9,7 @@
 		getSignParamsMessageUtf8
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -17,9 +18,10 @@
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
+		invalidTypedData?: boolean;
 	}
 
-	let { request }: Props = $props();
+	let { request, invalidTypedData = false }: Props = $props();
 
 	let application = $derived(request.verifyContext.verified.origin);
 
@@ -102,6 +104,12 @@
 		}
 	});
 </script>
+
+{#if invalidTypedData}
+	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
+		{$i18n.wallet_connect.text.invalid_typed_data}
+	</MessageBox>
+{/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
 <p class="mb-4 font-normal">{application}</p>

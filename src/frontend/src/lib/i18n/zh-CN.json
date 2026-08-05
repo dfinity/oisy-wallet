@@ -1600,6 +1600,7 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "",
