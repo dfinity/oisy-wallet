@@ -15,16 +15,19 @@ describe('OverlappedLogos.svelte', () => {
 		expect(images).toHaveLength(mockIcons.length);
 	});
 
-	it('renders a skeleton when icons array is empty', () => {
+	it('renders nothing when icons array is empty', () => {
 		const { container } = render(OverlappedLogos, { props: { icons: [] } });
 
 		const images = container.querySelectorAll('img');
 
 		expect(images).toHaveLength(0);
 
+		// No loading skeleton: an empty list is "no icons", not "loading".
 		const skeleton = container.querySelector('.w-12');
 
-		expect(skeleton).toBeInTheDocument();
+		expect(skeleton).not.toBeInTheDocument();
+
+		expect(getIconWrappers(container)).toHaveLength(0);
 	});
 
 	it('applies z-index to each icon wrapper', () => {
