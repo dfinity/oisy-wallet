@@ -1,12 +1,17 @@
+import type { IcToken } from '$icp/types/ic-token';
 import LimitOrderIntentHero from '$lib/components/trading/limit-order/LimitOrderIntentHero.svelte';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('LimitOrderIntentHero', () => {
+	const baseToken: IcToken = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
+	const quoteToken: IcToken = { ...mockValidIcToken, symbol: 'ckUSDC', decimals: 6 };
+
 	const baseProps = {
 		baseAmount: '10',
-		baseSymbol: 'ICP',
+		baseToken,
 		quoteAmount: '25',
-		quoteSymbol: 'ckUSDC'
+		quoteToken
 	};
 
 	it('renders a sell intent with both legs', () => {
@@ -23,14 +28,14 @@ describe('LimitOrderIntentHero', () => {
 		expect(container).toHaveTextContent('Buy');
 	});
 
-	it('shows fiat lines only when provided', () => {
+	it('shows fiat lines only when an exchange rate is known', () => {
 		const { container, rerender } = render(LimitOrderIntentHero, {
 			props: { side: 'sell', ...baseProps }
 		});
 
 		expect(container).not.toHaveTextContent('$19.00');
 
-		rerender({ side: 'sell', ...baseProps, baseFiat: '$19.00', quoteFiat: '$18.90' });
+		rerender({ side: 'sell', ...baseProps, baseExchangeRate: 1.9, quoteExchangeRate: 0.756 });
 
 		expect(container).toHaveTextContent('$19.00');
 		expect(container).toHaveTextContent('$18.90');
