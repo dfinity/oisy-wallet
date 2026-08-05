@@ -69,6 +69,8 @@ DFX_NETWORK=ic ./scripts/build.icpunks.sh
 DFX_NETWORK=ic ./scripts/build.icrc7.sh
 # .. creates candid for icrc3
 DFX_NETWORK=ic ./scripts/build.icrc3.sh
+# .. fetches candid for the plug_helper from the canister itself
+DFX_NETWORK=ic ./scripts/build.plug_helper.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
