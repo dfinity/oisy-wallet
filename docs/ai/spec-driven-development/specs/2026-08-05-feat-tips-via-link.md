@@ -516,6 +516,49 @@ Grouped by where they bite. Each needs a defined behaviour before build.
 - **Residual risk, by design:** whoever holds the link first can claim it, and there
   is no kill switch before expiry.
 
+## PRODUCT.md
+
+A new **Tipping** section, placed after **Personal notes** (the other
+link-sharing feature) and before **WalletConnect**, written in the same
+behaviour-first voice. It must cover, in the same PR as the behaviour change:
+
+- What a tip is, that it is created per token and amount from the user menu, and
+  that the recipient needs only an Internet Identity — no wallet, no address.
+- Which tokens are eligible **in the shipped wave** (wave 1: ICP + ckBTC), stated
+  as a deliberate limit rather than an omission, so a future reader can tell
+  "not yet" from "forgotten".
+- The lifecycle and its vocabulary: **Active → Claimed**, or **Active → expired →
+  Refunded**, and that the refund is **automatic** with no user action.
+- Expiry options and the default, and that expiry is enforced by the backend.
+- The two fee legs — funding at creation, payout deducted from the tip at claim —
+  and therefore that the recipient receives slightly less than the sender sent.
+- **Custody, stated honestly.** Whatever the [escrow
+  decision](#escrow-model--where-the-money-sits-between-send-and-claim) turns out
+  to be, PRODUCT.md must describe where the funds actually sit between funding and
+  claim. This is the section most likely to be quoted back at OISY, so it must not
+  inherit the design's "non-custodial" phrasing unless that is literally true.
+- The negative guarantees: no revocation, no recipient binding (whoever holds the
+  link first can claim), no multi-claim, no view receipts.
+- A pointer to the Plausible event, as the notes sections do.
+
+## Testing
+
+Beyond the per-PR gates, the cases that must be covered because a bug in them
+loses money rather than breaking a screen:
+
+- **Backend `it` tests:** double-claim under concurrency, claim after expiry,
+  payout-transfer failure and its compensation, orphaned deposit (funds landed,
+  record lost) reconciliation, refund idempotency (a sweep that runs twice pays
+  once), and per-user cap plus rate-limit rejection paths.
+- **Frontend unit tests:** the create → fund → confirm sequence including
+  idempotent replay after an interrupted funding, link/QR construction, and the
+  claim path against each backend error.
+- **Component tests:** every recipient state — logged-out Tip Status, claim
+  review, success, and **unavailable** — plus the sender's share screen and
+  History statuses, in both themes and at 390px.
+- **Not** new Playwright specs: `e2e/` is maintenance-only
+  ([testing.md](../../frontend/testing.md#e2e-status-temporarily-restricted)).
+
 ## Implementation (atomic PRs)
 
 Small and atomic, per AGENTS.md commandments 2–3. Wave 1 is ICP + ckBTC only; the UI
