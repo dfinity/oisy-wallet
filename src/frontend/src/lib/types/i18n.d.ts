@@ -2263,8 +2263,10 @@ interface I18nPlug_import {
 		send_to_wallet: string;
 		send_confirm_title: string;
 		send_confirm_description: string;
+		send_confirm_description_gas: string;
 		send_success: string;
-		send_only_ic: string;
+		send_unsupported_chain: string;
+		send_needs_gas: string;
 		send_below_fee: string;
 		unavailable_hint: string;
 		not_shown_title: string;

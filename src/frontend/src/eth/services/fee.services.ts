@@ -12,6 +12,7 @@ import { infuraProviders, type InfuraProvider } from '$eth/providers/infura.prov
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc4626Token } from '$eth/types/erc4626';
 import type { GetFeeData } from '$eth/types/infura';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
@@ -58,7 +59,10 @@ export const getErc20FeeData = async ({
 	amount,
 	...rest
 }: GetFeeData & {
-	contract: Erc20Token;
+	// ERC-4626 vault shares transfer through the ERC-20 `transfer` on their own
+	// contract, so gas is estimated the same way; only `address` / `symbol` / `name`
+	// are read here, which both token shapes provide.
+	contract: Erc20Token | Erc4626Token;
 	amount: bigint;
 	sourceNetwork: EthereumNetwork;
 	targetNetwork: Network | undefined;

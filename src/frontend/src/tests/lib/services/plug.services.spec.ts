@@ -60,6 +60,15 @@ const erc20Token = asToken({
 	address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
 });
 
+// An ERC-4626 vault share. It is an ERC-20 too, so it must be read via balanceOf
+// on its own contract — not fall through to the native branch and report ETH.
+const erc4626Token = asToken({
+	standard: { code: 'erc4626' },
+	symbol: 'bAutopilot_USDC',
+	network: BASE_NETWORK,
+	address: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4'
+});
+
 const splToken = asToken({
 	standard: { code: 'spl' },
 	symbol: 'USD1',
@@ -159,6 +168,22 @@ describe('loadPlugBalances', () => {
 
 		it('does not use the native loader for an ERC20, despite the shared network', async () => {
 			await call([erc20Token]);
+
+			expect(infuraProviders).not.toHaveBeenCalled();
+		});
+
+		it('reads an ERC-4626 vault via balanceOf on its own contract', async () => {
+			const results = await call([erc4626Token]);
+
+			expect(erc20Balance).toHaveBeenCalledExactlyOnceWith({
+				contract: { address: '0x0d877dc7c8fa3ad980dfdb18b48ec9f8768359c4' },
+				address: mockAccount.evmAddress
+			});
+			expect(results[0].balance).toBe(6n);
+		});
+
+		it('never reports the native balance for an ERC-4626 vault', async () => {
+			await call([erc4626Token]);
 
 			expect(infuraProviders).not.toHaveBeenCalled();
 		});
