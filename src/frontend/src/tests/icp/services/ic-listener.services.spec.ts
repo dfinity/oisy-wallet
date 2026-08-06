@@ -1,4 +1,5 @@
 import { syncWallet } from '$icp/services/ic-listener.services';
+import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
@@ -39,6 +40,7 @@ describe('ic-listener', () => {
 
 			balancesStore.reset(tokenId);
 			icTransactionsStore.reset(tokenId);
+			icTransactionsStatusStore.reset();
 		});
 
 		afterEach(() => {
@@ -159,6 +161,64 @@ describe('ic-listener', () => {
 				const transactionsNull = get(icTransactionsStore);
 
 				expect(transactionsNull?.[tokenId]).toBeNull();
+			});
+
+			it('should not count a failure when the token has no Index canister', () => {
+				const mockPostMessageNoTransactions: PostMessageDataResponseWallet = {
+					wallet: {
+						balance: {
+							certified: true,
+							data: mockBalance
+						},
+						newTransactions: undefined
+					}
+				};
+
+				syncWallet({ data: mockPostMessageNoTransactions, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBeUndefined();
+			});
+		});
+
+		describe('with unavailable transactions', () => {
+			const mockPostMessageUnavailable: PostMessageDataResponseWallet = {
+				wallet: {
+					balance: {
+						certified: true,
+						data: mockBalance
+					},
+					newTransactions: JSON.stringify([], jsonReplacer),
+					transactionsUnavailable: true
+				}
+			};
+
+			it('should count each consecutive failure', () => {
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(1);
+
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(2);
+			});
+
+			it('should reset the count on a successful sync', () => {
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(2);
+
+				syncWallet({ data: mockPostMessage, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
+			});
+
+			it('should keep the transactions already loaded', () => {
+				syncWallet({ data: mockPostMessage, tokenId });
+
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+
+				expect(get(icTransactionsStore)?.[tokenId]).toEqual(mockCertifiedTransactions);
 			});
 		});
 	});
