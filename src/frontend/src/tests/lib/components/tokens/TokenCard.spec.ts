@@ -11,7 +11,7 @@ describe('TokenCard', () => {
 	const onNetworkText = (network: string) =>
 		replacePlaceholders(en.tokens.text.on_network, { $network: network }).trim();
 
-	it('should show the network for a token group header without listing member networks', () => {
+	it('should show the group name for a token group header without listing member networks', () => {
 		const data: CardData = {
 			...USDC_TOKEN,
 			networks: [USDC_TOKEN.network, ICP_NETWORK]
