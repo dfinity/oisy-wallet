@@ -37,7 +37,8 @@ import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
 	SWAP_DELTA_INTERVAL_MS,
-	SWAP_DELTA_TIMEOUT_MS
+	SWAP_DELTA_TIMEOUT_MS,
+	SWAP_SIDE
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
@@ -84,7 +85,8 @@ import {
 	type SwapNearIntentsEvmParams,
 	type SwapNearIntentsSolParams,
 	type SwapParams,
-	type SwapVeloraParams
+	type SwapVeloraDeltaParams,
+	type SwapVeloraMarketParams
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { consoleError } from '$lib/utils/console.utils';
@@ -106,12 +108,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-import {
-	constructSimpleSDK,
-	type DeltaAuction,
-	type DeltaPrice,
-	type OptimalRate
-} from '@velora-dex/sdk';
+import { OrderHelpers, constructSimpleSDK, type BuildDeltaOrderParams } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 const checkNeedsApproval = async ({
@@ -1110,14 +1107,13 @@ export const fetchVeloraDeltaSwap = async ({
 	swapAmount,
 	sourceNetwork,
 	slippageValue,
-	destinationNetwork,
 	userAddress,
 	gas,
 	isGasless,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
-}: SwapVeloraParams): Promise<void> => {
+}: SwapVeloraDeltaParams): Promise<void> => {
 	// Velora Delta settles by pulling the source token via allowance/permit, which a native coin
 	// (no contract address) can't satisfy without the unimplemented DepositNativeAndPreSign flow.
 	// Native sources are routed to the Market quote upstream (fetchVeloraSwapAmount); fail fast
@@ -1138,29 +1134,20 @@ export const fetchVeloraDeltaSwap = async ({
 
 	const deltaContract = await sdk.delta.getDeltaContract();
 
-	const slippageMinimum = calculateSlippage({
-		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
-		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
-		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
-		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
-		quoteAmount: BigInt(swapDetails.destAmount),
-		slippagePercentage: Number(slippageValue)
-	});
-
 	if (isNullish(deltaContract)) {
 		return;
 	}
 
-	let signableOrderData;
+	let builtOrder;
 
-	const deltaOrderBaseParams = {
-		deltaPrice: swapDetails as DeltaPrice,
+	// The quoted route carries the tokens, the amounts and the destination chain, so the order is
+	// built server-side from it; slippage is expressed in basis points, which must be an integer —
+	// rounding guards against IEEE-754 noise in the percent conversion (0.29 * 100 === 28.999…).
+	const deltaOrderBaseParams: BuildDeltaOrderParams = {
+		route: swapDetails.route,
+		side: SWAP_SIDE,
+		slippage: Math.round(Number(slippageValue) * 100),
 		owner: userAddress,
-		srcToken: sourceToken.address,
-		destToken: destinationToken.address,
-		srcAmount: parsedSwapAmount.toString(),
-		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME
 	};
 
@@ -1177,7 +1164,7 @@ export const fetchVeloraDeltaSwap = async ({
 
 		progress(ProgressStepsSwap.SWAP);
 
-		signableOrderData = await sdk.delta.buildDeltaOrder({
+		builtOrder = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
 			nonce,
@@ -1201,10 +1188,10 @@ export const fetchVeloraDeltaSwap = async ({
 
 		progress(ProgressStepsSwap.SWAP);
 
-		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+		builtOrder = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
 	}
 
-	const hash = getSignParamsEIP712(signableOrderData);
+	const hash = getSignParamsEIP712(builtOrder.toSign);
 
 	const signature = await signPrehash({
 		hash,
@@ -1214,7 +1201,7 @@ export const fetchVeloraDeltaSwap = async ({
 	const compactSignature = getCompactSignature(signature);
 
 	const deltaAuction = await sdk.delta.postDeltaOrder({
-		order: signableOrderData.data,
+		order: builtOrder.toSign.value,
 		signature: compactSignature
 	});
 
@@ -1241,34 +1228,14 @@ const checkDeltaOrderStatus = async ({
 	while (Date.now() < deadline) {
 		const auction = await sdk.delta.getDeltaOrderById(auctionId);
 
-		if (isExecutedDeltaAuction({ auction })) {
+		// `COMPLETED` means the order settled on every chain, so cross-chain orders need no
+		// separate bridge check — they stay `BRIDGING` until the destination leg lands.
+		if (OrderHelpers.checks.isCompletedAuction(auction)) {
 			return;
 		}
 
 		await new Promise((r) => setTimeout(r, intervalMs));
 	}
-};
-
-const isExecutedDeltaAuction = ({
-	auction,
-	waitForCrosschain = true
-}: {
-	auction: Omit<DeltaAuction, 'signature'>;
-	waitForCrosschain?: boolean;
-}): boolean => {
-	if (auction.status !== 'EXECUTED') {
-		return false;
-	}
-
-	if (
-		waitForCrosschain &&
-		'bridge' in auction.order &&
-		auction.order.bridge.destinationChainId !== 0
-	) {
-		return auction.bridgeStatus === 'filled';
-	}
-
-	return true;
 };
 
 export const fetchVeloraMarketSwap = async ({
@@ -1284,7 +1251,7 @@ export const fetchVeloraMarketSwap = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
-}: SwapVeloraParams): Promise<void> => {
+}: SwapVeloraMarketParams): Promise<void> => {
 	const parsedSwapAmount = parseToken({
 		value: `${swapAmount}`,
 		unitName: sourceToken.decimals
@@ -1335,8 +1302,9 @@ export const fetchVeloraMarketSwap = async ({
 		srcToken: geSwapEthTokenAddress(sourceToken),
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcAmount: swapDetails.srcAmount,
-		slippage: Number(slippageValue) * 100,
-		priceRoute: swapDetails as OptimalRate,
+		// Basis points must be an integer — see the rounding note in fetchVeloraDeltaSwap.
+		slippage: Math.round(Number(slippageValue) * 100),
+		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME
 	});
