@@ -15,6 +15,7 @@ import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
@@ -38,7 +39,10 @@ import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
+import {
+	NEAR_INTENTS_EXTERNAL_REF_KEYS,
+	type NearIntentsQuoteResponse
+} from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
@@ -123,8 +127,11 @@ vi.mock('$lib/services/onesec-swap.services', () => ({
 
 vi.mock('$lib/services/near-intents.services', () => ({
 	fetchNearIntentsSwapQuote: vi.fn(),
-	submitNearIntentsDepositTx: vi.fn(),
-	pollNearIntentsStatus: vi.fn()
+	submitNearIntentsDepositTx: vi.fn()
+}));
+
+vi.mock('$lib/services/active-user-transactions.services', () => ({
+	createActiveUserTransaction: vi.fn()
 }));
 
 vi.mock('$eth/services/send.services', () => ({
@@ -1963,7 +1970,7 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
 		it('should not call setCustomToken when ERC20 destination token is toggleable and already enabled', async () => {
@@ -2072,7 +2079,7 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(mockSolSignature());
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
 		it('should not call setCustomToken when SPL destination token is toggleable and already enabled', async () => {
@@ -2150,7 +2157,7 @@ describe('swap.services', () => {
 
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
 		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {
@@ -2180,9 +2187,15 @@ describe('swap.services', () => {
 				depositAddress,
 				txHash: '0xTxHash123'
 			});
-			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress
-			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					data: { NearIntents: expect.objectContaining({ amount: 1000000n }) },
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+					])
+				})
+			);
 		});
 
 		it('should report progress steps in correct order', async () => {
@@ -2235,10 +2248,14 @@ describe('swap.services', () => {
 				txHash: '0xTxHash123',
 				depositMemo: 'stellar-memo'
 			});
-			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress,
-				depositMemo: 'stellar-memo'
-			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress },
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: 'stellar-memo' }
+					])
+				})
+			);
 		});
 	});
 
@@ -2254,7 +2271,7 @@ describe('swap.services', () => {
 
 			vi.mocked(sendSol).mockResolvedValue(solTxSignature);
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
-			vi.mocked(nearIntentsServices.pollNearIntentsStatus).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
 		});
 
 		it('should execute the full Solana swap flow', async () => {
@@ -2280,9 +2297,15 @@ describe('swap.services', () => {
 				depositAddress,
 				txHash: solTxSignature
 			});
-			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress
-			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					data: expect.objectContaining({ NearIntents: expect.anything() }),
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+					])
+				})
+			);
 		});
 
 		it('should report progress steps in correct order', async () => {
@@ -2323,10 +2346,14 @@ describe('swap.services', () => {
 				txHash: solTxSignature,
 				depositMemo: 'sol-memo-123'
 			});
-			expect(nearIntentsServices.pollNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress,
-				depositMemo: 'sol-memo-123'
-			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress },
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: 'sol-memo-123' }
+					])
+				})
+			);
 		});
 	});
 

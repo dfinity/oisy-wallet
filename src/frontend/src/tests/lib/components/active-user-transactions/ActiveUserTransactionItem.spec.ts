@@ -1,9 +1,27 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
 import en from '$lib/i18n/en.json';
-import { mockLiquidiumActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import {
+	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction
+} from '$tests/mocks/active-user-transactions.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
 describe('ActiveUserTransactionItem', () => {
+	it('renders NEAR Intents rows as a swap with amount, tokens, networks and provider', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockNearIntentsActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 USDC → USDC`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Ethereum → Solana');
+		expect(container).toHaveTextContent('NEAR Intents');
+	});
+
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {
 		render(ActiveUserTransactionItem, {
 			props: {
