@@ -158,7 +158,9 @@ The two are treated independently, because only one of them is essential. If the
 
 The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
 
-This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token.
+The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
 ---
 
