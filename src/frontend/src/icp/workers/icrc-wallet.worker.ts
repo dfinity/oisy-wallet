@@ -20,6 +20,7 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
+import { simulatedCanisterFailure } from '$lib/utils/simulated-canister-failures.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -38,6 +39,13 @@ const getTransactions = ({
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<GetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
+
+	// QA harness - DO NOT MERGE.
+	const simulated = simulatedCanisterFailure({ canisterId: data.indexCanisterId, kind: 'index' });
+
+	if (nonNullish(simulated)) {
+		return Promise.reject(simulated);
+	}
 
 	return getTransactionsApi({
 		identity,
@@ -78,6 +86,13 @@ const getBalance = ({
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<GetBalance> => {
 	assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
+
+	// QA harness - DO NOT MERGE.
+	const simulated = simulatedCanisterFailure({ canisterId: data.ledgerCanisterId, kind: 'ledger' });
+
+	if (nonNullish(simulated)) {
+		return Promise.reject(simulated);
+	}
 
 	return balance({
 		identity,
