@@ -25,10 +25,18 @@
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
+		hiddenInfoQualifiers,
+		saveHideInfoQualifiers,
+		type HideInfoKey
+	} from '$lib/utils/info.utils';
+	import {
 		filterUndismissedNotificationQualifiers,
 		isSimpleNotificationDismissed
 	} from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+
+	const UNAVAILABLE_INDEX_CANISTER_HIDE_KEY: HideInfoKey =
+		'oisy_ic_hide_transaction_unavailable_canister';
 
 	// The backend call is an update call that takes some time to complete.
 	// If the user profile is reactively refreshed before the call completes, the store would
@@ -79,9 +87,45 @@
 			.map(getTokenDisplaySymbol)
 	);
 
-	let tokensWithUnavailableCanister = $derived(
+	let failingIndexCanisters = $derived(
 		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
 	);
+
+	// Which tokens the user has already acknowledged. Per token, not one flag for the whole box:
+	// dismissing it for one token must not silence a different token failing later.
+	let dismissedUnavailableCanister = $state<string[]>(
+		hiddenInfoQualifiers(UNAVAILABLE_INDEX_CANISTER_HIDE_KEY)
+	);
+
+	const rememberDismissed = (qualifiers: string[]) => {
+		dismissedUnavailableCanister = qualifiers;
+
+		saveHideInfoQualifiers({ key: UNAVAILABLE_INDEX_CANISTER_HIDE_KEY, qualifiers });
+	};
+
+	// A dismissal covers one outage, not the session: once a token's Index canister answers again it
+	// is forgotten, so if it fails again later the user is told about it again.
+	$effect(() => {
+		const stillFailing = dismissedUnavailableCanister.filter((symbol) =>
+			failingIndexCanisters.includes(symbol)
+		);
+
+		if (stillFailing.length !== dismissedUnavailableCanister.length) {
+			rememberDismissed(stillFailing);
+		}
+	});
+
+	let tokensWithUnavailableCanister = $derived(
+		failingIndexCanisters.filter((symbol) => !dismissedUnavailableCanister.includes(symbol))
+	);
+
+	const dismissUnavailableCanisterWarning = () =>
+		rememberDismissed([
+			...dismissedUnavailableCanister,
+			...tokensWithUnavailableCanister.filter(
+				(symbol) => !dismissedUnavailableCanister.includes(symbol)
+			)
+		]);
 
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
@@ -148,7 +192,7 @@
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
-				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+				<MessageBox level="warning" onDismiss={dismissUnavailableCanisterWarning}>
 					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 					})}
