@@ -28,6 +28,10 @@ describe('OverlappedLogos.svelte', () => {
 		expect(skeleton).not.toBeInTheDocument();
 
 		expect(getIconWrappers(container)).toHaveLength(0);
+
+		// No element node renders at all (only Svelte's {#if} anchor comment), so a caller's
+		// styleClass adds no stray spacing when there is nothing to show.
+		expect(container.querySelector('*')).toBeNull();
 	});
 
 	it('applies z-index to each icon wrapper', () => {
