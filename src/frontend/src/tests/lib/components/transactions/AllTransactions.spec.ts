@@ -16,6 +16,8 @@ import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as infoUtils from '$lib/utils/info.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -25,7 +27,7 @@ import {
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('AllTransactions', () => {
@@ -50,6 +52,58 @@ describe('AllTransactions', () => {
 		return tokenId;
 	};
 
+	// `parseTokenId` mints a fresh symbol per call, so the ids have to be read back from the store
+	// rather than recreated - a recreated one never matches the token the component sees.
+	const setUpTwoTokensWithUnavailableIndexCanister = (): { first: TokenId; second: TokenId } => {
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...customIcrcToken,
+					id: parseTokenId('UTA'),
+					symbol: 'UTA',
+					ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
+					indexCanisterId: 'n5wcd-faaaa-aaaar-qaaea-cai'
+				},
+				certified: true
+			},
+			{
+				data: {
+					...customIcrcToken,
+					id: parseTokenId('UTB'),
+					symbol: 'UTB',
+					ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai',
+					indexCanisterId: 's3zol-vqaaa-aaaar-qacpa-cai'
+				},
+				certified: true
+			}
+		]);
+
+		const stored = get(icrcCustomTokensStore);
+
+		const first = stored?.find(({ data: { symbol } }) => symbol === 'UTA')?.data.id;
+		const second = stored?.find(({ data: { symbol } }) => symbol === 'UTB')?.data.id;
+
+		assertNonNullish(first);
+		assertNonNullish(second);
+
+		return { first, second };
+	};
+
+	const unavailableText = (symbols: string[]) =>
+		replacePlaceholders(en.activity.warning.unavailable_index_canister, {
+			$token_list: symbols.map((symbol) => `$${symbol}`).join(', ')
+		});
+
+	const dismissWarning = async (container: HTMLElement) => {
+		const warningBox = container.querySelector('.bg-warning-light');
+		assertNonNullish(warningBox);
+
+		const closeButton = warningBox.querySelector('button');
+		assertNonNullish(closeButton);
+
+		await fireEvent.click(closeButton);
+	};
+
 	const failTransactionsSync = ({ tokenId, times }: { tokenId: TokenId; times: number }) =>
 		Array.from({ length: times }).forEach(() => icTransactionsStatusStore.fail(tokenId));
 
@@ -63,6 +117,7 @@ describe('AllTransactions', () => {
 
 	beforeEach(() => {
 		icTransactionsStatusStore.reset();
+		icrcCustomTokensStore.resetAll();
 	});
 
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
@@ -145,32 +200,69 @@ describe('AllTransactions', () => {
 		expect(queryByText(exceptedText)).not.toBeInTheDocument();
 	});
 
-	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
-		const tokenId = setUpTokenWithUnavailableIndexCanister();
+	it('remembers the dismissal per token, not for the whole box', async () => {
+		const { first, second } = setUpTwoTokensWithUnavailableIndexCanister();
 
-		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
-
-		const spySessionStorage = vi.spyOn(Storage.prototype, 'setItem');
 		const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();
+		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
 
-		const { container } = render(AllTransactions);
+		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
 
-		const warningBox = container.querySelector('.bg-warning-light');
-		assertNonNullish(warningBox);
+		const { container, queryByText, unmount } = render(AllTransactions);
 
-		const closeButton = warningBox.querySelector('button');
-		assertNonNullish(closeButton);
+		expect(queryByText(unavailableText(['UTA']))).toBeInTheDocument();
 
-		await fireEvent.click(closeButton);
+		await dismissWarning(container);
 
-		expect(spySessionStorage).toHaveBeenCalledWith(
-			'oisy_ic_hide_transaction_unavailable_canister',
-			'true'
-		);
+		expect(spySave).toHaveBeenCalledWith({
+			key: 'oisy_ic_hide_transaction_unavailable_canister',
+			qualifiers: ['UTA']
+		});
+		// The per-token dismissal is local to the session, never persisted to the backend.
 		expect(spyDismiss).not.toHaveBeenCalled();
 
-		spySessionStorage.mockRestore();
+		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
+
+		// A different token failing must raise the box again - naming only that token.
+		failTransactionsSync({ tokenId: second, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		await waitFor(() => expect(queryByText(unavailableText(['UTB']))).toBeInTheDocument());
+
+		unmount();
 		spyDismiss.mockRestore();
+		spySave.mockRestore();
+	});
+
+	it('forgets the dismissal of a token whose Index canister recovers', async () => {
+		const { first } = setUpTwoTokensWithUnavailableIndexCanister();
+
+		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
+
+		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		const { container, queryByText, unmount } = render(AllTransactions);
+
+		await dismissWarning(container);
+
+		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
+
+		// Recovery drops it from the dismissed list...
+		icTransactionsStatusStore.succeed(first);
+
+		await waitFor(() =>
+			expect(spySave).toHaveBeenCalledWith({
+				key: 'oisy_ic_hide_transaction_unavailable_canister',
+				qualifiers: []
+			})
+		);
+
+		// ...so the next outage of the same token is surfaced again.
+		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).toBeInTheDocument());
+
+		unmount();
+		spySave.mockRestore();
 	});
 
 	it('renders the info box list', () => {
