@@ -33,6 +33,14 @@ export const replacePlaceholders = (text: string, substitutions: I18nSubstitutio
 	return result;
 };
 
+/**
+ * Joins items the way the given language writes a list — "A, B and C" in English, "A、B、C" in
+ * Japanese, and so on. Left to `Intl.ListFormat` rather than hardcoding a separator, because the
+ * conjunction, its position and even the comma differ per locale.
+ */
+export const formatList = ({ items, language }: { items: string[]; language: Languages }): string =>
+	new Intl.ListFormat(language, { type: 'conjunction', style: 'long' }).format(items);
+
 export const replaceOisyPlaceholders = (text: string): string =>
 	replacePlaceholders(text, {
 		$oisy_short: OISY_SHORT,
