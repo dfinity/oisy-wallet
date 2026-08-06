@@ -29,7 +29,11 @@ interface IcWalletStore<T> {
 export type GetBalanceAndTransactions<
 	TWithId extends
 		IcrcIndexDid.TransactionWithId | IcpIndexDid.TransactionWithId | Dip20TransactionWithId
-> = GetTransactions & { transactions: TWithId[] };
+> = GetTransactions & {
+	transactions: TWithId[];
+	// Set when the balance was fetched but the transactions were not - see PostMessageWalletDataSchema.
+	transactionsUnavailable?: boolean;
+};
 
 export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcIndexDid.Transaction | IcpIndexDid.Transaction | Event,
@@ -96,7 +100,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	};
 
 	private syncTransactions = ({
-		response: { transactions: fetchedTransactions, balance, ...rest },
+		response: { transactions: fetchedTransactions, balance, transactionsUnavailable, ...rest },
 		certified,
 		jobData
 	}: {
@@ -119,12 +123,15 @@ export class IcWalletBalanceAndTransactionsScheduler<
 			(!this.store.balance.certified && certified);
 
 		if (newExtendedTransactions.length === 0 && !newBalance) {
-			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
-			if (!this.initialized) {
+			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero.
+			// An unavailable Index canister is posted on every job too: the UI counts consecutive
+			// failures, so it must hear about each one even when nothing else changed.
+			if (!this.initialized || transactionsUnavailable === true) {
 				this.postMessageWalletBalanceAndTransactions({
 					transactions: [],
 					balance,
 					certified,
+					transactionsUnavailable,
 					...rest
 				});
 
@@ -159,6 +166,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 			transactions: newUiTransactions,
 			balance,
 			certified,
+			transactionsUnavailable,
 			...rest
 		});
 
@@ -170,9 +178,11 @@ export class IcWalletBalanceAndTransactionsScheduler<
 		transactions: newTransactions,
 		balance: data,
 		certified,
+		transactionsUnavailable,
 		...rest
 	}: GetTransactions & {
 		transactions: IcTransactionUi[];
+		transactionsUnavailable?: boolean;
 	} & {
 		certified: boolean;
 	}) {
@@ -187,6 +197,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 						certified
 					},
 					...rest,
+					...(transactionsUnavailable === true && { transactionsUnavailable }),
 					newTransactions: JSON.stringify(
 						Object.entries(certifiedTransactions).map(([_id, transaction]) => transaction),
 						jsonReplacer
