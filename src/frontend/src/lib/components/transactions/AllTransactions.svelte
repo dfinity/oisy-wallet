@@ -24,15 +24,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { resetHideInfo, type HideInfoKey } from '$lib/utils/info.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
 		isSimpleNotificationDismissed
 	} from '$lib/utils/notification.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-
-	const UNAVAILABLE_INDEX_CANISTER_HIDE_KEY: HideInfoKey =
-		'oisy_ic_hide_transaction_unavailable_canister';
 
 	// The backend call is an update call that takes some time to complete.
 	// If the user profile is reactively refreshed before the call completes, the store would
@@ -86,15 +82,6 @@
 	let tokensWithUnavailableCanister = $derived(
 		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
 	);
-
-	// Dismissing the warning silences the outage the user is looking at, not every future one: the
-	// box now clears itself on recovery, so once it does, forget the dismissal and let the next
-	// outage - possibly of a different token - raise it again.
-	$effect(() => {
-		if (tokensWithUnavailableCanister.length === 0) {
-			resetHideInfo(UNAVAILABLE_INDEX_CANISTER_HIDE_KEY);
-		}
-	});
 
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
@@ -161,7 +148,7 @@
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
-				<MessageBox closableKey={UNAVAILABLE_INDEX_CANISTER_HIDE_KEY} level="warning">
+				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
 					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
 						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
 					})}

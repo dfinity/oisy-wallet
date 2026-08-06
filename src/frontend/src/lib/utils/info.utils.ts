@@ -16,15 +16,6 @@ export const saveHideInfo = (key: HideInfoKey) => {
 	}
 };
 
-export const resetHideInfo = (key: HideInfoKey) => {
-	try {
-		sessionStorage.removeItem(key);
-	} catch (err: unknown) {
-		// We use the session storage for the operational part of the app but, not crucial
-		consoleError(err);
-	}
-};
-
 export const shouldHideInfo = (key: HideInfoKey): boolean => {
 	try {
 		const store: Storage = browser ? sessionStorage : ({ [key]: 'false' } as unknown as Storage);
