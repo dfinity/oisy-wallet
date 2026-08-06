@@ -6,7 +6,9 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import { qaLog } from '$lib/utils/simulated-canister-failures.utils';
 import { isNullish, jsonReviver } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const syncWallet = ({
 	data,
@@ -40,6 +42,12 @@ export const syncWallet = ({
 
 	if (transactionsUnavailable === true) {
 		icTransactionsStatusStore.fail(tokenId);
+
+		// QA harness - DO NOT MERGE.
+		qaLog(
+			`${tokenId.description}: transactions unavailable, consecutive failures now`,
+			get(icTransactionsStatusStore)[tokenId]
+		);
 	} else {
 		icTransactionsStatusStore.succeed(tokenId);
 	}

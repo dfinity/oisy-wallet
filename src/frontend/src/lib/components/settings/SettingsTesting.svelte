@@ -7,6 +7,7 @@
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
 		getSimulatedCanisterFailures,
+		qaLog,
 		resolveSimulatedCanisterIds,
 		setSimulatedCanisterFailures,
 		type SimulatedCanisterKind
@@ -73,6 +74,12 @@
 				symbols: ledgerSymbols,
 				tokens: $enabledIcrcTokens,
 				kind: 'ledger'
+			});
+
+			qaLog('resolved from the symbols typed:', {
+				index,
+				ledger,
+				enabledIcrcTokens: $enabledIcrcTokens.length
 			});
 
 			await setSimulatedCanisterFailures({

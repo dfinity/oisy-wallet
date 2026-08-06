@@ -34,6 +34,25 @@ const idbStore = (): UseStore => (store ??= createStore('oisy-testing', 'testing
 /** Never active on the beta or production builds, whatever is in IndexedDB. */
 export const simulatedCanisterFailuresEnabled = LOCAL || STAGING;
 
+// The wallet workers log to the same console as the page, so every line says which side it came
+// from: the whole point of the harness is that the two sides agree on what is being simulated.
+const QA_CONTEXT = typeof window === 'undefined' ? 'worker' : 'window';
+
+// Silent under vitest: the suite fails any test that writes to the console, and a harness must not
+// force every test that touches the wallet to opt out of that guard.
+const QA_LOGGING_ENABLED = simulatedCanisterFailuresEnabled && !import.meta.env.VITEST;
+
+export const qaLog = (...args: unknown[]): void => {
+	if (!QA_LOGGING_ENABLED) {
+		return;
+	}
+
+	// `console.log` rather than the `console.debug` used elsewhere: Chrome hides debug output unless
+	// the Verbose level is enabled, and these lines are the point of the harness.
+	// eslint-disable-next-line no-console
+	console.log(`[QA harness:${QA_CONTEXT}]`, ...args);
+};
+
 export const getSimulatedCanisterFailures = async (): Promise<SimulatedCanisterFailures> => {
 	if (!simulatedCanisterFailuresEnabled) {
 		return NO_FAILURES;
@@ -43,9 +62,11 @@ export const getSimulatedCanisterFailures = async (): Promise<SimulatedCanisterF
 		const failures = await idbGet<SimulatedCanisterFailures>(IDB_KEY, idbStore());
 
 		return failures ?? NO_FAILURES;
-	} catch (_err: unknown) {
+	} catch (err: unknown) {
 		// A harness must never become the reason a real call fails. A browser profile that denies
 		// storage access degrades to "nothing simulated".
+		qaLog('failed to read the simulated failures from IndexedDB', err);
+
 		return NO_FAILURES;
 	}
 };
@@ -58,16 +79,27 @@ export const setSimulatedCanisterFailures = async (
 	}
 
 	await idbSet(IDB_KEY, failures, idbStore());
+
+	qaLog('stored in IndexedDB:', failures);
 };
 
 // The snapshot the synchronous check reads. Kept up to date in the background - see below.
 let cachedFailures: SimulatedCanisterFailures = NO_FAILURES;
 
 const refreshCachedFailures = () => {
-	void getSimulatedCanisterFailures().then((failures) => (cachedFailures = failures));
+	void getSimulatedCanisterFailures().then((failures) => {
+		// Only on a change, otherwise this would log on every job of every token.
+		if (JSON.stringify(failures) !== JSON.stringify(cachedFailures)) {
+			qaLog('snapshot changed:', failures);
+		}
+
+		cachedFailures = failures;
+	});
 };
 
 if (simulatedCanisterFailuresEnabled) {
+	qaLog('enabled - reading the initial snapshot');
+
 	refreshCachedFailures();
 }
 
@@ -98,9 +130,21 @@ export const simulatedCanisterFailure = ({
 
 	const canisterIds = kind === 'index' ? indexCanisterIds : ledgerCanisterIds;
 
-	return canisterIds.includes(canisterId)
-		? new Error(`[QA harness] Simulated failure: ${kind} canister ${canisterId} is not responding`)
-		: undefined;
+	if (canisterIds.includes(canisterId)) {
+		qaLog(`injecting a failure for ${kind} canister ${canisterId}`);
+
+		return new Error(
+			`[QA harness] Simulated failure: ${kind} canister ${canisterId} is not responding`
+		);
+	}
+
+	// Logged only while something is simulated, and it prints both sides of the comparison: a
+	// canister ID that never shows up here is one the worker is not actually asking about.
+	if (canisterIds.length > 0) {
+		qaLog(`letting ${kind} canister ${canisterId} through - simulated are`, canisterIds);
+	}
+
+	return undefined;
 };
 
 /**

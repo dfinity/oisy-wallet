@@ -20,7 +20,7 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
-import { simulatedCanisterFailure } from '$lib/utils/simulated-canister-failures.utils';
+import { qaLog, simulatedCanisterFailure } from '$lib/utils/simulated-canister-failures.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -193,6 +193,12 @@ export const initIcrcWalletScheduler = (
 	data: PostMessageDataRequestIcrc | undefined
 ): IcWalletScheduler<PostMessageDataRequestIcrc> => {
 	const { success: withIndexCanister } = PostMessageDataRequestIcrcStrictSchema.safeParse(data);
+
+	// QA harness - DO NOT MERGE. A token running the balance-only scheduler never asks the Index
+	// canister anything, so a simulated Index failure could never fire for it.
+	qaLog(
+		`scheduler for ledger ${data?.ledgerCanisterId}: ${withIndexCanister ? 'balance + transactions' : 'balance only'}, index ${data?.indexCanisterId ?? 'none'}`
+	);
 
 	return withIndexCanister
 		? initIcrcWalletBalanceAndTransactionsScheduler()
