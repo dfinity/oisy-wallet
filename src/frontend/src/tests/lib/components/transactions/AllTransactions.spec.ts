@@ -15,7 +15,7 @@ import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenId } from '$lib/types/token';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -95,9 +95,10 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.no_index_canister, {
-			$token_list: '$UWT'
-		});
+		const exceptedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+			{ $token_list: 'UWT' }
+		);
 
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
@@ -109,9 +110,10 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const exceptedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: 'UTC' }
+		);
 
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
@@ -123,9 +125,10 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const exceptedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: 'UTC' }
+		);
 
 		expect(queryByText(exceptedText)).not.toBeInTheDocument();
 	});
@@ -138,9 +141,10 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const exceptedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: 'UTC' }
+		);
 
 		expect(queryByText(exceptedText)).not.toBeInTheDocument();
 	});
@@ -292,9 +296,10 @@ describe('AllTransactions', () => {
 
 			const { queryByText } = render(AllTransactions);
 
-			const expectedText = replacePlaceholders(en.activity.warning.no_index_canister, {
-				$token_list: '$NIC'
-			});
+			const expectedText = replacePlaceholders(
+				replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+				{ $token_list: 'NIC' }
+			);
 
 			expect(queryByText(expectedText)).not.toBeInTheDocument();
 		});
