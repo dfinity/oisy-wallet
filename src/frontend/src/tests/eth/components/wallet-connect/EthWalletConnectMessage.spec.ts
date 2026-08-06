@@ -351,4 +351,26 @@ describe('EthWalletConnectMessage', () => {
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
 	});
+
+	it('should not render the invalid typed-data warning by default', () => {
+		const { queryByTestId } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(queryByTestId('wallet-connect-invalid-typed-data-warning')).not.toBeInTheDocument();
+	});
+
+	it('should render the invalid typed-data warning when invalidTypedData is true', () => {
+		const { getByTestId, getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request,
+				invalidTypedData: true
+			}
+		});
+
+		expect(getByTestId('wallet-connect-invalid-typed-data-warning')).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.invalid_typed_data)).toBeInTheDocument();
+	});
 });

@@ -1600,6 +1600,7 @@
 			"amount": "",
 			"hex_data": "Dados HEX",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"sign_psbt": "",
