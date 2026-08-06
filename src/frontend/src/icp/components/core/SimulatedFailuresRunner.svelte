@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
-	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import { onLoadTransactionsError } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 	import {
 		isSimulatedFailure,
@@ -28,7 +28,11 @@
 	const tick = () => {
 		const failures = $simulatedFailuresStore;
 
-		$enabledIcrcTokens.forEach(({ id: tokenId, symbol }) => {
+		// The same list the warning reads. `enabledIcrcTokens` looks like the natural choice but
+		// concatenates the default and custom lists without excluding default ledgers from the custom
+		// half, so a toggled default token appears twice, under two different token ids - and the
+		// harness would then count a failure the warning never looks at.
+		$enabledFungibleNetworkTokens.forEach(({ id: tokenId, symbol }) => {
 			if (isSimulatedFailure({ tokenId, kind: 'ledger', failures })) {
 				qaLog(`${symbol}: simulating a Ledger canister failure`);
 
