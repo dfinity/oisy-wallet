@@ -1,3 +1,4 @@
+import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
@@ -218,17 +219,26 @@ export const signMessage = ({
 				const sign = (params: string[]): Promise<string> => {
 					const { identity } = get(authStore);
 
-					try {
-						const hash = getSignParamsMessageTypedDataV4Hash(params);
-						return signPrehash({
-							hash,
+					const signTypedDataHash = (): Promise<string> =>
+						signPrehash({
+							hash: getSignParamsMessageTypedDataV4Hash(params),
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
+
+					// `eth_signTypedData_v4` must be valid EIP-712 typed data: it always goes
+					// through the typed-data path and rejects on any parse/validate/hash
+					// failure, never downgrading to a raw message signature.
+					if (request.params.request.method === SESSION_REQUEST_ETH_SIGN_V4) {
+						return signTypedDataHash();
+					}
+
+					// personal_sign / eth_sign / legacy eth_signTypedData: attempt the
+					// typed-data hash, falling back to signing the raw message when the
+					// payload is not typed data.
+					try {
+						return signTypedDataHash();
 					} catch (_err: unknown) {
-						// If the above failed, it's because JSON.parse throw an exception.
-						// We are assuming that it did so because it tried to parse a string that does not represent an object.
-						// Therefore, we continue with a message as hex string.
 						const message = getSignParamsMessageHex(params);
 						return signMessageApi({
 							message,

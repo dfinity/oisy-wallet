@@ -1600,6 +1600,7 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"unreviewed_instructions": "",
+			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",
