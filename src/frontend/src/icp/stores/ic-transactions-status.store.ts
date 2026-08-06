@@ -1,5 +1,4 @@
 import type { TokenId } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type IcTransactionsStatusStoreData = Record<TokenId, number>;
@@ -35,15 +34,14 @@ const initIcTransactionsStatusStore = (): IcTransactionsStatusStore => {
 				[tokenId]: (state[tokenId] ?? 0) + 1
 			})),
 
+		// Records the successful check, rather than merely clearing a count. "Never checked" and
+		// "checked and fine" then read differently - no entry vs. an entry of zero - which is what
+		// lets a consumer tell a token that has recovered from one the wallet has yet to reach.
 		succeed: (tokenId: TokenId) =>
-			update((state) =>
-				nonNullish(state[tokenId])
-					? {
-							...state,
-							[tokenId]: 0
-						}
-					: state
-			),
+			update((state) => ({
+				...state,
+				[tokenId]: 0
+			})),
 
 		reset: () => set({} as IcTransactionsStatusStoreData)
 	};

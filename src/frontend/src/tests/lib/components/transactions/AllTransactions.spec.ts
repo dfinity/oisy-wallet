@@ -270,6 +270,29 @@ describe('AllTransactions', () => {
 		spySave.mockRestore();
 	});
 
+	it('keeps the dismissal across a reload, before anything has been checked', async () => {
+		const { first } = setUpTwoTokensWithUnavailableIndexCanister();
+
+		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
+		// A reload restores the dismissal from the session, while the failure counters - which live in
+		// memory only - start empty. "Nothing is failing" must not be read as "everything recovered".
+		vi.spyOn(infoUtils, 'hiddenInfoQualifiers').mockReturnValue(['UTA']);
+
+		const { queryByText, unmount } = render(AllTransactions);
+
+		expect(spySave).not.toHaveBeenCalled();
+
+		// The token is still broken, and the warning must stay dismissed rather than come back.
+		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
+
+		expect(spySave).not.toHaveBeenCalled();
+
+		unmount();
+		vi.restoreAllMocks();
+	});
+
 	it('renders the info box list', () => {
 		const { getByText } = render(AllTransactions);
 

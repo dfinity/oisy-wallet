@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
-	import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
+	import {
+		tokensWithRecoveredIndexCanister,
+		tokensWithUnavailableIndexCanister
+	} from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -106,13 +109,21 @@
 
 	// A dismissal covers one outage, not the session: once a token's Index canister answers again it
 	// is forgotten, so if it fails again later the user is told about it again.
+	//
+	// Keyed on an observed successful check, not on the token being absent from the failing list:
+	// right after a page load nothing has been checked yet, and treating that as a recovery would
+	// throw away every dismissal on every reload.
+	let recoveredIndexCanisters = $derived(
+		$tokensWithRecoveredIndexCanister.map(getTokenDisplaySymbol)
+	);
+
 	$effect(() => {
-		const stillFailing = dismissedUnavailableCanister.filter((symbol) =>
-			failingIndexCanisters.includes(symbol)
+		const stillDismissed = dismissedUnavailableCanister.filter(
+			(symbol) => !recoveredIndexCanisters.includes(symbol)
 		);
 
-		if (stillFailing.length !== dismissedUnavailableCanister.length) {
-			rememberDismissed(stillFailing);
+		if (stillDismissed.length !== dismissedUnavailableCanister.length) {
+			rememberDismissed(stillDismissed);
 		}
 	});
 

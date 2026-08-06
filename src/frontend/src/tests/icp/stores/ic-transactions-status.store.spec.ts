@@ -57,10 +57,18 @@ describe('ic-transactions-status.store', () => {
 			expect(get(icTransactionsStatusStore)[anotherTokenId]).toBe(1);
 		});
 
-		it('should not add an entry for a token that never failed', () => {
+		it('should record the successful check of a token that never failed', () => {
+			// "Never checked" (no entry) and "checked and fine" (zero) have to read differently, so a
+			// consumer can tell a recovery from a token the wallet has not reached yet.
 			icTransactionsStatusStore.succeed(tokenId);
 
-			expect(get(icTransactionsStatusStore)).toStrictEqual({});
+			expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
+		});
+
+		it('should leave a token that was never checked without an entry', () => {
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(get(icTransactionsStatusStore)[anotherTokenId]).toBeUndefined();
 		});
 
 		it('should start counting from scratch after a success', () => {
