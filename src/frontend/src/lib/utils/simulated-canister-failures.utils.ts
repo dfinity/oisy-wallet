@@ -42,6 +42,10 @@ const QA_CONTEXT = typeof window === 'undefined' ? 'worker' : 'window';
 // force every test that touches the wallet to opt out of that guard.
 const QA_LOGGING_ENABLED = simulatedCanisterFailuresEnabled && !import.meta.env.VITEST;
 
+// Identifies this module instance, so a duplicated module (one copy refreshed, another one read)
+// is visible rather than inferred.
+const QA_INSTANCE = `${QA_CONTEXT}-${Date.now() % 100_000}`;
+
 export const qaLog = (...args: unknown[]): void => {
 	if (!QA_LOGGING_ENABLED) {
 		return;
@@ -60,6 +64,8 @@ export const getSimulatedCanisterFailures = async (): Promise<SimulatedCanisterF
 
 	try {
 		const failures = await idbGet<SimulatedCanisterFailures>(IDB_KEY, idbStore());
+
+		qaLog(`read key "${IDB_KEY}" from db "oisy-testing"/"testing":`, failures);
 
 		return failures ?? NO_FAILURES;
 	} catch (err: unknown) {
@@ -90,7 +96,7 @@ const refreshCachedFailures = () => {
 	void getSimulatedCanisterFailures().then((failures) => {
 		// Only on a change, otherwise this would log on every job of every token.
 		if (JSON.stringify(failures) !== JSON.stringify(cachedFailures)) {
-			qaLog('snapshot changed:', failures);
+			qaLog(`instance ${QA_INSTANCE} snapshot changed:`, failures);
 		}
 
 		cachedFailures = failures;
@@ -98,7 +104,16 @@ const refreshCachedFailures = () => {
 };
 
 if (simulatedCanisterFailuresEnabled) {
-	qaLog('enabled - reading the initial snapshot');
+	// If the check and the snapshot report different instance ids, the module was bundled twice and
+	// the check is reading a copy nobody refreshes.
+	qaLog(`enabled - instance ${QA_INSTANCE}, reading the initial snapshot`);
+
+	// Which databases this side can actually see. A worker that cannot see "oisy-testing" is not
+	// looking at the same storage as the page that wrote it.
+	void indexedDB
+		?.databases?.()
+		.then((dbs) => qaLog(`instance ${QA_INSTANCE} sees databases`, dbs))
+		.catch((err: unknown) => qaLog('could not list the databases', err));
 
 	refreshCachedFailures();
 }
@@ -129,6 +144,14 @@ export const simulatedCanisterFailure = ({
 	refreshCachedFailures();
 
 	const canisterIds = kind === 'index' ? indexCanisterIds : ledgerCanisterIds;
+
+	// Unconditional: "no line at all" and "a line showing an empty list" are different bugs.
+	qaLog(
+		`[instance ${QA_INSTANCE}] checking ${kind} canister ${canisterId} against`,
+		canisterIds,
+		'| full snapshot',
+		cachedFailures
+	);
 
 	if (canisterIds.includes(canisterId)) {
 		qaLog(`injecting a failure for ${kind} canister ${canisterId}`);
