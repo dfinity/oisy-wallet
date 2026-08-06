@@ -16,6 +16,7 @@ import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as infoUtils from '$lib/utils/info.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -25,7 +26,7 @@ import {
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('AllTransactions', () => {
@@ -171,6 +172,28 @@ describe('AllTransactions', () => {
 
 		spySessionStorage.mockRestore();
 		spyDismiss.mockRestore();
+	});
+
+	it('forgets the dismissal once the warning clears, so the next outage raises it again', async () => {
+		const tokenId = setUpTokenWithUnavailableIndexCanister();
+
+		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		const spyReset = vi.spyOn(infoUtils, 'resetHideInfo').mockImplementation(() => {});
+
+		const { unmount } = render(AllTransactions);
+
+		expect(spyReset).not.toHaveBeenCalled();
+
+		// The token recovers: the box hides itself, and the dismissal must not outlive it.
+		icTransactionsStatusStore.succeed(tokenId);
+
+		await waitFor(() =>
+			expect(spyReset).toHaveBeenCalledWith('oisy_ic_hide_transaction_unavailable_canister')
+		);
+
+		unmount();
+		spyReset.mockRestore();
 	});
 
 	it('renders the info box list', () => {
