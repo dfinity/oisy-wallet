@@ -20,7 +20,6 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
-import { qaLog, simulatedCanisterFailure } from '$lib/utils/simulated-canister-failures.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { IcrcIndexDid } from '@icp-sdk/canisters/ledger/icrc';
 
@@ -39,13 +38,6 @@ const getTransactions = ({
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcrcStrict>): Promise<GetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
-
-	// QA harness - DO NOT MERGE.
-	const simulated = simulatedCanisterFailure({ canisterId: data.indexCanisterId, kind: 'index' });
-
-	if (nonNullish(simulated)) {
-		return Promise.reject(simulated);
-	}
 
 	return getTransactionsApi({
 		identity,
@@ -86,13 +78,6 @@ const getBalance = ({
 	data
 }: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<GetBalance> => {
 	assertNonNullish(data, 'No data - ledgerIndexCanister - provided to fetch balance.');
-
-	// QA harness - DO NOT MERGE.
-	const simulated = simulatedCanisterFailure({ canisterId: data.ledgerCanisterId, kind: 'ledger' });
-
-	if (nonNullish(simulated)) {
-		return Promise.reject(simulated);
-	}
 
 	return balance({
 		identity,
@@ -193,12 +178,6 @@ export const initIcrcWalletScheduler = (
 	data: PostMessageDataRequestIcrc | undefined
 ): IcWalletScheduler<PostMessageDataRequestIcrc> => {
 	const { success: withIndexCanister } = PostMessageDataRequestIcrcStrictSchema.safeParse(data);
-
-	// QA harness - DO NOT MERGE. A token running the balance-only scheduler never asks the Index
-	// canister anything, so a simulated Index failure could never fire for it.
-	qaLog(
-		`scheduler for ledger ${data?.ledgerCanisterId}: ${withIndexCanister ? 'balance + transactions' : 'balance only'}, index ${data?.indexCanisterId ?? 'none'}`
-	);
 
 	return withIndexCanister
 		? initIcrcWalletBalanceAndTransactionsScheduler()

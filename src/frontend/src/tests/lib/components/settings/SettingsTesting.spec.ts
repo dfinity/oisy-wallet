@@ -1,30 +1,11 @@
-import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import SettingsTesting from '$lib/components/settings/SettingsTesting.svelte';
-import * as simulator from '$lib/utils/simulated-canister-failures.utils';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { simulatedFailuresStore } from '$lib/utils/simulated-canister-failures.utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('SettingsTesting', () => {
-	const token: IcrcCustomToken = {
-		...mockValidIcToken,
-		symbol: 'GLDT',
-		ledgerCanisterId: 'gldt-ledger',
-		indexCanisterId: 'gldt-index',
-		version: 1n,
-		enabled: true
-	};
-
 	beforeEach(() => {
-		vi.restoreAllMocks();
-
-		icrcCustomTokensStore.resetAll();
-		icrcCustomTokensStore.setAll([{ data: token, certified: true }]);
-
-		vi.spyOn(simulator, 'getSimulatedCanisterFailures').mockResolvedValue({
-			indexCanisterIds: [],
-			ledgerCanisterIds: []
-		});
+		simulatedFailuresStore.set({ indexSymbols: [], ledgerSymbols: [] });
 	});
 
 	const inputs = (container: HTMLElement) => ({
@@ -42,44 +23,63 @@ describe('SettingsTesting', () => {
 		expect(getByText('Apply')).toBeInTheDocument();
 	});
 
-	it('should store the canister IDs resolved from the symbols', async () => {
-		const spySet = vi.spyOn(simulator, 'setSimulatedCanisterFailures').mockResolvedValue();
+	it('should store the symbols typed, upper-cased', async () => {
+		const { container, getByText } = render(SettingsTesting);
+
+		const { index } = inputs(container);
+
+		await fireEvent.input(index as HTMLInputElement, { target: { value: 'gldt, panda' } });
+		await fireEvent.click(getByText('Apply'));
+
+		await waitFor(() =>
+			expect(get(simulatedFailuresStore)).toStrictEqual({
+				indexSymbols: ['GLDT', 'PANDA'],
+				ledgerSymbols: []
+			})
+		);
+	});
+
+	it('should tell the index and ledger fields apart', async () => {
+		const { container, getByText } = render(SettingsTesting);
+
+		const { ledger } = inputs(container);
+
+		await fireEvent.input(ledger as HTMLInputElement, { target: { value: 'GLDT' } });
+		await fireEvent.click(getByText('Apply'));
+
+		await waitFor(() =>
+			expect(get(simulatedFailuresStore)).toStrictEqual({
+				indexSymbols: [],
+				ledgerSymbols: ['GLDT']
+			})
+		);
+	});
+
+	it('should clear the simulation when both fields are emptied', async () => {
+		simulatedFailuresStore.set({ indexSymbols: ['GLDT'], ledgerSymbols: [] });
 
 		const { container, getByText } = render(SettingsTesting);
 
 		const { index } = inputs(container);
 
-		await fireEvent.input(index as HTMLInputElement, { target: { value: 'gldt' } });
+		expect(index?.value).toBe('GLDT');
+
+		await fireEvent.input(index as HTMLInputElement, { target: { value: '' } });
 		await fireEvent.click(getByText('Apply'));
 
 		await waitFor(() =>
-			expect(spySet).toHaveBeenCalledWith({
-				indexCanisterIds: ['gldt-index'],
-				ledgerCanisterIds: []
-			})
+			expect(get(simulatedFailuresStore)).toStrictEqual({ indexSymbols: [], ledgerSymbols: [] })
 		);
 	});
 
-	it('should store nothing when both fields are empty', async () => {
-		const spySet = vi.spyOn(simulator, 'setSimulatedCanisterFailures').mockResolvedValue();
-
-		const { getByText } = render(SettingsTesting);
-
-		await fireEvent.click(getByText('Apply'));
-
-		await waitFor(() =>
-			expect(spySet).toHaveBeenCalledWith({ indexCanisterIds: [], ledgerCanisterIds: [] })
-		);
-	});
-
-	it('should prefill the fields with what is currently simulated', async () => {
-		vi.spyOn(simulator, 'getSimulatedCanisterFailures').mockResolvedValue({
-			indexCanisterIds: ['gldt-index'],
-			ledgerCanisterIds: []
-		});
+	it('should prefill the fields with what is currently simulated', () => {
+		simulatedFailuresStore.set({ indexSymbols: ['PANDA'], ledgerSymbols: ['GLDT'] });
 
 		const { container } = render(SettingsTesting);
 
-		await waitFor(() => expect(inputs(container).index?.value).toBe('GLDT'));
+		const { index, ledger } = inputs(container);
+
+		expect(index?.value).toBe('PANDA');
+		expect(ledger?.value).toBe('GLDT');
 	});
 });

@@ -1,90 +1,98 @@
-import { resolveSimulatedCanisterIds } from '$lib/utils/simulated-canister-failures.utils';
+import type { TokenId } from '$lib/types/token';
+import {
+	isSimulatedFailure,
+	parseSimulatedSymbols,
+	simulatedSummary,
+	unknownSimulatedSymbols,
+	type SimulatedFailures
+} from '$lib/utils/simulated-canister-failures.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('simulated-canister-failures.utils', () => {
-	describe('resolveSimulatedCanisterIds', () => {
-		const tokens = [
-			{ symbol: 'GLDT', ledgerCanisterId: 'gldt-ledger', indexCanisterId: 'gldt-index' },
-			{ symbol: 'PANDA', ledgerCanisterId: 'panda-ledger', indexCanisterId: 'panda-index' },
-			{ symbol: 'NOIDX', ledgerCanisterId: 'noidx-ledger' }
-		];
-
-		it('should resolve the index canister IDs', () => {
-			const { canisterIds, matchedSymbols, unknownSymbols } = resolveSimulatedCanisterIds({
-				symbols: 'GLDT,PANDA',
-				tokens,
-				kind: 'index'
-			});
-
-			expect(canisterIds).toStrictEqual(['gldt-index', 'panda-index']);
-			expect(matchedSymbols).toStrictEqual(['GLDT', 'PANDA']);
-			expect(unknownSymbols).toStrictEqual([]);
+	describe('parseSimulatedSymbols', () => {
+		it('should split on commas and upper-case', () => {
+			expect(parseSimulatedSymbols('gldt,PANDA')).toStrictEqual(['GLDT', 'PANDA']);
 		});
 
-		it('should resolve the ledger canister IDs', () => {
-			const { canisterIds } = resolveSimulatedCanisterIds({
-				symbols: 'GLDT',
-				tokens,
-				kind: 'ledger'
-			});
-
-			expect(canisterIds).toStrictEqual(['gldt-ledger']);
-		});
-
-		it('should ignore spacing and casing', () => {
-			const { canisterIds, matchedSymbols } = resolveSimulatedCanisterIds({
-				symbols: '  gldt ,   PaNdA  ',
-				tokens,
-				kind: 'index'
-			});
-
-			expect(canisterIds).toStrictEqual(['gldt-index', 'panda-index']);
-			// Reported back with the token's own casing, so the tester sees what actually matched.
-			expect(matchedSymbols).toStrictEqual(['GLDT', 'PANDA']);
-		});
-
-		it('should report an unknown symbol instead of silently dropping it', () => {
-			const { canisterIds, unknownSymbols } = resolveSimulatedCanisterIds({
-				symbols: 'GLDT,TYPO',
-				tokens,
-				kind: 'index'
-			});
-
-			expect(canisterIds).toStrictEqual(['gldt-index']);
-			expect(unknownSymbols).toStrictEqual(['TYPO']);
-		});
-
-		it('should report a token that has no index canister', () => {
-			const { canisterIds, unknownSymbols } = resolveSimulatedCanisterIds({
-				symbols: 'NOIDX',
-				tokens,
-				kind: 'index'
-			});
-
-			expect(canisterIds).toStrictEqual([]);
-			expect(unknownSymbols).toStrictEqual(['NOIDX']);
-		});
-
-		it('should resolve the ledger canister of a token that has no index canister', () => {
-			const { canisterIds, unknownSymbols } = resolveSimulatedCanisterIds({
-				symbols: 'NOIDX',
-				tokens,
-				kind: 'ledger'
-			});
-
-			expect(canisterIds).toStrictEqual(['noidx-ledger']);
-			expect(unknownSymbols).toStrictEqual([]);
+		it('should ignore spacing', () => {
+			expect(parseSimulatedSymbols('  gldt ,   PaNdA  ')).toStrictEqual(['GLDT', 'PANDA']);
 		});
 
 		it.each(['', '   ', ',', ' , , '])('should resolve nothing for %j', (symbols) => {
-			const { canisterIds, matchedSymbols, unknownSymbols } = resolveSimulatedCanisterIds({
-				symbols,
-				tokens,
-				kind: 'index'
-			});
+			expect(parseSimulatedSymbols(symbols)).toStrictEqual([]);
+		});
+	});
 
-			expect(canisterIds).toStrictEqual([]);
-			expect(matchedSymbols).toStrictEqual([]);
-			expect(unknownSymbols).toStrictEqual([]);
+	describe('isSimulatedFailure', () => {
+		const tokenId: TokenId = parseTokenId('PANDA');
+		const failures: SimulatedFailures = { indexSymbols: ['PANDA'], ledgerSymbols: ['GLDT'] };
+
+		it('should match the token id description against the simulated index symbols', () => {
+			expect(isSimulatedFailure({ tokenId, kind: 'index', failures })).toBeTruthy();
+		});
+
+		it('should not match a kind the token is not listed for', () => {
+			expect(isSimulatedFailure({ tokenId, kind: 'ledger', failures })).toBeFalsy();
+		});
+
+		it('should match the ledger symbols for a ledger check', () => {
+			expect(
+				isSimulatedFailure({ tokenId: parseTokenId('GLDT'), kind: 'ledger', failures })
+			).toBeTruthy();
+		});
+
+		it('should ignore casing', () => {
+			expect(
+				isSimulatedFailure({ tokenId: parseTokenId('panda'), kind: 'index', failures })
+			).toBeTruthy();
+		});
+
+		it('should not match another token', () => {
+			expect(
+				isSimulatedFailure({ tokenId: parseTokenId('EXE'), kind: 'index', failures })
+			).toBeFalsy();
+		});
+
+		it('should not match when nothing is simulated', () => {
+			expect(
+				isSimulatedFailure({
+					tokenId,
+					kind: 'index',
+					failures: { indexSymbols: [], ledgerSymbols: [] }
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('unknownSimulatedSymbols', () => {
+		const tokens = [{ symbol: 'GLDT' }, { symbol: 'PANDA' }];
+
+		it('should report a symbol that matches no token', () => {
+			expect(unknownSimulatedSymbols({ symbols: ['GLDT', 'TYPO'], tokens })).toStrictEqual([
+				'TYPO'
+			]);
+		});
+
+		it('should report nothing when every symbol matches', () => {
+			expect(unknownSimulatedSymbols({ symbols: ['GLDT', 'PANDA'], tokens })).toStrictEqual([]);
+		});
+
+		it('should compare case-insensitively', () => {
+			expect(
+				unknownSimulatedSymbols({ symbols: ['GLDT'], tokens: [{ symbol: 'gldt' }] })
+			).toStrictEqual([]);
+		});
+	});
+
+	describe('simulatedSummary', () => {
+		it('should label each symbol with its kind', () => {
+			expect(simulatedSummary({ indexSymbols: ['PANDA'], ledgerSymbols: ['GLDT'] })).toBe(
+				'PANDA (index), GLDT (ledger)'
+			);
+		});
+
+		it('should be empty when nothing is simulated', () => {
+			expect(simulatedSummary({ indexSymbols: [], ledgerSymbols: [] })).toBe('');
 		});
 	});
 });

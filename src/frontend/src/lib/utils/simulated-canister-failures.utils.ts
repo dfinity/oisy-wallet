@@ -1,50 +1,44 @@
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import type { TokenId } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
-import { createStore, get as idbGet, set as idbSet, type UseStore } from 'idb-keyval';
+import { writable, type Readable } from 'svelte/store';
 
 /**
  * QA harness — DO NOT MERGE.
  *
- * Lets a tester mark canisters as "not responding" so the wallet's failure paths can be exercised
- * on demand. The failure is injected inside the call that fails for real, so the error travels the
- * genuine path: the scheduler settles it, the balance survives an Index failure, and the UI counts
- * consecutive failures the same way it would during an actual outage.
+ * Lets a tester mark tokens as having a failing index or ledger canister, so the wallet's failure
+ * paths can be exercised on demand instead of waiting for a canister to genuinely misbehave.
  *
- * The selection lives in IndexedDB rather than localStorage because it has to be readable from the
- * wallet web worker, which has no access to localStorage. Reading it on every job also means the
- * tester can add or remove a token and see the effect on the next 30s cycle, without reloading.
+ * The simulation is applied in `syncWallet` (`$icp/services/ic-listener.services`), on the message
+ * the wallet worker posts to the UI thread — not inside the canister call itself. An earlier
+ * version injected in the worker; the worker is a separate thread with no access to the page's
+ * stores, and the IndexedDB hand-off it needed never reached it.
+ *
+ * What that costs: the worker's own `Promise.allSettled` handling is not exercised (it is covered
+ * by unit tests). What it still exercises, faithfully, is everything downstream — the payload is
+ * rewritten into exactly what the worker emits on an index failure, so the balance keeps updating,
+ * the loaded transactions stay, the per-token failure counter runs, and the warning appears at the
+ * threshold and clears on recovery.
  */
-export interface SimulatedCanisterFailures {
-	indexCanisterIds: string[];
-	ledgerCanisterIds: string[];
+export interface SimulatedFailures {
+	/** Token symbols, upper-cased. */
+	indexSymbols: string[];
+	ledgerSymbols: string[];
 }
 
 export type SimulatedCanisterKind = 'index' | 'ledger';
 
-const NO_FAILURES: SimulatedCanisterFailures = { indexCanisterIds: [], ledgerCanisterIds: [] };
+const NO_FAILURES: SimulatedFailures = { indexSymbols: [], ledgerSymbols: [] };
 
-const IDB_KEY = 'simulated-canister-failures';
+const STORAGE_KEY = 'oisy_simulated_canister_failures';
 
-// Created lazily rather than at module root: this module is reachable from the pre-rendered
-// Settings page, and there is no IndexedDB during SSG.
-let store: UseStore | undefined;
-
-const idbStore = (): UseStore => (store ??= createStore('oisy-testing', 'testing'));
-
-/** Never active on the beta or production builds, whatever is in IndexedDB. */
+/** Never active on the beta or production builds, whatever is in storage. */
 export const simulatedCanisterFailuresEnabled = LOCAL || STAGING;
 
-// The wallet workers log to the same console as the page, so every line says which side it came
-// from: the whole point of the harness is that the two sides agree on what is being simulated.
-const QA_CONTEXT = typeof window === 'undefined' ? 'worker' : 'window';
+const QA_CONTEXT = typeof window === 'undefined' ? 'ssg' : 'window';
 
-// Silent under vitest: the suite fails any test that writes to the console, and a harness must not
-// force every test that touches the wallet to opt out of that guard.
+// Silent under vitest: the suite fails any test that writes to the console.
 const QA_LOGGING_ENABLED = simulatedCanisterFailuresEnabled && !import.meta.env.VITEST;
-
-// Identifies this module instance, so a duplicated module (one copy refreshed, another one read)
-// is visible rather than inferred.
-const QA_INSTANCE = `${QA_CONTEXT}-${Date.now() % 100_000}`;
 
 export const qaLog = (...args: unknown[]): void => {
 	if (!QA_LOGGING_ENABLED) {
@@ -57,164 +51,102 @@ export const qaLog = (...args: unknown[]): void => {
 	console.log(`[QA harness:${QA_CONTEXT}]`, ...args);
 };
 
-export const getSimulatedCanisterFailures = async (): Promise<SimulatedCanisterFailures> => {
-	if (!simulatedCanisterFailuresEnabled) {
-		return NO_FAILURES;
-	}
+// Keyed off `window`, not off `localStorage`: during SSG the bare identifier is a ReferenceError on
+// some runtimes and a stub without `getItem` on Node 24, and neither is worth handling twice.
+const storage = (): Storage | undefined =>
+	typeof window === 'undefined' ? undefined : window.localStorage;
 
+const readStoredFailures = (): SimulatedFailures => {
 	try {
-		const failures = await idbGet<SimulatedCanisterFailures>(IDB_KEY, idbStore());
+		const stored = storage()?.getItem(STORAGE_KEY);
 
-		qaLog(`read key "${IDB_KEY}" from db "oisy-testing"/"testing":`, failures);
-
-		return failures ?? NO_FAILURES;
+		return isNullish(stored) ? NO_FAILURES : { ...NO_FAILURES, ...JSON.parse(stored) };
 	} catch (err: unknown) {
-		// A harness must never become the reason a real call fails. A browser profile that denies
-		// storage access degrades to "nothing simulated".
-		qaLog('failed to read the simulated failures from IndexedDB', err);
+		qaLog('could not read the stored simulated failures', err);
 
 		return NO_FAILURES;
 	}
 };
 
-export const setSimulatedCanisterFailures = async (
-	failures: SimulatedCanisterFailures
-): Promise<void> => {
-	if (!simulatedCanisterFailuresEnabled) {
-		return;
-	}
-
-	await idbSet(IDB_KEY, failures, idbStore());
-
-	qaLog('stored in IndexedDB:', failures);
-};
-
-// The snapshot the synchronous check reads. Kept up to date in the background - see below.
-let cachedFailures: SimulatedCanisterFailures = NO_FAILURES;
-
-const refreshCachedFailures = () => {
-	void getSimulatedCanisterFailures().then((failures) => {
-		// Only on a change, otherwise this would log on every job of every token.
-		if (JSON.stringify(failures) !== JSON.stringify(cachedFailures)) {
-			qaLog(`instance ${QA_INSTANCE} snapshot changed:`, failures);
-		}
-
-		cachedFailures = failures;
-	});
-};
-
-// `typeof` rather than a truthiness check: during SSG there is no IndexedDB and `indexedDB` is an
-// undefined identifier, so touching it at module scope is a ReferenceError, not `undefined`.
-if (simulatedCanisterFailuresEnabled && typeof indexedDB !== 'undefined') {
-	// If the check and the snapshot report different instance ids, the module was bundled twice and
-	// the check is reading a copy nobody refreshes.
-	qaLog(`enabled - instance ${QA_INSTANCE}, reading the initial snapshot`);
-
-	// Which databases this side can actually see. A worker that cannot see "oisy-testing" is not
-	// looking at the same storage as the page that wrote it.
-	void indexedDB
-		.databases?.()
-		.then((dbs) => qaLog(`instance ${QA_INSTANCE} sees databases`, dbs))
-		.catch((err: unknown) => qaLog('could not list the databases', err));
-
-	refreshCachedFailures();
-}
-
-/**
- * The error to fail the call with, or `undefined` to let it through. Called by the worker right
- * before the real request.
- *
- * Returns the error rather than throwing it, and reads a snapshot rather than awaiting one, because
- * both alternatives would change the shape of the call it wraps: a synchronous throw would escape
- * the caller's `Promise.allSettled` and turn a tolerated Index failure into a fatal one, and an
- * `await` would insert a microtask into the timing the harness is meant to leave untouched. The
- * cost of the snapshot is that a change made in Settings lands on the job after next.
- */
-export const simulatedCanisterFailure = ({
-	canisterId,
-	kind
-}: {
-	canisterId: string | undefined;
-	kind: SimulatedCanisterKind;
-}): Error | undefined => {
-	if (!simulatedCanisterFailuresEnabled || isNullish(canisterId)) {
-		return undefined;
-	}
-
-	const { indexCanisterIds, ledgerCanisterIds } = cachedFailures;
-
-	refreshCachedFailures();
-
-	const canisterIds = kind === 'index' ? indexCanisterIds : ledgerCanisterIds;
-
-	// Unconditional: "no line at all" and "a line showing an empty list" are different bugs.
-	qaLog(
-		`[instance ${QA_INSTANCE}] checking ${kind} canister ${canisterId} against`,
-		canisterIds,
-		'| full snapshot',
-		cachedFailures
+const initSimulatedFailuresStore = () => {
+	const { subscribe, set } = writable<SimulatedFailures>(
+		simulatedCanisterFailuresEnabled ? readStoredFailures() : NO_FAILURES
 	);
 
-	if (canisterIds.includes(canisterId)) {
-		qaLog(`injecting a failure for ${kind} canister ${canisterId}`);
-
-		return new Error(
-			`[QA harness] Simulated failure: ${kind} canister ${canisterId} is not responding`
-		);
-	}
-
-	// Logged only while something is simulated, and it prints both sides of the comparison: a
-	// canister ID that never shows up here is one the worker is not actually asking about.
-	if (canisterIds.length > 0) {
-		qaLog(`letting ${kind} canister ${canisterId} through - simulated are`, canisterIds);
-	}
-
-	return undefined;
-};
-
-/**
- * Maps the comma-separated symbols a tester typed onto the canister IDs of the tokens they own,
- * reporting back the symbols that matched nothing so a typo is visible rather than silent.
- */
-export const resolveSimulatedCanisterIds = <
-	T extends { symbol: string; ledgerCanisterId: string; indexCanisterId?: string }
->({
-	symbols,
-	tokens,
-	kind
-}: {
-	symbols: string;
-	tokens: T[];
-	kind: SimulatedCanisterKind;
-}): { canisterIds: string[]; matchedSymbols: string[]; unknownSymbols: string[] } => {
-	const requested = symbols
-		.split(',')
-		.map((symbol) => symbol.trim())
-		.filter((symbol) => symbol !== '');
-
-	return requested.reduce<{
-		canisterIds: string[];
-		matchedSymbols: string[];
-		unknownSymbols: string[];
-	}>(
-		(acc, symbol) => {
-			const token = tokens.find(
-				({ symbol: tokenSymbol }) => tokenSymbol.toLowerCase() === symbol.toLowerCase()
-			);
-
-			const canisterId =
-				kind === 'index' ? (token?.indexCanisterId ?? undefined) : token?.ledgerCanisterId;
-
-			if (isNullish(canisterId)) {
-				acc.unknownSymbols.push(symbol);
-				return acc;
+	return {
+		subscribe,
+		set: (failures: SimulatedFailures) => {
+			if (!simulatedCanisterFailuresEnabled) {
+				return;
 			}
 
-			acc.canisterIds.push(canisterId);
-			acc.matchedSymbols.push(token?.symbol ?? symbol);
+			try {
+				storage()?.setItem(STORAGE_KEY, JSON.stringify(failures));
+			} catch (err: unknown) {
+				qaLog('could not store the simulated failures', err);
+			}
 
-			return acc;
-		},
-		{ canisterIds: [], matchedSymbols: [], unknownSymbols: [] }
-	);
+			qaLog('now simulating', failures);
+
+			set(failures);
+		}
+	};
 };
+
+export const simulatedFailuresStore: Readable<SimulatedFailures> & {
+	set: (failures: SimulatedFailures) => void;
+} = initSimulatedFailuresStore();
+
+/** Splits what the tester typed into upper-cased symbols. */
+export const parseSimulatedSymbols = (symbols: string): string[] =>
+	symbols
+		.split(',')
+		.map((symbol) => symbol.trim().toUpperCase())
+		.filter((symbol) => symbol !== '');
+
+/**
+ * Whether the given token is currently being simulated as failing.
+ *
+ * A `TokenId` is a symbol whose description is the token symbol — the same string the tester types.
+ */
+export const isSimulatedFailure = ({
+	tokenId,
+	kind,
+	failures
+}: {
+	tokenId: TokenId;
+	kind: SimulatedCanisterKind;
+	failures: SimulatedFailures;
+}): boolean => {
+	if (!simulatedCanisterFailuresEnabled) {
+		return false;
+	}
+
+	const { description } = tokenId;
+
+	if (isNullish(description)) {
+		return false;
+	}
+
+	const symbols = kind === 'index' ? failures.indexSymbols : failures.ledgerSymbols;
+
+	return symbols.includes(description.toUpperCase());
+};
+
+/** Reports back the symbols that matched no enabled token, so a typo is visible. */
+export const unknownSimulatedSymbols = <T extends { symbol: string }>({
+	symbols,
+	tokens
+}: {
+	symbols: string[];
+	tokens: T[];
+}): string[] =>
+	symbols.filter(
+		(symbol) => !tokens.some(({ symbol: tokenSymbol }) => tokenSymbol.toUpperCase() === symbol)
+	);
+
+export const simulatedSummary = (failures: SimulatedFailures): string =>
+	[
+		...failures.indexSymbols.map((symbol) => `${symbol} (index)`),
+		...failures.ledgerSymbols.map((symbol) => `${symbol} (ledger)`)
+	].join(', ');

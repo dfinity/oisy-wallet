@@ -6,107 +6,44 @@
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import {
-		getSimulatedCanisterFailures,
-		qaLog,
-		resolveSimulatedCanisterIds,
-		setSimulatedCanisterFailures,
-		type SimulatedCanisterKind
+		parseSimulatedSymbols,
+		simulatedFailuresStore,
+		simulatedSummary,
+		unknownSimulatedSymbols
 	} from '$lib/utils/simulated-canister-failures.utils';
 
 	// QA harness - DO NOT MERGE. Deliberately not translated: the section never reaches a user.
 
-	let indexSymbols = $state('');
-	let ledgerSymbols = $state('');
-	let saving = $state(false);
+	let indexSymbols = $state($simulatedFailuresStore.indexSymbols.join(', '));
+	let ledgerSymbols = $state($simulatedFailuresStore.ledgerSymbols.join(', '));
 
-	const symbolsOf = ({
-		canisterIds,
-		kind
-	}: {
-		canisterIds: string[];
-		kind: SimulatedCanisterKind;
-	}): string =>
-		$enabledIcrcTokens
-			.filter(({ ledgerCanisterId, indexCanisterId }) =>
-				canisterIds.includes((kind === 'index' ? indexCanisterId : ledgerCanisterId) ?? '')
-			)
-			.map(({ symbol }) => symbol)
-			.join(', ');
+	const apply = () => {
+		const failures = {
+			indexSymbols: parseSimulatedSymbols(indexSymbols),
+			ledgerSymbols: parseSimulatedSymbols(ledgerSymbols)
+		};
 
-	// Show what is currently simulated, so a reload does not hide a switch left on. Once only: the
-	// token list refreshes on its own, and re-running this would wipe what the tester is typing.
-	let prefilled = false;
+		simulatedFailuresStore.set(failures);
 
-	$effect(() => {
-		const tokens = $enabledIcrcTokens;
+		// Warn rather than block: a symbol that matches no enabled token simply never fires, and the
+		// tester should see that rather than wonder why nothing happens.
+		const unknown = unknownSimulatedSymbols({
+			symbols: [...failures.indexSymbols, ...failures.ledgerSymbols],
+			tokens: $enabledIcrcTokens
+		});
 
-		if (prefilled || tokens.length === 0) {
-			return;
-		}
+		const summary = simulatedSummary(failures);
 
-		prefilled = true;
-
-		void (async () => {
-			const { indexCanisterIds, ledgerCanisterIds } = await getSimulatedCanisterFailures();
-
-			// Never clobber something typed while this was loading.
-			if (indexSymbols === '') {
-				indexSymbols = symbolsOf({ canisterIds: indexCanisterIds, kind: 'index' });
-			}
-
-			if (ledgerSymbols === '') {
-				ledgerSymbols = symbolsOf({ canisterIds: ledgerCanisterIds, kind: 'ledger' });
-			}
-		})();
-	});
-
-	const save = async () => {
-		saving = true;
-
-		try {
-			const index = resolveSimulatedCanisterIds({
-				symbols: indexSymbols,
-				tokens: $enabledIcrcTokens,
-				kind: 'index'
-			});
-
-			const ledger = resolveSimulatedCanisterIds({
-				symbols: ledgerSymbols,
-				tokens: $enabledIcrcTokens,
-				kind: 'ledger'
-			});
-
-			qaLog('resolved from the symbols typed:', {
-				index,
-				ledger,
-				enabledIcrcTokens: $enabledIcrcTokens.length
-			});
-
-			await setSimulatedCanisterFailures({
-				indexCanisterIds: index.canisterIds,
-				ledgerCanisterIds: ledger.canisterIds
-			});
-
-			const unknownSymbols = [...index.unknownSymbols, ...ledger.unknownSymbols];
-
-			const failing = [
-				...index.matchedSymbols.map((symbol) => `${symbol} (index)`),
-				...ledger.matchedSymbols.map((symbol) => `${symbol} (ledger)`)
-			];
-
-			toastsShow({
-				text:
-					unknownSymbols.length > 0
-						? `Not an enabled ICRC token (or no index canister): ${unknownSymbols.join(', ')}`
-						: failing.length > 0
-							? `Simulating a failure for ${failing.join(', ')} - takes effect on the next 30s cycle.`
-							: 'Simulated failures cleared - takes effect on the next 30s cycle.',
-				level: unknownSymbols.length > 0 ? 'warn' : 'success',
-				duration: 5000
-			});
-		} finally {
-			saving = false;
-		}
+		toastsShow({
+			text:
+				unknown.length > 0
+					? `Not an enabled ICRC token: ${unknown.join(', ')}. Now simulating: ${summary === '' ? 'nothing' : summary}`
+					: summary === ''
+						? 'Simulated failures cleared - takes effect on the next 30s cycle.'
+						: `Simulating a failure for ${summary} - takes effect on the next 30s cycle.`,
+			level: unknown.length > 0 ? 'warn' : 'success',
+			duration: 5000
+		});
 	};
 </script>
 
@@ -121,7 +58,6 @@
 		{#snippet value()}
 			<InputText
 				name="simulated-index-failures"
-				disabled={saving}
 				placeholder="GLDT, PANDA"
 				required={false}
 				bind:value={indexSymbols}
@@ -143,7 +79,6 @@
 		{#snippet value()}
 			<InputText
 				name="simulated-ledger-failures"
-				disabled={saving}
 				placeholder="GLDT, PANDA"
 				required={false}
 				bind:value={ledgerSymbols}
@@ -160,12 +95,12 @@
 		{#snippet key()}{/snippet}
 
 		{#snippet value()}
-			<Button disabled={saving} onclick={save}>Apply</Button>
+			<Button onclick={apply}>Apply</Button>
 		{/snippet}
 
 		{#snippet info()}
-			Applies within one 30s wallet cycle - no reload needed. Empty both fields and apply to stop
-			simulating.
+			Applies on the next 30s wallet cycle - no reload needed, and it survives one. Empty both
+			fields and apply to stop simulating.
 		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
