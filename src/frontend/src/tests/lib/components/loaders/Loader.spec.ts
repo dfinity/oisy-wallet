@@ -3,6 +3,7 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
+import type * as LendBorrowEnv from '$env/lend-borrow';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -36,6 +37,24 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+
+const { mockLendBorrowEnabled, mockLiquidiumEnabled } = vi.hoisted(() => ({
+	mockLendBorrowEnabled: { value: true },
+	mockLiquidiumEnabled: { value: true }
+}));
+
+vi.mock('$env/lend-borrow', async (importOriginal) => ({
+	...(await importOriginal<typeof LendBorrowEnv>()),
+	get LEND_BORROW_ENABLED() {
+		return mockLendBorrowEnabled.value;
+	}
+}));
+
+vi.mock('$env/liquidium', () => ({
+	get LIQUIDIUM_ENABLED() {
+		return mockLiquidiumEnabled.value;
+	}
+}));
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -106,6 +125,48 @@ describe('Loader', () => {
 
 		await waitFor(() => {
 			expect(initLoader).toHaveBeenCalledOnce();
+		});
+	});
+
+	// Liquidium profiles are keyed by the ETH address and its writes are signature-gated, so the
+	// address is required even for a user who shows no ETH/EVM network at all.
+	describe('handling the lend & borrow ETH address', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			setupTestnetsStore('disabled');
+
+			ethAddressStore.reset();
+
+			mockLendBorrowEnabled.value = true;
+			mockLiquidiumEnabled.value = true;
+		});
+
+		it('should load the ETH address when every ETH/EVM network is disabled', async () => {
+			setupUserNetworksStore('allDisabled');
+
+			render(Loader, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(loadEthAddress).toHaveBeenCalledOnce();
+			});
+		});
+
+		it.each([
+			{ flag: 'the lend & borrow feature', disable: () => (mockLendBorrowEnabled.value = false) },
+			{ flag: 'the Liquidium provider', disable: () => (mockLiquidiumEnabled.value = false) }
+		])('should not load the ETH address when $flag is disabled', async ({ disable }) => {
+			disable();
+
+			setupUserNetworksStore('allDisabled');
+
+			render(Loader, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(initLoader).toHaveBeenCalledOnce();
+			});
+
+			expect(loadEthAddress).not.toHaveBeenCalled();
 		});
 	});
 
