@@ -103,7 +103,9 @@ const refreshCachedFailures = () => {
 	});
 };
 
-if (simulatedCanisterFailuresEnabled) {
+// `typeof` rather than a truthiness check: during SSG there is no IndexedDB and `indexedDB` is an
+// undefined identifier, so touching it at module scope is a ReferenceError, not `undefined`.
+if (simulatedCanisterFailuresEnabled && typeof indexedDB !== 'undefined') {
 	// If the check and the snapshot report different instance ids, the module was bundled twice and
 	// the check is reading a copy nobody refreshes.
 	qaLog(`enabled - instance ${QA_INSTANCE}, reading the initial snapshot`);
@@ -111,7 +113,7 @@ if (simulatedCanisterFailuresEnabled) {
 	// Which databases this side can actually see. A worker that cannot see "oisy-testing" is not
 	// looking at the same storage as the page that wrote it.
 	void indexedDB
-		?.databases?.()
+		.databases?.()
 		.then((dbs) => qaLog(`instance ${QA_INSTANCE} sees databases`, dbs))
 		.catch((err: unknown) => qaLog('could not list the databases', err));
 
