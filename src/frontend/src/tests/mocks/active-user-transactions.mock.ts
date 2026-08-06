@@ -4,6 +4,7 @@ import type {
 	ActiveUserTransactionError,
 	ActiveUserTransactionRef,
 	LiquidiumData,
+	NearIntentsData,
 	OneSecIcpToEvmData
 } from '$declarations/backend/backend.did';
 import { ZERO } from '$lib/constants/app.constants';
@@ -12,6 +13,7 @@ import type {
 	UpdateActiveUserTransactionParams
 } from '$lib/types/api';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
+import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 
 export const mockActiveUserTransactionId = '11111111-1111-4111-8111-111111111111';
@@ -27,6 +29,30 @@ export const mockOneSecIcpToEvmData: OneSecIcpToEvmData = {
 
 export const mockActiveUserTransactionData: ActiveUserTransactionData = {
 	OneSecIcpToEvm: mockOneSecIcpToEvmData
+};
+
+export const mockNearIntentsData: NearIntentsData = {
+	source_token: { Erc20: ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 1n] },
+	dest_token: { SplMainnet: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' },
+	amount: 1_000_000n
+};
+
+export const mockNearIntentsActiveUserTransaction: ActiveUserTransaction = {
+	id: '33333333-3333-4333-8333-333333333333',
+	status: { Pending: null },
+	data: { NearIntents: mockNearIntentsData },
+	progress_step: [],
+	external_refs: [
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: '0xDepositAddress123' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'USDC' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Ethereum' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDC' },
+		{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Solana' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
 };
 
 export const mockLiquidiumData: LiquidiumData = {

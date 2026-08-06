@@ -21,6 +21,7 @@
 		liquidiumActionKey,
 		toLiquidiumExternalRefsMap
 	} from '$lib/utils/liquidium-active-tx.utils';
+	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
 	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
@@ -36,6 +37,10 @@
 	let { tx, isUnseen, dismissing, onDismiss }: Props = $props();
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
+	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
+	// OneSec and NEAR Intents are both cross-chain swaps rendered identically
+	// (they share the same display-ref key names in `external_refs`).
+	const isSwap = $derived(isOneSec || isNearIntents);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
@@ -65,9 +70,11 @@
 	const providerName = $derived(
 		isLiquidium
 			? lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
-			: isOneSec
-				? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
-				: undefined
+			: isNearIntents
+				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
+				: isOneSec
+					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
+					: undefined
 	);
 
 	const titleText = $derived(
@@ -80,7 +87,7 @@
 					.filter(nonNullish)
 					.join(' ')
 			: [
-					isOneSec ? $i18n.swap.text.swap : undefined,
+					isSwap ? $i18n.swap.text.swap : undefined,
 					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
 					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 					'→',

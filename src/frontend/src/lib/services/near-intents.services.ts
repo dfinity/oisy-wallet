@@ -1,17 +1,14 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
-	NEAR_INTENTS_POLL_INTERVAL_MS,
-	NEAR_INTENTS_POLL_MAX_ATTEMPTS,
 	NEAR_INTENTS_QUOTE_DEADLINE_MS
 } from '$lib/constants/swap.constants';
 import {
 	fetchNearIntentsQuote,
-	fetchNearIntentsStatus,
 	fetchNearIntentsTokens,
 	submitNearIntentsDeposit
 } from '$lib/rest/near-intents.rest';
-import { NEAR_INTENTS_TERMINAL_STATUSES, type NearIntentsToken } from '$lib/types/near-intents';
+import type { NearIntentsToken } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
 import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
@@ -133,31 +130,4 @@ export const submitNearIntentsDepositTx = async ({
 		depositAddress,
 		...(depositMemo ? { memo: depositMemo } : {})
 	});
-};
-
-export const pollNearIntentsStatus = async ({
-	depositAddress,
-	depositMemo
-}: {
-	depositAddress: string;
-	depositMemo?: string;
-}): Promise<void> => {
-	for (let i = 0; i < NEAR_INTENTS_POLL_MAX_ATTEMPTS; i++) {
-		const { status } = await fetchNearIntentsStatus({
-			depositAddress,
-			depositMemo
-		});
-
-		if (NEAR_INTENTS_TERMINAL_STATUSES.includes(status)) {
-			if (status === 'SUCCESS') {
-				return;
-			}
-
-			throw new Error(`NEAR Intents swap ${status.toLowerCase()}`);
-		}
-
-		await new Promise((r) => setTimeout(r, NEAR_INTENTS_POLL_INTERVAL_MS));
-	}
-
-	throw new Error('NEAR Intents swap timed out');
 };
