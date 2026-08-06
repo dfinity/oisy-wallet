@@ -15,6 +15,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
+	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
@@ -23,6 +24,10 @@
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
 	} from '$lib/utils/liquidium-active-tx.utils';
+	import {
+		buildNearIntentsSwapTrackingMetadata,
+		isNearIntentsActiveUserTransaction
+	} from '$lib/utils/near-intents-active-tx.utils';
 	import {
 		buildOneSecSwapTrackingMetadata,
 		isOneSecActiveUserTransaction
@@ -64,6 +69,12 @@
 
 			if (liquidium.length > 0) {
 				await pollLiquidiumActiveUserTransactions({ identity, transactions: liquidium });
+			}
+
+			const nearIntents = $activeUserTransactionsPending.filter(isNearIntentsActiveUserTransaction);
+
+			if (nearIntents.length > 0) {
+				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -128,6 +139,21 @@
 				trackEvent({
 					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
 					metadata: buildOneSecSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isNearIntentsActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildNearIntentsSwapTrackingMetadata({ tx })
 				});
 
 				if (isSucceeded) {
