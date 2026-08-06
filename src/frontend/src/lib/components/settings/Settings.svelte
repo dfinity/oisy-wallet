@@ -8,6 +8,7 @@
 	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsExportData from '$lib/components/settings/SettingsExportData.svelte';
 	import SettingsPreferences from '$lib/components/settings/SettingsPreferences.svelte';
+	import SettingsTesting from '$lib/components/settings/SettingsTesting.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -34,6 +35,7 @@
 	import { emit } from '$lib/utils/events.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { simulatedCanisterFailuresEnabled } from '$lib/utils/simulated-canister-failures.utils';
 
 	const modalId = Symbol();
 
@@ -187,6 +189,11 @@
 
 {#if AI_ASSISTANT_CONSOLE_ENABLED}
 	<SettingsExperimentalFeatures />
+{/if}
+
+<!-- QA harness - DO NOT MERGE. -->
+{#if simulatedCanisterFailuresEnabled}
+	<SettingsTesting />
 {/if}
 
 <div class="mt-24">
