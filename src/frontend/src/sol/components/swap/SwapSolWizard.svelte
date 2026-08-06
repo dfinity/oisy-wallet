@@ -12,7 +12,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
+		TRACK_COUNT_SWAP_SUBMITTED
 	} from '$lib/constants/analytics.constants';
 	import { solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -225,8 +225,11 @@
 
 			progress(ProgressStepsSwap.DONE);
 
+			// The foreground completes once the user's funds have left their wallet;
+			// success/failure of the background settlement is tracked separately via
+			// the AUT store, so we fire `submitted` here (matching OneSec).
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name: TRACK_COUNT_SWAP_SUBMITTED,
 				metadata: swapTrackingMetadata
 			});
 
@@ -290,7 +293,7 @@
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-				<SwapProgress sendWithTransfer {swapProgressStep} />
+				<SwapProgress sendWithTransfer {swapProgressStep} swapWithActiveTransaction />
 			{/if}
 		{/key}
 	</SolFeeContext>

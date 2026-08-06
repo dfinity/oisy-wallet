@@ -11,7 +11,6 @@ import {
 	fetchNearIntentsSwapQuote,
 	loadNearIntentsTokens,
 	nearIntentsSupportedTokens,
-	pollNearIntentsStatus,
 	submitNearIntentsDepositTx
 } from '$lib/services/near-intents.services';
 import type { NearIntentsToken } from '$lib/types/near-intents';
@@ -23,8 +22,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
 	mockNearIntentsQuoteResponse,
-	mockNearIntentsStatusFailed,
-	mockNearIntentsStatusPending,
 	mockNearIntentsStatusSuccess,
 	mockNearIntentsTokens
 } from '$tests/mocks/near-intents.mock';
@@ -366,55 +363,6 @@ describe('near-intents.services', () => {
 				txHash: '0xHash',
 				depositAddress: '0xDeposit',
 				memo: 'test-memo'
-			});
-		});
-	});
-
-	describe('pollNearIntentsStatus', () => {
-		it('should resolve when status is SUCCESS', async () => {
-			vi.mocked(nearIntentsApi.fetchNearIntentsStatus).mockResolvedValue(
-				mockNearIntentsStatusSuccess
-			);
-
-			await expect(pollNearIntentsStatus({ depositAddress: '0xDeposit' })).resolves.toBeUndefined();
-
-			expect(nearIntentsApi.fetchNearIntentsStatus).toHaveBeenCalledOnce();
-		});
-
-		it('should throw when status is FAILED', async () => {
-			vi.mocked(nearIntentsApi.fetchNearIntentsStatus).mockResolvedValue(
-				mockNearIntentsStatusFailed
-			);
-
-			await expect(pollNearIntentsStatus({ depositAddress: '0xDeposit' })).rejects.toThrow(
-				'NEAR Intents swap failed'
-			);
-		});
-
-		it('should poll multiple times until terminal status', async () => {
-			vi.mocked(nearIntentsApi.fetchNearIntentsStatus)
-				.mockResolvedValueOnce(mockNearIntentsStatusPending)
-				.mockResolvedValueOnce({ ...mockNearIntentsStatusPending, status: 'PROCESSING' })
-				.mockResolvedValueOnce(mockNearIntentsStatusSuccess);
-
-			await pollNearIntentsStatus({ depositAddress: '0xDeposit' });
-
-			expect(nearIntentsApi.fetchNearIntentsStatus).toHaveBeenCalledTimes(3);
-		});
-
-		it('includes depositMemo in status calls', async () => {
-			vi.mocked(nearIntentsApi.fetchNearIntentsStatus).mockResolvedValue(
-				mockNearIntentsStatusSuccess
-			);
-
-			await pollNearIntentsStatus({
-				depositAddress: '0xDeposit',
-				depositMemo: 'test-memo'
-			});
-
-			expect(nearIntentsApi.fetchNearIntentsStatus).toHaveBeenCalledWith({
-				depositAddress: '0xDeposit',
-				depositMemo: 'test-memo'
 			});
 		});
 	});
