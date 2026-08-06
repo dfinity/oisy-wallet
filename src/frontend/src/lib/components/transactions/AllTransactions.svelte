@@ -13,6 +13,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
@@ -23,7 +24,7 @@
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token-ui';
-	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		hiddenInfoQualifiers,
 		saveHideInfoQualifiers,
@@ -186,7 +187,7 @@
 			{#if undismissedNoCanister.length > 0}
 				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
 					{replacePlaceholders(replaceOisyPlaceholders($i18n.activity.warning.no_index_canister), {
-						$token_list: undismissedNoCanister.join(', ')
+						$token_list: formatList({ items: undismissedNoCanister, language: $currentLanguage })
 					})}
 				</MessageBox>
 			{/if}
@@ -196,7 +197,10 @@
 					{replacePlaceholders(
 						replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
 						{
-							$token_list: tokensWithUnavailableCanister.join(', ')
+							$token_list: formatList({
+								items: tokensWithUnavailableCanister,
+								language: $currentLanguage
+							})
 						}
 					)}
 				</MessageBox>
