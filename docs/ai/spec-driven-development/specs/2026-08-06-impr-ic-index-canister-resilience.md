@@ -200,8 +200,10 @@ holding a per-`TokenId` consecutive-failure count, fed from `syncWallet`
 (`ic-listener.services.ts`): increment when `transactionsUnavailable` is true,
 reset to zero on any successful transaction sync. Not persisted.
 
-**Threshold.** New constant (3) alongside the other IC constants; a derived
-store exposes the token IDs at or above it.
+**Threshold.** New constant (3) alongside the other wallet-timer constants
+(`IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD`); a derived store
+(`$icp/derived/ic-transactions-status.derived.ts`) exposes the **enabled** tokens
+at or above it, so a disabled token never raises a banner.
 
 **Banner.** `AllTransactions.svelte:69-93` stops deriving the "unavailable" list
 from `icTransactionsStore[tokenId] === null` and uses the new derived store
