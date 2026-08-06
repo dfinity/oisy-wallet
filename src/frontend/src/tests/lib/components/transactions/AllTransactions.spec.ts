@@ -12,10 +12,11 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
 import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+import { Languages } from '$lib/enums/languages';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenId } from '$lib/types/token';
-import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as infoUtils from '$lib/utils/info.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -91,7 +92,7 @@ describe('AllTransactions', () => {
 
 	const unavailableText = (symbols: string[]) =>
 		replacePlaceholders(replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister), {
-			$token_list: symbols.join(', ')
+			$token_list: formatList({ items: symbols, language: Languages.ENGLISH })
 		});
 
 	const dismissWarning = async (container: HTMLElement) => {
@@ -152,7 +153,7 @@ describe('AllTransactions', () => {
 
 		const exceptedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.no_index_canister),
-			{ $token_list: 'UWT' }
+			{ $token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH }) }
 		);
 
 		expect(getByText(exceptedText)).toBeInTheDocument();
@@ -167,7 +168,7 @@ describe('AllTransactions', () => {
 
 		const exceptedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
-			{ $token_list: 'UTC' }
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
 		expect(getByText(exceptedText)).toBeInTheDocument();
@@ -182,7 +183,7 @@ describe('AllTransactions', () => {
 
 		const exceptedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
-			{ $token_list: 'UTC' }
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
 		expect(queryByText(exceptedText)).not.toBeInTheDocument();
@@ -198,7 +199,7 @@ describe('AllTransactions', () => {
 
 		const exceptedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
-			{ $token_list: 'UTC' }
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
 		expect(queryByText(exceptedText)).not.toBeInTheDocument();
@@ -390,7 +391,7 @@ describe('AllTransactions', () => {
 
 			const expectedText = replacePlaceholders(
 				replaceOisyPlaceholders(en.activity.warning.no_index_canister),
-				{ $token_list: 'NIC' }
+				{ $token_list: formatList({ items: ['NIC'], language: Languages.ENGLISH }) }
 			);
 
 			expect(queryByText(expectedText)).not.toBeInTheDocument();
