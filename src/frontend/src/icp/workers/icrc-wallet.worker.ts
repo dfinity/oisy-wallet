@@ -27,7 +27,10 @@ type GetTransactions = IcrcIndexDid.GetTransactions;
 
 type GetBalance = bigint;
 
-type GetBalanceAndTransactions = Omit<GetTransactions, 'balance'> & { balance: GetBalance };
+type GetBalanceAndTransactions = Omit<GetTransactions, 'balance'> & {
+	balance: GetBalance;
+	transactionsUnavailable?: boolean;
+};
 
 const getTransactions = ({
 	identity,
@@ -115,7 +118,8 @@ const getBalanceAndTransactions = async (
 	const withoutNewTransactions: GetBalanceAndTransactions = {
 		balance,
 		transactions: [],
-		oldest_tx_id: []
+		oldest_tx_id: [],
+		transactionsUnavailable: true
 	};
 
 	if (transactionsResult.status === 'rejected') {

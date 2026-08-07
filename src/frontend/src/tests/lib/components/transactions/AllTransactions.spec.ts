@@ -5,13 +5,16 @@ import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
+import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
 import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
@@ -32,12 +35,34 @@ describe('AllTransactions', () => {
 		enabled: true
 	};
 
+	const setUpTokenWithUnavailableIndexCanister = (): TokenId => {
+		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
+			...customIcrcToken,
+			symbol: 'UTC',
+			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
+		};
+
+		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
+
+		const tokenId = get(icrcCustomTokensStore)?.at(0)?.data.id;
+		assertNonNullish(tokenId);
+
+		return tokenId;
+	};
+
+	const failTransactionsSync = ({ tokenId, times }: { tokenId: TokenId; times: number }) =>
+		Array.from({ length: times }).forEach(() => icTransactionsStatusStore.fail(tokenId));
+
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
 			writable: true,
 			configurable: true,
 			value: IntersectionObserverActive
 		});
+	});
+
+	beforeEach(() => {
+		icTransactionsStatusStore.reset();
 	});
 
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
@@ -77,19 +102,10 @@ describe('AllTransactions', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
-	it('renders the unavailable Index canister warning box', () => {
-		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
-			...customIcrcToken,
-			symbol: 'UTC',
-			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
-		};
+	it('renders the unavailable Index canister warning box after enough consecutive failures', () => {
+		const tokenId = setUpTokenWithUnavailableIndexCanister();
 
-		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
-
-		const store = get(icrcCustomTokensStore);
-		const tokenId = store?.at(0)?.data.id;
-		assertNonNullish(tokenId);
-		icTransactionsStore.nullify(tokenId);
+		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
 
 		const { getByText } = render(AllTransactions);
 
@@ -100,19 +116,39 @@ describe('AllTransactions', () => {
 		expect(getByText(exceptedText)).toBeInTheDocument();
 	});
 
+	it('does not render the unavailable Index canister warning box before the threshold', () => {
+		const tokenId = setUpTokenWithUnavailableIndexCanister();
+
+		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD - 1 });
+
+		const { queryByText } = render(AllTransactions);
+
+		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
+			$token_list: '$UTC'
+		});
+
+		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+	});
+
+	it('stops rendering the unavailable Index canister warning box after a successful sync', () => {
+		const tokenId = setUpTokenWithUnavailableIndexCanister();
+
+		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+		icTransactionsStatusStore.succeed(tokenId);
+
+		const { queryByText } = render(AllTransactions);
+
+		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
+			$token_list: '$UTC'
+		});
+
+		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+	});
+
 	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
-		const tokenWithUnavailableIndexCanister: IcrcCustomToken = {
-			...customIcrcToken,
-			symbol: 'UTC',
-			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai'
-		};
+		const tokenId = setUpTokenWithUnavailableIndexCanister();
 
-		icrcCustomTokensStore.setAll([{ data: tokenWithUnavailableIndexCanister, certified: true }]);
-
-		const store = get(icrcCustomTokensStore);
-		const tokenId = store?.at(0)?.data.id;
-		assertNonNullish(tokenId);
-		icTransactionsStore.nullify(tokenId);
+		failTransactionsSync({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
 
 		const spySessionStorage = vi.spyOn(Storage.prototype, 'setItem');
 		const spyDismiss = vi.spyOn(notificationServices, 'dismissNotifications').mockResolvedValue();

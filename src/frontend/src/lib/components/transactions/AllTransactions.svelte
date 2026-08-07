@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
+	import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -66,30 +67,20 @@
 		});
 	};
 
-	let enabledTokensWithoutTransaction = $derived(
+	// A nullified entry means the wallet syncs the balance only, because the token has no Index
+	// canister at all. A token whose Index canister is merely failing keeps its transactions and is
+	// surfaced by tokensWithUnavailableIndexCanister once the failures pile up.
+	// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
+	let tokensWithoutCanister = $derived(
 		$enabledFungibleNetworkTokens
 			.filter((token) => $icTransactionsStore?.[token.id] === null)
 			.map((token: TokenUi) => token as IcToken)
+			.filter(hasNoIndexCanister)
+			.map(getTokenDisplaySymbol)
 	);
 
-	let { tokensWithoutCanister, tokensWithUnavailableCanister } = $derived(
-		enabledTokensWithoutTransaction.reduce<{
-			tokensWithoutCanister: string[];
-			tokensWithUnavailableCanister: string[];
-		}>(
-			(acc, curr) => {
-				// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
-				const symbol = getTokenDisplaySymbol(curr);
-
-				if (hasNoIndexCanister(curr)) {
-					acc.tokensWithoutCanister.push(symbol);
-				} else {
-					acc.tokensWithUnavailableCanister.push(symbol);
-				}
-				return acc;
-			},
-			{ tokensWithoutCanister: [], tokensWithUnavailableCanister: [] }
-		)
+	let tokensWithUnavailableCanister = $derived(
+		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
 	);
 
 	let undismissedNoCanister = $derived(
