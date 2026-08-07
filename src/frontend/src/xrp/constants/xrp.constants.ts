@@ -1,0 +1,1 @@
+export const XRP_DERIVATION_PATH_PREFIX = 'XRP';
