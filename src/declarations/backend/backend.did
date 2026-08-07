@@ -29,6 +29,10 @@ type ActiveUserTransactionData = variant {
 	// source/destination leg (EVM and Solana); the deposit address, its
 	// optional memo, and origin/destination tx hashes ride in `external_refs`.
 	NearIntents : NearIntentsData;
+	// Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+	// modes, discriminated by the `mode` field; the auction id, order hash,
+	// transaction hash and nonce ride in `external_refs`.
+	Velora : VeloraData;
 	// Liquidium lend/borrow flow. A single variant covers all four actions
 	// (supply, borrow, repay, withdraw).
 	Liquidium : LiquidiumData
@@ -1275,6 +1279,21 @@ type Utxo = record {
 	// The outpoint of the UTXO.
 	outpoint : Outpoint
 };
+// Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+// id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+// pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+// `external_refs`; only the canonical immutable fields are captured here.
+type VeloraData = record {
+	mode : VeloraSwapMode;
+	source_token : TokenId;
+	// Source-token amount in base units.
+	amount : nat;
+	dest_token : TokenId
+};
+// Which Velora execution mode an active transaction tracks. Determines how the
+// frontend polls for settlement: `Delta` by auction id against Velora's Delta
+// API, `Market` by transaction receipt on the source chain.
+type VeloraSwapMode = variant { Delta; Market };
 service : (Arg) -> {
 	// Adds one or more dismissed notifications to the user's profile.
 	//
