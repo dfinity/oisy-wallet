@@ -2316,8 +2316,8 @@
 			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
-			"unavailable_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターは現在利用できません。"
+			"no_index_canister": "$oisy_short は $token_list の取引を読み込めません。トークンの発行者が取引の追跡機能を提供していません。",
+			"unavailable_index_canister": "$oisy_short は現在 $token_list の最新の取引を読み込めません。再試行を続けています。"
 		}
 	},
 	"earning": {

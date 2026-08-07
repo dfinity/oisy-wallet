@@ -217,6 +217,9 @@ Both strings above in `src/frontend/src/lib/i18n/en.json:2315-2318`, plus
 translations for the locales listed in the `Languages` enum. No new keys, so no
 new placeholders and no bundle-size impact beyond the string lengths.
 
+`ar.json` is deliberately left untouched: Arabic is not in the `Languages` enum,
+so the file is unreachable at runtime.
+
 ### Tests
 
 The `test-coverage` CI gate enforces whole-project thresholds, so each PR ships
