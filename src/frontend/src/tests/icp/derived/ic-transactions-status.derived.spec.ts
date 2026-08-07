@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import {
 	tokensWithRecoveredIndexCanister,
 	tokensWithUnavailableIndexCanister
@@ -73,6 +74,16 @@ describe('ic-transactions-status.derived', () => {
 
 			fail({ tokenId, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
 			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(get(tokensWithUnavailableIndexCanister)).toStrictEqual([]);
+		});
+
+		it('should ignore a token of another chain', () => {
+			// Only IC tokens are identified by a Ledger canister ID, so a non-IC token must never reach
+			// a consumer of this store — even if something did record a failure against it.
+			setUpToken();
+
+			fail({ tokenId: ETHEREUM_TOKEN_ID, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
 
 			expect(get(tokensWithUnavailableIndexCanister)).toStrictEqual([]);
 		});

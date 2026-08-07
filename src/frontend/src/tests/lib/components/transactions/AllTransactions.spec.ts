@@ -55,6 +55,9 @@ describe('AllTransactions', () => {
 
 	// `parseTokenId` mints a fresh symbol per call, so the ids have to be read back from the store
 	// rather than recreated - a recreated one never matches the token the component sees.
+	// The dismissal is recorded against the Ledger canister ID, not the symbol.
+	const UTA_LEDGER_CANISTER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
+
 	const setUpTwoTokensWithUnavailableIndexCanister = (): { first: TokenId; second: TokenId } => {
 		icrcCustomTokensStore.setAll([
 			{
@@ -221,7 +224,7 @@ describe('AllTransactions', () => {
 
 		expect(spySave).toHaveBeenCalledWith({
 			key: 'oisy_ic_hide_transaction_unavailable_canister',
-			qualifiers: ['UTA']
+			qualifiers: [UTA_LEDGER_CANISTER_ID]
 		});
 		// The per-token dismissal is local to the session, never persisted to the backend.
 		expect(spyDismiss).not.toHaveBeenCalled();
@@ -276,7 +279,7 @@ describe('AllTransactions', () => {
 		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
 		// A reload restores the dismissal from the session, while the failure counters - which live in
 		// memory only - start empty. "Nothing is failing" must not be read as "everything recovered".
-		vi.spyOn(infoUtils, 'hiddenInfoQualifiers').mockReturnValue(['UTA']);
+		vi.spyOn(infoUtils, 'hiddenInfoQualifiers').mockReturnValue([UTA_LEDGER_CANISTER_ID]);
 
 		const { queryByText, unmount } = render(AllTransactions);
 
@@ -288,6 +291,58 @@ describe('AllTransactions', () => {
 		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
 
 		expect(spySave).not.toHaveBeenCalled();
+
+		unmount();
+		vi.restoreAllMocks();
+	});
+
+	it('keeps the two tokens apart when they share a symbol', async () => {
+		icrcCustomTokensStore.setAll([
+			{
+				data: {
+					...customIcrcToken,
+					id: parseTokenId('DUP'),
+					symbol: 'DUP',
+					ledgerCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
+					indexCanisterId: 'n5wcd-faaaa-aaaar-qaaea-cai'
+				},
+				certified: true
+			},
+			{
+				data: {
+					...customIcrcToken,
+					id: parseTokenId('DUP'),
+					symbol: 'DUP',
+					ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai',
+					indexCanisterId: 's3zol-vqaaa-aaaar-qacpa-cai'
+				},
+				certified: true
+			}
+		]);
+
+		const stored = get(icrcCustomTokensStore);
+		const first = stored?.at(0)?.data.id;
+		const second = stored?.at(1)?.data.id;
+		assertNonNullish(first);
+		assertNonNullish(second);
+
+		vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
+
+		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		const { container, queryByText, unmount } = render(AllTransactions);
+
+		expect(queryByText(unavailableText(['DUP']))).toBeInTheDocument();
+
+		await dismissWarning(container);
+
+		await waitFor(() => expect(queryByText(unavailableText(['DUP']))).not.toBeInTheDocument());
+
+		// The other token happens to share the symbol, but it is a different token: its own outage
+		// must still be surfaced.
+		failTransactionsSync({ tokenId: second, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
+
+		await waitFor(() => expect(queryByText(unavailableText(['DUP']))).toBeInTheDocument());
 
 		unmount();
 		vi.restoreAllMocks();

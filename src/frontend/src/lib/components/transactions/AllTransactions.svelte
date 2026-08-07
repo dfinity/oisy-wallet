@@ -91,18 +91,19 @@
 			.map(getTokenDisplaySymbol)
 	);
 
-	let failingIndexCanisters = $derived(
-		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
-	);
+	// Identified by Ledger canister ID, never by symbol: a user can hold two tokens with the same
+	// symbol, and a dismissal recorded against a symbol would silence both. The symbol is only ever
+	// used for what is rendered.
+	let failingTokens = $derived($tokensWithUnavailableIndexCanister);
 
 	// Which tokens the user has already acknowledged. Per token, not one flag for the whole box:
 	// dismissing it for one token must not silence a different token failing later.
-	let dismissedUnavailableCanister = $state<string[]>(
+	let dismissedLedgerCanisterIds = $state<string[]>(
 		hiddenInfoQualifiers(UNAVAILABLE_INDEX_CANISTER_HIDE_KEY)
 	);
 
 	const rememberDismissed = (qualifiers: string[]) => {
-		dismissedUnavailableCanister = qualifiers;
+		dismissedLedgerCanisterIds = qualifiers;
 
 		saveHideInfoQualifiers({ key: UNAVAILABLE_INDEX_CANISTER_HIDE_KEY, qualifiers });
 	};
@@ -113,30 +114,34 @@
 	// Keyed on an observed successful check, not on the token being absent from the failing list:
 	// right after a page load nothing has been checked yet, and treating that as a recovery would
 	// throw away every dismissal on every reload.
-	let recoveredIndexCanisters = $derived(
-		$tokensWithRecoveredIndexCanister.map(getTokenDisplaySymbol)
+	let recoveredLedgerCanisterIds = $derived(
+		$tokensWithRecoveredIndexCanister.map(({ ledgerCanisterId }) => ledgerCanisterId)
 	);
 
 	$effect(() => {
-		const stillDismissed = dismissedUnavailableCanister.filter(
-			(symbol) => !recoveredIndexCanisters.includes(symbol)
+		const stillDismissed = dismissedLedgerCanisterIds.filter(
+			(ledgerCanisterId) => !recoveredLedgerCanisterIds.includes(ledgerCanisterId)
 		);
 
-		if (stillDismissed.length !== dismissedUnavailableCanister.length) {
+		if (stillDismissed.length !== dismissedLedgerCanisterIds.length) {
 			rememberDismissed(stillDismissed);
 		}
 	});
 
+	let undismissedUnavailableTokens = $derived(
+		failingTokens.filter(
+			({ ledgerCanisterId }) => !dismissedLedgerCanisterIds.includes(ledgerCanisterId)
+		)
+	);
+
 	let tokensWithUnavailableCanister = $derived(
-		failingIndexCanisters.filter((symbol) => !dismissedUnavailableCanister.includes(symbol))
+		undismissedUnavailableTokens.map(getTokenDisplaySymbol)
 	);
 
 	const dismissUnavailableCanisterWarning = () =>
 		rememberDismissed([
-			...dismissedUnavailableCanister,
-			...tokensWithUnavailableCanister.filter(
-				(symbol) => !dismissedUnavailableCanister.includes(symbol)
-			)
+			...dismissedLedgerCanisterIds,
+			...undismissedUnavailableTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 		]);
 
 	let undismissedNoCanister = $derived(
