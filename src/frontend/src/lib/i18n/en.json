@@ -246,6 +246,19 @@
 			"learn_more": "Learn more"
 		}
 	},
+	"mobile_auth": {
+		"text": {
+			"title": "Connect your mobile app",
+			"description": "You are signing in to the $oisy_name mobile app. Authentication happens here, on the web, so your mobile wallet is exactly the same wallet as in your browser.",
+			"continue": "Continue with Internet Identity",
+			"redirecting": "All set — returning you to the $oisy_name app…",
+			"return_to_app": "Open the $oisy_name app"
+		},
+		"error": {
+			"invalid_request": "This sign-in link is invalid or incomplete. Please restart the sign-in from the $oisy_name app.",
+			"error_while_signing_in": "Something went wrong while signing in. Please restart the sign-in from the $oisy_name app."
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "All apps",
