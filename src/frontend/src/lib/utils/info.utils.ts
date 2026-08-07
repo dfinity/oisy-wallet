@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { consoleError } from '$lib/utils/console.utils';
+import { isNullish } from '@dfinity/utils';
 
 export type HideInfoKey =
 	| 'oisy_ic_hide_bitcoin_info'
@@ -13,6 +14,48 @@ export const saveHideInfo = (key: HideInfoKey) => {
 	} catch (err: unknown) {
 		// We use the session storage for the operational part of the app but, not crucial
 		consoleError(err);
+	}
+};
+
+/**
+ * The qualified variant of the flags above: instead of "this box is hidden", it records *what* the
+ * user dismissed - e.g. the tokens named in the box at the time. A box that can name a different
+ * subject later needs this, otherwise dismissing it once silences every future subject too.
+ */
+export const saveHideInfoQualifiers = ({
+	key,
+	qualifiers
+}: {
+	key: HideInfoKey;
+	qualifiers: string[];
+}) => {
+	try {
+		sessionStorage.setItem(key, JSON.stringify(qualifiers));
+	} catch (err: unknown) {
+		// We use the session storage for the operational part of the app but, not crucial
+		consoleError(err);
+	}
+};
+
+export const hiddenInfoQualifiers = (key: HideInfoKey): string[] => {
+	try {
+		if (!browser) {
+			return [];
+		}
+
+		const stored = sessionStorage.getItem(key);
+
+		if (isNullish(stored)) {
+			return [];
+		}
+
+		const qualifiers: unknown = JSON.parse(stored);
+
+		return Array.isArray(qualifiers) ? qualifiers.map((qualifier) => `${qualifier}`) : [];
+	} catch (err: unknown) {
+		// We use the session storage for the operational part of the app but, not crucial
+		consoleError(err);
+		return [];
 	}
 };
 

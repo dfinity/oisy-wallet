@@ -117,8 +117,8 @@ it is out of scope.)
 
 ### Warning text
 
-`unavailable_index_canister` — non-dismissible box, must read correctly both
-when the list below it is empty and when it shows older transactions:
+`unavailable_index_canister` — must read correctly both when the list below it
+is empty and when it shows older transactions:
 
 > `$oisy_short can’t load the latest transactions for $token_list right now, and keeps retrying.`
 
@@ -133,8 +133,7 @@ persisted via `NOTIFICATION_VERSIONS.NoIndexCanister`), text de-jargoned:
   tick is the retry.
 - Does **not** change the 30s interval, nor the 10s query-only warmup.
 - Does **not** persist the failure counter; it is in-memory and per session.
-- Does **not** change the dismissal behaviour of the `no_index_canister` box,
-  nor make the new warning dismissible.
+- Does **not** change the dismissal behaviour of the `no_index_canister` box.
 - Does **not** touch ETH/SOL/BTC transaction loading, nor the backend
   user-transactions storage (`save_user_transactions` / `get_user_transactions`),
   which covers ETH and SOL only and plays no part here.
@@ -260,6 +259,34 @@ None outstanding — the failure paths were traced end to end against
 - **Warmup interaction.** Failures during the first 10s (query-only) are
   invisible to the counter, so the effective delay after a fresh load is ~100s.
   Accepted as-is.
+
+## Amendment — dismissal granularity (added after PR 3)
+
+_Resolved:_ the spec originally called the `unavailable_index_canister` box
+non-dismissible. It is dismissible today, and stays so — what was wrong was the
+granularity, not the button. The box wrote a single session-wide flag, so
+dismissing it for one token silenced every other token for the rest of the
+session.
+
+Shipped as a fourth PR: the dismissal is remembered **per token**, the text
+lists only the tokens that are not dismissed, and a dismissal ends with the
+outage it silenced — once a token's Index canister answers again it is dropped
+from the dismissed list, so a later failure of that same token is surfaced
+again. `saveHideInfoQualifiers` / `hiddenInfoQualifiers` in
+`src/frontend/src/lib/utils/info.utils.ts` are the qualified variant of the
+existing boolean hide-flags; they reuse the same sessionStorage key, whose value
+becomes a JSON list.
+
+The qualifiers are **ledger canister IDs**, not symbols: a user can hold two
+tokens with the same symbol, and a dismissal keyed on the symbol would silence
+both. Symbols remain what the box renders. For the same reason the derived
+stores narrow to IC tokens with `isIcToken` rather than casting - only IC tokens
+have a ledger canister ID.
+
+Recovery is keyed on an observed successful check (`succeed` records a zero,
+against no entry at all for a token never checked) rather than on the token's
+absence from the failing list: the counters are in-memory, so straight after a
+page load nothing is failing yet and every dismissal would otherwise be dropped.
 
 ## Follow-ups (out of scope)
 
