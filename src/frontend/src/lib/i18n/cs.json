@@ -2713,5 +2713,35 @@
 				"unavailable_title": "Tento odkaz vypršel nebo už byl použit"
 			}
 		}
+	},
+	"plug_import": {
+		"text": {
+			"title": "",
+			"settings_entry": "",
+			"settings_entry_description": "",
+			"settings_open": "",
+			"intro": "",
+			"phrase_label": "",
+			"phrase_placeholder": "",
+			"accounts_label": "",
+			"accounts_hint": "",
+			"submit": "",
+			"reset": "",
+			"account": "",
+			"principal": "",
+			"addresses": "",
+			"balance_loading": "",
+			"balance_unavailable": "",
+			"empty_account": "",
+			"unavailable_hint": "",
+			"not_shown_title": "",
+			"not_shown_description": "",
+			"read_only_title": "",
+			"read_only_description": ""
+		},
+		"error": {
+			"invalid_phrase": "",
+			"derivation_failed": ""
+		}
 	}
 }

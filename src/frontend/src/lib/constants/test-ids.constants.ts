@@ -431,3 +431,12 @@ export const BUY_MODAL_ONRAMPER_IFRAME = 'buy-modal-onramper-iframe';
 
 // CONFIRMATION POPUP
 export const CONFIRMATION_POPUP_MODAL = 'confirmation-popup-modal';
+
+export const PLUG_IMPORT_PHRASE_INPUT = 'plug-import-phrase-input';
+export const PLUG_IMPORT_ACCOUNTS_INPUT = 'plug-import-accounts-input';
+export const PLUG_IMPORT_SUBMIT_BUTTON = 'plug-import-submit-button';
+export const PLUG_IMPORT_RESET_BUTTON = 'plug-import-reset-button';
+export const PLUG_IMPORT_ERROR = 'plug-import-error';
+export const PLUG_IMPORT_ACCOUNT = 'plug-import-account';
+export const PLUG_IMPORT_SETTINGS_LINK = 'plug-import-settings-link';
+export const PLUG_IMPORT_NOTICES = 'plug-import-notices';
