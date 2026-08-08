@@ -1,12 +1,21 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
+} from '$lib/enums/plausible';
+import { trackAppError } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError, UserProfileNotFoundError } from '$lib/types/errors';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
 import { consoleError } from '$lib/utils/console.utils';
+import { isNetworkUnreachableError, networkErrorSubcode } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -61,7 +70,7 @@ export const loadCertifiedUserProfile = async ({
 	}
 };
 
-export type LoadUserProfileFailureReason = 'signups-closed' | 'unknown';
+export type LoadUserProfileFailureReason = 'signups-closed' | 'network-unreachable' | 'unknown';
 
 export type LoadUserProfileResult = ResultSuccess<LoadUserProfileFailureReason> & {
 	// `true` only when this call created the profile. Such a user has no signing allowance yet and
@@ -115,13 +124,39 @@ export const loadUserProfile = async ({
 			return { success: false, err: 'signups-closed', profileCreated };
 		}
 
-		const { settings } = get(i18n);
+		// The profile gates the whole app, so an unreachable network here is not something a
+		// toast can help with: it hands over to `InfrastructureErrorPage` instead, which can
+		// offer a reload. Deliberately no toast and no sign-out — discarding the session over
+		// a dropped connection is hostile when a reload would have fixed it.
+		if (isNetworkUnreachableError(err)) {
+			consoleError('Failed to load the user profile: the network is unreachable.', err);
+
+			infrastructureError.set({
+				operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				err
+			});
+
+			trackAppError({
+				context: PLAUSIBLE_EVENT_CONTEXTS.BACKEND,
+				subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+				code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+				subcode: networkErrorSubcode(err),
+				severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER,
+				err
+			});
+
+			return { success: false, err: 'network-unreachable', profileCreated };
+		}
+
+		const { init } = get(i18n);
 		toastsError({
-			msg: { text: settings.error.loading_profile },
+			msg: { text: init.error.loading_profile },
 			err
 		});
 		return { success: false, err: 'unknown', profileCreated };
 	}
+
+	infrastructureError.reset();
 
 	return { success: true, profileCreated };
 };

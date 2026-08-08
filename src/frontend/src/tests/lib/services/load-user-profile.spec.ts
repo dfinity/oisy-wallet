@@ -1,13 +1,23 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
+import {
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
+} from '$lib/enums/plausible';
+import * as analyticsServices from '$lib/services/analytics.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
+import { infrastructureError } from '$lib/stores/infrastructure-error.store';
+import { toastsStore } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { SignupsClosedError } from '$lib/types/errors';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
+import { HttpFetchErrorCode, TransportError } from '@dfinity/agent';
 import { waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/api/backend.api');
 
@@ -18,10 +28,16 @@ const mockProfile: UserProfile = {
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('load-user-profile.services', () => {
+	let trackAppErrorSpy: MockInstance;
+
 	describe('loadUserProfile', () => {
 		beforeEach(() => {
 			userProfileStore.reset();
+			infrastructureError.reset();
+			toastsStore.reset();
 			vi.clearAllMocks();
+
+			trackAppErrorSpy = vi.spyOn(analyticsServices, 'trackAppError').mockImplementation(() => {});
 		});
 
 		it('should not create a user profile if uncertified profile is found', async () => {
@@ -174,6 +190,84 @@ describe('load-user-profile.services', () => {
 			await waitFor(() => expect(callCount).toBe(2));
 
 			consoleErrorSpy.mockRestore();
+		});
+
+		describe('when the network is unreachable', () => {
+			const networkError = () =>
+				TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')));
+
+			beforeEach(() => {
+				infrastructureError.reset();
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+			});
+
+			it('should surface network-unreachable instead of unknown', async () => {
+				vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(networkError());
+
+				const result = await loadUserProfile({ identity: mockIdentity });
+
+				expect(result).toEqual({
+					success: false,
+					err: 'network-unreachable',
+					profileCreated: false
+				});
+			});
+
+			it('should record the failing operation in the infrastructure error store', async () => {
+				vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(networkError());
+
+				await loadUserProfile({ identity: mockIdentity });
+
+				expect(get(infrastructureError)).toEqual({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+					detail: expect.stringContaining('Failed to fetch HTTP request')
+				});
+			});
+
+			// The page owns this failure; a toast floating over a dead skeleton is what we are fixing.
+			it('should not show a toast', async () => {
+				vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(networkError());
+
+				await loadUserProfile({ identity: mockIdentity });
+
+				expect(get(toastsStore)).toHaveLength(0);
+			});
+
+			it('should track a blocker-severity exceptional error', async () => {
+				vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(networkError());
+
+				await loadUserProfile({ identity: mockIdentity });
+
+				expect(trackAppErrorSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+						severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.BLOCKER
+					})
+				);
+			});
+
+			it('should clear a standing error once the profile loads again', async () => {
+				infrastructureError.set({
+					operation: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_PROFILE,
+					err: networkError()
+				});
+				vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue({ Ok: mockProfile });
+
+				await loadUserProfile({ identity: mockIdentity });
+
+				expect(get(infrastructureError)).toBeUndefined();
+			});
+
+			it('should still show a toast and report unknown for a non-network error', async () => {
+				vi.spyOn(backendApi, 'getUserProfile').mockRejectedValue(new Error('Boom'));
+
+				const result = await loadUserProfile({ identity: mockIdentity });
+
+				expect(result).toEqual({ success: false, err: 'unknown', profileCreated: false });
+				expect(get(infrastructureError)).toBeUndefined();
+				expect(get(toastsStore)[0].text).toContain(en.init.error.loading_profile);
+			});
 		});
 	});
 });

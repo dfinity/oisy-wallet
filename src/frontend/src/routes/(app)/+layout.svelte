@@ -9,6 +9,7 @@
 	import { isTokenIc } from '$icp/utils/icrc.utils';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
+	import InfrastructureErrorPage from '$lib/components/auth/InfrastructureErrorPage.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
 	import Footer from '$lib/components/core/Footer.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
@@ -25,6 +26,7 @@
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
+	import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 	import { token } from '$lib/stores/token.store';
 	import {
 		isRouteBorrowings,
@@ -108,6 +110,9 @@
 
 {#if $isAuthLocked}
 	<LockPage />
+{:else if $authSignedIn && nonNullish($infrastructureError)}
+	<!-- Gated on `$authSignedIn` so a stale error never renders over the landing page after sign-out. -->
+	<InfrastructureErrorPage />
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div

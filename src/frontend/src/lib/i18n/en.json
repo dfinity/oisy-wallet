@@ -764,7 +764,18 @@
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
 			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
-			"sol_wallet_error": "Error while loading SOL wallet information."
+			"sol_wallet_error": "Error while loading SOL wallet information.",
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
+			"network_unreachable": "Couldn't reach the network. Some information may be missing."
+		},
+		"unavailable": {
+			"title": "Can't reach the network",
+			"description": "$oisy_short couldn't connect to the Internet Computer. This may be your internet connection, or a temporary problem with the network. Your funds are safe and unaffected.",
+			"details": "Technical details",
+			"operation": "Failed to load: $operation",
+			"reload": "Reload",
+			"logout": "Log out",
+			"logout_hint": "Logging out will clear all cached data"
 		}
 	},
 	"hero": {
@@ -830,7 +841,6 @@
 			"appearance_system": "Enables your operating systems color mode"
 		},
 		"error": {
-			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience.",
 			"export_exchange_rate_unavailable": "Exchange rates are still loading. Try again in a moment.",
 			"export_failed": "We couldn't generate your export. Please try again."
 		}

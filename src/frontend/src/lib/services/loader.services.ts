@@ -104,6 +104,13 @@ export const initLoader = async ({
 			return;
 		}
 
+		// An unreachable network keeps the session: `loadUserProfile` has already flagged it, and
+		// `InfrastructureErrorPage` now owns the screen with a reload and an explicit log-out.
+		// Signing out here would throw the user back to the landing page for a dropped connection.
+		if (userProfileError === 'network-unreachable') {
+			return;
+		}
+
 		await signOut({});
 		return;
 	}

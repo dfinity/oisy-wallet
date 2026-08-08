@@ -9,8 +9,14 @@ import type {
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	PLAUSIBLE_EVENT_ERROR_CODES,
+	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR
+} from '$lib/enums/plausible';
 import { QrCodeType } from '$lib/enums/qr-code-types';
 import { RewardType } from '$lib/enums/reward-type';
+import * as analyticsServices from '$lib/services/analytics.services';
 import {
 	claimVipReward,
 	getCampaignEligibilities,
@@ -23,20 +29,28 @@ import {
 	setReferrer
 } from '$lib/services/reward.services';
 import { i18n } from '$lib/stores/i18n.store';
+import { infrastructureError } from '$lib/stores/infrastructure-error.store';
 import * as toastsStore from '$lib/stores/toasts.store';
+import { toastsStore as toasts } from '$lib/stores/toasts.store';
 import { AlreadyClaimedError, InvalidCampaignError, InvalidCodeError } from '$lib/types/errors';
 import type { RewardClaimApiResponse, RewardResponseInfo } from '$lib/types/reward';
 import { INITIAL_REWARD_RESULT } from '$lib/utils/rewards.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { HttpFetchErrorCode, TransportError } from '@dfinity/agent';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('reward.services', () => {
+	let trackAppErrorSpy: MockInstance;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		trackAppErrorSpy = vi.spyOn(analyticsServices, 'trackAppError').mockImplementation(() => {});
 	});
 
 	describe('getCampaignEligibilities', () => {
@@ -161,6 +175,69 @@ describe('reward.services', () => {
 					nullishIdentityErrorMessage
 				});
 				expect(isGold).toBeFalsy();
+			});
+		});
+
+		describe('on failure', () => {
+			beforeEach(() => {
+				toasts.reset();
+				vi.spyOn(console, 'error').mockImplementation(() => {});
+			});
+
+			it('should show the short connection message without the raw agent detail', async () => {
+				vi.spyOn(rewardApi, 'getUserInfo').mockRejectedValueOnce(
+					TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
+				);
+
+				const { isVip } = await getUserRoles({ identity: mockIdentity });
+
+				expect(isVip).toBeFalsy();
+
+				const [toast] = get(toasts);
+
+				expect(toast.text).toBe(en.init.error.network_unreachable);
+				expect(toast.text).not.toContain('Failed to fetch HTTP request');
+			});
+
+			it('should track a major-severity exceptional error', async () => {
+				vi.spyOn(rewardApi, 'getUserInfo').mockRejectedValueOnce(
+					TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
+				);
+
+				await getUserRoles({ identity: mockIdentity });
+
+				expect(trackAppErrorSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR.USER_ROLES,
+						code: PLAUSIBLE_EVENT_ERROR_CODES.NETWORK_ERROR,
+						severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES.MAJOR
+					})
+				);
+			});
+
+			// A non-network failure keeps its reward-specific message and its error detail — that
+			// detail is the only clue we have about what went wrong.
+			it('should keep the reward-specific message for any other error', async () => {
+				vi.spyOn(rewardApi, 'getUserInfo').mockRejectedValueOnce(new Error('Boom'));
+
+				await getUserRoles({ identity: mockIdentity });
+
+				const [toast] = get(toasts);
+
+				expect(toast.text).toContain(en.vip.reward.error.loading_user_data);
+				expect(toast.text).toContain('Boom');
+				expect(trackAppErrorSpy).not.toHaveBeenCalled();
+			});
+
+			// The wallet works without reward data, so this failure must never take the app over.
+			it('should not set the blocking infrastructure error store', async () => {
+				vi.spyOn(rewardApi, 'getUserInfo').mockRejectedValueOnce(
+					TransportError.fromCode(new HttpFetchErrorCode(new TypeError('Load failed')))
+				);
+
+				await getUserRoles({ identity: mockIdentity });
+
+				expect(get(infrastructureError)).toBeUndefined();
 			});
 		});
 	});

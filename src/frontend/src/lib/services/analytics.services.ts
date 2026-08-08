@@ -4,13 +4,16 @@ import { TRACK_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import {
 	PLAUSIBLE_EVENT_CONTEXTS,
+	type PLAUSIBLE_EVENT_ERROR_CODES,
 	PLAUSIBLE_EVENT_ERROR_SEVERITIES,
+	type PLAUSIBLE_EVENT_ERROR_SUBCODES,
 	PLAUSIBLE_EVENT_EVENTS_KEYS,
 	type PLAUSIBLE_EVENT_FILTER_MODIFIERS,
 	type PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES,
 	PLAUSIBLE_EVENT_RESULT_STATUSES,
 	PLAUSIBLE_EVENT_SOURCE_LOCATIONS,
 	PLAUSIBLE_EVENT_SOURCES,
+	type PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR,
 	PLAUSIBLE_EVENT_SUBCONTEXT_BACKEND,
 	PLAUSIBLE_EVENTS
 } from '$lib/enums/plausible';
@@ -19,8 +22,9 @@ import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import type { RateLimitInfo } from '$lib/types/api';
 import { consoleWarn } from '$lib/utils/console.utils';
+import { replaceIcErrorFields } from '$lib/utils/error.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { init, track } from '@plausible-analytics/tracker';
 
 let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
@@ -248,4 +252,61 @@ export const buildLearnMoreEvent = ({
 			source_path
 		}
 	};
+};
+
+// Plausible truncates long property values, and a raw agent-js message can carry a whole
+// headers blob. Cap it so the useful head of the message survives instead of being cut
+// at an arbitrary point by the tracker.
+const MAX_ERROR_TEXT_LENGTH = 300;
+
+/**
+ * Emit the one event that says "OISY could not do its job for reasons outside the user's
+ * control" — a fault, not a rejected operation.
+ *
+ * Deliberately one generic event rather than a counter per failure: a fault is only otherwise
+ * observable as an *absence* of other events, which is exactly when a signal matters most.
+ *
+ * Four independent dimensions, so a dashboard can count at whichever level a question needs:
+ * - `event_context` — which area/dependency failed (count outages by problem area);
+ * - `event_subcontext` — the operation that could not complete;
+ * - `result_error_code` / `result_error_subcode` — the class of failure and its finer cause;
+ * - `result_error_severity` — the cost to the user: unusable (`blocker`) or degraded (`major`).
+ *
+ * `result_error_text` is for debugging a single event only. It is long and varies for the same
+ * cause, so never count on it — that is what the code/subcode pair is for.
+ *
+ * Privacy (analytics.md §6): the only free text emitted is the sanitised transport error,
+ * which carries no principal, address, amount, or user content.
+ */
+export const trackAppError = ({
+	context,
+	subcontext,
+	code,
+	subcode,
+	severity,
+	err
+}: {
+	context: PLAUSIBLE_EVENT_CONTEXTS;
+	subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_APP_ERROR;
+	code: PLAUSIBLE_EVENT_ERROR_CODES;
+	subcode?: PLAUSIBLE_EVENT_ERROR_SUBCODES;
+	severity: PLAUSIBLE_EVENT_ERROR_SEVERITIES;
+	err?: unknown;
+}) => {
+	const errorText = nonNullish(err) ? replaceIcErrorFields(err) : undefined;
+
+	trackEvent({
+		name: PLAUSIBLE_EVENTS.APP_ERROR,
+		metadata: {
+			event_context: context,
+			event_subcontext: subcontext,
+			result_status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+			result_error_code: code,
+			...(nonNullish(subcode) && { result_error_subcode: subcode }),
+			result_error_severity: severity,
+			...(notEmptyString(errorText) && {
+				result_error_text: errorText.slice(0, MAX_ERROR_TEXT_LENGTH)
+			})
+		}
+	});
 };
