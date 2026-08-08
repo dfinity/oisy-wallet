@@ -1,14 +1,19 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
-import { ERC20_DEPOSIT_ERC20_HASH, ERC20_DEPOSIT_HASH } from '$eth/constants/erc20.constants';
-import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+import {
+	ERC20_DEPOSIT_ERC20_HASH,
+	ERC20_DEPOSIT_HASH,
+	ERC20_TRANSFER_HASH
+} from '$eth/constants/erc20.constants';
+import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { createMockEthTransactionsUi } from '$tests/mocks/eth-transactions.mock';
+import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -283,6 +288,126 @@ describe('EthTransaction', () => {
 			assertNonNullish(labelElement);
 
 			expect(labelElement.textContent).toBe(get(i18n).send.text.send);
+		});
+	});
+
+	describe('with ERC20 transfer transactions', () => {
+		// Decoded: { to: '0x1234567890abcdef1234567890abcdef12345678', value: 10000000n }
+		const mockTransferData = `${ERC20_TRANSFER_HASH}0000000000000000000000001234567890abcdef1234567890abcdef123456780000000000000000000000000000000000000000000000000000000000989680`;
+
+		const mockGasUsed = 21000n;
+		const mockGasPrice = 1000000000n;
+
+		// As listed among the native token transactions: no value, addressed to the ERC20 contract.
+		const mockTransferTx = {
+			...mockTrx,
+			type: 'send' as const,
+			value: ZERO,
+			to: USDC_TOKEN.address,
+			data: mockTransferData,
+			gasUsed: mockGasUsed,
+			gasPrice: mockGasPrice
+		};
+
+		const expectedFeeAmount = `${formatToken({
+			value: mockGasUsed * mockGasPrice * -1n,
+			displayDecimals: EIGHT_DECIMALS,
+			unitName: ETHEREUM_TOKEN.decimals,
+			showPlusSign: true
+		})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`;
+
+		it('should render "Send" label with amount and symbol of the transferred token', () => {
+			const { getByTestId } = render(EthTransaction, {
+				props: {
+					transaction: mockTransferTx,
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const labelElement = getByTestId(TRANSACTION_CHILDREN_CONTAINER);
+
+			assertNonNullish(labelElement);
+
+			const expected = replacePlaceholders(get(i18n).send.text.send_token, {
+				$token: `${formatToken({
+					value: 10000000n,
+					displayDecimals: USDC_TOKEN.decimals,
+					unitName: USDC_TOKEN.decimals
+				})} ${getTokenDisplaySymbol(USDC_TOKEN)}`
+			});
+
+			expect(labelElement.textContent).toBe(expected);
+		});
+
+		it('should render the gas fee as display amount', () => {
+			const { container } = render(EthTransaction, {
+				props: {
+					transaction: mockTransferTx,
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amountElement);
+
+			expect(amountElement.textContent).toBe(expectedFeeAmount);
+		});
+
+		it('should render label and amount of the token itself when the transaction is not addressed to a known token', () => {
+			const { container, getByTestId } = render(EthTransaction, {
+				props: {
+					transaction: { ...mockTransferTx, to: mockEthAddress2, value: 123450000000000n },
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const labelElement = getByTestId(TRANSACTION_CHILDREN_CONTAINER);
+
+			assertNonNullish(labelElement);
+
+			expect(labelElement.textContent).toBe(get(i18n).send.text.send);
+
+			const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amountElement);
+
+			expect(amountElement.textContent).toBe(
+				`${formatToken({
+					value: -123450000000000n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: ETHEREUM_TOKEN.decimals,
+					showPlusSign: false
+				})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`
+			);
+		});
+
+		it('should not apply to receive transactions', () => {
+			const { container, getByTestId } = render(EthTransaction, {
+				props: {
+					transaction: { ...mockTransferTx, type: 'receive' as const, value: 123450000000000n },
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			const labelElement = getByTestId(TRANSACTION_CHILDREN_CONTAINER);
+
+			assertNonNullish(labelElement);
+
+			expect(labelElement.textContent).toBe(get(i18n).receive.text.receive);
+
+			const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amountElement);
+
+			expect(amountElement.textContent).toBe(
+				`${formatToken({
+					value: 123450000000000n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: ETHEREUM_TOKEN.decimals,
+					showPlusSign: true
+				})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`
+			);
 		});
 	});
 });
