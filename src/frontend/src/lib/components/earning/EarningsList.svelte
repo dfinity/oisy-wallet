@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
-	import { erc4626CustomTokensNotInitialized } from '$eth/derived/erc4626.derived';
+	import { erc4626CustomTokensLoading } from '$eth/derived/erc4626.derived';
 	import { allVaults } from '$eth/derived/vaults.derived';
 	import { isTokenHarvestAutopilot } from '$eth/utils/harvest-autopilots.utils';
 	import EarningsListSkeletons from '$lib/components/earning/EarningsListSkeletons.svelte';
@@ -11,7 +11,7 @@
 	import VaultCard from '$lib/components/vaults/VaultCard.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath, VAULT_PARAM } from '$lib/constants/routes.constants';
-	import { liquidiumPortfolio } from '$lib/derived/liquidium.derived';
+	import { liquidiumPortfolio, liquidiumPortfolioLoading } from '$lib/derived/liquidium.derived';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
@@ -19,7 +19,7 @@
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils';
 	import { filterEnabledToken } from '$lib/utils/token.utils';
 
-	let loading = $derived($erc4626CustomTokensNotInitialized);
+	let loading = $derived($erc4626CustomTokensLoading || $liquidiumPortfolioLoading);
 
 	let filteredVaults = $derived(
 		$allVaults.filter(
