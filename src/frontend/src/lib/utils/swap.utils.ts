@@ -16,7 +16,6 @@ import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
-	SWAP_SLIPPAGE_VALUE_DECIMALS,
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
@@ -164,16 +163,16 @@ export const calculateSlippage = ({
  *
  * The fractional part is dropped rather than rounded so an order can never allow more slippage
  * than the user accepted (1.005% must become 100 bps, not 101). Flooring the raw product alone
- * would lose a whole basis point to IEEE-754 noise (0.29 * 100 === 28.999…), so the value is
- * first snapped to the {@link SWAP_SLIPPAGE_VALUE_DECIMALS} granularity the slippage input
- * enforces — that erases the noise while keeping genuine fractional basis points intact. The
- * absolute value guards against a negative value slipping past input validation and reaching a
- * provider as negative slippage.
+ * would lose a whole basis point to IEEE-754 noise (0.29 * 100 === 28.999…), so the noise is
+ * rounded away first. The 1e-6 bps precision is deliberately independent of the slippage input's
+ * decimal limit so the invariant holds even for a value that bypassed the input: it only needs to
+ * stay far coarser than float noise (~1e-14) and finer than any granularity a caller could mean.
+ * The absolute value guards against a negative value slipping past input validation and reaching
+ * a provider as negative slippage.
  */
 export const slippagePercentToBasisPoints = (slippageValue: Amount): number => {
-	const snapped = Math.round(Math.abs(Number(slippageValue)) * 10 ** SWAP_SLIPPAGE_VALUE_DECIMALS);
-	// A percent with SWAP_SLIPPAGE_VALUE_DECIMALS decimals has two fewer of them as basis points
-	return Math.floor(snapped / 10 ** (SWAP_SLIPPAGE_VALUE_DECIMALS - 2));
+	const basisPoints = Math.abs(Number(slippageValue)) * 100;
+	return Math.floor(Math.round(basisPoints * 1e6) / 1e6);
 };
 
 /**

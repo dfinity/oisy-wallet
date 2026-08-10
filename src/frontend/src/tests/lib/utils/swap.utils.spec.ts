@@ -354,6 +354,12 @@ describe('swap utils', () => {
 			expect(slippagePercentToBasisPoints('1.0099')).toBe(100);
 		});
 
+		it('floors values finer than the slippage input allows instead of rounding them up', () => {
+			// The invariant must hold even for a value that bypassed the input's decimal limit
+			expect(slippagePercentToBasisPoints('1.0051')).toBe(100);
+			expect(slippagePercentToBasisPoints(0.123456)).toBe(12);
+		});
+
 		it('survives IEEE-754 noise in the percent conversion', () => {
 			// 0.29 * 100 === 28.999999999999996 — a bare floor would drop a whole basis point
 			expect(slippagePercentToBasisPoints('0.29')).toBe(29);
