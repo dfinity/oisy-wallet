@@ -38,7 +38,7 @@
 	fixed artwork (`oisy_bg_light.webp`) whose base color is exactly
 	`--color-background-page`, so a solid `bg-page` was invisible over the
 	flat areas but stamped a hard-edged rectangle over the artwork's
-	blobs — most visible on the `Assets` tab bar, which pins right on top
+	blobs. It shows worst on the `Assets` tab bar, which pins right on top
 	of the upper-left blob. A translucent fill plus `backdrop-blur` still
 	masks the content scrolling underneath while letting the artwork
 	through. Same treatment as the lock screen (see `LockPage`).
