@@ -21,13 +21,14 @@ export const MICROLAMPORTS_PER_LAMPORT = 1_000_000n;
 export const SOLANA_DEFAULT_COMPUTE_UNIT_LIMIT_PER_INSTRUCTION = 200_000n;
 export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 
-// Above this, the prioritisation fee stops looking like a congestion tip and starts looking
-// like the real cost of the transaction, so the review calls it out explicitly. Typical
-// mainnet tips sit three orders of magnitude below it.
-export const SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS = 10_000_000n;
+// A prioritisation fee is only meaningful next to what the same transaction *should* cost, so the
+// review judges it against a baseline: the larger of this fiat floor and what OISY itself would
+// pay right now. The floor keeps the baseline honest when the network is quiet and its estimate
+// collapses towards nothing, which would otherwise make an ordinary tip look enormous.
+export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 
-// An absolute threshold alone cannot describe the attack: what drains an account is a fee that is
-// large *relative to what it holds*, and a threshold low enough to catch that on a small balance
-// would fire constantly on a large one. The review therefore also warns once the fee exceeds the
-// balance divided by this.
-export const SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR = 10n;
+// Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
+// own choice, five times it is worth questioning. Both stay short of blocking, since paying well
+// over the odds is a legitimate thing to want during congestion.
+export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
+export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;

@@ -1601,6 +1601,7 @@
 			"amount": "",
 			"hex_data": "Dati HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",

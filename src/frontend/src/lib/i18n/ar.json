@@ -1601,6 +1601,7 @@
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",

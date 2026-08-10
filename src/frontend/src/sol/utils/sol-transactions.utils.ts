@@ -2,7 +2,10 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
-import { calculateSolPrioritizationFee } from '$sol/utils/sol-instructions-compute-budget.utils';
+import {
+	calculateSolPrioritizationFee,
+	resolveSolComputeUnitLimit
+} from '$sol/utils/sol-instructions-compute-budget.utils';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -127,5 +130,18 @@ export const mapSolTransactionMessage = ({
 		instructionsCount: instructionsList.length
 	});
 
-	return { ...rest, ...(nonNullish(prioritizationFee) && { prioritizationFee }) };
+	if (isNullish(prioritizationFee)) {
+		return rest;
+	}
+
+	// The resolved limit travels with the fee: pricing the network's own estimate, which is quoted
+	// per compute unit, against this request needs the very same limit.
+	return {
+		...rest,
+		prioritizationFee,
+		computeUnitLimit: resolveSolComputeUnitLimit({
+			computeUnitLimit,
+			instructionsCount: instructionsList.length
+		})
+	};
 };

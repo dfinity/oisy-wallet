@@ -7,7 +7,9 @@ import {
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import {
 	calculateSolPrioritizationFee,
-	parseSolComputeBudgetInstruction
+	convertSolComputeUnitPriceToFee,
+	parseSolComputeBudgetInstruction,
+	resolveSolComputeUnitLimit
 } from '$sol/utils/sol-instructions-compute-budget.utils';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
@@ -123,6 +125,64 @@ describe('sol-instructions-compute-budget.utils', () => {
 			expect(() => parseSolComputeBudgetInstruction(mockInstruction)).toThrow(
 				'Unknown Solana Compute Budget instruction: unknown-instruction'
 			);
+		});
+	});
+
+	describe('resolveSolComputeUnitLimit', () => {
+		it('should default to the per-instruction budget when no limit is requested', () => {
+			expect(resolveSolComputeUnitLimit({ instructionsCount: 3 })).toBe(600_000n);
+		});
+
+		it('should clamp both the requested and the defaulted limit to the transaction-wide cap', () => {
+			expect(resolveSolComputeUnitLimit({ instructionsCount: 20 })).toBe(
+				SOLANA_MAX_COMPUTE_UNIT_LIMIT
+			);
+
+			expect(
+				resolveSolComputeUnitLimit({ computeUnitLimit: 2n ** 32n - 1n, instructionsCount: 1 })
+			).toBe(SOLANA_MAX_COMPUTE_UNIT_LIMIT);
+		});
+
+		it('should keep a requested limit below the cap', () => {
+			expect(resolveSolComputeUnitLimit({ computeUnitLimit: 50_000n, instructionsCount: 9 })).toBe(
+				50_000n
+			);
+		});
+	});
+
+	describe('convertSolComputeUnitPriceToFee', () => {
+		it('should scale micro-lamports per compute unit down to whole lamports', () => {
+			// 1_000_000 micro-lamports per unit is exactly 1 lamport per unit
+			expect(
+				convertSolComputeUnitPriceToFee({
+					computeUnitPrice: MICROLAMPORTS_PER_LAMPORT,
+					computeUnitLimit: 200_000n
+				})
+			).toBe(200_000n);
+		});
+
+		it('should not confuse a price with a fee', () => {
+			// a price of 50_000 micro-lamports per unit over 200_000 units is 10_000 lamports, three
+			// orders of magnitude away from the price itself
+			expect(
+				convertSolComputeUnitPriceToFee({
+					computeUnitPrice: 50_000n,
+					computeUnitLimit: 200_000n
+				})
+			).toBe(10_000n);
+		});
+
+		it('should round up to the next whole lamport', () => {
+			expect(convertSolComputeUnitPriceToFee({ computeUnitPrice: 1n, computeUnitLimit: 1n })).toBe(
+				1n
+			);
+
+			expect(
+				convertSolComputeUnitPriceToFee({
+					computeUnitPrice: 1n,
+					computeUnitLimit: MICROLAMPORTS_PER_LAMPORT
+				})
+			).toBe(1n);
 		});
 	});
 

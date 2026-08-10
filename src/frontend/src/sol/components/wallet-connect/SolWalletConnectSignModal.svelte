@@ -77,13 +77,21 @@
 	let isApproval = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
+	let prioritizationFeeEstimate = $state<bigint | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress, isApproval, unreviewed, prioritizationFee } =
-			await decodeService({
-				base64EncodedTransactionMessage: data,
-				networkId
-			}));
+		({
+			amount,
+			destination,
+			tokenAddress,
+			isApproval,
+			unreviewed,
+			prioritizationFee,
+			prioritizationFeeEstimate
+		} = await decodeService({
+			base64EncodedTransactionMessage: data,
+			networkId
+		}));
 	};
 
 	// When the transaction moves an SPL token we know, review it with that token's
@@ -192,6 +200,7 @@
 				onApprove={sign}
 				onReject={reject}
 				{prioritizationFee}
+				{prioritizationFeeEstimate}
 				source={address ?? ''}
 				token={reviewToken}
 				unreviewed={unreviewed ?? false}

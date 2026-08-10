@@ -41,7 +41,8 @@ describe('sol-transactions.utils', () => {
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
 				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-				prioritizationFee: 238_217n
+				prioritizationFee: 238_217n,
+				computeUnitLimit: 152_343n
 			});
 		});
 
@@ -268,7 +269,7 @@ describe('sol-transactions.utils', () => {
 					...mockSolParsedTransactionMessage,
 					instructions: [instruction1, instruction2]
 				})
-			).toStrictEqual({ amount: 1n, prioritizationFee: 400_000n });
+			).toStrictEqual({ amount: 1n, prioritizationFee: 400_000n, computeUnitLimit: 400_000n });
 		});
 
 		it('should report a prioritization fee from a compute unit price and limit', () => {
@@ -279,7 +280,8 @@ describe('sol-transactions.utils', () => {
 
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
 				amount: 1n,
-				prioritizationFee: 50_000n
+				prioritizationFee: 50_000n,
+				computeUnitLimit: 50_000n
 			});
 		});
 
@@ -297,7 +299,8 @@ describe('sol-transactions.utils', () => {
 				amount: 1_000n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				prioritizationFee: 1_400_000_000_000n
+				prioritizationFee: 1_400_000_000_000n,
+				computeUnitLimit: 1_400_000n
 			});
 		});
 
@@ -336,7 +339,8 @@ describe('sol-transactions.utils', () => {
 				amount: 1n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				prioritizationFee: 1_000_000_001n
+				prioritizationFee: 1_000_000_001n,
+				computeUnitLimit: 1_400_000n
 			});
 		});
 

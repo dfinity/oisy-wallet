@@ -1284,6 +1284,7 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		dapp_prioritization_fee: string;
 		high_prioritization_fee: string;
 		invalid_typed_data: string;
 		raw_copied: string;

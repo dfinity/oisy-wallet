@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
@@ -17,8 +18,16 @@ describe('SolWalletConnectSignReview', () => {
 		onReject: vi.fn()
 	};
 
+	// What OISY would pay to prioritise the same transaction: 800_000 micro-lamports per compute
+	// unit over a 1_400_000 unit budget.
+	const networkEstimate = 1_120_000n;
+
+	// At this rate the ten cent floor sits at 500_000 lamports, below the network estimate above.
+	const solUsdPrice = 200;
+
 	beforeEach(() => {
 		balancesStore.reset(SOLANA_TOKEN.id);
+		exchangeStore.reset();
 	});
 
 	it('should render the unreviewed instructions warning', () => {
@@ -56,7 +65,7 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 	});
 
-	it('should render the base network fee', () => {
+	it('should render the base network fee as a labelled row', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props
 		});
@@ -65,7 +74,7 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText('0.000005 SOL')).toBeInTheDocument();
 	});
 
-	it('should render the prioritization fee', () => {
+	it('should render the prioritization fee at the full precision of the token', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props: {
 				...props,
@@ -74,7 +83,34 @@ describe('SolWalletConnectSignReview', () => {
 		});
 
 		expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+		// the ninth decimal must survive: rounding it away would alter the very number this review
+		// exists to disclose
 		expect(getByText('0.000238217 SOL')).toBeInTheDocument();
+	});
+
+	it('should render each fee row as a label above its value', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				prioritizationFee: 238_217n
+			}
+		});
+
+		expect(getByText(en.fee.text.network_fee).tagName).toBe('LABEL');
+		expect(getByText(en.fee.text.prioritization_fee).tagName).toBe('LABEL');
+	});
+
+	it('should show the fiat approximation next to a fee', () => {
+		exchangeStore.set([{ solana: { usd: solUsdPrice } }]);
+
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				prioritizationFee: 500_000_000n
+			}
+		});
+
+		expect(getByText('~$100.00')).toBeInTheDocument();
 	});
 
 	it('should not render the prioritization fee when the transaction requests none', () => {
@@ -85,79 +121,133 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 	});
 
-	it('should warn about an unusually high prioritization fee', () => {
-		const { getByText } = render(SolWalletConnectSignReview, {
-			props: {
-				...props,
-				prioritizationFee: 1_400_000_000_000n
-			}
+	describe('comparing the requested fee against the baseline', () => {
+		it('should say nothing about a fee in line with the network', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 238_217n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.dapp_prioritization_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
-		expect(getByText('1400 SOL')).toBeInTheDocument();
-	});
+		it('should say nothing about a swap priced off the same congestion data', () => {
+			// a routine aggregator swap tips around 0.0016 SOL, under twice the network estimate
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 1_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
 
-	it('should not warn about a prioritization fee within the usual range', () => {
-		const { queryByText } = render(SolWalletConnectSignReview, {
-			props: {
-				...props,
-				prioritizationFee: 238_217n
-			}
+			expect(queryByText(en.wallet_connect.text.dapp_prioritization_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
-	});
+		it('should name the dApp as the author of a fee between two and five times the baseline', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 3_000_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
 
-	it('should warn about a fee that is modest outright but claims most of the balance', () => {
-		balancesStore.set({
-			id: SOLANA_TOKEN.id,
-			data: { data: 2_000_000n, certified: true }
+			expect(getByText(en.wallet_connect.text.dapp_prioritization_fee)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		const { getByText } = render(SolWalletConnectSignReview, {
-			props: {
-				...props,
-				prioritizationFee: 1_000_000n
-			}
+		it('should warn about a fee above five times the baseline', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.dapp_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
-	});
+		it('should take the fiat floor as the baseline when it beats the network estimate', () => {
+			exchangeStore.set([{ solana: { usd: solUsdPrice } }]);
 
-	it('should not warn about a fee that is negligible next to the balance', () => {
-		balancesStore.set({
-			id: SOLANA_TOKEN.id,
-			data: { data: 100_000_000_000n, certified: true }
+			// against the 100_000 lamport estimate this fee would be twelve times over and warn;
+			// against the 500_000 lamport floor it is between two and five times
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 1_200_000n,
+					prioritizationFeeEstimate: 100_000n
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.dapp_prioritization_fee)).toBeInTheDocument();
 		});
 
-		const { queryByText } = render(SolWalletConnectSignReview, {
-			props: {
-				...props,
-				prioritizationFee: 1_000_000n
-			}
+		it('should take the network estimate as the baseline when it beats the fiat floor', () => {
+			exchangeStore.set([{ solana: { usd: solUsdPrice } }]);
+
+			// the same fee that the 500_000 lamport floor would flag passes unremarked once the
+			// network itself is asking 1_120_000
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 1_200_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.dapp_prioritization_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
-	});
+		it('should fall back to the fiat floor when the network estimate is unavailable', () => {
+			exchangeStore.set([{ solana: { usd: solUsdPrice } }]);
 
-	it('should surface the prioritization fee of a transfer that hides one behind a dust amount', () => {
-		balancesStore.set({
-			id: SOLANA_TOKEN.id,
-			data: { data: 2_000_000_000n, certified: true }
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 5_000_000n
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
 		});
 
-		const { getByText } = render(SolWalletConnectSignReview, {
-			props: {
-				...props,
-				amount: 1n,
-				prioritizationFee: 1_000_000_001n
-			}
+		it('should say nothing when neither the exchange rate nor the estimate is known', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 1_000_000_001n
+				}
+			});
+
+			expect(queryByText(en.wallet_connect.text.dapp_prioritization_fee)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.high_prioritization_fee)).not.toBeInTheDocument();
 		});
 
-		// 1 lamport moved, against a 1_000_000_001 lamport prioritization fee and the 5_000 lamport
-		// base fee
-		expect(getByText('1.000000001 SOL')).toBeInTheDocument();
-		expect(getByText('0.000005 SOL')).toBeInTheDocument();
-		expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
+		it('should surface and warn about a fee hidden behind a dust transfer', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					amount: 1n,
+					prioritizationFee: 1_000_000_001n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			// 1 lamport moved, against a 1_000_000_001 lamport prioritization fee and the 5_000
+			// lamport base fee
+			expect(getByText('1.000000001 SOL')).toBeInTheDocument();
+			expect(getByText('0.000005 SOL')).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
+		});
 	});
 });

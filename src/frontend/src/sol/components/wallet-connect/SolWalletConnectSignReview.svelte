@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
@@ -8,14 +8,17 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
+	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import { maxBigInt } from '$lib/utils/bigint.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import {
-		SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR,
-		SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS,
+		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
+		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
+		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
 
@@ -30,6 +33,7 @@
 		// when the transaction itself moves an SPL token.
 		feeToken: Token;
 		prioritizationFee?: bigint;
+		prioritizationFeeEstimate?: bigint;
 		isApproval?: boolean;
 		unreviewed?: boolean;
 		onApprove: () => void;
@@ -45,6 +49,7 @@
 		token,
 		feeToken,
 		prioritizationFee,
+		prioritizationFeeEstimate,
 		isApproval = false,
 		unreviewed = false,
 		onApprove,
@@ -53,21 +58,61 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
-	let feeBalance = $derived($balancesStore?.[feeToken.id]?.data);
-
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
-	// Two triggers, because the fee that empties an account is not necessarily a big number: it is
-	// whatever is big next to that account's balance. The absolute threshold still stands on its
-	// own, so the warning also works before the balance is known.
+	let prioritizationFeeFloor = $derived(
+		nonNullish(feeExchangeRate) && feeExchangeRate > 0
+			? BigInt(
+					Math.ceil(
+						(SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD / feeExchangeRate) *
+							10 ** feeToken.decimals
+					)
+				)
+			: undefined
+	);
+
+	// Whichever of the two arms is available carries the baseline on its own: an unknown exchange
+	// rate leaves the network estimate, a failed estimate leaves the floor. With neither there is
+	// nothing to call the fee unusual against, so the review shows it and says nothing about it.
+	let prioritizationFeeBaseline = $derived(
+		maxBigInt(prioritizationFeeFloor, prioritizationFeeEstimate)
+	);
+
+	let comparablePrioritizationFee = $derived(
+		nonNullish(prioritizationFee) && nonNullish(prioritizationFeeBaseline)
+			? { fee: prioritizationFee, baseline: prioritizationFeeBaseline }
+			: undefined
+	);
+
 	let highPrioritizationFee = $derived(
-		nonNullish(prioritizationFee) &&
-			(prioritizationFee >= SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS ||
-				(nonNullish(feeBalance) &&
-					feeBalance > ZERO &&
-					prioritizationFee * SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR > feeBalance))
+		nonNullish(comparablePrioritizationFee) &&
+			comparablePrioritizationFee.fee >=
+				comparablePrioritizationFee.baseline * SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER
+	);
+
+	let dappPrioritizationFee = $derived(
+		!highPrioritizationFee &&
+			nonNullish(comparablePrioritizationFee) &&
+			comparablePrioritizationFee.fee >=
+				comparablePrioritizationFee.baseline * SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER
 	);
 </script>
+
+{#snippet feeValue(feeAmount: bigint)}
+	{@const formattedFee = formatToken({
+		value: feeAmount,
+		unitName: feeToken.decimals,
+		displayDecimals: feeToken.decimals
+	})}
+
+	<div class="flex gap-4">
+		{`${formattedFee} ${feeToken.symbol}`}
+
+		<div class="text-tertiary">
+			<ConvertAmountExchange amount={formattedFee} exchangeRate={feeExchangeRate} />
+		</div>
+	</div>
+{/snippet}
 
 <ContentWithToolbar>
 	{#if unreviewed}
@@ -86,33 +131,21 @@
 			<SendDataSpender spender={destination} />
 		{/if}
 
-		<FeeDisplay
-			decimals={feeToken.decimals}
-			exchangeRate={feeExchangeRate}
-			feeAmount={SOLANA_TRANSACTION_FEE_IN_LAMPORTS}
-			symbol={feeToken.symbol}
-		>
-			{#snippet label()}
-				<span>{$i18n.fee.text.network_fee}</span>
-			{/snippet}
-		</FeeDisplay>
+		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
+			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+		</WalletConnectModalValue>
 
 		{#if nonNullish(prioritizationFee)}
-			<FeeDisplay
-				decimals={feeToken.decimals}
-				exchangeRate={feeExchangeRate}
-				feeAmount={prioritizationFee}
-				symbol={feeToken.symbol}
-			>
-				{#snippet label()}
-					<span>{$i18n.fee.text.prioritization_fee}</span>
-				{/snippet}
-			</FeeDisplay>
+			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
+				{@render feeValue(prioritizationFee)}
+			</WalletConnectModalValue>
 		{/if}
 
-		<!-- A steep priority fee is a legitimate choice when the network is congested, so it warns
-		     instead of blocking the way invalid typed data does on Ethereum. -->
-		{#if highPrioritizationFee}
+		<!-- A steep priority fee is a legitimate choice when the network is congested, so both tiers
+		     inform instead of blocking the way invalid typed data does on Ethereum. -->
+		{#if dappPrioritizationFee}
+			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+		{:else if highPrioritizationFee}
 			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 		{/if}
 

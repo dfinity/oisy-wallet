@@ -1601,6 +1601,7 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
