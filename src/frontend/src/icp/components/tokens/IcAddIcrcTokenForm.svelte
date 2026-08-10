@@ -1,6 +1,9 @@
 <script lang="ts">
 	import InputText from '$lib/components/ui/InputText.svelte';
-	import { TOKEN_MODAL_INDEX_CANISTER_ID_INPUT } from '$lib/constants/test-ids.constants';
+	import {
+		TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
+		TOKEN_MODAL_LEDGER_CANISTER_ID_INPUT
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -28,6 +31,7 @@
 		name="ledgerCanisterId"
 		disabled={editMode}
 		placeholder="_____-_____-_____-_____-cai"
+		testId={TOKEN_MODAL_LEDGER_CANISTER_ID_INPUT}
 		bind:value={ledgerCanisterId}
 	/>
 </div>

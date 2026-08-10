@@ -9,7 +9,10 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
+	import {
+		MANAGE_TOKENS_MODAL_IMPORT_BUTTON,
+		MANAGE_TOKENS_MODAL_SAVE
+	} from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
@@ -225,6 +228,7 @@
 					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
 				onclick={onAddToken}
 				styleClass="whitespace-nowrap"
+				testId={MANAGE_TOKENS_MODAL_IMPORT_BUTTON}
 			>
 				<IconPlus />
 				{isNftsPage ? $i18n.tokens.manage.text.import_nft : $i18n.tokens.manage.text.import_token}

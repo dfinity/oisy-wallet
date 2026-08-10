@@ -190,6 +190,11 @@ export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
 export const MANAGE_TOKENS_MODAL_SAVE = 'manage-tokens-modal-save';
 export const MANAGE_TOKENS_MODAL_TOKEN_TOGGLE = 'manage-tokens-modal-token-toggle';
 export const MANAGE_TOKENS_IC_ADD_NFT_INPUT = 'manage-tokens-ic-add-nft-input';
+export const MANAGE_TOKENS_MODAL_IMPORT_BUTTON = 'manage-tokens-modal-import-button';
+export const MANAGE_TOKENS_MODAL_NETWORK_SELECT = 'manage-tokens-modal-network-select';
+export const MANAGE_TOKENS_MODAL_NEXT_BUTTON = 'manage-tokens-modal-next-button';
+export const MANAGE_TOKENS_MODAL_CONTRACT_ADDRESS_INPUT =
+	'manage-tokens-modal-contract-address-input';
 
 export const NETWORKS_SWITCHER_SELECTOR = 'networks-switcher-selector';
 export const NETWORKS_SWITCHER_DROPDOWN = 'networks-switcher-dropdown';
@@ -363,6 +368,7 @@ export const CONTACT_CARD_EXPAND_BUTTON = 'contact-card-expand-button';
 // token modal
 export const TOKEN_MODAL_CONTENT_DELETE_BUTTON = 'token-modal-content-delete-button';
 export const TOKEN_MODAL_DELETE_BUTTON = 'token-modal-delete-button';
+export const TOKEN_MODAL_LEDGER_CANISTER_ID_INPUT = 'token-modal-ledger-canister-id-input';
 export const TOKEN_MODAL_INDEX_CANISTER_ID_INPUT = 'token-modal-index-canister-id-input';
 export const TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON =
 	'token-modal-index-canister-id-edit-button';

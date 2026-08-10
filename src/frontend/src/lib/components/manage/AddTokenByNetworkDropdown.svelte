@@ -3,6 +3,7 @@
 	import Select from '$lib/components/ui/Select.svelte';
 	import SelectOption from '$lib/components/ui/SelectOption.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { MANAGE_TOKENS_MODAL_NETWORK_SELECT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 
@@ -27,7 +28,12 @@
 			class="network mt-1 pt-0.5"
 			class:disabled
 		>
-			<Select name="network" {disabled} bind:selectedValue={networkName}>
+			<Select
+				name="network"
+				{disabled}
+				testId={MANAGE_TOKENS_MODAL_NETWORK_SELECT}
+				bind:selectedValue={networkName}
+			>
 				<option class:hidden={nonNullish(networkName)} disabled selected value={undefined}
 					>{$i18n.tokens.manage.placeholder.select_network}</option
 				>
