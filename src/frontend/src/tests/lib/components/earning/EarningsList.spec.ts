@@ -22,9 +22,13 @@ import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-vi.mock('$eth/constants/harvest-autopilots.constants', () => ({
-	HARVEST_AUTOPILOT_ADDRESSES: ['0xautopilotaddress']
-}));
+vi.mock(import('$eth/constants/harvest-autopilots.constants'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		HARVEST_AUTOPILOT_ADDRESSES: ['0xautopilotaddress']
+	};
+});
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
