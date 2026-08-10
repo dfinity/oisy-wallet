@@ -34,6 +34,13 @@ const unreviewedInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	unreviewed: true
 });
+// A Compute Budget instruction we cannot price hides part of what the transaction would cost.
+// Unlike an undecodable program call, which merely leaves the review incomplete, this one makes
+// the fee shown provably wrong — so it must fail closed rather than warn.
+const unpriceableInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	ambiguous: true
+});
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -602,9 +609,9 @@ const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolT
 		}
 
 		// The deprecated `RequestUnits` carries its own flat `additionalFee`, which the review
-		// cannot price the same way. Flag it rather than quietly report a fee of zero.
+		// cannot price the same way.
 		if (instructionType === ComputeBudgetInstruction.RequestUnits) {
-			return unreviewedInstruction();
+			return unpriceableInstruction();
 		}
 
 		// Heap frame and loaded-accounts data size requests do not affect the fee.
@@ -612,7 +619,7 @@ const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolT
 	} catch (err: unknown) {
 		consoleWarn('Could not parse Solana Compute Budget instruction', err);
 
-		return unreviewedInstruction();
+		return unpriceableInstruction();
 	}
 };
 

@@ -25,3 +25,9 @@ export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 // like the real cost of the transaction, so the review calls it out explicitly. Typical
 // mainnet tips sit three orders of magnitude below it.
 export const SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS = 10_000_000n;
+
+// An absolute threshold alone cannot describe the attack: what drains an account is a fee that is
+// large *relative to what it holds*, and a threshold low enough to catch that on a small balance
+// would fire constantly on a large one. The review therefore also warns once the fee exceeds the
+// balance divided by this.
+export const SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR = 10n;

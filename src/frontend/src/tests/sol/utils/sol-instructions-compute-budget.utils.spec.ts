@@ -171,6 +171,22 @@ describe('sol-instructions-compute-budget.utils', () => {
 			).toBe(238_217n);
 		});
 
+		it.each([
+			{ computeUnitPrice: 714_285_715n, expected: 1_000_000_001n },
+			{ computeUnitPrice: 71_428_571_429n, expected: 100_000_000_001n }
+		])(
+			'should round a fee of $computeUnitPrice micro-lamports per unit up, not down',
+			({ computeUnitPrice, expected }) => {
+				expect(
+					calculateSolPrioritizationFee({
+						computeUnitPrice,
+						computeUnitLimit: SOLANA_MAX_COMPUTE_UNIT_LIMIT,
+						instructionsCount: 3
+					})
+				).toBe(expected);
+			}
+		);
+
 		it('should round the fee up to the next whole lamport', () => {
 			expect(
 				calculateSolPrioritizationFee({

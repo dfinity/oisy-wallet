@@ -918,25 +918,25 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should flag the deprecated RequestUnits instruction as unreviewed', () => {
+		it('should fail closed on the deprecated RequestUnits instruction, which it cannot price', () => {
 			const instruction = getRequestUnitsInstruction({ units: 200_000, additionalFee: 1_000_000 });
 
 			expect(mapSolInstruction(instruction)).toStrictEqual({
 				amount: undefined,
-				unreviewed: true
+				ambiguous: true
 			});
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should flag a malformed Compute Budget instruction as unreviewed instead of throwing', () => {
+		it('should fail closed on a malformed Compute Budget instruction instead of throwing', () => {
 			const malformedInstruction: SolInstruction = {
 				programAddress: address(COMPUTE_BUDGET_PROGRAM_ADDRESS)
 			};
 
 			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({
 				amount: undefined,
-				unreviewed: true
+				ambiguous: true
 			});
 
 			expect(console.warn).toHaveBeenCalledOnce();

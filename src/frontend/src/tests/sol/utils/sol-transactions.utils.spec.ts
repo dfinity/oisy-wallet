@@ -10,7 +10,12 @@ import {
 	mockSolAddress2,
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
-import type { TransactionMessage } from '@solana/kit';
+import {
+	getSetComputeUnitLimitInstruction,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
+import { getTransferSolInstruction } from '@solana-program/system';
+import { address, createNoopSigner, type TransactionMessage } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.utils', () => {
@@ -293,6 +298,45 @@ describe('sol-transactions.utils', () => {
 				source: mockSolAddress,
 				destination: mockSolAddress2,
 				prioritizationFee: 1_400_000_000_000n
+			});
+		});
+
+		it('should propagate an instruction that declares itself unpriceable as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, ambiguous: true })
+				.mockReturnValueOnce({ amount: 1n });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n, ambiguous: true });
+		});
+
+		it('should surface the prioritization fee of a transfer that hides one behind a dust amount', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			const instructions = [
+				getSetComputeUnitLimitInstruction({ units: 1_400_000 }),
+				getSetComputeUnitPriceInstruction({ microLamports: 714_285_715 }),
+				getTransferSolInstruction({
+					source: createNoopSigner(address(mockSolAddress)),
+					destination: address(mockSolAddress2),
+					amount: 1n
+				})
+			];
+
+			// The transfer is worth 1 lamport, while the compute budget claims 1_000_000_001 lamports
+			// on top of the 5_000 lamport base fee
+			expect(
+				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions })
+			).toStrictEqual({
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				prioritizationFee: 1_000_000_001n
 			});
 		});
 

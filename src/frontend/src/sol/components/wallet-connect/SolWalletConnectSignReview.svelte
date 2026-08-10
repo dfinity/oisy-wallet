@@ -8,11 +8,13 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import {
+		SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR,
 		SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
@@ -51,10 +53,19 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
+	let feeBalance = $derived($balancesStore?.[feeToken.id]?.data);
+
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
+	// Two triggers, because the fee that empties an account is not necessarily a big number: it is
+	// whatever is big next to that account's balance. The absolute threshold still stands on its
+	// own, so the warning also works before the balance is known.
 	let highPrioritizationFee = $derived(
-		nonNullish(prioritizationFee) && prioritizationFee > SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS
+		nonNullish(prioritizationFee) &&
+			(prioritizationFee >= SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS ||
+				(nonNullish(feeBalance) &&
+					feeBalance > ZERO &&
+					prioritizationFee * SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR > feeBalance))
 	);
 </script>
 
