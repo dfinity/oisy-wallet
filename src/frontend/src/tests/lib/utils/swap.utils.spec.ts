@@ -47,7 +47,8 @@ import {
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult,
 	resolveNearIntentsBlockchain,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -338,6 +339,34 @@ describe('swap utils', () => {
 
 		it('returns 0 for full slippage (100%)', () => {
 			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(ZERO);
+		});
+	});
+
+	describe('slippagePercentToBasisPoints', () => {
+		it('converts whole and fractional percentages to basis points', () => {
+			expect(slippagePercentToBasisPoints(1)).toBe(100);
+			expect(slippagePercentToBasisPoints('0.5')).toBe(50);
+			expect(slippagePercentToBasisPoints(1.5)).toBe(150);
+		});
+
+		it('floors fractional basis points instead of rounding them up', () => {
+			expect(slippagePercentToBasisPoints(1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('1.0099')).toBe(100);
+		});
+
+		it('survives IEEE-754 noise in the percent conversion', () => {
+			// 0.29 * 100 === 28.999999999999996 — a bare floor would drop a whole basis point
+			expect(slippagePercentToBasisPoints('0.29')).toBe(29);
+			expect(slippagePercentToBasisPoints(0.29)).toBe(29);
+		});
+
+		it('takes the absolute value of a negative slippage', () => {
+			expect(slippagePercentToBasisPoints(-1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('-0.29')).toBe(29);
+		});
+
+		it('returns 0 for zero slippage', () => {
+			expect(slippagePercentToBasisPoints(0)).toBe(0);
 		});
 	});
 

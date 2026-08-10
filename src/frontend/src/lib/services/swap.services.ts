@@ -104,7 +104,8 @@ import {
 	calculateSlippage,
 	geSwapEthTokenAddress,
 	getWithdrawableToken,
-	isKongSupportedIcToken
+	isKongSupportedIcToken,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -1190,16 +1191,14 @@ export const fetchVeloraDeltaSwap = async ({
 
 	let builtOrder;
 
-	// Slippage is expressed in basis points, which must be an integer — rounding guards against
-	// IEEE-754 noise in the percent conversion (0.29 * 100 === 28.999…).
-	const roundedSlippage = Math.round(Number(slippageValue) * 100);
+	const slippageBasisPoints = slippagePercentToBasisPoints(slippageValue);
 
 	// The quoted route carries the tokens, the amounts and the destination chain, so the order is
 	// built server-side from it.
 	const deltaOrderBaseParams: BuildDeltaOrderParams = {
 		route: swapDetails.route,
 		side: SWAP_SIDE,
-		slippage: roundedSlippage,
+		slippage: slippageBasisPoints,
 		owner: userAddress,
 		partner: OISY_URL_HOSTNAME
 	};
@@ -1249,7 +1248,7 @@ export const fetchVeloraDeltaSwap = async ({
 	// and refuse to sign an order that guarantees less than the user accepted.
 	const minDestAmount = calculateSlippage({
 		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
-		slippagePercentage: roundedSlippage / 100
+		slippagePercentage: slippageBasisPoints / 100
 	});
 
 	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {
@@ -1376,8 +1375,7 @@ export const fetchVeloraMarketSwap = async ({
 		srcToken: geSwapEthTokenAddress(sourceToken),
 		destToken: geSwapEthTokenAddress(destinationToken),
 		srcAmount: swapDetails.srcAmount,
-		// Basis points must be an integer — see the rounding note in fetchVeloraDeltaSwap.
-		slippage: Math.round(Number(slippageValue) * 100),
+		slippage: slippagePercentToBasisPoints(slippageValue),
 		priceRoute: swapDetails,
 		userAddress,
 		partner: OISY_URL_HOSTNAME

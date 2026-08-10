@@ -16,6 +16,7 @@ import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
 	SWAP_DEFAULT_SLIPPAGE_VALUE,
 	SWAP_ETH_TOKEN_PLACEHOLDER,
+	SWAP_SLIPPAGE_VALUE_DECIMALS,
 	swapProvidersDetails
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
@@ -27,7 +28,7 @@ import type {
 	NearIntentsToken
 } from '$lib/types/near-intents';
 import type { NetworkId } from '$lib/types/network';
-import type { OptionAmount } from '$lib/types/send';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
@@ -156,6 +157,23 @@ export const calculateSlippage = ({
 }): bigint => {
 	const factor = 1 - slippagePercentage / 100;
 	return BigInt(Math.floor(Number(quoteAmount) * factor));
+};
+
+/**
+ * Converts a slippage percentage into the integer basis points some providers (e.g. Velora) require.
+ *
+ * The fractional part is dropped rather than rounded so an order can never allow more slippage
+ * than the user accepted (1.005% must become 100 bps, not 101). Flooring the raw product alone
+ * would lose a whole basis point to IEEE-754 noise (0.29 * 100 === 28.999…), so the value is
+ * first snapped to the {@link SWAP_SLIPPAGE_VALUE_DECIMALS} granularity the slippage input
+ * enforces — that erases the noise while keeping genuine fractional basis points intact. The
+ * absolute value guards against a negative value slipping past input validation and reaching a
+ * provider as negative slippage.
+ */
+export const slippagePercentToBasisPoints = (slippageValue: Amount): number => {
+	const snapped = Math.round(Math.abs(Number(slippageValue)) * 10 ** SWAP_SLIPPAGE_VALUE_DECIMALS);
+	// A percent with SWAP_SLIPPAGE_VALUE_DECIMALS decimals has two fewer of them as basis points
+	return Math.floor(snapped / 10 ** (SWAP_SLIPPAGE_VALUE_DECIMALS - 2));
 };
 
 /**
