@@ -2,11 +2,8 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
-	ActiveUserTransactionStatus,
-	TokenId as BackendTokenId
+	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
-import type { EthereumNetwork } from '$eth/types/network';
-import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
@@ -16,53 +13,12 @@ import {
 } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
-import {
-	isNetworkIdEthereum,
-	isNetworkIdEvm,
-	isNetworkIdSOLDevnet,
-	isNetworkIdSolana
-} from '$lib/utils/network.utils';
-import { isTokenSpl } from '$sol/utils/spl.utils';
+import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isNearIntentsActiveUserTransaction = (tx: ActiveUserTransaction): boolean =>
 	'NearIntents' in tx.data;
-
-/**
- * Maps an OISY app token to its canonical backend `TokenId` variant. NEAR
- * Intents spans EVM (native + ERC-20) and Solana (native + SPL) as both source
- * and destination, so — unlike OneSec's `Erc20`/`Icrc`-only mapper — this covers
- * all four. Returns `undefined` for an unmappable token (should not happen for a
- * NEAR-Intents-supported asset).
- */
-const appTokenToBackendTokenId = (token: AppToken): BackendTokenId | undefined => {
-	const {
-		network: { id: networkId }
-	} = token;
-
-	if (isTokenErc20(token)) {
-		return { Erc20: [token.address, BigInt(token.network.chainId)] };
-	}
-
-	if (isTokenSpl(token)) {
-		return isNetworkIdSOLDevnet(networkId)
-			? { SplDevnet: token.address }
-			: { SplMainnet: token.address };
-	}
-
-	// Native tokens carry no contract address; disambiguate by network.
-	if (isNetworkIdSolana(networkId)) {
-		return isNetworkIdSOLDevnet(networkId) ? { SolNativeDevnet: null } : { SolNativeMainnet: null };
-	}
-
-	// Native EVM coin (ETH, BNB, POL, …), identified by chain id.
-	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
-		return { EvmNative: BigInt((token.network as EthereumNetwork).chainId) };
-	}
-
-	return undefined;
-};
 
 /**
  * Builds the `NearIntents` AUT data variant carrying the canonical immutable
@@ -79,8 +35,8 @@ export const toNearIntentsData = ({
 	destinationToken: AppToken;
 	amount: bigint;
 }): ActiveUserTransactionData | undefined => {
-	const source_token = appTokenToBackendTokenId(sourceToken);
-	const dest_token = appTokenToBackendTokenId(destinationToken);
+	const source_token = toBackendTokenId(sourceToken);
+	const dest_token = toBackendTokenId(destinationToken);
 
 	if (nonNullish(source_token) && nonNullish(dest_token)) {
 		return { NearIntents: { source_token, dest_token, amount } };
