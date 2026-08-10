@@ -33,7 +33,7 @@
 	// previewing it as a permit would describe something that is not signed.
 	let json = $derived.by(() => {
 		if (!isEthSignTypedDataMethod(method)) {
-			return undefined;
+			return;
 		}
 
 		try {
