@@ -70,6 +70,10 @@
 </script>
 
 <ContentWithToolbar>
+	{#if unreviewed}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
+	{/if}
+
 	<SendData
 		{amount}
 		{application}
@@ -104,10 +108,6 @@
 					<span>{$i18n.fee.text.prioritization_fee}</span>
 				{/snippet}
 			</FeeDisplay>
-		{/if}
-
-		{#if unreviewed}
-			<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 		{/if}
 
 		<!-- A steep priority fee is a legitimate choice when the network is congested, so it warns
