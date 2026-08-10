@@ -256,10 +256,8 @@
 
 		<LimitOrderIntentHero
 			baseAmount={baseAmountDisplay}
-			baseExchangeRate={baseUsdPrice}
 			baseToken={base}
 			quoteAmount={quoteAmountDisplay}
-			quoteExchangeRate={quoteUsdPrice}
 			quoteToken={quote}
 			{side}
 		/>
