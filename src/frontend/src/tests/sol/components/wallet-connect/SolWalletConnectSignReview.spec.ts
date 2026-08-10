@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
@@ -19,6 +20,39 @@ describe('SolWalletConnectSignReview', () => {
 
 	beforeEach(() => {
 		balancesStore.reset(SOLANA_TOKEN.id);
+		exchangeStore.reset();
+	});
+
+	it('should render the network and the fees as title/value pairs, like every other row', () => {
+		const { container, getByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				prioritizationFee: 238_217n
+			}
+		});
+
+		expect(getByText(en.send.text.network)).toHaveAttribute('for', 'network');
+		expect(container.querySelector('#network')).toHaveTextContent(SOLANA_TOKEN.network.name);
+
+		expect(getByText(en.fee.text.network_fee)).toHaveAttribute('for', 'network-fee');
+		expect(container.querySelector('#network-fee')).toHaveTextContent('0.000005 SOL');
+
+		expect(getByText(en.fee.text.prioritization_fee)).toHaveAttribute('for', 'prioritization-fee');
+		expect(container.querySelector('#prioritization-fee')).toHaveTextContent('0.000238217 SOL');
+	});
+
+	it('should keep the fiat approximation next to each fee', () => {
+		exchangeStore.set([{ solana: { usd: 30 } }]);
+
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				prioritizationFee: 5_000_000n
+			}
+		});
+
+		expect(getByText('< $0.01')).toBeInTheDocument();
+		expect(getByText('~$0.15')).toBeInTheDocument();
 	});
 
 	it('should render the unreviewed instructions warning', () => {

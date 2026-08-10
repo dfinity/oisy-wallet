@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
-	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
+	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
 	import {
 		SOLANA_HIGH_PRIORITIZATION_FEE_BALANCE_DIVISOR,
 		SOLANA_HIGH_PRIORITIZATION_FEE_IN_LAMPORTS,
@@ -69,6 +71,22 @@
 	);
 </script>
 
+{#snippet feeValue(feeAmount: bigint)}
+	{@const formattedFee = formatToken({
+		value: feeAmount,
+		unitName: feeToken.decimals,
+		displayDecimals: feeToken.decimals
+	})}
+
+	<div class="flex gap-4">
+		{`${formattedFee} ${feeToken.symbol}`}
+
+		<div class="text-tertiary">
+			<ConvertAmountExchange amount={formattedFee} exchangeRate={feeExchangeRate} />
+		</div>
+	</div>
+{/snippet}
+
 <ContentWithToolbar>
 	<SendData
 		{amount}
@@ -82,28 +100,14 @@
 			<SendDataSpender spender={destination} />
 		{/if}
 
-		<FeeDisplay
-			decimals={feeToken.decimals}
-			exchangeRate={feeExchangeRate}
-			feeAmount={SOLANA_TRANSACTION_FEE_IN_LAMPORTS}
-			symbol={feeToken.symbol}
-		>
-			{#snippet label()}
-				<span>{$i18n.fee.text.network_fee}</span>
-			{/snippet}
-		</FeeDisplay>
+		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
+			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+		</WalletConnectModalValue>
 
 		{#if nonNullish(prioritizationFee)}
-			<FeeDisplay
-				decimals={feeToken.decimals}
-				exchangeRate={feeExchangeRate}
-				feeAmount={prioritizationFee}
-				symbol={feeToken.symbol}
-			>
-				{#snippet label()}
-					<span>{$i18n.fee.text.prioritization_fee}</span>
-				{/snippet}
-			</FeeDisplay>
+			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
+				{@render feeValue(prioritizationFee)}
+			</WalletConnectModalValue>
 		{/if}
 
 		{#if unreviewed}
@@ -121,7 +125,9 @@
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
 		{#snippet sourceNetwork()}
-			<ReviewNetwork sourceNetwork={token.network} />
+			<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
+				<NetworkWithLogo network={token.network} />
+			</WalletConnectModalValue>
 		{/snippet}
 	</SendData>
 
