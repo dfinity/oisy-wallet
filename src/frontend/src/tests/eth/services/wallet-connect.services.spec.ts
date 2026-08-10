@@ -1,4 +1,6 @@
 import {
+	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
@@ -139,7 +141,20 @@ describe('eth wallet-connect.services', () => {
 			});
 		});
 
-		it('falls back to raw message signing for a plain (non-typed-data) message', async () => {
+		it('signs a valid typed-data permit via signPrehash for the legacy typed-data method', async () => {
+			const request = buildRequest({
+				method: SESSION_REQUEST_ETH_SIGN_LEGACY,
+				params: [HOLDER, daiPermitJson(true)]
+			});
+
+			const result = await signMessage(buildParams(request));
+
+			expect(result).toStrictEqual({ success: true });
+			expect(signPrehash).toHaveBeenCalledOnce();
+			expect(signMessageApi).not.toHaveBeenCalled();
+		});
+
+		it('signs a plain (non-typed-data) message as a raw message', async () => {
 			const message = '0x48656c6c6f'; // "Hello"
 			const request = buildRequest({
 				method: SESSION_REQUEST_PERSONAL_SIGN,
@@ -158,5 +173,27 @@ describe('eth wallet-connect.services', () => {
 				message: '0xRAW_SIGNATURE'
 			});
 		});
+
+		it.each([SESSION_REQUEST_PERSONAL_SIGN, SESSION_REQUEST_ETH_SIGN])(
+			'signs a valid typed-data permit sent through %s as a raw message, never as EIP-712',
+			async (method) => {
+				// A dApp can dress an executable EIP-712 authorization as a plain message
+				// request. It is approved as a plain message, so it must be signed as one.
+				const message = daiPermitJson(true);
+				const request = buildRequest({ method, params: [message, HOLDER] });
+
+				const result = await signMessage(buildParams(request));
+
+				expect(result).toStrictEqual({ success: true });
+				expect(signPrehash).not.toHaveBeenCalled();
+				expect(signMessageApi).toHaveBeenCalledOnce();
+				expect(vi.mocked(signMessageApi).mock.calls[0][0]).toMatchObject({ message });
+				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+					id: request.id,
+					topic: request.topic,
+					message: '0xRAW_SIGNATURE'
+				});
+			}
+		);
 	});
 });
