@@ -1,11 +1,11 @@
-import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
 import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/eth-fee.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import type { SendParams } from '$eth/types/send';
 import {
 	getSignParamsMessageHex,
-	getSignParamsMessageTypedDataV4Hash
+	getSignParamsMessageTypedDataV4Hash,
+	isEthSignTypedDataMethod
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
@@ -219,33 +219,26 @@ export const signMessage = ({
 				const sign = (params: string[]): Promise<string> => {
 					const { identity } = get(authStore);
 
-					const signTypedDataHash = (): Promise<string> =>
-						signPrehash({
+					// The signature scheme is decided by the requested method alone. A
+					// payload that parses as EIP-712 must not turn `personal_sign` /
+					// `eth_sign` into a typed-data signature: the user approves those as
+					// plain messages, and an EIP-712 signature over them would be an
+					// executable authorization (e.g. an ERC-2612 permit) they never saw.
+					if (isEthSignTypedDataMethod(request.params.request.method)) {
+						// Typed-data methods reject on any parse/validate/hash failure, never
+						// downgrading to a raw message signature.
+						return signPrehash({
 							hash: getSignParamsMessageTypedDataV4Hash(params),
 							identity,
 							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 						});
-
-					// `eth_signTypedData_v4` must be valid EIP-712 typed data: it always goes
-					// through the typed-data path and rejects on any parse/validate/hash
-					// failure, never downgrading to a raw message signature.
-					if (request.params.request.method === SESSION_REQUEST_ETH_SIGN_V4) {
-						return signTypedDataHash();
 					}
 
-					// personal_sign / eth_sign / legacy eth_signTypedData: attempt the
-					// typed-data hash, falling back to signing the raw message when the
-					// payload is not typed data.
-					try {
-						return signTypedDataHash();
-					} catch (_err: unknown) {
-						const message = getSignParamsMessageHex(params);
-						return signMessageApi({
-							message,
-							identity,
-							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-						});
-					}
+					return signMessageApi({
+						message: getSignParamsMessageHex(params),
+						identity,
+						nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+					});
 				};
 
 				const signedMessage = await sign(params);
