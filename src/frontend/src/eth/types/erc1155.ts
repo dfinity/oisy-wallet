@@ -26,6 +26,8 @@ export interface Erc1155UriJson {
 	decimals?: number;
 	description?: string;
 	image?: string;
+	image_url?: string;
+	image_data?: string;
 	attributes?: { trait_type: string; value: UriJsonPrimitive }[];
 	properties?: Record<string, NestedUriJsonValue>;
 }

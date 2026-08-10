@@ -162,6 +162,7 @@ describe('infura-erc1155.providers', () => {
 				vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 
 				global.fetch = vi.fn().mockResolvedValue({
+					ok: true,
 					json: () => Promise.resolve(mockMetadata)
 				});
 
@@ -181,6 +182,20 @@ describe('infura-erc1155.providers', () => {
 				expect(global.fetch).toHaveBeenCalledOnce();
 
 				expect(result).toEqual(expected);
+			});
+
+			it('should substitute the {id} placeholder of the contract URI per EIP-1155', async () => {
+				mockUri.mockResolvedValueOnce('https://example.com/metadata/{id}.json');
+
+				const provider = new InfuraErc1155Provider(infura);
+
+				await provider.getNftMetadata(mockParams);
+
+				expect(global.fetch).toHaveBeenCalledExactlyOnceWith(
+					new URL(
+						'https://example.com/metadata/0000000000000000000000000000000000000000000000000000000000003039.json'
+					)
+				);
 			});
 
 			it('should handle metadata gracefully if the contract does not support IERC1155MetadataURI', async () => {
@@ -237,6 +252,7 @@ describe('infura-erc1155.providers', () => {
 
 			it('should handle nullish metadata gracefully', async () => {
 				global.fetch = vi.fn().mockResolvedValueOnce({
+					ok: true,
 					json: () => Promise.resolve(undefined)
 				});
 

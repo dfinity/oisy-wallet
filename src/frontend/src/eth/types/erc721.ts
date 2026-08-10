@@ -25,6 +25,9 @@ export interface Erc721UriJson {
 	name?: string;
 	image?: string;
 	image_url?: string;
+	// Inline SVG markup, as popularized by the OpenSea metadata standard for
+	// fully on-chain collections.
+	image_data?: string;
 	description?: string;
 	attributes?: {
 		trait_type: string;

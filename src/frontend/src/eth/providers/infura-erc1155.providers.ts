@@ -5,6 +5,7 @@ import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc1155ContractAddress, Erc1155Metadata } from '$eth/types/erc1155';
+import { replaceErc1155UriTokenId } from '$eth/utils/erc1155.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -128,7 +129,7 @@ export class InfuraErc1155Provider extends InfuraErc165Provider {
 		const tokenUri = await erc1155Contract.uri(tokenId);
 
 		const { metadata, imageUrl } = await fetchMetadataFromUri({
-			metadataUrl: tokenUri.replace(/{id}/g, tokenId.toString()),
+			metadataUrl: replaceErc1155UriTokenId({ uri: tokenUri, tokenId }),
 			contractAddress,
 			tokenId
 		});

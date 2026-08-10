@@ -146,6 +146,7 @@ describe('infura-erc721.providers', () => {
 				vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
 
 				global.fetch = vi.fn().mockResolvedValue({
+					ok: true,
 					json: () => Promise.resolve(mockMetadata)
 				});
 

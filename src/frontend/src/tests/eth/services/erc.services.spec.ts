@@ -143,8 +143,82 @@ describe('erc.services', () => {
 			});
 			expect(parseMetadataResourceUrl).toHaveBeenNthCalledWith(2, {
 				url: mockMetadataResponse.image,
+				base: expectedMetadataUrl,
 				error: new InvalidMetadataImageUrl(tokenId, contractAddress)
 			});
+		});
+
+		it('should throw if the metadata URL responds with an error status', async () => {
+			mockFetch.mockResolvedValueOnce({
+				ok: false,
+				json: () => mockMetadataResponse
+			} as unknown as Response);
+
+			await expect(fetchMetadataFromUri(mockParams)).rejects.toThrow(
+				new InvalidTokenUri(tokenId, contractAddress)
+			);
+		});
+
+		it('should resolve an image referenced relatively to the metadata document', async () => {
+			const metadata = { ...mockMetadataResponse, image: `images/${tokenId}.png` };
+
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => metadata
+			} as unknown as Response);
+
+			const result = await fetchMetadataFromUri({
+				...mockParams,
+				metadataUrl: 'https://example.com/collection/metadata.json'
+			});
+
+			expect(result).toEqual({
+				metadata,
+				imageUrl: new URL(`https://example.com/collection/images/${tokenId}.png`)
+			});
+		});
+
+		it('should build a data URL out of inline SVG image data', async () => {
+			const imageData = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
+			const metadata = { ...mockMetadataResponse, image: undefined, image_data: imageData };
+
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => metadata
+			} as unknown as Response);
+
+			const result = await fetchMetadataFromUri(mockParams);
+
+			expect(result).toEqual({
+				metadata,
+				imageUrl: new URL(`data:image/svg+xml;utf8,${encodeURIComponent(imageData)}`)
+			});
+		});
+
+		it('should prefer a referenced image over inline SVG image data', async () => {
+			const metadata = { ...mockMetadataResponse, image_data: '<svg />' };
+
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => metadata
+			} as unknown as Response);
+
+			const result = await fetchMetadataFromUri(mockParams);
+
+			expect(result).toEqual({ metadata, imageUrl: new URL(mockMetadataResponse.image) });
+		});
+
+		it('should keep the metadata when the image URL is unusable', async () => {
+			const metadata = { ...mockMetadataResponse, image: 'http://localhost:3000/image.png' };
+
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () => metadata
+			} as unknown as Response);
+
+			const result = await fetchMetadataFromUri(mockParams);
+
+			expect(result).toEqual({ metadata, imageUrl: undefined });
 		});
 	});
 });

@@ -81,15 +81,35 @@ export const getNftCountsByNetwork = (
 	};
 };
 
-const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
-	const IPFS_PROTOCOL = 'ipfs:';
-	const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';
+const DATA_PROTOCOL = 'data:';
 
-	if (url.protocol !== IPFS_PROTOCOL) {
+// Content-addressed schemes are not fetchable by the browser; they have to be
+// rewritten to an HTTP gateway that serves the same content.
+const CONTENT_ADDRESSED_GATEWAYS: Record<string, string> = {
+	'ipfs:': 'https://ipfs.io/ipfs/',
+	'ipns:': 'https://ipfs.io/ipns/',
+	'ar:': 'https://arweave.net/'
+};
+
+// `ipfs://ipfs/<cid>` and its `ipns`/`ar` equivalents are widespread in NFT
+// metadata; the gateway already carries that segment, so keeping it would build
+// a path that does not exist.
+const DUPLICATED_GATEWAY_SEGMENT = /^(?:ipfs|ipns|ar)\//;
+
+const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
+	const gateway = CONTENT_ADDRESSED_GATEWAYS[url.protocol];
+
+	if (isNullish(gateway)) {
 		return url;
 	}
 
-	const newUrl = url.href.replace(`${IPFS_PROTOCOL}//`, IPFS_GATEWAY);
+	const prefix = `${url.protocol}//`;
+
+	const href = url.href.startsWith(prefix)
+		? `${prefix}${url.href.slice(prefix.length).replace(DUPLICATED_GATEWAY_SEGMENT, '')}`
+		: url.href;
+
+	const newUrl = href.replace(prefix, gateway);
 
 	const parsedNewUrl = UrlSchema.safeParse(newUrl);
 
@@ -101,7 +121,7 @@ const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 };
 
 const dataUrlMediaStatus = ({ url }: { url: URL }): MediaStatusEnum | undefined => {
-	if (url.protocol !== 'data:') {
+	if (url.protocol !== DATA_PROTOCOL) {
 		return;
 	}
 
@@ -129,16 +149,43 @@ const base64ByteLength = ({ data }: { data: string }): number => {
 	return Math.floor((sanitizedData.length * 3) / 4) - padding;
 };
 
-export const parseMetadataResourceUrl = ({ url, error }: { url: string; error: NftError }): URL => {
-	const parsedUrl = UrlSchema.safeParse(url);
+// A metadata document routinely references its media with a path relative to
+// itself, so the document URL has to be used as base for those to resolve.
+const resolveResourceUrl = ({ url, base }: { url: string; base?: URL }): URL | undefined => {
+	try {
+		return nonNullish(base) ? new URL(url, base) : new URL(url);
+	} catch (_: unknown) {
+		// A reference the URL parser rejects is simply not resolvable media.
+	}
+};
 
-	if (!parsedUrl.success) {
+export const parseMetadataResourceUrl = ({
+	url,
+	error,
+	base
+}: {
+	url: string;
+	error: NftError;
+	base?: URL;
+}): URL => {
+	const resolvedUrl = resolveResourceUrl({ url, base });
+
+	if (isNullish(resolvedUrl)) {
 		throw error;
 	}
 
-	const adaptedUrl = adaptMetadataResourceUrl(new URL(parsedUrl.data));
+	// Fully on-chain collections inline their token URI and their media as a
+	// `data:` URI. Those are not network resources, so they bypass `UrlSchema`
+	// — `dataUrlMediaStatus` is what vets them further down the pipeline.
+	if (resolvedUrl.protocol === DATA_PROTOCOL) {
+		return resolvedUrl;
+	}
 
-	if (isNullish(adaptedUrl)) {
+	const adaptedUrl = adaptMetadataResourceUrl(resolvedUrl);
+
+	// Validation runs on the adapted URL: content-addressed schemes are only
+	// fetchable once rewritten to their gateway.
+	if (isNullish(adaptedUrl) || !UrlSchema.safeParse(adaptedUrl.href).success) {
 		throw error;
 	}
 

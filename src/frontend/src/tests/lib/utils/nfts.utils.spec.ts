@@ -383,6 +383,67 @@ describe('nfts.utils', () => {
 
 			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
 		});
+
+		it('should not duplicate the ipfs segment of the gateway', () => {
+			const url = 'ipfs://ipfs/Qm12345abcde/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/Qm12345abcde/metadata.json');
+		});
+
+		it('should transform a valid ipns:// URL to the IPNS gateway', () => {
+			const url = 'ipns://example.eth/metadata.json';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipns/example.eth/metadata.json');
+		});
+
+		it('should transform a valid ar:// URL to the Arweave gateway', () => {
+			const url = 'ar://ZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmY';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe('https://arweave.net/ZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmY');
+		});
+
+		it('should return a data URL untouched', () => {
+			const url = 'data:image/svg+xml;utf8,%3Csvg%2F%3E';
+			const result = parseMetadataResourceUrl({ url, error: mockError });
+
+			expect(result?.href).toBe(url);
+		});
+
+		it('should resolve a relative URL against the provided base', () => {
+			const url = '../images/27.png';
+			const base = new URL('https://example.com/collection/metadata/27.json');
+
+			const result = parseMetadataResourceUrl({ url, base, error: mockError });
+
+			expect(result?.href).toBe('https://example.com/collection/images/27.png');
+		});
+
+		it('should resolve a relative URL against an IPFS base', () => {
+			const url = '27.png';
+			const base = new URL('https://ipfs.io/ipfs/Qm12345abcde/metadata/27.json');
+
+			const result = parseMetadataResourceUrl({ url, base, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/Qm12345abcde/metadata/27.png');
+		});
+
+		it('should keep an absolute URL when a base is provided', () => {
+			const url = 'ipfs://Qm12345abcde/27.png';
+			const base = new URL('https://example.com/metadata/27.json');
+
+			const result = parseMetadataResourceUrl({ url, base, error: mockError });
+
+			expect(result?.href).toBe('https://ipfs.io/ipfs/Qm12345abcde/27.png');
+		});
+
+		it('should raise an error for a relative URL without a base', () => {
+			const url = '27.png';
+
+			expect(() => parseMetadataResourceUrl({ url, error: mockError })).toThrow(mockError);
+		});
 	});
 
 	describe('mapTokenToCollection', () => {

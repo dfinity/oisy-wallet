@@ -6,7 +6,12 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
+import {
+	isTokenErc1155,
+	isTokenErc1155CustomToken,
+	replaceErc1155UriTokenId
+} from '$eth/utils/erc1155.utils';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
@@ -60,6 +65,47 @@ describe('erc1155.utils', () => {
 			...MOCK_ERC721_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc1155CustomToken(token)).toBeFalsy();
+		});
+	});
+
+	describe('replaceErc1155UriTokenId', () => {
+		const uri = 'ipfs://bafybeibtnykuscihteucyu5zv5ccmzsnt57tfpyv43zurafe2ghh6xo44i/{id}.json';
+
+		it('should substitute the id as 64-char zero-padded lowercase hexadecimal', () => {
+			expect(replaceErc1155UriTokenId({ uri, tokenId: parseNftId('1') })).toBe(
+				'ipfs://bafybeibtnykuscihteucyu5zv5ccmzsnt57tfpyv43zurafe2ghh6xo44i/0000000000000000000000000000000000000000000000000000000000000001.json'
+			);
+		});
+
+		it('should substitute a large id in lowercase hexadecimal', () => {
+			expect(replaceErc1155UriTokenId({ uri, tokenId: parseNftId('305') })).toBe(
+				'ipfs://bafybeibtnykuscihteucyu5zv5ccmzsnt57tfpyv43zurafe2ghh6xo44i/0000000000000000000000000000000000000000000000000000000000000131.json'
+			);
+		});
+
+		it('should substitute every occurrence of the placeholder', () => {
+			expect(
+				replaceErc1155UriTokenId({
+					uri: 'https://example.com/{id}/meta/{id}.json',
+					tokenId: parseNftId('16')
+				})
+			).toBe(
+				'https://example.com/0000000000000000000000000000000000000000000000000000000000000010/meta/0000000000000000000000000000000000000000000000000000000000000010.json'
+			);
+		});
+
+		it('should return the URI untouched when it has no placeholder', () => {
+			const staticUri = 'https://example.com/meta/1.json';
+
+			expect(replaceErc1155UriTokenId({ uri: staticUri, tokenId: parseNftId('1') })).toBe(
+				staticUri
+			);
+		});
+
+		it('should fall back to the raw id when it is not a number', () => {
+			expect(replaceErc1155UriTokenId({ uri, tokenId: parseNftId('abc') })).toBe(
+				'ipfs://bafybeibtnykuscihteucyu5zv5ccmzsnt57tfpyv43zurafe2ghh6xo44i/abc.json'
+			);
 		});
 	});
 });
