@@ -26,6 +26,22 @@ describe('SolWalletConnectSignReview', () => {
 		expect(getByText(en.wallet_connect.text.unreviewed_instructions)).toBeInTheDocument();
 	});
 
+	it('should render the unreviewed instructions warning above the application', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: {
+				...props,
+				unreviewed: true
+			}
+		});
+
+		const warning = getByText(en.wallet_connect.text.unreviewed_instructions);
+		const application = getByText(en.wallet_connect.text.application);
+
+		expect(warning.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+			Node.DOCUMENT_POSITION_FOLLOWING
+		);
+	});
+
 	it('should not render the unreviewed instructions warning by default', () => {
 		const { queryByText } = render(SolWalletConnectSignReview, {
 			props

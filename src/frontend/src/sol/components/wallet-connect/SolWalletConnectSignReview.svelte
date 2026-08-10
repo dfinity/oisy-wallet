@@ -40,6 +40,10 @@
 </script>
 
 <ContentWithToolbar>
+	{#if unreviewed}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
+	{/if}
+
 	<SendData
 		{amount}
 		{application}
@@ -50,10 +54,6 @@
 	>
 		{#if isApproval}
 			<SendDataSpender spender={destination} />
-		{/if}
-
-		{#if unreviewed}
-			<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
