@@ -1244,6 +1244,7 @@ interface I18nFee {
 		transaction_fees: string;
 		network_fee: string;
 		approval_fee: string;
+		prioritization_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1283,6 +1284,7 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		high_prioritization_fee: string;
 		invalid_typed_data: string;
 		raw_copied: string;
 		sign_message: string;

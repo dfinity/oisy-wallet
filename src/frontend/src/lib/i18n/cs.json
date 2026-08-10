@@ -1553,7 +1553,8 @@
 			"ata_fee": "Poplatek ATA",
 			"transaction_fees": "Poplatky za transakci",
 			"network_fee": "Síťový poplatek",
-			"approval_fee": "Poplatek za schválení"
+			"approval_fee": "Poplatek za schválení",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."
@@ -1600,6 +1601,7 @@
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"unreviewed_instructions": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",

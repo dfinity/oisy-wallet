@@ -1553,7 +1553,8 @@
 			"ata_fee": "ATA 手续费",
 			"transaction_fees": "交易手续费",
 			"network_fee": "网络手续费",
-			"approval_fee": "授权手续费"
+			"approval_fee": "授权手续费",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1600,6 +1601,7 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"unreviewed_instructions": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",

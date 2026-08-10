@@ -2,6 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import { calculateSolPrioritizationFee } from '$sol/utils/sol-instructions-compute-budget.utils';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -45,11 +46,22 @@ const conflicts = ({
 
 export const mapSolTransactionMessage = ({
 	instructions
-}: TransactionMessage): MappedSolTransaction =>
-	Array.from(instructions).reduce<MappedSolTransaction>(
+}: TransactionMessage): MappedSolTransaction => {
+	const instructionsList = Array.from(instructions);
+
+	const mapped = instructionsList.reduce<MappedSolTransaction>(
 		(acc, instruction) => {
-			const { amount, source, destination, payer, tokenAddress, isApproval, unreviewed } =
-				mapSolInstruction(instruction);
+			const {
+				amount,
+				source,
+				destination,
+				payer,
+				tokenAddress,
+				isApproval,
+				unreviewed,
+				computeUnitPrice,
+				computeUnitLimit
+			} = mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the
@@ -91,8 +103,23 @@ export const mapSolTransactionMessage = ({
 				...(nonNullish(tokenAddress) && { tokenAddress }),
 				...((isApproval ?? acc.isApproval) && { isApproval: true }),
 				...((unreviewed ?? acc.unreviewed) && { unreviewed: true }),
-				...(ambiguous && { ambiguous })
+				...(ambiguous && { ambiguous }),
+				...(nonNullish(computeUnitPrice) && { computeUnitPrice }),
+				...(nonNullish(computeUnitLimit) && { computeUnitLimit })
 			};
 		},
 		{ amount: undefined }
 	);
+
+	const { computeUnitPrice, computeUnitLimit, ...rest } = mapped;
+
+	// The prioritisation fee needs the whole message: the price and the limit come from separate
+	// instructions, and the limit falls back to a default derived from the instruction count.
+	const prioritizationFee = calculateSolPrioritizationFee({
+		computeUnitPrice,
+		computeUnitLimit,
+		instructionsCount: instructionsList.length
+	});
+
+	return { ...rest, ...(nonNullish(prioritizationFee) && { prioritizationFee }) };
+};

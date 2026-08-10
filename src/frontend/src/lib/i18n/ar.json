@@ -1553,7 +1553,8 @@
 			"ata_fee": "رسوم ATA",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1600,6 +1601,7 @@
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"unreviewed_instructions": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",

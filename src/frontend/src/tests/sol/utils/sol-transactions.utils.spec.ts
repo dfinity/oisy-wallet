@@ -35,7 +35,8 @@ describe('sol-transactions.utils', () => {
 				unreviewed: true,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+				prioritizationFee: 238_217n
 			});
 		});
 
@@ -235,6 +236,64 @@ describe('sol-transactions.utils', () => {
 					instructions: [instruction1, instruction2]
 				})
 			).toStrictEqual({ amount: undefined, unreviewed: true });
+		});
+
+		it('should not report a prioritization fee when no compute budget is requested', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 1n })
+				.mockReturnValueOnce({ amount: undefined });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n });
+		});
+
+		it('should report a prioritization fee from a compute unit price alone', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000n })
+				.mockReturnValueOnce({ amount: 1n });
+
+			// no explicit limit, so the runtime default of 200_000 compute units per instruction
+			// applies to both instructions
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n, prioritizationFee: 400_000n });
+		});
+
+		it('should report a prioritization fee from a compute unit price and limit', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000n })
+				.mockReturnValueOnce({ amount: undefined, computeUnitLimit: 50_000n })
+				.mockReturnValueOnce({ amount: 1n });
+
+			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+				amount: 1n,
+				prioritizationFee: 50_000n
+			});
+		});
+
+		it('should report a balance-draining prioritization fee alongside a modest transfer', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000_000_000n })
+				.mockReturnValueOnce({ amount: undefined, computeUnitLimit: 1_400_000n })
+				.mockReturnValueOnce({
+					amount: 1_000n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
+
+			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+				amount: 1_000n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				prioritizationFee: 1_400_000_000_000n
+			});
 		});
 
 		it('should ignore instructions with undefined amount (no change to accumulator)', () => {

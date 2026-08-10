@@ -1553,7 +1553,8 @@
 			"ata_fee": "ATA-Gebühr",
 			"transaction_fees": "Transaktionsgebühr",
 			"network_fee": "Netzwerkgebühr",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Unzureichendes Guthaben, um die Gebühren zu decken."
@@ -1600,6 +1601,7 @@
 			"amount": "",
 			"hex_data": "HEX-Daten",
 			"unreviewed_instructions": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",

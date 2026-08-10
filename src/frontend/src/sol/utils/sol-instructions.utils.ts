@@ -24,6 +24,7 @@ import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.ut
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
@@ -578,6 +579,43 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 	return unreviewedInstruction();
 };
 
+const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	try {
+		const parsedInstruction = parseSolComputeBudgetInstruction(instruction);
+
+		const { instructionType } = parsedInstruction;
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitPrice) {
+			const {
+				data: { microLamports }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitPrice: microLamports };
+		}
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitLimit) {
+			const {
+				data: { units }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitLimit: BigInt(units) };
+		}
+
+		// The deprecated `RequestUnits` carries its own flat `additionalFee`, which the review
+		// cannot price the same way. Flag it rather than quietly report a fee of zero.
+		if (instructionType === ComputeBudgetInstruction.RequestUnits) {
+			return unreviewedInstruction();
+		}
+
+		// Heap frame and loaded-accounts data size requests do not affect the fee.
+		return ignoredInstruction();
+	} catch (err: unknown) {
+		consoleWarn('Could not parse Solana Compute Budget instruction', err);
+
+		return unreviewedInstruction();
+	}
+};
+
 const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
 	const { instructionType } = instruction;
 
@@ -594,11 +632,12 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
-	// Compute budget instructions only tune fees and limits and can never move funds,
-	// so they are ignored wholesale before parsing — a malformed or not-yet-supported
-	// variant would make the parser throw and crash the signing guard.
+	// Compute budget instructions can never move funds, but they do set the prioritisation
+	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
+	// Parsing stays behind its own guard: a malformed or not-yet-supported variant would
+	// otherwise throw and crash the signing flow.
 	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
-		return ignoredInstruction();
+		return mapSolComputeBudgetInstruction(instruction);
 	}
 
 	const parsedInstruction = parseSolInstruction(instruction);
