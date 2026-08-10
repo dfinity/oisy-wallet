@@ -1,6 +1,6 @@
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
@@ -12,7 +12,9 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
+import { signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_DELTA_INTERVAL_MS, SWAP_DELTA_TIMEOUT_MS } from '$lib/constants/swap.constants';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
@@ -43,7 +45,7 @@ import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
-import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -58,8 +60,12 @@ import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
-import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
-import { constructSimpleSDK } from '@velora-dex/sdk';
+import {
+	mockVeloraCrossChainSwapResponse,
+	mockVeloraDeltaPrice,
+	mockVeloraOptimalRate
+} from '$tests/mocks/velora.mock';
+import { constructSimpleSDK, type DeltaPrice, type OptimalRate } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
@@ -142,9 +148,16 @@ vi.mock('$sol/services/sol-send.services', () => ({
 	sendSol: vi.fn()
 }));
 
-vi.mock('@velora-dex/sdk', () => ({
-	constructSimpleSDK: vi.fn()
-}));
+// `OrderHelpers` stays real: its status predicates are pure, and re-implementing them here would
+// let the test disagree with the SDK about which statuses are terminal failures.
+vi.mock('@velora-dex/sdk', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		constructSimpleSDK: vi.fn()
+	};
+});
 
 vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
@@ -867,14 +880,13 @@ describe('swap.services', () => {
 		const mockReceiveAmount = 900000000n; // 0.9 DST
 		const mockSlippageValue = '0.5';
 		const mockSourceNetwork = ETHEREUM_NETWORK;
-		const mockDestinationNetwork = SEPOLIA_NETWORK;
 		const mockUserAddress = mockEthAddress;
 		const mockGas = '21000';
 		const mockMaxFeePerGas = '20000000000';
 		const mockMaxPriorityFeePerGas = '2000000000';
 
-		const mockSwapDetails: VeloraSwapDetails = {
-			...mockVeloraSwapDetails
+		const mockSwapDetails: DeltaPrice = {
+			...mockVeloraDeltaPrice
 		};
 
 		const mockProgress = vi.fn();
@@ -921,14 +933,14 @@ describe('swap.services', () => {
 				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
 			);
 			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
+			// destAmount mirrors what the server would build from the mock quote's origin output
+			// (900000000) at the default 0.5% slippage.
 			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-				data: { order: 'mock-order-data' }
+				toSign: { domain: {}, types: {}, value: { destAmount: '895500000' } },
+				orderHash: 'mock-order-hash'
 			});
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
-			mockDeltaContractGetDeltaOrderById.mockResolvedValue({
-				status: 'EXECUTED',
-				order: { bridge: { destinationChainId: 0 } }
-			});
+			mockDeltaContractGetDeltaOrderById.mockResolvedValue({ status: 'COMPLETED' });
 
 			vi.mocked(createPermit).mockResolvedValue({
 				nonce: '0',
@@ -947,7 +959,6 @@ describe('swap.services', () => {
 				sourceNetwork: mockSourceNetwork,
 				receiveAmount: mockReceiveAmount,
 				slippageValue: mockSlippageValue,
-				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
 				isGasless: false,
@@ -977,7 +988,6 @@ describe('swap.services', () => {
 					sourceNetwork: mockSourceNetwork,
 					receiveAmount: mockReceiveAmount,
 					slippageValue: mockSlippageValue,
-					destinationNetwork: mockDestinationNetwork,
 					userAddress: mockUserAddress,
 					gas: BigInt(mockGas),
 					isGasless: false,
@@ -1000,7 +1010,6 @@ describe('swap.services', () => {
 				sourceNetwork: mockSourceNetwork,
 				receiveAmount: mockReceiveAmount,
 				slippageValue: mockSlippageValue,
-				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
 				isGasless: true,
@@ -1025,7 +1034,6 @@ describe('swap.services', () => {
 				sourceNetwork: mockSourceNetwork,
 				receiveAmount: mockReceiveAmount,
 				slippageValue: mockSlippageValue,
-				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
 				isGasless: false,
@@ -1038,11 +1046,12 @@ describe('swap.services', () => {
 			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
 		});
 
-		it('should handle cross-chain bridge execution', async () => {
+		it('should treat a cross-chain order as settled only once it reports COMPLETED', async () => {
+			// A cross-chain order stays `BRIDGING` until the destination leg lands, so `COMPLETED`
+			// on its own means settled on every chain — no separate bridge check is needed.
 			mockDeltaContractGetDeltaOrderById.mockResolvedValue({
-				status: 'EXECUTED',
-				order: { bridge: { destinationChainId: 1 } },
-				bridgeStatus: 'filled'
+				status: 'COMPLETED',
+				transactions: [{ originTx: '0xorigin', destinationTx: '0xdestination' }]
 			});
 
 			await fetchVeloraDeltaSwap({
@@ -1054,7 +1063,6 @@ describe('swap.services', () => {
 				sourceNetwork: mockSourceNetwork,
 				receiveAmount: mockReceiveAmount,
 				slippageValue: mockSlippageValue,
-				destinationNetwork: mockDestinationNetwork,
 				userAddress: mockUserAddress,
 				gas: BigInt(mockGas),
 				isGasless: false,
@@ -1064,6 +1072,180 @@ describe('swap.services', () => {
 			});
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('rounds the slippage to integer basis points when building the order', async () => {
+			// 29 bps on the mock quote's origin output (900000000) → minimum 897390000.
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
+				toSign: { domain: {}, types: {}, value: { destAmount: '897390000' } },
+				orderHash: 'mock-order-hash'
+			});
+
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				// 0.29 * 100 === 28.999999999999996 in IEEE-754 — must reach the SDK as 29
+				slippageValue: '0.29',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails
+			});
+
+			expect(mockDeltaContractBuildDeltaOrder).toHaveBeenCalledWith(
+				expect.objectContaining({ slippage: 29 })
+			);
+		});
+
+		it('refuses to sign an order whose destAmount is below the slippage minimum', async () => {
+			// The server-built minimum guarantees less than the quoted origin output (900000000)
+			// minus the 0.5% slippage the user accepted (895500000).
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
+				toSign: { domain: {}, types: {}, value: { destAmount: '895499999' } },
+				orderHash: 'mock-order-hash'
+			});
+
+			await expect(
+				fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				})
+			).rejects.toThrow(
+				// The `Slippage exceeded.` prefix is what the wizards match to show the slippage hint.
+				'Slippage exceeded. Velora returned 895499999, expected at least 895500000.'
+			);
+
+			expect(signPrehash).not.toHaveBeenCalled();
+			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
+		});
+
+		it.each(['FAILED', 'EXPIRED', 'CANCELLED', 'REFUNDED', 'REFUNDING'])(
+			'throws instead of reporting success when the order ends up %s',
+			async (status) => {
+				mockDeltaContractGetDeltaOrderById.mockResolvedValue({ status });
+
+				await expect(
+					fetchVeloraDeltaSwap({
+						identity: mockIdentity,
+						progress: mockProgress,
+						sourceToken: mockSourceToken,
+						destinationToken: mockDestinationToken,
+						swapAmount: mockSwapAmount,
+						sourceNetwork: mockSourceNetwork,
+						receiveAmount: mockReceiveAmount,
+						slippageValue: mockSlippageValue,
+						userAddress: mockUserAddress,
+						gas: BigInt(mockGas),
+						isGasless: false,
+						maxFeePerGas: BigInt(mockMaxFeePerGas),
+						maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+						swapDetails: mockSwapDetails
+					})
+				).rejects.toThrow(`Velora Delta swap ${status.toLowerCase()} (order mock-auction-id)`);
+
+				// A terminal failure never recovers, so polling stops on the first read.
+				expect(mockDeltaContractGetDeltaOrderById).toHaveBeenCalledOnce();
+				expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			}
+		);
+
+		it('keeps polling through transient statuses and surfaces the terminal failure', async () => {
+			vi.useFakeTimers();
+
+			mockDeltaContractGetDeltaOrderById
+				.mockResolvedValueOnce({ status: 'ACTIVE' })
+				.mockResolvedValueOnce({ status: 'BRIDGING' })
+				.mockResolvedValueOnce({ status: 'SUSPENDED' })
+				.mockResolvedValueOnce({ status: 'CANCELLING' })
+				.mockResolvedValueOnce({ status: 'FAILED' });
+
+			try {
+				// The rejection is captured rather than asserted with `expect().rejects` so that the
+				// assertion can happen *after* virtual time advances — awaiting it up front would
+				// deadlock, since nothing settles until the poll interval elapses.
+				const settled = fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				}).catch((err: unknown) => err);
+
+				await vi.advanceTimersByTimeAsync(4 * SWAP_DELTA_INTERVAL_MS);
+
+				await expect(settled).resolves.toEqual(
+					new Error('Velora Delta swap failed (order mock-auction-id)')
+				);
+			} finally {
+				vi.useRealTimers();
+			}
+
+			expect(mockDeltaContractGetDeltaOrderById).toHaveBeenCalledTimes(5);
+			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('throws instead of reporting success when the order never settles before the timeout', async () => {
+			vi.useFakeTimers();
+
+			mockDeltaContractGetDeltaOrderById.mockResolvedValue({ status: 'ACTIVE' });
+
+			try {
+				// See the note above on capturing the rejection instead of awaiting `expect().rejects`.
+				const settled = fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				}).catch((err: unknown) => err);
+
+				await vi.advanceTimersByTimeAsync(SWAP_DELTA_TIMEOUT_MS + SWAP_DELTA_INTERVAL_MS);
+
+				await expect(settled).resolves.toEqual(
+					new Error('Velora Delta swap timed out (order mock-auction-id)')
+				);
+			} finally {
+				vi.useRealTimers();
+			}
+
+			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 		});
 	});
 
@@ -1089,22 +1271,8 @@ describe('swap.services', () => {
 		const mockMaxFeePerGas = '20000000000';
 		const mockMaxPriorityFeePerGas = '2000000000';
 
-		const mockSwapDetails = {
-			srcToken: mockEthAddress,
-			destToken: '0xDestinationToken',
-			srcAmount: '1000000000000000000',
-			destAmount: '900000000',
-			destAmountBeforeFee: '920000000',
-			gasCost: '50000',
-			gasCostBeforeFee: '48000',
-			gasCostUSD: '15.5',
-			gasCostUSDBeforeFee: '14.8',
-			srcUSD: '1000.0',
-			destUSD: '895.5',
-			destUSDBeforeFee: '915.2',
-			partner: 'PartnerName',
-			partnerFee: 0.25,
-			hmac: 'abcd1234'
+		const mockSwapDetails: OptimalRate = {
+			...mockVeloraOptimalRate
 		};
 
 		const mockProgress = vi.fn();
@@ -1160,10 +1328,9 @@ describe('swap.services', () => {
 				gas: BigInt(mockGas),
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails,
+				swapDetails: mockSwapDetails,
 				receiveAmount: BigInt(1000),
-				isGasless: false,
-				destinationNetwork: SEPOLIA_NETWORK
+				isGasless: false
 			});
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
@@ -1188,10 +1355,9 @@ describe('swap.services', () => {
 				gas: BigInt(mockGas),
 				maxFeePerGas: BigInt(mockMaxFeePerGas),
 				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-				swapDetails: mockSwapDetails as VeloraSwapDetails,
+				swapDetails: mockSwapDetails,
 				receiveAmount: BigInt(1000),
-				isGasless: false,
-				destinationNetwork: SEPOLIA_NETWORK
+				isGasless: false
 			});
 
 			expect(mockProgress).toHaveBeenCalledTimes(2);
@@ -1200,6 +1366,28 @@ describe('swap.services', () => {
 
 			expect(mockSwapGetSpender).toHaveBeenCalled();
 			expect(mockSwapBuildTx).toHaveBeenCalled();
+		});
+
+		it('rounds the slippage to integer basis points when building the transaction', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				// 0.29 * 100 === 28.999999999999996 in IEEE-754 — must reach the SDK as 29
+				slippageValue: '0.29',
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false
+			});
+
+			expect(mockSwapBuildTx).toHaveBeenCalledWith(expect.objectContaining({ slippage: 29 }));
 		});
 	});
 
@@ -1615,12 +1803,7 @@ describe('swap.services', () => {
 		});
 
 		it('should track SWAP_OFFER with delta event type on successful delta quote', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridge: { scalingFactor: 0 }
-				}
-			});
+			mockGetQuote.mockResolvedValue({ delta: mockVeloraDeltaPrice });
 
 			await fetchVeloraSwapAmount({
 				sourceToken,
@@ -1692,13 +1875,8 @@ describe('swap.services', () => {
 			});
 		});
 
-		it('should track bridge info in delta swap', async () => {
-			mockGetQuote.mockResolvedValue({
-				delta: {
-					destAmount: '123',
-					bridgeInfo: { destAmountAfterBridge: '949920' }
-				}
-			});
+		it('should track a cross-chain delta swap', async () => {
+			mockGetQuote.mockResolvedValue(mockVeloraCrossChainSwapResponse);
 
 			await fetchVeloraSwapAmount({
 				sourceToken,
