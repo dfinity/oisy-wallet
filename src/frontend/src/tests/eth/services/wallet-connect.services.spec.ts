@@ -180,7 +180,11 @@ describe('eth wallet-connect.services', () => {
 				// A dApp can dress an executable EIP-712 authorization as a plain message
 				// request. It is approved as a plain message, so it must be signed as one.
 				const message = daiPermitJson(true);
-				const request = buildRequest({ method, params: [message, HOLDER] });
+				// `eth_sign` takes [address, data] while `personal_sign` takes [data, address].
+				const request = buildRequest({
+					method,
+					params: method === SESSION_REQUEST_ETH_SIGN ? [HOLDER, message] : [message, HOLDER]
+				});
 
 				const result = await signMessage(buildParams(request));
 

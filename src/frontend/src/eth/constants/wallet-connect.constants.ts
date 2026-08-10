@@ -7,7 +7,7 @@ export const SESSION_REQUEST_ETH_SIGN_LEGACY = 'eth_signTypedData';
 
 // Only these methods carry EIP-712 typed data. Any other signing method signs
 // the raw message, whatever its payload happens to look like.
-export const SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS: string[] = [
+export const SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS: readonly string[] = [
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_ETH_SIGN_LEGACY
 ];
