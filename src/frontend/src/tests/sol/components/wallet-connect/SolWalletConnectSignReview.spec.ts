@@ -1,6 +1,7 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
@@ -249,5 +250,27 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByText('0.000005 SOL')).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
 		});
+	});
+
+	it('should render the network row with the same label-above-value shape as the other rows', () => {
+		const { container } = render(SolWalletConnectSignReview, { props });
+
+		const label = container.querySelector('label[for="network"]');
+		const value = container.querySelector('#network');
+
+		expect(label).toHaveTextContent(en.send.text.network);
+		expect(value).toHaveTextContent(SOLANA_TOKEN.network.name);
+	});
+
+	it('should render the network logo within the network row', () => {
+		const { container } = render(SolWalletConnectSignReview, { props });
+
+		const logo = container.querySelector(
+			`#network img[alt="${replacePlaceholders(en.core.alt.logo, {
+				$name: SOLANA_TOKEN.network.name
+			})}"]`
+		);
+
+		expect(logo).toBeInTheDocument();
 	});
 });

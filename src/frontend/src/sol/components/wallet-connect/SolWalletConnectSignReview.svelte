@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
-	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -154,7 +154,9 @@
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
 		{#snippet sourceNetwork()}
-			<ReviewNetwork sourceNetwork={token.network} />
+			<WalletConnectModalValue label={$i18n.send.text.network} ref="network">
+				<NetworkWithLogo network={token.network} />
+			</WalletConnectModalValue>
 		{/snippet}
 	</SendData>
 
