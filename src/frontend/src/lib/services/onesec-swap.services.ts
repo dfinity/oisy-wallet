@@ -295,12 +295,6 @@ const createAutAndDetachCloser = async ({
 	extraRefs: Partial<Record<OneSecExternalRefKey, string>>;
 	plan: BridgingPlan;
 }): Promise<void> => {
-	// Unreachable for the ERC-20 / ICRC pair OneSec supports, but the token
-	// mapper is shared: an unmappable token degrades to an untracked swap.
-	if (isNullish(data)) {
-		return;
-	}
-
 	const initialRefs: Partial<Record<OneSecExternalRefKey, string>> = {
 		...toOneSecDisplayRefs({
 			sourceToken,
@@ -310,19 +304,24 @@ const createAutAndDetachCloser = async ({
 		...extraRefs
 	};
 
-	// AUT persistence is best-effort: a failed `createActiveUserTransaction`
-	// must NOT abort the plan. The user has already committed funds (point of
-	// no return), so the closer is the only path that completes the bridge —
-	// it always runs, persisted row or not.
-	try {
-		await createActiveUserTransaction({
-			identity,
-			id: swapId,
-			data,
-			externalRefs: toOneSecExternalRefs(initialRefs)
-		});
-	} catch (err: unknown) {
-		consoleError(err);
+	// AUT persistence is best-effort: neither a failed
+	// `createActiveUserTransaction` nor an unmappable token may abort the plan.
+	// The user has already committed funds (point of no return), so the closer is
+	// the only path that completes the bridge — it always runs, persisted row or
+	// not. Nullish `data` is unreachable for the ERC-20 / ICRC pair OneSec
+	// supports, but the token mapper is shared, so it must degrade to an
+	// untracked bridge rather than a stranded one.
+	if (nonNullish(data)) {
+		try {
+			await createActiveUserTransaction({
+				identity,
+				id: swapId,
+				data,
+				externalRefs: toOneSecExternalRefs(initialRefs)
+			});
+		} catch (err: unknown) {
+			consoleError(err);
+		}
 	}
 
 	finishOneSecBridgingInSession({ identity, id: swapId, plan, initialRefs });
