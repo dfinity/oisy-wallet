@@ -1190,13 +1190,16 @@ export const fetchVeloraDeltaSwap = async ({
 
 	let builtOrder;
 
+	// Slippage is expressed in basis points, which must be an integer — rounding guards against
+	// IEEE-754 noise in the percent conversion (0.29 * 100 === 28.999…).
+	const roundedSlippage = Math.round(Number(slippageValue) * 100);
+
 	// The quoted route carries the tokens, the amounts and the destination chain, so the order is
-	// built server-side from it; slippage is expressed in basis points, which must be an integer —
-	// rounding guards against IEEE-754 noise in the percent conversion (0.29 * 100 === 28.999…).
+	// built server-side from it.
 	const deltaOrderBaseParams: BuildDeltaOrderParams = {
 		route: swapDetails.route,
 		side: SWAP_SIDE,
-		slippage: Math.round(Number(slippageValue) * 100),
+		slippage: roundedSlippage,
 		owner: userAddress,
 		partner: OISY_URL_HOSTNAME
 	};
@@ -1239,6 +1242,20 @@ export const fetchVeloraDeltaSwap = async ({
 		progress(ProgressStepsSwap.SWAP);
 
 		builtOrder = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
+
+	// The server derives the signed on-chain minimum (`destAmount`) from the route and the
+	// slippage; re-derive it from the quoted origin output (the leg the on-chain order settles)
+	// and refuse to sign an order that guarantees less than the user accepted.
+	const minDestAmount = calculateSlippage({
+		quoteAmount: BigInt(swapDetails.route.origin.output.amount),
+		slippagePercentage: roundedSlippage / 100
+	});
+
+	if (BigInt(builtOrder.toSign.value.destAmount) < minDestAmount) {
+		throw new Error(
+			`Slippage exceeded. Velora returned ${builtOrder.toSign.value.destAmount}, expected at least ${minDestAmount}.`
+		);
 	}
 
 	const hash = getSignParamsEIP712(builtOrder.toSign);
@@ -1284,8 +1301,15 @@ const checkDeltaOrderStatus = async ({
 			return;
 		}
 
+		// Terminal failures (failed, expired, cancelled, refunding, refunded)
+		if (OrderHelpers.checks.isFailedAuction(auction)) {
+			throw new Error(`Velora Delta swap ${auction.status.toLowerCase()} (order ${auctionId})`);
+		}
+
 		await new Promise((r) => setTimeout(r, intervalMs));
 	}
+
+	throw new Error(`Velora Delta swap timed out (order ${auctionId})`);
 };
 
 export const fetchVeloraMarketSwap = async ({

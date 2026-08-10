@@ -12,7 +12,9 @@ import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
+import { signPrehash } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { SWAP_DELTA_INTERVAL_MS, SWAP_DELTA_TIMEOUT_MS } from '$lib/constants/swap.constants';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
@@ -146,14 +148,16 @@ vi.mock('$sol/services/sol-send.services', () => ({
 	sendSol: vi.fn()
 }));
 
-vi.mock('@velora-dex/sdk', () => ({
-	constructSimpleSDK: vi.fn(),
-	OrderHelpers: {
-		checks: {
-			isCompletedAuction: ({ status }: { status: string }) => status === 'COMPLETED'
-		}
-	}
-}));
+// `OrderHelpers` stays real: its status predicates are pure, and re-implementing them here would
+// let the test disagree with the SDK about which statuses are terminal failures.
+vi.mock('@velora-dex/sdk', async (importOriginal) => {
+	const actual = await importOriginal();
+
+	return {
+		...(actual as Record<string, unknown>),
+		constructSimpleSDK: vi.fn()
+	};
+});
 
 vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
@@ -929,8 +933,10 @@ describe('swap.services', () => {
 				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
 			);
 			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
+			// destAmount mirrors what the server would build from the mock quote's origin output
+			// (900000000) at the default 0.5% slippage.
 			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-				toSign: { domain: {}, types: {}, value: { order: 'mock-order-data' } },
+				toSign: { domain: {}, types: {}, value: { destAmount: '895500000' } },
 				orderHash: 'mock-order-hash'
 			});
 			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
@@ -1069,6 +1075,12 @@ describe('swap.services', () => {
 		});
 
 		it('rounds the slippage to integer basis points when building the order', async () => {
+			// 29 bps on the mock quote's origin output (900000000) → minimum 897390000.
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
+				toSign: { domain: {}, types: {}, value: { destAmount: '897390000' } },
+				orderHash: 'mock-order-hash'
+			});
+
 			await fetchVeloraDeltaSwap({
 				identity: mockIdentity,
 				progress: mockProgress,
@@ -1090,6 +1102,150 @@ describe('swap.services', () => {
 			expect(mockDeltaContractBuildDeltaOrder).toHaveBeenCalledWith(
 				expect.objectContaining({ slippage: 29 })
 			);
+		});
+
+		it('refuses to sign an order whose destAmount is below the slippage minimum', async () => {
+			// The server-built minimum guarantees less than the quoted origin output (900000000)
+			// minus the 0.5% slippage the user accepted (895500000).
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
+				toSign: { domain: {}, types: {}, value: { destAmount: '895499999' } },
+				orderHash: 'mock-order-hash'
+			});
+
+			await expect(
+				fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				})
+			).rejects.toThrow(
+				// The `Slippage exceeded.` prefix is what the wizards match to show the slippage hint.
+				'Slippage exceeded. Velora returned 895499999, expected at least 895500000.'
+			);
+
+			expect(signPrehash).not.toHaveBeenCalled();
+			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
+		});
+
+		it.each(['FAILED', 'EXPIRED', 'CANCELLED', 'REFUNDED', 'REFUNDING'])(
+			'throws instead of reporting success when the order ends up %s',
+			async (status) => {
+				mockDeltaContractGetDeltaOrderById.mockResolvedValue({ status });
+
+				await expect(
+					fetchVeloraDeltaSwap({
+						identity: mockIdentity,
+						progress: mockProgress,
+						sourceToken: mockSourceToken,
+						destinationToken: mockDestinationToken,
+						swapAmount: mockSwapAmount,
+						sourceNetwork: mockSourceNetwork,
+						receiveAmount: mockReceiveAmount,
+						slippageValue: mockSlippageValue,
+						userAddress: mockUserAddress,
+						gas: BigInt(mockGas),
+						isGasless: false,
+						maxFeePerGas: BigInt(mockMaxFeePerGas),
+						maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+						swapDetails: mockSwapDetails
+					})
+				).rejects.toThrow(`Velora Delta swap ${status.toLowerCase()} (order mock-auction-id)`);
+
+				// A terminal failure never recovers, so polling stops on the first read.
+				expect(mockDeltaContractGetDeltaOrderById).toHaveBeenCalledOnce();
+				expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			}
+		);
+
+		it('keeps polling through transient statuses and surfaces the terminal failure', async () => {
+			vi.useFakeTimers();
+
+			mockDeltaContractGetDeltaOrderById
+				.mockResolvedValueOnce({ status: 'ACTIVE' })
+				.mockResolvedValueOnce({ status: 'BRIDGING' })
+				.mockResolvedValueOnce({ status: 'SUSPENDED' })
+				.mockResolvedValueOnce({ status: 'CANCELLING' })
+				.mockResolvedValueOnce({ status: 'FAILED' });
+
+			try {
+				// The rejection is captured rather than asserted with `expect().rejects` so that the
+				// assertion can happen *after* virtual time advances — awaiting it up front would
+				// deadlock, since nothing settles until the poll interval elapses.
+				const settled = fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				}).catch((err: unknown) => err);
+
+				await vi.advanceTimersByTimeAsync(4 * SWAP_DELTA_INTERVAL_MS);
+
+				await expect(settled).resolves.toEqual(
+					new Error('Velora Delta swap failed (order mock-auction-id)')
+				);
+			} finally {
+				vi.useRealTimers();
+			}
+
+			expect(mockDeltaContractGetDeltaOrderById).toHaveBeenCalledTimes(5);
+			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('throws instead of reporting success when the order never settles before the timeout', async () => {
+			vi.useFakeTimers();
+
+			mockDeltaContractGetDeltaOrderById.mockResolvedValue({ status: 'ACTIVE' });
+
+			try {
+				// See the note above on capturing the rejection instead of awaiting `expect().rejects`.
+				const settled = fetchVeloraDeltaSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken: mockSourceToken,
+					destinationToken: mockDestinationToken,
+					swapAmount: mockSwapAmount,
+					sourceNetwork: mockSourceNetwork,
+					receiveAmount: mockReceiveAmount,
+					slippageValue: mockSlippageValue,
+					userAddress: mockUserAddress,
+					gas: BigInt(mockGas),
+					isGasless: false,
+					maxFeePerGas: BigInt(mockMaxFeePerGas),
+					maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+					swapDetails: mockSwapDetails
+				}).catch((err: unknown) => err);
+
+				await vi.advanceTimersByTimeAsync(SWAP_DELTA_TIMEOUT_MS + SWAP_DELTA_INTERVAL_MS);
+
+				await expect(settled).resolves.toEqual(
+					new Error('Velora Delta swap timed out (order mock-auction-id)')
+				);
+			} finally {
+				vi.useRealTimers();
+			}
+
+			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 		});
 	});
 
