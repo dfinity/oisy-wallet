@@ -1,9 +1,15 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
+import {
+	mapSolTransactionMessage,
+	mapSolTransactionStatus
+} from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
-import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolTransactionUi,
+	mockSolParsedTransactionMessage
+} from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
@@ -14,6 +20,27 @@ import type { TransactionMessage } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.utils', () => {
+	describe('mapSolTransactionStatus', () => {
+		const mockTransaction = createMockSolTransactionUi('tx');
+
+		it('should map a finalized transaction to confirmed', () => {
+			expect(mapSolTransactionStatus({ ...mockTransaction, status: 'finalized' })).toBe(
+				'confirmed'
+			);
+		});
+
+		it.each(['confirmed', 'processed'] as const)(
+			'should map a %s transaction to pending',
+			(status) => {
+				expect(mapSolTransactionStatus({ ...mockTransaction, status })).toBe('pending');
+			}
+		);
+
+		it('should map a transaction without commitment to pending', () => {
+			expect(mapSolTransactionStatus({ ...mockTransaction, status: null })).toBe('pending');
+		});
+	});
+
 	describe('mapSolTransactionMessage', () => {
 		const [instruction1, instruction2, instruction3] = mockSolParsedTransactionMessage.instructions;
 		const mockParams: TransactionMessage = {

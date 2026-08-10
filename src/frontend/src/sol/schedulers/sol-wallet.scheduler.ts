@@ -202,10 +202,18 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 			);
 		}
 
-		const newRpcTransactions = rpcCertified.filter(
-			({ data: { id, signature } }) =>
-				refreshedSignatures.has(String(signature)) || isNullish(this.store.transactions[`${id}`])
-		);
+		const newRpcTransactions = rpcCertified.filter(({ data: { id, signature, status } }) => {
+			const knownTransaction = this.store.transactions[`${id}`];
+
+			return (
+				refreshedSignatures.has(String(signature)) ||
+				isNullish(knownTransaction) ||
+				// A transaction first seen below the `finalized` commitment is emitted as pending. It keeps
+				// the same id once the cluster advances its commitment, so without re-emitting it on a
+				// commitment change the UI would show it as pending forever.
+				knownTransaction.data.status !== status
+			);
+		});
 
 		if (USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && newRpcTransactions.length > 0) {
 			const backendTokenId = solBackendTokenId({ network, tokenAddress });

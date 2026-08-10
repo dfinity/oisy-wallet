@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { mapSolTransactionStatus } from '$sol/utils/sol-transactions.utils';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -15,13 +16,11 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let { type, value, timestamp, status, to, from, toOwner, fromOwner } = $derived(transaction);
+	let { type, value, timestamp, to, from, toOwner, fromOwner } = $derived(transaction);
 
 	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let pending = $derived(status === 'processed' || isNullish(status));
-
-	let transactionStatus: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
+	let transactionStatus: TransactionStatus = $derived(mapSolTransactionStatus(transaction));
 
 	let displayAmount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : value);
 

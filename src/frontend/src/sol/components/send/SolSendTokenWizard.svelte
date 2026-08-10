@@ -38,6 +38,7 @@
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 	import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -203,6 +204,11 @@
 			});
 
 			setTimeout(() => close(), 750);
+
+			// The Solana wallet worker only polls once a minute, so without an explicit trigger the
+			// transaction that was just sent - and is not finalized yet - would stay out of the list for
+			// up to that long.
+			await waitAndTriggerWallet();
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,

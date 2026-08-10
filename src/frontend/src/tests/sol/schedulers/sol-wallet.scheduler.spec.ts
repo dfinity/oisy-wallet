@@ -489,6 +489,66 @@ describe('sol-wallet.scheduler', () => {
 			expect(saveSolFinalizedTransactions).not.toHaveBeenCalled();
 		});
 
+		it('should re-emit a known transaction when its commitment advances to finalized', async () => {
+			const [pendingTransaction] = createMockSolTransactionsUi(1).map((transaction) => ({
+				...transaction,
+				status: 'confirmed' as const
+			}));
+			const finalizedTransaction: SolTransactionUi = {
+				...pendingTransaction,
+				status: 'finalized'
+			};
+
+			spyLoadTransactions.mockResolvedValue([pendingTransaction]);
+
+			await scheduler.trigger(startData);
+
+			expect(scheduler['store'].transactions).toEqual({
+				[pendingTransaction.id]: { data: pendingTransaction, certified: false }
+			});
+
+			postMessageMock.mockClear();
+			spyLoadTransactions.mockResolvedValue([finalizedTransaction]);
+
+			await scheduler.trigger(startData);
+
+			expect(scheduler['store'].transactions).toEqual({
+				[finalizedTransaction.id]: { data: finalizedTransaction, certified: false }
+			});
+			expect(postMessageMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					msg: 'syncSolWallet',
+					data: expect.objectContaining({
+						wallet: expect.objectContaining({
+							newTransactions: JSON.stringify(
+								[{ data: finalizedTransaction, certified: false }],
+								jsonReplacer
+							)
+						})
+					})
+				})
+			);
+		});
+
+		it('should not re-emit a known transaction when its commitment did not change', async () => {
+			const [pendingTransaction] = createMockSolTransactionsUi(1).map((transaction) => ({
+				...transaction,
+				status: 'confirmed' as const
+			}));
+
+			spyLoadTransactions.mockResolvedValue([pendingTransaction]);
+
+			await scheduler.trigger(startData);
+
+			postMessageMock.mockClear();
+
+			await scheduler.trigger(startData);
+
+			expect(postMessageMock).not.toHaveBeenCalledWith(
+				expect.objectContaining({ msg: 'syncSolWallet' })
+			);
+		});
+
 		it('should load backend stored transactions and include them in the response', async () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,

@@ -1,5 +1,6 @@
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+import en from '$lib/i18n/en.json';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
@@ -52,5 +53,32 @@ describe('SolTransaction', () => {
 				showPlusSign: true
 			})} ${getTokenDisplaySymbol(SOLANA_TOKEN)}`
 		);
+	});
+
+	it.each(['confirmed', 'processed'] as const)(
+		'should mark a %s transaction as pending',
+		(status) => {
+			const { getByText } = render(SolTransaction, {
+				props: { transaction: { ...mockTrx, status }, token: SOLANA_TOKEN }
+			});
+
+			expect(getByText(en.transaction.status.pending)).toBeInTheDocument();
+		}
+	);
+
+	it('should mark a transaction without commitment as pending', () => {
+		const { getByText } = render(SolTransaction, {
+			props: { transaction: { ...mockTrx, status: null }, token: SOLANA_TOKEN }
+		});
+
+		expect(getByText(en.transaction.status.pending)).toBeInTheDocument();
+	});
+
+	it('should not mark a finalized transaction as pending', () => {
+		const { queryByText } = render(SolTransaction, {
+			props: { transaction: { ...mockTrx, status: 'finalized' }, token: SOLANA_TOKEN }
+		});
+
+		expect(queryByText(en.transaction.status.pending)).toBeNull();
 	});
 });

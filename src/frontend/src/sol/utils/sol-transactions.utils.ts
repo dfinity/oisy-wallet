@@ -1,8 +1,10 @@
 import { ZERO } from '$lib/constants/app.constants';
+import type { TransactionStatus } from '$lib/types/transaction';
 import type { OptionSolAddress } from '$sol/types/address';
-import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import type { MappedSolTransaction, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
+import { isSolTransactionFinalized } from '$sol/utils/user-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	decompileTransactionMessageFetchingLookupTables,
@@ -14,6 +16,16 @@ import {
 	type Transaction,
 	type TransactionMessage
 } from '@solana/kit';
+
+/**
+ * Maps the Solana commitment of a transaction to the cross-chain UI status.
+ *
+ * A Solana transaction is only irreversible once the cluster has rooted it, so anything below the
+ * `finalized` commitment - including a signature whose commitment the RPC has not reported yet - is
+ * still revertible and must be surfaced as pending, the same way the other chains do.
+ */
+export const mapSolTransactionStatus = (transaction: SolTransactionUi): TransactionStatus =>
+	isSolTransactionFinalized(transaction) ? 'confirmed' : 'pending';
 
 export const decodeTransactionMessage = (transactionMessage: string): Transaction => {
 	const transactionBytes = getBase64Encoder().encode(transactionMessage);
