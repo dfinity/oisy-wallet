@@ -288,13 +288,19 @@ const createAutAndDetachCloser = async ({
 }: {
 	identity: Identity;
 	swapId: string;
-	data: ActiveUserTransactionData;
+	data: ActiveUserTransactionData | undefined;
 	sourceToken: Token;
 	destinationToken: Token;
 	swapAmount: string | number;
 	extraRefs: Partial<Record<OneSecExternalRefKey, string>>;
 	plan: BridgingPlan;
 }): Promise<void> => {
+	// Unreachable for the ERC-20 / ICRC pair OneSec supports, but the token
+	// mapper is shared: an unmappable token degrades to an untracked swap.
+	if (isNullish(data)) {
+		return;
+	}
+
 	const initialRefs: Partial<Record<OneSecExternalRefKey, string>> = {
 		...toOneSecDisplayRefs({
 			sourceToken,
