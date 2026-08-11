@@ -158,7 +158,8 @@
 			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
 			const isPermitSupported = await isErc20SupportsPermit({
 				contractAddress: $sourceToken.address,
-				userAddress: $ethAddress
+				userAddress: $ethAddress,
+				chainId: $sourceToken.network.chainId
 			});
 			setIsTokenPermitSupported({
 				address: $sourceToken.address,
