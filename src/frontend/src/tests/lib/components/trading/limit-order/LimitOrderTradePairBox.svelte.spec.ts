@@ -166,20 +166,43 @@ describe('LimitOrderTradePairBox', () => {
 		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
-	it('leaves the derived quote input unmarked when a quote-denominated error fires', () => {
-		const { getAllByTestId } = render(LimitOrderTradePairBox, {
-			props: { ...baseProps, side: 'sell', baseAmount: '0.25', price: '1' }
-		});
+	// The red mark is the subject of this fix, so it is asserted directly rather than
+	// through the message beside it — a regression could drop one and keep the other.
+	// There is no semantic equivalent to assert instead: nothing in this tree sets
+	// `aria-invalid`, so the class `TokenInputCurrency` toggles is the observable.
+	//
+	// Fake timers rather than `waitFor`: the mark arrives on `TokenInputContent`'s
+	// 300ms validation debounce, and both rows run their own. Waiting on the base row
+	// alone resolves while the quote row's debounce is still pending, so the negative
+	// assertion would pass against a marked quote row simply by reading it too early.
+	// Advancing past both leaves nothing in flight for either to be judged on.
+	it('marks the base amount and leaves the derived quote input unmarked', async () => {
+		vi.useFakeTimers();
 
-		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+		try {
+			const { getAllByTestId } = render(LimitOrderTradePairBox, {
+				props: { ...baseProps, side: 'sell', baseAmount: '0.25', price: '1' }
+			});
 
-		expect(quoteInput).toBeDisabled();
-		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(
-			en.trading.limit_order.error_min_notional.split(' $')[0]
-		);
-		expect(baseInput.closest('div.py-2')).toHaveTextContent(
-			en.trading.limit_order.error_min_notional.split(' $')[0]
-		);
+			const expected = replacePlaceholders(en.trading.limit_order.error_min_notional, {
+				$amount: '1',
+				$symbol: 'ckUSDC'
+			});
+
+			const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+			expect(quoteInput).toBeDisabled();
+
+			// `TokenInputContent` debounces its validation by 300ms.
+			await vi.advanceTimersByTimeAsync(400);
+
+			expect(baseInput.closest('.token-input-currency')).toHaveClass('text-error-primary');
+			expect(quoteInput.closest('.token-input-currency')).not.toHaveClass('text-error-primary');
+			expect(baseInput.closest('div.py-2')).toHaveTextContent(expected);
+			expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it('shows the lot-multiple error when the amount is not a multiple of the lot size', () => {
