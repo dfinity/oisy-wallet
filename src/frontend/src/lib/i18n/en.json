@@ -1195,6 +1195,7 @@
 			"swapping": "Swapping...",
 			"starting_to_swap": "Submitting your swap...",
 			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
+			"finishing_in_background": "Wrapping up. We'll keep working on it in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
 			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
-			"swap_refunded": "The swap transaction was refunded."
+			"swap_refunded": "The swap transaction was refunded.",
+			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed."
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
+			"sign_transaction": "Sign Transaction",
+			"sign_and_send_transaction": "Sign and Send Transaction",
 			"signing_address": "Signing address",
 			"fee": "Fee",
 			"btc_symbol": "BTC",

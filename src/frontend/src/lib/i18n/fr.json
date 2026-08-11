@@ -1195,6 +1195,7 @@
 			"swapping": "Échange en cours...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Actualisation de l'interface",
 			"swap_provider": "Fournisseur d'échange",
 			"swap_provider_website": "Site web",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "Les tokens de votre précédent échange ont été retirés avec succès. Vous pouvez maintenant fermer cette fenêtre.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
 			"sign_message": "Signer le message",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

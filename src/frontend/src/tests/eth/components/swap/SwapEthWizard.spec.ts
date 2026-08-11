@@ -9,6 +9,10 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import {
+	TRACK_COUNT_SWAP_SUBMITTED,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -453,6 +457,27 @@ describe('SwapEthWizard', () => {
 			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
 			expect(onClose).toHaveBeenCalledOnce();
 			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('reports the swap as submitted, leaving success to the active-transaction poller', async () => {
+			const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+			const { getByRole, getByText, queryByRole } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(trackEventSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+			);
+			expect(trackEventSpy).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+			);
 		});
 
 		it('surfaces the failure on the review page when the swap fails', async () => {

@@ -1195,6 +1195,7 @@
 			"swapping": "スワップ中...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UIを更新中",
 			"swap_provider": "スワッププロバイダー",
 			"swap_provider_website": "ウェブサイト",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

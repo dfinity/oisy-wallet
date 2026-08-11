@@ -1195,6 +1195,7 @@
 			"swapping": "स्वैप कर रहा है...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

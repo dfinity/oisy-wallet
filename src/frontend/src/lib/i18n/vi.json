@@ -1195,6 +1195,7 @@
 			"swapping": "Đang hoán đổi...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
 			"swap_provider_website": "Trang web",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

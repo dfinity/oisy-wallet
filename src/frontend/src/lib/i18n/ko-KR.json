@@ -1195,6 +1195,7 @@
 			"swapping": "스왑 중...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
 			"swap_provider_website": "웹사이트",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1607,6 +1609,8 @@
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
