@@ -34,6 +34,7 @@
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -78,6 +79,7 @@
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let preview = $state<SolSimulationPreview | undefined>();
 
 	const updateData = async () => {
 		({
@@ -87,10 +89,12 @@
 			isApproval,
 			unreviewed,
 			prioritizationFee,
-			prioritizationFeeEstimate
+			prioritizationFeeEstimate,
+			preview
 		} = await decodeService({
 			base64EncodedTransactionMessage: data,
-			networkId
+			networkId,
+			address
 		}));
 	};
 
@@ -106,7 +110,7 @@
 	);
 
 	$effect(() => {
-		[data, networkId];
+		[data, networkId, address];
 
 		untrack(() => updateData());
 	});
@@ -201,6 +205,7 @@
 				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}
+				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
 				source={address ?? ''}

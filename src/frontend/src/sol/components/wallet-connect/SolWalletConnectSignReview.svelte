@@ -15,12 +15,14 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import {
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 
 	interface Props {
 		amount?: bigint;
@@ -36,6 +38,9 @@
 		prioritizationFeeEstimate?: bigint;
 		isApproval?: boolean;
 		unreviewed?: boolean;
+		// What a simulation says this message would do to the user's own accounts. Absent whenever
+		// the simulation could not be obtained, in which case the review shows what it always has.
+		preview?: SolSimulationPreview;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -52,6 +57,7 @@
 		prioritizationFeeEstimate,
 		isApproval = false,
 		unreviewed = false,
+		preview,
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -147,6 +153,10 @@
 			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 		{:else if highPrioritizationFee}
 			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{/if}
+
+		{#if nonNullish(preview)}
+			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
