@@ -27,6 +27,11 @@
 		exchangeRate?: number;
 		disabled?: boolean;
 		readOnlyAmount?: boolean;
+		// Opt-in companion to `disabled`: tints the amount half of the field so a
+		// derived amount is legible as non-editable at a glance. Left off by default —
+		// the other disabled legs in the app keep the plain fill. Has no effect on its
+		// own, so it can never dress an editable field as dead.
+		muted?: boolean;
 		placeholder?: string;
 		// Overrides the "Select token" prompt shown while no token is picked — e.g.
 		// to name what has to be chosen first when the picker is still gated.
@@ -57,6 +62,7 @@
 		exchangeRate,
 		disabled = false,
 		readOnlyAmount = false,
+		muted = false,
 		placeholder = '0',
 		selectTokenText,
 		errorType = $bindable(),
@@ -78,6 +84,15 @@
 	// Nothing to type into and no picker to open: the field is inert, so it must
 	// not offer a hover border or a pointer cursor.
 	const inert = $derived(disabled && !isSelectable);
+
+	// Gated on `disabled` so `muted` cannot produce a field that looks dead and still
+	// takes a caret; `readOnlyAmount` is excluded because it drops the frame and
+	// dresses the selector as its own pill, leaving nothing for the tint to fill.
+	const mutedAmount = $derived(muted && disabled && !readOnlyAmount);
+
+	// The selector joins the tint only while it cannot be opened. White is this
+	// field's promise that a region is pressable, and it is kept honest both ways.
+	const mutedSelector = $derived(mutedAmount && !isSelectable);
 
 	const onFocus = () => (focused = true);
 	const onBlur = () => (focused = false);
@@ -135,12 +150,21 @@
 	error={nonNullish(errorType) || nonNullish(error)}
 	{focused}
 	{inert}
+	muted={mutedAmount}
 	{readOnlyAmount}
 	styleClass="h-14 text-3xl"
 >
+	<!-- The gix input paints its own `--input-background`, cleared here so this
+		 wrapper's fill shows through, and `rounded-l-lg` keeps that fill inside the
+		 frame's corners. `cursor` is inherited, so not-allowed reaches the disabled
+		 input without a rule of its own and stops at the selector, which carries its
+		 own `cursor: pointer` for as long as it is enabled. -->
 	<div
-		style={readOnlyAmount ? '--input-background: transparent;' : undefined}
+		style={readOnlyAmount || mutedAmount ? '--input-background: transparent;' : undefined}
 		class="flex h-full w-full items-center"
+		class:bg-disabled={mutedAmount}
+		class:cursor-not-allowed={mutedAmount}
+		class:rounded-l-lg={mutedAmount}
 	>
 		{#if token}
 			{#if displayUnit === 'token'}
@@ -190,17 +214,29 @@
 	</div>
 
 	{#if !readOnlyAmount}
-		<div class="h-3/4 w-[1px] bg-disabled"></div>
+		<!-- Full height when muted: the inset rule leaves the container's white showing
+			 above and below it, invisible on a white field but two slivers once the
+			 halves either side are tinted. -->
+		<div class={`w-[1px] bg-disabled ${mutedAmount ? 'h-full' : 'h-3/4'}`}></div>
 	{/if}
 
 	{#if !readOnlyAmount || isSelectable}
+		<!-- `muted-selector` squares off the edge facing the divider. Every `button` is
+			 rounded by the global stylesheet at `--border-radius-md` (16px, twice this
+			 frame's), which goes unnoticed while the button has no fill of its own but
+			 cuts two white notches out of the tint. A `rounded-*` utility cannot undo
+			 it — utilities are emitted inside `@layer`, and the unlayered global rule
+			 wins the cascade whatever its specificity — so the override is a scoped
+			 rule, which is unlayered too. -->
 		<button
 			class="flex h-full items-center gap-1 px-3 transition-colors disabled:cursor-not-allowed"
+			class:bg-disabled={mutedSelector}
 			class:bg-primary={readOnlyAmount}
 			class:border={readOnlyAmount}
 			class:border-solid={readOnlyAmount}
 			class:border-tertiary={readOnlyAmount}
 			class:hover:border-brand-primary={readOnlyAmount && isSelectable}
+			class:muted-selector={mutedSelector}
 			class:rounded-lg={readOnlyAmount}
 			class:shadow-inner={readOnlyAmount}
 			data-tid={TOKEN_INPUT_SELECT_TOKEN_BUTTON}
@@ -213,12 +249,14 @@
 				<div class="ml-2 text-sm font-semibold">{getTokenDisplaySymbol(token)}</div>
 			{:else}
 				<!-- Grey rather than brand while the picker is unavailable: the plus is
-					 the field's only affordance, so leaving it blue reads as actionable. -->
+					 the field's only affordance, so leaving it blue reads as actionable. The
+					 disc is dropped on a muted field — the same tint over itself makes a
+					 darker circle that draws the eye to the one control that does nothing. -->
 				<span
 					style={`width: ${logoSizes['xs']}; height: ${logoSizes['xs']};`}
 					class="flex items-center justify-center rounded-full"
 					class:bg-brand-primary={isSelectable}
-					class:bg-disabled={!isSelectable}
+					class:bg-disabled={!isSelectable && !mutedSelector}
 					class:text-primary-inverted={isSelectable}
 					class:text-tertiary={!isSelectable}
 				>
@@ -238,3 +276,11 @@
 
 	{@render balance()}
 </div>
+
+<style lang="scss">
+	// Only the outer edge stays round; the edge against the divider is squared so the
+	// muted fill meets the amount half without a notch of the frame showing through.
+	.muted-selector {
+		border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+	}
+</style>

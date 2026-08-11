@@ -9,6 +9,11 @@
 		// drops the hover affordance, which would otherwise promise an interaction
 		// that isn't there.
 		inert?: boolean;
+		// The amount is not editable. The frame keeps its neutral border on hover:
+		// lighting it up in brand would promise a field that takes a caret, which the
+		// tint inside is there to say it does not — even though the token selector on
+		// the far side is still pressable.
+		muted?: boolean;
 		styleClass?: string;
 		children: Snippet;
 	}
@@ -18,6 +23,7 @@
 		error = false,
 		readOnlyAmount = false,
 		inert = false,
+		muted = false,
 		styleClass,
 		children
 	}: Props = $props();
@@ -33,7 +39,7 @@
 	class:border-tertiary={!readOnlyAmount && !error && !focused}
 	class:cursor-not-allowed={inert}
 	class:focus-within:border-2={!readOnlyAmount && !inert}
-	class:hover:border-brand-primary={!readOnlyAmount && !error && !inert}
+	class:hover:border-brand-primary={!readOnlyAmount && !error && !inert && !muted}
 	class:shadow-inner={!readOnlyAmount}
 >
 	{@render children()}

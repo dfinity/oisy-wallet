@@ -26,8 +26,6 @@ export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
-export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
