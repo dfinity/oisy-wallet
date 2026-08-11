@@ -1,7 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
-import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
+import {
+	SESSION_REQUEST_ETH_SIGN_V4,
+	SESSION_REQUEST_PERSONAL_SIGN
+} from '$eth/constants/wallet-connect.constants';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import * as walletConnectUtils from '$eth/utils/wallet-connect.utils';
@@ -372,5 +375,34 @@ describe('EthWalletConnectMessage', () => {
 
 		expect(getByTestId('wallet-connect-invalid-typed-data-warning')).toBeInTheDocument();
 		expect(getByText(en.wallet_connect.text.invalid_typed_data)).toBeInTheDocument();
+	});
+
+	it('should render a typed-data payload sent through personal_sign as a raw message', () => {
+		// Such a request is signed as a plain message, so previewing it as a permit
+		// would describe an authorization that is not the one being signed.
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				...request.params,
+				request: {
+					...request.params.request,
+					method: SESSION_REQUEST_PERSONAL_SIGN
+				}
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		expect(queryByText('{ ... }')).not.toBeInTheDocument();
+		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
+		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+
+		expect(
+			getByText(getSignParamsMessageUtf8(newRequest.params.request.params))
+		).toBeInTheDocument();
 	});
 });

@@ -1,4 +1,4 @@
-import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
+import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
 import { ZERO } from '$lib/constants/app.constants';
@@ -265,13 +265,22 @@ export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string =>
 };
 
 /**
- * Whether an `eth_signTypedData_v4` request would fail to sign — i.e. its typed
- * data cannot be parsed, validated, and hashed. Used by the confirmation UI to
- * warn and disable approval, so the preview mirrors what the signer would do
- * (which rejects any such v4 request).
+ * Whether a request carries EIP-712 typed data, i.e. whether its payload is
+ * interpreted as typed data rather than as a raw message. This is decided by the
+ * method alone, never by the shape of the payload: a `personal_sign` payload
+ * that happens to parse as typed data is still only ever a raw message.
+ */
+export const isEthSignTypedDataMethod = (method: string): boolean =>
+	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
+
+/**
+ * Whether a typed-data request would fail to sign — i.e. its typed data cannot
+ * be parsed, validated, and hashed. Used by the confirmation UI to warn and
+ * disable approval, so the preview mirrors what the signer would do (which
+ * rejects any such typed-data request).
  *
- * Returns `false` for non-v4 methods (e.g. `personal_sign`), which are signed
- * differently and stay approvable.
+ * Returns `false` for raw-message methods (e.g. `personal_sign`), which are
+ * signed differently and stay approvable.
  */
 export const hasInvalidTypedData = ({
 	method,
@@ -280,7 +289,7 @@ export const hasInvalidTypedData = ({
 	method: string;
 	params: string[];
 }): boolean => {
-	if (method !== SESSION_REQUEST_ETH_SIGN_V4) {
+	if (!isEthSignTypedDataMethod(method)) {
 		return false;
 	}
 
