@@ -18,12 +18,7 @@ import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import {
-	SwapProvider,
-	VeloraSwapTypes,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
+import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -36,6 +31,7 @@ import {
 	mockVeloraDeltaProvider,
 	mockVeloraMarketProvider
 } from '$tests/mocks/swap.mocks';
+import { mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable, type Writable } from 'svelte/store';
 
@@ -338,7 +334,7 @@ describe('SwapEthWizard', () => {
 				provider: SwapProvider.VELORA,
 				receiveAmount: 1000000000n,
 				type: VeloraSwapTypes.MARKET,
-				swapDetails: {} as VeloraSwapDetails
+				swapDetails: mockVeloraOptimalRate
 			}
 		];
 
@@ -682,7 +678,7 @@ describe('SwapEthWizard', () => {
 					provider: SwapProvider.VELORA,
 					receiveAmount: 1000000000n,
 					type: VeloraSwapTypes.MARKET,
-					swapDetails: {} as VeloraSwapDetails
+					swapDetails: mockVeloraOptimalRate
 				}
 			];
 

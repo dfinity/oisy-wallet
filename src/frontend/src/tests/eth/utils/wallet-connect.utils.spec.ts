@@ -1,4 +1,6 @@
 import {
+	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
@@ -7,6 +9,7 @@ import {
 	assertValidEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
+	isEthSignTypedDataMethod,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
@@ -132,9 +135,8 @@ describe('wallet-connect.utils', () => {
 		});
 
 		it('throws a non-typed-data error for a plain (non-JSON) message', () => {
-			// personal_sign / eth_sign carry a hex string, not typed-data JSON. The
-			// caller relies on this NOT being a WalletConnectEthTypedDataError so it
-			// can fall back to raw message signing.
+			// A typed-data method whose payload is not typed-data JSON fails to hash,
+			// and the request is rejected rather than signed.
 			let caught: unknown;
 			try {
 				getSignParamsMessageTypedDataV4Hash(['0xdeadbeef']);
@@ -175,11 +177,38 @@ describe('wallet-connect.utils', () => {
 			).toBeFalsy();
 		});
 
-		it('is false for a non-v4 method', () => {
-			// personal_sign is signed differently and must stay approvable.
+		it('is true for a type-invalid legacy typed-data permit', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_LEGACY,
+					params: toParams(daiPermit('false'))
+				})
+			).toBeTruthy();
+		});
+
+		it('is false for a raw-message method, even with a typed-data payload', () => {
+			// personal_sign is signed as a raw message and must stay approvable.
 			expect(
 				hasInvalidTypedData({ method: SESSION_REQUEST_PERSONAL_SIGN, params: ['0xdeadbeef'] })
 			).toBeFalsy();
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_PERSONAL_SIGN,
+					params: toParams(daiPermit('false'))
+				})
+			).toBeFalsy();
+		});
+	});
+
+	describe('isEthSignTypedDataMethod', () => {
+		it('is true for the typed-data methods', () => {
+			expect(isEthSignTypedDataMethod(SESSION_REQUEST_ETH_SIGN_V4)).toBeTruthy();
+			expect(isEthSignTypedDataMethod(SESSION_REQUEST_ETH_SIGN_LEGACY)).toBeTruthy();
+		});
+
+		it('is false for the raw-message methods', () => {
+			expect(isEthSignTypedDataMethod(SESSION_REQUEST_PERSONAL_SIGN)).toBeFalsy();
+			expect(isEthSignTypedDataMethod(SESSION_REQUEST_ETH_SIGN)).toBeFalsy();
 		});
 	});
 

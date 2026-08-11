@@ -1,5 +1,6 @@
 import type { ActiveUserTransactionRef } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -30,6 +31,7 @@ import {
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
+import { Principal } from '@icp-sdk/core/principal';
 
 const USDC_ETHEREUM = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const USDC_SOLANA = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
@@ -92,11 +94,27 @@ describe('near-intents-active-tx.utils', () => {
 			});
 		});
 
-		it('returns undefined when a token cannot be mapped to a backend TokenId', () => {
+		it('maps an ICP-side destination to its ICRC ledger', () => {
 			expect(
 				toNearIntentsData({
 					sourceToken: makeErc20Token(USDC_ETHEREUM),
 					destinationToken: mockValidIcToken,
+					amount: 1n
+				})
+			).toEqual({
+				NearIntents: {
+					source_token: { Erc20: [USDC_ETHEREUM, ETHEREUM_NETWORK.chainId] },
+					dest_token: { Icrc: Principal.fromText(mockValidIcToken.ledgerCanisterId) },
+					amount: 1n
+				}
+			});
+		});
+
+		it('returns undefined when a token cannot be mapped to a backend TokenId', () => {
+			expect(
+				toNearIntentsData({
+					sourceToken: makeErc20Token(USDC_ETHEREUM),
+					destinationToken: BTC_MAINNET_TOKEN,
 					amount: 1n
 				})
 			).toBeUndefined();
