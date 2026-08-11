@@ -20,13 +20,13 @@ describe('html.utils', () => {
 			expect(container.textContent).toBe('Hello');
 		});
 
-		it('should preserve target blank links with noopener rel', () => {
+		it('should preserve target blank links with noopener noreferrer rel', () => {
 			const result = sanitize('<a href="https://oisy.com" target="_blank">OISY</a>');
 			const link = parseHtml(result).querySelector('a');
 
 			expect(link?.getAttribute('href')).toBe('https://oisy.com');
 			expect(link?.getAttribute('target')).toBe('_blank');
-			expect(link?.getAttribute('rel')).toBe('noopener');
+			expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
 			expect(link?.getAttribute('data-target')).toBeNull();
 		});
 
@@ -53,13 +53,13 @@ describe('html.utils', () => {
 			expect(container.querySelector('li')?.textContent).toBe('item');
 		});
 
-		it('should preserve target blank links with noopener rel', () => {
+		it('should preserve target blank links with noopener noreferrer rel', () => {
 			const result = sanitizeUntrusted('<a href="https://oisy.com" target="_blank">OISY</a>');
 			const link = parseHtml(result).querySelector('a');
 
 			expect(link?.getAttribute('href')).toBe('https://oisy.com');
 			expect(link?.getAttribute('target')).toBe('_blank');
-			expect(link?.getAttribute('rel')).toBe('noopener');
+			expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
 			expect(link?.getAttribute('data-target')).toBeNull();
 		});
 

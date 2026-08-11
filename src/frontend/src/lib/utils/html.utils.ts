@@ -56,11 +56,16 @@ const UNTRUSTED_CONFIG: Config = {
 const restoreTargetAttributeHook = (node: Element) => {
 	if (node.getAttribute('data-target') === 'blank') {
 		// Use provided "rel" value if it contains "noopener" or "noreferrer" (https://web.dev/external-anchors-use-rel-noopener/)
-		// otherwise add "noopener".
+		// otherwise fall back to the pair we require on external links everywhere else.
+		// `sanitizeUntrusted` drops "rel" as an unlisted attribute, so a third-party link always
+		// lands on that fallback rather than on a value its author picked.
 		// split() to avoid invalid values (e.g. "noopenernoreferrer")
 		const originRel = node.getAttribute('rel') ?? '';
 		const parts = originRel.split(/\s+/);
-		const rel = parts.includes('noopener') || parts.includes('noreferrer') ? originRel : 'noopener';
+		const rel =
+			parts.includes('noopener') || parts.includes('noreferrer')
+				? originRel
+				: 'noopener noreferrer';
 
 		node.setAttribute('target', '_blank');
 		node.setAttribute('rel', rel);
