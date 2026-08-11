@@ -1,5 +1,8 @@
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
-import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
+import type {
+	WalletConnectEthSignTypedDataV4,
+	WalletConnectEthTypedDataApproval
+} from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
@@ -25,14 +28,17 @@ export const getSignParamsMessageTypedDataV4 = (
 };
 
 /**
- * Thrown when an `eth_signTypedData_v4` request carries a value whose runtime
- * JSON type does not match the type declared in its EIP-712 schema.
+ * Thrown when an `eth_signTypedData_v4` request does not conform to its own
+ * EIP-712 schema — either a value whose runtime JSON type does not match the
+ * declared type, or a message key that the schema does not declare at all.
  *
  * `ethers` does not type-check EIP-712 values before hashing and coerces
  * mismatched values instead of rejecting them — its `bool` encoder, for
  * instance, treats any truthy value (including a non-empty string) as `true`.
- * We reject such payloads so OISY only signs typed data that conforms to its
- * declared schema.
+ * It also encodes only the declared members, silently ignoring any other key,
+ * which lets a request carry data that the wallet may read but the digest never
+ * covers. We reject such payloads so OISY only signs typed data that conforms
+ * to its declared schema.
  */
 export class WalletConnectEthTypedDataError extends Error {}
 
@@ -222,6 +228,19 @@ const assertValidTypedDataStruct = ({
 	}
 
 	const record = value as Record<string, unknown>;
+
+	// A key the struct does not declare is never encoded, so it cannot be part of
+	// the digest while still being readable by whatever renders the request.
+	// Reject instead of ignoring it, so no request can carry data that the user
+	// might be shown but would not sign.
+	const declared = new Set(fields.map(({ name }) => name));
+	const undeclared = Object.keys(record).find((key) => !declared.has(key));
+	if (nonNullish(undeclared)) {
+		throw new WalletConnectEthTypedDataError(
+			`EIP-712 message contains "${path}.${undeclared}", which type "${type}" does not declare and which would therefore not be signed.`
+		);
+	}
+
 	fields.forEach(({ name, type: fieldType }) =>
 		assertValidTypedDataValue({
 			types,
@@ -248,6 +267,157 @@ export const assertValidEthTypedData = ({
 	message: Record<string, unknown>;
 }): void =>
 	assertValidTypedDataStruct({ types, type: primaryType, value: message, path: primaryType });
+
+interface EthTypedDataApprovalSchema {
+	primaryType: string;
+	types: Record<string, Array<TypedDataField>>;
+	toApproval: (message: Record<string, unknown>) => WalletConnectEthTypedDataApproval;
+}
+
+const toDeclaredAddress = (value: unknown): string | undefined =>
+	typeof value === 'string' ? value : undefined;
+
+const toDeclaredUint = (value: unknown): bigint | undefined =>
+	typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
+
+const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
+	nonNullish(value) && typeof value === 'object' && !Array.isArray(value)
+		? (value as Record<string, unknown>)
+		: {};
+
+/**
+ * The EIP-712 schemas OISY understands well enough to summarize above the raw
+ * message, each paired with the declared members that feed the summary.
+ *
+ * A schema is matched field by field rather than by the mere presence of a
+ * `spender` or `details` key: a struct that is not one of these carries no
+ * guarantee that such a key means what an allowance summary would suggest.
+ */
+const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
+	// Uniswap Permit2 `PermitSingle`.
+	{
+		primaryType: 'PermitSingle',
+		types: {
+			PermitSingle: [
+				{ name: 'details', type: 'PermitDetails' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'sigDeadline', type: 'uint256' }
+			],
+			PermitDetails: [
+				{ name: 'token', type: 'address' },
+				{ name: 'amount', type: 'uint160' },
+				{ name: 'expiration', type: 'uint48' },
+				{ name: 'nonce', type: 'uint48' }
+			]
+		},
+		toApproval: ({ spender, details }) => {
+			const { token, amount, expiration } = toDeclaredStruct(details);
+
+			const expirationSeconds = toDeclaredUint(expiration);
+
+			return {
+				spender: toDeclaredAddress(spender),
+				token: toDeclaredAddress(token),
+				amount: toDeclaredUint(amount),
+				expiration: nonNullish(expirationSeconds) ? Number(expirationSeconds) : undefined
+			};
+		}
+	},
+	// Standard ERC-2612 `Permit`.
+	{
+		primaryType: 'Permit',
+		types: {
+			Permit: [
+				{ name: 'owner', type: 'address' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'value', type: 'uint256' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'deadline', type: 'uint256' }
+			]
+		},
+		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+	},
+	// DAI's non-standard `Permit`, whose approval is a bool rather than an amount.
+	{
+		primaryType: 'Permit',
+		types: {
+			Permit: [
+				{ name: 'holder', type: 'address' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'expiry', type: 'uint256' },
+				{ name: 'allowed', type: 'bool' }
+			]
+		},
+		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+	}
+];
+
+const sameTypedDataFields = ({
+	fields,
+	expected
+}: {
+	fields: Array<TypedDataField>;
+	expected: Array<TypedDataField>;
+}): boolean =>
+	fields.length === expected.length &&
+	fields.every(
+		({ name, type }, index) => expected[index].name === name && expected[index].type === type
+	);
+
+const matchesApprovalSchema = ({
+	types,
+	schema
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	schema: EthTypedDataApprovalSchema;
+}): boolean => {
+	const expectedNames = Object.keys(schema.types);
+
+	return (
+		Object.keys(types).length === expectedNames.length &&
+		expectedNames.every((name) => {
+			const fields = types[name];
+
+			return nonNullish(fields) && sameTypedDataFields({ fields, expected: schema.types[name] });
+		})
+	);
+};
+
+/**
+ * Derives the approval facts summarized above the raw message of a typed-data
+ * request.
+ *
+ * Returns `undefined` unless the payload matches a recognized approval schema
+ * exactly and every value conforms to it. That is what keeps the summary honest:
+ * each fact it carries is a declared member of the struct being hashed, so it
+ * cannot be steered by a key that the signature does not cover.
+ */
+export const getEthTypedDataApproval = ({
+	types,
+	message
+}: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
+		matchesApprovalSchema({ types: rest, schema })
+	);
+
+	if (isNullish(schema)) {
+		return;
+	}
+
+	try {
+		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
+
+		return schema.toApproval(message);
+	} catch (_err: unknown) {
+		// A payload that does not conform to its own schema is not summarized: it
+		// is rejected for signing anyway, and any value read from it would be
+		// describing something the user cannot sign.
+		
+	}
+};
 
 export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
