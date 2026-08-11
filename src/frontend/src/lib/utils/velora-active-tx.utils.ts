@@ -124,15 +124,23 @@ export const toVeloraDeltaLearnedRefs = (
  * Maps a Velora Delta order to the AUT status enum.
  *
  * Built on the SDK's own partitions so that a patch release reclassifying a
- * status carries through here. `SUSPENDED` and `CANCELLING` sit in *neither*
- * partition and are handled explicitly as still-in-flight: `SUSPENDED` means the
- * order cannot currently be filled (insufficient balance or allowance) and still
- * resolves to `COMPLETED` or `EXPIRED` on its own, and `CANCELLING` resolves to
- * `CANCELLED`. An early `Failed` write could never be walked back, since AUT
- * terminal states are immutable on the backend.
+ * status carries through here, with three statuses handled explicitly in front
+ * of them because they read as terminal to the SDK — or to neither partition —
+ * while the order is still moving. AUT terminal states are immutable on the
+ * backend, and a terminalized row leaves `activeUserTransactionsPending`, so an
+ * early write is irreversible *and* stops the poller from learning anything
+ * else about the order:
  *
- * `REFUNDING` is safe to write as `Failed` even though it reads as in-flight:
- * its only continuation is `REFUNDED`, which is also `Failed`.
+ * - `SUSPENDED` (in neither partition) means the order cannot currently be
+ *   filled — insufficient balance or allowance — and still resolves to
+ *   `COMPLETED` or `EXPIRED` on its own.
+ * - `CANCELLING` (in neither partition) resolves to `CANCELLED`.
+ * - `REFUNDING` sits in the SDK's *failed* partition, and its verdict is indeed
+ *   already settled — its only continuation, `REFUNDED`, is also `Failed`. It is
+ *   still kept in flight, because terminalizing on the intent to refund buys
+ *   nothing and costs two things: the row would claim the swap "was refunded"
+ *   before any refund landed, and the poller could never persist the refund hash
+ *   that `refunds[]` reveals once it does. Terminalize on `REFUNDED`.
  *
  * Returns `undefined` for an unrecognised status so the poller leaves the row
  * untouched rather than guessing. Bumping `@velora-dex/sdk` requires reviewing
@@ -145,23 +153,26 @@ export const toVeloraDeltaStatus = (
 		return { Succeeded: null };
 	}
 
-	if (OrderHelpers.checks.isFailedAuction(auction)) {
-		return { Failed: null };
-	}
-
 	if (
 		OrderHelpers.checks.isPendingAuction(auction) ||
 		auction.status === 'SUSPENDED' ||
-		auction.status === 'CANCELLING'
+		auction.status === 'CANCELLING' ||
+		auction.status === 'REFUNDING'
 	) {
 		return { Executing: null };
+	}
+
+	if (OrderHelpers.checks.isFailedAuction(auction)) {
+		return { Failed: null };
 	}
 
 	return undefined;
 };
 
 export const veloraDeltaStatusError = (status: DeltaOrderStatus): string | undefined => {
-	if (status === 'REFUNDED' || status === 'REFUNDING') {
+	// `REFUNDING` is deliberately absent: it never reaches a `Failed` write, so it
+	// never carries an error — see `toVeloraDeltaStatus`.
+	if (status === 'REFUNDED') {
 		return get(i18n).swap.error.swap_refunded;
 	}
 

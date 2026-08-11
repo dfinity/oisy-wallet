@@ -254,11 +254,18 @@ describe('velora-active-tx.utils', () => {
 			}
 		);
 
+		// In the SDK's failed partition, but the refund has not landed yet:
+		// terminalizing here would claim the swap "was refunded" early and stop the
+		// poller before it can persist the refund hash.
+		it('does NOT treat REFUNDING as terminal, despite the SDK failed partition', () => {
+			expect(toVeloraDeltaStatus(auctionWithStatus('REFUNDING'))).toEqual({ Executing: null });
+		});
+
 		it('maps COMPLETED to Succeeded', () => {
 			expect(toVeloraDeltaStatus(auctionWithStatus('COMPLETED'))).toEqual({ Succeeded: null });
 		});
 
-		it.each<DeltaOrderStatus>(['FAILED', 'EXPIRED', 'CANCELLED', 'REFUNDED', 'REFUNDING'])(
+		it.each<DeltaOrderStatus>(['FAILED', 'EXPIRED', 'CANCELLED', 'REFUNDED'])(
 			'maps the failed status %s to Failed',
 			(status) => {
 				expect(toVeloraDeltaStatus(auctionWithStatus(status))).toEqual({ Failed: null });
@@ -273,8 +280,13 @@ describe('velora-active-tx.utils', () => {
 	});
 
 	describe('veloraDeltaStatusError', () => {
-		it.each<DeltaOrderStatus>(['REFUNDED', 'REFUNDING'])('reports %s as a refund', (status) => {
-			expect(veloraDeltaStatusError(status)).toBe(en.swap.error.swap_refunded);
+		it('reports REFUNDED as a refund', () => {
+			expect(veloraDeltaStatusError('REFUNDED')).toBe(en.swap.error.swap_refunded);
+		});
+
+		// It never reaches a Failed write, so it never carries an error.
+		it('has no error text for REFUNDING', () => {
+			expect(veloraDeltaStatusError('REFUNDING')).toBeUndefined();
 		});
 
 		it.each<DeltaOrderStatus>(['FAILED', 'EXPIRED', 'CANCELLED'])(

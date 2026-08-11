@@ -196,6 +196,54 @@ describe('velora-active-tx.services', () => {
 			);
 		});
 
+		// A row terminalized at REFUNDING would leave the pending set, so the refund
+		// hash the order only reveals once the refund lands could never be persisted.
+		it('keeps a refunding order in flight so the refund hash can still be learned', async () => {
+			getDeltaOrderById.mockResolvedValue({
+				status: 'REFUNDING',
+				transactions: [],
+				refunds: []
+			});
+
+			const tx = buildTx({ mode: 'Delta', refs: deltaRefs });
+
+			await pollVeloraActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [tx],
+				userAddress: mockEthAddress
+			});
+
+			expect(applySpy).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					update: { status: { Executing: null } }
+				})
+			);
+
+			getDeltaOrderById.mockResolvedValue({
+				status: 'REFUNDED',
+				transactions: [],
+				refunds: [{ tx: '0xrefund', chainId: 1, token: '0xtoken', amount: '1' }]
+			});
+
+			await pollVeloraActiveUserTransactions({
+				identity: mockIdentity,
+				transactions: [{ ...tx, status: { Executing: null } }],
+				userAddress: mockEthAddress
+			});
+
+			expect(applySpy).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					update: expect.objectContaining({
+						status: { Failed: null },
+						error: en.swap.error.swap_refunded,
+						externalRefs: expect.arrayContaining([
+							{ key: VELORA_EXTERNAL_REF_KEYS.REFUND_TX_HASH, value: '0xrefund' }
+						])
+					})
+				})
+			);
+		});
+
 		it('leaves the row untouched on an unrecognised status', async () => {
 			getDeltaOrderById.mockResolvedValue({
 				status: 'SOMETHING_NEW',
