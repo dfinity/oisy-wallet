@@ -12,7 +12,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	// Read-only price rows shared by the limit-order Review and the order-detail
-	// modal: the limit price plus current value, the value difference (green when
+	// modal: the limit price plus current value, the value difference (neutral while
 	// the order is favourable, amber/red as it gives value up — `valueDifference`
 	// is signed relative to the caller's side) and — for resting orders — the
 	// queue position. Rendered as `ModalValue` rows, the same key/value style the Swap
@@ -64,13 +64,18 @@
 		{/snippet}
 
 		{#snippet mainValue()}
-			{nonNullish(currentValueDisplay)
-				? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
-						$price: currentValueDisplay,
-						$quote: quoteSymbol,
-						$base: baseSymbol
-					})
-				: '-'}
+			<!-- `ModalValue` bolds every value it renders. These three read as context
+				 for the limit price above, not as figures in their own right, so they
+				 step back down to regular weight. -->
+			<span class="font-normal">
+				{nonNullish(currentValueDisplay)
+					? replacePlaceholders($i18n.trading.limit_order.current_value_feed, {
+							$price: currentValueDisplay,
+							$quote: quoteSymbol,
+							$base: baseSymbol
+						})
+					: '-'}
+			</span>
 		{/snippet}
 	</ModalValue>
 
@@ -82,16 +87,21 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					<!-- Same treatment as the Swap review: shared `ValueDifference`, swap's
-						 own thresholds, and neither `muted` nor `successNeutral` — so the
-						 figure is green when the order is favourable and amber/red with the
-						 warning icon when it gives value up. -->
-					<ValueDifference
-						errorLevel={SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
-						iconPosition="left"
-						value={valueDifference}
-						warningLevel={SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
-					/>
+					<!-- `successNeutral`, unlike the Swap review: a swap's difference is
+						 realized on the spot, so green means money made. A limit order has
+						 not executed yet — a favourable gap is the premium being asked for,
+						 not a gain — so the figure stays neutral until it turns amber/red for
+						 giving value up. `ValueDifference` bolds itself in those two states,
+						 which is why they keep their weight while this row loses it. -->
+					<span class="font-normal">
+						<ValueDifference
+							errorLevel={SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
+							iconPosition="left"
+							successNeutral
+							value={valueDifference}
+							warningLevel={SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
+						/>
+					</span>
 				{/snippet}
 			</ModalValue>
 		</div>
@@ -105,7 +115,7 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					{queueText}
+					<span class="font-normal">{queueText}</span>
 				{/snippet}
 			</ModalValue>
 		</div>
