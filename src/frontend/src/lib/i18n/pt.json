@@ -1555,7 +1555,8 @@
 			"ata_fee": "Taxa ATA",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cobrir as taxas."
@@ -1602,6 +1603,8 @@
 			"amount": "",
 			"hex_data": "Dados HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",

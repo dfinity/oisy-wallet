@@ -76,9 +76,19 @@
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
+	let prioritizationFee = $state<bigint | undefined>();
+	let prioritizationFeeEstimate = $state<bigint | undefined>();
 
 	const updateData = async () => {
-		({ amount, destination, tokenAddress, isApproval, unreviewed } = await decodeService({
+		({
+			amount,
+			destination,
+			tokenAddress,
+			isApproval,
+			unreviewed,
+			prioritizationFee,
+			prioritizationFeeEstimate
+		} = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
@@ -187,9 +197,12 @@
 				{application}
 				{data}
 				destination={destination ?? ''}
+				feeToken={token}
 				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}
+				{prioritizationFee}
+				{prioritizationFeeEstimate}
 				source={address ?? ''}
 				token={reviewToken}
 				unreviewed={unreviewed ?? false}
