@@ -31,17 +31,25 @@ import {
 	getSetLoadedAccountsDataSizeLimitInstruction
 } from '@solana-program/compute-budget';
 import {
+	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBurnCheckedInstruction,
+	getBurnInstruction,
 	getCreateAssociatedTokenIdempotentInstruction,
 	getCreateAssociatedTokenInstruction,
+	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
 	getApproveInstruction as getToken2022ApproveInstruction,
-	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
+	getBurnInstruction as getToken2022BurnInstruction,
+	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
 	address,
@@ -1107,6 +1115,104 @@ describe('sol-instructions.utils', () => {
 				tokenAddress: JUP_TOKEN.address,
 				isApproval: true
 			});
+		});
+
+		it('should fail closed on a `SetAuthority` instruction', () => {
+			const instruction = getSetAuthorityInstruction({
+				owned: address(mockSolAddress),
+				owner: address(mockSolAddress),
+				authorityType: AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `Burn` instruction', () => {
+			const instruction = getBurnInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `BurnChecked` instruction', () => {
+			const instruction = getBurnCheckedInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `SetAuthority` instruction', () => {
+			const instruction = getToken2022SetAuthorityInstruction({
+				owned: address(mockSolAddress),
+				owner: address(mockSolAddress),
+				authorityType: Token2022AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `Burn` instruction', () => {
+			const instruction = getToken2022BurnInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `BurnChecked` instruction', () => {
+			const instruction = getToken2022BurnCheckedInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should ignore a Create Associated Token instruction', () => {

@@ -41,6 +41,7 @@
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
 		preview?: SolSimulationPreview;
+		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -58,6 +59,7 @@
 		isApproval = false,
 		unreviewed = false,
 		preview,
+		approveDisabled = false,
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -171,6 +173,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {onApprove} {onReject} />
+		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>

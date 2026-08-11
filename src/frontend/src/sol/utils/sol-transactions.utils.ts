@@ -61,7 +61,7 @@ export const mapSolTransactionMessage = ({
 				unreviewed,
 				computeUnitPrice,
 				computeUnitLimit,
-				ambiguous: unpriceable
+				ambiguous: instructionAmbiguous
 			} = mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
@@ -79,9 +79,11 @@ export const mapSolTransactionMessage = ({
 			// instructions we don't decode). We surface it as a warning instead, so the user
 			// is told the review is incomplete and can decide.
 			//
-			// An instruction can also declare itself unfaithful on its own — a Compute Budget
-			// directive we cannot price makes the fee shown wrong rather than incomplete — and
-			// that verdict propagates untouched.
+			// An instruction can also declare itself unfaithful on its own, and that verdict
+			// propagates untouched. Two kinds do: a Compute Budget directive we cannot price makes
+			// the fee shown wrong rather than incomplete, and an authority change or a burn is
+			// decoded in full yet has no amount/source/destination the summary can carry, so a
+			// warning would let it hide behind a dust transfer the user does see.
 			const mixesTokenWithNonToken =
 				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
 				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
@@ -92,7 +94,7 @@ export const mapSolTransactionMessage = ({
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
-				(unpriceable ?? false) ||
+				(instructionAmbiguous ?? false) ||
 				conflicts({ current: acc.source, next: source }) ||
 				conflicts({ current: acc.destination, next: destination }) ||
 				conflicts({ current: acc.payer, next: payer }) ||

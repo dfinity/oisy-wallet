@@ -23,6 +23,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { consoleError } from '$lib/utils/console.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$sol/constants/steps.constants';
@@ -80,22 +81,36 @@
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	let preview = $state<SolSimulationPreview | undefined>();
+	// The decode is asynchronous, so until it settles the review shows an empty summary and no
+	// warning. Approval waits for it: signing on the strength of a review that has not been
+	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
+	// which leaves rejecting as the only way out.
+	let decoded = $state(false);
 
 	const updateData = async () => {
-		({
-			amount,
-			destination,
-			tokenAddress,
-			isApproval,
-			unreviewed,
-			prioritizationFee,
-			prioritizationFeeEstimate,
-			preview
-		} = await decodeService({
-			base64EncodedTransactionMessage: data,
-			networkId,
-			address
-		}));
+		try {
+			({
+				amount,
+				destination,
+				tokenAddress,
+				isApproval,
+				unreviewed,
+				prioritizationFee,
+				prioritizationFeeEstimate,
+				preview
+			} = await decodeService({
+				base64EncodedTransactionMessage: data,
+				networkId,
+				address
+			}));
+
+			decoded = true;
+		} catch (err: unknown) {
+			// The effect cannot await this, so a rejection would go unhandled. Leaving `decoded`
+			// false is the outcome we want anyway: a review that could not be computed stays
+			// unapprovable, and rejecting is the only way out.
+			consoleError(err);
+		}
 	};
 
 	// When the transaction moves an SPL token we know, review it with that token's
@@ -112,7 +127,11 @@
 	$effect(() => {
 		[data, networkId, address];
 
-		untrack(() => updateData());
+		untrack(() => {
+			decoded = false;
+
+			updateData();
+		});
 	});
 
 	/**
@@ -199,6 +218,7 @@
 			<SolWalletConnectSignReview
 				{amount}
 				{application}
+				approveDisabled={!decoded}
 				{data}
 				destination={destination ?? ''}
 				feeToken={token}
