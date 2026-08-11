@@ -102,8 +102,8 @@
 	// "Current value" anchors on the cross of the two legs' USD exchange-rate
 	// prices (base ÷ quote), NOT the DEX order-book mid — mirroring the reference
 	// the limit-order creation flow uses (see `referenceRate`). The book bid/ask
-	// still drive the crossing check below. The same two rates feed the hero's
-	// fiat lines, which it formats itself the way the Swap review does.
+	// still drive the crossing check below. Both rates stay in use here for that
+	// cross and for the analytics payload, and no longer reach the hero.
 	const baseUsdPrice = $derived($exchanges?.[base.id]?.usd);
 	const quoteUsdPrice = $derived($exchanges?.[quote.id]?.usd);
 	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
