@@ -1606,6 +1606,7 @@
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",
 			"sign_psbt": "",

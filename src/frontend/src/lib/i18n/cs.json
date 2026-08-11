@@ -1606,6 +1606,7 @@
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",
