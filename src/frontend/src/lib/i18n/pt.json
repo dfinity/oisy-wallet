@@ -1603,7 +1603,7 @@
 			"hex_data": "Dados HEX",
 			"unreviewed_instructions": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
-			"unverifiable_erc20_transfer": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem",
 			"sign_psbt": "",

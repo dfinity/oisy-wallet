@@ -1603,7 +1603,7 @@
 			"hex_data": "Dữ liệu HEX",
 			"unreviewed_instructions": "",
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
-			"unverifiable_erc20_transfer": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "",

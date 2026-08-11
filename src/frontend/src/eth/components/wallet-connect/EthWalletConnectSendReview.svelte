@@ -82,19 +82,18 @@
 	// contract the transaction is addressed to.
 	let destinationDisplay = $derived(erc20Transfer ? (decodedErc20Data?.to ?? null) : destination);
 
-	// Fail closed: without both the token and its decoded calldata, the review
-	// cannot state what the user would actually approve.
-	let unverifiableErc20Transfer = $derived(
-		erc20Transfer && (isNullish(decodedErc20Data) || isNullish(token))
-	);
+	// Fail closed: without both the token and its decoded calldata, the review cannot state what
+	// the user would actually approve. This covers approve as well as transfer, since an
+	// undecodable approve would otherwise render as a zero-amount interaction and stay approvable.
+	let unverifiableErc20 = $derived(erc20 && (isNullish(decodedErc20Data) || isNullish(token)));
 
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 </script>
 
 <ContentWithToolbar>
-	{#if unverifiableErc20Transfer}
-		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-transfer-warning">
-			{$i18n.wallet_connect.text.unverifiable_erc20_transfer}
+	{#if unverifiableErc20}
+		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
+			{$i18n.wallet_connect.text.unverifiable_erc20_request}
 		</MessageBox>
 	{/if}
 
@@ -103,7 +102,7 @@
 		{application}
 		{balance}
 		destination={destinationDisplay}
-		showNullishAmountLabel={unverifiableErc20Transfer}
+		showNullishAmountLabel={unverifiableErc20}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
@@ -134,7 +133,7 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled || unverifiableErc20Transfer}
+			approveDisabled={approveDisabled || unverifiableErc20}
 			{onApprove}
 			{onReject}
 		/>

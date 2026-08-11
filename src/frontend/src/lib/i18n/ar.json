@@ -1603,7 +1603,7 @@
 			"hex_data": "بيانات HEX",
 			"unreviewed_instructions": "",
 			"invalid_typed_data": "",
-			"unverifiable_erc20_transfer": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",

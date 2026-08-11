@@ -30,7 +30,7 @@ describe('EthWalletConnectSendReview', () => {
 		onReject: vi.fn()
 	};
 
-	const warningTestId = 'wallet-connect-unverifiable-erc20-transfer-warning';
+	const warningTestId = 'wallet-connect-unverifiable-erc20-warning';
 
 	beforeEach(() => {
 		vi.clearAllMocks();

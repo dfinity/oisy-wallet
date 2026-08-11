@@ -1603,7 +1603,7 @@
 			"hex_data": "HEX Data",
 			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
 			"invalid_typed_data": "This request contains a value whose type doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
-			"unverifiable_erc20_transfer": "This request moves a token OISY can't identify or decode. What's shown may differ from what would actually be sent, so approval is disabled.",
+			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
