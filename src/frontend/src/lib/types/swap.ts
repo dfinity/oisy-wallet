@@ -14,7 +14,7 @@ import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
-import type { DeltaPrice, OptimalRate, QuoteParams, SimpleFetchSDK } from '@velora-dex/sdk';
+import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -364,14 +364,6 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
-}
-
-export interface CheckDeltaOrderStatusParams {
-	sdk: SimpleFetchSDK;
-	auctionId: string;
-	onExecuted?: () => void;
-	timeoutMs?: number;
-	intervalMs?: number;
 }
 
 export interface DeltaSwapResponse {

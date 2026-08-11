@@ -921,6 +921,7 @@ interface I18nSwap {
 		swapping: string;
 		starting_to_swap: string;
 		starting_to_bridge: string;
+		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -968,6 +969,7 @@ interface I18nSwap {
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
+		swap_replaced_or_dropped: string;
 	};
 }
 
