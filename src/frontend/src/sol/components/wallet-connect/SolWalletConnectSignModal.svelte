@@ -169,7 +169,9 @@
 <WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{$i18n.wallet_connect.text.sign_message}
+			{signWithSending
+				? $i18n.wallet_connect.text.sign_and_send_transaction
+				: $i18n.wallet_connect.text.sign_transaction}
 		</WalletConnectModalTitle>
 	{/snippet}
 

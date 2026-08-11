@@ -1604,6 +1604,8 @@
 			"raw_copied": "Données brutes de la transaction copiées dans le presse-papiers.",
 			"sign_message": "Signer le message",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
