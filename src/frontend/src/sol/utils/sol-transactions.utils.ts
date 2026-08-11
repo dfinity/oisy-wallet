@@ -2,6 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
+import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -45,8 +46,10 @@ const conflicts = ({
 
 export const mapSolTransactionMessage = ({
 	instructions
-}: TransactionMessage): MappedSolTransaction =>
-	Array.from(instructions).reduce<MappedSolTransaction>(
+}: TransactionMessage): MappedSolTransaction => {
+	const instructionsList = Array.from(instructions);
+
+	const mapped = instructionsList.reduce<MappedSolTransaction>(
 		(acc, instruction) => {
 			const {
 				amount,
@@ -56,7 +59,9 @@ export const mapSolTransactionMessage = ({
 				tokenAddress,
 				isApproval,
 				unreviewed,
-				ambiguous: undisplayable
+				computeUnitPrice,
+				computeUnitLimit,
+				ambiguous: instructionAmbiguous
 			} = mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
@@ -74,9 +79,11 @@ export const mapSolTransactionMessage = ({
 			// instructions we don't decode). We surface it as a warning instead, so the user
 			// is told the review is incomplete and can decide.
 			//
-			// An instruction can also judge itself undisplayable — an authority change or a burn is
-			// decoded in full, yet has no amount/source/destination the summary can carry, so a
-			// warning would let it hide behind a dust transfer. That verdict propagates untouched.
+			// An instruction can also declare itself unfaithful on its own, and that verdict
+			// propagates untouched. Two kinds do: a Compute Budget directive we cannot price makes
+			// the fee shown wrong rather than incomplete, and an authority change or a burn is
+			// decoded in full yet has no amount/source/destination the summary can carry, so a
+			// warning would let it hide behind a dust transfer the user does see.
 			const mixesTokenWithNonToken =
 				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
 				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
@@ -87,7 +94,7 @@ export const mapSolTransactionMessage = ({
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
-				(undisplayable ?? false) ||
+				(instructionAmbiguous ?? false) ||
 				conflicts({ current: acc.source, next: source }) ||
 				conflicts({ current: acc.destination, next: destination }) ||
 				conflicts({ current: acc.payer, next: payer }) ||
@@ -104,8 +111,36 @@ export const mapSolTransactionMessage = ({
 				...(nonNullish(tokenAddress) && { tokenAddress }),
 				...((isApproval ?? acc.isApproval) && { isApproval: true }),
 				...((unreviewed ?? acc.unreviewed) && { unreviewed: true }),
-				...(ambiguous && { ambiguous })
+				...(ambiguous && { ambiguous }),
+				...(nonNullish(computeUnitPrice) && { computeUnitPrice }),
+				...(nonNullish(computeUnitLimit) && { computeUnitLimit })
 			};
 		},
 		{ amount: undefined }
 	);
+
+	const { computeUnitPrice, computeUnitLimit, ...rest } = mapped;
+
+	// The prioritisation fee needs the whole message: the price and the limit come from separate
+	// instructions, and the limit falls back to a default derived from the instruction count.
+	const prioritizationFee = calculateSolPrioritizationFee({
+		computeUnitPrice,
+		computeUnitLimit,
+		instructionsCount: instructionsList.length
+	});
+
+	if (isNullish(prioritizationFee)) {
+		return rest;
+	}
+
+	// The resolved limit travels with the fee: pricing the network's own estimate, which is quoted
+	// per compute unit, against this request needs the very same limit.
+	return {
+		...rest,
+		prioritizationFee,
+		computeUnitLimit: resolveSolComputeUnitLimit({
+			computeUnitLimit,
+			instructionsCount: instructionsList.length
+		})
+	};
+};

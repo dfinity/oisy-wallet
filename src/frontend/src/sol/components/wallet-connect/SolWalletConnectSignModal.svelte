@@ -77,6 +77,8 @@
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
+	let prioritizationFee = $state<bigint | undefined>();
+	let prioritizationFeeEstimate = $state<bigint | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -85,7 +87,15 @@
 
 	const updateData = async () => {
 		try {
-			({ amount, destination, tokenAddress, isApproval, unreviewed } = await decodeService({
+			({
+				amount,
+				destination,
+				tokenAddress,
+				isApproval,
+				unreviewed,
+				prioritizationFee,
+				prioritizationFeeEstimate
+			} = await decodeService({
 				base64EncodedTransactionMessage: data,
 				networkId
 			}));
@@ -207,9 +217,12 @@
 				approveDisabled={!decoded}
 				{data}
 				destination={destination ?? ''}
+				feeToken={token}
 				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}
+				{prioritizationFee}
+				{prioritizationFeeEstimate}
 				source={address ?? ''}
 				token={reviewToken}
 				unreviewed={unreviewed ?? false}

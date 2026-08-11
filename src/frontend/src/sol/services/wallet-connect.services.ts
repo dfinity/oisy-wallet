@@ -19,7 +19,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -33,6 +33,7 @@ import { signTransaction as executeSign } from '$sol/services/sol-sign.services'
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import {
 	createSigner,
@@ -83,7 +84,19 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
+	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
+
+	// The review is synchronous, so the estimate the requested fee is judged against is fetched
+	// here, where the request is already being decoded before the modal opens.
+	const prioritizationFeeEstimate = await estimateSolPrioritizationFee({
+		computeUnitLimit: mappedTransaction.computeUnitLimit,
+		network: solNetwork
+	});
+
+	const mapped = {
+		...mappedTransaction,
+		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate })
+	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
 	// not surfaced by the mapper. Recover it from the source token account (the account
@@ -100,6 +113,34 @@ export const decode = async ({
 	});
 
 	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+};
+
+/**
+ * What OISY would pay to prioritise this message, so the review can say whether the fee the dApp
+ * asks for is in line with the network or far above it.
+ *
+ * `getRecentPrioritizationFees` quotes micro-lamports per compute unit, so it only becomes a
+ * comparable lamport figure once applied to the very compute unit limit this message resolves to.
+ */
+const estimateSolPrioritizationFee = async ({
+	computeUnitLimit,
+	network
+}: {
+	computeUnitLimit?: bigint;
+	network: SolanaNetworkType;
+}): Promise<bigint | undefined> => {
+	if (isNullish(computeUnitLimit)) {
+		return undefined;
+	}
+
+	try {
+		const computeUnitPrice = await estimatePriorityFee({ network });
+
+		return convertSolComputeUnitPriceToFee({ computeUnitPrice, computeUnitLimit });
+	} catch (_: unknown) {
+		// Best-effort: without an estimate the review falls back to its fiat floor. A failed
+		// lookup must never keep the user from seeing the request.
+	}
 };
 
 /**
