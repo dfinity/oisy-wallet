@@ -11,6 +11,7 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { Contract, type ContractTransaction } from 'ethers/contract';
+import { TypedDataEncoder } from 'ethers/hash';
 import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
@@ -130,21 +131,40 @@ export class InfuraErc20Provider implements Erc20Provider {
 
 	isErc20SupportsPermit = async ({
 		contractAddress,
-		userAddress
+		userAddress,
+		chainId
 	}: {
 		contractAddress: string;
 		userAddress: EthAddress;
+		chainId: bigint;
 	}): Promise<boolean> => {
-		const { nonces, DOMAIN_SEPARATOR, version } = new Contract(
+		const { nonces, DOMAIN_SEPARATOR, version, name } = new Contract(
 			contractAddress,
 			ERC20_PERMIT_ABI,
 			this.provider
 		);
 
 		try {
-			await Promise.all([nonces(userAddress), DOMAIN_SEPARATOR(), version()]);
+			const [, domainSeparator, tokenVersion, tokenName] = await Promise.all([
+				nonces(userAddress),
+				DOMAIN_SEPARATOR(),
+				version(),
+				name()
+			]);
 
-			return true;
+			// Probing for the getters is not enough: a token can expose all of them yet hash a
+			// different domain shape (salt-based domains without chainId, DAI-style permits), and a
+			// permit signed over the wrong domain can never be verified by the token. Only report
+			// support when the standard EIP-2612 domain reproduces the token's DOMAIN_SEPARATOR;
+			// everything else must go through the on-chain approval flow.
+			return (
+				TypedDataEncoder.hashDomain({
+					name: tokenName,
+					version: tokenVersion,
+					chainId,
+					verifyingContract: contractAddress
+				}).toLowerCase() === domainSeparator.toLowerCase()
+			);
 		} catch (_: unknown) {
 			return false;
 		}
