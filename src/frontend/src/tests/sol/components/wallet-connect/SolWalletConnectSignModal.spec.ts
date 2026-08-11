@@ -6,6 +6,8 @@ import {
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import { decode } from '$sol/services/wallet-connect.services';
+import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render, waitFor } from '@testing-library/svelte';
@@ -73,6 +75,30 @@ describe('SolWalletConnectSignModal', () => {
 		});
 
 		expect(queryByText(en.wallet_connect.text.sign_message)).not.toBeInTheDocument();
+	});
+
+	it('should keep approval disabled until the transaction decode resolves', async () => {
+		let resolveDecode: (mapped: MappedSolTransaction) => void = () => {};
+
+		vi.mocked(decode).mockReturnValueOnce(
+			new Promise<MappedSolTransaction>((resolve) => {
+				resolveDecode = resolve;
+			})
+		);
+
+		const { getByRole } = render(SolWalletConnectSignModal, {
+			props: props(SESSION_REQUEST_SOL_SIGN_TRANSACTION)
+		});
+
+		const approve = getByRole('button', { name: en.core.text.approve });
+
+		expect(approve).toBeDisabled();
+
+		resolveDecode({ amount: 1n });
+
+		await waitFor(() => {
+			expect(approve).toBeEnabled();
+		});
 	});
 
 	it('should keep the message title for a sign-message request', async () => {

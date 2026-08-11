@@ -1,3 +1,4 @@
+import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
@@ -15,6 +16,18 @@ import {
 	getSetComputeUnitPriceInstruction
 } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
+import {
+	AuthorityType,
+	getBurnInstruction,
+	getSetAuthorityInstruction,
+	getTransferCheckedInstruction
+} from '@solana-program/token';
+import {
+	getBurnInstruction as getToken2022BurnInstruction,
+	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	AuthorityType as Token2022AuthorityType
+} from '@solana-program/token-2022';
 import { address, createNoopSigner, type TransactionMessage } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
@@ -502,6 +515,110 @@ describe('sol-transactions.utils', () => {
 			spyMapSolInstruction.mockReturnValue({});
 
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: undefined });
+		});
+
+		describe('with a dust transfer hiding a takeover or a burn', () => {
+			// These exercise the real instruction mapper end to end, which is the point: the attack
+			// lives in how a decoded instruction is reduced, not in a stubbed verdict.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const dustTransfer = getTransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			const token2022DustTransfer = getToken2022TransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			it('should reject a `SetAuthority` handing the source account to an attacker', () => {
+				const setAuthority = getSetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer, setAuthority]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a `Burn` of the balance the summary does not show', () => {
+				const burn = getBurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer, burn]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `SetAuthority` handing the source account to an attacker', () => {
+				const setAuthority = getToken2022SetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: Token2022AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [token2022DustTransfer, setAuthority]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `Burn` of the balance the summary does not show', () => {
+				const burn = getToken2022BurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [token2022DustTransfer, burn]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should keep a lone dust transfer signable', () => {
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer]
+					})
+				).toStrictEqual({
+					amount: 1n,
+					source: mockAtaAddress,
+					destination: mockSolAddress2,
+					tokenAddress: JUP_TOKEN.address
+				});
+			});
 		});
 
 		it('should correctly initialise sum from ZERO', () => {

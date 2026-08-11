@@ -34,10 +34,12 @@ const unreviewedInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	unreviewed: true
 });
-// A Compute Budget instruction we cannot price hides part of what the transaction would cost.
-// Unlike an undecodable program call, which merely leaves the review incomplete, this one makes
-// the fee shown provably wrong — so it must fail closed rather than warn.
-const unpriceableInstruction = (): MappedSolTransaction => ({
+// An undecodable program call merely leaves the review incomplete. These ones are decoded and
+// still cannot be stated faithfully, so they fail closed rather than warn: a Compute Budget
+// directive we cannot price makes the fee shown provably wrong, and an authority change or a
+// burn has no amount/source/destination the single-value summary can carry, so a warning would
+// let it ride along invisibly behind a dust transfer the user does see.
+const unfaithfulInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	ambiguous: true
 });
@@ -503,6 +505,14 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		};
 	}
 
+	if (
+		instructionType === TokenInstruction.SetAuthority ||
+		instructionType === TokenInstruction.Burn ||
+		instructionType === TokenInstruction.BurnChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
@@ -581,6 +591,17 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		};
 	}
 
+	// Token-2022 adds permissioned burns on top of the legacy program's burn variants.
+	if (
+		instructionType === Token2022Instruction.SetAuthority ||
+		instructionType === Token2022Instruction.Burn ||
+		instructionType === Token2022Instruction.BurnChecked ||
+		instructionType === Token2022Instruction.PermissionedBurn ||
+		instructionType === Token2022Instruction.PermissionedBurnChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
@@ -611,7 +632,7 @@ const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolT
 		// The deprecated `RequestUnits` carries its own flat `additionalFee`, which the review
 		// cannot price the same way.
 		if (instructionType === ComputeBudgetInstruction.RequestUnits) {
-			return unpriceableInstruction();
+			return unfaithfulInstruction();
 		}
 
 		// Heap frame and loaded-accounts data size requests do not affect the fee.
@@ -619,7 +640,7 @@ const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolT
 	} catch (err: unknown) {
 		consoleWarn('Could not parse Solana Compute Budget instruction', err);
 
-		return unpriceableInstruction();
+		return unfaithfulInstruction();
 	}
 };
 
