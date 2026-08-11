@@ -1604,6 +1604,8 @@
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

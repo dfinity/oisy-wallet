@@ -6,7 +6,8 @@
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import {
 		getSignParamsMessageTypedDataV4,
-		getSignParamsMessageUtf8
+		getSignParamsMessageUtf8,
+		isEthSignTypedDataMethod
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -27,7 +28,14 @@
 
 	let method = $derived(request.params.request.method);
 
+	// Only a typed-data method is previewed as typed data. A raw-message request
+	// whose payload happens to parse as EIP-712 is signed as a plain message, so
+	// previewing it as a permit would describe something that is not signed.
 	let json = $derived.by(() => {
+		if (!isEthSignTypedDataMethod(method)) {
+			return;
+		}
+
 		try {
 			return getSignParamsMessageTypedDataV4(request.params.request.params);
 		} catch (_: unknown) {
