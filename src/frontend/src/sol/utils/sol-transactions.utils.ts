@@ -2,10 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { OptionSolAddress } from '$sol/types/address';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
-import {
-	calculateSolPrioritizationFee,
-	resolveSolComputeUnitLimit
-} from '$sol/utils/sol-instructions-compute-budget.utils';
+import { calculateSolPrioritizationFee, resolveSolComputeUnitLimit } from '$sol/utils/fee.utils';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {

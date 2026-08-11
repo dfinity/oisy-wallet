@@ -33,8 +33,8 @@ import { signTransaction as executeSign } from '$sol/services/sol-sign.services'
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
-import { convertSolComputeUnitPriceToFee } from '$sol/utils/sol-instructions-compute-budget.utils';
 import {
 	createSigner,
 	signMessage as signMessageBytes,
