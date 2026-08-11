@@ -1606,6 +1606,7 @@
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "",
