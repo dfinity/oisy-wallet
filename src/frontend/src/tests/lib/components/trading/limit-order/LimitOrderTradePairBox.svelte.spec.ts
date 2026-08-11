@@ -128,7 +128,10 @@ describe('LimitOrderTradePairBox', () => {
 		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
-	it('shows the buy balance error under the quote (second) token box, not the base box', () => {
+	// The quote row is a derived readout, disabled on both sides, so no amount error
+	// belongs to it — even the ones denominated in the quote token. Each of these
+	// asserts the error lands on the base amount, the only input that can clear it.
+	it('shows the buy balance error under the base (first) token box, not the quote box', () => {
 		// Buy 100 ICP at 12 ckUSDC each costs 1200 ckUSDC, above the 1000 free quote.
 		const { getAllByTestId } = render(LimitOrderTradePairBox, {
 			props: { ...baseProps, side: 'buy', baseAmount: '100', price: '12', freeQuote: 1000 }
@@ -142,11 +145,11 @@ describe('LimitOrderTradePairBox', () => {
 
 		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
-		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
-		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
 	});
 
-	it('shows the min-notional error under the quote (second) token box', () => {
+	it('shows the min-notional error under the base (first) token box, not the quote box', () => {
 		// 0.25 ICP at 1 ckUSDC is a 0.25 notional, below the pair's min notional of 1.
 		const { getAllByTestId } = render(LimitOrderTradePairBox, {
 			props: { ...baseProps, side: 'buy', baseAmount: '0.25', price: '1' }
@@ -159,8 +162,24 @@ describe('LimitOrderTradePairBox', () => {
 
 		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
 
-		expect(quoteInput.closest('div.py-2')).toHaveTextContent(expected);
-		expect(baseInput.closest('div.py-2')).not.toHaveTextContent(expected);
+		expect(baseInput.closest('div.py-2')).toHaveTextContent(expected);
+		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(expected);
+	});
+
+	it('leaves the derived quote input unmarked when a quote-denominated error fires', () => {
+		const { getAllByTestId } = render(LimitOrderTradePairBox, {
+			props: { ...baseProps, side: 'sell', baseAmount: '0.25', price: '1' }
+		});
+
+		const [baseInput, quoteInput] = getAllByTestId(TOKEN_INPUT_CURRENCY_TOKEN);
+
+		expect(quoteInput).toBeDisabled();
+		expect(quoteInput.closest('div.py-2')).not.toHaveTextContent(
+			en.trading.limit_order.error_min_notional.split(' $')[0]
+		);
+		expect(baseInput.closest('div.py-2')).toHaveTextContent(
+			en.trading.limit_order.error_min_notional.split(' $')[0]
+		);
 	});
 
 	it('shows the lot-multiple error when the amount is not a multiple of the lot size', () => {
