@@ -1195,6 +1195,7 @@
 			"swapping": "Wymiana...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
 			"swap_provider_website": "Strona internetowa",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {

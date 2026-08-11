@@ -9,33 +9,24 @@
 	// Read-only two-leg intent hero shared by the limit-order Review and the
 	// order-detail modal: "You SELL/BUY <base>" on top, the derived quote bound
 	// below, with a centered direction arrow. Built from the same `SwapToken` rows
-	// and card as `TokensReview`, so it reads identically to the Swap review —
-	// logo, amount, fiat line — with the limit-order labels. Amounts are display
-	// strings so each caller rounds to the pair's decimals; the fiat line is
-	// derived from the exchange rate, and is omitted when no rate is known.
+	// and card as `TokensReview`, so it reads identically to the Swap review — with
+	// the limit-order labels and no fiat line: a swap review quotes a price the
+	// screen states nowhere else, whereas the rows below already spell this order's
+	// limit price and current value out in the quote token. Amounts are display
+	// strings so each caller rounds to the pair's decimals.
 	interface Props {
 		side: LimitOrderSide;
 		baseAmount: OptionAmount;
 		quoteAmount: OptionAmount;
 		baseToken?: Token;
 		quoteToken?: Token;
-		baseExchangeRate?: number;
-		quoteExchangeRate?: number;
 	}
 
-	let {
-		side,
-		baseAmount,
-		quoteAmount,
-		baseToken,
-		quoteToken,
-		baseExchangeRate,
-		quoteExchangeRate
-	}: Props = $props();
+	let { side, baseAmount, quoteAmount, baseToken, quoteToken }: Props = $props();
 </script>
 
 <div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow-sm">
-	<SwapToken amount={baseAmount} exchangeRate={baseExchangeRate} token={baseToken}>
+	<SwapToken amount={baseAmount} showExchangeValue={false} token={baseToken}>
 		{#snippet title()}
 			{$i18n.trading.limit_order.hero_prefix}
 			<!-- Red sell / green buy, as the order rows colour their side word. -->
@@ -61,7 +52,7 @@
 		<div class="h-[1px] w-[45%] bg-tertiary text-tertiary-inverted"></div>
 	</div>
 
-	<SwapToken amount={quoteAmount} exchangeRate={quoteExchangeRate} token={quoteToken}>
+	<SwapToken amount={quoteAmount} showExchangeValue={false} token={quoteToken}>
 		{#snippet title()}
 			{side === 'sell'
 				? $i18n.trading.limit_order.you_get_at_least

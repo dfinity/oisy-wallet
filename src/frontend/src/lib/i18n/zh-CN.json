@@ -1195,6 +1195,7 @@
 			"swapping": "正在兑换...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
 			"swap_provider_website": "官网",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {

@@ -1195,6 +1195,7 @@
 			"swapping": "جاري التبديل...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
 			"swap_provider_website": "الموقع الإلكتروني",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {

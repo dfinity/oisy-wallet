@@ -1195,6 +1195,7 @@
 			"swapping": "Intercambiando...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
