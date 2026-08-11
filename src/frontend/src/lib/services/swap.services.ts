@@ -1,10 +1,13 @@
+import type { VeloraSwapMode } from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { EthereumNetwork } from '$eth/types/network';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isTokenErc } from '$eth/utils/erc.utils';
 import { isDefaultEthereumToken, isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -34,12 +37,7 @@ import {
 	ZERO
 } from '$lib/constants/app.constants';
 import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
-import {
-	ICP_SWAP_POOL_FEE,
-	SWAP_DELTA_INTERVAL_MS,
-	SWAP_DELTA_TIMEOUT_MS,
-	SWAP_SIDE
-} from '$lib/constants/swap.constants';
+import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -71,7 +69,6 @@ import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
-	type CheckDeltaOrderStatusParams,
 	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
@@ -90,6 +87,7 @@ import {
 	type SwapVeloraMarketParams
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { VELORA_EXTERNAL_REF_KEYS, type VeloraExternalRefKey } from '$lib/types/velora-swap';
 import { consoleError } from '$lib/utils/console.utils';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import { formatToken } from '$lib/utils/format.utils';
@@ -108,6 +106,11 @@ import {
 	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { isTokenToggleable } from '$lib/utils/token-toggleable.utils';
+import {
+	toVeloraData,
+	toVeloraDisplayRefs,
+	toVeloraExternalRefs
+} from '$lib/utils/velora-active-tx.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -115,7 +118,7 @@ import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish, nowInBigIntNanoSeconds } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
-import { OrderHelpers, constructSimpleSDK, type BuildDeltaOrderParams } from '@velora-dex/sdk';
+import { constructSimpleSDK, type BuildDeltaOrderParams } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
 const checkNeedsApproval = async ({
@@ -1150,6 +1153,73 @@ export const withdrawUserUnusedBalance = async ({
 	}
 };
 
+/**
+ * Registers the Active User Transaction that carries a committed Velora swap to
+ * its terminal state, so the modal can close while settlement continues in the
+ * background.
+ *
+ * Best-effort, mirroring the other AUT providers: by the time this runs the
+ * order is live in the auction (Delta) or the transaction is broadcast
+ * (Market), so a failure here costs tracking, never funds.
+ */
+const createVeloraActiveUserTransaction = async ({
+	identity,
+	mode,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	parsedSwapAmount,
+	sourceNetwork,
+	pollRefs
+}: {
+	identity: Identity;
+	mode: VeloraSwapMode;
+	sourceToken: ErcFungibleToken;
+	destinationToken: ErcFungibleToken;
+	swapAmount: Amount;
+	parsedSwapAmount: bigint;
+	sourceNetwork: EthereumNetwork;
+	pollRefs: Partial<Record<VeloraExternalRefKey, string>>;
+}): Promise<void> => {
+	try {
+		const data = toVeloraData({
+			mode,
+			sourceToken,
+			destinationToken,
+			amount: parsedSwapAmount
+		});
+
+		if (isNullish(data)) {
+			return;
+		}
+
+		// Snapshotted rather than derived at settlement: the row's terminal
+		// analytics must report the value the user swapped at, and this is the same
+		// rate the wizard used for the `swap_submitted` event of this swap.
+		const sourceTokenExchangeRate = get(exchanges)?.[sourceToken.id]?.usd;
+
+		await createActiveUserTransaction({
+			identity,
+			id: crypto.randomUUID(),
+			data,
+			externalRefs: toVeloraExternalRefs({
+				...toVeloraDisplayRefs({
+					sourceToken,
+					destinationToken,
+					amount: `${swapAmount}`,
+					usdSourceValue: nonNullish(sourceTokenExchangeRate)
+						? `${Number(swapAmount) * sourceTokenExchangeRate}`
+						: undefined
+				}),
+				[VELORA_EXTERNAL_REF_KEYS.CHAIN_ID]: `${sourceNetwork.chainId}`,
+				...pollRefs
+			})
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
 export const fetchVeloraDeltaSwap = async ({
 	identity,
 	progress,
@@ -1266,49 +1336,31 @@ export const fetchVeloraDeltaSwap = async ({
 
 	const compactSignature = getCompactSignature(signature);
 
+	// The order is live in the auction from here on — the point of no return.
 	const deltaAuction = await sdk.delta.postDeltaOrder({
 		order: builtOrder.toSign.value,
 		signature: compactSignature
 	});
 
-	await checkDeltaOrderStatus({
-		sdk,
-		auctionId: deltaAuction.id
+	await createVeloraActiveUserTransaction({
+		identity,
+		mode: { Delta: null },
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		parsedSwapAmount,
+		sourceNetwork,
+		pollRefs: {
+			[VELORA_EXTERNAL_REF_KEYS.AUCTION_ID]: deltaAuction.id,
+			[VELORA_EXTERNAL_REF_KEYS.ORDER_HASH]: builtOrder.orderHash
+		}
 	});
 
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// The destination token is enabled so it stays visible while the order
+	// settles; the balance refresh happens once the AUT row terminalizes.
 	await enableSwapDestinationToken({ destinationToken, identity });
-
-	await waitAndTriggerWallet();
-};
-
-const checkDeltaOrderStatus = async ({
-	sdk,
-	auctionId,
-	timeoutMs = SWAP_DELTA_TIMEOUT_MS,
-	intervalMs = SWAP_DELTA_INTERVAL_MS
-}: CheckDeltaOrderStatusParams): Promise<void> => {
-	const deadline = Date.now() + timeoutMs;
-
-	while (Date.now() < deadline) {
-		const auction = await sdk.delta.getDeltaOrderById(auctionId);
-
-		// `COMPLETED` means the order settled on every chain, so cross-chain orders need no
-		// separate bridge check — they stay `BRIDGING` until the destination leg lands.
-		if (OrderHelpers.checks.isCompletedAuction(auction)) {
-			return;
-		}
-
-		// Terminal failures (failed, expired, cancelled, refunding, refunded)
-		if (OrderHelpers.checks.isFailedAuction(auction)) {
-			throw new Error(`Velora Delta swap ${auction.status.toLowerCase()} (order ${auctionId})`);
-		}
-
-		await new Promise((r) => setTimeout(r, intervalMs));
-	}
-
-	throw new Error(`Velora Delta swap timed out (order ${auctionId})`);
 };
 
 export const fetchVeloraMarketSwap = async ({
@@ -1381,7 +1433,11 @@ export const fetchVeloraMarketSwap = async ({
 		partner: OISY_URL_HOSTNAME
 	});
 
-	await swap({
+	// The transaction is broadcast from here on — the point of no return. `swap`
+	// also kicks off `processTransactionSent`, which populates the pending row in
+	// the token's transaction list; the AUT row adds the durable, cross-session
+	// settlement record on top of it.
+	const { hash, nonce } = await swap({
 		from: userAddress,
 		to: txParams.to,
 		transaction: txParams,
@@ -1393,9 +1449,23 @@ export const fetchVeloraMarketSwap = async ({
 		progress
 	});
 
+	await createVeloraActiveUserTransaction({
+		identity,
+		mode: { Market: null },
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		parsedSwapAmount,
+		sourceNetwork,
+		pollRefs: {
+			[VELORA_EXTERNAL_REF_KEYS.TX_HASH]: hash,
+			[VELORA_EXTERNAL_REF_KEYS.TX_NONCE]: `${nonce}`
+		}
+	});
+
 	progress(ProgressStepsSwap.UPDATE_UI);
 
+	// The destination token is enabled so it stays visible while the transaction
+	// confirms; the balance refresh happens once the AUT row terminalizes.
 	await enableSwapDestinationToken({ destinationToken, identity });
-
-	await waitAndTriggerWallet();
 };

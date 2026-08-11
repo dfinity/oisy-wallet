@@ -187,10 +187,17 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
 	);
 
-	// OneSec and NEAR Intents both close the modal at initiation and settle in the
-	// background via the Active User Transactions store.
+	const isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
+	// Velora, OneSec and NEAR Intents all close the modal at initiation and settle
+	// in the background via the Active User Transactions store. Only the ICP-native
+	// providers still complete inside the modal.
 	const isActiveTransactionSwap = $derived(
-		isNearIntentsProvider || $swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+		isNearIntentsProvider ||
+			isOneSecProvider ||
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
 	const isApproveNeeded = $derived(
@@ -382,11 +389,11 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec and NEAR Intents swaps, the foreground completes once the
-			// user's funds have left their wallet; success/failure of the background
-			// phase is tracked separately via the AUT store, so we fire `submitted`
-			// here. Velora still completes fully inside `await` and reaches this point
-			// only on success.
+			// For AUT-tracked swaps the foreground completes once the swap is
+			// committed — funds have left the wallet, or the order is live in the
+			// auction; success/failure of the background phase is tracked separately
+			// via the AUT store, so we fire `submitted` here. The ICP-native providers
+			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
 				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
@@ -488,6 +495,7 @@
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
 					swapWithActiveTransaction={isActiveTransactionSwap}
+					swapWithBridging={isOneSecProvider}
 				/>
 			{/if}
 		{/key}
