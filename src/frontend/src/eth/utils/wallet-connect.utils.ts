@@ -415,7 +415,6 @@ export const getEthTypedDataApproval = ({
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be
 		// describing something the user cannot sign.
-		
 	}
 };
 
