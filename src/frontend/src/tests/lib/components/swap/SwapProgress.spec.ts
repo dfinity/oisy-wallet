@@ -126,6 +126,37 @@ describe('SwapProgress', () => {
 		});
 	});
 
+	describe('swapWithActiveTransaction', () => {
+		it('replaces the swapping and refreshing copy with the background-settlement copy', () => {
+			const { container } = render(SwapProgress, {
+				props: { swapWithActiveTransaction: true }
+			});
+
+			expect(container).toHaveTextContent(en.swap.text.starting_to_swap);
+			expect(container).toHaveTextContent(en.swap.text.finishing_in_background);
+			expect(container).not.toHaveTextContent(baseStepTexts.swapping);
+			expect(container).not.toHaveTextContent(baseStepTexts.refreshingUi);
+		});
+
+		it('uses the bridging copy only when the background phase is a bridge', () => {
+			const { container } = render(SwapProgress, {
+				props: { swapWithActiveTransaction: true, swapWithBridging: true }
+			});
+
+			expect(container).toHaveTextContent(en.swap.text.starting_to_bridge);
+			expect(container).not.toHaveTextContent(en.swap.text.finishing_in_background);
+		});
+
+		it('ignores swapWithBridging when the swap is not tracked in the background', () => {
+			const { container } = render(SwapProgress, {
+				props: { swapWithBridging: true }
+			});
+
+			expect(container).toHaveTextContent(baseStepTexts.refreshingUi);
+			expect(container).not.toHaveTextContent(en.swap.text.starting_to_bridge);
+		});
+	});
+
 	describe('progress step highlighting', () => {
 		it('renders with INITIALIZATION step by default', () => {
 			const { container } = render(SwapProgress);

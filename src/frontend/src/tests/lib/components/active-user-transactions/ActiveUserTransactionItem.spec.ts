@@ -2,7 +2,8 @@ import ActiveUserTransactionItem from '$lib/components/active-user-transactions/
 import en from '$lib/i18n/en.json';
 import {
 	mockLiquidiumActiveUserTransaction,
-	mockNearIntentsActiveUserTransaction
+	mockNearIntentsActiveUserTransaction,
+	mockVeloraActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 
@@ -20,6 +21,23 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.swap.text.swap} 1 USDC → USDC`)).toBeInTheDocument();
 		expect(container).toHaveTextContent('Ethereum → Solana');
 		expect(container).toHaveTextContent('NEAR Intents');
+	});
+
+	it('renders Velora rows as a swap with the provider, collapsing a same-chain network line', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockVeloraActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 USDC → USDT`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Velora');
+		// Source and destination share a network, so it reads once, not "Ethereum → Ethereum".
+		expect(container).not.toHaveTextContent('Ethereum → Ethereum');
+		expect(container).toHaveTextContent('Ethereum');
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {
