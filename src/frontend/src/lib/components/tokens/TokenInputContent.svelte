@@ -29,7 +29,8 @@
 		readOnlyAmount?: boolean;
 		// Opt-in companion to `disabled`: tints the amount half of the field so a
 		// derived amount is legible as non-editable at a glance. Left off by default —
-		// the other disabled legs in the app keep the plain fill.
+		// the other disabled legs in the app keep the plain fill. Has no effect on its
+		// own, so it can never dress an editable field as dead.
 		muted?: boolean;
 		placeholder?: string;
 		// Overrides the "Select token" prompt shown while no token is picked — e.g.
@@ -84,9 +85,10 @@
 	// not offer a hover border or a pointer cursor.
 	const inert = $derived(disabled && !isSelectable);
 
-	// `readOnlyAmount` drops the frame and dresses the selector as its own pill, so
-	// there is no field left for the muted treatment to apply to.
-	const mutedAmount = $derived(muted && !readOnlyAmount);
+	// Gated on `disabled` so `muted` cannot produce a field that looks dead and still
+	// takes a caret; `readOnlyAmount` is excluded because it drops the frame and
+	// dresses the selector as its own pill, leaving nothing for the tint to fill.
+	const mutedAmount = $derived(muted && disabled && !readOnlyAmount);
 
 	// The selector joins the tint only while it cannot be opened. White is this
 	// field's promise that a region is pressable, and it is kept honest both ways.
@@ -148,7 +150,7 @@
 	error={nonNullish(errorType) || nonNullish(error)}
 	{focused}
 	{inert}
-	{muted}
+	muted={mutedAmount}
 	{readOnlyAmount}
 	styleClass="h-14 text-3xl"
 >
@@ -158,7 +160,7 @@
 		 input without a rule of its own and stops at the selector, which carries its
 		 own `cursor: pointer` for as long as it is enabled. -->
 	<div
-		style={readOnlyAmount || muted ? '--input-background: transparent;' : undefined}
+		style={readOnlyAmount || mutedAmount ? '--input-background: transparent;' : undefined}
 		class="flex h-full w-full items-center"
 		class:bg-disabled={mutedAmount}
 		class:cursor-not-allowed={mutedAmount}
