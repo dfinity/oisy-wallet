@@ -1276,7 +1276,7 @@ export const fetchVeloraDeltaSwap = async ({
 	if (isGasless) {
 		progress(ProgressStepsSwap.APPROVE);
 
-		const { nonce, deadline, encodedPermit } = await createPermit({
+		const { deadline, encodedPermit } = await createPermit({
 			token: sourceToken,
 			userAddress,
 			spender: deltaContract,
@@ -1286,10 +1286,13 @@ export const fetchVeloraDeltaSwap = async ({
 
 		progress(ProgressStepsSwap.SWAP);
 
+		// The order nonce is deliberately not set: the permit nonce is already embedded in the
+		// signature inside `encodedPermit`, while the order nonce is a separate per-address replay
+		// guard that the server randomizes when omitted. Reusing the per-token, counter-based
+		// permit nonce here collides on /v2/delta/orders ("Nonce has already been used").
 		builtOrder = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
-			nonce,
 			permit: encodedPermit
 		});
 	} else {

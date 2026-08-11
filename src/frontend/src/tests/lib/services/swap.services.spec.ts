@@ -1023,6 +1023,16 @@ describe('swap.services', () => {
 
 			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
 			expect(createPermit).toHaveBeenCalled();
+
+			// The permit rides along, but the order nonce must stay unset: the server randomizes
+			// it, and the per-token permit counter would collide per address on /v2/delta/orders.
+			const [[buildParams]] = mockDeltaContractBuildDeltaOrder.mock.calls;
+
+			expect(buildParams).toMatchObject({
+				deadline: 1234567890,
+				permit: '0xpermitdata'
+			});
+			expect(buildParams).not.toHaveProperty('nonce');
 		});
 
 		it('should handle delta contract not found', async () => {
