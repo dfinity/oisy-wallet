@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -8,6 +8,7 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
@@ -24,6 +25,7 @@
 		application: string;
 		data?: string;
 		erc20Approve: boolean;
+		erc20Transfer?: boolean;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
 		approveDisabled?: boolean;
@@ -37,6 +39,7 @@
 		application,
 		data,
 		erc20Approve,
+		erc20Transfer = false,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
 		approveDisabled = false,
@@ -44,16 +47,27 @@
 		onReject
 	}: Props = $props();
 
-	let { to: spender, value: amountDisplay } = $derived(
-		erc20Approve && nonNullish(data)
-			? decodeErc20AbiData({ data })
-			: { to: destination, value: amount }
-	);
+	let erc20 = $derived(erc20Approve || erc20Transfer);
+
+	let decodedErc20Data = $derived.by(() => {
+		if (!erc20 || isNullish(data)) {
+			return;
+		}
+
+		try {
+			return decodeErc20AbiData({ data });
+		} catch (_: unknown) {
+			// Calldata that does not decode must not be summarized: the review would
+			// otherwise describe something else than what gets signed and broadcast.
+		}
+	});
+
+	let spender = $derived(erc20Approve ? decodedErc20Data?.to : undefined);
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let token = $derived(
-		erc20Approve
+		erc20
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: destination, networkId }) &&
@@ -62,15 +76,34 @@
 			: $sendToken
 	);
 
+	let amountDisplay = $derived(erc20 ? decodedErc20Data?.value : amount);
+
+	// A transfer moves tokens to the address encoded in the calldata, not to the
+	// contract the transaction is addressed to.
+	let destinationDisplay = $derived(erc20Transfer ? (decodedErc20Data?.to ?? null) : destination);
+
+	// Fail closed: without both the token and its decoded calldata, the review
+	// cannot state what the user would actually approve.
+	let unverifiableErc20Transfer = $derived(
+		erc20Transfer && (isNullish(decodedErc20Data) || isNullish(token))
+	);
+
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 </script>
 
 <ContentWithToolbar>
+	{#if unverifiableErc20Transfer}
+		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-transfer-warning">
+			{$i18n.wallet_connect.text.unverifiable_erc20_transfer}
+		</MessageBox>
+	{/if}
+
 	<SendData
 		amount={amountDisplay}
 		{application}
 		{balance}
-		{destination}
+		destination={destinationDisplay}
+		showNullishAmountLabel={unverifiableErc20Transfer}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
 		{token}
@@ -100,6 +133,10 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
+		<WalletConnectActions
+			approveDisabled={approveDisabled || unverifiableErc20Transfer}
+			{onApprove}
+			{onReject}
+		/>
 	{/snippet}
 </ContentWithToolbar>

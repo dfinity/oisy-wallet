@@ -1284,6 +1284,7 @@ interface I18nWallet_connect {
 		hex_data: string;
 		unreviewed_instructions: string;
 		invalid_typed_data: string;
+		unverifiable_erc20_transfer: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
