@@ -76,12 +76,19 @@
 	let tokenAddress = $state<OptionSolAddress>();
 	let isApproval = $state<boolean | undefined>();
 	let unreviewed = $state<boolean | undefined>();
+	// The decode is asynchronous, so until it settles the review shows an empty summary and no
+	// warning. Approval waits for it: signing on the strength of a review that has not been
+	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
+	// which leaves rejecting as the only way out.
+	let decoded = $state(false);
 
 	const updateData = async () => {
 		({ amount, destination, tokenAddress, isApproval, unreviewed } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
+
+		decoded = true;
 	};
 
 	// When the transaction moves an SPL token we know, review it with that token's
@@ -98,7 +105,11 @@
 	$effect(() => {
 		[data, networkId];
 
-		untrack(() => updateData());
+		untrack(() => {
+			decoded = false;
+
+			updateData();
+		});
 	});
 
 	/**
@@ -185,6 +196,7 @@
 			<SolWalletConnectSignReview
 				{amount}
 				{application}
+				approveDisabled={!decoded}
 				{data}
 				destination={destination ?? ''}
 				isApproval={isApproval ?? false}

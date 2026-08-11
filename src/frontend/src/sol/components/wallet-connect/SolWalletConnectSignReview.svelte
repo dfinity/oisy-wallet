@@ -20,6 +20,7 @@
 		token: Token;
 		isApproval?: boolean;
 		unreviewed?: boolean;
+		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
 	}
@@ -33,6 +34,7 @@
 		token,
 		isApproval = false,
 		unreviewed = false,
+		approveDisabled = false,
 		onApprove,
 		onReject
 	}: Props = $props();
@@ -69,6 +71,6 @@
 	</SendData>
 
 	{#snippet toolbar()}
-		<WalletConnectActions {onApprove} {onReject} />
+		<WalletConnectActions {approveDisabled} {onApprove} {onReject} />
 	{/snippet}
 </ContentWithToolbar>

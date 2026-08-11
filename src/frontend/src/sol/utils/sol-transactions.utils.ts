@@ -48,8 +48,16 @@ export const mapSolTransactionMessage = ({
 }: TransactionMessage): MappedSolTransaction =>
 	Array.from(instructions).reduce<MappedSolTransaction>(
 		(acc, instruction) => {
-			const { amount, source, destination, payer, tokenAddress, isApproval, unreviewed } =
-				mapSolInstruction(instruction);
+			const {
+				amount,
+				source,
+				destination,
+				payer,
+				tokenAddress,
+				isApproval,
+				unreviewed,
+				ambiguous: undisplayable
+			} = mapSolInstruction(instruction);
 
 			// The summary holds a single value per field, so any later instruction that
 			// disagrees on source, destination or payer would be silently dropped from the
@@ -65,6 +73,10 @@ export const mapSolTransactionMessage = ({
 			// break most real dApp interactions (swaps, staking, NFT mints all carry
 			// instructions we don't decode). We surface it as a warning instead, so the user
 			// is told the review is incomplete and can decide.
+			//
+			// An instruction can also judge itself undisplayable — an authority change or a burn is
+			// decoded in full, yet has no amount/source/destination the summary can carry, so a
+			// warning would let it hide behind a dust transfer. That verdict propagates untouched.
 			const mixesTokenWithNonToken =
 				(nonNullish(tokenAddress) && nonNullish(acc.amount) && isNullish(acc.tokenAddress)) ||
 				(isNullish(tokenAddress) && nonNullish(amount) && nonNullish(acc.tokenAddress));
@@ -75,6 +87,7 @@ export const mapSolTransactionMessage = ({
 
 			const ambiguous =
 				(acc.ambiguous ?? false) ||
+				(undisplayable ?? false) ||
 				conflicts({ current: acc.source, next: source }) ||
 				conflicts({ current: acc.destination, next: destination }) ||
 				conflicts({ current: acc.payer, next: payer }) ||

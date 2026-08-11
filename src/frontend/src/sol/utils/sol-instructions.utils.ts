@@ -33,6 +33,14 @@ const unreviewedInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	unreviewed: true
 });
+// An undecodable instruction merely leaves the review incomplete. These ones are decoded and
+// still cannot be summarised: handing a token account to a new authority, or destroying its
+// balance, has no amount/source/destination the single-value summary can carry. Warning would
+// let them ride along invisibly behind a dust transfer the user does see, so they fail closed.
+const undisplayableInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	ambiguous: true
+});
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -495,6 +503,14 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		};
 	}
 
+	if (
+		instructionType === TokenInstruction.SetAuthority ||
+		instructionType === TokenInstruction.Burn ||
+		instructionType === TokenInstruction.BurnChecked
+	) {
+		return undisplayableInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
@@ -571,6 +587,17 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 			tokenAddress,
 			isApproval: true
 		};
+	}
+
+	// Token-2022 adds permissioned burns on top of the legacy program's burn variants.
+	if (
+		instructionType === Token2022Instruction.SetAuthority ||
+		instructionType === Token2022Instruction.Burn ||
+		instructionType === Token2022Instruction.BurnChecked ||
+		instructionType === Token2022Instruction.PermissionedBurn ||
+		instructionType === Token2022Instruction.PermissionedBurnChecked
+	) {
+		return undisplayableInstruction();
 	}
 
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
