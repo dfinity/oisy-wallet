@@ -140,7 +140,6 @@ const estimateSolPrioritizationFee = async ({
 	} catch (_: unknown) {
 		// Best-effort: without an estimate the review falls back to its fiat floor. A failed
 		// lookup must never keep the user from seeing the request.
-		return undefined;
 	}
 };
 
