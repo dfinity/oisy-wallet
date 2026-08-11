@@ -152,7 +152,7 @@ describe('sol-simulation.utils', () => {
 			});
 		});
 
-		it('should ignore accounts that are not the user own', () => {
+		it('should ignore accounts the user does not own', () => {
 			const preview = mapSolSimulationPreview({
 				addresses: [mockAtaAddress],
 				preAccounts: [tokenAccount({ amount: 5_000_000n, owner: mockSolAddress2 })],
