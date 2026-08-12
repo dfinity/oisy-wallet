@@ -64,6 +64,7 @@ describe('AllTransactions', () => {
 
 	beforeEach(() => {
 		icTransactionsStatusStore.reset();
+		icrcCustomTokensStore.resetAll();
 	});
 
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
@@ -106,6 +107,18 @@ describe('AllTransactions', () => {
 		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
+	it('does not raise the no Index canister warning for a token of another chain', () => {
+		// Only IC tokens have an `indexCanisterId`; for anything else `hasNoIndexCanister` reads
+		// `undefined` and would report the token as lacking one.
+		icTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+
+		const { container } = render(AllTransactions);
+
+		expect(container.querySelector('.bg-warning-light')).toBeNull();
+
+		icTransactionsStore.reset(ETHEREUM_TOKEN_ID);
+	});
+
 	it('renders the unavailable Index canister warning box after enough consecutive failures', () => {
 		const tokenId = setUpTokenWithUnavailableIndexCanister();
 
@@ -113,12 +126,12 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(
+		const expectedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
 			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
-		expect(getByText(exceptedText)).toBeInTheDocument();
+		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
 	it('does not render the unavailable Index canister warning box before the threshold', () => {
@@ -128,12 +141,12 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(
+		const expectedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
 			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
-		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+		expect(queryByText(expectedText)).not.toBeInTheDocument();
 	});
 
 	it('stops rendering the unavailable Index canister warning box after a successful sync', () => {
@@ -144,12 +157,12 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(
+		const expectedText = replacePlaceholders(
 			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
 			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
 		);
 
-		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+		expect(queryByText(expectedText)).not.toBeInTheDocument();
 	});
 
 	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
