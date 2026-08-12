@@ -15,3 +15,8 @@ yarn.lock
 /target
 
 .dfx
+
+# `cap sync` copies the built web assets into the native projects.
+mobile/ios/App/App/public
+mobile/android/app/src/main/assets/public
+mobile/ios/App/Pods
