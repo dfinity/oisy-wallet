@@ -1195,6 +1195,7 @@
 			"swapping": "正在兑换...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "刷新界面中",
 			"swap_provider": "兑换服务商",
 			"swap_provider_website": "官网",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1553,7 +1555,8 @@
 			"ata_fee": "ATA 手续费",
 			"transaction_fees": "交易手续费",
 			"network_fee": "网络手续费",
-			"approval_fee": "授权手续费"
+			"approval_fee": "授权手续费",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1600,10 +1603,15 @@
 			"amount": "金额",
 			"hex_data": "HEX 数据",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

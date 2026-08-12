@@ -18,3 +18,15 @@ export interface WalletConnectEthSignTypedDataV4 {
 	message: Record<string, unknown>;
 	primaryType: string;
 }
+
+/**
+ * The approval facts summarized above the raw message of an `eth_signTypedData_v4`
+ * request. Every field is read from a member declared by the signed struct, so
+ * what the user reads is what the digest covers.
+ */
+export interface WalletConnectEthTypedDataApproval {
+	spender?: string;
+	token?: string;
+	amount?: bigint;
+	expiration?: number;
+}

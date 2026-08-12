@@ -4,12 +4,11 @@
 	import { onDestroy } from 'svelte';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
-	import {
-		SESSION_REQUEST_ETH_SIGN_LEGACY,
-		SESSION_REQUEST_ETH_SIGN_V4
-	} from '$eth/constants/wallet-connect.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
-	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
+	import {
+		getSignParamsMessageTypedDataV4,
+		isEthSignTypedDataMethod
+	} from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
@@ -31,7 +30,7 @@
 	let method = $derived(request.params.request.method);
 
 	let domainName = $derived.by(() => {
-		if (method === SESSION_REQUEST_ETH_SIGN_V4 || method === SESSION_REQUEST_ETH_SIGN_LEGACY) {
+		if (isEthSignTypedDataMethod(method)) {
 			const {
 				domain: { name }
 			} = getSignParamsMessageTypedDataV4(request.params.request.params);

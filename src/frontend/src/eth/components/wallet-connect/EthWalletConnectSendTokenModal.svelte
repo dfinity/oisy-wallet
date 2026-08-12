@@ -22,7 +22,10 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import {
+		isErc20TransactionApprove,
+		isErc20TransactionTransfer
+	} from '$eth/utils/transactions.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -54,6 +57,8 @@
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
 	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
+
+	let erc20Transfer = $derived(isErc20TransactionTransfer(firstTransaction.data));
 
 	/**
 	 * Send context store
@@ -209,6 +214,7 @@
 						{data}
 						{destination}
 						{erc20Approve}
+						{erc20Transfer}
 						onApprove={send}
 						onReject={reject}
 						{sourceNetwork}
