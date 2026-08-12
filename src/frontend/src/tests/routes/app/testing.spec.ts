@@ -9,4 +9,10 @@ describe('Testing page', () => {
 		expect(getByText('Testing')).toBeInTheDocument();
 		expect(getByText(/Scenarios that make failure paths reachable on demand/)).toBeInTheDocument();
 	});
+
+	it('should host the canister-failure scenario', () => {
+		const { getByText } = render(TestingPage);
+
+		expect(getByText('Unavailable Ledger or Index Canister Simulation')).toBeInTheDocument();
+	});
 });

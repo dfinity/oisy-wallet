@@ -4,6 +4,8 @@ import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
 import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+import type { TokenId } from '$lib/types/token';
+import { qaLog } from '$lib/utils/simulated-canister-failures.utils';
 import { derived, type Readable } from 'svelte/store';
 
 // Only IC tokens can have a failing Index canister, and consumers identify them by their Ledger
@@ -20,10 +22,27 @@ const enabledIcTokens: Readable<IcToken[]> = derived(
  */
 export const tokensWithUnavailableIndexCanister: Readable<IcToken[]> = derived(
 	[enabledIcTokens, icTransactionsStatusStore],
-	([$enabledIcTokens, $icTransactionsStatusStore]) =>
-		$enabledIcTokens.filter(
+	([$enabledIcTokens, $icTransactionsStatusStore]) => {
+		const tokens = $enabledIcTokens.filter(
 			({ id }) => ($icTransactionsStatusStore[id] ?? 0) >= IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD
-		)
+		);
+
+		// Testing harness - DO NOT MERGE. Prints both sides: what is counted, and which of the enabled
+		// tokens the count is matched against.
+		if (Object.getOwnPropertySymbols($icTransactionsStatusStore).length > 0) {
+			qaLog(
+				'failure counts',
+				Object.getOwnPropertySymbols($icTransactionsStatusStore).map(
+					(id) => `${id.description}=${$icTransactionsStatusStore[id as TokenId]}`
+				),
+				`| threshold ${IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD} | warned about`,
+				tokens.map(({ symbol }) => symbol),
+				`| enabled IC tokens counted against: ${$enabledIcTokens.length}`
+			);
+		}
+
+		return tokens;
+	}
 );
 
 /**
