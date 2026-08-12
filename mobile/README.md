@@ -9,13 +9,24 @@ Capacitor shell wrapping the OISY web app as native Android and iOS apps.
 ## How login works (and why the wallet is the same as on the web)
 
 Internet Identity derives the principal from the **origin** of the frontend
-requesting the delegation. The app therefore never authenticates from the
-WebView: it opens the system browser on `<canonical origin>/mobile-auth`,
-which runs the normal II sign-in for an app-owned session key and returns the
-delegation chain via the `oisy://auth-callback` deep link. Same origin ⇒ same
-principal ⇒ same wallet. See `src/frontend/src/lib/services/auth-mobile.services.ts`
-(app side) and `src/frontend/src/lib/services/auth-mobile-bridge.services.ts`
-(bridge side).
+requesting the delegation, so the app never authenticates from the WebView.
+Two transports exist (`MOBILE_APP_AUTH_TRANSPORT` in
+`src/frontend/src/lib/constants/mobile-flags.constants.ts`):
+
+- **`redirect` (default, phase 2)** — ICRC-167/ICRC-34: the app opens the
+  system browser directly on II with an `icrc34_delegation` request; II
+  returns the delegation by navigating to
+  `https://<canonical origin>/signer-callback`, a verified universal link the
+  OS routes into the app. The principal derives from the callback's origin ⇒
+  same wallet as the web. Requires `/.well-known/ii-auth-callbacks`,
+  `apple-app-site-association` and `assetlinks.json` on the origin (all in
+  `src/frontend/static/.well-known/`).
+- **`bridge` (fallback, phase 1)** — the system browser opens
+  `<canonical origin>/mobile-auth`, which runs the II sign-in and returns the
+  chain via the `oisy://auth-callback` custom-scheme deep link.
+
+See `src/frontend/src/lib/services/auth-mobile.services.ts` (app side) and
+`src/frontend/src/lib/services/auth-mobile-bridge.services.ts` (bridge side).
 
 ## Build locally
 

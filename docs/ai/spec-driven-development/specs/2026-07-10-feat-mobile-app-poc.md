@@ -103,6 +103,29 @@ influences derivation.
   the One-Click buttons are hidden in `local`-mode builds by existing
   design (the local II replica does not support the OpenID flow).
 
+### Phase 2 — ICRC-167 redirect transport (default)
+
+Internet Identity has since implemented a redirect flow (ICRC-167 browser URL
+transport carrying an ICRC-34 `icrc34_delegation` request), which replaces the
+bridge page as the default transport (`MOBILE_APP_AUTH_TRANSPORT` in
+`mobile-flags.constants.ts`; the phase-1 bridge remains as fallback):
+
+1. The app opens the system browser directly on II
+   (`https://id.ai/authorize#message=<icrc34 request>&callback=<https url>&state=<nonce>`).
+2. II runs the sign-in and navigates to the callback — a **universal link on
+   the canonical origin** (`https://<env>/signer-callback`), routed by the OS
+   into the app after verifying `apple-app-site-association` /
+   `assetlinks.json` against the app's signature. No custom scheme carries the
+   delegation, closing the phase-1 interception caveat.
+3. The relying-party delegation's principal derives from the callback URL's
+   origin — the canonical domain — so identity preservation holds without the
+   bridge.
+4. The origin must allowlist the callback byte-for-byte at
+   `/.well-known/ii-auth-callbacks` (generated per environment at build time).
+5. If the OS does not route the link (app not installed, verification failed),
+   the `/signer-callback` web page renders and relays the same fragment over
+   the phase-1 custom scheme as a rescue path.
+
 ## Changes (grounded in real files)
 
 | Area           | File(s)                                                                   | Change                                                                                                                              |

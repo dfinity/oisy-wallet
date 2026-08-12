@@ -9,6 +9,21 @@ export const MOBILE_AUTH_CALLBACK_URI = 'oisy://auth-callback';
 // would receive the user's delegation chain.
 export const MOBILE_AUTH_ALLOWED_REDIRECT_URIS: readonly string[] = [MOBILE_AUTH_CALLBACK_URI];
 
+// ICRC-167 redirect transport (phase 2) — the app opens Internet Identity
+// directly with an icrc34_delegation request; the delegation returns via a
+// universal link on the canonical origin, so no bridge page is involved and
+// no interceptable custom scheme carries the delegation.
+// See https://github.com/dfinity/wg-identity-authentication/blob/main/topics/icrc_167_browser_url_transport.md
+export const MOBILE_AUTH_II_TRANSPORT_URL = 'https://id.ai/authorize';
+
+// Must match, byte-for-byte, an entry in /.well-known/ii-auth-callbacks and
+// the universal-link path registered by the apps (AASA / assetlinks.json).
+export const MOBILE_AUTH_REDIRECT_CALLBACK_PATH = '/signer-callback';
+
+export const MOBILE_AUTH_ICRC167_MESSAGE_PARAM = 'message';
+export const MOBILE_AUTH_ICRC167_CALLBACK_PARAM = 'callback';
+export const MOBILE_AUTH_ICRC167_STATE_PARAM = 'state';
+
 export const MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM = 'sessionPublicKey';
 export const MOBILE_AUTH_REDIRECT_URI_PARAM = 'redirectUri';
 export const MOBILE_AUTH_OPENID_PROVIDER_PARAM = 'openIdProvider';

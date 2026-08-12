@@ -6,16 +6,19 @@ import {
 	MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM
 } from '$lib/constants/mobile-auth.constants';
 import {
+	buildIcrc167DelegationUrl,
 	buildMobileAuthBridgeUrl,
 	buildMobileAuthCallbackUrl,
 	isAllowedMobileAuthRedirectUri,
+	isIcrc167CallbackUrl,
 	isMobileAuthCallbackUrl,
 	isOpenIdProvider,
 	isValidEd25519DerPublicKey,
+	parseIcrc167CallbackUrl,
 	parseMobileAuthCallbackUrl
 } from '$lib/utils/auth-mobile.utils';
-import { uint8ArrayToHexString } from '@dfinity/utils';
-import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { uint8ArrayToBase64, uint8ArrayToHexString } from '@dfinity/utils';
+import { DelegationChain, Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 
 describe('auth-mobile utils', () => {
 	describe('isAllowedMobileAuthRedirectUri', () => {
@@ -145,6 +148,124 @@ describe('auth-mobile utils', () => {
 			expect(url.pathname).toBe('/mobile-auth');
 			expect(url.searchParams.get(MOBILE_AUTH_SESSION_PUBLIC_KEY_PARAM)).toBe('deadbeef');
 			expect(url.searchParams.get(MOBILE_AUTH_REDIRECT_URI_PARAM)).toBe(MOBILE_AUTH_CALLBACK_URI);
+		});
+	});
+
+	describe('buildIcrc167DelegationUrl', () => {
+		it('should carry the icrc34 request, callback and state in the fragment', () => {
+			const url = new URL(
+				buildIcrc167DelegationUrl({
+					transportUrl: 'https://id.ai/authorize',
+					callbackUrl: 'https://audit.oisy.com/signer-callback',
+					sessionPublicKeyDerBase64: 'AAAA',
+					maxTimeToLive: 123n,
+					state: 'nonce'
+				})
+			);
+
+			expect(url.origin).toBe('https://id.ai');
+			expect(url.pathname).toBe('/authorize');
+
+			const params = new URLSearchParams(url.hash.replace(/^#/, ''));
+
+			expect(params.get('callback')).toBe('https://audit.oisy.com/signer-callback');
+			expect(params.get('state')).toBe('nonce');
+
+			const message = JSON.parse(params.get('message') ?? '{}');
+
+			expect(message.method).toBe('icrc34_delegation');
+			expect(message.params).toEqual({ publicKey: 'AAAA', maxTimeToLive: '123' });
+		});
+	});
+
+	describe('isIcrc167CallbackUrl', () => {
+		const callbackUrl = 'https://audit.oisy.com/signer-callback';
+
+		it.each([callbackUrl, `${callbackUrl}#message=x&state=y`, `${callbackUrl}?foo=bar`])(
+			'should accept %s',
+			(url) => {
+				expect(isIcrc167CallbackUrl({ url, callbackUrl })).toBeTruthy();
+			}
+		);
+
+		it.each([
+			'not a url',
+			'https://audit.oisy.com/other-path',
+			'https://evil.com/signer-callback',
+			'http://audit.oisy.com/signer-callback',
+			'oisy://auth-callback#message=x'
+		])('should reject %s', (url) => {
+			expect(isIcrc167CallbackUrl({ url, callbackUrl })).toBeFalsy();
+		});
+	});
+
+	describe('parseIcrc167CallbackUrl', () => {
+		const callbackUrl = 'https://audit.oisy.com/signer-callback';
+
+		const buildResponseUrl = async (): Promise<{ url: string; sessionDerBase64: string }> => {
+			const rootKey = Ed25519KeyIdentity.generate();
+			const sessionKey = Ed25519KeyIdentity.generate();
+			const chain = await DelegationChain.create(
+				rootKey,
+				sessionKey.getPublicKey(),
+				new Date(Date.now() + 60_000)
+			);
+
+			const result = {
+				publicKey: uint8ArrayToBase64(new Uint8Array(chain.publicKey)),
+				signerDelegation: chain.delegations.map(({ delegation, signature }) => ({
+					delegation: {
+						pubkey: uint8ArrayToBase64(new Uint8Array(delegation.pubkey)),
+						expiration: delegation.expiration.toString()
+					},
+					signature: uint8ArrayToBase64(new Uint8Array(signature))
+				}))
+			};
+
+			const message = JSON.stringify({ jsonrpc: '2.0', id: 1, result });
+			const params = new URLSearchParams({ message, state: 'nonce' });
+
+			return {
+				url: `${callbackUrl}#${params.toString()}`,
+				sessionDerBase64: uint8ArrayToBase64(new Uint8Array(sessionKey.getPublicKey().toDer()))
+			};
+		};
+
+		it('should round-trip a delegation chain and the state', async () => {
+			const { url, sessionDerBase64 } = await buildResponseUrl();
+
+			const parsed = parseIcrc167CallbackUrl(url);
+
+			expect(parsed).toBeDefined();
+			expect(parsed?.state).toBe('nonce');
+
+			const lastDelegation = parsed?.chain.delegations.at(-1);
+
+			expect(
+				uint8ArrayToBase64(new Uint8Array(lastDelegation?.delegation.pubkey ?? new Uint8Array()))
+			).toBe(sessionDerBase64);
+		});
+
+		it('should throw on a signer-reported JSON-RPC error', () => {
+			const message = JSON.stringify({
+				jsonrpc: '2.0',
+				id: 1,
+				error: { code: 3001, message: 'Action aborted' }
+			});
+			const url = `${callbackUrl}#${new URLSearchParams({ message }).toString()}`;
+
+			expect(() => parseIcrc167CallbackUrl(url)).toThrow('Signer error 3001: Action aborted');
+		});
+
+		it.each([
+			'not a url',
+			callbackUrl,
+			`${callbackUrl}#state=only`,
+			`${callbackUrl}#message=not-json`,
+			`${callbackUrl}#message=${encodeURIComponent('{"jsonrpc":"2.0","id":1,"result":{}}')}`,
+			`${callbackUrl}#message=${encodeURIComponent('{"jsonrpc":"2.0","id":1,"result":{"publicKey":"AAAA","signerDelegation":[{}]}}')}`
+		])('should return undefined for malformed callback %s', (url) => {
+			expect(parseIcrc167CallbackUrl(url)).toBeUndefined();
 		});
 	});
 

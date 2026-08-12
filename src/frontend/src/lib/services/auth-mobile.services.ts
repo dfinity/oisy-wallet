@@ -1,7 +1,11 @@
 import {
 	MOBILE_AUTH_CALLBACK_URI,
+	MOBILE_AUTH_II_TRANSPORT_URL,
+	MOBILE_AUTH_MAX_TIME_TO_LIVE,
+	MOBILE_AUTH_REDIRECT_CALLBACK_PATH,
 	MOBILE_AUTH_SESSION_EXPIRATION_STORAGE_KEY
 } from '$lib/constants/mobile-auth.constants';
+import { MOBILE_APP_AUTH_TRANSPORT } from '$lib/constants/mobile-flags.constants';
 import { OISY_URL } from '$lib/constants/oisy.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { authStore } from '$lib/stores/auth.store';
@@ -9,14 +13,17 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OpenIdProvider } from '$lib/types/auth';
 import {
+	buildIcrc167DelegationUrl,
 	buildMobileAuthBridgeUrl,
+	isIcrc167CallbackUrl,
 	isMobileAuthCallbackUrl,
+	parseIcrc167CallbackUrl,
 	parseMobileAuthCallbackUrl
 } from '$lib/utils/auth-mobile.utils';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
-import { isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { isNullish, nonNullish, uint8ArrayToBase64, uint8ArrayToHexString } from '@dfinity/utils';
 import { KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
@@ -82,14 +89,27 @@ export const signInMobile = async ({
 	// callback handler must be able to restore the key from storage.
 	await storage.set(KEY_STORAGE_KEY, JSON.stringify(sessionKey.toJSON()));
 
-	const url = buildMobileAuthBridgeUrl({
-		baseUrl: OISY_URL,
-		sessionPublicKeyDerHex: uint8ArrayToHexString(sessionKey.getPublicKey().toDer()),
-		redirectUri: MOBILE_AUTH_CALLBACK_URI,
-		// One-Click sign-in (Google / Apple / Microsoft) rides through the same
-		// bridge: Internet Identity 2.0 performs the OIDC flow on the web side.
-		...(nonNullish(openIdProvider) ? { openIdProvider } : {})
-	});
+	const url =
+		MOBILE_APP_AUTH_TRANSPORT === 'redirect'
+			? // ICRC-167: open Internet Identity directly; the delegation returns via
+				// the universal link on the canonical origin. Provider choice (passkey
+				// vs Google/Apple/Microsoft) happens on II's own page, so the
+				// `openIdProvider` hint is not forwarded on this transport.
+				buildIcrc167DelegationUrl({
+					transportUrl: MOBILE_AUTH_II_TRANSPORT_URL,
+					callbackUrl: redirectCallbackUrl(),
+					sessionPublicKeyDerBase64: uint8ArrayToBase64(sessionKey.getPublicKey().toDer()),
+					maxTimeToLive: MOBILE_AUTH_MAX_TIME_TO_LIVE,
+					state: newRedirectState()
+				})
+			: buildMobileAuthBridgeUrl({
+					baseUrl: OISY_URL,
+					sessionPublicKeyDerHex: uint8ArrayToHexString(sessionKey.getPublicKey().toDer()),
+					redirectUri: MOBILE_AUTH_CALLBACK_URI,
+					// One-Click sign-in (Google / Apple / Microsoft) rides through the same
+					// bridge: Internet Identity 2.0 performs the OIDC flow on the web side.
+					...(nonNullish(openIdProvider) ? { openIdProvider } : {})
+				});
 
 	try {
 		await Browser.open({ url });
@@ -102,6 +122,21 @@ export const signInMobile = async ({
 	return await result;
 };
 
+const redirectCallbackUrl = (): string => `${OISY_URL}${MOBILE_AUTH_REDIRECT_CALLBACK_PATH}`;
+
+// Anti-injection nonce for the redirect flow, echoed back by the signer in the
+// callback's `state`. In-memory only: if the OS recycles the WebView while the
+// user authenticates, the nonce is gone and the state check is skipped on the
+// cold-start path — the chain-must-bind-to-our-session-key check below remains
+// the authoritative gate in every case.
+let pendingRedirectState: string | undefined;
+
+const newRedirectState = (): string => {
+	const bytes = crypto.getRandomValues(new Uint8Array(16));
+	pendingRedirectState = uint8ArrayToHexString(bytes);
+	return pendingRedirectState;
+};
+
 const toastCallbackError = (err?: unknown) => {
 	toastsError({
 		msg: { text: replaceOisyPlaceholders(get(i18n).mobile_auth.error.error_while_signing_in) },
@@ -112,20 +147,72 @@ const toastCallbackError = (err?: unknown) => {
 };
 
 const handleMobileAuthCallback = async ({ url }: { url: string }): Promise<void> => {
+	// ICRC-167 universal-link callback (redirect transport).
+	if (isIcrc167CallbackUrl({ url, callbackUrl: redirectCallbackUrl() })) {
+		try {
+			// Throws when the signer returned a JSON-RPC error (e.g. user denied).
+			const parsed = parseIcrc167CallbackUrl(url);
+
+			if (isNullish(parsed)) {
+				toastCallbackError();
+				return;
+			}
+
+			const { chain, state } = parsed;
+
+			// The state check only applies while this JS context still holds the
+			// nonce — after a WebView recycle it is gone and the binding check in
+			// `completeSignIn` is the authoritative gate.
+			if (nonNullish(pendingRedirectState) && state !== pendingRedirectState) {
+				toastCallbackError();
+				return;
+			}
+			pendingRedirectState = undefined;
+
+			await completeSignIn(chain);
+		} catch (err: unknown) {
+			toastCallbackError(err);
+		}
+		return;
+	}
+
+	// Phase-1 bridge callback (`oisy://` custom scheme).
 	if (!isMobileAuthCallbackUrl(url)) {
 		return;
 	}
 
-	const delegationChainJson = parseMobileAuthCallbackUrl(url);
-
-	if (isNullish(delegationChainJson)) {
-		toastCallbackError();
-		return;
-	}
-
 	try {
-		const chain = DelegationChain.fromJSON(delegationChainJson);
+		const delegationChainJson = parseMobileAuthCallbackUrl(url);
 
+		if (nonNullish(delegationChainJson)) {
+			const chain = DelegationChain.fromJSON(delegationChainJson);
+
+			await completeSignIn(chain);
+			return;
+		}
+
+		// The /signer-callback web fallback relays an ICRC-167 fragment over the
+		// custom scheme when the universal link did not reach the app.
+		const parsed = parseIcrc167CallbackUrl(url);
+
+		if (isNullish(parsed)) {
+			toastCallbackError();
+			return;
+		}
+
+		await completeSignIn(parsed.chain);
+	} catch (err: unknown) {
+		toastCallbackError(err);
+	}
+};
+
+/**
+ * Shared tail of both transports: validates the chain, binds it to the stored
+ * session key, persists it where the auth client expects it and syncs the
+ * auth store. Settles the pending sign-in promise.
+ */
+const completeSignIn = async (chain: DelegationChain): Promise<void> => {
+	try {
 		if (!isDelegationValid(chain)) {
 			toastCallbackError();
 			return;

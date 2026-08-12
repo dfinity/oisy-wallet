@@ -22,14 +22,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- POC deep link for the Internet Identity auth-bridge callback
-                 (oisy://auth-callback). Production must migrate to verified
-                 App Links — see docs/ai/spec-driven-development/specs/2026-07-10-feat-mobile-app-poc.md. -->
+            <!-- Phase-1 POC deep link for the Internet Identity auth-bridge
+                 callback (oisy://auth-callback). Fallback while the verified
+                 App Link below is being rolled out — see
+                 docs/ai/spec-driven-development/specs/2026-07-10-feat-mobile-app-poc.md. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="oisy" android:host="auth-callback" />
+            </intent-filter>
+
+            <!-- Verified App Link for the ICRC-167 delegation callback: the OS
+                 routes https://<env>/signer-callback into the app only after
+                 verifying /.well-known/assetlinks.json against this build's
+                 signing certificate. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="audit.oisy.com" />
+                <data android:host="staging.oisy.com" />
+                <data android:host="oisy.com" />
+                <data android:pathPrefix="/signer-callback" />
             </intent-filter>
 
         </activity>
