@@ -1613,7 +1613,7 @@
 			"simulation_control_removed": "Removed",
 			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
 			"high_prioritization_fee": "This transaction sets an unusually high priority fee. Check it carefully and only sign if you trust this app.",
-			"invalid_typed_data": "This request contains a value whose type doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
+			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
 			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",

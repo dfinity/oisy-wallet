@@ -167,6 +167,82 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(expected)).toBeInTheDocument();
 	});
 
+	it('should not summarize keys the signed schema does not declare', () => {
+		// ERC-3009 transfer authorization: `spender` and `details` are absent from
+		// the declared type, so they are absent from the digest. Summarizing them
+		// would describe an approval of 1 USDC while 5,000 USDC is being signed away.
+		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						'0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+						JSON.stringify({
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								TransferWithAuthorization: [
+									{ name: 'from', type: 'address' },
+									{ name: 'to', type: 'address' },
+									{ name: 'value', type: 'uint256' },
+									{ name: 'validAfter', type: 'uint256' },
+									{ name: 'validBefore', type: 'uint256' },
+									{ name: 'nonce', type: 'bytes32' }
+								]
+							},
+							domain: {
+								name: 'USD Coin',
+								version: '2',
+								chainId: '1',
+								verifyingContract: USDC_TOKEN.address
+							},
+							primaryType: 'TransferWithAuthorization',
+							message: {
+								from: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+								to: '0x1111111111111111111111111111111111111111',
+								value: '5000000000',
+								validAfter: '0',
+								validBefore: '1893456000',
+								nonce: `0x${'ab'.repeat(32)}`,
+								spender: '0x2222222222222222222222222222222222222222',
+								details: {
+									token: USDC_TOKEN.address,
+									amount: '1000000',
+									expiration: '1800000000'
+								}
+							}
+						})
+					]
+				},
+				chainId: ETHEREUM_NETWORK.chainId.toString()
+			}
+		} as WalletKitTypes.SessionRequest;
+
+		const { getByText, queryByText } = render(EthWalletConnectMessage, {
+			props: {
+				request: newRequest
+			}
+		});
+
+		expect(queryByText(en.wallet_connect.text.token)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.network)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.amount)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.spender)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.expiration)).not.toBeInTheDocument();
+
+		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+		expect(queryByText('0x2222222222222222222222222222222222222222')).not.toBeInTheDocument();
+
+		// The full payload stays available in the raw message viewer.
+		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
+		expect(getByText('{ ... }')).toBeInTheDocument();
+	});
+
 	it('should not render the token if it is not enabled', () => {
 		erc20DefaultTokensStore.reset();
 		erc20CustomTokensStore.resetAll();
