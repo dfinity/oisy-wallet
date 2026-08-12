@@ -14,13 +14,7 @@ import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
-import type {
-	BridgePrice,
-	DeltaPrice,
-	OptimalRate,
-	QuoteParams,
-	SimpleFetchSDK
-} from '@velora-dex/sdk';
+import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -113,8 +107,15 @@ export type SwapMappedResult =
 			provider: SwapProvider.VELORA;
 			receiveAmount: bigint;
 			receiveOutMinimum?: bigint;
-			swapDetails: VeloraSwapDetails;
-			type: string;
+			swapDetails: DeltaPrice;
+			type: VeloraSwapTypes.DELTA;
+	  }
+	| {
+			provider: SwapProvider.VELORA;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: OptimalRate;
+			type: VeloraSwapTypes.MARKET;
 	  }
 	| {
 			provider: SwapProvider.NEAR_INTENTS;
@@ -227,7 +228,12 @@ export interface FormatSlippageParams {
 	decimals: number;
 }
 
-export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
+/**
+ * Quote payload of either Velora execution mode. The two shapes are mutually exclusive —
+ * `DeltaPrice.partner` is an object while `OptimalRate.partner` is a string — so this is a
+ * union discriminated by `VeloraSwapTypes`, never an intersection.
+ */
+export type VeloraSwapDetails = DeltaPrice | OptimalRate;
 
 export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
@@ -316,7 +322,7 @@ export interface SwapProvidersConfig {
 	website: string;
 }
 
-export interface SwapVeloraParams extends RequiredTransactionFeeData {
+interface SwapVeloraParams extends RequiredTransactionFeeData {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
 	sourceToken: ErcFungibleToken;
@@ -325,10 +331,16 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
-	destinationNetwork: EthereumNetwork;
 	userAddress: EthAddress;
-	swapDetails: VeloraSwapDetails;
 	isGasless: boolean;
+}
+
+export interface SwapVeloraDeltaParams extends SwapVeloraParams {
+	swapDetails: DeltaPrice;
+}
+
+export interface SwapVeloraMarketParams extends SwapVeloraParams {
+	swapDetails: OptimalRate;
 }
 
 interface SwapNearIntentsParams {
@@ -354,15 +366,6 @@ export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	userAddress: SolAddress;
 }
 
-export interface CheckDeltaOrderStatusParams {
-	sdk: SimpleFetchSDK;
-	auctionId: string;
-	onExecuted?: () => void;
-	timeoutMs?: number;
-	intervalMs?: number;
-}
-
 export interface DeltaSwapResponse {
-	delta: DeltaPrice | BridgePrice;
-	deltaAddress: string;
+	delta: DeltaPrice;
 }

@@ -145,7 +145,7 @@
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
-			"nfts": "Open the Collectibles view",
+			"nfts": "Open the collectibles view",
 			"settings": "Open your settings",
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
@@ -289,7 +289,7 @@
 			"dex": "DEX",
 			"game": "Game",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Collectibles",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -981,16 +981,16 @@
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
-			"no_nfts_found": "No NFTs found",
-			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
-			"select_nft": "Select NFT"
+			"no_nfts_found": "No collectibles found",
+			"no_nfts_found_desc": "Adjust your search or network to find your collectibles",
+			"select_nft": "Select collectible"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network",
-			"search_nfts": "Search NFTs"
+			"search_nfts": "Search collectibles"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -1035,7 +1035,7 @@
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
 			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later.",
-			"no_nft_selected": "No NFT has been selected for sending."
+			"no_nft_selected": "No collectible has been selected for sending."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -1208,6 +1208,7 @@
 			"swapping": "Swapping...",
 			"starting_to_swap": "Submitting your swap...",
 			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
+			"finishing_in_background": "Wrapping up. We'll keep working on it in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1254,7 +1255,8 @@
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
 			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
-			"swap_refunded": "The swap transaction was refunded."
+			"swap_refunded": "The swap transaction was refunded.",
+			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed."
 		}
 	},
 	"buy": {
@@ -1357,7 +1359,7 @@
 		"import": {
 			"text": {
 				"title": "Import token",
-				"title_nft": "Import NFT collection",
+				"title_nft": "Import collection",
 				"review": "Review",
 				"saving": "Saving...",
 				"updating": "Updating token list",
@@ -1381,7 +1383,7 @@
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
-				"unrecognized_nft_canister_id_standard": "We couldn't detect the NFT collection canister ID standard. Please check the provided canister ID and try again. Or contact support if the issue persists.",
+				"unrecognized_nft_canister_id_standard": "We couldn't detect the collection canister ID standard. Please check the provided canister ID and try again. Or contact support if the issue persists.",
 				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_canister_id": "The Canister ID is missing. Did you provide a value?",
@@ -1396,12 +1398,12 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"title_nft": "Manage NFT collections",
+				"title_nft": "Manage collections",
 				"manage_list": "Manage tokens",
-				"manage_list_nft": "Manage NFTs",
+				"manage_list_nft": "Manage collectibles",
 				"list_settings": "List settings",
 				"import_token": "Import token",
-				"import_nft": "Import NFT collection",
+				"import_nft": "Import collection",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
 				"enable_more_assets": "Enable more tokens"
@@ -1479,16 +1481,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
-			"count_one": "$count NFT",
-			"count_other": "$count NFTs",
-			"title_empty": "Your NFTs will appear here",
-			"description_empty": "It looks like you haven't received NFTs yet",
-			"title_not_supported": "NFTs are not yet supported on the selected network",
-			"description_not_supported": "Please do not send NTFs to your address",
-			"grouping": "Grouping",
-			"as_plain_list": "Show as plain list",
-			"by_collection": "Group by collection",
+			"title": "Collectibles",
+			"count_one": "$count collectible",
+			"count_other": "$count collectibles",
+			"title_empty": "Your collectibles will appear here",
+			"description_empty": "It looks like you haven't received collectibles yet",
+			"title_not_supported": "Collectibles are not yet supported on the selected network",
+			"description_not_supported": "Please do not send collectibles to your address",
 			"show_spam": "Show spam",
 			"show_hidden": "Show hidden",
 			"recents_first": "Recents first",
@@ -1501,21 +1500,23 @@
 			"quantity": "Quantity",
 			"item_traits": "Item traits",
 			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
-			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"nft_not_loaded": "The collectible could not be displayed as it has not been loaded yet",
 			"collections": "Collections",
-			"all_assets": "All assets",
+			"check_new": "Check for new",
+			"check_new_short": "Check",
+			"ungrouped": "Ungrouped",
 			"address_copied": "Address $address copied",
 			"collection_name_copied": "Collection name copied",
 			"id_copied": "Token ID name copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"spam_warning": "Move '$collection' to spam?",
-			"spam_warning_text": "This will move all NFTs in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
+			"spam_warning_text": "This will move all collectibles in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
 			"hide": "Hide",
 			"unhide": "Unhide",
 			"hidden": "Hidden",
 			"hide_warning": "Hide '$collection'?",
-			"hide_warning_text": "This will hide <b>$collection</b> and all associated NFTs from your main view, but you can always find and restore them later.",
+			"hide_warning_text": "This will hide <b>$collection</b> and all associated collectibles from your main view, but you can always find and restore them later.",
 			"open_explorer": "Open this contract in blockchain explorer",
 			"img_consent_disabled": "You disabled images from this collection",
 			"img_consent_none": "Image disabled for security reasons",
@@ -1542,13 +1543,14 @@
 			"media_stored_at_different_location": "The Media appears to be stored at a different location. To access it, you can use this link, after carefully reviewing it:"
 		},
 		"alt": {
-			"placeholder_image": "No NFTs yet",
+			"placeholder_image": "No collectibles yet",
 			"card": {
-				"image": "Image of NFT with token ID: $tokenId"
+				"image": "Image of collectible with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
 			"review_preference": "Change display preference",
-			"go_to_collection": "Open the collection page"
+			"go_to_collection": "Open the collection page",
+			"check_new": "Check for new collectibles"
 		}
 	},
 	"fee": {
@@ -1566,7 +1568,8 @@
 			"ata_fee": "ATA fee",
 			"transaction_fees": "Transaction fees",
 			"network_fee": "Network fee",
-			"approval_fee": "Approval fee"
+			"approval_fee": "Approval fee",
+			"prioritization_fee": "Priority fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1613,9 +1616,15 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
+			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
+			"high_prioritization_fee": "This transaction sets an unusually high priority fee. Check it carefully and only sign if you trust this app.",
+			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
+			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
+			"sign_transaction": "Sign Transaction",
+			"sign_and_send_transaction": "Sign and Send Transaction",
 			"signing_address": "Signing address",
 			"fee": "Fee",
 			"btc_symbol": "BTC",
@@ -1830,6 +1839,8 @@
 			"buy": "Buy",
 			"select_sell_token": "Select token to sell",
 			"select_buy_token": "Select token to buy",
+			"select_sell_token_first": "Select token to sell first",
+			"select_buy_token_first": "Select token to buy first",
 			"you_sell": "You sell",
 			"you_buy": "You buy",
 			"hero_prefix": "You",
@@ -1880,7 +1891,7 @@
 			"error_min_notional": "Order value must be at least $amount $symbol",
 			"error_max_notional": "Order value can't exceed $amount $symbol",
 			"fok_title": "Fill or kill",
-			"fok_help": "Fill the whole order now at your price or better, or cancel it — nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
+			"fok_help": "Fill the whole order now at your price or better, or cancel it. Nothing rests. The price must cross the order book for the order to fill, and the order always executes as a taker (taker fee applies).",
 			"routing_name": "Routed via $provider",
 			"routing_tag": "best execution",
 			"best_ask": "Best ask",

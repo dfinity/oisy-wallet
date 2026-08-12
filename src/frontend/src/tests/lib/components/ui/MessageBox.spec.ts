@@ -1,4 +1,5 @@
 import MessageBox from '$lib/components/ui/MessageBox.svelte';
+import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -173,6 +174,46 @@ describe('MessageBox', () => {
 			expect(queryByTestId('msg-box')).not.toBeInTheDocument();
 
 			vi.restoreAllMocks();
+		});
+	});
+
+	describe('slide transition', () => {
+		const renderClosable = () =>
+			render(MessageBox, {
+				props: { children: childrenSnippet, testId: 'msg-box', onDismiss: vi.fn() }
+			});
+
+		it('should stay mounted and animate while sliding out', async () => {
+			const { getByRole, queryByTestId } = renderClosable();
+
+			await fireEvent.click(getByRole('button', { name: en.core.text.close }));
+
+			// `overflow: hidden` is the inline style Svelte's slide sets for the duration of the
+			// transition, so its presence proves the box animates out instead of vanishing.
+			await waitFor(() => {
+				const box = queryByTestId('msg-box');
+
+				assertNonNullish(box);
+
+				expect(box.style.overflow).toBe('hidden');
+			});
+		});
+
+		it('should be removed within the shared slide duration', async () => {
+			const { getByRole, queryByTestId } = renderClosable();
+
+			await fireEvent.click(getByRole('button', { name: en.core.text.close }));
+
+			const { duration } = SLIDE_PARAMS;
+
+			assertNonNullish(duration);
+
+			await waitFor(
+				() => {
+					expect(queryByTestId('msg-box')).not.toBeInTheDocument();
+				},
+				{ timeout: duration + 100 }
+			);
 		});
 	});
 

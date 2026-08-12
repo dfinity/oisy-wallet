@@ -289,7 +289,7 @@
 			"dex": "DEX",
 			"game": "गेम",
 			"lending": "लेंडिंग",
-			"nft": "NFT",
+			"nft": "संग्रहणीय वस्तुएं",
 			"rwa": "RWA",
 			"social": "सोशल",
 			"staking": "स्टेकिंग",
@@ -1208,6 +1208,7 @@
 			"swapping": "स्वैप कर रहा है...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1254,7 +1255,8 @@
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1479,16 +1481,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "संग्रहणीय वस्तुएं",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
-			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title_empty": "आपकी संग्रहणीय वस्तुएं यहाँ दिखाई देंगी",
+			"description_empty": "ऐसा लगता है कि आपने अभी तक संग्रहणीय वस्तुएं प्राप्त नहीं की हैं",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "समूहीकरण",
-			"as_plain_list": "सादी सूची के रूप में दिखाएँ",
-			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
 			"recents_first": "नवीनतम पहले",
@@ -1501,9 +1500,11 @@
 			"quantity": "मात्रा",
 			"item_traits": "आइटम विशेषताएँ",
 			"collection_not_loaded": "संग्रह प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
-			"nft_not_loaded": "NFT प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
+			"nft_not_loaded": "संग्रहणीय वस्तु प्रदर्शित नहीं की जा सकी क्योंकि यह अभी तक लोड नहीं हुई है",
 			"collections": "संग्रह",
-			"all_assets": "सभी एसेट्स",
+			"check_new": "नए देखें",
+			"check_new_short": "देखें",
+			"ungrouped": "असमूहीकृत",
 			"address_copied": "पता $address कॉपी किया गया",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1542,13 +1543,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "अभी तक कोई NFTs नहीं",
+			"placeholder_image": "अभी तक कोई संग्रहणीय वस्तुएं नहीं",
 			"card": {
-				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
+				"image": "टोकन आईडी के साथ संग्रहणीय वस्तु की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "नए संग्रहणीय आइटम जाँचें"
 		}
 	},
 	"fee": {
@@ -1566,7 +1568,8 @@
 			"ata_fee": "ATA शुल्क",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -1613,9 +1616,15 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
@@ -1830,6 +1839,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",

@@ -932,6 +932,7 @@ interface I18nSwap {
 		swapping: string;
 		starting_to_swap: string;
 		starting_to_bridge: string;
+		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -979,6 +980,7 @@ interface I18nSwap {
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
+		swap_replaced_or_dropped: string;
 	};
 }
 
@@ -1175,9 +1177,6 @@ interface I18nNfts {
 		description_empty: string;
 		title_not_supported: string;
 		description_not_supported: string;
-		grouping: string;
-		as_plain_list: string;
-		by_collection: string;
 		show_spam: string;
 		show_hidden: string;
 		recents_first: string;
@@ -1192,7 +1191,9 @@ interface I18nNfts {
 		collection_not_loaded: string;
 		nft_not_loaded: string;
 		collections: string;
-		all_assets: string;
+		check_new: string;
+		check_new_short: string;
+		ungrouped: string;
 		address_copied: string;
 		collection_name_copied: string;
 		id_copied: string;
@@ -1236,6 +1237,7 @@ interface I18nNfts {
 		copy_address: string;
 		review_preference: string;
 		go_to_collection: string;
+		check_new: string;
 	};
 }
 
@@ -1255,6 +1257,7 @@ interface I18nFee {
 		transaction_fees: string;
 		network_fee: string;
 		approval_fee: string;
+		prioritization_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1294,9 +1297,15 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		dapp_prioritization_fee: string;
+		high_prioritization_fee: string;
+		invalid_typed_data: string;
+		unverifiable_erc20_request: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
+		sign_transaction: string;
+		sign_and_send_transaction: string;
 		signing_address: string;
 		fee: string;
 		btc_symbol: string;
@@ -1501,6 +1510,8 @@ interface I18nTrading {
 		buy: string;
 		select_sell_token: string;
 		select_buy_token: string;
+		select_sell_token_first: string;
+		select_buy_token_first: string;
 		you_sell: string;
 		you_buy: string;
 		hero_prefix: string;

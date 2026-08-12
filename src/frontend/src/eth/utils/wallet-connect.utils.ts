@@ -1,10 +1,15 @@
-import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
+import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
+import type {
+	WalletConnectEthSignTypedDataV4,
+	WalletConnectEthTypedDataApproval
+} from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
+import { ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import { consoleError } from '$lib/utils/console.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
-import { TypedDataEncoder } from 'ethers/hash';
+import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
@@ -22,10 +27,447 @@ export const getSignParamsMessageTypedDataV4 = (
 	return JSON.parse(message);
 };
 
+/**
+ * Thrown when an `eth_signTypedData_v4` request does not conform to its own
+ * EIP-712 schema — either a value whose runtime JSON type does not match the
+ * declared type, or a message key that the schema does not declare at all.
+ *
+ * `ethers` does not type-check EIP-712 values before hashing and coerces
+ * mismatched values instead of rejecting them — its `bool` encoder, for
+ * instance, treats any truthy value (including a non-empty string) as `true`.
+ * It also encodes only the declared members, silently ignoring any other key,
+ * which lets a request carry data that the wallet may read but the digest never
+ * covers. We reject such payloads so OISY only signs typed data that conforms
+ * to its declared schema.
+ */
+export class WalletConnectEthTypedDataError extends Error {}
+
+const ARRAY_TYPE_REGEX = /^(.+)\[(\d*)\]$/;
+const INTEGER_TYPE_REGEX = /^u?int(\d*)$/;
+const FIXED_BYTES_TYPE_REGEX = /^bytes(\d+)$/;
+const DYNAMIC_BYTES_REGEX = /^0x([0-9a-fA-F]{2})*$/;
+const DECIMAL_INTEGER_REGEX = /^-?\d+$/;
+const HEX_INTEGER_REGEX = /^0x[0-9a-fA-F]+$/;
+
+const describeRuntimeType = (value: unknown): string => {
+	if (value === null) {
+		return 'null';
+	}
+	if (Array.isArray(value)) {
+		return 'array';
+	}
+	return typeof value;
+};
+
+const invalidTypedDataValue = ({
+	path,
+	type,
+	value
+}: {
+	path: string;
+	type: string;
+	value: unknown;
+}): never => {
+	throw new WalletConnectEthTypedDataError(
+		`EIP-712 value at "${path}" does not match its declared type "${type}" (received ${describeRuntimeType(value)}).`
+	);
+};
+
+const assertValidInteger = ({
+	value,
+	type,
+	path
+}: {
+	value: unknown;
+	type: string;
+	path: string;
+}): void => {
+	// `uint`/`int` are aliases for the 256-bit variants: the digits group is
+	// empty for them, so fall back to 256 rather than parsing '' as 0.
+	const digits = type.match(INTEGER_TYPE_REGEX)?.[1] ?? '';
+	const bits = digits === '' ? 256 : Number(digits);
+
+	// Solidity integer types are 8..256 bits in steps of 8. Guard against invalid
+	// sizes (e.g. `uint0`) to avoid runtime errors and to match ethers' behavior.
+	if (!Number.isInteger(bits) || bits < 8 || bits > 256 || bits % 8 !== 0) {
+		return invalidTypedDataValue({ path, type, value });
+	}
+
+	const signed = !type.startsWith('u');
+
+	let parsed: bigint;
+	if (typeof value === 'bigint') {
+		parsed = value;
+	} else if (typeof value === 'number' && Number.isSafeInteger(value)) {
+		parsed = BigInt(value);
+	} else if (
+		typeof value === 'string' &&
+		(DECIMAL_INTEGER_REGEX.test(value) || HEX_INTEGER_REGEX.test(value))
+	) {
+		parsed = BigInt(value);
+	} else {
+		return invalidTypedDataValue({ path, type, value });
+	}
+
+	const min = signed ? -(2n ** BigInt(bits - 1)) : ZERO;
+	const max = signed ? 2n ** BigInt(bits - 1) - 1n : 2n ** BigInt(bits) - 1n;
+
+	if (parsed < min || parsed > max) {
+		invalidTypedDataValue({ path, type, value });
+	}
+};
+
+const assertValidBytes = ({
+	value,
+	type,
+	path
+}: {
+	value: unknown;
+	type: string;
+	path: string;
+}): void => {
+	if (typeof value !== 'string') {
+		return invalidTypedDataValue({ path, type, value });
+	}
+
+	const fixedSize = type.match(FIXED_BYTES_TYPE_REGEX)?.[1];
+	if (nonNullish(fixedSize)) {
+		const size = Number(fixedSize);
+		if (size < 1 || size > 32 || !new RegExp(`^0x[0-9a-fA-F]{${size * 2}}$`).test(value)) {
+			invalidTypedDataValue({ path, type, value });
+		}
+		return;
+	}
+
+	if (!DYNAMIC_BYTES_REGEX.test(value)) {
+		invalidTypedDataValue({ path, type, value });
+	}
+};
+
+const assertValidTypedDataValue = ({
+	types,
+	type,
+	value,
+	path
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: unknown;
+	path: string;
+}): void => {
+	const arrayMatch = type.match(ARRAY_TYPE_REGEX);
+	if (nonNullish(arrayMatch)) {
+		const [, baseType, fixedLength] = arrayMatch;
+		if (!Array.isArray(value)) {
+			return invalidTypedDataValue({ path, type, value });
+		}
+		if (fixedLength !== '' && value.length !== Number(fixedLength)) {
+			return invalidTypedDataValue({ path, type, value });
+		}
+		value.forEach((item, index) =>
+			assertValidTypedDataValue({ types, type: baseType, value: item, path: `${path}[${index}]` })
+		);
+		return;
+	}
+
+	// Custom struct reference.
+	if (type in types) {
+		return assertValidTypedDataStruct({ types, type, value, path });
+	}
+
+	if (type === 'bool') {
+		// Reject any non-boolean: `ethers` would otherwise coerce a truthy value
+		// (e.g. a non-empty string) to `true`.
+		if (typeof value !== 'boolean') {
+			invalidTypedDataValue({ path, type, value });
+		}
+		return;
+	}
+
+	if (type === 'address') {
+		if (typeof value !== 'string' || !isEthAddress(value)) {
+			invalidTypedDataValue({ path, type, value });
+		}
+		return;
+	}
+
+	if (type === 'string') {
+		if (typeof value !== 'string') {
+			invalidTypedDataValue({ path, type, value });
+		}
+		return;
+	}
+
+	if (type === 'bytes' || FIXED_BYTES_TYPE_REGEX.test(type)) {
+		return assertValidBytes({ value, type, path });
+	}
+
+	if (INTEGER_TYPE_REGEX.test(type)) {
+		return assertValidInteger({ value, type, path });
+	}
+
+	// Unknown type: neither a declared struct nor a recognized atomic type.
+	// `ethers` would reject it while hashing, so we reject it here too.
+	invalidTypedDataValue({ path, type, value });
+};
+
+const assertValidTypedDataStruct = ({
+	types,
+	type,
+	value,
+	path
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: unknown;
+	path: string;
+}): void => {
+	const fields = types[type];
+	if (isNullish(fields) || typeof value !== 'object' || value === null || Array.isArray(value)) {
+		return invalidTypedDataValue({ path, type, value });
+	}
+
+	const record = value as Record<string, unknown>;
+
+	// A key the struct does not declare is never encoded, so it cannot be part of
+	// the digest while still being readable by whatever renders the request.
+	// Reject instead of ignoring it, so no request can carry data that the user
+	// might be shown but would not sign.
+	const declared = new Set(fields.map(({ name }) => name));
+	const undeclared = Object.keys(record).find((key) => !declared.has(key));
+	if (nonNullish(undeclared)) {
+		throw new WalletConnectEthTypedDataError(
+			`EIP-712 message contains "${path}.${undeclared}", which type "${type}" does not declare and which would therefore not be signed.`
+		);
+	}
+
+	fields.forEach(({ name, type: fieldType }) =>
+		assertValidTypedDataValue({
+			types,
+			type: fieldType,
+			value: record[name],
+			path: `${path}.${name}`
+		})
+	);
+};
+
+/**
+ * Recursively validates that every value in an EIP-712 message matches the type
+ * declared for it in the schema — at the top level, inside nested structs, and
+ * inside arrays. Throws {@link WalletConnectEthTypedDataError} on the first
+ * mismatch. See {@link WalletConnectEthTypedDataError} for why this is required.
+ */
+export const assertValidEthTypedData = ({
+	types,
+	primaryType,
+	message
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	primaryType: string;
+	message: Record<string, unknown>;
+}): void =>
+	assertValidTypedDataStruct({ types, type: primaryType, value: message, path: primaryType });
+
+interface EthTypedDataApprovalSchema {
+	primaryType: string;
+	types: Record<string, Array<TypedDataField>>;
+	toApproval: (message: Record<string, unknown>) => WalletConnectEthTypedDataApproval;
+}
+
+const toDeclaredAddress = (value: unknown): string | undefined =>
+	typeof value === 'string' ? value : undefined;
+
+const toDeclaredUint = (value: unknown): bigint | undefined =>
+	typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
+
+const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
+	nonNullish(value) && typeof value === 'object' && !Array.isArray(value)
+		? (value as Record<string, unknown>)
+		: {};
+
+/**
+ * The EIP-712 schemas OISY understands well enough to summarize above the raw
+ * message, each paired with the declared members that feed the summary.
+ *
+ * A schema is matched field by field rather than by the mere presence of a
+ * `spender` or `details` key: a struct that is not one of these carries no
+ * guarantee that such a key means what an allowance summary would suggest.
+ */
+const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
+	// Uniswap Permit2 `PermitSingle`.
+	{
+		primaryType: 'PermitSingle',
+		types: {
+			PermitSingle: [
+				{ name: 'details', type: 'PermitDetails' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'sigDeadline', type: 'uint256' }
+			],
+			PermitDetails: [
+				{ name: 'token', type: 'address' },
+				{ name: 'amount', type: 'uint160' },
+				{ name: 'expiration', type: 'uint48' },
+				{ name: 'nonce', type: 'uint48' }
+			]
+		},
+		toApproval: ({ spender, details }) => {
+			const { token, amount, expiration } = toDeclaredStruct(details);
+
+			const expirationSeconds = toDeclaredUint(expiration);
+
+			return {
+				spender: toDeclaredAddress(spender),
+				token: toDeclaredAddress(token),
+				amount: toDeclaredUint(amount),
+				expiration: nonNullish(expirationSeconds) ? Number(expirationSeconds) : undefined
+			};
+		}
+	},
+	// Standard ERC-2612 `Permit`.
+	{
+		primaryType: 'Permit',
+		types: {
+			Permit: [
+				{ name: 'owner', type: 'address' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'value', type: 'uint256' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'deadline', type: 'uint256' }
+			]
+		},
+		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+	},
+	// DAI's non-standard `Permit`, whose approval is a bool rather than an amount.
+	{
+		primaryType: 'Permit',
+		types: {
+			Permit: [
+				{ name: 'holder', type: 'address' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'expiry', type: 'uint256' },
+				{ name: 'allowed', type: 'bool' }
+			]
+		},
+		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+	}
+];
+
+const sameTypedDataFields = ({
+	fields,
+	expected
+}: {
+	fields: Array<TypedDataField>;
+	expected: Array<TypedDataField>;
+}): boolean =>
+	fields.length === expected.length &&
+	fields.every(
+		({ name, type }, index) => expected[index].name === name && expected[index].type === type
+	);
+
+const matchesApprovalSchema = ({
+	types,
+	schema
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	schema: EthTypedDataApprovalSchema;
+}): boolean => {
+	const expectedNames = Object.keys(schema.types);
+
+	return (
+		Object.keys(types).length === expectedNames.length &&
+		expectedNames.every((name) => {
+			const fields = types[name];
+
+			return nonNullish(fields) && sameTypedDataFields({ fields, expected: schema.types[name] });
+		})
+	);
+};
+
+/**
+ * Derives the approval facts summarized above the raw message of a typed-data
+ * request.
+ *
+ * Returns `undefined` unless the payload matches a recognized approval schema
+ * exactly and every value conforms to it. That is what keeps the summary honest:
+ * each fact it carries is a declared member of the struct being hashed, so it
+ * cannot be steered by a key that the signature does not cover.
+ */
+export const getEthTypedDataApproval = ({
+	types,
+	message
+}: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	const schema = ETH_TYPED_DATA_APPROVAL_SCHEMAS.find((schema) =>
+		matchesApprovalSchema({ types: rest, schema })
+	);
+
+	if (isNullish(schema)) {
+		return;
+	}
+
+	try {
+		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
+
+		return schema.toApproval(message);
+	} catch (_err: unknown) {
+		// A payload that does not conform to its own schema is not summarized: it
+		// is rejected for signing anyway, and any value read from it would be
+		// describing something the user cannot sign.
+	}
+};
+
 export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
 	const { EIP712Domain: _, ...rest } = types;
+
+	// Reject type-invalid payloads before hashing so we only sign typed data
+	// that conforms to its declared schema.
+	assertValidEthTypedData({
+		types: rest,
+		primaryType: TypedDataEncoder.getPrimaryType(rest),
+		message
+	});
+
 	return TypedDataEncoder.hash(domain, { ...rest }, message);
+};
+
+/**
+ * Whether a request carries EIP-712 typed data, i.e. whether its payload is
+ * interpreted as typed data rather than as a raw message. This is decided by the
+ * method alone, never by the shape of the payload: a `personal_sign` payload
+ * that happens to parse as typed data is still only ever a raw message.
+ */
+export const isEthSignTypedDataMethod = (method: string): boolean =>
+	SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS.includes(method);
+
+/**
+ * Whether a typed-data request would fail to sign — i.e. its typed data cannot
+ * be parsed, validated, and hashed. Used by the confirmation UI to warn and
+ * disable approval, so the preview mirrors what the signer would do (which
+ * rejects any such typed-data request).
+ *
+ * Returns `false` for raw-message methods (e.g. `personal_sign`), which are
+ * signed differently and stay approvable.
+ */
+export const hasInvalidTypedData = ({
+	method,
+	params
+}: {
+	method: string;
+	params: string[];
+}): boolean => {
+	if (!isEthSignTypedDataMethod(method)) {
+		return false;
+	}
+
+	try {
+		getSignParamsMessageTypedDataV4Hash(params);
+		return false;
+	} catch (_err: unknown) {
+		return true;
+	}
 };
 
 export const convertHexToUtf8 = (value: string): string => {

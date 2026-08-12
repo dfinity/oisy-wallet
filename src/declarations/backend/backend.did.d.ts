@@ -61,6 +61,14 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+			 * modes, discriminated by the `mode` field; the auction id, order hash,
+			 * transaction hash and nonce ride in `external_refs`.
+			 */
+			Velora: VeloraData;
+	  }
+	| {
+			/**
 			 * Liquidium lend/borrow flow. A single variant covers all four actions
 			 * (supply, borrow, repay, withdraw).
 			 */
@@ -1976,6 +1984,27 @@ export interface Utxo {
 	 */
 	outpoint: Outpoint;
 }
+/**
+ * Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+ * id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+ * pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+ * `external_refs`; only the canonical immutable fields are captured here.
+ */
+export interface VeloraData {
+	mode: VeloraSwapMode;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which Velora execution mode an active transaction tracks. Determines how the
+ * frontend polls for settlement: `Delta` by auction id against Velora's Delta
+ * API, `Market` by transaction receipt on the source chain.
+ */
+export type VeloraSwapMode = { Delta: null } | { Market: null };
 export interface _SERVICE {
 	/**
 	 * Adds one or more dismissed notifications to the user's profile.

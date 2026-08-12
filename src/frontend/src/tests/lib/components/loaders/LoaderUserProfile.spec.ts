@@ -25,7 +25,7 @@ describe('LoaderUserProfile', () => {
 		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: mockUserProfile });
 			await Promise.resolve();
-			return { success: true };
+			return { success: true, profileCreated: false };
 		});
 
 		render(LoaderUserProfile, { children: mockSnippet });
@@ -38,7 +38,7 @@ describe('LoaderUserProfile', () => {
 	it('should re-load user profile on event', () => {
 		const spy = vi.spyOn(loadUserServices, 'loadUserProfile').mockImplementationOnce(async () => {
 			await Promise.resolve();
-			return { success: true };
+			return { success: true, profileCreated: false };
 		});
 
 		render(LoaderUserProfile, { children: mockSnippet });
@@ -50,7 +50,7 @@ describe('LoaderUserProfile', () => {
 		spy.mockImplementationOnce(async () => {
 			userProfileStore.set({ certified: true, profile: { ...mockUserProfile, version: [2n] } });
 			await Promise.resolve();
-			return { success: true };
+			return { success: true, profileCreated: false };
 		});
 
 		emit({ message: 'oisyRefreshUserProfile' });
@@ -67,7 +67,7 @@ describe('LoaderUserProfile', () => {
 		it('should sign the user out via infoSignOut', async () => {
 			const loadSpy = vi
 				.spyOn(loadUserServices, 'loadUserProfile')
-				.mockResolvedValue({ success: false, err: 'signups-closed' });
+				.mockResolvedValue({ success: false, err: 'signups-closed', profileCreated: false });
 
 			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);
 
@@ -88,7 +88,8 @@ describe('LoaderUserProfile', () => {
 		it('should not sign the user out when loadUserProfile fails for an unknown reason', async () => {
 			vi.spyOn(loadUserServices, 'loadUserProfile').mockResolvedValue({
 				success: false,
-				err: 'unknown'
+				err: 'unknown',
+				profileCreated: false
 			});
 
 			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);
@@ -103,7 +104,8 @@ describe('LoaderUserProfile', () => {
 		it('should sign the user out only once when load is re-triggered', async () => {
 			vi.spyOn(loadUserServices, 'loadUserProfile').mockResolvedValue({
 				success: false,
-				err: 'signups-closed'
+				err: 'signups-closed',
+				profileCreated: false
 			});
 
 			const infoSignOutSpy = vi.spyOn(authServices, 'infoSignOut').mockResolvedValue(undefined);

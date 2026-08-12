@@ -289,7 +289,7 @@
 			"dex": "DEX",
 			"game": "Gra",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Przedmioty kolekcjonerskie",
 			"rwa": "RWA",
 			"social": "Społecznościowe",
 			"staking": "Staking",
@@ -1208,6 +1208,7 @@
 			"swapping": "Wymiana...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Odświeżanie interfejsu użytkownika",
 			"swap_provider": "Dostawca wymiany",
 			"swap_provider_website": "Strona internetowa",
@@ -1254,7 +1255,8 @@
 			"swap_sucess_manually_withdraw_success": "Tokeny z poprzedniej wymiany zostały pomyślnie wypłacone. Możesz teraz zamknąć to okno.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1479,16 +1481,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "Przedmioty kolekcjonerskie",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Twoje NFT pojawią się tutaj",
-			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych NFT",
+			"title_empty": "Twoje przedmioty kolekcjonerskie pojawią się tutaj",
+			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych przedmiotów kolekcjonerskich",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "Grupowanie",
-			"as_plain_list": "Pokaż jako zwykłą listę",
-			"by_collection": "Grupuj według kolekcji",
 			"show_spam": "Pokaż spam",
 			"show_hidden": "Pokaż ukryte",
 			"recents_first": "Najnowsze najpierw",
@@ -1501,9 +1500,11 @@
 			"quantity": "Ilość",
 			"item_traits": "Cechy przedmiotu",
 			"collection_not_loaded": "Kolekcja nie mogła zostać wyświetlona, ponieważ nie została jeszcze załadowana",
-			"nft_not_loaded": "NFT nie mógł zostać wyświetlony, ponieważ nie został jeszcze załadowany",
+			"nft_not_loaded": "Przedmiot kolekcjonerski nie mógł zostać wyświetlony, ponieważ nie został jeszcze załadowany",
 			"collections": "Kolekcje",
-			"all_assets": "Wszystkie aktywa",
+			"check_new": "Sprawdź nowe",
+			"check_new_short": "Sprawdź",
+			"ungrouped": "Bez grupowania",
 			"address_copied": "Adres $address skopiowany",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1542,13 +1543,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Jeszcze brak NFT",
+			"placeholder_image": "Jeszcze brak przedmiotów kolekcjonerskich",
 			"card": {
-				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
+				"image": "Obraz przedmiotu kolekcjonerskiego z identyfikatorem tokena: $tokenId"
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Sprawdź nowe kolekcje"
 		}
 	},
 	"fee": {
@@ -1566,7 +1568,8 @@
 			"ata_fee": "Opłata ATA",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Niewystarczające saldo na pokrycie opłat."
@@ -1613,9 +1616,15 @@
 			"amount": "",
 			"hex_data": "Dane HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"invalid_typed_data": "To żądanie zawiera wartość, której typ nie odpowiada schematowi zadeklarowanemu przez aplikację. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego podpisywanie jest wyłączone.",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
@@ -1830,6 +1839,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",

@@ -1,12 +1,13 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
+	isErc20TransactionTransfer,
 	isMaxUint256,
 	mapAddressToName,
 	mapEthTransactionUi
@@ -261,6 +262,20 @@ describe('transactions.utils', () => {
 			});
 
 			expect(result.type).toBe('approve');
+		});
+	});
+
+	describe('isErc20TransactionTransfer', () => {
+		it('should return true for calldata starting with the transfer selector', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeTruthy();
+		});
+
+		it('should return false for calldata of another ERC20 method', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+		});
+
+		it('should return false for nullish calldata', () => {
+			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
 		});
 	});
 

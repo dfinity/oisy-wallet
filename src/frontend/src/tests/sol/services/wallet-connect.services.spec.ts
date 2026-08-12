@@ -11,7 +11,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -78,7 +78,8 @@ vi.mock('$sol/providers/sol-rpc.providers', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	getAccountInfo: vi.fn()
+	getAccountInfo: vi.fn(),
+	estimatePriorityFee: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -241,6 +242,56 @@ describe('wallet-connect.services', () => {
 			const result = await decode({ base64EncodedTransactionMessage, networkId });
 
 			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+		});
+
+		describe('prioritization fee estimate', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					amount: 123n,
+					source: mockSolAddress,
+					destination: mockSolAddress2,
+					prioritizationFee: 1_000_000_001n,
+					computeUnitLimit: 1_400_000n
+				});
+			});
+
+			it('should price the network estimate over the compute unit limit of this transaction', async () => {
+				// the RPC quotes micro-lamports per compute unit, so 800_000 over 1_400_000 units is
+				// 1_120_000 lamports, not 800_000
+				vi.mocked(estimatePriorityFee).mockResolvedValue(800_000n);
+
+				const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+				expect(estimatePriorityFee).toHaveBeenCalledExactlyOnceWith({ network: 'mainnet' });
+				expect(result).toEqual(expect.objectContaining({ prioritizationFeeEstimate: 1_120_000n }));
+			});
+
+			it('should omit the estimate when the RPC fails, without failing the decode', async () => {
+				vi.mocked(estimatePriorityFee).mockRejectedValue(new Error('RPC down'));
+
+				const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+				expect(result).toEqual(
+					expect.objectContaining({ amount: 123n, prioritizationFee: 1_000_000_001n })
+				);
+				expect(result).not.toHaveProperty('prioritizationFeeEstimate');
+			});
+
+			it('should not query the network when the transaction requests no prioritization', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					amount: 123n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
+
+				const result = await decode({ base64EncodedTransactionMessage, networkId });
+
+				expect(estimatePriorityFee).not.toHaveBeenCalled();
+				expect(result).not.toHaveProperty('prioritizationFeeEstimate');
+			});
 		});
 	});
 
