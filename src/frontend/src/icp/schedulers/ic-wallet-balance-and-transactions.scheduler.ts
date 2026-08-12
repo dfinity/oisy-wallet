@@ -123,7 +123,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 			(!this.store.balance.certified && certified);
 
 		if (newExtendedTransactions.length === 0 && !newBalance) {
-			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero.
+			// We execute postMessage at least once because a user may have no transactions at all, so we want to display the balance (including zero).
 			// An unavailable Index canister is posted on every job too: the UI counts consecutive
 			// failures, so it must hear about each one even when nothing else changed.
 			if (!this.initialized || transactionsUnavailable === true) {
