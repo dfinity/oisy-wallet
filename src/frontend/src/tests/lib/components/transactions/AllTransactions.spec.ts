@@ -6,6 +6,7 @@ import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
+import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -122,6 +123,7 @@ describe('AllTransactions', () => {
 	beforeEach(() => {
 		icTransactionsStatusStore.reset();
 		icrcCustomTokensStore.resetAll();
+		icTransactionsWarningStore.reset();
 	});
 
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));

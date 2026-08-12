@@ -288,6 +288,20 @@ against no entry at all for a token never checked) rather than on the token's
 absence from the failing list: the counters are in-memory, so straight after a
 page load nothing is failing yet and every dismissal would otherwise be dropped.
 
+## Amendment — the token page (added after PR 3)
+
+_Resolved:_ the token page chose between its "transaction history unavailable"
+notice and the generic empty state from `icTransactionsStore[tokenId] === null`.
+PR 1 removed that value's second meaning, so a token with a failing Index
+canister showed "make your first transaction" instead — a regression, fixed by
+driving the notice from the same failure signal as the Activity warning.
+
+The page also carries the warning box itself, above the list, naming only its
+own token. Keeping the transactions loaded before the outage (PR 1) means the
+list stands during an outage; without the box nothing would mark it stale.
+Dismissal is shared with the Activity page through
+`icTransactionsWarningStore`, so closing it in either place silences both.
+
 ## Follow-ups (out of scope)
 
 - Decouple the stale-Index check from transaction loading and run it on its own
