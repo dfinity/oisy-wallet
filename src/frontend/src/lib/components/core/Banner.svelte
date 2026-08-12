@@ -1,8 +1,6 @@
 <script lang="ts">
 	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import IconGixWarning from '$lib/components/icons/IconGixWarning.svelte';
-	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
-	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let envBannerVisible = $state(true);
@@ -10,26 +8,24 @@
 	const closeEnvBanner = () => (envBannerVisible = false);
 </script>
 
-{#if STAGING && envBannerVisible}
+<!-- Testing harness - DO NOT MERGE. This replaces the environment banner (staging / beta) rather
+     than sitting next to it: both are fixed to the same slot, and this message contains what they
+     say. It is deliberately unconditional - the only warning that survives into a deployed build,
+     and the one that would show up if this branch ever reached production through a stray merge.
+     The dismissal is the environment banner's: closeable, and back on the next load. Deliberately
+     not translated, like the rest of the harness. -->
+{#if envBannerVisible}
 	<div
 		class="test-banner fixed top-0 left-1/2 flex max-w-screen-md -translate-x-1/2 justify-between gap-4 border-4 border-solid border-black bg-error-primary"
 	>
 		<span class="flex items-center justify-center gap-4">
 			<IconGixWarning size="48px" />
-			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
+			<h3 class="clamp-4">
+				Testing harness build - contains QA-only code that simulates failures. Never deploy to
+				production.
+			</h3>
 		</span>
 		<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}><IconCloseThin /></button>
-	</div>
-{:else if BETA && envBannerVisible}
-	<div
-		class="fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
-	>
-		<WarningBanner>
-			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
-			<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}>
-				<IconCloseThin />
-			</button>
-		</WarningBanner>
 	</div>
 {/if}
 
