@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
-	import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
+	import {
+		enabledIcTokens,
+		tokensWithUnavailableIndexCanister
+	} from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import AllTransactionsList from '$lib/components/transactions/AllTransactionsList.svelte';
@@ -13,7 +15,6 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		hiddenMicroTransactionsBannerVisible,
@@ -22,7 +23,6 @@
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
@@ -72,9 +72,8 @@
 	// surfaced by tokensWithUnavailableIndexCanister once the failures pile up.
 	// TODO: use a unique token identifier (e.g. token ID + network) instead of the display symbol to avoid collisions if two tokens share the same symbol
 	let tokensWithoutCanister = $derived(
-		$enabledFungibleNetworkTokens
-			.filter((token) => $icTransactionsStore?.[token.id] === null)
-			.map((token: TokenUi) => token as IcToken)
+		$enabledIcTokens
+			.filter(({ id }) => $icTransactionsStore?.[id] === null)
 			.filter(hasNoIndexCanister)
 			.map(getTokenDisplaySymbol)
 	);

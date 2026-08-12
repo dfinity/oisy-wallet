@@ -63,6 +63,7 @@ describe('AllTransactions', () => {
 
 	beforeEach(() => {
 		icTransactionsStatusStore.reset();
+		icrcCustomTokensStore.resetAll();
 	});
 
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
@@ -100,6 +101,18 @@ describe('AllTransactions', () => {
 		});
 
 		expect(getByText(exceptedText)).toBeInTheDocument();
+	});
+
+	it('does not raise the no Index canister warning for a token of another chain', () => {
+		// Only IC tokens have an `indexCanisterId`; for anything else `hasNoIndexCanister` reads
+		// `undefined` and would report the token as lacking one.
+		icTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+
+		const { container } = render(AllTransactions);
+
+		expect(container.querySelector('.bg-warning-light')).toBeNull();
+
+		icTransactionsStore.reset(ETHEREUM_TOKEN_ID);
 	});
 
 	it('renders the unavailable Index canister warning box after enough consecutive failures', () => {
