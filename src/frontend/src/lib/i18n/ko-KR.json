@@ -1195,6 +1195,7 @@
 			"swapping": "스왑 중...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI 새로고침 중",
 			"swap_provider": "스왑 제공자",
 			"swap_provider_website": "웹사이트",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "이전 스왑의 토큰이 성공적으로 출금되었습니다. 이제 이 창을 닫을 수 있습니다.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1553,7 +1555,8 @@
 			"ata_fee": "ATA 수수료",
 			"transaction_fees": "트랜잭션 수수료",
 			"network_fee": "네트워크 수수료",
-			"approval_fee": "승인 수수료"
+			"approval_fee": "승인 수수료",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "수수료를 충당할 잔액이 부족합니다."
@@ -1600,10 +1603,15 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",

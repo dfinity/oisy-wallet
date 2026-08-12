@@ -33,8 +33,10 @@ export const syncWallet = ({
 
 	if (isNullish(newTransactions)) {
 		// The scheduler runs on the Ledger canister only, because the token has no Index canister at
-		// all. That is a permanent property of the token, not an outage, so it is not counted.
+		// all. That is a permanent property of the token, not an outage, so it is not counted - and
+		// any streak recorded while it did have one is void.
 		icTransactionsStore.nullify(tokenId);
+		icTransactionsStatusStore.succeed(tokenId);
 		return;
 	}
 

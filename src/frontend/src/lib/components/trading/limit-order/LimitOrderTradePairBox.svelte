@@ -277,10 +277,12 @@
 		<span class="h-px flex-1 bg-disabled"></span>
 	</div>
 
-	<!-- Quote row: the derived amount in a disabled input. Deliberately not
+	<!-- Quote row: the derived amount in a disabled, muted input. Deliberately not
 		 `readOnlyAmount` — that strips the input's frame and turns the selector into
-		 a pill, whereas Swap renders its computed "You receive" leg as a plain
-		 disabled input. Same shape here keeps the two modals consistent. -->
+		 a pill, and the quote token still has to be pickable here. The muted fill does
+		 the job the dropped frame would have: it says "computed", before the caret has
+		 to refuse the click — and it stops at the divider, so the still-pickable token
+		 selector is not dressed as disabled too. -->
 	<div class="py-2">
 		<TokenInputContent
 			amount={quoteAmountValue}
@@ -288,6 +290,7 @@
 			displayUnit={inputUnit}
 			exchangeRate={quoteExchangeRate}
 			isSelectable={nonNullish(baseSymbol)}
+			muted
 			onClick={onSelectQuoteGuarded}
 			onCustomValidate={onQuoteCustomValidate}
 			{selectTokenText}

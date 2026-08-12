@@ -154,12 +154,10 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(
-			replaceOisyPlaceholders(en.activity.warning.no_index_canister),
-			{ $token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH }) }
-		);
-
-		expect(getByText(exceptedText)).toBeInTheDocument();
+		const expectedText = replacePlaceholders(replaceOisyPlaceholders(en.activity.warning.no_index_canister), {
+			$token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH })
+		});
+		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
 	it('renders the unavailable Index canister warning box after enough consecutive failures', () => {

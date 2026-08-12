@@ -2,8 +2,7 @@ import type {
 	ActiveUserTransaction,
 	ActiveUserTransactionData,
 	ActiveUserTransactionRef,
-	ActiveUserTransactionStatus,
-	TokenId as BackendTokenId
+	ActiveUserTransactionStatus
 } from '$declarations/backend/backend.did';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -22,8 +21,9 @@ import {
 } from '$lib/types/onesec-swap';
 import { SwapProvider } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
+import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { Principal } from '@icp-sdk/core/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { DEFAULT_CONFIG, type TokenConfig, type Transfer } from 'onesec-bridge';
 import { get } from 'svelte/store';
 
@@ -238,20 +238,6 @@ export const findMatchingOneSecTransfer = ({
 	});
 };
 
-/**
- * Maps an Erc20Token to the canister-side `TokenId` variant. Native EVM tokens
- * are not currently supported by OneSec swaps in OISY, so this helper assumes
- * an ERC-20 source/destination. The chain id is required (and present on the
- * `Erc20Token`'s network).
- */
-const erc20ToBackendTokenId = (token: Erc20Token): BackendTokenId => ({
-	Erc20: [token.address, BigInt(token.network.chainId)]
-});
-
-const icrcToBackendTokenId = (token: IcToken): BackendTokenId => ({
-	Icrc: Principal.fromText(token.ledgerCanisterId)
-});
-
 interface OneSecIcpToEvmInput {
 	sourceToken: IcToken;
 	destinationToken: Erc20Token;
@@ -271,28 +257,42 @@ export const toOneSecIcpToEvmData = ({
 	destinationToken,
 	amount,
 	recipientEvmAddress
-}: OneSecIcpToEvmInput): ActiveUserTransactionData => ({
-	OneSecIcpToEvm: {
-		source_token: icrcToBackendTokenId(sourceToken),
-		dest_token: erc20ToBackendTokenId(destinationToken),
-		amount,
-		recipient_evm_address: recipientEvmAddress
+}: OneSecIcpToEvmInput): ActiveUserTransactionData | undefined => {
+	const source_token = toBackendTokenId(sourceToken);
+	const dest_token = toBackendTokenId(destinationToken);
+
+	if (nonNullish(source_token) && nonNullish(dest_token)) {
+		return {
+			OneSecIcpToEvm: {
+				source_token,
+				dest_token,
+				amount,
+				recipient_evm_address: recipientEvmAddress
+			}
+		};
 	}
-});
+};
 
 export const toOneSecEvmToIcpData = ({
 	sourceToken,
 	destinationToken,
 	amount,
 	recipientPrincipal
-}: OneSecEvmToIcpInput): ActiveUserTransactionData => ({
-	OneSecEvmToIcp: {
-		source_token: erc20ToBackendTokenId(sourceToken),
-		dest_token: icrcToBackendTokenId(destinationToken),
-		amount,
-		recipient_principal: recipientPrincipal
+}: OneSecEvmToIcpInput): ActiveUserTransactionData | undefined => {
+	const source_token = toBackendTokenId(sourceToken);
+	const dest_token = toBackendTokenId(destinationToken);
+
+	if (nonNullish(source_token) && nonNullish(dest_token)) {
+		return {
+			OneSecEvmToIcp: {
+				source_token,
+				dest_token,
+				amount,
+				recipient_principal: recipientPrincipal
+			}
+		};
 	}
-});
+};
 
 /**
  * Builds a `(key, value)` external-ref array for a OneSec record. Keys are
