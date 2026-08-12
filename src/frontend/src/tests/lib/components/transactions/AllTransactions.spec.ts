@@ -96,9 +96,13 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const expectedText = replacePlaceholders(replaceOisyPlaceholders(en.activity.warning.no_index_canister), {
-			$token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH })
-		});
+		const expectedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+			{
+				$token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH })
+			}
+		);
+
 		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
