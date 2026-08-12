@@ -47,7 +47,8 @@ import {
 	mapVeloraMarketSwapResult,
 	mapVeloraSwapResult,
 	resolveNearIntentsBlockchain,
-	resolveNearIntentsSwapAssets
+	resolveNearIntentsSwapAssets,
+	slippagePercentToBasisPoints
 } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -60,7 +61,7 @@ import {
 } from '$tests/mocks/near-intents.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import {
-	mockVeloraBridgeSwapResponse,
+	mockVeloraCrossChainSwapResponse,
 	mockVeloraDeltaSwapResponse
 } from '$tests/mocks/velora.mock';
 import type { OptimalRate, SwapSide } from '@velora-dex/sdk';
@@ -341,6 +342,40 @@ describe('swap utils', () => {
 		});
 	});
 
+	describe('slippagePercentToBasisPoints', () => {
+		it('converts whole and fractional percentages to basis points', () => {
+			expect(slippagePercentToBasisPoints(1)).toBe(100);
+			expect(slippagePercentToBasisPoints('0.5')).toBe(50);
+			expect(slippagePercentToBasisPoints(1.5)).toBe(150);
+		});
+
+		it('floors fractional basis points instead of rounding them up', () => {
+			expect(slippagePercentToBasisPoints(1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('1.0099')).toBe(100);
+		});
+
+		it('floors values finer than the slippage input allows instead of rounding them up', () => {
+			// The invariant must hold even for a value that bypassed the input's decimal limit
+			expect(slippagePercentToBasisPoints('1.0051')).toBe(100);
+			expect(slippagePercentToBasisPoints(0.123456)).toBe(12);
+		});
+
+		it('survives IEEE-754 noise in the percent conversion', () => {
+			// 0.29 * 100 === 28.999999999999996 — a bare floor would drop a whole basis point
+			expect(slippagePercentToBasisPoints('0.29')).toBe(29);
+			expect(slippagePercentToBasisPoints(0.29)).toBe(29);
+		});
+
+		it('takes the absolute value of a negative slippage', () => {
+			expect(slippagePercentToBasisPoints(-1.005)).toBe(100);
+			expect(slippagePercentToBasisPoints('-0.29')).toBe(29);
+		});
+
+		it('returns 0 for zero slippage', () => {
+			expect(slippagePercentToBasisPoints(0)).toBe(0);
+		});
+	});
+
 	describe('formatReceiveOutMinimum', () => {
 		it('formats valid number slippage', () => {
 			const result = formatReceiveOutMinimum({
@@ -406,7 +441,7 @@ describe('swap utils', () => {
 	});
 
 	describe('mapVeloraSwapResult', () => {
-		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
+		it('should map a same-chain DeltaPrice result correctly', () => {
 			const mockDeltaSwap: DeltaSwapResponse = {
 				...mockVeloraDeltaSwapResponse
 			};
@@ -414,21 +449,22 @@ describe('swap utils', () => {
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(900n);
+			expect(result.receiveAmount).toBe(900000000n);
 			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 
-		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: DeltaSwapResponse = {
-				...mockVeloraBridgeSwapResponse
+		it('should read the destination step of a cross-chain route, not the origin one', () => {
+			const mockCrossChainSwap: DeltaSwapResponse = {
+				...mockVeloraCrossChainSwapResponse
 			};
 
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockCrossChainSwap);
 
-			expect(result.provider).toBe(SwapProvider.VELORA);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
+			// The origin step is denominated in the 18-decimal source token; only the destination
+			// step carries the amount in the 6-decimal destination token.
+			expect(result.receiveAmount).toBe(99976241n);
+			expect(result.swapDetails).toBe(mockCrossChainSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});

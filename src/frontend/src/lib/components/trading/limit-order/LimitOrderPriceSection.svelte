@@ -4,7 +4,6 @@
 	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import TokenInputContainer from '$lib/components/tokens/TokenInputContainer.svelte';
 	import PillButton from '$lib/components/ui/PillButton.svelte';
-	import ScrollableBar from '$lib/components/ui/ScrollableBar.svelte';
 	import ValueDifference from '$lib/components/ui/ValueDifference.svelte';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -186,6 +185,10 @@
 		return undefined;
 	});
 
+	const hasFooter = $derived(
+		showValueDifference || nonNullish(queueText) || nonNullish(tickError) || nonNullish(warningText)
+	);
+
 	const presetLabel1 = $derived(
 		side === 'sell'
 			? $i18n.trading.limit_order.preset_sell_1
@@ -239,9 +242,27 @@
 	class:border-error-primary={nonNullish(warningText) && warningText.danger}
 	class:border-warning-primary={nonNullish(warningText) && !warningText.danger}
 >
-	<!-- Same shape as the token-input boxes above: `text-sm font-bold` title, the
-		 framed field, then the controls. Helper lines below all share `text-xs`. -->
-	<div id={labelId} class="mb-2 text-sm font-bold text-primary">{label}</div>
+	<!-- The presets share the title's line: they set the very price the title names,
+		 and lifting them out of the space under the field keeps the box short. Title
+		 plus pills comes to ~483px against the 488px the dialog leaves at its 560px
+		 width, so the row wraps rather than scrolls — the longest labels (fill-or-kill,
+		 or a five-character base symbol) and every phone width drop the pills onto a
+		 line of their own instead of clipping them. -->
+	<div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+		<span id={labelId} class="text-sm font-bold text-primary">{label}</span>
+
+		<div class="flex flex-wrap items-center gap-2">
+			{@render presetButton({ preset: 'book', label: bidAskLabel })}
+
+			<!-- Keeps the book price set apart from the three value-derived presets,
+				 as the `|` did when these were links. -->
+			<span class="h-4 w-px shrink-0 bg-disabled" aria-hidden="true"></span>
+
+			{#each pricePresets as { preset, label } (preset)}
+				{@render presetButton({ preset, label, arrow: preset !== 0 })}
+			{/each}
+		</div>
+	</div>
 
 	<!-- The shared container, so the field carries the same frame, height and
 		 focus/hover behaviour as the amount inputs — the quote symbol sits where
@@ -267,29 +288,42 @@
 		</span>
 	</TokenInputContainer>
 
-	<!-- The value difference shares the presets' row rather than taking one of its
-		 own: it is a single short figure, and on a crossing price the warning below
-		 already carries the same colour. `pb-1` matches `ScrollableBar`'s, so the
-		 figure sits on the pills' centre line. -->
-	<div class="mt-2 flex items-center gap-2">
-		<div class="min-w-0 flex-1">
-			<ScrollableBar>
-				{@render presetButton({ preset: 'book', label: bidAskLabel })}
+	<!-- Everything the entered price implies, on one row under the field: the messages
+		 read left, the value difference is pinned right. The row always renders and only
+		 its top margin is conditional — gating it behind an `{#if}` would leave the
+		 lines inside needing `|global` to animate at all, and a global outro makes the
+		 wizard hold this step on screen until it finishes, dragging the price box into
+		 the next step on the way to Review. -->
+	<div class="flex items-start justify-between gap-2" class:mt-2={hasFooter}>
+		<div class="flex min-w-0 flex-1 flex-col gap-1">
+			{#if nonNullish(queueText)}
+				<p class="mb-0 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
+			{/if}
 
-				<!-- Keeps the book price set apart from the three value-derived presets,
-					 as the `|` did when these were links. -->
-				<span class="h-4 w-px shrink-0 bg-disabled" aria-hidden="true"></span>
+			{#if nonNullish(tickError)}
+				<p class="mb-0 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
+			{/if}
 
-				{#each pricePresets as { preset, label } (preset)}
-					{@render presetButton({ preset, label, arrow: preset !== 0 })}
-				{/each}
-			</ScrollableBar>
+			{#if nonNullish(warningText)}
+				<!-- Plain line rather than a tinted chip: its own `px-2.5` indented the
+					 copy past the title and field, and the subtle fill barely reads on the
+					 box's own background. The section border already carries the alert
+					 colour. -->
+				<p
+					class="mb-0 text-xs"
+					class:text-error-primary={warningText.danger}
+					class:text-warning-primary={!warningText.danger}
+					transition:slide={SLIDE_PARAMS}
+				>
+					{warningText.text}
+				</p>
+			{/if}
 		</div>
 
 		{#if showValueDifference}
 			<!-- `ValueDifference` sets no size of its own; without `text-sm` it
 				 inherits the base 16px and ends up the largest text in the box. -->
-			<span class="shrink-0 pb-1 text-sm">
+			<span class="shrink-0 text-sm">
 				<ValueDifference
 					errorLevel={-5}
 					iconPosition="left"
@@ -301,26 +335,4 @@
 			</span>
 		{/if}
 	</div>
-
-	{#if nonNullish(queueText)}
-		<p class="mt-1 mb-0 text-xs text-tertiary" transition:slide={SLIDE_PARAMS}>{queueText}</p>
-	{/if}
-
-	{#if nonNullish(tickError)}
-		<p class="mt-1 mb-0 text-xs text-error-primary" transition:slide={SLIDE_PARAMS}>{tickError}</p>
-	{/if}
-
-	{#if nonNullish(warningText)}
-		<!-- Plain line rather than a tinted chip: its own `px-2.5` indented the copy
-			 past the title and field, and the subtle fill barely reads on the box's
-			 own background. The section border already carries the alert colour. -->
-		<p
-			class="mt-2 mb-0 text-xs"
-			class:text-error-primary={warningText.danger}
-			class:text-warning-primary={!warningText.danger}
-			transition:slide={SLIDE_PARAMS}
-		>
-			{warningText.text}
-		</p>
-	{/if}
 </div>

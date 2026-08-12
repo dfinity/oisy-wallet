@@ -1195,6 +1195,7 @@
 			"swapping": "Swapping...",
 			"starting_to_swap": "Submitting your swap...",
 			"starting_to_bridge": "Wrapping up. We'll keep bridging in the background.",
+			"finishing_in_background": "Wrapping up. We'll keep working on it in the background.",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
 			"swap_provider_website": "Website",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
 			"swap_completed_close_failed": "The transaction completed successfully, but we failed to close the modal. Please refresh the page.",
 			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
-			"swap_refunded": "The swap transaction was refunded."
+			"swap_refunded": "The swap transaction was refunded.",
+			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed."
 		}
 	},
 	"buy": {
@@ -1553,7 +1555,8 @@
 			"ata_fee": "ATA fee",
 			"transaction_fees": "Transaction fees",
 			"network_fee": "Network fee",
-			"approval_fee": "Approval fee"
+			"approval_fee": "Approval fee",
+			"prioritization_fee": "Priority fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1600,10 +1603,15 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
-			"invalid_typed_data": "This request contains a value whose type doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
+			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
+			"high_prioritization_fee": "This transaction sets an unusually high priority fee. Check it carefully and only sign if you trust this app.",
+			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
+			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message",
 			"sign_psbt": "Sign Transaction",
+			"sign_transaction": "Sign Transaction",
+			"sign_and_send_transaction": "Sign and Send Transaction",
 			"signing_address": "Signing address",
 			"fee": "Fee",
 			"btc_symbol": "BTC",

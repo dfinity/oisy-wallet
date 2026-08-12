@@ -26,6 +26,7 @@
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -38,9 +39,11 @@
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
 	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
-	// OneSec and NEAR Intents are both cross-chain swaps rendered identically
-	// (they share the same display-ref key names in `external_refs`).
-	const isSwap = $derived(isOneSec || isNearIntents);
+	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
+	// Every swap provider is rendered identically — they share the same
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction
+	// is internal routing and deliberately not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
@@ -74,7 +77,9 @@
 				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
 				: isOneSec
 					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
-					: undefined
+					: isVelora
+						? (swapProvidersDetails[SwapProvider.VELORA]?.name ?? '')
+						: undefined
 	);
 
 	const titleText = $derived(
@@ -100,6 +105,14 @@
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
 	const destinationNetwork = $derived(
 		refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
+	);
+
+	// A same-chain swap — always the case for a Velora Market swap — would
+	// otherwise read "Ethereum → Ethereum".
+	const networkText = $derived(
+		sourceNetwork === destinationNetwork
+			? sourceNetwork
+			: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
 	const createdAgo = $derived(
@@ -166,8 +179,7 @@
 			{#if isLiquidium}
 				{providerName}
 			{:else}
-				{sourceNetwork} → {destinationNetwork}{#if nonNullish(providerName)}<Divider
-					/>{providerName}{/if}
+				{networkText}{#if nonNullish(providerName)}<Divider />{providerName}{/if}
 			{/if}
 		{/snippet}
 

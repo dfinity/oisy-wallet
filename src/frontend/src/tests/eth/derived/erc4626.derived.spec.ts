@@ -5,6 +5,7 @@ import {
 	erc4626AssetAddresses,
 	erc4626CustomTokens,
 	erc4626CustomTokensInitialized,
+	erc4626CustomTokensLoading,
 	erc4626CustomTokensNotInitialized,
 	erc4626Tokens,
 	erc4626TokensExchangeData
@@ -246,6 +247,47 @@ describe('erc4626.derived', () => {
 			erc4626CustomTokensStore.setAll([]);
 
 			expect(get(erc4626CustomTokensNotInitialized)).toBeFalsy();
+		});
+	});
+
+	describe('erc4626CustomTokensLoading', () => {
+		const mockStoreUninitialized = () => {
+			vi.spyOn(erc4626CustomTokensStore, 'subscribe').mockImplementation((fn) => {
+				fn(undefined);
+				return () => {};
+			});
+		};
+
+		const mockNetworksEnabled = (enabled: boolean) => {
+			vi.spyOn(userNetworks, 'subscribe').mockImplementation((fn) => {
+				fn({
+					[ETHEREUM_NETWORK_ID]: { enabled, isTestnet: false },
+					[BASE_NETWORK_ID]: { enabled, isTestnet: false }
+				});
+				return () => {};
+			});
+		};
+
+		it('should return true while the store is not initialized and a network is enabled', () => {
+			mockStoreUninitialized();
+			mockNetworksEnabled(true);
+
+			expect(get(erc4626CustomTokensLoading)).toBeTruthy();
+		});
+
+		it('should return false when the store is not initialized but no network is enabled', () => {
+			mockStoreUninitialized();
+			mockNetworksEnabled(false);
+
+			expect(get(erc4626CustomTokensLoading)).toBeFalsy();
+		});
+
+		it('should return false once the store has been set', () => {
+			mockNetworksEnabled(true);
+
+			erc4626CustomTokensStore.setAll([]);
+
+			expect(get(erc4626CustomTokensLoading)).toBeFalsy();
 		});
 	});
 
