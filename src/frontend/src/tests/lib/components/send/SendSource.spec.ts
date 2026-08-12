@@ -3,6 +3,7 @@ import SendSource from '$lib/components/send/SendSource.svelte';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
@@ -13,7 +14,7 @@ describe('SendSource', () => {
 		source: mockEthAddress
 	};
 
-	const sourceSelector = 'div[id="source"]';
+	const sourceSelector = 'div[id="signer"]';
 	const balanceSelector = 'div[id="balance"]';
 
 	const contact: ContactUi = {
@@ -43,6 +44,12 @@ describe('SendSource', () => {
 		expect(source).toHaveTextContent(mockEthAddress);
 		expect(balance?.textContent).toContain('0.22');
 		expect(balance?.textContent).toContain('BTC');
+	});
+
+	it('should label the address field as signer', () => {
+		const { container } = render(SendSource, { props });
+
+		expect(container).toHaveTextContent(en.wallet_connect.text.signer);
 	});
 
 	it('should render all field but balance without value', () => {
