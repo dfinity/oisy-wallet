@@ -9,6 +9,10 @@ import {
 	type EthFeeStore,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import {
+	TRACK_COUNT_SWAP_SUBMITTED,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -18,12 +22,7 @@ import * as swapServices from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, type SwapError } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import {
-	SwapProvider,
-	VeloraSwapTypes,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
+import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
@@ -36,6 +35,7 @@ import {
 	mockVeloraDeltaProvider,
 	mockVeloraMarketProvider
 } from '$tests/mocks/swap.mocks';
+import { mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get, readable, writable, type Writable } from 'svelte/store';
 
@@ -338,7 +338,7 @@ describe('SwapEthWizard', () => {
 				provider: SwapProvider.VELORA,
 				receiveAmount: 1000000000n,
 				type: VeloraSwapTypes.MARKET,
-				swapDetails: {} as VeloraSwapDetails
+				swapDetails: mockVeloraOptimalRate
 			}
 		];
 
@@ -457,6 +457,27 @@ describe('SwapEthWizard', () => {
 			expect(swapServices.fetchVeloraMarketSwap).toHaveBeenCalledOnce();
 			expect(onClose).toHaveBeenCalledOnce();
 			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		it('reports the swap as submitted, leaving success to the active-transaction poller', async () => {
+			const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+			const { getByRole, getByText, queryByRole } = renderExecution();
+
+			const valueDifferenceCheckbox = queryByRole('checkbox');
+			if (valueDifferenceCheckbox) {
+				await fireEvent.click(getByRole('checkbox'));
+			}
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(trackEventSpy).toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+			);
+			expect(trackEventSpy).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+			);
 		});
 
 		it('surfaces the failure on the review page when the swap fails', async () => {
@@ -682,7 +703,7 @@ describe('SwapEthWizard', () => {
 					provider: SwapProvider.VELORA,
 					receiveAmount: 1000000000n,
 					type: VeloraSwapTypes.MARKET,
-					swapDetails: {} as VeloraSwapDetails
+					swapDetails: mockVeloraOptimalRate
 				}
 			];
 

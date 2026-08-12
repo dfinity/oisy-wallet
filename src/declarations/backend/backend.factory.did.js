@@ -251,6 +251,16 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const VeloraSwapMode = IDL.Variant({
+		Delta: IDL.Null,
+		Market: IDL.Null
+	});
+	const VeloraData = IDL.Record({
+		mode: VeloraSwapMode,
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const LiquidiumAction = IDL.Variant({
 		Withdraw: IDL.Null,
 		Repay: IDL.Null,
@@ -267,6 +277,7 @@ export const idlFactory = ({ IDL }) => {
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		NearIntents: NearIntentsData,
+		Velora: VeloraData,
 		Liquidium: LiquidiumData
 	});
 	const CreateActiveUserTransactionRequest = IDL.Record({

@@ -81,6 +81,10 @@ pub enum ActiveUserTransactionData {
     /// source/destination leg (EVM and Solana); the deposit address, its
     /// optional memo, and origin/destination tx hashes ride in `external_refs`.
     NearIntents(NearIntentsData),
+    /// Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+    /// modes, discriminated by the `mode` field; the auction id, order hash,
+    /// transaction hash and nonce ride in `external_refs`.
+    Velora(VeloraData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -126,6 +130,28 @@ pub struct LiquidiumData {
 /// captured here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct NearIntentsData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
+    pub amount: Nat,
+}
+
+/// Which Velora execution mode an active transaction tracks. Determines how the
+/// frontend polls for settlement: `Delta` by auction id against Velora's Delta
+/// API, `Market` by transaction receipt on the source chain.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum VeloraSwapMode {
+    Delta,
+    Market,
+}
+
+/// Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+/// id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+/// pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+/// `external_refs`; only the canonical immutable fields are captured here.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct VeloraData {
+    pub mode: VeloraSwapMode,
     pub source_token: TokenId,
     pub dest_token: TokenId,
     /// Source-token amount in base units.
@@ -199,9 +225,10 @@ mod tests {
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
-        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+        VeloraSwapMode,
     };
-    use crate::types::token_id::TokenId;
+    use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
 
     fn sample_record() -> ActiveUserTransaction {
         ActiveUserTransaction {
@@ -271,6 +298,41 @@ mod tests {
             amount: Nat::from(250_000u64),
         });
         assert_eq!(roundtrip(&original), original);
+    }
+
+    fn erc20(address: &str, chain_id: u64) -> TokenId {
+        TokenId::Erc20(ErcTokenId(address.to_string()), chain_id)
+    }
+
+    #[test]
+    fn velora_delta_variant_roundtrips() {
+        let original = ActiveUserTransactionData::Velora(VeloraData {
+            mode: VeloraSwapMode::Delta,
+            source_token: erc20("0x0000000000000000000000000000000000000abc", 1),
+            dest_token: erc20("0x0000000000000000000000000000000000000def", 1),
+            amount: Nat::from(7_500u64),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn velora_market_variant_roundtrips() {
+        // Market is the only mode reachable from a native source coin, so the
+        // round-trip covers `EvmNative` on the source side too.
+        let original = ActiveUserTransactionData::Velora(VeloraData {
+            mode: VeloraSwapMode::Market,
+            source_token: TokenId::EvmNative(8453),
+            dest_token: erc20("0x0000000000000000000000000000000000000def", 8453),
+            amount: Nat::from(1_250u64),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn velora_swap_mode_roundtrips() {
+        for mode in [VeloraSwapMode::Delta, VeloraSwapMode::Market] {
+            assert_eq!(roundtrip(&mode), mode);
+        }
     }
 
     #[test]

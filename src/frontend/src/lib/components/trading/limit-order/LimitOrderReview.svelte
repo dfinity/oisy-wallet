@@ -11,7 +11,6 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { oisyTradeIcTokenBySymbol } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -78,15 +77,9 @@
 	);
 
 	// Resolved the same way the form does, so the hero can show each leg's logo
-	// and fiat value exactly as the Swap review does.
+	// exactly as the Swap review does.
 	const baseToken = $derived($oisyTradeIcTokenBySymbol[base]);
 	const quoteToken = $derived($oisyTradeIcTokenBySymbol[quote]);
-	const baseExchangeRate = $derived(
-		nonNullish(baseToken) ? $exchanges?.[baseToken.id]?.usd : undefined
-	);
-	const quoteExchangeRate = $derived(
-		nonNullish(quoteToken) ? $exchanges?.[quoteToken.id]?.usd : undefined
-	);
 	const priceDisplay = $derived(
 		formatTradeAmount({ amount: price, decimals: pairView?.quoteDecimals ?? 8 })
 	);
@@ -139,10 +132,8 @@
 <ContentWithToolbar>
 	<LimitOrderIntentHero
 		baseAmount={baseAmountDisplay}
-		{baseExchangeRate}
 		{baseToken}
 		quoteAmount={quoteAmountDisplay}
-		{quoteExchangeRate}
 		{quoteToken}
 		{side}
 	/>

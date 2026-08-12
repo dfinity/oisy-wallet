@@ -163,6 +163,33 @@ describe('ic-listener', () => {
 				expect(transactionsNull?.[tokenId]).toBeNull();
 			});
 
+			it('should clear an existing streak when the token has no Index canister', () => {
+				const mockPostMessageUnavailable: PostMessageDataResponseWallet = {
+					wallet: {
+						balance: { certified: true, data: mockBalance },
+						newTransactions: JSON.stringify([], jsonReplacer),
+						transactionsUnavailable: true
+					}
+				};
+
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+				syncWallet({ data: mockPostMessageUnavailable, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(2);
+
+				const mockPostMessageNoTransactions: PostMessageDataResponseWallet = {
+					wallet: {
+						balance: { certified: true, data: mockBalance },
+						newTransactions: undefined
+					}
+				};
+
+				// The token is now permanently without an Index canister: an outage streak is void.
+				syncWallet({ data: mockPostMessageNoTransactions, tokenId });
+
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
+			});
+
 			it('should not count a failure when the token has no Index canister', () => {
 				const mockPostMessageNoTransactions: PostMessageDataResponseWallet = {
 					wallet: {
@@ -176,7 +203,9 @@ describe('ic-listener', () => {
 
 				syncWallet({ data: mockPostMessageNoTransactions, tokenId });
 
-				expect(get(icTransactionsStatusStore)[tokenId]).toBeUndefined();
+				// Zero, not absent: the token is recorded as checked and not failing. `succeed` writes
+				// the zero so that "never checked" stays distinguishable from "checked and fine".
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
 			});
 		});
 

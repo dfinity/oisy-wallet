@@ -921,6 +921,7 @@ interface I18nSwap {
 		swapping: string;
 		starting_to_swap: string;
 		starting_to_bridge: string;
+		finishing_in_background: string;
 		refreshing_ui: string;
 		swap_provider: string;
 		swap_provider_website: string;
@@ -968,6 +969,7 @@ interface I18nSwap {
 		swap_completed_close_failed: string;
 		cannot_save_provider_agreement: string;
 		swap_refunded: string;
+		swap_replaced_or_dropped: string;
 	};
 }
 
@@ -1244,6 +1246,7 @@ interface I18nFee {
 		transaction_fees: string;
 		network_fee: string;
 		approval_fee: string;
+		prioritization_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1283,10 +1286,15 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		dapp_prioritization_fee: string;
+		high_prioritization_fee: string;
 		invalid_typed_data: string;
+		unverifiable_erc20_request: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
+		sign_transaction: string;
+		sign_and_send_transaction: string;
 		signing_address: string;
 		fee: string;
 		btc_symbol: string;

@@ -277,6 +277,17 @@ again. `saveHideInfoQualifiers` / `hiddenInfoQualifiers` in
 existing boolean hide-flags; they reuse the same sessionStorage key, whose value
 becomes a JSON list.
 
+The qualifiers are **ledger canister IDs**, not symbols: a user can hold two
+tokens with the same symbol, and a dismissal keyed on the symbol would silence
+both. Symbols remain what the box renders. For the same reason the derived
+stores narrow to IC tokens with `isIcToken` rather than casting - only IC tokens
+have a ledger canister ID.
+
+Recovery is keyed on an observed successful check (`succeed` records a zero,
+against no entry at all for a token never checked) rather than on the token's
+absence from the failing list: the counters are in-memory, so straight after a
+page load nothing is failing yet and every dismissal would otherwise be dropped.
+
 ## Follow-ups (out of scope)
 
 - Decouple the stale-Index check from transaction loading and run it on its own
