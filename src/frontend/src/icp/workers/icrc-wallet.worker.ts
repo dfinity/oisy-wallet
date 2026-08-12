@@ -90,22 +90,41 @@ const getBalance = ({
  * The transactions are fetched using the `getTransactions` function, which is a wrapper around the `getTransactions` function of the ICRC Index canister API.
  * The balance is fetched using the `getBalance` function, which is a wrapper around the `balance` function of the ICRC Ledger canister API.
  *
- * The errors raised by this function are handled directly in the scheduler.
- * If loading the transactions fails, the scheduler restarts using only the Ledger canister.
- * If loading the balance fails, the same happens, and we don't load the transactions any more.
- * It was deemed not relevant since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
- *
  * @param {SchedulerJobParams<PostMessageDataRequestIcrcStrict>} params - The parameters for the function, including the identity and data.
  * @returns {Promise<GetBalanceAndTransactions>} A promise that resolves to an object containing the balance and transactions of the account.
  */
 const getBalanceAndTransactions = async (
 	params: SchedulerJobParams<PostMessageDataRequestIcrcStrict>
 ): Promise<GetBalanceAndTransactions> => {
-	const [balance, transactions] = await Promise.all([getBalance(params), getTransactions(params)]);
+	const [balanceResult, transactionsResult] = await Promise.allSettled([
+		getBalance(params),
+		getTransactions(params)
+	]);
+
+	// The Ledger balance is the source of truth. Without it there is nothing meaningful to display, so
+	// a Ledger failure is fatal and surfaced as a sync error.
+	if (balanceResult.status === 'rejected') {
+		throw balanceResult.reason;
+	}
+
+	const { value: balance } = balanceResult;
+
+	// A failing Index canister must not block the Ledger balance update, nor discard the transactions
+	// already displayed. The Index only feeds the transactions history, so on failure we post the
+	// balance with no transaction delta and let the history catch up on the next successful tick.
+	const withoutNewTransactions: GetBalanceAndTransactions = {
+		balance,
+		transactions: [],
+		oldest_tx_id: []
+	};
+
+	if (transactionsResult.status === 'rejected') {
+		return withoutNewTransactions;
+	}
 
 	// Ignoring the balance from the transactions' response.
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
-	const { balance: indexCanisterBalance, ...rest } = transactions;
+	const { balance: indexCanisterBalance, ...rest } = transactionsResult.value;
 
 	const indexCanisterIsOutOfSync = balance !== indexCanisterBalance;
 
@@ -116,18 +135,17 @@ const getBalanceAndTransactions = async (
 			data: { ledgerCanisterId, indexCanisterId }
 		} = params;
 
+		// A status check that fails is as inconclusive as a negative verdict: either way we cannot
+		// trust the transactions we just received.
 		const indexCanisterAwake = await isIndexCanisterAwake({
 			identity,
 			certified,
 			ledgerCanisterId,
 			indexCanisterId
-		});
+		}).catch(() => false);
 
 		if (!indexCanisterAwake) {
-			// We prefer to make the loading fail since it will be handled with Ledger canister only and Index canister unavailable.
-			throw new Error(
-				`Index canister ${indexCanisterId} for Ledger canister ${ledgerCanisterId} is not awake`
-			);
+			return withoutNewTransactions;
 		}
 	}
 
