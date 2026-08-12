@@ -1365,6 +1365,7 @@ interface I18nWallet_connect {
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
+		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};

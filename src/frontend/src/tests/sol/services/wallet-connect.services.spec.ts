@@ -39,7 +39,10 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
-import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolCompiledTransactionMessageBytes,
+	mockSolSignedTransaction
+} from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
@@ -1019,6 +1022,51 @@ describe('wallet-connect.services', () => {
 				duration: 2000
 			});
 			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		// A `signMessage` signature is taken over the raw bytes with the same key, derivation path and
+		// no domain separator that the transaction flow signs a compiled transaction message with, so
+		// a transaction smuggled through this method would come back as a usable transaction
+		// signature obtained from a review that shows no amount, destination or fee.
+		describe('with a serialized transaction message as the payload', () => {
+			it.each(['legacy', 0] as const)(
+				'should refuse to sign a version %s transaction message and reject the request',
+				async (version) => {
+					const request = {
+						id: 1,
+						topic: 'mock-topic',
+						params: {
+							request: {
+								method: SESSION_REQUEST_SOL_SIGN_MESSAGE,
+								params: {
+									message: getBase58Decoder().decode(
+										createMockSolCompiledTransactionMessageBytes(version)
+									),
+									pubkey: mockSolAddress
+								}
+							}
+						}
+					} as unknown as WalletKitTypes.SessionRequest;
+
+					const result = await signMessage({ ...mockParams, request });
+
+					expect(result).toEqual({ success: false });
+
+					expect(solSignUtils.signMessage).not.toHaveBeenCalled();
+					expect(mockListener.approveRequest).not.toHaveBeenCalled();
+					expect(mockParams.modalNext).not.toHaveBeenCalled();
+
+					expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+						topic: request.topic,
+						id: request.id,
+						error: UNEXPECTED_ERROR
+					});
+
+					expect(spyToastsError).toHaveBeenCalledWith({
+						msg: { text: en.wallet_connect.error.sol_transaction_as_message }
+					});
+				}
+			);
 		});
 
 		it('should reject over WalletConnect and surface the error when signing fails', async () => {
