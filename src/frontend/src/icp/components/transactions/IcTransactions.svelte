@@ -16,6 +16,7 @@
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
+	import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
@@ -43,8 +44,16 @@
 		})
 	);
 
-	let noTransactions = $derived(
+	// A nullified entry means the token has no Index canister at all - a permanent property, not an
+	// outage. A failing Index canister is a separate signal now: it no longer discards what was
+	// already loaded, so it cannot be inferred from the store being empty.
+	let noIndexCanister = $derived(
 		nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null
+	);
+
+	let unavailableIndexCanister = $derived(
+		nonNullish($pageToken) &&
+			$tokensWithUnavailableIndexCanister.some(({ id }) => id === $pageToken.id)
 	);
 
 	let token = $derived($pageToken ?? ICP_TOKEN);
@@ -65,6 +74,12 @@
 
 	let groupedTransactions = $derived(
 		nonNullish($icTransactions) ? groupTransactionsByDate(filteredTransactions) : undefined
+	);
+
+	// The placeholder replaces the list, so it is only the right answer when there is nothing to
+	// show. During an outage the transactions loaded earlier are more useful than the notice.
+	let noTransactions = $derived(
+		noIndexCanister || (unavailableIndexCanister && filteredTransactions.length === 0)
 	);
 </script>
 
