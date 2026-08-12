@@ -5,6 +5,8 @@ import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import type { Token } from '$lib/types/token';
 import {
+	isNetworkIdBTCMainnet,
+	isNetworkIdBTCTestnet,
 	isNetworkIdEthereum,
 	isNetworkIdEvm,
 	isNetworkIdSOLDevnet,
@@ -77,9 +79,10 @@ export const tokenIdKey = (id: TokenId): string | undefined => {
  * Transaction's `data` payload.
  *
  * Covers every asset the AUT consumers can swap: ERC-20 and ERC-4626 vault
- * tokens, native EVM coins, ICRC ledgers, and SPL / native Solana on both
- * mainnet and devnet. Returns `undefined` for anything else, which callers treat
- * as "do not track this operation" rather than as an error.
+ * tokens, native EVM coins, ICRC ledgers, SPL / native Solana on both mainnet
+ * and devnet, and native Bitcoin on mainnet and testnet. Returns `undefined` for
+ * anything else — including Bitcoin regtest, which has no backend variant —
+ * which callers treat as "do not track this operation" rather than as an error.
  *
  * An Internet Computer token maps to `Icrc` by ledger canister id — including
  * ICP itself, whose dedicated `IcpNative` variant is reserved for the
@@ -111,6 +114,16 @@ export const toBackendTokenId = (token: Token): TokenId | undefined => {
 	// Native tokens carry no contract address; disambiguate by network.
 	if (isNetworkIdSolana(networkId)) {
 		return isNetworkIdSOLDevnet(networkId) ? { SolNativeDevnet: null } : { SolNativeMainnet: null };
+	}
+
+	// Each Bitcoin network is matched on its own rather than via `isNetworkIdBitcoin`,
+	// so regtest — which has no backend `TokenId` variant — falls through to `undefined`.
+	if (isNetworkIdBTCMainnet(networkId)) {
+		return { BtcNativeMainnet: null };
+	}
+
+	if (isNetworkIdBTCTestnet(networkId)) {
+		return { BtcNativeTestnet: null };
 	}
 
 	// Native EVM coin (ETH, BNB, POL, …), identified by chain id.
