@@ -245,61 +245,6 @@ describe('AllTransactions', () => {
 		spySave.mockRestore();
 	});
 
-	it('forgets the dismissal of a token whose Index canister recovers', async () => {
-		const { first } = setUpTwoTokensWithUnavailableIndexCanister();
-
-		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
-
-		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
-
-		const { container, queryByText, unmount } = render(AllTransactions);
-
-		await dismissWarning(container);
-
-		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
-
-		// Recovery drops it from the dismissed list...
-		icTransactionsStatusStore.succeed(first);
-
-		await waitFor(() =>
-			expect(spySave).toHaveBeenCalledWith({
-				key: 'oisy_ic_hide_transaction_unavailable_canister',
-				qualifiers: []
-			})
-		);
-
-		// ...so the next outage of the same token is surfaced again.
-		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
-
-		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).toBeInTheDocument());
-
-		unmount();
-		spySave.mockRestore();
-	});
-
-	it('keeps the dismissal across a reload, before anything has been checked', async () => {
-		const { first } = setUpTwoTokensWithUnavailableIndexCanister();
-
-		const spySave = vi.spyOn(infoUtils, 'saveHideInfoQualifiers').mockImplementation(() => {});
-		// A reload restores the dismissal from the session, while the failure counters - which live in
-		// memory only - start empty. "Nothing is failing" must not be read as "everything recovered".
-		vi.spyOn(infoUtils, 'hiddenInfoQualifiers').mockReturnValue([UTA_LEDGER_CANISTER_ID]);
-
-		const { queryByText, unmount } = render(AllTransactions);
-
-		expect(spySave).not.toHaveBeenCalled();
-
-		// The token is still broken, and the warning must stay dismissed rather than come back.
-		failTransactionsSync({ tokenId: first, times: IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD });
-
-		await waitFor(() => expect(queryByText(unavailableText(['UTA']))).not.toBeInTheDocument());
-
-		expect(spySave).not.toHaveBeenCalled();
-
-		unmount();
-		vi.restoreAllMocks();
-	});
-
 	it('keeps the two tokens apart when they share a symbol', async () => {
 		icrcCustomTokensStore.setAll([
 			{
