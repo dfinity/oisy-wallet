@@ -1297,6 +1297,7 @@ interface I18nWallet_connect {
 		dapp_prioritization_fee: string;
 		high_prioritization_fee: string;
 		invalid_typed_data: string;
+		unverifiable_erc20_request: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;
