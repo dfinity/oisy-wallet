@@ -4,7 +4,7 @@ import {
 	saveHideInfoQualifiers,
 	type HideInfoKey
 } from '$lib/utils/info.utils';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 
 const UNAVAILABLE_INDEX_CANISTER_HIDE_KEY: HideInfoKey =
 	'oisy_ic_hide_transaction_unavailable_canister';
@@ -27,9 +27,9 @@ export interface IcTransactionsWarningStore extends Readable<string[]> {
  * and a dismissal recorded against the symbol would silence both.
  */
 const initIcTransactionsWarningStore = (): IcTransactionsWarningStore => {
-	const { subscribe, update } = writable<string[]>(
-		hiddenInfoQualifiers(UNAVAILABLE_INDEX_CANISTER_HIDE_KEY)
-	);
+	const store = writable<string[]>(hiddenInfoQualifiers(UNAVAILABLE_INDEX_CANISTER_HIDE_KEY));
+
+	const { subscribe, set, update } = store;
 
 	// Written through on every change, so the dismissal survives a reload within the session.
 	const save = (qualifiers: string[]): string[] => {
@@ -53,14 +53,23 @@ const initIcTransactionsWarningStore = (): IcTransactionsWarningStore => {
 
 		// A dismissal covers one outage, not the session: a token whose Index canister answers again
 		// is forgotten, so a later failure is surfaced afresh.
-		forget: (ledgerCanisterIds: string[]) =>
-			update((dismissed) => {
-				const remaining = dismissed.filter(
-					(ledgerCanisterId) => !ledgerCanisterIds.includes(ledgerCanisterId)
-				);
+		//
+		// Nothing to forget is the common case - callers pass every recovered token on every change -
+		// and returning early rather than setting an unchanged value keeps subscribers still, since
+		// Svelte treats any array as changed even when the reference is identical.
+		forget: (ledgerCanisterIds: string[]) => {
+			const dismissed = get(store);
 
-				return remaining.length === dismissed.length ? dismissed : save(remaining);
-			}),
+			const remaining = dismissed.filter(
+				(ledgerCanisterId) => !ledgerCanisterIds.includes(ledgerCanisterId)
+			);
+
+			if (remaining.length === dismissed.length) {
+				return;
+			}
+
+			set(save(remaining));
+		},
 
 		reset: () => update(() => save([]))
 	};

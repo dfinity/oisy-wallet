@@ -92,4 +92,35 @@ describe('ic-transactions-status.store', () => {
 			expect(get(icTransactionsStatusStore)).toStrictEqual({});
 		});
 	});
+
+	describe('notifications', () => {
+		it('should not notify when a token already at zero succeeds again', () => {
+			icTransactionsStatusStore.succeed(tokenId);
+
+			const notified = vi.fn();
+			const unsubscribe = icTransactionsStatusStore.subscribe(notified);
+
+			// Every token reports success on every job, so this is the common path.
+			icTransactionsStatusStore.succeed(tokenId);
+			icTransactionsStatusStore.succeed(tokenId);
+
+			// Only the subscription's own initial call.
+			expect(notified).toHaveBeenCalledOnce();
+
+			unsubscribe();
+		});
+
+		it('should notify when a token recovers from a failure', () => {
+			icTransactionsStatusStore.fail(tokenId);
+
+			const notified = vi.fn();
+			const unsubscribe = icTransactionsStatusStore.subscribe(notified);
+
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(notified).toHaveBeenCalledTimes(2);
+
+			unsubscribe();
+		});
+	});
 });

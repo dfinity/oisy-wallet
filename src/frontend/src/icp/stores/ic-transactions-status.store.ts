@@ -1,5 +1,5 @@
 import type { TokenId } from '$lib/types/token';
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 
 export type IcTransactionsStatusStoreData = Record<TokenId, number>;
 
@@ -21,9 +21,9 @@ export interface IcTransactionsStatusStore extends Readable<IcTransactionsStatus
  * within a couple of ticks.
  */
 const initIcTransactionsStatusStore = (): IcTransactionsStatusStore => {
-	const { subscribe, set, update } = writable<IcTransactionsStatusStoreData>(
-		{} as IcTransactionsStatusStoreData
-	);
+	const store = writable<IcTransactionsStatusStoreData>({} as IcTransactionsStatusStoreData);
+
+	const { subscribe, set, update } = store;
 
 	return {
 		subscribe,
@@ -37,11 +37,20 @@ const initIcTransactionsStatusStore = (): IcTransactionsStatusStore => {
 		// Records the successful check, rather than merely clearing a count. "Never checked" and
 		// "checked and fine" then read differently - no entry vs. an entry of zero - which is what
 		// lets a consumer tell a token that has recovered from one the wallet has yet to reach.
-		succeed: (tokenId: TokenId) =>
+		//
+		// Skipped entirely when the token is already at zero, which is the common case: every token
+		// reports success on every job. A store notification is not free - Svelte treats any object
+		// as changed, so subscribers would recompute on each tick for no reason.
+		succeed: (tokenId: TokenId) => {
+			if (get(store)[tokenId] === 0) {
+				return;
+			}
+
 			update((state) => ({
 				...state,
 				[tokenId]: 0
-			})),
+			}));
+		},
 
 		reset: () => set({} as IcTransactionsStatusStoreData)
 	};
