@@ -2325,7 +2325,7 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short kann keine Transaktionen für $token_list laden – der Herausgeber des Tokens bietet keine Transaktionsverfolgung an.",
-			"unavailable_index_canister": "$oisy_short kann die neuesten Transaktionen für $token_list gerade nicht laden und versucht es weiter."
+			"unavailable_index_canister": "Die neuesten Transaktionen für $token_list können im Moment nicht geladen werden, da ihr Tracking-Dienst nicht antwortet. Sie werden automatisch geladen, sobald er wieder erreichbar ist."
 		}
 	},
 	"earning": {
