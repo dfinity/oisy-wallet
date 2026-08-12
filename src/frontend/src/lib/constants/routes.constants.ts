@@ -16,6 +16,8 @@ export enum AppPath {
 	Liabilities = '/liabilities/',
 	ProvidersLiquidium = '/providers/liquidium/',
 	ProvidersOisyTrade = '/providers/oisy-trade/',
+	// Testing harness - DO NOT MERGE.
+	Testing = '/testing/',
 	LicenseAgreement = '/license-agreement/',
 	PrivacyPolicy = '/privacy-policy/',
 	TermsOfUse = '/terms-of-use/'

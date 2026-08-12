@@ -123,6 +123,8 @@ export const NAVIGATION_ITEM_NOTES = 'navigation-item-notes';
 export const NAVIGATION_ITEM_SETTINGS = 'navigation-item-settings';
 export const NAVIGATION_ITEM_HOMEPAGE = 'navigation-item-homepage';
 export const NAVIGATION_ITEM_REWARDS = 'navigation-item-rewards';
+// Testing harness - DO NOT MERGE.
+export const NAVIGATION_ITEM_TESTING = 'navigation-item-testing';
 
 export const NAVIGATION_GROUP_PORTFOLIO = 'navigation-group-portfolio';
 export const NAVIGATION_GROUP_FINANCE = 'navigation-group-finance';
