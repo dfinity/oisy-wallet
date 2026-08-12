@@ -69,10 +69,14 @@
 
 	{`${value > ZERO ? '+' : '-'}${magnitude} ${tokenSymbol}`}
 
-	<!-- The sign is carried once, by the amount: the fiat figure prices the size of the change. -->
-	<div class="text-tertiary">
-		<ConvertAmountExchange amount={magnitude} {exchangeRate} />
-	</div>
+	<!-- The sign is carried once, by the amount: the fiat figure prices the size of the change.
+	     A mint we do not know has no rate, and the wrapper is skipped rather than left as an empty
+	     flex item, so such a row is a bare amount in the DOM as well as on screen. -->
+	{#if nonNullish(exchangeRate)}
+		<div class="text-tertiary">
+			<ConvertAmountExchange amount={magnitude} {exchangeRate} />
+		</div>
+	{/if}
 {/snippet}
 
 <!-- An authority change moves no funds at all, so it would be invisible among the amounts. It is
