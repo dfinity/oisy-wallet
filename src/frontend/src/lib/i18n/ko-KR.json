@@ -2325,7 +2325,7 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short에서 $token_list의 거래를 불러올 수 없습니다. 토큰 발행자가 거래 추적 기능을 제공하지 않습니다.",
-			"unavailable_index_canister": "$oisy_short에서 지금은 $token_list의 최신 거래를 불러올 수 없습니다. 계속 다시 시도하고 있습니다."
+			"unavailable_index_canister": "$token_list의 최신 거래를 지금은 불러올 수 없습니다. 거래 추적 서비스가 응답하지 않기 때문입니다. 서비스가 복구되면 자동으로 불러옵니다."
 		}
 	},
 	"earning": {

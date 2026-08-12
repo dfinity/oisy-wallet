@@ -120,7 +120,12 @@ it is out of scope.)
 `unavailable_index_canister` — non-dismissible box, must read correctly both
 when the list below it is empty and when it shows older transactions:
 
-> `$oisy_short can’t load the latest transactions for $token_list right now, and keeps retrying.`
+> `The latest transactions for $token_list can’t be loaded at the moment, because their tracking service isn’t responding. They will be loaded automatically once it’s back.`
+
+_Resolved:_ an earlier draft opened with `$oisy_short can’t load…`, which reads
+as OISY’s fault when the failing component belongs to the token. Naming the
+tracking service instead also avoids a singular/plural problem: “their” works
+whether the box lists one token or several, so no second key is needed.
 
 `no_index_canister` — unchanged behaviour (dismissible, per-token dismissal
 persisted via `NOTIFICATION_VERSIONS.NoIndexCanister`), text de-jargoned:

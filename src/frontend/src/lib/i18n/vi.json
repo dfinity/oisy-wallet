@@ -2325,7 +2325,7 @@
 		},
 		"warning": {
 			"no_index_canister": "$oisy_short không thể tải giao dịch của $token_list — đơn vị phát hành token không cung cấp tính năng theo dõi giao dịch.",
-			"unavailable_index_canister": "Hiện $oisy_short không thể tải các giao dịch mới nhất của $token_list và vẫn đang thử lại."
+			"unavailable_index_canister": "Hiện không thể tải các giao dịch mới nhất của $token_list, vì dịch vụ theo dõi của chúng không phản hồi. Chúng sẽ được tải tự động ngay khi dịch vụ hoạt động trở lại."
 		}
 	},
 	"earning": {
