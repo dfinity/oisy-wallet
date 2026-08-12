@@ -96,6 +96,12 @@
 			: undefined
 	);
 
+	// 1Sec is the only provider on this wizard that settles in the background, and
+	// its background phase is a bridge.
+	let isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
 			return;
@@ -308,8 +314,8 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
-				swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ONE_SEC}
+				swapWithActiveTransaction={isOneSecProvider}
+				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 				bind:failedSteps={swapFailedProgressSteps}

@@ -1195,6 +1195,7 @@
 			"swapping": "Intercambiando...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1553,7 +1555,8 @@
 			"ata_fee": "Comisión ATA",
 			"transaction_fees": "Comisiones de transacción",
 			"network_fee": "Comisión de red",
-			"approval_fee": "Comisión de aprobación"
+			"approval_fee": "Comisión de aprobación",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cubrir las comisiones."
@@ -1600,10 +1603,15 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"unreviewed_instructions": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
