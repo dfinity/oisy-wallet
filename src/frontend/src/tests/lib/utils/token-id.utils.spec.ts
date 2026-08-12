@@ -1,6 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SOLANA_DEVNET_NETWORK } from '$env/networks/networks.sol.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN,
+	BTC_REGTEST_TOKEN,
+	BTC_TESTNET_TOKEN
+} from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
@@ -81,8 +85,15 @@ describe('token-id.utils', () => {
 			});
 		});
 
+		it('maps native Bitcoin by network', () => {
+			expect(toBackendTokenId(BTC_MAINNET_TOKEN)).toEqual({ BtcNativeMainnet: null });
+			expect(toBackendTokenId(BTC_TESTNET_TOKEN)).toEqual({ BtcNativeTestnet: null });
+		});
+
+		// Bitcoin regtest is a local-development network with no `TokenId` variant
+		// on the backend, so it must stay untrackable rather than borrow testnet's.
 		it('returns undefined for a token with no backend representation', () => {
-			expect(toBackendTokenId(BTC_MAINNET_TOKEN)).toBeUndefined();
+			expect(toBackendTokenId(BTC_REGTEST_TOKEN)).toBeUndefined();
 		});
 	});
 });
