@@ -9,7 +9,7 @@ import { derived, type Readable } from 'svelte/store';
 // Only IC tokens can have a failing Index canister, and consumers identify them by their Ledger
 // canister ID - which the other chains' tokens do not have. Narrow with the type guard rather than
 // casting, so a non-IC token cannot reach a consumer reading `ledgerCanisterId`.
-const enabledIcTokens: Readable<IcToken[]> = derived(
+export const enabledIcTokens: Readable<IcToken[]> = derived(
 	[enabledFungibleNetworkTokens],
 	([$enabledFungibleNetworkTokens]) => $enabledFungibleNetworkTokens.filter(isIcToken)
 );
