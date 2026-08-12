@@ -1362,6 +1362,7 @@ interface I18nWallet_connect {
 		btc_psbt_decode: string;
 		btc_psbt_input_not_segwit: string;
 		btc_psbt_input_not_owned: string;
+		btc_psbt_input_ambiguous: string;
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
