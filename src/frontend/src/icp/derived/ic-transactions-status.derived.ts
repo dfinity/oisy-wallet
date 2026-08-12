@@ -1,4 +1,6 @@
+import { browser } from '$app/environment';
 import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
+import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
@@ -56,3 +58,28 @@ export const tokensWithRecoveredIndexCanister: Readable<IcToken[]> = derived(
 	([$enabledIcTokens, $icTransactionsStatusStore]) =>
 		$enabledIcTokens.filter(({ id }) => $icTransactionsStatusStore[id] === 0)
 );
+
+/**
+ * The tokens the user should actually be warned about: failing, and not already acknowledged.
+ *
+ * Shared by the Activity page and the token page so that dismissing the warning in one silences it
+ * in the other.
+ */
+export const tokensToWarnAboutIndexCanister: Readable<IcToken[]> = derived(
+	[tokensWithUnavailableIndexCanister, icTransactionsWarningStore],
+	([$tokensWithUnavailableIndexCanister, $icTransactionsWarningStore]) =>
+		$tokensWithUnavailableIndexCanister.filter(
+			({ ledgerCanisterId }) => !$icTransactionsWarningStore.includes(ledgerCanisterId)
+		)
+);
+
+// The forget-on-recovery rule lives here rather than in a component: the warning is raised in two
+// places, and a token can recover while neither of them is mounted.
+//
+// Browser only: subscribing reaches a SvelteKit store whose `subscribe` calls `getContext`, which
+// throws outside a component - and during prerendering there is no component.
+if (browser) {
+	tokensWithRecoveredIndexCanister.subscribe((tokens) =>
+		icTransactionsWarningStore.forget(tokens.map(({ ledgerCanisterId }) => ledgerCanisterId))
+	);
+}
