@@ -1,6 +1,6 @@
 import type { ActiveUserTransactionRef } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_REGTEST_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc4626Token } from '$eth/types/erc4626';
@@ -129,7 +129,7 @@ describe('velora-active-tx.utils', () => {
 				toVeloraData({
 					mode: { Delta: null },
 					sourceToken: makeErc20Token(USDC_ETHEREUM),
-					destinationToken: BTC_MAINNET_TOKEN,
+					destinationToken: BTC_REGTEST_TOKEN,
 					amount: 5n
 				})
 			).toBeUndefined();
