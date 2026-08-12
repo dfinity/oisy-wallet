@@ -85,7 +85,7 @@
 	label={$i18n.wallet_connect.text.simulated_changes}
 	ref="simulated-changes"
 >
-	<div class="flex flex-col gap-2">
+	<div class="flex flex-col gap-1">
 		{#if nonNullish(solDelta)}
 			<div class="flex gap-4" data-tid="simulated-sol-delta">
 				{@render delta({
