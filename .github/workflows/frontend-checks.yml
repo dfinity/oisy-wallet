@@ -216,6 +216,9 @@ jobs:
     permissions:
       contents: read
     strategy:
+      # One network failing should not hide the state of the others: `config`
+      # needs every domain file to produce a meaningful comparison.
+      fail-fast: false
       matrix:
         network: ${{ fromJson(needs.config-preparation.outputs.network-matrix) }}
 
@@ -233,6 +236,14 @@ jobs:
           FILE="ic-domain.$NETWORK.txt"
           DOMAINS="build/.well-known/ic-domains"
           echo "" > "$FILE"
+
+          # Some networks (e.g. old-backend) have no frontend canister, so the
+          # build cannot run there at all. That is not a failure: leave the
+          # placeholder blank line, which the validation ignores.
+          if ! dfx canister id frontend --network "$NETWORK" >/dev/null 2>&1; then
+            echo "No frontend canister for $NETWORK; leaving the domain file blank."
+            exit 0
+          fi
 
           # `dfx build` downloads dependency artifacts from GitHub releases, which
           # fails intermittently. Retry before giving up, and keep the output so a
