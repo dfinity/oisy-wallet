@@ -2333,8 +2333,8 @@
 			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
-			"unavailable_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। इंडेक्स कैनिस्टर वर्तमान में अनुपलब्ध है।"
+			"no_index_canister": "$oisy_short, $token_list के लेनदेन लोड नहीं कर सकता — टोकन जारीकर्ता लेनदेन ट्रैकिंग की सुविधा नहीं देता।",
+			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।"
 		}
 	},
 	"earning": {

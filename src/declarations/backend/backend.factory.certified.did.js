@@ -251,6 +251,20 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat,
 		dest_token: TokenId
 	});
+	const ChainFusionDirection = IDL.Variant({
+		BtcToCkBtc: IDL.Null,
+		CkBtcToBtc: IDL.Null,
+		EthToCkEth: IDL.Null,
+		CkErc20ToErc20: IDL.Null,
+		Erc20ToCkErc20: IDL.Null,
+		CkEthToEth: IDL.Null
+	});
+	const ChainFusionData = IDL.Record({
+		direction: ChainFusionDirection,
+		source_token: TokenId,
+		amount: IDL.Nat,
+		dest_token: TokenId
+	});
 	const VeloraSwapMode = IDL.Variant({
 		Delta: IDL.Null,
 		Market: IDL.Null
@@ -277,6 +291,7 @@ export const idlFactory = ({ IDL }) => {
 		OneSecEvmToIcp: OneSecEvmToIcpData,
 		OneSecIcpToEvm: OneSecIcpToEvmData,
 		NearIntents: NearIntentsData,
+		ChainFusion: ChainFusionData,
 		Velora: VeloraData,
 		Liquidium: LiquidiumData
 	});
