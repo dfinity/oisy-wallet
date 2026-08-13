@@ -2333,8 +2333,8 @@
 			"hidden_micro_transactions": "As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
 		},
 		"warning": {
-			"no_index_canister": "As transações para $token_list não podem ser exibidas. Nenhum canister Index disponível.",
-			"unavailable_index_canister": "As transações para $token_list não podem ser exibidas. O canister Index está atualmente indisponível."
+			"no_index_canister": "$oisy_short não consegue carregar as transações de $token_list — o emissor do token não oferece rastreamento de transações.",
+			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar."
 		}
 	},
 	"earning": {
