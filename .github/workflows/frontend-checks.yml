@@ -231,8 +231,9 @@ jobs:
       - name: Check ic-domains
         continue-on-error: true
         # The build output is kept, so that a failure can be diagnosed from the job log.
-        # Networks that serve no domain (local, old-backend, test_be_1) are expected to fail
-        # here and to leave the file empty; the `config` job asserts which ones those are.
+        # Networks that serve no domain (local, old-backend, test_be_1) are expected to produce
+        # no domain here, leaving the file with only its placeholder blank line, which the
+        # domain diff ignores.
         run: |
           FILE="ic-domain.$NETWORK.txt"
           echo "" > "$FILE"
