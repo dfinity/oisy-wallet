@@ -3,9 +3,13 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
+import { summarizeSolWalletConnectRequest } from '$sol/services/wallet-connect-summary.services';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$sol/services/wallet-connect-summary.services');
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
@@ -27,8 +31,14 @@ describe('SolWalletConnectSignReview', () => {
 	const solUsdPrice = 200;
 
 	beforeEach(() => {
+		vi.resetAllMocks();
+
 		balancesStore.reset(SOLANA_TOKEN.id);
 		exchangeStore.reset();
+
+		mockAuthStore();
+
+		vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined);
 	});
 
 	it('should render the unreviewed instructions warning', () => {
@@ -370,5 +380,109 @@ describe('SolWalletConnectSignReview', () => {
 		);
 
 		expect(logo).toBeInTheDocument();
+	});
+
+	// The generated sentence is written by an LLM canister over an update call, so it arrives late
+	// or not at all. The review is the deterministic part and must not depend on it in any way.
+	describe('the generated summary', () => {
+		const summaryProps = {
+			...props,
+			data: 'AQID',
+			prioritizationFee: 238_217n,
+			preview: { solDelta: -10_000_000n, tokenDeltas: [], controlChanges: [] }
+		};
+
+		const expectReviewIntact = ({
+			getByText,
+			getByTestId
+		}: ReturnType<typeof render<typeof SolWalletConnectSignReview>>) => {
+			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
+			expect(getByText(en.core.text.amount)).toBeInTheDocument();
+			expect(getByText(en.send.text.destination)).toBeInTheDocument();
+			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
+			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.simulated_changes)).toBeInTheDocument();
+			expect(getByTestId('simulated-sol-delta')).toHaveTextContent('-0.01 SOL');
+			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
+		};
+
+		it('should leave the review as it is while the sentence has not arrived', () => {
+			vi.mocked(summarizeSolWalletConnectRequest).mockReturnValue(new Promise(() => {}));
+
+			const result = render(SolWalletConnectSignReview, { props: summaryProps });
+
+			expectReviewIntact(result);
+
+			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+		});
+
+		it('should leave the review as it is when the sentence never arrives', async () => {
+			vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined);
+
+			const result = render(SolWalletConnectSignReview, { props: summaryProps });
+
+			await waitFor(() => {
+				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+			});
+
+			expectReviewIntact(result);
+
+			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+		});
+
+		it('should leave the review as it is when the request throws', async () => {
+			vi.mocked(summarizeSolWalletConnectRequest).mockRejectedValue(new Error('unreachable'));
+
+			const result = render(SolWalletConnectSignReview, { props: summaryProps });
+
+			await waitFor(() => {
+				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+			});
+
+			expectReviewIntact(result);
+
+			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+		});
+
+		it.each([
+			{
+				state: 'pending',
+				mock: () =>
+					vi.mocked(summarizeSolWalletConnectRequest).mockReturnValue(new Promise(() => {}))
+			},
+			{
+				state: 'absent',
+				mock: () => vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined)
+			},
+			{
+				state: 'present',
+				mock: () =>
+					vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue('Transfer of 0.001 SOL.')
+			}
+		])('should leave approval enabled while the sentence is $state', async ({ mock }) => {
+			mock();
+
+			const { getByRole } = render(SolWalletConnectSignReview, { props: summaryProps });
+
+			await waitFor(() => {
+				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		it('should not enable approval that the decode disabled', async () => {
+			vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue('Transfer of 0.001 SOL.');
+
+			const { getByRole, getByTestId } = render(SolWalletConnectSignReview, {
+				props: { ...summaryProps, approveDisabled: true }
+			});
+
+			await waitFor(() => {
+				expect(getByTestId('wallet-connect-summary')).toBeInTheDocument();
+			});
+
+			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
+		});
 	});
 });

@@ -12,6 +12,7 @@
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
+	import { findSplToken } from '$sol/utils/spl.utils';
 
 	interface Props {
 		preview: SolSimulationPreview;
@@ -23,11 +24,8 @@
 
 	let { solDelta, tokenDeltas, controlChanges } = $derived(preview);
 
-	// The same mint can exist on several clusters, so the network is matched too.
 	const splToken = (tokenAddress: SplTokenAddress): SplCustomToken | undefined =>
-		$enabledSplTokens.find(
-			({ address, network: { id } }) => address === tokenAddress && id === feeToken.network.id
-		);
+		findSplToken({ tokens: $enabledSplTokens, tokenAddress, networkId: feeToken.network.id });
 
 	const symbol = (tokenAddress: SplTokenAddress): string =>
 		splToken(tokenAddress)?.symbol ?? shortenWithMiddleEllipsis({ text: tokenAddress });

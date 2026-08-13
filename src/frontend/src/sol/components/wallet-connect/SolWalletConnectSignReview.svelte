@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { SOL_WALLET_CONNECT_SUMMARY_ENABLED } from '$env/sol-wallet-connect-summary.env';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -16,6 +17,7 @@
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
+	import SolWalletConnectSummary from '$sol/components/wallet-connect/SolWalletConnectSummary.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
@@ -141,6 +143,23 @@
 <ContentWithToolbar>
 	{#if unreviewed}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
+	{/if}
+
+	<!-- Arrives late or not at all, and nothing below it waits for it: `approveDisabled` is the
+	     caller's, decided by the decode alone. -->
+	{#if SOL_WALLET_CONNECT_SUMMARY_ENABLED}
+		<SolWalletConnectSummary
+			{amount}
+			{destination}
+			{feeToken}
+			{isApproval}
+			networkFee={SOLANA_TRANSACTION_FEE_IN_LAMPORTS}
+			{preview}
+			{prioritizationFee}
+			{source}
+			{token}
+			{unreviewed}
+		/>
 	{/if}
 
 	<SendData
