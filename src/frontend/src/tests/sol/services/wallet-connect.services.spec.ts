@@ -22,8 +22,10 @@ import * as solSendServices from '$sol/services/sol-send.services';
 import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
@@ -79,11 +81,17 @@ vi.mock('$sol/providers/sol-rpc.providers', () => ({
 
 vi.mock('$sol/api/solana.api', () => ({
 	getAccountInfo: vi.fn(),
-	estimatePriorityFee: vi.fn()
+	estimatePriorityFee: vi.fn(),
+	getMultipleAccountsInfo: vi.fn(),
+	simulateTransactionAccounts: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-simulation.services', () => ({
+	simulateSolTransactionPreview: vi.fn()
 }));
 
 describe('wallet-connect.services', () => {
@@ -156,16 +164,20 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
-				`No Solana network for network ${networkId.description}`
-			);
+			await expect(
+				decode({ base64EncodedTransactionMessage, networkId, address: mockSolAddress })
+			).rejects.toThrow(`No Solana network for network ${networkId.description}`);
 		});
 
 		it('should parse and map a transaction successfully for a valid network', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(parseSolBase64TransactionMessage).toHaveBeenCalledWith({
 				transactionMessage: base64EncodedTransactionMessage,
@@ -189,7 +201,11 @@ describe('wallet-connect.services', () => {
 				value: { data: { parsed: { info: { mint: mockSplAddress } } } }
 			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(getAccountInfo).toHaveBeenCalledWith(
 				expect.objectContaining({ address: mockAtaAddress })
@@ -219,7 +235,11 @@ describe('wallet-connect.services', () => {
 				value: { data: ['', 'base64'] }
 			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(getAccountInfo).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ address: mockSolAddress })
@@ -239,9 +259,55 @@ describe('wallet-connect.services', () => {
 
 			vi.mocked(getAccountInfo).mockRejectedValue(new Error('RPC down'));
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+		});
+
+		describe('simulated preview', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			const mockPreview: SolSimulationPreview = {
+				solDelta: -5_000n,
+				tokenDeltas: [],
+				controlChanges: []
+			};
+
+			it('should attach the preview to the decoded review', async () => {
+				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(mockPreview);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(simulateSolTransactionPreview).toHaveBeenCalledExactlyOnceWith({
+					base64EncodedTransactionMessage,
+					transactionMessage: mockParsedTransaction,
+					address: mockSolAddress,
+					network: 'mainnet'
+				});
+				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
+			});
+
+			it('should decode without a preview when the simulation yields none', async () => {
+				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(undefined);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(mockMappedTransaction);
+				expect(result).not.toHaveProperty('preview');
+			});
 		});
 
 		describe('prioritization fee estimate', () => {
@@ -263,7 +329,11 @@ describe('wallet-connect.services', () => {
 				// 1_120_000 lamports, not 800_000
 				vi.mocked(estimatePriorityFee).mockResolvedValue(800_000n);
 
-				const result = await decode({ base64EncodedTransactionMessage, networkId });
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
 
 				expect(estimatePriorityFee).toHaveBeenCalledExactlyOnceWith({ network: 'mainnet' });
 				expect(result).toEqual(expect.objectContaining({ prioritizationFeeEstimate: 1_120_000n }));
@@ -272,7 +342,11 @@ describe('wallet-connect.services', () => {
 			it('should omit the estimate when the RPC fails, without failing the decode', async () => {
 				vi.mocked(estimatePriorityFee).mockRejectedValue(new Error('RPC down'));
 
-				const result = await decode({ base64EncodedTransactionMessage, networkId });
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
 
 				expect(result).toEqual(
 					expect.objectContaining({ amount: 123n, prioritizationFee: 1_000_000_001n })
@@ -287,7 +361,11 @@ describe('wallet-connect.services', () => {
 					destination: mockSolAddress2
 				});
 
-				const result = await decode({ base64EncodedTransactionMessage, networkId });
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
 
 				expect(estimatePriorityFee).not.toHaveBeenCalled();
 				expect(result).not.toHaveProperty('prioritizationFeeEstimate');
