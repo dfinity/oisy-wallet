@@ -27,7 +27,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { signAsync as signSecp256k1Async } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { networks, payments, Psbt } from 'bitcoinjs-lib';
+import { networks, payments, Psbt, Transaction } from 'bitcoinjs-lib';
 import type { MockInstance } from 'vitest';
 
 const BIP122_MAINNET_CHAIN_ID = 'bip122:000000000019d6689c085ae165831e93';
@@ -238,6 +238,41 @@ describe('btc wallet-connect.services', () => {
 		return psbt.toBase64();
 	};
 
+	// A previous transaction paying `value` to `script`, so an input can carry the `nonWitnessUtxo`
+	// bitcoinjs-lib actually builds the sighash from, with a matching prevout hash.
+	const buildPrevTx = ({ script, value }: { script: Buffer; value: number }): Transaction => {
+		const tx = new Transaction();
+		tx.addInput(Buffer.alloc(32, 1), 0);
+		tx.addOutput(script, value);
+
+		return tx;
+	};
+
+	const buildPsbtWithBothUtxos = ({
+		witnessUtxo,
+		nonWitnessUtxo
+	}: {
+		witnessUtxo: { script: Buffer; value: number };
+		nonWitnessUtxo: { script: Buffer; value: number };
+	}): string => {
+		const prevTx = buildPrevTx(nonWitnessUtxo);
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: prevTx.getId(),
+			index: 0,
+			nonWitnessUtxo: prevTx.toBuffer(),
+			witnessUtxo
+		});
+
+		// External recipient
+		psbt.addOutput({ script: externalScript as Buffer, value: 70_000 });
+		// Change back to the wallet
+		psbt.addOutput({ script: walletScript as Buffer, value: 28_000 });
+
+		return psbt.toBase64();
+	};
+
 	const buildRequest = (params: Record<string, unknown>): WalletKitTypes.SessionRequest =>
 		({
 			params: {
@@ -264,6 +299,92 @@ describe('btc wallet-connect.services', () => {
 		// 100_000 - (70_000 + 28_000)
 		expect(decoded.fee).toBe(2_000n);
 		expect(decoded.broadcast).toBeFalsy();
+		expect(decoded.ambiguous).toBeFalsy();
+	});
+
+	it('decodes an input stating the same previous output in witnessUtxo and nonWitnessUtxo', () => {
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 100_000 },
+				nonWitnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.inputs[0].address).toBe(walletAddress);
+		expect(decoded.inputs[0].value).toBe(100_000n);
+		expect(decoded.inputs[0].signedByWallet).toBeTruthy();
+		expect(decoded.totalSignedInputs).toBe(100_000n);
+		expect(decoded.fee).toBe(2_000n);
+	});
+
+	it('shows no figure for an input whose witnessUtxo and nonWitnessUtxo values disagree', () => {
+		// bitcoinjs-lib signs the `nonWitnessUtxo` value; a review reading `witnessUtxo` would price
+		// the request at 10_000 while the signature commits to 100_000.
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 10_000 },
+				nonWitnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.inputs[0].address).toBeUndefined();
+		expect(decoded.inputs[0].signedByWallet).toBeFalsy();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('shows no figure for an input whose witnessUtxo and nonWitnessUtxo scripts disagree', () => {
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 100_000 },
+				nonWitnessUtxo: { script: externalScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('withholds the total and the fee when only a second input contradicts itself', () => {
+		// A single lying input distorts the total and the fee too, so no figure may be shown.
+		const honestPrevTx = buildPrevTx({ script: walletScript as Buffer, value: 100_000 });
+		const lyingPrevTx = buildPrevTx({ script: walletScript as Buffer, value: 900_000 });
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: honestPrevTx.getId(),
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+		});
+		psbt.addInput({
+			hash: lyingPrevTx.getId(),
+			index: 0,
+			nonWitnessUtxo: lyingPrevTx.toBuffer(),
+			witnessUtxo: { script: walletScript as Buffer, value: 1_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 100_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[1].value).toBeUndefined();
+		expect(decoded.fee).toBeUndefined();
 	});
 
 	it('flags an input as not owned when it does not match the wallet address', () => {
@@ -301,6 +422,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.inputs[0].value).toBeUndefined();
 		expect(decoded.totalSignedInputs).toBe(ZERO);
 		expect(decoded.fee).toBeUndefined();
+		expect(decoded.ambiguous).toBeFalsy();
 	});
 
 	it('reports the broadcast flag and defaults it to false', () => {
@@ -370,6 +492,28 @@ describe('btc wallet-connect.services', () => {
 				hash: '0000000000000000000000000000000000000000000000000000000000000001',
 				index: 0,
 				witnessUtxo: { script: ownScript as Buffer, value: 100_000 }
+			});
+			psbt.addOutput({ script: ownScript as Buffer, value: 90_000 });
+
+			return psbt.toBase64();
+		};
+
+		const buildOwnedPsbtWithBothUtxos = ({ witnessValue }: { witnessValue: number }): string => {
+			const { output: ownScript } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const prevTx = new Transaction();
+			prevTx.addInput(Buffer.alloc(32, 1), 0);
+			prevTx.addOutput(ownScript as Buffer, 100_000);
+
+			const psbt = new Psbt({ network: networks.bitcoin });
+			psbt.addInput({
+				hash: prevTx.getId(),
+				index: 0,
+				nonWitnessUtxo: prevTx.toBuffer(),
+				witnessUtxo: { script: ownScript as Buffer, value: witnessValue }
 			});
 			psbt.addOutput({ script: ownScript as Buffer, value: 90_000 });
 
@@ -472,6 +616,78 @@ describe('btc wallet-connect.services', () => {
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
 			expect(progress).toHaveBeenCalledWith(ProgressStepsSign.DONE);
+		});
+
+		it('signs a request whose witnessUtxo and nonWitnessUtxo state the same previous output', async () => {
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: {
+						psbt: buildOwnedPsbtWithBothUtxos({ witnessValue: 100_000 }),
+						broadcast: false
+					}
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: true });
+
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				message: { psbt: expect.any(String) }
+			});
+
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
+		});
+
+		it('rejects a request whose witnessUtxo and nonWitnessUtxo disagree without signing', async () => {
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			// The review would price this at 10_000 while the signature would commit to the 100_000 the
+			// `nonWitnessUtxo` states.
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: {
+						psbt: buildOwnedPsbtWithBothUtxos({ witnessValue: 10_000 }),
+						broadcast: false
+					}
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_ambiguous }
+			});
 		});
 	});
 

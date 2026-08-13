@@ -7,6 +7,8 @@ export interface WalletConnectEthSendTransactionParams {
 	to?: string;
 	data?: string;
 	gasPrice?: string;
+	// The gas limit as `eth_sendTransaction` names it. It is the field OISY signs when present.
+	gas?: string;
 	gasLimit?: string;
 	value?: string;
 	nonce?: string;
