@@ -75,9 +75,25 @@ export const toSolWalletConnectSummaryFacts = ({
 		network: { id: networkId }
 	} = feeToken;
 
+	// A simulation that moves nothing says nothing about the outcome, and a control change carries
+	// no amount, so only a balance delta counts as the simulation having described what happens.
+	const simulatedBalanceChange =
+		nonNullish(preview) && (nonNullish(preview.solDelta) || preview.tokenDeltas.length > 0);
+
+	// A decoded leg speaks for the transaction only when it is the whole transaction. Where
+	// instructions were left undecoded, the leg OISY can read is often internal plumbing rather
+	// than the outcome: a routed swap funds a temporary wrapped-SOL account owned by the signer,
+	// so quoting that leg announces a transfer to an address the user never chose and omits the
+	// token they actually receive. The simulated balances are the outcome, so where they exist
+	// they replace the leg instead of sitting beside it.
+	//
+	// An approval is exempt. It is not plumbing, it hands spending rights to someone, and the
+	// simulated balances do not restate it, so dropping it would hide the fact most worth stating.
+	const supersededByPreview = !isApproval && unreviewed && simulatedBalanceChange;
+
 	// Instructions OISY cannot decode yield no amount, and the review drops the amount and
 	// destination rows rather than filling them. What is not on screen is not sent either.
-	const decoded = nonNullish(amount);
+	const decoded = nonNullish(amount) && !supersededByPreview;
 
 	const splSymbol = (tokenAddress: string): string =>
 		findSplToken({ tokens: splTokens, tokenAddress, networkId })?.symbol ??

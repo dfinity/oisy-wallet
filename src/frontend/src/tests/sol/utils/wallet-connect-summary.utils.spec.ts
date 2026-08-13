@@ -127,6 +127,75 @@ describe('wallet-connect-summary.utils', () => {
 			);
 		});
 
+		// A partial decode of a routed swap reads the wrapping leg, whose recipient is a temporary
+		// account owned by the signer. Quoting it states a transfer to an address the user never
+		// chose, and omits the token they receive; the simulated balances state both correctly.
+		it('should let the simulated balances replace a leg decoded out of a partial transaction', () => {
+			const facts = toSolWalletConnectSummaryFacts({
+				...params,
+				amount: 5_000_000n,
+				unreviewed: true,
+				preview: {
+					solDelta: -5_454_491n,
+					tokenDeltas: [
+						{
+							account: mockAtaAddress,
+							tokenAddress: mockSplAddress,
+							decimals: 6,
+							delta: 377_098n
+						}
+					],
+					controlChanges: []
+				}
+			});
+
+			expect(facts.join('\n')).not.toContain('Amount');
+			expect(facts.join('\n')).not.toContain('Recipient');
+
+			expect(facts).toContain('Simulated balance change: -0.005454491 SOL');
+			expect(facts).toContain('Simulated balance change: +0.377098 CcExVbJ...rFRrbta');
+		});
+
+		it('should keep the decoded transfer when the whole transaction was decoded', () => {
+			const facts = toSolWalletConnectSummaryFacts({
+				...params,
+				amount: 5_000_000n,
+				preview: { solDelta: -5_454_491n, tokenDeltas: [], controlChanges: [] }
+			});
+
+			expect(facts).toContain('Amount: 0.005 SOL');
+			expect(facts).toContain('Recipient: 4GsmSut...AM56JR8');
+		});
+
+		// A control change carries no amount, so it cannot stand in for the leg it would replace.
+		it('should keep the decoded transfer when the simulation found no balance change', () => {
+			const facts = toSolWalletConnectSummaryFacts({
+				...params,
+				amount: 5_000_000n,
+				unreviewed: true,
+				preview: {
+					tokenDeltas: [],
+					controlChanges: [{ account: mockAtaAddress, field: 'delegate' }]
+				}
+			});
+
+			expect(facts).toContain('Amount: 0.005 SOL');
+			expect(facts).toContain('Recipient: 4GsmSut...AM56JR8');
+		});
+
+		it('should keep an approval the simulated balances do not restate', () => {
+			const facts = toSolWalletConnectSummaryFacts({
+				...params,
+				amount: 5_000_000n,
+				isApproval: true,
+				unreviewed: true,
+				preview: { solDelta: -5_454_491n, tokenDeltas: [], controlChanges: [] }
+			});
+
+			expect(facts).toContain('Amount: 0.005 SOL');
+			expect(facts).toContain('Approved spender: 4GsmSut...AM56JR8');
+		});
+
 		it('should state the unreviewed caveat the review warns about', () => {
 			const facts = toSolWalletConnectSummaryFacts({
 				...params,
@@ -143,7 +212,6 @@ describe('wallet-connect-summary.utils', () => {
 				...params,
 				amount: 1_000_000n,
 				prioritizationFee: 238_217n,
-				unreviewed: true,
 				preview: {
 					solDelta: -10_000_000n,
 					tokenDeltas: [],
@@ -162,8 +230,7 @@ describe('wallet-connect-summary.utils', () => {
 				'Network fee: 0.000005 SOL',
 				'Priority fee: 0.000238217 SOL',
 				'Simulated balance change: -0.01 SOL',
-				'Simulated control change: HoTxtcV...CJwLULd gets a new account owner',
-				'Caveat: OISY could not decode every instruction, so these facts may be incomplete'
+				'Simulated control change: HoTxtcV...CJwLULd gets a new account owner'
 			]);
 		});
 
