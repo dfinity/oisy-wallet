@@ -2,9 +2,15 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
+import {
+	isSolCompiledTransactionMessage,
+	mapSolTransactionMessage
+} from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
-import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolCompiledTransactionMessageBytes,
+	mockSolParsedTransactionMessage
+} from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
@@ -630,6 +636,61 @@ describe('sol-transactions.utils', () => {
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
 				amount: 60n
 			});
+		});
+	});
+
+	describe('isSolCompiledTransactionMessage', () => {
+		const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
+
+		it.each(['legacy', 0] as const)(
+			'should detect a compiled transaction message of version %s',
+			(version) => {
+				expect(
+					isSolCompiledTransactionMessage(createMockSolCompiledTransactionMessageBytes(version))
+				).toBeTruthy();
+			}
+		);
+
+		it('should detect a compiled transaction message padded with trailing bytes', () => {
+			const bytes = createMockSolCompiledTransactionMessageBytes('legacy');
+
+			expect(
+				isSolCompiledTransactionMessage(Uint8Array.from([...bytes, 1, 2, 3, 4, 5]))
+			).toBeTruthy();
+		});
+
+		it.each([
+			'Sign in with Solana',
+			'example.com wants you to sign in with your Solana account:\n7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1\n\nNonce: 32891756',
+			'{"domain":"example.com","statement":"Log in","nonce":"abc123"}',
+			'a'
+		])('should not flag the plain text message %j', (text) => {
+			expect(isSolCompiledTransactionMessage(encode(text))).toBeFalsy();
+		});
+
+		it('should not flag empty bytes', () => {
+			expect(isSolCompiledTransactionMessage(new Uint8Array(0))).toBeFalsy();
+		});
+
+		it('should not flag a truncated transaction message', () => {
+			const bytes = createMockSolCompiledTransactionMessageBytes('legacy');
+
+			expect(isSolCompiledTransactionMessage(bytes.slice(0, bytes.length - 3))).toBeFalsy();
+		});
+
+		// The guard refuses everything the decoder accepts, so its cost is what it does to genuine
+		// messages. Solana message signing carries UTF-8 text, and no printable-ASCII string is
+		// shaped like a compiled message, so a sign-in challenge is never caught by it.
+		it('should not flag any printable-ASCII message', () => {
+			const texts = Array.from({ length: 2000 }, (_, i) =>
+				Array.from({ length: 1 + (i % 400) }, (_, j) =>
+					String.fromCharCode(32 + ((i * 31 + j * 17) % 95))
+				).join('')
+			);
+
+			expect(texts.filter((text) => isSolCompiledTransactionMessage(encode(text)))).toStrictEqual(
+				[]
+			);
 		});
 	});
 });

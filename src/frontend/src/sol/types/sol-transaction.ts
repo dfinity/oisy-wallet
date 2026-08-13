@@ -110,3 +110,45 @@ export interface SolMappedTransaction {
 	to: SolAddress;
 	tokenAddress?: SplTokenAddress;
 }
+
+/**
+ * One value movement, as named by a single transfer instruction.
+ *
+ * OISY decodes instructions in two representations that never meet: `@solana/kit` objects for an
+ * unsigned message, RPC JSON for anything the network has already run. They do not have to. They
+ * meet here, as legs, which is the narrowest shape the party rules need.
+ */
+export interface SolTransferLeg {
+	source: SolAddress;
+	destination: SolAddress;
+	amount: bigint;
+	tokenAddress?: SplTokenAddress;
+}
+
+export interface SolTransferParty {
+	address: SolAddress;
+	// The wallet owning the account, where it is known. SPL transfers name token accounts, and a
+	// user recognises a wallet address where nobody recognises their own associated token account.
+	owner?: SolAddress;
+	// Whether the account is one of the user's own. Our own account legitimately appears among the
+	// destinations of a swap, where it is what the user receives, so it is marked rather than
+	// dropped.
+	own: boolean;
+}
+
+/**
+ * Who a transaction spends from and who it pays.
+ *
+ * The two rules are asymmetric on purpose. Sources answers "what of ours is being spent", so a
+ * counterparty paying into a pool never appears there. Destinations answers "where does the value
+ * end up", counting every leg we are on either side of, which is the only way a swap can show what
+ * the user receives and not only what they spend.
+ */
+export interface SolTransferParties {
+	sources: SolTransferParty[];
+	destinations: SolTransferParty[];
+	// `true` when the lists were built from top-level instructions alone. A routed swap performs
+	// its transfers inside cross-program invocations, so such lists can be empty for a message that
+	// moves four amounts, and an empty list reads as an answer rather than as a gap.
+	partial: boolean;
+}

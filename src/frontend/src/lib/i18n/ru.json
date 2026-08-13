@@ -936,7 +936,6 @@
 			"send": "Отправить",
 			"send_token": "",
 			"destination": "Получатель",
-			"source": "Источник",
 			"balance": "Баланс",
 			"review": "Подверждение",
 			"signing_approval": "Подписание одобрения...",
@@ -1611,8 +1610,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
@@ -1621,6 +1626,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1681,9 +1687,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
 		}
@@ -2332,8 +2340,8 @@
 			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
-			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",
-			"unavailable_index_canister": "Транзакции для $token_list не могут быть отображены. Контейнер индекса в настоящее время недоступен."
+			"no_index_canister": "$oisy_short не может загрузить транзакции для $token_list — эмитент токена не предоставляет отслеживание транзакций.",
+			"unavailable_index_canister": "Последние транзакции для $token_list сейчас не могут быть загружены, так как их сервис отслеживания не отвечает. Они загрузятся автоматически, как только он снова заработает."
 		}
 	},
 	"earning": {

@@ -1,14 +1,20 @@
 use std::collections::HashSet;
 
 use candid::{Nat, Principal};
-use shared::types::active_user_transaction::{
-    ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
-    ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
-    GetActiveUserTransactionsResponse, UpdateActiveUserTransactionRequest,
-    MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
-    MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS, MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
-    MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
-    MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN, MAX_LIQUIDIUM_POOL_ID_LEN,
+use shared::types::{
+    active_user_transaction::{
+        ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest,
+        GetActiveUserTransactionsResponse, UpdateActiveUserTransactionRequest,
+        MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
+        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
+        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
+        MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_VALUE_LEN, MAX_ACTIVE_USER_TRANSACTION_ID_LEN,
+        MAX_ACTIVE_USER_TRANSACTION_PROGRESS_STEP_LEN, MAX_EVM_ADDRESS_LEN,
+        MAX_LIQUIDIUM_POOL_ID_LEN,
+    },
+    token_id::TokenId,
 };
 
 use crate::types::{ActiveUserTransactionKey, ActiveUserTransactionsMap, Candid, StoredPrincipal};
@@ -232,6 +238,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
         ActiveUserTransactionData::Velora(d) => {
             require_positive_amount(&d.amount)?;
         }
+        ActiveUserTransactionData::ChainFusion(d) => {
+            require_positive_amount(&d.amount)?;
+            require_chain_fusion_pair(d)?;
+        }
     }
     Ok(())
 }
@@ -252,6 +262,41 @@ fn require_pool_id(pool_id: &str) -> Result<(), ActiveUserTransactionError> {
         ));
     }
     Ok(())
+}
+
+/// Each direction fixes which side of the conversion is the ck (ICRC) token and
+/// what kind the other side must be. `data` is immutable after creation and the
+/// FE poller picks its settlement oracle from `direction`, so a pair that
+/// contradicts the direction could never settle and would occupy one of the
+/// user's slots forever — reject it up front. Kinds only, deliberately: any
+/// EVM chain id and any ICRC ledger stay valid so testnets need no special
+/// casing here.
+fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTransactionError> {
+    let is_btc = |t: &TokenId| matches!(t, TokenId::BtcNativeMainnet | TokenId::BtcNativeTestnet);
+    let is_eth = |t: &TokenId| matches!(t, TokenId::EvmNative(_));
+    let is_erc20 = |t: &TokenId| matches!(t, TokenId::Erc20(..));
+    let is_ck = |t: &TokenId| matches!(t, TokenId::Icrc(_));
+
+    let ok = match data.direction {
+        ChainFusionDirection::BtcToCkBtc => is_btc(&data.source_token) && is_ck(&data.dest_token),
+        ChainFusionDirection::CkBtcToBtc => is_ck(&data.source_token) && is_btc(&data.dest_token),
+        ChainFusionDirection::EthToCkEth => is_eth(&data.source_token) && is_ck(&data.dest_token),
+        ChainFusionDirection::CkEthToEth => is_ck(&data.source_token) && is_eth(&data.dest_token),
+        ChainFusionDirection::Erc20ToCkErc20 => {
+            is_erc20(&data.source_token) && is_ck(&data.dest_token)
+        }
+        ChainFusionDirection::CkErc20ToErc20 => {
+            is_ck(&data.source_token) && is_erc20(&data.dest_token)
+        }
+    };
+
+    if ok {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "token pair does not match chain-fusion direction".to_string(),
+        ))
+    }
 }
 
 fn require_evm_address(addr: &str) -> Result<(), ActiveUserTransactionError> {
@@ -307,10 +352,10 @@ mod tests {
     use shared::types::{
         active_user_transaction::{
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
-            ActiveUserTransactionStatus, CreateActiveUserTransactionRequest, LiquidiumAction,
-            LiquidiumData, NearIntentsData, OneSecEvmToIcpData, OneSecIcpToEvmData,
-            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
-            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
+            CreateActiveUserTransactionRequest, LiquidiumAction, LiquidiumData, NearIntentsData,
+            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+            VeloraSwapMode, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         custom_token::ErcTokenId,
         token_id::TokenId,
@@ -534,6 +579,95 @@ mod tests {
             let (mut map, _mm) = setup();
             let mut req = create_req("velora-1");
             req.data = velora_data(0, mode);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
+    const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
+    const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+
+    fn icrc(ledger: &str) -> TokenId {
+        TokenId::Icrc(Principal::from_text(ledger).unwrap())
+    }
+
+    fn chain_fusion_data(
+        amount: u64,
+        direction: ChainFusionDirection,
+    ) -> ActiveUserTransactionData {
+        // Mirrors `chain_fusion_leg` in the shared-crate tests: each direction
+        // carries the token pair it can actually settle, since `validate_data`
+        // rejects a pair that contradicts the direction.
+        let (source_token, dest_token) = match &direction {
+            ChainFusionDirection::BtcToCkBtc => (TokenId::BtcNativeMainnet, icrc(CKBTC_LEDGER)),
+            ChainFusionDirection::CkBtcToBtc => (icrc(CKBTC_LEDGER), TokenId::BtcNativeMainnet),
+            ChainFusionDirection::EthToCkEth => (TokenId::EvmNative(1), icrc(CKETH_LEDGER)),
+            ChainFusionDirection::CkEthToEth => (icrc(CKETH_LEDGER), TokenId::EvmNative(1)),
+            ChainFusionDirection::Erc20ToCkErc20 => (
+                TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+                icrc(CKUSDC_LEDGER),
+            ),
+            ChainFusionDirection::CkErc20ToErc20 => (
+                icrc(CKUSDC_LEDGER),
+                TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            ),
+        };
+        ActiveUserTransactionData::ChainFusion(ChainFusionData {
+            direction,
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn chain_fusion_create_roundtrip() {
+        // All six directions share one variant, so each must survive create —
+        // and the stable-memory read path — unchanged; the direction is what
+        // the FE poller routes on.
+        for direction in ChainFusionDirection::ALL {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = chain_fusion_data(1_000, direction.clone());
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(listed[0].data, chain_fusion_data(1_000, direction));
+        }
+    }
+
+    #[test]
+    fn chain_fusion_zero_amount_rejected() {
+        for direction in ChainFusionDirection::ALL {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = chain_fusion_data(0, direction);
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    #[test]
+    fn chain_fusion_mismatched_token_pair_rejected() {
+        // The BtcToCkBtc pair submitted under every other direction: `data` is
+        // immutable after creation, so a row whose tokens contradict its
+        // direction could never settle and must be rejected up front.
+        for direction in ChainFusionDirection::ALL {
+            if direction == ChainFusionDirection::BtcToCkBtc {
+                continue;
+            }
+            let (mut map, _mm) = setup();
+            let mut req = create_req("ck-1");
+            req.data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token: TokenId::BtcNativeMainnet,
+                dest_token: icrc(CKBTC_LEDGER),
+                amount: Nat::from(1_000u64),
+            });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
         }

@@ -936,7 +936,6 @@
 			"send": "भेजें",
 			"send_token": "",
 			"destination": "गंतव्य",
-			"source": "स्रोत",
 			"balance": "शेष राशि",
 			"review": "समीक्षा",
 			"signing_approval": "अनुमोदन पर हस्ताक्षर कर रहा है...",
@@ -1611,8 +1610,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
@@ -1621,6 +1626,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1681,9 +1687,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
 			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
 		}
@@ -2332,8 +2340,8 @@
 			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
-			"unavailable_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। इंडेक्स कैनिस्टर वर्तमान में अनुपलब्ध है।"
+			"no_index_canister": "$oisy_short, $token_list के लेनदेन लोड नहीं कर सकता — टोकन जारीकर्ता लेनदेन ट्रैकिंग की सुविधा नहीं देता।",
+			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।"
 		}
 	},
 	"earning": {
