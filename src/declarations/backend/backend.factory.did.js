@@ -125,14 +125,14 @@ export const idlFactory = ({ IDL }) => {
 		regtest: IDL.Null,
 		testnet: IDL.Null
 	});
-	const Outpoint = IDL.Record({
+	const OutPoint = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),
 		vout: IDL.Nat32
 	});
 	const Utxo = IDL.Record({
 		height: IDL.Nat32,
 		value: IDL.Nat64,
-		outpoint: Outpoint
+		outpoint: OutPoint
 	});
 	const BtcAddPendingTransactionRequest = IDL.Record({
 		txid: IDL.Vec(IDL.Nat8),

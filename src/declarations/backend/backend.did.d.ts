@@ -1214,25 +1214,22 @@ export interface NearIntentsData {
 	amount: bigint;
 	dest_token: TokenId;
 }
-/**
- * Bitcoin Network.
- */
 export type Network =
 	| {
 			/**
-			 * The Bitcoin mainnet.
+			 * Bitcoin Mainnet.
 			 */
 			mainnet: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin regtest, used for local testing purposes.
+			 * Bitcoin Regtest.
 			 */
 			regtest: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin testnet.
+			 * Bitcoin Testnet4.
 			 */
 			testnet: null;
 	  };
@@ -1298,19 +1295,16 @@ export interface OnramperSignedEntry {
 	value: string;
 }
 /**
- * Outpoint.
+ * A reference to a transaction output.
  */
-export interface Outpoint {
+export interface OutPoint {
 	/**
-	 * Transaction ID (TxID).
-	 *
-	 * The hash of the transaction that created the UTXO.
+	 * A cryptographic hash of the transaction.
+	 * A transaction can output multiple UTXOs.
 	 */
 	txid: Uint8Array;
 	/**
-	 * Output Index (vout).
-	 *
-	 * The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	 * The index of the output within the transaction.
 	 */
 	vout: number;
 }
@@ -2011,21 +2005,12 @@ export type UserTransactionError =
 			UserNotFound: null;
 	  };
 /**
- * Unspent Transaction Output (UTXO).
+ * An unspent transaction output.
  */
 export interface Utxo {
-	/**
-	 * The block height at which the UTXO was created.
-	 */
 	height: number;
-	/**
-	 * The value of the UTXO in satoshis.
-	 */
 	value: bigint;
-	/**
-	 * The outpoint of the UTXO.
-	 */
-	outpoint: Outpoint;
+	outpoint: OutPoint;
 }
 /**
  * Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
