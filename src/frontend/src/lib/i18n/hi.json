@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
