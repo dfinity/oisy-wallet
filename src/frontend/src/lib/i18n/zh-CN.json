@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
@@ -1681,6 +1683,7 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
@@ -2332,8 +2335,8 @@
 			"hidden_micro_transactions": "代币价值非常小的交易当前已被隐藏。要显示它们，请前往<a href=\"/settings/\">设置</a>。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">了解更多</a>"
 		},
 		"warning": {
-			"no_index_canister": "无法显示 $token_list 的交易记录。未提供 Index canister。",
-			"unavailable_index_canister": "无法显示 $token_list 的交易记录。Index canister 当前不可用。"
+			"no_index_canister": "$oisy_short 无法加载 $token_list 的交易——代币发行方未提供交易记录功能。",
+			"unavailable_index_canister": "目前无法加载 $token_list 的最新交易，因为其交易记录服务没有响应。服务恢复后将自动加载。"
 		}
 	},
 	"earning": {

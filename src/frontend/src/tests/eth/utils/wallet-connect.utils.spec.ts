@@ -8,6 +8,7 @@ import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect'
 import {
 	assertValidEthTypedData,
 	getEthTypedDataApproval,
+	getSendParamsGas,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
@@ -270,6 +271,28 @@ describe('wallet-connect.utils', () => {
 					params: toParams(daiPermit('false'))
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('getSendParamsGas', () => {
+		it('reads the hex quantity an eth_sendTransaction request quotes', () => {
+			expect(getSendParamsGas('0x1e8480')).toBe(2_000_000n);
+		});
+
+		it('reads a decimal quantity', () => {
+			expect(getSendParamsGas('21000')).toBe(21_000n);
+		});
+
+		it('is undefined when the request carries no gas limit', () => {
+			expect(getSendParamsGas(undefined)).toBeUndefined();
+		});
+
+		it('is undefined for a quantity that is not a usable limit', () => {
+			expect(getSendParamsGas('0x')).toBeUndefined();
+			expect(getSendParamsGas('not-a-number')).toBeUndefined();
+			expect(getSendParamsGas('')).toBeUndefined();
+			expect(getSendParamsGas('0x0')).toBeUndefined();
+			expect(getSendParamsGas('-1')).toBeUndefined();
 		});
 	});
 

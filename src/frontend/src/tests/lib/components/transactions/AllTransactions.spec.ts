@@ -12,10 +12,11 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import AllTransactions from '$lib/components/transactions/AllTransactions.svelte';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
 import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
+import { Languages } from '$lib/enums/languages';
 import * as notificationServices from '$lib/services/notification.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenId } from '$lib/types/token';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
@@ -96,11 +97,14 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.no_index_canister, {
-			$token_list: '$UWT'
-		});
+		const expectedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+			{
+				$token_list: formatList({ items: ['UWT'], language: Languages.ENGLISH })
+			}
+		);
 
-		expect(getByText(exceptedText)).toBeInTheDocument();
+		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
 	it('does not raise the no Index canister warning for a token of another chain', () => {
@@ -122,11 +126,12 @@ describe('AllTransactions', () => {
 
 		const { getByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const expectedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
+		);
 
-		expect(getByText(exceptedText)).toBeInTheDocument();
+		expect(getByText(expectedText)).toBeInTheDocument();
 	});
 
 	it('does not render the unavailable Index canister warning box before the threshold', () => {
@@ -136,11 +141,12 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const expectedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
+		);
 
-		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+		expect(queryByText(expectedText)).not.toBeInTheDocument();
 	});
 
 	it('stops rendering the unavailable Index canister warning box after a successful sync', () => {
@@ -151,11 +157,12 @@ describe('AllTransactions', () => {
 
 		const { queryByText } = render(AllTransactions);
 
-		const exceptedText = replacePlaceholders(en.activity.warning.unavailable_index_canister, {
-			$token_list: '$UTC'
-		});
+		const expectedText = replacePlaceholders(
+			replaceOisyPlaceholders(en.activity.warning.unavailable_index_canister),
+			{ $token_list: formatList({ items: ['UTC'], language: Languages.ENGLISH }) }
+		);
 
-		expect(queryByText(exceptedText)).not.toBeInTheDocument();
+		expect(queryByText(expectedText)).not.toBeInTheDocument();
 	});
 
 	it('closes the unavailable Index canister warning via sessionStorage, not backend persistence', async () => {
@@ -305,9 +312,10 @@ describe('AllTransactions', () => {
 
 			const { queryByText } = render(AllTransactions);
 
-			const expectedText = replacePlaceholders(en.activity.warning.no_index_canister, {
-				$token_list: '$NIC'
-			});
+			const expectedText = replacePlaceholders(
+				replaceOisyPlaceholders(en.activity.warning.no_index_canister),
+				{ $token_list: formatList({ items: ['NIC'], language: Languages.ENGLISH }) }
+			);
 
 			expect(queryByText(expectedText)).not.toBeInTheDocument();
 		});
