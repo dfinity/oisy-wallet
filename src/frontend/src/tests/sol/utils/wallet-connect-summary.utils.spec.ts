@@ -226,6 +226,12 @@ describe('wallet-connect-summary.utils', () => {
 			).toBe('Transfer of 0.001 SOL.');
 		});
 
+		it('should keep an answer that never terminates its sentence', () => {
+			expect(sanitizeSolWalletConnectSummary({ content: 'Transfer of 0.001 SOL', facts })).toBe(
+				'Transfer of 0.001 SOL'
+			);
+		});
+
 		it('should not mistake a decimal point for the end of the sentence', () => {
 			expect(sanitizeSolWalletConnectSummary({ content: 'Transfer of 0.001 SOL.', facts })).toBe(
 				'Transfer of 0.001 SOL.'

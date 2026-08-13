@@ -164,13 +164,13 @@ export const sanitizeSolWalletConnectSummary = ({
 		return;
 	}
 
-	const sentence = content
-		.replace(THINK_REGEX, '')
-		.replace(/\s+/g, ' ')
-		.trim()
-		.match(FIRST_SENTENCE_REGEX)?.[0];
+	const answer = content.replace(THINK_REGEX, '').replace(/\s+/g, ' ').trim();
 
-	if (isNullish(sentence) || sentence.length === 0) {
+	// An answer with no terminator at all is already a single fragment, and the length bound below
+	// is what keeps it short. Only a second sentence is worth cutting away.
+	const sentence = answer.match(FIRST_SENTENCE_REGEX)?.[0] ?? answer;
+
+	if (sentence.length === 0) {
 		return;
 	}
 
