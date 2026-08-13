@@ -276,7 +276,7 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(getByText(en.send.text.network)).toBeInTheDocument();
-			expect(getByText(en.send.text.source)).toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
 			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();
