@@ -30,6 +30,7 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -62,6 +63,7 @@ import { get } from 'svelte/store';
 interface WalletConnectDecodeTransactionParams {
 	base64EncodedTransactionMessage: string;
 	networkId: NetworkId;
+	address: OptionSolAddress;
 }
 
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
@@ -75,7 +77,8 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 
 export const decode = async ({
 	base64EncodedTransactionMessage,
-	networkId
+	networkId,
+	address
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
@@ -86,16 +89,26 @@ export const decode = async ({
 
 	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
 
-	// The review is synchronous, so the estimate the requested fee is judged against is fetched
-	// here, where the request is already being decoded before the modal opens.
-	const prioritizationFeeEstimate = await estimateSolPrioritizationFee({
-		computeUnitLimit: mappedTransaction.computeUnitLimit,
-		network: solNetwork
-	});
+	// The review is synchronous, so both the estimate the requested fee is judged against and the
+	// simulated preview are fetched here, where the request is already being decoded before the
+	// modal opens. A preview that lands after the user has approved would be worthless.
+	const [prioritizationFeeEstimate, preview] = await Promise.all([
+		estimateSolPrioritizationFee({
+			computeUnitLimit: mappedTransaction.computeUnitLimit,
+			network: solNetwork
+		}),
+		simulateSolTransactionPreview({
+			base64EncodedTransactionMessage,
+			transactionMessage: parsedTransactionMessage,
+			address,
+			network: solNetwork
+		})
+	]);
 
 	const mapped = {
 		...mappedTransaction,
-		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate })
+		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
+		...(nonNullish(preview) && { preview })
 	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is

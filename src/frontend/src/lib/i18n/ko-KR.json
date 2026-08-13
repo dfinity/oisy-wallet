@@ -1602,6 +1602,14 @@
 			"amount": "금액",
 			"hex_data": "HEX 데이터",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
@@ -2324,8 +2332,8 @@
 			"hidden_micro_transactions": "매우 작은 토큰 가치의 거래가 현재 숨겨져 있습니다. 표시하려면 <a href=\"/settings/\">설정</a>으로 이동하세요.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">자세히 알아보기</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 사용 가능한 인덱스 캐니스터가 없습니다.",
-			"unavailable_index_canister": "$token_list에 대한 거래를 표시할 수 없습니다. 인덱스 캐니스터를 현재 사용할 수 없습니다."
+			"no_index_canister": "$oisy_short에서 $token_list의 거래를 불러올 수 없습니다. 토큰 발행자가 거래 추적 기능을 제공하지 않습니다.",
+			"unavailable_index_canister": "$token_list의 최신 거래를 지금은 불러올 수 없습니다. 거래 추적 서비스가 응답하지 않기 때문입니다. 서비스가 복구되면 자동으로 불러옵니다."
 		}
 	},
 	"earning": {

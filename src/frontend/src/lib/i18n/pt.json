@@ -1602,6 +1602,14 @@
 			"amount": "",
 			"hex_data": "Dados HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
@@ -2324,8 +2332,8 @@
 			"hidden_micro_transactions": "As transações com valores de token muito pequenos estão atualmente ocultas. Para mostrá-las, vá para <a href=\"/settings/\">Configurações</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Saiba mais</a>"
 		},
 		"warning": {
-			"no_index_canister": "As transações para $token_list não podem ser exibidas. Nenhum canister Index disponível.",
-			"unavailable_index_canister": "As transações para $token_list não podem ser exibidas. O canister Index está atualmente indisponível."
+			"no_index_canister": "$oisy_short não consegue carregar as transações de $token_list — o emissor do token não oferece rastreamento de transações.",
+			"unavailable_index_canister": "No momento, as transações mais recentes de $token_list não podem ser carregadas, porque o serviço de rastreamento delas não está respondendo. Elas serão carregadas automaticamente assim que ele voltar."
 		}
 	},
 	"earning": {

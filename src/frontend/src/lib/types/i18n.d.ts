@@ -1285,6 +1285,14 @@ interface I18nWallet_connect {
 		amount: string;
 		hex_data: string;
 		unreviewed_instructions: string;
+		simulated_changes: string;
+		simulation_note: string;
+		simulation_control_change: string;
+		simulation_new_owner: string;
+		simulation_new_spender: string;
+		simulation_new_close_authority: string;
+		simulation_new_program: string;
+		simulation_control_removed: string;
 		dapp_prioritization_fee: string;
 		high_prioritization_fee: string;
 		invalid_typed_data: string;

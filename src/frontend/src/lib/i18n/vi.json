@@ -1602,6 +1602,14 @@
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
 			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
@@ -2324,8 +2332,8 @@
 			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
-			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
-			"unavailable_index_canister": "Không thể hiển thị giao dịch cho $token_list. Canister index hiện không khả dụng."
+			"no_index_canister": "$oisy_short không thể tải giao dịch của $token_list — đơn vị phát hành token không cung cấp tính năng theo dõi giao dịch.",
+			"unavailable_index_canister": "Hiện không thể tải các giao dịch mới nhất của $token_list, vì dịch vụ theo dõi của chúng không phản hồi. Chúng sẽ được tải tự động ngay khi dịch vụ hoạt động trở lại."
 		}
 	},
 	"earning": {

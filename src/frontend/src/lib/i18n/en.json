@@ -1602,6 +1602,14 @@
 			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"unreviewed_instructions": "This transaction contains instructions OISY can't decode, so the review below may be incomplete. Only sign if you trust this app.",
+			"simulated_changes": "Simulated changes to your accounts",
+			"simulation_note": "Simulated against the network's current state. What happens when the transaction actually runs can differ.",
+			"simulation_control_change": "This transaction would change who controls one or more of your accounts. Approving it can hand over an account itself, not only what is in it.",
+			"simulation_new_owner": "New account owner",
+			"simulation_new_spender": "New approved spender",
+			"simulation_new_close_authority": "New close authority",
+			"simulation_new_program": "New owning program",
+			"simulation_control_removed": "Removed",
 			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
 			"high_prioritization_fee": "This transaction sets an unusually high priority fee. Check it carefully and only sign if you trust this app.",
 			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
@@ -2324,8 +2332,8 @@
 			"hidden_micro_transactions": "Transactions with very small token values are currently hidden. To show them, go to <a href=\"/settings/\">Settings</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Learn more</a>"
 		},
 		"warning": {
-			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
-			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
+			"no_index_canister": "$oisy_short can’t load transactions for $token_list — the token issuer doesn’t provide transaction tracking.",
+			"unavailable_index_canister": "The latest transactions for $token_list can’t be loaded at the moment, because their tracking service isn’t responding. They will be loaded automatically once it’s back."
 		}
 	},
 	"earning": {

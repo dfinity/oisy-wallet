@@ -66,11 +66,16 @@ describe('ic-transactions.services', () => {
 			balancesStore.set({ id: tokenId, data: { data: bn1Bi, certified: false } });
 		});
 
-		it('should reset transactions store and balances store', () => {
+		it('should reset the balances store', () => {
 			onLoadTransactionsError({ tokenId, error: mockError });
 
-			expect(get(icTransactionsStore)?.[tokenId]).toBeNull();
 			expect(get(balancesStore)?.[tokenId]).toBeNull();
+		});
+
+		it('should keep the transactions already loaded', () => {
+			onLoadTransactionsError({ tokenId, error: mockError });
+
+			expect(get(icTransactionsStore)?.[tokenId]).toStrictEqual(mockTransactions);
 		});
 
 		it('should track events', () => {
@@ -126,6 +131,7 @@ describe('ic-transactions.services', () => {
 
 			spyTrackEvent = vi.spyOn(analytics, 'trackEvent');
 
+			icTransactionsStore.reset(tokenId);
 			icTransactionsStore.append({ tokenId, transactions: mockTransactions });
 		});
 
