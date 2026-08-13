@@ -20,6 +20,7 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
+import { TOKEN_2022_PROGRAM_ADDRESS, TOKEN_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -30,7 +31,8 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
-import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
+import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
+import { calculateAssociatedTokenAddress } from '$sol/services/spl-accounts.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -48,6 +50,10 @@ import {
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
+import {
+	deriveSolTransferParties,
+	mapSolTransferLegs
+} from '$sol/utils/sol-transfer-parties.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { WalletKitTypes } from '@reown/walletkit';
 import {
@@ -91,20 +97,22 @@ export const decode = async ({
 	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
 
 	// The review is synchronous, so both the estimate the requested fee is judged against and the
-	// simulated preview are fetched here, where the request is already being decoded before the
-	// modal opens. A preview that lands after the user has approved would be worthless.
-	const [prioritizationFeeEstimate, preview] = await Promise.all([
+	// simulation are fetched here, where the request is already being decoded before the modal
+	// opens. A simulation that lands after the user has approved would be worthless.
+	const [prioritizationFeeEstimate, simulation] = await Promise.all([
 		estimateSolPrioritizationFee({
 			computeUnitLimit: mappedTransaction.computeUnitLimit,
 			network: solNetwork
 		}),
-		simulateSolTransactionPreview({
+		simulateSolTransaction({
 			base64EncodedTransactionMessage,
 			transactionMessage: parsedTransactionMessage,
 			address,
 			network: solNetwork
 		})
 	]);
+
+	const { preview, parties: simulatedParties } = simulation ?? {};
 
 	const mapped = {
 		...mappedTransaction,
@@ -117,16 +125,77 @@ export const decode = async ({
 	// being debited) so the review can still show the correct token instead of native
 	// SOL. We deliberately do not look at the destination: a native SOL transfer *to* a
 	// token account would otherwise be misread as an SPL transfer.
-	if (nonNullish(mapped.tokenAddress)) {
-		return mapped;
+	const tokenAddress =
+		mapped.tokenAddress ??
+		(await resolveSplTokenAddress({ address: mapped.source, network: solNetwork }));
+
+	const parties = simulatedParties ?? {
+		...deriveSolTransferParties({
+			legs: mapSolTransferLegs(parsedTransactionMessage.instructions),
+			...(await ownSolAddresses({ address, tokenAddress }))
+		}),
+		// Without a simulation the legs are whatever the message states itself, and a routed swap
+		// states none of them. The lists stay, because losing the destination the review shows
+		// today would be a regression, but they must say that they are partial: an empty list
+		// reads as "nothing moves", which is the most dangerous thing this review can claim.
+		partial: true
+	};
+
+	return {
+		...mapped,
+		...(nonNullish(tokenAddress) && { tokenAddress }),
+		parties
+	};
+};
+
+/**
+ * The accounts the user owns, when there is no simulation to read them from.
+ *
+ * The wallet address alone would not do: SPL transfers name token accounts, so matching on it
+ * would put every token transfer in neither list, for exactly the transactions the lists exist to
+ * explain. The user's associated token account is derived locally instead, for both token programs
+ * since a mint belongs to one or the other, which costs no round trip. Each derived account maps
+ * back to the wallet so that it is shown as one, the way the activity list already shows them.
+ */
+const ownSolAddresses = async ({
+	address,
+	tokenAddress
+}: {
+	address: OptionSolAddress;
+	tokenAddress: SplTokenAddress | undefined;
+}): Promise<{
+	ownedAddresses: SolAddress[];
+	addressToOwner: Record<SolAddress, SolAddress>;
+}> => {
+	if (isNullish(address)) {
+		return { ownedAddresses: [], addressToOwner: {} };
 	}
 
-	const tokenAddress = await resolveSplTokenAddress({
-		address: mapped.source,
-		network: solNetwork
-	});
+	if (isNullish(tokenAddress)) {
+		return { ownedAddresses: [address], addressToOwner: {} };
+	}
 
-	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+	try {
+		const ataAddresses = await Promise.all(
+			[TOKEN_PROGRAM_ADDRESS, TOKEN_2022_PROGRAM_ADDRESS].map(
+				async (tokenOwnerAddress) =>
+					await calculateAssociatedTokenAddress({ owner: address, tokenAddress, tokenOwnerAddress })
+			)
+		);
+
+		return {
+			ownedAddresses: [address, ...ataAddresses],
+			addressToOwner: ataAddresses.reduce<Record<SolAddress, SolAddress>>(
+				(acc, ata) => ({ ...acc, [ata]: address }),
+				{}
+			)
+		};
+	} catch (_: unknown) {
+		// Deriving an address needs the subtle crypto the browser only offers in a secure context.
+		// Losing it costs the lists their token accounts, which the partial marker already covers;
+		// letting it throw would cost the user the whole review.
+		return { ownedAddresses: [address], addressToOwner: {} };
+	}
 };
 
 /**

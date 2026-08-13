@@ -112,6 +112,13 @@ must see the same two lists, or the review taught them nothing about what they s
 constraint is what makes [section 4](#4-the-hard-part-two-instruction-representations) the
 substance of this feature rather than an implementation footnote.
 
+**Shipping order.** The review surface ships first, in full, together with the shared derivation
+that both surfaces call. The activity surface is a follow-up: it renders the same
+`deriveSolTransferParties` over legs adapted from `getTransaction` metadata, which the RPC-side
+adapter already covers, so the follow-up is presentation and wiring rather than a second rule. The
+constraint above still binds it, and it is the reason the derivation was built shared from the
+start rather than inlined into the review.
+
 ---
 
 ## 4. The hard part: two instruction representations
@@ -247,23 +254,41 @@ instruction list has to be reshaped, and the rule from
 
 ---
 
-## 7. Open questions (facts to confirm)
+## 7. Open questions (answered during implementation)
+
+All four were checked against Solana mainnet during the build, using a real Raydium-routed swap
+(`62CoPSXsWtTK6iSXshkhmKT4hDYokc4UskKKRyU2GgToH4Ku8ezd9u95sxm2fDdPtC3acZGzkAXdeoo1Zn57WEjG`)
+replayed through `simulateTransaction` with `replaceRecentBlockhash: true`. None of them
+invalidated the design; the fourth reshaped it slightly, as noted.
 
 - **Does every RPC provider OISY uses honour `innerInstructions: true` on `simulateTransaction`?**
-  The option is comparatively recent on the validator side. PR #13695's fail-open posture means a
-  provider that rejects the config leaves the review as it is today, but the degraded case here is
-  worse than absent: the lists would silently fall back to top-level instructions only, which for a
-  routed swap means two empty lists rather than no lists. Confirm per provider, and make the
-  degraded state explicit rather than silent.
+  **Yes.** OISY's only Solana HTTP provider is Alchemy (mainnet and devnet, plus a local test
+  validator), and Alchemy documents the option. It was exercised live against a stock Agave RPC,
+  which is what the local validator runs, and returned the inner instructions as expected.
+  `@solana/kit` types the option and its response, so the request is checked at compile time. The
+  degraded state is not silent regardless: a provider that refused the option would fail the whole
+  simulation, and the review then says the lists are partial
+  ([8.2](#82-when-simulation-is-unavailable-fall-back-to-top-level-instructions-and-say-the-lists-are-partial)).
 - **For a Raydium-style swap, do the SPL Token and Token-2022 CPIs come back on the
-  `ParsedTransactionInstruction` arm or the partially decoded one?** This decides how many legs a
-  real swap actually yields. Both programs are core enough that the RPC parser should cover them,
-  but this should be checked against a live cluster with a real routed swap rather than assumed.
+  `ParsedTransactionInstruction` arm or the partially decoded one?** **The parsed arm.** In the
+  swap above, all twenty inner instructions came back parsed except the three that are calls into
+  the routing and pool programs themselves. Every SPL Token instruction, including the eight
+  `transfer` and `transferChecked` calls the legs are made of, was parsed. So a real routed swap
+  yields its legs in full, and the partially decoded arm is confined to programs that are not
+  transfers anyway.
 - **Are the simulation's `innerInstructions` indexed against top-level instructions the same way
-  `getTransaction`'s are?** Only matters if a splice is ever reintroduced; Option C does not splice.
-- **Can the owned-address set be built without extra round trips on the review path?** The
-  simulation preview already fetches `jsonParsed` account states carrying `owner`. Confirm that
-  covers every account the legs reference, and what the fallback is when it does not.
+  `getTransaction`'s are?** **Yes, identically.** The same transaction returns the same single
+  group at `index: 2`, with the same twenty instructions in the same order and on the same arms,
+  from both methods. The implementation relies on the grouping (it appends each top-level
+  instruction's invocations after it) but still performs no splice.
+- **Can the owned-address set be built without extra round trips on the review path?** **Yes, and
+  it also removes round trips the mapper would otherwise make.** The `jsonParsed` account states
+  the preview already fetches carry `owner` and `mint` for every token account, and the accounts it
+  asks about are the message's writable ones, which is necessarily a superset of the accounts a
+  transfer names. Handing those mints to `mapSolParsedInstruction` as `addressToToken` is what stops
+  it looking up the mint of each unchecked transfer. The one case not covered is the fallback path,
+  where there is no simulation at all: there the user's associated token account is derived locally
+  with `findAssociatedTokenPda`, for both token programs, which costs no round trip either.
 
 ---
 
@@ -340,7 +365,9 @@ behaves exactly as it does today.
 1. The Solana WalletConnect review shows **Sources** and **Destinations** lists in place of the
    single destination field, derived from the transaction's transfer instructions.
 2. The Solana activity shows the same two lists for an executed transaction, derived from
-   transaction metadata, and matching what the review showed for the same transaction.
+   transaction metadata, and matching what the review showed for the same transaction. _(Deferred
+   to the follow-up described in [section 3](#3-where-the-lists-appear); the derivation and the
+   RPC-side adapter it needs are in place.)_
 3. Both surfaces call **one** derivation function; the rule from
    [section 2.1](#21-derivation-rules) is implemented once.
 4. A plain send produces exactly one entry in each list.

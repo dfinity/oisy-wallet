@@ -119,6 +119,59 @@ const isOwnAccount = ({
 	pre?.token?.owner === userAddress ||
 	post?.token?.owner === userAddress;
 
+/**
+ * Who owns each account the simulation already read, and which of those accounts are the user's own.
+ *
+ * Costs no extra round trip: both sides of the diff are `jsonParsed`, so every token account they
+ * cover already carries its owner and its mint. That is what lets the transfer lists match on
+ * token accounts, which is what SPL transfers actually name. A rule matched against the wallet
+ * address alone would put every token transfer in neither list.
+ *
+ * The mint travels along for the same reason it is free: recovering it later would cost a lookup
+ * per unchecked transfer, on the review's critical path.
+ */
+export const mapSolSimulationAccountOwners = ({
+	addresses,
+	preAccounts,
+	postAccounts,
+	userAddress
+}: {
+	addresses: SolAddress[];
+	preAccounts: readonly SolanaParsedAccountInfo[];
+	postAccounts: readonly SolanaParsedAccountInfo[];
+	userAddress: SolAddress;
+}): {
+	ownedAddresses: SolAddress[];
+	addressToOwner: Record<SolAddress, SolAddress>;
+	addressToToken: Record<SolAddress, SplTokenAddress>;
+} =>
+	addresses.reduce<{
+		ownedAddresses: SolAddress[];
+		addressToOwner: Record<SolAddress, SolAddress>;
+		addressToToken: Record<SolAddress, SplTokenAddress>;
+	}>(
+		({ ownedAddresses, addressToOwner, addressToToken }, address, index) => {
+			const pre = parseAccountState(preAccounts[index]);
+			const post = parseAccountState(postAccounts[index]);
+
+			// An account this message creates has no pre-state, and one it closes has no post-state.
+			const token = post?.token ?? pre?.token;
+
+			return {
+				ownedAddresses: isOwnAccount({ address, userAddress, pre, post })
+					? [...ownedAddresses, address]
+					: ownedAddresses,
+				addressToOwner: nonNullish(token)
+					? { ...addressToOwner, [address]: token.owner }
+					: addressToOwner,
+				addressToToken: nonNullish(token)
+					? { ...addressToToken, [address]: token.tokenAddress }
+					: addressToToken
+			};
+		},
+		{ ownedAddresses: [], addressToOwner: {}, addressToToken: {} }
+	);
+
 const controlChanges = ({
 	account,
 	pre,

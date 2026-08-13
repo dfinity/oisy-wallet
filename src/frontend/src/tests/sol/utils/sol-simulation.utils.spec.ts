@@ -5,6 +5,7 @@ import type { SolanaParsedAccountInfo } from '$sol/types/sol-rpc';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import {
 	isEmptySolSimulationPreview,
+	mapSolSimulationAccountOwners,
 	mapSolSimulationPreview,
 	selectSolSimulationAddresses
 } from '$sol/utils/sol-simulation.utils';
@@ -269,6 +270,58 @@ describe('sol-simulation.utils', () => {
 
 			expect(preview).not.toHaveProperty('solDelta');
 			expect(isEmptySolSimulationPreview(preview)).toBeTruthy();
+		});
+	});
+
+	describe('mapSolSimulationAccountOwners', () => {
+		it('should own the token accounts the user owns, not only their wallet', () => {
+			const { ownedAddresses } = mapSolSimulationAccountOwners({
+				addresses: [mockSolAddress, mockAtaAddress, mockAtaAddress2],
+				preAccounts: [
+					systemAccount({ lamports: 1_000_000n }),
+					tokenAccount({ amount: 5_000n, owner: mockSolAddress }),
+					tokenAccount({ amount: 5_000n, owner: mockSolAddress2 })
+				],
+				postAccounts: [
+					systemAccount({ lamports: 900_000n }),
+					tokenAccount({ amount: 4_000n, owner: mockSolAddress }),
+					tokenAccount({ amount: 6_000n, owner: mockSolAddress2 })
+				],
+				userAddress: mockSolAddress
+			});
+
+			expect(ownedAddresses).toEqual([mockSolAddress, mockAtaAddress]);
+		});
+
+		it('should own an account the message creates, which has no pre-state to read', () => {
+			const { ownedAddresses, addressToOwner } = mapSolSimulationAccountOwners({
+				addresses: [mockAtaAddress],
+				preAccounts: [null],
+				postAccounts: [tokenAccount({ amount: ZERO, owner: mockSolAddress })],
+				userAddress: mockSolAddress
+			});
+
+			expect(ownedAddresses).toEqual([mockAtaAddress]);
+			expect(addressToOwner).toEqual({ [mockAtaAddress]: mockSolAddress });
+		});
+
+		it('should name the owner and the mint of every token account it saw', () => {
+			const { addressToOwner, addressToToken } = mapSolSimulationAccountOwners({
+				addresses: [mockSolAddress, mockAtaAddress2],
+				preAccounts: [
+					systemAccount({ lamports: 1_000_000n }),
+					tokenAccount({ amount: 5_000n, owner: mockSolAddress2 })
+				],
+				postAccounts: [
+					systemAccount({ lamports: 1_000_000n }),
+					tokenAccount({ amount: 5_000n, owner: mockSolAddress2 })
+				],
+				userAddress: mockSolAddress
+			});
+
+			// A wallet has no owner of its own, so it contributes to neither map.
+			expect(addressToOwner).toEqual({ [mockAtaAddress2]: mockSolAddress2 });
+			expect(addressToToken).toEqual({ [mockAtaAddress2]: mockSplAddress });
 		});
 	});
 });

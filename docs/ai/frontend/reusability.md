@@ -117,6 +117,12 @@ Add new feature folders only if your concern doesn't fit any of the above.
 | `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                                                 |
 | `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                                                    |
 
+### Chain-specific utils worth knowing
+
+| Util                         | Where         | Purpose                                                                                                                                                                                                        |
+| ---------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface. |
+
 ### REST + workers
 
 | Module                                                                                       | Where           | Purpose                   |
