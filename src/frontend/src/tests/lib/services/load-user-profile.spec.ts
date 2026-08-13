@@ -32,7 +32,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: false });
 
 			expect(getUserProfileSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -53,7 +53,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: true });
 
 			expect(getUserProfileSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
@@ -74,7 +74,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: false });
 
 			expect(getUserProfileSpy).toHaveBeenCalledTimes(2);
 			expect(getUserProfileSpy).toHaveBeenNthCalledWith(1, {
@@ -102,7 +102,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity, reload: false });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: false });
 
 			expect(getUserProfileSpy).not.toHaveBeenCalled();
 			expect(get(userProfileStore)).toEqual({ certified: true, profile: anotherProfile });
@@ -113,7 +113,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity, reload: false });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: false });
 
 			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 		});
@@ -123,7 +123,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: false, err: 'unknown' });
+			expect(result).toEqual({ success: false, err: 'unknown', profileCreated: false });
 		});
 
 		it('should handle unknown error from getUserProfile', async () => {
@@ -133,7 +133,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: false, err: 'unknown' });
+			expect(result).toEqual({ success: false, err: 'unknown', profileCreated: false });
 		});
 
 		it('should surface signups-closed when createUserProfile rejects with SignupsClosedError', async () => {
@@ -144,7 +144,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: false, err: 'signups-closed' });
+			expect(result).toEqual({ success: false, err: 'signups-closed', profileCreated: false });
 			expect(createUserProfileSpy).toHaveBeenCalledWith({
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
@@ -168,7 +168,7 @@ describe('load-user-profile.services', () => {
 
 			const result = await loadUserProfile({ identity: mockIdentity });
 
-			expect(result).toEqual({ success: true });
+			expect(result).toEqual({ success: true, profileCreated: false });
 			expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 
 			await waitFor(() => expect(callCount).toBe(2));

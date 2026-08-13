@@ -3,7 +3,7 @@ pub mod pic_canister;
 use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
 use candid::{encode_one, CandidType, Nat, Principal};
-use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{CanisterSettings, PocketIc, PocketIcBuilder};
@@ -409,7 +409,21 @@ pub fn setup() -> PicBackend {
 /// Sets up a `PocketIC` environment with NNS subnet (for root key), II subnet, and fiduciary
 /// subnet. Deploys II on the II subnet and initializes the backend with the `PocketIC` root key so
 /// that delegation signature verification works end-to-end.
+///
+/// No cycles ledger is installed, so `allow_signing` reaches its rate limiter on every call
+/// (`has_sufficient_allowance` cannot short-circuit without a ledger to query). Rate-limit tests
+/// depend on that; use [`setup_with_ii_and_cycles_ledger`] when the test needs a real allowance.
 pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(false)
+}
+
+/// Like [`setup_with_ii`] but with the cycles ledger installed, so `allow_signing` can actually
+/// issue an `icrc_2_approve` and the resulting allowance is observable.
+pub fn setup_with_ii_and_cycles_ledger() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(true)
+}
+
+fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii::IICanister) {
     let pic = PocketIcBuilder::new()
         .with_nns_subnet()
         .with_ii_subnet()
@@ -443,7 +457,9 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         new_user_signups_allowed: None,
     });
 
-    let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
+    let mut builder = BackendBuilder::default()
+        .with_arg(encode_one(backend_init).unwrap())
+        .with_cycles_ledger(cycles_ledger_enabled);
 
     let backend_canister_id = builder.deploy_to(&pic);
     let backend = PicBackend {
@@ -574,11 +590,8 @@ impl PicBackend {
     ///
     /// This helper is idempotent and designed to be safe to call repeatedly:
     /// it first issues a `has_user_profile` query and only invokes the
-    /// `create_user_profile` update when the profile does not yet exist. This
-    /// avoids the side effects of `create_user_profile` (notably
-    /// `spawn_allow_signing_if_below_limit`, which consumes per-caller
-    /// rate-limit entries and spawns an inter-canister call) on repeated
-    /// invocations.
+    /// `create_user_profile` update when the profile does not yet exist,
+    /// keeping repeated invocations free of update-call side effects.
     pub fn ensure_user_profile(&self, caller: Principal) {
         let exists = self
             .query::<HasUserProfileResponse>(caller, "has_user_profile", ())

@@ -212,6 +212,10 @@ component uses. Never re-implement an icon that already exists.
   `$lib/services/auth.services` and `$lib/providers/auth-client.providers`.
 - Any HTML coming from backend / user input must be sanitized before
   `{@html …}`.
+- Text authored by a third party — e.g. a consent message built from data a
+  relying party supplies — goes through `sanitizeUntrusted` (`untrusted` prop
+  on `Html` / `Markdown`), which keeps only the markup Markdown can produce.
+  Never render it inside a `<form>` that drives a sensitive action.
 - External links: `target="_blank"` requires `rel="noopener noreferrer"`.
 - Threshold-signature operations are routed through the chain-fusion
   signer canister — not implemented here. See

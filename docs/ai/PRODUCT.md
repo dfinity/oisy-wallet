@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Activity
+
+### IC transactions and Index-canister outages
+
+For tokens on the Internet Computer, balances and transaction history come from two different canisters: the balance from the token's Ledger canister, the history from its Index canister. OISY refreshes both every 30 seconds.
+
+The two are treated independently, because only one of them is essential. If the Ledger canister cannot be reached the sync fails and the balance is dropped, since a wrong balance is worse than none. If the **Index** canister cannot be reached — it does not answer, or it answers with data OISY can tell is stale, which happens when it runs low on cycles and silently stops following the ledger — the balance still updates normally and the transactions already loaded stay on screen. OISY keeps retrying on the regular 30-second cycle; there is no separate back-off and no point at which it gives up for the session.
+
+The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
+
+The same warning appears on the token's own page, above its transaction list — naming only that token, and labelling the list as stale rather than replacing it, since what was loaded before the outage is still worth showing. The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**, and is shared between the two places: dismissing it on the token page also stops that token being named on the Activity page. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference. Tokens are identified by their ledger canister ID rather than their symbol, so two tokens that happen to share a symbol are never confused for one another.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
+
+---
+
 ## Exchange-rate sourcing
 
 OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
@@ -226,6 +242,18 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 - **Ethereum (`eip155`)** — supports `eth_sendTransaction`, `eth_sign`, `personal_sign`, `eth_signTypedData_v4`, and `eth_signTypedData` (legacy).
 - **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility). For `solana_signMessage`, OISY decodes the base58 message and shows the decoded text for review when possible (falling back to the raw value if decoding fails), then returns the base58-encoded Ed25519 signature.
 - **Bitcoin (`bip122`)** — supports `getAccountAddresses`, `signMessage`, and `signPsbt`. The namespace is advertised whenever any BTC address (mainnet, testnet, or regtest) is loaded, with one `bip122:<genesis>` chain and matching `bip122:<genesis>:<address>` account per present network, and the `bip122_addressesChanged` event.
+
+### Simulated preview of a Solana transaction
+
+Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OISY asks the network to **simulate** the request and shows what it would do **to the user's own accounts**: the native SOL change on the user's address (which absorbs the transaction and priority fees), the per-mint SPL token changes across the user's token accounts, and — separately and as a warning — any change to who controls one of those accounts.
+
+That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
+
+Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
+
+The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
+
+Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For transfers OISY does decode, the destination (or, for an approval, the spender) is shown as before.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 
