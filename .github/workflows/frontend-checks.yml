@@ -229,13 +229,35 @@ jobs:
       - name: Install dfx
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Check ic-domains
-        continue-on-error: true
         run: |
           FILE="ic-domain.$NETWORK.txt"
+          DOMAINS="build/.well-known/ic-domains"
           echo "" > "$FILE"
-          dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null && \
-            cat build/.well-known/ic-domains > "$FILE" && \
+
+          # `dfx build` downloads dependency artifacts from GitHub releases, which
+          # fails intermittently. Retry before giving up, and keep the output so a
+          # genuine build error is diagnosable from the job log.
+          for attempt in 1 2 3; do
+            if dfx build frontend --network "$NETWORK" >dfx-build.log 2>&1; then
+              break
+            fi
+            if [[ "$attempt" == 3 ]]; then
+              echo "::error::dfx build frontend --network $NETWORK failed after $attempt attempts"
+              cat dfx-build.log
+              exit 1
+            fi
+            echo "dfx build failed (attempt $attempt), retrying..."
+            sleep $((attempt * 15))
+          done
+
+          # Networks without a custom domain produce no ic-domains file. That is
+          # expected, and leaves the placeholder blank line the validation ignores.
+          if [[ -f "$DOMAINS" ]]; then
+            cat "$DOMAINS" > "$FILE"
             echo " $NETWORK" >> "$FILE"
+          else
+            echo "No $DOMAINS for $NETWORK; leaving the domain file blank."
+          fi
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
