@@ -19,13 +19,14 @@ import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
+	const actual = await importOriginal();
 	const { readable } = await import('svelte/store');
 	const { USDC_TOKEN } = await import('$env/tokens/tokens-erc20/tokens.usdc.env');
 
-	const mockToken = { ...USDC_TOKEN, enabled: false };
+	const mockToken = { ...USDC_TOKEN, enabled: true };
 
 	return {
-		...importOriginal,
+		...actual,
 		ercFungibleTokens: readable([mockToken]),
 		enabledErcFungibleTokens: readable([mockToken])
 	};
