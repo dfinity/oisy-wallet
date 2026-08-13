@@ -401,7 +401,10 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+			<!-- Once the transfer resolved, this row would only restate the token already named in the
+			hero, and the modal of a token transfer should read the same whether it was opened from the
+			token or from the native token that paid its fee. -->
+			{#if isNullish(transferToken) && nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
