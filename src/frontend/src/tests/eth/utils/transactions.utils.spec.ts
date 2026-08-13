@@ -14,7 +14,8 @@ import {
 	isErc20TransactionTransfer,
 	isMaxUint256,
 	mapAddressToName,
-	mapEthTransactionUi
+	mapEthTransactionUi,
+	tryDecodeErc20AbiData
 } from '$eth/utils/transactions.utils';
 import { toCkMinterBuiltInContacts } from '$icp-eth/utils/ck-minter-contacts.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -261,6 +262,18 @@ describe('transactions.utils', () => {
 			);
 		});
 
+		it('should map a transaction whose approve calldata does not decode', () => {
+			// Anyone can send a transaction to the wallet carrying a known selector and garbage.
+			const result = mapEthTransactionUi({
+				transaction: { ...transaction, data: `${ERC20_APPROVE_HASH}00` },
+				ckMinterInfoAddresses,
+				ethAddress
+			});
+
+			expect(result.type).toBe('approve');
+			expect(result.approveSpender).toBeUndefined();
+		});
+
 		it('should prioritize approve over other types when data starts with ERC20 approve hash', () => {
 			const approveData = `${ERC20_APPROVE_HASH}000000000000000000000000abcdef1234567890abcdef1234567890abcdef12ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`;
 
@@ -395,6 +408,26 @@ describe('transactions.utils', () => {
 
 		it('should return false for nullish calldata', () => {
 			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('tryDecodeErc20AbiData', () => {
+		const txData =
+			'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+
+		it('should decode well-formed calldata like decodeErc20AbiData', () => {
+			expect(tryDecodeErc20AbiData({ data: txData })).toStrictEqual(
+				decodeErc20AbiData({ data: txData })
+			);
+		});
+
+		it('should return undefined values instead of throwing on truncated calldata', () => {
+			expect(() => decodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toThrow();
+
+			expect(tryDecodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toStrictEqual({
+				to: undefined,
+				value: undefined
+			});
 		});
 	});
 
