@@ -65,7 +65,7 @@ describe('ic-transactions-status.store', () => {
 			expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
 		});
 
-		it('should leave a token that was never checked without an entry', () => {
+		it('should not create an entry for the other tokens', () => {
 			icTransactionsStatusStore.succeed(tokenId);
 
 			expect(get(icTransactionsStatusStore)[anotherTokenId]).toBeUndefined();

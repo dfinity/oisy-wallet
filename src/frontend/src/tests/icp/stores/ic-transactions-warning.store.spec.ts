@@ -23,6 +23,20 @@ describe('ic-transactions-warning.store', () => {
 		expect(get(icTransactionsWarningStore)).toStrictEqual([token.ledgerCanisterId]);
 	});
 
+	it('should not notify when every token is already dismissed', () => {
+		icTransactionsWarningStore.dismiss([token]);
+
+		const notified = vi.fn();
+		const unsubscribe = icTransactionsWarningStore.subscribe(notified);
+
+		icTransactionsWarningStore.dismiss([token]);
+
+		// Only the subscription's own initial call.
+		expect(notified).toHaveBeenCalledOnce();
+
+		unsubscribe();
+	});
+
 	it('should forget a dismissed token', () => {
 		icTransactionsWarningStore.dismiss([token]);
 
