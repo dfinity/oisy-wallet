@@ -399,6 +399,26 @@ describe('EthTransactionModal', () => {
 			});
 		});
 
+		it('should fall back to the contract call rendering when the calldata does not decode', () => {
+			const { getByText, queryByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, data: `${ERC20_TRANSFER_HASH}00` },
+				token: ETHEREUM_TOKEN
+			});
+
+			// The contract stays the counterparty rather than a recipient we could not read.
+			expect(getByText(USDC_TOKEN.address)).toBeInTheDocument();
+
+			expect(
+				queryByText(
+					`${formatToken({
+						value: 10000000n,
+						unitName: USDC_TOKEN.decimals,
+						displayDecimals: USDC_TOKEN.decimals
+					})} ${USDC_TOKEN.symbol}`
+				)
+			).not.toBeInTheDocument();
+		});
+
 		it('should display the native token value when the transaction is not addressed to a known token', () => {
 			const { getAllByText } = render(EthTransactionModal, {
 				transaction: {
