@@ -2332,8 +2332,8 @@
 			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
-			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",
-			"unavailable_index_canister": "Транзакции для $token_list не могут быть отображены. Контейнер индекса в настоящее время недоступен."
+			"no_index_canister": "$oisy_short не может загрузить транзакции для $token_list — эмитент токена не предоставляет отслеживание транзакций.",
+			"unavailable_index_canister": "Последние транзакции для $token_list сейчас не могут быть загружены, так как их сервис отслеживания не отвечает. Они загрузятся автоматически, как только он снова заработает."
 		}
 	},
 	"earning": {
