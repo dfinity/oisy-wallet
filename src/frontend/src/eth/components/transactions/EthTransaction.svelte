@@ -105,6 +105,10 @@
 
 	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
 	// send would present the contract as the recipient. The recipient is in the calldata.
+	//
+	// Deliberately not gated on `transferToken`: recognising the contract is what lets us name the
+	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
+	// put the contract back in the counterparty of every transfer of a token we do not know.
 	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
 
 	let displayToken = $derived(approveToken ?? token);
