@@ -196,6 +196,7 @@ jobs:
       contents: read
     outputs:
       network-matrix: ${{ steps.set-matrix.outputs.network-matrix }}
+      dfx-version: ${{ steps.set-dfx-version.outputs.dfx-version }}
 
     steps:
       - name: Checkout
@@ -209,6 +210,10 @@ jobs:
         run: |
           NETWORKS=$(scripts/build.ic-domains.test.list | jq -R . | jq -s -c .)
           echo "network-matrix=$NETWORKS" >> $GITHUB_OUTPUT
+      - name: Set dfx Version
+        id: set-dfx-version
+        run: |
+          echo "dfx-version=$(jq -er '.dfx' dfx.json)" >> $GITHUB_OUTPUT
 
   config-build:
     runs-on: ubuntu-24.04
@@ -229,8 +234,24 @@ jobs:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
+      # This job fans out over every network, so an uncached install pulls the same dfx release
+      # asset from github.com once per network. dfxvm does not retry that download, and those
+      # failures are what made this check flaky: `error sending request for url
+      # (https://github.com/dfinity/sdk/releases/download/<version>/dfx-x86_64-unknown-linux-gnu.tar.gz.sha256)`.
+      - name: Restore dfx
+        id: cache-dfx
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            ~/.local/share/dfx
+            ~/.cache/dfinity
+          key: ${{ runner.os }}-dfx-${{ needs.config-preparation.outputs.dfx-version }}
       - name: Install dfx
+        if: steps.cache-dfx.outputs.cache-hit != 'true'
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+      - name: Set up dfx path
+        if: steps.cache-dfx.outputs.cache-hit == 'true'
+        run: echo "$HOME/.local/share/dfx/bin" >> "$GITHUB_PATH"
       - name: Check ic-domains
         run: |
           FILE="ic-domain.$NETWORK.txt"
