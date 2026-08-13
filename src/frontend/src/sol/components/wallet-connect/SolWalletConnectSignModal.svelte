@@ -35,6 +35,7 @@
 	} from '$sol/services/wallet-connect.services';
 	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
+	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -79,6 +80,7 @@
 	let unreviewed = $state<boolean | undefined>();
 	let prioritizationFee = $state<bigint | undefined>();
 	let prioritizationFeeEstimate = $state<bigint | undefined>();
+	let preview = $state<SolSimulationPreview | undefined>();
 	// The decode is asynchronous, so until it settles the review shows an empty summary and no
 	// warning. Approval waits for it: signing on the strength of a review that has not been
 	// computed yet is exactly what the warnings exist to prevent. A failed decode never flips it,
@@ -94,10 +96,12 @@
 				isApproval,
 				unreviewed,
 				prioritizationFee,
-				prioritizationFeeEstimate
+				prioritizationFeeEstimate,
+				preview
 			} = await decodeService({
 				base64EncodedTransactionMessage: data,
-				networkId
+				networkId,
+				address
 			}));
 
 			decoded = true;
@@ -121,7 +125,7 @@
 	);
 
 	$effect(() => {
-		[data, networkId];
+		[data, networkId, address];
 
 		untrack(() => {
 			decoded = false;
@@ -221,6 +225,7 @@
 				isApproval={isApproval ?? false}
 				onApprove={sign}
 				onReject={reject}
+				{preview}
 				{prioritizationFee}
 				{prioritizationFeeEstimate}
 				source={address ?? ''}
