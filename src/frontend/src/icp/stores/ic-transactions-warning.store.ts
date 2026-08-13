@@ -41,15 +41,21 @@ const initIcTransactionsWarningStore = (): IcTransactionsWarningStore => {
 	return {
 		subscribe,
 
-		dismiss: (tokens: IcToken[]) =>
-			update((dismissed) =>
-				save([
-					...dismissed,
-					...tokens
-						.map(({ ledgerCanisterId }) => ledgerCanisterId)
-						.filter((ledgerCanisterId) => !dismissed.includes(ledgerCanisterId))
-				])
-			),
+		// Like `forget` below, a no-op when nothing changes: writing an equal array would still write
+		// through to session storage and notify every subscriber.
+		dismiss: (tokens: IcToken[]) => {
+			const dismissed = get(store);
+
+			const added = tokens
+				.map(({ ledgerCanisterId }) => ledgerCanisterId)
+				.filter((ledgerCanisterId) => !dismissed.includes(ledgerCanisterId));
+
+			if (added.length === 0) {
+				return;
+			}
+
+			set(save([...dismissed, ...added]));
+		},
 
 		// A dismissal covers one outage, not the session: a token whose Index canister answers again
 		// is forgotten, so a later failure is surfaced afresh.
