@@ -719,6 +719,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					wallet: {
 						balance: { certified, data: mockBalance },
 						oldest_tx_id: [],
+						transactionsUnavailable: true,
 						newTransactions: JSON.stringify([], jsonReplacer)
 					}
 				}
@@ -915,6 +916,20 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					mockPostMessageWithoutNewTransactions(true)
 				);
 				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			});
+
+			it('should keep reporting the unavailable Index canister on later jobs even if nothing changed', async () => {
+				spyGetTransactions.mockRejectedValue(new Error('Index canister unavailable'));
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				postMessageMock.mockClear();
+
+				await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageWithoutNewTransactions(true));
 			});
 
 			it('should surface an error if the Ledger canister fails', async () => {

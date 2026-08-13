@@ -66,6 +66,11 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
+	// Instructions OISY cannot decode yield no amount, and with it no destination and no balance
+	// worth showing: what the transaction does is then told by the simulated changes alone. The
+	// rows are dropped rather than filled with a zero the decode never produced.
+	let decoded = $derived(nonNullish(amount));
+
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
 	let prioritizationFeeFloor = $derived(
@@ -131,7 +136,9 @@
 		{amount}
 		{application}
 		{balance}
-		destination={isApproval ? null : destination}
+		destination={isApproval || !decoded ? null : destination}
+		showAmount={decoded}
+		showBalance={decoded}
 		{source}
 		{token}
 	>
