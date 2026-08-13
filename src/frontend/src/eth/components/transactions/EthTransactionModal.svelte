@@ -8,7 +8,7 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiData,
+		tryDecodeErc20AbiData,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer,
 		isMaxUint256,
@@ -77,7 +77,7 @@
 
 	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit || isErc20Transfer) && nonNullish(data)
-			? decodeErc20AbiData({ data })
+			? tryDecodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
 
@@ -111,14 +111,19 @@
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
+	// Calldata carrying the transfer selector still may not decode. Without a recipient and an amount
+	// there is no transfer to describe, so the entry stays a plain contract call rather than claiming
+	// a send it cannot name - and pointing that send at the contract.
+	let transferDecoded = $derived(isErc20Transfer && nonNullish(dataTo) && nonNullish(dataValue));
+
 	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
 	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
 	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
-	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
+	let transferToken = $derived(transferDecoded ? contractToken : undefined);
 
 	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
 	// send would present the contract as the recipient. The recipient is in the calldata.
-	let recipient = $derived((isErc20Transfer ? dataTo : undefined) ?? to);
+	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
 
 	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
 
