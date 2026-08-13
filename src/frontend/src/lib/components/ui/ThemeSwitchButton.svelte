@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { themeStore, Theme } from '@dfinity/gix-components';
 	import IconMoon from '$lib/components/icons/IconMoon.svelte';
 	import IconSun from '$lib/components/icons/IconSun.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { themeStore } from '$lib/stores/theme.store';
+	import { Theme } from '$lib/types/theme';
 
 	const handleClick = () => {
 		themeStore.select($themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT);

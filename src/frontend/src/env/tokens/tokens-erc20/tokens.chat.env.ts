@@ -22,5 +22,6 @@ export const CHAT_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: CHAT_DECIMALS,
 	icon: '/icons/sns/2ouva-viaaa-aaaaq-aaamq-cai.png',
 	address: '0xDb95092C454235E7e666c4E226dBBbCdeb499d25',
-	groupData: CHAT_TOKEN_GROUP
+	groupData: CHAT_TOKEN_GROUP,
+	metadataOnly: true
 };

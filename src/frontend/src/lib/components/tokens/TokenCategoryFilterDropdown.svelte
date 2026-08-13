@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ModalFilterButton from '$lib/components/ui/ModalFilterButton.svelte';
+	import Popover from '$lib/components/ui/Popover.svelte';
 	import { tokenCategoryFilter } from '$lib/derived/settings.derived';
 	import { TokenCategoryTagValue } from '$lib/enums/token-tag';
 	import { i18n } from '$lib/stores/i18n.store';

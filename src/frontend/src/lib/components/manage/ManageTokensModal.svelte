@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
@@ -8,6 +7,7 @@
 	import AddTokenReviewByNetwork from '$lib/components/manage/AddTokenReviewByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -23,6 +23,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';

@@ -2,8 +2,8 @@ import { swapWizardSteps } from '$lib/config/swap.config';
 import { WizardStepsGetToken } from '$lib/enums/wizard-steps';
 import type { WizardStepsGetTokenType } from '$lib/types/get-token';
 import type { WizardStepsParams } from '$lib/types/steps';
+import type { WizardSteps } from '$lib/types/wizard';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { WizardSteps } from '@dfinity/gix-components';
 
 export interface GetTokenWizardStepsParams extends WizardStepsParams {
 	tokenSymbol: string;

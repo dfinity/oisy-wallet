@@ -8,6 +8,7 @@ import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -58,6 +59,7 @@ export interface Modal<T> {
 		| 'referral-code'
 		| 'referral-state'
 		| 'address-book'
+		| 'notes'
 		| 'dapp-details'
 		| 'vip-reward-state'
 		| 'reward-details'
@@ -70,6 +72,14 @@ export interface Modal<T> {
 		| 'get-token'
 		| 'harvest-stake'
 		| 'harvest-unstake'
+		| 'liquidium-supply'
+		| 'trading-deposit'
+		| 'oisy-trade-withdraw'
+		| 'oisy-trade-order-detail'
+		| 'limit-order'
+		| 'liquidium-borrow'
+		| 'liquidium-withdraw'
+		| 'liquidium-repay'
 		| 'universal-scanner'
 		| 'pay-dialog'
 		| 'wallet-connect-sessions';
@@ -130,6 +140,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipQrCode: (params: SetWithDataParams<QrCodeType>) => void;
 	openReferralCode: (id: symbol) => void;
 	openAddressBook: (params: SetWithOptionalDataParams<AddressBookModalParams>) => void;
+	openNotes: (id: symbol) => void;
 	openDappDetails: (params: SetWithDataParams<OisyDappDescription>) => void;
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
@@ -141,6 +152,14 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openHarvestStake: (id: symbol) => void;
 	openHarvestUnstake: (id: symbol) => void;
+	openLiquidiumSupply: (id: symbol) => void;
+	openTradingDeposit: (id: symbol) => void;
+	openOisyTradeWithdraw: (params: SetWithOptionalDataParams<OisyTradeWithdrawToken>) => void;
+	openOisyTradeOrderDetail: (params: SetWithDataParams<OisyTradeOrderView>) => void;
+	openLimitOrder: (id: symbol) => void;
+	openLiquidiumBorrow: (id: symbol) => void;
+	openLiquidiumWithdraw: (id: symbol) => void;
+	openLiquidiumRepay: (id: symbol) => void;
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
@@ -225,6 +244,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddressBook: <(params: SetWithOptionalDataParams<AddressBookModalParams>) => void>(
 			setTypeWithData('address-book')
 		),
+		openNotes: setType('notes'),
 		openDappDetails: <(params: SetWithDataParams<OisyDappDescription>) => void>(
 			setTypeWithData('dapp-details')
 		),
@@ -250,6 +270,18 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openHarvestStake: setType('harvest-stake'),
 		openHarvestUnstake: setType('harvest-unstake'),
+		openLiquidiumSupply: setType('liquidium-supply'),
+		openTradingDeposit: setType('trading-deposit'),
+		openOisyTradeWithdraw: <(params: SetWithOptionalDataParams<OisyTradeWithdrawToken>) => void>(
+			setTypeWithData('oisy-trade-withdraw')
+		),
+		openOisyTradeOrderDetail: <(params: SetWithDataParams<OisyTradeOrderView>) => void>(
+			setTypeWithData('oisy-trade-order-detail')
+		),
+		openLimitOrder: setType('limit-order'),
+		openLiquidiumBorrow: setType('liquidium-borrow'),
+		openLiquidiumWithdraw: setType('liquidium-withdraw'),
+		openLiquidiumRepay: setType('liquidium-repay'),
 		openUniversalScanner: <(params: SetWithOptionalDataParams<UniversalScannerData>) => void>(
 			setTypeWithData('universal-scanner')
 		),

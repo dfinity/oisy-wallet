@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import Select from '$lib/components/ui/Select.svelte';
+	import SelectOption from '$lib/components/ui/SelectOption.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -26,14 +27,14 @@
 			class="network mt-1 pt-0.5"
 			class:disabled
 		>
-			<Dropdown name="network" {disabled} bind:selectedValue={networkName}>
+			<Select name="network" {disabled} bind:selectedValue={networkName}>
 				<option class:hidden={nonNullish(networkName)} disabled selected value={undefined}
 					>{$i18n.tokens.manage.placeholder.select_network}</option
 				>
 				{#each availableNetworks as network (network.id)}
-					<DropdownItem value={network.name}>{network.name}</DropdownItem>
+					<SelectOption value={network.name}>{network.name}</SelectOption>
 				{/each}
-			</Dropdown>
+			</Select>
 		</div>
 	{/snippet}
 </Value>

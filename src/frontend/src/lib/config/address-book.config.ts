@@ -1,6 +1,6 @@
 import { AddressBookSteps } from '$lib/enums/progress-steps';
 import type { WizardStepsParams } from '$lib/types/steps';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { WizardSteps } from '$lib/types/wizard';
 
 export const addressBookWizardSteps = ({
 	i18n

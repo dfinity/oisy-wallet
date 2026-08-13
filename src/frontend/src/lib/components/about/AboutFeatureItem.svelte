@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {

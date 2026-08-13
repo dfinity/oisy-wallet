@@ -1,7 +1,6 @@
 <script lang="ts">
-	import IconRocket from '$lib/components/icons/lucide/IconRocket.svelte';
+	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
-	import IconSparkles from '$lib/components/icons/lucide/IconSparkles.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -18,18 +17,13 @@
 		},
 		{
 			id: 'move_swap_grow',
-			icon: IconRocket,
+			icon: IconLineChart,
 			label: $i18n.auth.text.move_swap_grow
-		},
-		{
-			id: 'instant_and_private',
-			icon: IconSparkles,
-			label: $i18n.auth.text.instant_and_private
 		}
 	]);
 </script>
 
-<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 1.5md:grid-cols-4">
+<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 1.5md:grid-cols-3">
 	{#each cards as { id, icon: IconCmp, label } (id)}
 		<div
 			class="feature-card flex min-h-32 flex-col justify-between gap-4 rounded-xl border border-brand-subtle-20 py-4 pr-12 pl-4 text-primary backdrop-blur-md sm:min-h-44 sm:rounded-3xl"

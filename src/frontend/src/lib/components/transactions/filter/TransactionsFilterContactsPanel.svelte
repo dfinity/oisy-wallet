@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import TransactionsFilterContactsEmptyState from '$lib/components/transactions/filter/TransactionsFilterContactsEmptyState.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import {
@@ -81,8 +81,8 @@
 					<Checkbox
 						checked={selectedSet.has(id)}
 						inputId={`transactions-filter-contact-${id}`}
+						onChange={() => onToggleContactId(id)}
 						text="inline"
-						on:nnsChange={() => onToggleContactId(id)}
 					>
 						<span class="inline-flex items-center gap-2">
 							<span class="flex shrink-0 items-center">

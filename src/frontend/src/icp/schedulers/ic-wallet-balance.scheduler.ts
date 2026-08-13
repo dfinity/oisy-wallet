@@ -16,9 +16,7 @@ interface IcrcBalanceStore {
 
 export class IcWalletBalanceScheduler<
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrc
-		| PostMessageDataRequestIcp
-		| PostMessageDataRequestDip20
+		PostMessageDataRequestIcrc | PostMessageDataRequestIcp | PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private _queryAndUpdateWithWarmup?: ReturnType<typeof createQueryAndUpdateWithWarmup>;
 

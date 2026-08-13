@@ -8,8 +8,8 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import {
 		isEarningPath,
-		isNftsPath,
 		isTokensPath,
+		isTradingPath,
 		isTransactionsPath
 	} from '$lib/utils/nav.utils';
 
@@ -21,15 +21,15 @@
 
 	let inputValue = $derived($tokenListStore.filter);
 
-	// Persist the filter when switching between asset tabs (Tokens, NFTs, Earning) or returning from transactions.
-	// Reset it when navigating from any other page (e.g. Settings, Activity).
+	// Persist the filter when switching between asset tabs (Tokens, Earning, Trading) or returning from transactions.
+	// Reset it when navigating from any other page (e.g. Settings, Activity, NFTs — a standalone destination now).
 	afterNavigate(({ from }) => {
 		const previousRoute = from?.route?.id ?? null;
 
 		if (
 			!isTokensPath(previousRoute) &&
-			!isNftsPath(previousRoute) &&
 			!isEarningPath(previousRoute) &&
+			!isTradingPath(previousRoute) &&
 			!isTransactionsPath(previousRoute)
 		) {
 			tokenListStore.set({ filter: '' });

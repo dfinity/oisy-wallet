@@ -4,9 +4,9 @@ import {
 	walletConnectSignSteps
 } from '$eth/constants/steps.constants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
+import type { ProgressStep } from '$lib/types/progress-step';
 import type { ProgressSteps } from '$lib/types/progress-steps';
 import en from '$tests/mocks/i18n.mock';
-import type { ProgressStep } from '@dfinity/gix-components';
 
 describe('steps.constants', () => {
 	const expectedSendStepsWithoutApproval: ProgressSteps = [

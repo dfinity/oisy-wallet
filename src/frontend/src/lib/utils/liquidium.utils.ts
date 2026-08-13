@@ -1,0 +1,444 @@
+import type { TokenId } from '$declarations/backend/backend.did';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ZERO } from '$lib/constants/app.constants';
+import {
+	LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS,
+	LIQUIDIUM_HEALTH_AT_RISK_PERCENT,
+	LIQUIDIUM_HEALTH_CRITICAL_PERCENT,
+	LIQUIDIUM_NETWORK_ORDER,
+	LIQUIDIUM_POOL_ORDER,
+	type LiquidiumHealthLevel
+} from '$lib/constants/liquidium.constants';
+import type { LiquidiumMarket, LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
+import type { Token } from '$lib/types/token';
+import { findTwinToken } from '$lib/utils/token.utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
+import {
+	Chain,
+	isAssetIdentifier,
+	type Pool,
+	type UserPositionSummary,
+	type UserReserve
+} from '@liquidium/client';
+
+// Backend `TokenId` for a Liquidium AUT record — the ck-asset ledger backing the asset.
+export const liquidiumAssetTokenId = (asset: string): TokenId => {
+	const ledgerCanisterId = LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS[asset];
+
+	assertNonNullish(ledgerCanisterId, `No ICRC ledger configured for Liquidium asset ${asset}`);
+
+	return { Icrc: Principal.fromText(ledgerCanisterId) };
+};
+
+// Display token (logo/label) for a Liquidium market/reserve. Keyed by (chain, asset)
+// because the same symbol maps to a different oisy token per chain: native BTC vs
+// ckBTC, ERC-20 USDC/USDT vs their ck twins. ICP-chain ck assets resolve from the
+// runtime token list via their twin symbol; native/ERC assets and ICP are static.
+export const liquidiumMarketToken = ({
+	chain,
+	asset,
+	tokens
+}: {
+	chain: string;
+	asset: string;
+	tokens: Token[];
+}): Token | undefined => {
+	if (chain === 'ICP') {
+		switch (asset) {
+			case 'ICP':
+				return ICP_TOKEN;
+			case 'BTC':
+				return findTwinToken({ tokenToPair: BTC_MAINNET_TOKEN, tokens });
+			case 'USDC':
+				return findTwinToken({ tokenToPair: USDC_TOKEN, tokens });
+			case 'USDT':
+				return findTwinToken({ tokenToPair: USDT_TOKEN, tokens });
+			default:
+				return undefined;
+		}
+	}
+
+	if (chain === 'BTC' && asset === 'BTC') {
+		return BTC_MAINNET_TOKEN;
+	}
+
+	if (chain === 'ETH') {
+		switch (asset) {
+			case 'ETH':
+				return ETHEREUM_TOKEN;
+			case 'USDC':
+				return USDC_TOKEN;
+			case 'USDT':
+				return USDT_TOKEN;
+			default:
+				return undefined;
+		}
+	}
+
+	return undefined;
+};
+
+// Display token for a rail the user can actually transact on, for the modal pickers.
+export const liquidiumEnabledRailToken = ({
+	chain,
+	asset,
+	enabledTokens
+}: {
+	chain: string;
+	asset: string;
+	enabledTokens: Token[];
+}): Token | undefined => {
+	const token = liquidiumMarketToken({ chain, asset, tokens: enabledTokens });
+
+	return nonNullish(token) && enabledTokens.some(({ id }) => id === token.id) ? token : undefined;
+};
+
+// Scaled protocol rate → percentage.
+const rateToPercent = ({ rate, rateDecimals }: { rate: bigint; rateDecimals: bigint }): number =>
+	(Number(rate) / 10 ** Number(rateDecimals)) * 100;
+
+const scaledUsdToNumber = ({ value, decimals }: { value: bigint; decimals: bigint }): number =>
+	Number(value) / 10 ** Number(decimals);
+
+// Buffer-remaining health %: (1 − LTV / liquidationThreshold) × 100, clamped. From the
+// bps fields, not the raw `healthFactor` (whose scale is unreliable across positions).
+export const liquidiumHealthFactorPercent = ({
+	currentLtvBps,
+	weightedLiquidationThresholdBps
+}: {
+	currentLtvBps: bigint;
+	weightedLiquidationThresholdBps: bigint;
+}): number => {
+	const threshold = Number(weightedLiquidationThresholdBps);
+
+	if (threshold <= 0) {
+		// No threshold to compute against: healthy only when there's also no debt. Debt with a
+		// missing/zero threshold is a bad/edge payload — surface it as fully at-risk rather than
+		// masking it as a healthy 100%.
+		return currentLtvBps > ZERO ? 0 : 100;
+	}
+
+	return Math.min(100, Math.max(0, (1 - Number(currentLtvBps) / threshold) * 100));
+};
+
+export const liquidiumHealthLevel = (healthFactorPercent: number): LiquidiumHealthLevel =>
+	healthFactorPercent >= LIQUIDIUM_HEALTH_AT_RISK_PERCENT
+		? 'healthy'
+		: healthFactorPercent >= LIQUIDIUM_HEALTH_CRITICAL_PERCENT
+			? 'at-risk'
+			: 'critical';
+
+// Borrow preview math (aggregate — see the FE plan "Borrow milestone").
+export const liquidiumResultingLtvPercent = ({
+	totalDebtUsd,
+	newBorrowUsd,
+	totalCollateralUsd
+}: {
+	totalDebtUsd: number;
+	newBorrowUsd: number;
+	totalCollateralUsd: number;
+}): number =>
+	totalCollateralUsd > 0 ? ((totalDebtUsd + newBorrowUsd) / totalCollateralUsd) * 100 : 0;
+
+// Projected health: current health minus the new debt's marginal effect
+// (− newBorrowUsd / (collateral × liquidationThreshold)), clamped [0, 100].
+export const liquidiumProjectedHealthPercent = ({
+	currentHealthPercent,
+	newBorrowUsd,
+	totalCollateralUsd,
+	weightedLiquidationThresholdBps
+}: {
+	currentHealthPercent: number;
+	newBorrowUsd: number;
+	totalCollateralUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (totalCollateralUsd <= 0 || thresholdRatio <= 0) {
+		return 0;
+	}
+
+	const marginalPercent = (newBorrowUsd / (totalCollateralUsd * thresholdRatio)) * 100;
+
+	return Math.min(100, Math.max(0, currentHealthPercent - marginalPercent));
+};
+
+// Free collateral USD: max(0, collateral − debt / threshold); full collateral when no debt.
+// Open debt with a zero threshold (edge payload) → fully reserved.
+export const liquidiumFreeCollateralUsd = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	if (totalDebtUsd <= 0) {
+		return Math.max(0, totalCollateralUsd);
+	}
+
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (thresholdRatio <= 0) {
+		return 0;
+	}
+
+	return Math.max(0, totalCollateralUsd - totalDebtUsd / thresholdRatio);
+};
+
+// Projected health after removing `withdrawUsd` of collateral: (1 − ltv / threshold) × 100,
+// clamped. Threshold held constant (v1 approximation; canister is the final gate).
+export const liquidiumProjectedHealthAfterWithdrawPercent = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	withdrawUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	withdrawUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	if (totalDebtUsd <= 0) {
+		return 100;
+	}
+
+	const remainingCollateralUsd = totalCollateralUsd - withdrawUsd;
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (remainingCollateralUsd <= 0 || thresholdRatio <= 0) {
+		return 0;
+	}
+
+	const resultingLtv = totalDebtUsd / remainingCollateralUsd;
+
+	return Math.min(100, Math.max(0, (1 - resultingLtv / thresholdRatio) * 100));
+};
+
+// Projected health after repaying `repayUsd` of debt: (1 − ltv / threshold) × 100,
+// clamped. Repaying only reduces debt, so health moves toward 100% (fully cleared → 100%).
+// Threshold held constant (v1 approximation, conservative for repay; canister is the final gate).
+export const liquidiumProjectedHealthAfterRepayPercent = ({
+	totalCollateralUsd,
+	totalDebtUsd,
+	repayUsd,
+	weightedLiquidationThresholdBps
+}: {
+	totalCollateralUsd: number;
+	totalDebtUsd: number;
+	repayUsd: number;
+	weightedLiquidationThresholdBps: number;
+}): number => {
+	const remainingDebtUsd = Math.max(0, totalDebtUsd - repayUsd);
+
+	if (remainingDebtUsd <= 0) {
+		return 100;
+	}
+
+	const thresholdRatio = weightedLiquidationThresholdBps / 10_000;
+
+	if (totalCollateralUsd <= 0 || thresholdRatio <= 0) {
+		return 0;
+	}
+
+	const resultingLtv = remainingDebtUsd / totalCollateralUsd;
+
+	return Math.min(100, Math.max(0, (1 - resultingLtv / thresholdRatio) * 100));
+};
+
+const isUnderSupplyCap = ({ totalSupply, supplyCap }: Pool): boolean =>
+	isNullish(supplyCap) || totalSupply < supplyCap;
+
+export const mapLiquidiumMarket = (pool: Pool): LiquidiumMarket => ({
+	poolId: pool.id,
+	asset: pool.asset,
+	chain: pool.chain,
+	supplyApy: rateToPercent({ rate: pool.lendingRate, rateDecimals: pool.rateDecimals }),
+	borrowApy: rateToPercent({ rate: pool.borrowingRate, rateDecimals: pool.rateDecimals }),
+	// pool.maxLtv is basis points (the SDK uses it directly as `maxAllowedLtvBps`), not the
+	// rate scale — convert to a 0–1 ratio.
+	maxLtv: Number(pool.maxLtv) / 10_000,
+	frozen: pool.frozen,
+	available: !pool.frozen && isUnderSupplyCap(pool)
+});
+
+// Transfer rails a pool asset supports: its native/ERC chain plus the ICP (ck-ledger)
+// rail where the protocol offers one. A single lending pool is shared across rails (e.g.
+// ETH/USDC and ICP/ckUSDC settle in the same USDC pool), so this is a per-asset transfer
+// choice, not separate pools. Derived from the SDK's own identifier guard so it stays
+// correct if the protocol adds pairs.
+export const liquidiumSupportedRails = (asset: string): string[] =>
+	Object.values(Chain).filter((chain) => isAssetIdentifier({ chain, asset }));
+
+// Expands one pool into a market per supported transfer rail (`market.chain` is the rail,
+// not the pool's backing chain). Both rails of an asset carry identical pool economics
+// (APY / LTV / availability) and share `poolId`; they differ only by transfer chain, which
+// drives the display token, the supply/repay transfer rail and the borrow/withdraw
+// delivery chain. Holdings stay per-pool — this expansion is for the market/entry surface only.
+export const mapLiquidiumMarketRails = (pool: Pool): LiquidiumMarket[] => {
+	const base = mapLiquidiumMarket(pool);
+
+	return liquidiumSupportedRails(pool.asset).map((chain) => ({ ...base, chain }));
+};
+
+// The ck (non-native) rail is the ICP-chain rail of a non-ICP asset; every other rail is native.
+const isNativeRail = ({ chain, asset }: { chain: string; asset: string }): boolean =>
+	chain !== 'ICP' || asset === 'ICP';
+
+// Stable display order for a list of Liquidium rail entries (markets or position reserves),
+// layered on the order Liquidium returns:
+//  1. pool, by asset, per LIQUIDIUM_POOL_ORDER — unlisted assets keep their received order, last;
+//  2. native rail before the ck rail within a pool (BTC before ckBTC, USDC before ckUSDC);
+//  3. transfer-network order (LIQUIDIUM_NETWORK_ORDER) as the final tiebreaker.
+// Entries that tie on every key keep their received order (Array.sort is stable). Shared by the
+// Markets list and the withdraw/repay pickers so positions and markets order identically.
+export const orderLiquidiumRails = <T extends { asset: string; chain: string }>(
+	entries: T[]
+): T[] => {
+	// Unlisted assets rank after the listed ones, keeping their first-seen (received) order so
+	// each pool's rails stay grouped.
+	const receivedAssets = [...new Set(entries.map(({ asset }) => asset))];
+
+	const poolRank = (asset: string): number => {
+		const known = LIQUIDIUM_POOL_ORDER.indexOf(asset);
+		return known >= 0 ? known : LIQUIDIUM_POOL_ORDER.length + receivedAssets.indexOf(asset);
+	};
+
+	const networkRank = (chain: string): number => {
+		const known = LIQUIDIUM_NETWORK_ORDER.indexOf(chain);
+		return known >= 0 ? known : LIQUIDIUM_NETWORK_ORDER.length;
+	};
+
+	return [...entries].sort(
+		(a, b) =>
+			poolRank(a.asset) - poolRank(b.asset) ||
+			Number(isNativeRail(b)) - Number(isNativeRail(a)) ||
+			networkRank(a.chain) - networkRank(b.chain)
+	);
+};
+
+export const mapLiquidiumReserve = ({
+	position,
+	pool,
+	suppliedUsd,
+	borrowedUsd,
+	usdDecimals
+}: UserReserve): LiquidiumReserve => ({
+	poolId: position.poolId,
+	asset: position.asset,
+	chain: pool.chain,
+	supplyApy: rateToPercent({ rate: pool.lendingRate, rateDecimals: pool.rateDecimals }),
+	borrowApy: rateToPercent({ rate: pool.borrowingRate, rateDecimals: pool.rateDecimals }),
+	deposited: position.deposited,
+	depositedDecimals: Number(position.depositedDecimals),
+	borrowed: position.borrowed,
+	borrowedDecimals: Number(position.borrowedDecimals),
+	debtInterest: position.debtInterest,
+	suppliedUsd: scaledUsdToNumber({ value: suppliedUsd, decimals: usdDecimals }),
+	borrowedUsd: scaledUsdToNumber({ value: borrowedUsd, decimals: usdDecimals })
+});
+
+// Expands one position into an entry per supported transfer rail, so the withdraw/repay
+// pickers can offer both the native rail and the ICP (ck-ledger) rail for the same pool
+// balance — the position-surface counterpart of `mapLiquidiumMarketRails`. The entries share
+// `poolId` and all position economics (deposited / borrowed / USD); they differ only by
+// `chain`, which drives the display token, the repay transfer rail and the withdraw delivery
+// chain. A single-rail asset (ICP) yields one unchanged entry. Kept picker-only — the mapped
+// portfolio reserves stay one-per-pool so dashboard rows and USD totals never double-count.
+export const liquidiumReserveRails = (reserve: LiquidiumReserve): LiquidiumReserve[] => {
+	// Fall back to the reserve's own (native) chain if the SDK guard reports no rails for the
+	// asset, so a position can never silently drop out of the withdraw/repay picker. Rail
+	// display order is applied downstream by `orderLiquidiumRails`, not here.
+	const rails = liquidiumSupportedRails(reserve.asset);
+
+	return (rails.length > 0 ? rails : [reserve.chain]).map((chain) => ({ ...reserve, chain }));
+};
+
+export const mapLiquidiumPortfolio = ({
+	reserves,
+	summary
+}: {
+	reserves: UserReserve[];
+	summary: UserPositionSummary;
+}): LiquidiumPortfolio => ({
+	reserves: reserves.map(mapLiquidiumReserve),
+	totalSuppliedUsd: scaledUsdToNumber({
+		value: summary.totalCollateralUsd,
+		decimals: summary.usdDecimals
+	}),
+	totalBorrowedUsd: scaledUsdToNumber({
+		value: summary.totalDebtUsd,
+		decimals: summary.usdDecimals
+	}),
+	netValueUsd: scaledUsdToNumber({ value: summary.netWorthUsd, decimals: summary.usdDecimals }),
+	availableBorrowsUsd: scaledUsdToNumber({
+		value: summary.availableBorrowsUsd,
+		decimals: summary.usdDecimals
+	}),
+	weightedLiquidationThresholdBps: Number(summary.weightedLiquidationThresholdBps),
+	healthFactorPercent: liquidiumHealthFactorPercent({
+		currentLtvBps: summary.currentLtvBps,
+		weightedLiquidationThresholdBps: summary.weightedLiquidationThresholdBps
+	})
+});
+
+// Best supply APY across enterable pools; 0 when none.
+export const liquidiumMaxSupplyApy = (markets: LiquidiumMarket[]): number =>
+	markets.reduce(
+		(max, { supplyApy, available }) => (available ? Math.max(max, supplyApy) : max),
+		0
+	);
+
+// Lowest borrow APY across enterable pools (Borrow card "from" badge); 0 when none.
+export const liquidiumMinBorrowApy = (markets: LiquidiumMarket[]): number => {
+	const rates = markets.filter(({ available }) => available).map(({ borrowApy }) => borrowApy);
+
+	return rates.length > 0 ? Math.min(...rates) : 0;
+};
+
+// Best (highest) max-LTV ratio across enterable pools; 0 when none.
+export const liquidiumMaxLtv = (markets: LiquidiumMarket[]): number =>
+	markets.reduce((max, { maxLtv, available }) => (available ? Math.max(max, maxLtv ?? 0) : max), 0);
+
+// Estimated total borrowing power in USD: the power still available from already-supplied
+// collateral, plus what idle wallet assets could unlock if supplied. Deliberately an
+// over-approximation (all fungibles, best max-LTV) mirroring the Earn page's earning
+// potential — the protocol remains the real gate on any actual borrow.
+export const liquidiumBorrowingPowerPotentialUsd = ({
+	availableBorrowsUsd,
+	walletBalanceUsd,
+	maxLtv
+}: {
+	availableBorrowsUsd: number;
+	walletBalanceUsd: number;
+	maxLtv: number;
+}): number => availableBorrowsUsd + Math.max(0, walletBalanceUsd) * maxLtv;
+
+// Yearly borrow interest in USD (Σ borrowedUsd·borrowApy / 100); 0 when no positions.
+export const liquidiumBorrowInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
+	(portfolio?.reserves ?? []).reduce(
+		(acc, { borrowedUsd, borrowApy }) => acc + (borrowedUsd * borrowApy) / 100,
+		0
+	);
+
+// Yearly supply interest in USD (Σ suppliedUsd·supplyApy / 100); 0 when no positions.
+export const liquidiumSupplyInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
+	(portfolio?.reserves ?? []).reduce(
+		(acc, { suppliedUsd, supplyApy }) => acc + (suppliedUsd * supplyApy) / 100,
+		0
+	);
+
+// Net yearly interest in USD (Σ suppliedUsd·supplyApy − Σ borrowedUsd·borrowApy, /100); 0 when no positions.
+export const liquidiumNetInterestUsd = (portfolio: LiquidiumPortfolio | null): number =>
+	(portfolio?.reserves ?? []).reduce(
+		(acc, { suppliedUsd, supplyApy, borrowedUsd, borrowApy }) =>
+			acc + (suppliedUsd * supplyApy - borrowedUsd * borrowApy) / 100,
+		0
+	);

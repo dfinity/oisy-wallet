@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,

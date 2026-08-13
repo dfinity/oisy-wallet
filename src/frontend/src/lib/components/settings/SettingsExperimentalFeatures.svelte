@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Toggle } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { updateUserExperimentalFeatureSettings } from '$lib/api/backend.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Toggle from '$lib/components/ui/Toggle.svelte';
 	import { OISY_AI_ASSISTANT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
@@ -73,7 +73,7 @@
 						: $i18n.settings.text.enable_beta_feature}
 					checked={$userExperimentalFeatures?.[feature].enabled ?? false}
 					disabled={loading}
-					on:nnsToggle={async () => {
+					onToggle={async () => {
 						await save({
 							[feature]: {
 								...$userExperimentalFeatures?.[feature],

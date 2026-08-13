@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import { OPEN_CRYPTO_PAY_ECOSYSTEM_URL } from '$lib/constants/open-crypto-pay.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';

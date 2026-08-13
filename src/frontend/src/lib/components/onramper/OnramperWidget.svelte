@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { Spinner } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -12,7 +11,12 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { harvestAutopilots } from '$eth/derived/harvest-autopilots.derived';
 	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
+	import {
+		OnramperRateLimitedError,
+		OnramperSecretNotConfiguredError
+	} from '$lib/canisters/errors';
 	import BuyUnavailableNotice from '$lib/components/buy/BuyUnavailableNotice.svelte';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { BUY_MODAL_ONRAMPER_IFRAME } from '$lib/constants/test-ids.constants';
 	import { btcAddressMainnet, ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -21,9 +25,15 @@
 	import { networkBitcoin, networkEthereum, networkSolana } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import {
+		PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES,
+		PLAUSIBLE_EVENT_RESULT_STATUSES
+	} from '$lib/enums/plausible';
+	import { trackOnramperOpen } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import { consoleError } from '$lib/utils/console.utils';
+	import { getTokenIdentifier } from '$lib/utils/identifier.utils';
 	import { buildOnramperLink, mapOnramperNetworkWallets } from '$lib/utils/onramper.utils';
 
 	let vault = $derived(
@@ -73,12 +83,30 @@
 	let src = $state<string | undefined>(undefined);
 	let signingFailed = $state(false);
 
+	let tokenPayload = $derived(
+		nonNullish($token)
+			? {
+					network: $token.network.id.description ?? '',
+					symbol: $token.symbol,
+					name: $token.name,
+					address: getTokenIdentifier($token)
+				}
+			: undefined
+	);
+
+	const classifyOnramperError = (error: unknown): PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES =>
+		error instanceof OnramperSecretNotConfiguredError
+			? PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES.SECRET_NOT_CONFIGURED
+			: error instanceof OnramperRateLimitedError
+				? PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES.RATE_LIMITED
+				: PLAUSIBLE_EVENT_ONRAMPER_ERROR_TYPES.SIGNING_FAILED;
+
 	// Resolve the signed widget URL through the backend canister whenever the inputs change. Build
 	// the link asynchronously (the canister returns the HMAC over the sensitive parameters) and
 	// guard against late resolutions overwriting newer state via a cancellation token.
 	$effect(() => {
 		const currentIdentity = $authIdentity;
-		if (!nonNullish(currentIdentity)) {
+		if (isNullish(currentIdentity)) {
 			src = undefined;
 			signingFailed = false;
 			return;
@@ -104,12 +132,24 @@
 			.then((url) => {
 				if (!cancelled) {
 					src = url;
+
+					trackOnramperOpen({
+						token: tokenPayload,
+						status: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS
+					});
 				}
 			})
 			.catch((error: unknown) => {
 				if (!cancelled) {
 					consoleError('Could not sign OnRamper widget URL', error);
 					signingFailed = true;
+
+					trackOnramperOpen({
+						token: tokenPayload,
+						status: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+						errorType: classifyOnramperError(error),
+						errorMessage: error instanceof Error ? error.message : undefined
+					});
 				}
 			});
 
@@ -155,15 +195,15 @@
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
 
 {#if signingFailed}
-	<BuyUnavailableNotice />
+	<BuyUnavailableNotice reason="signing-failed" />
 {:else}
 	<div
 		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 		class:invisible={themeLoaded && nonNullish(src)}
 		class:opacity-0={themeLoaded && nonNullish(src)}
-		class:opacity-100={!themeLoaded || !nonNullish(src)}
+		class:opacity-100={!themeLoaded || isNullish(src)}
 	>
-		<Spinner inline />
+		<LoaderSpinner inline />
 	</div>
 
 	{#if nonNullish(src)}

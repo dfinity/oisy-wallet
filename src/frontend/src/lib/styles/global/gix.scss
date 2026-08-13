@@ -11,8 +11,6 @@
 *****************************************************/
 
 :root {
-	--toggle-disabled-opacity: 1;
-
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: var(--border-radius-xs);
 	--border-radius: var(--border-radius-sm);
@@ -65,9 +63,6 @@
 
 	// Segment
 	--segment-selected-background: var(--color-base-black);
-
-	// Checkbox
-	--checkbox-padding: 0;
 
 	// Modal
 
@@ -262,66 +257,6 @@ div.modal {
 	}
 }
 
-div.popover {
-	--background-contrast: var(--overlay-background-contrast);
-
-	.wrapper {
-		padding: var(--padding-0_5x);
-		--padding: var(--padding-0_5x);
-
-		--border-radius: 16px;
-
-		max-width: calc(100vw - (2 * var(--padding)));
-	}
-}
-
-div.toggle {
-	scale: 1.45;
-	transform-origin: 50%;
-	margin-inline: var(--padding);
-
-	--card-background-contrast: var(--color-background-disabled-alt);
-	--card-background: var(--color-base-white);
-
-	&:hover {
-		--card-background-contrast: var(--color-background-disabled-alt2);
-	}
-
-	&:disabled,
-	&.disabled {
-		--card-background: var(--color-background-disabled);
-		--card-background-contrast: var(--color-background-disabled);
-	}
-
-	&:has(input[type='checkbox']:checked) {
-		--card-background-contrast: var(--color-background-brand-primary);
-
-		&:hover {
-			--card-background-contrast: var(--color-background-brand-secondary);
-		}
-
-		&:active {
-			--card-background-contrast: var(--color-background-brand-primary);
-		}
-
-		&:disabled,
-		&.disabled {
-			--card-background: var(--color-background-primary-alt);
-			--card-background-contrast: var(--color-background-brand-subtle-20);
-		}
-	}
-
-	@media (width < theme(--breakpoint-lg)) {
-		scale: 1.6;
-		margin-inline: var(--padding);
-	}
-
-	@media (width < theme(--breakpoint-sm)) {
-		scale: 1.8;
-		margin-inline: var(--padding-2x);
-	}
-}
-
 div.segment-button {
 	button.selected {
 		color: var(--color-foreground-primary-inverted);
@@ -361,54 +296,6 @@ div.step {
 		.text {
 			color: var(--color-foreground-primary);
 		}
-	}
-}
-
-div.checkbox,
-div.radio {
-	&:hover input {
-		--secondary: var(--color-background-brand-secondary) !important;
-		--input-custom-border-color: var(--color-background-brand-secondary);
-		--focus-background: var(--color-background-brand-secondary);
-		--input-background: var(--color-background-brand-secondary);
-	}
-
-	input[type='checkbox'],
-	input[type='radio'] {
-		--focus-background: var(--color-background-primary);
-
-		&:focus {
-			--focus-background: var(--color-background-primary);
-		}
-
-		&:checked {
-			--focus-background: var(--color-background-brand-primary-alt);
-			--input-custom-border-color: var(--color-background-brand-primary-alt);
-			--input-background: var(--color-background-brand-primary-alt);
-
-			&:hover:not(:active),
-			&:focus:not(:active) {
-				--secondary: var(--color-background-brand-secondary);
-				--focus-background: var(--color-background-brand-secondary);
-				--input-custom-border-color: var(--color-background-brand-secondary);
-			}
-		}
-
-		&:checked:after {
-			--background-contrast: var(--color-foreground-primary-inverted);
-		}
-	}
-}
-
-// Native selects
-div.select {
-	& .icon {
-		--disable-contrast: var(--color-foreground-primary);
-	}
-
-	option {
-		background: var(--color-background-primary);
-		color: var(--color-foreground-primary);
 	}
 }
 

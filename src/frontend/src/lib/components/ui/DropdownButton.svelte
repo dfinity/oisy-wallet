@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { IconExpandMore } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import IconExpandMore from '$lib/components/icons/IconExpandMore.svelte';
 
 	interface Props {
 		children?: Snippet;

@@ -21,7 +21,7 @@ use crate::utils::{
     mock::{CALLER, USER_1},
     pocketic::{
         controller, pic_canister::PicCanisterTrait, setup, setup_with_ii,
-        setup_with_production_config, BackendBuilder, PicBackend,
+        setup_with_ii_and_cycles_ledger, setup_with_production_config, BackendBuilder, PicBackend,
     },
 };
 
@@ -192,18 +192,15 @@ fn test_get_allowed_cycles_requires_registered_user() {
 
 #[test]
 fn test_get_allowed_cycles_returns_correct_amount() {
-    let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(USER_1).unwrap();
+    let (pic_setup, ii) = setup_with_ii_and_cycles_ledger();
+    let (caller, chain) = register_ii_caller(&ii, b"allowed-cycles-device");
 
-    // Create a user profile so the allow_signing function is called.
-    // `create_user_profile` spawns an async `allow_signing` task; give
-    // PocketIC a few ticks so the inter-canister call to the cycles ledger
-    // settles before we query the allowance.
     call_create_user_profile(&pic_setup, caller).expect("Failed to call create user profile");
 
-    for _ in 0..10 {
-        pic_setup.pic.tick();
-    }
+    // The allowance is granted exclusively by `allow_signing`, which requires a valid II
+    // delegation chain. Creating a profile on its own grants nothing.
+    call_allow_signing_with_delegation(&pic_setup, caller, Some(chain))
+        .expect("allow_signing should succeed");
 
     // Call get_allowed_cycles
     let result = call_get_allowed_cycles(&pic_setup, caller);
@@ -245,7 +242,7 @@ fn test_get_allowed_cycles_returns_correct_error_when_cycles_ledger_unavailable(
 }
 
 // -------------------------------------------------------------------------------------------------
-// - Housekeeping / allow_signing concurrency integration tests
+// - Housekeeping integration tests
 // -------------------------------------------------------------------------------------------------
 
 /// Verify the canister remains responsive after multiple housekeeping timer
@@ -278,10 +275,9 @@ fn test_housekeeping_lock_resets_after_failed_topup() {
 }
 
 /// Verify that creating many user profiles in quick succession does not cause
-/// the canister to become unresponsive, even without a cycles ledger
-/// (each spawned `allow_signing` task will fail).
+/// the canister to become unresponsive, and that every profile is persisted.
 #[test]
-fn test_allow_signing_backpressure_under_burst() {
+fn test_user_profile_creation_burst_keeps_canister_responsive() {
     let pic_setup = setup();
 
     for i in 0u8..60 {
@@ -334,6 +330,219 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
     );
 }
 
+/// Regression test for the **automatic** (timer-driven) cycles-ledger top-up.
+///
+/// The hourly housekeeping timer must actually *deposit* cycles into the
+/// backend's cycles-ledger account when the balance is below threshold — not
+/// merely leave the canister responsive (which is all
+/// `test_housekeeping_resumes_after_cycles_ledger_becomes_available` checks).
+/// If the timer or its spawned task silently stops refilling the patron
+/// account, it drains until threshold signing (BTC / EVM / SOL sends) fails
+/// wallet-wide via `PatronPaysIcrc2Cycles`. This asserts the deposit happens.
+#[test]
+fn test_housekeeping_timer_deposits_into_cycles_ledger() {
+    use candid::{decode_one, encode_one};
+    use ic_cycles_ledger_client::Account;
+
+    let pic_setup = BackendBuilder::default().with_cycles_ledger(true).deploy();
+    let backend_id = pic_setup.canister_id;
+    // The cycles ledger is installed at its mainnet id in the test harness.
+    let cycles_ledger_id =
+        Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").expect("cycles ledger id");
+
+    let balance_of = || -> Nat {
+        let arg = encode_one(Account {
+            owner: backend_id,
+            subaccount: None,
+        })
+        .unwrap();
+        let reply = pic_setup
+            .pic
+            .query_call(cycles_ledger_id, controller(), "icrc1_balance_of", arg)
+            .expect("icrc1_balance_of query should succeed");
+        decode_one(&reply).expect("decode cycles-ledger balance")
+    };
+
+    // Let the immediate (init) housekeeping top-up settle first, so `before`
+    // already reflects it. The assertion then isolates the *hourly* interval,
+    // rather than passing on the immediate run even if the interval is broken.
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+    let before = balance_of();
+
+    // Advancing past the hourly interval must trigger a further deposit.
+    pic_setup.pic.advance_time(Duration::from_hours(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+    let after = balance_of();
+
+    assert!(
+        after > before,
+        "hourly housekeeping timer must top up the cycles-ledger account \
+         (before={before}, after={after})"
+    );
+}
+
+/// Faithfully reproduces the production send outage.
+///
+/// BTC / EVM / SOL sends are signed by the chain-fusion signer, which charges
+/// its fee by pulling cycles from the backend's **shared** cycles-ledger
+/// account (the "patron") via `icrc2_transfer_from`, using the allowance
+/// `allow_signing` grants it. When that shared pool is drained, every signing
+/// operation fails with `InsufficientFunds` — the exact error users saw for
+/// BTC and EVM sends. This test drives the real drain path (acting as the
+/// signer) to reproduce the failure, then verifies the housekeeping top-up
+/// refills the pool and signing recovers without manual intervention.
+#[test]
+fn test_signer_fee_pull_fails_when_patron_drained_and_recovers_after_topup() {
+    use candid::{decode_one, encode_one, Nat};
+    use ic_cycles_ledger_client::{Account as ClAccount, TransferFromArgs, TransferFromError};
+    use serde_bytes::ByteBuf;
+
+    /// Mirrors `signer::service::principal2account`: the signer's allowance is
+    /// keyed by the user's principal encoded as a ledger subaccount.
+    fn principal_to_subaccount(principal: &Principal) -> ByteBuf {
+        let hex_str = ic_ledger_types::AccountIdentifier::new(
+            principal,
+            &ic_ledger_types::Subaccount([0u8; 32]),
+        )
+        .to_hex();
+        ByteBuf::from(hex::decode(hex_str).expect("valid account hex"))
+    }
+
+    let (pic_setup, ii) = setup_with_ii_and_cycles_ledger();
+    let backend_id = pic_setup.canister_id;
+    let signer = Principal::from_text(crate::utils::mock::SIGNER_CANISTER_ID).expect("signer id");
+    let (user, chain) = register_ii_caller(&ii, b"patron-drain-device");
+    let cycles_ledger_id =
+        Principal::from_text("um5iw-rqaaa-aaaaq-qaaba-cai").expect("cycles ledger id");
+
+    // Logging in makes the backend grant the signer an allowance to spend from
+    // its shared cycles-ledger account on this user's behalf, and the
+    // housekeeping top-up funds that shared account.
+    call_create_user_profile(&pic_setup, user).expect("create user profile");
+    call_allow_signing_with_delegation(&pic_setup, user, Some(chain))
+        .expect("allow_signing should succeed");
+    pic_setup.pic.advance_time(Duration::from_hours(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+
+    let spender_subaccount = principal_to_subaccount(&user);
+    let patron = ClAccount {
+        owner: backend_id,
+        subaccount: None,
+    };
+    let signer_account = ClAccount {
+        owner: signer,
+        subaccount: None,
+    };
+
+    let balance_of = |account: &ClAccount| -> Nat {
+        let reply = pic_setup
+            .pic
+            .query_call(
+                cycles_ledger_id,
+                signer,
+                "icrc1_balance_of",
+                encode_one(account).unwrap(),
+            )
+            .expect("icrc1_balance_of query");
+        decode_one(&reply).expect("decode balance")
+    };
+
+    // The signer pulls `amount` from the shared patron account — the exact path
+    // the chain-fusion signer takes to charge a signing fee.
+    let signer_pull = |amount: Nat| -> std::result::Result<Nat, TransferFromError> {
+        let args = TransferFromArgs {
+            to: signer_account.clone(),
+            fee: None,
+            spender_subaccount: Some(spender_subaccount.clone()),
+            from: patron.clone(),
+            memo: None,
+            created_at_time: None,
+            amount,
+        };
+        let reply = pic_setup
+            .pic
+            .update_call(
+                cycles_ledger_id,
+                signer,
+                "icrc2_transfer_from",
+                encode_one(args).unwrap(),
+            )
+            .expect("icrc2_transfer_from ingress");
+        decode_one(&reply).expect("decode transfer_from result")
+    };
+
+    // One signing operation's worth of cycles (LEDGER_FEE + SIGNER_FEE), and the
+    // ledger transfer fee.
+    let op_fee = Nat::from(81_000_000_000u64);
+    let ledger_fee = Nat::from(1_000_000_000u64);
+
+    // The top-up funded the shared pool, so a signing-fee pull succeeds.
+    let funded = balance_of(&patron);
+    assert!(
+        funded > op_fee,
+        "patron pool should be funded by the housekeeping top-up (got {funded})"
+    );
+    signer_pull(op_fee.clone()).expect("signing-fee pull should succeed while funded");
+
+    // Drain the shared pool to (near) zero, simulating heavy signing load.
+    let remaining = balance_of(&patron);
+    signer_pull(remaining - ledger_fee.clone()).expect("drain pull should succeed");
+
+    // Now the pool is empty: the next signing-fee pull fails with the exact
+    // error users saw in production.
+    let drained = balance_of(&patron);
+    assert!(drained < op_fee, "pool should be drained (got {drained})");
+    match signer_pull(op_fee.clone()) {
+        Err(TransferFromError::InsufficientFunds { balance }) => {
+            assert_eq!(balance, drained, "error should report the drained balance");
+        }
+        other => panic!("expected InsufficientFunds, got {other:?}"),
+    }
+
+    // Recovery: the hourly housekeeping top-up refills the shared pool and
+    // signing works again — no manual intervention. In production the backend
+    // canister holds ample raw cycles (tens of T); mirror that so the top-up
+    // has cycles to forward (the tiny default test budget is otherwise spent by
+    // repeated top-ups and time-advance burn).
+    pic_setup.pic.add_cycles(backend_id, 100_000_000_000_000);
+    pic_setup.pic.advance_time(Duration::from_hours(1));
+    for _ in 0..20 {
+        pic_setup.pic.tick();
+    }
+    let refilled = balance_of(&patron);
+    assert!(
+        refilled > op_fee,
+        "housekeeping top-up should refill the pool (got {refilled})"
+    );
+    signer_pull(op_fee).expect("signing-fee pull should succeed after top-up");
+}
+
+/// `allow_signing` is the only path to a cycles allowance — creating a user profile grants
+/// nothing — so a caller that cannot present a valid II delegation chain must be rejected.
+#[test]
+fn test_allow_signing_requires_ii_delegation() {
+    let (pic_setup, ii) = setup_with_ii();
+    let (caller, _chain) = register_ii_caller(&ii, b"allow-signing-no-delegation-device");
+
+    call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
+
+    let result = call_allow_signing(&pic_setup, caller);
+
+    assert!(
+        matches!(
+            result,
+            Err(AllowSigningError::InvalidDelegationChain { .. })
+        ),
+        "expected InvalidDelegationChain, got {result:?}"
+    );
+}
+
 // -------------------------------------------------------------------------------------------------
 // - Rate-limit integration tests for allow_signing
 // -------------------------------------------------------------------------------------------------
@@ -341,24 +550,17 @@ fn test_housekeeping_resumes_after_cycles_ledger_becomes_available() {
 /// Calling `allow_signing` more than 3 times within an hour must return
 /// `AllowSigningError::RateLimited` with the expected payload fields.
 ///
-/// Note: `create_user_profile` internally calls `spawn_allow_signing_if_below_limit`,
-/// which already consumes 1 of the 3 allowed rate-limit entries (in both the
-/// guard and business limiters).
+/// Note: `create_user_profile` has no signer side effects, so the full budget
+/// of 3 entries is available to the explicit calls below.
 #[test]
 fn test_allow_signing_rate_limited_after_exceeding_limit() {
     let (pic_setup, ii) = setup_with_ii();
     let (caller, chain) = register_ii_caller(&ii, b"rate-limit-exceed-device");
 
-    // 1 of 3 business rate-limit entries consumed here.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    // Process the spawned allow_signing task so the rate-limit entry is recorded.
-    for _ in 0..5 {
-        pic_setup.pic.tick();
-    }
-
-    // 2 more explicit calls should still be within the business limit.
-    for i in 0..2 {
+    // 3 explicit calls should still be within the business limit.
+    for i in 0..3 {
         let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
         assert!(
             !matches!(result, Err(AllowSigningError::RateLimited(_))),
@@ -388,8 +590,6 @@ fn test_allow_signing_rate_limited_after_exceeding_limit() {
 
 /// Verify that a different principal is independently tracked and not blocked
 /// by the first principal's exhausted rate limit.
-///
-/// Each `create_user_profile` consumes 1 rate-limit entry for that caller.
 #[test]
 fn test_allow_signing_rate_limit_is_per_caller() {
     let (pic_setup, ii) = setup_with_ii();
@@ -399,12 +599,8 @@ fn test_allow_signing_rate_limit_is_per_caller() {
     call_create_user_profile(&pic_setup, caller_a).expect("profile A");
     call_create_user_profile(&pic_setup, caller_b).expect("profile B");
 
-    for _ in 0..5 {
-        pic_setup.pic.tick();
-    }
-
-    // Exhaust caller_a's remaining 2 entries, then confirm the next is blocked.
-    for _ in 0..2 {
+    // Exhaust caller_a's 3 entries, then confirm the next is blocked.
+    for _ in 0..3 {
         let _ = call_allow_signing_with_delegation(&pic_setup, caller_a, Some(chain_a.clone()));
     }
     assert!(
@@ -415,7 +611,7 @@ fn test_allow_signing_rate_limit_is_per_caller() {
         "caller_a should be rate-limited"
     );
 
-    // caller_b should still be allowed (only 1 entry used by profile creation).
+    // caller_b has its own untouched budget.
     let result = call_allow_signing_with_delegation(&pic_setup, caller_b, Some(chain_b.clone()));
     assert!(
         !matches!(result, Err(AllowSigningError::RateLimited(_))),
@@ -429,16 +625,16 @@ fn test_allow_signing_rate_limit_is_per_caller() {
 /// the rate limit would normally permit.
 #[test]
 fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
-    let pic_setup = setup_with_cycles_ledger();
-    let caller = Principal::from_text(USER_1).unwrap();
+    let (pic_setup, ii) = setup_with_ii_and_cycles_ledger();
+    let (caller, chain) = register_ii_caller(&ii, b"skip-rate-limit-device");
 
-    // Create profile → housekeeping spawns allow_signing which sets up the
-    // allowance above SUFFICIENT_CYCLES_THRESHOLD (~1.458 T cycles).
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    for _ in 0..10 {
-        pic_setup.pic.tick();
-    }
+    // Establish the allowance above SUFFICIENT_CYCLES_THRESHOLD (~1.458 T cycles). This consumes
+    // the first of the 3 rate-limit entries; the remaining calls below must short-circuit before
+    // the limiter is consulted, so they never exhaust the other two.
+    call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()))
+        .expect("allow_signing should succeed");
 
     // Confirm the allowance is indeed above threshold.
     let allowance =
@@ -446,7 +642,7 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
     let expected = Nat::from(2_917_000_000_000_u64);
     assert_eq!(
         allowance.allowed_cycles, expected,
-        "unexpected allowance after profile creation; expected {expected}, got {}",
+        "unexpected allowance after allow_signing; expected {expected}, got {}",
         allowance.allowed_cycles
     );
 
@@ -454,7 +650,7 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
     // None of these should be rate-limited because the allowance check
     // short-circuits before the rate limiter is consulted.
     for i in 0..6 {
-        let result = call_allow_signing(&pic_setup, caller);
+        let result = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
         assert!(
             !matches!(result, Err(AllowSigningError::RateLimited(_))),
             "call {i} should not be rate-limited when allowance is sufficient: {result:?}",
@@ -464,22 +660,15 @@ fn test_allow_signing_skips_rate_limit_when_allowance_sufficient() {
 
 /// After the one-hour window elapses, the same principal should be able to
 /// call `allow_signing` again without being rate-limited.
-///
-/// `create_user_profile` consumes 1 rate-limit entry for the caller.
 #[test]
 fn test_allow_signing_rate_limit_resets_after_window() {
     let (pic_setup, ii) = setup_with_ii();
     let (caller, chain) = register_ii_caller(&ii, b"rate-limit-window-device");
 
-    // 1 of 3 entries consumed.
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    for _ in 0..5 {
-        pic_setup.pic.tick();
-    }
-
-    // Use remaining 2 entries, then confirm the next is blocked.
-    for _ in 0..2 {
+    // Use all 3 entries, then confirm the next is blocked.
+    for _ in 0..3 {
         let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
     assert!(
@@ -521,12 +710,8 @@ fn test_allow_signing_guard_does_not_interfere_with_business_limiter() {
 
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    for _ in 0..5 {
-        pic_setup.pic.tick();
-    }
-
-    // Exhaust the business limiter (3 entries: 1 from profile + 2 explicit).
-    for _ in 0..2 {
+    // Exhaust the business limiter (3 explicit entries).
+    for _ in 0..3 {
         let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
 
@@ -547,12 +732,8 @@ fn test_allow_signing_guard_resets_independently_of_business_limiter() {
 
     call_create_user_profile(&pic_setup, caller).expect("Failed to create user profile");
 
-    for _ in 0..5 {
-        pic_setup.pic.tick();
-    }
-
     // Exhaust the business limiter.
-    for _ in 0..2 {
+    for _ in 0..3 {
         let _ = call_allow_signing_with_delegation(&pic_setup, caller, Some(chain.clone()));
     }
     assert!(
@@ -796,7 +977,7 @@ fn test_allow_signing_requires_delegation_chain() {
 }
 
 #[test]
-fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
+fn test_allow_signing_enforces_guard_under_production_config() {
     let pic_setup = setup_with_production_config();
     let caller = Principal::from_text(CALLER).unwrap();
     pic_setup.ensure_user_profile(caller);
@@ -804,11 +985,11 @@ fn test_allow_signing_without_delegation_chain_passes_when_guard_disabled() {
     let result = call_allow_signing_with_delegation(&pic_setup, caller, None);
 
     assert!(
-        !matches!(
+        matches!(
             result,
             Err(AllowSigningError::InvalidDelegationChain { .. })
         ),
-        "Delegation guard is disabled, should not get InvalidDelegationChain: {result:?}"
+        "Guard is enforced in production, expected InvalidDelegationChain: {result:?}"
     );
 }
 

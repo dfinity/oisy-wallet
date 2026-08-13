@@ -1,16 +1,40 @@
+import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
-import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
+import {
+	isSolCompiledTransactionMessage,
+	mapSolTransactionMessage
+} from '$sol/utils/sol-transactions.utils';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
-import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolCompiledTransactionMessageBytes,
+	mockSolParsedTransactionMessage
+} from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
 	mockSolAddress2,
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
-import type { TransactionMessage } from '@solana/kit';
+import {
+	getSetComputeUnitLimitInstruction,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
+import { getTransferSolInstruction } from '@solana-program/system';
+import {
+	AuthorityType,
+	getBurnInstruction,
+	getSetAuthorityInstruction,
+	getTransferCheckedInstruction
+} from '@solana-program/token';
+import {
+	getBurnInstruction as getToken2022BurnInstruction,
+	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	AuthorityType as Token2022AuthorityType
+} from '@solana-program/token-2022';
+import { address, createNoopSigner, type TransactionMessage } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-transactions.utils', () => {
@@ -32,10 +56,12 @@ describe('sol-transactions.utils', () => {
 		it('should map a sol transaction message', () => {
 			expect(mapSolTransactionMessage(mockSolParsedTransactionMessage)).toStrictEqual({
 				amount: 2044380n,
-				ambiguous: true,
+				unreviewed: true,
 				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
 				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+				prioritizationFee: 238_217n,
+				computeUnitLimit: 152_343n
 			});
 		});
 
@@ -202,7 +228,7 @@ describe('sol-transactions.utils', () => {
 			});
 		});
 
-		it('should flag a transaction with an unreviewed instruction as ambiguous', () => {
+		it('should surface an unreviewed instruction as a warning, not reject it', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({
 					amount: 1n,
@@ -220,7 +246,120 @@ describe('sol-transactions.utils', () => {
 				amount: 1n,
 				source: mockSolAddress,
 				destination: mockSolAddress2,
-				ambiguous: true
+				unreviewed: true
+			});
+		});
+
+		it('should surface a wholly unreviewed transaction as unreviewed without an amount', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, unreviewed: true })
+				.mockReturnValueOnce({ amount: undefined, unreviewed: true });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: undefined, unreviewed: true });
+		});
+
+		it('should not report a prioritization fee when no compute budget is requested', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: 1n })
+				.mockReturnValueOnce({ amount: undefined });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n });
+		});
+
+		it('should report a prioritization fee from a compute unit price alone', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000n })
+				.mockReturnValueOnce({ amount: 1n });
+
+			// no explicit limit, so the runtime default of 200_000 compute units per instruction
+			// applies to both instructions
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n, prioritizationFee: 400_000n, computeUnitLimit: 400_000n });
+		});
+
+		it('should report a prioritization fee from a compute unit price and limit', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000n })
+				.mockReturnValueOnce({ amount: undefined, computeUnitLimit: 50_000n })
+				.mockReturnValueOnce({ amount: 1n });
+
+			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+				amount: 1n,
+				prioritizationFee: 50_000n,
+				computeUnitLimit: 50_000n
+			});
+		});
+
+		it('should report a balance-draining prioritization fee alongside a modest transfer', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, computeUnitPrice: 1_000_000_000_000n })
+				.mockReturnValueOnce({ amount: undefined, computeUnitLimit: 1_400_000n })
+				.mockReturnValueOnce({
+					amount: 1_000n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
+
+			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
+				amount: 1_000n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				prioritizationFee: 1_400_000_000_000n,
+				computeUnitLimit: 1_400_000n
+			});
+		});
+
+		it('should propagate an instruction that declares itself unpriceable as ambiguous', () => {
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: undefined, ambiguous: true })
+				.mockReturnValueOnce({ amount: 1n });
+
+			expect(
+				mapSolTransactionMessage({
+					...mockSolParsedTransactionMessage,
+					instructions: [instruction1, instruction2]
+				})
+			).toStrictEqual({ amount: 1n, ambiguous: true });
+		});
+
+		it('should surface the prioritization fee of a transfer that hides one behind a dust amount', () => {
+			// the surrounding suite stubs the instruction mapper; this case exercises the real one
+			spyMapSolInstruction.mockRestore();
+
+			const instructions = [
+				getSetComputeUnitLimitInstruction({ units: 1_400_000 }),
+				getSetComputeUnitPriceInstruction({ microLamports: 714_285_715 }),
+				getTransferSolInstruction({
+					source: createNoopSigner(address(mockSolAddress)),
+					destination: address(mockSolAddress2),
+					amount: 1n
+				})
+			];
+
+			// The transfer is worth 1 lamport, while the compute budget claims 1_000_000_001 lamports
+			// on top of the 5_000 lamport base fee
+			expect(
+				mapSolTransactionMessage({ ...mockSolParsedTransactionMessage, instructions })
+			).toStrictEqual({
+				amount: 1n,
+				source: mockSolAddress,
+				destination: mockSolAddress2,
+				prioritizationFee: 1_000_000_001n,
+				computeUnitLimit: 1_400_000n
 			});
 		});
 
@@ -384,6 +523,110 @@ describe('sol-transactions.utils', () => {
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({ amount: undefined });
 		});
 
+		describe('with a dust transfer hiding a takeover or a burn', () => {
+			// These exercise the real instruction mapper end to end, which is the point: the attack
+			// lives in how a decoded instruction is reduced, not in a stubbed verdict.
+			beforeEach(() => {
+				spyMapSolInstruction.mockRestore();
+			});
+
+			const dustTransfer = getTransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			const token2022DustTransfer = getToken2022TransferCheckedInstruction({
+				source: address(mockAtaAddress),
+				mint: address(JUP_TOKEN.address),
+				destination: address(mockSolAddress2),
+				authority: address(mockSolAddress),
+				amount: 1n,
+				decimals: 6
+			});
+
+			it('should reject a `SetAuthority` handing the source account to an attacker', () => {
+				const setAuthority = getSetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer, setAuthority]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a `Burn` of the balance the summary does not show', () => {
+				const burn = getBurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer, burn]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `SetAuthority` handing the source account to an attacker', () => {
+				const setAuthority = getToken2022SetAuthorityInstruction({
+					owned: address(mockAtaAddress),
+					owner: address(mockSolAddress),
+					authorityType: Token2022AuthorityType.AccountOwner,
+					newAuthority: address(mockSolAddress3)
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [token2022DustTransfer, setAuthority]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should reject a Token-2022 `Burn` of the balance the summary does not show', () => {
+				const burn = getToken2022BurnInstruction({
+					account: address(mockAtaAddress),
+					mint: address(JUP_TOKEN.address),
+					authority: address(mockSolAddress),
+					amount: 1_000_000n
+				});
+
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [token2022DustTransfer, burn]
+					})
+				).toStrictEqual(expect.objectContaining({ ambiguous: true }));
+			});
+
+			it('should keep a lone dust transfer signable', () => {
+				expect(
+					mapSolTransactionMessage({
+						...mockSolParsedTransactionMessage,
+						instructions: [dustTransfer]
+					})
+				).toStrictEqual({
+					amount: 1n,
+					source: mockAtaAddress,
+					destination: mockSolAddress2,
+					tokenAddress: JUP_TOKEN.address
+				});
+			});
+		});
+
 		it('should correctly initialise sum from ZERO', () => {
 			spyMapSolInstruction
 				.mockReturnValueOnce({ amount: undefined })
@@ -393,6 +636,61 @@ describe('sol-transactions.utils', () => {
 			expect(mapSolTransactionMessage(mockParams)).toStrictEqual({
 				amount: 60n
 			});
+		});
+	});
+
+	describe('isSolCompiledTransactionMessage', () => {
+		const encode = (text: string): Uint8Array => new TextEncoder().encode(text);
+
+		it.each(['legacy', 0] as const)(
+			'should detect a compiled transaction message of version %s',
+			(version) => {
+				expect(
+					isSolCompiledTransactionMessage(createMockSolCompiledTransactionMessageBytes(version))
+				).toBeTruthy();
+			}
+		);
+
+		it('should detect a compiled transaction message padded with trailing bytes', () => {
+			const bytes = createMockSolCompiledTransactionMessageBytes('legacy');
+
+			expect(
+				isSolCompiledTransactionMessage(Uint8Array.from([...bytes, 1, 2, 3, 4, 5]))
+			).toBeTruthy();
+		});
+
+		it.each([
+			'Sign in with Solana',
+			'example.com wants you to sign in with your Solana account:\n7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1\n\nNonce: 32891756',
+			'{"domain":"example.com","statement":"Log in","nonce":"abc123"}',
+			'a'
+		])('should not flag the plain text message %j', (text) => {
+			expect(isSolCompiledTransactionMessage(encode(text))).toBeFalsy();
+		});
+
+		it('should not flag empty bytes', () => {
+			expect(isSolCompiledTransactionMessage(new Uint8Array(0))).toBeFalsy();
+		});
+
+		it('should not flag a truncated transaction message', () => {
+			const bytes = createMockSolCompiledTransactionMessageBytes('legacy');
+
+			expect(isSolCompiledTransactionMessage(bytes.slice(0, bytes.length - 3))).toBeFalsy();
+		});
+
+		// The guard refuses everything the decoder accepts, so its cost is what it does to genuine
+		// messages. Solana message signing carries UTF-8 text, and no printable-ASCII string is
+		// shaped like a compiled message, so a sign-in challenge is never caught by it.
+		it('should not flag any printable-ASCII message', () => {
+			const texts = Array.from({ length: 2000 }, (_, i) =>
+				Array.from({ length: 1 + (i % 400) }, (_, j) =>
+					String.fromCharCode(32 + ((i * 31 + j * 17) % 95))
+				).join('')
+			);
+
+			expect(texts.filter((text) => isSolCompiledTransactionMessage(encode(text)))).toStrictEqual(
+				[]
+			);
 		});
 	});
 });

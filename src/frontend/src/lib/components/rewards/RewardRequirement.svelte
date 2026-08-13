@@ -11,8 +11,8 @@
 </script>
 
 <script generics="T extends CampaignCriterion = CampaignCriterion" lang="ts">
-	import { IconCheckCircleFill } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import IconCheckCircleFill from '$lib/components/icons/IconCheckCircleFill.svelte';
 	import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

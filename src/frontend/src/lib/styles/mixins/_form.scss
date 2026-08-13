@@ -1,0 +1,25 @@
+@mixin input {
+	background: var(--input-background);
+	color: var(--input-background-contrast);
+	border: var(--input-border-size) solid
+		var(--input-error-color, var(--input-custom-border-color, var(--input-border-color)));
+
+	transition:
+		color var(--animation-time-short) ease-out,
+		background var(--animation-time-short) ease-out,
+		border var(--animation-time-short) ease-in;
+
+	&:focus {
+		@include input-focus;
+	}
+
+	&::placeholder {
+		color: var(--disable-contrast);
+	}
+}
+
+@mixin input-focus {
+	border: var(--input-border-size) solid var(--secondary);
+	background: var(--focus-background);
+	color: var(--focus-background-contrast);
+}

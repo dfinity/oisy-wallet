@@ -1,4 +1,4 @@
-import type { ProgressStep, ProgressStepState } from '@dfinity/gix-components';
+import type { ProgressStep, ProgressStepState } from '$lib/types/progress-step';
 
 export interface StaticStep extends Omit<ProgressStep, 'state'> {
 	progressLabel?: string;

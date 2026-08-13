@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault, stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
@@ -9,6 +8,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { MediaStatusEnum } from '$lib/enums/media-status';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { preventDefault, stopPropagation } from '$lib/utils/event-modifiers.utils';
 
 	interface Props {
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';

@@ -26,8 +26,6 @@ export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
-export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
@@ -40,8 +38,6 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
-export const NEAR_INTENTS_POLL_INTERVAL_MS = 2_000;
-export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
@@ -50,6 +46,7 @@ export const NEAR_INTENTS_TOS_LINK =
 	'https://docs.near-intents.org/security-compliance/terms-of-service';
 
 export const SWAP_MODE = 'all';
+export const SWAP_MODE_MARKET = 'market';
 export const SWAP_SIDE = 'SELL';
 
 export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {

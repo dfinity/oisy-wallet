@@ -1,4 +1,5 @@
 import type { UserData } from '$declarations/rewards/rewards.did';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
@@ -12,18 +13,26 @@ import {
 	NAVIGATION_MENU_RECEIVE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_SCANNER_BUTTON,
+	NAVIGATION_MENU_SETTINGS_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { userSelectedNetworkStore } from '$lib/stores/user-selected-network.store';
 import { getSymbol } from '$lib/utils/modal.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+
+const mockGoto = vi.fn();
+vi.mock('$app/navigation', () => ({
+	goto: (...args: unknown[]) => mockGoto(...args)
+}));
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -35,6 +44,7 @@ describe('Menu', () => {
 	const menuItemScannerButtonSelector = `button[data-tid="${NAVIGATION_MENU_SCANNER_BUTTON}"]`;
 	const menuItemPayButtonSelector = `button[data-tid="${NAVIGATION_MENU_PAY_BUTTON}"]`;
 	const menuItemReferralButtonSelector = `button[data-tid="${NAVIGATION_MENU_REFERRAL_BUTTON}"]`;
+	const menuItemSettingsButtonSelector = `button[data-tid="${NAVIGATION_MENU_SETTINGS_BUTTON}"]`;
 	const menuItemWhyOisyButtonSelector = `button[data-tid="${NAVIGATION_MENU_WHY_OISY_BUTTON}"]`;
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
 	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
@@ -54,6 +64,7 @@ describe('Menu', () => {
 		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockUserData([]));
 		vi.spyOn(toastsStore, 'toastsShow');
 		setPrivacyMode({ enabled: false });
+		userSelectedNetworkStore.set(undefined);
 	});
 
 	const mockUserData = (powers: Array<string>): UserData => ({
@@ -94,6 +105,24 @@ describe('Menu', () => {
 			}
 			return element;
 		});
+
+	it('keeps the menu button highlighted while the popover is open', async () => {
+		({ container } = render(Menu));
+
+		const menuButton: HTMLButtonElement | null = container.querySelector(menuButtonSelector);
+
+		assertNonNullish(menuButton);
+
+		expect(menuButton).not.toHaveClass('opened');
+		expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+
+		menuButton.click();
+
+		await waitFor(() => {
+			expect(menuButton).toHaveClass('opened');
+			expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+		});
+	});
 
 	it('renders the privacy mode menu item', async () => {
 		await openMenu();
@@ -179,6 +208,38 @@ describe('Menu', () => {
 	it('renders the support button in the menu', async () => {
 		await openMenu();
 		await waitForElement({ selector: menuItemSupportButtonSelector });
+	});
+
+	it('renders the settings button in the menu', async () => {
+		await openMenu();
+		await waitForElement({ selector: menuItemSettingsButtonSelector });
+	});
+
+	it('navigates to the settings page preserving the selected network when the settings button is clicked', async () => {
+		userSelectedNetworkStore.set(ICP_NETWORK_ID);
+
+		await openMenu();
+		await waitForElement({ selector: menuItemSettingsButtonSelector });
+
+		const button: HTMLButtonElement | null = container.querySelector(
+			menuItemSettingsButtonSelector
+		);
+
+		assertNonNullish(button);
+
+		// Navigation is deferred until the popover backdrop has faded out. Drive that
+		// deterministic delay with fake timers instead of blocking on a real timeout.
+		vi.useFakeTimers();
+
+		button.click();
+
+		await vi.advanceTimersByTimeAsync(BACKDROP_FADE_OUT_DURATION);
+
+		expect(mockGoto).toHaveBeenCalledExactlyOnceWith(
+			expect.stringContaining(`/settings/?network=${ICP_NETWORK_ID.description}`)
+		);
+
+		vi.useRealTimers();
 	});
 
 	it('should render the logged out version if not signed in', async () => {

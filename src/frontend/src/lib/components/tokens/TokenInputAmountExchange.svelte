@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
@@ -15,6 +14,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
 	interface Props {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type IcReceiveInfoCkBtc from '$icp/components/receive/IcReceiveInfoCkBtc.svelte';
 	import type IcReceiveInfoIcp from '$icp/components/receive/IcReceiveInfoIcp.svelte';
@@ -7,11 +6,13 @@
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReceiveTitle from '$lib/components/receive/ReceiveTitle.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { WizardStepsReceiveAddress } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	interface Props {

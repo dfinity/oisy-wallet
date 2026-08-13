@@ -4,6 +4,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
+import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { UniversalScannerData } from '$lib/types/scanner';
 import type { SendModalData } from '$lib/types/send';
@@ -67,9 +68,55 @@ export const modalHarvestUnstake: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'harvest-unstake'
 );
+export const modalLiquidiumSupply: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-supply'
+);
+export const modalLiquidiumBorrow: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-borrow'
+);
+export const modalLiquidiumWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-withdraw'
+);
+export const modalLiquidiumRepay: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'liquidium-repay'
+);
+export const modalTradingDeposit: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'trading-deposit'
+);
+export const modalOisyTradeWithdraw: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'oisy-trade-withdraw'
+);
+export const modalOisyTradeWithdrawData: Readable<OisyTradeWithdrawToken | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'oisy-trade-withdraw'
+			? ($modalStore?.data as OisyTradeWithdrawToken | undefined)
+			: undefined
+);
+export const modalOisyTradeOrderDetail: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'oisy-trade-order-detail'
+);
+export const modalOisyTradeOrderDetailData: Readable<OisyTradeOrderView | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'oisy-trade-order-detail'
+			? ($modalStore?.data as OisyTradeOrderView | undefined)
+			: undefined
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'
+);
+export const modalLimitOrder: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'limit-order'
 );
 export const modalBuy: Readable<boolean> = derived(
 	modalStore,
@@ -219,6 +266,10 @@ export const modalReferralCode: Readable<boolean> = derived(
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
+);
+export const modalNotes: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'notes'
 );
 export const modalDAppDetails: Readable<boolean> = derived(
 	modalStore,

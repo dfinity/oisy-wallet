@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import {
 		SUPPORTED_MAINNET_NETWORKS,
@@ -14,6 +13,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
 		SETTINGS_NETWORKS_MODAL_SAVE_BUTTON,
@@ -149,11 +149,11 @@
 		<h5 class="mb-4 flex">{$i18n.settings.text.networks}</h5>
 		<div class="flex font-bold">
 			<Checkbox
+				checked={enabledTestnet}
 				inputId="toggle-testnets-switcher"
+				onChange={toggleTestnets}
 				testId={SETTINGS_NETWORKS_MODAL_TESTNET_CHECKBOX}
 				text="inline"
-				bind:checked={enabledTestnet}
-				on:nnsChange={toggleTestnets}
 			>
 				{$i18n.settings.text.enable_testnets}
 			</Checkbox>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 	import EthConvertTokenWizard from '$eth/components/convert/EthConvertTokenWizard.svelte';
@@ -8,6 +7,7 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,

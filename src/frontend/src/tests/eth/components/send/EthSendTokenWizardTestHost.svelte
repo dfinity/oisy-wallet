@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { setContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
@@ -10,6 +9,7 @@
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 
 	interface SendContextForTest {
 		sendToken: Readable<Token | NonFungibleToken>;

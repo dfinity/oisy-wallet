@@ -20,6 +20,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { isNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
+import { writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -40,8 +41,19 @@ describe('AiAssistantReviewSendEthToken', () => {
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: SEPOLIA_TOKEN })]]);
 
 	const mockEthFeeStore = () => {
-		const store = ethFeeStore.initEthFeeStore();
-		store.setFee(mockFees);
+		// Build the store directly rather than through the (possibly spied) factory, so it is
+		// guaranteed to hold the fee regardless of test order.
+		const { subscribe } = writable<ethFeeStore.FeeStoreData>(mockFees);
+		const store: ethFeeStore.EthFeeStore = { subscribe, setFee: vi.fn() };
+
+		vi.spyOn(ethFeeStore, 'initEthFeeStore').mockImplementation(() => store);
+	};
+
+	const mockEmptyEthFeeStore = () => {
+		// Build an empty store directly rather than through the (possibly spied) factory, so it is
+		// guaranteed to hold no fee regardless of test order.
+		const { subscribe } = writable<ethFeeStore.FeeStoreData>(undefined);
+		const store: ethFeeStore.EthFeeStore = { subscribe, setFee: vi.fn() };
 
 		vi.spyOn(ethFeeStore, 'initEthFeeStore').mockImplementation(() => store);
 	};
@@ -213,6 +225,27 @@ describe('AiAssistantReviewSendEthToken', () => {
 		});
 
 		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should disable the send button and not send when the gas fee is not defined', async () => {
+		mockAuthStore();
+		mockCkEthMinterInfoStore();
+		mockEthAddressStore();
+		mockBalance();
+		mockEmptyEthFeeStore();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props,
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		expect(button).toBeDisabled();
 
 		await fireEvent.click(button);
 

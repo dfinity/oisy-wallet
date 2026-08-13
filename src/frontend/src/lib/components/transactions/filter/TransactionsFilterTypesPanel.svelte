@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Checkbox } from '@dfinity/gix-components';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import {
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
 		PLAUSIBLE_EVENT_FILTER_MODIFIERS
@@ -43,8 +43,8 @@
 			<Checkbox
 				checked={selectedSet.has(type)}
 				inputId={`transactions-filter-type-${type}`}
+				onChange={() => onToggleType(type)}
 				text="inline"
-				on:nnsChange={() => onToggleType(type)}
 			>
 				<span class="text-sm">{label}</span>
 			</Checkbox>

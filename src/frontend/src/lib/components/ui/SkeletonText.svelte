@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
+	import { isIOS } from '$lib/utils/device.utils';
 </script>
 
 <div aria-hidden="true">

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { Collapsible } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 
 	interface Props {
 		listHeader: Snippet;

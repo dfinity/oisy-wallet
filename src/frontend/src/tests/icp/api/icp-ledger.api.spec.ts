@@ -1,4 +1,5 @@
-import { icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
+import { accountBalance, icrc1Transfer, transfer } from '$icp/api/icp-ledger.api';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import {
 	mockAccountIdentifierText,
@@ -124,6 +125,36 @@ describe('icp-ledger.api', () => {
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1Transfer({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('accountBalance', () => {
+		const params = {
+			owner: mockPrincipal2,
+			identity: mockIdentity,
+			certified: true,
+			ledgerCanisterId: mockLedgerCanisterId
+		};
+
+		const mockBalance = 1_000_000n;
+
+		beforeEach(() => {
+			ledgerCanisterMock.accountBalance.mockResolvedValue(mockBalance);
+		});
+
+		it('successfully calls accountBalance endpoint with the owner account identifier', async () => {
+			const result = await accountBalance(params);
+
+			expect(result).toEqual(mockBalance);
+
+			expect(ledgerCanisterMock.accountBalance).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				accountIdentifier: getAccountIdentifier(mockPrincipal2)
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(accountBalance({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

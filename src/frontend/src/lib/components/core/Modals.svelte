@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import NotesModal from '$lib/components/notes/NotesModal.svelte';
 	import PayDialog from '$lib/components/pay/PayDialog.svelte';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
@@ -26,6 +28,7 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalAddressBook,
+		modalNotes,
 		modalVipQrCodeData,
 		modalIcHideTokenData,
 		modalHideTokenData,
@@ -66,6 +69,8 @@
 		<ReferralCodeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
+	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
+		<NotesModal />
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}

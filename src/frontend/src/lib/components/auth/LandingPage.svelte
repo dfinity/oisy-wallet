@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { themeStore } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import FeatureCards from '$lib/components/auth/FeatureCards.svelte';
@@ -8,6 +7,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { themeStore } from '$lib/stores/theme.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));

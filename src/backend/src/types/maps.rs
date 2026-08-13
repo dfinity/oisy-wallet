@@ -10,8 +10,12 @@ use shared::types::{
     user_profile::StoredUserProfile, user_transaction::UserTransaction, Timestamp,
 };
 
-use crate::types::storable::{
-    ActiveUserTransactionKey, Candid, StoredPrincipal, StoredTokenId, UserTransactionKey,
+use crate::{
+    personal_notes::share::model::PersonalNoteShareRecord,
+    types::storable::{
+        ActiveUserTransactionKey, Candid, PersonalNoteShareCreatorKey, PersonalNoteShareToken,
+        StoredPrincipal, StoredTokenId, UserTransactionKey,
+    },
 };
 
 pub type VMem = VirtualMemory<DefaultMemoryImpl>;
@@ -57,3 +61,14 @@ pub type AgreementHistoryMap =
 /// partial updates during polling do not rewrite a whole `Vec`.
 pub type ActiveUserTransactionsMap =
     StableBTreeMap<ActiveUserTransactionKey, Candid<ActiveUserTransaction>, VMem>;
+
+/// Primary personal-note-share store: token → record. Publicly readable by
+/// design (unlike every other map here) — see `personal_notes::share`.
+pub type PersonalNoteShareMap =
+    StableBTreeMap<PersonalNoteShareToken, Candid<PersonalNoteShareRecord>, VMem>;
+
+/// By-creator index for the active-share cap: `(creator, token) → expires_at_ns`.
+/// Lets the cap check range-scan one creator's shares without touching
+/// [`PersonalNoteShareMap`].
+pub type PersonalNoteSharesByCreatorMap =
+    StableBTreeMap<PersonalNoteShareCreatorKey, Timestamp, VMem>;

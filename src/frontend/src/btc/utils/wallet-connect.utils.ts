@@ -1,10 +1,18 @@
+import { btcWalletConnectDerivationPath } from '$btc/constants/wallet-connect.constants';
+import type { OptionBtcAddress } from '$btc/types/address';
+import type {
+	WalletConnectBtcAccountAddresses,
+	WalletConnectBtcPsbtInputPrevout,
+	WalletConnectBtcPsbtPrevout
+} from '$btc/types/wallet-connect';
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
+import type { NetworkId } from '$lib/types/network';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { Signature } from '@noble/secp256k1';
-import { crypto as btcCrypto } from 'bitcoinjs-lib';
+import { crypto as btcCrypto, Transaction, type Psbt } from 'bitcoinjs-lib';
 
 const { DerivationPath, PublicKeyWithChainCode: Secp256k1PublicKeyWithChainCode } = secp256k1;
 
@@ -40,6 +48,41 @@ export const deriveBtcPublicKey = ({ principal }: { principal: Principal }): Uin
 	});
 
 	return Uint8Array.from(masterKey.deriveSubkeyWithChainCode(derivationPath).public_key.toBuffer());
+};
+
+/**
+ * Build the Reown `getAccountAddresses` response payload for a single P2WPKH account.
+ *
+ * OISY exposes a single static first-external Native SegWit address per network. The compressed
+ * public key (hex) is derived from the caller principal and surfaced so the dApp can verify
+ * signatures without an extra round-trip. The advertised BIP-84 `path` is network-aware (mainnet
+ * coin type `0'`, test networks `1'`).
+ *
+ * Returns an empty list when the address is nullish so callers can advertise only loaded networks.
+ */
+export const buildBtcAccountAddresses = ({
+	address,
+	principal,
+	networkId
+}: {
+	address: OptionBtcAddress;
+	principal: Principal;
+	networkId: NetworkId;
+}): WalletConnectBtcAccountAddresses => {
+	if (isNullish(address)) {
+		return [];
+	}
+
+	const publicKey = Buffer.from(deriveBtcPublicKey({ principal })).toString('hex');
+
+	return [
+		{
+			address,
+			publicKey,
+			path: btcWalletConnectDerivationPath({ networkId }),
+			intention: 'payment'
+		}
+	];
 };
 
 /**
@@ -126,4 +169,90 @@ export const encodeRecoverableSignature = ({
 	}
 
 	throw new Error('Could not recover the signature recovery id for the BTC public key.');
+};
+
+type PsbtInput = Psbt['data']['inputs'][number];
+
+const nonWitnessPrevout = ({
+	nonWitnessUtxo,
+	vout
+}: {
+	nonWitnessUtxo: Uint8Array;
+	vout: number;
+}): WalletConnectBtcPsbtPrevout | undefined => {
+	try {
+		const { outs } = Transaction.fromBuffer(Buffer.from(nonWitnessUtxo));
+
+		const out = outs[vout];
+
+		return nonNullish(out) ? { value: BigInt(out.value), script: out.script } : undefined;
+	} catch (_: unknown) {
+		// An unparsable previous transaction states no readable previous output.
+	}
+};
+
+const prevoutsMatch = ({
+	a,
+	b
+}: {
+	a: WalletConnectBtcPsbtPrevout;
+	b: WalletConnectBtcPsbtPrevout;
+}): boolean =>
+	a.value === b.value && Buffer.compare(Buffer.from(a.script), Buffer.from(b.script)) === 0;
+
+/**
+ * Resolve the previous output of a PSBT input as the signing path reads it.
+ *
+ * bitcoinjs-lib builds the sighash from `nonWitnessUtxo` whenever the input carries it and only
+ * falls back to `witnessUtxo` otherwise (`getHashForSig`), and the value and the script of that
+ * previous output are committed to by the signature. BIP-174 lets an input carry both fields and
+ * does not require them to agree, so a dApp could state one previous output in the field a review
+ * reads and another in the field the signer consumes, and have the user approve figures that are
+ * not the ones being signed.
+ *
+ * Therefore: when both fields are present they must describe the same previous output, and the
+ * resolved prevout is taken from `nonWitnessUtxo`, the field the signature actually commits to.
+ * A disagreement, or a `nonWitnessUtxo` that cannot be read, is reported as `ambiguous` with no
+ * prevout, so the caller refuses the request instead of picking one of two contradicting readings.
+ *
+ * An input carrying only `nonWitnessUtxo` resolves to no prevout: OISY signs P2WPKH inputs only and
+ * rejects such an input before signing, so the review leaves it unpriced rather than pricing a
+ * previous output no signature will commit to.
+ */
+export const resolvePsbtInputPrevout = ({
+	input,
+	vout
+}: {
+	input: PsbtInput;
+	vout: number;
+}): WalletConnectBtcPsbtInputPrevout => {
+	const { witnessUtxo, nonWitnessUtxo } = input;
+
+	if (isNullish(nonWitnessUtxo)) {
+		return {
+			prevout: nonNullish(witnessUtxo)
+				? { value: BigInt(witnessUtxo.value), script: witnessUtxo.script }
+				: undefined,
+			ambiguous: false
+		};
+	}
+
+	const signedPrevout = nonWitnessPrevout({ nonWitnessUtxo, vout });
+
+	if (isNullish(signedPrevout)) {
+		return { prevout: undefined, ambiguous: true };
+	}
+
+	if (isNullish(witnessUtxo)) {
+		return { prevout: undefined, ambiguous: false };
+	}
+
+	const declaredPrevout: WalletConnectBtcPsbtPrevout = {
+		value: BigInt(witnessUtxo.value),
+		script: witnessUtxo.script
+	};
+
+	return prevoutsMatch({ a: declaredPrevout, b: signedPrevout })
+		? { prevout: signedPrevout, ambiguous: false }
+		: { prevout: undefined, ambiguous: true };
 };

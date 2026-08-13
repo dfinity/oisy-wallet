@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Modal, Html } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import episodeFour from '$lib/assets/oisy-episode-four.svg';
@@ -7,7 +6,9 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import Modal from '$lib/components/ui/Modal.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
 	import { OISY_REWARDS_URL, OISY_WELCOME_TWITTER_URL } from '$lib/constants/oisy.constants';
 	import {

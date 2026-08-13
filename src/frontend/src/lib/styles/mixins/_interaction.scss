@@ -1,0 +1,14 @@
+@mixin tappable {
+	touch-action: manipulation;
+	cursor: pointer;
+}
+
+@mixin initial {
+	touch-action: initial;
+	cursor: initial;
+}
+
+@mixin none {
+	cursor: inherit;
+	pointer-events: none;
+}

@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { Spinner, stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import LoaderSpinner from '$lib/components/ui/LoaderSpinner.svelte';
 	import { busy } from '$lib/stores/busy.store';
+	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 
 	const close = () => {
 		if (isNullish($busy) || !$busy.close) {
@@ -35,7 +36,7 @@
 		<div class="content">
 			{#if $busy.spinner}
 				<div class="spinner text-off-white">
-					<Spinner />
+					<LoaderSpinner />
 				</div>
 			{/if}
 

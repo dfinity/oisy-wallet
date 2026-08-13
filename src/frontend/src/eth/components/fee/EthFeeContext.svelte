@@ -2,7 +2,12 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
-	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
+	import {
+		ETH_FEE_DATA_LISTENER_DELAY,
+		ETH_FEE_RETRY_BASE_DELAY,
+		ETH_FEE_RETRY_MAX_ATTEMPTS,
+		ETH_FEE_RETRY_MAX_DELAY
+	} from '$eth/constants/eth.constants';
 	import { encodeErc20Approve } from '$eth/services/approve.services';
 	import { encodeErc4626Redeem, encodeErc4626Withdraw } from '$eth/services/erc4626.services';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -282,6 +287,10 @@
 					err
 				})
 			);
+
+			// Self-heal a transient failure (e.g. a mobile radio dropping while OISY is
+			// backgrounded) by retrying with exponential backoff instead of leaving the fee unset.
+			scheduleRetry();
 		}
 	};
 
@@ -296,6 +305,32 @@
 	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 
 	let isDestroyed = $state(false);
+
+	// Retry budget for failed fee fetches: incremented per scheduled retry, reset when a fee is
+	// successfully resolved (see the $effect below) or when a fresh fetch cycle starts
+	// (`obverseFeeData`), and cleared on destroy.
+	let retryTimer = $state<NodeJS.Timeout | undefined>();
+	let retryAttempts = $state(0);
+
+	const scheduleRetry = () => {
+		if (isDestroyed || !observe || retryAttempts >= ETH_FEE_RETRY_MAX_ATTEMPTS) {
+			return;
+		}
+
+		const delay = Math.min(ETH_FEE_RETRY_BASE_DELAY * 2 ** retryAttempts, ETH_FEE_RETRY_MAX_DELAY);
+		retryAttempts++;
+
+		clearTimeout(retryTimer);
+		retryTimer = setTimeout(() => {
+			retryTimer = undefined;
+
+			if (isDestroyed || !observe) {
+				return;
+			}
+
+			debounceUpdateFeeData();
+		}, delay);
+	};
 
 	const obverseFeeData = async () => {
 		const throttledCallback = () => {
@@ -321,6 +356,11 @@
 			return;
 		}
 
+		// A fresh fetch cycle (mount, `observe` flip, or foreground return) restores the retry budget.
+		clearTimeout(retryTimer);
+		retryTimer = undefined;
+		retryAttempts = 0;
+
 		debounceUpdateFeeData();
 
 		listener = initMinedTransactionsListener({
@@ -339,6 +379,7 @@
 		await listener?.disconnect();
 		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
+		clearTimeout(retryTimer);
 	});
 
 	/**
@@ -359,10 +400,34 @@
 		}
 	});
 
+	// When a fee is successfully resolved, reset the retry budget and cancel any pending retry.
+	// A failed fetch does not change the store, so this only reacts to successes.
+	$effect(() => {
+		if (nonNullish($feeStore)) {
+			untrack(() => {
+				retryAttempts = 0;
+				clearTimeout(retryTimer);
+				retryTimer = undefined;
+			});
+		}
+	});
+
+	// Recover the fee when OISY returns to the foreground. Mobile browsers freeze backgrounded
+	// tabs and tear down the fee WebSocket; on return, re-fetch and reconnect the listener.
+	const onVisibilityChange = () => {
+		if (document.hidden || isDestroyed || !observe) {
+			return;
+		}
+
+		untrack(() => obverseFeeData());
+	};
+
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
 	 */
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
+
+<svelte:document onvisibilitychange={onVisibilityChange} />
 
 {@render children()}

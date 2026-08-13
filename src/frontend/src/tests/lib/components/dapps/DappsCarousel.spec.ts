@@ -3,10 +3,8 @@ import * as dapps from '$env/dapp-descriptions.env';
 import * as rewards from '$env/reward-campaigns.env';
 import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 import DappsCarousel from '$lib/components/dapps/DappsCarousel.svelte';
-import { stakeProvidersConfig } from '$lib/config/stake.config';
 import { CAROUSEL_CONTAINER } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { StakeProvider } from '$lib/types/stake';
 import { mockDappsDescriptions } from '$tests/mocks/dapps.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
@@ -20,7 +18,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: mockUserProfile, certified: false });
 	});
 
-	it('should render nothing if there is no dApps, no rewards and earning is not enabled', () => {
+	it('should render nothing if there are no dApps and no rewards', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 
@@ -29,7 +27,7 @@ describe('DappsCarousel', () => {
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps has the carousel prop, no rewards and earning is not enabled', () => {
+	it('should render nothing if no dApps have the carousel prop and no rewards', () => {
 		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue(
 			mockDappsDescriptions.map((dapp) => ({ ...dapp, carousel: undefined }))
@@ -40,7 +38,7 @@ describe('DappsCarousel', () => {
 		expect(container.textContent).toBe('');
 	});
 
-	it('should render nothing if no dApps, featured reward is unknown and earning is not enabled', () => {
+	it('should render nothing if there are no dApps and the featured reward is unknown', () => {
 		vi.spyOn(rewards, 'FEATURED_REWARD_CAROUSEL_SLIDE_ID', 'get').mockReturnValue(
 			'test' as typeof FEATURED_REWARD_CAROUSEL_SLIDE_ID
 		);
@@ -60,7 +58,6 @@ describe('DappsCarousel', () => {
 					...mockUserSettings.dapp.dapp_carousel,
 					hidden_dapp_ids: [
 						FEATURED_REWARD_CAROUSEL_SLIDE_ID,
-						stakeProvidersConfig[StakeProvider.HARVEST_AUTOPILOTS].name,
 						...mockDappsDescriptions.map(({ id }) => id)
 					]
 				}

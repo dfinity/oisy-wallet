@@ -26,30 +26,25 @@
 		width: var(--spinner-size);
 		height: var(--spinner-size);
 
-		animation: app-spinner-linear-rotate 2000ms linear infinite;
+		animation: app-spinner-rotate 800ms linear infinite;
 
 		position: absolute;
 		top: calc(50% - (var(--spinner-size) / 2));
 		left: calc(50% - (var(--spinner-size) / 2));
 
-		--radius: 45px;
-		--circumference: calc(3.14159265359 * var(--radius) * 2);
-
-		--start: calc((1 - 0.05) * var(--circumference));
-		--end: calc((1 - 0.8) * var(--circumference));
-
 		circle {
-			stroke-dasharray: var(--circumference);
+			// r=45 in a 100x100 viewBox → circumference ≈ 283; show a ~25% arc, hide the rest.
+			stroke-dasharray: 70 213;
 			stroke-width: 10%;
-			transform-origin: 50% 50% 0;
-			transition-property: stroke;
-			animation-name: app-spinner-stroke-rotate-100;
-			animation-duration: 4000ms;
-			animation-timing-function: cubic-bezier(0.35, 0, 0.25, 1);
-			animation-iteration-count: infinite;
+			stroke-linecap: round;
 			fill: transparent;
 			stroke: currentColor;
-			transition: stroke-dashoffset 225ms linear;
+		}
+	}
+
+	@keyframes app-spinner-rotate {
+		to {
+			transform: rotate(360deg);
 		}
 	}
 </style>

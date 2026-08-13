@@ -1,14 +1,25 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import AiAssistantChat from '$lib/components/ai-assistant/AiAssistantChat.svelte';
 	import AiAssistantResetButton from '$lib/components/ai-assistant/AiAssistantResetButton.svelte';
 	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
+	import IconCloseThin from '$lib/components/icons/IconCloseThin.svelte';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let loading = $state(false);
+
+	// On mobile the console is a full-screen takeover, but it lives inside the
+	// footer's low stacking context while the bottom nav bar sits at a higher
+	// z-index — so the nav would paint over the console's input row. The nav
+	// already hides itself while a bottom sheet is open; reuse that mechanism
+	// for the console's lifetime (this component only mounts while it is open).
+	$effect(() => {
+		bottomSheetOpenStore.set(true);
+		return () => bottomSheetOpenStore.set(false);
+	});
 </script>
 
 <div
@@ -29,7 +40,7 @@
 			aria-label={$i18n.core.text.close}
 			onclick={aiAssistantStore.close}
 		>
-			<IconClose />
+			<IconCloseThin />
 		</button>
 	</div>
 

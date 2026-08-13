@@ -1,9 +1,12 @@
 import type { Network as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import type { Network as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
 import { SUPPORTED_BSC_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.bsc.env';
-import { SUPPORTED_EVM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
+import {
+	SUPPORTED_EVM_NETWORK_IDS,
+	SUPPORTED_EVM_NETWORKS
+} from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_POLYGON_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
@@ -11,7 +14,11 @@ import {
 	BTC_TESTNET_NETWORK_ID,
 	SUPPORTED_BITCOIN_NETWORK_IDS
 } from '$env/networks/networks.btc.env';
-import { SEPOLIA_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
+import {
+	SEPOLIA_NETWORK_ID,
+	SUPPORTED_ETHEREUM_NETWORK_IDS,
+	SUPPORTED_ETHEREUM_NETWORKS
+} from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	SOLANA_DEVNET_NETWORK_ID,
@@ -41,6 +48,16 @@ export const assertIsNetworkEthereum: (
 };
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
+
+/**
+ * Resolves an EVM chain id back to the network OISY knows it by, across both the
+ * Ethereum and the EVM network sets. Returns `undefined` for a chain OISY does
+ * not support.
+ */
+export const findEvmNetworkByChainId = (chainId: bigint): EthereumNetwork | undefined =>
+	[...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+		({ chainId: networkChainId }) => networkChainId === chainId
+	);
 
 export const isNetworkSolana = (network: Network | undefined): network is SolanaNetwork =>
 	isNetworkIdSolana(network?.id);

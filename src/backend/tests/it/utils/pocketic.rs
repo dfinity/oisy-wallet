@@ -2,11 +2,11 @@
 pub mod pic_canister;
 use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
-use candid::{encode_one, CandidType, Principal};
-use ic_cdk::bitcoin_canister::Network as BitcoinNetwork;
+use candid::{encode_one, CandidType, Nat, Principal};
+use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{PocketIc, PocketIcBuilder};
+use pocket_ic::{CanisterSettings, PocketIc, PocketIcBuilder};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
@@ -318,11 +318,38 @@ impl BackendBuilder {
             .expect("Test setup error: Failed to set controllers");
     }
 
+    /// Zero the backend's freezing threshold so its frozen reserve is 0.
+    ///
+    /// The cycles-ledger top-up subtracts the canister's frozen reserve (derived from the freezing
+    /// threshold and the idle burn rate) before sending. `PocketIC` reports a nonzero idle burn, so
+    /// with the default 30-day threshold the reserve would consume the small test balance and the
+    /// top-up would send nothing. Zeroing the threshold makes the reserve 0, so top-up tests behave
+    /// deterministically (percentage of the full balance) regardless of `PocketIC`'s cost model.
+    fn zero_freezing_threshold(&mut self, pic: &PocketIc) {
+        let canister_id = self.canister_id(pic);
+        let controller = Some(
+            *self
+                .controllers
+                .first()
+                .expect("Test setup error: BackendBuilder must have at least one controller"),
+        );
+        pic.update_canister_settings(
+            canister_id,
+            controller,
+            CanisterSettings {
+                freezing_threshold: Some(Nat::from(0u32)),
+                ..Default::default()
+            },
+        )
+        .expect("Test setup error: Failed to zero the freezing threshold");
+    }
+
     pub fn deploy_backend(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
         self.install_backend(pic);
         self.set_controllers(pic);
+        self.zero_freezing_threshold(pic);
         canister_id
     }
 
@@ -382,7 +409,21 @@ pub fn setup() -> PicBackend {
 /// Sets up a `PocketIC` environment with NNS subnet (for root key), II subnet, and fiduciary
 /// subnet. Deploys II on the II subnet and initializes the backend with the `PocketIC` root key so
 /// that delegation signature verification works end-to-end.
+///
+/// No cycles ledger is installed, so `allow_signing` reaches its rate limiter on every call
+/// (`has_sufficient_allowance` cannot short-circuit without a ledger to query). Rate-limit tests
+/// depend on that; use [`setup_with_ii_and_cycles_ledger`] when the test needs a real allowance.
 pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(false)
+}
+
+/// Like [`setup_with_ii`] but with the cycles ledger installed, so `allow_signing` can actually
+/// issue an `icrc_2_approve` and the resulting allowance is observable.
+pub fn setup_with_ii_and_cycles_ledger() -> (PicBackend, super::ii::IICanister) {
+    setup_with_ii_internal(true)
+}
+
+fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii::IICanister) {
     let pic = PocketIcBuilder::new()
         .with_nns_subnet()
         .with_ii_subnet()
@@ -416,7 +457,9 @@ pub fn setup_with_ii() -> (PicBackend, super::ii::IICanister) {
         new_user_signups_allowed: None,
     });
 
-    let mut builder = BackendBuilder::default().with_arg(encode_one(backend_init).unwrap());
+    let mut builder = BackendBuilder::default()
+        .with_arg(encode_one(backend_init).unwrap())
+        .with_cycles_ledger(cycles_ledger_enabled);
 
     let backend_canister_id = builder.deploy_to(&pic);
     let backend = PicBackend {
@@ -547,11 +590,8 @@ impl PicBackend {
     ///
     /// This helper is idempotent and designed to be safe to call repeatedly:
     /// it first issues a `has_user_profile` query and only invokes the
-    /// `create_user_profile` update when the profile does not yet exist. This
-    /// avoids the side effects of `create_user_profile` (notably
-    /// `spawn_allow_signing_if_below_limit`, which consumes per-caller
-    /// rate-limit entries and spawns an inter-canister call) on repeated
-    /// invocations.
+    /// `create_user_profile` update when the profile does not yet exist,
+    /// keeping repeated invocations free of update-call side effects.
     pub fn ensure_user_profile(&self, caller: Principal) {
         let exists = self
             .query::<HasUserProfileResponse>(caller, "has_user_profile", ())

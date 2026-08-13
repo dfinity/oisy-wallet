@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, onDestroy, setContext } from 'svelte';
@@ -23,16 +22,22 @@
 	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import {
+		isErc20TransactionApprove,
+		isErc20TransactionTransfer
+	} from '$eth/utils/transactions.utils';
+	import { getSendParamsGas } from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
@@ -41,6 +46,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -53,6 +59,8 @@
 	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
 
 	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
+
+	let erc20Transfer = $derived(isErc20TransactionTransfer(firstTransaction.data));
 
 	/**
 	 * Send context store
@@ -69,11 +77,13 @@
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	const feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
 		feeSymbolStore.set($sendToken.symbol);
 		feeTokenIdStore.set($sendToken.id);
 		feeDecimalsStore.set($sendToken.decimals);
+		feeExchangeRateStore.set($exchanges?.[$sendToken.id]?.usd);
 	});
 
 	setContext<FeeContextType>(
@@ -82,7 +92,8 @@
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
-			feeDecimalsStore
+			feeDecimalsStore,
+			feeExchangeRateStore
 		})
 	);
 
@@ -148,6 +159,8 @@
 
 	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
 
+	let requestedGas = $derived(getSendParamsGas(firstTransaction.gas));
+
 	const send = async () => {
 		if (isNullish(modal)) {
 			return;
@@ -204,11 +217,14 @@
 					<EthWalletConnectSendReview
 						{amount}
 						{application}
+						approveDisabled={isNullish($feeStore)}
 						{data}
 						{destination}
 						{erc20Approve}
+						{erc20Transfer}
 						onApprove={send}
 						onReject={reject}
+						{requestedGas}
 						{sourceNetwork}
 						{targetNetwork}
 					/>

@@ -4,6 +4,7 @@ import {
 	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { AppPath } from '$lib/constants/routes.constants';
@@ -23,6 +24,7 @@ import {
 	getMediaStatus,
 	getMediaStatusOrCache,
 	getNftCollectionUi,
+	getNftCountsByNetwork,
 	getNftSendCloseRedirectUrl,
 	getNftSendRedirectUrl,
 	mapTokenToCollection,
@@ -1156,5 +1158,29 @@ describe('nfts.utils', () => {
 
 			expect(global.fetch).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe('getNftCountsByNetwork', () => {
+	const ethNft: Nft = {
+		...mockValidErc721Nft,
+		collection: { ...mockValidErc721Nft.collection, network: ETHEREUM_NETWORK }
+	};
+	const icpNft: Nft = {
+		...mockValidErc721Nft,
+		collection: { ...mockValidErc721Nft.collection, network: ICP_NETWORK }
+	};
+
+	it('returns a zero total and no networks for an empty list', () => {
+		expect(getNftCountsByNetwork([])).toEqual({ total: 0, byNetwork: [] });
+	});
+
+	it('totals the NFTs and groups them per network, ordered by count descending', () => {
+		const { total, byNetwork } = getNftCountsByNetwork([ethNft, icpNft, ethNft]);
+
+		expect(total).toBe(3);
+		expect(byNetwork).toHaveLength(2);
+		expect(byNetwork[0]).toEqual({ network: ETHEREUM_NETWORK, count: 2 });
+		expect(byNetwork[1]).toEqual({ network: ICP_NETWORK, count: 1 });
 	});
 });

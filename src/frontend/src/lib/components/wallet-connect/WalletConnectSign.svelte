@@ -2,6 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import BtcWalletConnectSignModal from '$btc/components/wallet-connect/BtcWalletConnectSignModal.svelte';
+	import BtcWalletConnectSignPsbtModal from '$btc/components/wallet-connect/BtcWalletConnectSignPsbtModal.svelte';
+	import { SESSION_REQUEST_BTC_SIGN_PSBT } from '$btc/constants/wallet-connect.constants';
 	import { BIP122_CHAINS } from '$env/bip122-chains.env';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
@@ -15,7 +17,9 @@
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { walletConnectListenerStore } from '$lib/stores/wallet-connect.store';
+	import SolWalletConnectSignMessageModal from '$sol/components/wallet-connect/SolWalletConnectSignMessageModal.svelte';
 	import SolWalletConnectSignModal from '$sol/components/wallet-connect/SolWalletConnectSignModal.svelte';
+	import { SESSION_REQUEST_SOL_SIGN_MESSAGE } from '$sol/constants/wallet-connect.constants';
 	import { enabledSolanaNetworks } from '$sol/derived/networks.derived';
 
 	let listener = $derived($walletConnectListenerStore);
@@ -60,9 +64,17 @@
 		{#if nonNullish(ethChainId)}
 			<EthWalletConnectSignModal {listener} {request} />
 		{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
-			<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+			{#if request.params.request.method === SESSION_REQUEST_SOL_SIGN_MESSAGE}
+				<SolWalletConnectSignMessageModal {listener} network={sourceSolNetwork} {request} />
+			{:else}
+				<SolWalletConnectSignModal {listener} network={sourceSolNetwork} {request} />
+			{/if}
 		{:else if nonNullish(btcChain)}
-			<BtcWalletConnectSignModal address={btcAddress} {listener} {request} />
+			{#if request.params.request.method === SESSION_REQUEST_BTC_SIGN_PSBT}
+				<BtcWalletConnectSignPsbtModal address={btcAddress} {listener} {request} />
+			{:else}
+				<BtcWalletConnectSignModal address={btcAddress} {listener} {request} />
+			{/if}
 		{/if}
 	{/key}
 {/if}

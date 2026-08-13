@@ -53,6 +53,32 @@ export type ActiveUserTransactionData =
 	| { OneSecIcpToEvm: OneSecIcpToEvmData }
 	| {
 			/**
+			 * NEAR Intents (1Click) cross-chain swap. A single variant covers every
+			 * source/destination leg (EVM and Solana); the deposit address, its
+			 * optional memo, and origin/destination tx hashes ride in `external_refs`.
+			 */
+			NearIntents: NearIntentsData;
+	  }
+	| {
+			/**
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
+			 * single variant covers all six directions, discriminated by the
+			 * `direction` field; the minter block indices, the BTC txid and deposit
+			 * address, and the Ethereum deposit tx hash and block number ride in
+			 * `external_refs`.
+			 */
+			ChainFusion: ChainFusionData;
+	  }
+	| {
+			/**
+			 * Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+			 * modes, discriminated by the `mode` field; the auction id, order hash,
+			 * transaction hash and nonce ride in `external_refs`.
+			 */
+			Velora: VeloraData;
+	  }
+	| {
+			/**
 			 * Liquidium lend/borrow flow. A single variant covers all four actions
 			 * (supply, borrow, repay, withdraw).
 			 */
@@ -82,8 +108,7 @@ export interface ActiveUserTransactionRef {
  * dedupe twin variants anyway.
  */
 export type ActiveUserTransactionResult =
-	| { Ok: ActiveUserTransaction }
-	| { Err: ActiveUserTransactionError };
+	{ Ok: ActiveUserTransaction } | { Err: ActiveUserTransactionError };
 /**
  * Lifecycle status of an active user transaction.
  *
@@ -93,10 +118,7 @@ export type ActiveUserTransactionResult =
  * terminal states are immutable (idempotent no-op).
  */
 export type ActiveUserTransactionStatus =
-	| { Failed: null }
-	| { Executing: null }
-	| { Succeeded: null }
-	| { Pending: null };
+	{ Failed: null } | { Executing: null } | { Succeeded: null } | { Pending: null };
 export type AddDappSettingsError =
 	| { MaxHiddenDappIds: null }
 	| { VersionMismatch: null }
@@ -116,8 +138,7 @@ export interface AddHiddenDappIdRequest {
 	dapp_id: string;
 }
 export type AddUserDismissedNotificationResult =
-	| { Ok: null }
-	| { Err: AddDismissedNotificationError };
+	{ Ok: null } | { Err: AddDismissedNotificationError };
 export type AddUserHiddenDappIdResult =
 	| {
 			/**
@@ -542,6 +563,39 @@ export type CanisterStatusType =
 			 */
 			running: null;
 	  };
+/**
+ * Chain Fusion ck conversion payload. Every settlement pointer is learned
+ * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
+ * those live in `external_refs`; only the canonical immutable fields are
+ * captured here, which is why all six directions share one variant.
+ *
+ * `direction` is explicit rather than inferred from the token pair: the poller
+ * selects its settlement oracle from it, and re-deriving "is this a mint or a
+ * withdrawal?" from two token ids on every tick would rediscover something
+ * known for certain at creation.
+ */
+export interface ChainFusionData {
+	direction: ChainFusionDirection;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which ck conversion an active transaction tracks. Determines which minter the
+ * frontend asks about settlement, and how: the three withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while the mint
+ * directions are observed from the deposit side.
+ */
+export type ChainFusionDirection =
+	| { BtcToCkBtc: null }
+	| { CkBtcToBtc: null }
+	| { EthToCkEth: null }
+	| { CkErc20ToErc20: null }
+	| { Erc20ToCkErc20: null }
+	| { CkEthToEth: null };
 export interface Config {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -575,6 +629,11 @@ export interface Config {
 	 */
 	new_user_signups_allowed: [] | [boolean];
 }
+export type ConsumePersonalNoteShareResult =
+	| {
+			Ok: PersonalNoteShareContent;
+	  }
+	| { Err: PersonalNoteShareError };
 export interface Contact {
 	id: bigint;
 	name: string;
@@ -624,6 +683,25 @@ export type CreateContactResult =
 			 */
 			Err: ContactError;
 	  };
+/**
+ * Create-share request. `token` and `ct_content` are opaque ciphertext/ids to
+ * the canister — it enforces only their sizes and the expiry/flag fields,
+ * never the note content.
+ */
+export interface CreatePersonalNoteShareRequest {
+	/**
+	 * Opaque, client-generated random id; also the map key.
+	 */
+	token: string;
+	/**
+	 * AES-GCM ciphertext of `{ v, note }`, keyed by the per-share key held
+	 * only in the link fragment.
+	 */
+	ct_content: Uint8Array;
+	single_use: boolean;
+	expires_at_ns: bigint;
+}
+export type CreatePersonalNoteShareResult = { Ok: null } | { Err: PersonalNoteShareError };
 export type CreateUserProfileError = {
 	/**
 	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
@@ -693,6 +771,22 @@ export type DeleteContactResult =
 			 * The contact was not deleted due to an error.
 			 */
 			Err: ContactError;
+	  };
+export interface DeletePersonalNoteRequest {
+	note_id: string;
+}
+export type DeletePersonalNoteResult =
+	| {
+			/**
+			 * The note was deleted (idempotent — also `Ok` when it did not exist).
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be deleted due to an error.
+			 */
+			Err: PersonalNoteError;
 	  };
 export type DismissedNotification =
 	| {
@@ -835,6 +929,35 @@ export type GetContactsResult =
 			 */
 			Err: ContactError;
 	  };
+export type GetPersonalNoteShareResult =
+	{ Ok: PersonalNoteShareContent } | { Err: PersonalNoteShareError };
+export type GetPersonalNoteSharesCountResult = { Ok: bigint } | { Err: PersonalNoteShareError };
+export type GetPersonalNotesCountResult =
+	| {
+			/**
+			 * The caller's total note count.
+			 */
+			Ok: bigint;
+	  }
+	| {
+			/**
+			 * The count could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
+export type GetPersonalNotesResult =
+	| {
+			/**
+			 * All of the caller's (encrypted) notes.
+			 */
+			Ok: Array<PersonalNoteEntry>;
+	  }
+	| {
+			/**
+			 * The notes could not be retrieved due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult =
 	| {
@@ -899,8 +1022,7 @@ export interface GetUserTransactionsResponse {
 	transactions: Array<UserTransaction>;
 }
 export type GetUserTransactionsResult =
-	| { Ok: GetUserTransactionsResponse }
-	| { Err: UserTransactionError };
+	{ Ok: GetUserTransactionsResponse } | { Err: UserTransactionError };
 export interface HasUserProfileResponse {
 	has_user_profile: boolean;
 }
@@ -994,10 +1116,7 @@ export interface IcrcTransactionData {
  * The kind of ICRC ledger operation.
  */
 export type IcrcTransactionType =
-	| { Approve: { spender: string } }
-	| { Burn: null }
-	| { Mint: null }
-	| { Transfer: null };
+	{ Approve: { spender: string } } | { Burn: null } | { Mint: null } | { Transfer: null };
 /**
  * An account identifier for Internet Computer tokens.
  */
@@ -1023,10 +1142,7 @@ export type Icrcv2AccountId =
  * Represents the MIME type of image.
  */
 export type ImageMimeType =
-	| { 'image/gif': null }
-	| { 'image/png': null }
-	| { 'image/jpeg': null }
-	| { 'image/webp': null };
+	{ 'image/gif': null } | { 'image/png': null } | { 'image/jpeg': null } | { 'image/webp': null };
 export interface InitArg {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -1067,10 +1183,7 @@ export interface InitArg {
  * Which Liquidium lend/borrow action an active transaction tracks.
  */
 export type LiquidiumAction =
-	| { Withdraw: null }
-	| { Repay: null }
-	| { Borrow: null }
-	| { Supply: null };
+	{ Withdraw: null } | { Repay: null } | { Borrow: null } | { Supply: null };
 export interface LiquidiumData {
 	/**
 	 * The asset moved by this action (supplied, borrowed, repaid, withdrawn).
@@ -1087,24 +1200,36 @@ export interface LiquidiumData {
 	amount: bigint;
 }
 /**
- * Bitcoin Network.
+ * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
+ * off-chain by polling the 1Click status endpoint keyed by the deposit
+ * address, so that address (and its optional memo, plus learned-mid-flow tx
+ * hashes) lives in `external_refs`; only the canonical immutable trio is
+ * captured here.
  */
+export interface NearIntentsData {
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
 export type Network =
 	| {
 			/**
-			 * The Bitcoin mainnet.
+			 * Bitcoin Mainnet.
 			 */
 			mainnet: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin regtest, used for local testing purposes.
+			 * Bitcoin Regtest.
 			 */
 			regtest: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin testnet.
+			 * Bitcoin Testnet4.
 			 */
 			testnet: null;
 	  };
@@ -1170,19 +1295,16 @@ export interface OnramperSignedEntry {
 	value: string;
 }
 /**
- * Outpoint.
+ * A reference to a transaction output.
  */
-export interface Outpoint {
+export interface OutPoint {
 	/**
-	 * Transaction ID (TxID).
-	 *
-	 * The hash of the transaction that created the UTXO.
+	 * A cryptographic hash of the transaction.
+	 * A transaction can output multiple UTXOs.
 	 */
 	txid: Uint8Array;
 	/**
-	 * Output Index (vout).
-	 *
-	 * The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	 * The index of the output within the transaction.
 	 */
 	vout: number;
 }
@@ -1190,6 +1312,131 @@ export interface PendingTransaction {
 	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
+/**
+ * A single stored entry returned by `get_personal_notes`, and the upsert
+ * payload for `set_personal_note` (aliased as [`SetPersonalNoteRequest`]).
+ */
+export interface PersonalNoteEntry {
+	/**
+	 * The encrypted note envelope. Opaque ciphertext to the canister; decrypted
+	 * client-side.
+	 */
+	encrypted_note: Uint8Array;
+	/**
+	 * Stable, client-generated id (≤ [`MAX_PERSONAL_NOTE_ID_BYTES`] UTF-8 bytes).
+	 */
+	note_id: string;
+}
+export type PersonalNoteError =
+	| {
+			/**
+			 * The ciphertext exceeds [`MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`].
+			 */
+			NoteCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTES_PER_USER`] and tried to add
+			 * a *new* note. No existing note is evicted.
+			 */
+			TooManyNotes: null;
+	  }
+	| {
+			/**
+			 * The caller exceeded the per-caller write rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `note_id` exceeds [`MAX_PERSONAL_NOTE_ID_BYTES`].
+			 */
+			NoteIdTooLong: null;
+	  }
+	| {
+			/**
+			 * An unexpected internal error (e.g. a vetKeys access/derivation failure).
+			 * The message never contains note cleartext (the canister cannot read it).
+			 */
+			InternalError: { msg: string };
+	  };
+/**
+ * Returned by `get_personal_note_share` / `consume_personal_note_share`.
+ */
+export interface PersonalNoteShareContent {
+	ct_content: Uint8Array;
+	expires_at_ns: bigint;
+}
+export type PersonalNoteShareError =
+	| {
+			/**
+			 * `expires_at_ns` is not strictly in the future of IC time, or is
+			 * further out than [`MAX_PERSONAL_NOTE_SHARE_EXPIRY_NS`].
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * No unexpired entry for this token. Also returned for an
+			 * already-consumed single-use share and a reusable/single-use mismatch
+			 * (e.g. calling the reusable getter on a single-use share) — collapsing
+			 * every case into one response so a reader can never distinguish
+			 * "expired" from "used" from "never existed".
+			 */
+			NotFound: null;
+	  }
+	| {
+			/**
+			 * `ct_content` exceeds `personal_note::MAX_PERSONAL_NOTE_CIPHERTEXT_BYTES`.
+			 */
+			ContentCiphertextTooLarge: null;
+	  }
+	| {
+			/**
+			 * The caller is already at [`MAX_PERSONAL_NOTE_SHARES_PER_USER`] active
+			 * shares.
+			 */
+			TooManyShares: null;
+	  }
+	| {
+			/**
+			 * The caller (create) or the shared anonymous bucket (consume) exceeded
+			 * the rate limit.
+			 */
+			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The `token` already identifies an existing share; the client should
+			 * generate a fresh random token and retry.
+			 */
+			DuplicateToken: null;
+	  }
+	| {
+			/**
+			 * The `token` exceeds [`MAX_PERSONAL_NOTE_SHARE_TOKEN_BYTES`] or is empty.
+			 */
+			TokenTooLong: null;
+	  }
+	| { InternalError: { msg: string } };
+/**
+ * Shared result for the two vetKey-derivation endpoints (the caller's encrypted
+ * vetKey and the store's public verification key). Both return opaque bytes on
+ * success; the wire shape is identical, so one enum serves both.
+ */
+export type PersonalNotesVetkeyResult =
+	| {
+			/**
+			 * vetKey bytes, opaque to the canister.
+			 */
+			Ok: Uint8Array;
+	  }
+	| {
+			/**
+			 * The vetKey could not be derived due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 /**
  * Which external provider the agreement belongs to.
  *
@@ -1211,8 +1458,7 @@ export interface ProviderAgreementType {
 	scope: ProviderAgreementScope;
 }
 export type QualifiedNotificationKind =
-	| { NoIndexCanister: null }
-	| { UnavailableIndexCanister: null };
+	{ NoIndexCanister: null } | { UnavailableIndexCanister: null };
 /**
  * Error returned when a caller exceeds the allowed call rate.
  */
@@ -1239,6 +1485,19 @@ export interface SaveUserTransactionsRequest {
 	transactions: Array<UserTransaction>;
 }
 export type SaveUserTransactionsResult = { Ok: null } | { Err: UserTransactionError };
+export type SetPersonalNoteResult =
+	| {
+			/**
+			 * The note was created or updated successfully.
+			 */
+			Ok: null;
+	  }
+	| {
+			/**
+			 * The note could not be stored due to an error.
+			 */
+			Err: PersonalNoteError;
+	  };
 export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
@@ -1270,11 +1529,28 @@ export interface Settings {
 export type SignOnramperWidgetUrlError =
 	| {
 			/**
+			 * A wallet address supplied by the caller did not match the address the backend derives for
+			 * that network from the caller's principal. The backend signs only addresses the caller
+			 * provably owns, so a mismatch (a derivation-parity bug or a tampering attempt) fails the
+			 * whole request rather than signing an address the caller may not control.
+			 */
+			AddressMismatch: null;
+	  }
+	| {
+			/**
 			 * The caller exceeded the per-principal rate limit for signing requests. The endpoint signs
 			 * arbitrary caller-supplied parameters with a shared secret, so the limit bounds its use as a
 			 * signing oracle.
 			 */
 			RateLimited: RateLimitError;
+	  }
+	| {
+			/**
+			 * The backend could not derive one of the caller's addresses (e.g. a threshold public-key
+			 * read failed), so the supplied address could not be verified. The request is rejected
+			 * rather than signing an unverified address.
+			 */
+			AddressDerivationFailed: null;
 	  }
 	| {
 			/**
@@ -1302,12 +1578,29 @@ export interface SignOnramperWidgetUrlRequest {
 	 */
 	wallet_address_tags: Array<OnramperSignedEntry>;
 }
+/**
+ * Successful response of `sign_onramper_widget_url`. Returns both the signature and the exact
+ * canonical query fragment that was signed, so the frontend appends the latter verbatim instead of
+ * re-deriving it (which risks diverging from what was HMAC'd and silently breaking the signature).
+ */
+export interface SignOnramperWidgetUrlResponse {
+	/**
+	 * Hex-encoded HMAC-SHA256 over `signed_query`, appended to the widget URL as `&signature=…`.
+	 */
+	signature: string;
+	/**
+	 * The canonical signed parameter string (e.g. `networkWallets=bitcoin:bc1…&wallets=btc:…`).
+	 * This is a valid un-encoded URL query fragment; the frontend appends it as `&<signed_query>`
+	 * when non-empty. Empty when no sensitive parameters were supplied.
+	 */
+	signed_query: string;
+}
 export type SignOnramperWidgetUrlResult =
 	| {
 			/**
-			 * Hex-encoded HMAC-SHA256 signature over the canonicalized signed parameters.
+			 * The signature plus the exact canonical query fragment that was signed.
 			 */
-			Ok: string;
+			Ok: SignOnramperWidgetUrlResponse;
 	  }
 	| { Err: SignOnramperWidgetUrlError };
 /**
@@ -1347,7 +1640,16 @@ export interface Stats {
 	custom_token_count: bigint;
 	exchange_rates_count: bigint;
 	token_activity_count: bigint;
+	/**
+	 * Total number of stored personal-note shares across all users (active or
+	 * not yet pruned).
+	 */
+	personal_note_shares_count: bigint;
 	agreement_history_count: bigint;
+	/**
+	 * Total number of stored (encrypted) personal-note entries across all users.
+	 */
+	personal_notes_count: bigint;
 	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
@@ -1370,10 +1672,7 @@ export type Token =
 	| { Erc4626: ErcToken }
 	| { Dip721: ExtV2Token };
 export type TokenAccountId =
-	| { Btc: BtcAddress }
-	| { Eth: EthAddress }
-	| { Sol: string }
-	| { Icrcv2: Icrcv2AccountId };
+	{ Btc: BtcAddress } | { Eth: EthAddress } | { Sol: string } | { Icrcv2: Icrcv2AccountId };
 /**
  * A unified token identifier covering both native and custom tokens for the main supported chains.
  * Unlike `CustomTokenId` (which only covers user-added tokens), this enum also includes
@@ -1706,22 +2005,34 @@ export type UserTransactionError =
 			UserNotFound: null;
 	  };
 /**
- * Unspent Transaction Output (UTXO).
+ * An unspent transaction output.
  */
 export interface Utxo {
-	/**
-	 * The block height at which the UTXO was created.
-	 */
 	height: number;
-	/**
-	 * The value of the UTXO in satoshis.
-	 */
 	value: bigint;
-	/**
-	 * The outpoint of the UTXO.
-	 */
-	outpoint: Outpoint;
+	outpoint: OutPoint;
 }
+/**
+ * Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+ * id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+ * pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+ * `external_refs`; only the canonical immutable fields are captured here.
+ */
+export interface VeloraData {
+	mode: VeloraSwapMode;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which Velora execution mode an active transaction tracks. Determines how the
+ * frontend polls for settlement: `Delta` by auction id against Velora's Delta
+ * API, `Market` by transaction receipt on the source chain.
+ */
+export type VeloraSwapMode = { Delta: null } | { Market: null };
 export interface _SERVICE {
 	/**
 	 * Adds one or more dismissed notifications to the user's profile.
@@ -1828,6 +2139,17 @@ export interface _SERVICE {
 	 */
 	config: ActorMethod<[], Config>;
 	/**
+	 * Returns a **single-use** share's content exactly once, atomically deleting
+	 * it on success. Callable anonymously; guarded only by a coarse global rate
+	 * limiter, since an anonymous update call has no distinguishing principal to
+	 * rate-limit per-caller — every anonymous caller shares one bucket.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, already-consumed, or reusable; `RateLimited` at the global cap).
+	 */
+	consume_personal_note_share: ActorMethod<[string], ConsumePersonalNoteShareResult>;
+	/**
 	 * Creates a new active user transaction record for the caller.
 	 *
 	 * # Errors
@@ -1847,6 +2169,19 @@ export interface _SERVICE {
 	 * The created contact on success.
 	 */
 	create_contact: ActorMethod<[CreateContactRequest], CreateContactResult>;
+	/**
+	 * Creates a share for one of the caller's notes. The note text and the share
+	 * key never reach the canister — only opaque ciphertext, the expiry, and the
+	 * single-use flag.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (e.g. `TooManyShares`,
+	 * `ContentCiphertextTooLarge`, `InvalidExpiry`, `DuplicateToken`, `RateLimited`).
+	 */
+	create_personal_note_share: ActorMethod<
+		[CreatePersonalNoteShareRequest],
+		CreatePersonalNoteShareResult
+	>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -1876,6 +2211,14 @@ export interface _SERVICE {
 	 * This operation is idempotent - it will return OK if the contact has already been deleted.
 	 */
 	delete_contact: ActorMethod<[bigint], DeleteContactResult>;
+	/**
+	 * Deletes one of the caller's personal notes. Idempotent — deleting a missing
+	 * note returns `Ok`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `RateLimited`).
+	 */
+	delete_personal_note: ActorMethod<[DeletePersonalNoteRequest], DeletePersonalNoteResult>;
 	/**
 	 * Returns whether the backend is currently fetching and caching exchange rates.
 	 *
@@ -1969,6 +2312,63 @@ export interface _SERVICE {
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
+	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
+	 * share. A single-use share's content is only ever returned by
+	 * `consume_personal_note_share`. Callable anonymously — a deliberate,
+	 * narrowly-scoped exception to notes endpoints normally requiring an
+	 * authenticated caller, since the recipient of a share link has no OISY
+	 * identity.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError` (`NotFound` for expired,
+	 * unknown, or single-use).
+	 */
+	get_personal_note_share: ActorMethod<[string], GetPersonalNoteShareResult>;
+	/**
+	 * Returns the caller's active-share count (drives the client-side "at cap"
+	 * gate). Mirrors `get_personal_notes_count`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteShareError`.
+	 */
+	get_personal_note_shares_count: ActorMethod<[], GetPersonalNoteSharesCountResult>;
+	/**
+	 * Returns all of the caller's (encrypted) personal notes, decrypted client-side.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes: ActorMethod<[], GetPersonalNotesResult>;
+	/**
+	 * Returns the caller's total note count (drives the client-side capacity gate).
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_count: ActorMethod<[], GetPersonalNotesCountResult>;
+	/**
+	 * Derives the caller's encrypted vetKey for the supplied transport public key.
+	 * The browser decrypts it and derives the per-user symmetric key.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_encrypted_vetkey: ActorMethod<[Uint8Array], PersonalNotesVetkeyResult>;
+	/**
+	 * Returns the personal-notes vetKey verification (public) key. The browser uses
+	 * it to verify the derived vetKey. Same value for every user.
+	 *
+	 * This is an `update` because it makes an inter-canister call to the vetKD
+	 * system API.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError`.
+	 */
+	get_personal_notes_vetkey_public_key: ActorMethod<[], PersonalNotesVetkeyResult>;
+	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
 	 * # Returns
@@ -2045,14 +2445,6 @@ export interface _SERVICE {
 	 */
 	new_user_signups_allowed: ActorMethod<[], boolean>;
 	/**
-	 * Returns whether the `OnRamper` widget can be signed, i.e. whether controllers have provisioned
-	 * the signing secret via `set_api_keys`.
-	 *
-	 * Exposed as an unauthenticated query (mirroring `exchange_rate_enabled`) so the frontend can
-	 * disable the buy flow up front when the secret is missing, rather than failing on widget open.
-	 */
-	onramper_enabled: ActorMethod<[], boolean>;
-	/**
 	 * Remove custom token for the user.
 	 */
 	remove_custom_token: ActorMethod<[CustomToken], undefined>;
@@ -2117,6 +2509,15 @@ export interface _SERVICE {
 	 */
 	set_onramper_signing_secret: ActorMethod<[[] | [string]], undefined>;
 	/**
+	 * Creates or updates one of the caller's personal notes (add and edit share the
+	 * same upsert, keyed by `note_id`). The value is opaque ciphertext.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `PersonalNoteError` (e.g. `TooManyNotes`,
+	 * `NoteCiphertextTooLarge`, `RateLimited`).
+	 */
+	set_personal_note: ActorMethod<[PersonalNoteEntry], SetPersonalNoteResult>;
+	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *
 	 * # Returns
@@ -2128,14 +2529,17 @@ export interface _SERVICE {
 	 */
 	set_user_show_testnets: ActorMethod<[SetShowTestnetsRequest], SetUserShowTestnetsResult>;
 	/**
-	 * Sign the three sensitive `OnRamper` widget parameters with the controller-managed HMAC secret.
+	 * Sign the `OnRamper` widget's `networkWallets` with the controller-managed HMAC secret, after
+	 * verifying each supplied address matches the one the backend derives for the caller.
 	 *
 	 * Returns the hex-encoded HMAC-SHA256 the frontend appends to the widget URL as `&signature=…`.
+	 * The signed addresses are the backend-derived ones, and signing only happens when the caller's
+	 * supplied addresses match — so a caller can only ever obtain a signature over addresses they own.
 	 * Authenticated callers only: anonymous principals cannot extract signatures.
 	 *
 	 * This is an `update` (not a `query`) so the per-caller [`SIGN_ONRAMPER_WIDGET_URL_RATE_LIMITER`]
-	 * can persist its sliding window — a query would discard the recorded call. The frontend already
-	 * invokes it as a certified (replicated) call, so there is no added latency.
+	 * can persist its sliding window, and because address derivation makes inter-canister
+	 * (management-canister public-key) calls. The frontend already invokes it as a certified call.
 	 */
 	sign_onramper_widget_url: ActorMethod<
 		[SignOnramperWidgetUrlRequest],

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -7,6 +6,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 	import type { ContactUi } from '$lib/types/contact';
+	import { preventDefault } from '$lib/utils/event-modifiers.utils';
 
 	interface Props {
 		destination?: string;

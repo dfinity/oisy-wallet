@@ -193,9 +193,7 @@ import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 describe('MaxBalanceButton', () => {
 	it('renders the max action label', () => {
 		render(MaxBalanceButton, {
-			props: {
-				/* … */
-			}
+			props: {/* … */}
 		});
 		expect(screen.getByRole('button', { name: get(i18n).core.text.max })).toBeInTheDocument();
 	});

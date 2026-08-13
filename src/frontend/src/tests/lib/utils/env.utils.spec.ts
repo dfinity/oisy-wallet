@@ -1,6 +1,22 @@
-import { parseBoolEnvVar } from '$lib/utils/env.utils';
+import { isNode, parseBoolEnvVar } from '$lib/utils/env.utils';
 
 describe('env.utils', () => {
+	describe('isNode', () => {
+		afterEach(() => {
+			vi.unstubAllGlobals();
+		});
+
+		it('should return true in the Node test runtime', () => {
+			expect(isNode()).toBeTruthy();
+		});
+
+		it('should return false when process is absent', () => {
+			vi.stubGlobal('process', undefined);
+
+			expect(isNode()).toBeFalsy();
+		});
+	});
+
 	describe('parseBoolEnvVar', () => {
 		describe('when the check is `true` (default)', () => {
 			['true', 'TRUE', 'True', 'TrUe'].forEach((value) => {

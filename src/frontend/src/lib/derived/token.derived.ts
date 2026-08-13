@@ -1,3 +1,4 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	DEFAULT_ARBITRUM_TOKEN,
 	DEFAULT_BASE_TOKEN,
@@ -13,6 +14,7 @@ import {
 	networkBitcoin,
 	networkBsc,
 	networkEthereum,
+	networkICP,
 	networkPolygon,
 	networkSolana
 } from '$lib/derived/network.derived';
@@ -28,7 +30,8 @@ export const defaultFallbackToken: Readable<RequiredToken> = derived(
 		networkBsc,
 		networkPolygon,
 		networkSolana,
-		networkArbitrum
+		networkArbitrum,
+		networkICP
 	],
 	([
 		$networkBitcoin,
@@ -37,13 +40,17 @@ export const defaultFallbackToken: Readable<RequiredToken> = derived(
 		$networkBsc,
 		$networkPolygon,
 		$networkSolana,
-		$networkArbitrum
+		$networkArbitrum,
+		$networkICP
 	]) => {
 		if ($networkBitcoin) {
 			return DEFAULT_BITCOIN_TOKEN;
 		}
 		if ($networkSolana) {
 			return DEFAULT_SOLANA_TOKEN;
+		}
+		if ($networkICP) {
+			return ICP_TOKEN;
 		}
 		if ($networkEthereum) {
 			return DEFAULT_ETHEREUM_TOKEN;

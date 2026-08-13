@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';

@@ -1,7 +1,8 @@
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DEPOSIT_ERC20_HASH,
-	ERC20_DEPOSIT_HASH
+	ERC20_DEPOSIT_HASH,
+	ERC20_TRANSFER_HASH
 } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -23,6 +24,9 @@ export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean
 
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
+
+export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
+	nonNullish(data) && data.startsWith(ERC20_TRANSFER_HASH);
 
 export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
 	nonNullish(data) &&
@@ -55,6 +59,31 @@ export const decodeErc20AbiDataValue = ({
 	const { value } = decodeErc20AbiData({ data, bytesParam });
 
 	return value;
+};
+
+/**
+ * Decodes ERC20 calldata for display, treating calldata that does not decode as unknown.
+ *
+ * A known selector says nothing about the arguments that follow it: anyone can send a transaction to
+ * a wallet carrying the approve selector and a few bytes of garbage, and `decodeErc20AbiData` throws
+ * on it. Where the result only feeds a rendered row, that throw would take the transaction list down
+ * with it, so an entry that cannot be decoded degrades instead.
+ *
+ * Not for the send path, where the calldata is the wallet's own and a failure to decode it is a bug
+ * worth surfacing.
+ */
+export const tryDecodeErc20AbiData = ({
+	data,
+	bytesParam = false
+}: {
+	data: string;
+	bytesParam?: boolean;
+}): { to: string | undefined; value: bigint | undefined } => {
+	try {
+		return decodeErc20AbiData({ data, bytesParam });
+	} catch (_: unknown) {
+		return { to: undefined, value: undefined };
+	}
 };
 
 /**
@@ -108,7 +137,7 @@ export const mapEthTransactionUi = ({
 	const isApprove = isErc20TransactionApprove(data);
 
 	const { to: approveSpender } =
-		isApprove && nonNullish(data) ? decodeErc20AbiData({ data }) : { to: undefined };
+		isApprove && nonNullish(data) ? tryDecodeErc20AbiData({ data }) : { to: undefined };
 
 	return {
 		...transaction,

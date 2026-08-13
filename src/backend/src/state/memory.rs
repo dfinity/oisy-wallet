@@ -24,6 +24,19 @@ pub(crate) const EXCHANGE_RATE_MEMORY_ID: MemoryId = MemoryId::new(10);
 pub(crate) const USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(11);
 pub(crate) const AGREEMENT_HISTORY_MEMORY_ID: MemoryId = MemoryId::new(12);
 pub(crate) const ACTIVE_USER_TRANSACTIONS_MEMORY_ID: MemoryId = MemoryId::new(13);
+// Personal notes are stored via the vetKeys `EncryptedMaps` library, which is
+// built on a `KeyManager` and needs four contiguous memory regions: three for
+// the KeyManager (config, access-control, shared-keys) and one for the encrypted
+// key-value entries. See `personal_notes` / `state::init_personal_notes`.
+pub(crate) const PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(14);
+pub(crate) const PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(15);
+pub(crate) const PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(16);
+pub(crate) const PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(17);
+// Personal note shares are a plain, publicly-readable store (unlike the
+// per-user EncryptedMaps above): one map keyed by the opaque share token, and
+// a by-creator index used only to range-scan a creator's active-share count.
+pub(crate) const PERSONAL_NOTE_SHARES_MEMORY_ID: MemoryId = MemoryId::new(18);
+pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId::new(19);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

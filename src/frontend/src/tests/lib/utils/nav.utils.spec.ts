@@ -32,6 +32,7 @@ import {
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
+	isRouteTrading,
 	isRouteTransactions,
 	isSettingsPath,
 	isTokensPath,
@@ -490,6 +491,25 @@ describe('nav.utils', () => {
 			});
 		});
 
+		describe('isRouteTrading', () => {
+			it('should return true when route id matches Trading path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Trading}`;
+
+				expect(isRouteTrading(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteTrading(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Trading path', () => {
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteTrading(mockPage(`/anotherGroup/${AppPath.Trading}`))).toBeFalsy();
+			});
+		});
+
 		describe('isRouteSettings', () => {
 			const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Settings}`;
 
@@ -599,7 +619,7 @@ describe('nav.utils', () => {
 			});
 
 			it('should return true when route id is any subroute of the Earn path', () => {
-				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnRewards}`))).toBeTruthy();
+				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarnAutopilot}`))).toBeTruthy();
 				expect(isRouteEarn(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earn}/subroute`))).toBeTruthy();
 			});
 
@@ -719,7 +739,7 @@ describe('nav.utils', () => {
 
 		it('isEarnPath', () => {
 			expect(isEarnPath(withAppPrefix(AppPath.Earn))).toBeTruthy();
-			expect(isEarnPath(withAppPrefix(AppPath.EarnRewards))).toBeTruthy();
+			expect(isEarnPath(withAppPrefix(AppPath.EarnAutopilot))).toBeTruthy();
 			expect(isEarnPath('/(app)/earn/whatever')).toBeTruthy();
 			expect(isEarnPath(null)).toBeFalsy();
 		});

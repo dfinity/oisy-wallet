@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -23,6 +22,7 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
@@ -153,7 +153,8 @@
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
-			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id])
+			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id]) ||
+			isNullish($feeStore)
 	);
 
 	const send = async () => {

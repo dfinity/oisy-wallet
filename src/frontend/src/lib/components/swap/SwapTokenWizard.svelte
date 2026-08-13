@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
@@ -9,6 +8,7 @@
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 

@@ -27,7 +27,7 @@
 		toolbar: Snippet;
 		noResults?: Snippet;
 		topBanner?: Snippet;
-		onSelectNetworkFilter: () => void;
+		onSelectNetworkFilter?: () => void;
 		onTokenButtonClick?: (token: Token) => void;
 	}
 
@@ -95,7 +95,7 @@
 		<ModalFilterButton
 			ariaLabel={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
-			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter()}
+			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter?.()}
 		>
 			{$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 		</ModalFilterButton>

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { STAKE_PROVIDER_LOGO } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';

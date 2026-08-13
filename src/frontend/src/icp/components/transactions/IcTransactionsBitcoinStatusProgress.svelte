@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ProgressStep } from '$lib/types/progress-step';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
 	interface Props {

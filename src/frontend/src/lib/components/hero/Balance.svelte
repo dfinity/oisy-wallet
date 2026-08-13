@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -14,6 +13,7 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token-ui';
+	import { isIOS } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';

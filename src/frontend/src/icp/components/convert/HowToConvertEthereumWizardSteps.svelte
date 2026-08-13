@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { WizardStep } from '@dfinity/gix-components';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
@@ -8,6 +7,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { WizardStepsHowToConvert } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { WizardStep } from '$lib/types/wizard';
 
 	interface Props {
 		currentStep?: WizardStep;

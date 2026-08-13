@@ -1,0 +1,11 @@
+[
+	{
+		"id": "liquidium",
+		"type": "lending",
+		"titles": ["borrow.cards.liquidium.title"],
+		"description": "borrow.cards.liquidium.description",
+		"logo": "/images/dapps/liquidium-logo.webp",
+		"fields": ["networks", "assets", "currentBorrowing", "interestPerYear"],
+		"actionText": "borrow.cards.liquidium.action"
+	}
+]

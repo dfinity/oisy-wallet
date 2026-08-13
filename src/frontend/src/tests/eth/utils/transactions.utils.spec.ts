@@ -1,15 +1,17 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
+	isErc20TransactionTransfer,
 	isMaxUint256,
 	mapAddressToName,
-	mapEthTransactionUi
+	mapEthTransactionUi,
+	tryDecodeErc20AbiData
 } from '$eth/utils/transactions.utils';
 import { toCkMinterBuiltInContacts } from '$icp-eth/utils/ck-minter-contacts.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -251,6 +253,18 @@ describe('transactions.utils', () => {
 			);
 		});
 
+		it('should map a transaction whose approve calldata does not decode', () => {
+			// Anyone can send a transaction to the wallet carrying a known selector and garbage.
+			const result = mapEthTransactionUi({
+				transaction: { ...transaction, data: `${ERC20_APPROVE_HASH}00` },
+				ckMinterInfoAddresses,
+				ethAddress
+			});
+
+			expect(result.type).toBe('approve');
+			expect(result.approveSpender).toBeUndefined();
+		});
+
 		it('should prioritize approve over other types when data starts with ERC20 approve hash', () => {
 			const approveData = `${ERC20_APPROVE_HASH}000000000000000000000000abcdef1234567890abcdef1234567890abcdef12ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`;
 
@@ -261,6 +275,40 @@ describe('transactions.utils', () => {
 			});
 
 			expect(result.type).toBe('approve');
+		});
+	});
+
+	describe('isErc20TransactionTransfer', () => {
+		it('should return true for calldata starting with the transfer selector', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeTruthy();
+		});
+
+		it('should return false for calldata of another ERC20 method', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+		});
+
+		it('should return false for nullish calldata', () => {
+			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('tryDecodeErc20AbiData', () => {
+		const txData =
+			'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+
+		it('should decode well-formed calldata like decodeErc20AbiData', () => {
+			expect(tryDecodeErc20AbiData({ data: txData })).toStrictEqual(
+				decodeErc20AbiData({ data: txData })
+			);
+		});
+
+		it('should return undefined values instead of throwing on truncated calldata', () => {
+			expect(() => decodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toThrow();
+
+			expect(tryDecodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toStrictEqual({
+				to: undefined,
+				value: undefined
+			});
 		});
 	});
 

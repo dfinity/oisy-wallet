@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Checkbox, Html } from '@dfinity/gix-components';
 	import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet, untrack } from 'svelte';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
@@ -11,8 +10,10 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -172,9 +173,9 @@
 			<MessageBox level="error" styleClass="!mb-0">
 				{#snippet icon()}
 					<Checkbox
+						checked={isWarningConfirmed}
 						inputId="swap-review-warning-confirmation"
-						bind:checked={isWarningConfirmed}
-						on:nnsChange={() => (isWarningConfirmed = !isWarningConfirmed)}
+						onChange={() => (isWarningConfirmed = !isWarningConfirmed)}
 					/>
 				{/snippet}
 

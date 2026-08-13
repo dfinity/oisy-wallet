@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { IconBack } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import IconBack from '$lib/components/icons/IconBack.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
@@ -34,7 +34,7 @@
 
 	const breadcrumbItems = $derived([
 		{
-			label: $i18n.navigation.text.tokens,
+			label: $i18n.navigation.text.nfts,
 			url: nftsUrl({
 				originSelectedNetwork: $userSelectedNetworkStore
 			})

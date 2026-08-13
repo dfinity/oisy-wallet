@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { QRCode } from '@dfinity/gix-components';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
+	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
 	interface Props {
@@ -27,7 +27,7 @@
 	in:fade
 >
 	{#if render && nonNullish(address?.address)}
-		<QRCode value={address.address}>
+		<QrCode value={address.address}>
 			{#snippet logo()}
 				{#if nonNullish(address.addressType)}
 					<div class="flex items-center justify-center rounded-lg bg-primary p-2">
@@ -35,6 +35,6 @@
 					</div>
 				{/if}
 			{/snippet}
-		</QRCode>
+		</QrCode>
 	{/if}
 </div>

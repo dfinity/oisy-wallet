@@ -7,16 +7,26 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { lendBorrowProvidersConfig } from '$lib/config/lend-borrow.config';
 	import { swapProvidersDetails } from '$lib/constants/swap.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { LendBorrowProvider } from '$lib/types/lend-borrow';
+	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
+		isLiquidiumActiveUserTransaction,
+		liquidiumActionKey,
+		toLiquidiumExternalRefsMap
+	} from '$lib/utils/liquidium-active-tx.utils';
+	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
+	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -28,7 +38,15 @@
 	let { tx, isUnseen, dismissing, onDismiss }: Props = $props();
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
+	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
+	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
+	// Every swap provider is rendered identically — they share the same
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction
+	// is internal routing and deliberately not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora);
+	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
+	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
 
 	const isFailed = $derived('Failed' in tx.status);
 	const isSucceeded = $derived('Succeeded' in tx.status);
@@ -41,25 +59,60 @@
 				: 'bg-brand-subtle-20 text-brand-primary'
 	);
 
+	const liquidiumActionLabel = $derived(
+		'Liquidium' in tx.data
+			? {
+					supply: $i18n.liquidium.text.action_supply,
+					borrow: $i18n.liquidium.text.action_borrow,
+					repay: $i18n.liquidium.text.action_repay,
+					withdraw: $i18n.liquidium.text.action_withdraw
+				}[liquidiumActionKey(tx.data.Liquidium.action)]
+			: undefined
+	);
+
 	const providerName = $derived(
-		isOneSec ? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '') : undefined
+		isLiquidium
+			? lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
+			: isNearIntents
+				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
+				: isOneSec
+					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
+					: isVelora
+						? (swapProvidersDetails[SwapProvider.VELORA]?.name ?? '')
+						: undefined
 	);
 
 	const titleText = $derived(
-		[
-			isOneSec ? $i18n.swap.text.swap : undefined,
-			refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
-			refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
-			'→',
-			refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
-		]
-			.filter(nonNullish)
-			.join(' ')
+		isLiquidium
+			? [
+					liquidiumActionLabel,
+					liquidiumRefs[LIQUIDIUM_EXTERNAL_REF_KEYS.AMOUNT],
+					liquidiumRefs[LIQUIDIUM_EXTERNAL_REF_KEYS.ASSET_SYMBOL]
+				]
+					.filter(nonNullish)
+					.join(' ')
+			: [
+					isSwap ? $i18n.swap.text.swap : undefined,
+					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
+					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
+					'→',
+					refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL]
+				]
+					.filter(nonNullish)
+					.join(' ')
 	);
 
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
 	const destinationNetwork = $derived(
 		refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
+	);
+
+	// A same-chain swap — always the case for a Velora Market swap — would
+	// otherwise read "Ethereum → Ethereum".
+	const networkText = $derived(
+		sourceNetwork === destinationNetwork
+			? sourceNetwork
+			: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
 	const createdAgo = $derived(
@@ -123,8 +176,11 @@
 		{/snippet}
 
 		{#snippet description()}
-			{sourceNetwork} → {destinationNetwork}{#if nonNullish(providerName)}<Divider
-				/>{providerName}{/if}
+			{#if isLiquidium}
+				{providerName}
+			{:else}
+				{networkText}{#if nonNullish(providerName)}<Divider />{providerName}{/if}
+			{/if}
 		{/snippet}
 
 		{#snippet descriptionEnd()}

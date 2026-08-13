@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -23,6 +22,7 @@
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
 		TRACK_COUNT_SWAP_SUBMITTED,
@@ -53,6 +53,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -157,7 +158,8 @@
 			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
 			const isPermitSupported = await isErc20SupportsPermit({
 				contractAddress: $sourceToken.address,
-				userAddress: $ethAddress
+				userAddress: $ethAddress,
+				chainId: $sourceToken.network.chainId
 			});
 			setIsTokenPermitSupported({
 				address: $sourceToken.address,
@@ -184,6 +186,19 @@
 
 	const isNearIntentsProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
+	const isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
+	// Velora, OneSec and NEAR Intents all close the modal at initiation and settle
+	// in the background via the Active User Transactions store. Only the ICP-native
+	// providers still complete inside the modal.
+	const isActiveTransactionSwap = $derived(
+		isNearIntentsProvider ||
+			isOneSecProvider ||
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
 	const isApproveNeeded = $derived(
@@ -328,15 +343,15 @@
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
-					isGasless: $isSourceTokenPermitSupported ?? false,
-					destinationNetwork: $destinationToken.network,
-					swapDetails: selectedProvider.swapDetails
+					isGasless: $isSourceTokenPermitSupported ?? false
 				};
 
+				// `swapDetails` is spread inside each branch so that `type` narrows it to the quote
+				// shape of the matching mode.
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
-					await fetchVeloraDeltaSwap(params);
+					await fetchVeloraDeltaSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				} else {
-					await fetchVeloraMarketSwap(params);
+					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
@@ -375,15 +390,13 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec swaps, the foreground completes once the user's funds have
-			// left their wallet; success/failure of the background phase is tracked
-			// separately via the AUT store. Other providers (Velora, Near) still
+			// For AUT-tracked swaps the foreground completes once the swap is
+			// committed — funds have left the wallet, or the order is live in the
+			// auction; success/failure of the background phase is tracked separately
+			// via the AUT store, so we fire `submitted` here. The ICP-native providers
 			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name:
-					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
-						? TRACK_COUNT_SWAP_SUBMITTED
-						: TRACK_COUNT_SWAP_SUCCESS,
+				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -482,8 +495,8 @@
 					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
-						SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={isActiveTransactionSwap}
+					swapWithBridging={isOneSecProvider}
 				/>
 			{/if}
 		{/key}

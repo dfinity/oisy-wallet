@@ -39,6 +39,14 @@ export const isNftsPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`) ?? false;
 export const isEarningPath = (path: string | null) =>
 	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}`) ?? false;
+export const isTradingPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Trading}`) ?? false;
+export const isBorrowPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrow}`) ?? false;
+export const isOisyTradeProviderPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.ProvidersOisyTrade}`) ?? false;
+export const isBorrowingsPath = (path: string | null) =>
+	normalizePath(path)?.startsWith(`${ROUTE_ID_GROUP_APP}${AppPath.Borrowings}`) ?? false;
 export const isRewardsPath = (path: string | null) =>
 	normalizePath(path) === `${ROUTE_ID_GROUP_APP}${AppPath.Rewards}`;
 export const isEarnPath = (path: string | null) =>
@@ -61,6 +69,12 @@ export const isRouteTokens = ({ route: { id } }: Page): boolean => isTokensPath(
 export const isRouteNfts = ({ route: { id } }: Page): boolean => isNftsPath(id);
 
 export const isRouteEarning = ({ route: { id } }: Page): boolean => isEarningPath(id);
+
+export const isRouteTrading = ({ route: { id } }: Page): boolean => isTradingPath(id);
+export const isRouteBorrow = ({ route: { id } }: Page): boolean => isBorrowPath(id);
+export const isRouteOisyTradeProvider = ({ route: { id } }: Page): boolean =>
+	isOisyTradeProviderPath(id);
+export const isRouteBorrowings = ({ route: { id } }: Page): boolean => isBorrowingsPath(id);
 
 export const isRouteRewards = ({ route: { id } }: Page): boolean => isRewardsPath(id);
 

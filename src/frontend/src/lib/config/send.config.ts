@@ -1,6 +1,6 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import type { WizardStepsParams } from '$lib/types/steps';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { WizardSteps } from '$lib/types/wizard';
 
 interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;

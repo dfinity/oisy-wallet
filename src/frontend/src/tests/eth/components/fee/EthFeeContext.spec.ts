@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
+import { ETH_FEE_RETRY_MAX_ATTEMPTS } from '$eth/constants/eth.constants';
 import * as infuraMod from '$eth/providers/infura.providers';
 import { InfuraGasRest } from '$eth/rest/infura.rest';
 import * as approveServices from '$eth/services/approve.services';
@@ -496,6 +497,140 @@ describe('EthFeeContext', () => {
 			await vi.runAllTimersAsync();
 
 			expect(toastsErrorSpy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('fee recovery (foreground refetch + retry)', () => {
+		const mockFailingThenRecovering = () => {
+			const getFeeData = vi
+				.fn()
+				.mockRejectedValueOnce(new Error('network down'))
+				.mockResolvedValue({ gasPrice: null, maxFeePerGas: 10n, maxPriorityFeePerGas: 5n });
+
+			vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+				getFeeData,
+				safeEstimateGas: async () => await Promise.resolve(ZERO),
+				estimateGas: async () => await Promise.resolve(ZERO)
+			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+			return getFeeData;
+		};
+
+		it('should re-fetch the fee and reconnect the listener when returning to the foreground', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const initListenerSpy = vi.mocked(listenerServices.initMinedTransactionsListener);
+
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledOnce();
+
+			setFeeMock.mockClear();
+			initListenerSpy.mockClear();
+
+			document.dispatchEvent(new Event('visibilitychange'));
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).toHaveBeenCalledOnce();
+			expect(initListenerSpy).toHaveBeenCalledOnce();
+		});
+
+		it('should not re-fetch on foreground when not observing', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			renderWith({ observe: false });
+
+			await vi.runAllTimersAsync();
+
+			setFeeMock.mockClear();
+
+			document.dispatchEvent(new Event('visibilitychange'));
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('should not re-fetch on visibility change while the tab is hidden', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			setFeeMock.mockClear();
+
+			Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+
+			document.dispatchEvent(new Event('visibilitychange'));
+
+			await vi.runAllTimersAsync();
+
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+
+			delete (document as unknown as { hidden?: boolean }).hidden;
+		});
+
+		it('should retry a failed fee fetch and self-heal once the network recovers', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const toastsErrorSpy = vi.spyOn(toastsStore, 'toastsError');
+			const getFeeData = mockFailingThenRecovering();
+
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			// One failed attempt (error toast, no fee) followed by a successful retry.
+			expect(getFeeData).toHaveBeenCalledTimes(2);
+			expect(toastsErrorSpy).toHaveBeenCalledOnce();
+			expect(feeStore.setFee).toHaveBeenCalledOnce();
+		});
+
+		it('should stop retrying after the maximum number of attempts', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const getFeeData = vi.fn().mockRejectedValue(new Error('still down'));
+			vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+				getFeeData,
+				safeEstimateGas: async () => await Promise.resolve(ZERO),
+				estimateGas: async () => await Promise.resolve(ZERO)
+			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+			renderWith();
+
+			await vi.runAllTimersAsync();
+
+			// Initial attempt + a bounded number of retries, then it gives up.
+			expect(getFeeData).toHaveBeenCalledTimes(ETH_FEE_RETRY_MAX_ATTEMPTS + 1);
+			expect(feeStore.setFee).not.toHaveBeenCalled();
+		});
+
+		it('should not retry after the component is destroyed', async () => {
+			vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
+
+			const getFeeData = vi.fn().mockRejectedValue(new Error('down'));
+			vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
+				getFeeData,
+				safeEstimateGas: async () => await Promise.resolve(ZERO),
+				estimateGas: async () => await Promise.resolve(ZERO)
+			} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
+
+			const { unmount } = renderWith();
+
+			// Let the initial attempt fail and schedule a retry.
+			await vi.advanceTimersByTimeAsync(1_000);
+
+			const callsBeforeUnmount = getFeeData.mock.calls.length;
+
+			unmount();
+
+			await vi.advanceTimersByTimeAsync(60_000);
+
+			expect(getFeeData).toHaveBeenCalledTimes(callsBeforeUnmount);
 		});
 	});
 });

@@ -1,4 +1,8 @@
-import type { WalletConnectBtcApproveRequestMessage } from '$btc/types/wallet-connect';
+import type {
+	WalletConnectBtcAccountAddresses,
+	WalletConnectBtcApproveRequestMessage,
+	WalletConnectBtcApproveSignPsbtMessage
+} from '$btc/types/wallet-connect';
 import type { WalletConnectEthApproveRequestMessage } from '$eth/types/wallet-connect';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { WalletConnectSolApproveRequestMessage } from '$sol/types/wallet-connect';
@@ -9,6 +13,8 @@ import type { PairingTypes, SessionTypes } from '@walletconnect/types';
 
 export type WalletConnectApproveRequestMessage =
 	| WalletConnectBtcApproveRequestMessage
+	| WalletConnectBtcAccountAddresses
+	| WalletConnectBtcApproveSignPsbtMessage
 	| WalletConnectEthApproveRequestMessage
 	| WalletConnectSolApproveRequestMessage;
 
@@ -33,6 +39,8 @@ export abstract class WalletConnectListener implements WebSocketListener {
 		topic: string;
 		message: WalletConnectApproveRequestMessage;
 	}): Promise<void>;
+	// Disconnect a single session by topic, leaving any other sessions and pairings intact.
+	abstract disconnectSession(topic: string): Promise<void>;
 	abstract disconnect(): Promise<void>;
 }
 

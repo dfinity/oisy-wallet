@@ -5,8 +5,8 @@ import {
 	sendWizardStepsWithQrCodeScan
 } from '$lib/config/send.config';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import type { WizardSteps } from '$lib/types/wizard';
 import en from '$tests/mocks/i18n.mock';
-import type { WizardSteps } from '@dfinity/gix-components';
 
 describe('send.config', () => {
 	const expectedBaseConfig: WizardSteps<WizardStepsSend> = [

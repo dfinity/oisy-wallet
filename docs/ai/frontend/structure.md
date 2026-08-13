@@ -166,8 +166,8 @@ import { exchangeRates } from '$lib/derived/exchange.derived';
 
 1. **Is it a route / page?** → `src/frontend/src/routes/(app|public|sign)/...`
 2. **Is it a generic UI primitive (Button, Modal, Tooltip)?** → look in
-   `$lib/components/ui/` and `@dfinity/gix-components` first; only add a
-   new primitive if neither covers it.
+   `$lib/components/ui/` first; only add a new primitive if it doesn't
+   already cover it.
 3. **Is it a small, app-wide reusable presentational block (List,
    ListItem, Divider)?** → `$lib/components/common/`.
 4. **Is it specific to a feature (send, swap, ai-assistant, contact,
