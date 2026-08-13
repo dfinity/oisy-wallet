@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "गेम",
 			"lending": "लेंडिंग",
-			"nft": "NFT",
+			"nft": "संग्रहणीय वस्तुएं",
 			"rwa": "RWA",
 			"social": "सोशल",
 			"staking": "स्टेकिंग",
@@ -1195,6 +1195,7 @@
 			"swapping": "स्वैप कर रहा है...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "UI रीफ्रेश कर रहा है",
 			"swap_provider": "स्वैप प्रदाता",
 			"swap_provider_website": "वेबसाइट",
@@ -1241,7 +1242,8 @@
 			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1466,16 +1468,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "संग्रहणीय वस्तुएं",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
-			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title_empty": "आपकी संग्रहणीय वस्तुएं यहाँ दिखाई देंगी",
+			"description_empty": "ऐसा लगता है कि आपने अभी तक संग्रहणीय वस्तुएं प्राप्त नहीं की हैं",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "समूहीकरण",
-			"as_plain_list": "सादी सूची के रूप में दिखाएँ",
-			"by_collection": "संग्रह के अनुसार समूहित करें",
 			"show_spam": "स्पैम दिखाएँ",
 			"show_hidden": "छिपा हुआ दिखाएँ",
 			"recents_first": "नवीनतम पहले",
@@ -1488,9 +1487,11 @@
 			"quantity": "मात्रा",
 			"item_traits": "आइटम विशेषताएँ",
 			"collection_not_loaded": "संग्रह प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
-			"nft_not_loaded": "NFT प्रदर्शित नहीं किया जा सका क्योंकि यह अभी तक लोड नहीं हुआ है",
+			"nft_not_loaded": "संग्रहणीय वस्तु प्रदर्शित नहीं की जा सकी क्योंकि यह अभी तक लोड नहीं हुई है",
 			"collections": "संग्रह",
-			"all_assets": "सभी एसेट्स",
+			"check_new": "नए देखें",
+			"check_new_short": "देखें",
+			"ungrouped": "असमूहीकृत",
 			"address_copied": "पता $address कॉपी किया गया",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1529,13 +1530,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "अभी तक कोई NFTs नहीं",
+			"placeholder_image": "अभी तक कोई संग्रहणीय वस्तुएं नहीं",
 			"card": {
-				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
+				"image": "टोकन आईडी के साथ संग्रहणीय वस्तु की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "नए संग्रहणीय आइटम जाँचें"
 		}
 	},
 	"fee": {
@@ -1553,7 +1555,8 @@
 			"ata_fee": "ATA शुल्क",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -1600,9 +1603,25 @@
 			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
 			"fee": "",
 			"btc_symbol": "",
@@ -1664,9 +1683,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
 			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
 		}
@@ -1817,6 +1838,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -2313,8 +2336,8 @@
 			"hidden_micro_transactions": "बहुत छोटे टोकन मूल्यों वाले लेनदेन वर्तमान में छिपे हुए हैं। उन्हें दिखाने के लिए, <a href=\"/settings/\">सेटिंग्स</a> पर जाएं। <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">और जानें</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। कोई इंडेक्स कैनिस्टर उपलब्ध नहीं है।",
-			"unavailable_index_canister": "$token_list के लिए लेनदेन प्रदर्शित नहीं किए जा सकते। इंडेक्स कैनिस्टर वर्तमान में अनुपलब्ध है।"
+			"no_index_canister": "$oisy_short, $token_list के लेनदेन लोड नहीं कर सकता — टोकन जारीकर्ता लेनदेन ट्रैकिंग की सुविधा नहीं देता।",
+			"unavailable_index_canister": "$token_list के नवीनतम लेनदेन इस समय लोड नहीं किए जा सकते, क्योंकि उनकी ट्रैकिंग सेवा प्रतिक्रिया नहीं दे रही है। सेवा के वापस आते ही वे अपने आप लोड हो जाएंगे।"
 		}
 	},
 	"earning": {

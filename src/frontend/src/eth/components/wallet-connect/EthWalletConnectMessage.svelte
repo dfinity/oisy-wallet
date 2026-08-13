@@ -4,28 +4,39 @@
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { erc721Tokens } from '$eth/derived/erc721.derived';
+	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
 	import {
+		getEthTypedDataApproval,
 		getSignParamsMessageTypedDataV4,
-		getSignParamsMessageUtf8
+		getSignParamsMessageUtf8,
+		isEthSignTypedDataMethod
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
+		invalidTypedData?: boolean;
 	}
 
-	let { request }: Props = $props();
+	let { request, invalidTypedData = false }: Props = $props();
 
 	let application = $derived(request.verifyContext.verified.origin);
 
 	let method = $derived(request.params.request.method);
 
+	// Only a typed-data method is previewed as typed data. A raw-message request
+	// whose payload happens to parse as EIP-712 is signed as a plain message, so
+	// previewing it as a permit would describe something that is not signed.
 	let json = $derived.by(() => {
+		if (!isEthSignTypedDataMethod(method)) {
+			return;
+		}
+
 		try {
 			return getSignParamsMessageTypedDataV4(request.params.request.params);
 		} catch (_: unknown) {
@@ -34,21 +45,17 @@
 	});
 
 	let {
-		domain: { chainId },
-		message
-	} = $derived(json ?? { domain: { chainId: undefined }, message: undefined });
+		domain: { chainId }
+	} = $derived(json ?? { domain: { chainId: undefined } });
 
-	let { spender, details: rawDetails } = $derived(
-		message ?? { spender: undefined, details: undefined }
+	// The summary is derived from the signed schema, never from the shape of the
+	// message: a key the schema does not declare is absent from the digest, so
+	// displaying it would describe an approval that is not the one being signed.
+	let approval: WalletConnectEthTypedDataApproval = $derived(
+		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? {}
 	);
 
-	let details = $derived(
-		nonNullish(rawDetails) && typeof rawDetails === 'object' ? rawDetails : {}
-	);
-
-	let address = $derived(
-		'token' in details && typeof details.token === 'string' ? details.token : undefined
-	);
+	let { spender, token: address, amount, expiration } = $derived(approval);
 
 	let token = $derived.by(() => {
 		if (isNullish(address) || isNullish(chainId)) {
@@ -67,41 +74,18 @@
 		);
 	});
 
-	let amount = $derived.by(() => {
-		if (
-			'amount' in details &&
-			(typeof details.amount === 'string' || typeof details.amount === 'number')
-		) {
-			try {
-				return BigInt(details.amount);
-			} catch (_: unknown) {
-				// It could not be parsed as a BigInt, so we return undefined.
-				consoleWarn('Could not parse amount as BigInt:', details.amount);
-			}
-		}
-	});
-
-	let expiration = $derived.by(() => {
-		if (
-			'expiration' in details &&
-			(typeof details.expiration === 'string' || typeof details.expiration === 'number')
-		) {
-			try {
-				const timestamp = Number(details.expiration);
-
-				if (isNaN(timestamp)) {
-					consoleWarn('Could not parse expiration as a number:', details.expiration);
-					return;
-				}
-
-				return formatSecondsToDate({ seconds: timestamp, language: $currentLanguage });
-			} catch (_: unknown) {
-				// It could not be parsed as a BigInt, so we return undefined.
-				consoleWarn('Could not parse expiration as Date:', details.expiration);
-			}
-		}
-	});
+	let expirationDate = $derived(
+		nonNullish(expiration)
+			? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
+			: undefined
+	);
 </script>
+
+{#if invalidTypedData}
+	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
+		{$i18n.wallet_connect.text.invalid_typed_data}
+	</MessageBox>
+{/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
 <p class="mb-4 font-normal">{application}</p>
@@ -134,9 +118,9 @@
 	<p class="mb-4 font-normal">{spender}</p>
 {/if}
 
-{#if nonNullish(expiration)}
+{#if nonNullish(expirationDate)}
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
-	<p class="mb-4 font-normal">{expiration}</p>
+	<p class="mb-4 font-normal">{expirationDate}</p>
 {/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>

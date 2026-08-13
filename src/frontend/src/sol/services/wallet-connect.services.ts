@@ -19,7 +19,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { consoleWarn } from '$lib/utils/console.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
@@ -30,9 +30,11 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { convertSolComputeUnitPriceToFee } from '$sol/utils/fee.utils';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import {
 	createSigner,
@@ -42,6 +44,7 @@ import {
 } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
+	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
@@ -61,6 +64,7 @@ import { get } from 'svelte/store';
 interface WalletConnectDecodeTransactionParams {
 	base64EncodedTransactionMessage: string;
 	networkId: NetworkId;
+	address: OptionSolAddress;
 }
 
 type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
@@ -74,7 +78,8 @@ type WalletConnectSignTransactionParams = WalletConnectExecuteParams & {
 
 export const decode = async ({
 	base64EncodedTransactionMessage,
-	networkId
+	networkId,
+	address
 }: WalletConnectDecodeTransactionParams) => {
 	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
@@ -83,7 +88,29 @@ export const decode = async ({
 		rpc: solanaHttpRpc(solNetwork)
 	});
 
-	const mapped = mapSolTransactionMessage(parsedTransactionMessage);
+	const mappedTransaction = mapSolTransactionMessage(parsedTransactionMessage);
+
+	// The review is synchronous, so both the estimate the requested fee is judged against and the
+	// simulated preview are fetched here, where the request is already being decoded before the
+	// modal opens. A preview that lands after the user has approved would be worthless.
+	const [prioritizationFeeEstimate, preview] = await Promise.all([
+		estimateSolPrioritizationFee({
+			computeUnitLimit: mappedTransaction.computeUnitLimit,
+			network: solNetwork
+		}),
+		simulateSolTransactionPreview({
+			base64EncodedTransactionMessage,
+			transactionMessage: parsedTransactionMessage,
+			address,
+			network: solNetwork
+		})
+	]);
+
+	const mapped = {
+		...mappedTransaction,
+		...(nonNullish(prioritizationFeeEstimate) && { prioritizationFeeEstimate }),
+		...(nonNullish(preview) && { preview })
+	};
 
 	// Unchecked SPL `Transfer`/`Approve` instructions do not carry the mint, so it is
 	// not surfaced by the mapper. Recover it from the source token account (the account
@@ -100,6 +127,34 @@ export const decode = async ({
 	});
 
 	return nonNullish(tokenAddress) ? { ...mapped, tokenAddress } : mapped;
+};
+
+/**
+ * What OISY would pay to prioritise this message, so the review can say whether the fee the dApp
+ * asks for is in line with the network or far above it.
+ *
+ * `getRecentPrioritizationFees` quotes micro-lamports per compute unit, so it only becomes a
+ * comparable lamport figure once applied to the very compute unit limit this message resolves to.
+ */
+const estimateSolPrioritizationFee = async ({
+	computeUnitLimit,
+	network
+}: {
+	computeUnitLimit?: bigint;
+	network: SolanaNetworkType;
+}): Promise<bigint | undefined> => {
+	if (isNullish(computeUnitLimit)) {
+		return undefined;
+	}
+
+	try {
+		const computeUnitPrice = await estimatePriorityFee({ network });
+
+		return convertSolComputeUnitPriceToFee({ computeUnitPrice, computeUnitLimit });
+	} catch (_: unknown) {
+		// Best-effort: without an estimate the review falls back to its fiat floor. A failed
+		// lookup must never keep the user from seeing the request.
+	}
 };
 
 /**
@@ -384,6 +439,19 @@ export const sign = ({
 		})
 	});
 
+/**
+ * Reown sends the `signMessage` payload base58-encoded (per the Reown Solana RPC reference). A
+ * value that is not base58 carries no bytes to review or sign, so it is reported as an unusable
+ * parameter rather than thrown on.
+ */
+const decodeBase58Message = (message: string): Uint8Array | undefined => {
+	try {
+		return Uint8Array.from(getBase58Encoder().encode(message));
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
@@ -441,17 +509,48 @@ export const signMessage = ({
 				return { success: false };
 			}
 
+			const messageBytes = decodeBase58Message(message);
+
+			if (isNullish(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unknown_parameter }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// What is signed is decided by the requested method, never by what the payload parses as.
+			// This method signs messages, so a transaction is refused rather than rendered as text.
+			//
+			// It has to be refused rather than merely displayed differently: Ed25519 signs the raw
+			// bytes, and the transaction flow signs the compiled transaction message bytes with this
+			// very key, derivation path and no domain separator or prefix. A signature taken here over
+			// a transaction message is therefore byte-for-byte a usable transaction signature, while
+			// the review that obtained it shows no amount, destination, fee, decoded instruction,
+			// warning or simulation.
+			if (isSolCompiledTransactionMessage(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.sol_transaction_as_message }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				// Ed25519 signs the raw message bytes; the WC param is base58-encoded, and the response
-				// signature is base58 too (per the Reown Solana RPC reference).
+				// Ed25519 signs the raw message bytes, and the response signature is base58 too (per the
+				// Reown Solana RPC reference).
 				const signatureBytes = await signMessageBytes({
 					identity,
 					network: safeMapNetworkIdToNetwork(networkId),
-					message: Uint8Array.from(getBase58Encoder().encode(message))
+					message: messageBytes
 				});
 
 				const signature = getBase58Decoder().decode(signatureBytes);

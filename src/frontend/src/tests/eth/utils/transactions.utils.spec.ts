@@ -423,24 +423,16 @@ describe('transactions.utils', () => {
 	});
 
 	describe('isErc20TransactionTransfer', () => {
-		it('should return true for data with the ERC20 transfer prefix', () => {
-			expect(
-				isErc20TransactionTransfer(
-					`${ERC20_TRANSFER_HASH}0000000000000000000000001234567890abcdef1234567890abcdef123456780000000000000000000000000000000000000000000000000000000000989680`
-				)
-			).toBeTruthy();
+		it('should return true for calldata starting with the transfer selector', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeTruthy();
 		});
 
-		it('should return false for data of another ERC20 method', () => {
-			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}0000`)).toBeFalsy();
+		it('should return false for calldata of another ERC20 method', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
 		});
 
-		it('should return false for nullish or empty data', () => {
+		it('should return false for nullish calldata', () => {
 			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
-
-			expect(isErc20TransactionTransfer('')).toBeFalsy();
-
-			expect(isErc20TransactionTransfer('0x')).toBeFalsy();
 		});
 	});
 

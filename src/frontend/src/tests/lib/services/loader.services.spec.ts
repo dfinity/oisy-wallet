@@ -1,3 +1,4 @@
+import * as addressEnv from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
@@ -26,7 +27,7 @@ import { toNullable } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/load-user-profile.services', () => ({
-	loadUserProfile: vi.fn(() => Promise.resolve({ success: true }))
+	loadUserProfile: vi.fn(() => Promise.resolve({ success: true, profileCreated: false }))
 }));
 
 vi.mock('$lib/services/addresses.services', () => ({
@@ -161,7 +162,11 @@ describe('loader.services', () => {
 		});
 
 		it('should sign out if the user profile is not loaded', async () => {
-			vi.mocked(loadUserProfile).mockResolvedValueOnce({ success: false, err: 'unknown' });
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: false,
+				err: 'unknown',
+				profileCreated: false
+			});
 
 			await initLoader(mockParams);
 
@@ -171,7 +176,8 @@ describe('loader.services', () => {
 		it('should sign out via infoSignOut when signups are closed', async () => {
 			vi.mocked(loadUserProfile).mockResolvedValueOnce({
 				success: false,
-				err: 'signups-closed'
+				err: 'signups-closed',
+				profileCreated: false
 			});
 
 			await initLoader(mockParams);
@@ -181,6 +187,35 @@ describe('loader.services', () => {
 				source: 'signups-closed'
 			});
 			expect(signOut).not.toHaveBeenCalled();
+		});
+
+		it('should await the signer allowance when the profile was just created', async () => {
+			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: true,
+				profileCreated: true
+			});
+			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('no allowance'));
+
+			await initLoader(mockParams);
+
+			// Awaited: the failure short-circuits `initLoader` before the wallet workers start.
+			expect(loadAddresses).not.toHaveBeenCalled();
+		});
+
+		it('should not await the signer allowance for a returning user', async () => {
+			vi.spyOn(addressEnv, 'FRONTEND_DERIVATION_ENABLED', 'get').mockReturnValue(true);
+			vi.spyOn(authServices, 'errorSignOut').mockImplementation(vi.fn());
+			vi.mocked(loadUserProfile).mockResolvedValueOnce({
+				success: true,
+				profileCreated: false
+			});
+			vi.spyOn(api, 'allowSigning').mockRejectedValueOnce(new Error('no allowance'));
+
+			await initLoader(mockParams);
+
+			expect(loadAddresses).toHaveBeenCalledOnce();
 		});
 
 		it('should load addresses from the backend', async () => {

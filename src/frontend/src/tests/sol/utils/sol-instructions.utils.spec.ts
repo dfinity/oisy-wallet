@@ -27,17 +27,29 @@ import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.m
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import {
+	getRequestUnitsInstruction,
+	getSetLoadedAccountsDataSizeLimitInstruction
+} from '@solana-program/compute-budget';
+import {
+	AuthorityType,
 	getApproveCheckedInstruction,
 	getApproveInstruction,
+	getBurnCheckedInstruction,
+	getBurnInstruction,
 	getCreateAssociatedTokenIdempotentInstruction,
 	getCreateAssociatedTokenInstruction,
+	getSetAuthorityInstruction,
 	getTransferCheckedInstruction,
 	TokenInstruction
 } from '@solana-program/token';
 import {
 	getApproveCheckedInstruction as getToken2022ApproveCheckedInstruction,
 	getApproveInstruction as getToken2022ApproveInstruction,
-	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction
+	getBurnCheckedInstruction as getToken2022BurnCheckedInstruction,
+	getBurnInstruction as getToken2022BurnInstruction,
+	getSetAuthorityInstruction as getToken2022SetAuthorityInstruction,
+	getTransferCheckedInstruction as getToken2022TransferCheckedInstruction,
+	AuthorityType as Token2022AuthorityType
 } from '@solana-program/token-2022';
 import {
 	address,
@@ -880,7 +892,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
 		});
 
-		it('should ignore a Compute Budget instruction without parsing it', () => {
+		it('should surface the directives of a Compute Budget instruction', () => {
 			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
 				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
 			);
@@ -890,24 +902,52 @@ describe('sol-instructions.utils', () => {
 
 			expect(mockInstruction3).toBeUndefined();
 
-			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
-			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: undefined,
+				computeUnitLimit: 152_343n
+			});
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+				amount: undefined,
+				computeUnitPrice: 1_563_686n
+			});
 
-			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
+			expect(parseSolComputeBudgetInstruction).toHaveBeenCalledTimes(2);
 
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should ignore a malformed Compute Budget instruction instead of throwing', () => {
+		it('should ignore a Compute Budget instruction that does not price the transaction', () => {
+			const instruction = getSetLoadedAccountsDataSizeLimitInstruction({
+				accountDataSizeLimit: 64_000
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({ amount: undefined });
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on the deprecated RequestUnits instruction, which it cannot price', () => {
+			const instruction = getRequestUnitsInstruction({ units: 200_000, additionalFee: 1_000_000 });
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a malformed Compute Budget instruction instead of throwing', () => {
 			const malformedInstruction: SolInstruction = {
 				programAddress: address(COMPUTE_BUDGET_PROGRAM_ADDRESS)
 			};
 
-			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(malformedInstruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
 
-			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
-
-			expect(console.warn).not.toHaveBeenCalled();
+			expect(console.warn).toHaveBeenCalledOnce();
 		});
 
 		it('should map a valid System instruction', () => {
@@ -1075,6 +1115,104 @@ describe('sol-instructions.utils', () => {
 				tokenAddress: JUP_TOKEN.address,
 				isApproval: true
 			});
+		});
+
+		it('should fail closed on a `SetAuthority` instruction', () => {
+			const instruction = getSetAuthorityInstruction({
+				owned: address(mockSolAddress),
+				owner: address(mockSolAddress),
+				authorityType: AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `Burn` instruction', () => {
+			const instruction = getBurnInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a `BurnChecked` instruction', () => {
+			const instruction = getBurnCheckedInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `SetAuthority` instruction', () => {
+			const instruction = getToken2022SetAuthorityInstruction({
+				owned: address(mockSolAddress),
+				owner: address(mockSolAddress),
+				authorityType: Token2022AuthorityType.AccountOwner,
+				newAuthority: address(mockSolAddress2)
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `Burn` instruction', () => {
+			const instruction = getToken2022BurnInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should fail closed on a Token-2022 `BurnChecked` instruction', () => {
+			const instruction = getToken2022BurnCheckedInstruction({
+				account: address(mockSolAddress),
+				mint: address(JUP_TOKEN.address),
+				authority: address(mockSolAddress),
+				amount: 100n,
+				decimals: 6
+			});
+
+			expect(mapSolInstruction(instruction)).toStrictEqual({
+				amount: undefined,
+				ambiguous: true
+			});
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 
 		it('should ignore a Create Associated Token instruction', () => {
