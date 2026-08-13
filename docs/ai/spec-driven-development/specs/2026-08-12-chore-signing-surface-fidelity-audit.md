@@ -24,7 +24,7 @@ underneath is.
 Fixing these one at a time is losing a race. The reports arrived in a pattern, in a short window,
 across surfaces that have nothing in common except that they are all approval screens. Somebody is
 walking this surface systematically, and they are enumerating it faster than we are. This spec
-defines an audit that enumerates it ourselves: every signing surface, every displayed field,
+turns that enumeration into our own exercise: every signing surface, every displayed field,
 checked against the bytes that actually reach the signer, so the remaining instances are found by
 us rather than reported to us.
 
@@ -483,7 +483,7 @@ in the spec's asset folder, containing:
 The document is the audit. Its findings then become tickets, one per finding, each an atomic
 change with its own spec where the change warrants one.
 
-Note that the workflow's [Step 7 (Post-merge cleanup)](workflow.md#step-7--post-merge-cleanup-claude-code)
+Note that the workflow's [Step 7 (Post-merge cleanup)](../workflow.md#step-7--post-merge-cleanup-claude-code)
 removes a spec's asset folder after merge, on the reasoning that assets are planning artifacts and
 the shipped app becomes the source of truth. That reasoning does not hold for an audit report,
 which is a record of what was true at a commit and is not superseded by the code. Whether the
