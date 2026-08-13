@@ -1681,7 +1681,7 @@
 			"btc_psbt_decode": "This transaction could not be decoded for review. For your security, it was not signed.",
 			"btc_psbt_input_not_segwit": "This transaction includes an input that is not a SegWit (P2WPKH) input, which OISY cannot sign. For your security, it was not signed.",
 			"btc_psbt_input_not_owned": "This transaction includes an input that does not belong to this wallet's address, which OISY cannot sign. For your security, it was not signed.",
-			"btc_psbt_input_ambiguous": "This transaction describes one of its inputs in two contradicting ways, so the amounts shown for review could differ from the amounts being signed. For your security, it was not signed.",
+			"btc_psbt_input_ambiguous": "OISY cannot tell which previous output one of this transaction's inputs refers to, so the amounts shown for review could differ from the amounts being signed. For your security, it was not signed.",
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",

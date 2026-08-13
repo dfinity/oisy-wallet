@@ -29,9 +29,10 @@ export interface WalletConnectBtcPsbtInputPrevout {
 	// Undefined when the input states no previous output the signing path would use, or when the
 	// input is ambiguous, in which case no figure may be derived from it.
 	prevout: WalletConnectBtcPsbtPrevout | undefined;
-	// `true` when the input describes its previous output twice, in `witnessUtxo` and in
-	// `nonWitnessUtxo`, and the two disagree. The signer consumes only one of them, so the review
-	// could show a value or an address the signature does not commit to.
+	// `true` when the input's previous output cannot be pinned to one reading: either it is stated
+	// twice, in `witnessUtxo` and in `nonWitnessUtxo`, and the two disagree, or a `nonWitnessUtxo`
+	// is present but unreadable (unparsable, or missing the vout the input references). Either way
+	// the review could show a value or an address the signature does not commit to.
 	ambiguous: boolean;
 }
 
@@ -58,9 +59,10 @@ export interface WalletConnectBtcDecodedPsbt {
 	// Sum(inputs) - sum(outputs); undefined when an input is missing its UTXO value.
 	fee: bigint | undefined;
 	broadcast: boolean;
-	// `true` when at least one input states its previous output twice and the two statements
-	// disagree. Every figure above would then be one of two contradicting readings, so the request
-	// must be neither displayed nor signed.
+	// `true` when at least one input's previous output cannot be pinned to one reading, either
+	// because it is stated twice and the statements disagree, or because its `nonWitnessUtxo` is
+	// unreadable. Every figure above would then rest on a guess about what the signer will consume,
+	// so the request must be neither displayed nor signed.
 	ambiguous: boolean;
 }
 
