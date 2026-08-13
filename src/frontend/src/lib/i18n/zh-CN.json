@@ -1681,6 +1681,7 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",

@@ -1681,6 +1681,7 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
