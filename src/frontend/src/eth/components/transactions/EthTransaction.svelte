@@ -7,7 +7,7 @@
 	import {
 		isTransactionPending,
 		isMaxUint256,
-		decodeErc20AbiData,
+		tryDecodeErc20AbiData,
 		isErc20TransactionDeposit
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -52,7 +52,7 @@
 
 	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit) && nonNullish(data)
-			? decodeErc20AbiData({ data })
+			? tryDecodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
 
