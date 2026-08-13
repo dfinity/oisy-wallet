@@ -9,7 +9,7 @@ import {
 import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { formatToken } from '$lib/utils/format.utils';
+import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { createMockEthTransactionsUi } from '$tests/mocks/eth-transactions.mock';
@@ -381,6 +381,23 @@ describe('EthTransaction', () => {
 					showPlusSign: false
 				})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`
 			);
+		});
+
+		it('should render the recipient of the transfer instead of the token contract', () => {
+			const { getByText, queryByText } = render(EthTransaction, {
+				props: {
+					transaction: mockTransferTx,
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: '0x1234567890AbcdEF1234567890aBcdef12345678' }))
+			).toBeInTheDocument();
+
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }))
+			).not.toBeInTheDocument();
 		});
 
 		it('should not apply to receive transactions', () => {

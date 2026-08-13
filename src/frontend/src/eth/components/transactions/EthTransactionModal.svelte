@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -116,6 +116,10 @@
 	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
 	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
 
+	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
+	// send would present the contract as the recipient. The recipient is in the calldata.
+	let recipient = $derived((isErc20Transfer ? dataTo : undefined) ?? to);
+
 	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
 
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
@@ -130,6 +134,10 @@
 
 	let toExplorerUrl: string | undefined = $derived(
 		notEmptyString(to) ? `${explorerBaseUrl}/address/${to}` : undefined
+	);
+
+	let recipientExplorerUrl: string | undefined = $derived(
+		notEmptyString(recipient) ? `${explorerBaseUrl}/address/${recipient}` : undefined
 	);
 
 	let approveSpenderExplorerUrl = $derived(
@@ -274,13 +282,13 @@
 				{onSaveAddressComplete}
 				type="approve"
 			/>
-		{:else if nonNullish(to) && nonNullish(from)}
+		{:else if nonNullish(recipient) && nonNullish(from)}
 			<TransactionContactCard
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
-				{to}
-				{toExplorerUrl}
+				to={recipient}
+				toExplorerUrl={recipientExplorerUrl}
 				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}
@@ -355,7 +363,10 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+			<!-- Once the transfer resolved, this row would only restate the token already named in the
+			hero, and the modal of a token transfer should read the same whether it was opened from the
+			token or from the native token that paid its fee. -->
+			{#if isNullish(transferToken) && nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 

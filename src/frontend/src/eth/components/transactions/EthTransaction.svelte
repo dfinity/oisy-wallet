@@ -98,6 +98,10 @@
 	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
 	let transferToken = $derived(isErc20Transfer ? contractToken : undefined);
 
+	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
+	// send would present the contract as the recipient. The recipient is in the calldata.
+	let recipient = $derived((isErc20Transfer ? dataTo : undefined) ?? to);
+
 	let displayToken = $derived(approveToken ?? token);
 
 	let approveValue = $derived(isApprove ? dataValue : undefined);
@@ -226,7 +230,7 @@
 	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{status}
 	timestamp={transactionDate}
-	{to}
+	to={recipient}
 	token={isApprove ? token : displayToken}
 	{tokenId}
 	{type}
