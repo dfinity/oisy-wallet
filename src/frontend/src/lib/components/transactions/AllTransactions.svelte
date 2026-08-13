@@ -2,8 +2,9 @@
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import {
 		enabledIcTokens,
-		tokensWithUnavailableIndexCanister
+		tokensToWarnAboutIndexCanister
 	} from '$icp/derived/ic-transactions-status.derived';
+	import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -15,6 +16,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		hiddenMicroTransactionsBannerVisible,
@@ -23,7 +25,7 @@
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
 		isSimpleNotificationDismissed
@@ -78,9 +80,14 @@
 			.map(getTokenDisplaySymbol)
 	);
 
+	// The dismissal lives in a shared store: the same warning is raised on the token page, and
+	// dismissing it in either place has to silence both.
 	let tokensWithUnavailableCanister = $derived(
-		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
+		$tokensToWarnAboutIndexCanister.map(getTokenDisplaySymbol)
 	);
+
+	const dismissUnavailableCanisterWarning = () =>
+		icTransactionsWarningStore.dismiss($tokensToWarnAboutIndexCanister);
 
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
@@ -140,17 +147,23 @@
 		<div class="flex flex-col">
 			{#if undismissedNoCanister.length > 0}
 				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
-					{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-						$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
+					{replacePlaceholders(replaceOisyPlaceholders($i18n.activity.warning.no_index_canister), {
+						$token_list: formatList({ items: undismissedNoCanister, language: $currentLanguage })
 					})}
 				</MessageBox>
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
-				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
-					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
-					})}
+				<MessageBox level="warning" onDismiss={dismissUnavailableCanisterWarning}>
+					{replacePlaceholders(
+						replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
+						{
+							$token_list: formatList({
+								items: tokensWithUnavailableCanister,
+								language: $currentLanguage
+							})
+						}
+					)}
 				</MessageBox>
 			{/if}
 

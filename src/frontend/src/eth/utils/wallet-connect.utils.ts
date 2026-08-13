@@ -12,6 +12,31 @@ import type { Verify } from '@walletconnect/types';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
+/**
+ * The gas limit an `eth_sendTransaction` request asks OISY to sign, as a bigint.
+ *
+ * `eth_sendTransaction` quotes it as a hex quantity. Returns `undefined` when the request carries
+ * no limit, or one that is not a usable quantity, in which case the caller falls back to the gas
+ * OISY resolved itself.
+ *
+ * Both the review and the send path resolve the limit through here, so the maximum fee shown for
+ * approval is computed from the very limit that ends up in the signed transaction.
+ */
+export const getSendParamsGas = (gas: string | undefined): bigint | undefined => {
+	if (isNullish(gas)) {
+		return;
+	}
+
+	try {
+		const parsed = BigInt(gas);
+
+		return parsed > ZERO ? parsed : undefined;
+	} catch (_err: unknown) {
+		// A limit that does not parse says nothing about what the dApp wanted, so it is treated as
+		// absent rather than signed as-is.
+	}
+};
+
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
 

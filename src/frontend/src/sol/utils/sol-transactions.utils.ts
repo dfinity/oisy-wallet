@@ -36,6 +36,32 @@ export const parseSolBase64TransactionMessage = async ({
 	return await decompileTransactionMessageFetchingLookupTables(compiledTransactionMessage, rpc);
 };
 
+/**
+ * Whether these bytes decode as a compiled Solana transaction message.
+ *
+ * Decoder acceptance is the definition, deliberately, and it is wider than "the network would
+ * honour a signature over exactly these bytes": the decoder also accepts a message carrying
+ * trailing padding, for instance. The line is drawn there because this decoder is the very one the
+ * transaction flow parses requests with, so what counts as a transaction on this path is exactly
+ * what counts as one there.
+ *
+ * Decoding is the only criterion on purpose. A stricter sniff (plausible header counts, a
+ * non-empty instruction list) would let a crafted degenerate message through, and the error is not
+ * symmetric: refusing a genuine message costs a signature the dApp can ask for again, signing a
+ * disguised transaction costs funds. The cost is bounded because Solana message signing carries
+ * UTF-8 text, and no printable-ASCII string decodes as a compiled message, so only a binary
+ * payload that happens to be transaction-shaped is affected.
+ */
+export const isSolCompiledTransactionMessage = (bytes: Uint8Array): boolean => {
+	try {
+		getCompiledTransactionMessageDecoder().decode(bytes);
+
+		return true;
+	} catch (_: unknown) {
+		return false;
+	}
+};
+
 const conflicts = ({
 	current,
 	next

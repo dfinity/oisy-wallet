@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
@@ -1681,9 +1683,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Die für die Transaktion angeforderte Absenderadresse ist nicht die Adresse dieser Wallet.",
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
 			"unexpected_processing_request": "Unerwarteter Fehler bei der Verarbeitung der WalletConnect-Anfrage."
 		}
@@ -2332,8 +2336,8 @@
 			"hidden_micro_transactions": "Transaktionen mit sehr kleinen Token-Werten sind derzeit ausgeblendet. Um sie anzuzeigen, gehe zu <a href=\"/settings/\">Einstellungen</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Mehr erfahren</a>"
 		},
 		"warning": {
-			"no_index_canister": "Transaktionen für $token_list können nicht angezeigt werden. Kein Index-Canister verfügbar.",
-			"unavailable_index_canister": "Transaktionen für $token_list können nicht angezeigt werden. Index-Canister derzeit nicht verfügbar."
+			"no_index_canister": "$oisy_short kann keine Transaktionen für $token_list laden – der Herausgeber des Tokens bietet keine Transaktionsverfolgung an.",
+			"unavailable_index_canister": "Die neuesten Transaktionen für $token_list können im Moment nicht geladen werden, da ihr Tracking-Dienst nicht antwortet. Sie werden automatisch geladen, sobald er wieder erreichbar ist."
 		}
 	},
 	"earning": {
