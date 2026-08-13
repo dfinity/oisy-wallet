@@ -33,6 +33,10 @@
 		<p class="mb-4 font-normal text-error-primary">
 			{$i18n.wallet_connect.error.btc_psbt_decode}
 		</p>
+	{:else if decoded.ambiguous}
+		<p class="mb-4 font-normal text-error-primary">
+			{$i18n.wallet_connect.error.btc_psbt_input_ambiguous}
+		</p>
 	{:else}
 		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.psbt_inputs}</p>
 		<ul class="mb-4 list-none p-0">
@@ -85,7 +89,7 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approve={!decodeError && nonNullish(decoded) && !decoded.broadcast}
+			approve={!decodeError && nonNullish(decoded) && !decoded.ambiguous && !decoded.broadcast}
 			{onApprove}
 			{onReject}
 		/>
