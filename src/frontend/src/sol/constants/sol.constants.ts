@@ -27,6 +27,16 @@ export const SOLANA_MAX_COMPUTE_UNIT_LIMIT = 1_400_000n;
 // collapses towards nothing, which would otherwise make an ordinary tip look enormous.
 export const SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD = 0.1;
 
+// The simulated preview asks the RPC for the post-state of an explicit list of accounts. Only
+// writable accounts can change, which already discards most of a DeFi message's account set;
+// past this many the preview is dropped rather than truncated, because a truncated preview
+// would report "no changes" for accounts it never looked at.
+export const SOLANA_SIMULATION_MAX_ACCOUNTS = 60;
+
+// The preview is fetched before the review renders, so a slow or unresponsive RPC would hold
+// the request behind it. Past this it is abandoned and the review renders without it.
+export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
+
 // Multiples of that baseline at which the review speaks up: twice it is worth naming as the dApp's
 // own choice, five times it is worth questioning. Both stay short of blocking, since paying well
 // over the odds is a legitimate thing to want during congestion.
