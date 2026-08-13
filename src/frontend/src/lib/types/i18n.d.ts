@@ -674,7 +674,6 @@ interface I18nSend {
 		send: string;
 		send_token: string;
 		destination: string;
-		source: string;
 		balance: string;
 		review: string;
 		signing_approval: string;
@@ -1306,6 +1305,7 @@ interface I18nWallet_connect {
 		sign_transaction: string;
 		sign_and_send_transaction: string;
 		signing_address: string;
+		signer: string;
 		fee: string;
 		btc_symbol: string;
 		psbt_inputs: string;
