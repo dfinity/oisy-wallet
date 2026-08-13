@@ -1296,6 +1296,8 @@ interface I18nWallet_connect {
 		simulation_control_removed: string;
 		dapp_prioritization_fee: string;
 		high_prioritization_fee: string;
+		dapp_gas_limit: string;
+		high_gas_limit: string;
 		invalid_typed_data: string;
 		unverifiable_erc20_request: string;
 		raw_copied: string;
@@ -1366,6 +1368,7 @@ interface I18nWallet_connect {
 		from_address_not_wallet: string;
 		unknown_destination: string;
 		ambiguous_transaction: string;
+		sol_transaction_as_message: string;
 		request_not_defined: string;
 		unexpected_processing_request: string;
 	};

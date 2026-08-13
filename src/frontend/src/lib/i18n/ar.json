@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
@@ -1685,6 +1687,7 @@
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
 		}

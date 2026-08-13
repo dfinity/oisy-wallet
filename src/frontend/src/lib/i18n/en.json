@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "Removed",
 			"dapp_prioritization_fee": "Priority fee set by the dApp, not by OISY.",
 			"high_prioritization_fee": "This transaction sets an unusually high priority fee. Check it carefully and only sign if you trust this app.",
+			"dapp_gas_limit": "Gas limit set by the app, not by OISY. The max fee above is the most this transaction can spend.",
+			"high_gas_limit": "This request sets an unusually high gas limit, so the max fee above is far more than this transaction should cost. Check it carefully and only sign if you trust this app.",
 			"invalid_typed_data": "This request contains data that doesn't match the schema the app declared. What's shown may differ from what would actually be signed, so signing is disabled.",
 			"unverifiable_erc20_request": "This request involves a token OISY can't identify or decode. What's shown may differ from what would actually be signed, so approval is disabled.",
 			"raw_copied": "Raw transaction data copied to clipboard.",
@@ -1685,6 +1687,7 @@
 			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
 			"unknown_destination": "Unknown destination address.",
 			"ambiguous_transaction": "This transaction includes multiple actions that can't all be shown accurately for review. For your security, it was not signed.",
+			"sol_transaction_as_message": "This message is a Solana transaction, which can only be approved through a transaction review. For your security, it was not signed.",
 			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
 			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}

@@ -57,10 +57,18 @@ describe('ic-transactions-status.store', () => {
 			expect(get(icTransactionsStatusStore)[anotherTokenId]).toBe(1);
 		});
 
-		it('should not add an entry for a token that never failed', () => {
+		it('should record the successful check of a token that never failed', () => {
+			// "Never checked" (no entry) and "checked and fine" (zero) have to read differently, so a
+			// consumer can tell a recovery from a token the wallet has not reached yet.
 			icTransactionsStatusStore.succeed(tokenId);
 
-			expect(get(icTransactionsStatusStore)).toStrictEqual({});
+			expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
+		});
+
+		it('should not create an entry for the other tokens', () => {
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(get(icTransactionsStatusStore)[anotherTokenId]).toBeUndefined();
 		});
 
 		it('should start counting from scratch after a success', () => {
@@ -82,6 +90,37 @@ describe('ic-transactions-status.store', () => {
 			icTransactionsStatusStore.reset();
 
 			expect(get(icTransactionsStatusStore)).toStrictEqual({});
+		});
+	});
+
+	describe('notifications', () => {
+		it('should not notify when a token already at zero succeeds again', () => {
+			icTransactionsStatusStore.succeed(tokenId);
+
+			const notified = vi.fn();
+			const unsubscribe = icTransactionsStatusStore.subscribe(notified);
+
+			// Every token reports success on every job, so this is the common path.
+			icTransactionsStatusStore.succeed(tokenId);
+			icTransactionsStatusStore.succeed(tokenId);
+
+			// Only the subscription's own initial call.
+			expect(notified).toHaveBeenCalledOnce();
+
+			unsubscribe();
+		});
+
+		it('should notify when a token recovers from a failure', () => {
+			icTransactionsStatusStore.fail(tokenId);
+
+			const notified = vi.fn();
+			const unsubscribe = icTransactionsStatusStore.subscribe(notified);
+
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(notified).toHaveBeenCalledTimes(2);
+
+			unsubscribe();
 		});
 	});
 });

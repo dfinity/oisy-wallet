@@ -1613,6 +1613,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
@@ -1685,6 +1687,7 @@
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
 			"unexpected_processing_request": "Erro inesperado ao processar a solicitação com WalletConnect."
 		}
