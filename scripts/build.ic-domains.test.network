@@ -5,13 +5,14 @@ cd "$(dirname "$(realpath "$0")")/.." || exit
 print_help() {
   cat <<-"EOF"
 
-	Usage: $0 <network> [<output-file>]
+	Usage: $0 [--help] <network> [<output-file>]
 
-	Builds the frontend for one dfx network and prints its .well-known/ic-domains
-	entry, in the "<domain> <network>" form scripts/build.ic-domains.test compares.
+	Builds the frontend for one dfx network and writes its .well-known/ic-domains
+	entry to <output-file>, defaulting to ic-domain.<network>.txt, in the
+	"<domain> <network>" form scripts/build.ic-domains.test compares.
 
-	The output file always exists, and holds a single blank line when the network
-	serves no domain. The validation ignores blank lines.
+	The output file is always written, and holds a single blank line when the
+	network serves no domain. The validation ignores blank lines.
 	EOF
 }
 
