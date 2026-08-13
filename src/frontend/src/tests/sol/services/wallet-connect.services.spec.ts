@@ -22,11 +22,11 @@ import * as solSendServices from '$sol/services/sol-send.services';
 import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
-import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
+import { simulateSolTransaction } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
-import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import type { MappedSolTransaction, SolTransferParties } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
 import { signTransaction } from '$sol/utils/sol-sign.utils';
@@ -94,16 +94,24 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 vi.mock('$sol/services/sol-simulation.services', () => ({
-	simulateSolTransactionPreview: vi.fn()
+	simulateSolTransaction: vi.fn()
 }));
 
 describe('wallet-connect.services', () => {
-	const mockParsedTransaction = { mock: 'mockParsedTransaction' };
+	const mockParsedTransaction = { mock: 'mockParsedTransaction', instructions: [] };
 	const mockMappedTransaction: MappedSolTransaction = {
 		amount: 123n,
 		destination: mockAtaAddress
 	};
 	const mockTransactionMessage = { mock: 'mockTransactionMessage' };
+
+	// Without a simulation the lists come from the message's own instructions and say so. The mock
+	// message states none, so both are empty and the partial marker is the whole answer.
+	const emptyPartialParties: SolTransferParties = {
+		sources: [],
+		destinations: [],
+		partial: true
+	};
 
 	const mockSignature = mockSolSignature();
 	const mockSignatureBytes: SignatureBytes = getBase58Encoder().encode(
@@ -187,7 +195,7 @@ describe('wallet-connect.services', () => {
 				rpc: expect.anything()
 			});
 			expect(mapSolTransactionMessage).toHaveBeenCalledWith(mockParsedTransaction);
-			expect(result).toEqual(mockMappedTransaction);
+			expect(result).toEqual({ ...mockMappedTransaction, parties: emptyPartialParties });
 		});
 
 		it('should recover the SPL mint from the token account when the mapper did not surface it', async () => {
@@ -217,7 +225,8 @@ describe('wallet-connect.services', () => {
 				amount: 123n,
 				source: mockAtaAddress,
 				destination: mockSolAddress2,
-				tokenAddress: mockSplAddress
+				tokenAddress: mockSplAddress,
+				parties: emptyPartialParties
 			});
 		});
 
@@ -247,7 +256,12 @@ describe('wallet-connect.services', () => {
 			expect(getAccountInfo).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ address: mockSolAddress })
 			);
-			expect(result).toEqual({ amount: 5n, source: mockSolAddress, destination: mockAtaAddress });
+			expect(result).toEqual({
+				amount: 5n,
+				source: mockSolAddress,
+				destination: mockAtaAddress,
+				parties: emptyPartialParties
+			});
 		});
 
 		it('should fall back to native SOL when the token account lookup throws', async () => {
@@ -268,7 +282,12 @@ describe('wallet-connect.services', () => {
 				address: mockSolAddress
 			});
 
-			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+			expect(result).toEqual({
+				amount: 7n,
+				source: mockAtaAddress,
+				destination: mockSolAddress2,
+				parties: emptyPartialParties
+			});
 		});
 
 		describe('simulated preview', () => {
@@ -281,8 +300,17 @@ describe('wallet-connect.services', () => {
 				controlChanges: []
 			};
 
+			const mockParties: SolTransferParties = {
+				sources: [{ address: mockSolAddress, own: true }],
+				destinations: [{ address: mockSolAddress2, own: false }],
+				partial: false
+			};
+
 			it('should attach the preview to the decoded review', async () => {
-				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(mockPreview);
+				vi.mocked(simulateSolTransaction).mockResolvedValue({
+					preview: mockPreview,
+					parties: mockParties
+				});
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -290,7 +318,7 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(simulateSolTransactionPreview).toHaveBeenCalledExactlyOnceWith({
+				expect(simulateSolTransaction).toHaveBeenCalledExactlyOnceWith({
 					base64EncodedTransactionMessage,
 					transactionMessage: mockParsedTransaction,
 					address: mockSolAddress,
@@ -300,7 +328,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should decode without a preview when the simulation yields none', async () => {
-				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(undefined);
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties: mockParties });
 
 				const result = await decode({
 					base64EncodedTransactionMessage,
@@ -308,8 +336,43 @@ describe('wallet-connect.services', () => {
 					address: mockSolAddress
 				});
 
-				expect(result).toEqual(mockMappedTransaction);
+				expect(result).toEqual({ ...mockMappedTransaction, parties: mockParties });
 				expect(result).not.toHaveProperty('preview');
+			});
+		});
+
+		describe('transfer parties', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			it('should take the lists the simulation derived, whole', async () => {
+				const parties: SolTransferParties = {
+					sources: [{ address: mockAtaAddress, owner: mockSolAddress, own: true }],
+					destinations: [{ address: mockSolAddress2, own: false }],
+					partial: false
+				};
+
+				vi.mocked(simulateSolTransaction).mockResolvedValue({ parties });
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(expect.objectContaining({ parties }));
+			});
+
+			it('should mark the lists partial when there is no simulation to build them from', async () => {
+				vi.mocked(simulateSolTransaction).mockResolvedValue(undefined);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(expect.objectContaining({ parties: emptyPartialParties }));
 			});
 		});
 

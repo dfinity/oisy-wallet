@@ -10,7 +10,7 @@
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
-		decodeErc20AbiData,
+		tryDecodeErc20AbiData,
 		findErcTransfers,
 		formatErcTransferAsset,
 		isErc20TransactionDeposit,
@@ -83,7 +83,7 @@
 
 	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit || isErc20Transfer) && nonNullish(data)
-			? decodeErc20AbiData({ data })
+			? tryDecodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
 
@@ -134,9 +134,13 @@
 
 	let isCombinedFee = $derived(ercTransfers.length > 1);
 
+	// Calldata carrying the transfer selector still may not decode. Without a recipient and an amount
+	// there is nothing for the calldata to contribute, so only a loaded transfer can resolve it.
+	let transferDecoded = $derived(isErc20Transfer && nonNullish(dataTo) && nonNullish(dataValue));
+
 	// Falls back to the calldata when the transferred token is not loaded, so that the hero does not
 	// change once an unrelated token list finishes loading.
-	let transferToken = $derived(ercTransfer?.token ?? (isErc20Transfer ? contractToken : undefined));
+	let transferToken = $derived(ercTransfer?.token ?? (transferDecoded ? contractToken : undefined));
 
 	let transferValue = $derived(
 		nonNullish(ercTransfer)

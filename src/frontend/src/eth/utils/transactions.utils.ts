@@ -66,26 +66,40 @@ export const decodeErc20AbiDataValue = ({
 };
 
 /**
+ * Decodes ERC20 calldata for display, treating calldata that does not decode as unknown.
+ *
+ * A known selector says nothing about the arguments that follow it: anyone can send a transaction to
+ * a wallet carrying the approve selector and a few bytes of garbage, and `decodeErc20AbiData` throws
+ * on it. Where the result only feeds a rendered row, that throw would take the transaction list down
+ * with it, so an entry that cannot be decoded degrades instead.
+ *
+ * Not for the send path, where the calldata is the wallet's own and a failure to decode it is a bug
+ * worth surfacing.
+ */
+export const tryDecodeErc20AbiData = ({
+	data,
+	bytesParam = false
+}: {
+	data: string;
+	bytesParam?: boolean;
+}): { to: string | undefined; value: bigint | undefined } => {
+	try {
+		return decodeErc20AbiData({ data, bytesParam });
+	} catch (_: unknown) {
+		return { to: undefined, value: undefined };
+	}
+};
+
+/**
  * Decodes the recipient of an ERC20 `transfer` call.
  *
  * The recipient of a token transfer exists only in the calldata, since the transaction itself is
- * addressed to the token contract. Decoding is best-effort: calldata that carries the transfer
- * selector with truncated arguments would throw, and a missing recipient must degrade the display
- * rather than break the whole transaction list.
+ * addressed to the token contract.
  */
-export const decodeErc20TransferRecipient = (data: string | undefined): EthAddress | undefined => {
-	if (!isErc20TransactionTransfer(data) || isNullish(data)) {
-		return;
-	}
-
-	try {
-		const { to } = decodeErc20AbiData({ data });
-
-		return to;
-	} catch (_: unknown) {
-		return undefined;
-	}
-};
+export const decodeErc20TransferRecipient = (data: string | undefined): EthAddress | undefined =>
+	isErc20TransactionTransfer(data) && nonNullish(data)
+		? tryDecodeErc20AbiData({ data }).to
+		: undefined;
 
 /**
  * Groups EVM transactions by network and transaction hash.
@@ -240,7 +254,7 @@ export const mapEthTransactionUi = ({
 	const isApprove = isErc20TransactionApprove(data);
 
 	const { to: approveSpender } =
-		isApprove && nonNullish(data) ? decodeErc20AbiData({ data }) : { to: undefined };
+		isApprove && nonNullish(data) ? tryDecodeErc20AbiData({ data }) : { to: undefined };
 
 	return {
 		...transaction,

@@ -402,6 +402,42 @@ describe('EthTransaction', () => {
 			);
 		});
 
+		it('should render as a plain send when the transfer calldata does not decode', () => {
+			const { container, getByTestId, queryByText } = render(EthTransaction, {
+				props: {
+					transaction: {
+						...mockTransferTx,
+						transferRecipient: undefined,
+						data: `${ERC20_TRANSFER_HASH}00`
+					},
+					token: ETHEREUM_TOKEN
+				}
+			});
+
+			expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+				get(i18n).send.text.send
+			);
+
+			// No phantom recipient, and no fee for a send we cannot describe - the entry falls back
+			// to the native token value.
+			expect(
+				queryByText(shortenWithMiddleEllipsis({ text: mockTransferRecipient }))
+			).not.toBeInTheDocument();
+
+			const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+			assertNonNullish(amountElement);
+
+			expect(amountElement.textContent).toBe(
+				`${formatToken({
+					value: ZERO,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: ETHEREUM_TOKEN.decimals,
+					showPlusSign: false
+				})} ${getTokenDisplaySymbol(ETHEREUM_TOKEN)}`
+			);
+		});
+
 		it('should not apply to receive transactions', () => {
 			const { container, getByTestId } = render(EthTransaction, {
 				props: {

@@ -7,7 +7,6 @@ import {
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { decode } from '$sol/services/wallet-connect.services';
-import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render, waitFor } from '@testing-library/svelte';
@@ -78,10 +77,12 @@ describe('SolWalletConnectSignModal', () => {
 	});
 
 	it('should keep approval disabled until the transaction decode resolves', async () => {
-		let resolveDecode: (mapped: MappedSolTransaction) => void = () => {};
+		type DecodedReview = Awaited<ReturnType<typeof decode>>;
+
+		let resolveDecode: (mapped: DecodedReview) => void = () => {};
 
 		vi.mocked(decode).mockReturnValueOnce(
-			new Promise<MappedSolTransaction>((resolve) => {
+			new Promise<DecodedReview>((resolve) => {
 				resolveDecode = resolve;
 			})
 		);
@@ -94,7 +95,7 @@ describe('SolWalletConnectSignModal', () => {
 
 		expect(approve).toBeDisabled();
 
-		resolveDecode({ amount: 1n });
+		resolveDecode({ amount: 1n, parties: { sources: [], destinations: [], partial: true } });
 
 		await waitFor(() => {
 			expect(approve).toBeEnabled();
