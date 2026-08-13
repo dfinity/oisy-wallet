@@ -397,6 +397,49 @@ describe('EthTransactionModal', () => {
 			expect(getByText(formattedFee)).toBeInTheDocument();
 		});
 
+		describe('with the token contract resolving to a name', () => {
+			beforeEach(() => {
+				vi.mocked(mapAddressToName).mockImplementation(({ address }) =>
+					address === USDC_TOKEN.address ? USDC_TOKEN.name : undefined
+				);
+			});
+
+			afterEach(() => {
+				vi.mocked(mapAddressToName).mockReturnValue(undefined);
+			});
+
+			it('should not display the interacted with row for a resolved transfer', () => {
+				const { queryByText } = render(EthTransactionModal, {
+					transaction: mockTransferTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(queryByText(get(i18n).transaction.text.interacted_with)).not.toBeInTheDocument();
+
+				expect(queryByText(USDC_TOKEN.name)).not.toBeInTheDocument();
+			});
+
+			it('should display the interacted with row for a contract call that is not a transfer', () => {
+				const { getByText } = render(EthTransactionModal, {
+					transaction: { ...mockTransferTransactionUi, data: '0xabcdef' },
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
+
+				expect(getByText(USDC_TOKEN.name)).toBeInTheDocument();
+			});
+
+			it('should display the interacted with row for an approve transaction', () => {
+				const { getByText } = render(EthTransactionModal, {
+					transaction: { ...mockApproveTransactionUi, to: USDC_TOKEN.address },
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
+			});
+		});
+
 		it('should display the native token value when the transaction is not addressed to a known token', () => {
 			const { getAllByText } = render(EthTransactionModal, {
 				transaction: {
