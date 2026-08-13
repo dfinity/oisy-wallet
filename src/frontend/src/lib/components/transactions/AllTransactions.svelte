@@ -2,8 +2,9 @@
 	import type { DismissedNotification } from '$declarations/backend/backend.did';
 	import {
 		enabledIcTokens,
-		tokensWithUnavailableIndexCanister
+		tokensToWarnAboutIndexCanister
 	} from '$icp/derived/ic-transactions-status.derived';
+	import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -79,9 +80,14 @@
 			.map(getTokenDisplaySymbol)
 	);
 
+	// The dismissal lives in a shared store: the same warning is raised on the token page, and
+	// dismissing it in either place has to silence both.
 	let tokensWithUnavailableCanister = $derived(
-		$tokensWithUnavailableIndexCanister.map(getTokenDisplaySymbol)
+		$tokensToWarnAboutIndexCanister.map(getTokenDisplaySymbol)
 	);
+
+	const dismissUnavailableCanisterWarning = () =>
+		icTransactionsWarningStore.dismiss($tokensToWarnAboutIndexCanister);
 
 	let undismissedNoCanister = $derived(
 		filterUndismissedNotificationQualifiers({
@@ -148,7 +154,7 @@
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
-				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
+				<MessageBox level="warning" onDismiss={dismissUnavailableCanisterWarning}>
 					{replacePlaceholders(
 						replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
 						{

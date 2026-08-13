@@ -9,7 +9,7 @@
 //! currently requested `CanisterStatusResultV2`.
 
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::management_canister::{
+use ic_cdk_management_canister::{
     canister_status, CanisterStatusArgs, CanisterStatusResult, CanisterStatusType,
     DefiniteCanisterSettings,
 };
