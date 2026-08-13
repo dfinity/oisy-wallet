@@ -607,7 +607,7 @@ mod tests {
 
         let second = try_acquire_refresh_lock_at(start + REFRESH_LOCK_TIMEOUT_NS + 1).unwrap();
 
-        assert!(first.generation != second.generation);
+        assert_ne!(first.generation, second.generation);
     }
 
     #[test]

@@ -158,7 +158,8 @@
 			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
 			const isPermitSupported = await isErc20SupportsPermit({
 				contractAddress: $sourceToken.address,
-				userAddress: $ethAddress
+				userAddress: $ethAddress,
+				chainId: $sourceToken.network.chainId
 			});
 			setIsTokenPermitSupported({
 				address: $sourceToken.address,
@@ -185,6 +186,19 @@
 
 	const isNearIntentsProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
+	const isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
+	// Velora, OneSec and NEAR Intents all close the modal at initiation and settle
+	// in the background via the Active User Transactions store. Only the ICP-native
+	// providers still complete inside the modal.
+	const isActiveTransactionSwap = $derived(
+		isNearIntentsProvider ||
+			isOneSecProvider ||
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
 	const isApproveNeeded = $derived(
@@ -329,15 +343,15 @@
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
-					isGasless: $isSourceTokenPermitSupported ?? false,
-					destinationNetwork: $destinationToken.network,
-					swapDetails: selectedProvider.swapDetails
+					isGasless: $isSourceTokenPermitSupported ?? false
 				};
 
+				// `swapDetails` is spread inside each branch so that `type` narrows it to the quote
+				// shape of the matching mode.
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
-					await fetchVeloraDeltaSwap(params);
+					await fetchVeloraDeltaSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				} else {
-					await fetchVeloraMarketSwap(params);
+					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
@@ -376,15 +390,13 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec swaps, the foreground completes once the user's funds have
-			// left their wallet; success/failure of the background phase is tracked
-			// separately via the AUT store. Other providers (Velora, Near) still
+			// For AUT-tracked swaps the foreground completes once the swap is
+			// committed — funds have left the wallet, or the order is live in the
+			// auction; success/failure of the background phase is tracked separately
+			// via the AUT store, so we fire `submitted` here. The ICP-native providers
 			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name:
-					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
-						? TRACK_COUNT_SWAP_SUBMITTED
-						: TRACK_COUNT_SWAP_SUCCESS,
+				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -483,8 +495,8 @@
 					sendWithApproval={swapEmitsApprovalSteps}
 					sendWithTransfer={isTransferNeeded}
 					{swapProgressStep}
-					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
-						SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={isActiveTransactionSwap}
+					swapWithBridging={isOneSecProvider}
 				/>
 			{/if}
 		{/key}

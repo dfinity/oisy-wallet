@@ -84,6 +84,19 @@ export interface MappedSolTransaction {
 	// review screen cannot display. Unlike `ambiguous`, this does not block signing:
 	// it surfaces a warning so the user knows the review is incomplete and can decide.
 	unreviewed?: boolean;
+	// Compute Budget directives, set per instruction and combined at message level into
+	// `prioritizationFee`. They never move funds but they price the transaction. At message
+	// level `computeUnitLimit` is the *resolved* budget, defaulted and clamped as the runtime
+	// would, and it is kept so the network's per-compute-unit estimate can be priced the same way.
+	computeUnitPrice?: bigint;
+	computeUnitLimit?: bigint;
+	// The prioritisation fee, in lamports, the message will be charged on top of the base
+	// transaction fee. Only set at message level, where the whole instruction list is known.
+	prioritizationFee?: bigint;
+	// What OISY itself would pay to prioritise this same message, in lamports, from the network's
+	// recent fees. The review compares the requested fee against it. Absent when the estimate
+	// could not be obtained.
+	prioritizationFeeEstimate?: bigint;
 	// `true` when the message bundles instructions that disagree on source,
 	// destination, payer or action type. The summary keeps a single value per field,
 	// so such a transaction cannot be faithfully represented on the review screen and

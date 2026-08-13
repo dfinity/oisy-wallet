@@ -25,12 +25,12 @@ export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
 
+export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
+	nonNullish(data) && data.startsWith(ERC20_TRANSFER_HASH);
+
 export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
 	nonNullish(data) &&
 	(data.startsWith(ERC20_DEPOSIT_HASH) || data.startsWith(ERC20_DEPOSIT_ERC20_HASH));
-
-export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
-	nonNullish(data) && data.startsWith(ERC20_TRANSFER_HASH);
 
 const abiCoder = AbiCoder.defaultAbiCoder();
 
