@@ -8,7 +8,7 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
-		decodeErc20AbiData,
+		tryDecodeErc20AbiData,
 		isErc20TransactionDeposit,
 		isMaxUint256,
 		mapAddressToName
@@ -74,7 +74,7 @@
 
 	let { to: dataTo, value: dataValue } = $derived(
 		(isApprove || isErc20Deposit) && nonNullish(data)
-			? decodeErc20AbiData({ data })
+			? tryDecodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
 
