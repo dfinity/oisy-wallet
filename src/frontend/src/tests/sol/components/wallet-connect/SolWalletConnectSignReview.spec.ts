@@ -312,6 +312,44 @@ describe('SolWalletConnectSignReview', () => {
 		expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
 	});
 
+	describe('sources and destinations', () => {
+		it('should replace the single destination field with the lists', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: {
+						sources: [{ address: mockSolAddress, own: true }],
+						destinations: [{ address: mockSolAddress2, own: false }],
+						partial: false
+					}
+				}
+			});
+
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
+			expect(getByText(en.wallet_connect.text.transfer_destinations)).toBeInTheDocument();
+		});
+
+		it('should keep the destination field when the lists have nothing to put in its place', () => {
+			const { getByText, container } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: { sources: [], destinations: [], partial: true }
+				}
+			});
+
+			expect(getByText(en.send.text.destination)).toBeInTheDocument();
+			expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
+			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
+		});
+
+		it('should render no lists at all until the decode settles', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.transfer_destinations)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		});
+	});
+
 	it('should render the network row with the same label-above-value shape as the other rows', () => {
 		const { container } = render(SolWalletConnectSignReview, { props });
 
