@@ -15,6 +15,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { NOTIFICATION_VERSIONS } from '$lib/constants/notification.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import {
 		hiddenMicroTransactionsBannerVisible,
@@ -23,7 +24,7 @@
 	} from '$lib/derived/user-profile.derived';
 	import { dismissNotifications } from '$lib/services/notification.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { formatList, replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		filterUndismissedNotificationQualifiers,
 		isSimpleNotificationDismissed
@@ -140,17 +141,23 @@
 		<div class="flex flex-col">
 			{#if undismissedNoCanister.length > 0}
 				<MessageBox level="warning" onDismiss={dismissNoCanisterWarning}>
-					{replacePlaceholders($i18n.activity.warning.no_index_canister, {
-						$token_list: undismissedNoCanister.map((s) => `$${s}`).join(', ')
+					{replacePlaceholders(replaceOisyPlaceholders($i18n.activity.warning.no_index_canister), {
+						$token_list: formatList({ items: undismissedNoCanister, language: $currentLanguage })
 					})}
 				</MessageBox>
 			{/if}
 
 			{#if tokensWithUnavailableCanister.length > 0}
 				<MessageBox closableKey="oisy_ic_hide_transaction_unavailable_canister" level="warning">
-					{replacePlaceholders($i18n.activity.warning.unavailable_index_canister, {
-						$token_list: tokensWithUnavailableCanister.map((s) => `$${s}`).join(', ')
-					})}
+					{replacePlaceholders(
+						replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
+						{
+							$token_list: formatList({
+								items: tokensWithUnavailableCanister,
+								language: $currentLanguage
+							})
+						}
+					)}
 				</MessageBox>
 			{/if}
 
