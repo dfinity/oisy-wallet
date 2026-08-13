@@ -16,6 +16,10 @@
 		balance: OptionBalance;
 		source: string;
 		application: string;
+		// A caller whose decode produced no amount has nothing to say in the amount and balance rows,
+		// and a zero there would read as a figure the decode never produced. Both default to shown.
+		showAmount?: boolean;
+		showBalance?: boolean;
 		showNullishAmountLabel?: boolean;
 		showUnlimitedAmountLabel?: boolean;
 		sourceNetwork: Snippet;
@@ -31,6 +35,8 @@
 		balance,
 		source,
 		application,
+		showAmount = true,
+		showBalance = true,
 		showNullishAmountLabel = false,
 		showUnlimitedAmountLabel = false,
 		sourceNetwork,
@@ -45,15 +51,17 @@
 
 {@render destinationNetwork?.()}
 
-<SendDataAmount
-	{amount}
-	{exchangeRate}
-	showNullishLabel={showNullishAmountLabel}
-	showUnlimitedLabel={showUnlimitedAmountLabel}
-	{token}
-/>
+{#if showAmount}
+	<SendDataAmount
+		{amount}
+		{exchangeRate}
+		showNullishLabel={showNullishAmountLabel}
+		showUnlimitedLabel={showUnlimitedAmountLabel}
+		{token}
+	/>
+{/if}
 
-<SendSource {balance} {exchangeRate} {source} {token} />
+<SendSource {balance} {exchangeRate} {showBalance} {source} {token} />
 
 {#if nonNullish(destination)}
 	<SendDataDestination {destination} />

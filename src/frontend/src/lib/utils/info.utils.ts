@@ -10,6 +10,10 @@ export type HideInfoKey =
 
 export const saveHideInfo = (key: HideInfoKey) => {
 	try {
+		if (!browser) {
+			return;
+		}
+
 		sessionStorage.setItem(key, 'true');
 	} catch (err: unknown) {
 		// We use the session storage for the operational part of the app but, not crucial
@@ -30,6 +34,10 @@ export const saveHideInfoQualifiers = ({
 	qualifiers: string[];
 }) => {
 	try {
+		if (!browser) {
+			return;
+		}
+
 		sessionStorage.setItem(key, JSON.stringify(qualifiers));
 	} catch (err: unknown) {
 		// We use the session storage for the operational part of the app but, not crucial

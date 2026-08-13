@@ -3,7 +3,7 @@ import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
+import type { SolanaGetAccountInfoReturn, SolanaParsedAccountsInfo } from '$sol/types/sol-rpc';
 import type {
 	SolRpcTransaction,
 	SolRpcTransactionRaw,
@@ -11,7 +11,14 @@ import type {
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { address as solAddress, type Address, type Lamports, type Signature } from '@solana/kit';
+import {
+	address as solAddress,
+	type Address,
+	type Base64EncodedWireTransaction,
+	type Lamports,
+	type Signature,
+	type TransactionError
+} from '@solana/kit';
 import { SvelteMap } from 'svelte/reactivity';
 
 //lamports are like satoshis: https://solana.com/docs/terminology#lamport
@@ -225,6 +232,63 @@ export const estimatePriorityFee = async ({
 		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
 		ZERO
 	);
+};
+
+/**
+ * Reads the current state of several accounts in one call.
+ *
+ * Deliberately uncached, unlike `getAccountInfo` below: this is the "before" side of the
+ * simulated preview's diff, and a memoised entry from earlier in the session would fabricate
+ * a delta that never existed.
+ */
+export const getMultipleAccountsInfo = async ({
+	addresses,
+	network
+}: {
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+}): Promise<SolanaParsedAccountsInfo> => {
+	const { getMultipleAccounts } = solanaHttpRpc(network);
+
+	const { value } = await getMultipleAccounts(addresses.map(solAddress), {
+		encoding: 'jsonParsed'
+	}).send();
+
+	return value;
+};
+
+/**
+ * Runs a message against current network state without signing or sending it, and returns the
+ * post-state of the requested accounts.
+ *
+ * `replaceRecentBlockhash` (which implies no signature verification) is what lets an unsigned
+ * WalletConnect message simulate at all. `jsonParsed` makes the RPC apply its own SPL token
+ * account parser, so the caller gets mint, owner, delegate, close authority and amount as JSON
+ * instead of a raw layout to decode.
+ */
+export const simulateTransactionAccounts = async ({
+	base64EncodedTransactionMessage,
+	addresses,
+	network
+}: {
+	base64EncodedTransactionMessage: string;
+	addresses: SolAddress[];
+	network: SolanaNetworkType;
+}): Promise<{ err: TransactionError | null; accounts: SolanaParsedAccountsInfo }> => {
+	const { simulateTransaction } = solanaHttpRpc(network);
+
+	const {
+		value: { err, accounts }
+	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
+		encoding: 'base64',
+		replaceRecentBlockhash: true,
+		accounts: {
+			encoding: 'jsonParsed',
+			addresses: addresses.map(solAddress)
+		}
+	}).send();
+
+	return { err, accounts };
 };
 
 const addressToAccountInfo = new Map<
