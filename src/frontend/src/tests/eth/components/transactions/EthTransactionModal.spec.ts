@@ -421,7 +421,11 @@ describe('EthTransactionModal', () => {
 
 			it('should display the interacted with row for a contract call that is not a transfer', () => {
 				const { getByText } = render(EthTransactionModal, {
-					transaction: { ...mockTransferTransactionUi, data: '0xabcdef' },
+					transaction: {
+						...mockTransferTransactionUi,
+						transferRecipient: undefined,
+						data: '0xabcdef'
+					},
 					token: ETHEREUM_TOKEN
 				});
 
