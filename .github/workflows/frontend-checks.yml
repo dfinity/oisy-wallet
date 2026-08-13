@@ -230,10 +230,13 @@ jobs:
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Check ic-domains
         continue-on-error: true
+        # The build output is kept, so that a failure can be diagnosed from the job log.
+        # Networks that serve no domain (local, old-backend, test_be_1) are expected to fail
+        # here and to leave the file empty; the `config` job asserts which ones those are.
         run: |
           FILE="ic-domain.$NETWORK.txt"
           echo "" > "$FILE"
-          dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null && \
+          dfx build frontend --network "$NETWORK" && \
             cat build/.well-known/ic-domains > "$FILE" && \
             echo " $NETWORK" >> "$FILE"
         env:
