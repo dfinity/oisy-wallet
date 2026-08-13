@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$(realpath "$0")")/.." || exit
+
+print_help() {
+  cat <<-"EOF"
+
+	Usage: $0 <network> [<output-file>]
+
+	Builds the frontend for one dfx network and prints its .well-known/ic-domains
+	entry, in the "<domain> <network>" form scripts/build.ic-domains.test compares.
+
+	The output file always exists, and holds a single blank line when the network
+	serves no domain. The validation ignores blank lines.
+	EOF
+}
+
+if [[ "${1:-}" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+NETWORK="${1:?A network is required. See --help.}"
+FILE="${2:-ic-domain.$NETWORK.txt}"
+DOMAINS="build/.well-known/ic-domains"
+BUILD_LOG="dfx-build.$NETWORK.log"
+
+# GitHub renders `::error::` as an annotation; elsewhere it is only noise.
+report_error() {
+  if [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    echo "::error::$1"
+  else
+    echo "ERROR: $1" >&2
+  fi
+}
+
+echo "" >"$FILE"
+
+# Some networks (e.g. old-backend) have no frontend canister, so the build cannot
+# run there at all. That is not a failure: leave the placeholder blank line.
+if ! dfx canister id frontend --network "$NETWORK" >/dev/null 2>&1; then
+  echo "No frontend canister for $NETWORK; leaving the domain file blank."
+  exit 0
+fi
+
+# `dfx build` downloads dependency artifacts from GitHub releases, which fails
+# intermittently. Retry before giving up, and keep the output so a genuine build
+# error is diagnosable from the log.
+for attempt in 1 2 3; do
+  if dfx build frontend --network "$NETWORK" >"$BUILD_LOG" 2>&1; then
+    break
+  fi
+  if [[ "$attempt" == 3 ]]; then
+    report_error "dfx build frontend --network $NETWORK failed after $attempt attempts"
+    cat "$BUILD_LOG"
+    exit 1
+  fi
+  echo "dfx build failed (attempt $attempt), retrying..."
+  sleep $((attempt * 15))
+done
+
+# Networks without a custom domain produce no ic-domains file. That is expected,
+# and leaves the placeholder blank line the validation ignores.
+if [[ -f "$DOMAINS" ]]; then
+  cat "$DOMAINS" >"$FILE"
+  echo " $NETWORK" >>"$FILE"
+else
+  echo "No $DOMAINS for $NETWORK; leaving the domain file blank."
+fi
