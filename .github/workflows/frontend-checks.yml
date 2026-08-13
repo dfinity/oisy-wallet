@@ -229,16 +229,20 @@ jobs:
       - name: Install dfx
         uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Check ic-domains
-        continue-on-error: true
         # The build output is kept, so that a failure can be diagnosed from the job log.
         # Networks that serve no domain (local, old-backend, test_be_1) are expected to fail
-        # here and to leave the file empty; the `config` job asserts which ones those are.
+        # to build and to leave the file empty. For every other network a build failure is a
+        # real failure, and must be reported as such instead of as a missing domain later on.
         run: |
           FILE="ic-domain.$NETWORK.txt"
           echo "" > "$FILE"
-          dfx build frontend --network "$NETWORK" && \
-            cat build/.well-known/ic-domains > "$FILE" && \
+          if dfx build frontend --network "$NETWORK"; then
+            cat build/.well-known/ic-domains > "$FILE"
             echo " $NETWORK" >> "$FILE"
+          elif grep -q " $NETWORK\$" scripts/build.ic-domains.test.expected; then
+            echo "ERROR: 'dfx build frontend --network $NETWORK' failed, but this network is expected to serve a domain."
+            exit 1
+          fi
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
