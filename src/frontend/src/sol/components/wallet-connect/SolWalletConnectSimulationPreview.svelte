@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
+	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
 	interface Props {
 		preview: SolSimulationPreview;
@@ -21,17 +24,23 @@
 	let { solDelta, tokenDeltas, controlChanges } = $derived(preview);
 
 	// The same mint can exist on several clusters, so the network is matched too.
-	const symbol = (tokenAddress: SplTokenAddress): string =>
+	const splToken = (tokenAddress: SplTokenAddress): SplCustomToken | undefined =>
 		$enabledSplTokens.find(
 			({ address, network: { id } }) => address === tokenAddress && id === feeToken.network.id
-		)?.symbol ?? shortenWithMiddleEllipsis({ text: tokenAddress });
+		);
 
-	const signedAmount = ({ delta, decimals }: { delta: bigint; decimals: number }): string =>
-		`${delta > ZERO ? '+' : '-'}${formatToken({
-			value: delta > ZERO ? delta : -delta,
-			unitName: decimals,
-			displayDecimals: decimals
-		})}`;
+	const symbol = (tokenAddress: SplTokenAddress): string =>
+		splToken(tokenAddress)?.symbol ?? shortenWithMiddleEllipsis({ text: tokenAddress });
+
+	// A mint OISY does not know has no rate of its own, and no other token's rate describes it, so
+	// such a delta is left as a bare amount rather than priced against something it is not.
+	const splExchangeRate = (tokenAddress: SplTokenAddress): number | undefined => {
+		const token = splToken(tokenAddress);
+
+		return nonNullish(token) ? $exchanges?.[token.id]?.usd : undefined;
+	};
+
+	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
 	const controlLabels: Record<SolSimulationControlField, string> = $derived({
 		owner: $i18n.wallet_connect.text.simulation_new_owner,
@@ -40,6 +49,35 @@
 		program: $i18n.wallet_connect.text.simulation_new_program
 	});
 </script>
+
+{#snippet delta({
+	value,
+	decimals,
+	tokenSymbol,
+	exchangeRate
+}: {
+	value: bigint;
+	decimals: number;
+	tokenSymbol: string;
+	exchangeRate?: number;
+})}
+	{@const magnitude = formatToken({
+		value: value > ZERO ? value : -value,
+		unitName: decimals,
+		displayDecimals: decimals
+	})}
+
+	{`${value > ZERO ? '+' : '-'}${magnitude} ${tokenSymbol}`}
+
+	<!-- The sign is carried once, by the amount: the fiat figure prices the size of the change.
+	     A mint we do not know has no rate, and the wrapper is skipped rather than left as an empty
+	     flex item, so such a row is a bare amount in the DOM as well as on screen. -->
+	{#if nonNullish(exchangeRate)}
+		<div class="text-tertiary">
+			<ConvertAmountExchange amount={magnitude} {exchangeRate} />
+		</div>
+	{/if}
+{/snippet}
 
 <!-- An authority change moves no funds at all, so it would be invisible among the amounts. It is
      named first, on its own, because it is the one that hands over the account itself. -->
@@ -51,17 +89,27 @@
 	label={$i18n.wallet_connect.text.simulated_changes}
 	ref="simulated-changes"
 >
-	<div class="flex flex-col gap-2">
+	<div class="flex flex-col gap-1">
 		{#if nonNullish(solDelta)}
-			<span data-tid="simulated-sol-delta">
-				{`${signedAmount({ delta: solDelta, decimals: feeToken.decimals })} ${feeToken.symbol}`}
-			</span>
+			<div class="flex gap-4" data-tid="simulated-sol-delta">
+				{@render delta({
+					value: solDelta,
+					decimals: feeToken.decimals,
+					tokenSymbol: feeToken.symbol,
+					exchangeRate: feeExchangeRate
+				})}
+			</div>
 		{/if}
 
-		{#each tokenDeltas as { account, tokenAddress, decimals, delta } (`${account}-${tokenAddress}`)}
-			<span data-tid="simulated-token-delta">
-				{`${signedAmount({ delta, decimals })} ${symbol(tokenAddress)}`}
-			</span>
+		{#each tokenDeltas as { account, tokenAddress, decimals, delta: tokenDelta } (`${account}-${tokenAddress}`)}
+			<div class="flex gap-4" data-tid="simulated-token-delta">
+				{@render delta({
+					value: tokenDelta,
+					decimals,
+					tokenSymbol: symbol(tokenAddress),
+					exchangeRate: splExchangeRate(tokenAddress)
+				})}
+			</div>
 		{/each}
 
 		{#each controlChanges as { account, field, to } (`${account}-${field}`)}
