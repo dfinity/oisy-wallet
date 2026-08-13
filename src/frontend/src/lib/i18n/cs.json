@@ -936,7 +936,6 @@
 			"send": "Odeslat",
 			"send_token": "",
 			"destination": "Cíl",
-			"source": "Zdroj",
 			"balance": "Zůstatek",
 			"review": "Zkontrolovat",
 			"signing_approval": "Podepisování schválení...",
@@ -1623,6 +1622,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1687,6 +1687,7 @@
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
 		}

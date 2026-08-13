@@ -936,7 +936,6 @@
 			"send": "发送",
 			"send_token": "",
 			"destination": "目标地址",
-			"source": "来源地址",
 			"balance": "余额",
 			"review": "预览",
 			"signing_approval": "正在签署批准...",
@@ -1623,6 +1622,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1687,6 +1687,7 @@
 			"from_address_not_wallet": "请求交易的发起地址不是本钱包的地址。",
 			"unknown_destination": "未知的接收地址。",
 			"ambiguous_transaction": "此交易在多个地址之间转移资金，无法准确显示以供审核。为了您的安全，该交易未被签名。",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "意外错误：请求未定义，因此无法处理。",
 			"unexpected_processing_request": "处理 WalletConnect 请求时发生意外错误。"
 		}

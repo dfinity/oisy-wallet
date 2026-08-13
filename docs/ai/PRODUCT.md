@@ -158,7 +158,9 @@ The two are treated independently, because only one of them is essential. If the
 
 The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
 
-This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token.
+The same warning appears on the token's own page, above its transaction list — naming only that token, and labelling the list as stale rather than replacing it, since what was loaded before the outage is still worth showing. The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**, and is shared between the two places: dismissing it on the token page also stops that token being named on the Activity page. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference. Tokens are identified by their ledger canister ID rather than their symbol, so two tokens that happen to share a symbol are never confused for one another.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
 ---
 

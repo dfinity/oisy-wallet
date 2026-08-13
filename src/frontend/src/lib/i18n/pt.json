@@ -936,7 +936,6 @@
 			"send": "Enviar",
 			"send_token": "",
 			"destination": "Destino",
-			"source": "Origem",
 			"balance": "Saldo",
 			"review": "Revisar",
 			"signing_approval": "Assinando aprovação...",
@@ -1623,6 +1622,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1687,6 +1687,7 @@
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
 			"unexpected_processing_request": "Erro inesperado ao processar a solicitação com WalletConnect."
 		}

@@ -936,7 +936,6 @@
 			"send": "Senden",
 			"send_token": "",
 			"destination": "Ziel",
-			"source": "Quelle",
 			"balance": "Guthaben",
 			"review": "Überprüfen",
 			"signing_approval": "Genehmigung wird signiert...",
@@ -1623,6 +1622,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1687,6 +1687,7 @@
 			"from_address_not_wallet": "Die für die Transaktion angeforderte Absenderadresse ist nicht die Adresse dieser Wallet.",
 			"unknown_destination": "Unbekannte Zieladresse.",
 			"ambiguous_transaction": "Diese Transaktion bewegt Gelder zwischen mehreren Adressen und kann nicht korrekt zur Überprüfung angezeigt werden. Zu deiner Sicherheit wurde sie nicht signiert.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Unerwarteter Fehler: Anfrage ist nicht definiert und kann daher nicht verarbeitet werden.",
 			"unexpected_processing_request": "Unerwarteter Fehler bei der Verarbeitung der WalletConnect-Anfrage."
 		}

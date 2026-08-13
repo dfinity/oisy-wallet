@@ -72,7 +72,8 @@ Result: **Sources** = our WSOL account. **Destinations** = pool vault A, our USD
 
 Note what leg 2 does: it puts one of **our own** accounts in Destinations. That is the rule
 working as written, and it is the reason a swap can show what we receive rather than only what
-we spend. It also reads oddly. See [8. Pending decisions](#8-pending-decisions-facts-are-clear-we-just-need-to-decide).
+we spend. An unlabelled own address reads oddly, which is why our entry is marked as ours. See
+[8.1](#81-our-own-address-stays-in-destinations-labelled-as-ours).
 
 ### 2.3 What "our address" means
 
@@ -207,10 +208,11 @@ instruction list has to be reshaped, and the rule from
 - **Legs must be kept per instruction, not folded.** `mapSolTransactionMessage` exists to collapse
   the message into one summary. The lists are precisely the repair of that collapse, so the leg
   list has to survive to the derivation.
-- **This does not by itself retire `ambiguous`.** That flag still guards the single amount and
-  single token figure the review shows next to the lists. Two lists fix "who", not "how much".
-  Whether a transaction that is ambiguous only in its **addresses** can now be shown rather than
-  refused is a real consequence of this feature and is listed as a pending decision.
+- **This does not retire `ambiguous`.** That flag still guards the single amount and single token
+  figure the review shows next to the lists. Two lists fix "who", not "how much". Whether a
+  transaction that is ambiguous only in its **addresses** could now be shown rather than refused
+  was raised and decided against; see
+  [8.4](#84-ambiguous-keeps-refusing-address-disagreements-unchanged).
 - **Approvals are not transfers.** `Approve` / `ApproveChecked` currently produce a
   `destination` that is a **delegate**, flagged `isApproval`. A delegate is not a transfer
   destination, so an approval yields no leg and keeps its existing dedicated spender display
@@ -243,7 +245,8 @@ instruction list has to be reshaped, and the rule from
   identification, not party derivation.
 - **Chains other than Solana.** The rule is chain-agnostic and the Ethereum and Bitcoin reviews
   may well want it later, but this spec covers the Solana review and Solana activity only.
-- **Retiring the single-summary collapse.** See the pending decision on `ambiguous`.
+- **Retiring the single-summary collapse.** `ambiguous` is unchanged by this spec; see
+  [8.4](#84-ambiguous-keeps-refusing-address-disagreements-unchanged).
 
 ---
 
@@ -267,71 +270,87 @@ instruction list has to be reshaped, and the rule from
 
 ---
 
-## 8. Pending decisions (facts are clear, we just need to decide)
+## 8. Decisions (settled)
 
-### 8.1 Do we list ourselves among our own Destinations?
+These four were open when the spec was first written and are now settled. They are requirements
+for implementation, not recommendations. Nothing here is still up for discussion; the only items
+still open are the facts to confirm in
+[section 7](#7-open-questions-facts-to-confirm).
 
-**This one is for product, and this spec deliberately does not settle it.**
+### 8.1 Our own address stays in Destinations, labelled as ours
 
-By the rule as written, a swap puts one of **our own** accounts in Destinations, because we are
-the destination of the leg that pays us out (leg 2 in
-[section 2.2](#22-worked-example-a-routed-swap)). Product expanded the rule on purpose, so that a
-swap shows what we receive and not only what we spend. The expansion is what makes the feature
-worth having. It also reads oddly to see your own wallet listed under your own destinations.
+**Decided.** Our own accounts remain in Destinations, exactly as the rule in
+[section 2.1](#21-derivation-rules) produces them. Our entry must be **visually distinguished as
+the user's own address**, so that it does not read as a counterparty. The exact presentation is
+left to implementation.
 
-| Option                                          | Effect                                                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| 1. Show it, unmodified                          | One rule, no special cases, and the received leg is visible. Reads oddly.                        |
-| 2. Filter our own addresses out of Destinations | Reads naturally, but the received leg disappears, which undoes the reason the rule was expanded. |
-| 3. Show it, labelled as ours                    | Rule stays one line; the oddity is solved where it actually lives, in presentation.              |
+This follows the product author's stated intent rather than being a side effect of the rule as
+written. The first proposal was that Destinations contain only the destinations of transfers where
+we are the source. That was then withdrawn by its own author, on the observation that a swap would
+never show the user as a destination of anything, even though a swap is how the user receives. The
+rule was widened to "the destinations of transfer instructions that have our address as either
+source or destination" precisely so that a swap shows what the user receives. Our own account
+appearing there is the point of the widening, not an artefact of it.
 
-**Recommendation: option 3.** The rule is correct and the derivation should not learn an
-exception; what reads oddly is an unlabelled address, not the entry itself. Marking our own entry
-(for example as the user's own wallet or account) keeps the information and removes the confusion,
-and it costs nothing in the derivation, which already knows which addresses are ours.
+The closing constraint, that we do not show counterparties as Sources and show ourselves only when
+we really transfer, is a constraint on **Sources**. It says nothing about Destinations and is not
+an argument for filtering ourselves out of them.
 
-### 8.2 What do the lists show when simulation fails or is unavailable?
+Two alternatives were rejected. Filtering our own addresses out of Destinations removes the
+received leg, which undoes the reason the rule was widened in the first place. Showing the entry
+unlabelled leaves the oddity in place: what reads strangely is an unlabelled own address, not the
+entry itself. Labelling costs nothing in the derivation, which already knows which addresses are
+ours, and it keeps the rule a single line with no exception.
 
-The review's legs come from simulation, and simulation is best effort by design: PR #13695 fails
-open, so a failure, timeout, unsupported option, or rate limit leaves the review exactly as it is
-today.
+### 8.2 When simulation is unavailable, fall back to top-level instructions and say the lists are partial
 
-| Option                                                   | Effect                                                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 1. Hide both lists entirely                              | Honest, but the review loses the destination field it has today, which is a regression.                |
-| 2. Fall back to top-level instructions only              | Keeps a plain send fully correct; a routed swap shows two empty lists, which reads as "nothing moves". |
-| 3. Fall back to top-level, and say the lists are partial | Same coverage as option 2, without the false negative.                                                 |
+**Decided.** Both halves, together. When the review has no simulation to work from, it derives the
+lists from the top-level instructions, and it **states that the lists are partial**. "Partial" is
+stated whenever the lists were built without inner instructions, not only when something visibly
+failed. Neither half ships without the other.
 
-**Recommendation: option 3**, on the condition that "partial" is stated whenever the lists were
-built without inner instructions, not only when something visibly failed. Empty lists on a
-transaction that clearly does something are the single most dangerous thing this feature can show,
-and they are exactly what a swap produces from top-level instructions alone. Note also that a plain
-send degrades perfectly under option 3, so the common case loses nothing.
+The reason the second half is not optional: a routed swap performs its transfers as inner
+instructions, so top-level instructions alone yield two empty lists for a transaction that moved
+four amounts. That is worse than showing nothing, because an empty list looks like an answer. A
+user reading "Sources: none, Destinations: none" concludes that nothing moves. The partial marker
+is what stops a partial list being read as a complete one, and it is the only thing that makes the
+fallback safe.
 
-### 8.3 Should Sources be hidden when it contains only our own address?
+Hiding both lists entirely was rejected: the review would lose the destination field it has today,
+which is a regression. Falling back silently was rejected for the reason above. A plain send
+degrades perfectly under the decided behaviour, since its transfer is top level, so the common case
+loses nothing.
 
-For every plain send, Sources is exactly one entry: us. That duplicates the wallet identity the
-review already displays.
+### 8.3 Sources is hidden when it would contain only our own address, with a guard
 
-| Option                                         | Effect                                                                            |
-| ---------------------------------------------- | --------------------------------------------------------------------------------- |
-| 1. Always show                                 | Predictable; the section is redundant in the most common case.                    |
-| 2. Hide when it holds only our own address(es) | Cleaner default; a section that appears and disappears is harder to reason about. |
-| 3. Always show, collapsed to a compact form    | Predictable and quiet, at the cost of another display state.                      |
+**Decided.** Sources is not rendered when its only entries are our own addresses. This carries a
+requirement, not a nicety: a **hidden Sources list must be distinguishable from a Sources list we
+failed to derive**. "We spend nothing worth listing here" and "we did not compute the sources" must
+not render identically.
 
-**Recommendation: option 2**, with one guard: hiding must be distinguishable from having nothing
-to show. "We spend nothing here" and "we did not compute the sources" must not render identically.
-If option 3 in [8.2](#82-what-do-the-lists-show-when-simulation-fails-or-is-unavailable) is taken,
-that guard is already present and option 2 is safe.
+An ordinary outgoing send has exactly one Source, us, which tells the user nothing they do not
+already know and duplicates the wallet identity the review already displays. Suppressing a section
+that carries no information is right. It is only safe once a hidden list cannot be mistaken for a
+list that could not be built, which is why the guard is part of the decision rather than a
+follow-up. The partial marker decided in
+[8.2](#82-when-simulation-is-unavailable-fall-back-to-top-level-instructions-and-say-the-lists-are-partial)
+supplies exactly that distinction, so the two decisions hold together and neither is safe alone.
 
-### 8.4 Does `ambiguous` still refuse address disagreements?
+### 8.4 `ambiguous` keeps refusing address disagreements, unchanged
 
-`mapSolTransactionMessage` sets `ambiguous` (which refuses signing) when instructions disagree on
-source or destination, precisely because the single-field summary could not show them. With two
-lists, address disagreement is no longer unshowable. Whether the refusal narrows to disagreements
-about **amount and token** only is a decision with a real safety surface, and it should be made on
-its own rather than folded into this change. Until it is decided, this spec assumes `ambiguous`
-behaves exactly as it does today.
+**Decided: no change.** `mapSolTransactionMessage` continues to set `ambiguous`, and the signing
+flow continues to refuse, when instructions disagree on source or destination.
+
+Two lists that can display several addresses do not make a self-contradicting transaction
+displayable. The guard exists because the summary cannot state such a transaction faithfully, and
+that is still true once the lists exist. Being able to render more addresses is not the same as
+being able to explain a contradiction.
+
+The distinction is deliberate and worth stating plainly, because the two look similar from the
+outside: **the lists show several addresses that agree about what happened**, whereas **`ambiguous`
+fires when the instructions disagree about what happened**. A swap with four legs is not ambiguous;
+it is a transaction with four legs. Narrowing the refusal to disagreements about amount and token
+only would be a change with a real safety surface, and it is not made here.
 
 ---
 

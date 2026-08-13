@@ -1,5 +1,8 @@
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
+import {
+	tokensWithRecoveredIndexCanister,
+	tokensWithUnavailableIndexCanister
+} from '$icp/derived/ic-transactions-status.derived';
 import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -95,6 +98,61 @@ describe('ic-transactions-status.derived', () => {
 			]);
 
 			expect(get(tokensWithUnavailableIndexCanister)).toStrictEqual([]);
+		});
+	});
+
+	describe('tokensWithRecoveredIndexCanister', () => {
+		const recoveredToken: IcrcCustomToken = {
+			...mockValidIcToken,
+			symbol: 'RTC',
+			indexCanisterId: 'mxzaz-hqaaa-aaaar-qaada-cai',
+			version: 1n,
+			enabled: true
+		};
+
+		const setUpToken = (): TokenId => {
+			icrcCustomTokensStore.setAll([{ data: recoveredToken, certified: true }]);
+
+			const tokenId = get(icrcCustomTokensStore)?.at(0)?.data.id;
+			assertNonNullish(tokenId);
+
+			return tokenId;
+		};
+
+		beforeEach(() => {
+			icrcCustomTokensStore.resetAll();
+			icTransactionsStatusStore.reset();
+		});
+
+		it('should be empty for a token that has never been checked', () => {
+			setUpToken();
+
+			expect(get(tokensWithRecoveredIndexCanister)).toStrictEqual([]);
+		});
+
+		it('should be empty for a token that is currently failing', () => {
+			const tokenId = setUpToken();
+
+			icTransactionsStatusStore.fail(tokenId);
+
+			expect(get(tokensWithRecoveredIndexCanister)).toStrictEqual([]);
+		});
+
+		it('should contain a token that succeeded after failing', () => {
+			const tokenId = setUpToken();
+
+			icTransactionsStatusStore.fail(tokenId);
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(get(tokensWithRecoveredIndexCanister).map(({ id }) => id)).toStrictEqual([tokenId]);
+		});
+
+		it('should contain a token that succeeded without ever failing', () => {
+			const tokenId = setUpToken();
+
+			icTransactionsStatusStore.succeed(tokenId);
+
+			expect(get(tokensWithRecoveredIndexCanister).map(({ id }) => id)).toStrictEqual([tokenId]);
 		});
 	});
 });
