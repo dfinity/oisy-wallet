@@ -284,15 +284,15 @@ still open are the facts to confirm in
 the user's own address**, so that it does not read as a counterparty. The exact presentation is
 left to implementation.
 
-This follows the product author's stated intent rather than being a side effect of the rule he
-wrote. He first proposed that Destinations contain only the destinations of transfers where we are
-the source, then rejected that himself, with the observation that a swap would then not show him as
-a destination of anything, even though a swap is how he receives. He widened the rule to "the
-destinations of transfer instructions that have our address as either source or destination"
-precisely so that a swap shows what the user receives. Our own account appearing there is the point
-of the widening, not an artefact of it.
+This follows the product author's stated intent rather than being a side effect of the rule as
+written. The first proposal was that Destinations contain only the destinations of transfers where
+we are the source. That was then withdrawn by its own author, on the observation that a swap would
+never show the user as a destination of anything, even though a swap is how the user receives. The
+rule was widened to "the destinations of transfer instructions that have our address as either
+source or destination" precisely so that a swap shows what the user receives. Our own account
+appearing there is the point of the widening, not an artefact of it.
 
-His closing constraint, that we do not show counterparties as Sources and show ourselves only when
+The closing constraint, that we do not show counterparties as Sources and show ourselves only when
 we really transfer, is a constraint on **Sources**. It says nothing about Destinations and is not
 an argument for filtering ourselves out of them.
 
