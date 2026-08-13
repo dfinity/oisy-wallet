@@ -3,7 +3,7 @@
 mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
-    use ic_cdk::bitcoin_canister::{Network as BitcoinNetwork, Outpoint, Utxo};
+    use ic_cdk_bitcoin_canister::{Network as BitcoinNetwork, OutPoint, Txid, Utxo};
 
     use crate::{
         types::bitcoin::{
@@ -40,8 +40,8 @@ mod bitcoin {
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES],
+                        outpoint: OutPoint {
+                            txid: Txid::from([0; MAX_TXID_BYTES]),
                             vout: 0,
                         },
                         value: 0,
@@ -53,30 +53,13 @@ mod bitcoin {
                 valid: true,
             },
             TestVector {
-                description: "With a utxo that is too long",
-                input: BtcAddPendingTransactionRequest {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                    network: BitcoinNetwork::Mainnet,
-                    ii_delegation_chain: None,
-                },
-                valid: false,
-            },
-            TestVector {
                 description: "With too many utxos",
                 input: BtcAddPendingTransactionRequest {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0
                             },
                             value: 0,
@@ -117,8 +100,8 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![
                         Utxo {
-                            outpoint: Outpoint {
-                                txid: vec![0; MAX_TXID_BYTES],
+                            outpoint: OutPoint {
+                                txid: Txid::from([0; MAX_TXID_BYTES]),
                                 vout: 0,
                             },
                             value: 0,
@@ -129,21 +112,6 @@ mod bitcoin {
                 },
                 valid: false,
             },
-            TestVector {
-                description: "PendingTransaction with a utxo that is too long",
-                input: PendingTransaction {
-                    txid: vec![0; MAX_TXID_BYTES],
-                    utxos: vec![Utxo {
-                        outpoint: Outpoint {
-                            txid: vec![0; MAX_TXID_BYTES + 1],
-                            vout: 0,
-                        },
-                        value: 0,
-                        height: 0,
-                    }],
-                },
-                valid: false,
-            }
         ]
     );
 }

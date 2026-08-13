@@ -1612,6 +1612,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
@@ -1681,9 +1683,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "트랜잭션에 요청된 발신 주소가 이 지갑의 주소가 아닙니다.",
 			"unknown_destination": "알 수 없는 수신 주소입니다.",
 			"ambiguous_transaction": "이 거래는 여러 주소 간에 자금을 이동하므로 검토를 위해 정확하게 표시할 수 없습니다. 보안을 위해 서명되지 않았습니다.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "예기치 않은 오류: 요청이 정의되지 않아 처리할 수 없습니다.",
 			"unexpected_processing_request": "WalletConnect로 요청을 처리하는 중 예기치 않은 오류가 발생했습니다."
 		}

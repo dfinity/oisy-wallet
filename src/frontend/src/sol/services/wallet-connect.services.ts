@@ -44,6 +44,7 @@ import {
 } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
+	isSolCompiledTransactionMessage,
 	mapSolTransactionMessage,
 	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
@@ -438,6 +439,19 @@ export const sign = ({
 		})
 	});
 
+/**
+ * Reown sends the `signMessage` payload base58-encoded (per the Reown Solana RPC reference). A
+ * value that is not base58 carries no bytes to review or sign, so it is reported as an unusable
+ * parameter rather than thrown on.
+ */
+const decodeBase58Message = (message: string): Uint8Array | undefined => {
+	try {
+		return Uint8Array.from(getBase58Encoder().encode(message));
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
 type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: OptionWalletConnectListener;
 	address: OptionSolAddress;
@@ -495,17 +509,48 @@ export const signMessage = ({
 				return { success: false };
 			}
 
+			const messageBytes = decodeBase58Message(message);
+
+			if (isNullish(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.unknown_parameter }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
+			// What is signed is decided by the requested method, never by what the payload parses as.
+			// This method signs messages, so a transaction is refused rather than rendered as text.
+			//
+			// It has to be refused rather than merely displayed differently: Ed25519 signs the raw
+			// bytes, and the transaction flow signs the compiled transaction message bytes with this
+			// very key, derivation path and no domain separator or prefix. A signature taken here over
+			// a transaction message is therefore byte-for-byte a usable transaction signature, while
+			// the review that obtained it shows no amount, destination, fee, decoded instruction,
+			// warning or simulation.
+			if (isSolCompiledTransactionMessage(messageBytes)) {
+				toastsError({
+					msg: { text: get(i18n).wallet_connect.error.sol_transaction_as_message }
+				});
+
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
+
+				return { success: false };
+			}
+
 			modalNext();
 
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				// Ed25519 signs the raw message bytes; the WC param is base58-encoded, and the response
-				// signature is base58 too (per the Reown Solana RPC reference).
+				// Ed25519 signs the raw message bytes, and the response signature is base58 too (per the
+				// Reown Solana RPC reference).
 				const signatureBytes = await signMessageBytes({
 					identity,
 					network: safeMapNetworkIdToNetwork(networkId),
-					message: Uint8Array.from(getBase58Encoder().encode(message))
+					message: messageBytes
 				});
 
 				const signature = getBase58Decoder().decode(signatureBytes);

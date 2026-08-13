@@ -822,13 +822,12 @@ type NearIntentsData = record {
 	amount : nat;
 	dest_token : TokenId
 };
-// Bitcoin Network.
 type Network = variant {
-	// The Bitcoin mainnet.
+	// Bitcoin Mainnet.
 	mainnet;
-	// The Bitcoin regtest, used for local testing purposes.
+	// Bitcoin Regtest.
 	regtest;
-	// The Bitcoin testnet.
+	// Bitcoin Testnet4.
 	testnet
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
@@ -882,15 +881,12 @@ type OneSecIcpToEvmData = record {
 // `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
 // `key` to lowercase before signing.
 type OnramperSignedEntry = record { key : text; value : text };
-// Outpoint.
-type Outpoint = record {
-	// Transaction ID (TxID).
-	//
-	// The hash of the transaction that created the UTXO.
+// A reference to a transaction output.
+type OutPoint = record {
+	// A cryptographic hash of the transaction.
+	// A transaction can output multiple UTXOs.
 	txid : blob;
-	// Output Index (vout).
-	//
-	// The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	// The index of the output within the transaction.
 	vout : nat32
 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
@@ -1304,15 +1300,8 @@ type UserTransactionError = variant {
 	// Reserved for future caller-validation logic.
 	UserNotFound
 };
-// Unspent Transaction Output (UTXO).
-type Utxo = record {
-	// The block height at which the UTXO was created.
-	height : nat32;
-	// The value of the UTXO in satoshis.
-	value : nat64;
-	// The outpoint of the UTXO.
-	outpoint : Outpoint
-};
+// An unspent transaction output.
+type Utxo = record { height : nat32; value : nat64; outpoint : OutPoint };
 // Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
 // id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
 // pointers, and the learned-mid-flow settlement / refund tx hashes, live in

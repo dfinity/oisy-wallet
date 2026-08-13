@@ -1612,6 +1612,8 @@
 			"simulation_control_removed": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
@@ -1681,9 +1683,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
 			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
 		}
