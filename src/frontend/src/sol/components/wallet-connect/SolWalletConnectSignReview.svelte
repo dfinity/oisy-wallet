@@ -15,12 +15,16 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
+	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
 		SOLANA_PRIORITIZATION_FEE_BASELINE_FLOOR_USD,
 		SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER,
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
+	import type { SolTransferParties } from '$sol/types/sol-transaction';
 
 	interface Props {
 		amount?: bigint;
@@ -36,6 +40,12 @@
 		prioritizationFeeEstimate?: bigint;
 		isApproval?: boolean;
 		unreviewed?: boolean;
+		// What a simulation says this message would do to the user's own accounts. Absent whenever
+		// the simulation could not be obtained, in which case the review shows what it always has.
+		preview?: SolSimulationPreview;
+		// Who the transaction spends from and who it pays, derived from the transfer instructions
+		// it contains. Absent until the decode settles.
+		parties?: SolTransferParties;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -53,12 +63,24 @@
 		prioritizationFeeEstimate,
 		isApproval = false,
 		unreviewed = false,
+		preview,
+		parties,
 		approveDisabled = false,
 		onApprove,
 		onReject
 	}: Props = $props();
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
+
+	// The lists replace the single destination field, which had to pick one winner out of a swap.
+	// They only replace it once they have something to say: a message that yields no destination at
+	// all would otherwise lose the field the review shows today, for nothing.
+	let showParties = $derived(nonNullish(parties) && parties.destinations.length > 0);
+
+	// Instructions OISY cannot decode yield no amount, and with it no destination and no balance
+	// worth showing: what the transaction does is then told by the simulated changes alone. The
+	// rows are dropped rather than filled with a zero the decode never produced.
+	let decoded = $derived(nonNullish(amount));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
 
@@ -125,12 +147,18 @@
 		{amount}
 		{application}
 		{balance}
-		destination={isApproval ? null : destination}
+		destination={isApproval || !decoded || showParties ? null : destination}
+		showAmount={decoded}
+		showBalance={decoded}
 		{source}
 		{token}
 	>
 		{#if isApproval}
 			<SendDataSpender spender={destination} />
+		{/if}
+
+		{#if nonNullish(parties)}
+			<SolWalletConnectTransferParties {parties} userAddress={source} />
 		{/if}
 
 		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
@@ -149,6 +177,10 @@
 			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 		{:else if highPrioritizationFee}
 			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+		{/if}
+
+		{#if nonNullish(preview)}
+			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />

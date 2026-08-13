@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Activity
+
+### IC transactions and Index-canister outages
+
+For tokens on the Internet Computer, balances and transaction history come from two different canisters: the balance from the token's Ledger canister, the history from its Index canister. OISY refreshes both every 30 seconds.
+
+The two are treated independently, because only one of them is essential. If the Ledger canister cannot be reached the sync fails and the balance is dropped, since a wrong balance is worse than none. If the **Index** canister cannot be reached — it does not answer, or it answers with data OISY can tell is stale, which happens when it runs low on cycles and silently stops following the ledger — the balance still updates normally and the transactions already loaded stay on screen. OISY keeps retrying on the regular 30-second cycle; there is no separate back-off and no point at which it gives up for the session.
+
+The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
+
+The same warning appears on the token's own page, above its transaction list — naming only that token, and labelling the list as stale rather than replacing it, since what was loaded before the outage is still worth showing. The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**, and is shared between the two places: dismissing it on the token page also stops that token being named on the Activity page. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference. Tokens are identified by their ledger canister ID rather than their symbol, so two tokens that happen to share a symbol are never confused for one another.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
+
+---
+
 ## Exchange-rate sourcing
 
 OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
@@ -226,6 +242,32 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 - **Ethereum (`eip155`)** — supports `eth_sendTransaction`, `eth_sign`, `personal_sign`, `eth_signTypedData_v4`, and `eth_signTypedData` (legacy).
 - **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility). For `solana_signMessage`, OISY decodes the base58 message and shows the decoded text for review when possible (falling back to the raw value if decoding fails), then returns the base58-encoded Ed25519 signature.
 - **Bitcoin (`bip122`)** — supports `getAccountAddresses`, `signMessage`, and `signPsbt`. The namespace is advertised whenever any BTC address (mainnet, testnet, or regtest) is loaded, with one `bip122:<genesis>` chain and matching `bip122:<genesis>:<address>` account per present network, and the `bip122_addressesChanged` event.
+
+### Simulated preview of a Solana transaction
+
+Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OISY asks the network to **simulate** the request and shows what it would do **to the user's own accounts**: the native SOL change on the user's address (which absorbs the transaction and priority fees), the per-mint SPL token changes across the user's token accounts, and — separately and as a warning — any change to who controls one of those accounts.
+
+That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
+
+Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
+
+The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
+
+Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
+
+### Sources and destinations of a Solana transaction
+
+The same review answers "where is this going?" with two lists rather than one address. **Sources** holds the accounts the transaction spends from, and **Destinations** the accounts it pays into. The two rules are asymmetric on purpose: Sources holds the sources of transfers **the user's account is the source of**, while Destinations holds the destinations of transfers the user's account is **either the source or the destination** of. So a counterparty paying into a pool is never listed as a source, and the user appears as a source only when value genuinely leaves one of their accounts. A plain send yields exactly one entry in each list; a swap yields several, because every leg the user is on one side of contributes its destination.
+
+That asymmetry is what makes a swap describable at all. The leg that pays the user out puts one of the **user's own** accounts among the destinations, which is how the review shows what the user receives and not only what they spend. Such an entry is **marked as the user's own account**, so it does not read as a counterparty. Sources, by contrast, is hidden when it holds nothing but the wallet the review already names, since repeating it says nothing.
+
+Only transfers count. Creating an associated token account, changing an authority, setting a compute budget, or approving a spender contributes to neither list (an approval keeps its own spender row). Accounts are listed by the **wallet that owns them** wherever OISY knows it, because SPL transfers name token accounts and nobody recognises their own associated token account.
+
+The lists are built from the same simulation as the preview above, which is the only way to see a routed swap: such a swap performs every one of its transfers inside cross-program invocations, which do not exist in the unsigned message at all. When there is no simulation to build them from, OISY falls back to the instructions the message states itself **and says that the lists are partial**. That warning is not optional: without it, a routed swap would show two empty lists for a transaction that moves several amounts, and an empty list reads as an answer rather than as a gap.
+
+Showing several addresses does not make a self-contradicting transaction showable. A transaction whose instructions **disagree** about source, destination, payer, token or action type is still refused outright, exactly as before. Several addresses that agree about what happened is a swap; instructions that disagree about what happened is something OISY cannot state faithfully at all.
+
+The lists currently appear on the WalletConnect sign review. Showing them on an executed transaction in the activity list is a follow-up.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 

@@ -949,7 +949,6 @@
 			"send": "Invia",
 			"send_token": "",
 			"destination": "Destinazione",
-			"source": "Origine",
 			"balance": "Saldo",
 			"review": "Rivedi",
 			"signing_approval": "Firma approvazione...",
@@ -1616,8 +1615,22 @@
 			"amount": "",
 			"hex_data": "Dati HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
@@ -1626,6 +1639,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1686,9 +1700,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "L'indirizzo di origine richiesto per la transazione non è l'indirizzo di questo wallet.",
 			"unknown_destination": "Indirizzo di destinazione sconosciuto.",
 			"ambiguous_transaction": "Questa transazione sposta fondi tra più indirizzi e non può essere mostrata in modo accurato per la revisione. Per la tua sicurezza, non è stata firmata.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Errore inaspettato: la richiesta non è definita, pertanto non può essere elaborata.",
 			"unexpected_processing_request": "Errore inaspettato durante l'elaborazione della richiesta con WalletConnect."
 		}
@@ -2337,8 +2353,8 @@
 			"hidden_micro_transactions": "Le transazioni con valori di token molto piccoli sono attualmente nascoste. Per mostrarle, vai su <a href=\"/settings/\">Impostazioni</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Scopri di più</a>"
 		},
 		"warning": {
-			"no_index_canister": "Le transazioni per $token_list non possono essere visualizzate. Nessun canister Index disponibile.",
-			"unavailable_index_canister": "Le transazioni per $token_list non possono essere visualizzate. Il canister Index è attualmente non disponibile."
+			"no_index_canister": "$oisy_short non può caricare le transazioni di $token_list: l’emittente del token non offre il tracciamento delle transazioni.",
+			"unavailable_index_canister": "Al momento non è possibile caricare le ultime transazioni di $token_list, perché il loro servizio di tracciamento non risponde. Verranno caricate automaticamente non appena tornerà disponibile."
 		}
 	},
 	"earning": {

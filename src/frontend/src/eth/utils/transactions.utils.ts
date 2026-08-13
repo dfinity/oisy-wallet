@@ -62,6 +62,31 @@ export const decodeErc20AbiDataValue = ({
 };
 
 /**
+ * Decodes ERC20 calldata for display, treating calldata that does not decode as unknown.
+ *
+ * A known selector says nothing about the arguments that follow it: anyone can send a transaction to
+ * a wallet carrying the approve selector and a few bytes of garbage, and `decodeErc20AbiData` throws
+ * on it. Where the result only feeds a rendered row, that throw would take the transaction list down
+ * with it, so an entry that cannot be decoded degrades instead.
+ *
+ * Not for the send path, where the calldata is the wallet's own and a failure to decode it is a bug
+ * worth surfacing.
+ */
+export const tryDecodeErc20AbiData = ({
+	data,
+	bytesParam = false
+}: {
+	data: string;
+	bytesParam?: boolean;
+}): { to: string | undefined; value: bigint | undefined } => {
+	try {
+		return decodeErc20AbiData({ data, bytesParam });
+	} catch (_: unknown) {
+		return { to: undefined, value: undefined };
+	}
+};
+
+/**
  * It will try to map an address to a name among the known addresses (e.g. ERC20 tokens, built-in contacts).
  *
  * The string will be used to be displayed instead of the address and make it more user-friendly, avoiding confusions.
@@ -112,7 +137,7 @@ export const mapEthTransactionUi = ({
 	const isApprove = isErc20TransactionApprove(data);
 
 	const { to: approveSpender } =
-		isApprove && nonNullish(data) ? decodeErc20AbiData({ data }) : { to: undefined };
+		isApprove && nonNullish(data) ? tryDecodeErc20AbiData({ data }) : { to: undefined };
 
 	return {
 		...transaction,

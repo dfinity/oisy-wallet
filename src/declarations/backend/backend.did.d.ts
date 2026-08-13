@@ -61,6 +61,16 @@ export type ActiveUserTransactionData =
 	  }
 	| {
 			/**
+			 * Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
+			 * single variant covers all six directions, discriminated by the
+			 * `direction` field; the minter block indices, the BTC txid and deposit
+			 * address, and the Ethereum deposit tx hash and block number ride in
+			 * `external_refs`.
+			 */
+			ChainFusion: ChainFusionData;
+	  }
+	| {
+			/**
 			 * Velora (`ParaSwap`) EVM swap. A single variant covers both execution
 			 * modes, discriminated by the `mode` field; the auction id, order hash,
 			 * transaction hash and nonce ride in `external_refs`.
@@ -553,6 +563,39 @@ export type CanisterStatusType =
 			 */
 			running: null;
 	  };
+/**
+ * Chain Fusion ck conversion payload. Every settlement pointer is learned
+ * mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
+ * those live in `external_refs`; only the canonical immutable fields are
+ * captured here, which is why all six directions share one variant.
+ *
+ * `direction` is explicit rather than inferred from the token pair: the poller
+ * selects its settlement oracle from it, and re-deriving "is this a mint or a
+ * withdrawal?" from two token ids on every tick would rediscover something
+ * known for certain at creation.
+ */
+export interface ChainFusionData {
+	direction: ChainFusionDirection;
+	source_token: TokenId;
+	/**
+	 * Source-token amount in base units.
+	 */
+	amount: bigint;
+	dest_token: TokenId;
+}
+/**
+ * Which ck conversion an active transaction tracks. Determines which minter the
+ * frontend asks about settlement, and how: the three withdrawal directions have
+ * an exact status keyed by the minter's burn block index, while the mint
+ * directions are observed from the deposit side.
+ */
+export type ChainFusionDirection =
+	| { BtcToCkBtc: null }
+	| { CkBtcToBtc: null }
+	| { EthToCkEth: null }
+	| { CkErc20ToErc20: null }
+	| { Erc20ToCkErc20: null }
+	| { CkEthToEth: null };
 export interface Config {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -1171,25 +1214,22 @@ export interface NearIntentsData {
 	amount: bigint;
 	dest_token: TokenId;
 }
-/**
- * Bitcoin Network.
- */
 export type Network =
 	| {
 			/**
-			 * The Bitcoin mainnet.
+			 * Bitcoin Mainnet.
 			 */
 			mainnet: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin regtest, used for local testing purposes.
+			 * Bitcoin Regtest.
 			 */
 			regtest: null;
 	  }
 	| {
 			/**
-			 * The Bitcoin testnet.
+			 * Bitcoin Testnet4.
 			 */
 			testnet: null;
 	  };
@@ -1255,19 +1295,16 @@ export interface OnramperSignedEntry {
 	value: string;
 }
 /**
- * Outpoint.
+ * A reference to a transaction output.
  */
-export interface Outpoint {
+export interface OutPoint {
 	/**
-	 * Transaction ID (TxID).
-	 *
-	 * The hash of the transaction that created the UTXO.
+	 * A cryptographic hash of the transaction.
+	 * A transaction can output multiple UTXOs.
 	 */
 	txid: Uint8Array;
 	/**
-	 * Output Index (vout).
-	 *
-	 * The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	 * The index of the output within the transaction.
 	 */
 	vout: number;
 }
@@ -1968,21 +2005,12 @@ export type UserTransactionError =
 			UserNotFound: null;
 	  };
 /**
- * Unspent Transaction Output (UTXO).
+ * An unspent transaction output.
  */
 export interface Utxo {
-	/**
-	 * The block height at which the UTXO was created.
-	 */
 	height: number;
-	/**
-	 * The value of the UTXO in satoshis.
-	 */
 	value: bigint;
-	/**
-	 * The outpoint of the UTXO.
-	 */
-	outpoint: Outpoint;
+	outpoint: OutPoint;
 }
 /**
  * Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
