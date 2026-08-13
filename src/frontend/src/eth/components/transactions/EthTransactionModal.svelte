@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -390,7 +390,10 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+			<!-- Once the transfer resolved, this row would only restate the token already named in the
+			hero, and the modal of a token transfer should read the same whether it was opened from the
+			token or from the native token that paid its fee. -->
+			{#if isNullish(transferToken) && nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
