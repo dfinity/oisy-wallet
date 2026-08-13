@@ -17,6 +17,7 @@ export const ERC20_ABI = [
 // Not all ERC-20 tokens implement it, so this ABI is kept separate to avoid breaking logic.
 // Spec: https://eips.ethereum.org/EIPS/eip-2612
 export const ERC20_PERMIT_ABI = [
+	'function name() view returns (string)',
 	'function nonces(address owner) view returns (uint256)',
 	'function version() view returns (string)',
 	'function DOMAIN_SEPARATOR() view returns (bytes32)'

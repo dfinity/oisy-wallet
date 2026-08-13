@@ -11,7 +11,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getAccountInfo } from '$sol/api/solana.api';
+import { estimatePriorityFee, getAccountInfo } from '$sol/api/solana.api';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
@@ -22,8 +22,10 @@ import * as solSendServices from '$sol/services/sol-send.services';
 import { sendSignedTransaction } from '$sol/services/sol-send.services';
 import * as solSignServices from '$sol/services/sol-sign.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import { simulateSolTransactionPreview } from '$sol/services/sol-simulation.services';
 import { decode, decodeMessage, sign, signMessage } from '$sol/services/wallet-connect.services';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
+import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import * as solSignUtils from '$sol/utils/sol-sign.utils';
@@ -37,7 +39,10 @@ import {
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
-import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
+import {
+	createMockSolCompiledTransactionMessageBytes,
+	mockSolSignedTransaction
+} from '$tests/mocks/sol-transactions.mock';
 import {
 	mockAtaAddress,
 	mockSolAddress,
@@ -78,11 +83,18 @@ vi.mock('$sol/providers/sol-rpc.providers', () => ({
 }));
 
 vi.mock('$sol/api/solana.api', () => ({
-	getAccountInfo: vi.fn()
+	getAccountInfo: vi.fn(),
+	estimatePriorityFee: vi.fn(),
+	getMultipleAccountsInfo: vi.fn(),
+	simulateTransactionAccounts: vi.fn()
 }));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
+}));
+
+vi.mock('$sol/services/sol-simulation.services', () => ({
+	simulateSolTransactionPreview: vi.fn()
 }));
 
 describe('wallet-connect.services', () => {
@@ -155,16 +167,20 @@ describe('wallet-connect.services', () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = ICP_NETWORK_ID;
 
-			await expect(decode({ base64EncodedTransactionMessage, networkId })).rejects.toThrow(
-				`No Solana network for network ${networkId.description}`
-			);
+			await expect(
+				decode({ base64EncodedTransactionMessage, networkId, address: mockSolAddress })
+			).rejects.toThrow(`No Solana network for network ${networkId.description}`);
 		});
 
 		it('should parse and map a transaction successfully for a valid network', async () => {
 			const base64EncodedTransactionMessage = 'mockBase64Transaction';
 			const networkId = SOLANA_MAINNET_NETWORK_ID;
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(parseSolBase64TransactionMessage).toHaveBeenCalledWith({
 				transactionMessage: base64EncodedTransactionMessage,
@@ -188,7 +204,11 @@ describe('wallet-connect.services', () => {
 				value: { data: { parsed: { info: { mint: mockSplAddress } } } }
 			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(getAccountInfo).toHaveBeenCalledWith(
 				expect.objectContaining({ address: mockAtaAddress })
@@ -218,7 +238,11 @@ describe('wallet-connect.services', () => {
 				value: { data: ['', 'base64'] }
 			} as unknown as Awaited<ReturnType<typeof getAccountInfo>>);
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(getAccountInfo).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ address: mockSolAddress })
@@ -238,9 +262,117 @@ describe('wallet-connect.services', () => {
 
 			vi.mocked(getAccountInfo).mockRejectedValue(new Error('RPC down'));
 
-			const result = await decode({ base64EncodedTransactionMessage, networkId });
+			const result = await decode({
+				base64EncodedTransactionMessage,
+				networkId,
+				address: mockSolAddress
+			});
 
 			expect(result).toEqual({ amount: 7n, source: mockAtaAddress, destination: mockSolAddress2 });
+		});
+
+		describe('simulated preview', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			const mockPreview: SolSimulationPreview = {
+				solDelta: -5_000n,
+				tokenDeltas: [],
+				controlChanges: []
+			};
+
+			it('should attach the preview to the decoded review', async () => {
+				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(mockPreview);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(simulateSolTransactionPreview).toHaveBeenCalledExactlyOnceWith({
+					base64EncodedTransactionMessage,
+					transactionMessage: mockParsedTransaction,
+					address: mockSolAddress,
+					network: 'mainnet'
+				});
+				expect(result).toEqual(expect.objectContaining({ preview: mockPreview }));
+			});
+
+			it('should decode without a preview when the simulation yields none', async () => {
+				vi.mocked(simulateSolTransactionPreview).mockResolvedValue(undefined);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(mockMappedTransaction);
+				expect(result).not.toHaveProperty('preview');
+			});
+		});
+
+		describe('prioritization fee estimate', () => {
+			const base64EncodedTransactionMessage = 'mockBase64Transaction';
+			const networkId = SOLANA_MAINNET_NETWORK_ID;
+
+			beforeEach(() => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					amount: 123n,
+					source: mockSolAddress,
+					destination: mockSolAddress2,
+					prioritizationFee: 1_000_000_001n,
+					computeUnitLimit: 1_400_000n
+				});
+			});
+
+			it('should price the network estimate over the compute unit limit of this transaction', async () => {
+				// the RPC quotes micro-lamports per compute unit, so 800_000 over 1_400_000 units is
+				// 1_120_000 lamports, not 800_000
+				vi.mocked(estimatePriorityFee).mockResolvedValue(800_000n);
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(estimatePriorityFee).toHaveBeenCalledExactlyOnceWith({ network: 'mainnet' });
+				expect(result).toEqual(expect.objectContaining({ prioritizationFeeEstimate: 1_120_000n }));
+			});
+
+			it('should omit the estimate when the RPC fails, without failing the decode', async () => {
+				vi.mocked(estimatePriorityFee).mockRejectedValue(new Error('RPC down'));
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(result).toEqual(
+					expect.objectContaining({ amount: 123n, prioritizationFee: 1_000_000_001n })
+				);
+				expect(result).not.toHaveProperty('prioritizationFeeEstimate');
+			});
+
+			it('should not query the network when the transaction requests no prioritization', async () => {
+				vi.spyOn(solTransactionsUtils, 'mapSolTransactionMessage').mockReturnValue({
+					amount: 123n,
+					source: mockSolAddress,
+					destination: mockSolAddress2
+				});
+
+				const result = await decode({
+					base64EncodedTransactionMessage,
+					networkId,
+					address: mockSolAddress
+				});
+
+				expect(estimatePriorityFee).not.toHaveBeenCalled();
+				expect(result).not.toHaveProperty('prioritizationFeeEstimate');
+			});
 		});
 	});
 
@@ -890,6 +1022,51 @@ describe('wallet-connect.services', () => {
 				duration: 2000
 			});
 			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		// A `signMessage` signature is taken over the raw bytes with the same key, derivation path and
+		// no domain separator that the transaction flow signs a compiled transaction message with, so
+		// a transaction smuggled through this method would come back as a usable transaction
+		// signature obtained from a review that shows no amount, destination or fee.
+		describe('with a serialized transaction message as the payload', () => {
+			it.each(['legacy', 0] as const)(
+				'should refuse to sign a version %s transaction message and reject the request',
+				async (version) => {
+					const request = {
+						id: 1,
+						topic: 'mock-topic',
+						params: {
+							request: {
+								method: SESSION_REQUEST_SOL_SIGN_MESSAGE,
+								params: {
+									message: getBase58Decoder().decode(
+										createMockSolCompiledTransactionMessageBytes(version)
+									),
+									pubkey: mockSolAddress
+								}
+							}
+						}
+					} as unknown as WalletKitTypes.SessionRequest;
+
+					const result = await signMessage({ ...mockParams, request });
+
+					expect(result).toEqual({ success: false });
+
+					expect(solSignUtils.signMessage).not.toHaveBeenCalled();
+					expect(mockListener.approveRequest).not.toHaveBeenCalled();
+					expect(mockParams.modalNext).not.toHaveBeenCalled();
+
+					expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+						topic: request.topic,
+						id: request.id,
+						error: UNEXPECTED_ERROR
+					});
+
+					expect(spyToastsError).toHaveBeenCalledWith({
+						msg: { text: en.wallet_connect.error.sol_transaction_as_message }
+					});
+				}
+			);
 		});
 
 		it('should reject over WalletConnect and surface the error when signing fails', async () => {
