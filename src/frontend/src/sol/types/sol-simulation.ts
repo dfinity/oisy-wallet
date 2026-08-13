@@ -1,4 +1,5 @@
 import type { SolAddress } from '$sol/types/address';
+import type { SolTransferParties } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
 
 /**
@@ -35,4 +36,16 @@ export interface SolSimulationPreview {
 	solDelta?: bigint;
 	tokenDeltas: SolSimulationTokenDelta[];
 	controlChanges: SolSimulationControlChange[];
+}
+
+/**
+ * Everything one simulated run yields for the review.
+ *
+ * The preview is absent when the run changes nothing the user owns; the parties are always
+ * present, because a run that produced no transfer at all is itself the answer, and here it is a
+ * complete one rather than a gap.
+ */
+export interface SolSimulationResult {
+	preview?: SolSimulationPreview;
+	parties: SolTransferParties;
 }

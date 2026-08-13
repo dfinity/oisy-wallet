@@ -3,7 +3,11 @@ import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
-import type { SolanaGetAccountInfoReturn, SolanaParsedAccountsInfo } from '$sol/types/sol-rpc';
+import type {
+	SolanaGetAccountInfoReturn,
+	SolanaParsedAccountsInfo,
+	SolanaSimulatedInnerInstructions
+} from '$sol/types/sol-rpc';
 import type {
 	SolRpcTransaction,
 	SolRpcTransactionRaw,
@@ -265,6 +269,10 @@ export const getMultipleAccountsInfo = async ({
  * WalletConnect message simulate at all. `jsonParsed` makes the RPC apply its own SPL token
  * account parser, so the caller gets mint, owner, delegate, close authority and amount as JSON
  * instead of a raw layout to decode.
+ *
+ * `innerInstructions` returns the cross-program invocations the run would make, parsed by the same
+ * server-side parser. A routed swap performs its transfers there and nowhere else, so without them
+ * a decode of the message alone sees one opaque call and no value moving at all.
  */
 export const simulateTransactionAccounts = async ({
 	base64EncodedTransactionMessage,
@@ -274,13 +282,18 @@ export const simulateTransactionAccounts = async ({
 	base64EncodedTransactionMessage: string;
 	addresses: SolAddress[];
 	network: SolanaNetworkType;
-}): Promise<{ err: TransactionError | null; accounts: SolanaParsedAccountsInfo }> => {
+}): Promise<{
+	err: TransactionError | null;
+	accounts: SolanaParsedAccountsInfo;
+	innerInstructions: SolanaSimulatedInnerInstructions;
+}> => {
 	const { simulateTransaction } = solanaHttpRpc(network);
 
 	const {
-		value: { err, accounts }
+		value: { err, accounts, innerInstructions }
 	} = await simulateTransaction(base64EncodedTransactionMessage as Base64EncodedWireTransaction, {
 		encoding: 'base64',
+		innerInstructions: true,
 		replaceRecentBlockhash: true,
 		accounts: {
 			encoding: 'jsonParsed',
@@ -288,7 +301,7 @@ export const simulateTransactionAccounts = async ({
 		}
 	}).send();
 
-	return { err, accounts };
+	return { err, accounts, innerInstructions };
 };
 
 const addressToAccountInfo = new Map<
