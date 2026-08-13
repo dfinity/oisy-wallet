@@ -102,7 +102,7 @@ export const fetchVeloraSwapAmount = async ({
 
 		if ('delta' in data) {
 			const destinationTokenToDecimals = formatToken({
-				value: BigInt(data.delta.destAmount),
+				value: BigInt(data.delta.route.destination.output.amount),
 				unitName: destinationToken.decimals
 			});
 

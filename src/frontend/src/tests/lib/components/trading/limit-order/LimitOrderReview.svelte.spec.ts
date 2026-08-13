@@ -1,10 +1,31 @@
+import type { IcToken } from '$icp/types/ic-token';
 import LimitOrderReview from '$lib/components/trading/limit-order/LimitOrderReview.svelte';
 import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 import type { LimitOrderPairView, LimitOrderSide } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
+// The hero resolves each leg to its wallet token to render the logo and fiat
+// line, so the review needs the symbol → token map the wizard would have loaded.
+const { mockIcTokenBySymbol } = vi.hoisted(() => {
+	// eslint-disable-next-line @typescript-eslint/no-require-imports
+	const { writable } = require('svelte/store');
+	return { mockIcTokenBySymbol: writable({}) };
+});
+
+vi.mock('$lib/derived/oisy-trade.derived', () => ({
+	oisyTradeIcTokenBySymbol: mockIcTokenBySymbol
+}));
+
 describe('LimitOrderReview', () => {
+	beforeEach(() => {
+		mockIcTokenBySymbol.set({
+			ICP: { ...mockValidIcToken, symbol: 'ICP', decimals: 8 } as IcToken,
+			ckUSDC: { ...mockValidIcToken, symbol: 'ckUSDC', decimals: 6 } as IcToken
+		});
+	});
+
 	const pairView: LimitOrderPairView = {
 		baseSymbol: 'ICP',
 		quoteSymbol: 'ckUSDC',

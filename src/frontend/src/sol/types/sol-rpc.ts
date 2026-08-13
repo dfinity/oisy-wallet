@@ -29,3 +29,10 @@ export type SolanaGetAccountInfoReturn = ReturnTypeWithArgs<
 	GetAccountInfoApi['getAccountInfo'],
 	[Address, { encoding: 'jsonParsed' }]
 >;
+
+// A single account as the RPC returns it under `jsonParsed`, `null` when the account does not
+// exist. `getMultipleAccounts` and `simulateTransaction`'s `accounts` both answer in this shape,
+// which is what lets the simulated preview diff a "before" list against an "after" one.
+export type SolanaParsedAccountInfo = SolanaGetAccountInfoReturn['value'];
+
+export type SolanaParsedAccountsInfo = readonly SolanaParsedAccountInfo[];
