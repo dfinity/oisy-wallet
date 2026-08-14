@@ -1,6 +1,8 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
@@ -16,6 +18,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
+import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { createMockBackendUserTransaction } from '$tests/mocks/user-transactions.mock';
@@ -39,8 +42,8 @@ let mockGetUserTransactions: MockInstance;
 let mockSaveUserTransactions: MockInstance;
 
 const mockBackendTokenId = { EvmNative: 1n };
-const mockNetworkId = ETHEREUM_NETWORK_ID;
 const mockTokenId = ETHEREUM_TOKEN_ID;
+const mockNativeToken = ETHEREUM_TOKEN;
 
 const makeTx = ({
 	hash,
@@ -80,7 +83,9 @@ const MOCK_LATEST_BLOCK_NUMBER = 1000;
 describe('eth-user-transactions.services', () => {
 	let etherscanProvidersSpy: MockInstance;
 	let infuraProvidersSpy: MockInstance;
+	let alchemyProvidersSpy: MockInstance;
 	let mockTransactionsProvider: MockInstance;
+	let mockErc20TransactionsProvider: MockInstance;
 	let mockGetBlockNumber: MockInstance;
 
 	beforeEach(async () => {
@@ -88,15 +93,26 @@ describe('eth-user-transactions.services', () => {
 
 		ethTransactionsStore.reinitialize();
 
+		setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: undefined });
+
 		const backendApi = await import('$lib/api/backend.api');
 		mockGetUserTransactions = vi.mocked(backendApi.getUserTransactions);
 		mockSaveUserTransactions = vi.mocked(backendApi.saveUserTransactions);
 
 		mockTransactionsProvider = vi.fn().mockResolvedValue([]);
+		mockErc20TransactionsProvider = vi.fn().mockResolvedValue([]);
 		etherscanProvidersSpy = vi.spyOn(etherscanProvidersModule, 'etherscanProviders');
 		etherscanProvidersSpy.mockReturnValue({
-			transactions: mockTransactionsProvider
+			transactions: mockTransactionsProvider,
+			erc20Transactions: mockErc20TransactionsProvider
 		} as unknown as EtherscanProvider);
+
+		// Only reached for zero-value transfers, which the fixtures avoid; stubbed so the spam filter
+		// does not build a real provider.
+		alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
+		alchemyProvidersSpy.mockReturnValue({
+			getTransaction: vi.fn().mockResolvedValue(undefined)
+		} as unknown as AlchemyProvider);
 
 		mockGetBlockNumber = vi.fn().mockResolvedValue(MOCK_LATEST_BLOCK_NUMBER);
 		infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraProviders');
@@ -197,10 +213,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: undefined
 			});
 
@@ -210,6 +223,8 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 2: Paginating through backend — more pages available
 		it('paginates through backend when cursor is defined', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 200n });
+
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
 					overrides: {
@@ -236,10 +251,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: 200n,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 300
 			});
 
@@ -254,6 +266,8 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 2b: Last backend page — nextStart is None but oldestBlockIndex exists
 		it('signals hasMore when backend exhausted but Etherscan may have older', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 1n });
+
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
 					overrides: {
@@ -274,10 +288,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: 1n,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 200
 			});
 
@@ -297,10 +308,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100,
 				beAtCapacity: false
 			});
@@ -324,10 +332,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 50
 			});
 
@@ -347,10 +352,7 @@ describe('eth-user-transactions.services', () => {
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100,
 				beAtCapacity: true
 			});
@@ -367,10 +369,7 @@ describe('eth-user-transactions.services', () => {
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100,
 				beAtCapacity: false
 			});
@@ -385,10 +384,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 0
 			});
 
@@ -401,10 +397,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: undefined,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100
 			});
 
@@ -419,10 +412,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100
 			});
 
@@ -431,6 +421,8 @@ describe('eth-user-transactions.services', () => {
 
 		// Case 9: Backend returns empty on cursor — falls through to Etherscan
 		it('falls to Etherscan when backend returns empty for a cursor', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 5n });
+
 			mockGetUserTransactions.mockResolvedValue(makeBackendResponse());
 
 			const olderTxs = [makeTx({ hash: '0xold1', blockNumber: 80 })];
@@ -439,10 +431,7 @@ describe('eth-user-transactions.services', () => {
 			const { hasMore } = await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: 5n,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 100
 			});
 
@@ -472,10 +461,7 @@ describe('eth-user-transactions.services', () => {
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: undefined,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 110,
 				beAtCapacity: true
 			});
@@ -484,6 +470,113 @@ describe('eth-user-transactions.services', () => {
 
 			// The store's append method deduplicates by hash
 			expect(store?.[mockTokenId]).toHaveLength(2);
+		});
+	});
+
+	describe('paging a token rather than the chain', () => {
+		const mockErc20Token = { ...USDC_TOKEN, enabled: true };
+
+		const erc20BackendTokenId = {
+			Erc20: [USDC_TOKEN.address.toLowerCase(), USDC_TOKEN.network.chainId]
+		};
+
+		beforeEach(() => {
+			setEthBackendPaginationCursor({ tokenId: mockErc20Token.id, nextStart: undefined });
+
+			mockErc20TransactionsProvider.mockResolvedValue([]);
+		});
+
+		it('should ask the token transfer endpoint, not the chain history', async () => {
+			mockErc20TransactionsProvider.mockResolvedValue([makeTx({ hash: '0xold', blockNumber: 90 })]);
+
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				token: mockErc20Token,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockErc20TransactionsProvider).toHaveBeenCalledWith(
+				expect.objectContaining({ contract: mockErc20Token, address: mockEthAddress, endBlock: 99 })
+			);
+
+			// `txlist` would answer with the chain's own transactions, not this token's transfers.
+			expect(mockTransactionsProvider).not.toHaveBeenCalled();
+		});
+
+		it('should append what it fetched to the token slot', async () => {
+			mockErc20TransactionsProvider.mockResolvedValue([makeTx({ hash: '0xold', blockNumber: 90 })]);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				token: mockErc20Token,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(get(ethTransactionsStore)?.[mockErc20Token.id]).toHaveLength(1);
+		});
+
+		it('should store what it fetched under the token contract key', async () => {
+			mockErc20TransactionsProvider.mockResolvedValue([makeTx({ hash: '0xold', blockNumber: 90 })]);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				token: mockErc20Token,
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(mockSaveUserTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ tokenId: erc20BackendTokenId })
+			);
+		});
+
+		it('should read the stored page from the token contract key', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockErc20Token.id, nextStart: 200n });
+
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [
+							createMockBackendUserTransaction({
+								hash: '0xstored',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
+						],
+						nextStart: 50n
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				token: mockErc20Token,
+				oldestLoadedBlockNumber: 300
+			});
+
+			expect(mockGetUserTransactions).toHaveBeenCalledWith(
+				expect.objectContaining({ tokenId: erc20BackendTokenId })
+			);
+
+			expect(mockErc20TransactionsProvider).not.toHaveBeenCalled();
+		});
+
+		it('should page nothing for a token whose history it cannot store', async () => {
+			const { hasMore } = await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				token: MOCK_ERC721_TOKENS[0],
+				oldestLoadedBlockNumber: 100
+			});
+
+			expect(hasMore).toBeFalsy();
+			expect(mockGetUserTransactions).not.toHaveBeenCalled();
+			expect(mockErc20TransactionsProvider).not.toHaveBeenCalled();
+			expect(mockTransactionsProvider).not.toHaveBeenCalled();
 		});
 	});
 
@@ -503,6 +596,8 @@ describe('eth-user-transactions.services', () => {
 		});
 
 		it('should advance the cursor to the next page after loading one', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 200n });
+
 			mockGetUserTransactions.mockResolvedValue(
 				makeBackendResponse({
 					overrides: {
@@ -524,10 +619,7 @@ describe('eth-user-transactions.services', () => {
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: 200n,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 300
 			});
 
@@ -542,10 +634,7 @@ describe('eth-user-transactions.services', () => {
 			await loadNextEthUserTransactions({
 				identity: mockIdentity,
 				address: mockEthAddress,
-				transactionTokenId: mockBackendTokenId,
-				tokenId: mockTokenId,
-				networkId: mockNetworkId,
-				cursor: 200n,
+				token: mockNativeToken,
 				oldestLoadedBlockNumber: 300
 			});
 
