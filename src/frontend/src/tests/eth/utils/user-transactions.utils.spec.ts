@@ -1,12 +1,19 @@
 import type { UserTransaction } from '$declarations/backend/backend.did';
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import {
 	ETH_FINALITY_BLOCKS,
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
-	mapUserTransactionToTransaction
+	mapUserTransactionToTransaction,
+	toBackendTokenId
 } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Transaction } from '$lib/types/transaction';
+import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
+import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
 	extractMockEvmTransactionData,
@@ -315,6 +322,37 @@ describe('user-transactions.utils', () => {
 					currentBlockNumber: 500
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('toBackendTokenId', () => {
+		it('should key a chain native coin by its chain id', () => {
+			expect(toBackendTokenId(BASE_ETH_TOKEN)).toStrictEqual({ EvmNative: BASE_NETWORK.chainId });
+		});
+
+		it('should key an ERC20 token by contract and chain id', () => {
+			expect(toBackendTokenId(USDC_TOKEN)).toStrictEqual({
+				Erc20: [USDC_TOKEN.address.toLowerCase(), USDC_TOKEN.network.chainId]
+			});
+		});
+
+		it('should lowercase the contract, so one contract is never two histories', () => {
+			const checksummed = {
+				...USDC_TOKEN,
+				address: `0x${USDC_TOKEN.address.slice(2).toUpperCase()}`
+			};
+
+			expect(toBackendTokenId(checksummed)).toStrictEqual(toBackendTokenId(USDC_TOKEN));
+		});
+
+		it('should return undefined for a token off an EVM chain', () => {
+			expect(toBackendTokenId(ICP_TOKEN)).toBeUndefined();
+		});
+
+		it('should return undefined for non-fungible tokens', () => {
+			expect(toBackendTokenId(MOCK_ERC721_TOKENS[0])).toBeUndefined();
+
+			expect(toBackendTokenId(MOCK_ERC1155_TOKENS[0])).toBeUndefined();
 		});
 	});
 });

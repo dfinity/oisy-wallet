@@ -1,7 +1,44 @@
-import type { UserTransaction } from '$declarations/backend/backend.did';
+import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
+import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { ZERO } from '$lib/constants/app.constants';
+import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import { isNetworkEthereum } from '$lib/utils/network.utils';
 import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+
+/**
+ * The backend key under which a token's stored transaction history lives.
+ *
+ * The contract address is lowercased: the backend holds it as a plain string and compares it
+ * byte-for-byte as part of the storage key, while our token list carries checksummed addresses and
+ * Etherscan returns lowercase ones. Two casings of one contract would be two separate histories.
+ *
+ * `undefined` for tokens whose history this path cannot store - non-fungible transfers, and anything
+ * off an EVM chain.
+ */
+export const toBackendTokenId = (token: Token): BackendTokenId | undefined => {
+	const { network } = token;
+
+	if (!isNetworkEthereum(network)) {
+		return;
+	}
+
+	const { chainId } = network;
+
+	if (isTokenEthereumNative(token)) {
+		return { EvmNative: chainId };
+	}
+
+	if (isTokenErc4626(token)) {
+		return { Erc4626: [token.address.toLowerCase(), chainId] };
+	}
+
+	if (isTokenErc20(token)) {
+		return { Erc20: [token.address.toLowerCase(), chainId] };
+	}
+};
 
 export const mapTransactionToUserTransaction = (transaction: Transaction): UserTransaction => {
 	if (isNullish(transaction.hash)) {
