@@ -124,11 +124,21 @@ export const groupEthTransactionsByNetworkAndHash = <T>({
 
 		const itemNetworkId = networkId(item);
 
-		const networkGroup = groups.get(itemNetworkId) ?? new Map<string, T[]>();
+		const networkGroup = groups.get(itemNetworkId);
 
-		networkGroup.set(itemHash, [...(networkGroup.get(itemHash) ?? []), item]);
+		if (isNullish(networkGroup)) {
+			groups.set(itemNetworkId, new Map<string, T[]>([[itemHash, [item]]]));
 
-		groups.set(itemNetworkId, networkGroup);
+			return;
+		}
+
+		const groupItems = networkGroup.get(itemHash);
+
+		if (nonNullish(groupItems)) {
+			groupItems.push(item);
+		} else {
+			networkGroup.set(itemHash, [item]);
+		}
 	});
 
 	return groups;
