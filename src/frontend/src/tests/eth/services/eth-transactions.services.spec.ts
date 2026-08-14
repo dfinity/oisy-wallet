@@ -12,7 +12,8 @@ import {
 } from '$eth/services/eth-transactions.services';
 import {
 	loadEthUserTransactions,
-	saveEthFinalizedTransactions
+	saveEthFinalizedTransactions,
+	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
@@ -45,7 +46,8 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 vi.mock('$eth/services/eth-user-transactions.services', () => ({
 	loadEthUserTransactions: vi.fn(),
-	saveEthFinalizedTransactions: vi.fn()
+	saveEthFinalizedTransactions: vi.fn(),
+	setEthBackendPaginationCursor: vi.fn()
 }));
 
 vi.mock('$lib/utils/console.utils', () => ({
@@ -527,6 +529,56 @@ describe('eth-transactions.services', () => {
 						certified: false
 					}))
 				);
+			});
+
+			it('should keep the backend cursor of the page below the one it loaded', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: createMockEthTransactions(2),
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: 60n,
+					totalStored: 30n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(150);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				expect(setEthBackendPaginationCursor).toHaveBeenCalledWith({
+					tokenId: mockTokenId,
+					nextStart: 60n
+				});
+			});
+
+			it('should leave the backend cursor alone on a reload', async () => {
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: createMockEthTransactions(2),
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: 60n,
+					totalStored: 30n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(150);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard,
+					updateOnly: true
+				});
+
+				expect(setEthBackendPaginationCursor).not.toHaveBeenCalled();
 			});
 
 			it('should use update method when updateOnly is true', async () => {
