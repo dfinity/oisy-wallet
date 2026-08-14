@@ -39,7 +39,7 @@ vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
 	const mockToken = { ...USDC_TOKEN, enabled: true };
 
 	return {
-		...importOriginal,
+		...(await importOriginal()),
 		ercFungibleTokens: readable([mockToken]),
 		enabledErcFungibleTokens: readable([mockToken])
 	};

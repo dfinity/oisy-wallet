@@ -6,6 +6,7 @@
 	import { ercTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenErc } from '$eth/utils/erc.utils';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
@@ -165,7 +166,28 @@
 	// still wins when it names the asset, as for a single transfer split into several.
 	let showAsFee = $derived(isCombinedFee && isNullish(transferAssetText));
 
+	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
+	// send would present the contract as the recipient. The recipient comes from the loaded transfer,
+	// or from the calldata.
+	//
+	// Deliberately not gated on `transferToken`: recognising the contract is what lets us name the
+	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
+	// put the contract back in the counterparty of every transfer of a token we do not know.
 	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
+
+	// The fee is known from the receipt whether or not the token is: naming the asset needs the
+	// contract, accounting for what left the native balance does not. Either source establishes the
+	// entry as the fee side of a transfer - the loaded one also covers a router send, which no
+	// calldata decode can. A transfer that also moved native value is a real native send.
+	let isTransferFeeEntry = $derived((nonNullish(ercTransfer) || transferDecoded) && value === ZERO);
+
+	// The contract of the transferred token, so it can be verified: a symbol is not unique. On the
+	// native entry it is the transaction `to`; opened from the token itself it is that token, since
+	// there `to` is the recipient.
+	let contractAddress = $derived(
+		(isErc20Transfer ? to : undefined) ??
+			(nonNullish(token) && isTokenErc(token) ? token.address : undefined)
+	);
 
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
 
@@ -183,6 +205,10 @@
 
 	let recipientExplorerUrl: string | undefined = $derived(
 		notEmptyString(recipient) ? `${explorerBaseUrl}/address/${recipient}` : undefined
+	);
+
+	let contractExplorerUrl: string | undefined = $derived(
+		notEmptyString(contractAddress) ? `${explorerBaseUrl}/address/${contractAddress}` : undefined
 	);
 
 	let approveSpenderExplorerUrl = $derived(
@@ -250,7 +276,9 @@
 			: undefined
 	);
 
-	let displayValue = $derived((isErc20Deposit || showAsFee) && nonNullish(gasFee) ? gasFee : value);
+	let displayValue = $derived(
+		(isErc20Deposit || isTransferFeeEntry || showAsFee) && nonNullish(gasFee) ? gasFee : value
+	);
 
 	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
 </script>
@@ -301,6 +329,8 @@
 							{transferAssetText}
 						{/if}
 					</output>
+				{:else if isTransferFeeEntry}
+					<output>{$i18n.transaction.text.unknown_token}</output>
 				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
@@ -405,10 +435,24 @@
 				</ListItem>
 			{/if}
 
-			<!-- Once the transfer resolved, this row would only restate the token already named in the
-			hero, and the modal of a token transfer should read the same whether it was opened from the
-			token or from the native token that paid its fee. -->
-			{#if isNullish(transferToken) && nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+			<!-- The address alone: a name does not identify a token, verifying the contract is the point
+			of the row, and the hero already names the asset. Both together overflow the row. -->
+			{#if nonNullish(contractAddress)}
+				<ListItem>
+					<span>{$i18n.transaction.text.interacted_with}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>{shortenWithMiddleEllipsis({ text: contractAddress })}</output>
+
+						<AddressActions
+							copyAddress={contractAddress}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							externalLink={contractExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{:else if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
@@ -422,6 +466,16 @@
 							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</span>
+				</ListItem>
+			{/if}
+
+			<!-- Only for a token we cannot name: unscaled by decimals it is not an amount, and stating
+			it next to a known symbol would misread by orders of magnitude. -->
+			{#if isTransferFeeEntry && isNullish(transferToken) && nonNullish(dataValue)}
+				<ListItem>
+					<span>{$i18n.transaction.text.raw_value}</span>
+
+					<output>{dataValue}</output>
 				</ListItem>
 			{/if}
 
