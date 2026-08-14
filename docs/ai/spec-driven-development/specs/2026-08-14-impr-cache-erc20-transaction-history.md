@@ -59,13 +59,26 @@ Applying the same cache to `loadErcTransactions` without an ERC paging path woul
 
 ---
 
+## Delivery
+
+Two PRs, split at the point where behaviour starts changing:
+
+1. **Enabling, behaviour-neutral** — block-window parameters on the ERC transfer actions (change 1) and the ERC4626 mint/burn normalisation hoisted out of the load service into a reusable helper (see the ERC4626 interaction). Defaults preserve every current call, so this is provably a no-op.
+2. **The change itself** — the cache read, chunked saves, the ERC paging branch, the widened scroll gate and `PRODUCT.md` (changes 2–4).
+
+The estimate that motivated the split: ~280 lines of source across 10–12 files, and ~500 of tests at the 1.8× ratio #13728 came in at. Keeping the risky half small was the lesson of the ERC20 fee-entry stack.
+
+---
+
 ## Changes
 
 ### 1. Block bounds on the ERC Etherscan actions
 
-`erc20Transactions` (`src/frontend/src/eth/providers/etherscan.providers.ts:152`) accepts only `{ address, contract }` and hardcodes `startblock: 0`, `sort: 'desc'`. The same hardcoding is in `erc721Transactions` (:218), `erc1155Transactions` (:272) and `erc721TokenInventory` (:327).
+`erc20Transactions` (`src/frontend/src/eth/providers/etherscan.providers.ts:152`) accepts only `{ address, contract }` and hardcodes `startblock: 0`, `sort: 'desc'`. The same hardcoding is in `erc721Transactions` (:218) and `erc1155Transactions` (:272).
 
-Give the ERC actions the `startBlock` / `endBlock` / `sort` parameters `getHistory` already has (`TransactionsParams`, :33). Paging back needs `endBlock`; incremental loading forward needs `startBlock`.
+Give the three transfer actions the `startBlock` / `endBlock` / `sort` parameters `getHistory` already has (`TransactionsParams`, :33), defaulting to today's values so nothing moves until a caller asks for a window. Paging back needs `endBlock`; incremental loading forward needs `startBlock`.
+
+`erc721TokenInventory` (:327) carries the same two parameters but is left alone: it lists owned token ids rather than a block range, has no production callers, and a window means nothing to it.
 
 ### 2. An ERC branch for older history
 
