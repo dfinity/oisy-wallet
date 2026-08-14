@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Send",
 			"send_token": "Send $token",
+			"send_unknown_token": "Send unknown token",
 			"destination": "Destination",
 			"balance": "Balance",
 			"review": "Review",
@@ -1947,7 +1948,9 @@
 			"to_ata": "Recipient token account (ATA)",
 			"to_ata_copied": "Recipient token account (ATA) copied to clipboard.",
 			"block": "Block",
-			"interacted_with": "Interacted With (To)",
+			"interacted_with": "Interacted with",
+			"unknown_token": "Unknown token",
+			"raw_value": "Raw value",
 			"status": "Status",
 			"confirmations": "Confirmations",
 			"for": "For",
