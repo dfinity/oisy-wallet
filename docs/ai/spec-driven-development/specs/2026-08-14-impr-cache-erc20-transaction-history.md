@@ -1,0 +1,129 @@
+# Spec: Extend the backend transaction cache to ERC20 tokens
+
+This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
+
+## Goal
+
+Store ERC20 transfer history in the backend the way native EVM history is already stored, so an ERC20 token view loads from the user's own canister instead of re-fetching its entire history from Etherscan on every load — and can page back through history that Etherscan will no longer return.
+
+The cache must arrive **together with** an ERC20 paging path. Caching alone reproduces, on every ERC20 view, exactly the truncation that PR #13728 fixes for native coins.
+
+---
+
+## Background
+
+### Two loading paths, only one cached
+
+`loadEthereumTransactions` (`src/frontend/src/eth/services/eth-transactions.services.ts:46`) splits on the token:
+
+|             | native (ETH, BNB, POL, Base/Arbitrum ETH)                   | ERC20 / ERC4626 / ERC721 / ERC1155                |
+| ----------- | ----------------------------------------------------------- | ------------------------------------------------- |
+| entry point | `loadEthTransactions` (:157)                                | `loadErcTransactions` (:267)                      |
+| identity    | required                                                    | **never passed**                                  |
+| backend     | one page of stored history + cursor                         | **not used at all**                               |
+| Etherscan   | `txlist` + `txlistinternal`, only _after_ the stored cursor | `tokentx`, whole history from block 0, every load |
+
+The backend cache was wired into exactly two places — `eth-user-transactions.services.ts` and `sol-user-transactions.services.ts`. There is no ERC equivalent.
+
+### What that costs today
+
+Every load of an ERC20 token view re-fetches the token's complete transfer history:
+
+- One `tokentx` request per token per load, against a budget of `ETHERSCAN_MAX_CALLS_PER_SECOND` = 5 (beta/prod) or 2 elsewhere, batched across the whole token list by `eth-transactions-batch.services.ts`. A user with many ERC20 tokens pays this repeatedly.
+- Plus the spam filter's per-hash RPC calls (see below), also repeated every load.
+- History is bounded by what `tokentx` will return in one response — no `offset`/`page` is passed, so the request takes Etherscan's default page size. Beyond that ceiling, older transfers are simply unreachable, and always will be.
+
+### What the backend already supports
+
+No `backend.did` change is needed:
+
+- `TokenId` (`src/declarations/backend/backend.did.d.ts:1638`) already has `Erc20: [string, bigint]` (contract address, chain id) and `Erc721: [string, bigint]`, alongside `EvmNative: bigint`.
+- `UserTransaction` is chain-agnostic — `id`, `from`, `to`, `block_index`, `value`, `timestamp`, `network_data`.
+- `mapTransactionToUserTransaction` / `mapUserTransactionToTransaction` (`src/frontend/src/eth/utils/user-transactions.utils.ts`) round-trip through `network_data.Evm` and already carry `nft_token_id`. They are reusable unchanged.
+
+So this is entirely frontend work.
+
+### The constraint that shapes the whole change
+
+The native path's ten-row cap is not a bug in the cache — it is what a cache without paging looks like. `loadEthTransactions` asks the backend for one page (`WALLET_PAGINATION` = 10, `src/lib/constants/app.constants.ts:175`) and then asks Etherscan only for blocks _newer_ than the newest stored one, so the page it starts on is the page it ends on. That is the defect PR #13728 addresses, by wiring `loadNextEthUserTransactions` to an infinite scroll.
+
+Applying the same cache to `loadErcTransactions` without an ERC paging path would hand ERC20 views the same ten-row window they have never had. **The paging path is not a follow-up; it is part of this change.**
+
+---
+
+## Scope
+
+**In:** ERC20, and ERC4626 (which loads through the same `loadErc20Transactions` helper).
+
+**Out:** ERC721 and ERC1155 — see Pending decisions. Native paths are untouched; #13728 already covers them.
+
+---
+
+## Changes
+
+### 1. Block bounds on the ERC Etherscan actions
+
+`erc20Transactions` (`src/frontend/src/eth/providers/etherscan.providers.ts:152`) accepts only `{ address, contract }` and hardcodes `startblock: 0`, `sort: 'desc'`. The same hardcoding is in `erc721Transactions` (:218), `erc1155Transactions` (:272) and `erc721TokenInventory` (:327).
+
+Give the ERC actions the `startBlock` / `endBlock` / `sort` parameters `getHistory` already has (`TransactionsParams`, :33). Paging back needs `endBlock`; incremental loading forward needs `startBlock`.
+
+### 2. An ERC branch for older history
+
+`loadOlderFromEtherscan` (`src/frontend/src/eth/services/eth-user-transactions.services.ts:171`) calls `transactions()`, i.e. `txlist` — native only. It needs to dispatch on the token standard so an ERC20 token fetches `tokentx` bounded by `endBlock: oldestLoadedBlockNumber - 1`, and saves what it finds under `{ Erc20: [contract, chainId] }`.
+
+### 3. `loadErcTransactions` reads the cache
+
+Mirror `loadEthTransactions`: take `identity`, read one stored page, derive the incremental `startBlock` from `newestBlockIndex + 1`, fetch only newer transfers from Etherscan, combine newest-first, and save newly finalized rows in the background. `resolveEthIncrementalStartBlock` (:100) and `isTransactionFinalized` / `ETH_FINALITY_BLOCKS` = 64 apply unchanged.
+
+### 4. Widen the scroll gate
+
+`EthTransactionsScroll.svelte` (added by #13728) is gated on `isTokenEthereumNative` and builds `{ EvmNative: chainId }`. It must also accept ERC20 tokens and build `{ Erc20: [token.address, chainId] }`. The per-token cursor store from #13728 is already keyed by `TokenId`, so it needs no change.
+
+### Interactions to respect
+
+**Spam filtering must not be re-run on cached rows.** `loadErc20Transactions` (:344) passes every candidate through `filterSpamErc20Transfers`, whose `getTransactionSender` resolves the _outer_ transaction sender via one Alchemy `getTransaction(hash)` call per hash — the defence against address-poisoning `Transfer(victim, attacker, 0)` events, where `transaction.from` is the victim. Consequences:
+
+- Save **filtered** rows, so cached history carries no spam and the filter's RPC calls are paid once per transfer rather than on every load. Skipping this work on the cached page is a large part of the win.
+- Do **not** re-filter rows loaded from the backend: it would restore the per-hash RPC cost the cache is meant to remove.
+- A transfer already saved before a future filter improvement stays saved. Accepted; note it as a known limitation rather than designing a re-scan.
+
+**ERC4626 mint/burn normalisation stays a display convention.** `loadErc4626Transactions` rewrites `from`/`to` from the zero address to the vault address after loading. Re-applying it to already-normalised cached rows is idempotent (`from` is the vault, so the `isMint` test is false), so cached rows may pass through it safely. Prefer saving raw rows and normalising on read, so the cache holds chain truth rather than presentation shape.
+
+**Storage.** This multiplies stored transactions by the number of ERC20 tokens a user holds. `loadNextEthUserTransactions` already takes `beAtCapacity` to skip persisting when storage is full, but nothing in the codebase produces that flag — it is always the `false` default. See Open questions.
+
+---
+
+## Acceptance criteria
+
+1. An ERC20 token view loads its first page from the backend when stored history exists, and asks Etherscan only for transfers newer than the newest stored block.
+2. Scrolling an ERC20 token view pages back through stored history, then continues into Etherscan via `tokentx` bounded by the oldest row on screen, and persists what it fetches.
+3. An ERC20 view with more history than one page shows more than one page — the negative guarantee that this change does not import the native ten-row cap.
+4. Cached ERC20 rows are spam-filtered, and displaying them triggers no `getTransaction` RPC call per row.
+5. A fresh user with no stored history sees exactly what they see today.
+6. ERC721 and ERC1155 views behave exactly as they do today.
+7. Native views behave exactly as #13728 leaves them.
+8. `docs/ai/PRODUCT.md` gains a transaction-history description under `## Ethereum` covering both native and ERC20, since neither is described there today.
+
+---
+
+## Non-goals
+
+- No `backend.did` or stable-state change.
+- No change to how spam is detected — only to how often the detection runs.
+- No re-scan or migration of transfers saved before a future filter change.
+- No pagination for ERC721 / ERC1155 in this change.
+
+---
+
+## Open questions (facts to confirm)
+
+1. **What is `tokentx`'s actual default response ceiling** without `offset`/`page`? The 10,000-record figure is the commonly cited Etherscan default but is not verified in our code or in `docs/ai/integrations/etherscan.md`. It sets how much history is reachable on a first load, and therefore how much a user can ever cache.
+2. **Does the backend cap stored transactions per token, or per user?** This decides whether many ERC20 tokens can exhaust a user's storage and whether `beAtCapacity` needs a real producer before this ships.
+3. **Is `{ Erc20: [address, chainId] }` keyed on a checksummed or lowercased address on the backend?** A mismatch would silently split one token's history across two keys.
+4. **Does `saveUserTransactions` deduplicate by `id`?** The error type includes `DuplicateTransaction: { id: string }`, which suggests it rejects rather than ignores; the ERC path will re-offer rows it has already saved.
+
+## Pending decisions
+
+1. **ERC721 / ERC1155 in or out.** The mappers already carry `nft_token_id` and `TokenId` has an `Erc721` variant, so extending is cheap — but NFT views load differently and are out of the reported problem. Recommend: out, as a fast-follow.
+2. **Whether to raise `WALLET_PAGINATION` (10) for token views.** Ten rows is a small first page for a history view; it is shared across chains, so changing it affects Solana too.
+3. **Whether ERC4626 caches raw or normalised rows.** Raw is cleaner (above); normalised avoids a transform on every read. Recommend raw.
