@@ -171,6 +171,12 @@
 				});
 			}
 
+			// The transfer is known to be one, but the token is not in the wallet: without decimals and
+			// a symbol its amount cannot be stated, so the entry says what it is rather than nothing.
+			if (isTransferFeeEntry) {
+				return $i18n.send.text.send_unknown_token;
+			}
+
 			return $i18n.send.text.send;
 		}
 

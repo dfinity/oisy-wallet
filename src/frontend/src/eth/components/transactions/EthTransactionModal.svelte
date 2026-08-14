@@ -5,6 +5,7 @@
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { isTokenErc } from '$eth/utils/erc.utils';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
 	import {
@@ -137,6 +138,25 @@
 
 	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
 
+	// The contract of the transferred token, so it can be verified: a symbol is not unique. On the
+	// native entry it is the transaction `to`; opened from the token itself it is that token, since
+	// there `to` is the recipient.
+	let contractAddress = $derived(
+		(isErc20Transfer ? to : undefined) ??
+			(nonNullish(token) && isTokenErc(token) ? token.address : undefined)
+	);
+
+	let contractName: OptionString = $derived(
+		nonNullish(contractAddress) && nonNullish(token)
+			? mapAddressToName({
+					address: contractAddress,
+					networkId: token.network.id,
+					erc20Tokens: $erc20Tokens,
+					builtInContacts: $ckMinterBuiltInContacts
+				})
+			: undefined
+	);
+
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
@@ -153,6 +173,10 @@
 
 	let recipientExplorerUrl: string | undefined = $derived(
 		notEmptyString(recipient) ? `${explorerBaseUrl}/address/${recipient}` : undefined
+	);
+
+	let contractExplorerUrl: string | undefined = $derived(
+		notEmptyString(contractAddress) ? `${explorerBaseUrl}/address/${contractAddress}` : undefined
 	);
 
 	let approveSpenderExplorerUrl = $derived(
@@ -276,6 +300,8 @@
 							{displayToken.symbol}
 						{/if}
 					</output>
+				{:else if isTransferFeeEntry}
+					<output>{$i18n.transaction.text.unknown_token}</output>
 				{:else if nonNullish(token) && !isTokenErc721(token) && nonNullish(value)}
 					<output class:text-success-primary={type === 'receive'}>
 						{formatToken({
@@ -380,10 +406,27 @@
 				</ListItem>
 			{/if}
 
-			<!-- Once the transfer resolved, this row would only restate the token already named in the
-			hero, and the modal of a token transfer should read the same whether it was opened from the
-			token or from the native token that paid its fee. -->
-			{#if isNullish(transferToken) && nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
+			<!-- The contract is shown with its address rather than its name alone: a symbol does not
+			identify a token, and verifying the contract is the point of the row. -->
+			{#if nonNullish(contractAddress)}
+				<ListItem>
+					<span>{$i18n.transaction.text.interacted_with}</span>
+
+					<span class="flex max-w-[50%] flex-row break-all">
+						<output>
+							{#if nonNullish(contractName)}{contractName}{/if}
+							{shortenWithMiddleEllipsis({ text: contractAddress })}
+						</output>
+
+						<AddressActions
+							copyAddress={contractAddress}
+							copyAddressText={$i18n.transaction.text.to_copied}
+							externalLink={contractExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+						/>
+					</span>
+				</ListItem>
+			{:else if nonNullish(to) && nonNullish(toDisplay) && to !== toDisplay}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
@@ -397,6 +440,16 @@
 							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</span>
+				</ListItem>
+			{/if}
+
+			<!-- Only for a token we cannot name: unscaled by decimals it is not an amount, and stating
+			it next to a known symbol would misread by orders of magnitude. -->
+			{#if isTransferFeeEntry && isNullish(transferToken) && nonNullish(dataValue)}
+				<ListItem>
+					<span>{$i18n.transaction.text.raw_value}</span>
+
+					<output>{dataValue}</output>
 				</ListItem>
 			{/if}
 

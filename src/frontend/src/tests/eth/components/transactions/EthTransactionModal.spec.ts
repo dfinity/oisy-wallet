@@ -367,15 +367,20 @@ describe('EthTransactionModal', () => {
 				vi.mocked(mapAddressToName).mockReturnValue(undefined);
 			});
 
-			it('should not display the interacted with row for a resolved transfer', () => {
-				const { queryByText } = render(EthTransactionModal, {
+			it('should display the contract with its name and address for a resolved transfer', () => {
+				const { getByText } = render(EthTransactionModal, {
 					transaction: mockTransferTransactionUi,
 					token: ETHEREUM_TOKEN
 				});
 
-				expect(queryByText(get(i18n).transaction.text.interacted_with)).not.toBeInTheDocument();
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
 
-				expect(queryByText(USDC_TOKEN.name)).not.toBeInTheDocument();
+				// A symbol does not identify a token, so the address is shown alongside the name.
+				expect(getByText(USDC_TOKEN.name, { exact: false })).toBeInTheDocument();
+
+				expect(
+					getByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }), { exact: false })
+				).toBeInTheDocument();
 			});
 
 			it('should display the interacted with row for a contract call that is not a transfer', () => {
@@ -399,11 +404,13 @@ describe('EthTransactionModal', () => {
 			});
 		});
 
-		it('should still show the fee in the hero when the token is not in the token list', () => {
-			const { getAllByText } = render(EthTransactionModal, {
+		it('should name the token unknown rather than show the fee as the amount sent', () => {
+			const { getByText, getAllByText } = render(EthTransactionModal, {
 				transaction: { ...mockTransferTransactionUi, to: mockEthAddress2 },
 				token: ETHEREUM_TOKEN
 			});
+
+			expect(getByText(get(i18n).transaction.text.unknown_token)).toBeInTheDocument();
 
 			const formattedFee = `${formatToken({
 				value: gasUsed * gasPrice,
@@ -411,8 +418,23 @@ describe('EthTransactionModal', () => {
 				displayDecimals: ETHEREUM_TOKEN.decimals
 			})} ${ETHEREUM_TOKEN.symbol}`;
 
-			// The hero, plus the labelled fee row.
-			expect(getAllByText(formattedFee)).toHaveLength(2);
+			// Only in its labelled row, so it cannot read as the amount that was sent.
+			expect(getAllByText(formattedFee)).toHaveLength(1);
+		});
+
+		it('should show the undecoded value and the contract for a token it cannot name', () => {
+			const { getByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, to: mockEthAddress2 },
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.text.raw_value)).toBeInTheDocument();
+
+			expect(getByText('10000000')).toBeInTheDocument();
+
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: mockEthAddress2 }), { exact: false })
+			).toBeInTheDocument();
 		});
 
 		it('should fall back to the contract call rendering when the calldata does not decode', () => {

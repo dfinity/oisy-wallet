@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Envoyer",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Destination",
 			"balance": "Solde",
 			"review": "Vérifier",
@@ -1948,6 +1949,8 @@
 			"to_ata_copied": "Compte de token du destinataire (ATA) copié dans le presse-papiers.",
 			"block": "Bloc",
 			"interacted_with": "Interagi avec (À)",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Statut",
 			"confirmations": "Confirmations",
 			"for": "Pour",

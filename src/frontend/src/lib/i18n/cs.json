@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Odeslat",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Cíl",
 			"balance": "Zůstatek",
 			"review": "Zkontrolovat",
@@ -1948,6 +1949,8 @@
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
 			"interacted_with": "Interakce s (do)",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Stav",
 			"confirmations": "Potvrzení",
 			"for": "Pro",

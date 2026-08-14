@@ -400,7 +400,7 @@ describe('EthTransaction', () => {
 			).not.toBeInTheDocument();
 		});
 
-		it('should still show the fee when the transferred token is not in the token list', () => {
+		it('should name it an unknown token and still show the fee when it is not in the token list', () => {
 			// A deleted or never-imported token: the asset cannot be named, the fee is known regardless.
 			const { container, getByTestId } = render(EthTransaction, {
 				props: {
@@ -410,7 +410,7 @@ describe('EthTransaction', () => {
 			});
 
 			expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
-				get(i18n).send.text.send
+				get(i18n).send.text.send_unknown_token
 			);
 
 			const amountElement = container.querySelector('div.leading-5>span.justify-end');
