@@ -26,6 +26,7 @@
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
@@ -129,6 +130,11 @@
 	// put the contract back in the counterparty of every transfer of a token we do not know.
 	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
 
+	// The fee is known from the receipt whether or not the token is: naming the asset needs the
+	// contract, accounting for what left the native balance does not. A transfer that also moved
+	// native value is a real native send, so only a zero-value entry is the fee side of one.
+	let isTransferFeeEntry = $derived(transferDecoded && value === ZERO);
+
 	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
 
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
@@ -214,7 +220,9 @@
 			: undefined
 	);
 
-	let displayValue = $derived(isErc20Deposit && nonNullish(gasFee) ? gasFee : value);
+	let displayValue = $derived(
+		(isErc20Deposit || isTransferFeeEntry) && nonNullish(gasFee) ? gasFee : value
+	);
 
 	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
 </script>

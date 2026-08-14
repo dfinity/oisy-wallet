@@ -12,6 +12,7 @@
 		isErc20TransactionTransfer
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
@@ -110,6 +111,11 @@
 	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
 	// put the contract back in the counterparty of every transfer of a token we do not know.
 	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
+
+	// The fee is known from the receipt whether or not the token is: naming the asset needs the
+	// contract, accounting for what left the native balance does not. A transfer that also moved
+	// native value is a real native send, so only a zero-value entry is the fee side of one.
+	let isTransferFeeEntry = $derived(transferDecoded && value === ZERO);
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -219,7 +225,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit || nonNullish(transferToken)
+		isApprove || isErc20Deposit || isTransferFeeEntry
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined

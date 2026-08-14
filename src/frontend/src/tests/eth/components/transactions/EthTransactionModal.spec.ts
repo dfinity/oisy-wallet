@@ -399,6 +399,22 @@ describe('EthTransactionModal', () => {
 			});
 		});
 
+		it('should still show the fee in the hero when the token is not in the token list', () => {
+			const { getAllByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, to: mockEthAddress2 },
+				token: ETHEREUM_TOKEN
+			});
+
+			const formattedFee = `${formatToken({
+				value: gasUsed * gasPrice,
+				unitName: ETHEREUM_TOKEN.decimals,
+				displayDecimals: ETHEREUM_TOKEN.decimals
+			})} ${ETHEREUM_TOKEN.symbol}`;
+
+			// The hero, plus the labelled fee row.
+			expect(getAllByText(formattedFee)).toHaveLength(2);
+		});
+
 		it('should fall back to the contract call rendering when the calldata does not decode', () => {
 			const { getByText, queryByText } = render(EthTransactionModal, {
 				transaction: { ...mockTransferTransactionUi, data: `${ERC20_TRANSFER_HASH}00` },
