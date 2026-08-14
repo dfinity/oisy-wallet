@@ -1,4 +1,4 @@
-import { last, primitiveArrayEqual } from '$lib/utils/array.utils';
+import { chunk, last, primitiveArrayEqual } from '$lib/utils/array.utils';
 
 describe('array.utils', () => {
 	describe('last', () => {
@@ -70,6 +70,26 @@ describe('array.utils', () => {
 
 		it('should return false when second array is empty and first is not', () => {
 			expect(primitiveArrayEqual([1], [])).toBeFalsy();
+		});
+	});
+
+	describe('chunk', () => {
+		it('should split into groups of the given size, in order', () => {
+			expect(chunk({ elements: [1, 2, 3, 4, 5], size: 2 })).toStrictEqual([[1, 2], [3, 4], [5]]);
+		});
+
+		it('should return one group when the size covers everything', () => {
+			expect(chunk({ elements: [1, 2], size: 5 })).toStrictEqual([[1, 2]]);
+		});
+
+		it('should return nothing for an empty array', () => {
+			expect(chunk({ elements: [], size: 3 })).toStrictEqual([]);
+		});
+
+		it('should not lose the input for a size below one', () => {
+			expect(chunk({ elements: [1, 2], size: 0 })).toStrictEqual([[1, 2]]);
+
+			expect(chunk({ elements: [], size: 0 })).toStrictEqual([]);
 		});
 	});
 });

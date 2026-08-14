@@ -1,5 +1,5 @@
 import * as backendApi from '$lib/api/backend.api';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { USER_TRANSACTIONS_SAVE_BATCH_SIZE, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
@@ -187,6 +187,60 @@ describe('user-transactions.services', () => {
 
 			expect(result).toEqual({ success: true });
 			expect(backendApi.saveUserTransactions).not.toHaveBeenCalled();
+		});
+
+		it('should split a save the backend would reject into batches it accepts', async () => {
+			vi.spyOn(backendApi, 'saveUserTransactions').mockResolvedValue();
+
+			const transactions = Array.from(
+				{ length: USER_TRANSACTIONS_SAVE_BATCH_SIZE + 1 },
+				(_, i) => ({
+					...mockTx,
+					hash: `tx-${i}`
+				})
+			);
+
+			const result = await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: alwaysFinalized,
+				mapToBackend: mockMapToBackendUserTransaction,
+				canSave: alwaysSaveable
+			});
+
+			expect(result).toEqual({ success: true });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(2);
+
+			const [[first], [second]] = vi.mocked(backendApi.saveUserTransactions).mock.calls;
+
+			expect(first.transactions).toHaveLength(USER_TRANSACTIONS_SAVE_BATCH_SIZE);
+			expect(second.transactions).toHaveLength(1);
+		});
+
+		it('should report failure when one batch fails', async () => {
+			vi.spyOn(backendApi, 'saveUserTransactions')
+				.mockResolvedValueOnce()
+				.mockRejectedValueOnce(new Error('too many'));
+
+			const transactions = Array.from(
+				{ length: USER_TRANSACTIONS_SAVE_BATCH_SIZE + 1 },
+				(_, i) => ({
+					...mockTx,
+					hash: `tx-${i}`
+				})
+			);
+
+			const result = await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: alwaysFinalized,
+				mapToBackend: mockMapToBackendUserTransaction,
+				canSave: alwaysSaveable
+			});
+
+			expect(result).toEqual({ success: false });
 		});
 
 		it('should save finalized transactions that pass both filters', async () => {
