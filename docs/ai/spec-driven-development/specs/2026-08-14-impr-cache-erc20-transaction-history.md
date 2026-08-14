@@ -31,7 +31,7 @@ Every load of an ERC20 token view re-fetches the token's complete transfer histo
 
 - One `tokentx` request per token per load, against a budget of `ETHERSCAN_MAX_CALLS_PER_SECOND` = 5 (beta/prod) or 2 elsewhere, batched across the whole token list by `eth-transactions-batch.services.ts`. A user with many ERC20 tokens pays this repeatedly.
 - Plus the spam filter's per-hash RPC calls (see below), also repeated every load.
-- History is bounded by what `tokentx` will return in one response — no `offset`/`page` is passed, so the request takes Etherscan's default page size. Beyond that ceiling, older transfers are simply unreachable, and always will be.
+- History is bounded by what `tokentx` returns in one response — no `offset`/`page` is passed, so the request takes whatever Etherscan's undocumented default is (see Open questions). Beyond that ceiling, older transfers are unreachable today and always will be, because nothing stores them.
 
 ### What the backend already supports
 
@@ -69,7 +69,7 @@ Give the ERC actions the `startBlock` / `endBlock` / `sort` parameters `getHisto
 
 ### 2. An ERC branch for older history
 
-`loadOlderFromEtherscan` (`src/frontend/src/eth/services/eth-user-transactions.services.ts:171`) calls `transactions()`, i.e. `txlist` — native only. It needs to dispatch on the token standard so an ERC20 token fetches `tokentx` bounded by `endBlock: oldestLoadedBlockNumber - 1`, and saves what it finds under `{ Erc20: [contract, chainId] }`.
+`loadOlderFromEtherscan` (`src/frontend/src/eth/services/eth-user-transactions.services.ts:171`) calls `transactions()`, i.e. `txlist` — native only. It needs to dispatch on the token standard so an ERC20 token fetches `tokentx` bounded by `endBlock: oldestLoadedBlockNumber - 1`, and saves what it finds under `{ Erc20: [contract, chainId] }` — lowercased, and chunked to 500 rows per call (see Backend contract).
 
 ### 3. `loadErcTransactions` reads the cache
 
@@ -77,7 +77,7 @@ Mirror `loadEthTransactions`: take `identity`, read one stored page, derive the 
 
 ### 4. Widen the scroll gate
 
-`EthTransactionsScroll.svelte` (added by #13728) is gated on `isTokenEthereumNative` and builds `{ EvmNative: chainId }`. It must also accept ERC20 tokens and build `{ Erc20: [token.address, chainId] }`. The per-token cursor store from #13728 is already keyed by `TokenId`, so it needs no change.
+`EthTransactionsScroll.svelte` (added by #13728) is gated on `isTokenEthereumNative` and builds `{ EvmNative: chainId }`. It must also accept ERC20 tokens and build `{ Erc20: [token.address.toLowerCase(), chainId] }`. The per-token cursor store from #13728 is already keyed by the frontend `TokenId`, so it needs no change.
 
 ### Interactions to respect
 
@@ -99,7 +99,7 @@ The cache stores **raw** rows, so the backend holds chain truth rather than pres
 
 Leaving it where it is would put raw `0x0` counterparties on the paged rows and vault addresses on the first page of the same list. So hoist the mapping into a shared helper and apply it at every insertion point for an ERC4626 token. The transform is pure and idempotent — after normalisation `from` is the vault, so the `isMint` test is false — hence applying it to rows that have already been through it is harmless, and the helper needs no "already normalised" flag.
 
-**Storage.** This multiplies stored transactions by the number of ERC20 tokens a user holds. `loadNextEthUserTransactions` already takes `beAtCapacity` to skip persisting when storage is full, but nothing in the codebase produces that flag — it is always the `false` default. See Open questions.
+**Storage.** This multiplies stored transactions by the number of ERC20 tokens a user holds — bounded per token at 10 000 (see Backend contract), so tokens cannot starve one another, but total per-user growth is real. `loadNextEthUserTransactions` already takes `beAtCapacity` to skip persisting when storage is full, and nothing in the codebase produces that flag — it is always the `false` default. Wiring a producer is out of scope here, but the flag is the hook if it becomes necessary.
 
 ---
 
@@ -109,10 +109,12 @@ Leaving it where it is would put raw `0x0` counterparties on the paged rows and 
 2. Scrolling an ERC20 token view pages back through stored history, then continues into Etherscan via `tokentx` bounded by the oldest row on screen, and persists what it fetches.
 3. An ERC20 view with more history than one page shows more than one page — the negative guarantee that this change does not import the native ten-row cap.
 4. Cached ERC20 rows are spam-filtered, and displaying them triggers no `getTransaction` RPC call per row.
-5. A fresh user with no stored history sees exactly what they see today.
-6. ERC721 and ERC1155 views behave exactly as they do today.
-7. Native views behave exactly as #13728 leaves them.
-8. `docs/ai/PRODUCT.md` gains a transaction-history description under `## Ethereum` covering both native and ERC20, since neither is described there today.
+5. Saving a token whose fetched history exceeds 500 rows succeeds — the batch is chunked, not rejected with `TooManyTransactions`.
+6. The backend `TokenId` is built from a lowercased contract address at both save and load, so one token has one key.
+7. A fresh user with no stored history sees exactly what they see today.
+8. ERC721 and ERC1155 views behave exactly as they do today.
+9. Native views behave exactly as #13728 leaves them.
+10. `docs/ai/PRODUCT.md` gains a transaction-history description under `## Ethereum` covering both native and ERC20, since neither is described there today.
 
 ---
 
@@ -125,12 +127,27 @@ Leaving it where it is would put raw `0x0` counterparties on the paged rows and 
 
 ---
 
+## Backend contract (confirmed)
+
+Read from `src/backend/src/transactions/model.rs` and `src/shared/src/types/user_transaction.rs`.
+
+| limit                               | value  | consequence                                                                |
+| ----------------------------------- | ------ | -------------------------------------------------------------------------- |
+| `MAX_USER_TRANSACTIONS_PER_TOKEN`   | 10 000 | per `(principal, token_id)`, so many ERC20 tokens cannot starve each other |
+| `MAX_SAVE_USER_TRANSACTIONS_BATCH`  | 500    | **a save of more than 500 rows fails with `TooManyTransactions`**          |
+| `MAX_GET_USER_TRANSACTIONS_RESULTS` | 100    | caps `maxResults`; `WALLET_PAGINATION` (10) is well under                  |
+
+**Saves must be chunked.** `save_transactions` rejects the whole batch above 500 rows. The native path never noticed because it only ever offers an incremental slice, but an ERC20 token's first save is its _entire_ fetched history, which routinely exceeds 500. Chunk into batches of ≤500, or the first save of an active token fails outright.
+
+**Duplicates are safe to re-offer.** `save_transactions` builds a `HashSet` of known ids and `continue`s past anything already stored. `DuplicateTransaction` is documented in `user_transaction.rs:142` as _"Reserved — duplicates are currently silently skipped during save"_ and is never constructed anywhere in the backend. So the ERC path may re-offer rows it has already saved without special-casing.
+
+**The token key is a raw string.** `TokenId::Erc20(ErcTokenId, ChainId)` where `ErcTokenId(pub String)` (`src/shared/src/types/custom_token.rs:69`) — no validation, no normalisation, compared byte-for-byte as part of the stable-structures key. Our env tokens carry checksummed addresses while Etherscan returns lowercase, so **lowercase the address when building the backend `TokenId`**, at both save and load. Getting this wrong splits one token's history across two keys, silently.
+
+**Trimming discards the oldest.** Over 10 000 rows for a token, `save_transactions` keeps the newest and trims the oldest at a whole-block boundary. So rows fetched while paging deep into a token already at the cap are trimmed away again, and will be re-fetched from Etherscan next time. This applies equally to the native path from #13728; it bounds the cache, it does not break paging.
+
 ## Open questions (facts to confirm)
 
-1. **What is `tokentx`'s actual default response ceiling** without `offset`/`page`? The 10,000-record figure is the commonly cited Etherscan default but is not verified in our code or in `docs/ai/integrations/etherscan.md`. It sets how much history is reachable on a first load, and therefore how much a user can ever cache.
-2. **Does the backend cap stored transactions per token, or per user?** This decides whether many ERC20 tokens can exhaust a user's storage and whether `beAtCapacity` needs a real producer before this ships.
-3. **Is `{ Erc20: [address, chainId] }` keyed on a checksummed or lowercased address on the backend?** A mismatch would silently split one token's history across two keys.
-4. **Does `saveUserTransactions` deduplicate by `id`?** The error type includes `DuplicateTransaction: { id: string }`, which suggests it rejects rather than ignores; the ERC path will re-offer rows it has already saved.
+1. **`tokentx`'s response ceiling without `offset`/`page` is undocumented.** Etherscan's current v2 endpoint docs (`api-reference/endpoint/tokentx`) show `page: 1` / `offset: 100` only as examples and state no maximum; the commonly cited 10 000-record figure appears nowhere we can verify. Rather than depend on an undocumented default, **pass `offset`/`page` explicitly** so the window is ours to choose, and treat "how much history one request can return" as a parameter rather than a discovered constant. Settling the real ceiling would need a live call against a high-volume address.
 
 ## Decisions
 
