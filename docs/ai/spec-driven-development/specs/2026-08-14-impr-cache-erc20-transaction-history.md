@@ -55,7 +55,7 @@ Applying the same cache to `loadErcTransactions` without an ERC paging path woul
 
 **In:** ERC20, and ERC4626 (which loads through the same `loadErc20Transactions` helper).
 
-**Out:** ERC721 and ERC1155 — see Pending decisions. Native paths are untouched; #13728 already covers them.
+**Out:** ERC721 and ERC1155 — see Decisions. Native paths are untouched; #13728 already covers them.
 
 ---
 
@@ -87,7 +87,17 @@ Mirror `loadEthTransactions`: take `identity`, read one stored page, derive the 
 - Do **not** re-filter rows loaded from the backend: it would restore the per-hash RPC cost the cache is meant to remove.
 - A transfer already saved before a future filter improvement stays saved. Accepted; note it as a known limitation rather than designing a re-scan.
 
-**ERC4626 mint/burn normalisation stays a display convention.** `loadErc4626Transactions` rewrites `from`/`to` from the zero address to the vault address after loading. Re-applying it to already-normalised cached rows is idempotent (`from` is the vault, so the `isMint` test is false), so cached rows may pass through it safely. Prefer saving raw rows and normalising on read, so the cache holds chain truth rather than presentation shape.
+**ERC4626 mint/burn normalisation becomes a cross-cutting concern.** `loadErc4626Transactions` rewrites `from`/`to` from `ZERO_ETH_ADDRESS` to the vault address, as a display convention — and it does so at the one place vault rows currently enter the store.
+
+The cache stores **raw** rows, so the backend holds chain truth rather than presentation shape. That obliges the transform to move: with a cache and a paging path, vault rows reach `ethTransactionsStore` at three places, and only the first applies it today —
+
+| insertion point                         | source                                          |
+| --------------------------------------- | ----------------------------------------------- |
+| `eth-transactions.services.ts:321`      | `loadErcTransactions` — Etherscan, initial load |
+| `eth-user-transactions.services.ts:164` | backend page, while paging back                 |
+| `eth-user-transactions.services.ts:247` | Etherscan, older than the oldest row on screen  |
+
+Leaving it where it is would put raw `0x0` counterparties on the paged rows and vault addresses on the first page of the same list. So hoist the mapping into a shared helper and apply it at every insertion point for an ERC4626 token. The transform is pure and idempotent — after normalisation `from` is the vault, so the `isMint` test is false — hence applying it to rows that have already been through it is harmless, and the helper needs no "already normalised" flag.
 
 **Storage.** This multiplies stored transactions by the number of ERC20 tokens a user holds. `loadNextEthUserTransactions` already takes `beAtCapacity` to skip persisting when storage is full, but nothing in the codebase produces that flag — it is always the `false` default. See Open questions.
 
@@ -122,8 +132,11 @@ Mirror `loadEthTransactions`: take `identity`, read one stored page, derive the 
 3. **Is `{ Erc20: [address, chainId] }` keyed on a checksummed or lowercased address on the backend?** A mismatch would silently split one token's history across two keys.
 4. **Does `saveUserTransactions` deduplicate by `id`?** The error type includes `DuplicateTransaction: { id: string }`, which suggests it rejects rather than ignores; the ERC path will re-offer rows it has already saved.
 
-## Pending decisions
+## Decisions
 
-1. **ERC721 / ERC1155 in or out.** The mappers already carry `nft_token_id` and `TokenId` has an `Erc721` variant, so extending is cheap — but NFT views load differently and are out of the reported problem. Recommend: out, as a fast-follow.
+1. **ERC721 / ERC1155 in or out.** The mappers already carry `nft_token_id` and `TokenId` has an `Erc721` variant, so extending is cheap — but NFT views load differently and are out of the reported problem.
+   _Resolved: out._ A fast-follow if wanted; this change leaves both untouched.
 2. **Whether to raise `WALLET_PAGINATION` (10) for token views.** Ten rows is a small first page for a history view; it is shared across chains, so changing it affects Solana too.
-3. **Whether ERC4626 caches raw or normalised rows.** Raw is cleaner (above); normalised avoids a transform on every read. Recommend raw.
+   _Resolved: leave at 10._ Paging is what makes the page size tolerable; changing a cross-chain constant is a separate call.
+3. **Whether ERC4626 caches raw or normalised rows.**
+   _Resolved: raw, with the normalisation hoisted to a shared helper._ See the ERC4626 interaction above for what this obliges.
