@@ -29,18 +29,13 @@
 
 	let collapsible = $state<ReturnType<typeof Collapsible> | undefined>();
 
-	let expanded = $state(false);
-
 	// The sentence costs an update call to the LLM canister, so it is asked for when the user opens
 	// the group and never for a row they only scrolled past. Once asked, it stays mounted:
 	// collapsing hides it, and re-expanding must not pay for it twice.
+	//
+	// Driven by the toggle callback rather than by a binding, because the children of a collapsible
+	// are rendered whether or not it is open: only the callback says the user actually opened it.
 	let requested = $state(false);
-
-	$effect(() => {
-		if (expanded) {
-			requested = true;
-		}
-	});
 
 	let facts = $derived(toSolTransactionGroupSummaryFacts(group));
 
@@ -58,9 +53,11 @@
 <Collapsible
 	bind:this={collapsible}
 	expandButton
+	onToggle={({ expanded }) => {
+		requested = requested || expanded;
+	}}
 	testId={testId ?? 'sol-transactions-group'}
 	wrapHeight
-	bind:expanded
 >
 	{#snippet header()}
 		<span class="block w-full rounded-xl px-2 py-2">
