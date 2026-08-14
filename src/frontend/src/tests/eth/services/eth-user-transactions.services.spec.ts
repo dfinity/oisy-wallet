@@ -6,9 +6,11 @@ import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
 import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
+	getEthBackendPaginationCursor,
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
-	saveEthFinalizedTransactions
+	saveEthFinalizedTransactions,
+	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
@@ -482,6 +484,72 @@ describe('eth-user-transactions.services', () => {
 
 			// The store's append method deduplicates by hash
 			expect(store?.[mockTokenId]).toHaveLength(2);
+		});
+	});
+
+	describe('backend pagination cursor', () => {
+		beforeEach(() => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: undefined });
+		});
+
+		it('should keep and clear the cursor of a token', () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 42n });
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBe(42n);
+
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: undefined });
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
+		});
+
+		it('should advance the cursor to the next page after loading one', async () => {
+			mockGetUserTransactions.mockResolvedValue(
+				makeBackendResponse({
+					overrides: {
+						transactions: [
+							createMockBackendUserTransaction({
+								hash: '0xhash1',
+								blockIndex: 100n,
+								timestamp: 1000n
+							})
+						],
+						newestBlockIndex: 500n,
+						oldestBlockIndex: 50n,
+						totalStored: 300n,
+						nextStart: 100n
+					}
+				})
+			);
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 200n,
+				oldestLoadedBlockNumber: 300
+			});
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBe(100n);
+		});
+
+		it('should clear the cursor once the backend has nothing left', async () => {
+			setEthBackendPaginationCursor({ tokenId: mockTokenId, nextStart: 200n });
+
+			mockGetUserTransactions.mockResolvedValue(makeBackendResponse({}));
+
+			await loadNextEthUserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: mockBackendTokenId,
+				tokenId: mockTokenId,
+				networkId: mockNetworkId,
+				cursor: 200n,
+				oldestLoadedBlockNumber: 300
+			});
+
+			expect(getEthBackendPaginationCursor(mockTokenId)).toBeUndefined();
 		});
 	});
 
