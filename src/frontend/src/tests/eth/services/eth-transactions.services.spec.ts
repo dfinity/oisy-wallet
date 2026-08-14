@@ -20,6 +20,7 @@ import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import { erc4626DefaultTokensStore } from '$eth/stores/erc4626-default-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -98,6 +99,9 @@ describe('eth-transactions.services', () => {
 					erc1155Transactions: mockErcTransactions
 				} as unknown as EtherscanProvider);
 
+				// Fungible transfers are now saved in the background, so the mock has to be awaitable.
+				vi.mocked(saveEthFinalizedTransactions).mockResolvedValue({ success: true });
+
 				erc721CustomTokensStore.resetAll();
 				erc721CustomTokensStore.setAll([
 					{ data: { ...mockValidErc721Token, enabled: true }, certified: false }
@@ -164,7 +168,9 @@ describe('eth-transactions.services', () => {
 
 					expect(mockErcTransactions).toHaveBeenCalledWith({
 						contract: { ...token, enabled: true },
-						address: mockEthAddress
+						address: mockEthAddress,
+						// Only the fungible transfer endpoint takes a window; the rest still fetch everything.
+						...(isTokenErc20(token) ? { startBlock: 0 } : {})
 					});
 				}
 			);
@@ -294,6 +300,128 @@ describe('eth-transactions.services', () => {
 					});
 				}
 			);
+
+			describe('stored history', () => {
+				const mockToken = USDC_TOKEN;
+				const mockTokenId = USDC_TOKEN.id;
+
+				const backendTokenId = {
+					Erc20: [USDC_TOKEN.address.toLowerCase(), USDC_TOKEN.network.chainId]
+				};
+
+				const loadUsdc = (updateOnly = false) =>
+					loadEthereumTransactions({
+						identity: mockIdentity,
+						networkId: mockToken.network.id,
+						tokenId: mockTokenId,
+						chainId: ETHEREUM_NETWORK.chainId,
+						standard: mockToken.standard,
+						updateOnly
+					});
+
+				beforeEach(() => {
+					mockErcTransactions.mockResolvedValue([]);
+					vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
+				});
+
+				it('should read the stored page under the token contract key', async () => {
+					await loadUsdc();
+
+					expect(loadEthUserTransactions).toHaveBeenCalledWith(
+						expect.objectContaining({ tokenId: backendTokenId })
+					);
+				});
+
+				it('should ask Etherscan only for transfers newer than the newest stored one', async () => {
+					vi.mocked(loadEthUserTransactions).mockResolvedValue({
+						transactions: [],
+						newestBlockIndex: 100n,
+						oldestBlockIndex: 50n,
+						nextStart: undefined,
+						totalStored: 2n
+					});
+
+					await loadUsdc();
+
+					expect(mockErcTransactions).toHaveBeenCalledWith(
+						expect.objectContaining({ startBlock: 101 })
+					);
+				});
+
+				it('should show stored history together with what it fetched', async () => {
+					const storedTransactions = createMockEthTransactions(2);
+					const fetchedTransactions = createMockEthTransactions(1);
+
+					vi.mocked(loadEthUserTransactions).mockResolvedValue({
+						transactions: storedTransactions,
+						newestBlockIndex: 100n,
+						oldestBlockIndex: 50n,
+						nextStart: 40n,
+						totalStored: 2n
+					});
+					mockErcTransactions.mockResolvedValue(fetchedTransactions);
+
+					await loadUsdc();
+
+					expect(get(ethTransactionsStore)?.[mockTokenId]).toHaveLength(3);
+				});
+
+				it('should keep the cursor of the page below the stored one', async () => {
+					vi.mocked(loadEthUserTransactions).mockResolvedValue({
+						transactions: [],
+						newestBlockIndex: 100n,
+						oldestBlockIndex: 50n,
+						nextStart: 40n,
+						totalStored: 2n
+					});
+
+					await loadUsdc();
+
+					expect(setEthBackendPaginationCursor).toHaveBeenCalledWith({
+						tokenId: mockTokenId,
+						nextStart: 40n
+					});
+				});
+
+				it('should leave the cursor alone on a reload', async () => {
+					vi.mocked(loadEthUserTransactions).mockResolvedValue({
+						transactions: [],
+						newestBlockIndex: 100n,
+						oldestBlockIndex: 50n,
+						nextStart: 40n,
+						totalStored: 2n
+					});
+
+					await loadUsdc(true);
+
+					expect(setEthBackendPaginationCursor).not.toHaveBeenCalled();
+				});
+
+				it('should store what it fetched under the token contract key', async () => {
+					mockErcTransactions.mockResolvedValue(createMockEthTransactions(1));
+
+					await loadUsdc();
+
+					expect(saveEthFinalizedTransactions).toHaveBeenCalledWith(
+						expect.objectContaining({ tokenId: backendTokenId })
+					);
+				});
+
+				it('should not reach the backend for a token whose history it cannot store', async () => {
+					const { id: tokenId, network, standard } = mockValidErc721Token;
+
+					await loadEthereumTransactions({
+						identity: mockIdentity,
+						networkId: network.id,
+						tokenId,
+						chainId: ETHEREUM_NETWORK.chainId,
+						standard
+					});
+
+					expect(loadEthUserTransactions).not.toHaveBeenCalled();
+					expect(saveEthFinalizedTransactions).not.toHaveBeenCalled();
+				});
+			});
 		}, 60000);
 
 		describe('when token is native ETH', () => {
