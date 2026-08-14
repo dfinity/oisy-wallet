@@ -1948,7 +1948,7 @@
 			"to_ata": "수신자 토큰 계정 (ATA)",
 			"to_ata_copied": "수신자 토큰 계정 (ATA)이 클립보드에 복사되었습니다.",
 			"block": "블록",
-			"interacted_with": "상호작용 대상 (수신)",
+			"interacted_with": "상호작용 대상",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "상태",

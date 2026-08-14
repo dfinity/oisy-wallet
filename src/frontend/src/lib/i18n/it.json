@@ -1948,7 +1948,7 @@
 			"to_ata": "Conto token destinatario (ATA)",
 			"to_ata_copied": "Conto token destinatario (ATA) copiato negli appunti.",
 			"block": "Blocco",
-			"interacted_with": "Interagito con (A)",
+			"interacted_with": "Interagito con",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "Stato",

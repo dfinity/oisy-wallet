@@ -1948,7 +1948,7 @@
 			"to_ata": "接收方代币账户 (ATA)",
 			"to_ata_copied": "接收方代币账户 (ATA) 已复制到剪贴板。",
 			"block": "区块",
-			"interacted_with": "交互对象（接收方）",
+			"interacted_with": "交互对象",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "状态",
