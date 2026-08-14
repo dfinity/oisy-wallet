@@ -10,7 +10,8 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	loadEthUserTransactions,
-	saveEthFinalizedTransactions
+	saveEthFinalizedTransactions,
+	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { EthAddress } from '$eth/types/address';
@@ -181,6 +182,11 @@ const loadEthTransactions = async ({
 		const stored = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED
 			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
 			: undefined;
+
+		// Left alone on a reload: the timer must not rewind pages the user has already scrolled past.
+		if (!updateOnly) {
+			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
+		}
 
 		const startBlock = resolveEthIncrementalStartBlock({
 			newestStoredBlockIndex: stored?.newestBlockIndex,
