@@ -8,9 +8,11 @@
 		isTransactionPending,
 		isMaxUint256,
 		tryDecodeErc20AbiData,
-		isErc20TransactionDeposit
+		isErc20TransactionDeposit,
+		isErc20TransactionTransfer
 	} from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
@@ -50,8 +52,10 @@
 
 	let isErc20Deposit = $derived(isErc20TransactionDeposit(data));
 
+	let isErc20Transfer = $derived(type === 'send' && isErc20TransactionTransfer(data));
+
 	let { to: dataTo, value: dataValue } = $derived(
-		(isApprove || isErc20Deposit) && nonNullish(data)
+		(isApprove || isErc20Deposit || isErc20Transfer) && nonNullish(data)
 			? tryDecodeErc20AbiData({ data })
 			: { to: undefined, value: undefined }
 	);
@@ -76,8 +80,10 @@
 			: undefined
 	);
 
-	let approveToken = $derived(
-		isApprove && nonNullish(to)
+	// Both `approve` and ERC20 `transfer` transactions are addressed to the ERC20 contract, so the
+	// transaction `to` identifies the token the transaction is about - not the spender or the recipient.
+	let contractToken = $derived(
+		(isApprove || isErc20Transfer) && nonNullish(to)
 			? $ercFungibleTokens.find(
 					({ address, network: { id: networkId } }) =>
 						areAddressesEqual({ address1: address, address2: to, networkId }) &&
@@ -85,6 +91,31 @@
 				)
 			: undefined
 	);
+
+	let approveToken = $derived(isApprove ? contractToken : undefined);
+
+	// Calldata carrying the transfer selector still may not decode. Without a recipient and an amount
+	// there is no transfer to describe, so the entry stays a plain contract call rather than claiming
+	// a send it cannot name - and pointing that send at the contract.
+	let transferDecoded = $derived(isErc20Transfer && nonNullish(dataTo) && nonNullish(dataValue));
+
+	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
+	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
+	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
+	let transferToken = $derived(transferDecoded ? contractToken : undefined);
+
+	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
+	// send would present the contract as the recipient. The recipient is in the calldata.
+	//
+	// Deliberately not gated on `transferToken`: recognising the contract is what lets us name the
+	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
+	// put the contract back in the counterparty of every transfer of a token we do not know.
+	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
+
+	// The fee is known from the receipt whether or not the token is: naming the asset needs the
+	// contract, accounting for what left the native balance does not. A transfer that also moved
+	// native value is a real native send, so only a zero-value entry is the fee side of one.
+	let isTransferFeeEntry = $derived(transferDecoded && value === ZERO);
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -116,12 +147,34 @@
 		return symbolText;
 	});
 
+	let transferAmountText = $derived(
+		nonNullish(transferToken) && nonNullish(dataValue)
+			? `${formatToken({
+					value: dataValue,
+					displayDecimals: transferToken.decimals,
+					unitName: transferToken.decimals
+				})} ${getTokenDisplaySymbol(transferToken)}`
+			: undefined
+	);
+
 	let label = $derived.by(() => {
 		if (type === 'send') {
 			if (isErc20Deposit && nonNullish(depositToken) && nonNullish(depositValue)) {
 				return replacePlaceholders($i18n.send.text.send_token, {
 					$token: `${depositValue} ${depositToken.symbol}`
 				});
+			}
+
+			if (nonNullish(transferAmountText)) {
+				return replacePlaceholders($i18n.send.text.send_token, {
+					$token: transferAmountText
+				});
+			}
+
+			// The transfer is known to be one, but the token is not in the wallet: without decimals and
+			// a symbol its amount cannot be stated, so the entry says what it is rather than nothing.
+			if (isTransferFeeEntry) {
+				return $i18n.send.text.send_unknown_token;
 			}
 
 			return $i18n.send.text.send;
@@ -178,7 +231,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit
+		isApprove || isErc20Deposit || isTransferFeeEntry
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined
@@ -198,7 +251,7 @@
 	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
 	{status}
 	timestamp={transactionDate}
-	{to}
+	to={recipient}
 	token={isApprove ? token : displayToken}
 	{tokenId}
 	{type}
