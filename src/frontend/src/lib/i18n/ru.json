@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Отправить",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Получатель",
 			"balance": "Баланс",
 			"review": "Подверждение",
@@ -1948,6 +1949,8 @@
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
 			"interacted_with": "Взаимодействовали с (Получатель)",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "Для",

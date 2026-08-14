@@ -128,7 +128,20 @@
 				: undefined
 	);
 
+	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
+	// send would present the contract as the recipient. The recipient comes from the loaded transfer,
+	// or from the calldata.
+	//
+	// Deliberately not gated on `transferToken`: recognising the contract is what lets us name the
+	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
+	// put the contract back in the counterparty of every transfer of a token we do not know.
 	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
+
+	// The fee is known from the receipt whether or not the token is: naming the asset needs the
+	// contract, accounting for what left the native balance does not. Either source establishes the
+	// entry as the fee side of a transfer - the loaded one also covers a router send, which no
+	// calldata decode can. A transfer that also moved native value is a real native send.
+	let isTransferFeeEntry = $derived((nonNullish(ercTransfer) || transferDecoded) && value === ZERO);
 
 	let displayToken = $derived(approveToken ?? token);
 
@@ -182,6 +195,12 @@
 				return replacePlaceholders($i18n.send.text.send_token, {
 					$token: transferAmountText
 				});
+			}
+
+			// The transfer is known to be one, but the token is not in the wallet: without decimals and
+			// a symbol its amount cannot be stated, so the entry says what it is rather than nothing.
+			if (isTransferFeeEntry) {
+				return $i18n.send.text.send_unknown_token;
 			}
 
 			return $i18n.send.text.send;
@@ -238,7 +257,7 @@
 	);
 
 	let displayAmount = $derived(
-		isApprove || isErc20Deposit || nonNullish(transferToken)
+		isApprove || isErc20Deposit || isTransferFeeEntry
 			? nonNullish(gasFee)
 				? gasFee * -1n
 				: undefined

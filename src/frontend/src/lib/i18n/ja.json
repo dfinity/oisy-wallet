@@ -935,6 +935,7 @@
 		"text": {
 			"send": "送信",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "宛先",
 			"balance": "残高",
 			"review": "確認",
@@ -1948,6 +1949,8 @@
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
 			"interacted_with": "実行先コントラクト（To）",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "ステータス",
 			"confirmations": "確認数",
 			"for": "承認先",

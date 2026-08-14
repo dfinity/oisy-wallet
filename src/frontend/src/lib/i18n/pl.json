@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Wyślij",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Miejsce docelowe",
 			"balance": "Saldo",
 			"review": "Przegląd",
@@ -1948,6 +1949,8 @@
 			"to_ata_copied": "Konto tokena odbiorcy (ATA) skopiowane do schowka.",
 			"block": "Blok",
 			"interacted_with": "Interakcja z (Do)",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Status",
 			"confirmations": "Potwierdzenia",
 			"for": "",
