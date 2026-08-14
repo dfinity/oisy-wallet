@@ -1,10 +1,11 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
-import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { USER_TRANSACTIONS_SAVE_BATCH_SIZE, WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
+import { chunk } from '$lib/utils/array.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
 
@@ -83,12 +84,22 @@ export const saveFinalizedTransactions = async <T>({
 		return { success: true };
 	}
 
+	// The backend rejects an oversized batch outright rather than storing part of it, so a token whose
+	// whole history is offered at once - as an ERC20 token's first save is - has to be split up.
+	const batches = chunk({
+		elements: finalized.map(mapToBackend),
+		size: USER_TRANSACTIONS_SAVE_BATCH_SIZE
+	});
+
 	try {
-		await saveUserTransactions({
-			identity,
-			tokenId,
-			transactions: finalized.map(mapToBackend)
-		});
+		for (const batch of batches) {
+			await saveUserTransactions({
+				identity,
+				tokenId,
+				transactions: batch
+			});
+		}
+
 		return { success: true };
 	} catch (_: unknown) {
 		return { success: false };

@@ -173,6 +173,10 @@ export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+// The backend rejects a whole `save_user_transactions` batch above its own limit
+// (`MAX_SAVE_USER_TRANSACTIONS_BATCH` in src/shared/src/types/user_transaction.rs), so saves are
+// split into batches of this size. Keep the two in step.
+export const USER_TRANSACTIONS_SAVE_BATCH_SIZE = 500;
 // How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
 // At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
 export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;

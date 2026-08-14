@@ -1,12 +1,16 @@
 import type { TokenId as BackendTokenId } from '$declarations/backend/backend.did';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { fetchErc20Transfers } from '$eth/services/erc-transfers.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isTokenErc4626, normalizeErc4626MintBurnTransfers } from '$eth/utils/erc4626.utils';
 import {
 	isTransactionFinalized,
 	mapTransactionToUserTransaction,
-	mapUserTransactionToTransaction
+	mapUserTransactionToTransaction,
+	toBackendTokenId
 } from '$eth/utils/user-transactions.utils';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import {
@@ -14,8 +18,7 @@ import {
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { NullishIdentity } from '$lib/types/identity';
-import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -111,6 +114,24 @@ export const saveEthFinalizedTransactions = ({
 	});
 
 /**
+ * Presents stored rows the way the token's own load path would.
+ *
+ * Stored history is held as the chain reported it, so a vault's share mints and burns still name the
+ * zero address and have to be read as transfers with the vault - the same convention the initial load
+ * applies. Every other token passes through untouched.
+ */
+const forDisplay = ({
+	transactions,
+	token
+}: {
+	transactions: Transaction[];
+	token: Token;
+}): Transaction[] =>
+	isTokenErc4626(token)
+		? normalizeErc4626MintBurnTransfers({ transactions, vaultAddress: token.address })
+		: transactions;
+
+/**
  * Loads the next page of stored transactions from the backend and appends to the store.
  * When the backend has no more pages, falls back to Etherscan to fetch older transactions
  * and persists them in the backend for future sessions.
@@ -118,10 +139,8 @@ export const saveEthFinalizedTransactions = ({
  * @param identity - The caller's identity; if nullish the backend call is skipped.
  * @param address - The user's ETH address used to query Etherscan for older history;
  *   if nullish the Etherscan fallback is skipped.
- * @param transactionTokenId - The backend-typed token identifier used for API calls.
- * @param tokenId - The frontend token identifier used to key the transactions store.
- * @param networkId - The network to query when falling back to Etherscan.
- * @param cursor - The `nextStart` value from a previous page; `undefined` when the backend is exhausted.
+ * @param token - The token whose history is being paged; determines both the backend key and which
+ *   Etherscan action answers for older history. A token this path cannot store pages nothing.
  * @param oldestLoadedBlockNumber - The lowest block number among transactions already
  *   displayed in the UI. Used as the upper bound when querying Etherscan for older history.
  * @param beAtCapacity - When `true`, skip persisting Etherscan results to the backend
@@ -131,22 +150,26 @@ export const saveEthFinalizedTransactions = ({
 export const loadNextEthUserTransactions = async ({
 	identity,
 	address,
-	transactionTokenId,
-	tokenId,
-	networkId,
-	cursor,
+	token,
 	oldestLoadedBlockNumber,
 	beAtCapacity = false
 }: {
 	identity: NullishIdentity;
 	address: OptionEthAddress;
-	transactionTokenId: BackendTokenId;
-	tokenId: TokenId;
-	networkId: NetworkId;
-	cursor: bigint | undefined;
+	token: Token;
 	oldestLoadedBlockNumber: number | undefined;
 	beAtCapacity?: boolean;
 }): Promise<{ hasMore: boolean }> => {
+	const transactionTokenId = toBackendTokenId(token);
+
+	if (isNullish(transactionTokenId)) {
+		return { hasMore: false };
+	}
+
+	const { id: tokenId } = token;
+
+	const cursor = getEthBackendPaginationCursor(tokenId);
+
 	if (nonNullish(cursor)) {
 		const result = await loadEthUserTransactions({
 			identity,
@@ -156,10 +179,12 @@ export const loadNextEthUserTransactions = async ({
 		});
 
 		if (nonNullish(result) && result.transactions.length > 0) {
-			const certifiedTransactions = result.transactions.map((transaction) => ({
-				data: transaction,
-				certified: false
-			}));
+			const certifiedTransactions = forDisplay({ transactions: result.transactions, token }).map(
+				(transaction) => ({
+					data: transaction,
+					certified: false
+				})
+			);
 
 			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
@@ -178,8 +203,7 @@ export const loadNextEthUserTransactions = async ({
 		identity,
 		address,
 		transactionTokenId,
-		tokenId,
-		networkId,
+		token,
 		oldestLoadedBlockNumber,
 		skipSave: beAtCapacity
 	});
@@ -193,8 +217,7 @@ export const loadNextEthUserTransactions = async ({
  * @param address - The user's ETH address to query Etherscan with;
  *   returns `{ hasMore: false }` when nullish.
  * @param transactionTokenId - The backend-typed token identifier used for saving.
- * @param tokenId - The frontend token identifier used to key the transactions store.
- * @param networkId - The network whose Etherscan provider will be used.
+ * @param token - The token being paged; decides which Etherscan action answers for its history.
  * @param oldestLoadedBlockNumber - The lowest block number currently displayed;
  *   Etherscan is queried for blocks strictly below this value. Returns early when
  *   `undefined` or `<= 0`.
@@ -205,16 +228,14 @@ const loadOlderFromEtherscan = async ({
 	identity,
 	address,
 	transactionTokenId,
-	tokenId,
-	networkId,
+	token,
 	oldestLoadedBlockNumber,
 	skipSave
 }: {
 	identity: NullishIdentity;
 	address: OptionEthAddress;
 	transactionTokenId: BackendTokenId;
-	tokenId: TokenId;
-	networkId: NetworkId;
+	token: Token;
 	oldestLoadedBlockNumber: number | undefined;
 	skipSave: boolean;
 }): Promise<{ hasMore: boolean }> => {
@@ -226,23 +247,35 @@ const loadOlderFromEtherscan = async ({
 		return { hasMore: false };
 	}
 
-	try {
-		const { transactions: transactionsProvider } = etherscanProviders(networkId);
+	const {
+		id: tokenId,
+		network: { id: networkId }
+	} = token;
 
-		const olderTransactions = await transactionsProvider({
-			address,
-			endBlock: oldestLoadedBlockNumber - 1,
-			sort: 'desc'
-		});
+	try {
+		const endBlock = oldestLoadedBlockNumber - 1;
+
+		// A token transfer's history is in `tokentx`, keyed by contract; the chain's own is in `txlist`.
+		// Asking the wrong one would append another asset's transactions under this token.
+		const olderTransactions =
+			isTokenErc20(token) || isTokenErc4626(token)
+				? await fetchErc20Transfers({ networkId, token, address, endBlock })
+				: await etherscanProviders(networkId).transactions({
+						address,
+						endBlock,
+						sort: 'desc'
+					});
 
 		if (olderTransactions.length === 0) {
 			return { hasMore: false };
 		}
 
-		const certifiedTransactions = olderTransactions.map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		const certifiedTransactions = forDisplay({ transactions: olderTransactions, token }).map(
+			(transaction) => ({
+				data: transaction,
+				certified: false
+			})
+		);
 
 		ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 

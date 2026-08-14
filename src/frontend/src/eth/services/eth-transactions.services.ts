@@ -5,27 +5,24 @@ import { enabledErc1155Tokens } from '$eth/derived/erc1155.derived';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import { erc4626Tokens } from '$eth/derived/erc4626.derived';
 import { enabledErc721Tokens } from '$eth/derived/erc721.derived';
-import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { fetchErc20Transfers } from '$eth/services/erc-transfers.services';
 import {
 	loadEthUserTransactions,
 	saveEthFinalizedTransactions,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import type { EthAddress } from '$eth/types/address';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
-import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
-import type { Erc4626CustomToken } from '$eth/types/erc4626-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { EthereumChainId } from '$eth/types/network';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isTokenErc4626, normalizeErc4626MintBurnTransfers } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
-import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { toBackendTokenId } from '$eth/utils/user-transactions.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
@@ -64,7 +61,7 @@ export const loadEthereumTransactions = ({
 		return loadEthTransactions({ identity, networkId, tokenId, chainId, updateOnly, silent });
 	}
 
-	return loadErcTransactions({ networkId, tokenId, standard, updateOnly });
+	return loadErcTransactions({ identity, networkId, tokenId, standard, updateOnly });
 };
 
 // If we use the update method instead of the set method, we can keep the existing transactions and just update their data.
@@ -81,7 +78,7 @@ export const reloadEthereumTransactions = (params: {
 const hasStoredEthTransactions = (tokenId: TokenId): boolean =>
 	(get(ethTransactionsStore)?.[tokenId] ?? []).length > 0;
 
-const maxEthNativeBlockNumberInStore = (tokenId: TokenId): number | undefined => {
+const maxBlockNumberInStore = (tokenId: TokenId): number | undefined => {
 	const rows = get(ethTransactionsStore)?.[tokenId];
 
 	if (isNullish(rows) || rows.length === 0) {
@@ -196,7 +193,7 @@ const loadEthTransactions = async ({
 			newestStoredBlockIndex: stored?.newestBlockIndex,
 			maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
 				? undefined
-				: maxEthNativeBlockNumberInStore(tokenId)
+				: maxBlockNumberInStore(tokenId)
 		});
 
 		const newTransactions = await loadNewEthNativeTransactionsAfterStartBlock({
@@ -272,11 +269,13 @@ const loadEthTransactions = async ({
 };
 
 const loadErcTransactions = async ({
+	identity,
 	networkId,
 	tokenId,
 	standard,
 	updateOnly = false
 }: {
+	identity: NullishIdentity;
 	networkId: NetworkId;
 	tokenId: TokenId;
 	standard: TokenStandard;
@@ -303,18 +302,54 @@ const loadErcTransactions = async ({
 		return { success: false };
 	}
 
+	// Non-fungible transfers come from endpoints this path does not store, so they keep fetching their
+	// whole history every time - and must not pick up an incremental start block from the store.
+	const transactionTokenId = toBackendTokenId(token);
+	const cached = USER_TRANSACTIONS_LOAD_FROM_BACKEND_ENABLED && nonNullish(transactionTokenId);
+
 	try {
-		const transactions = isTokenErc4626(token)
-			? await loadErc4626Transactions({ networkId, token, address })
-			: isTokenErc20(token)
-				? await loadErc20Transactions({ networkId, token, address })
+		const stored = cached
+			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
+			: undefined;
+
+		// Only while the list is being built from scratch. The periodic refresh comes through here too,
+		// so resetting the cursor unconditionally would send the next scroll back over pages the user
+		// already has.
+		if (cached && !hasStoredEthTransactions(tokenId)) {
+			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
+		}
+
+		const startBlock = cached
+			? resolveEthIncrementalStartBlock({
+					newestStoredBlockIndex: stored?.newestBlockIndex,
+					maxBlockFromTransactionsStore: nonNullish(stored?.newestBlockIndex)
+						? undefined
+						: maxBlockNumberInStore(tokenId)
+				})
+			: 0;
+
+		const fetched =
+			isTokenErc4626(token) || isTokenErc20(token)
+				? await fetchErc20Transfers({ networkId, token, address, startBlock })
 				: isTokenErc721(token)
 					? await loadErc721Transactions({ networkId, token, address })
 					: isTokenErc1155(token)
 						? await loadErc1155Transactions({ networkId, token, address })
 						: [];
 
-		const certifiedTransactions = transactions.map((transaction) => ({
+		// Combine newest-first: new transactions (desc) then stored (desc from backend)
+		const allTransactions = [...fetched, ...(stored?.transactions ?? [])];
+
+		// Applied here rather than on the fetched rows alone, because stored rows are held as the chain
+		// reported them - see `normalizeErc4626MintBurnTransfers`.
+		const displayedTransactions = isTokenErc4626(token)
+			? normalizeErc4626MintBurnTransfers({
+					transactions: allTransactions,
+					vaultAddress: token.address
+				})
+			: allTransactions;
+
+		const certifiedTransactions = displayedTransactions.map((transaction) => ({
 			data: transaction,
 			// We set the certified property to false because we don't have a way to certify ERC transactions for now.
 			certified: false
@@ -324,8 +359,31 @@ const loadErcTransactions = async ({
 			certifiedTransactions.forEach((transaction) =>
 				ethTransactionsStore.update({ tokenId, transaction })
 			);
+		} else if (cached) {
+			// Prepended rather than set, because once a token is cached this batch is not the whole
+			// history: it is the newest stored page plus whatever is newer than it. Replacing the slot
+			// would throw away every older page the user scrolled in - and the periodic refresh runs
+			// through here every 30 seconds.
+			ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 		} else {
+			// Collectibles still fetch their whole history every time, so replacing the slot is a real
+			// refresh and drops what the chain no longer reports.
 			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+		}
+
+		// Saved as fetched, before the vault normalisation, so the backend holds what the chain reported.
+		if (cached && fetched.length > 0) {
+			const blockNumbers = fetched.map(({ blockNumber }) => blockNumber).filter(nonNullish);
+			const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
+
+			if (maxBlockNumber > 0) {
+				saveEthFinalizedTransactions({
+					identity,
+					tokenId: transactionTokenId,
+					transactions: fetched,
+					currentBlockNumber: maxBlockNumber
+				}).catch((err) => consoleError('Background save of finalized transactions failed:', err));
+			}
 		}
 	} catch (err: unknown) {
 		ethTransactionsStore.nullify(tokenId);
@@ -352,55 +410,6 @@ const loadErcTransactions = async ({
 	}
 
 	return { success: true };
-};
-
-const loadErc20Transactions = async ({
-	networkId,
-	token,
-	address
-}: {
-	networkId: NetworkId;
-	token: Erc20CustomToken | Erc4626CustomToken;
-	address: Address;
-}): Promise<Transaction[]> => {
-	const { erc20Transactions } = etherscanProviders(networkId);
-
-	const transactions = await retryWithDelay({
-		request: async () => await erc20Transactions({ contract: token, address })
-	});
-
-	const { getTransaction } = alchemyProviders(networkId);
-
-	return filterSpamErc20Transfers({
-		transactions,
-		userAddress: address,
-		// The `transaction.from` is the `Transfer` event's _from (who tokens move from), not
-		// the EOA that signed the tx. In address-poisoning scams the attacker emits
-		// `Transfer(victim, attacker, 0)`, so `transaction.from == victim`. We need the
-		// outer tx sender via RPC to tell whether the user actually initiated it.
-		getTransactionSender: async (hash: string): Promise<EthAddress | undefined> => {
-			const tx = await getTransaction(hash);
-			return tx?.from;
-		}
-	});
-};
-
-/**
- * Loads ERC4626 vault token transactions, presenting share mints and burns as transfers with the
- * vault - see `normalizeErc4626MintBurnTransfers` for why.
- */
-const loadErc4626Transactions = async ({
-	networkId,
-	token,
-	address
-}: {
-	networkId: NetworkId;
-	token: Erc4626CustomToken;
-	address: Address;
-}): Promise<Transaction[]> => {
-	const transactions = await loadErc20Transactions({ networkId, token, address });
-
-	return normalizeErc4626MintBurnTransfers({ transactions, vaultAddress: token.address });
 };
 
 const loadErc721Transactions = async ({

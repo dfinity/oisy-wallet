@@ -1,4 +1,3 @@
-import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import EthTransactionsScroll from '$eth/components/transactions/EthTransactionsScroll.svelte';
@@ -7,6 +6,7 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { token } from '$lib/stores/token.store';
 import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
+import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import {
 	IntersectionObserverActive,
@@ -70,28 +70,10 @@ describe('EthTransactionsScroll', () => {
 
 		expect(loadNextSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
-				transactionTokenId: { EvmNative: BASE_NETWORK.chainId },
-				tokenId: mockToken.id,
-				networkId: mockToken.network.id,
+				token: mockToken,
 				oldestLoadedBlockNumber
 			})
 		);
-	});
-
-	it('should pass the stored backend cursor', () => {
-		ethUserTransactionsServices.setEthBackendPaginationCursor({
-			tokenId: mockToken.id,
-			nextStart: 77n
-		});
-
-		render(EthTransactionsScroll, { token: mockToken, children: mockSnippet });
-
-		expect(loadNextSpy).toHaveBeenCalledWith(expect.objectContaining({ cursor: 77n }));
-
-		ethUserTransactionsServices.setEthBackendPaginationCursor({
-			tokenId: mockToken.id,
-			nextStart: undefined
-		});
 	});
 
 	it('should not load anything while no transaction is on screen', () => {
@@ -102,13 +84,27 @@ describe('EthTransactionsScroll', () => {
 		expect(loadNextSpy).not.toHaveBeenCalled();
 	});
 
-	it('should not load anything for a token whose history is not the chain history', () => {
-		// Older ERC20 transfers come from `tokentx`, which this path does not query.
+	it('should page an ERC20 token as well as the chain coin', () => {
 		token.set(USDC_TOKEN);
 
 		setTransactions({ tokenId: USDC_TOKEN.id });
 
 		render(EthTransactionsScroll, { token: USDC_TOKEN, children: mockSnippet });
+
+		expect(loadNextSpy).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ token: USDC_TOKEN, oldestLoadedBlockNumber })
+		);
+	});
+
+	it('should not load anything for a token whose history it cannot store', () => {
+		// Collectible transfers come from endpoints this path does not read.
+		const [nonFungible] = MOCK_ERC721_TOKENS;
+
+		token.set(nonFungible);
+
+		setTransactions({ tokenId: nonFungible.id });
+
+		render(EthTransactionsScroll, { token: nonFungible, children: mockSnippet });
 
 		expect(loadNextSpy).not.toHaveBeenCalled();
 	});
