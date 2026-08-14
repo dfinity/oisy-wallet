@@ -146,17 +146,6 @@
 			(nonNullish(token) && isTokenErc(token) ? token.address : undefined)
 	);
 
-	let contractName: OptionString = $derived(
-		nonNullish(contractAddress) && nonNullish(token)
-			? mapAddressToName({
-					address: contractAddress,
-					networkId: token.network.id,
-					erc20Tokens: $erc20Tokens,
-					builtInContacts: $ckMinterBuiltInContacts
-				})
-			: undefined
-	);
-
 	let displayToken = $derived(depositToken ?? approveToken ?? transferToken ?? token);
 
 	let explorerBaseUrl = $derived(getExplorerUrl({ token }));
@@ -406,17 +395,14 @@
 				</ListItem>
 			{/if}
 
-			<!-- The contract is shown with its address rather than its name alone: a symbol does not
-			identify a token, and verifying the contract is the point of the row. -->
+			<!-- The address alone: a name does not identify a token, verifying the contract is the point
+			of the row, and the hero already names the asset. Both together overflow the row. -->
 			{#if nonNullish(contractAddress)}
 				<ListItem>
 					<span>{$i18n.transaction.text.interacted_with}</span>
 
 					<span class="flex max-w-[50%] flex-row break-all">
-						<output>
-							{#if nonNullish(contractName)}{contractName}{/if}
-							{shortenWithMiddleEllipsis({ text: contractAddress })}
-						</output>
+						<output>{shortenWithMiddleEllipsis({ text: contractAddress })}</output>
 
 						<AddressActions
 							copyAddress={contractAddress}

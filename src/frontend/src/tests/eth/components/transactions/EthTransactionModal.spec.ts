@@ -367,20 +367,20 @@ describe('EthTransactionModal', () => {
 				vi.mocked(mapAddressToName).mockReturnValue(undefined);
 			});
 
-			it('should display the contract with its name and address for a resolved transfer', () => {
-				const { getByText } = render(EthTransactionModal, {
+			it('should display the contract address for a resolved transfer', () => {
+				const { getByText, queryByText } = render(EthTransactionModal, {
 					transaction: mockTransferTransactionUi,
 					token: ETHEREUM_TOKEN
 				});
 
 				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
 
-				// A symbol does not identify a token, so the address is shown alongside the name.
-				expect(getByText(USDC_TOKEN.name, { exact: false })).toBeInTheDocument();
-
+				// The address alone: the hero already names the asset.
 				expect(
-					getByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }), { exact: false })
+					getByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }))
 				).toBeInTheDocument();
+
+				expect(queryByText(USDC_TOKEN.name, { exact: false })).not.toBeInTheDocument();
 			});
 
 			it('should display the interacted with row for a contract call that is not a transfer', () => {
