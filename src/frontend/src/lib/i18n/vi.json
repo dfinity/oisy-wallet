@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Gửi",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Tới",
 			"balance": "Số dư",
 			"review": "Xem lại",
@@ -1947,7 +1948,9 @@
 			"to_ata": "Tài khoản token người nhận (ATA)",
 			"to_ata_copied": "Tài khoản token người nhận (ATA) đã được sao chép vào khay nhớ tạm.",
 			"block": "Khối",
-			"interacted_with": "Đã tương tác với (Đến)",
+			"interacted_with": "Đã tương tác với",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Trạng thái",
 			"confirmations": "Xác nhận",
 			"for": "",
