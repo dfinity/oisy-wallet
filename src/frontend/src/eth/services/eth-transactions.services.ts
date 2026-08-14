@@ -75,6 +75,9 @@ export const reloadEthereumTransactions = (params: {
 	silent?: boolean;
 }): Promise<ResultSuccess> => loadEthereumTransactions({ ...params, updateOnly: true });
 
+const hasStoredEthTransactions = (tokenId: TokenId): boolean =>
+	(get(ethTransactionsStore)?.[tokenId] ?? []).length > 0;
+
 const maxBlockNumberInStore = (tokenId: TokenId): number | undefined => {
 	const rows = get(ethTransactionsStore)?.[tokenId];
 
@@ -304,8 +307,10 @@ const loadErcTransactions = async ({
 			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
 			: undefined;
 
-		// Left alone on a reload: the timer must not rewind pages the user has already scrolled past.
-		if (cached && !updateOnly) {
+		// Only while the list is being built from scratch. The periodic refresh comes through here too,
+		// so resetting the cursor unconditionally would send the next scroll back over pages the user
+		// already has.
+		if (cached && !hasStoredEthTransactions(tokenId)) {
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
 
@@ -349,7 +354,15 @@ const loadErcTransactions = async ({
 			certifiedTransactions.forEach((transaction) =>
 				ethTransactionsStore.update({ tokenId, transaction })
 			);
+		} else if (cached) {
+			// Prepended rather than set, because once a token is cached this batch is not the whole
+			// history: it is the newest stored page plus whatever is newer than it. Replacing the slot
+			// would throw away every older page the user scrolled in - and the periodic refresh runs
+			// through here every 30 seconds.
+			ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 		} else {
+			// Collectibles still fetch their whole history every time, so replacing the slot is a real
+			// refresh and drops what the chain no longer reports.
 			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
 		}
 

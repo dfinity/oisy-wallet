@@ -320,6 +320,10 @@ describe('eth-transactions.services', () => {
 					});
 
 				beforeEach(() => {
+					// A cached token now prepends rather than replaces, so rows left by an earlier test would
+					// make the next one look like a refresh.
+					ethTransactionsStore.reinitialize();
+
 					mockErcTransactions.mockResolvedValue([]);
 					vi.mocked(loadEthUserTransactions).mockResolvedValue(undefined);
 				});
@@ -383,7 +387,14 @@ describe('eth-transactions.services', () => {
 					});
 				});
 
-				it('should leave the cursor alone on a reload', async () => {
+				it('should leave the cursor alone once the list has been built', async () => {
+					// The periodic refresh runs the same path, so it must not send the next scroll back over
+					// pages the user already has.
+					ethTransactionsStore.set({
+						tokenId: mockTokenId,
+						transactions: createMockEthTransactions(3).map((data) => ({ data, certified: false }))
+					});
+
 					vi.mocked(loadEthUserTransactions).mockResolvedValue({
 						transactions: [],
 						newestBlockIndex: 100n,
@@ -392,9 +403,62 @@ describe('eth-transactions.services', () => {
 						totalStored: 2n
 					});
 
-					await loadUsdc(true);
+					await loadUsdc();
 
 					expect(setEthBackendPaginationCursor).not.toHaveBeenCalled();
+				});
+
+				it('should keep pages already scrolled in when it refreshes', async () => {
+					const pagedIn = createMockEthTransactions(4);
+
+					ethTransactionsStore.set({
+						tokenId: mockTokenId,
+						transactions: pagedIn.map((data) => ({ data, certified: false }))
+					});
+
+					const newestPage = createMockEthTransactions(2);
+
+					vi.mocked(loadEthUserTransactions).mockResolvedValue({
+						transactions: newestPage,
+						newestBlockIndex: 100n,
+						oldestBlockIndex: 50n,
+						nextStart: 40n,
+						totalStored: 30n
+					});
+
+					await loadUsdc();
+
+					const rows = get(ethTransactionsStore)?.[mockTokenId];
+
+					assertNonNullish(rows);
+
+					expect(rows).toHaveLength(pagedIn.length + newestPage.length);
+
+					expect(rows.map(({ data: { hash } }) => hash)).toEqual(
+						expect.arrayContaining(pagedIn.map(({ hash }) => hash))
+					);
+				});
+
+				it('should still replace the list for a token it does not cache', async () => {
+					const { id: tokenId, network, standard } = mockValidErc721Token;
+
+					ethTransactionsStore.set({
+						tokenId,
+						transactions: createMockEthTransactions(3).map((data) => ({ data, certified: false }))
+					});
+
+					const fetched = createMockEthTransactions(1);
+					mockErcTransactions.mockResolvedValue(fetched);
+
+					await loadEthereumTransactions({
+						identity: mockIdentity,
+						networkId: network.id,
+						tokenId,
+						chainId: ETHEREUM_NETWORK.chainId,
+						standard
+					});
+
+					expect(get(ethTransactionsStore)?.[tokenId]).toHaveLength(fetched.length);
 				});
 
 				it('should store what it fetched under the token contract key', async () => {
