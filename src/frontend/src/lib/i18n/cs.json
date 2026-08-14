@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Historie transakcí není k dispozici",
 			"missing_index_canister_explanation": "Momentálně nemůže $oisy_short zobrazit vaši minulou historii transakcí tokenů, protože vydavatel dosud neposkytl funkci sledování. Měla by být brzy přidána. Mezitím žádné obavy – stále můžete posílat a přijímat své tokeny jako obvykle.",
 			"index_canister_not_working_explanation": "Momentálně nemůže $oisy_short zobrazit vaši minulou historii transakcí tokenů, protože funkce sledování vydavatele v současné době nereaguje. Měla by být brzy vyřešena. Mezitím se žádné obavy – stále můžete posílat a přijímat své tokeny jako obvykle.",
-			"token_needs_enabling": "Pro zobrazení historie transakcí je třeba povolit token."
+			"token_needs_enabling": "Pro zobrazení historie transakcí je třeba povolit token.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",

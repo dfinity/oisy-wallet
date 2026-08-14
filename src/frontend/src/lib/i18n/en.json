@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
 			"index_canister_not_working_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer's tracking feature is currently not responding. It should be resolved soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
-			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
+			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history.",
+			"grouped_swap": "Swap",
+			"grouped_bundle": "Bundled transaction",
+			"grouped_count": "$count transfers in one transaction"
 		},
 		"error": {
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",

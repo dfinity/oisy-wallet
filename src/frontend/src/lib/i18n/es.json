@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Historial de transacciones no disponible",
 			"missing_index_canister_explanation": "En este momento, $oisy_short no puede mostrar tus transacciones de tokens pasadas porque el emisor aún no ha proporcionado la función de seguimiento. Debería añadirse pronto. Mientras tanto, no te preocupes — puedes seguir enviando y recibiendo tus tokens como de costumbre.",
 			"index_canister_not_working_explanation": "En este momento, $oisy_short no puede mostrar tus transacciones de tokens pasadas porque la función de seguimiento del emisor no está respondiendo actualmente. Debería resolverse pronto. Mientras tanto, no te preocupes — puedes seguir enviando y recibiendo tus tokens como de costumbre.",
-			"token_needs_enabling": "El token necesita ser habilitado para poder ver el historial de transacciones."
+			"token_needs_enabling": "El token necesita ser habilitado para poder ver el historial de transacciones.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Error al cargar las transacciones de $symbol.",

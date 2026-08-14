@@ -1707,6 +1707,9 @@ interface I18nTransactions {
 		missing_index_canister_explanation: string;
 		index_canister_not_working_explanation: string;
 		token_needs_enabling: string;
+		grouped_swap: string;
+		grouped_bundle: string;
+		grouped_count: string;
 	};
 	error: {
 		loading_transactions_symbol: string;

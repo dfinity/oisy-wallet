@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Cronologia transazioni non disponibile",
 			"missing_index_canister_explanation": "Attualmente, $oisy_short non può mostrare la cronologia delle tue transazioni di token perché l'emittente non ha ancora fornito la funzione di tracciamento. Dovrebbe essere aggiunta presto. Nel frattempo, non preoccuparti — puoi comunque inviare e ricevere i tuoi token come al solito.",
 			"index_canister_not_working_explanation": "Attualmente, $oisy_short non può mostrare la cronologia delle tue transazioni di token perché la funzione di tracciamento dell'emittente non risponde. Dovrebbe essere risolto presto. Nel frattempo, non preoccuparti — puoi comunque inviare e ricevere i tuoi token come al solito.",
-			"token_needs_enabling": "Il token deve essere abilitato per visualizzare la cronologia delle transazioni."
+			"token_needs_enabling": "Il token deve essere abilitato per visualizzare la cronologia delle transazioni.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",

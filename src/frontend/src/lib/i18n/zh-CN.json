@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "交易历史不可用",
 			"missing_index_canister_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方尚未提供追踪功能。该功能应很快上线。与此同时，请放心，您仍然可以正常发送和接收代币。",
 			"index_canister_not_working_explanation": "目前，$oisy_short 无法显示您的代币交易历史，因为发行方的追踪功能暂时无响应。该问题应很快得到解决。与此同时，请放心，您仍然可以正常发送和接收代币。",
-			"token_needs_enabling": "需启用该代币才能查看交易历史。"
+			"token_needs_enabling": "需启用该代币才能查看交易历史。",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",

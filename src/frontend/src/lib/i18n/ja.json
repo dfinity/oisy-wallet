@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "トランザクション履歴は利用できません。",
 			"missing_index_canister_explanation": "現在、$oisy_shortは発行者がまだトラッキング機能を提供していないため、過去のトークントランザクションを表示できません。近日中に追加される予定です。現状でもトークンの送受信は可能なので、ご安心ください。",
 			"index_canister_not_working_explanation": "現在、$oisy_shortは発行元の追跡機能が現在応答していないため、過去のトークントランザクションを表示できません。間もなく解決される予定です。現状でもトークンの送受信は可能なので、ご安心ください。",
-			"token_needs_enabling": "トランザクション履歴を表示するにはトークンを有効にする必要があります。"
+			"token_needs_enabling": "トランザクション履歴を表示するにはトークンを有効にする必要があります。",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "$symbolトランザクションの読み込み中にエラーが発生しました。",

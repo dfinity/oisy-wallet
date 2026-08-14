@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Historia transakcji niedostępna",
 			"missing_index_canister_explanation": "W tej chwili $oisy_short nie może wyświetlić Twojej historii transakcji tokenów, ponieważ emitent nie udostępnił jeszcze funkcji śledzenia. Powinna zostać dodana wkrótce. W międzyczasie nie martw się — nadal możesz wysyłać i odbierać swoje tokeny jak zwykle.",
 			"index_canister_not_working_explanation": "W tej chwili $oisy_short nie może wyświetlić Twojej historii transakcji tokenów, ponieważ funkcja śledzenia emitenta obecnie nie odpowiada. Powinno to zostać wkrótce rozwiązane. W międzyczasie nie martw się — nadal możesz wysyłać i odbierać swoje tokeny jak zwykle.",
-			"token_needs_enabling": "Token musi być włączony, aby wyświetlić historię transakcji."
+			"token_needs_enabling": "Token musi być włączony, aby wyświetlić historię transakcji.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",

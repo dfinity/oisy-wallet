@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "Lịch sử giao dịch không khả dụng",
 			"missing_index_canister_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì nhà phát hành chưa cung cấp tính năng theo dõi. Nó sẽ sớm được bổ sung. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",
 			"index_canister_not_working_explanation": "Hiện tại, $oisy_short không thể hiển thị lịch sử giao dịch token của bạn vì tính năng theo dõi của nhà phát hành hiện không phản hồi. Nó sẽ sớm được giải quyết. Trong thời gian chờ đợi, đừng lo lắng — bạn vẫn có thể gửi và nhận token của mình như bình thường.",
-			"token_needs_enabling": "Token cần được bật để xem lịch sử giao dịch."
+			"token_needs_enabling": "Token cần được bật để xem lịch sử giao dịch.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",

@@ -2034,7 +2034,10 @@
 			"transaction_history_unavailable": "트랜잭션 내역을 이용할 수 없습니다",
 			"missing_index_canister_explanation": "현재 발급자가 추적 기능을 아직 제공하지 않아 $oisy_short이 이전 토큰 트랜잭션을 표시할 수 없습니다. 곧 추가될 예정입니다. 그동안 걱정하지 마세요 — 평소처럼 토큰을 보내고 받을 수 있습니다.",
 			"index_canister_not_working_explanation": "현재 발급자의 추적 기능이 응답하지 않아 $oisy_short이 이전 토큰 트랜잭션을 표시할 수 없습니다. 곧 해결될 예정입니다. 그동안 걱정하지 마세요 — 평소처럼 토큰을 보내고 받을 수 있습니다.",
-			"token_needs_enabling": "트랜잭션 내역을 보려면 토큰을 활성화해야 합니다."
+			"token_needs_enabling": "트랜잭션 내역을 보려면 토큰을 활성화해야 합니다.",
+			"grouped_swap": "",
+			"grouped_bundle": "",
+			"grouped_count": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "$symbol 트랜잭션을 불러오는 중 오류가 발생했습니다.",

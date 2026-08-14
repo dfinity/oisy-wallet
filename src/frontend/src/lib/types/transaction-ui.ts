@@ -31,6 +31,8 @@ export type EthAllTransactionUiWithCmp = Extract<
 	{ component: 'ethereum' }
 >;
 
+export type SolAllTransactionUiWithCmp = Extract<AllTransactionUiWithCmp, { component: 'solana' }>;
+
 export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
