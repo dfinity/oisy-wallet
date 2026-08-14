@@ -1,6 +1,8 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
-import { ERC20_DEPOSIT_HASH } from '$eth/constants/erc20.constants';
+import { ERC20_DEPOSIT_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
+import { mapAddressToName } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -9,6 +11,7 @@ import {
 	createMockEthTransactionsUi,
 	createMockNftTransactionsUi
 } from '$tests/mocks/eth-transactions.mock';
+import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -18,6 +21,20 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 		disconnect: async () => {}
 	})
 }));
+
+vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
+	const actual = await importOriginal();
+	const { readable } = await import('svelte/store');
+	const { USDC_TOKEN } = await import('$env/tokens/tokens-erc20/tokens.usdc.env');
+
+	const mockToken = { ...USDC_TOKEN, enabled: true };
+
+	return {
+		...actual,
+		ercFungibleTokens: readable([mockToken]),
+		enabledErcFungibleTokens: readable([mockToken])
+	};
+});
 
 vi.mock(import('$eth/utils/transactions.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -277,5 +294,186 @@ describe('EthTransactionModal', () => {
 		})} ${ETHEREUM_TOKEN.symbol}`;
 
 		expect(getAllByText(formattedGasFee)[0]).toBeInTheDocument();
+	});
+
+	describe('with ERC20 transfer transactions', () => {
+		const gasUsed = 21_000n;
+		const gasPrice = 1_000_000_000n;
+
+		// Decoded: { to: '0x1234567890abcdef1234567890abcdef12345678', value: 10000000n }
+		const mockTransferData = `${ERC20_TRANSFER_HASH}0000000000000000000000001234567890abcdef1234567890abcdef123456780000000000000000000000000000000000000000000000000000000000989680`;
+
+		// As listed among the native token transactions: no value, addressed to the ERC20 contract.
+		const mockTransferTransactionUi = {
+			...mockEthTransactionUi,
+			type: 'send' as const,
+			value: ZERO,
+			to: USDC_TOKEN.address,
+			data: mockTransferData,
+			gasUsed,
+			gasPrice
+		};
+
+		it('should display the transferred amount instead of the native token value', () => {
+			const { getByText } = render(EthTransactionModal, {
+				transaction: mockTransferTransactionUi,
+				token: ETHEREUM_TOKEN
+			});
+
+			const formattedAmount = `${formatToken({
+				value: 10000000n,
+				unitName: USDC_TOKEN.decimals,
+				displayDecimals: USDC_TOKEN.decimals
+			})} ${USDC_TOKEN.symbol}`;
+
+			expect(getByText(formattedAmount)).toBeInTheDocument();
+		});
+
+		it('should still display the fee paid with the native token', () => {
+			const { getByText } = render(EthTransactionModal, {
+				transaction: mockTransferTransactionUi,
+				token: ETHEREUM_TOKEN
+			});
+
+			const formattedFee = `${formatToken({
+				value: gasUsed * gasPrice,
+				unitName: ETHEREUM_TOKEN.decimals,
+				displayDecimals: ETHEREUM_TOKEN.decimals
+			})} ${ETHEREUM_TOKEN.symbol}`;
+
+			expect(getByText(get(i18n).fee.text.fee)).toBeInTheDocument();
+			expect(getByText(formattedFee)).toBeInTheDocument();
+		});
+
+		it('should display the recipient of the transfer instead of the token contract', () => {
+			const { getByText, queryByText } = render(EthTransactionModal, {
+				transaction: mockTransferTransactionUi,
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText('0x1234567890AbcdEF1234567890aBcdef12345678')).toBeInTheDocument();
+
+			expect(queryByText(USDC_TOKEN.address)).not.toBeInTheDocument();
+		});
+
+		describe('with the token contract resolving to a name', () => {
+			beforeEach(() => {
+				vi.mocked(mapAddressToName).mockImplementation(({ address }) =>
+					address === USDC_TOKEN.address ? USDC_TOKEN.name : undefined
+				);
+			});
+
+			afterEach(() => {
+				vi.mocked(mapAddressToName).mockReturnValue(undefined);
+			});
+
+			it('should display the contract address for a resolved transfer', () => {
+				const { getByText, queryByText } = render(EthTransactionModal, {
+					transaction: mockTransferTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
+
+				// The address alone: the hero already names the asset.
+				expect(
+					getByText(shortenWithMiddleEllipsis({ text: USDC_TOKEN.address }))
+				).toBeInTheDocument();
+
+				expect(queryByText(USDC_TOKEN.name, { exact: false })).not.toBeInTheDocument();
+			});
+
+			it('should display the interacted with row for a contract call that is not a transfer', () => {
+				const { getByText } = render(EthTransactionModal, {
+					transaction: { ...mockTransferTransactionUi, data: '0xabcdef' },
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
+
+				expect(getByText(USDC_TOKEN.name)).toBeInTheDocument();
+			});
+
+			it('should display the interacted with row for an approve transaction', () => {
+				const { getByText } = render(EthTransactionModal, {
+					transaction: { ...mockApproveTransactionUi, to: USDC_TOKEN.address },
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(get(i18n).transaction.text.interacted_with)).toBeInTheDocument();
+			});
+		});
+
+		it('should name the token unknown rather than show the fee as the amount sent', () => {
+			const { getByText, getAllByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, to: mockEthAddress2 },
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.text.unknown_token)).toBeInTheDocument();
+
+			const formattedFee = `${formatToken({
+				value: gasUsed * gasPrice,
+				unitName: ETHEREUM_TOKEN.decimals,
+				displayDecimals: ETHEREUM_TOKEN.decimals
+			})} ${ETHEREUM_TOKEN.symbol}`;
+
+			// Only in its labelled row, so it cannot read as the amount that was sent.
+			expect(getAllByText(formattedFee)).toHaveLength(1);
+		});
+
+		it('should show the undecoded value and the contract for a token it cannot name', () => {
+			const { getByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, to: mockEthAddress2 },
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText(get(i18n).transaction.text.raw_value)).toBeInTheDocument();
+
+			expect(getByText('10000000')).toBeInTheDocument();
+
+			expect(
+				getByText(shortenWithMiddleEllipsis({ text: mockEthAddress2 }), { exact: false })
+			).toBeInTheDocument();
+		});
+
+		it('should fall back to the contract call rendering when the calldata does not decode', () => {
+			const { getByText, queryByText } = render(EthTransactionModal, {
+				transaction: { ...mockTransferTransactionUi, data: `${ERC20_TRANSFER_HASH}00` },
+				token: ETHEREUM_TOKEN
+			});
+
+			// The contract stays the counterparty rather than a recipient we could not read.
+			expect(getByText(USDC_TOKEN.address)).toBeInTheDocument();
+
+			expect(
+				queryByText(
+					`${formatToken({
+						value: 10000000n,
+						unitName: USDC_TOKEN.decimals,
+						displayDecimals: USDC_TOKEN.decimals
+					})} ${USDC_TOKEN.symbol}`
+				)
+			).not.toBeInTheDocument();
+		});
+
+		it('should display the native token value when the transaction is not addressed to a known token', () => {
+			const { getAllByText } = render(EthTransactionModal, {
+				transaction: {
+					...mockTransferTransactionUi,
+					to: mockEthAddress2,
+					value: 123450000000000n
+				},
+				token: ETHEREUM_TOKEN
+			});
+
+			const formattedAmount = `${formatToken({
+				value: 123450000000000n,
+				unitName: ETHEREUM_TOKEN.decimals,
+				displayDecimals: ETHEREUM_TOKEN.decimals
+			})} ${ETHEREUM_TOKEN.symbol}`;
+
+			expect(getAllByText(formattedAmount)[0]).toBeInTheDocument();
+		});
 	});
 });
