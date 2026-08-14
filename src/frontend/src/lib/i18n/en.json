@@ -1612,7 +1612,6 @@
 			"simulation_new_close_authority": "New close authority",
 			"simulation_new_program": "New owning program",
 			"simulation_control_removed": "Removed",
-			"summary": "Generated summary",
 			"summary_note": "Written by an AI model from the values in this review. OISY does not verify it, it can be wrong or incomplete, and it is only in English. The values below are what you are signing.",
 			"transfer_sources": "Sources",
 			"transfer_destinations": "Destinations",
@@ -1961,7 +1960,9 @@
 			"for": "For",
 			"for_copied": "Spender address copied to clipboard.",
 			"expiration": "Expiration",
-			"approve_label": "Approve $approveAmount"
+			"approve_label": "Approve $approveAmount",
+			"summary": "Generated summary",
+			"summary_note": "Written by an AI model from the values on this screen. OISY does not verify it, it can be wrong or incomplete, and it is only in English. The values below are the transaction."
 		},
 		"status": {
 			"confirmed": "Confirmed",

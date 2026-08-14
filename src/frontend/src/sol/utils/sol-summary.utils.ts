@@ -2,15 +2,16 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import {
-	SOLANA_WALLET_CONNECT_SUMMARY_MAX_LENGTH,
-	SOLANA_WALLET_CONNECT_SUMMARY_MAX_PROMPT_LENGTH
-} from '$sol/constants/wallet-connect.constants';
+	SOLANA_SUMMARY_MAX_LENGTH,
+	SOLANA_SUMMARY_MAX_PROMPT_LENGTH
+} from '$sol/constants/sol-summary.constants';
 import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
+import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { findSplToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-interface SolWalletConnectSummaryFactsParams {
+interface SolSignRequestSummaryFactsParams {
 	amount?: bigint;
 	token: Token;
 	feeToken: Token;
@@ -52,13 +53,30 @@ const formatDelta = ({
 	`Simulated balance change: ${value > ZERO ? '+' : '-'}${formatAmount({ value: value > ZERO ? value : -value, decimals })} ${symbol}`;
 
 /**
+ * Whole facts, up to the prompt budget.
+ *
+ * A screen that has more to say than the budget allows is cut at a line boundary rather than
+ * mid-fact, so the model never receives half a figure and phrases it as a whole one.
+ */
+const withinPromptBudget = (facts: (string | undefined)[]): string[] =>
+	facts.reduce<string[]>((acc, fact) => {
+		if (isNullish(fact)) {
+			return acc;
+		}
+
+		const { length } = [...acc, fact].join('\n');
+
+		return length > SOLANA_SUMMARY_MAX_PROMPT_LENGTH ? acc : [...acc, fact];
+	}, []);
+
+/**
  * The facts the generated sentence is allowed to phrase.
  *
  * Every line restates something the review has already derived deterministically and is already
  * rendering, in the same shortened form the user sees. Nothing else is sent: the model is never
  * given raw instruction data to interpret, so it can only ever rephrase what is on screen.
  */
-export const toSolWalletConnectSummaryFacts = ({
+export const toSolSignRequestSummaryFacts = ({
 	amount,
 	token,
 	feeToken,
@@ -70,7 +88,7 @@ export const toSolWalletConnectSummaryFacts = ({
 	prioritizationFee,
 	preview,
 	splTokens
-}: SolWalletConnectSummaryFactsParams): string[] => {
+}: SolSignRequestSummaryFactsParams): string[] => {
 	const {
 		network: { id: networkId }
 	} = feeToken;
@@ -134,16 +152,46 @@ export const toSolWalletConnectSummaryFacts = ({
 	];
 
 	// A message that touches enough accounts to blow the budget has more balance changes than one
-	// sentence can honestly describe, so the list is cut at a line boundary rather than mid-fact.
-	return facts.reduce<string[]>((acc, fact) => {
-		if (isNullish(fact)) {
-			return acc;
-		}
+	// sentence can honestly describe.
+	return withinPromptBudget(facts);
+};
 
-		const { length } = [...acc, fact].join('\n');
+// The direction is stated rather than left to be inferred from the addresses: the model is given
+// no way to tell which of them is the user's, and guessing is exactly what it must not do.
+const TRANSACTION_DIRECTION_FACTS: Record<SolTransactionType, string> = {
+	send: 'Direction: sent from this wallet',
+	receive: 'Direction: received by this wallet'
+};
 
-		return length > SOLANA_WALLET_CONNECT_SUMMARY_MAX_PROMPT_LENGTH ? acc : [...acc, fact];
-	}, []);
+/**
+ * The facts a transaction the user already made is allowed to phrase.
+ *
+ * The same rule as for a sign request, against a different screen: every line restates a row the
+ * transaction details modal is already showing, in the same form. The fee and the block are not
+ * sent because that modal does not show them, and the fee is quoted in SOL while the transaction
+ * may be an SPL one, so a single token's decimals could not render both faithfully.
+ */
+export const toSolTransactionSummaryFacts = ({
+	transaction: { type, value, from, fromOwner, to, toOwner, status },
+	token
+}: {
+	transaction: SolTransactionUi;
+	token: Token;
+}): string[] => {
+	// The modal shows the owner where it knows one and the token account otherwise. The sentence
+	// names the same address, so the two cannot disagree about who the counterparty is.
+	const counterparty = type === 'receive' ? (fromOwner ?? from) : (toOwner ?? to);
+
+	return withinPromptBudget([
+		TRANSACTION_DIRECTION_FACTS[type],
+		nonNullish(value)
+			? `Amount: ${formatAmount({ value, decimals: token.decimals })} ${token.symbol}`
+			: undefined,
+		nonNullish(counterparty)
+			? `${type === 'receive' ? 'Sender' : 'Recipient'}: ${formatAddress(counterparty)}`
+			: undefined,
+		nonNullish(status) ? `Status: ${status}` : undefined
+	]);
 };
 
 // Everything up to and including a reasoning block belongs to the model's scratchpad, not to its
@@ -164,12 +212,12 @@ const FIGURE_REGEX = /\d+(?:[.,]\d+)*/g;
 /**
  * The model's answer, or nothing at all.
  *
- * The sentence sits above a review whose rows are the truth, so anything that could contradict
+ * The sentence sits beside rows that are the truth, so anything that could contradict
  * them is dropped rather than repaired: a figure the facts never contained, markup, more than one
  * sentence, or a length past the bound the prompt asked for. Dropping is safe by construction,
  * since the review renders without a summary anyway.
  */
-export const sanitizeSolWalletConnectSummary = ({
+export const sanitizeSolSummary = ({
 	content,
 	facts
 }: {
@@ -190,7 +238,7 @@ export const sanitizeSolWalletConnectSummary = ({
 		return;
 	}
 
-	if (sentence.length > SOLANA_WALLET_CONNECT_SUMMARY_MAX_LENGTH) {
+	if (sentence.length > SOLANA_SUMMARY_MAX_LENGTH) {
 		return;
 	}
 

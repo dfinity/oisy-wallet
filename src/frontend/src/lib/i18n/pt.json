@@ -1612,7 +1612,6 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
-			"summary": "",
 			"summary_note": "",
 			"transfer_sources": "",
 			"transfer_destinations": "",
@@ -1961,7 +1960,9 @@
 			"for": "",
 			"for_copied": "",
 			"expiration": "",
-			"approve_label": ""
+			"approve_label": "",
+			"summary": "",
+			"summary_note": ""
 		},
 		"status": {
 			"confirmed": "Confirmado",

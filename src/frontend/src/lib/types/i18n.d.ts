@@ -1295,7 +1295,6 @@ interface I18nWallet_connect {
 		simulation_new_close_authority: string;
 		simulation_new_program: string;
 		simulation_control_removed: string;
-		summary: string;
 		summary_note: string;
 		transfer_sources: string;
 		transfer_destinations: string;
@@ -1636,6 +1635,8 @@ interface I18nTransaction {
 		for_copied: string;
 		expiration: string;
 		approve_label: string;
+		summary: string;
+		summary_note: string;
 	};
 	status: {
 		confirmed: string;

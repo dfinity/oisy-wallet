@@ -1612,7 +1612,6 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
-			"summary": "",
 			"summary_note": "",
 			"transfer_sources": "",
 			"transfer_destinations": "",
@@ -1961,7 +1960,9 @@
 			"for": "대상",
 			"for_copied": "사용자 주소가 클립보드에 복사되었습니다.",
 			"expiration": "만료",
-			"approve_label": "$approveAmount 승인"
+			"approve_label": "$approveAmount 승인",
+			"summary": "",
+			"summary_note": ""
 		},
 		"status": {
 			"confirmed": "확인됨",

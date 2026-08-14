@@ -1612,7 +1612,6 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
-			"summary": "",
 			"summary_note": "",
 			"transfer_sources": "",
 			"transfer_destinations": "",
@@ -1961,7 +1960,9 @@
 			"for": "承認先",
 			"for_copied": "承認先アドレスをクリップボードにコピーしました。",
 			"expiration": "有効期限",
-			"approve_label": "$approveAmount を承認"
+			"approve_label": "$approveAmount を承認",
+			"summary": "",
+			"summary_note": ""
 		},
 		"status": {
 			"confirmed": "確認済み",

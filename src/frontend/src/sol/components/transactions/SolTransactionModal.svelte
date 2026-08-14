@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { SOL_SUMMARY_ENABLED } from '$env/sol-summary.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
@@ -22,6 +23,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
+	import SolTransactionSummary from '$sol/components/transactions/SolTransactionSummary.svelte';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	interface Props {
@@ -120,6 +122,11 @@
 				{/if}
 			{/snippet}
 		</ModalHero>
+
+		<!-- Arrives late or not at all, and nothing below it waits for it. -->
+		{#if SOL_SUMMARY_ENABLED && nonNullish(token)}
+			<SolTransactionSummary {token} {transaction} />
+		{/if}
 
 		{#if nonNullish(toAddress) && nonNullish(fromAddress)}
 			<TransactionContactCard

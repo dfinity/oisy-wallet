@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { SOL_WALLET_CONNECT_SUMMARY_ENABLED } from '$env/sol-wallet-connect-summary.env';
+	import { SOL_SUMMARY_ENABLED } from '$env/sol-summary.env';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -147,7 +147,7 @@
 
 	<!-- Arrives late or not at all, and nothing below it waits for it: `approveDisabled` is the
 	     caller's, decided by the decode alone. -->
-	{#if SOL_WALLET_CONNECT_SUMMARY_ENABLED}
+	{#if SOL_SUMMARY_ENABLED}
 		<SolWalletConnectSummary
 			{amount}
 			{destination}

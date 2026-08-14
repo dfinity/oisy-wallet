@@ -3,13 +3,13 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
-import { summarizeSolWalletConnectRequest } from '$sol/services/wallet-connect-summary.services';
+import { summarizeSolFacts } from '$sol/services/sol-summary.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$sol/services/wallet-connect-summary.services');
+vi.mock('$sol/services/sol-summary.services');
 
 describe('SolWalletConnectSignReview', () => {
 	const props = {
@@ -38,7 +38,7 @@ describe('SolWalletConnectSignReview', () => {
 
 		mockAuthStore();
 
-		vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined);
+		vi.mocked(summarizeSolFacts).mockResolvedValue(undefined);
 	});
 
 	it('should render the unreviewed instructions warning', () => {
@@ -407,57 +407,55 @@ describe('SolWalletConnectSignReview', () => {
 		};
 
 		it('should leave the review as it is while the sentence has not arrived', () => {
-			vi.mocked(summarizeSolWalletConnectRequest).mockReturnValue(new Promise(() => {}));
+			vi.mocked(summarizeSolFacts).mockReturnValue(new Promise(() => {}));
 
 			const result = render(SolWalletConnectSignReview, { props: summaryProps });
 
 			expectReviewIntact(result);
 
-			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+			expect(result.queryByTestId('sol-summary')).not.toBeInTheDocument();
 		});
 
 		it('should leave the review as it is when the sentence never arrives', async () => {
-			vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined);
+			vi.mocked(summarizeSolFacts).mockResolvedValue(undefined);
 
 			const result = render(SolWalletConnectSignReview, { props: summaryProps });
 
 			await waitFor(() => {
-				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+				expect(summarizeSolFacts).toHaveBeenCalled();
 			});
 
 			expectReviewIntact(result);
 
-			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+			expect(result.queryByTestId('sol-summary')).not.toBeInTheDocument();
 		});
 
 		it('should leave the review as it is when the request throws', async () => {
-			vi.mocked(summarizeSolWalletConnectRequest).mockRejectedValue(new Error('unreachable'));
+			vi.mocked(summarizeSolFacts).mockRejectedValue(new Error('unreachable'));
 
 			const result = render(SolWalletConnectSignReview, { props: summaryProps });
 
 			await waitFor(() => {
-				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+				expect(summarizeSolFacts).toHaveBeenCalled();
 			});
 
 			expectReviewIntact(result);
 
-			expect(result.queryByTestId('wallet-connect-summary')).not.toBeInTheDocument();
+			expect(result.queryByTestId('sol-summary')).not.toBeInTheDocument();
 		});
 
 		it.each([
 			{
 				state: 'pending',
-				mock: () =>
-					vi.mocked(summarizeSolWalletConnectRequest).mockReturnValue(new Promise(() => {}))
+				mock: () => vi.mocked(summarizeSolFacts).mockReturnValue(new Promise(() => {}))
 			},
 			{
 				state: 'absent',
-				mock: () => vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue(undefined)
+				mock: () => vi.mocked(summarizeSolFacts).mockResolvedValue(undefined)
 			},
 			{
 				state: 'present',
-				mock: () =>
-					vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue('Transfer of 0.001 SOL.')
+				mock: () => vi.mocked(summarizeSolFacts).mockResolvedValue('Transfer of 0.001 SOL.')
 			}
 		])('should leave approval enabled while the sentence is $state', async ({ mock }) => {
 			mock();
@@ -465,21 +463,21 @@ describe('SolWalletConnectSignReview', () => {
 			const { getByRole } = render(SolWalletConnectSignReview, { props: summaryProps });
 
 			await waitFor(() => {
-				expect(summarizeSolWalletConnectRequest).toHaveBeenCalled();
+				expect(summarizeSolFacts).toHaveBeenCalled();
 			});
 
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 		});
 
 		it('should not enable approval that the decode disabled', async () => {
-			vi.mocked(summarizeSolWalletConnectRequest).mockResolvedValue('Transfer of 0.001 SOL.');
+			vi.mocked(summarizeSolFacts).mockResolvedValue('Transfer of 0.001 SOL.');
 
 			const { getByRole, getByTestId } = render(SolWalletConnectSignReview, {
 				props: { ...summaryProps, approveDisabled: true }
 			});
 
 			await waitFor(() => {
-				expect(getByTestId('wallet-connect-summary')).toBeInTheDocument();
+				expect(getByTestId('sol-summary')).toBeInTheDocument();
 			});
 
 			expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
