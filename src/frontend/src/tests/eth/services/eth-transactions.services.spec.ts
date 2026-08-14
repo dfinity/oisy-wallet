@@ -588,7 +588,12 @@ describe('eth-transactions.services', () => {
 			});
 
 			it('should keep pages already scrolled in when it refreshes', async () => {
-				const pagedIn = createMockEthTransactions(4);
+				// Hashes are fixed and disjoint: the store deduplicates by hash, so the assertion below
+				// would be at the mercy of the mock's random ones colliding.
+				const pagedIn = createMockEthTransactions(4).map((transaction, index) => ({
+					...transaction,
+					hash: `0xpagedin${index}`
+				}));
 
 				ethTransactionsStore.set({
 					tokenId: mockTokenId,
@@ -596,7 +601,10 @@ describe('eth-transactions.services', () => {
 				});
 
 				// A refresh only ever returns the newest stored page plus anything newer than it.
-				const newestPage = createMockEthTransactions(2);
+				const newestPage = createMockEthTransactions(2).map((transaction, index) => ({
+					...transaction,
+					hash: `0xnewest${index}`
+				}));
 
 				vi.mocked(loadEthUserTransactions).mockResolvedValue({
 					transactions: newestPage,
