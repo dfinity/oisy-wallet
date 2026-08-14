@@ -2,6 +2,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import {
 	sanitizeSolSummary,
 	toSolSignRequestSummaryFacts,
+	toSolTransactionGroupSummaryFacts,
 	toSolTransactionSummaryFacts
 } from '$sol/utils/sol-summary.utils';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
@@ -392,6 +393,88 @@ describe('sol-summary.utils', () => {
 				'Recipient: 4GsmSut...AM56JR8',
 				'Status: finalized'
 			]);
+		});
+	});
+
+	describe('toSolTransactionGroupSummaryFacts', () => {
+		const leg = ({ symbol, decimals, net }: { symbol: string; decimals: number; net: bigint }) => ({
+			symbol,
+			decimals,
+			net
+		});
+
+		const row = ({
+			type = 'send',
+			to = mockSolAddress2
+		}: {
+			type?: 'send' | 'receive';
+			to?: string;
+		}) =>
+			({
+				component: 'solana',
+				token: SOLANA_TOKEN,
+				transaction: { ...createMockSolTransactionUi('tx'), type, to, from: to }
+			}) as never;
+
+		const group = {
+			signature: 'sig',
+			transactions: [row({}), row({})],
+			legs: [
+				leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n }),
+				leg({ symbol: 'USDC', decimals: 6, net: 377_098n })
+			],
+			isSwap: true
+		};
+
+		// The sign is spent here rather than passed on: a bare minus is something a model can drop.
+		it('should say paid for a negative net and received for a positive one', () => {
+			const facts = toSolTransactionGroupSummaryFacts(group);
+
+			expect(facts).toContain('Paid: 0.005 SOL');
+			expect(facts).toContain('Received: 0.377098 USDC');
+		});
+
+		it('should name a one-in one-out group an exchange', () => {
+			const facts = toSolTransactionGroupSummaryFacts(group);
+
+			expect(facts).toContain('Kind: one transaction that exchanged one token for another');
+		});
+
+		it('should leave any other shape unnamed', () => {
+			const facts = toSolTransactionGroupSummaryFacts({
+				...group,
+				legs: [
+					leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n }),
+					leg({ symbol: 'USDC', decimals: 6, net: -377_098n })
+				],
+				isSwap: false
+			});
+
+			expect(facts).toContain('Kind: one transaction that moved several amounts');
+			expect(facts.join('\n')).not.toContain('exchanged');
+		});
+
+		it('should state how many rows the group holds', () => {
+			const facts = toSolTransactionGroupSummaryFacts(group);
+
+			expect(facts).toContain('Transfers: 2');
+		});
+
+		it('should name the counterparty every row agrees on, shortened', () => {
+			const facts = toSolTransactionGroupSummaryFacts(group);
+
+			expect(facts).toContain('Counterparty: 4GsmSut...AM56JR8');
+			expect(facts.join('\n')).not.toContain(mockSolAddress2);
+		});
+
+		// Naming one of several addresses would be picking a winner.
+		it('should name no counterparty when the rows disagree', () => {
+			const facts = toSolTransactionGroupSummaryFacts({
+				...group,
+				transactions: [row({}), row({ to: mockSolAddress })]
+			});
+
+			expect(facts.join('\n')).not.toContain('Counterparty');
 		});
 	});
 });

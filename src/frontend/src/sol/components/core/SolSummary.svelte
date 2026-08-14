@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,9 +11,12 @@
 		// The screens that show this differ in what the reader must be told to trust instead of the
 		// sentence: on a sign request it is what they are about to sign, elsewhere it is the rows.
 		note?: string;
+		// Fired once the sentence is on screen. A container that sized itself around the content
+		// before the sentence arrived would otherwise clip it, since it lands seconds later.
+		onRendered?: () => void;
 	}
 
-	let { facts, note }: Props = $props();
+	let { facts, note, onRendered }: Props = $props();
 
 	let summary = $state<string | undefined>();
 
@@ -34,9 +37,17 @@
 			// Deliberately not awaited: the screen is already complete and correct without this
 			// sentence, and nothing on it may wait on an update call to the LLM canister.
 			void summarizeSolFacts({ facts: currentFacts, identity })
-				.then((result) => {
-					if (currentRequestId === requestId) {
-						summary = result;
+				.then(async (result) => {
+					if (currentRequestId !== requestId) {
+						return;
+					}
+
+					summary = result;
+
+					if (nonNullish(result)) {
+						await tick();
+
+						onRendered?.();
 					}
 				})
 				// The service resolves rather than rejects by contract. The guard is here so that a

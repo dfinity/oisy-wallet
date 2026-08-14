@@ -7,6 +7,7 @@ import {
 } from '$sol/constants/sol-summary.constants';
 import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
+import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { findSplToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -191,6 +192,52 @@ export const toSolTransactionSummaryFacts = ({
 			? `${type === 'receive' ? 'Sender' : 'Recipient'}: ${formatAddress(counterparty)}`
 			: undefined,
 		nonNullish(status) ? `Status: ${status}` : undefined
+	]);
+};
+
+/**
+ * The one counterparty of a group, or nothing.
+ *
+ * Every row has to agree, and every row has to have one. A bundle that touched several addresses
+ * has no single counterparty, and a sentence naming one of them would be picking a winner.
+ */
+const groupCounterparty = ({ transactions }: SolTransactionGroup): string | undefined => {
+	const counterparties = transactions.map(
+		({ transaction: { type, from, fromOwner, to, toOwner } }) =>
+			type === 'receive' ? (fromOwner ?? from) : (toOwner ?? to)
+	);
+
+	const [first] = counterparties;
+
+	return nonNullish(first) && counterparties.every((address) => address === first)
+		? first
+		: undefined;
+};
+
+/**
+ * The facts the rows of one transaction are allowed to phrase, once they are back together.
+ *
+ * The legs are already netted, which is the whole point: the row-level amounts are legs of one
+ * movement, and only the net is a fact about the balance. The sign is spent here rather than
+ * passed on, because "paid" and "received" are what the sentence needs and a bare minus is
+ * something a model can drop.
+ */
+export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): string[] => {
+	const { transactions, legs, isSwap } = group;
+
+	const counterparty = groupCounterparty(group);
+
+	return withinPromptBudget([
+		isSwap
+			? 'Kind: one transaction that exchanged one token for another'
+			: 'Kind: one transaction that moved several amounts',
+		...legs.map(({ symbol, decimals, net }) =>
+			net < ZERO
+				? `Paid: ${formatAmount({ value: -net, decimals })} ${symbol}`
+				: `Received: ${formatAmount({ value: net, decimals })} ${symbol}`
+		),
+		nonNullish(counterparty) ? `Counterparty: ${formatAddress(counterparty)}` : undefined,
+		`Transfers: ${transactions.length}`
 	]);
 };
 

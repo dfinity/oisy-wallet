@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
+	import { SOL_SUMMARY_ENABLED } from '$env/sol-summary.env';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -12,8 +13,10 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import SolSummary from '$sol/components/core/SolSummary.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
+	import { toSolTransactionGroupSummaryFacts } from '$sol/utils/sol-summary.utils';
 
 	interface Props {
 		group: SolTransactionGroup;
@@ -23,6 +26,23 @@
 	let { group, testId }: Props = $props();
 
 	let { transactions, legs, isSwap } = $derived(group);
+
+	let collapsible = $state<ReturnType<typeof Collapsible> | undefined>();
+
+	let expanded = $state(false);
+
+	// The sentence costs an update call to the LLM canister, so it is asked for when the user opens
+	// the group and never for a row they only scrolled past. Once asked, it stays mounted:
+	// collapsing hides it, and re-expanding must not pay for it twice.
+	let requested = $state(false);
+
+	$effect(() => {
+		if (expanded) {
+			requested = true;
+		}
+	});
+
+	let facts = $derived(toSolTransactionGroupSummaryFacts(group));
 
 	// Every row of the group is the same transaction on the same network, so the first one speaks
 	// for all of them.
@@ -35,7 +55,13 @@
 	);
 </script>
 
-<Collapsible expandButton testId={testId ?? 'sol-transactions-group'} wrapHeight>
+<Collapsible
+	bind:this={collapsible}
+	expandButton
+	testId={testId ?? 'sol-transactions-group'}
+	wrapHeight
+	bind:expanded
+>
 	{#snippet header()}
 		<span class="block w-full rounded-xl px-2 py-2">
 			<Card noMargin withGap>
@@ -79,6 +105,12 @@
 			</Card>
 		</span>
 	{/snippet}
+
+	{#if SOL_SUMMARY_ENABLED && requested}
+		<div class="pb-2">
+			<SolSummary {facts} onRendered={() => collapsible?.updateMaxHeight()} />
+		</div>
+	{/if}
 
 	{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${transactionUi.token.id.description}-${index}`)}
 		{@const { token, transaction } = transactionUi}
