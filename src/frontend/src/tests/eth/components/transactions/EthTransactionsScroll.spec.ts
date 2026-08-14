@@ -1,9 +1,11 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import EthTransactionsScroll from '$eth/components/transactions/EthTransactionsScroll.svelte';
 import * as ethUserTransactionsServices from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { token } from '$lib/stores/token.store';
+import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import {
@@ -29,7 +31,7 @@ describe('EthTransactionsScroll', () => {
 
 	let loadNextSpy: MockInstance;
 
-	const setTransactions = ({ tokenId }: { tokenId: symbol }) => {
+	const setTransactions = ({ tokenId }: { tokenId: TokenId }) => {
 		ethTransactionsStore.set({
 			tokenId,
 			transactions: mockTransactions.map((transaction) => ({
@@ -68,7 +70,7 @@ describe('EthTransactionsScroll', () => {
 
 		expect(loadNextSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
-				transactionTokenId: { EvmNative: mockToken.network.chainId },
+				transactionTokenId: { EvmNative: BASE_NETWORK.chainId },
 				tokenId: mockToken.id,
 				networkId: mockToken.network.id,
 				oldestLoadedBlockNumber
