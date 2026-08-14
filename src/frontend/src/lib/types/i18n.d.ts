@@ -684,6 +684,7 @@ interface I18nSend {
 	text: {
 		send: string;
 		send_token: string;
+		send_unknown_token: string;
 		destination: string;
 		balance: string;
 		review: string;
@@ -1633,6 +1634,8 @@ interface I18nTransaction {
 		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
+		unknown_token: string;
+		raw_value: string;
 		status: string;
 		confirmations: string;
 		for: string;
