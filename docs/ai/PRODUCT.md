@@ -285,6 +285,16 @@ Requests are still handled **one at a time**: while a request from one dApp is u
 
 ## Ethereum
 
+### Transaction history
+
+A token's transaction list is built from two sources: the indexed history of the chain, and the copy OISY keeps for the user in their own backend canister. The stored copy is what makes history survive — it is read first, the chain is then asked only for what happened after the newest stored entry, and finalized entries are written back as they are seen. Scrolling to the end of a list asks for the page before it: first from stored history, and once that is exhausted, from the chain for anything older still, which is then stored too. So history reaches further back the more the wallet is used, and is not limited to what one indexer request will return.
+
+This applies to a chain's own coin — ETH, and the native coin of each supported EVM chain — and to ERC20 tokens, each keyed separately so one token's history never mixes with another's. Collectible (ERC721 and ERC1155) transfers are not stored this way: their lists are re-read from the chain each time and show only what one request returns.
+
+Stored history is bounded per token, and the oldest entries are dropped once that bound is reached; anything trimmed is still reachable from the chain while the indexer will serve it. Entries are held as the chain reported them. Where that would read oddly — a vault's share mints and burns are recorded against the zero address rather than the vault — the list presents the sensible counterparty without altering what was stored.
+
+Token transfers that merely look like the user's own activity are filtered out before display or storage. An attacker can emit a zero-value transfer that names the user as sender, so a transfer is checked against who actually signed and paid for the transaction, not against the transfer event alone.
+
 ### Transaction fees
 
 When an Ethereum send or approval flow is open, OISY fetches the current network gas fee and keeps it current for as long as the flow stays open. If the wallet is backgrounded — common on mobile, where switching apps, locking the screen, or bouncing between a dApp and OISY during a WalletConnect approval suspends the tab — the fee fetch can be interrupted. OISY recovers on its own: it re-fetches the fee when the wallet returns to the foreground, and retries transient fetch failures automatically, so a send is not left permanently unable to proceed.
