@@ -259,6 +259,59 @@ describe('etherscan.providers', () => {
 						provider.erc20Transactions({ address: mockEthAddress, contract: mockValidErc20Token })
 					).rejects.toThrow('Network error');
 				});
+
+				it('should query the whole history newest-first when given no window', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					await provider.erc20Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc20Token
+					});
+
+					expect(mockFetch).toHaveBeenCalledWith('account', {
+						action: 'tokentx',
+						contractAddress: mockValidErc20Token.address,
+						address: mockEthAddress,
+						startblock: 0,
+						sort: 'desc'
+					});
+				});
+
+				it('should pass a block window through to the query', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					await provider.erc20Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc20Token,
+						startBlock: 100,
+						endBlock: 200,
+						sort: 'asc'
+					});
+
+					expect(mockFetch).toHaveBeenCalledWith('account', {
+						action: 'tokentx',
+						contractAddress: mockValidErc20Token.address,
+						address: mockEthAddress,
+						startblock: 100,
+						endblock: 200,
+						sort: 'asc'
+					});
+				});
+
+				it('should omit the end of the window when it is not given', async () => {
+					const provider = new EtherscanProvider(network, chainId);
+
+					await provider.erc20Transactions({
+						address: mockEthAddress,
+						contract: mockValidErc20Token,
+						startBlock: 100
+					});
+
+					expect(mockFetch).toHaveBeenCalledWith(
+						'account',
+						expect.not.objectContaining({ endblock: expect.anything() })
+					);
+				});
 			});
 
 			describe('erc721Transactions', () => {
