@@ -182,8 +182,10 @@ const loadEthTransactions = async ({
 			? await loadEthUserTransactions({ identity, tokenId: transactionTokenId })
 			: undefined;
 
-		// Left alone on a reload: the timer must not rewind pages the user has already scrolled past.
-		if (!updateOnly) {
+		// Only while the list is being built from scratch. The periodic refresh comes through here too,
+		// so resetting the cursor unconditionally would send the next scroll back over pages the user
+		// already has.
+		if (!hasStoredEthTransactions(tokenId)) {
 			setEthBackendPaginationCursor({ tokenId, nextStart: stored?.nextStart });
 		}
 
@@ -214,7 +216,10 @@ const loadEthTransactions = async ({
 				ethTransactionsStore.update({ tokenId, transaction })
 			);
 		} else {
-			ethTransactionsStore.set({ tokenId, transactions: certifiedTransactions });
+			// Prepended rather than set, because this batch is not the whole history: it is the newest
+			// stored page plus whatever is newer than it. Replacing the slot would throw away every older
+			// page the user scrolled in - and the periodic refresh runs through here every 30 seconds.
+			ethTransactionsStore.prepend({ tokenId, transactions: certifiedTransactions });
 		}
 
 		// Save newly finalized transactions to backend (fire-and-forget).

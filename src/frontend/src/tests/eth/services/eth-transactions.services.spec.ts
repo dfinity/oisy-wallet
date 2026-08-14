@@ -757,7 +757,14 @@ describe('eth-transactions.services', () => {
 				});
 			});
 
-			it('should leave the backend cursor alone on a reload', async () => {
+			it('should leave the backend cursor alone once the list has been built', async () => {
+				// The periodic refresh runs the same path, so it must not send the next scroll back over
+				// pages the user already has.
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: createMockEthTransactions(3).map((data) => ({ data, certified: false }))
+				});
+
 				vi.mocked(loadEthUserTransactions).mockResolvedValue({
 					transactions: createMockEthTransactions(2),
 					newestBlockIndex: 100n,
@@ -774,11 +781,59 @@ describe('eth-transactions.services', () => {
 					networkId: mockNetworkId,
 					tokenId: mockTokenId,
 					chainId: mockChainId,
-					standard: mockStandard,
-					updateOnly: true
+					standard: mockStandard
 				});
 
 				expect(setEthBackendPaginationCursor).not.toHaveBeenCalled();
+			});
+
+			it('should keep pages already scrolled in when it refreshes', async () => {
+				// Hashes are fixed and disjoint: the store deduplicates by hash, so the assertion below
+				// would be at the mercy of the mock's random ones colliding.
+				const pagedIn = createMockEthTransactions(4).map((transaction, index) => ({
+					...transaction,
+					hash: `0xpagedin${index}`
+				}));
+
+				ethTransactionsStore.set({
+					tokenId: mockTokenId,
+					transactions: pagedIn.map((data) => ({ data, certified: false }))
+				});
+
+				// A refresh only ever returns the newest stored page plus anything newer than it.
+				const newestPage = createMockEthTransactions(2).map((transaction, index) => ({
+					...transaction,
+					hash: `0xnewest${index}`
+				}));
+
+				vi.mocked(loadEthUserTransactions).mockResolvedValue({
+					transactions: newestPage,
+					newestBlockIndex: 100n,
+					oldestBlockIndex: 50n,
+					nextStart: 60n,
+					totalStored: 30n
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(150);
+				mockEthTransactionsProvider.mockResolvedValueOnce([]);
+
+				await loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId: mockNetworkId,
+					tokenId: mockTokenId,
+					chainId: mockChainId,
+					standard: mockStandard
+				});
+
+				const rows = get(ethTransactionsStore)?.[mockTokenId];
+
+				assertNonNullish(rows);
+
+				expect(rows).toHaveLength(pagedIn.length + newestPage.length);
+
+				expect(rows.map(({ data: { hash } }) => hash)).toEqual(
+					expect.arrayContaining(pagedIn.map(({ hash }) => hash))
+				);
 			});
 
 			it('should use update method when updateOnly is true', async () => {
