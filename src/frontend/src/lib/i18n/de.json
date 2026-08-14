@@ -1948,7 +1948,7 @@
 			"to_ata": "Empfänger-Token-Konto (ATA)",
 			"to_ata_copied": "Empfänger-Token-Konto (ATA) in die Zwischenablage kopiert.",
 			"block": "Block",
-			"interacted_with": "Interagierte mit (Ziel)",
+			"interacted_with": "Interagierte mit",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "Status",

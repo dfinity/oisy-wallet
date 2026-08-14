@@ -1948,7 +1948,7 @@
 			"to_ata": "Conta de token do destinatário (ATA)",
 			"to_ata_copied": "Conta de token do destinatário (ATA) copiada para a área de transferência.",
 			"block": "Bloco",
-			"interacted_with": "Interagido com (Para)",
+			"interacted_with": "Interagido com",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "Status",

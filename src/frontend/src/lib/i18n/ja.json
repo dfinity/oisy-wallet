@@ -1948,7 +1948,7 @@
 			"to_ata": "受信者トークンアカウント（ATA）",
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
-			"interacted_with": "実行先コントラクト（To）",
+			"interacted_with": "実行先コントラクト",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "ステータス",

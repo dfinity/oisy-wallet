@@ -1948,7 +1948,7 @@
 			"to_ata": "Účet tokenu příjemce (ATA)",
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
-			"interacted_with": "Interakce s (do)",
+			"interacted_with": "Interakce s",
 			"unknown_token": "",
 			"raw_value": "",
 			"status": "Stav",
