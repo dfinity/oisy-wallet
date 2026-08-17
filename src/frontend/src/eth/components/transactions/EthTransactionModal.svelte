@@ -12,7 +12,7 @@
 	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
 		tryDecodeErc20AbiData,
-		findErcTransfer,
+		findErcTransfers,
 		formatErcTransferAsset,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer,
@@ -119,24 +119,28 @@
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
 	// A zero-value native send is the fee entry of a token transfer: the transfer itself moved no
-	// native value. Its loaded counterpart is the `Transfer` event, so it describes a direct transfer,
-	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
-	let ercTransfer = $derived(
+	// native value. Its loaded counterparts are the `Transfer` events, so they describe a direct
+	// transfer, a router send and a `transferFrom` alike - unlike the calldata, which covers the first.
+	let ercTransfers = $derived(
 		isSend && value === ZERO && nonNullish(token) && isTokenEthereumNative(token)
-			? findErcTransfer({
+			? findErcTransfers({
 					hash,
 					networkId: token.network.id,
 					transfers: $ercTransfersByNetworkAndHash
 				})
-			: undefined
+			: []
 	);
+
+	let ercTransfer = $derived(ercTransfers.length === 1 ? ercTransfers[0] : undefined);
+
+	let isCombinedFee = $derived(ercTransfers.length > 1);
 
 	// Calldata carrying the transfer selector still may not decode. Without a recipient and an amount
 	// there is nothing for the calldata to contribute, so only a loaded transfer can resolve it.
 	let transferDecoded = $derived(isErc20Transfer && nonNullish(dataTo) && nonNullish(dataValue));
 
-	// Falls back to the calldata when the transferred token is not loaded, so that the entry does not
-	// change label once an unrelated token list finishes loading.
+	// Falls back to the calldata when the transferred token is not loaded, so that the hero does not
+	// change once an unrelated token list finishes loading.
 	let transferToken = $derived(ercTransfer?.token ?? (transferDecoded ? contractToken : undefined));
 
 	let transferValue = $derived(
@@ -156,6 +160,11 @@
 				})
 			: undefined
 	);
+
+	// Several transfers under one hash - a swap, a batch send - and the entry describes none of them.
+	// All it accounts for is the fee that paid for them, so that is what it reads as. The calldata
+	// still wins when it names the asset, as for a single transfer split into several.
+	let showAsFee = $derived(isCombinedFee && isNullish(transferAssetText));
 
 	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
 	// send would present the contract as the recipient. The recipient comes from the loaded transfer,
@@ -268,7 +277,7 @@
 	);
 
 	let displayValue = $derived(
-		(isErc20Deposit || isTransferFeeEntry) && nonNullish(gasFee) ? gasFee : value
+		(isErc20Deposit || isTransferFeeEntry || showAsFee) && nonNullish(gasFee) ? gasFee : value
 	);
 
 	let displayType = $derived(isErc20Deposit ? 'deposit' : type);
@@ -290,7 +299,9 @@
 			{/snippet}
 
 			{#snippet subtitle()}
-				<span class="capitalize">{$i18n.transaction.type[displayType]}</span>
+				<span class="capitalize"
+					>{showAsFee ? $i18n.fee.text.fee : $i18n.transaction.type[displayType]}</span
+				>
 			{/snippet}
 
 			{#snippet title()}

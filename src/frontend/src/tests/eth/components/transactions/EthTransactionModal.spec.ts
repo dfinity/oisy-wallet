@@ -551,6 +551,36 @@ describe('EthTransactionModal', () => {
 				ethTransactionsStore.reset(mockValidErc721Token.id);
 			});
 
+			it('should read as a fee when several transfers share the hash', () => {
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{ data: { ...mockErc20Transfer, value: 1n, tokenId: 123 }, certified: false }
+					]
+				});
+
+				const { getAllByText, queryByText } = render(EthTransactionModal, {
+					transaction: mockRouterTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				const formattedFee = `${formatToken({
+					value: gasUsed * gasPrice,
+					unitName: ETHEREUM_TOKEN.decimals,
+					displayDecimals: ETHEREUM_TOKEN.decimals
+				})} ${ETHEREUM_TOKEN.symbol}`;
+
+				expect(queryByText(get(i18n).transaction.type.send)).not.toBeInTheDocument();
+
+				// The subtitle, plus the label of the fee row.
+				expect(getAllByText(get(i18n).fee.text.fee)).toHaveLength(2);
+
+				// The hero, plus the fee row itself.
+				expect(getAllByText(formattedFee)).toHaveLength(2);
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
+			});
+
 			it('should display amount and recipient of the loaded transfer', () => {
 				const { getByText } = render(EthTransactionModal, {
 					transaction: mockRouterTransactionUi,

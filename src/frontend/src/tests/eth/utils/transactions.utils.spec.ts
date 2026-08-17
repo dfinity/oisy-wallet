@@ -10,6 +10,7 @@ import {
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
 	findErcTransfer,
+	findErcTransfers,
 	formatErcTransferAsset,
 	groupEthTransactionsByNetworkAndHash,
 	isErc20TransactionTransfer,
@@ -418,6 +419,30 @@ describe('transactions.utils', () => {
 			expect(
 				findErcTransfer({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
 			).toBeUndefined();
+		});
+
+		it('should return every transfer of a hash', () => {
+			expect(
+				findErcTransfers({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([transfer, transfer]);
+
+			expect(
+				findErcTransfers({ hash: '0xaaa', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([transfer]);
+		});
+
+		it('should return no transfers for an unknown hash, network or nullish hash', () => {
+			expect(
+				findErcTransfers({ hash: '0xccc', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([]);
+
+			expect(
+				findErcTransfers({ hash: '0xaaa', networkId: SEPOLIA_NETWORK_ID, transfers })
+			).toStrictEqual([]);
+
+			expect(
+				findErcTransfers({ hash: undefined, networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([]);
 		});
 
 		it('should return undefined for an unknown hash, network or nullish hash', () => {
