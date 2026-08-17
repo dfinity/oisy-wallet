@@ -1645,7 +1645,8 @@
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
 			"disconnect_all": "सभी डिस्कनेक्ट करें",
 			"disconnect_app": "$name को डिस्कनेक्ट करें",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."

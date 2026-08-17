@@ -1645,7 +1645,8 @@
 			"no_connected_apps": "Nenhum aplicativo está conectado no momento.",
 			"disconnect_all": "Desconectar todos",
 			"disconnect_app": "Desconectar $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."
