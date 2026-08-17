@@ -3,13 +3,16 @@
 	import EthTransactionStatus from '$eth/components/transactions/EthTransactionStatus.svelte';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { ercFungibleTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isTokenErc } from '$eth/utils/erc.utils';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 	import {
 		tryDecodeErc20AbiData,
+		findErcFungibleTransfer,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer,
 		isMaxUint256,
@@ -62,6 +65,7 @@
 		to,
 		type,
 		approveSpender,
+		transferRecipient,
 		data,
 		gasUsed,
 		gasPrice
@@ -113,30 +117,49 @@
 
 	let isUnlimitedApprove = $derived(isMaxUint256(approveValue));
 
+	// A zero-value native send is the fee entry of a token transfer: the transfer itself moved no
+	// native value. Its loaded counterpart is the `Transfer` event, so it describes a direct transfer,
+	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
+	let ercTransfer = $derived(
+		isSend && value === ZERO && nonNullish(token) && isTokenEthereumNative(token)
+			? findErcFungibleTransfer({
+					hash,
+					networkId: token.network.id,
+					transfers: $ercFungibleTransfersByNetworkAndHash
+				})
+			: undefined
+	);
+
 	// Calldata carrying the transfer selector still may not decode. Without a recipient and an amount
-	// there is no transfer to describe, so the entry stays a plain contract call rather than claiming
-	// a send it cannot name - and pointing that send at the contract.
+	// there is nothing for the calldata to contribute, so only a loaded transfer can resolve it.
 	let transferDecoded = $derived(isErc20Transfer && nonNullish(dataTo) && nonNullish(dataValue));
 
-	// An ERC20 transfer is listed among the transactions of the native token too, since the fee was
-	// paid with it. Only in that view does `to` resolve to a known token - in the ERC20 token view it
-	// is the recipient of the transfer - so this tells us we are rendering the fee side of the send.
-	let transferToken = $derived(transferDecoded ? contractToken : undefined);
+	// Falls back to the calldata when the transferred token is not loaded, so that the entry does not
+	// change label once an unrelated token list finishes loading.
+	let transferToken = $derived(ercTransfer?.token ?? (transferDecoded ? contractToken : undefined));
+
+	let transferValue = $derived(
+		nonNullish(ercTransfer)
+			? ercTransfer.transaction.value
+			: nonNullish(transferToken)
+				? dataValue
+				: undefined
+	);
 
 	// The transaction is addressed to the token contract, so showing `to` as the counterparty of a
-	// send would present the contract as the recipient. The recipient is in the calldata.
+	// send would present the contract as the recipient. The recipient comes from the loaded transfer,
+	// or from the calldata.
 	//
 	// Deliberately not gated on `transferToken`: recognising the contract is what lets us name the
 	// asset and show the fee, not what makes the decoded address the recipient. Requiring it would
 	// put the contract back in the counterparty of every transfer of a token we do not know.
-	let recipient = $derived((transferDecoded ? dataTo : undefined) ?? to);
+	let recipient = $derived(ercTransfer?.transaction.to ?? transferRecipient ?? to);
 
 	// The fee is known from the receipt whether or not the token is: naming the asset needs the
-	// contract, accounting for what left the native balance does not. A transfer that also moved
-	// native value is a real native send, so only a zero-value entry is the fee side of one.
-	let isTransferFeeEntry = $derived(transferDecoded && value === ZERO);
-
-	let transferValue = $derived(nonNullish(transferToken) ? dataValue : undefined);
+	// contract, accounting for what left the native balance does not. Either source establishes the
+	// entry as the fee side of a transfer - the loaded one also covers a router send, which no
+	// calldata decode can. A transfer that also moved native value is a real native send.
+	let isTransferFeeEntry = $derived((nonNullish(ercTransfer) || transferDecoded) && value === ZERO);
 
 	// The contract of the transferred token, so it can be verified: a symbol is not unique. On the
 	// native entry it is the transaction `to`; opened from the token itself it is that token, since
