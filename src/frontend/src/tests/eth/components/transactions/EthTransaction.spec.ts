@@ -12,12 +12,26 @@ import { TRANSACTION_CHILDREN_CONTAINER } from '$lib/constants/test-ids.constant
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { createMockEthTransactionsUi } from '$tests/mocks/eth-transactions.mock';
 import { mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+vi.mock(import('$eth/derived/erc721.derived'), async (importOriginal) => {
+	const { readable } = await import('svelte/store');
+	const { mockValidErc721Token } = await import('$tests/mocks/erc721-tokens.mock');
+
+	const mockToken = { ...mockValidErc721Token, enabled: true };
+
+	return {
+		...importOriginal,
+		erc721Tokens: readable([mockToken]),
+		enabledErc721Tokens: readable([mockToken])
+	};
+});
 
 vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -556,6 +570,42 @@ describe('EthTransaction', () => {
 				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
 					get(i18n).send.text.send
 				);
+			});
+
+			it('should describe a non-fungible transfer by collection and token id', () => {
+				// Only the NFT transfer may share the hash, or it would resolve to nothing.
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{
+							data: { ...mockErc20Transfer, value: 1n, tokenId: 123 },
+							certified: false
+						}
+					]
+				});
+
+				const { container, getByTestId } = render(EthTransaction, {
+					props: {
+						transaction: mockRouterTx,
+						token: ETHEREUM_TOKEN
+					}
+				});
+
+				expect(getByTestId(TRANSACTION_CHILDREN_CONTAINER).textContent).toBe(
+					replacePlaceholders(get(i18n).send.text.send_token, {
+						$token: `${getTokenDisplayName(mockValidErc721Token)} #123`
+					})
+				);
+
+				const amountElement = container.querySelector('div.leading-5>span.justify-end');
+
+				assertNonNullish(amountElement);
+
+				expect(amountElement.textContent).toBe(expectedFeeAmount);
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
 			});
 
 			it('should ignore the loaded transfer when rendering the transfer for its own token', () => {

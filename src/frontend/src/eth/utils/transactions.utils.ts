@@ -6,14 +6,18 @@ import {
 } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { ErcFungibleTransfer, EthTransactionUi } from '$eth/types/eth-transaction';
+import type { ErcTransfer, EthTransactionUi } from '$eth/types/eth-transaction';
 import { MAX_UINT_256 } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
+import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getContactForAddress } from '$lib/utils/contact.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { AbiCoder } from 'ethers/abi';
@@ -145,20 +149,20 @@ export const groupEthTransactionsByNetworkAndHash = <T>({
 };
 
 /**
- * Finds the ERC fungible transfer that a transaction hash belongs to.
+ * Finds the ERC transfer that a transaction hash belongs to.
  *
  * A swap or a batch send emits several transfers under the same hash. None of them describes the
  * transaction on its own, so an ambiguous hash resolves to nothing rather than to an arbitrary leg.
  */
-export const findErcFungibleTransfer = ({
+export const findErcTransfer = ({
 	hash,
 	networkId,
 	transfers
 }: {
 	hash: string | undefined;
 	networkId: NetworkId;
-	transfers: Map<NetworkId, Map<string, ErcFungibleTransfer[]>>;
-}): ErcFungibleTransfer | undefined => {
+	transfers: Map<NetworkId, Map<string, ErcTransfer[]>>;
+}): ErcTransfer | undefined => {
 	if (isNullish(hash)) {
 		return;
 	}
@@ -166,6 +170,39 @@ export const findErcFungibleTransfer = ({
 	const matches = transfers.get(networkId)?.get(hash);
 
 	return matches?.length === 1 ? matches[0] : undefined;
+};
+
+/**
+ * Describes what an ERC transfer moved, to be displayed with the transaction.
+ *
+ * A non-fungible transfer has no amount worth formatting: `value` carries the ERC1155 quantity, or
+ * simply 1 for an ERC721, and formatting either with the collection decimals renders a meaningless
+ * fraction. The collection and the token id identify it instead.
+ */
+export const formatErcTransferAsset = ({
+	token,
+	value,
+	tokenId
+}: {
+	token: Token;
+	value?: bigint;
+	tokenId?: number;
+}): string | undefined => {
+	if (isTokenNonFungible(token)) {
+		const name = getTokenDisplayName(token);
+
+		return nonNullish(tokenId) ? `${name} #${tokenId}` : name;
+	}
+
+	if (isNullish(value)) {
+		return;
+	}
+
+	return `${formatToken({
+		value,
+		displayDecimals: token.decimals,
+		unitName: token.decimals
+	})} ${getTokenDisplaySymbol(token)}`;
 };
 
 /**

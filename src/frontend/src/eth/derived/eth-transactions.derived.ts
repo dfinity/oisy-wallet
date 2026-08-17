@@ -1,7 +1,9 @@
 import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
+import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { ethTransactionsStore, type EthTransactionsData } from '$eth/stores/eth-transactions.store';
-import type { ErcFungibleTransfer } from '$eth/types/eth-transaction';
+import type { ErcTransfer } from '$eth/types/eth-transaction';
 import {
 	groupEthTransactionsByNetworkAndHash,
 	mapEthTransactionUi
@@ -49,25 +51,26 @@ export const sortedEthTransactions: Readable<NonNullable<EthTransactionsData>> =
 );
 
 /**
- * The loaded ERC fungible token transfers, grouped by network and transaction hash.
+ * The loaded ERC token transfers - fungible and non-fungible - grouped by network and transaction hash.
  *
  * Lets a native transaction entry find the token transfer it paid the fee for. The index is built
  * once per store change instead of scanning every token slot per rendered row.
  */
-export const ercFungibleTransfersByNetworkAndHash: Readable<
-	Map<NetworkId, Map<string, ErcFungibleTransfer[]>>
-> = derived([ethTransactionsStore, ercFungibleTokens], ([$ethTransactionsStore, $tokens]) =>
-	groupEthTransactionsByNetworkAndHash({
-		items: $tokens.flatMap((token) =>
-			($ethTransactionsStore?.[token.id] ?? []).map(({ data: transaction }) => ({
-				transaction,
-				token
-			}))
-		),
-		networkId: ({ token: { network } }) => network.id,
-		hash: ({ transaction }) => transaction.hash
-	})
-);
+export const ercTransfersByNetworkAndHash: Readable<Map<NetworkId, Map<string, ErcTransfer[]>>> =
+	derived(
+		[ethTransactionsStore, ercFungibleTokens, erc721Tokens, erc1155Tokens],
+		([$ethTransactionsStore, $ercFungibleTokens, $erc721Tokens, $erc1155Tokens]) =>
+			groupEthTransactionsByNetworkAndHash({
+				items: [...$ercFungibleTokens, ...$erc721Tokens, ...$erc1155Tokens].flatMap((token) =>
+					($ethTransactionsStore?.[token.id] ?? []).map(({ data: transaction }) => ({
+						transaction,
+						token
+					}))
+				),
+				networkId: ({ token: { network } }) => network.id,
+				hash: ({ transaction }) => transaction.hash
+			})
+	);
 
 export const ethTransactionsInitialized: Readable<boolean> = derived(
 	[ethTransactionsStore, tokenWithFallback],

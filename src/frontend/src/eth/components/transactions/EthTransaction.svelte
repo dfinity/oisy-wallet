@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
-	import { ercFungibleTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
+	import { ercTransfersByNetworkAndHash } from '$eth/derived/eth-transactions.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -10,7 +10,8 @@
 		isTransactionPending,
 		isMaxUint256,
 		tryDecodeErc20AbiData,
-		findErcFungibleTransfer,
+		findErcTransfer,
+		formatErcTransferAsset,
 		isErc20TransactionDeposit,
 		isErc20TransactionTransfer
 	} from '$eth/utils/transactions.utils';
@@ -104,10 +105,10 @@
 	// a router send and a `transferFrom` alike - unlike the calldata, which only covers the first.
 	let ercTransfer = $derived(
 		type === 'send' && value === ZERO && isTokenEthereumNative(token)
-			? findErcFungibleTransfer({
+			? findErcTransfer({
 					hash,
 					networkId: token.network.id,
-					transfers: $ercFungibleTransfersByNetworkAndHash
+					transfers: $ercTransfersByNetworkAndHash
 				})
 			: undefined
 	);
@@ -174,12 +175,12 @@
 	});
 
 	let transferAmountText = $derived(
-		nonNullish(transferToken) && nonNullish(transferValue)
-			? `${formatToken({
+		nonNullish(transferToken)
+			? formatErcTransferAsset({
+					token: transferToken,
 					value: transferValue,
-					displayDecimals: transferToken.decimals,
-					unitName: transferToken.decimals
-				})} ${getTokenDisplaySymbol(transferToken)}`
+					tokenId: ercTransfer?.transaction.tokenId
+				})
 			: undefined
 	);
 
