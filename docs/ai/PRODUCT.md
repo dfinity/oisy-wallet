@@ -12,6 +12,22 @@ Users authenticate via Internet Identity (WebAuthn), making OISY cross-device by
 
 ---
 
+## When OISY cannot reach the network
+
+The wallet is served from, and talks to, the Internet Computer, so an unreachable network is a state users do encounter — and it is indistinguishable, from inside the browser, between an Internet Computer problem and the user's own connectivity (an offline device, a captive-portal wifi, a mobile tab whose connection lapsed while backgrounded). The wording therefore describes the symptom and never asserts a cause.
+
+**During startup — a full-page notice.** If the user profile cannot be loaded because the network is unreachable, OISY replaces the app with a dedicated page rather than showing an error toast over a skeleton that will never finish loading. The page carries the OISY logo, explains that the wallet could not connect and that funds are safe and unaffected, and offers the only two things that help: **Reload** and **Log out**. The underlying technical error is available behind a collapsed "Technical details" disclosure — useful when a user pastes a screenshot into a support thread — but it is never the first thing they read. Raw client-library text (`Failed to fetch HTTP request: Load failed`) is no longer appended to a user-facing message anywhere.
+
+The user stays signed in. A dropped connection does **not** end the session: earlier behaviour signed the user out on a profile-loading failure, which discarded the session over something a reload usually fixes. A genuinely unknown (non-network) failure still signs the user out.
+
+**After startup — the wallet keeps working.** Data loaded in the background that the wallet functions without (reward and user-role information) shows a brief "couldn't reach the network" message and nothing more. It deliberately does **not** escalate to the full-page state: a wallet that has finished loading stays usable, and taking the screen over would steal a session that may recover on its own.
+
+OISY does **not** automatically retry, poll, or reconnect in either case — recovery is the user's explicit reload. This is a deliberate exclusion, not an oversight.
+
+Both cases emit the `app_error` Plausible event, so an outage is directly observable rather than only inferable from a drop in other events. It distinguishes a connectivity problem on the user's side from an Internet Computer gateway failure, which are indistinguishable to the user but not to us.
+
+---
+
 ## Navigation
 
 The primary navigation is a desktop **sidebar** and a mobile **bottom bar** that share one set of destinations arranged by a grouped information architecture: **Portfolio**, **Finance**, and **More**. The grouping is intentionally different per form factor — the mobile bar has limited slots, so Notes earns a top-level slot there while NFTs lives in the More group; on desktop NFTs sits in Portfolio and Notes lives in More.

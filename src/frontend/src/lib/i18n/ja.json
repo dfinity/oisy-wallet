@@ -764,7 +764,18 @@
 			"allow_signing": "署名の準備中にエラーが発生しました。サインアウトされました。問題が解決しない場合は、サポートにお問い合わせください。",
 			"waiting_for_allowed_cycles_aborted": "Cyclesレジャーの準備を中止しました。後でログインしてください。",
 			"btc_wallet_error": "BTCウォレット情報の読み込み中にエラーが発生しました。",
-			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。"
+			"sol_wallet_error": "SOLウォレット情報の読み込み中にエラーが発生しました。",
+			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
+			"network_unreachable": ""
+		},
+		"unavailable": {
+			"title": "",
+			"description": "",
+			"details": "",
+			"operation": "",
+			"reload": "",
+			"logout": "",
+			"logout_hint": ""
 		}
 	},
 	"hero": {
@@ -830,7 +841,6 @@
 			"appearance_system": "OSのテーマ設定に従う"
 		},
 		"error": {
-			"loading_profile": "プロフィールの読み込み中にエラーが発生しました。ページを更新してください。",
 			"export_exchange_rate_unavailable": "為替レートを読み込み中です。しばらくしてから再度お試しください。",
 			"export_failed": "エクスポートを作成できませんでした。もう一度お試しください。"
 		}

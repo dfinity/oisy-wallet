@@ -764,7 +764,18 @@
 			"allow_signing": "حدثت مشكلة أثناء إعداد محفظتك للتوقيع. تم تسجيل خروجك. إذا استمرت المشكلة، يرجى الاتصال بالدعم.",
 			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "خطأ أثناء تحميل معلومات محفظة BTC.",
-			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL."
+			"sol_wallet_error": "خطأ أثناء تحميل معلومات محفظة SOL.",
+			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
+			"network_unreachable": ""
+		},
+		"unavailable": {
+			"title": "",
+			"description": "",
+			"details": "",
+			"operation": "",
+			"reload": "",
+			"logout": "",
+			"logout_hint": ""
 		}
 	},
 	"hero": {
@@ -830,7 +841,6 @@
 			"appearance_system": "يمكّن وضع الألوان لنظام التشغيل الخاص بك"
 		},
 		"error": {
-			"loading_profile": "خطأ أثناء تحميل الملف الشخصي. يرجى تحديث الصفحة للحصول على التجربة الكاملة.",
 			"export_exchange_rate_unavailable": "لا تزال أسعار الصرف قيد التحميل. حاول مرة أخرى بعد لحظة.",
 			"export_failed": "لم نتمكن من إنشاء التصدير الخاص بك. يرجى المحاولة مرة أخرى."
 		}
