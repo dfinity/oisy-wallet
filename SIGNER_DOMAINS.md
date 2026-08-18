@@ -100,7 +100,8 @@ When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte
 This means:
 
 - **Signer** version advances automatically whenever the OISY wallet version is bumped (via the existing _Version Bump and Release Branch Creation_ workflow).
-- **Legacy signer** version is bumped independently via the _Legacy Signer Version Bump_ workflow. At some point the legacy signer will be frozen to a snapshot of `main` and only receive hotfixes.
+- **Legacy signer** version is, until the freeze described in [Milestone 2](#milestone-2-deploy-v5-signer), also advanced by that same workflow, which writes the new version into `signer-versions.json`. This is deliberate: during Milestone 1 the legacy signer is rebuilt from `main` on every push to `main` and every `v*` tag (`deploy_all_signers` in `deploy-to-environment.yml`), so it serves the wallet's code and must not claim a different version.
+- The _Legacy Signer Version Bump_ workflow remains the path for bumping the legacy signer on its own, and becomes the only path once the legacy signer is frozen and only receives hotfixes.
 
 ### Tagging convention
 
@@ -115,14 +116,14 @@ The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) a
 
 **Release pipelines:**
 
-| Step              | Main OISY + Signer                                              | Legacy Signer                                                   |
-| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------------- |
-| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) |
-| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                           |
-| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`        |
-| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)     |
-| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                             |
-| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                  |
+| Step              | Main OISY + Signer                                              | Legacy Signer                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | `bump-version.yml` (kept in lockstep until the freeze), or _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) for an independent bump |
+| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                                                                                                              |
+| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`                                                                                           |
+| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)                                                                                        |
+| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                                                                                                                |
+| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                                                                                                     |
 
 ### Canister definitions
 
@@ -150,6 +151,7 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 - Upgrade the OISY signer to agent-js v5
 - Deploy the v5 signer to `signer.oisy.com` and `oisy.com`
 - Keep the v4 signer on `legacy-signer.oisy.com` (frozen at the last v4 version)
+  - **Freezing is a two-part change, and both parts are required.** Stop rebuilding the legacy signer from `main`, by removing `legacy_signer_frontend` from the `deploy_all_signers` branch of `deploy-to-environment.yml`; and stop advancing its version, by removing the `signer-versions.json` write from `bump-version.yml`. Doing only the second leaves v5 code deployed under a v4 label, which is worse than the drift the lockstep write was added to fix.
 - Dapps still on v4 that did not switch to `legacy-signer.oisy.com` will see errors on `oisy.com/sign`
   - Detect v4 dapps and show a user-friendly error message
   - Send a Plausible event to identify affected dapps
