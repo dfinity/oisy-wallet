@@ -4,6 +4,7 @@ import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -44,7 +45,8 @@ export enum SwapProvider {
 	KONG_SWAP = 'kongSwap',
 	VELORA = 'velora',
 	NEAR_INTENTS = 'nearIntents',
-	ONE_SEC = 'oneSec'
+	ONE_SEC = 'oneSec',
+	CHAIN_FUSION = 'chainFusion'
 }
 
 export enum VeloraSwapTypes {
@@ -129,6 +131,12 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			receiveOutMinimum?: bigint;
 			swapDetails: OneSecSwapDetails;
+			type?: string;
+	  }
+	| {
+			provider: SwapProvider.CHAIN_FUSION;
+			receiveAmount: bigint;
+			swapDetails: ChainFusionSwapDetails;
 			type?: string;
 	  };
 
@@ -265,6 +273,54 @@ export interface GetWithdrawableTokenParams {
 export interface OneSecSwapDetails {
 	transferFeeInUnits: bigint;
 	protocolFeeInPercent: number;
+}
+
+export type ChainFusionFee = ProviderFee & {
+	labelPath: string;
+	/**
+	 * Whether the fee comes out of the converted amount — reducing what the user
+	 * receives — or is charged on top of it, from balance.
+	 *
+	 * A ck ledger fee is charged on top: `approve(amount)` debits `amount + fee` while
+	 * the minter withdraws the full `amount`. Subtracting it would under-report what
+	 * actually lands *and* show the same cost twice, since every fee is already itemized
+	 * below the form. Only a fee the minter genuinely takes out of what it burns — the
+	 * UTXO and KYT fees of the BTC directions — reduces the receive amount. The Ethereum
+	 * gas of a ckETH withdrawal is deliberately *not* flagged although the minter does
+	 * deduct it: the estimate is a doubled, mostly-reimbursed ceiling, so the Convert
+	 * flow — and therefore this one — shows the full 1:1 amount and itemizes the gas
+	 * as a fee row instead.
+	 */
+	deductedFromAmount?: boolean;
+};
+
+export interface ChainFusionSwapDetails {
+	// Charged in the source token, in source-token units. Whether an entry also comes out
+	// of the converted amount is `deductedFromAmount`'s job, not this list's — a ck ledger
+	// fee belongs here yet is paid on top of the amount.
+	sourceFees: ChainFusionFee[];
+	// Charged in a third token the user must hold (ckETH for ckERC20 → ERC20; native
+	// ETH gas is already handled by the EVM wizard's fee context).
+	externalFees: ChainFusionFee[];
+	// Minter-enforced floor, in source-token units, when the direction has one.
+	minimumAmount?: bigint;
+	// Whether the minter info the quote read was certified, set only by the directions
+	// that consult it (ckETH → ETH). Mirrors Convert's `minter-info-not-certified` gate:
+	// an uncertified read blocks Review until the certified update lands.
+	minterInfoCertified?: boolean;
+}
+
+/**
+ * One ck conversion pair: a ck ledger and the native token it is backed by.
+ *
+ * Resolved from the curated ck token environment rather than from a runtime token
+ * list, because a provider's `getSupportedTokens` is invoked with no arguments and
+ * `getSupportedDestinations` only ever sees the source token. The 1Sec analogue is
+ * `DEFAULT_CONFIG.tokens`.
+ */
+export interface ChainFusionPair {
+	ckLedgerCanisterId: LedgerCanisterIdText;
+	twinToken: Token;
 }
 
 export interface OneSecIcpToEvmParams {
