@@ -2,10 +2,12 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 import { ERC20_DEPOSIT_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
+import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { mapAddressToName } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { getTokenDisplayName } from '$lib/utils/token.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
 	createMockEthTransactionsUi,
@@ -21,6 +23,19 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 		disconnect: async () => {}
 	})
 }));
+
+vi.mock(import('$eth/derived/erc721.derived'), async (importOriginal) => {
+	const { readable } = await import('svelte/store');
+	const { mockValidErc721Token } = await import('$tests/mocks/erc721-tokens.mock');
+
+	const mockToken = { ...mockValidErc721Token, enabled: true };
+
+	return {
+		...importOriginal,
+		erc721Tokens: readable([mockToken]),
+		enabledErc721Tokens: readable([mockToken])
+	};
+});
 
 vi.mock(import('$eth/derived/erc-fungible.derived'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -303,12 +318,16 @@ describe('EthTransactionModal', () => {
 		// Decoded: { to: '0x1234567890abcdef1234567890abcdef12345678', value: 10000000n }
 		const mockTransferData = `${ERC20_TRANSFER_HASH}0000000000000000000000001234567890abcdef1234567890abcdef123456780000000000000000000000000000000000000000000000000000000000989680`;
 
-		// As listed among the native token transactions: no value, addressed to the ERC20 contract.
+		const mockTransferRecipient = '0x1234567890AbcdEF1234567890aBcdef12345678';
+
+		// As listed among the native token transactions: no value, addressed to the ERC20 contract,
+		// with the recipient decoded from the calldata by `mapEthTransactionUi`.
 		const mockTransferTransactionUi = {
 			...mockEthTransactionUi,
 			type: 'send' as const,
 			value: ZERO,
 			to: USDC_TOKEN.address,
+			transferRecipient: mockTransferRecipient,
 			data: mockTransferData,
 			gasUsed,
 			gasPrice
@@ -345,17 +364,6 @@ describe('EthTransactionModal', () => {
 			expect(getByText(formattedFee)).toBeInTheDocument();
 		});
 
-		it('should display the recipient of the transfer instead of the token contract', () => {
-			const { getByText, queryByText } = render(EthTransactionModal, {
-				transaction: mockTransferTransactionUi,
-				token: ETHEREUM_TOKEN
-			});
-
-			expect(getByText('0x1234567890AbcdEF1234567890aBcdef12345678')).toBeInTheDocument();
-
-			expect(queryByText(USDC_TOKEN.address)).not.toBeInTheDocument();
-		});
-
 		describe('with the token contract resolving to a name', () => {
 			beforeEach(() => {
 				vi.mocked(mapAddressToName).mockImplementation(({ address }) =>
@@ -385,7 +393,11 @@ describe('EthTransactionModal', () => {
 
 			it('should display the interacted with row for a contract call that is not a transfer', () => {
 				const { getByText } = render(EthTransactionModal, {
-					transaction: { ...mockTransferTransactionUi, data: '0xabcdef' },
+					transaction: {
+						...mockTransferTransactionUi,
+						transferRecipient: undefined,
+						data: '0xabcdef'
+					},
 					token: ETHEREUM_TOKEN
 				});
 
@@ -439,7 +451,11 @@ describe('EthTransactionModal', () => {
 
 		it('should fall back to the contract call rendering when the calldata does not decode', () => {
 			const { getByText, queryByText } = render(EthTransactionModal, {
-				transaction: { ...mockTransferTransactionUi, data: `${ERC20_TRANSFER_HASH}00` },
+				transaction: {
+					...mockTransferTransactionUi,
+					transferRecipient: undefined,
+					data: `${ERC20_TRANSFER_HASH}00`
+				},
 				token: ETHEREUM_TOKEN
 			});
 
@@ -474,6 +490,115 @@ describe('EthTransactionModal', () => {
 			})} ${ETHEREUM_TOKEN.symbol}`;
 
 			expect(getAllByText(formattedAmount)[0]).toBeInTheDocument();
+		});
+
+		it('should display the recipient of the transfer instead of the token contract', () => {
+			const { getByText, queryByText } = render(EthTransactionModal, {
+				transaction: mockTransferTransactionUi,
+				token: ETHEREUM_TOKEN
+			});
+
+			expect(getByText(mockTransferRecipient)).toBeInTheDocument();
+
+			expect(queryByText(USDC_TOKEN.address)).not.toBeInTheDocument();
+		});
+
+		describe('with the transfer loaded for its own token', () => {
+			// A router send: the calldata is not a plain `transfer`, so only the loaded transfer describes it.
+			const mockRouterTransactionUi = {
+				...mockTransferTransactionUi,
+				to: mockEthAddress2,
+				transferRecipient: undefined,
+				data: '0xabcdef'
+			};
+
+			const mockErc20Transfer = {
+				...mockEthTransactionUi,
+				hash: mockRouterTransactionUi.hash,
+				to: mockTransferRecipient,
+				value: 20000000n
+			};
+
+			beforeEach(() => {
+				ethTransactionsStore.set({
+					tokenId: USDC_TOKEN.id,
+					transactions: [{ data: mockErc20Transfer, certified: false }]
+				});
+			});
+
+			afterEach(() => {
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+			});
+
+			it('should describe a non-fungible transfer by collection and token id', () => {
+				// Only the NFT transfer may share the hash, or it would resolve to nothing.
+				ethTransactionsStore.reset(USDC_TOKEN.id);
+
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{ data: { ...mockErc20Transfer, value: 1n, tokenId: 123 }, certified: false }
+					]
+				});
+
+				const { getByText } = render(EthTransactionModal, {
+					transaction: mockRouterTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(getByText(`${getTokenDisplayName(mockValidErc721Token)} #123`)).toBeInTheDocument();
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
+			});
+
+			it('should read as a fee when several transfers share the hash', () => {
+				ethTransactionsStore.set({
+					tokenId: mockValidErc721Token.id,
+					transactions: [
+						{ data: { ...mockErc20Transfer, value: 1n, tokenId: 123 }, certified: false }
+					]
+				});
+
+				const { getAllByText, queryByText } = render(EthTransactionModal, {
+					transaction: mockRouterTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				const formattedFee = `${formatToken({
+					value: gasUsed * gasPrice,
+					unitName: ETHEREUM_TOKEN.decimals,
+					displayDecimals: ETHEREUM_TOKEN.decimals
+				})} ${ETHEREUM_TOKEN.symbol}`;
+
+				expect(queryByText(get(i18n).transaction.type.send)).not.toBeInTheDocument();
+
+				// The subtitle, plus the label of the fee row.
+				expect(getAllByText(get(i18n).fee.text.fee)).toHaveLength(2);
+
+				// The hero, plus the fee row itself.
+				expect(getAllByText(formattedFee)).toHaveLength(2);
+
+				ethTransactionsStore.reset(mockValidErc721Token.id);
+			});
+
+			it('should display amount and recipient of the loaded transfer', () => {
+				const { getByText } = render(EthTransactionModal, {
+					transaction: mockRouterTransactionUi,
+					token: ETHEREUM_TOKEN
+				});
+
+				expect(
+					getByText(
+						`${formatToken({
+							value: 20000000n,
+							unitName: USDC_TOKEN.decimals,
+							displayDecimals: USDC_TOKEN.decimals
+						})} ${USDC_TOKEN.symbol}`
+					)
+				).toBeInTheDocument();
+
+				expect(getByText(mockTransferRecipient)).toBeInTheDocument();
+			});
 		});
 	});
 });

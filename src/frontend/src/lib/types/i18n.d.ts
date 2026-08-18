@@ -957,6 +957,7 @@ interface I18nSwap {
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
+		chain_fusion_minimum_amount: string;
 		value_difference_error_confirmation: string;
 		value_difference_missing_price_confirmation: string;
 	};
