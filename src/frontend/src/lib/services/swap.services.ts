@@ -160,6 +160,22 @@ export const enableSwapDestinationToken = async ({
 	}
 
 	try {
+		// A Chain Fusion mint or a 1Sec bridge lands on an ICRC (ck) token, which neither
+		// the ERC nor the SPL branch below can persist — the swap used to complete with the
+		// destination still hidden and its new balance invisible. Enabled through the same
+		// `autoLoadSingleToken` trio the ICPSwap flow uses for its own destination.
+		if (isTokenIcrc(destinationToken)) {
+			await autoLoadSingleToken({
+				identity,
+				token: destinationToken,
+				setToken: setCustomIcrcToken,
+				loadTokens: loadCustomTokens,
+				errorMessage: get(i18n).init.error.icrc_custom_token
+			});
+
+			return;
+		}
+
 		if (isTokenErc(destinationToken)) {
 			await setCustomToken({
 				token: toCustomToken({
