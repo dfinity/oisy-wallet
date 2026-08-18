@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
@@ -16,9 +18,16 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -36,8 +45,10 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { fetchChainFusionEvmSwap } from '$lib/services/chain-fusion-swap.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
+		enableSwapDestinationToken,
 		fetchNearIntentsEvmSwap,
 		fetchOneSecEvmToIcpSwap,
 		fetchVeloraDeltaSwap,
@@ -188,6 +199,28 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
 	);
 
+	const isChainFusionProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	const ckMinterInfo = $derived($ckEthMinterInfoStore?.[ETHEREUM_TOKEN_ID]);
+
+	const ckHelperContractAddress = $derived(
+		nonNullish($sourceToken) && isTokenErcFungible($sourceToken)
+			? toCkErc20HelperContractAddress(ckMinterInfo)
+			: toCkEthHelperContractAddress(ckMinterInfo)
+	);
+
+	const ckDepositDestination = $derived(
+		isChainFusionProvider ? (ckHelperContractAddress ?? '') : ''
+	);
+
+	$effect(() => {
+		[ckDepositDestination];
+
+		untrack(() => evaluateFee());
+	});
+
 	const isOneSecProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
@@ -209,7 +242,8 @@
 
 	const swapEmitsApprovalSteps = $derived(
 		!isNearIntentsProvider &&
-			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			($swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA ||
+				isChainFusionProvider) &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
@@ -377,6 +411,48 @@
 					maxPriorityFeePerGas,
 					swapId: crypto.randomUUID()
 				});
+			} else if (selectedProvider?.provider === SwapProvider.CHAIN_FUSION) {
+				if (isNullish(ckHelperContractAddress)) {
+					toastsError({
+						msg: { text: $i18n.send.assertion.address_unknown }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				const { valid } = assertCkEthMinterInfoLoaded({
+					minterInfo: ckMinterInfo,
+					network: ICP_NETWORK
+				});
+
+				if (!valid) {
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchChainFusionEvmSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as Erc20Token,
+					swapAmount,
+					userAddress: $ethAddress,
+					helperContractAddress: ckHelperContractAddress,
+					sourceNetwork: $sourceToken.network,
+					minterInfo: ckMinterInfo,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -447,11 +523,13 @@
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
+		destination={ckDepositDestination}
 		{nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 		sendToken={$sourceToken}
 		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network}
+		targetNetwork={isChainFusionProvider ? ICP_NETWORK : undefined}
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
@@ -493,7 +571,7 @@
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress
 					sendWithApproval={swapEmitsApprovalSteps}
-					sendWithTransfer={isTransferNeeded}
+					sendWithTransfer={isTransferNeeded || isChainFusionProvider}
 					{swapProgressStep}
 					swapWithActiveTransaction={isActiveTransactionSwap}
 					swapWithBridging={isOneSecProvider}

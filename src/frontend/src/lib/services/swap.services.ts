@@ -148,7 +148,7 @@ const checkNeedsApproval = async ({
 	}
 };
 
-const enableSwapDestinationToken = async ({
+export const enableSwapDestinationToken = async ({
 	destinationToken,
 	identity
 }: {
@@ -896,6 +896,8 @@ export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Pro
 	await enableOneSecDestinationToken(params);
 };
 
+// `satisfies` keeps the map total: `SwapIcpWizard` indexes it with a provider key, so
+// a missing member would be a runtime `undefined(…)` call rather than a type error.
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
 	[SwapProvider.KONG_SWAP]: fetchKongSwap,
@@ -908,8 +910,15 @@ export const swapService = {
 	},
 	[SwapProvider.ONE_SEC]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// Chain Fusion needs the user's own Ethereum address to withdraw to, which
+	// `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly through
+	// `fetchChainFusionIcpSwap` and never reaches this entry — exactly as it does for
+	// 1Sec above.
+	[SwapProvider.CHAIN_FUSION]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
-};
+} satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
 
 export const withdrawICPSwapAfterFailedSwap = async ({
 	identity,
