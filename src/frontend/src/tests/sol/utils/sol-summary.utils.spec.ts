@@ -258,6 +258,39 @@ describe('sol-summary.utils', () => {
 	});
 
 	describe('sanitizeSolSummary', () => {
+		// The bug this fixes: a round amount written the tidy way took the whole sentence with it.
+		it('should keep a sentence that writes a round figure with a trailing zero', () => {
+			expect(
+				sanitizeSolSummary({
+					content: 'Transfer of 0.10 USD1 to 4GsmSut...AM56JR8.',
+					facts: ['Amount: 0.1 USD1', 'Recipient: 4GsmSut...AM56JR8']
+				})
+			).toBe('Transfer of 0.10 USD1 to 4GsmSut...AM56JR8.');
+		});
+
+		it.each([
+			{ written: '1.500', stated: '1.5' },
+			{ written: '0.3700', stated: '0.37' },
+			{ written: '5.0', stated: '5' }
+		])('should read $written and $stated as the same figure', ({ written, stated }) => {
+			expect(
+				sanitizeSolSummary({ content: `Paid ${written} SOL.`, facts: [`Paid: ${stated} SOL`] })
+			).toBe(`Paid ${written} SOL.`);
+		});
+
+		// The other end of the same guard: a fragment of a stated figure is not a stated figure.
+		it('should drop a figure that is only a fragment of one the facts state', () => {
+			expect(
+				sanitizeSolSummary({ content: 'Transfer of 1 SOL.', facts: ['Amount: 0.001 SOL'] })
+			).toBeUndefined();
+		});
+
+		it('should still drop a figure the facts never state', () => {
+			expect(
+				sanitizeSolSummary({ content: 'Transfer of 0.11 USD1.', facts: ['Amount: 0.1 USD1'] })
+			).toBeUndefined();
+		});
+
 		const facts = ['Amount: 0.001 SOL', 'Recipient: 4GsmSut...AM56JR8'];
 
 		it('should return nothing for an absent response', () => {

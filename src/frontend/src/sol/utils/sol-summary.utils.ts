@@ -263,6 +263,23 @@ const MARKUP_REGEX = /[<>`|[\]{}*_#]|https?:/i;
 const FIGURE_REGEX = /\d+(?:[.,]\d+)*/g;
 
 /**
+ * A figure reduced to the quantity it names.
+ *
+ * `0.10` and `0.1` are the same number, and a model writing a round amount the tidy way was having
+ * its whole sentence thrown out for it: every summary of a 0.1 USD1 transfer disappeared. Trailing
+ * zeros after a decimal point carry no value, so they are dropped before comparing.
+ *
+ * The comparison that follows is set membership rather than a substring test, which also closes
+ * the other end of the same guard: `includes('1')` was satisfied by the `1` inside `0.001`, so a
+ * figure the facts never stated could pass by being a fragment of one that they did.
+ */
+const sameFigure = (figure: string): string => {
+	const plain = figure.replace(/,/g, '');
+
+	return plain.includes('.') ? plain.replace(/0+$/, '').replace(/\.$/, '') : plain;
+};
+
+/**
  * The model's answer, or nothing at all.
  *
  * The sentence sits beside rows that are the truth, so anything that could contradict
@@ -306,8 +323,11 @@ export const sanitizeSolSummary = ({
 	}
 
 	// The one thing a summary must never do is put a number on screen that OISY did not derive.
-	const prompt = facts.join('\n');
-	const invented = (sentence.match(FIGURE_REGEX) ?? []).some((figure) => !prompt.includes(figure));
+	const stated = new Set((facts.join('\n').match(FIGURE_REGEX) ?? []).map(sameFigure));
+
+	const invented = (sentence.match(FIGURE_REGEX) ?? []).some(
+		(figure) => !stated.has(sameFigure(figure))
+	);
 
 	return invented ? undefined : sentence;
 };
