@@ -100,8 +100,8 @@ export default defineConfig((): UserConfig => ({
 			thresholds: {
 				autoUpdate: true,
 				statements: 82.1,
-				branches: 74.9,
-				functions: 80.2,
+				branches: 75.1,
+				functions: 80.3,
 				lines: 83.0
 			}
 		}
