@@ -27,4 +27,11 @@ export interface SolTransactionEffectLeg {
 export interface SolTransactionEffect {
 	legs: SolTransactionEffectLeg[];
 	instructionsCount: number;
+	// What the transaction is made of, in order: the parsed name of each instruction where the RPC
+	// gives one, and the program otherwise. This is the shape that says what a transaction *is*
+	// rather than what it moved. Creating an account and transferring a token is still a transfer;
+	// sending one token, receiving another and closing an account is a swap. The balances alone
+	// cannot tell those apart, and the instruction list is what a block explorer reads to title a
+	// transaction.
+	steps: string[];
 }

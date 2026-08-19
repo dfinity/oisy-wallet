@@ -6,7 +6,7 @@ import {
 	SOLANA_SUMMARY_SYSTEM_PROMPT,
 	SOLANA_SUMMARY_TIMEOUT_MILLISECONDS
 } from '$sol/constants/sol-summary.constants';
-import { summarizeSolFacts } from '$sol/services/sol-summary.services';
+import { resetSolSummaries, summarizeSolFacts } from '$sol/services/sol-summary.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 
@@ -21,6 +21,8 @@ describe('sol-summary.services', () => {
 
 	beforeEach(() => {
 		vi.resetAllMocks();
+
+		resetSolSummaries();
 	});
 
 	describe('summarizeSolFacts', () => {

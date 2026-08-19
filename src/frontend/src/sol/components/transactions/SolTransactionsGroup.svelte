@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { untrack } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { SOL_SUMMARY_ENABLED } from '$env/sol-summary.env';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -10,11 +10,12 @@
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import SolSummary from '$sol/components/core/SolSummary.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+	import { summarizeSolFacts } from '$sol/services/sol-summary.services';
 	import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
 	import { toSolTransactionGroupSummaryFacts } from '$sol/utils/sol-summary.utils';
 
@@ -40,38 +41,48 @@
 				})
 	);
 
-	let collapsible = $state<ReturnType<typeof Collapsible> | undefined>();
-
-	// The sentence costs an update call to the LLM canister, so it is asked for when the user opens
-	// the group and never for a row they only scrolled past. Once asked, it stays mounted:
-	// collapsing hides it, and re-expanding must not pay for it twice.
-	//
-	// Driven by the toggle callback rather than by a binding, because the children of a collapsible
-	// are rendered whether or not it is open: only the callback says the user actually opened it.
-	let requested = $state(false);
-
 	let facts = $derived(toSolTransactionGroupSummaryFacts(group));
+
+	let prompt = $derived(facts.join('\n'));
+
+	// The sentence is the row, so it is asked for as soon as a bundled transaction is rendered
+	// rather than when it is opened. The service caches one answer per set of facts for the
+	// session, which is what keeps a scrolled list from buying the same sentence twice.
+	let summary = $state<string | undefined>();
+
+	$effect(() => {
+		const currentPrompt = prompt;
+		const identity = $authIdentity;
+
+		untrack(() => {
+			summary = undefined;
+
+			void summarizeSolFacts({
+				facts: currentPrompt.length === 0 ? [] : currentPrompt.split('\n'),
+				identity
+			})
+				.then((result) => {
+					if (currentPrompt === prompt) {
+						summary = result;
+					}
+				})
+				.catch(() => undefined);
+		});
+	});
 
 	// Every row of the group is the same transaction on the same network, so the first one speaks
 	// for all of them.
 	let network = $derived(transactions[0]?.token.network);
 
-	// A swap is the only shape the netting can name. Everything else is called what it provably is,
-	// one transaction that moved several things, rather than given a guessed label.
+	// Until the sentence arrives the row says what it provably is. A swap is the only shape the
+	// netting can name on its own; anything else stays unnamed rather than guessed at.
 	let label = $derived(
-		isSwap ? $i18n.transactions.text.grouped_swap : $i18n.transactions.text.grouped_bundle
+		summary ??
+			(isSwap ? $i18n.transactions.text.grouped_swap : $i18n.transactions.text.grouped_bundle)
 	);
 </script>
 
-<Collapsible
-	bind:this={collapsible}
-	expandButton
-	onToggle={({ expanded }) => {
-		requested = requested || expanded;
-	}}
-	testId={testId ?? 'sol-transactions-group'}
-	wrapHeight
->
+<Collapsible expandButton testId={testId ?? 'sol-transactions-group'} wrapHeight>
 	{#snippet header()}
 		<span class="block w-full rounded-xl px-2 py-2">
 			<Card noMargin withGap>
@@ -113,12 +124,6 @@
 			</Card>
 		</span>
 	{/snippet}
-
-	{#if SOL_SUMMARY_ENABLED && requested}
-		<div class="pb-2">
-			<SolSummary {facts} onRendered={() => collapsible?.updateMaxHeight()} />
-		</div>
-	{/if}
 
 	{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${transactionUi.token.id.description}-${index}`)}
 		{@const { token, transaction } = transactionUi}

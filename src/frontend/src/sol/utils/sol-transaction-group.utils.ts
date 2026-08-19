@@ -136,7 +136,10 @@ export const groupSolTransactionsBySignature = (
 			transactions: siblings,
 			legs,
 			isSwap: isSwap(legs),
-			...(nonNullish(effect) && { instructionsCount: effect.instructionsCount })
+			...(nonNullish(effect) && {
+				instructionsCount: effect.instructionsCount,
+				steps: effect.steps
+			})
 		};
 
 		return [...acc, { kind: 'group', group }];

@@ -165,7 +165,7 @@ describe('sol-transactions.services', () => {
 			effect: mapSolTransactionEffect({
 				transaction: mockTransactionDetail,
 				address: mockSolAddress,
-				instructionsCount: mockAllInstructions.length
+				instructions: mockAllInstructions
 			})
 		};
 
@@ -270,7 +270,7 @@ describe('sol-transactions.services', () => {
 					effect: mapSolTransactionEffect({
 						transaction: mockTransactionDetailOnlyInnerInstructions,
 						address: mockSolAddress,
-						instructionsCount: innerInstructions.length
+						instructions: innerInstructions
 					})
 				}))
 				.reverse();

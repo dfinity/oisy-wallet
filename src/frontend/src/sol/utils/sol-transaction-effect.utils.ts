@@ -1,4 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import type { SolAddress } from '$sol/types/address';
 import type { ParsedAccount, SolRpcTransaction } from '$sol/types/sol-transaction';
 import type {
@@ -10,6 +11,9 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 type SolTokenBalance = NonNullable<
 	NonNullable<SolRpcTransaction['meta']>['preTokenBalances']
 >[number];
+
+// The instructions as the RPC hands them over, before the mapper decorates them.
+type SolInstruction = SolRpcTransaction['transaction']['message']['instructions'][number];
 
 /**
  * The SOL a transaction moved for this wallet, fee included.
@@ -99,6 +103,27 @@ const tokenLegs = ({
 	}, []);
 };
 
+// Enough of the shape to classify by, and no more: a transaction with hundreds of inner
+// instructions says what it is in its first dozen, and the rest is routing.
+const MAX_STEPS = 12;
+
+/**
+ * What the transaction is made of, in the order it ran.
+ *
+ * The RPC parses the instructions it knows, and their names are already the vocabulary a block
+ * explorer titles transactions with: `createAccount`, `transfer`, `closeAccount`, `syncNative`.
+ * Anything it cannot parse keeps its program instead, which is itself informative: a step through
+ * a swap program is how a routed swap announces itself.
+ */
+const toSteps = (instructions: readonly SolInstruction[]): string[] =>
+	instructions
+		.slice(0, MAX_STEPS)
+		.map((instruction) =>
+			'parsed' in instruction && nonNullish(instruction.parsed?.type)
+				? `${instruction.parsed.type}`
+				: `unparsed program ${shortenWithMiddleEllipsis({ text: String(instruction.programId) })}`
+		);
+
 /**
  * What a confirmed transaction did to this wallet, and how much of it there was.
  *
@@ -112,11 +137,11 @@ const tokenLegs = ({
 export const mapSolTransactionEffect = ({
 	transaction,
 	address,
-	instructionsCount
+	instructions
 }: {
 	transaction: SolRpcTransaction;
 	address: SolAddress;
-	instructionsCount: number;
+	instructions: readonly SolInstruction[];
 }): SolTransactionEffect | undefined => {
 	const {
 		meta,
@@ -148,5 +173,5 @@ export const mapSolTransactionEffect = ({
 		({ net: a }, { net: b }) => (a < ZERO ? 0 : 1) - (b < ZERO ? 0 : 1)
 	);
 
-	return { legs, instructionsCount };
+	return { legs, instructionsCount: instructions.length, steps: toSteps(instructions) };
 };

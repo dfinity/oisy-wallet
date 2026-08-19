@@ -41,7 +41,7 @@ describe('sol-transaction-effect.utils', () => {
 			const effect = mapSolTransactionEffect({
 				transaction: tx(),
 				address: OWNER,
-				instructionsCount: 7
+				instructions: Array.from({ length: 7 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([{ decimals: 9, net: -5_454_491n }]);
@@ -49,8 +49,11 @@ describe('sol-transaction-effect.utils', () => {
 
 		it('should count every instruction the transaction carried', () => {
 			expect(
-				mapSolTransactionEffect({ transaction: tx(), address: OWNER, instructionsCount: 7 })
-					?.instructionsCount
+				mapSolTransactionEffect({
+					transaction: tx(),
+					address: OWNER,
+					instructions: Array.from({ length: 7 }, () => ({ programId: 'p' })) as never
+				})?.instructionsCount
 			).toBe(7);
 		});
 
@@ -61,7 +64,7 @@ describe('sol-transaction-effect.utils', () => {
 					postTokenBalances: [tokenBalance({ amount: '377098' })]
 				}),
 				address: OWNER,
-				instructionsCount: 7
+				instructions: Array.from({ length: 7 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([
@@ -76,7 +79,7 @@ describe('sol-transaction-effect.utils', () => {
 					postTokenBalances: [tokenBalance({ owner: OTHER, amount: '377098' })]
 				}),
 				address: OWNER,
-				instructionsCount: 2
+				instructions: Array.from({ length: 2 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([{ decimals: 9, net: -5_454_491n }]);
@@ -96,7 +99,7 @@ describe('sol-transaction-effect.utils', () => {
 					]
 				}),
 				address: OWNER,
-				instructionsCount: 3
+				instructions: Array.from({ length: 3 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toContainEqual({ tokenAddress: USDC, decimals: 6, net: 1_000n });
@@ -109,7 +112,7 @@ describe('sol-transaction-effect.utils', () => {
 					postTokenBalances: [tokenBalance({ amount: '1000' })]
 				}),
 				address: OWNER,
-				instructionsCount: 3
+				instructions: Array.from({ length: 3 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([{ decimals: 9, net: -5_454_491n }]);
@@ -119,7 +122,7 @@ describe('sol-transaction-effect.utils', () => {
 			const effect = mapSolTransactionEffect({
 				transaction: tx({ postTokenBalances: [tokenBalance({ amount: '377098' })] }),
 				address: OWNER,
-				instructionsCount: 5
+				instructions: Array.from({ length: 5 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs.map(({ net }) => net < ZERO)).toStrictEqual([true, false]);
@@ -129,7 +132,7 @@ describe('sol-transaction-effect.utils', () => {
 			const effect = mapSolTransactionEffect({
 				transaction: tx({ preBalances: [10n, ZERO], postBalances: [10n, ZERO] }),
 				address: OWNER,
-				instructionsCount: 1
+				instructions: Array.from({ length: 1 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([]);
@@ -143,7 +146,7 @@ describe('sol-transaction-effect.utils', () => {
 						transaction: { message: { accountKeys: [] } }
 					} as unknown as SolRpcTransaction,
 					address: OWNER,
-					instructionsCount: 1
+					instructions: Array.from({ length: 1 }, () => ({ programId: 'p' })) as never
 				})
 			).toBeUndefined();
 		});
@@ -152,7 +155,7 @@ describe('sol-transaction-effect.utils', () => {
 			const effect = mapSolTransactionEffect({
 				transaction: tx(),
 				address: 'NeVerNamed333333333333333333333333333333333',
-				instructionsCount: 1
+				instructions: Array.from({ length: 1 }, () => ({ programId: 'p' })) as never
 			});
 
 			expect(effect?.legs).toStrictEqual([]);

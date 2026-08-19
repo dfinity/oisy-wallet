@@ -483,8 +483,7 @@ describe('sol-summary.utils', () => {
 				isSwap: false
 			});
 
-			expect(facts).toContain('Kind: several amounts at once');
-			expect(facts.join('\n')).not.toContain('exchanged');
+			expect(facts.join('\n')).not.toContain('Kind:');
 		});
 
 		it('should state how many rows the group holds', () => {

@@ -13,6 +13,7 @@ RULES:
 - Answer with exactly one sentence of at most 120 characters, ending with a period.
 - Plain text only: no markdown, no formatting, no quotes, no links, no code, no line breaks.
 - Name the action first, the way a block explorer would, for example "Transfer of ..." or "Approval of ...".
+- When the facts list steps, name what the transaction IS from them, and ignore the steps that only prepare or clean up. Creating or closing a token account alongside a transfer is still a transfer, and the rent it costs is not a second payment. Sending one token and receiving another is a swap.
 - If the only facts about what moves are simulated balance changes, state those changes as what the transaction does and do not name a transfer type.
 - Do not give advice, do not warn, do not address the reader.
 - If the facts do not describe an action, answer with exactly: UNKNOWN`;

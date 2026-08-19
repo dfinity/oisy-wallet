@@ -4,6 +4,7 @@ import SolTransactionsGroup from '$sol/components/transactions/SolTransactionsGr
 import { summarizeSolFacts } from '$sol/services/sol-summary.services';
 import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { createMockSolTransactionUi } from '$tests/mocks/sol-transactions.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
@@ -30,13 +31,39 @@ describe('SolTransactionsGroup', () => {
 		mockAuthStore();
 	});
 
-	// The sentence costs an update call, so a group nobody opened must not pay for one.
-	it('should not ask for a sentence before the group is opened', () => {
-		vi.mocked(summarizeSolFacts).mockResolvedValue('Paid 0.005454491 SOL.');
+	// The sentence is the row's title now, so it is asked for as soon as the row renders. The
+	// service caches one answer per set of facts, which is what makes that affordable.
+	it('should ask for a sentence as soon as the row renders', async () => {
+		vi.mocked(summarizeSolFacts).mockResolvedValue('Transfer of 0.1 USD1 to 4GsmSut...AM56JR8.');
 
 		render(SolTransactionsGroup, { props: { group } });
 
-		expect(summarizeSolFacts).not.toHaveBeenCalled();
+		await waitFor(() => {
+			expect(summarizeSolFacts).toHaveBeenCalledOnce();
+		});
+	});
+
+	it('should title the row with the sentence once it arrives', async () => {
+		vi.mocked(summarizeSolFacts).mockResolvedValue('Transfer of 0.1 USD1 to 4GsmSut...AM56JR8.');
+
+		const { getByTestId } = render(SolTransactionsGroup, { props: { group } });
+
+		await waitFor(() => {
+			expect(getByTestId('sol-transactions-group-label')).toHaveTextContent(
+				'Transfer of 0.1 USD1 to 4GsmSut...AM56JR8.'
+			);
+		});
+	});
+
+	// Until it arrives the row still has to say something, and it says only what it can prove.
+	it('should title the row with what it can prove until then', () => {
+		vi.mocked(summarizeSolFacts).mockReturnValue(new Promise(() => {}));
+
+		const { getByTestId } = render(SolTransactionsGroup, { props: { group } });
+
+		expect(getByTestId('sol-transactions-group-label')).toHaveTextContent(
+			en.transactions.text.grouped_bundle
+		);
 	});
 
 	it('should show the sentence once the group is opened', async () => {

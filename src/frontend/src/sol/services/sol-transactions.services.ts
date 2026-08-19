@@ -424,7 +424,7 @@ export const fetchSolTransactionsForSignature = async ({
 	const effect = mapSolTransactionEffect({
 		transaction: transactionDetail,
 		address,
-		instructionsCount: allInstructions.length
+		instructions: allInstructions
 	});
 
 	// The instructions are received in the order they were executed, meaning the first instruction

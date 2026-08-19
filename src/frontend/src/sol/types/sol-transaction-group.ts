@@ -34,6 +34,9 @@ export interface SolTransactionGroup {
 	// rather than the sum of its decodable rows. It lets the row say how much of itself it shows
 	// instead of implying it shows all of it.
 	instructionsCount?: number;
+	// The instruction shapes, in order. What says whether a transaction is a transfer, a swap or a
+	// stake; the balances only say how much moved.
+	steps?: string[];
 }
 
 export type SolGroupedTransactionEntry =
