@@ -12,8 +12,10 @@ import {
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
+	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
+import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
 
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -475,16 +477,71 @@ describe('wallet-connect.utils', () => {
 				spender: SPENDER,
 				token: DAI,
 				amount: 123456789n,
+				unlimited: false,
 				expiration: 1761743754
 			});
 		});
 
-		it('summarizes an ERC-2612 permit with its declared spender', () => {
-			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({ spender: SPENDER });
+		// Permit2 saturates at its declared uint160, not at the 256-bit maximum.
+		it('calls a saturated Permit2 allowance unlimited', () => {
+			const typedData = structuredClone(permit2);
+			(typedData.message.details as Record<string, unknown>).amount = MAX_UINT_160.toString();
+
+			expect(getEthTypedDataApproval(typedData)?.unlimited).toBeTruthy();
 		});
 
-		it('summarizes a DAI permit with its declared spender', () => {
-			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({ spender: SPENDER });
+		it('summarizes an ERC-2612 permit from its value, deadline and verifying contract', () => {
+			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({
+				spender: SPENDER,
+				// ERC-2612 names no token: the contract that verifies the permit is the token.
+				token: DAI,
+				amount: 1000000n,
+				unlimited: false,
+				expiration: 1893456000
+			});
+		});
+
+		// The report this fixes: an unlimited permit summarized as a bare spender.
+		it('calls a saturated ERC-2612 value unlimited', () => {
+			const typedData = structuredClone(erc2612Permit);
+			typedData.message.value = MAX_UINT_256.toString();
+
+			expect(getEthTypedDataApproval(typedData)).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: MAX_UINT_256,
+				unlimited: true,
+				expiration: 1893456000
+			});
+		});
+
+		// "Never expires" is written as a saturated uint256, which is not a moment in time.
+		it('states no expiration for a deadline no date can hold', () => {
+			const typedData = structuredClone(erc2612Permit);
+			typedData.message.deadline = MAX_UINT_256.toString();
+
+			expect(getEthTypedDataApproval(typedData)?.expiration).toBeUndefined();
+		});
+
+		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
+		it('summarizes an allowed DAI permit as unlimited', () => {
+			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: undefined,
+				unlimited: true,
+				expiration: 1893456000
+			});
+		});
+
+		it('summarizes a cleared DAI permit as a revocation', () => {
+			expect(getEthTypedDataApproval(daiPermit(false))).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: ZERO,
+				unlimited: false,
+				expiration: 1893456000
+			});
 		});
 
 		it('summarizes nothing for an ERC-3009 authorization carrying undeclared summary keys', () => {
@@ -528,6 +585,27 @@ describe('wallet-connect.utils', () => {
 			(typedData.message.details as Record<string, unknown>).token = 'not-an-address';
 
 			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+		});
+	});
+
+	describe('toTypedDataDomainChainId', () => {
+		// EIP-712 declares `chainId` as a uint256, so every one of these is chain 1 and all of them
+		// hash to the same digest.
+		it.each(['1', 1, 1n, '0x1', '01', '0x01'])('reads %s as the same chain', (chainId) => {
+			expect(toTypedDataDomainChainId(chainId)).toBe(1n);
+		});
+
+		it.each([undefined, null, 'mainnet', '', {}, [], 1.5, '0x'])(
+			'reads %s as no chain at all',
+			(value) => {
+				expect(toTypedDataDomainChainId(value)).not.toBe(1n);
+			}
+		);
+
+		// The value comes from the dApp, so what it cannot read must not take the review down.
+		it('does not throw on a value that is not a number', () => {
+			expect(() => toTypedDataDomainChainId('mainnet')).not.toThrow();
+			expect(toTypedDataDomainChainId('mainnet')).toBeUndefined();
 		});
 	});
 });

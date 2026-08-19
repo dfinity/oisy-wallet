@@ -1330,6 +1330,7 @@ interface I18nWallet_connect {
 		disconnect_all: string;
 		disconnect_app: string;
 		wallet_connect: string;
+		token_units: string;
 	};
 	alt: { connect_input: string };
 	domain: {
