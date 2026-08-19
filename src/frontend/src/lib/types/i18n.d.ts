@@ -673,6 +673,7 @@ interface I18nSend {
 	text: {
 		send: string;
 		send_token: string;
+		send_unknown_token: string;
 		destination: string;
 		balance: string;
 		review: string;
@@ -945,6 +946,7 @@ interface I18nSwap {
 		near_intents_tos: string;
 		onesec_transfer_fee: string;
 		onesec_protocol_fee: string;
+		chain_fusion_minimum_amount: string;
 		value_difference_error_confirmation: string;
 		value_difference_missing_price_confirmation: string;
 	};
@@ -1622,6 +1624,8 @@ interface I18nTransaction {
 		to_ata_copied: string;
 		block: string;
 		interacted_with: string;
+		unknown_token: string;
+		raw_value: string;
 		status: string;
 		confirmations: string;
 		for: string;

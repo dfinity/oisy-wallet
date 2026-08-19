@@ -6,14 +6,18 @@ import {
 } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { ErcTransfer, EthTransactionUi } from '$eth/types/eth-transaction';
 import { MAX_UINT_256 } from '$lib/constants/app.constants';
 import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
+import type { Token } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { getContactForAddress } from '$lib/utils/contact.utils';
+import { formatToken } from '$lib/utils/format.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { AbiCoder } from 'ethers/abi';
@@ -87,6 +91,129 @@ export const tryDecodeErc20AbiData = ({
 };
 
 /**
+ * Decodes the recipient of an ERC20 `transfer` call.
+ *
+ * The recipient of a token transfer exists only in the calldata, since the transaction itself is
+ * addressed to the token contract.
+ */
+export const decodeErc20TransferRecipient = (data: string | undefined): EthAddress | undefined =>
+	isErc20TransactionTransfer(data) && nonNullish(data)
+		? tryDecodeErc20AbiData({ data }).to
+		: undefined;
+
+/**
+ * Groups EVM transactions by network and transaction hash.
+ *
+ * One transaction can produce several entries in the wallet - a token transfer plus the native entry
+ * for the fee it paid - and the hash is the only thing that relates them. Entries without a hash
+ * cannot be related to anything, so they are left out.
+ */
+export const groupEthTransactionsByNetworkAndHash = <T>({
+	items,
+	networkId,
+	hash
+}: {
+	items: T[];
+	networkId: (item: T) => NetworkId;
+	hash: (item: T) => string | undefined;
+}): Map<NetworkId, Map<string, T[]>> => {
+	const groups = new Map<NetworkId, Map<string, T[]>>();
+
+	items.forEach((item) => {
+		const itemHash = hash(item);
+
+		if (isNullish(itemHash)) {
+			return;
+		}
+
+		const itemNetworkId = networkId(item);
+
+		const networkGroup = groups.get(itemNetworkId);
+
+		if (isNullish(networkGroup)) {
+			groups.set(itemNetworkId, new Map<string, T[]>([[itemHash, [item]]]));
+
+			return;
+		}
+
+		const groupItems = networkGroup.get(itemHash);
+
+		if (nonNullish(groupItems)) {
+			groupItems.push(item);
+		} else {
+			networkGroup.set(itemHash, [item]);
+		}
+	});
+
+	return groups;
+};
+
+/**
+ * Finds every ERC transfer that a transaction hash produced.
+ *
+ * More than one means the transaction moved several assets - a swap, a batch send, a token that
+ * splits a transfer - so no single transfer describes it.
+ */
+export const findErcTransfers = ({
+	hash,
+	networkId,
+	transfers
+}: {
+	hash: string | undefined;
+	networkId: NetworkId;
+	transfers: Map<NetworkId, Map<string, ErcTransfer[]>>;
+}): ErcTransfer[] => (isNullish(hash) ? [] : (transfers.get(networkId)?.get(hash) ?? []));
+
+/**
+ * Finds the ERC transfer that a transaction hash belongs to.
+ *
+ * A swap or a batch send emits several transfers under the same hash. None of them describes the
+ * transaction on its own, so an ambiguous hash resolves to nothing rather than to an arbitrary leg.
+ */
+export const findErcTransfer = (params: {
+	hash: string | undefined;
+	networkId: NetworkId;
+	transfers: Map<NetworkId, Map<string, ErcTransfer[]>>;
+}): ErcTransfer | undefined => {
+	const matches = findErcTransfers(params);
+
+	return matches.length === 1 ? matches[0] : undefined;
+};
+
+/**
+ * Describes what an ERC transfer moved, to be displayed with the transaction.
+ *
+ * A non-fungible transfer has no amount worth formatting: `value` carries the ERC1155 quantity, or
+ * simply 1 for an ERC721, and formatting either with the collection decimals renders a meaningless
+ * fraction. The collection and the token id identify it instead.
+ */
+export const formatErcTransferAsset = ({
+	token,
+	value,
+	tokenId
+}: {
+	token: Token;
+	value?: bigint;
+	tokenId?: number;
+}): string | undefined => {
+	if (isTokenNonFungible(token)) {
+		const name = getTokenDisplayName(token);
+
+		return nonNullish(tokenId) ? `${name} #${tokenId}` : name;
+	}
+
+	if (isNullish(value)) {
+		return;
+	}
+
+	return `${formatToken({
+		value,
+		displayDecimals: token.decimals,
+		unitName: token.decimals
+	})} ${getTokenDisplaySymbol(token)}`;
+};
+
+/**
  * It will try to map an address to a name among the known addresses (e.g. ERC20 tokens, built-in contacts).
  *
  * The string will be used to be displayed instead of the address and make it more user-friendly, avoiding confusions.
@@ -151,7 +278,8 @@ export const mapEthTransactionUi = ({
 					: from?.toLowerCase() === ethAddress?.toLowerCase()
 						? 'send'
 						: 'receive',
-		approveSpender
+		approveSpender,
+		transferRecipient: decodeErc20TransferRecipient(data)
 	};
 };
 

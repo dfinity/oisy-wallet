@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Wyślij",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Miejsce docelowe",
 			"balance": "Saldo",
 			"review": "Przegląd",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Nie udało się pobrać ceny przynajmniej jednego z tokenów. <strong>Zweryfikuj niezależnie</strong>, czy ta oferta wymiany jest uczciwa.<br>Pamiętaj, że ustawienie poślizgu (slippage) <strong>nie</strong> chroni Cię przed ofertą z dużo niższą wartością otrzymywaną!"
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "Konto tokena odbiorcy (ATA)",
 			"to_ata_copied": "Konto tokena odbiorcy (ATA) skopiowane do schowka.",
 			"block": "Blok",
-			"interacted_with": "Interakcja z (Do)",
+			"interacted_with": "Interakcja z",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Status",
 			"confirmations": "Potwierdzenia",
 			"for": "",

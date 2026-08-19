@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Отправить",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Получатель",
 			"balance": "Баланс",
 			"review": "Подверждение",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "Счет отправителя токенов (ATA)",
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
-			"interacted_with": "Взаимодействовали с (Получатель)",
+			"interacted_with": "Взаимодействовали с",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "Для",

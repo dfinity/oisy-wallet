@@ -8,6 +8,7 @@ import { swap as sendEvmSwap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
+import { loadCustomTokens as loadCustomIcrcTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { setCustomToken } from '$lib/api/backend.api';
@@ -24,6 +25,7 @@ import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
+	enableSwapDestinationToken,
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
 	fetchOneSecEvmToIcpSwap,
@@ -54,7 +56,11 @@ import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.servi
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockValidIcCkToken,
+	mockValidIcToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
@@ -69,6 +75,11 @@ import {
 } from '$tests/mocks/velora.mock';
 import { constructSimpleSDK, type DeltaPrice, type OptimalRate } from '@velora-dex/sdk';
 import { get, readable } from 'svelte/store';
+
+vi.mock('$icp/services/icrc.services', async (importOriginal) => ({
+	...(await importOriginal<object>()),
+	loadCustomTokens: vi.fn()
+}));
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()
@@ -2205,6 +2216,43 @@ describe('swap.services', () => {
 					})
 				})
 			);
+		});
+	});
+
+	describe('enableSwapDestinationToken with an ICRC destination', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		// The regression this guards: a Chain Fusion mint (and a 1Sec bridge) lands on an
+		// ICRC ck token, which the ERC and SPL branches cannot persist — the swap completed
+		// with the destination still hidden and its new balance invisible.
+		it('persists a disabled ICRC destination and reloads the custom tokens', async () => {
+			await enableSwapDestinationToken({
+				identity: mockIdentity,
+				destinationToken: {
+					...mockValidIcCkToken,
+					standard: { code: 'icrc' },
+					enabled: false
+				} as IcTokenToggleable
+			});
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomIcrcTokens).toHaveBeenCalledOnce();
+		});
+
+		it('does nothing when the ICRC destination is already enabled', async () => {
+			await enableSwapDestinationToken({
+				identity: mockIdentity,
+				destinationToken: {
+					...mockValidIcCkToken,
+					standard: { code: 'icrc' },
+					enabled: true
+				} as IcTokenToggleable
+			});
+
+			expect(setCustomToken).not.toHaveBeenCalled();
+			expect(loadCustomIcrcTokens).not.toHaveBeenCalled();
 		});
 	});
 

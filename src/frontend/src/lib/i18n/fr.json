@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Envoyer",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Destination",
 			"balance": "Solde",
 			"review": "Vérifier",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Le prix d'au moins un des tokens n'a pas pu être récupéré. Veuillez <strong>vérifier de manière indépendante</strong> que cette offre de swap est équitable.<br>Notez que le réglage du slippage ne vous protège <strong>pas</strong> d'une offre avec une valeur de réception bien inférieure !"
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "Compte de token du destinataire (ATA)",
 			"to_ata_copied": "Compte de token du destinataire (ATA) copié dans le presse-papiers.",
 			"block": "Bloc",
-			"interacted_with": "Interagi avec (À)",
+			"interacted_with": "Interagi avec",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Statut",
 			"confirmations": "Confirmations",
 			"for": "Pour",

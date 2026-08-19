@@ -56,11 +56,16 @@ const oisyTradeRawOrders: Readable<UserOrder[]> = derived(
 	({ orders }) => orders ?? []
 );
 
-// The caller's orders resolved to OISY tokens, newest first. Orders whose
-// base/quote ledger the wallet doesn't know are dropped.
+// The caller's orders resolved to OISY tokens, newest first. Wallet metadata is
+// preferred, but DEX supported-token metadata keeps disabled-token orders visible.
 export const oisyTradeOrders: Readable<OisyTradeOrderView[]> = derived(
-	[oisyTradeRawOrders, enabledIcTokens],
-	([$orders, $enabledIcTokens]) => mapOisyTradeOrders({ orders: $orders, tokens: $enabledIcTokens })
+	[oisyTradeRawOrders, oisyTradeSupportedTokens, enabledIcTokens],
+	([$orders, $supportedTokens, $enabledIcTokens]) =>
+		mapOisyTradeOrders({
+			orders: $orders,
+			tokens: $enabledIcTokens,
+			supportedTokens: $supportedTokens
+		})
 );
 
 // Working orders (Active tab): status Pending or Open.

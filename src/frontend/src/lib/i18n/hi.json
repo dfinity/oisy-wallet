@@ -935,6 +935,7 @@
 		"text": {
 			"send": "भेजें",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "गंतव्य",
 			"balance": "शेष राशि",
 			"review": "समीक्षा",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "प्राप्तकर्ता टोकन खाता (ATA)",
 			"to_ata_copied": "प्राप्तकर्ता टोकन खाता (ATA) क्लिपबोर्ड पर कॉपी किया गया।",
 			"block": "ब्लॉक",
-			"interacted_with": "के साथ इंटरैक्ट किया गया (को)",
+			"interacted_with": "के साथ इंटरैक्ट किया गया",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "स्थिति",
 			"confirmations": "पुष्टियां",
 			"for": "",

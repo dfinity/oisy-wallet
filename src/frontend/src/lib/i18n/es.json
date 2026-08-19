@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Enviar",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Destino",
 			"balance": "Saldo",
 			"review": "Revisar",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "No se pudo obtener el precio de al menos uno de los tokens. Por favor, <strong>verifica de forma independiente</strong> que esta oferta de intercambio sea justa.<br>Ten en cuenta que la configuración de slippage <strong>no</strong> te protege de una oferta con un valor de recepción mucho menor."
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "Cuenta de token del destinatario (ATA)",
 			"to_ata_copied": "Cuenta de token del destinatario (ATA) copiada al portapapeles.",
 			"block": "Bloque",
-			"interacted_with": "Interactuado Con (A)",
+			"interacted_with": "Interactuado con",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Estado",
 			"confirmations": "Confirmaciones",
 			"for": "Para",

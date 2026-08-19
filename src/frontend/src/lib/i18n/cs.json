@@ -935,6 +935,7 @@
 		"text": {
 			"send": "Odeslat",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Cíl",
 			"balance": "Zůstatek",
 			"review": "Zkontrolovat",
@@ -1219,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
@@ -1947,7 +1949,9 @@
 			"to_ata": "Účet tokenu příjemce (ATA)",
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
-			"interacted_with": "Interakce s (do)",
+			"interacted_with": "Interakce s",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Stav",
 			"confirmations": "Potvrzení",
 			"for": "Pro",
