@@ -88,8 +88,24 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		this.timer.stop();
 	}
 
+	protected setRef(data: PostMessageDataRequestBtc | undefined) {
+		const newRef = data?.btcAddress.data;
+
+		// A scheduler re-keyed to another address must not filter or merge against the previous
+		// address's state (mirrors sol-wallet.scheduler.ts).
+		if (this.ref !== newRef) {
+			this.store = {
+				balance: undefined,
+				transactions: {},
+				latestBitcoinBlockHeight: undefined
+			};
+		}
+
+		this.ref = newRef;
+	}
+
 	async start(data: PostMessageDataRequestBtc | undefined) {
-		this.ref = data?.btcAddress.data;
+		this.setRef(data);
 
 		await this.timer.start<PostMessageDataRequestBtc>({
 			interval: WALLET_TIMER_INTERVAL_MILLIS,
@@ -99,6 +115,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}
 
 	async trigger(data: PostMessageDataRequestBtc | undefined) {
+		this.setRef(data);
+
 		await this.timer.trigger<PostMessageDataRequestBtc>({
 			job: this.syncWallet,
 			data

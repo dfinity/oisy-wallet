@@ -34,9 +34,17 @@ export const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 // Suggested non-Chain-Fusion ICRC tokens to be enabled by default if the user set no preference
 export const ICRC_SUGGESTED_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = [];
 
-export const ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = Object.values(
+const ALL_ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = Object.values(
 	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
 ).filter(nonNullish);
 
+// Curated/visible additional ICRC tokens: metadata-only entries are excluded
+// here (not shown, not suggested).
+export const ADDITIONAL_ICRC_TOKENS: IcTokenWithoutId[] = ALL_ADDITIONAL_ICRC_TOKENS.filter(
+	({ metadataOnly }) => !metadataOnly
+);
+
+// Enrichment lookup for manually imported tokens: keeps every entry, including
+// metadata-only ones, so an explicit import still resolves the curated metadata.
 export const ADDITIONAL_ICRC_TOKENS_INDEXED: Record<LedgerCanisterIdText, IcTokenWithoutId> =
-	buildIndexedIcTokens(ADDITIONAL_ICRC_TOKENS);
+	buildIndexedIcTokens(ALL_ADDITIONAL_ICRC_TOKENS);

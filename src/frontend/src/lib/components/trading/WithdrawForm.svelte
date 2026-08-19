@@ -5,6 +5,7 @@
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -19,6 +20,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -94,6 +96,7 @@
 <ContentWithToolbar>
 	<div class="mb-4">
 		<TokenInput
+			autofocus={isDesktop()}
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
 			isSelectable
@@ -148,7 +151,14 @@
 
 	<ModalValue>
 		{#snippet label()}{$i18n.trading.withdraw.from}{/snippet}
-		{#snippet mainValue()}{OISY_TRADE_PROVIDER_NAME}{/snippet}
+		{#snippet mainValue()}
+			<span class="inline-flex items-center gap-2">
+				<span class="flex" aria-hidden="true">
+					<OisyTradeMark size="22" />
+				</span>
+				{OISY_TRADE_PROVIDER_NAME}
+			</span>
+		{/snippet}
 	</ModalValue>
 
 	<FeeDisplay

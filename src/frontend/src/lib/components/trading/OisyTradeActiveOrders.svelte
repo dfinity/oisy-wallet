@@ -6,6 +6,8 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeOrderRow from '$lib/components/trading/OisyTradeOrderRow.svelte';
+	import LimitOrder from '$lib/components/trading/limit-order/LimitOrder.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
@@ -77,6 +79,27 @@
 <StakeContentSection>
 	{#snippet title()}
 		<h4>{$i18n.trading.page.active_orders}</h4>
+	{/snippet}
+
+	{#snippet action()}
+		<LimitOrder>
+			{#snippet trigger(open)}
+				{#if $oisyTradeHasAssets}
+					<Button colorStyle="primary" onclick={open} paddingSmall type="button">
+						{$i18n.trading.page.new_order}
+					</Button>
+				{:else}
+					<!--
+						Deposit-first: no free balance to place an order against yet. Left as a
+						plain disabled button (like the other provider pages) — the Active-orders
+						empty state below already tells the user to deposit, so no tooltip.
+					-->
+					<Button colorStyle="primary" disabled paddingSmall type="button">
+						{$i18n.trading.page.new_order}
+					</Button>
+				{/if}
+			{/snippet}
+		</LimitOrder>
 	{/snippet}
 
 	{#snippet content()}

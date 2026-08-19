@@ -13,7 +13,7 @@ import {
 	convertCkETHToEth,
 	convertCkErc20ToErc20
 } from '$icp/services/ck.services';
-import type { IcSendParams, IcTransferParams } from '$icp/types/ic-send';
+import type { IcCkWithdrawalResult, IcSendParams, IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcpAddress } from '$icp/utils/account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
@@ -36,8 +36,8 @@ export const sendIc = async ({
 	token: IcToken;
 	targetNetworkId?: NetworkId;
 	sendCompleted: () => void;
-}): Promise<void> => {
-	await send({
+}): Promise<IcCkWithdrawalResult | undefined> => {
+	const result = await send({
 		progress,
 		...rest
 	});
@@ -47,6 +47,8 @@ export const sendIc = async ({
 	progress?.(ProgressStepsSendIc.RELOAD);
 
 	await waitAndTriggerWallet();
+
+	return result;
 };
 
 const send = async ({
@@ -56,29 +58,26 @@ const send = async ({
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId?: NetworkId;
-}): Promise<void> => {
+}): Promise<IcCkWithdrawalResult | undefined> => {
 	if (isNetworkIdBitcoin(targetNetworkId)) {
-		await convertCkBTCToBtc({
+		return await convertCkBTCToBtc({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	if (isConvertCkEthToEth({ token, networkId: targetNetworkId })) {
-		await convertCkETHToEth({
+		return await convertCkETHToEth({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
-		await convertCkErc20ToErc20({
+		return await convertCkErc20ToErc20({
 			...rest,
 			token
 		});
-		return;
 	}
 
 	const { ledgerCanisterId } = token;

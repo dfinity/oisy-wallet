@@ -66,11 +66,12 @@ export const computeLiquidiumBorrowPreview = ({
 };
 
 // Borrow is a `signMessage` outflow (no oisy broadcast): resolve profile → `lending.borrow`
-// → record an AUT so the modal closes before settlement. Funds land at `receiverAddress`.
+// → record an AUT so the modal closes before settlement. Funds land at `receiver` on `chain`.
 export const executeLiquidiumBorrow = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	receiverAddress,
@@ -81,6 +82,7 @@ export const executeLiquidiumBorrow = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	receiverAddress: string;
@@ -99,7 +101,8 @@ export const executeLiquidiumBorrow = async ({
 		profileId,
 		poolId,
 		amount,
-		receiverAddress,
+		chain,
+		receiver: receiverAddress,
 		signerWalletAddress: ethAddress,
 		signerChain: Chain.ETH,
 		signerWalletAdapter: liquidiumWalletAdapter({ identity })

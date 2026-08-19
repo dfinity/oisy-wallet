@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
@@ -22,7 +23,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { back } from '$lib/utils/nav.utils';
+	import { back, isTradingPath } from '$lib/utils/nav.utils';
 
 	interface Props {
 		onDeposit: () => void;
@@ -31,11 +32,17 @@
 
 	let { onDeposit, onWithdraw }: Props = $props();
 
+	// Unlike the other provider heroes, this page is also a top-level destination
+	// reachable from the main navigation, where a back arrow would be redundant.
+	// Only show it when the user drilled in from the Assets → Trading tab, so
+	// popping history returns them to that tab.
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
 	});
+
+	const showBackButton = $derived(isTradingPath(fromRoute?.route.id ?? null));
 
 	const fiat = (value: number): string =>
 		formatCurrency({
@@ -52,32 +59,50 @@
 
 	const hasDeposits = $derived($oisyTradeAssets.length > 0);
 	const hasReserved = $derived($oisyTradeReservedUsdValue > 0);
+
+	// Scroll down to the "What is OISY TRADE" info box (a sibling section on the
+	// same page) — resolved by DOM id rather than a hash link so it works inside
+	// the app's scroll container.
+	const scrollToInfo = () =>
+		document.getElementById('oisy-trade-info')?.scrollIntoView({ behavior: 'smooth' });
 </script>
 
 <StakeContentSection>
 	{#snippet title()}
-		<div class="absolute top-0 left-0">
-			<ButtonIcon
-				ariaLabel={$i18n.core.text.back}
-				colorStyle="tertiary"
-				link={false}
-				onclick={() => back({ pop: nonNullish(fromRoute) })}
-			>
-				{#snippet icon()}
-					<IconBackArrow />
-				{/snippet}
-			</ButtonIcon>
-		</div>
+		{#if showBackButton}
+			<div class="absolute top-0 left-0">
+				<ButtonIcon
+					ariaLabel={$i18n.core.text.back}
+					colorStyle="tertiary"
+					link={false}
+					onclick={() => back({ pop: nonNullish(fromRoute) })}
+				>
+					{#snippet icon()}
+						<IconBackArrow />
+					{/snippet}
+				</ButtonIcon>
+			</div>
+		{/if}
 
 		<div class="flex w-full flex-col items-center text-center">
 			<OisyTradeMark />
 
 			<h2 class="my-2 text-xl font-bold sm:text-2xl">{$i18n.trading.text.provider_name}</h2>
 
-			<p class="max-w-lg text-sm text-tertiary sm:text-base">
+			<div class="max-w-lg text-sm text-tertiary sm:text-base">
 				{$i18n.trading.page.tagline}
-				<span class="hidden sm:inline">{$i18n.trading.page.tagline_desktop}</span>
-			</p>
+			</div>
+
+			<Button
+				innerStyleClass="items-center"
+				link
+				onclick={scrollToInfo}
+				styleClass="mt-2 text-sm"
+				type="button"
+			>
+				<span>{$i18n.core.text.learn_more}</span>
+				<IconArrowDown size="18" />
+			</Button>
 		</div>
 	{/snippet}
 
@@ -87,7 +112,7 @@
 			left-aligned layout on mobile (smaller value type, no fixed height), per
 			the design's mobile hero treatment.
 		-->
-		<div class="flex w-full flex-col gap-3 sm:flex-row">
+		<div class="mt-6 flex w-full flex-col gap-3 sm:flex-row">
 			<div
 				class="flex w-full flex-col gap-1.5 rounded-xl border border-disabled bg-secondary p-4 sm:w-1/2 sm:items-center sm:text-center"
 			>
@@ -99,9 +124,13 @@
 						{depositable}
 					{/if}
 				</span>
-				<span class="text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
+				<!-- Breathing room above the action, carried by the hint rather than the
+					 button: the button's `mt-auto` (which keeps the two desktop cards' buttons
+					 level) would override any `mt-*` on it. 8px here plus the column's
+					 `gap-1.5` gives the same 14px on both breakpoints. -->
+				<span class="mb-2 text-xs text-tertiary">{$i18n.trading.page.trading_potential_hint}</span>
 
-				<Button colorStyle="success" fullWidth onclick={onDeposit} styleClass="mt-4 sm:mt-auto">
+				<Button colorStyle="success" fullWidth onclick={onDeposit} styleClass="sm:mt-auto">
 					{$i18n.trading.page.deposit}
 				</Button>
 			</div>
@@ -117,7 +146,7 @@
 						{deposited}
 					{/if}
 				</span>
-				<span class="text-xs text-tertiary">
+				<span class="mb-2 text-xs text-tertiary">
 					{#if $isPrivacyMode}
 						<IconDots variant="xs" />
 					{:else if hasReserved}
@@ -138,7 +167,7 @@
 					disabled={!hasDeposits}
 					fullWidth
 					onclick={onWithdraw}
-					styleClass="mt-4 sm:mt-auto"
+					styleClass="sm:mt-auto"
 				>
 					{$i18n.trading.page.withdraw}
 				</Button>

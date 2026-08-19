@@ -90,7 +90,7 @@ event name or a metadata value.
 
 Use for a feature that has **several actions and/or a success/error lifecycle**
 that you want to see as _one_ event distinguished by metadata. Examples:
-`TOKEN_MANAGE`, `TRADING`, `TRANSACTION_FILTER`, `ONRAMPER_OPEN`. The action
+`TOKEN_MANAGE`, `LIMIT_ORDER`, `TRANSACTION_FILTER`, `ONRAMPER_OPEN`. The action
 rides in `event_subcontext` / `event_modifier`, the outcome in `result_status` —
 so you get one event name, not `foo_create_success` / `foo_create_error` /
 `foo_delete_success` / … multiplying out. This is the **preferred** pattern for
@@ -99,10 +99,10 @@ any new feature area (see §5, pattern B).
 ### `analytics.constants.ts` flat `TRACK_*` constants — simple counters
 
 Use for a **single, self-contained count** where a structured family would be
-overkill: `sign_in_success`, `wallet_connect`, `welcome_open`,
-`note_share_open`. The constant _is_ the event name (a snake_case string). These
-are grouped by domain with a comment header. Fine for one-shot funnels; reach for
-the enum pattern the moment you have more than ~2 related actions.
+overkill: `sign_in_success`, `wallet_connect`, `welcome_open`. The constant _is_
+the event name (a snake_case string). These are grouped by domain with a comment
+header. Fine for one-shot funnels; reach for the enum pattern the moment you have
+more than ~2 related actions.
 
 > Rule of thumb: **> 2 related actions, or any success/error lifecycle → enum
 > family + domain service (pattern B). One isolated ping → flat constant
@@ -150,15 +150,18 @@ Repeatable keys use a numeric suffix (`event_key`, `event_key2`, …;
 
 ### Event — what happened
 
-| Property                          | Description                                            | Examples              | Value source                                              |
-| --------------------------------- | ------------------------------------------------------ | --------------------- | --------------------------------------------------------- |
-| `event_context`                   | Section / status / form the event belongs to           | `nft`, `send`, `earn` | `PLAUSIBLE_EVENT_CONTEXTS`                                |
-| `event_subcontext`                | More granular context (subsection, wizard step, field) | `Harvest Autopilot`   | `PLAUSIBLE_EVENT_SUBCONTEXT_*`                            |
-| `event_trigger`                   | What triggered the event                               | `auto`, `click`       | free string                                               |
-| `event_provider`                  | Third-party provider                                   | `velora`, `liquidium` | free string / provider const                              |
-| `event_modifier`                  | "Direction" for two-way events                         | `enable` / `disable`  | `PLAUSIBLE_EVENT_FILTER_MODIFIERS` or feature-local union |
-| `event_key` (`event_key2`, …)     | Event-specific key                                     | `episode`, `type`     | `PLAUSIBLE_EVENT_EVENTS_KEYS` / free string               |
-| `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`     | free string                                               |
+| Property                          | Description                                            | Examples                                                          | Value source                                              |
+| --------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------- |
+| `event_context`                   | Section / status / form the event belongs to           | `nft`, `send`, `earn`                                             | `PLAUSIBLE_EVENT_CONTEXTS`                                |
+| `event_subcontext`                | More granular context (subsection, wizard step, field) | `Harvest Autopilot`                                               | `PLAUSIBLE_EVENT_SUBCONTEXT_*`                            |
+| `event_trigger`                   | What triggered the event                               | `auto`, `click`                                                   | free string                                               |
+| `event_provider`                  | Third-party provider                                   | `velora`, `liquidium`, `OISY Trade`                               | free string / provider const                              |
+| `event_modifier`                  | "Direction" for two-way events                         | `enable` / `disable`, `deposit` / `withdraw`, `create` / `cancel` | `PLAUSIBLE_EVENT_FILTER_MODIFIERS` or feature-local union |
+| `event_key` (`event_key2`, …)     | Event-specific key                                     | `episode`, `type`                                                 | `PLAUSIBLE_EVENT_EVENTS_KEYS` / free string               |
+| `event_value` (`event_value2`, …) | Event-specific value                                   | `s1e4`, `address`                                                 | free string                                               |
+| `side`                            | Order side (trade events)                              | `buy` / `sell`                                                    | feature-local union                                       |
+| `order_type`                      | Order time-in-force (trade events)                     | `FOK` / `GTC`                                                     | feature-local union                                       |
+| `price`                           | Limit price, quote per base (trade events)             | `8.42`                                                            | string (full-precision decimal string)                    |
 
 ### Source — where it came from
 
@@ -205,7 +208,7 @@ Same fields as **Token**, prefixed `token2_` — for flows with two tokens (swap
 trade, deposit/withdraw): `token2_network`, `token2_address`, `token2_standard`,
 `token2_symbol`, `token2_name`, `token2_id`, `token2_amount`, `token2_usd_price`,
 `token2_usd_value`. By convention the primary/base token is `token_*` and the
-quote/second token is `token2_*` (see `trackTrading`).
+quote/second token is `token2_*` (see `trackLimitOrder`).
 
 > **Code vs. schema naming.** A few code enums use adjacent names for the same
 > idea — e.g. `result_error_message` in code maps to this doc's
@@ -262,7 +265,9 @@ export const trackFoo = ({ modifier, resultStatus, error }: TrackFooParams) => {
 `result_status` beats a cartesian explosion of `foo_create_success`,
 `foo_delete_error`, … It keeps the enum small and the dashboard groupable. Only
 fall back to distinct flat constants when the actions are genuinely unrelated
-funnels (like the note-share creator vs. recipient events).
+one-off pings (e.g. `welcome_open` vs. `wallet_connect`). Two enum families for
+one feature are fine when the flows differ — e.g. `personal_note` (lifecycle) and
+`personal_note_share` (the share funnel) share a context but track different journeys.
 
 **Firing point / lifecycle:** for async flows, fire `executing` (or a
 `submitted` counter) when the action starts, then `success` / `error` from the

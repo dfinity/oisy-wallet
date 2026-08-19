@@ -12,7 +12,7 @@ vi.mock('$lib/api/liquidium.api', () => ({
 }));
 
 vi.mock('$lib/utils/liquidium.utils', () => ({
-	mapLiquidiumMarket: vi.fn(),
+	mapLiquidiumMarketRails: vi.fn(),
 	mapLiquidiumPortfolio: vi.fn()
 }));
 
@@ -46,7 +46,7 @@ describe('liquidium.services', () => {
 			market: { listPools, getAssetPrices },
 			positions: { getUserReserves, getUserPositionSummary }
 		} as unknown as ReturnType<typeof liquidiumApi.liquidiumClient>);
-		vi.mocked(liquidiumUtils.mapLiquidiumMarket).mockReturnValue(market);
+		vi.mocked(liquidiumUtils.mapLiquidiumMarketRails).mockReturnValue([market]);
 		vi.mocked(liquidiumUtils.mapLiquidiumPortfolio).mockReturnValue(portfolio);
 		getAssetPrices.mockResolvedValue({});
 	});
@@ -84,7 +84,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: false
 			});
 			expect(liquidiumApi.liquidiumClient).not.toHaveBeenCalled();
 		});
@@ -98,7 +99,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 			expect(getUserReserves).not.toHaveBeenCalled();
 			expect(getUserPositionSummary).not.toHaveBeenCalled();
@@ -126,7 +128,8 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 		});
 
@@ -142,11 +145,12 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [market],
 				portfolio,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
 			});
 		});
 
-		it('swallows SDK errors and leaves the store unchanged', async () => {
+		it('swallows SDK errors and leaves the data unchanged, but settles the loaded flag', async () => {
 			listPools.mockRejectedValue(new Error('rpc down'));
 
 			await expect(loadLiquidium({ identity: mockIdentity, ethAddress })).resolves.toBeUndefined();
@@ -154,7 +158,28 @@ describe('liquidium.services', () => {
 			expect(get(liquidiumStore)).toEqual({
 				markets: [],
 				portfolio: null,
-				assetPrices: {}
+				assetPrices: {},
+				loaded: true
+			});
+		});
+
+		it('keeps already-loaded positions when a refresh fails', async () => {
+			listPools.mockResolvedValue([{ id: 'pool-btc' }]);
+			getProfileId.mockResolvedValue(profileId);
+			getUserReserves.mockResolvedValue([]);
+			getUserPositionSummary.mockResolvedValue({});
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			listPools.mockRejectedValue(new Error('rpc down'));
+
+			await loadLiquidium({ identity: mockIdentity, ethAddress });
+
+			expect(get(liquidiumStore)).toEqual({
+				markets: [market],
+				portfolio,
+				assetPrices: {},
+				loaded: true
 			});
 		});
 	});

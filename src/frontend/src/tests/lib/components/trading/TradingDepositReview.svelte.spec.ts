@@ -41,6 +41,17 @@ describe('TradingDepositReview', () => {
 		expect(getByText(en.trading.deposit.transaction_fee)).toBeInTheDocument();
 	});
 
+	it('should render the OISY Trade logo, hidden from assistive tech', () => {
+		const { container } = render(TradingDepositReview, { props: { ...baseProps } });
+
+		const mark = container.querySelector('[aria-label="OISY Trade"]');
+
+		expect(mark).toBeInTheDocument();
+		// Decorative next to its own text label: must stay inside an aria-hidden
+		// wrapper so screen readers don't announce "OISY Trade" twice.
+		expect(mark?.closest('[aria-hidden="true"]')).not.toBeNull();
+	});
+
 	it('should render the fee breakdown in fiat when an exchange rate is available', () => {
 		exchangesMock.set({ [token.id]: { usd: 7 } });
 

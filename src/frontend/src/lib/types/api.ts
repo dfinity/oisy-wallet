@@ -20,7 +20,7 @@ import type {
 	BtcTxOutput,
 	EcdsaKeyId,
 	SchnorrKeyId,
-	BitcoinNetwork as SignerBitcoinNetwork,
+	Network as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';

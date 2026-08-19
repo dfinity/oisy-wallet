@@ -4,15 +4,21 @@ import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
-const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade, mockGoto } = vi.hoisted(() => ({
-	mockTradingEnabled: { value: true },
-	mockProviderEnabled: { value: true },
-	mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined)),
-	mockGoto: vi.fn()
-}));
+const { mockTradingEnabled, mockProviderEnabled, mockLoadOisyTrade, mockGoto, mockTrackEvent } =
+	vi.hoisted(() => ({
+		mockTradingEnabled: { value: true },
+		mockProviderEnabled: { value: true },
+		mockLoadOisyTrade: vi.fn(() => Promise.resolve(undefined)),
+		mockGoto: vi.fn(),
+		mockTrackEvent: vi.fn()
+	}));
 
+// `anyTradingProviderEnabled` currently derives from `OISY_TRADE_ENABLED`, but
+// it is mocked independently on purpose: it lets us drive the multi-provider
+// state where the surface stays reachable (another provider on) while OISY TRADE
+// is off, which is what the provider-unavailable EmptyState branch handles.
 vi.mock('$env/trading', () => ({
-	get TRADING_ENABLED() {
+	get anyTradingProviderEnabled() {
 		return mockTradingEnabled.value;
 	}
 }));
@@ -30,6 +36,10 @@ vi.mock('$lib/services/oisy-trade.services', () => ({
 vi.mock('$app/navigation', () => ({
 	goto: mockGoto,
 	afterNavigate: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: mockTrackEvent
 }));
 
 describe('OisyTradeProvider', () => {
@@ -63,7 +73,7 @@ describe('OisyTradeProvider', () => {
 		expect(mockLoadOisyTrade).toHaveBeenCalled();
 	});
 
-	it('redirects away and renders nothing when the Trading feature flag is off', async () => {
+	it('redirects away and renders nothing when no trading provider is enabled', async () => {
 		mockTradingEnabled.value = false;
 
 		const { queryByText } = render(OisyTradeProvider);
@@ -72,5 +82,29 @@ describe('OisyTradeProvider', () => {
 
 		expect(mockGoto).toHaveBeenCalled();
 		expect(queryByText(en.trading.text.provider_name)).toBeNull();
+	});
+
+	it('tracks a page_open event on mount when trading is enabled', async () => {
+		render(OisyTradeProvider);
+
+		await tick();
+
+		expect(mockTrackEvent).toHaveBeenCalledExactlyOnceWith({
+			name: 'page_open',
+			metadata: {
+				event_context: 'trading',
+				event_value: 'oisy-trade-page'
+			}
+		});
+	});
+
+	it('does not track a page_open event when the Trading feature flag is off', async () => {
+		mockTradingEnabled.value = false;
+
+		render(OisyTradeProvider);
+
+		await tick();
+
+		expect(mockTrackEvent).not.toHaveBeenCalled();
 	});
 });

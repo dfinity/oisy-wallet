@@ -33,6 +33,36 @@ export const mockHarvestProvider: EarningProvider = {
 	data: readable(mockHarvestProviderData)
 };
 
+export const mockLiquidiumBorrowCardConfig = {
+	id: 'liquidium',
+	titles: ['mock.liquidium.title'],
+	description: 'mock.liquidium.description',
+	logo: '/mock/liquidium-logo.svg',
+	fields: [
+		EarningCardFields.NETWORKS,
+		EarningCardFields.ASSETS,
+		EarningCardFields.CURRENT_BORROWING,
+		EarningCardFields.INTEREST_PER_YEAR
+	],
+	actionText: 'mock.liquidium.action'
+};
+
+export const mockLiquidiumBorrowProviderData: EarningProviderData = {
+	[EarningCardFields.APY]: '4.5',
+	[EarningCardFields.NETWORKS]: ['eth-icon'],
+	[EarningCardFields.ASSETS]: ['usdc-icon'],
+	[EarningCardFields.CURRENT_BORROWING]: 100,
+	[EarningCardFields.INTEREST_PER_YEAR]: 4.5,
+	action: vi.fn().mockResolvedValue(undefined)
+};
+
+export const mockLiquidiumBorrowProvider: EarningProvider = {
+	id: 'liquidium',
+	type: 'lending',
+	card: mockLiquidiumBorrowCardConfig,
+	data: readable(mockLiquidiumBorrowProviderData)
+};
+
 export const mockGoldDaoCardConfig = {
 	id: 'gold-dao-staking',
 	titles: ['mock.golddao.title'],

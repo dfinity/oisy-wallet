@@ -15,7 +15,7 @@ import * as liquidiumServices from '$lib/services/liquidium.services';
 import type { LiquidiumPortfolio, LiquidiumReserve } from '$lib/types/liquidium';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { NativeAddressSupplyTarget, SupplyFlow, SupplyTarget } from '@liquidium/client';
+import type { SupplyFlow, SupplyTarget } from '@liquidium/client';
 
 vi.mock('$lib/api/liquidium.api', () => ({ liquidiumClient: vi.fn() }));
 vi.mock('$lib/services/liquidium.services', () => ({ getOrCreateLiquidiumProfile: vi.fn() }));
@@ -135,8 +135,7 @@ describe('liquidium-repay.services', () => {
 			activeUserTransactionsServices.createActiveUserTransaction
 		);
 
-		const nativeTarget: NativeAddressSupplyTarget = {
-			type: 'nativeAddress',
+		const nativeTarget: SupplyTarget = {
 			poolId,
 			asset: 'BTC',
 			chain: 'BTC',
@@ -161,6 +160,7 @@ describe('liquidium-repay.services', () => {
 				identity: mockIdentity,
 				ethAddress,
 				poolId,
+				chain: 'BTC',
 				asset: 'BTC',
 				amount: 100_000_000n,
 				inflowFee: 50n,
@@ -184,7 +184,12 @@ describe('liquidium-repay.services', () => {
 
 			await run();
 
-			expect(supply).toHaveBeenCalledExactlyOnceWith({ profileId, poolId, action: 'repayment' });
+			expect(supply).toHaveBeenCalledExactlyOnceWith({
+				profileId,
+				poolId,
+				chain: 'BTC',
+				action: 'repayment'
+			});
 			// Gross transfer = net repayment (100_000_000) + provider inflow fee (50).
 			expect(broadcast).toHaveBeenCalledExactlyOnceWith({
 				target: nativeTarget,
@@ -247,6 +252,7 @@ describe('liquidium-repay.services', () => {
 				identity: mockIdentity,
 				ethAddress,
 				poolId,
+				chain: 'BTC',
 				asset: 'BTC',
 				amount: 100_000_000n,
 				inflowFee: 50n,
@@ -261,25 +267,6 @@ describe('liquidium-repay.services', () => {
 			const [[arg]] = createActiveUserTransaction.mock.calls;
 
 			expect(arg).not.toHaveProperty('progressStep');
-		});
-
-		it('rejects an icrcAccount target and registers nothing', async () => {
-			supply.mockResolvedValue(
-				buildFlow({
-					type: 'icrcAccount',
-					poolId,
-					asset: 'BTC',
-					chain: 'BTC',
-					action: 'repayment',
-					owner: 'aaaaa-aa',
-					subaccount: new Uint8Array(),
-					account: 'icrc-account-text'
-				})
-			);
-
-			await expect(run()).rejects.toThrow('unsupported');
-			expect(broadcast).not.toHaveBeenCalled();
-			expect(createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 	});
 });

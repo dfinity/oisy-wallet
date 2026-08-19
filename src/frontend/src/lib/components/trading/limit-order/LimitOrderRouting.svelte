@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import IconChevronRight from '$lib/components/icons/lucide/IconChevronRight.svelte';
+	import OisyTradeMark from '$lib/components/trading/OisyTradeMark.svelte';
 	import { OISY_TRADE_PROVIDER_NAME } from '$lib/constants/oisy-trade.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -20,7 +21,7 @@
 
 	// Relative spread only: (ask − bid) / mid × 100.
 	const spreadPercent = $derived.by((): number | null => {
-		if (!nonNullish(bid) || !nonNullish(ask)) {
+		if (isNullish(bid) || isNullish(ask)) {
 			return null;
 		}
 		const mid = (ask + bid) / 2;
@@ -41,7 +42,10 @@
 		onclick={() => (expanded = !expanded)}
 		type="button"
 	>
-		<span class="bg-success-subtle h-4 w-4 flex-shrink-0 rounded"></span>
+		<!-- Decorative: the row's own text already names the provider. -->
+		<span class="flex flex-shrink-0 items-center" aria-hidden="true">
+			<OisyTradeMark size="16" />
+		</span>
 		<span class="flex-1 text-xs text-secondary">
 			{replacePlaceholders($i18n.trading.limit_order.routing_name, { $provider: '' })}<strong
 				class="font-semibold text-primary">{OISY_TRADE_PROVIDER_NAME}</strong
@@ -60,13 +64,13 @@
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-error-primary"
 			>
-				<span>{$i18n.trading.limit_order.lowest_ask}</span>
+				<span>{$i18n.trading.limit_order.best_ask}</span>
 				<span>{nonNullish(ask) ? `${ask} ${quote}` : '-'}</span>
 			</div>
 			<div
 				class="flex justify-between border-b border-disabled px-2.5 py-1.5 text-xs text-success-primary"
 			>
-				<span>{$i18n.trading.limit_order.highest_bid}</span>
+				<span>{$i18n.trading.limit_order.best_bid}</span>
 				<span>{nonNullish(bid) ? `${bid} ${quote}` : '-'}</span>
 			</div>
 			<div

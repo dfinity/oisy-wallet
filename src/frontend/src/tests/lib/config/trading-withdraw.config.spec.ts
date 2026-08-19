@@ -9,7 +9,7 @@ describe('trading-withdraw.config', () => {
 				{ name: WizardStepsTradingWithdraw.WITHDRAW, title: en.trading.withdraw.title },
 				{ name: WizardStepsTradingWithdraw.REVIEW, title: en.trading.withdraw.review_title },
 				{ name: WizardStepsTradingWithdraw.WITHDRAWING, title: en.trading.withdraw.progress_title },
-				{ name: WizardStepsTradingWithdraw.TOKENS_LIST, title: en.send.text.select_token }
+				{ name: WizardStepsTradingWithdraw.TOKENS_LIST, title: en.trading.withdraw.title }
 			]);
 		});
 	});

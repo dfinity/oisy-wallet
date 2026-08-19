@@ -17,7 +17,6 @@ import type {
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { WorkerData } from '$lib/types/worker';
-import { isIOS } from '$lib/utils/device.utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
@@ -82,7 +81,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 
 		await syncWalletFromCache({ tokenId, networkId });
 
-		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
+		const worker = await AppWorker.getInstance({ pooled: true, poolKey: ledgerCanisterId });
 		return new IcpWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId);
 	}
 

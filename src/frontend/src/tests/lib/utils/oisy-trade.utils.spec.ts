@@ -34,6 +34,7 @@ import {
 	oisyTradeAssetHasReserved,
 	oisyTradeAssetMatchesFilter,
 	oisyTradeDepositableTokens,
+	oisyTradeHistoryCountLabel,
 	oisyTradeOrderDisplayStatus,
 	oisyTradeOrderMatchesFilter,
 	oisyTradeSupportedTokenSymbols,
@@ -54,6 +55,7 @@ import {
 	valueDifferencePercent
 } from '$lib/utils/oisy-trade.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
+import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -378,6 +380,19 @@ describe('oisy-trade.utils — limit order', () => {
 			).toBeTruthy();
 		});
 
+		it('flags a sell balance shortfall even without a price', () => {
+			// A sell spends the base amount outright, so the balance is checkable before pricing.
+			expect(
+				validateAmount({ side: 'sell', baseAmount: 10, price: NaN, freeBalance: 5, pair }).errorKind
+			).toBe('balance');
+		});
+
+		it('does not flag a buy balance without a price (spend unknown)', () => {
+			expect(
+				validateAmount({ side: 'buy', baseAmount: 10, price: NaN, freeBalance: 0, pair }).errorKind
+			).toBeUndefined();
+		});
+
 		it('surfaces balance before the lot check', () => {
 			// 10.3 exceeds free 5 AND is not a 0.25 multiple → balance wins.
 			expect(
@@ -677,6 +692,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity,
 		filledQuantity = ZERO,
 		status,
+		createdAt = 42n,
 		base = baseLedgerId,
 		quote = quoteLedgerId
 	}: {
@@ -686,6 +702,7 @@ describe('oisy-trade.utils — orders', () => {
 		quantity: bigint;
 		filledQuantity?: bigint;
 		status: OisyTradeOrderStatus;
+		createdAt?: bigint;
 		base?: string;
 		quote?: string;
 	}): UserOrder =>
@@ -697,7 +714,8 @@ describe('oisy-trade.utils — orders', () => {
 				price,
 				quantity,
 				filled_quantity: filledQuantity,
-				status: { [status]: null }
+				status: { [status]: null },
+				created_at: createdAt
 			}
 		}) as unknown as UserOrder;
 
@@ -723,7 +741,8 @@ describe('oisy-trade.utils — orders', () => {
 				quantity: 100,
 				price: 2.75,
 				filledQuantity: 25,
-				status: 'Open'
+				status: 'Open',
+				createdAt: 42n
 			});
 		});
 
@@ -839,6 +858,32 @@ describe('oisy-trade.utils — orders', () => {
 		});
 	});
 
+	describe('oisyTradeHistoryCountLabel', () => {
+		const history = (...statuses: OisyTradeOrderStatus[]): OisyTradeOrderView[] =>
+			mapOisyTradeOrders({
+				orders: statuses.map((status) =>
+					buildOrder({ side: 'Sell', quantity: 1n, price: 1n, status })
+				),
+				tokens
+			});
+
+		it('joins the non-zero terminal buckets with a middot', () => {
+			expect(
+				oisyTradeHistoryCountLabel({ orders: history('Filled', 'Filled', 'Canceled'), i18n: en })
+			).toBe('2 filled · 1 canceled');
+		});
+
+		it('omits empty buckets and keeps the filled/expired/canceled order', () => {
+			expect(oisyTradeHistoryCountLabel({ orders: history('Expired', 'Filled'), i18n: en })).toBe(
+				'1 filled · 1 expired'
+			);
+		});
+
+		it('is empty for no history', () => {
+			expect(oisyTradeHistoryCountLabel({ orders: [], i18n: en })).toBe('');
+		});
+	});
+
 	describe('oisyTradeOrderDisplayStatus', () => {
 		it('shows an Open order with a fill as Partial, others unchanged', () => {
 			expect(oisyTradeOrderDisplayStatus({ status: 'Open', filledQuantity: 0 } as never)).toBe(
@@ -921,7 +966,7 @@ describe('oisy-trade.utils — search', () => {
 			Canceled: 'Canceled',
 			Expired: 'Expired'
 		},
-		provider: 'OISY TRADE'
+		provider: 'OISY Trade'
 	};
 
 	const order: OisyTradeOrderView = {
@@ -932,7 +977,8 @@ describe('oisy-trade.utils — search', () => {
 		quantity: 100,
 		price: 2.5,
 		filledQuantity: 0,
-		status: 'Open'
+		status: 'Open',
+		createdAt: ZERO
 	};
 
 	describe('oisyTradeAssetMatchesFilter', () => {

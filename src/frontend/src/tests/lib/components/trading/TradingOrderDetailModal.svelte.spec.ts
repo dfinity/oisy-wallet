@@ -1,5 +1,6 @@
 import type { IcToken } from '$icp/types/ic-token';
 import TradingOrderDetailModal from '$lib/components/trading/TradingOrderDetailModal.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 import type { OisyTradeOrderStatus, OisyTradeOrderView } from '$lib/types/oisy-trade';
 import en from '$tests/mocks/i18n.mock';
@@ -29,6 +30,7 @@ const buildOrder = (over: Partial<OisyTradeOrderView> = {}): OisyTradeOrderView 
 	price: 2.5,
 	filledQuantity: 0,
 	status: 'Open' as OisyTradeOrderStatus,
+	createdAt: ZERO,
 	...over
 });
 

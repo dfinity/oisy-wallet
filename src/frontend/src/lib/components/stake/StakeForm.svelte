@@ -23,6 +23,9 @@
 	interface Props {
 		amount: OptionAmount;
 		amountSetToMax?: boolean;
+		// Focus the amount input on mount. Callers gate this on `isDesktop()` so
+		// mobile keyboards don't pop open over the form.
+		autofocus?: boolean;
 		disabled?: boolean;
 		destination?: Address;
 		totalFee?: bigint;
@@ -34,6 +37,10 @@
 		maxAmount?: bigint;
 		errorType?: TokenActionErrorType;
 		error?: Error;
+		// Makes the token logo a clickable selector; when set, `onClick` fires on click.
+		// Defaults to a static (non-selectable) token display.
+		isSelectable?: boolean;
+		onClick?: () => void;
 		onCustomValidate?: (userAmount: bigint) => TokenActionErrorType;
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		onClose: () => void;
@@ -44,6 +51,7 @@
 	let {
 		amount = $bindable(),
 		amountSetToMax = $bindable(false),
+		autofocus = false,
 		disabled,
 		destination,
 		totalFee,
@@ -51,6 +59,8 @@
 		maxAmount,
 		errorType = $bindable(),
 		error = $bindable(),
+		isSelectable = false,
+		onClick,
 		onCustomValidate,
 		onCustomErrorValidate,
 		onClose,
@@ -85,9 +95,11 @@
 <ContentWithToolbar>
 	<div class="mb-8">
 		<TokenInput
+			{autofocus}
 			displayUnit={inputUnit}
 			exchangeRate={$sendTokenExchangeRate}
-			isSelectable={false}
+			{isSelectable}
+			{onClick}
 			{onCustomErrorValidate}
 			{onCustomValidate}
 			showTokenNetwork

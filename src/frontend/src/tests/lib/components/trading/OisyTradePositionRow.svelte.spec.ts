@@ -1,10 +1,16 @@
+import { goto } from '$app/navigation';
 import OisyTradePositionRow from '$lib/components/trading/OisyTradePositionRow.svelte';
 import { ZERO } from '$lib/constants/app.constants';
+import { AppPath } from '$lib/constants/routes.constants';
 import type { OisyTradeAsset } from '$lib/types/oisy-trade';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
 
 describe('OisyTradePositionRow', () => {
 	const token = { ...mockValidIcToken, symbol: 'ICP', decimals: 8 };
@@ -41,19 +47,20 @@ describe('OisyTradePositionRow', () => {
 	});
 
 	it('shows the "in orders" chip only when part of the balance is reserved', () => {
-		const { queryByText } = render(OisyTradePositionRow, {
+		const { queryByLabelText } = render(OisyTradePositionRow, {
 			props: { asset: buildAsset({ reserved: ZERO }) }
 		});
 
-		expect(queryByText('in orders', { exact: false })).toBeNull();
+		expect(queryByLabelText(en.trading.page.in_orders_label)).toBeNull();
 	});
 
-	it('renders the reserved amount in the "in orders" chip', () => {
-		const { getByText } = render(OisyTradePositionRow, {
+	it('renders the reserved amount with a lock icon in the "in orders" chip', () => {
+		const { getByText, getByLabelText } = render(OisyTradePositionRow, {
 			props: { asset: buildAsset({ free: 40000000n, reserved: 60000000n, total: 100000000n }) }
 		});
 
-		expect(getByText('0.6 ICP in orders')).toBeInTheDocument();
+		expect(getByLabelText(en.trading.page.in_orders_label)).toBeInTheDocument();
+		expect(getByText('0.6 ICP')).toBeInTheDocument();
 	});
 
 	it('masks the amount in privacy mode', () => {
@@ -64,5 +71,25 @@ describe('OisyTradePositionRow', () => {
 		});
 
 		expect(queryByText('1 ICP')).toBeNull();
+	});
+
+	describe('holdings variant', () => {
+		it('is not clickable in the default provider variant', () => {
+			const { queryByRole } = render(OisyTradePositionRow, {
+				props: { asset: buildAsset() }
+			});
+
+			expect(queryByRole('button')).toBeNull();
+		});
+
+		it('navigates to the Trade provider page when clicked', async () => {
+			const { getByRole } = render(OisyTradePositionRow, {
+				props: { asset: buildAsset(), variant: 'holdings' }
+			});
+
+			await fireEvent.click(getByRole('button'));
+
+			expect(goto).toHaveBeenCalledWith(AppPath.ProvidersOisyTrade);
+		});
 	});
 });

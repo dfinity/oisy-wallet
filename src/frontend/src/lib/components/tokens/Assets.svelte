@@ -4,22 +4,24 @@
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { anyLendBorrowProviderEnabled } from '$env/lend-borrow';
-	import { TRADING_ENABLED } from '$env/trading';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import BorrowingsList from '$lib/components/borrowings/BorrowingsList.svelte';
+	import GoToBorrowButton from '$lib/components/borrowings/GoToBorrowButton.svelte';
 	import EarningsList from '$lib/components/earning/EarningsList.svelte';
 	import GoToEarnButton from '$lib/components/earning/GoToEarnButton.svelte';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
+	import NftGroupToggle from '$lib/components/nfts/NftGroupToggle.svelte';
 	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
 	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
-	import RefreshCollectionsButton from '$lib/components/nfts/RefreshCollectionsButton.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensFilter from '$lib/components/tokens/TokensFilter.svelte';
 	import TokensList from '$lib/components/tokens/TokensList.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSortMenu from '$lib/components/tokens/TokensSortMenu.svelte';
+	import GoToTradeButton from '$lib/components/trading/GoToTradeButton.svelte';
 	import TradingList from '$lib/components/trading/TradingList.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
@@ -27,6 +29,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
+	import { oisyTradeHasAssets } from '$lib/derived/oisy-trade.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -71,25 +74,26 @@
 					     tab row's natural width on narrow viewports (see the
 					     matching note in SlidingInput.svelte). -->
 					<div class="relative flex min-w-0 grow-1 justify-between">
-						<TokensFilter>
-							{#snippet overflowableContent()}
-								<!-- NFTs is its own nav destination now, so the standalone NFTs page
-								     shows no Tokens/Earning/Trading tab bar. -->
-								{#if tab !== TokenTypes.NFTS}
+						{#if tab === TokenTypes.NFTS}
+							<NftGroupToggle />
+						{:else}
+							<TokensFilter>
+								{#snippet overflowableContent()}
 									<Tabs
 										styleClass="mt-2 mb-6"
 										tabVariant="menu"
 										tabs={[
 											{
 												label: $i18n.tokens.text.title,
+												shortLabel: $i18n.tokens.text.title_short,
 												id: TokenTypes.TOKENS,
 												path: `${AppPath.Tokens}${page.url.search}`
 											},
-											...(TRADING_ENABLED
+											...(anyTradingProviderEnabled
 												? [
 														{
 															label: $i18n.trading.text.tab_title,
-															shortLabel: $i18n.navigation.text.trade,
+															shortLabel: $i18n.trading.text.tab_title_short,
 															id: TokenTypes.TRADING,
 															path: `${AppPath.Trading}${page.url.search}`
 														}
@@ -99,7 +103,7 @@
 												? [
 														{
 															label: $i18n.earning.text.tab_title,
-															shortLabel: $i18n.navigation.text.earning,
+															shortLabel: $i18n.earning.text.tab_title_short,
 															id: TokenTypes.EARNING,
 															path: `${AppPath.Earning}${page.url.search}`
 														}
@@ -109,7 +113,7 @@
 												? [
 														{
 															label: $i18n.borrowings.text.tab_title,
-															shortLabel: $i18n.navigation.text.borrow,
+															shortLabel: $i18n.borrowings.text.tab_title_short,
 															id: TokenTypes.BORROWINGS,
 															path: `${AppPath.Borrowings}${page.url.search}`
 														}
@@ -119,9 +123,9 @@
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
 									/>
-								{/if}
-							{/snippet}
-						</TokensFilter>
+								{/snippet}
+							</TokensFilter>
+						{/if}
 					</div>
 					{#if tab === TokenTypes.TOKENS}
 						<div class="flex">
@@ -132,9 +136,6 @@
 						</div>
 					{:else if tab === TokenTypes.NFTS}
 						<div class="flex">
-							<RefreshCollectionsButton />
-						</div>
-						<div class="ml-1 flex">
 							<NftSortMenu />
 						</div>
 						<div class="ml-1 flex">
@@ -170,6 +171,13 @@
 				</ManageTokensButton>
 			{:else if activeTab === TokenTypes.EARNING}
 				<GoToEarnButton />
+			{:else if activeTab === TokenTypes.TRADING && $oisyTradeHasAssets}
+				<!-- Empty Trading tab shows its own Go-to-Trade button inside the
+				     onboarding info box (see TradingList); only the populated list
+				     needs the button down here. -->
+				<GoToTradeButton />
+			{:else if activeTab === TokenTypes.BORROWINGS}
+				<GoToBorrowButton />
 			{/if}
 		</div>
 	</div>

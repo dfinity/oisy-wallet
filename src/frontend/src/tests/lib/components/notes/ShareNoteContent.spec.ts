@@ -1,16 +1,24 @@
 import ShareNoteContent from '$lib/components/notes/ShareNoteContent.svelte';
-import { TRACK_NOTE_SHARE_CREATED } from '$lib/constants/analytics.constants';
 import { MAX_PERSONAL_NOTE_SHARES_PER_USER } from '$lib/constants/app.constants';
+import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 import {
 	NOTES_SHARE_CAP_MESSAGE,
 	NOTES_SHARE_CREATE_BUTTON,
-	NOTES_SHARE_DONE_BUTTON
+	NOTES_SHARE_DONE_BUTTON,
+	NOTES_SHARE_LINK_COPY
 } from '$lib/constants/test-ids.constants';
-import * as analyticsServices from '$lib/services/analytics.services';
+import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 import * as shareServices from '$lib/services/personal-note-share.services';
+import { trackPersonalNoteShare } from '$lib/services/personal-notes-analytics.services';
 import type { PersonalNoteUi } from '$lib/types/personal-note';
+import * as shareUtils from '$lib/utils/share.utils';
+import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+
+vi.mock('$lib/services/personal-notes-analytics.services', () => ({
+	trackPersonalNoteShare: vi.fn()
+}));
 
 describe('ShareNoteContent', () => {
 	const note: PersonalNoteUi = {
@@ -24,6 +32,19 @@ describe('ShareNoteContent', () => {
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		vi.clearAllMocks();
+	});
+
+	it('links "Learn more" to the notes docs page', () => {
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+
+		const { getByRole } = render(ShareNoteContent, { props: baseProps() });
+
+		// Points at the notes docs page, not the docs root.
+		expect(getByRole('link', { name: en.core.text.learn_more })).toHaveAttribute(
+			'href',
+			OISY_NOTES_DOCS_URL
+		);
 	});
 
 	it('creates a link and reveals it, tracking the non-personal attributes', async () => {
@@ -31,7 +52,6 @@ describe('ShareNoteContent', () => {
 		const createSpy = vi
 			.spyOn(shareServices, 'createNoteShare')
 			.mockResolvedValue({ link: 'https://oisy.com/notes/share/tok#k=KEY', token: 'tok' });
-		const trackSpy = vi.spyOn(analyticsServices, 'trackEvent').mockImplementation(() => {});
 
 		const { getByTestId, queryByTestId, container } = render(ShareNoteContent, {
 			props: baseProps()
@@ -53,10 +73,63 @@ describe('ShareNoteContent', () => {
 			singleUse: false
 		});
 
-		expect(trackSpy).toHaveBeenCalledExactlyOnceWith({
-			name: TRACK_NOTE_SHARE_CREATED,
-			metadata: { expiry: '24h', singleUse: 'false' }
+		expect(trackPersonalNoteShare).toHaveBeenCalledExactlyOnceWith({
+			step: 'create',
+			side: 'creator',
+			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+			singleUse: false,
+			expiry: '24h'
 		});
+	});
+
+	it('confirms a copied link inline, without a toast (visible over the bottom sheet)', async () => {
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+		vi.spyOn(shareServices, 'createNoteShare').mockResolvedValue({
+			link: 'https://oisy.com/notes/share/tok#k=KEY',
+			token: 'tok'
+		});
+		const copySpy = vi.spyOn(shareUtils, 'copyText').mockResolvedValue();
+
+		const { getByTestId, container } = render(ShareNoteContent, { props: baseProps() });
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_CREATE_BUTTON));
+		await waitFor(() => expect(getByTestId(NOTES_SHARE_LINK_COPY)).toBeInTheDocument());
+
+		// The confirmation is not shown before copying.
+		expect(container).not.toHaveTextContent(en.notes.share.text.link_copied);
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_LINK_COPY));
+
+		expect(copySpy).toHaveBeenCalledExactlyOnceWith('https://oisy.com/notes/share/tok#k=KEY');
+
+		await waitFor(() => expect(container).toHaveTextContent(en.notes.share.text.link_copied));
+	});
+
+	it('tracks a create failure without leaking the note text', async () => {
+		// A cap race (TooManyShares) is a create failure that reflects in the UI
+		// without toasting — so it exercises error tracking with no console output.
+		vi.spyOn(shareServices, 'getActiveShareCount').mockResolvedValue(0);
+		vi.spyOn(shareServices, 'createNoteShare').mockRejectedValue({ TooManyShares: null });
+
+		const { getByTestId } = render(ShareNoteContent, { props: baseProps() });
+
+		await fireEvent.click(getByTestId(NOTES_SHARE_CREATE_BUTTON));
+
+		await waitFor(() =>
+			expect(trackPersonalNoteShare).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					step: 'create',
+					side: 'creator',
+					resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+					singleUse: false,
+					expiry: '24h',
+					error: expect.stringContaining('TooManyShares')
+				})
+			)
+		);
+
+		// The share cap is reflected in the UI (button disabled) rather than toasted.
+		expect(getByTestId(NOTES_SHARE_CREATE_BUTTON)).toBeDisabled();
 	});
 
 	it('disables creation and shows the cap message at the active-share cap', async () => {

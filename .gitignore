@@ -3,6 +3,9 @@
 .idea/
 **/*~
 
+# Claude Code local worktrees, settings and artifacts (nothing under .claude is shared)
+.claude/
+
 # ESLint and Prettier
 .eslintcache
 

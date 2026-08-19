@@ -13,6 +13,7 @@ vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
 }));
 
+// Assets → Borrowings tab holdings row: no action, clicks through to the provider page.
 describe('LiquidiumBorrowingCard', () => {
 	const reserve = (overrides: Partial<LiquidiumReserve> = {}): LiquidiumReserve => ({
 		poolId: 'pool-btc',
@@ -46,47 +47,25 @@ describe('LiquidiumBorrowingCard', () => {
 		expect(container.textContent).toContain('−');
 	});
 
-	it('renders a Repay action button', () => {
-		const { getByText } = render(LiquidiumBorrowingCard, { props: { reserve: reserve() } });
-
-		expect(getByText(en.liquidium.text.action_repay)).toBeInTheDocument();
-	});
-
-	it('does not render the provider tag in the provider variant', () => {
+	it('renders the Liquidium provider tag', () => {
 		const { container } = render(LiquidiumBorrowingCard, { props: { reserve: reserve() } });
 
-		expect(container).not.toHaveTextContent(
+		expect(container).toHaveTextContent(
 			lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
 		);
 	});
 
-	describe('holdings variant', () => {
-		it('does not render the Repay action button', () => {
-			const { queryByText } = render(LiquidiumBorrowingCard, {
-				props: { reserve: reserve(), variant: 'holdings' }
-			});
+	it('does not render a Repay action button', () => {
+		const { queryByText } = render(LiquidiumBorrowingCard, { props: { reserve: reserve() } });
 
-			expect(queryByText(en.liquidium.text.action_repay)).not.toBeInTheDocument();
-		});
+		expect(queryByText(en.liquidium.text.action_repay)).not.toBeInTheDocument();
+	});
 
-		it('renders the Liquidium provider tag', () => {
-			const { container } = render(LiquidiumBorrowingCard, {
-				props: { reserve: reserve(), variant: 'holdings' }
-			});
+	it('navigates to the Liquidium provider page when clicked', async () => {
+		const { getByRole } = render(LiquidiumBorrowingCard, { props: { reserve: reserve() } });
 
-			expect(container).toHaveTextContent(
-				lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
-			);
-		});
+		await fireEvent.click(getByRole('button'));
 
-		it('navigates to the Liquidium provider page when clicked', async () => {
-			const { getByRole } = render(LiquidiumBorrowingCard, {
-				props: { reserve: reserve(), variant: 'holdings' }
-			});
-
-			await fireEvent.click(getByRole('button'));
-
-			expect(goto).toHaveBeenCalledWith(AppPath.ProvidersLiquidium);
-		});
+		expect(goto).toHaveBeenCalledWith(AppPath.ProvidersLiquidium);
 	});
 });

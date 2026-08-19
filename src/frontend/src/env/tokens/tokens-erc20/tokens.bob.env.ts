@@ -22,5 +22,6 @@ export const BOB_TOKEN: RequiredAdditionalErc20Token = {
 	decimals: BOB_DECIMALS,
 	icon: '/icons/icrc/7pail-xaaaa-aaaas-aabmq-cai.png',
 	address: '0xecc5f868AdD75F4ff9FD00bbBDE12C35BA2C9C89',
-	groupData: BOB_TOKEN_GROUP
+	groupData: BOB_TOKEN_GROUP,
+	metadataOnly: true
 };

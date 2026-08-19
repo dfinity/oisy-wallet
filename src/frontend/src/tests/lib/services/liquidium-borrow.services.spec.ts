@@ -38,6 +38,7 @@ describe('liquidium-borrow.services', () => {
 			identity: mockIdentity,
 			ethAddress,
 			poolId,
+			chain: 'BTC',
 			asset: 'BTC',
 			amount: 100_000_000n,
 			receiverAddress,
@@ -63,7 +64,8 @@ describe('liquidium-borrow.services', () => {
 				profileId,
 				poolId,
 				amount: 100_000_000n,
-				receiverAddress,
+				chain: 'BTC',
+				receiver: receiverAddress,
 				signerWalletAddress: ethAddress,
 				signerChain: 'ETH'
 			})
