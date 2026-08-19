@@ -470,7 +470,7 @@ describe('sol-summary.utils', () => {
 		it('should name a one-in one-out group an exchange', () => {
 			const facts = toSolTransactionGroupSummaryFacts(group);
 
-			expect(facts).toContain('Kind: one transaction that exchanged one token for another');
+			expect(facts).toContain('Kind: an exchange of one token for another');
 		});
 
 		it('should leave any other shape unnamed', () => {
@@ -483,7 +483,7 @@ describe('sol-summary.utils', () => {
 				isSwap: false
 			});
 
-			expect(facts).toContain('Kind: one transaction that moved several amounts');
+			expect(facts).toContain('Kind: several amounts at once');
 			expect(facts.join('\n')).not.toContain('exchanged');
 		});
 
