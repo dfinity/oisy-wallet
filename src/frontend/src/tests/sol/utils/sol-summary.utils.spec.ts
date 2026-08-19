@@ -474,10 +474,11 @@ describe('sol-summary.utils', () => {
 			expect(facts).toContain('Received: 0.377098 USDC');
 		});
 
-		it('should name a one-in one-out group an exchange', () => {
+		// The wallet calls it a swap, so the facts do too: the sentence takes its verb from here.
+		it('should call a one-in one-out group a swap', () => {
 			const facts = toSolTransactionGroupSummaryFacts(group);
 
-			expect(facts).toContain('Kind: an exchange of one token for another');
+			expect(facts).toContain('Kind: a swap, one token out and another in');
 		});
 
 		it('should leave any other shape unnamed', () => {

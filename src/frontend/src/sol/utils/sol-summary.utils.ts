@@ -240,7 +240,7 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 		// The protocol is the only fact here the wallet could not have worked out on its own, and it
 		// is what turns "received some tokens" into "received them from a bridge".
 		nonNullish(programs) && programs.length > 0 ? `Through: ${programs.join(', ')}` : undefined,
-		isSwap ? 'Kind: an exchange of one token for another' : undefined,
+		isSwap ? 'Kind: a swap, one token out and another in' : undefined,
 		...spoken.map(({ symbol, decimals, net }) =>
 			net < ZERO
 				? `Paid: ${formatAmount({ value: -net, decimals })} ${symbol}`
