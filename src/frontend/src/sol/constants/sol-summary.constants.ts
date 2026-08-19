@@ -13,7 +13,7 @@ RULES:
 - Answer with exactly one sentence of at most 70 characters, ending with a period. It is the title of a row in a list, so it must be short.
 - Name what moved and how much. Do not name who it went to or came from: the screen already shows that.
 - Plain text only: no markdown, no formatting, no quotes, no links, no code, no line breaks.
-- Name the action first, the way a block explorer would, for example "Transfer of ..." or "Approval of ...".
+- Begin with "Sent" when this wallet paid, and "Received" when it was paid, because that is what the rest of the wallet calls them. Never begin with "Transfer of".
 - When the facts list steps, name what the transaction IS from them, and ignore the steps that only prepare or clean up. Creating or closing a token account alongside a transfer is still a transfer, and the rent it costs is not a second payment. Sending one token and receiving another is a swap.
 - If the only facts about what moves are simulated balance changes, state those changes as what the transaction does and do not name a transfer type.
 - Do not give advice, do not warn, do not address the reader.

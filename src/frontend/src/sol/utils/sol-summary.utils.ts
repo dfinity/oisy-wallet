@@ -214,11 +214,13 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 	// was actually sent is what had the model announcing "0.1 USD1 and 0.00203928 SOL", where a
 	// block explorer says only the first. Up to a handful of accounts can be opened at once.
 	const rentOnly = ({ native, net }: SolTransactionGroupLeg): boolean => {
-		if (!native || net >= ZERO) {
+		if (!native || net === ZERO) {
 			return false;
 		}
 
-		const paid = ZERO - net;
+		// The deposit lands on whichever side opened the account: paid when sending to someone who
+		// had none, received when somebody opened one for this wallet. It is rent either way.
+		const paid = net < ZERO ? ZERO - net : net;
 		const accounts = paid / SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS;
 
 		return (
@@ -241,7 +243,6 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 				? `Paid: ${formatAmount({ value: -net, decimals })} ${symbol}`
 				: `Received: ${formatAmount({ value: net, decimals })} ${symbol}`
 		),
-		`Transfers: ${transactions.length}`,
 		// The amounts above come from the confirmed balances and are whole, but the transfers are
 		// only the instructions OISY could read. Saying so keeps the sentence from presenting a
 		// partial reading as a complete one.
@@ -316,22 +317,26 @@ export const sanitizeSolSummary = ({
 		return;
 	}
 
-	if (MARKUP_REGEX.test(sentence)) {
+	// The model supplies the closing stop about half the time, and a list where some rows end in one
+	// and others do not reads as a mistake. Adding it is safe: it changes no figure and no claim.
+	const closed = /[.!?]$/.test(sentence) ? sentence : `${sentence}.`;
+
+	if (MARKUP_REGEX.test(closed)) {
 		return;
 	}
 
 	// The model is told to say this when the facts describe no action, and it is also what a
 	// stripped-down answer collapses to.
-	if (sentence.replace(/[.!?]/g, '').trim().toUpperCase() === 'UNKNOWN') {
+	if (closed.replace(/[.!?]/g, '').trim().toUpperCase() === 'UNKNOWN') {
 		return;
 	}
 
 	// The one thing a summary must never do is put a number on screen that OISY did not derive.
 	const stated = new Set((facts.join('\n').match(FIGURE_REGEX) ?? []).map(sameFigure));
 
-	const invented = (sentence.match(FIGURE_REGEX) ?? []).some(
+	const invented = (closed.match(FIGURE_REGEX) ?? []).some(
 		(figure) => !stated.has(sameFigure(figure))
 	);
 
-	return invented ? undefined : sentence;
+	return invented ? undefined : closed;
 };

@@ -329,9 +329,10 @@ describe('sol-summary.utils', () => {
 			).toBe('Transfer of 0.001 SOL.');
 		});
 
-		it('should keep an answer that never terminates its sentence', () => {
+		// A list where some rows end in a stop and others do not reads as a mistake, so one is added.
+		it('should close an answer that never terminates its sentence', () => {
 			expect(sanitizeSolSummary({ content: 'Transfer of 0.001 SOL', facts })).toBe(
-				'Transfer of 0.001 SOL'
+				'Transfer of 0.001 SOL.'
 			);
 		});
 
@@ -492,10 +493,12 @@ describe('sol-summary.utils', () => {
 			expect(facts.join('\n')).not.toContain('Kind:');
 		});
 
-		it('should state how many rows the group holds', () => {
+		// The row already says "2 inner transfers" underneath, and offering the count as a fact had
+		// the model reading it as an amount: "Transfer of 0.1 USD1 and 2 tokens".
+		it('should not offer the number of rows as a fact', () => {
 			const facts = toSolTransactionGroupSummaryFacts(group);
 
-			expect(facts).toContain('Transfers: 2');
+			expect(facts.join('\n')).not.toContain('Transfers:');
 		});
 
 		// The row shows who it went to underneath, so the sentence spends its characters on what
