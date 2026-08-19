@@ -12,6 +12,7 @@ import {
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
+	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -584,6 +585,27 @@ describe('wallet-connect.utils', () => {
 			(typedData.message.details as Record<string, unknown>).token = 'not-an-address';
 
 			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+		});
+	});
+
+	describe('toTypedDataDomainChainId', () => {
+		// EIP-712 declares `chainId` as a uint256, so every one of these is chain 1 and all of them
+		// hash to the same digest.
+		it.each(['1', 1, 1n, '0x1', '01', '0x01'])('reads %s as the same chain', (chainId) => {
+			expect(toTypedDataDomainChainId(chainId)).toBe(1n);
+		});
+
+		it.each([undefined, null, 'mainnet', '', {}, [], 1.5, '0x'])(
+			'reads %s as no chain at all',
+			(value) => {
+				expect(toTypedDataDomainChainId(value)).not.toBe(1n);
+			}
+		);
+
+		// The value comes from the dApp, so what it cannot read must not take the review down.
+		it('does not throw on a value that is not a number', () => {
+			expect(() => toTypedDataDomainChainId('mainnet')).not.toThrow();
+			expect(toTypedDataDomainChainId('mainnet')).toBeUndefined();
 		});
 	});
 });

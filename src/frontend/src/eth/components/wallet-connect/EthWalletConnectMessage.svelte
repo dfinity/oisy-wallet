@@ -9,7 +9,8 @@
 		getEthTypedDataApproval,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
-		isEthSignTypedDataMethod
+		isEthSignTypedDataMethod,
+		toTypedDataDomainChainId
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -58,8 +59,12 @@
 
 	let { spender, token: address, amount, unlimited, expiration } = $derived(approval);
 
+	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
+	// all the same chain and all hash alike. Comparing the text matched one form only.
+	let domainChainId = $derived(toTypedDataDomainChainId(chainId));
+
 	let token = $derived.by(() => {
-		if (isNullish(address) || isNullish(chainId)) {
+		if (isNullish(address) || isNullish(domainChainId)) {
 			return;
 		}
 
@@ -71,11 +76,7 @@
 					address1: tokenAddress,
 					address2: address,
 					networkId
-				}) &&
-				// A domain states its `chainId` as a number as readily as as a string, and both hash
-				// to the same digest. Comparing one side as text dropped the token whenever a dApp
-				// chose the number, and the amount hung off the token.
-				tokenChainId.toString() === String(chainId)
+				}) && tokenChainId === domainChainId
 		);
 	});
 

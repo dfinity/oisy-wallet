@@ -578,13 +578,29 @@ describe('EthWalletConnectMessage', () => {
 			);
 		});
 
-		// A domain may state its chain as a number, and both forms hash the same.
-		it('should resolve the token when the domain states a numeric chain', () => {
-			const { getByText } = render(EthWalletConnectMessage, {
-				props: { request: erc2612Request({ value: '1000000', chainId: 1 }) }
+		// A domain may state its chain in any uint256 form, and all of them hash the same.
+		it.each([1, '1', '0x1', '01'])(
+			'should resolve the token when the domain states its chain as %s',
+			(chainId) => {
+				const { getByText } = render(EthWalletConnectMessage, {
+					props: { request: erc2612Request({ value: '1000000', chainId }) }
+				});
+
+				expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			}
+		);
+
+		// A chain OISY cannot read leaves the token unresolved rather than resolved wrongly, and
+		// the allowance is still stated.
+		it('should still state the allowance when the domain chain is unreadable', () => {
+			const { getByTestId, queryByText } = render(EthWalletConnectMessage, {
+				props: { request: erc2612Request({ value: '1000000', chainId: 'mainnet' }) }
 			});
 
-			expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
+			expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
+			expect(getByTestId('wallet-connect-typed-data-amount')).toHaveTextContent(
+				`1000000 ${en.wallet_connect.text.token_units}`
+			);
 		});
 	});
 });

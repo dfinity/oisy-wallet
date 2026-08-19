@@ -309,6 +309,30 @@ const toDeclaredUint = (value: unknown): bigint | undefined =>
 	typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
 
 /**
+ * The chain a typed-data domain states, as a number.
+ *
+ * EIP-712 declares `chainId` as a `uint256`, so a domain may state it as a number, as a decimal
+ * string, or as a hex one, and every form hashes to the same digest. Comparing them as text
+ * matched only the form OISY happens to write, dropping the token for the rest, and the amount
+ * hangs off the token.
+ *
+ * Returns `undefined` for anything that is not a chain. The value comes from the dApp, and
+ * `BigInt` throws on what it cannot read rather than reporting it, so a token is then left
+ * unresolved instead of resolved wrongly.
+ */
+export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => {
+	if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'bigint') {
+		return;
+	}
+
+	try {
+		return BigInt(value);
+	} catch (_err: unknown) {
+		// Not a chain id at all.
+	}
+};
+
+/**
  * A deadline as a number of seconds, when it is one a date can be built from.
  *
  * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and that is not a
