@@ -308,7 +308,7 @@ jobs:
         run: npm run lint:lockfile
 
   frontend-checks-pass:
-    if: always()
+    if: ${{ !cancelled() }}
     needs: ['format', 'lint', 'check', 'test', 'test-coverage', 'config', 'lockfile']
     runs-on: ubuntu-24.04
     permissions:

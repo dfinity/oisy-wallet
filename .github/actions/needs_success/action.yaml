@@ -7,8 +7,14 @@ description: |
   instead you wish the current job to fail if any job needed by
   the current one fails, you need to:
 
-  - set the current job to always run. (use: `if: $ {{ always() }}`)
+  - set the current job to run unless the run was cancelled.
+    (use: `if: $ {{ !cancelled() }}`)
   - check the result of all the needed jobs. (use this action)
+
+  Prefer `!cancelled()` over `always()`. This action treats any result
+  other than success as a failure, cancellation included. Workflows here
+  set `cancel-in-progress` for pull requests, so with `always()` a run
+  superseded by a newer push would report a spurious gate failure.
 inputs:
   needs:
     description: "JSON describing the needed jobs.  (use: `'$ {{ toJson(needs) }}'`)"

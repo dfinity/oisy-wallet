@@ -110,7 +110,7 @@ jobs:
           BASE_REV: ${{ github.event.merge_group.base_sha || github.event.merge_group.base_ref || github.event.pull_request.base.sha || github.event.pull_request.base.ref || 'main' }}
 
   pr-checks-pass:
-    if: always()
+    if: ${{ !cancelled() }}
     needs: ['check-pr-title', 'check-pr-description', 'check-empty-pr']
     runs-on: ubuntu-24.04
     permissions:

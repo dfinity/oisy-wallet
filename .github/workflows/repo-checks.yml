@@ -28,7 +28,7 @@ jobs:
   repo-checks-pass:
     needs:
       - lint-ls
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read

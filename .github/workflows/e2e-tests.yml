@@ -373,7 +373,7 @@ jobs:
             ```
 
   e2e-tests-pass:
-    if: always()
+    if: ${{ !cancelled() }}
     needs: ['check-e2e-changes', 'e2e', 'finalize-snapshots-update']
     runs-on: ubuntu-24.04
     permissions:
