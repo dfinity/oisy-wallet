@@ -21,7 +21,7 @@ describe('SolTransactionsGroup', () => {
 	const group: SolTransactionGroup = {
 		signature: 'sig',
 		transactions: [row(), row()] as never,
-		legs: [{ symbol: 'SOL', decimals: 9, net: -5_454_491n }],
+		legs: [{ symbol: 'SOL', decimals: 9, net: -5_454_491n, native: true }],
 		isSwap: false
 	};
 
@@ -119,7 +119,7 @@ describe('SolTransactionsGroup', () => {
 			group: {
 				...group,
 				transactions: [row(), row()] as never,
-				legs: [{ symbol: 'SOL', decimals: 9, net: -5_454_491n }]
+				legs: [{ symbol: 'SOL', decimals: 9, net: -5_454_491n, native: true }]
 			}
 		});
 
@@ -140,7 +140,7 @@ describe('SolTransactionsGroup', () => {
 		});
 
 		await rerender({
-			group: { ...group, legs: [{ symbol: 'SOL', decimals: 9, net: -9_999_999n }] }
+			group: { ...group, legs: [{ symbol: 'SOL', decimals: 9, net: -9_999_999n, native: true }] }
 		});
 
 		await waitFor(() => {

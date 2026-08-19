@@ -42,3 +42,8 @@ export const SOLANA_SIMULATION_TIMEOUT_MILLISECONDS = 5_000;
 // over the odds is a legitimate thing to want during congestion.
 export const SOLANA_PRIORITIZATION_FEE_NOTICE_MULTIPLIER = 2n;
 export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
+
+// What it costs to open an SPL token account, and it is refunded when the account is closed. A
+// transfer to someone who has no account for that token pays this so the tokens have somewhere to
+// land, which is why it shows up beside real payments and is not one.
+export const SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS = 2_039_280n;

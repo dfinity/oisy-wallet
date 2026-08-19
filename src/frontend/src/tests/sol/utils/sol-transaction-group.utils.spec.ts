@@ -113,11 +113,17 @@ describe('sol-transaction-group.utils', () => {
 				]);
 
 				expect(legsOf(entries)).toStrictEqual([
-					{ symbol: SOLANA_TOKEN.symbol, decimals: SOLANA_TOKEN.decimals, net: -5_000_000n },
+					{
+						symbol: SOLANA_TOKEN.symbol,
+						decimals: SOLANA_TOKEN.decimals,
+						net: -5_000_000n,
+						native: true
+					},
 					{
 						symbol: mockValidSplToken.symbol,
 						decimals: mockValidSplToken.decimals,
-						net: 377_098n
+						net: 377_098n,
+						native: false
 					}
 				]);
 			});
@@ -131,8 +137,18 @@ describe('sol-transaction-group.utils', () => {
 				]);
 
 				expect(legsOf(entries)).toStrictEqual([
-					{ symbol: SOLANA_TOKEN.symbol, decimals: SOLANA_TOKEN.decimals, net: -4_000_000n },
-					{ symbol: mockValidSplToken.symbol, decimals: mockValidSplToken.decimals, net: 2n }
+					{
+						symbol: SOLANA_TOKEN.symbol,
+						decimals: SOLANA_TOKEN.decimals,
+						net: -4_000_000n,
+						native: true
+					},
+					{
+						symbol: mockValidSplToken.symbol,
+						decimals: mockValidSplToken.decimals,
+						net: 2n,
+						native: false
+					}
 				]);
 			});
 
@@ -144,7 +160,12 @@ describe('sol-transaction-group.utils', () => {
 				]);
 
 				expect(legsOf(entries)).toStrictEqual([
-					{ symbol: mockValidSplToken.symbol, decimals: mockValidSplToken.decimals, net: 2n }
+					{
+						symbol: mockValidSplToken.symbol,
+						decimals: mockValidSplToken.decimals,
+						net: 2n,
+						native: false
+					}
 				]);
 			});
 		});
@@ -206,11 +227,12 @@ describe('sol-transaction-group.utils', () => {
 				]);
 
 				expect(entries[0].kind === 'group' && entries[0].group.legs).toStrictEqual([
-					{ symbol: SOLANA_TOKEN.symbol, decimals: 9, net: -5_454_491n },
+					{ symbol: SOLANA_TOKEN.symbol, decimals: 9, net: -5_454_491n, native: true },
 					{
 						symbol: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
 						decimals: 6,
-						net: 377_098n
+						net: 377_098n,
+						native: false
 					}
 				]);
 			});
@@ -232,7 +254,12 @@ describe('sol-transaction-group.utils', () => {
 				]);
 
 				expect(entries[0].kind === 'group' && entries[0].group.legs).toStrictEqual([
-					{ symbol: SOLANA_TOKEN.symbol, decimals: SOLANA_TOKEN.decimals, net: -4_000_000n }
+					{
+						symbol: SOLANA_TOKEN.symbol,
+						decimals: SOLANA_TOKEN.decimals,
+						net: -4_000_000n,
+						native: true
+					}
 				]);
 				expect(entries[0].kind === 'group' && entries[0].group.instructionsCount).toBeUndefined();
 			});

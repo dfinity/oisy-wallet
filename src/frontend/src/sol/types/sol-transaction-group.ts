@@ -14,6 +14,9 @@ export interface SolTransactionGroupLeg {
 	symbol: string;
 	decimals: number;
 	net: bigint;
+	// `true` for SOL itself rather than a token on it. Kept as a fact rather than inferred from the
+	// symbol, because what a leg is should not depend on how it happens to be labelled.
+	native: boolean;
 }
 
 /**

@@ -430,11 +430,17 @@ describe('sol-summary.utils', () => {
 	});
 
 	describe('toSolTransactionGroupSummaryFacts', () => {
-		const leg = ({ symbol, decimals, net }: { symbol: string; decimals: number; net: bigint }) => ({
+		const leg = ({
 			symbol,
 			decimals,
-			net
-		});
+			net,
+			native
+		}: {
+			symbol: string;
+			decimals: number;
+			net: bigint;
+			native: boolean;
+		}) => ({ symbol, decimals, net, native });
 
 		const row = ({
 			type = 'send',
@@ -453,8 +459,8 @@ describe('sol-summary.utils', () => {
 			signature: 'sig',
 			transactions: [row({}), row({})],
 			legs: [
-				leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n }),
-				leg({ symbol: 'USDC', decimals: 6, net: 377_098n })
+				leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n, native: true }),
+				leg({ symbol: 'USDC', decimals: 6, net: 377_098n, native: false })
 			],
 			isSwap: true
 		};
@@ -477,8 +483,8 @@ describe('sol-summary.utils', () => {
 			const facts = toSolTransactionGroupSummaryFacts({
 				...group,
 				legs: [
-					leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n }),
-					leg({ symbol: 'USDC', decimals: 6, net: -377_098n })
+					leg({ symbol: 'SOL', decimals: 9, net: -5_000_000n, native: true }),
+					leg({ symbol: 'USDC', decimals: 6, net: -377_098n, native: false })
 				],
 				isSwap: false
 			});
@@ -492,11 +498,50 @@ describe('sol-summary.utils', () => {
 			expect(facts).toContain('Transfers: 2');
 		});
 
-		it('should name the counterparty every row agrees on, shortened', () => {
+		// The row shows who it went to underneath, so the sentence spends its characters on what
+		// moved instead.
+		it('should not name a counterparty', () => {
 			const facts = toSolTransactionGroupSummaryFacts(group);
 
-			expect(facts).toContain('Counterparty: 4GsmSut...AM56JR8');
+			expect(facts.join('\n')).not.toContain('Counterparty');
 			expect(facts.join('\n')).not.toContain(mockSolAddress2);
+		});
+
+		// Rent opens a token account so the tokens have somewhere to land. Offering it as a payment
+		// is what had the sentence announcing it beside the amount actually sent.
+		it('should not offer account rent as a payment', () => {
+			const facts = toSolTransactionGroupSummaryFacts({
+				...group,
+				legs: [
+					{ symbol: 'SOL', decimals: 9, net: -2_039_280n, native: true },
+					{ symbol: 'USD1', decimals: 6, net: -100_000n, native: false }
+				]
+			});
+
+			expect(facts).toContain('Paid: 0.1 USD1');
+			expect(facts.join('\n')).not.toContain('SOL');
+		});
+
+		it('should still state SOL that is not rent', () => {
+			const facts = toSolTransactionGroupSummaryFacts({
+				...group,
+				legs: [
+					{ symbol: 'SOL', decimals: 9, net: -5_000_000n, native: true },
+					{ symbol: 'USD1', decimals: 6, net: -100_000n, native: false }
+				]
+			});
+
+			expect(facts).toContain('Paid: 0.005 SOL');
+		});
+
+		// A transaction that moved only SOL has nothing else to say, so the figure stays.
+		it('should state rent when it is all there is', () => {
+			const facts = toSolTransactionGroupSummaryFacts({
+				...group,
+				legs: [{ symbol: 'SOL', decimals: 9, net: -2_039_280n, native: true }]
+			});
+
+			expect(facts).toContain('Paid: 0.00203928 SOL');
 		});
 
 		// Naming one of several addresses would be picking a winner.

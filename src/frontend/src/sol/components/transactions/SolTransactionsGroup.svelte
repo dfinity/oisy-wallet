@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
@@ -84,7 +84,7 @@
 
 <Collapsible expandButton testId={testId ?? 'sol-transactions-group'} wrapHeight>
 	{#snippet header()}
-		<span class="block w-full rounded-xl px-2 py-2">
+		<span class="block w-full min-w-0 overflow-hidden rounded-xl px-2 py-2">
 			<Card noMargin withGap>
 				<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
 					<span class="truncate" data-tid="sol-transactions-group-label">{label}</span>
@@ -102,18 +102,23 @@
 					</div>
 				{/snippet}
 
+				<!-- The sentence names the amounts, so repeating them beside it says the same thing
+				     twice on the one row where space is tightest. The transfers inside still carry
+				     their own. -->
 				{#snippet amount()}
-					<span class="flex flex-col items-end">
-						{#if $isPrivacyMode}
-							<IconDots />
-						{:else}
-							{#each legs as { symbol, decimals, net } (symbol)}
-								<span data-tid={`sol-transactions-group-leg-${symbol}`}>
-									<Amount amount={net} {decimals} formatPositiveAmount {symbol} />
-								</span>
-							{/each}
-						{/if}
-					</span>
+					{#if isNullish(summary)}
+						<span class="flex flex-col items-end">
+							{#if $isPrivacyMode}
+								<IconDots />
+							{:else}
+								{#each legs as { symbol, decimals, net } (symbol)}
+									<span data-tid={`sol-transactions-group-leg-${symbol}`}>
+										<Amount amount={net} {decimals} formatPositiveAmount {symbol} />
+									</span>
+								{/each}
+							{/if}
+						</span>
+					{/if}
 				{/snippet}
 
 				{#snippet description()}

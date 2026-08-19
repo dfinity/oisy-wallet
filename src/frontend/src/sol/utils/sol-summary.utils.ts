@@ -5,9 +5,10 @@ import {
 	SOLANA_SUMMARY_MAX_LENGTH,
 	SOLANA_SUMMARY_MAX_PROMPT_LENGTH
 } from '$sol/constants/sol-summary.constants';
+import { SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS } from '$sol/constants/sol.constants';
 import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
-import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
+import type { SolTransactionGroup, SolTransactionGroupLeg } from '$sol/types/sol-transaction-group';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { findSplToken } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -157,6 +158,9 @@ export const toSolSignRequestSummaryFacts = ({
 	return withinPromptBudget(facts);
 };
 
+// More than this and the rent stops being incidental, so the figure is stated rather than hidden.
+const MAX_OPENED_TOKEN_ACCOUNTS = 4n;
+
 // The direction is stated rather than left to be inferred from the addresses: the model is given
 // no way to tell which of them is the user's, and guessing is exactly what it must not do.
 const TRANSACTION_DIRECTION_FACTS: Record<SolTransactionType, string> = {
@@ -196,25 +200,6 @@ export const toSolTransactionSummaryFacts = ({
 };
 
 /**
- * The one counterparty of a group, or nothing.
- *
- * Every row has to agree, and every row has to have one. A bundle that touched several addresses
- * has no single counterparty, and a sentence naming one of them would be picking a winner.
- */
-const groupCounterparty = ({ transactions }: SolTransactionGroup): string | undefined => {
-	const counterparties = transactions.map(
-		({ transaction: { type, from, fromOwner, to, toOwner } }) =>
-			type === 'receive' ? (fromOwner ?? from) : (toOwner ?? to)
-	);
-
-	const [first] = counterparties;
-
-	return nonNullish(first) && counterparties.every((address) => address === first)
-		? first
-		: undefined;
-};
-
-/**
  * The facts the rows of one transaction are allowed to phrase, once they are back together.
  *
  * The legs are already netted, which is the whole point: the row-level amounts are legs of one
@@ -225,7 +210,25 @@ const groupCounterparty = ({ transactions }: SolTransactionGroup): string | unde
 export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): string[] => {
 	const { transactions, legs, isSwap, instructionsCount, steps } = group;
 
-	const counterparty = groupCounterparty(group);
+	// The rent is not a payment, so it is not offered as one. Stating it alongside the amount that
+	// was actually sent is what had the model announcing "0.1 USD1 and 0.00203928 SOL", where a
+	// block explorer says only the first. Up to a handful of accounts can be opened at once.
+	const rentOnly = ({ native, net }: SolTransactionGroupLeg): boolean => {
+		if (!native || net >= ZERO) {
+			return false;
+		}
+
+		const paid = ZERO - net;
+		const accounts = paid / SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS;
+
+		return (
+			paid % SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS === ZERO &&
+			accounts >= 1n &&
+			accounts <= MAX_OPENED_TOKEN_ACCOUNTS
+		);
+	};
+
+	const spoken = legs.some(({ native }) => !native) ? legs.filter((leg) => !rentOnly(leg)) : legs;
 
 	return withinPromptBudget([
 		// The steps are what say what the transaction is. Creating an account and transferring a
@@ -233,12 +236,11 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 		// swap. The balances only say how much moved, which is why they are not enough on their own.
 		nonNullish(steps) && steps.length > 0 ? `Steps: ${steps.join(', ')}` : undefined,
 		isSwap ? 'Kind: an exchange of one token for another' : undefined,
-		...legs.map(({ symbol, decimals, net }) =>
+		...spoken.map(({ symbol, decimals, net }) =>
 			net < ZERO
 				? `Paid: ${formatAmount({ value: -net, decimals })} ${symbol}`
 				: `Received: ${formatAmount({ value: net, decimals })} ${symbol}`
 		),
-		nonNullish(counterparty) ? `Counterparty: ${formatAddress(counterparty)}` : undefined,
 		`Transfers: ${transactions.length}`,
 		// The amounts above come from the confirmed balances and are whole, but the transfers are
 		// only the instructions OISY could read. Saying so keeps the sentence from presenting a

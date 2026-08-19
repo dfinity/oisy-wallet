@@ -39,7 +39,8 @@ const toEffectLegs = ({
 	return legs.map(({ tokenAddress, decimals, net }) => ({
 		symbol: symbolOf(tokenAddress) ?? tokenAddress ?? SOL_SYMBOL,
 		decimals,
-		net
+		net,
+		native: isNullish(tokenAddress)
 	}));
 };
 
@@ -64,7 +65,13 @@ const toLegs = (transactions: SolAllTransactionUiWithCmp[]): SolTransactionGroup
 
 			return {
 				...acc,
-				[symbol]: { symbol, decimals, net: (acc[symbol]?.net ?? ZERO) + signed }
+				[symbol]: {
+					symbol,
+					decimals,
+					net: (acc[symbol]?.net ?? ZERO) + signed,
+					// A token carries a mint address; SOL itself does not.
+					native: isNullish((token as { address?: string }).address)
+				}
 			};
 		},
 		{}
