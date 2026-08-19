@@ -70,14 +70,13 @@ struct BitcoinInitConfig {
 ///    .with_wasm("path/to/backend.wasm")
 ///    .with_arg(vec![1, 2, 3])
 ///    .with_controllers(vec![Principal::from_text("controller").unwrap()])
-///    .with_cycles(1_000_000_000_000)
 ///    .deploy();
 /// ```
 #[derive(Debug)]
 pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
     canister_id: Option<Principal>,
-    /// Cycles to add to the backend canister.
+    /// Cycles the backend canister is created with.
     cycles: u128,
     /// Path to the backend wasm file.
     wasm_path: String,
@@ -106,8 +105,6 @@ impl BackendBuilder {
     /// - Low enough that half of it stays under the per-user signing allowance
     ///   (`per_user_cycles_allowance`, ~2.9T), which caps how much the signer can pull from the
     ///   topped-up patron account.
-    ///
-    /// To override, please use `with_cycles()`.
     pub const DEFAULT_CYCLES: u128 = 4_000_000_000_000;
 
     /// The default Wasm file to deploy:
