@@ -24,8 +24,15 @@
 	// flight would otherwise be described by a sentence written about the previous ones.
 	let requestId = 0;
 
+	// Depend on the prompt's text, never on the array carrying it. The activity list rebuilds its
+	// rows on every store tick, so an identical fact list arrives as a fresh array several times a
+	// second. Tracking its identity re-fired this effect each time, and each firing cancelled the
+	// answer the previous one was still waiting for: the sentence could never arrive, while the
+	// canister was asked for it over a hundred times a minute for a single open group.
+	let prompt = $derived(facts.join('\n'));
+
 	$effect(() => {
-		const currentFacts = facts;
+		const currentPrompt = prompt;
 		const identity = $authIdentity;
 
 		untrack(() => {
@@ -36,7 +43,10 @@
 
 			// Deliberately not awaited: the screen is already complete and correct without this
 			// sentence, and nothing on it may wait on an update call to the LLM canister.
-			void summarizeSolFacts({ facts: currentFacts, identity })
+			void summarizeSolFacts({
+				facts: currentPrompt.length === 0 ? [] : currentPrompt.split('\n'),
+				identity
+			})
 				.then(async (result) => {
 					if (currentRequestId !== requestId) {
 						return;

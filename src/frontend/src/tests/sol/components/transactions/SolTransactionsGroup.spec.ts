@@ -71,4 +71,53 @@ describe('SolTransactionsGroup', () => {
 			expect(summarizeSolFacts).toHaveBeenCalledOnce();
 		});
 	});
+
+	// The bug this guards: the activity list rebuilds its rows on every store tick, so an identical
+	// fact list arrives as a fresh array. Tracking its identity fired a new canister call each time
+	// and cancelled the answer the previous one was waiting for, so no sentence ever arrived while
+	// the canister was asked over a hundred times a minute for one open group.
+	it('should not ask again when the same group is rebuilt with identical contents', async () => {
+		vi.mocked(summarizeSolFacts).mockResolvedValue('Paid 0.005454491 SOL.');
+
+		const { getByTestId, rerender } = render(SolTransactionsGroup, { props: { group } });
+
+		await fireEvent.click(getByTestId('collapsible-header'));
+
+		await waitFor(() => {
+			expect(summarizeSolFacts).toHaveBeenCalledOnce();
+		});
+
+		// A new object, a new array of legs, the very same facts.
+		await rerender({
+			group: {
+				...group,
+				transactions: [row(), row()] as never,
+				legs: [{ symbol: 'SOL', decimals: 9, net: -5_454_491n }]
+			}
+		});
+
+		await waitFor(() => {
+			expect(summarizeSolFacts).toHaveBeenCalledOnce();
+		});
+	});
+
+	it('should ask again when the facts themselves change', async () => {
+		vi.mocked(summarizeSolFacts).mockResolvedValue('Paid 0.005454491 SOL.');
+
+		const { getByTestId, rerender } = render(SolTransactionsGroup, { props: { group } });
+
+		await fireEvent.click(getByTestId('collapsible-header'));
+
+		await waitFor(() => {
+			expect(summarizeSolFacts).toHaveBeenCalledOnce();
+		});
+
+		await rerender({
+			group: { ...group, legs: [{ symbol: 'SOL', decimals: 9, net: -9_999_999n }] }
+		});
+
+		await waitFor(() => {
+			expect(summarizeSolFacts).toHaveBeenCalledTimes(2);
+		});
+	});
 });
