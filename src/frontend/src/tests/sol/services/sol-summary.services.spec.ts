@@ -31,7 +31,7 @@ describe('sol-summary.services', () => {
 
 			const summary = await summarizeSolFacts({ facts, identity: mockIdentity });
 
-			expect(summary).toBe('Transfer of 0.001 SOL.');
+			expect(summary).toBe('Transfer of 0.001 SOL');
 		});
 
 		// The model is given the facts the review derived, and nothing else: no instruction data,
@@ -76,7 +76,7 @@ describe('sol-summary.services', () => {
 				.mockResolvedValueOnce(answer('Transfer of 0.001 SOL.'));
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBe(
-				'Transfer of 0.001 SOL.'
+				'Transfer of 0.001 SOL'
 			);
 
 			expect(llmChat).toHaveBeenCalledTimes(2);
@@ -126,7 +126,7 @@ describe('sol-summary.services', () => {
 			vi.mocked(llmChat).mockResolvedValue(answer('Transfer of 0.001 SOL.'));
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBe(
-				'Transfer of 0.001 SOL.'
+				'Transfer of 0.001 SOL'
 			);
 
 			expect(spyWarn).not.toHaveBeenCalled();

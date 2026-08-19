@@ -265,7 +265,7 @@ describe('sol-summary.utils', () => {
 					content: 'Transfer of 0.10 USD1 to 4GsmSut...AM56JR8.',
 					facts: ['Amount: 0.1 USD1', 'Recipient: 4GsmSut...AM56JR8']
 				})
-			).toBe('Transfer of 0.10 USD1 to 4GsmSut...AM56JR8.');
+			).toBe('Transfer of 0.10 USD1 to 4GsmSut...AM56JR8');
 		});
 
 		it.each([
@@ -275,7 +275,7 @@ describe('sol-summary.utils', () => {
 		])('should read $written and $stated as the same figure', ({ written, stated }) => {
 			expect(
 				sanitizeSolSummary({ content: `Paid ${written} SOL.`, facts: [`Paid: ${stated} SOL`] })
-			).toBe(`Paid ${written} SOL.`);
+			).toBe(`Paid ${written} SOL`);
 		});
 
 		// The other end of the same guard: a fragment of a stated figure is not a stated figure.
@@ -302,13 +302,15 @@ describe('sol-summary.utils', () => {
 			expect(sanitizeSolSummary({ content: '   \n  ', facts })).toBeUndefined();
 		});
 
-		it('should return the sentence', () => {
+		// The row is a title, and the rows around it end without a full stop, so the one the model
+		// writes is taken off rather than asked for: it supplies one either way.
+		it('should return the sentence without its closing stop', () => {
 			expect(
 				sanitizeSolSummary({
 					content: 'Transfer of 0.001 SOL to 4GsmSut...AM56JR8.',
 					facts
 				})
-			).toBe('Transfer of 0.001 SOL to 4GsmSut...AM56JR8.');
+			).toBe('Transfer of 0.001 SOL to 4GsmSut...AM56JR8');
 		});
 
 		it('should drop the model reasoning block', () => {
@@ -317,7 +319,7 @@ describe('sol-summary.utils', () => {
 					content: '<think>the user wants a summary</think>\nTransfer of 0.001 SOL.',
 					facts
 				})
-			).toBe('Transfer of 0.001 SOL.');
+			).toBe('Transfer of 0.001 SOL');
 		});
 
 		it('should keep only the first sentence', () => {
@@ -326,19 +328,18 @@ describe('sol-summary.utils', () => {
 					content: 'Transfer of 0.001 SOL. Only sign this if you trust the app.',
 					facts
 				})
-			).toBe('Transfer of 0.001 SOL.');
+			).toBe('Transfer of 0.001 SOL');
 		});
 
-		// A list where some rows end in a stop and others do not reads as a mistake, so one is added.
-		it('should close an answer that never terminates its sentence', () => {
+		it('should leave an answer that never terminates its sentence alone', () => {
 			expect(sanitizeSolSummary({ content: 'Transfer of 0.001 SOL', facts })).toBe(
-				'Transfer of 0.001 SOL.'
+				'Transfer of 0.001 SOL'
 			);
 		});
 
 		it('should not mistake a decimal point for the end of the sentence', () => {
 			expect(sanitizeSolSummary({ content: 'Transfer of 0.001 SOL.', facts })).toBe(
-				'Transfer of 0.001 SOL.'
+				'Transfer of 0.001 SOL'
 			);
 		});
 

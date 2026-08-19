@@ -10,12 +10,12 @@ You rewrite a list of facts about a Solana transaction as one short sentence, fo
 RULES:
 - Use ONLY the facts given to you. Never infer, guess, calculate, or add anything, including what the transaction is for or whether it is safe. Name an app or protocol only when the facts name it.
 - Copy every number, amount, token symbol and address exactly as given. Never invent one, never round one, never convert one.
-- Answer with exactly one sentence of at most 70 characters, ending with a period. It is the title of a row in a list, so it must be short.
+- Answer with exactly one sentence of at most 70 characters. It is the title of a row in a list, so it must be short, and it ends without a full stop.
 - Name what moved and how much. Do not name who it went to or came from: the screen already shows that.
 - Plain text only: no markdown, no formatting, no quotes, no links, no code, no line breaks.
 - Begin with exactly one of these three words, because they are what the rest of the wallet calls things: "Sent" when this wallet paid, "Received" when it was paid, "Swapped" when one token left and another arrived. Never begin with anything else, and never begin with the name of an app, a protocol or a program.
 - A swap is "Swapped X for Y". Say that even when the facts name the app it happened on.
-- When the facts name what it went through, it goes at the end and only if the sentence still fits: "Swapped 0.005 SOL for 0.377098 USDC on Jupiter." It never replaces the action and it is never the subject.
+- When the facts name an app, it goes last and only if the sentence still fits, always written as "on NAME": "Swapped 0.005 SOL for 0.377098 USDC on Jupiter". Never "via", never "through". It never replaces the action and it is never the subject.
 - When the facts list steps, name what the transaction IS from them, and ignore the steps that only prepare or clean up. Creating or closing a token account alongside a transfer is still a transfer, and the rent it costs is not a second payment. Sending one token and receiving another is a swap.
 - If the only facts about what moves are simulated balance changes, state those changes as what the transaction does and do not name a transfer type.
 - Do not give advice, do not warn, do not address the reader.

@@ -239,7 +239,7 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 		nonNullish(steps) && steps.length > 0 ? `Steps: ${steps.join(', ')}` : undefined,
 		// The protocol is the only fact here the wallet could not have worked out on its own, and it
 		// is what turns "received some tokens" into "received them from a bridge".
-		nonNullish(programs) && programs.length > 0 ? `Through: ${programs.join(', ')}` : undefined,
+		nonNullish(programs) && programs.length > 0 ? `App: ${programs.join(', ')}` : undefined,
 		isSwap ? 'Kind: a swap, one token out and another in' : undefined,
 		...spoken.map(({ symbol, decimals, net }) =>
 			net < ZERO
@@ -320,26 +320,31 @@ export const sanitizeSolSummary = ({
 		return;
 	}
 
-	// The model supplies the closing stop about half the time, and a list where some rows end in one
-	// and others do not reads as a mistake. Adding it is safe: it changes no figure and no claim.
-	const closed = /[.!?]$/.test(sentence) ? sentence : `${sentence}.`;
+	// The row is a title, not prose, and the rows around it end without one. Stripping is safe: it
+	// changes no figure and no claim, and it is done here rather than asked for because the model
+	// supplies a full stop whether or not it is told to.
+	const titled = sentence.replace(/[.!?]+$/, '').trim();
 
-	if (MARKUP_REGEX.test(closed)) {
+	if (titled.length === 0) {
+		return;
+	}
+
+	if (MARKUP_REGEX.test(titled)) {
 		return;
 	}
 
 	// The model is told to say this when the facts describe no action, and it is also what a
 	// stripped-down answer collapses to.
-	if (closed.replace(/[.!?]/g, '').trim().toUpperCase() === 'UNKNOWN') {
+	if (titled.toUpperCase() === 'UNKNOWN') {
 		return;
 	}
 
 	// The one thing a summary must never do is put a number on screen that OISY did not derive.
 	const stated = new Set((facts.join('\n').match(FIGURE_REGEX) ?? []).map(sameFigure));
 
-	const invented = (closed.match(FIGURE_REGEX) ?? []).some(
+	const invented = (titled.match(FIGURE_REGEX) ?? []).some(
 		(figure) => !stated.has(sameFigure(figure))
 	);
 
-	return invented ? undefined : closed;
+	return invented ? undefined : titled;
 };
