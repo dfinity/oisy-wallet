@@ -1,3 +1,4 @@
+import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
@@ -8,8 +9,10 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import type { NetworkId } from '$lib/types/network';
-import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
+import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
+import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
 
 export const SWAP_SLIPPAGE_PRESET_VALUES = [0.5, 1.5, 3];
 export const [_, SWAP_DEFAULT_SLIPPAGE_VALUE] = SWAP_SLIPPAGE_PRESET_VALUES;
@@ -50,6 +53,12 @@ export const SWAP_MODE_MARKET = 'market';
 export const SWAP_SIDE = 'SELL';
 
 export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {
+	[SwapProvider.CHAIN_FUSION]: {
+		website: 'https://internetcomputer.org/chainfusion',
+		name: 'Chain Fusion',
+		// TODO: replace with a real logo
+		logo: '/images/dapps/chain-fusion-logo.svg'
+	},
 	[SwapProvider.VELORA]: {
 		website: 'https://app.velora.xyz/',
 		name: 'Velora',
@@ -87,6 +96,11 @@ const SUPPORTED_CROSS_SWAP_NETWORK_IDS = [
 	...SUPPORTED_CROSS_SWAP_SOL_NETWORK_IDS
 ];
 
+export const CHAIN_FUSION_PAIRS: ChainFusionPair[] = toChainFusionPairs([
+	...ICRC_CK_TOKENS,
+	...PUBLIC_ICRC_TOKENS
+]);
+
 // EVM networks supported by OneSec for ICP bridging
 export const ONESEC_EVM_NETWORK_IDS = [
 	ETHEREUM_NETWORK_ID,
@@ -94,19 +108,26 @@ export const ONESEC_EVM_NETWORK_IDS = [
 	ARBITRUM_MAINNET_NETWORK_ID
 ];
 
-// For OneSec-supporting EVM chains, also allow ICP as a swap destination
-const SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP = ONESEC_SWAP_ENABLED
-	? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
-	: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
+const CHAIN_FUSION_EVM_NETWORK_IDS = CHAIN_FUSION_SWAP_ENABLED ? [ETHEREUM_NETWORK_ID] : [];
+
+const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
+	...new Set<NetworkId>([
+		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
+		...CHAIN_FUSION_EVM_NETWORK_IDS
+	])
+];
+
+const withIcpIfPaired = (networkId: NetworkId): NetworkId[] =>
+	ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId)
+		? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
+		: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
-	[ICP_NETWORK_ID]: ONESEC_SWAP_ENABLED
-		? [ICP_NETWORK_ID, ...ONESEC_EVM_NETWORK_IDS]
-		: [ICP_NETWORK_ID],
-	[ETHEREUM_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
-	[ARBITRUM_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
-	[BSC_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[POLYGON_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[BASE_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
+	[ICP_NETWORK_ID]: [ICP_NETWORK_ID, ...ICP_PAIRED_EVM_NETWORK_IDS],
+	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
+	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
+	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),
+	[POLYGON_MAINNET_NETWORK_ID]: withIcpIfPaired(POLYGON_MAINNET_NETWORK_ID),
+	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS
 };

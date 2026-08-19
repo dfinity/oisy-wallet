@@ -148,7 +148,7 @@ const checkNeedsApproval = async ({
 	}
 };
 
-const enableSwapDestinationToken = async ({
+export const enableSwapDestinationToken = async ({
 	destinationToken,
 	identity
 }: {
@@ -160,6 +160,22 @@ const enableSwapDestinationToken = async ({
 	}
 
 	try {
+		// A Chain Fusion mint or a 1Sec bridge lands on an ICRC (ck) token, which neither
+		// the ERC nor the SPL branch below can persist — the swap used to complete with the
+		// destination still hidden and its new balance invisible. Enabled through the same
+		// `autoLoadSingleToken` trio the ICPSwap flow uses for its own destination.
+		if (isTokenIcrc(destinationToken)) {
+			await autoLoadSingleToken({
+				identity,
+				token: destinationToken,
+				setToken: setCustomIcrcToken,
+				loadTokens: loadCustomTokens,
+				errorMessage: get(i18n).init.error.icrc_custom_token
+			});
+
+			return;
+		}
+
 		if (isTokenErc(destinationToken)) {
 			await setCustomToken({
 				token: toCustomToken({
@@ -896,6 +912,8 @@ export const fetchOneSecIcpToEvmSwap = async (params: OneSecIcpToEvmParams): Pro
 	await enableOneSecDestinationToken(params);
 };
 
+// `satisfies` keeps the map total: `SwapIcpWizard` indexes it with a provider key, so
+// a missing member would be a runtime `undefined(…)` call rather than a type error.
 export const swapService = {
 	[SwapProvider.ICP_SWAP]: fetchIcpSwap,
 	[SwapProvider.KONG_SWAP]: fetchKongSwap,
@@ -908,8 +926,15 @@ export const swapService = {
 	},
 	[SwapProvider.ONE_SEC]: () => {
 		throw new Error(get(i18n).swap.error.unexpected);
+	},
+	// Chain Fusion needs the user's own Ethereum address to withdraw to, which
+	// `SwapParams` cannot carry, so `SwapIcpWizard` dispatches it explicitly through
+	// `fetchChainFusionIcpSwap` and never reaches this entry — exactly as it does for
+	// 1Sec above.
+	[SwapProvider.CHAIN_FUSION]: () => {
+		throw new Error(get(i18n).swap.error.unexpected);
 	}
-};
+} satisfies Record<SwapProvider, (params: SwapParams) => Promise<void>>;
 
 export const withdrawICPSwapAfterFailedSwap = async ({
 	identity,

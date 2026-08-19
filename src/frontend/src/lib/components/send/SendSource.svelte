@@ -34,7 +34,7 @@
 	</WalletConnectModalValue>
 {/if}
 
-<WalletConnectModalValue label={$i18n.send.text.source} ref="source">
+<WalletConnectModalValue label={$i18n.wallet_connect.text.signer} ref="signer">
 	<div class="flex flex-col gap-1">
 		{source}
 		<ContactOrToken identifier={source} />

@@ -1,13 +1,21 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import {
+		ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR,
+		ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER,
+		ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER
+	} from '$eth/constants/eth.constants';
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
@@ -18,6 +26,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { maxBigInt } from '$lib/utils/bigint.utils';
 
 	interface Props {
 		amount: bigint;
@@ -26,6 +35,9 @@
 		data?: string;
 		erc20Approve: boolean;
 		erc20Transfer?: boolean;
+		// The gas limit the dApp asked for, when it asked for one. It is what gets signed, so it is
+		// also what the maximum fee below is priced on.
+		requestedGas?: bigint;
 		sourceNetwork: EthereumNetwork;
 		targetNetwork?: Network;
 		approveDisabled?: boolean;
@@ -40,12 +52,35 @@
 		data,
 		erc20Approve,
 		erc20Transfer = false,
+		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
 		approveDisabled = false,
 		onApprove,
 		onReject
 	}: Props = $props();
+
+	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+
+	// Unused gas is refunded, so a high limit is not a fee on its own. It is a ceiling the user
+	// authorizes, and a contract that consumes all of it burns the whole amount, which is why the
+	// review prices the limit that will be signed rather than the one OISY would have used.
+	let signedGas = $derived(requestedGas ?? $feeStore?.gas);
+
+	let baselineGas = $derived(maxBigInt(ETH_WALLET_CONNECT_GAS_BASELINE_FLOOR, $feeStore?.gas));
+
+	// A request that carries no limit of its own is signed with the estimate, so there is nothing to
+	// judge and the review says nothing about it.
+	let highGasLimit = $derived(
+		nonNullish(requestedGas) &&
+			requestedGas >= baselineGas * ETH_WALLET_CONNECT_GAS_WARNING_MULTIPLIER
+	);
+
+	let dappGasLimit = $derived(
+		!highGasLimit &&
+			nonNullish(requestedGas) &&
+			requestedGas >= baselineGas * ETH_WALLET_CONNECT_GAS_NOTICE_MULTIPLIER
+	);
 
 	let erc20 = $derived(erc20Approve || erc20Transfer);
 
@@ -126,6 +161,24 @@
 
 		{#if erc20Approve && nonNullish(spender)}
 			<SendDataSpender {spender} />
+		{/if}
+
+		<EthFeeDisplay gas={signedGas}>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+
+		<!-- Padding an estimate is ordinary dApp behaviour and unused gas is refunded, so both tiers
+		     inform instead of blocking the way undecodable ERC20 calldata does. -->
+		{#if dappGasLimit}
+			<MessageBox level="info" testId="wallet-connect-dapp-gas-limit">
+				{$i18n.wallet_connect.text.dapp_gas_limit}
+			</MessageBox>
+		{:else if highGasLimit}
+			<MessageBox level="warning" testId="wallet-connect-high-gas-limit">
+				{$i18n.wallet_connect.text.high_gas_limit}
+			</MessageBox>
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />

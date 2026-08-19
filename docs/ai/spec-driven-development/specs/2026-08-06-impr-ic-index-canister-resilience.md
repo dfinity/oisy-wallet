@@ -117,10 +117,15 @@ it is out of scope.)
 
 ### Warning text
 
-`unavailable_index_canister` — non-dismissible box, must read correctly both
-when the list below it is empty and when it shows older transactions:
+`unavailable_index_canister` — must read correctly both when the list below it
+is empty and when it shows older transactions:
 
-> `$oisy_short can’t load the latest transactions for $token_list right now, and keeps retrying.`
+> `The latest transactions for $token_list can’t be loaded at the moment, because their tracking service isn’t responding. They will be loaded automatically once it’s back.`
+
+_Resolved:_ an earlier draft opened with `$oisy_short can’t load…`, which reads
+as OISY’s fault when the failing component belongs to the token. Naming the
+tracking service instead also avoids a singular/plural problem: “their” works
+whether the box lists one token or several, so no second key is needed.
 
 `no_index_canister` — unchanged behaviour (dismissible, per-token dismissal
 persisted via `NOTIFICATION_VERSIONS.NoIndexCanister`), text de-jargoned:
@@ -133,8 +138,7 @@ persisted via `NOTIFICATION_VERSIONS.NoIndexCanister`), text de-jargoned:
   tick is the retry.
 - Does **not** change the 30s interval, nor the 10s query-only warmup.
 - Does **not** persist the failure counter; it is in-memory and per session.
-- Does **not** change the dismissal behaviour of the `no_index_canister` box,
-  nor make the new warning dismissible.
+- Does **not** change the dismissal behaviour of the `no_index_canister` box.
 - Does **not** touch ETH/SOL/BTC transaction loading, nor the backend
   user-transactions storage (`save_user_transactions` / `get_user_transactions`),
   which covers ETH and SOL only and plays no part here.
@@ -200,8 +204,10 @@ holding a per-`TokenId` consecutive-failure count, fed from `syncWallet`
 (`ic-listener.services.ts`): increment when `transactionsUnavailable` is true,
 reset to zero on any successful transaction sync. Not persisted.
 
-**Threshold.** New constant (3) alongside the other IC constants; a derived
-store exposes the token IDs at or above it.
+**Threshold.** New constant (3) alongside the other wallet-timer constants
+(`IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD`); a derived store
+(`$icp/derived/ic-transactions-status.derived.ts`) exposes the **enabled** tokens
+at or above it, so a disabled token never raises a banner.
 
 **Banner.** `AllTransactions.svelte:69-93` stops deriving the "unavailable" list
 from `icTransactionsStore[tokenId] === null` and uses the new derived store
@@ -214,6 +220,9 @@ and continues to feed the dismissible `no_index_canister` box via
 Both strings above in `src/frontend/src/lib/i18n/en.json:2315-2318`, plus
 translations for the locales listed in the `Languages` enum. No new keys, so no
 new placeholders and no bundle-size impact beyond the string lengths.
+
+`ar.json` is deliberately left untouched: Arabic is not in the `Languages` enum,
+so the file is unreachable at runtime.
 
 ### Tests
 
@@ -255,6 +264,48 @@ None outstanding — the failure paths were traced end to end against
 - **Warmup interaction.** Failures during the first 10s (query-only) are
   invisible to the counter, so the effective delay after a fresh load is ~100s.
   Accepted as-is.
+
+## Amendment — dismissal granularity (added after PR 3)
+
+_Resolved:_ the spec originally called the `unavailable_index_canister` box
+non-dismissible. It is dismissible today, and stays so — what was wrong was the
+granularity, not the button. The box wrote a single session-wide flag, so
+dismissing it for one token silenced every other token for the rest of the
+session.
+
+Shipped as a fourth PR: the dismissal is remembered **per token**, the text
+lists only the tokens that are not dismissed, and a dismissal ends with the
+outage it silenced — once a token's Index canister answers again it is dropped
+from the dismissed list, so a later failure of that same token is surfaced
+again. `saveHideInfoQualifiers` / `hiddenInfoQualifiers` in
+`src/frontend/src/lib/utils/info.utils.ts` are the qualified variant of the
+existing boolean hide-flags; they reuse the same sessionStorage key, whose value
+becomes a JSON list.
+
+The qualifiers are **ledger canister IDs**, not symbols: a user can hold two
+tokens with the same symbol, and a dismissal keyed on the symbol would silence
+both. Symbols remain what the box renders. For the same reason the derived
+stores narrow to IC tokens with `isIcToken` rather than casting - only IC tokens
+have a ledger canister ID.
+
+Recovery is keyed on an observed successful check (`succeed` records a zero,
+against no entry at all for a token never checked) rather than on the token's
+absence from the failing list: the counters are in-memory, so straight after a
+page load nothing is failing yet and every dismissal would otherwise be dropped.
+
+## Amendment — the token page (added after PR 3)
+
+_Resolved:_ the token page chose between its "transaction history unavailable"
+notice and the generic empty state from `icTransactionsStore[tokenId] === null`.
+PR 1 removed that value's second meaning, so a token with a failing Index
+canister showed "make your first transaction" instead — a regression, fixed by
+driving the notice from the same failure signal as the Activity warning.
+
+The page also carries the warning box itself, above the list, naming only its
+own token. Keeping the transactions loaded before the outage (PR 1) means the
+list stands during an outage; without the box nothing would mark it stale.
+Dismissal is shared with the Activity page through
+`icTransactionsWarningStore`, so closing it in either place silences both.
 
 ## Follow-ups (out of scope)
 

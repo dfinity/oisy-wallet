@@ -8,12 +8,17 @@ import * as analytics from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import type { ChainFusionSwapDetails } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockOneSecProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
+import {
+	mockChainFusionProvider,
+	mockOneSecProvider,
+	mockSwapProviders
+} from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -27,12 +32,18 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 
 const mockSwapFn = vi.fn();
 const mockOneSecFn = vi.fn();
+const mockChainFusionFn = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchOneSecIcpToEvmSwap: (...args: unknown[]) => mockOneSecFn(...args),
+	enableSwapDestinationToken: vi.fn(),
 	swapService: {
 		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
 	}
+}));
+
+vi.mock('$lib/services/chain-fusion-swap.services', () => ({
+	fetchChainFusionIcpSwap: (...args: unknown[]) => mockChainFusionFn(...args)
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -340,6 +351,74 @@ describe('SwapIcpWizard', () => {
 				expect(mockOneSecFn).not.toHaveBeenCalled();
 				expect(toasts.toastsError).toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('Chain Fusion ICP→Ethereum withdrawal', () => {
+			const ckEthFeeToken = {
+				...mockValidIcCkToken,
+				symbol: 'ckETH',
+				decimals: 18,
+				ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
+			};
+
+			// A ckERC20 source names the ckETH ledger as its fee ledger — the field
+			// `convertCkErc20ToErc20` approves on, and the one the wizard now picks the
+			// external fees to approve by.
+			const ckErc20SourceToken = {
+				...mockToken,
+				feeLedgerCanisterId: ckEthFeeToken.ledgerCanisterId
+			};
+
+			const setChainFusionContext = (swapDetails?: ChainFusionSwapDetails) => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...(mockContext.get(SWAP_CONTEXT_KEY) as object),
+					sourceToken: readable(ckErc20SourceToken),
+					destinationToken: readable(mockValidErc20Token)
+				});
+
+				const provider = mockChainFusionProvider(swapDetails);
+				const chainFusionAmountsStore = initSwapAmountsStore();
+				chainFusionAmountsStore.setSwaps({
+					swaps: [provider],
+					amountForSwap: 1,
+					selectedProvider: provider
+				});
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: chainFusionAmountsStore });
+			};
+
+			const submit = async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+			};
+
+			beforeEach(() => {
+				mockChainFusionFn.mockResolvedValue(undefined);
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			});
+
+			// No ckETH fee allowance is passed on purpose: `fetchChainFusionIcpSwap` resolves
+			// it itself, freshly, at execution time — a quote-time figure goes stale while the
+			// user sits on Review, and the minter rejects a stale allowance with
+			// `InsufficientAllowance`.
+			it('dispatches the withdrawal to the user own Ethereum address', async () => {
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						destinationAddress: mockEthAddress,
+						sourceToken: ckErc20SourceToken
+					})
+				);
 			});
 		});
 	});

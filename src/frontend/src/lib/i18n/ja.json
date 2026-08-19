@@ -935,8 +935,8 @@
 		"text": {
 			"send": "送信",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "宛先",
-			"source": "送信元",
 			"balance": "残高",
 			"review": "確認",
 			"signing_approval": "承認の署名中...",
@@ -1220,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "少なくとも1つのトークンの価格を取得できませんでした。このスワップオファーが公正な取引であることを<strong>独自に確認</strong>してください。<br>スリッページ設定は、受取額が大幅に低いオファーからは保護<strong>されません</strong>のでご注意ください！"
 		},
@@ -1611,8 +1612,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
@@ -1621,6 +1628,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1681,9 +1689,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "トランザクションで要求された送信元アドレスがこのウォレットのアドレスではありません。",
 			"unknown_destination": "不明な宛先アドレスです。",
 			"ambiguous_transaction": "このトランザクションは複数のアドレス間で資金を移動するため、確認のために正確に表示できません。安全のため、署名されませんでした。",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "予期しないエラー: リクエストが定義されていないため、処理できません。",
 			"unexpected_processing_request": "WalletConnectでリクエストを処理中に予期しないエラーが発生しました。"
 		}
@@ -1939,7 +1949,9 @@
 			"to_ata": "受信者トークンアカウント（ATA）",
 			"to_ata_copied": "受信者トークンアカウント（ATA）がクリップボードにコピーされました。",
 			"block": "ブロック",
-			"interacted_with": "実行先コントラクト（To）",
+			"interacted_with": "実行先コントラクト",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "ステータス",
 			"confirmations": "確認数",
 			"for": "承認先",
@@ -2332,8 +2344,8 @@
 			"hidden_micro_transactions": "非常に小さなトークン価値のトランザクションは現在非表示になっています。表示するには、<a href=\"/settings/\">設定</a>に移動してください。 <a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">詳細はこちら</a>"
 		},
 		"warning": {
-			"no_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターが利用できません。",
-			"unavailable_index_canister": "$token_listのトランザクションは表示できません。インデックスキャニスターは現在利用できません。"
+			"no_index_canister": "$oisy_short は $token_list の取引を読み込めません。トークンの発行者が取引の追跡機能を提供していません。",
+			"unavailable_index_canister": "$token_list の最新の取引は現在読み込めません。取引の追跡サービスが応答していないためです。サービスが復旧しだい自動的に読み込まれます。"
 		}
 	},
 	"earning": {

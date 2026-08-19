@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 	import { KONGSWAP_PROVIDER_ENABLED } from '$env/rest/kongswap.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 	import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+	import SwapDetailsChainFusion from '$lib/components/swap/SwapDetailsChainFusion.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsNearIntents from '$lib/components/swap/SwapDetailsNearIntents.svelte';
@@ -117,6 +119,8 @@
 				<SwapDetailsNearIntents provider={selectedProvider} {slippageValue} />
 			{:else if selectedProvider.provider === SwapProvider.ONE_SEC && ONESEC_SWAP_ENABLED}
 				<SwapDetailsOneSec provider={selectedProvider} />
+			{:else if selectedProvider.provider === SwapProvider.CHAIN_FUSION && CHAIN_FUSION_SWAP_ENABLED}
+				<SwapDetailsChainFusion provider={selectedProvider} />
 			{/if}
 		{/snippet}
 		{#snippet contentFooter(closeFn)}

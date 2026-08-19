@@ -61,6 +61,14 @@ export default defineConfig((): UserConfig => ({
 			{
 				find: '@plausible-analytics/tracker',
 				replacement: resolve(__dirname, 'src/frontend/src/tests/mocks/plausible-tracker.mock')
+			},
+			{
+				// The ESM build re-exports the `ethers` barrel, which in turn does a
+				// named `WebSocket` import from `ws`. `ws` is CommonJS, so Node's ESM
+				// loader throws on it before any test runs. The CJS build resolves the
+				// same code through `require`, where that interop works.
+				find: /^onesec-bridge$/,
+				replacement: resolve(__dirname, 'node_modules/onesec-bridge/dist/index.cjs.js')
 			}
 		]
 	},
@@ -69,6 +77,13 @@ export default defineConfig((): UserConfig => ({
 	},
 	test: {
 		environment: 'jsdom',
+		server: {
+			deps: {
+				// The package is `"type": "module"`, so Node would read its `.js` CJS
+				// build as ESM. Inlining hands it to Vite, which transforms it.
+				inline: ['onesec-bridge']
+			}
+		},
 		globals: true,
 		watch: false,
 		silent: false,
@@ -84,10 +99,10 @@ export default defineConfig((): UserConfig => ({
 			// TODO: increase the thresholds slowly up to an acceptable 90% at least
 			thresholds: {
 				autoUpdate: true,
-				statements: 80.2,
-				branches: 73.4,
-				functions: 77.8,
-				lines: 81.3
+				statements: 82.1,
+				branches: 75.1,
+				functions: 80.3,
+				lines: 83.0
 			}
 		}
 	}
