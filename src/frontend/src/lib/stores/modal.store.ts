@@ -154,7 +154,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openHarvestUnstake: (id: symbol) => void;
 	openLiquidiumSupply: (id: symbol) => void;
 	openTradingDeposit: (id: symbol) => void;
-	openOisyTradeWithdraw: (params: SetWithDataParams<OisyTradeWithdrawToken>) => void;
+	openOisyTradeWithdraw: (params: SetWithOptionalDataParams<OisyTradeWithdrawToken>) => void;
 	openOisyTradeOrderDetail: (params: SetWithDataParams<OisyTradeOrderView>) => void;
 	openLimitOrder: (id: symbol) => void;
 	openLiquidiumBorrow: (id: symbol) => void;
@@ -272,7 +272,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openHarvestUnstake: setType('harvest-unstake'),
 		openLiquidiumSupply: setType('liquidium-supply'),
 		openTradingDeposit: setType('trading-deposit'),
-		openOisyTradeWithdraw: <(params: SetWithDataParams<OisyTradeWithdrawToken>) => void>(
+		openOisyTradeWithdraw: <(params: SetWithOptionalDataParams<OisyTradeWithdrawToken>) => void>(
 			setTypeWithData('oisy-trade-withdraw')
 		),
 		openOisyTradeOrderDetail: <(params: SetWithDataParams<OisyTradeOrderView>) => void>(

@@ -73,8 +73,8 @@ describe('DefaultEarningOpportunityCard', () => {
 			cardFields: mockCardFields
 		});
 
-		expect(screen.getByText('+ $50/year')).toBeInTheDocument();
-		expect(screen.getByText('+ $200/year')).toBeInTheDocument();
+		expect(screen.getByText('+$50/year')).toBeInTheDocument();
+		expect(screen.getByText('+$200/year')).toBeInTheDocument();
 	});
 
 	it('renders dash when a field is missing', () => {

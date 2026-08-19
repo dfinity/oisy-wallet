@@ -37,6 +37,13 @@ interface AlchemyConfig {
 const ALCHEMY_SUBSCRIPTION_MINED_TRANSACTIONS = 'alchemy_minedTransactions';
 const ALCHEMY_SUBSCRIPTION_PENDING_TRANSACTIONS = 'alchemy_pendingTransactions';
 
+// Exponential-backoff reconnect schedule for the subscription WebSocket when it drops
+// unexpectedly (e.g. a mobile OS suspending a backgrounded tab). An intentional disconnect()
+// never reconnects. Kept local to this provider to stay decoupled from the fee-context retry.
+const ALCHEMY_WS_RECONNECT_BASE_DELAY = 1_000;
+const ALCHEMY_WS_RECONNECT_MAX_DELAY = 30_000;
+const ALCHEMY_WS_RECONNECT_MAX_ATTEMPTS = 5;
+
 const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
@@ -97,10 +104,14 @@ const subscribeAlchemyWs = <T>({
 	params: object;
 	onEvent: (event: T) => void | Promise<void>;
 }): WebSocketListener => {
-	const ws = new WebSocket(wssUrl);
-
+	let ws: WebSocket;
 	let subscriptionId: string | null = null;
 	let requestId = 1;
+
+	// Reconnect state. `closedByCaller` guarantees an intentional disconnect() never reconnects.
+	let closedByCaller = false;
+	let reconnectAttempts = 0;
+	let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const send = (payload: object) => {
 		if (ws.readyState === WebSocket.OPEN) {
@@ -109,6 +120,9 @@ const subscribeAlchemyWs = <T>({
 	};
 
 	const onOpen = () => {
+		// A successful (re)connection clears the backoff.
+		reconnectAttempts = 0;
+
 		send({
 			jsonrpc: '2.0',
 			id: requestId++,
@@ -134,13 +148,47 @@ const subscribeAlchemyWs = <T>({
 		}
 	};
 
+	const scheduleReconnect = () => {
+		if (closedByCaller || reconnectAttempts >= ALCHEMY_WS_RECONNECT_MAX_ATTEMPTS) {
+			return;
+		}
+
+		const delay = Math.min(
+			ALCHEMY_WS_RECONNECT_BASE_DELAY * 2 ** reconnectAttempts,
+			ALCHEMY_WS_RECONNECT_MAX_DELAY
+		);
+		reconnectAttempts++;
+
+		clearTimeout(reconnectTimer);
+		reconnectTimer = setTimeout(connect, delay);
+	};
+
+	// A drop we did not initiate (e.g. the OS suspending a backgrounded tab) triggers a reconnect.
+	// The WebSocket spec guarantees a `close` event even after a failed connection, so listening to
+	// `close` alone is sufficient.
+	const onClose = () => {
+		if (!closedByCaller) {
+			scheduleReconnect();
+		}
+	};
+
 	// use addEventListener so removeEventListener works
-	ws.addEventListener('open', onOpen);
-	ws.addEventListener('message', onMessage);
+	const connect = () => {
+		subscriptionId = null;
+		ws = new WebSocket(wssUrl);
+		ws.addEventListener('open', onOpen);
+		ws.addEventListener('message', onMessage);
+		ws.addEventListener('close', onClose);
+	};
+
+	connect();
 
 	return {
 		// eslint-disable-next-line require-await
 		disconnect: async () => {
+			closedByCaller = true;
+			clearTimeout(reconnectTimer);
+
 			if (subscriptionId && ws.readyState === WebSocket.OPEN) {
 				send({
 					jsonrpc: '2.0',
@@ -151,6 +199,7 @@ const subscribeAlchemyWs = <T>({
 			}
 			ws.removeEventListener('message', onMessage);
 			ws.removeEventListener('open', onOpen);
+			ws.removeEventListener('close', onClose);
 			ws.close();
 			subscriptionId = null;
 		}

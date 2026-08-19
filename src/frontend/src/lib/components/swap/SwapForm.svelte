@@ -41,6 +41,7 @@
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
+		message?: Snippet;
 		errorType?: TokenActionErrorType;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
@@ -55,6 +56,7 @@
 		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
+		message,
 		errorType = $bindable(),
 		onCustomValidate,
 		fee,
@@ -263,6 +265,8 @@
 				{/snippet}
 			</TokenInputNetworkWrapper>
 		</div>
+
+		{@render message?.()}
 
 		<SwapCrossChainInfo />
 

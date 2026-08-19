@@ -1,3 +1,4 @@
+import { ICP_LEDGER_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
@@ -8,27 +9,42 @@ import {
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 
 // Provider id for the earning-provider registry.
 export const LIQUIDIUM_PROVIDER_ID = 'liquidium';
 
-// Market asset symbol → oisy token (for logo/label); unmapped future assets fall
-// back to symbol-only.
-export const LIQUIDIUM_ASSET_TOKENS: Record<string, Token> = {
-	BTC: BTC_MAINNET_TOKEN,
-	ETH: ETHEREUM_TOKEN,
-	USDC: USDC_TOKEN,
-	USDT: USDT_TOKEN
-};
+// Advertised v1 asset set, for the Earn-card Networks/Assets icon rows only (a static
+// marketing summary, distinct from the live per-market display token which is resolved
+// by (chain, asset) via `liquidiumMarketToken`).
+export const LIQUIDIUM_ADVERTISED_TOKENS: Token[] = [
+	BTC_MAINNET_TOKEN,
+	ETHEREUM_TOKEN,
+	USDC_TOKEN,
+	USDT_TOKEN,
+	ICP_TOKEN
+];
 
-// ck-ledger backing each asset, for the AUT's backend `TokenId`.
+// Display order for the Markets list and the withdraw/repay pickers, applied as a stable sort on
+// top of the order Liquidium returns (see `orderLiquidiumRails`). Primary key: the lending pool,
+// by asset symbol. Assets not listed keep their received order, after the listed ones.
+export const LIQUIDIUM_POOL_ORDER: string[] = ['BTC', 'ETH', 'ICP', 'USDC', 'USDT'];
+
+// Transfer-network order, the final tiebreaker after "native rail first" — so extra networks
+// slot in predictably if the protocol adds them.
+export const LIQUIDIUM_NETWORK_ORDER: string[] = ['BTC', 'ETH', 'ICP'];
+
+// ck-ledger backing each asset, for the AUT's backend `TokenId`. Keyed by symbol: the
+// ck twin is the same regardless of transfer chain (native BTC and ckBTC both settle on
+// the ckBTC ledger); ICP maps to its own ledger.
 export const LIQUIDIUM_ASSET_LEDGER_CANISTER_IDS: Record<string, OptionCanisterIdText> = {
 	BTC: IC_CKBTC_LEDGER_CANISTER_ID,
 	ETH: IC_CKETH_LEDGER_CANISTER_ID,
 	USDC: IC_CKUSDC_LEDGER_CANISTER_ID,
-	USDT: IC_CKUSDT_LEDGER_CANISTER_ID
+	USDT: IC_CKUSDT_LEDGER_CANISTER_ID,
+	ICP: ICP_LEDGER_CANISTER_ID
 };
 
 // Display bands — Liquidium publishes no discrete cut-offs, so oisy picks its own

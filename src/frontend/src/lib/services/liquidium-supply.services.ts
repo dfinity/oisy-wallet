@@ -17,8 +17,9 @@ import type { Identity } from '@icp-sdk/core/agent';
 import {
 	SupplyAction,
 	type Asset,
+	type AssetIdentifier,
 	type Chain,
-	type NativeAddressSupplyTarget
+	type SupplyTarget
 } from '@liquidium/client';
 
 // Liquidium's per-inflow processing fee (base units of `asset`), deducted by the
@@ -32,10 +33,12 @@ export const estimateLiquidiumInflowFee = async ({
 	asset: Asset;
 	chain: Chain;
 }): Promise<bigint> => {
+	// `asset`/`chain` reach us as the SDK's wide enums; the protocol only ships supported pairs.
+	// We type-assert to the correlated `AssetIdentifier` shape at this boundary to satisfy the SDK's typing.
 	const { totalFee } = await liquidiumClient({ identity }).lending.estimateInflowFee({
 		asset,
 		chain
-	});
+	} as AssetIdentifier);
 
 	return totalFee;
 };
@@ -44,7 +47,7 @@ export const estimateLiquidiumInflowFee = async ({
 // target and returns the txid the AUT poller correlates on. Implemented by the
 // wizard, which owns oisy's per-chain fee/UTXO machinery.
 export type LiquidiumSupplyBroadcast = (params: {
-	target: NativeAddressSupplyTarget;
+	target: SupplyTarget;
 	amount: bigint;
 }) => Promise<string>;
 
@@ -53,12 +56,13 @@ export type LiquidiumSupplyBroadcast = (params: {
 //
 // The protocol deducts its inflow fee from the inflow, so we transfer
 // `amount + inflowFee` to credit the user's `amount` (the recorded position stays net).
-// Only the `nativeAddress` rail is supported (the only one v1 assets return via the
-// SDK's `resolveSupplyTarget`); `icrcAccount` would need contract-interaction, which we don't request.
+// We only drive the transfer rail (`lending.supply` without a wallet adapter), which
+// returns the flat `SupplyTarget` address oisy broadcasts to.
 export const executeLiquidiumSupply = async ({
 	identity,
 	ethAddress,
 	poolId,
+	chain,
 	asset,
 	amount,
 	inflowFee,
@@ -70,6 +74,7 @@ export const executeLiquidiumSupply = async ({
 	identity: Identity;
 	ethAddress: EthAddress;
 	poolId: string;
+	chain: Chain;
 	asset: string;
 	amount: bigint;
 	inflowFee: bigint;
@@ -85,14 +90,9 @@ export const executeLiquidiumSupply = async ({
 	const flow = await liquidiumClient({ identity }).lending.supply({
 		profileId,
 		poolId,
+		chain,
 		action: SupplyAction.deposit
 	});
-
-	if (flow.target.type !== 'nativeAddress') {
-		throw new Error(
-			`Liquidium supply: unsupported "${flow.target.type}" target for ${asset} (only nativeAddress is supported)`
-		);
-	}
 
 	progress?.(ProgressStepsLiquidiumSupply.TRANSFER);
 

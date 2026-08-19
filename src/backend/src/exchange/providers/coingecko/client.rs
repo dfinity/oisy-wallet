@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use ic_cdk::{api::time, management_canister::HttpHeader};
+use ic_cdk::api::time;
+use ic_cdk_management_canister::HttpHeader;
 use serde::Deserialize;
 use shared::types::exchange::ExchangeData;
 

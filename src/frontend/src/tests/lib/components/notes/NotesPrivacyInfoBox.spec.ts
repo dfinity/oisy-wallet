@@ -1,4 +1,5 @@
 import NotesPrivacyInfoBox from '$lib/components/notes/NotesPrivacyInfoBox.svelte';
+import { OISY_NOTES_DOCS_URL } from '$lib/constants/oisy.constants';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
@@ -16,6 +17,10 @@ describe('NotesPrivacyInfoBox', () => {
 			`${en.notes.text.encrypted_lead} ${en.notes.text.encrypted_info.trim()}`
 		);
 
-		expect(getByRole('link', { name: en.core.text.learn_more })).toBeInTheDocument();
+		const learnMore = getByRole('link', { name: en.core.text.learn_more });
+
+		expect(learnMore).toBeInTheDocument();
+		// Points at the notes docs page, not the docs root.
+		expect(learnMore).toHaveAttribute('href', OISY_NOTES_DOCS_URL);
 	});
 });

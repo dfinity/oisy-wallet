@@ -7,7 +7,7 @@ describe('LimitOrderTermsList', () => {
 			props: { orderTypeLabel: 'Good until canceled', makerFee: 0, takerFee: 0.2 }
 		});
 
-		expect(container).toHaveTextContent('OISY TRADE');
+		expect(container).toHaveTextContent('OISY Trade');
 		expect(container).toHaveTextContent('Good until canceled');
 		// maker 0 → "no fee" copy, taker 0.2 → percentage
 		expect(container).toHaveTextContent('0.2');

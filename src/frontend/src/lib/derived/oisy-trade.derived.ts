@@ -21,9 +21,11 @@ import {
 	mapOisyTradeAssets,
 	mapOisyTradeOrders,
 	oisyTradeSupportedTokenSymbols as mapSupportedTokenSymbols,
+	sumOisyTradeAssetsFreeUsd,
 	sumOisyTradeAssetsUsd,
 	toOisyTradeWithdrawTokens
 } from '$lib/utils/oisy-trade.utils';
+import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -97,6 +99,21 @@ export const oisyTradeUsdValue: Readable<number> = derived(oisyTradeAssets, ($as
 	sumOisyTradeAssetsUsd($assets)
 );
 
+// Fiat value of the free (withdrawable / tradeable) portion of DEX deposits —
+// the "$X free" part of the provider page's Deposited box.
+export const oisyTradeFreeUsdValue: Readable<number> = derived(oisyTradeAssets, ($assets) =>
+	sumOisyTradeAssetsFreeUsd($assets)
+);
+
+// Fiat value locked in open orders (total deposited minus free) — the
+// "$Y in orders" part of the Deposited box.
+export const oisyTradeReservedUsdValue: Readable<number> = derived(
+	[oisyTradeUsdValue, oisyTradeFreeUsdValue],
+	// Clamp to 0: both operands are independent Number(formatToken(...))
+	// conversions, so float rounding can otherwise yield a tiny negative.
+	([$total, $free]) => Math.max(0, $total - $free)
+);
+
 // Whether the user has any DEX deposit yet — drives the onboarding-vs-sections
 // state on the Trading tab.
 export const oisyTradeHasAssets: Readable<boolean> = derived(
@@ -117,6 +134,18 @@ export const oisyTradeDepositableTokens: Readable<IcToken[]> = derived(
 			tokens: $enabledIcTokens,
 			hasBalance: (token) => ($balances?.[token.id]?.data ?? ZERO) > ZERO
 		})
+);
+
+// Fiat value the user could still deposit: the wallet balances of the
+// depositable tokens (held in the wallet, not yet on the DEX) — the provider
+// page's "Trading potential".
+export const oisyTradeDepositableUsdValue: Readable<number> = derived(
+	[oisyTradeDepositableTokens, balancesStore, exchanges],
+	([$tokens, $balances, $exchanges]) =>
+		$tokens.reduce(
+			(acc, token) => acc + (calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0),
+			0
+		)
 );
 
 // DEX balances joined with the matching OISY token, so the Trading tab can offer

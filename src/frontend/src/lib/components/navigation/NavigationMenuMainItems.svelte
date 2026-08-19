@@ -2,11 +2,11 @@
 	import { assertNever, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Component } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
-	import { TRADING_ENABLED } from '$env/trading';
+	import { anyTradingProviderEnabled } from '$env/trading';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconPlant from '$lib/components/icons/IconPlant.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
@@ -63,6 +63,7 @@
 		isRouteRewards,
 		isRouteSettings,
 		isRouteTokens,
+		isRouteOisyTradeProvider,
 		isRouteTrading,
 		isRouteTransactions,
 		networkUrl
@@ -95,8 +96,17 @@
 	// Which group's bottom sheet is open on mobile (null = none).
 	let openSheet = $state<NavigationGroupId | null>(null);
 
+	// Skip the sheet's exit animation when it closes because the user picked an item
+	// (i.e. a navigation is starting), so the blurred scrim doesn't linger over the
+	// freshly-rendered page. Manual dismissals (scrim tap / group toggle) keep it.
+	let closeSheetInstantly = $state(false);
+
 	const toggleSheet = (id: NavigationGroupId) => {
 		openSheet = openSheet === id ? null : id;
+		// Opening (or switching) a sheet: any later manual dismissal should animate.
+		if (nonNullish(openSheet)) {
+			closeSheetInstantly = false;
+		}
 	};
 
 	const MOBILE_GROUP_ICON: Partial<Record<NavigationGroupId, Component>> = {
@@ -109,6 +119,17 @@
 	const networkId = $derived($userSelectedNetworkStore);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
+
+	// A navigation while a sheet is open means the user picked an item, so close it
+	// right away without the exit animation (see closeSheetInstantly). Closing here
+	// rather than in afterNavigate keeps it correct even if the navigation is later
+	// cancelled (afterNavigate would not run, leaving instantClose stuck true).
+	beforeNavigate(() => {
+		if (nonNullish(openSheet)) {
+			closeSheetInstantly = true;
+			openSheet = null;
+		}
+	});
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
@@ -145,6 +166,7 @@
 	const assetsSelected = $derived(
 		isRouteTokens(page) ||
 			isRouteEarning(page) ||
+			isRouteTrading(page) ||
 			isRouteBorrowings(page) ||
 			isRouteTransactions(page)
 	);
@@ -177,18 +199,18 @@
 				href: url(AppPath.Activity),
 				selected: isRouteActivity(page)
 			},
-			// Trade and Borrow are NEW Finance destinations. Trade is gated behind
-			// TRADING_ENABLED like the Assets Trading tab; Borrow routes to the
+			// Trade and Borrow are NEW Finance destinations. Trade is gated by the
+			// trading providers like the Assets Trading tab; Borrow routes to the
 			// dedicated /borrow/ page.
-			...(TRADING_ENABLED
+			...(anyTradingProviderEnabled
 				? {
 						trade: {
 							label: $i18n.navigation.text.trade,
 							ariaLabel: $i18n.navigation.alt.trade,
 							testId: prefixedTestId(NAVIGATION_ITEM_TRADE),
 							icon: IconLineChart,
-							href: url(AppPath.Trading),
-							selected: isRouteTrading(page),
+							href: url(AppPath.ProvidersOisyTrade),
+							selected: isRouteOisyTradeProvider(page),
 							tag: $i18n.core.text.new,
 							tagVariant: 'emphasis'
 						}
@@ -410,6 +432,7 @@
 	{#each MOBILE_NAVIGATION_BAR as slot (slot.id)}
 		{#if slot.type === 'group'}
 			<NavigationGroupSheet
+				instantClose={closeSheetInstantly}
 				label={SECTION_META[slot.id].label()}
 				onClose={() => (openSheet = null)}
 				testId={prefixedTestId(`${SECTION_META[slot.id].testId}-sheet`)}

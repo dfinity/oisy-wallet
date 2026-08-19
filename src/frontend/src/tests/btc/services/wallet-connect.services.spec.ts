@@ -1,4 +1,11 @@
-import { decodePsbt, getAccountAddresses, signPsbt } from '$btc/services/wallet-connect.services';
+import { SESSION_REQUEST_BTC_SIGN_MESSAGE } from '$btc/constants/wallet-connect.constants';
+import {
+	decodeMessage,
+	decodePsbt,
+	getAccountAddresses,
+	sign,
+	signPsbt
+} from '$btc/services/wallet-connect.services';
 import type { OptionBtcAddress } from '$btc/types/address';
 import * as btcWalletConnectUtils from '$btc/utils/wallet-connect.utils';
 import { BIP122_CHAINS } from '$env/bip122-chains.env';
@@ -13,13 +20,14 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { signAsync as signSecp256k1Async } from '@noble/secp256k1';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { networks, payments, Psbt } from 'bitcoinjs-lib';
+import { networks, payments, Psbt, Transaction } from 'bitcoinjs-lib';
 import type { MockInstance } from 'vitest';
 
 const BIP122_MAINNET_CHAIN_ID = 'bip122:000000000019d6689c085ae165831e93';
@@ -230,6 +238,41 @@ describe('btc wallet-connect.services', () => {
 		return psbt.toBase64();
 	};
 
+	// A previous transaction paying `value` to `script`, so an input can carry the `nonWitnessUtxo`
+	// bitcoinjs-lib actually builds the sighash from, with a matching prevout hash.
+	const buildPrevTx = ({ script, value }: { script: Buffer; value: number }): Transaction => {
+		const tx = new Transaction();
+		tx.addInput(Buffer.alloc(32, 1), 0);
+		tx.addOutput(script, value);
+
+		return tx;
+	};
+
+	const buildPsbtWithBothUtxos = ({
+		witnessUtxo,
+		nonWitnessUtxo
+	}: {
+		witnessUtxo: { script: Buffer; value: number };
+		nonWitnessUtxo: { script: Buffer; value: number };
+	}): string => {
+		const prevTx = buildPrevTx(nonWitnessUtxo);
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: prevTx.getId(),
+			index: 0,
+			nonWitnessUtxo: prevTx.toBuffer(),
+			witnessUtxo
+		});
+
+		// External recipient
+		psbt.addOutput({ script: externalScript as Buffer, value: 70_000 });
+		// Change back to the wallet
+		psbt.addOutput({ script: walletScript as Buffer, value: 28_000 });
+
+		return psbt.toBase64();
+	};
+
 	const buildRequest = (params: Record<string, unknown>): WalletKitTypes.SessionRequest =>
 		({
 			params: {
@@ -256,6 +299,92 @@ describe('btc wallet-connect.services', () => {
 		// 100_000 - (70_000 + 28_000)
 		expect(decoded.fee).toBe(2_000n);
 		expect(decoded.broadcast).toBeFalsy();
+		expect(decoded.ambiguous).toBeFalsy();
+	});
+
+	it('decodes an input stating the same previous output in witnessUtxo and nonWitnessUtxo', () => {
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 100_000 },
+				nonWitnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeFalsy();
+		expect(decoded.inputs[0].address).toBe(walletAddress);
+		expect(decoded.inputs[0].value).toBe(100_000n);
+		expect(decoded.inputs[0].signedByWallet).toBeTruthy();
+		expect(decoded.totalSignedInputs).toBe(100_000n);
+		expect(decoded.fee).toBe(2_000n);
+	});
+
+	it('shows no figure for an input whose witnessUtxo and nonWitnessUtxo values disagree', () => {
+		// bitcoinjs-lib signs the `nonWitnessUtxo` value; a review reading `witnessUtxo` would price
+		// the request at 10_000 while the signature commits to 100_000.
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 10_000 },
+				nonWitnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.inputs[0].address).toBeUndefined();
+		expect(decoded.inputs[0].signedByWallet).toBeFalsy();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('shows no figure for an input whose witnessUtxo and nonWitnessUtxo scripts disagree', () => {
+		const request = buildRequest({
+			psbt: buildPsbtWithBothUtxos({
+				witnessUtxo: { script: walletScript as Buffer, value: 100_000 },
+				nonWitnessUtxo: { script: externalScript as Buffer, value: 100_000 }
+			}),
+			broadcast: false
+		});
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[0].value).toBeUndefined();
+		expect(decoded.totalSignedInputs).toBe(ZERO);
+		expect(decoded.fee).toBeUndefined();
+	});
+
+	it('withholds the total and the fee when only a second input contradicts itself', () => {
+		// A single lying input distorts the total and the fee too, so no figure may be shown.
+		const honestPrevTx = buildPrevTx({ script: walletScript as Buffer, value: 100_000 });
+		const lyingPrevTx = buildPrevTx({ script: walletScript as Buffer, value: 900_000 });
+
+		const psbt = new Psbt({ network });
+		psbt.addInput({
+			hash: honestPrevTx.getId(),
+			index: 0,
+			witnessUtxo: { script: walletScript as Buffer, value: 100_000 }
+		});
+		psbt.addInput({
+			hash: lyingPrevTx.getId(),
+			index: 0,
+			nonWitnessUtxo: lyingPrevTx.toBuffer(),
+			witnessUtxo: { script: walletScript as Buffer, value: 1_000 }
+		});
+		psbt.addOutput({ script: externalScript as Buffer, value: 100_000 });
+
+		const request = buildRequest({ psbt: psbt.toBase64(), broadcast: false });
+
+		const decoded = decodePsbt({ request, address: walletAddress });
+
+		expect(decoded.ambiguous).toBeTruthy();
+		expect(decoded.inputs[1].value).toBeUndefined();
+		expect(decoded.fee).toBeUndefined();
 	});
 
 	it('flags an input as not owned when it does not match the wallet address', () => {
@@ -293,6 +422,7 @@ describe('btc wallet-connect.services', () => {
 		expect(decoded.inputs[0].value).toBeUndefined();
 		expect(decoded.totalSignedInputs).toBe(ZERO);
 		expect(decoded.fee).toBeUndefined();
+		expect(decoded.ambiguous).toBeFalsy();
 	});
 
 	it('reports the broadcast flag and defaults it to false', () => {
@@ -368,6 +498,28 @@ describe('btc wallet-connect.services', () => {
 			return psbt.toBase64();
 		};
 
+		const buildOwnedPsbtWithBothUtxos = ({ witnessValue }: { witnessValue: number }): string => {
+			const { output: ownScript } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const prevTx = new Transaction();
+			prevTx.addInput(Buffer.alloc(32, 1), 0);
+			prevTx.addOutput(ownScript as Buffer, 100_000);
+
+			const psbt = new Psbt({ network: networks.bitcoin });
+			psbt.addInput({
+				hash: prevTx.getId(),
+				index: 0,
+				nonWitnessUtxo: prevTx.toBuffer(),
+				witnessUtxo: { script: ownScript as Buffer, value: witnessValue }
+			});
+			psbt.addOutput({ script: ownScript as Buffer, value: 90_000 });
+
+			return psbt.toBase64();
+		};
+
 		const mockListener = {
 			pair: vi.fn(),
 			approveSession: vi.fn(),
@@ -395,8 +547,8 @@ describe('btc wallet-connect.services', () => {
 				Uint8Array.from(signerPubkey)
 			);
 
-			vi.spyOn(signerApi, 'genericSignWithEcdsa').mockImplementation(async ({ messageHash }) =>
-				(await signSecp256k1Async(Uint8Array.from(messageHash), privateKey)).toCompactRawBytes()
+			vi.spyOn(signerApi, 'signBtcPrehash').mockImplementation(async ({ hash }) =>
+				(await signSecp256k1Async(Uint8Array.from(hash), privateKey)).toCompactRawBytes()
 			);
 		});
 
@@ -427,7 +579,7 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.approveRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
 			expect(modalNext).not.toHaveBeenCalled();
 
 			expect(spyToastsError).toHaveBeenCalledWith({
@@ -462,8 +614,291 @@ describe('btc wallet-connect.services', () => {
 			});
 
 			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
-			expect(signerApi.genericSignWithEcdsa).toHaveBeenCalledOnce();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
 			expect(progress).toHaveBeenCalledWith(ProgressStepsSign.DONE);
+		});
+
+		it('signs a request whose witnessUtxo and nonWitnessUtxo state the same previous output', async () => {
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: {
+						psbt: buildOwnedPsbtWithBothUtxos({ witnessValue: 100_000 }),
+						broadcast: false
+					}
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: true });
+
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				message: { psbt: expect.any(String) }
+			});
+
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledOnce();
+		});
+
+		it('rejects a request whose witnessUtxo and nonWitnessUtxo disagree without signing', async () => {
+			const { address: mainnetAddress } = payments.p2wpkh({
+				pubkey: signerPubkey,
+				network: networks.bitcoin
+			});
+
+			// The review would price this at 10_000 while the signature would commit to the 100_000 the
+			// `nonWitnessUtxo` states.
+			const result = await signPsbt({
+				listener: mockListener,
+				request: buildSignRequest({
+					chainId: mainnetChainId,
+					params: {
+						psbt: buildOwnedPsbtWithBothUtxos({ witnessValue: 10_000 }),
+						broadcast: false
+					}
+				}),
+				address: mainnetAddress,
+				modalNext,
+				progress,
+				identity: mockIdentity
+			});
+
+			expect(result).toEqual({ success: false });
+
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				id: 456,
+				topic: 'sign-topic',
+				error: UNEXPECTED_ERROR
+			});
+
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: en.wallet_connect.error.btc_psbt_input_ambiguous }
+			});
+		});
+	});
+
+	describe('decodeMessage', () => {
+		const mockMessage = 'hello';
+
+		const createMockRequest = ({
+			params = { message: mockMessage }
+		}: {
+			params?: Record<string, unknown>;
+		} = {}): WalletKitTypes.SessionRequest =>
+			({
+				id: 123,
+				topic: 'mock-topic',
+				params: {
+					request: {
+						method: SESSION_REQUEST_BTC_SIGN_MESSAGE,
+						params
+					}
+				}
+			}) as WalletKitTypes.SessionRequest;
+
+		it('should extract the signMessage payload', () => {
+			expect(decodeMessage(createMockRequest())).toBe(mockMessage);
+		});
+
+		it('should fall back to an empty message when the parameter is missing', () => {
+			expect(decodeMessage(createMockRequest({ params: {} }))).toBe('');
+		});
+	});
+
+	describe('sign', () => {
+		const mockMessage = 'hello';
+		const mockSignature = 'mock-base64-signature';
+		const mockRawSignature = new Uint8Array(64).fill(1);
+		const mockPublicKey = new Uint8Array(33).fill(2);
+
+		const mockListener = {
+			pair: vi.fn(),
+			approveSession: vi.fn(),
+			rejectSession: vi.fn(),
+			attachHandlers: vi.fn(),
+			detachHandlers: vi.fn(),
+			rejectRequest: vi.fn(),
+			getActiveSessions: vi.fn(),
+			approveRequest: vi.fn(),
+			disconnectSession: vi.fn(),
+			disconnect: vi.fn()
+		} as WalletConnectListener;
+
+		let spyToastsShow: MockInstance;
+		let spyToastsError: MockInstance;
+
+		const createMockRequest = ({
+			params = { message: mockMessage }
+		}: {
+			params?: Record<string, unknown>;
+		} = {}): WalletKitTypes.SessionRequest =>
+			({
+				id: 123,
+				topic: 'mock-topic',
+				params: {
+					request: {
+						method: SESSION_REQUEST_BTC_SIGN_MESSAGE,
+						params
+					}
+				}
+			}) as WalletKitTypes.SessionRequest;
+
+		const createMockParams = (request = createMockRequest()) => ({
+			address: mockBtcAddress,
+			modalNext: vi.fn(),
+			progress: vi.fn(),
+			identity: mockIdentity,
+			request,
+			listener: mockListener
+		});
+
+		beforeEach(() => {
+			vi.restoreAllMocks();
+			vi.clearAllMocks();
+
+			vi.spyOn(signerApi, 'signBtcPrehash').mockResolvedValue(mockRawSignature);
+			vi.spyOn(btcWalletConnectUtils, 'deriveBtcPublicKey').mockReturnValue(mockPublicKey);
+			vi.spyOn(btcWalletConnectUtils, 'encodeRecoverableSignature').mockReturnValue(mockSignature);
+
+			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow').mockImplementation(() => Symbol('toast'));
+			spyToastsError = vi
+				.spyOn(toastsStore, 'toastsError')
+				.mockImplementation(() => Symbol('toast'));
+		});
+
+		it('should reject the request when the BTC address is nullish', async () => {
+			const params = createMockParams();
+
+			const result = await sign({ ...params, address: null });
+
+			expect(result).toEqual({ success: false });
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+			expect(params.modalNext).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.wallet_connect.error.wallet_not_initialized }
+			});
+		});
+
+		it('should reject the request when the message parameter is missing', async () => {
+			const params = createMockParams(createMockRequest({ params: {} }));
+
+			const result = await sign(params);
+
+			expect(result).toEqual({ success: false });
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+			expect(params.modalNext).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.wallet_connect.error.unknown_parameter }
+			});
+		});
+
+		it('should reject the request when the identity is nullish', async () => {
+			const params = createMockParams();
+
+			const result = await sign({ ...params, identity: null });
+
+			expect(result).toEqual({ success: false });
+			expect(signerApi.signBtcPrehash).not.toHaveBeenCalled();
+			expect(params.modalNext).not.toHaveBeenCalled();
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.auth.error.no_internet_identity }
+			});
+		});
+
+		it('should approve the request with a BTC recoverable signature and address', async () => {
+			const params = createMockParams();
+			const messageHash = btcWalletConnectUtils.bitcoinSignedMessageHash(mockMessage);
+
+			const result = await sign(params);
+
+			expect(result).toStrictEqual({ success: true });
+			expect(signerApi.signBtcPrehash).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				hash: messageHash
+			});
+			expect(btcWalletConnectUtils.deriveBtcPublicKey).toHaveBeenCalledExactlyOnceWith({
+				principal: mockIdentity.getPrincipal()
+			});
+			expect(btcWalletConnectUtils.encodeRecoverableSignature).toHaveBeenCalledExactlyOnceWith({
+				signature: mockRawSignature,
+				messageHash,
+				publicKey: mockPublicKey
+			});
+			expect(params.modalNext).toHaveBeenCalledOnce();
+			expect(params.progress).toHaveBeenCalledTimes(3);
+			expect(params.progress).toHaveBeenNthCalledWith(1, ProgressStepsSign.SIGN);
+			expect(params.progress).toHaveBeenNthCalledWith(2, ProgressStepsSign.APPROVE_WALLET_CONNECT);
+			expect(params.progress).toHaveBeenNthCalledWith(3, ProgressStepsSign.DONE);
+			expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				message: { signature: mockSignature, address: mockBtcAddress }
+			});
+			expect(mockListener.rejectRequest).not.toHaveBeenCalled();
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+				text: replacePlaceholders(en.wallet_connect.info.transaction_executed, {
+					$method: SESSION_REQUEST_BTC_SIGN_MESSAGE
+				}),
+				level: 'info',
+				duration: 2000
+			});
+			expect(spyToastsError).not.toHaveBeenCalled();
+		});
+
+		it('should reject the request when signing fails', async () => {
+			const params = createMockParams();
+			const mockError = new Error('mock-sign-error');
+
+			vi.mocked(signerApi.signBtcPrehash).mockRejectedValueOnce(mockError);
+
+			const result = await sign(params);
+
+			expect(result).toStrictEqual({ success: false, err: mockError });
+			expect(params.modalNext).toHaveBeenCalledOnce();
+			expect(params.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSign.SIGN);
+			expect(mockListener.approveRequest).not.toHaveBeenCalled();
+			expect(mockListener.rejectRequest).toHaveBeenCalledExactlyOnceWith({
+				topic: params.request.topic,
+				id: params.request.id,
+				error: UNEXPECTED_ERROR
+			});
+			expect(spyToastsShow).not.toHaveBeenCalled();
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
+				msg: { text: en.wallet_connect.error.unexpected_processing_request },
+				err: mockError
+			});
 		});
 	});
 });

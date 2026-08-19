@@ -70,14 +70,17 @@
 			<span style="overflow-wrap: anywhere;" class="truncate font-bold text-primary">
 				{parts.title}
 			</span>
-			{#if parts.body !== ''}
-				<span style="overflow-wrap: anywhere;" class="truncate text-tertiary">
-					{parts.body}
-				</span>
-			{/if}
-			<span class="text-xs text-tertiary">{timestamp}</span>
+			<!-- Apple-Notes style meta line: the timestamp leads and the body preview
+				follows on the same line, so every row keeps the same two-line height
+				whether or not the note has body text. -->
+			<span class="flex min-w-0 items-baseline gap-1.5 text-xs">
+				<span class="shrink-0 text-secondary">{timestamp}</span>
+				{#if parts.body !== ''}
+					<span class="min-w-0 flex-1 truncate text-tertiary">{parts.body}</span>
+				{/if}
+			</span>
 		</span>
-		<span class="shrink-0 text-tertiary">
+		<span class="shrink-0 text-disabled">
 			<IconChevronRight />
 		</span>
 	</button>

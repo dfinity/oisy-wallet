@@ -9,7 +9,7 @@
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
 	} from '$icp/stores/ic-token-fee.store';
-	import type { IcToken } from '$icp/types/ic-token';
+	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
@@ -25,7 +25,12 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { fetchOneSecIcpToEvmSwap, swapService } from '$lib/services/swap.services';
+	import { fetchChainFusionIcpSwap } from '$lib/services/chain-fusion-swap.services';
+	import {
+		enableSwapDestinationToken,
+		fetchOneSecIcpToEvmSwap,
+		swapService
+	} from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -94,6 +99,12 @@
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
 			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
 			: undefined
+	);
+
+	// 1Sec is the only provider on this wizard that settles in the background, and
+	// its background phase is a bridge.
+	let isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
 
 	$effect(() => {
@@ -185,6 +196,28 @@
 					userEthAddress: $ethAddress,
 					setFailedProgressStep,
 					swapId: crypto.randomUUID()
+				});
+			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
+				if (isNullish($ethAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+					onBack();
+					return;
+				}
+
+				await fetchChainFusionIcpSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as IcCkToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					destinationAddress: $ethAddress,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
 				});
 			} else {
 				await swapService[$swapAmountsStore.selectedProvider.provider]({
@@ -308,8 +341,8 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
-				swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ONE_SEC}
+				swapWithActiveTransaction={isOneSecProvider}
+				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}
 				bind:failedSteps={swapFailedProgressSteps}

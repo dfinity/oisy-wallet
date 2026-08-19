@@ -153,7 +153,8 @@
 			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
-			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id])
+			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id]) ||
+			isNullish($feeStore)
 	);
 
 	const send = async () => {

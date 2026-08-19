@@ -24,6 +24,7 @@ import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.ut
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { ComputeBudgetInstruction } from '@solana-program/compute-budget';
 import { SystemInstruction } from '@solana-program/system';
 import { AssociatedTokenInstruction, TokenInstruction } from '@solana-program/token';
 import { Token2022Instruction } from '@solana-program/token-2022';
@@ -32,6 +33,15 @@ const ignoredInstruction = (): MappedSolTransaction => ({ amount: undefined });
 const unreviewedInstruction = (): MappedSolTransaction => ({
 	amount: undefined,
 	unreviewed: true
+});
+// An undecodable program call merely leaves the review incomplete. These ones are decoded and
+// still cannot be stated faithfully, so they fail closed rather than warn: a Compute Budget
+// directive we cannot price makes the fee shown provably wrong, and an authority change or a
+// burn has no amount/source/destination the single-value summary can carry, so a warning would
+// let it ride along invisibly behind a dust transfer the user does see.
+const unfaithfulInstruction = (): MappedSolTransaction => ({
+	amount: undefined,
+	ambiguous: true
 });
 
 const mapSystemParsedInstruction = ({
@@ -495,6 +505,14 @@ const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTra
 		};
 	}
 
+	if (
+		instructionType === TokenInstruction.SetAuthority ||
+		instructionType === TokenInstruction.Burn ||
+		instructionType === TokenInstruction.BurnChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
@@ -573,9 +591,57 @@ const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSo
 		};
 	}
 
+	// Token-2022 adds permissioned burns on top of the legacy program's burn variants.
+	if (
+		instructionType === Token2022Instruction.SetAuthority ||
+		instructionType === Token2022Instruction.Burn ||
+		instructionType === Token2022Instruction.BurnChecked ||
+		instructionType === Token2022Instruction.PermissionedBurn ||
+		instructionType === Token2022Instruction.PermissionedBurnChecked
+	) {
+		return unfaithfulInstruction();
+	}
+
 	consoleWarn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
 
 	return unreviewedInstruction();
+};
+
+const mapSolComputeBudgetInstruction = (instruction: SolInstruction): MappedSolTransaction => {
+	try {
+		const parsedInstruction = parseSolComputeBudgetInstruction(instruction);
+
+		const { instructionType } = parsedInstruction;
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitPrice) {
+			const {
+				data: { microLamports }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitPrice: microLamports };
+		}
+
+		if (instructionType === ComputeBudgetInstruction.SetComputeUnitLimit) {
+			const {
+				data: { units }
+			} = parsedInstruction;
+
+			return { amount: undefined, computeUnitLimit: BigInt(units) };
+		}
+
+		// The deprecated `RequestUnits` carries its own flat `additionalFee`, which the review
+		// cannot price the same way.
+		if (instructionType === ComputeBudgetInstruction.RequestUnits) {
+			return unfaithfulInstruction();
+		}
+
+		// Heap frame and loaded-accounts data size requests do not affect the fee.
+		return ignoredInstruction();
+	} catch (err: unknown) {
+		consoleWarn('Could not parse Solana Compute Budget instruction', err);
+
+		return unfaithfulInstruction();
+	}
 };
 
 const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
@@ -594,11 +660,12 @@ const mapSolAtaInstruction = (instruction: SolParsedInstruction): MappedSolTrans
 };
 
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
-	// Compute budget instructions only tune fees and limits and can never move funds,
-	// so they are ignored wholesale before parsing — a malformed or not-yet-supported
-	// variant would make the parser throw and crash the signing guard.
+	// Compute budget instructions can never move funds, but they do set the prioritisation
+	// fee the wallet pays in SOL, so their directives are surfaced rather than ignored.
+	// Parsing stays behind its own guard: a malformed or not-yet-supported variant would
+	// otherwise throw and crash the signing flow.
 	if (instruction.programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS) {
-		return ignoredInstruction();
+		return mapSolComputeBudgetInstruction(instruction);
 	}
 
 	const parsedInstruction = parseSolInstruction(instruction);

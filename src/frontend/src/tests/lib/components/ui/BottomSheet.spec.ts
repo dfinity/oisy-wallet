@@ -67,6 +67,22 @@ describe('BottomSheet component', () => {
 		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
+	it('resets store when unmounted while visible', () => {
+		const { unmount } = render(BottomSheetTest, {
+			visible: true,
+			contentTest: 'Modal-driven content'
+		});
+
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
+
+		// Modal-driven sheets (e.g. PayDialog) are unmounted on close rather than
+		// toggled via visible; the store must still reset so the mobile nav bar
+		// reappears.
+		unmount();
+
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
+	});
+
 	it('store toggles correctly when visibility changes programmatically', async () => {
 		const { rerender } = render(BottomSheetTest, {
 			visible: false,

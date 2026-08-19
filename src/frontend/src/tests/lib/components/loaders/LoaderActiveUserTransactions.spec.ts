@@ -1,17 +1,31 @@
 import LoaderActiveUserTransactions from '$lib/components/loaders/LoaderActiveUserTransactions.svelte';
 import {
+	TRACK_COUNT_LIQUIDIUM_ERROR,
+	TRACK_COUNT_LIQUIDIUM_SUCCESS,
 	TRACK_COUNT_SWAP_ERROR,
 	TRACK_COUNT_SWAP_SUCCESS
 } from '$lib/constants/analytics.constants';
 import { ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { LIQUIDIUM_PROVIDER_ID } from '$lib/constants/liquidium.constants';
+import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
+import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
+import * as liquidiumServices from '$lib/services/liquidium.services';
+import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
+import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { SwapProvider } from '$lib/types/swap';
 import * as walletUtils from '$lib/utils/wallet.utils';
-import { mockActiveUserTransaction } from '$tests/mocks/active-user-transactions.mock';
+import {
+	mockActiveUserTransaction,
+	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction,
+	mockVeloraActiveUserTransaction
+} from '$tests/mocks/active-user-transactions.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
@@ -37,6 +51,55 @@ const failed = (id: string) =>
 		id,
 		status: { Failed: null } as const
 	}) satisfies typeof mockActiveUserTransaction;
+
+const pendingNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const succeededNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const pendingVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const succeededVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const pendingLiquidium = (id: string) =>
+	({
+		...mockLiquidiumActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockLiquidiumActiveUserTransaction;
+
+const succeededLiquidium = (id: string) =>
+	({
+		...mockLiquidiumActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockLiquidiumActiveUserTransaction;
+
+const failedLiquidium = (id: string) =>
+	({
+		...mockLiquidiumActiveUserTransaction,
+		id,
+		status: { Failed: null } as const
+	}) satisfies typeof mockLiquidiumActiveUserTransaction;
 
 const appliedFlags = (): Record<string, true> =>
 	get(activeUserTransactionsStore)?.terminalSideEffectsApplied ?? {};
@@ -127,6 +190,77 @@ describe('LoaderActiveUserTransactions', () => {
 			expect(spy).toHaveBeenCalledTimes(2);
 		});
 
+		it('polls Liquidium rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const liquidiumSpy = vi
+				.spyOn(liquidiumPoller, 'pollLiquidiumActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingLiquidium('liquidium-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(liquidiumSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls NEAR Intents rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const nearSpy = vi
+				.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingNearIntents('near-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls Velora rows on each tick when present, with the EVM address', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			const tx = pendingVelora('velora-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(veloraSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx],
+				userAddress: mockEthAddress
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -196,6 +330,108 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.ONE_SEC })
 			});
 			expect(appliedFlags()).toEqual({ a: true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the NEAR Intents dApp when a NEAR row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededNearIntents('near-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+			expect(appliedFlags()).toEqual({ 'near-a': true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the Velora dApp when a Velora row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededVelora('velora-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.VELORA })
+			});
+			expect(appliedFlags()).toEqual({ 'velora-a': true });
+		});
+
+		it('fires wallet and Liquidium refreshes plus analytics when a Liquidium row succeeds', async () => {
+			const loadLiquidiumSpy = vi.spyOn(liquidiumServices, 'loadLiquidium').mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingLiquidium('liquidium-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(loadLiquidiumSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededLiquidium('liquidium-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(loadLiquidiumSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ethAddress: mockEthAddress
+			});
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_LIQUIDIUM_SUCCESS,
+				metadata: {
+					dApp: LIQUIDIUM_PROVIDER_ID,
+					action: 'supply',
+					token: 'BTC',
+					tokenAmount: '1'
+				}
+			});
+			expect(appliedFlags()).toEqual({ 'liquidium-a': true });
+		});
+
+		it('fires Liquidium error analytics without refreshing balances when a Liquidium row fails', async () => {
+			const loadLiquidiumSpy = vi.spyOn(liquidiumServices, 'loadLiquidium').mockResolvedValue();
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingLiquidium('liquidium-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({ transaction: failedLiquidium('liquidium-a') });
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(loadLiquidiumSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_LIQUIDIUM_ERROR,
+				metadata: expect.objectContaining({
+					dApp: LIQUIDIUM_PROVIDER_ID,
+					action: 'supply',
+					token: 'BTC',
+					tokenAmount: '1'
+				})
+			});
+			expect(appliedFlags()).toEqual({ 'liquidium-a': true });
 		});
 
 		it('fires a swap_error event (and no wallet refresh) when a row transitions to Failed', async () => {

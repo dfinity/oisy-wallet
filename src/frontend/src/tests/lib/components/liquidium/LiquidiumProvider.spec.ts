@@ -66,7 +66,7 @@ describe('LiquidiumProvider', () => {
 
 		const { container } = render(LiquidiumProvider);
 
-		expect(container).toHaveTextContent(en.liquidium.text.health_factor);
+		expect(container).toHaveTextContent(en.liquidium.text.total_supplied);
 		expect(container).toHaveTextContent(en.liquidium.text.supplied);
 		expect(container).toHaveTextContent(en.liquidium.text.markets);
 		expect(container).toHaveTextContent('BTC');

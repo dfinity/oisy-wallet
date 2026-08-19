@@ -8,7 +8,8 @@ describe('trading-withdraw.config', () => {
 			expect(tradingWithdrawWizardSteps({ i18n: en })).toStrictEqual([
 				{ name: WizardStepsTradingWithdraw.WITHDRAW, title: en.trading.withdraw.title },
 				{ name: WizardStepsTradingWithdraw.REVIEW, title: en.trading.withdraw.review_title },
-				{ name: WizardStepsTradingWithdraw.WITHDRAWING, title: en.trading.withdraw.progress_title }
+				{ name: WizardStepsTradingWithdraw.WITHDRAWING, title: en.trading.withdraw.progress_title },
+				{ name: WizardStepsTradingWithdraw.TOKENS_LIST, title: en.trading.withdraw.title }
 			]);
 		});
 	});

@@ -14,7 +14,7 @@
 		<p class="py-10 text-center text-tertiary">{$i18n.borrowings.text.no_borrowings}</p>
 	{:else}
 		{#each borrowReserves as reserve (reserve.poolId)}
-			<LiquidiumBorrowingCard {reserve} variant="holdings" />
+			<LiquidiumBorrowingCard {reserve} />
 		{/each}
 	{/if}
 </div>

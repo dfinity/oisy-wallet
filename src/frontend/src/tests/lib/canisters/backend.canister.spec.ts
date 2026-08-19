@@ -6,10 +6,15 @@ import type {
 	BtcGetPendingTransactionsResult,
 	CustomToken,
 	IcrcToken,
+	SignOnramperWidgetUrlResult,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
-import { CanisterInternalError } from '$lib/canisters/errors';
+import {
+	CanisterInternalError,
+	OnramperRateLimitedError,
+	OnramperSecretNotConfiguredError
+} from '$lib/canisters/errors';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddPendingTransactionParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -608,6 +613,70 @@ describe('backend.canister', () => {
 			});
 
 			await expect(getAllowedCycles()).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('signOnramperWidgetUrl', () => {
+		const signOnramperWidgetUrlParams = {
+			wallets: [{ cryptoId: 'btc' as const, wallet: 'bc1q-user' }],
+			networkWallets: [{ networkId: 'bitcoin' as const, wallet: 'bc1q-user' }],
+			walletAddressTags: [{ cryptoId: 'xrp' as const, tag: 'destination-tag' }]
+		};
+
+		it('should sign Onramper widget URL parameters', async () => {
+			const okResponse = {
+				signature: 'a'.repeat(64),
+				signed_query:
+					'networkWallets=bitcoin:bc1q-user&walletAddressTags=xrp:destination-tag&wallets=btc:bc1q-user'
+			};
+			const result: SignOnramperWidgetUrlResult = { Ok: okResponse };
+
+			service.sign_onramper_widget_url.mockResolvedValue(result);
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await signOnramperWidgetUrl(signOnramperWidgetUrlParams);
+
+			expect(service.sign_onramper_widget_url).toHaveBeenCalledExactlyOnceWith({
+				wallets: [{ key: 'btc', value: 'bc1q-user' }],
+				network_wallets: [{ key: 'bitcoin', value: 'bc1q-user' }],
+				wallet_address_tags: [{ key: 'xrp', value: 'destination-tag' }]
+			});
+			expect(res).toStrictEqual(okResponse);
+		});
+
+		it('should throw an OnramperSecretNotConfiguredError if the signing secret is missing', async () => {
+			service.sign_onramper_widget_url.mockResolvedValue({
+				Err: { SecretNotConfigured: null }
+			});
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(signOnramperWidgetUrl(signOnramperWidgetUrlParams)).rejects.toThrow(
+				new OnramperSecretNotConfiguredError(
+					'OnRamper signing secret is not configured on the backend canister.'
+				)
+			);
+		});
+
+		it('should throw an OnramperRateLimitedError if the signing endpoint rate-limits', async () => {
+			service.sign_onramper_widget_url.mockResolvedValue({
+				Err: { RateLimited: { max_calls: 30, window_ns: 60_000_000_000n, caller: mockPrincipal } }
+			});
+
+			const { signOnramperWidgetUrl } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(signOnramperWidgetUrl(signOnramperWidgetUrlParams)).rejects.toThrow(
+				new OnramperRateLimitedError(
+					'Rate limit exceeded. Maximum of 30 calls allowed every 60 seconds.'
+				)
+			);
 		});
 	});
 

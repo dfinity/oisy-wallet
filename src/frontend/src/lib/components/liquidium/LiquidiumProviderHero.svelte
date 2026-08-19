@@ -2,11 +2,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
+	import IconArrowDown from '$lib/components/icons/lucide/IconArrowDown.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import LiquidiumSummary from '$lib/components/liquidium/LiquidiumSummary.svelte';
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { STAKE_PROVIDER_LOGO } from '$lib/constants/test-ids.constants';
@@ -18,12 +19,19 @@
 		logo: string;
 		pageTitle: string;
 		pageDescription: string;
-		url: string;
 		portfolio: LiquidiumPortfolio | null;
 		showSummary?: boolean;
+		onLearnMore: () => void;
 	}
 
-	let { logo, pageTitle, pageDescription, url, portfolio, showSummary = true }: Props = $props();
+	let {
+		logo,
+		pageTitle,
+		pageDescription,
+		portfolio,
+		showSummary = true,
+		onLearnMore
+	}: Props = $props();
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -57,21 +65,12 @@
 			<div class="text-sm sm:text-base">
 				<Html text={pageDescription} />
 			</div>
-		</div>
 
-		{#if showSummary}
-			<div class="absolute top-0 right-0">
-				<ExternalLink
-					ariaLabel={$i18n.core.text.learn_more}
-					color="blue"
-					href={url}
-					iconAsLast
-					styleClass="text-sm"
-				>
-					{$i18n.core.text.learn_more}
-				</ExternalLink>
-			</div>
-		{/if}
+			<Button innerStyleClass="items-center" link onclick={onLearnMore} styleClass="mt-2 text-sm">
+				<span>{$i18n.core.text.learn_more}</span>
+				<IconArrowDown size="18" />
+			</Button>
+		</div>
 	{/snippet}
 
 	{#snippet content()}

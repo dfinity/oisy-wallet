@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { BACKDROP_FADE_OUT_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { stopPropagation } from '$lib/utils/event-modifiers.utils';
 	import { handleKeyPress } from '$lib/utils/keyboard.utils';
@@ -21,7 +22,6 @@
 	const close = () => onClose?.();
 
 	const FADE_IN_DURATION = 75 as const;
-	const FADE_OUT_DURATION = 250 as const;
 </script>
 
 <div
@@ -35,7 +35,7 @@
 	role="button"
 	tabindex="-1"
 	in:fade|global={{ duration: FADE_IN_DURATION }}
-	out:fade|global={{ duration: FADE_OUT_DURATION }}
+	out:fade|global={{ duration: BACKDROP_FADE_OUT_DURATION }}
 ></div>
 
 <style lang="scss">

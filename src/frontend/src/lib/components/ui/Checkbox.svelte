@@ -100,21 +100,24 @@
 		--checkbox-input-size: 20px;
 
 		// Folded in from the former global gix.scss `div.checkbox, div.radio`
-		// override layer, now that OISY owns this component.
+		// override layer, now that OISY owns this component. Hover brightens the
+		// border for both states, but only a checked box also darkens its fill — an
+		// unchecked box keeps its resting background, since a solid hover fill would
+		// read as already selected.
 		&:hover input {
 			--secondary: var(--color-background-brand-secondary) !important;
 			--input-custom-border-color: var(--color-background-brand-secondary);
-			--focus-background: var(--color-background-brand-secondary);
-			--input-background: var(--color-background-brand-secondary);
+
+			// form.input-focus (border only)
+			border: var(--input-border-size) solid var(--secondary);
 		}
 
-		&:hover {
-			input {
-				// form.input-focus
-				border: var(--input-border-size) solid var(--secondary);
-				background: var(--focus-background);
-				color: var(--focus-background-contrast);
-			}
+		&:hover input:checked {
+			--focus-background: var(--color-background-brand-secondary);
+			--input-background: var(--color-background-brand-secondary);
+
+			background: var(--focus-background);
+			color: var(--focus-background-contrast);
 		}
 
 		&.disabled {

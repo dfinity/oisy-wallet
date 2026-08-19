@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import LiquidiumProviderFee from '$lib/components/liquidium/supply/LiquidiumProviderFee.svelte';
 	import LiquidiumSupplyAgreement from '$lib/components/liquidium/supply/LiquidiumSupplyAgreement.svelte';
@@ -10,6 +10,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { LiquidiumMarket } from '$lib/types/liquidium';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isDesktop } from '$lib/utils/device.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -28,6 +29,8 @@
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		// Per-rail fee row (EthFeeDisplay / BtcUtxosFeeDisplay).
 		feeDisplay: Snippet;
+		// Opens the token-selection step; when set, the token logo becomes a selector.
+		onSelectToken?: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -40,6 +43,7 @@
 		inflowFeeUnavailable = false,
 		onCustomErrorValidate,
 		feeDisplay,
+		onSelectToken,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -71,7 +75,10 @@
 </script>
 
 <StakeForm
+	autofocus={isDesktop()}
 	disabled={!agreementChecked || feeMissing || inflowFeeUnavailable}
+	isSelectable={nonNullish(onSelectToken)}
+	onClick={onSelectToken}
 	{onClose}
 	{onCustomErrorValidate}
 	{onNext}

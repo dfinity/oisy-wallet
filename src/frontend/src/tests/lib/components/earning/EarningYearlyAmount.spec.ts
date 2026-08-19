@@ -58,7 +58,21 @@ describe('EarningYearlyAmount', () => {
 	it('renders with plus sign when showPlusSign is true', () => {
 		render(EarningYearlyAmount, { value: 10, showPlusSign: true });
 
-		expect(screen.getByText(getFormattedText('+ $10.00'))).toBeInTheDocument();
+		expect(screen.getByText(getFormattedText('+$10.00'))).toBeInTheDocument();
+	});
+
+	it('renders a single minus sign with showMinusSign for a negative value', () => {
+		render(EarningYearlyAmount, { value: -10, showMinusSign: true });
+
+		expect(screen.getByText(getFormattedText('−$10.00'))).toBeInTheDocument();
+		expect(screen.queryByText(getFormattedText('−−$10.00'))).not.toBeInTheDocument();
+	});
+
+	it('renders no minus sign with showMinusSign when the amount is 0', () => {
+		render(EarningYearlyAmount, { value: 0, showMinusSign: true });
+
+		expect(screen.getByText(getFormattedText('$0.00'))).toBeInTheDocument();
+		expect(screen.queryByText(getFormattedText('−$0.00'))).not.toBeInTheDocument();
 	});
 
 	it('applies text-success-primary class for positive amount when showAsSuccess is true', () => {

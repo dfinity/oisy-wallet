@@ -5,7 +5,7 @@
 	import { enabledEthEvmNativeTokens } from '$eth/derived/native-tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
-	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	interface Props {
@@ -25,7 +25,7 @@
 </script>
 
 {#if nonNullish(token)}
-	<SendTokenContext {token}>
+	<TokenActionContext {token}>
 		<EthWalletConnectSendTokenModal {firstTransaction} {listener} {request} {sourceNetwork} />
-	</SendTokenContext>
+	</TokenActionContext>
 {/if}

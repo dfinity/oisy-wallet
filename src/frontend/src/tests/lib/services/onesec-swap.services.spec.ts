@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { send } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
+import { ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import {
@@ -9,11 +10,14 @@ import {
 	executeOneSecIcpToEvmBridge,
 	fetchOneSecEvmToIcpQuote,
 	fetchOneSecIcpToEvmQuote,
-	pollOneSecActiveUserTransactions
+	pollOneSecActiveUserTransactions,
+	resetOneSecForwardingNotifyThrottle
 } from '$lib/services/onesec-swap.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 import { SwapProvider } from '$lib/types/swap';
+import { consoleError } from '$lib/utils/console.utils';
+import * as oneSecUtils from '$lib/utils/onesec-swap.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import {
 	mockActiveUserTransaction,
@@ -29,11 +33,13 @@ import type * as OneSecBridge from 'onesec-bridge';
 
 const USDC_LEDGER = '53nhb-haaaa-aaaar-qbn5q-cai';
 
-const { getTransfersMock, getTransferMock, getForwardingStatusMock } = vi.hoisted(() => ({
-	getTransfersMock: vi.fn(),
-	getTransferMock: vi.fn(),
-	getForwardingStatusMock: vi.fn()
-}));
+const { getTransfersMock, getTransferMock, getForwardingStatusMock, forwardEvmToIcpMock } =
+	vi.hoisted(() => ({
+		getTransfersMock: vi.fn(),
+		getTransferMock: vi.fn(),
+		getForwardingStatusMock: vi.fn(),
+		forwardEvmToIcpMock: vi.fn()
+	}));
 
 const { mockPlan, mockStep, mockExpectedFee, mockEvmToIcpBuilderObj, mockIcpToEvmBuilderObj } =
 	vi.hoisted(() => {
@@ -83,7 +89,8 @@ vi.mock('onesec-bridge', async (importOriginal) => {
 		getTransfers: getTransfersMock,
 		oneSecForwarding: vi.fn().mockReturnValue({
 			getTransfer: getTransferMock,
-			getForwardingStatus: getForwardingStatusMock
+			getForwardingStatus: getForwardingStatusMock,
+			forwardEvmToIcp: forwardEvmToIcpMock
 		})
 	};
 });
@@ -448,6 +455,35 @@ describe('onesec-swap.services', () => {
 				);
 			});
 
+			it('still runs the in-session closer when the row payload cannot be built', async () => {
+				const dataSpy = vi.spyOn(oneSecUtils, 'toOneSecIcpToEvmData').mockReturnValue(undefined);
+
+				try {
+					mockPlan.nextStepToRun
+						.mockReturnValueOnce(mockStep)
+						.mockReturnValueOnce(mockStep)
+						.mockReturnValue(undefined);
+					mockStep.index.mockReturnValueOnce(0).mockReturnValueOnce(1);
+					mockStep.run
+						.mockResolvedValueOnce({ state: 'succeeded' })
+						.mockResolvedValueOnce({ state: 'succeeded' });
+					mockStep.getTransferId.mockReturnValueOnce(undefined).mockReturnValueOnce({ id: 42n });
+
+					await executeOneSecIcpToEvmBridge({ ...baseIcpToEvmParams, swapId });
+
+					expect(createSpy).not.toHaveBeenCalled();
+
+					await vi.waitFor(() => {
+						expect(updateSpy.mock.calls.at(-1)?.[0]).toMatchObject({
+							id: swapId,
+							status: { Succeeded: null }
+						});
+					});
+				} finally {
+					dataSpy.mockRestore();
+				}
+			});
+
 			it('does not create a row when a foreground step fails', async () => {
 				mockPlan.nextStepToRun.mockReturnValueOnce(mockStep).mockReturnValue(undefined);
 				mockStep.run.mockResolvedValue({ state: 'failed', error: { message: 'boom' } });
@@ -773,6 +809,32 @@ describe('onesec-swap.services', () => {
 
 				expect(baseEvmToIcpParams.setFailedProgressStep).not.toHaveBeenCalled();
 			});
+
+			it('the in-session closer leaves the row pending when a remaining step throws unexpectedly', async () => {
+				// A thrown step (network blip, canister unreachable) has an unknown
+				// outcome, and the deposit is already on-chain. Writing Failed would
+				// remove the row from the pending poll set and disable the poller's
+				// cross-session recovery (forwarding re-notify), stranding the funds.
+				mockPlan.nextStepToRun
+					.mockReturnValueOnce(mockStep) // foreground: fee
+					.mockReturnValueOnce(mockStep) // foreground: forwarding
+					.mockReturnValueOnce(mockStep) // closer: notify (throws)
+					.mockReturnValue(undefined);
+				mockStep.run
+					.mockResolvedValueOnce({ state: 'succeeded' })
+					.mockResolvedValueOnce({ state: 'succeeded', forwardingAddress })
+					.mockRejectedValueOnce(new Error('canister unreachable'));
+
+				await executeOneSecEvmToIcpBridge({ ...baseEvmToIcpParams, swapId });
+
+				await vi.waitFor(() => {
+					expect(vi.mocked(consoleError)).toHaveBeenCalledWith(
+						expect.objectContaining({ message: 'canister unreachable' })
+					);
+				});
+
+				expect(updateSpy).not.toHaveBeenCalled();
+			});
 		});
 	});
 
@@ -821,6 +883,8 @@ describe('onesec-swap.services', () => {
 			getTransfersMock.mockReset();
 			getTransferMock.mockReset();
 			getForwardingStatusMock.mockReset();
+			forwardEvmToIcpMock.mockReset();
+			resetOneSecForwardingNotifyThrottle();
 		});
 
 		it('no-ops on an empty list and does not call the SDK', async () => {
@@ -1010,10 +1074,10 @@ describe('onesec-swap.services', () => {
 			).resolves.toBeUndefined();
 		});
 
-		describe('EVM→ICP transferId discovery via getForwardingStatus', () => {
+		describe('EVM→ICP transferId discovery and forwarding re-notify', () => {
 			it('discovers the transferId when done.id > baseline, persists it, and advances status via exact lookup', async () => {
 				// baseline = 5; OneSec returns done = 99 → strictly greater, accepted.
-				getForwardingStatusMock.mockResolvedValueOnce({ done: { id: 99n } });
+				forwardEvmToIcpMock.mockResolvedValueOnce({ done: { id: 99n } });
 				getTransferMock.mockResolvedValueOnce({
 					source: { chain: 'Ethereum', amount: sourceAmount },
 					destination: { chain: 'ICP', amount: sourceAmount },
@@ -1031,7 +1095,7 @@ describe('onesec-swap.services', () => {
 					transactions: [evmToIcpPendingTx]
 				});
 
-				expect(getForwardingStatusMock).toHaveBeenCalledExactlyOnceWith(
+				expect(forwardEvmToIcpMock).toHaveBeenCalledExactlyOnceWith(
 					'USDC',
 					'Ethereum',
 					evmToIcpForwardingAddress,
@@ -1056,7 +1120,7 @@ describe('onesec-swap.services', () => {
 			it('does not persist or advance when done.id equals the baseline (stale)', async () => {
 				// baseline = 5; OneSec returns the same `done = 5` from the previous swap
 				// because the new deposit hasn't been processed yet. Must be rejected.
-				getForwardingStatusMock.mockResolvedValueOnce({
+				forwardEvmToIcpMock.mockResolvedValueOnce({
 					done: { id: BigInt(evmToIcpBaselineTransferId) }
 				});
 				getTransfersMock.mockResolvedValueOnce([]);
@@ -1071,14 +1135,14 @@ describe('onesec-swap.services', () => {
 					transactions: [evmToIcpPendingTx]
 				});
 
-				expect(getForwardingStatusMock).toHaveBeenCalledOnce();
+				expect(forwardEvmToIcpMock).toHaveBeenCalledOnce();
 				expect(updateSpy).not.toHaveBeenCalled();
 				expect(getTransferMock).not.toHaveBeenCalled();
 				expect(applySpy).not.toHaveBeenCalled();
 			});
 
 			it('does not persist or advance when done.id is less than the baseline', async () => {
-				getForwardingStatusMock.mockResolvedValueOnce({ done: { id: 1n } });
+				forwardEvmToIcpMock.mockResolvedValueOnce({ done: { id: 1n } });
 				getTransfersMock.mockResolvedValueOnce([]);
 				const updateSpy = vi.spyOn(activeUserTransactionsServices, 'updateActiveUserTransaction');
 
@@ -1091,7 +1155,7 @@ describe('onesec-swap.services', () => {
 				expect(getTransferMock).not.toHaveBeenCalled();
 			});
 
-			it('does not call getForwardingStatus when the baseline ref is missing', async () => {
+			it('does not call the forwarding SDK when the baseline ref is missing', async () => {
 				// Pre-baseline AUT rows (or rows whose foreground bailed before
 				// persisting the baseline) cannot safely discover via `done`,
 				// because we can't tell new from stale. Skip discovery; fall back
@@ -1114,6 +1178,7 @@ describe('onesec-swap.services', () => {
 					]
 				});
 
+				expect(forwardEvmToIcpMock).not.toHaveBeenCalled();
 				expect(getForwardingStatusMock).not.toHaveBeenCalled();
 				expect(updateSpy).not.toHaveBeenCalled();
 			});
@@ -1122,7 +1187,7 @@ describe('onesec-swap.services', () => {
 				// "0" is the sentinel the foreground writes when the user has no
 				// prior completed forwarding. Any positive done.id is strictly
 				// greater than 0 and must be accepted.
-				getForwardingStatusMock.mockResolvedValueOnce({ done: { id: 1n } });
+				forwardEvmToIcpMock.mockResolvedValueOnce({ done: { id: 1n } });
 				getTransferMock.mockResolvedValueOnce({
 					source: { chain: 'Ethereum', amount: sourceAmount },
 					destination: { chain: 'ICP', amount: sourceAmount },
@@ -1162,8 +1227,8 @@ describe('onesec-swap.services', () => {
 				expect(getTransferMock).toHaveBeenCalledExactlyOnceWith({ id: 1n });
 			});
 
-			it('does not persist or advance when getForwardingStatus has no done id', async () => {
-				getForwardingStatusMock.mockResolvedValueOnce({
+			it('does not persist or advance when the forwarding response has no done id', async () => {
+				forwardEvmToIcpMock.mockResolvedValueOnce({
 					status: { CheckingBalance: null }
 				});
 				getTransfersMock.mockResolvedValueOnce([]);
@@ -1178,13 +1243,13 @@ describe('onesec-swap.services', () => {
 					transactions: [evmToIcpPendingTx]
 				});
 
-				expect(getForwardingStatusMock).toHaveBeenCalledOnce();
+				expect(forwardEvmToIcpMock).toHaveBeenCalledOnce();
 				expect(updateSpy).not.toHaveBeenCalled();
 				expect(getTransferMock).not.toHaveBeenCalled();
 				expect(applySpy).not.toHaveBeenCalled();
 			});
 
-			it('does not call getForwardingStatus for ICP→EVM rows', async () => {
+			it('does not call the forwarding SDK for ICP→EVM rows', async () => {
 				getTransfersMock.mockResolvedValueOnce([]);
 
 				await pollOneSecActiveUserTransactions({
@@ -1192,10 +1257,11 @@ describe('onesec-swap.services', () => {
 					transactions: [pendingTx]
 				});
 
+				expect(forwardEvmToIcpMock).not.toHaveBeenCalled();
 				expect(getForwardingStatusMock).not.toHaveBeenCalled();
 			});
 
-			it('does not call getForwardingStatus when the forwarding-address ref is missing', async () => {
+			it('does not call the forwarding SDK when the forwarding-address ref is missing', async () => {
 				getTransfersMock.mockResolvedValueOnce([]);
 
 				await pollOneSecActiveUserTransactions({
@@ -1203,10 +1269,11 @@ describe('onesec-swap.services', () => {
 					transactions: [{ ...evmToIcpPendingTx, external_refs: [] }]
 				});
 
+				expect(forwardEvmToIcpMock).not.toHaveBeenCalled();
 				expect(getForwardingStatusMock).not.toHaveBeenCalled();
 			});
 
-			it('does not call getForwardingStatus when a TRANSFER_ID ref is already present', async () => {
+			it('does not call the forwarding SDK when a TRANSFER_ID ref is already present', async () => {
 				getTransferMock.mockResolvedValueOnce({
 					source: { chain: 'Ethereum', amount: sourceAmount },
 					destination: { chain: 'ICP', amount: sourceAmount },
@@ -1230,12 +1297,13 @@ describe('onesec-swap.services', () => {
 					]
 				});
 
+				expect(forwardEvmToIcpMock).not.toHaveBeenCalled();
 				expect(getForwardingStatusMock).not.toHaveBeenCalled();
 				expect(getTransferMock).toHaveBeenCalledExactlyOnceWith({ id: 7n });
 			});
 
-			it('swallows getForwardingStatus SDK errors so the next tick can retry', async () => {
-				getForwardingStatusMock.mockRejectedValueOnce(new Error('canister unreachable'));
+			it('swallows forwarding SDK errors so the next tick can retry', async () => {
+				forwardEvmToIcpMock.mockRejectedValueOnce(new Error('canister unreachable'));
 				getTransfersMock.mockResolvedValueOnce([]);
 
 				await expect(
@@ -1244,6 +1312,50 @@ describe('onesec-swap.services', () => {
 						transactions: [evmToIcpPendingTx]
 					})
 				).resolves.toBeUndefined();
+			});
+
+			it('re-notifies OneSec on the first poll, then falls back to the read-only status lookup within the throttle window', async () => {
+				forwardEvmToIcpMock.mockResolvedValue({ status: { CheckingBalance: null } });
+				getForwardingStatusMock.mockResolvedValue({ status: { CheckingBalance: null } });
+				getTransfersMock.mockResolvedValue([]);
+
+				await pollOneSecActiveUserTransactions({
+					identity: mockIdentity,
+					transactions: [evmToIcpPendingTx]
+				});
+				await pollOneSecActiveUserTransactions({
+					identity: mockIdentity,
+					transactions: [evmToIcpPendingTx]
+				});
+
+				expect(forwardEvmToIcpMock).toHaveBeenCalledOnce();
+				expect(getForwardingStatusMock).toHaveBeenCalledOnce();
+			});
+
+			it('re-notifies OneSec again once the throttle interval has elapsed', async () => {
+				vi.useFakeTimers();
+
+				try {
+					forwardEvmToIcpMock.mockResolvedValue({ status: { CheckingBalance: null } });
+					getTransfersMock.mockResolvedValue([]);
+
+					await pollOneSecActiveUserTransactions({
+						identity: mockIdentity,
+						transactions: [evmToIcpPendingTx]
+					});
+
+					vi.setSystemTime(Date.now() + ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS);
+
+					await pollOneSecActiveUserTransactions({
+						identity: mockIdentity,
+						transactions: [evmToIcpPendingTx]
+					});
+
+					expect(forwardEvmToIcpMock).toHaveBeenCalledTimes(2);
+					expect(getForwardingStatusMock).not.toHaveBeenCalled();
+				} finally {
+					vi.useRealTimers();
+				}
 			});
 		});
 	});

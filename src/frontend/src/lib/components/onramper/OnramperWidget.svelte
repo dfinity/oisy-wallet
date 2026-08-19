@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 	import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -106,7 +106,7 @@
 	// guard against late resolutions overwriting newer state via a cancellation token.
 	$effect(() => {
 		const currentIdentity = $authIdentity;
-		if (!nonNullish(currentIdentity)) {
+		if (isNullish(currentIdentity)) {
 			src = undefined;
 			signingFailed = false;
 			return;
@@ -201,7 +201,7 @@
 		class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 		class:invisible={themeLoaded && nonNullish(src)}
 		class:opacity-0={themeLoaded && nonNullish(src)}
-		class:opacity-100={!themeLoaded || !nonNullish(src)}
+		class:opacity-100={!themeLoaded || isNullish(src)}
 	>
 		<LoaderSpinner inline />
 	</div>

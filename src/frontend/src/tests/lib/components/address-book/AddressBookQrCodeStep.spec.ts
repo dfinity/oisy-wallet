@@ -11,14 +11,6 @@ describe('AddressBookQrCodeStep', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		vi.mock('@dfinity/gix-components', () => ({
-			QRCodeReader: vi.fn().mockImplementation(() => ({
-				$$render: () => '<div data-tid="mock-qr-reader">Mocked QR Reader</div>',
-				$$slots: {},
-				$$scope: {}
-			}))
-		}));
 	});
 
 	it('should initialize and start scanning on mount', () => {

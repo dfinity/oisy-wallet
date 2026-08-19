@@ -8,15 +8,16 @@
 	import LimitOrderTokensList from '$lib/components/trading/limit-order/LimitOrderTokensList.svelte';
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
-	import {
-		PLAUSIBLE_EVENT_RESULT_STATUSES,
-		PLAUSIBLE_EVENT_SUBCONTEXT_TRADING
-	} from '$lib/enums/plausible';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { oisyTradeIcTokenBySymbol, oisyTradePairs } from '$lib/derived/oisy-trade.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { ProgressStepsLimitOrder } from '$lib/enums/progress-steps';
 	import { WizardStepsLimitOrder } from '$lib/enums/wizard-steps';
 	import { loadOisyTrade, loadOrderBook, placeLimitOrder } from '$lib/services/oisy-trade.services';
-	import { trackTrading, type TrackTradingParams } from '$lib/services/trading-analytics.services';
+	import {
+		trackLimitOrder,
+		type TrackLimitOrderParams
+	} from '$lib/services/trading-analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook } from '$lib/types/oisy-trade';
@@ -24,7 +25,9 @@
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
 	import {
 		type LimitOrderSide,
+		presetTargetPrice,
 		priceLevelToHuman,
+		referenceRate,
 		toCandidSide,
 		toPairView,
 		toPriceUnits,
@@ -38,6 +41,8 @@
 		steps: WizardSteps<WizardStepsLimitOrder>;
 		modal: WizardModal<WizardStepsLimitOrder>;
 		progressStep: string;
+		// Owned by the modal so the step header can title the picker per side.
+		side?: LimitOrderSide;
 		onBack: () => void;
 		onClose: () => void;
 	}
@@ -47,12 +52,12 @@
 		steps,
 		modal = $bindable(),
 		progressStep = $bindable(),
+		side = $bindable('sell'),
 		onBack,
 		onClose
 	}: Props = $props();
 
 	// --- shared form state -------------------------------------------------
-	let side: LimitOrderSide = $state('sell');
 	let baseSymbol: string | undefined = $state();
 	let quoteSymbol: string | undefined = $state();
 	let baseAmount: string = $state('');
@@ -98,14 +103,51 @@
 			: null;
 	});
 
-	// "Current value" reference: order-book mid-price (best on-chain reference
-	// available without the full USD feed integration; see PR notes). Falls back
-	// to whichever side exists, else 0 (presets/value-difference then inert).
-	const currentValue = $derived.by((): number => {
-		if (nonNullish(bid) && nonNullish(ask)) {
-			return (bid + ask) / 2;
+	// USD exchange-rate price of each leg, from the app-wide price feed.
+	const baseToken = $derived(
+		nonNullish(baseSymbol) ? $oisyTradeIcTokenBySymbol[baseSymbol] : undefined
+	);
+	const quoteToken = $derived(
+		nonNullish(quoteSymbol) ? $oisyTradeIcTokenBySymbol[quoteSymbol] : undefined
+	);
+	const baseUsdPrice = $derived(
+		nonNullish(baseToken) ? $exchanges?.[baseToken.id]?.usd : undefined
+	);
+	const quoteUsdPrice = $derived(
+		nonNullish(quoteToken) ? $exchanges?.[quoteToken.id]?.usd : undefined
+	);
+
+	// "Current value" reference the percentage presets (Market / ±%) and the
+	// value-difference indicator anchor on: the cross of the two legs' USD
+	// exchange-rate prices, NOT the DEX order-book mid (see `referenceRate`). The
+	// book bid/ask/mid still drives the Bid/Ask preset and the crossing /
+	// fill-or-kill checks.
+	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
+
+	// While a preset is latched, keep the price tracking its live target as the
+	// reference rate (or book) moves — but only on the Form step. Opening Review
+	// freezes the price: this effect stops running there, mirroring how the swap
+	// flow freezes its quote at review. A manual price edit clears `activePreset`
+	// (see LimitOrderForm), so typing detaches the price from the market.
+	$effect(() => {
+		if (
+			currentStep?.name !== WizardStepsLimitOrder.FORM ||
+			isNullish(activePreset) ||
+			isNullish(pairView)
+		) {
+			return;
 		}
-		return bid ?? ask ?? 0;
+		const target = presetTargetPrice({
+			preset: activePreset,
+			side,
+			currentValue,
+			bid,
+			ask,
+			tickSize: pairView.tickSize
+		});
+		if (nonNullish(target)) {
+			price = target.toString();
+		}
 	});
 
 	// Aggregated depth in human units, for the queue-position projection.
@@ -151,6 +193,24 @@
 
 	const goTo = (stepName: WizardStepsLimitOrder) => goToWizardStep({ modal, steps, stepName });
 
+	// Frozen market snapshot captured the moment Review opens, so the confirmation
+	// screen stays put while the ticker / price feed keep polling underneath.
+	let reviewCurrentValue = $state(0);
+	let reviewBid = $state<number | null>(null);
+	let reviewAsk = $state<number | null>(null);
+	let reviewDepthLevels = $state<{
+		asks: { price: number; quantity: number }[];
+		bids: { price: number; quantity: number }[];
+	}>({ asks: [], bids: [] });
+
+	const openReview = () => {
+		reviewCurrentValue = currentValue;
+		reviewBid = bid;
+		reviewAsk = ask;
+		reviewDepthLevels = depthLevels;
+		goTo(WizardStepsLimitOrder.REVIEW);
+	};
+
 	// Parsed Review inputs, guarded against NaN from empty/partial fields so the
 	// Review step never renders NaN (nor feeds NaN% into ValueDifference).
 	const reviewBaseAmount = $derived(
@@ -171,20 +231,23 @@
 		goTo(WizardStepsLimitOrder.PLACING);
 		progressStep = ProgressStepsLimitOrder.PLACE;
 
-		const orderFields: Pick<
-			TrackTradingParams,
-			'base' | 'quote' | 'side' | 'orderType' | 'volume'
-		> = {
+		const orderFields: Omit<TrackLimitOrderParams, 'action' | 'resultStatus' | 'error'> = {
 			base: baseSymbol,
 			quote: quoteSymbol,
 			side,
 			orderType: fillOrKill ? 'FOK' : 'GTC',
-			// Order volume is the base-token quantity. Use the raw entered string rather than
-			// the parsed number so full precision is preserved (no `1e-7`).
-			volume: baseAmount
+			// Amounts and price use the raw entered strings rather than the parsed
+			// numbers so full precision is preserved (no `1e-7`).
+			baseAmount,
+			price,
+			// Market USD reference prices per leg + the order's per-leg USD value.
+			baseUsdPrice,
+			quoteUsdPrice,
+			baseUsdValue: nonNullish(baseUsdPrice) ? baseUsdPrice * baseNum : undefined,
+			quoteUsdValue: nonNullish(quoteUsdPrice) ? quoteUsdPrice * baseNum * priceNum : undefined
 		};
-		trackTrading({
-			subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+		trackLimitOrder({
+			action: 'create',
 			resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.EXECUTING,
 			...orderFields
 		});
@@ -206,16 +269,16 @@
 			// for the next poll.
 			await loadOisyTrade({ identity: $authIdentity });
 
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			trackLimitOrder({
+				action: 'create',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
 				...orderFields
 			});
 			progressStep = ProgressStepsLimitOrder.DONE;
 			onClose();
 		} catch (err: unknown) {
-			trackTrading({
-				subContext: PLAUSIBLE_EVENT_SUBCONTEXT_TRADING.LIMIT_ORDER,
+			trackLimitOrder({
+				action: 'create',
 				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
 				...orderFields,
 				error: replaceIcErrorFields(err)
@@ -261,11 +324,11 @@
 	/>
 {:else if currentStep?.name === WizardStepsLimitOrder.REVIEW}
 	<LimitOrderReview
-		{ask}
+		ask={reviewAsk}
 		baseAmount={reviewBaseAmount}
-		{bid}
-		{currentValue}
-		{depthLevels}
+		bid={reviewBid}
+		currentValue={reviewCurrentValue}
+		depthLevels={reviewDepthLevels}
 		{fillOrKill}
 		onBack={() => goTo(WizardStepsLimitOrder.FORM)}
 		onPlace={place}
@@ -283,7 +346,7 @@
 		{currentValue}
 		{depthLevels}
 		{onClose}
-		onReview={() => goTo(WizardStepsLimitOrder.REVIEW)}
+		onReview={openReview}
 		onSelectBase={() => goTo(WizardStepsLimitOrder.BASE_TOKEN)}
 		onSelectQuote={() => goTo(WizardStepsLimitOrder.QUOTE_TOKEN)}
 		{pairView}

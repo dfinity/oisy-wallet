@@ -3,11 +3,13 @@ import { llmChat } from '$lib/api/llm.api';
 import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 import { AI_ASSISTANT_SEND_MESSAGE_BUTTON } from '$lib/constants/test-ids.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
+import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 vi.mock('$lib/services/auth.services');
 vi.mock('$lib/api/llm.api');
@@ -30,6 +32,7 @@ describe('AiAssistantConsole', () => {
 
 	beforeEach(() => {
 		aiAssistantStore.reset();
+		bottomSheetOpenStore.set(false);
 	});
 
 	it('renders welcome message if the store is empty', () => {
@@ -65,5 +68,25 @@ describe('AiAssistantConsole', () => {
 			expect(getByText(newMessageContent)).toBeInTheDocument();
 			expect(getByText(responseContent)).toBeInTheDocument();
 		});
+	});
+
+	it('hides the mobile navigation bar while open', async () => {
+		render(AiAssistantConsole);
+
+		await waitFor(() => {
+			expect(get(bottomSheetOpenStore)).toBeTruthy();
+		});
+	});
+
+	it('restores the mobile navigation bar once closed', async () => {
+		const { unmount } = render(AiAssistantConsole);
+
+		await waitFor(() => {
+			expect(get(bottomSheetOpenStore)).toBeTruthy();
+		});
+
+		unmount();
+
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 });

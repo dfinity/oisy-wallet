@@ -19,7 +19,7 @@
 
 | Layer                                | Path                                                                 | What goes there                                                                                                                    |
 | ------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives. Also reach for `@dfinity/gix-components` for many primitives (Modal, Toast, BottomSheet, Spinner, …).        |
+| **Generic UI primitives**            | `$lib/components/ui/`                                                | App-local primitives, incl. the vendored ones (Modal, Toast, BottomSheet, LoaderSpinner, Popover, Input, …).                       |
 | **App-wide presentational**          | `$lib/components/common/`                                            | Tiny shared blocks: `List`, `ListItem`, `ListItemButton`, `Divider`, `MaxBalanceButton`, `ModalHero`, `ModalListItem`, `QrButton`. |
 | **Feature components (cross-chain)** | `$lib/components/<feature>/`                                         | Cross-chain feature surfaces (auth, send, receive, swap, contact, hero, ai-assistant, settings, …). See list below.                |
 | **Chain-specific components**        | `$btc / $eth / $evm / $icp / $sol / $icp-eth /components/<feature>/` | UI specific to a chain.                                                                                                            |
@@ -52,15 +52,16 @@
 
 ### Common building blocks
 
-| Component                            | Where                      | Use it for                                     |
-| ------------------------------------ | -------------------------- | ---------------------------------------------- |
-| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                       |
-| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border. |
-| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                 |
-| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.            |
-| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                  |
-| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.       |
-| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                            |
+| Component                            | Where                      | Use it for                                                                                                        |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `List`, `ListItem`, `ListItemButton` | `$lib/components/common/`  | Vertical lists of items.                                                                                          |
+| `Divider`                            | `$lib/components/common/`  | Section separator. Don't roll your own border.                                                                    |
+| `MaxBalanceButton`                   | `$lib/components/common/`  | "Max" button on amount inputs.                                                                                    |
+| `ModalHero`, `ModalListItem`         | `$lib/components/common/`  | Modal headers and modal list items.                                                                               |
+| `QrButton`                           | `$lib/components/common/`  | "Scan QR" entry-point button.                                                                                     |
+| `GoToButton`                         | `$lib/components/common/`  | "Go to X" success CTA (label + testId + onclick); base for `GoToTradeButton`/`GoToEarnButton`/`GoToBorrowButton`. |
+| `Loader*` and `loaders/`             | `$lib/components/loaders/` | Loaders, suspense boundaries, skeletons.                                                                          |
+| `icons/`                             | `$lib/components/icons/`   | Project's icon set.                                                                                               |
 
 ### Cross-chain feature folders
 
@@ -104,16 +105,23 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Common utils
 
-| Util                                                        | Where                             | Purpose                           |
-| ----------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.       |
-| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.        |
-| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper. |
-| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.         |
-| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates.            |
-| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                 |
-| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                 |
-| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                    |
+| Util                                                        | Where                             | Purpose                                                           |
+| ----------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------- |
+| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.                                       |
+| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.                                        |
+| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper.                                 |
+| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                         |
+| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates, `findEvmNetworkByChainId`.                 |
+| `token-id.utils`                                            | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`). |
+| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                                                 |
+| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                                                 |
+| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                                                    |
+
+### Chain-specific utils worth knowing
+
+| Util                         | Where         | Purpose                                                                                                                                                                                                        |
+| ---------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface. |
 
 ### REST + workers
 

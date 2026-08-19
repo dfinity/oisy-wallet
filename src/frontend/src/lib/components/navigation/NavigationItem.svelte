@@ -35,11 +35,13 @@
 		{@render label?.()}
 	</span>
 	{#if nonNullish(tag)}
-		<!-- Desktop: scaled to 80% and lifted (-translate-y-1.5) instead of sitting
-		     inline at the label's own baseline, so it reads as a raised badge
-		     rather than a same-size continuation of the label text. -->
+		<!-- Desktop: scaled to 80% from its left edge (origin-left) so the shrink
+		     hugs the label instead of drifting right. md:ml-0 resets the mobile
+		     ml-10, leaving the label-to-badge gap to the row's own gap-3
+		     (0.75rem/12px) — the same token spacing the icon and label use. No
+		     vertical offset — the row's items-center keeps the badge centred. -->
 		<div
-			class="absolute -mt-1.5 ml-10 scale-75 text-xs/4.5 font-bold uppercase md:relative md:ml-1 md:mt-0 md:-translate-y-1.5 md:scale-[0.8]"
+			class="absolute -mt-1.5 ml-10 scale-75 text-xs/4.5 font-bold uppercase md:relative md:mt-0 md:ml-0 md:origin-left md:scale-[0.8]"
 		>
 			<Tag size="sm" variant={tagVariant}>{tag}</Tag>
 		</div>

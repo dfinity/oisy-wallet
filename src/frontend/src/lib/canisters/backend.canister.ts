@@ -23,6 +23,7 @@ import {
 	mapBtcGetFeePercentilesError,
 	mapBtcGetPendingTransactionsError,
 	mapGetAllowedCyclesError,
+	mapPersonalNotesVetkeyError,
 	mapSignOnramperWidgetUrlError
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
@@ -62,7 +63,7 @@ import {
 	Canister,
 	createServices,
 	fromNullable,
-	nonNullish,
+	isNullish,
 	toNullable,
 	type QueryParams
 } from '@dfinity/utils';
@@ -444,7 +445,7 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	private mapExchangeRate = (rate: ExchangeRate | undefined): BackendExchangeRate | undefined => {
-		if (!nonNullish(rate)) {
+		if (isNullish(rate)) {
 			return;
 		}
 
@@ -645,7 +646,7 @@ export class BackendCanister extends Canister<BackendService> {
 		if ('Ok' in response) {
 			return response.Ok;
 		}
-		throw response.Err;
+		throw mapPersonalNotesVetkeyError(response.Err);
 	};
 
 	getPersonalNotesVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
@@ -655,7 +656,7 @@ export class BackendCanister extends Canister<BackendService> {
 		if ('Ok' in response) {
 			return response.Ok;
 		}
-		throw response.Err;
+		throw mapPersonalNotesVetkeyError(response.Err);
 	};
 
 	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {

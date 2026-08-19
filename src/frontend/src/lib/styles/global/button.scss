@@ -32,6 +32,7 @@ a.as-button {
 	&.tertiary-main-card,
 	&.muted,
 	&.success,
+	&.success-light,
 	&.error {
 		justify-content: center;
 
@@ -55,6 +56,7 @@ a.as-button {
 	&.tertiary-main-card,
 	&.muted,
 	&.success,
+	&.success-light,
 	&.error {
 		font-weight: var(--font-weight-bold);
 
@@ -205,6 +207,45 @@ a.as-button {
 	&.secondary-light.loading {
 		@apply text-brand-primary-alt;
 		@apply bg-brand-subtle-10;
+	}
+
+	// SUCCESS LIGHT
+	&.success-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-success-primary;
+
+		&:not(.transparent) {
+			@apply bg-success-subtle-10;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
+
+		&:hover {
+			@apply text-success-primary;
+			@apply bg-success-subtle-20;
+		}
+
+		&:active {
+			@apply text-success-primary;
+			@apply bg-success-subtle-30;
+		}
+
+		&:focus-visible {
+			@apply text-success-primary;
+			@apply bg-success-subtle-10;
+		}
+	}
+
+	&.success-light.disabled:not(.loading):not(.link),
+	&.success-light[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-disabled;
+	}
+
+	&.success-light.loading {
+		@apply text-success-primary;
+		@apply bg-success-subtle-10;
 	}
 
 	// TERTIARY

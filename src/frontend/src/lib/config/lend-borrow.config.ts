@@ -15,7 +15,8 @@ export const lendBorrowProvidersConfig: Record<LendBorrowProvider, LendBorrowPro
 		name: 'Liquidium',
 		descriptionKey: 'liquidium.text.description',
 		logo: '/images/dapps/liquidium-logo.webp',
-		url: 'https://liquidium.fi/docs/quick-start/core-concepts'
+		url: 'https://liquidium.fi/',
+		docsUrl: 'https://liquidium.fi/docs'
 	}
 };
 
@@ -33,6 +34,10 @@ export const liquidiumSupplyWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumSupply.SUPPLYING,
 		title: i18n.liquidium.text.supplying
+	},
+	{
+		name: WizardStepsLiquidiumSupply.TOKENS_LIST,
+		title: i18n.liquidium.text.select_supply_token
 	}
 ];
 
@@ -50,6 +55,10 @@ export const liquidiumBorrowWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumBorrow.BORROWING,
 		title: i18n.liquidium.text.borrowing
+	},
+	{
+		name: WizardStepsLiquidiumBorrow.TOKENS_LIST,
+		title: i18n.liquidium.text.select_borrow_token
 	}
 ];
 
@@ -67,6 +76,10 @@ export const liquidiumWithdrawWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumWithdraw.WITHDRAWING,
 		title: i18n.liquidium.text.withdrawing
+	},
+	{
+		name: WizardStepsLiquidiumWithdraw.TOKENS_LIST,
+		title: i18n.liquidium.text.select_withdraw_token
 	}
 ];
 
@@ -84,5 +97,9 @@ export const liquidiumRepayWizardSteps = ({
 	{
 		name: WizardStepsLiquidiumRepay.REPAYING,
 		title: i18n.liquidium.text.repaying
+	},
+	{
+		name: WizardStepsLiquidiumRepay.TOKENS_LIST,
+		title: i18n.liquidium.text.select_repay_token
 	}
 ];
