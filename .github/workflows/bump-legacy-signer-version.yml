@@ -46,10 +46,7 @@ jobs:
             const semver = require('semver');
             const path = 'signer-versions.json';
             const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-            // Unpinned means the legacy signer still tracks the wallet, so the first bump that
-            // freezes it starts from the wallet version rather than from nothing.
-            const current = data.legacy_signer_frontend ?? require('./package.json').version;
-            const bumped = semver.inc(current, process.env.VERSION_BUMP);
+            const bumped = semver.inc(data.legacy_signer_frontend, process.env.VERSION_BUMP);
             if (!bumped) {
               console.error('Failed to bump version');
               process.exit(1);

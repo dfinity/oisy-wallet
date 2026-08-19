@@ -77,15 +77,15 @@ The `OISY_SIGNER_TARGET` env var is baked into each canister's `build` command i
 
 When set, this env var affects the build in several ways:
 
-| Aspect                   | Default (unset)     | `signer`                     | `legacy_signer`                                        |
-| ------------------------ | ------------------- | ---------------------------- | ------------------------------------------------------ |
-| `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`    | `https://legacy-signer.oisy.com`                       |
-| `VITE_APP_VERSION`       | from `package.json` | from `package.json`          | `signer-versions.json` pin if set, else `package.json` |
-| `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`                               |
-| `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*                                    |
-| Plausible domain         | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`                               |
-| SvelteKit reroute        | Normal routing      | All routes -> `/sign`        | All routes -> `/sign`                                  |
-| `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)                           |
+| Aspect                   | Default (unset)     | `signer`                     | `legacy_signer`                  |
+| ------------------------ | ------------------- | ---------------------------- | -------------------------------- |
+| `VITE_OISY_DOMAIN`       | `https://oisy.com`  | `https://signer.oisy.com`    | `https://legacy-signer.oisy.com` |
+| `VITE_APP_VERSION`       | from `package.json` | from `package.json`          | from `signer-versions.json`      |
+| `.well-known/ic-domains` | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
+| `AUTH_DERIVATION_ORIGIN` | (varies)            | Canonical origin \*          | Canonical origin \*              |
+| Plausible domain         | `oisy.com`          | `signer.oisy.com`            | `legacy-signer.oisy.com`         |
+| SvelteKit reroute        | Normal routing      | All routes -> `/sign`        | All routes -> `/sign`            |
+| `ii-alternative-origins` | Lists alt origins   | Lists alt origins (from env) | Lists alt origins (from env)     |
 
 \* Canonical origin per environment: see `AUTH_DERIVATION_ORIGIN` and [Identity Derivation](#identity-derivation).
 
@@ -93,17 +93,17 @@ When set, this env var affects the build in several ways:
 
 The **signer** (`signer_frontend`) shares the same version as the main OISY wallet, read from `package.json`. It is released, deployed, and versioned hand-in-hand with OISY.
 
-The **legacy signer** (`legacy_signer_frontend`) can pin its own independent version in `signer-versions.json`. When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte.config.js` read that pin. A `null` pin, and every other target including `signer`, falls through to `package.json`.
+The **legacy signer** (`legacy_signer_frontend`) has a separate version, stored in `signer-versions.json`. Separate is not yet the same as independent: the value is held equal to `package.json` for now, and only starts to diverge at the [Milestone 2](#milestone-2-deploy-v5-signer) freeze.
 
-The pin is `null` today, on purpose. The legacy signer is still rebuilt from `main` on every push to `main` and every `v*` tag (`deploy_all_signers` in `deploy-to-environment.yml`), so it serves the wallet's code and should report the wallet's version. Nothing has to be kept in sync, so nothing can drift.
+When `OISY_SIGNER_TARGET=legacy_signer` is set, both `vite.utils.ts` and `svelte.config.js` read the version from `signer-versions.json`. For all other targets (including `signer`), the version falls through to `package.json`.
 
 This means:
 
-- **Signer** and **legacy signer** versions both advance automatically whenever the OISY wallet version is bumped, via the existing _Version Bump and Release Branch Creation_ workflow. Neither needs its own bump.
-- Writing a version into the pin is what **freezes** the legacy signer at a v4 snapshot. That is a [Milestone 2](#milestone-2-deploy-v5-signer) action, not routine maintenance.
-- The _Legacy Signer Version Bump_ workflow performs that pin, seeding from the wallet version when the pin is still `null`, and afterwards is the path for legacy-only hotfix bumps.
+- **Signer** version advances automatically whenever the OISY wallet version is bumped (via the existing _Version Bump and Release Branch Creation_ workflow).
+- **Legacy signer** version is advanced by that same workflow, which writes the new version into `signer-versions.json`. This is deliberate: the legacy signer is still rebuilt from `main` on every push to `main` and every `v*` tag (`deploy_all_signers` in `deploy-to-environment.yml`), so it serves the wallet's code and must not claim a different version.
+- The _Legacy Signer Version Bump_ workflow remains the path for bumping the legacy signer on its own, and becomes the only path once the legacy signer is frozen and only receives hotfixes.
 
-A previous convention advanced the pin by hand in each release PR to keep it equal to `package.json`. That is what left the legacy signer reporting `2.5.3` after the v2.5.4 release, when the first fully unattended release PR had nobody to hand-edit it. An empty pin removes the need for the convention.
+Before this was automated, the value was advanced by hand in each release PR. That is what left the legacy signer reporting `2.5.3` after the v2.5.4 release, when the first fully unattended release PR had nobody to hand-edit it.
 
 ### Tagging convention
 
@@ -118,14 +118,14 @@ The slash-scoped format keeps tags filterable (`git tag -l 'legacy-signer/*'`) a
 
 **Release pipelines:**
 
-| Step              | Main OISY + Signer                                              | Legacy Signer                                                                                                                                    |
-| ----------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | Inherited from `package.json` while the pin is `null`. _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) pins it, which freezes it |
-| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                                                                                                            |
-| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`                                                                                         |
-| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)                                                                                      |
-| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                                                                                                              |
-| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                                                                                                   |
+| Step              | Main OISY + Signer                                              | Legacy Signer                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version bump      | _Version Bump and Release Branch Creation_ (`bump-version.yml`) | `bump-version.yml` (kept in lockstep until the freeze), or _Legacy Signer Version Bump_ (`bump-legacy-signer-version.yml`) for an independent bump |
+| PR branch         | `chore(release)/v2.0.3`                                         | `chore(release)/legacy-signer-v1.0.1`                                                                                                              |
+| Auto-tag on merge | `tag-release.yml` → `v2.0.3`                                    | `tag-legacy-signer-release.yml` → `legacy-signer/v1.0.1`                                                                                           |
+| Beta deploy       | `deploy-to-environment.yml` (all canisters)                     | `deploy-to-environment.yml` (`legacy_signer_frontend` only)                                                                                        |
+| Release notes     | `release-notes.yml` on `v*` push                                | N/A                                                                                                                                                |
+| Production (IC)   | Orbit workflow                                                  | Orbit workflow                                                                                                                                     |
 
 ### Canister definitions
 
@@ -153,7 +153,7 @@ Each signer domain reports to Plausible under its own domain name. This means yo
 - Upgrade the OISY signer to agent-js v5
 - Deploy the v5 signer to `signer.oisy.com` and `oisy.com`
 - Keep the v4 signer on `legacy-signer.oisy.com` (frozen at the last v4 version)
-  - **Freezing is a two-part change, and both parts are required.** Stop rebuilding the legacy signer from `main`, by removing `legacy_signer_frontend` from the `deploy_all_signers` branch of `deploy-to-environment.yml`; and pin its version, by running _Legacy Signer Version Bump_ so `signer-versions.json` holds a real value instead of `null`. Pinning alone would label v5 code as v4; unpinning the deploy alone would leave frozen v4 code reporting the wallet's advancing version.
+  - **Freezing is a two-part change, and both parts are required.** Stop rebuilding the legacy signer from `main`, by removing `legacy_signer_frontend` from the `deploy_all_signers` branch of `deploy-to-environment.yml`; and stop advancing its version, by removing the `signer-versions.json` write from `bump-version.yml`. Doing only the second leaves v5 code deployed under a v4 label, which is worse than the drift the lockstep write was added to fix.
 - Dapps still on v4 that did not switch to `legacy-signer.oisy.com` will see errors on `oisy.com/sign`
   - Detect v4 dapps and show a user-friendly error message
   - Send a Plausible event to identify affected dapps
