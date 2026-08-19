@@ -44,14 +44,6 @@ jobs:
         run: |
           npm version "$VERSION_BUMP" --no-git-tag-version
           new_version=$(node -p "require('./package.json').version")
-          NEW_VERSION="$new_version" node -e "
-            const fs = require('fs');
-            const path = 'signer-versions.json';
-            const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-            data.legacy_signer_frontend = process.env.NEW_VERSION;
-            fs.writeFileSync(path, JSON.stringify(data, null, '\t') + '\n');
-            console.log('Enforced legacy signer version: ' + process.env.NEW_VERSION);
-          "
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "Bumped to version: $new_version"
         env:
@@ -65,5 +57,3 @@ jobs:
           title: 'chore(release): v${{ steps.bump_version.outputs.new_version }}'
           body: |
             This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
-
-            It also aligns `signer-versions.json`, since the legacy signer is redeployed from `main` alongside the wallet until it is frozen. See the Versioning section of `SIGNER_DOMAINS.md`.

@@ -139,6 +139,8 @@ export const defineViteReplacements = (): {
 
 	const signerTarget = process.env.OISY_SIGNER_TARGET;
 
+	// A null pin means the legacy signer is still built from main, so it reports the wallet version
+	// because it is the wallet's code. Writing a version here is what freezes it at a v4 snapshot.
 	const version =
 		(signerTarget === 'legacy_signer' ? SIGNER_VERSIONS['legacy_signer_frontend'] : undefined) ??
 		packageVersion;
