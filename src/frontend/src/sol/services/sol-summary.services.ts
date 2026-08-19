@@ -7,7 +7,7 @@ import {
 	SOLANA_SUMMARY_TIMEOUT_MILLISECONDS
 } from '$sol/constants/sol-summary.constants';
 import { sanitizeSolSummary } from '$sol/utils/sol-summary.utils';
-import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, toNullable } from '@dfinity/utils';
 
 /**
  * One sentence phrasing facts the screen has already derived, or nothing.
@@ -52,25 +52,37 @@ export const summarizeSolFacts = async ({
 			})
 		]);
 
+		// Every way this can fail used to look the same from outside: no sentence. Distinguishing
+		// them is the difference between reading the cause and guessing at it, and guessing cost
+		// three passes on a bug that was never where it appeared to be. The screen is unchanged
+		// either way; only the reason is written down.
 		if (isNullish(response)) {
+			consoleWarn('Generated summary: no answer within', SOLANA_SUMMARY_TIMEOUT_MILLISECONDS, 'ms');
+
 			return;
 		}
 
 		const answer = fromNullable(response.message.content);
 
+		if (isNullish(answer)) {
+			consoleWarn('Generated summary: the model answered with nothing');
+
+			return;
+		}
+
 		const sentence = sanitizeSolSummary({ content: answer, facts });
 
-		// A rejected answer used to vanish without trace, which is what made a dropped sentence
-		// indistinguishable from one that never came back. The feature only runs where the gate lets
-		// it, so this says what was refused and leaves the rest of the screen alone.
-		if (nonNullish(answer) && isNullish(sentence)) {
+		if (isNullish(sentence)) {
 			consoleWarn('Generated summary refused:', answer);
 		}
 
 		return sentence;
-	} catch (_: unknown) {
+	} catch (err: unknown) {
 		// Best-effort: the sentence is a convenience on top of a screen that is already complete,
 		// so a canister that is slow, unreachable or disabled changes nothing about the screen.
+		// It is still said out loud, because a swallowed rejection is indistinguishable from a
+		// model that had nothing to say.
+		consoleWarn('Generated summary: the call failed', err);
 	} finally {
 		clearTimeout(timer);
 	}

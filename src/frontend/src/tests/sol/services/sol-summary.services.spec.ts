@@ -52,16 +52,27 @@ describe('sol-summary.services', () => {
 			});
 		});
 
-		it('should return nothing when the call fails', async () => {
-			vi.mocked(llmChat).mockRejectedValue(new Error('canister rejected the call'));
+		it('should return nothing, and say the call failed, when the call fails', async () => {
+			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
+			const err = new Error('canister rejected the call');
+			vi.mocked(llmChat).mockRejectedValue(err);
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
+
+			expect(spyWarn).toHaveBeenCalledExactlyOnceWith('Generated summary: the call failed', err);
 		});
 
-		it('should return nothing when the model answers with nothing', async () => {
+		it('should return nothing, and say so, when the model answers with nothing', async () => {
+			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
 			vi.mocked(llmChat).mockResolvedValue({ message: { content: [], tool_calls: [] } });
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
+
+			expect(spyWarn).toHaveBeenCalledExactlyOnceWith(
+				'Generated summary: the model answered with nothing'
+			);
 		});
 
 		// A refused answer used to leave no trace, which made a dropped sentence look exactly like one
@@ -91,7 +102,9 @@ describe('sol-summary.services', () => {
 			expect(spyWarn).not.toHaveBeenCalled();
 		});
 
-		it('should return nothing when the call outlives its budget', async () => {
+		it('should return nothing, and say so, when the call outlives its budget', async () => {
+			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
 			vi.useFakeTimers();
 
 			vi.mocked(llmChat).mockReturnValue(new Promise(() => {}));
@@ -101,6 +114,12 @@ describe('sol-summary.services', () => {
 			await vi.advanceTimersByTimeAsync(SOLANA_SUMMARY_TIMEOUT_MILLISECONDS);
 
 			await expect(pending).resolves.toBeUndefined();
+
+			expect(spyWarn).toHaveBeenCalledExactlyOnceWith(
+				'Generated summary: no answer within',
+				SOLANA_SUMMARY_TIMEOUT_MILLISECONDS,
+				'ms'
+			);
 
 			vi.useRealTimers();
 		});
