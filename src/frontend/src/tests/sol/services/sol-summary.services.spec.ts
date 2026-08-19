@@ -1,6 +1,7 @@
 import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import { AI_ASSISTANT_LLM_MODEL } from '$lib/constants/ai-assistant.constants';
+import * as consoleUtils from '$lib/utils/console.utils';
 import {
 	SOLANA_SUMMARY_SYSTEM_PROMPT,
 	SOLANA_SUMMARY_TIMEOUT_MILLISECONDS
@@ -63,10 +64,31 @@ describe('sol-summary.services', () => {
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
 		});
 
-		it('should return nothing when the model answers with something it was not given', async () => {
+		// A refused answer used to leave no trace, which made a dropped sentence look exactly like one
+		// that never came back. Saying what was refused is what tells the two apart.
+		it('should return nothing, and say what it refused, when the model answers with something it was not given', async () => {
+			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
 			vi.mocked(llmChat).mockResolvedValue(answer('Transfer of 42 SOL to a Raydium pool.'));
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
+
+			expect(spyWarn).toHaveBeenCalledExactlyOnceWith(
+				'Generated summary refused:',
+				'Transfer of 42 SOL to a Raydium pool.'
+			);
+		});
+
+		it('should say nothing when the model answers with something it can keep', async () => {
+			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
+			vi.mocked(llmChat).mockResolvedValue(answer('Transfer of 0.001 SOL.'));
+
+			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBe(
+				'Transfer of 0.001 SOL.'
+			);
+
+			expect(spyWarn).not.toHaveBeenCalled();
 		});
 
 		it('should return nothing when the call outlives its budget', async () => {

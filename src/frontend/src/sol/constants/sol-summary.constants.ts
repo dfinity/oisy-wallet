@@ -19,8 +19,10 @@ RULES:
 
 // The sentence is decoration on top of a screen that is already complete, so it is given a budget
 // rather than being waited on. The canister call is an update call (consensus, then queueing, then
-// generation), so a few seconds is normal and this only bounds the pathological case.
-export const SOLANA_SUMMARY_TIMEOUT_MILLISECONDS = 20_000;
+// generation), and measured on staging it routinely runs past twenty seconds: at that budget the
+// answer arrived and was thrown away, which reads exactly like a model that produced nothing.
+// Nothing waits on this, so a generous bound costs only a sentence that appears late.
+export const SOLANA_SUMMARY_TIMEOUT_MILLISECONDS = 60_000;
 
 // Bounds on what crosses the boundary in each direction. The prompt cap is far below the
 // canister's own ~10 KiB limit: the facts are a handful of short lines, and a transaction that

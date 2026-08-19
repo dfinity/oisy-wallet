@@ -1,12 +1,13 @@
 import { llmChat } from '$lib/api/llm.api';
 import { AI_ASSISTANT_LLM_MODEL } from '$lib/constants/ai-assistant.constants';
 import type { NullishIdentity } from '$lib/types/identity';
+import { consoleWarn } from '$lib/utils/console.utils';
 import {
 	SOLANA_SUMMARY_SYSTEM_PROMPT,
 	SOLANA_SUMMARY_TIMEOUT_MILLISECONDS
 } from '$sol/constants/sol-summary.constants';
 import { sanitizeSolSummary } from '$sol/utils/sol-summary.utils';
-import { fromNullable, isNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 
 /**
  * One sentence phrasing facts the screen has already derived, or nothing.
@@ -55,10 +56,18 @@ export const summarizeSolFacts = async ({
 			return;
 		}
 
-		return sanitizeSolSummary({
-			content: fromNullable(response.message.content),
-			facts
-		});
+		const answer = fromNullable(response.message.content);
+
+		const sentence = sanitizeSolSummary({ content: answer, facts });
+
+		// A rejected answer used to vanish without trace, which is what made a dropped sentence
+		// indistinguishable from one that never came back. The feature only runs where the gate lets
+		// it, so this says what was refused and leaves the rest of the screen alone.
+		if (nonNullish(answer) && isNullish(sentence)) {
+			consoleWarn('Generated summary refused:', answer);
+		}
+
+		return sentence;
 	} catch (_: unknown) {
 		// Best-effort: the sentence is a convenience on top of a screen that is already complete,
 		// so a canister that is slow, unreachable or disabled changes nothing about the screen.
