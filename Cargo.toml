@@ -38,10 +38,11 @@ hex = "0.4"
 hmac = "0.13"
 sha2 = "0.11"
 lazy_static = "1.5"
-# pocket-ic server 12.0 uses pocket-ic library 12.0
+# The pocket-ic library requires a matching major version of the pocket-ic server, which
+# `scripts/test.backend.sh` downloads from the version resolved here.
 # See:
-# Server version: https://github.com/dfinity/pocketic/releases/tag/12.0.0
-# Library version: https://docs.rs/pocket-ic/12.0.0
+# Server version: https://github.com/dfinity/pocketic/releases/tag/15.0.0
+# Library version: https://docs.rs/pocket-ic/15.0.0
 pocket-ic = "15.0.0"
 pretty_assertions = "1.4"
 bitcoin = "0.32"
