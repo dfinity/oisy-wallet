@@ -104,7 +104,7 @@ jobs:
       - lint-shell
       - lint-github-actions
       - download-candid
-    if: ${{ !cancelled() }}
+    if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read

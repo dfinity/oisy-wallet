@@ -61,7 +61,7 @@ jobs:
 
   backend-checks-pass:
     needs: ['lint', 'workspace-dependencies']
-    if: ${{ !cancelled() }}
+    if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read

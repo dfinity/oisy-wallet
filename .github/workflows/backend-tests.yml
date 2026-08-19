@@ -194,7 +194,7 @@ jobs:
     needs:
       - tests
       - breaking-interface
-    if: ${{ !cancelled() }}
+    if: ${{ always() }}
     runs-on: ubuntu-24.04
     permissions:
       contents: read
