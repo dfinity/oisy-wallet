@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "Il token deve essere abilitato per visualizzare la cronologia delle transazioni.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",

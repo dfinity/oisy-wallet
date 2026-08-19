@@ -29,6 +29,7 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
+import { mapSolTransactionEffect } from '$sol/utils/sol-transaction-effect.utils';
 import {
 	mapSolTransactionToUserTransaction,
 	mapUserTransactionToSolTransaction
@@ -158,7 +159,14 @@ describe('sol-transactions.services', () => {
 			to: mockSolAddress2,
 			type: 'send',
 			status: mockTransactionDetail.confirmationStatus,
-			fee: mockTransactionDetail.meta?.fee
+			fee: mockTransactionDetail.meta?.fee,
+			// Every row of a signature carries what the confirmed balances say the whole transaction
+			// did, so a caller regrouping them is not limited to the instructions that decoded.
+			effect: mapSolTransactionEffect({
+				transaction: mockTransactionDetail,
+				address: mockSolAddress,
+				instructionsCount: mockAllInstructions.length
+			})
 		};
 
 		const indexStartAtaMapping = Math.floor(mockAllInstructions.length / 3);
@@ -258,7 +266,12 @@ describe('sol-transactions.services', () => {
 			const expectedInnerInstructions: SolTransactionUi[] = innerInstructions
 				.map((instruction, index) => ({
 					...expected,
-					id: `${expected.id}-${index}-${instruction.programId}`
+					id: `${expected.id}-${index}-${instruction.programId}`,
+					effect: mapSolTransactionEffect({
+						transaction: mockTransactionDetailOnlyInnerInstructions,
+						address: mockSolAddress,
+						instructionsCount: innerInstructions.length
+					})
 				}))
 				.reverse();
 

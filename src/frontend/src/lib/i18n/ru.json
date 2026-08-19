@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "Чтобы просмотреть историю транзакций токен должен быть активен.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Ошибка при загрузке транзакций $symbol.",

@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "Token cần được bật để xem lịch sử giao dịch.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",

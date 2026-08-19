@@ -33,6 +33,7 @@ import type {
 import type { SplTokenAddress } from '$sol/types/spl';
 import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { mapSolTransactionEffect } from '$sol/utils/sol-transaction-effect.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import {
 	requiresStoredSplOwnerRefresh,
@@ -415,13 +416,26 @@ export const fetchSolTransactionsForSignature = async ({
 		})
 	);
 
+	// What the transaction did to this wallet, read from the balances the network recorded rather
+	// than from the instructions above. An instruction that did not decode produced no row, so the
+	// rows alone describe the decodable part of the transaction; the balances describe all of it.
+	// Every row carries the same object so that anything regrouping them by signature can state
+	// the transaction instead of the sum of its legible parts.
+	const effect = mapSolTransactionEffect({
+		transaction: transactionDetail,
+		address,
+		instructionsCount: allInstructions.length
+	});
+
 	// The instructions are received in the order they were executed, meaning the first instruction
 	// in the list was executed first, and the last instruction was executed last.
 	// However, since they all share the same timestamp, we want to display them in reverse
 	// order—from the last executed instruction to the first. This ensures that when shown,
 	// the most recently executed instruction appears first, maintaining a more intuitive,
 	// backward-looking view of execution history.
-	return parsedTransactions.reverse();
+	return parsedTransactions
+		.map((transaction) => (nonNullish(effect) ? { ...transaction, effect } : transaction))
+		.reverse();
 };
 
 export const loadNextSolTransactions = async ({

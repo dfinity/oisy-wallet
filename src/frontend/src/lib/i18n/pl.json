@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "Token musi być włączony, aby wyświetlić historię transakcji.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",

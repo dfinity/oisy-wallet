@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "Le token doit être activé pour voir l'historique des transactions.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "Erreur lors du chargement des transactions $symbol.",

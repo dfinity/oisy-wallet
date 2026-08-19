@@ -29,6 +29,11 @@ export interface SolTransactionGroup {
 	// `true` when the netting has exactly one token out and one token in, the only shape a single
 	// line can honestly call a swap. Anything else is left unnamed rather than named wrongly.
 	isSwap: boolean;
+	// How many instructions the transaction carried, inner ones included. Present only when the
+	// confirmed balances were available, which is also when `legs` states the whole transaction
+	// rather than the sum of its decodable rows. It lets the row say how much of itself it shows
+	// instead of implying it shows all of it.
+	instructionsCount?: number;
 }
 
 export type SolGroupedTransactionEntry =

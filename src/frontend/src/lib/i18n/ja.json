@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "トランザクション履歴を表示するにはトークンを有効にする必要があります。",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "$symbolトランザクションの読み込み中にエラーが発生しました。",

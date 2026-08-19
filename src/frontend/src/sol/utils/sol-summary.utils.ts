@@ -223,7 +223,7 @@ const groupCounterparty = ({ transactions }: SolTransactionGroup): string | unde
  * something a model can drop.
  */
 export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): string[] => {
-	const { transactions, legs, isSwap } = group;
+	const { transactions, legs, isSwap, instructionsCount } = group;
 
 	const counterparty = groupCounterparty(group);
 
@@ -237,7 +237,13 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 				: `Received: ${formatAmount({ value: net, decimals })} ${symbol}`
 		),
 		nonNullish(counterparty) ? `Counterparty: ${formatAddress(counterparty)}` : undefined,
-		`Transfers: ${transactions.length}`
+		`Transfers: ${transactions.length}`,
+		// The amounts above come from the confirmed balances and are whole, but the transfers are
+		// only the instructions OISY could read. Saying so keeps the sentence from presenting a
+		// partial reading as a complete one.
+		nonNullish(instructionsCount) && instructionsCount > transactions.length
+			? `Caveat: OISY could only read ${transactions.length} of the ${instructionsCount} instructions, so the amounts are the transaction's while the transfers are not all of it`
+			: undefined
 	]);
 };
 

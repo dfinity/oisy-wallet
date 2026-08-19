@@ -1710,6 +1710,7 @@ interface I18nTransactions {
 		grouped_swap: string;
 		grouped_bundle: string;
 		grouped_count: string;
+		grouped_partial: string;
 	};
 	error: {
 		loading_transactions_symbol: string;

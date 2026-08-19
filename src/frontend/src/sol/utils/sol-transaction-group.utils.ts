@@ -3,12 +3,45 @@ import type {
 	AllTransactionUiWithCmp,
 	SolAllTransactionUiWithCmp
 } from '$lib/types/transaction-ui';
+import type { SolTransactionEffect } from '$sol/types/sol-transaction-effect';
 import type {
 	SolGroupedTransactionEntry,
 	SolTransactionGroup,
 	SolTransactionGroupLeg
 } from '$sol/types/sol-transaction-group';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+
+// The label a native leg falls back to when no row in the group happens to be a SOL one.
+const SOL_SYMBOL = 'SOL';
+
+/**
+ * The legs the confirmed balances state, named with the symbols this wallet knows.
+ *
+ * Preferred over summing the rows whenever the transaction carried `meta`, because a row exists
+ * only for an instruction OISY could decode: summing them describes the legible part of a
+ * transaction and presents it as the whole. A mint with no matching row keeps its address as its
+ * label rather than being dropped, since a token nobody named still moved.
+ */
+const toEffectLegs = ({
+	effect: { legs },
+	transactions
+}: {
+	effect: SolTransactionEffect;
+	transactions: SolAllTransactionUiWithCmp[];
+}): SolTransactionGroupLeg[] => {
+	const symbolOf = (tokenAddress: string | undefined): string | undefined =>
+		transactions.find(({ token }) =>
+			isNullish(tokenAddress)
+				? isNullish((token as { address?: string }).address)
+				: (token as { address?: string }).address?.toLowerCase() === tokenAddress.toLowerCase()
+		)?.token.symbol;
+
+	return legs.map(({ tokenAddress, decimals, net }) => ({
+		symbol: symbolOf(tokenAddress) ?? tokenAddress ?? SOL_SYMBOL,
+		decimals,
+		net
+	}));
+};
 
 /**
  * What each token did across the group, from the wallet's side.
@@ -91,13 +124,19 @@ export const groupSolTransactionsBySignature = (
 
 		emitted.add(signature);
 
-		const legs = toLegs(siblings);
+		// Every row of a signature carries the same effect, so the first one speaks for all of them.
+		const { effect } = siblings[0].transaction;
+
+		const legs = nonNullish(effect)
+			? toEffectLegs({ effect, transactions: siblings })
+			: toLegs(siblings);
 
 		const group: SolTransactionGroup = {
 			signature,
 			transactions: siblings,
 			legs,
-			isSwap: isSwap(legs)
+			isSwap: isSwap(legs),
+			...(nonNullish(effect) && { instructionsCount: effect.instructionsCount })
 		};
 
 		return [...acc, { kind: 'group', group }];

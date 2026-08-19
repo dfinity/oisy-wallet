@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "يجب تمكين التوكن لعرض سجل المعاملات.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",

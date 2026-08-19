@@ -2,6 +2,7 @@ import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolAddress } from '$sol/types/address';
+import type { SolTransactionEffect } from '$sol/types/sol-transaction-effect';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
 	getBase58Decoder,
@@ -30,6 +31,11 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	// For Solana transactions, we want to show the owner instead of the ATA address
 	fromOwner?: SolAddress;
 	toOwner?: SolAddress;
+	// What the whole transaction did to this wallet, taken from the confirmed balances rather than
+	// from the instructions this row was decoded from. Every row of one signature carries the same
+	// object, so anything regrouping them by signature can state the transaction rather than the
+	// sum of the parts it managed to decode. Absent when the transaction carried no `meta`.
+	effect?: SolTransactionEffect;
 }
 
 const mockSolSignature = () => {

@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history.",
 			"grouped_swap": "Swap",
 			"grouped_bundle": "Bundled transaction",
-			"grouped_count": "$count transfers in one transaction"
+			"grouped_count": "$count transfers in one transaction",
+			"grouped_partial": "Showing $shown of $total instructions"
 		},
 		"error": {
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",

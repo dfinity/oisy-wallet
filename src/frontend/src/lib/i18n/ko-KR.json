@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "트랜잭션 내역을 보려면 토큰을 활성화해야 합니다.",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "$symbol 트랜잭션을 불러오는 중 오류가 발생했습니다.",

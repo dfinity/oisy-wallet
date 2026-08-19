@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "लेनदेन इतिहास देखने के लिए टोकन को सक्षम करने की आवश्यकता है।",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "$symbol लेनदेन लोड करते समय त्रुटि।",

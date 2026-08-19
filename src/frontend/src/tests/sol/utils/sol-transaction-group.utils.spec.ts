@@ -178,5 +178,64 @@ describe('sol-transaction-group.utils', () => {
 				expect(isSwapOf(entries)).toBeFalsy();
 			});
 		});
+
+		describe('the confirmed balances', () => {
+			const effect = {
+				legs: [
+					{ decimals: 9, net: -5_454_491n },
+					{
+						tokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						decimals: 6,
+						net: 377_098n
+					}
+				],
+				instructionsCount: 7
+			};
+
+			const withEffect = (entry: AllTransactionUiWithCmp) =>
+				({
+					...entry,
+					transaction: { ...entry.transaction, effect }
+				}) as AllTransactionUiWithCmp;
+
+			// The rows cover only what decoded; the balances cover the transaction.
+			it('should state the balances rather than the sum of the rows', () => {
+				const entries = groupSolTransactionsBySignature([
+					withEffect(solLeg({ id: 'a1', sig: SIG_A, type: 'send', value: 1n })),
+					withEffect(solLeg({ id: 'a2', sig: SIG_A, type: 'send', value: 1n }))
+				]);
+
+				expect(entries[0].kind === 'group' && entries[0].group.legs).toStrictEqual([
+					{ symbol: SOLANA_TOKEN.symbol, decimals: 9, net: -5_454_491n },
+					{
+						symbol: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+						decimals: 6,
+						net: 377_098n
+					}
+				]);
+			});
+
+			it('should carry how many instructions the transaction had', () => {
+				const entries = groupSolTransactionsBySignature([
+					withEffect(solLeg({ id: 'a1', sig: SIG_A })),
+					withEffect(solLeg({ id: 'a2', sig: SIG_A }))
+				]);
+
+				expect(entries[0].kind === 'group' && entries[0].group.instructionsCount).toBe(7);
+			});
+
+			// A transaction with no meta is the only case where the rows are all there is.
+			it('should fall back to the rows when there are no balances', () => {
+				const entries = groupSolTransactionsBySignature([
+					solLeg({ id: 'a1', sig: SIG_A, type: 'send', value: 5_000_000n }),
+					solLeg({ id: 'a2', sig: SIG_A, type: 'receive', value: 1_000_000n })
+				]);
+
+				expect(entries[0].kind === 'group' && entries[0].group.legs).toStrictEqual([
+					{ symbol: SOLANA_TOKEN.symbol, decimals: SOLANA_TOKEN.decimals, net: -4_000_000n }
+				]);
+				expect(entries[0].kind === 'group' && entries[0].group.instructionsCount).toBeUndefined();
+			});
+		});
 	});
 });

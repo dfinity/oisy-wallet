@@ -2037,7 +2037,8 @@
 			"token_needs_enabling": "需启用该代币才能查看交易历史。",
 			"grouped_swap": "",
 			"grouped_bundle": "",
-			"grouped_count": ""
+			"grouped_count": "",
+			"grouped_partial": ""
 		},
 		"error": {
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",

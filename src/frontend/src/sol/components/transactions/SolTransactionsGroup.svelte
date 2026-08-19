@@ -25,7 +25,20 @@
 
 	let { group, testId }: Props = $props();
 
-	let { transactions, legs, isSwap } = $derived(group);
+	let { transactions, legs, isSwap, instructionsCount } = $derived(group);
+
+	// The rows only ever cover instructions OISY could decode. Saying so is the difference between
+	// a bundle that reports the transaction and one that quietly reports the part of it we read.
+	let countText = $derived(
+		nonNullish(instructionsCount) && instructionsCount > transactions.length
+			? replacePlaceholders($i18n.transactions.text.grouped_partial, {
+					$shown: `${transactions.length}`,
+					$total: `${instructionsCount}`
+				})
+			: replacePlaceholders($i18n.transactions.text.grouped_count, {
+					$count: `${transactions.length}`
+				})
+	);
 
 	let collapsible = $state<ReturnType<typeof Collapsible> | undefined>();
 
@@ -94,9 +107,7 @@
 
 				{#snippet description()}
 					<span class="flex min-w-0 text-xs text-tertiary sm:text-sm">
-						{replacePlaceholders($i18n.transactions.text.grouped_count, {
-							$count: `${transactions.length}`
-						})}
+						{countText}
 					</span>
 				{/snippet}
 			</Card>
