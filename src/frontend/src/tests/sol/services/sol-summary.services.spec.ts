@@ -52,7 +52,7 @@ describe('sol-summary.services', () => {
 			});
 		});
 
-		it('should return nothing, and say the call failed, when the call fails', async () => {
+		it('should return nothing, and say the call failed, when both attempts fail', async () => {
 			const spyWarn = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
 
 			const err = new Error('canister rejected the call');
@@ -60,7 +60,35 @@ describe('sol-summary.services', () => {
 
 			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
 
-			expect(spyWarn).toHaveBeenCalledExactlyOnceWith('Generated summary: the call failed', err);
+			expect(llmChat).toHaveBeenCalledTimes(2);
+			expect(spyWarn).toHaveBeenCalledWith('Generated summary: the call failed', err);
+		});
+
+		// The canister rejects with a timeout when its off-chain worker does not answer in time, and
+		// that says nothing about the request itself.
+		it('should ask once more when the first attempt is rejected', async () => {
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
+			vi.mocked(llmChat)
+				.mockRejectedValueOnce(new Error('Reject code: 4, Reject text: Timeout'))
+				.mockResolvedValueOnce(answer('Transfer of 0.001 SOL.'));
+
+			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBe(
+				'Transfer of 0.001 SOL.'
+			);
+
+			expect(llmChat).toHaveBeenCalledTimes(2);
+		});
+
+		// A loop here is what put a hundred calls a minute on the canister once already.
+		it('should never ask more than twice', async () => {
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => undefined);
+
+			vi.mocked(llmChat).mockRejectedValue(new Error('Reject code: 4, Reject text: Timeout'));
+
+			await expect(summarizeSolFacts({ facts, identity: mockIdentity })).resolves.toBeUndefined();
+
+			expect(llmChat).toHaveBeenCalledTimes(2);
 		});
 
 		it('should return nothing, and say so, when the model answers with nothing', async () => {

@@ -228,9 +228,7 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 	const counterparty = groupCounterparty(group);
 
 	return withinPromptBudget([
-		isSwap
-			? 'Kind: one transaction that exchanged one token for another'
-			: 'Kind: one transaction that moved several amounts',
+		isSwap ? 'Kind: an exchange of one token for another' : 'Kind: several amounts at once',
 		...legs.map(({ symbol, decimals, net }) =>
 			net < ZERO
 				? `Paid: ${formatAmount({ value: -net, decimals })} ${symbol}`
@@ -242,7 +240,7 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 		// only the instructions OISY could read. Saying so keeps the sentence from presenting a
 		// partial reading as a complete one.
 		nonNullish(instructionsCount) && instructionsCount > transactions.length
-			? `Caveat: OISY could only read ${transactions.length} of the ${instructionsCount} instructions, so the amounts are the transaction's while the transfers are not all of it`
+			? `Caveat: only ${transactions.length} of ${instructionsCount} instructions could be read`
 			: undefined
 	]);
 };

@@ -34,19 +34,37 @@ export const summarizeSolFacts = async ({
 
 	let timer: ReturnType<typeof setTimeout> | undefined;
 
+	const ask = () =>
+		llmChat({
+			request: {
+				model: AI_ASSISTANT_LLM_MODEL,
+				messages: [
+					{ system: { content: SOLANA_SUMMARY_SYSTEM_PROMPT } },
+					{ user: { content: facts.join('\n') } }
+				],
+				tools: toNullable()
+			},
+			identity
+		});
+
+	// The canister answers off-chain and rejects with a timeout when a worker does not come back in
+	// time. Measured on staging: a short prompt was answered while a longer one from the same screen
+	// was rejected seconds later, so the rejection is about that moment rather than about the
+	// request. One retry rides it out, and one is all it gets: an unbounded loop here is what put a
+	// hundred calls a minute on this canister once already.
+	const askOnceMore = async () => {
+		try {
+			return await ask();
+		} catch (err: unknown) {
+			consoleWarn('Generated summary: retrying after', err);
+
+			return await ask();
+		}
+	};
+
 	try {
 		const response = await Promise.race([
-			llmChat({
-				request: {
-					model: AI_ASSISTANT_LLM_MODEL,
-					messages: [
-						{ system: { content: SOLANA_SUMMARY_SYSTEM_PROMPT } },
-						{ user: { content: facts.join('\n') } }
-					],
-					tools: toNullable()
-				},
-				identity
-			}),
+			askOnceMore(),
 			new Promise<undefined>((resolve) => {
 				timer = setTimeout(() => resolve(undefined), SOLANA_SUMMARY_TIMEOUT_MILLISECONDS);
 			})
