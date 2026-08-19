@@ -47,3 +47,35 @@ export const SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER = 5n;
 // transfer to someone who has no account for that token pays this so the tokens have somewhere to
 // land, which is why it shows up beside real payments and is not one.
 export const SOLANA_TOKEN_ACCOUNT_RENT_LAMPORTS = 2_039_280n;
+
+/**
+ * The programs worth naming, by the name a person would recognise.
+ *
+ * Deliberately short. A wrong label on a program is worse than none, because "on Raydium" reads as
+ * a fact rather than a guess, so only programs whose identity is not in doubt are listed here.
+ * Anything else keeps its address, which is at least checkable.
+ */
+export const SOLANA_PROGRAM_NAMES: Record<string, string> = {
+	'11111111111111111111111111111111': 'the System program',
+	ComputeBudget111111111111111111111111111111: 'the Compute Budget program',
+	TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA: 'the Token program',
+	TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb: 'the Token-2022 program',
+	ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL: 'the Associated Token program',
+	MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr: 'the Memo program',
+	Stake11111111111111111111111111111111111111: 'the Stake program',
+	Vote111111111111111111111111111111111111111: 'the Vote program',
+	JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4: 'Jupiter',
+	'675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8': 'Raydium',
+	whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc: 'Orca',
+	dahPEoZGXfyV58JqqH85okdHmpN8U2q8owgPUXSCPxe: 'Omni Bridge'
+};
+
+// The programs every Solana transaction is made of. Naming them says nothing about what happened,
+// so they are left out of the ones the sentence may mention.
+export const SOLANA_PLUMBING_PROGRAMS = [
+	'11111111111111111111111111111111',
+	'ComputeBudget111111111111111111111111111111',
+	'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+	'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb',
+	'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'
+];

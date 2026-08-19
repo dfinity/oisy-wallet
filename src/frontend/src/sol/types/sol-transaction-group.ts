@@ -40,6 +40,8 @@ export interface SolTransactionGroup {
 	// The instruction shapes, in order. What says whether a transaction is a transfer, a swap or a
 	// stake; the balances only say how much moved.
 	steps?: string[];
+	// The protocols it went through, named where the name is not in doubt.
+	programs?: string[];
 }
 
 export type SolGroupedTransactionEntry =

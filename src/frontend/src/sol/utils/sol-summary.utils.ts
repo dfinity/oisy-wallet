@@ -208,7 +208,7 @@ export const toSolTransactionSummaryFacts = ({
  * something a model can drop.
  */
 export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): string[] => {
-	const { transactions, legs, isSwap, instructionsCount, steps } = group;
+	const { transactions, legs, isSwap, instructionsCount, steps, programs } = group;
 
 	// The rent is not a payment, so it is not offered as one. Stating it alongside the amount that
 	// was actually sent is what had the model announcing "0.1 USD1 and 0.00203928 SOL", where a
@@ -237,6 +237,9 @@ export const toSolTransactionGroupSummaryFacts = (group: SolTransactionGroup): s
 		// token is a transfer; sending one token, receiving another and closing an account is a
 		// swap. The balances only say how much moved, which is why they are not enough on their own.
 		nonNullish(steps) && steps.length > 0 ? `Steps: ${steps.join(', ')}` : undefined,
+		// The protocol is the only fact here the wallet could not have worked out on its own, and it
+		// is what turns "received some tokens" into "received them from a bridge".
+		nonNullish(programs) && programs.length > 0 ? `Through: ${programs.join(', ')}` : undefined,
 		isSwap ? 'Kind: an exchange of one token for another' : undefined,
 		...spoken.map(({ symbol, decimals, net }) =>
 			net < ZERO

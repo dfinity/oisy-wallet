@@ -160,5 +160,45 @@ describe('sol-transaction-effect.utils', () => {
 
 			expect(effect?.legs).toStrictEqual([]);
 		});
+
+		// The plumbing every transaction is made of names nothing, so it is left out. What is left is
+		// the protocol the user actually dealt with, which is what a block explorer titles by.
+		it('should name the protocols it went through and skip the plumbing', () => {
+			const effect = mapSolTransactionEffect({
+				transaction: tx(),
+				address: OWNER,
+				instructions: [
+					{ programId: 'ComputeBudget111111111111111111111111111111' },
+					{ programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' },
+					{ programId: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' }
+				] as never
+			});
+
+			expect(effect?.programs).toStrictEqual(['Jupiter']);
+		});
+
+		// A wrong label reads as a fact, so an unknown program keeps the address instead.
+		it('should keep the address of a protocol it cannot name', () => {
+			const effect = mapSolTransactionEffect({
+				transaction: tx(),
+				address: OWNER,
+				instructions: [{ programId: 'SoMeUnKnownProgram1111111111111111111111111' }] as never
+			});
+
+			expect(effect?.programs).toStrictEqual(['SoMeUnK...1111111']);
+		});
+
+		it('should name a protocol once however often it appears', () => {
+			const effect = mapSolTransactionEffect({
+				transaction: tx(),
+				address: OWNER,
+				instructions: [
+					{ programId: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' },
+					{ programId: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4' }
+				] as never
+			});
+
+			expect(effect?.programs).toStrictEqual(['Jupiter']);
+		});
 	});
 });

@@ -10,13 +10,23 @@
 	import Collapsible from '$lib/components/ui/Collapsible.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
+	import {
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import { summarizeSolFacts } from '$sol/services/sol-summary.services';
+	import { loadSolTransactionEffect } from '$sol/services/sol-transaction-effect.services';
+	import { SolanaNetworks } from '$sol/types/network';
+	import type { SolSignature } from '$sol/types/sol-transaction';
+	import type { SolTransactionEffect } from '$sol/types/sol-transaction-effect';
 	import type { SolTransactionGroup } from '$sol/types/sol-transaction-group';
+	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 	import { toSolTransactionGroupSummaryFacts } from '$sol/utils/sol-summary.utils';
 
 	interface Props {
@@ -41,7 +51,62 @@
 				})
 	);
 
-	let facts = $derived(toSolTransactionGroupSummaryFacts(group));
+	// The activity list is served by the backend, which carries the transfers but not the
+	// instructions they came from. So the row asks for its own transaction: one query, cached per
+	// signature, and only for a bundled one, where the sentence has to name a swap or a bridge
+	// rather than list amounts. Until it lands the facts are what the rows already say.
+	let detail = $state<SolTransactionEffect | undefined>();
+
+	let network = $derived(transactions[0]?.token.network);
+
+	let solNetwork = $derived(nonNullish(network) ? mapNetworkIdToNetwork(network.id) : undefined);
+
+	let address = $derived(
+		solNetwork === SolanaNetworks.devnet
+			? $solAddressDevnet
+			: solNetwork === SolanaNetworks.local
+				? $solAddressLocal
+				: $solAddressMainnet
+	);
+
+	$effect(() => {
+		const currentSignature = group.signature;
+		const currentNetwork = solNetwork;
+		const currentAddress = address;
+
+		untrack(() => {
+			detail = undefined;
+
+			if (isNullish(currentNetwork) || isNullish(currentAddress)) {
+				return;
+			}
+
+			void loadSolTransactionEffect({
+				signature: { signature: currentSignature } as SolSignature,
+				network: currentNetwork,
+				address: currentAddress
+			})
+				.then((result) => {
+					if (currentSignature === group.signature) {
+						detail = result;
+					}
+				})
+				.catch(() => undefined);
+		});
+	});
+
+	let facts = $derived(
+		toSolTransactionGroupSummaryFacts(
+			nonNullish(detail)
+				? {
+						...group,
+						instructionsCount: detail.instructionsCount,
+						steps: detail.steps,
+						programs: detail.programs
+					}
+				: group
+		)
+	);
 
 	let prompt = $derived(facts.join('\n'));
 
@@ -69,10 +134,6 @@
 				.catch(() => undefined);
 		});
 	});
-
-	// Every row of the group is the same transaction on the same network, so the first one speaks
-	// for all of them.
-	let network = $derived(transactions[0]?.token.network);
 
 	// Until the sentence arrives the row says what it provably is. A swap is the only shape the
 	// netting can name on its own; anything else stays unnamed rather than guessed at.

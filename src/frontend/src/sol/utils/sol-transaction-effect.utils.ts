@@ -1,5 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { SOLANA_PLUMBING_PROGRAMS, SOLANA_PROGRAM_NAMES } from '$sol/constants/sol.constants';
 import type { SolAddress } from '$sol/types/address';
 import type { ParsedAccount, SolRpcTransaction } from '$sol/types/sol-transaction';
 import type {
@@ -107,6 +108,9 @@ const tokenLegs = ({
 // instructions says what it is in its first dozen, and the rest is routing.
 const MAX_STEPS = 12;
 
+// A transaction that touched more protocols than this is not going to be named by one of them.
+const MAX_PROGRAMS = 3;
+
 /**
  * What the transaction is made of, in the order it ran.
  *
@@ -123,6 +127,26 @@ const toSteps = (instructions: readonly SolInstruction[]): string[] =>
 				? `${instruction.parsed.type}`
 				: `unparsed program ${shortenWithMiddleEllipsis({ text: String(instruction.programId) })}`
 		);
+
+/**
+ * The programs a transaction went through, named where the name is not in doubt.
+ *
+ * The plumbing every Solana transaction is made of says nothing about what happened, so it is left
+ * out: a list ending in "the System program" would have the sentence naming the machinery instead
+ * of the app. What remains is the protocol the user actually dealt with, which is what a block
+ * explorer puts in its title when the transfers do not reduce to one line.
+ */
+const toPrograms = (instructions: readonly SolInstruction[]): string[] => {
+	const named = instructions
+		.map(({ programId }) => String(programId))
+		.filter((programId) => !SOLANA_PLUMBING_PROGRAMS.includes(programId))
+		.map(
+			(programId) =>
+				SOLANA_PROGRAM_NAMES[programId] ?? shortenWithMiddleEllipsis({ text: programId })
+		);
+
+	return named.filter((name, index) => named.indexOf(name) === index).slice(0, MAX_PROGRAMS);
+};
 
 /**
  * What a confirmed transaction did to this wallet, and how much of it there was.
@@ -173,5 +197,10 @@ export const mapSolTransactionEffect = ({
 		({ net: a }, { net: b }) => (a < ZERO ? 0 : 1) - (b < ZERO ? 0 : 1)
 	);
 
-	return { legs, instructionsCount: instructions.length, steps: toSteps(instructions) };
+	return {
+		legs,
+		instructionsCount: instructions.length,
+		steps: toSteps(instructions),
+		programs: toPrograms(instructions)
+	};
 };

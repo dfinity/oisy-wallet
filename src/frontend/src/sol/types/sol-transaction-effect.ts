@@ -34,4 +34,8 @@ export interface SolTransactionEffect {
 	// cannot tell those apart, and the instruction list is what a block explorer reads to title a
 	// transaction.
 	steps: string[];
+	// The protocols the transaction went through, named where the name is not in doubt and given as
+	// an address otherwise. This is what lets a bridge or a swap say whose it was, which the
+	// balances and the step names never can.
+	programs: string[];
 }
