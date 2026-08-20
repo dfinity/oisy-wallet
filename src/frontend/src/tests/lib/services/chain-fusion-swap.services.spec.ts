@@ -2,13 +2,18 @@ import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
+import { send as sendEth } from '$eth/services/send.services';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
 import { sendIc } from '$icp/services/ic-send.services';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import {
 	fetchChainFusionEvmQuote,
+	fetchChainFusionEvmSwap,
 	fetchChainFusionIcpQuote,
 	fetchChainFusionIcpSwap
 } from '$lib/services/chain-fusion-swap.services';
@@ -24,6 +29,7 @@ import {
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let mockEnabled = true;
 
@@ -41,6 +47,14 @@ vi.mock('$icp/services/ic-send.services', () => ({
 	sendIc: vi.fn()
 }));
 
+vi.mock('$eth/services/send.services', () => ({
+	send: vi.fn()
+}));
+
+vi.mock('$lib/services/active-user-transactions.services', () => ({
+	createActiveUserTransaction: vi.fn()
+}));
+
 const IC_CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
 const IC_CKUSDC_LEDGER = 'xevnm-gaaaa-aaaar-qafnq-cai';
 const LOCAL_CKUSDC_LEDGER = 'yfumr-cyaaa-aaaar-qaela-cai';
@@ -50,6 +64,17 @@ const CKETH_LEDGER_FEE = 2_000n;
 const CK_LEDGER_FEE = 123n;
 
 const AMOUNT = 1_000_000n;
+
+const SWAP_ID = '11111111-1111-4111-8111-111111111111';
+const MINTER_CANISTER_ID = 'sv3dd-oaaaa-aaaar-qacoa-cai';
+
+// The wire format is a sorted `(key, value)` array; assertions read better keyed.
+const refsOfLastCreate = (): Record<string, string> =>
+	Object.fromEntries(
+		(vi.mocked(createActiveUserTransaction).mock.lastCall?.[0].externalRefs ?? []).map(
+			({ key, value }) => [key, value]
+		)
+	);
 
 const makeCkToken = ({
 	ledgerCanisterId,
@@ -404,7 +429,8 @@ describe('chain-fusion-swap.services', () => {
 			identity: mockIdentity,
 			progress,
 			swapAmount: '1',
-			destinationAddress: mockEthAddress
+			destinationAddress: mockEthAddress,
+			swapId: SWAP_ID
 		};
 
 		beforeEach(() => {
@@ -470,6 +496,213 @@ describe('chain-fusion-swap.services', () => {
 					destinationToken: ETHEREUM_TOKEN
 				})
 			).resolves.toStrictEqual(result);
+		});
+
+		it('should create an active user transaction keyed on the ckETH burn index', async () => {
+			vi.mocked(sendIc).mockResolvedValue({ type: 'ckEthToEth', blockIndex: 7n });
+
+			await fetchChainFusionIcpSwap({
+				...swapParams,
+				sourceToken: { ...ckEthSource, minterCanisterId: MINTER_CANISTER_ID },
+				destinationToken: ETHEREUM_TOKEN,
+				usdSourceValue: '3000'
+			});
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					id: SWAP_ID,
+					data: {
+						ChainFusion: {
+							direction: { CkEthToEth: null },
+							source_token: { Icrc: Principal.fromText(IC_CKETH_LEDGER) },
+							dest_token: { EvmNative: 1n },
+							// `swapAmount: '1'` in the *source* token's base units.
+							amount: 10n ** BigInt(ckEthSource.decimals)
+						}
+					}
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_cketh_index: '7',
+					chain_fusion_minter_id: MINTER_CANISTER_ID,
+					amount: '1',
+					usd_source_value: '3000',
+					source_token_symbol: 'ckETH-swap-source',
+					destination_token_symbol: ETHEREUM_TOKEN.symbol
+				})
+			);
+
+			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_ckerc20_index');
+		});
+
+		it('should key a ckERC20 withdrawal on its ckETH burn index and carry the ckERC20 one', async () => {
+			vi.mocked(sendIc).mockResolvedValue({
+				type: 'ckErc20ToErc20',
+				ckEthBlockIndex: 11n,
+				ckErc20BlockIndex: 12n
+			});
+
+			await fetchChainFusionIcpSwap({
+				...swapParams,
+				sourceToken: { ...ckUsdcSource, minterCanisterId: MINTER_CANISTER_ID },
+				destinationToken: USDC_TOKEN
+			});
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					data: expect.objectContaining({
+						ChainFusion: expect.objectContaining({ direction: { CkErc20ToErc20: null } })
+					})
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_cketh_index: '11',
+					chain_fusion_ckerc20_index: '12'
+				})
+			);
+		});
+
+		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
+			const result = { type: 'ckEthToEth', blockIndex: 7n } as const;
+
+			vi.mocked(sendIc).mockResolvedValue(result);
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+
+			// The funds have already left the wallet — a bookkeeping failure must not read
+			// as the conversion having failed.
+			await expect(
+				fetchChainFusionIcpSwap({
+					...swapParams,
+					sourceToken: ckEthSource,
+					destinationToken: ETHEREUM_TOKEN
+				})
+			).resolves.toStrictEqual(result);
+		});
+	});
+
+	describe('fetchChainFusionEvmSwap', () => {
+		const progress = vi.fn();
+
+		const DEPOSIT_TX_HASH = '0xdeadbeef';
+		const HELPER_CONTRACT = '0x7574eB42cA208A4f6960ECCAfDF186D627dCC175';
+
+		const ckEthDestination: IcCkToken = {
+			...makeCkToken({
+				ledgerCanisterId: IC_CKETH_LEDGER,
+				twinToken: ETHEREUM_TOKEN,
+				symbol: 'ckETH-mint-destination'
+			}),
+			minterCanisterId: MINTER_CANISTER_ID
+		};
+
+		const ckUsdcDestination: IcCkToken = {
+			...makeCkToken({
+				ledgerCanisterId: IC_CKUSDC_LEDGER,
+				twinToken: USDC_TOKEN,
+				symbol: 'ckUSDC-mint-destination'
+			}),
+			minterCanisterId: MINTER_CANISTER_ID
+		};
+
+		const swapParams = {
+			identity: mockIdentity,
+			progress,
+			swapAmount: '1',
+			userAddress: mockEthAddress,
+			helperContractAddress: HELPER_CONTRACT,
+			sourceNetwork: ETHEREUM_TOKEN.network as EthereumNetwork,
+			minterInfo: undefined,
+			gas: 1n,
+			maxFeePerGas: 1n,
+			maxPriorityFeePerGas: 1n,
+			swapId: SWAP_ID
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.mocked(sendEth).mockResolvedValue({ hash: DEPOSIT_TX_HASH });
+		});
+
+		it('should create an active user transaction carrying what the mint poller needs', async () => {
+			await fetchChainFusionEvmSwap({
+				...swapParams,
+				sourceToken: ETHEREUM_TOKEN as unknown as Erc20Token,
+				destinationToken: ckEthDestination
+			});
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					id: SWAP_ID,
+					data: {
+						ChainFusion: {
+							direction: { EthToCkEth: null },
+							source_token: { EvmNative: 1n },
+							dest_token: { Icrc: Principal.fromText(IC_CKETH_LEDGER) },
+							amount: 1_000_000_000_000_000_000n
+						}
+					}
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_deposit_tx: DEPOSIT_TX_HASH,
+					chain_fusion_helper: HELPER_CONTRACT,
+					chain_fusion_minter_id: MINTER_CANISTER_ID
+				})
+			);
+
+			// Learned only once the deposit mines; nothing to snapshot at creation.
+			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_deposit_block');
+		});
+
+		it('should record an ERC20 deposit as the Erc20ToCkErc20 direction', async () => {
+			await fetchChainFusionEvmSwap({
+				...swapParams,
+				sourceToken: USDC_TOKEN,
+				destinationToken: ckUsdcDestination
+			});
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					data: expect.objectContaining({
+						ChainFusion: expect.objectContaining({
+							direction: { Erc20ToCkErc20: null },
+							source_token: { Erc20: [USDC_TOKEN.address, 1n] }
+						})
+					})
+				})
+			);
+		});
+
+		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+
+			await expect(
+				fetchChainFusionEvmSwap({
+					...swapParams,
+					sourceToken: ETHEREUM_TOKEN as unknown as Erc20Token,
+					destinationToken: ckEthDestination
+				})
+			).resolves.toBeUndefined();
+		});
+
+		// A row with no minter to ask could never terminalize, and would hold one of the
+		// user's slots for good. Not tracking it at all is the lesser evil.
+		it('should create no row when the ck token names no minter', async () => {
+			await fetchChainFusionEvmSwap({
+				...swapParams,
+				sourceToken: ETHEREUM_TOKEN as unknown as Erc20Token,
+				destinationToken: { ...ckEthDestination, minterCanisterId: undefined }
+			});
+
+			expect(sendEth).toHaveBeenCalledOnce();
+			expect(createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import type { ChainFusionDirection } from '$declarations/backend/backend.did';
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
@@ -8,6 +9,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import {
@@ -26,7 +28,12 @@ import {
 	ProgressStepsSendIc,
 	ProgressStepsSwap
 } from '$lib/enums/progress-steps';
+import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import type { CanisterIdText } from '$lib/types/canister';
+import {
+	CHAIN_FUSION_EXTERNAL_REF_KEYS,
+	type ChainFusionExternalRefKey
+} from '$lib/types/chain-fusion-swap';
 import type { Amount } from '$lib/types/send';
 import {
 	SwapProvider,
@@ -37,6 +44,11 @@ import {
 	type SwapMappedResult
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import {
+	toChainFusionData,
+	toChainFusionDisplayRefs,
+	toChainFusionExternalRefs
+} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 import { asCkTwinOf, computeChainFusionReceiveAmount } from '$lib/utils/chain-fusion-swap.utils';
 import { consoleError } from '$lib/utils/console.utils';
 import { parseToken } from '$lib/utils/parse.utils';
@@ -273,6 +285,71 @@ const toSwapProgressStep = (step: ProgressStepsSendIc): ProgressStepsSwap =>
 	})[step];
 
 /**
+ * Persists the active user transaction that keeps a ck conversion settling after the
+ * modal closes. Called at the point of no return — the funds have already left the
+ * user's wallet — which is why every failure here is swallowed: an untracked
+ * conversion still completes, and surfacing a bookkeeping error as a swap failure
+ * would be a lie about the money. Same contract as `createAutAndDetachCloser`.
+ *
+ * Two prerequisites are checked rather than assumed, because a row that cannot be
+ * polled is worse than no row: it never terminalizes and occupies one of the user's
+ * slots for good. Both are unreachable for the pairs Chain Fusion offers — but
+ * `toBackendTokenId` is shared, and `minterCanisterId` is optional on `IcCkToken`.
+ * Either way the conversion degrades to untracked, which is the Convert flow's
+ * behaviour today, rather than to aborted.
+ */
+const createChainFusionActiveUserTransaction = async ({
+	identity,
+	swapId,
+	direction,
+	sourceToken,
+	destinationToken,
+	minterCanisterId,
+	amount,
+	swapAmount,
+	usdSourceValue,
+	extraRefs
+}: {
+	identity: Identity;
+	swapId: string;
+	direction: ChainFusionDirection;
+	sourceToken: Token;
+	destinationToken: Token;
+	minterCanisterId: CanisterIdText | undefined;
+	amount: bigint;
+	swapAmount: Amount;
+	usdSourceValue?: string;
+	extraRefs: Partial<Record<ChainFusionExternalRefKey, string>>;
+}): Promise<void> => {
+	try {
+		const data = toChainFusionData({ direction, sourceToken, destinationToken, amount });
+
+		if (isNullish(data) || isNullish(minterCanisterId)) {
+			consoleError('Skipping an untrackable Chain Fusion conversion', { swapId });
+			return;
+		}
+
+		await createActiveUserTransaction({
+			identity,
+			id: swapId,
+			data,
+			externalRefs: toChainFusionExternalRefs({
+				...toChainFusionDisplayRefs({
+					sourceToken,
+					destinationToken,
+					amount: `${swapAmount}`,
+					usdSourceValue
+				}),
+				[CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID]: minterCanisterId,
+				...extraRefs
+			})
+		});
+	} catch (err: unknown) {
+		consoleError(err);
+	}
+};
+
+/**
  * Enabling the destination runs only after the funds have moved, so a swap the user
  * cancels on Review never leaves an enabled token behind. Failure is swallowed: the
  * conversion already succeeded and visibility is not worth surfacing as a swap error.
@@ -296,8 +373,8 @@ const enableDestination = async (
  * existing `sendIc`, which already owns the approve/withdraw choreography the Convert
  * flow uses. Nothing in `$icp` changes for this.
  *
- * Returns the minter block index `sendIc` now surfaces, so PR 5 can key an active user
- * transaction on it without re-deriving anything.
+ * Returns the minter block index `sendIc` surfaces — the same index the active user
+ * transaction created here is keyed on, so nothing is re-derived.
  */
 export const fetchChainFusionIcpSwap = async ({
 	identity,
@@ -306,6 +383,8 @@ export const fetchChainFusionIcpSwap = async ({
 	destinationToken,
 	swapAmount,
 	destinationAddress,
+	swapId,
+	usdSourceValue,
 	enableDestinationToken
 }: {
 	identity: Identity;
@@ -314,6 +393,8 @@ export const fetchChainFusionIcpSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	destinationAddress: EthAddress;
+	swapId: string;
+	usdSourceValue?: string;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<IcCkWithdrawalResult | undefined> => {
 	// The ckETH allowance a ckERC20 withdrawal grants the minter, resolved here — at the
@@ -337,10 +418,12 @@ export const fetchChainFusionIcpSwap = async ({
 		? (await resolveCkErc20WithdrawalDetails(sourceToken))?.externalFees[0]?.fee
 		: undefined;
 
+	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+
 	const result = await sendIc({
 		identity,
 		token: sourceToken,
-		amount: parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals }),
+		amount,
 		to: destinationAddress,
 		targetNetworkId: destinationToken.network.id,
 		ckErc20ToErc20MaxCkEthFees,
@@ -349,6 +432,35 @@ export const fetchChainFusionIcpSwap = async ({
 		// no separate completion hook to fire.
 		sendCompleted: () => undefined
 	});
+
+	// The withdrawal is irreversible from here, so the row is created regardless of what
+	// follows. The direction comes from the result rather than from a second look at the
+	// token pair: `sendIc` already decided which minter leg it ran.
+	if (nonNullish(result) && result.type !== 'ckBtcToBtc') {
+		await createChainFusionActiveUserTransaction({
+			identity,
+			swapId,
+			direction: result.type === 'ckEthToEth' ? { CkEthToEth: null } : { CkErc20ToErc20: null },
+			sourceToken,
+			destinationToken,
+			// The ck source is the token being burned, so its minter is the one to ask.
+			minterCanisterId: sourceToken.minterCanisterId,
+			amount,
+			swapAmount,
+			usdSourceValue,
+			extraRefs: {
+				// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
+				// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
+				// index rides along as the only pointer back to that burn.
+				[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
+					result.type === 'ckEthToEth' ? result.blockIndex : result.ckEthBlockIndex
+				}`,
+				...(result.type === 'ckErc20ToErc20' && {
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${result.ckErc20BlockIndex}`
+				})
+			}
+		});
+	}
 
 	await enableDestination(enableDestinationToken);
 
@@ -386,6 +498,7 @@ export const fetchChainFusionEvmSwap = async ({
 	identity,
 	progress,
 	sourceToken,
+	destinationToken,
 	swapAmount,
 	userAddress,
 	helperContractAddress,
@@ -394,11 +507,14 @@ export const fetchChainFusionEvmSwap = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
+	swapId,
+	usdSourceValue,
 	enableDestinationToken
 }: {
 	identity: Identity;
 	progress: (step: ProgressStepsSwap) => void;
 	sourceToken: Erc20Token;
+	destinationToken: IcCkToken;
 	swapAmount: Amount;
 	userAddress: EthAddress;
 	helperContractAddress: EthAddress;
@@ -407,9 +523,13 @@ export const fetchChainFusionEvmSwap = async ({
 	gas: bigint;
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
+	swapId: string;
+	usdSourceValue?: string;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
-	await sendEth({
+	const amount = parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals });
+
+	const { hash } = await sendEth({
 		identity,
 		from: userAddress,
 		// The minter's helper contract, for both legs: `sendTransaction` recognises it as the
@@ -419,7 +539,7 @@ export const fetchChainFusionEvmSwap = async ({
 		// here, since the destination is always a contract address and ERC20 ICP has no ck twin.
 		to: mapAddressStartsWith0x(helperContractAddress),
 		token: sourceToken,
-		amount: parseToken({ value: `${swapAmount}`, unitName: sourceToken.decimals }),
+		amount,
 		sourceNetwork,
 		targetNetwork: ICP_NETWORK,
 		minterInfo,
@@ -432,6 +552,31 @@ export const fetchChainFusionEvmSwap = async ({
 			if (nonNullish(mapped)) {
 				progress(mapped);
 			}
+		}
+	});
+
+	// The deposit is broadcast, so the row is created regardless of what follows. It
+	// carries what the poller needs to follow the mint without any store: the deposit's
+	// hash, the helper contract the log to look for lives at, and the minter to ask how
+	// far it has scanned. The helper contract is snapshotted rather than re-read later,
+	// because a minter upgrade moves the address while the log stays at the old one.
+	await createChainFusionActiveUserTransaction({
+		identity,
+		swapId,
+		// `isTokenErc20`, not `isTokenErcFungible`: the direction must agree with how
+		// `toBackendTokenId` classifies the source, and only its `Erc20` arm carries
+		// the contract address the mint poller's ckERC20 log topic is built from.
+		direction: isTokenErc20(sourceToken) ? { Erc20ToCkErc20: null } : { EthToCkEth: null },
+		sourceToken,
+		destinationToken,
+		// The ck destination is the token being minted, so its minter is the one to ask.
+		minterCanisterId: destinationToken.minterCanisterId,
+		amount,
+		swapAmount,
+		usdSourceValue,
+		extraRefs: {
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.DEPOSIT_TX_HASH]: hash,
+			[CHAIN_FUSION_EXTERNAL_REF_KEYS.HELPER_CONTRACT_ADDRESS]: helperContractAddress
 		}
 	});
 

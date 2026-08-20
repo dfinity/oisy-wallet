@@ -101,11 +101,19 @@
 			: undefined
 	);
 
-	// 1Sec is the only provider on this wizard that settles in the background, and
-	// its background phase is a bridge.
+	// 1Sec's background phase is a bridge; Chain Fusion's is a ck minter settling a
+	// withdrawal, so it gets the plain background wording.
 	let isOneSecProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
+
+	let isChainFusionProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	// Both close the modal once the funds have left the wallet and finish settling
+	// through the Active User Transactions store.
+	let isActiveTransactionSwap = $derived(isOneSecProvider || isChainFusionProvider);
 
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
@@ -213,6 +221,8 @@
 					destinationToken: $destinationToken,
 					swapAmount,
 					destinationAddress: $ethAddress,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
 							destinationToken: $destinationToken,
@@ -245,15 +255,12 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec swaps, the foreground completes once the user's funds have
-			// left their wallet; success/failure of the background phase is tracked
+			// For OneSec and Chain Fusion, the foreground completes once the user's funds
+			// have left their wallet; success/failure of the background phase is tracked
 			// separately via the AUT store. Other providers (ICPSwap, KongSwap) still
 			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name:
-					$swapAmountsStore.selectedProvider.provider === SwapProvider.ONE_SEC
-						? TRACK_COUNT_SWAP_SUBMITTED
-						: TRACK_COUNT_SWAP_SUCCESS,
+				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -341,7 +348,7 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
-				swapWithActiveTransaction={isOneSecProvider}
+				swapWithActiveTransaction={isActiveTransactionSwap}
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}

@@ -3,6 +3,7 @@ import type {
 	ActiveUserTransactionData,
 	ActiveUserTransactionError,
 	ActiveUserTransactionRef,
+	ChainFusionData,
 	LiquidiumData,
 	NearIntentsData,
 	OneSecIcpToEvmData,
@@ -13,6 +14,7 @@ import type {
 	CreateActiveUserTransactionParams,
 	UpdateActiveUserTransactionParams
 } from '$lib/types/api';
+import { CHAIN_FUSION_EXTERNAL_REF_KEYS } from '$lib/types/chain-fusion-swap';
 import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 import { NEAR_INTENTS_EXTERNAL_REF_KEYS } from '$lib/types/near-intents';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
@@ -78,6 +80,36 @@ export const mockVeloraActiveUserTransaction: ActiveUserTransaction = {
 		{ key: VELORA_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Ethereum' },
 		{ key: VELORA_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'USDT' },
 		{ key: VELORA_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
+	],
+	created_at_ns: ZERO,
+	updated_at_ns: ZERO,
+	error: []
+};
+
+export const mockChainFusionData: ChainFusionData = {
+	direction: { CkEthToEth: null },
+	source_token: { Icrc: mockPrincipal },
+	dest_token: { EvmNative: 1n },
+	amount: 1_000_000n
+};
+
+export const mockChainFusionActiveUserTransaction: ActiveUserTransaction = {
+	id: '66666666-6666-4666-8666-666666666666',
+	status: { Pending: null },
+	data: { ChainFusion: mockChainFusionData },
+	progress_step: [],
+	external_refs: [
+		{
+			key: CHAIN_FUSION_EXTERNAL_REF_KEYS.MINTER_CANISTER_ID,
+			value: 'sv3dd-oaaaa-aaaar-qacoa-cai'
+		},
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX, value: '7' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.AMOUNT, value: '1' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.USD_SOURCE_VALUE, value: '3000' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL, value: 'ckETH' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL, value: 'Internet Computer' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.DESTINATION_TOKEN_SYMBOL, value: 'ETH' },
+		{ key: CHAIN_FUSION_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL, value: 'Ethereum' }
 	],
 	created_at_ns: ZERO,
 	updated_at_ns: ZERO,

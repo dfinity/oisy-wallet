@@ -303,6 +303,29 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 ---
 
+## Swap
+
+### Chain Fusion as a swap provider
+
+Turning ETH into ckETH, or a twinned ERC-20 into its ckERC-20 counterpart, is offered inside the Swap modal as an ordinary provider named **Chain Fusion**, competing on rate with ICPSwap, KongSwap, Velora, NEAR Intents and 1Sec. Selecting ETH as the pay token puts ckETH among the receive options; selecting ckETH puts ETH among them, and the same holds for every ck twin whose native side is on **Ethereum mainnet** — the only network where the ck helper contracts are deployed. USDC on Base or Arbitrum therefore gets no Chain Fusion offer, because a ckUSDC deposit made there could never be minted.
+
+The offer carries no slippage: a ck conversion is deterministic, so the rate is 1:1 apart from fees, and the provider sheet itemizes those fees one row at a time rather than as a single sum. A ckERC-20 withdrawal is the one case that charges in a **third token** — the minter's Ethereum gas is paid in ckETH — so the sheet names it separately and the form blocks Review when the user's ckETH balance cannot cover it.
+
+The pre-existing **Convert** flow is unchanged and still reachable from a token's own page. Both paths coexist; the two mechanisms are identical, only the entry point and the presentation differ.
+
+### Cross-session settlement
+
+A ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
+
+How settlement is observed differs by direction, because the minters answer different questions:
+
+- A **withdrawal** (ckETH → ETH, ckERC-20 → ERC-20) is exact. The minter is asked about the withdrawal directly, keyed on the ledger burn index it returned. Note that a freshly submitted withdrawal reads as "not found" until the minter indexes it, which is treated as "still in flight" and never as a failure — a terminal verdict cannot be taken back.
+- A **mint** (ETH → ckETH, ERC-20 → ckERC-20) has no per-deposit status endpoint, so it is followed the same way the Convert flow's pending "virtual" transaction is: the deposit counts as in flight for as long as the minter has not yet scanned past the Ethereum block it landed in, and the helper contract's deposit log is what confirms, once the minter has, that there was a deposit to mint at all. A transaction that reverted, or that mined without producing a deposit log for this user, is reported as failed rather than quietly counted as a success.
+
+When a row reaches a terminal state it refreshes the wallet and reports into the **swap** analytics funnel — not the convert one — exactly once, including when it finalizes across a page refresh.
+
+---
+
 ## Buy (OnRamper)
 
 Users can buy crypto with fiat through an embedded OnRamper widget. OnRamper requires the destination wallet addresses in the widget URL to be HMAC-signed so they cannot be tampered with in transit; OISY holds the signing secret in the backend canister (it never reaches the browser) and the frontend asks the backend to sign the URL before loading the widget.

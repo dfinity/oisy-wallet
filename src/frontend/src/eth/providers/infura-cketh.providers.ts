@@ -46,13 +46,19 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		return ckEthContract.deposit.populateTransaction(to);
 	};
 
+	// `endBlock` defaults to `latest`, which is what the pending-transactions
+	// listener wants: every deposit the minter has not yet observed. A caller that
+	// already knows which block its deposit landed in passes both bounds instead,
+	// turning an open-ended scan into a single-block lookup.
 	getLogs = ({
 		contract: { address: contractAddress },
 		startBlock: fromBlock,
+		endBlock: toBlock = 'latest',
 		topics
 	}: {
 		contract: ContractAddress;
 		startBlock?: BlockTag;
+		endBlock?: BlockTag;
 		topics: (string | null)[];
 	}): Promise<Log[]> => {
 		try {
@@ -66,6 +72,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 					network: this.network.toString(),
 					contractAddress,
 					fromBlock: fromBlock?.toString() ?? 'latest',
+					toBlock: toBlock.toString(),
 					topics: topics.join(',')
 				}
 			});
@@ -75,7 +82,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 
 		return this.provider.getLogs({
 			fromBlock,
-			toBlock: 'latest',
+			toBlock,
 			address: contractAddress,
 			topics
 		});

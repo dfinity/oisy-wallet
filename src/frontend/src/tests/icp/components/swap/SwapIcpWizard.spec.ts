@@ -1,6 +1,10 @@
 import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
+import {
+	TRACK_COUNT_SWAP_SUBMITTED,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -8,7 +12,7 @@ import * as analytics from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
-import type { ChainFusionSwapDetails } from '$lib/types/swap';
+import { SwapProvider, type ChainFusionSwapDetails } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -418,6 +422,41 @@ describe('SwapIcpWizard', () => {
 						destinationAddress: mockEthAddress,
 						sourceToken: ckErc20SourceToken
 					})
+				);
+			});
+
+			// The id the active user transaction is created under, so the row and the
+			// `swap_submitted` event describe the same conversion.
+			it('passes a swap id and the USD value the row is snapshotted with', async () => {
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ swapId: expect.any(String) })
+				);
+
+				expect(mockChainFusionFn.mock.lastCall?.[0].swapId).not.toBe('');
+			});
+
+			// The foreground ends when the funds leave the wallet; the minter settles
+			// afterwards, and the AUT row is what reports success or failure.
+			it('reports the conversion as submitted rather than succeeded', async () => {
+				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_SWAP_SUBMITTED,
+						metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+					})
+				);
+
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 				);
 			});
 		});

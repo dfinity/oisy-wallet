@@ -13,6 +13,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
 	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
@@ -20,6 +21,10 @@
 	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+	import {
+		buildChainFusionSwapTrackingMetadata,
+		isChainFusionActiveUserTransaction
+	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { consoleError } from '$lib/utils/console.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
@@ -90,6 +95,12 @@
 					transactions: velora,
 					userAddress: $ethAddress
 				});
+			}
+
+			const chainFusion = $activeUserTransactionsPending.filter(isChainFusionActiveUserTransaction);
+
+			if (chainFusion.length > 0) {
+				await pollChainFusionActiveUserTransactions({ identity, transactions: chainFusion });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -184,6 +195,23 @@
 				trackEvent({
 					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
 					metadata: buildVeloraSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isChainFusionActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				// A ck conversion started from the Swap modal reports into the swap funnel.
+				// The untouched Convert flow keeps firing its own `TRACK_COUNT_CONVERT_*`.
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildChainFusionSwapTrackingMetadata({ tx })
 				});
 
 				if (isSucceeded) {
