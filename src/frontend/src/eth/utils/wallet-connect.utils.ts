@@ -1,3 +1,4 @@
+import { EIP155_CHAINS } from '$env/eip155-chains.env';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type {
 	WalletConnectEthSignTypedDataV4,
@@ -511,7 +512,60 @@ export const getEthTypedDataApproval = ({
 	}
 };
 
-export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
+/**
+ * Asserts that the typed data being hashed belongs to the chain the session was granted for.
+ *
+ * The domain separator carries the chain, and OISY's Ethereum key carries none: one key signs for
+ * every EVM network. So without this the chain a dApp connected under constrains nothing. A session
+ * scoped to a testnet could ask for a domain on mainnet, and the digest it got back would be
+ * accepted there by a real token — an unlimited permit obtained through a session that was never
+ * granted mainnet at all.
+ *
+ * The envelope chain is required too. Treating an absent or unrecognised one as "nothing to check"
+ * would leave the check bypassable by simply omitting it.
+ *
+ * A domain that states no chain is rejected on the same grounds rather than waved through: such a
+ * signature is bound to no network, which makes it valid on all of them.
+ */
+const assertTypedDataChain = ({
+	domain,
+	sessionChainId
+}: {
+	domain: TypedDataDomain;
+	sessionChainId: string | undefined;
+}): void => {
+	const granted = nonNullish(sessionChainId)
+		? toTypedDataDomainChainId(EIP155_CHAINS[sessionChainId]?.chainId)
+		: undefined;
+
+	if (isNullish(granted)) {
+		throw new WalletConnectEthTypedDataError(
+			`The session states no chain OISY recognizes ("${sessionChainId ?? 'none'}"), so there is nothing the signed domain can be held to.`
+		);
+	}
+
+	const signed = toTypedDataDomainChainId(domain.chainId);
+
+	if (isNullish(signed)) {
+		throw new WalletConnectEthTypedDataError(
+			'The EIP-712 domain states no chain, which would make the signature valid on every one of them.'
+		);
+	}
+
+	if (signed !== granted) {
+		throw new WalletConnectEthTypedDataError(
+			`The EIP-712 domain is on chain ${signed}, which this session was not granted: it connected for chain ${granted}.`
+		);
+	}
+};
+
+export const getSignParamsMessageTypedDataV4Hash = ({
+	params,
+	sessionChainId
+}: {
+	params: string[];
+	sessionChainId: string | undefined;
+}): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
 	const { EIP712Domain: _, ...rest } = types;
 
@@ -522,6 +576,10 @@ export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string =>
 		primaryType: TypedDataEncoder.getPrimaryType(rest),
 		message
 	});
+
+	// Checked here rather than in the review, so that the gate and the signer cannot disagree:
+	// both reach the digest through this function, and neither can produce one without a chain.
+	assertTypedDataChain({ domain, sessionChainId });
 
 	return TypedDataEncoder.hash(domain, { ...rest }, message);
 };
@@ -546,17 +604,19 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
  */
 export const hasInvalidTypedData = ({
 	method,
-	params
+	params,
+	sessionChainId
 }: {
 	method: string;
 	params: string[];
+	sessionChainId: string | undefined;
 }): boolean => {
 	if (!isEthSignTypedDataMethod(method)) {
 		return false;
 	}
 
 	try {
-		getSignParamsMessageTypedDataV4Hash(params);
+		getSignParamsMessageTypedDataV4Hash({ params, sessionChainId });
 		return false;
 	} catch (_err: unknown) {
 		return true;

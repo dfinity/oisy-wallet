@@ -52,7 +52,8 @@ describe('WalletConnectSignReview', () => {
 						})
 					]
 				},
-				chainId: ETHEREUM_NETWORK.chainId.toString()
+				// CAIP-2, as a WalletConnect envelope states it, and as the chain binding reads it.
+				chainId: `eip155:${ETHEREUM_NETWORK.chainId}`
 			},
 			verifyContext: {
 				verified: {
