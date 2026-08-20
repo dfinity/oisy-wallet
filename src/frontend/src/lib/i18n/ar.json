@@ -1659,7 +1659,8 @@
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
 			"disconnect_all": "قطع اتصال الكل",
 			"disconnect_app": "قطع الاتصال بـ $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "على سبيل المثال: wc:a281567bb3e4..."

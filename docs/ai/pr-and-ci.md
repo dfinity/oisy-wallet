@@ -236,4 +236,7 @@ reviewers — the file does it.
 Releases are tagged via the `tag-release.yml` and `bump-version.yml`
 workflows; the legacy signer has its own `bump-legacy-signer-version.yml`
 and `tag-legacy-signer-release.yml`. Don't bump versions or edit
-`signer-versions.json` manually.
+`signer-versions.json` manually. `bump-version.yml` keeps the legacy
+signer version in lockstep with the wallet, because the legacy signer is
+still rebuilt from `main` on every release. See
+[Versioning](../../SIGNER_DOMAINS.md#versioning).

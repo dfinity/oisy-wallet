@@ -1659,7 +1659,8 @@
 			"no_connected_apps": "当前没有已连接的应用。",
 			"disconnect_all": "断开所有连接",
 			"disconnect_app": "断开与 $name 的连接",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "例如：wc:a281567bb3e4..."

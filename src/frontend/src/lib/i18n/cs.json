@@ -1659,7 +1659,8 @@
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"disconnect_all": "Odpojit vše",
 			"disconnect_app": "Odpojit $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "např. wc:a281567bb3e4..."

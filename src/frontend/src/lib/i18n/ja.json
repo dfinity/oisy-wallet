@@ -1659,7 +1659,8 @@
 			"no_connected_apps": "現在接続されているアプリはありません。",
 			"disconnect_all": "すべて切断",
 			"disconnect_app": "$name を切断",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "例: wc:a281567bb3e4..."
