@@ -1,6 +1,7 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
 import en from '$lib/i18n/en.json';
 import {
+	mockChainFusionActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
 	mockNearIntentsActiveUserTransaction,
 	mockVeloraActiveUserTransaction
@@ -38,6 +39,23 @@ describe('ActiveUserTransactionItem', () => {
 		// Source and destination share a network, so it reads once, not "Ethereum → Ethereum".
 		expect(container).not.toHaveTextContent('Ethereum → Ethereum');
 		expect(container).toHaveTextContent('Ethereum');
+	});
+
+	// A ck conversion joins the swap union and reuses the shared display refs, so it
+	// needs no row layout of its own.
+	it('renders Chain Fusion rows as a swap with the provider and the cross-chain networks', () => {
+		const { container } = render(ActiveUserTransactionItem, {
+			props: {
+				tx: mockChainFusionActiveUserTransaction,
+				isUnseen: false,
+				dismissing: false,
+				onDismiss: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(`${en.swap.text.swap} 1 ckETH → ETH`)).toBeInTheDocument();
+		expect(container).toHaveTextContent('Internet Computer → Ethereum');
+		expect(container).toHaveTextContent('Chain Fusion');
 	});
 
 	it('renders Liquidium rows with the action, amount, asset and provider', () => {

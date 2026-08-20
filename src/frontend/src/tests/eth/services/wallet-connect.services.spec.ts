@@ -1,12 +1,16 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
-import { signMessage } from '$eth/services/wallet-connect.services';
+import { send as executeSend } from '$eth/services/send.services';
+import { send, signMessage } from '$eth/services/wallet-connect.services';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { authStore } from '$lib/stores/auth.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
@@ -16,6 +20,10 @@ import type { WalletKitTypes } from '@reown/walletkit';
 vi.mock('$lib/api/signer.api', () => ({
 	signPrehash: vi.fn(),
 	signMessage: vi.fn()
+}));
+
+vi.mock('$eth/services/send.services', () => ({
+	send: vi.fn()
 }));
 
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
@@ -199,5 +207,68 @@ describe('eth wallet-connect.services', () => {
 				});
 			}
 		);
+	});
+
+	describe('send', () => {
+		const mockListener = {
+			rejectRequest: vi.fn(),
+			approveRequest: vi.fn()
+		} as unknown as WalletConnectListener;
+
+		const estimatedGas = 250_000n;
+
+		const buildParams = (gas?: string) => ({
+			request: {
+				id: 1,
+				topic: 'mock-topic',
+				params: {
+					request: {
+						method: 'eth_sendTransaction',
+						params: [{ from: HOLDER, to: SPENDER, gas }]
+					}
+				}
+			} as unknown as WalletKitTypes.SessionRequest,
+			listener: mockListener,
+			address: HOLDER,
+			amount: ZERO,
+			fee: {
+				maxFeePerGas: 1_000_000_000n,
+				maxPriorityFeePerGas: 100_000_000n,
+				gas: estimatedGas
+			},
+			modalNext: vi.fn(),
+			progress: vi.fn(),
+			token: ETHEREUM_TOKEN,
+			identity: mockIdentity,
+			minterInfo: undefined,
+			sourceNetwork: ETHEREUM_NETWORK,
+			targetNetwork: ETHEREUM_NETWORK
+		});
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(executeSend).mockResolvedValue({ hash: '0xHASH' });
+		});
+
+		it('signs the gas limit the dApp requested', async () => {
+			const { success } = await send(buildParams('0x1e8480'));
+
+			expect(success).toBeTruthy();
+			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: 2_000_000n });
+		});
+
+		it('signs the gas OISY resolved when the request carries none', async () => {
+			const { success } = await send(buildParams());
+
+			expect(success).toBeTruthy();
+			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: estimatedGas });
+		});
+
+		it('signs the gas OISY resolved when the requested limit is not a usable quantity', async () => {
+			const { success } = await send(buildParams('0x'));
+
+			expect(success).toBeTruthy();
+			expect(vi.mocked(executeSend).mock.calls[0][0]).toMatchObject({ gas: estimatedGas });
+		});
 	});
 });

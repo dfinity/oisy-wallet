@@ -158,7 +158,9 @@ The two are treated independently, because only one of them is essential. If the
 
 The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
 
-This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token.
+The same warning appears on the token's own page, above its transaction list — naming only that token, and labelling the list as stale rather than replacing it, since what was loaded before the outage is still worth showing. The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**, and is shared between the two places: dismissing it on the token page also stops that token being named on the Activity page. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference. Tokens are identified by their ledger canister ID rather than their symbol, so two tokens that happen to share a symbol are never confused for one another.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
 
 ---
 
@@ -251,7 +253,21 @@ Simulation also sees what a static decode structurally cannot. Effects produced 
 
 The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
 
-Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For transfers OISY does decode, the destination (or, for an approval, the spender) is shown as before.
+Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
+
+### Sources and destinations of a Solana transaction
+
+The same review answers "where is this going?" with two lists rather than one address. **Sources** holds the accounts the transaction spends from, and **Destinations** the accounts it pays into. The two rules are asymmetric on purpose: Sources holds the sources of transfers **the user's account is the source of**, while Destinations holds the destinations of transfers the user's account is **either the source or the destination** of. So a counterparty paying into a pool is never listed as a source, and the user appears as a source only when value genuinely leaves one of their accounts. A plain send yields exactly one entry in each list; a swap yields several, because every leg the user is on one side of contributes its destination.
+
+That asymmetry is what makes a swap describable at all. The leg that pays the user out puts one of the **user's own** accounts among the destinations, which is how the review shows what the user receives and not only what they spend. Such an entry is **marked as the user's own account**, so it does not read as a counterparty. Sources, by contrast, is hidden when it holds nothing but the wallet the review already names, since repeating it says nothing.
+
+Only transfers count. Creating an associated token account, changing an authority, setting a compute budget, or approving a spender contributes to neither list (an approval keeps its own spender row). Accounts are listed by the **wallet that owns them** wherever OISY knows it, because SPL transfers name token accounts and nobody recognises their own associated token account.
+
+The lists are built from the same simulation as the preview above, which is the only way to see a routed swap: such a swap performs every one of its transfers inside cross-program invocations, which do not exist in the unsigned message at all. When there is no simulation to build them from, OISY falls back to the instructions the message states itself **and says that the lists are partial**. That warning is not optional: without it, a routed swap would show two empty lists for a transaction that moves several amounts, and an empty list reads as an answer rather than as a gap.
+
+Showing several addresses does not make a self-contradicting transaction showable. A transaction whose instructions **disagree** about source, destination, payer, token or action type is still refused outright, exactly as before. Several addresses that agree about what happened is a swap; instructions that disagree about what happened is something OISY cannot state faithfully at all.
+
+The lists currently appear on the WalletConnect sign review. Showing them on an executed transaction in the activity list is a follow-up.
 
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 
@@ -284,6 +300,29 @@ A transaction is never submitted without a resolved fee: every Ethereum send pat
 While a BTC send initiated through the wallet is unconfirmed, its UTXOs are reserved on the backend so the next send flow cannot pick the same UTXOs and build a conflicting transaction. Reservations are kept per user (the caller's principal) and auto-expire one hour after they are recorded, on the assumption that a still-unconfirmed transaction at that point has failed and the inputs are free again.
 
 The Bitcoin address scoped to a reservation is always **derived from the authenticated principal** (P2WPKH from the threshold-ECDSA-derived public key). The caller cannot specify which address's pending transactions are read, added, or pruned — there is no API surface for that, and there is no support for a single user owning multiple addresses. The reservation system is a self-affecting UX guard; double-spend itself is prevented by Bitcoin consensus.
+
+---
+
+## Swap
+
+### Chain Fusion as a swap provider
+
+Turning ETH into ckETH, or a twinned ERC-20 into its ckERC-20 counterpart, is offered inside the Swap modal as an ordinary provider named **Chain Fusion**, competing on rate with ICPSwap, KongSwap, Velora, NEAR Intents and 1Sec. Selecting ETH as the pay token puts ckETH among the receive options; selecting ckETH puts ETH among them, and the same holds for every ck twin whose native side is on **Ethereum mainnet** — the only network where the ck helper contracts are deployed. USDC on Base or Arbitrum therefore gets no Chain Fusion offer, because a ckUSDC deposit made there could never be minted.
+
+The offer carries no slippage: a ck conversion is deterministic, so the rate is 1:1 apart from fees, and the provider sheet itemizes those fees one row at a time rather than as a single sum. A ckERC-20 withdrawal is the one case that charges in a **third token** — the minter's Ethereum gas is paid in ckETH — so the sheet names it separately and the form blocks Review when the user's ckETH balance cannot cover it.
+
+The pre-existing **Convert** flow is unchanged and still reachable from a token's own page. Both paths coexist; the two mechanisms are identical, only the entry point and the presentation differ.
+
+### Cross-session settlement
+
+A ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
+
+How settlement is observed differs by direction, because the minters answer different questions:
+
+- A **withdrawal** (ckETH → ETH, ckERC-20 → ERC-20) is exact. The minter is asked about the withdrawal directly, keyed on the ledger burn index it returned. Note that a freshly submitted withdrawal reads as "not found" until the minter indexes it, which is treated as "still in flight" and never as a failure — a terminal verdict cannot be taken back.
+- A **mint** (ETH → ckETH, ERC-20 → ckERC-20) has no per-deposit status endpoint, so it is followed the same way the Convert flow's pending "virtual" transaction is: the deposit counts as in flight for as long as the minter has not yet scanned past the Ethereum block it landed in, and the helper contract's deposit log is what confirms, once the minter has, that there was a deposit to mint at all. A transaction that reverted, or that mined without producing a deposit log for this user, is reported as failed rather than quietly counted as a success.
+
+When a row reaches a terminal state it refreshes the wallet and reports into the **swap** analytics funnel — not the convert one — exactly once, including when it finalizes across a page refresh.
 
 ---
 

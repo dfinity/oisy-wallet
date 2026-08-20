@@ -1,4 +1,5 @@
 import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
+import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 import type { IcToken } from '$icp/types/ic-token';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD } from '$lib/constants/app.constants';
@@ -22,5 +23,32 @@ export const tokensWithUnavailableIndexCanister: Readable<IcToken[]> = derived(
 	([$enabledIcTokens, $icTransactionsStatusStore]) =>
 		$enabledIcTokens.filter(
 			({ id }) => ($icTransactionsStatusStore[id] ?? 0) >= IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD
+		)
+);
+
+/**
+ * The enabled tokens whose transactions were fetched successfully at least once since the app
+ * loaded — an entry of zero, as opposed to no entry at all.
+ *
+ * The distinction matters for anything that wants to react to a *recovery*: "not failing" is also
+ * true of every token the wallet has yet to reach, which on a fresh page load is all of them.
+ */
+export const tokensWithRecoveredIndexCanister: Readable<IcToken[]> = derived(
+	[enabledIcTokens, icTransactionsStatusStore],
+	([$enabledIcTokens, $icTransactionsStatusStore]) =>
+		$enabledIcTokens.filter(({ id }) => $icTransactionsStatusStore[id] === 0)
+);
+
+/**
+ * The tokens the user should actually be warned about: failing, and not already acknowledged.
+ *
+ * Shared by the Activity page and the token page so that dismissing the warning in one silences it
+ * in the other.
+ */
+export const tokensToWarnAboutIndexCanister: Readable<IcToken[]> = derived(
+	[tokensWithUnavailableIndexCanister, icTransactionsWarningStore],
+	([$tokensWithUnavailableIndexCanister, $icTransactionsWarningStore]) =>
+		$tokensWithUnavailableIndexCanister.filter(
+			({ ledgerCanisterId }) => !$icTransactionsWarningStore.includes(ledgerCanisterId)
 		)
 );

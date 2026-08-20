@@ -935,8 +935,8 @@
 		"text": {
 			"send": "भेजें",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "गंतव्य",
-			"source": "स्रोत",
 			"balance": "शेष राशि",
 			"review": "समीक्षा",
 			"signing_approval": "अनुमोदन पर हस्ताक्षर कर रहा है...",
@@ -1220,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "कम से कम एक टोकन की कीमत प्राप्त नहीं की जा सकी। कृपया <strong>स्वतंत्र रूप से सत्यापित करें</strong> कि यह स्वैप ऑफर उचित सौदा है।<br>ध्यान दें कि स्लिपेज सेटिंग आपको बहुत कम प्राप्त मूल्य वाले ऑफर से सुरक्षित <strong>नहीं</strong> करती है!"
 		},
@@ -1611,8 +1612,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
@@ -1621,6 +1628,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1638,7 +1646,8 @@
 			"no_connected_apps": "वर्तमान में कोई ऐप्स कनेक्ट नहीं हैं।",
 			"disconnect_all": "सभी डिस्कनेक्ट करें",
 			"disconnect_app": "$name को डिस्कनेक्ट करें",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "उदाहरण के लिए wc:a281567bb3e4..."
@@ -1681,9 +1690,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "लेनदेन के लिए अनुरोधित 'फ्रॉम' पता इस वॉलेट का पता नहीं है।",
 			"unknown_destination": "अज्ञात गंतव्य पता।",
 			"ambiguous_transaction": "यह लेनदेन कई पतों के बीच धनराशि स्थानांतरित करता है और समीक्षा के लिए सटीक रूप से नहीं दिखाया जा सकता। आपकी सुरक्षा के लिए, इसे साइन नहीं किया गया।",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "अप्रत्याशित त्रुटि: अनुरोध परिभाषित नहीं है इसलिए इसे संसाधित नहीं किया जा सकता है।",
 			"unexpected_processing_request": "वॉलेटकनेक्ट के साथ अनुरोध को संसाधित करते समय अप्रत्याशित त्रुटि।"
 		}
@@ -1939,7 +1950,9 @@
 			"to_ata": "प्राप्तकर्ता टोकन खाता (ATA)",
 			"to_ata_copied": "प्राप्तकर्ता टोकन खाता (ATA) क्लिपबोर्ड पर कॉपी किया गया।",
 			"block": "ब्लॉक",
-			"interacted_with": "के साथ इंटरैक्ट किया गया (को)",
+			"interacted_with": "के साथ इंटरैक्ट किया गया",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "स्थिति",
 			"confirmations": "पुष्टियां",
 			"for": "",

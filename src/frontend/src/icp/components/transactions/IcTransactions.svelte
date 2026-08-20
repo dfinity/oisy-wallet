@@ -16,8 +16,12 @@
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import { tokensWithUnavailableIndexCanister } from '$icp/derived/ic-transactions-status.derived';
+	import {
+		tokensToWarnAboutIndexCanister,
+		tokensWithUnavailableIndexCanister
+	} from '$icp/derived/ic-transactions-status.derived';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
+	import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
@@ -25,6 +29,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -32,6 +37,8 @@
 	import { hideMicroTransactions } from '$lib/derived/user-profile.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { filterReceivedMicroTransactions } from '$lib/utils/transactions.utils';
 
@@ -54,6 +61,12 @@
 	let unavailableIndexCanister = $derived(
 		nonNullish($pageToken) &&
 			$tokensWithUnavailableIndexCanister.some(({ id }) => id === $pageToken.id)
+	);
+
+	// Only this token, never the whole failing set: the page is about one token. Dismissal is shared
+	// with the Activity page, so closing it here stops naming this token there too.
+	let warnedToken = $derived(
+		$tokensToWarnAboutIndexCanister.find(({ id }) => id === $pageToken?.id)
 	);
 
 	let token = $derived($pageToken ?? ICP_TOKEN);
@@ -101,6 +114,17 @@
 
 {#if !noTransactions}
 	<HiddenMicroTransactionsInfoBox />
+{/if}
+
+<!-- Above the list rather than replacing it: what was loaded before the outage is still worth
+	showing, but it is stale and has to say so. -->
+{#if nonNullish(warnedToken) && filteredTransactions.length > 0}
+	<MessageBox level="warning" onDismiss={() => icTransactionsWarningStore.dismiss([warnedToken])}>
+		{replacePlaceholders(
+			replaceOisyPlaceholders($i18n.activity.warning.unavailable_index_canister),
+			{ $token_list: getTokenDisplaySymbol(warnedToken) }
+		)}
+	</MessageBox>
 {/if}
 
 <IcTransactionsSkeletons>

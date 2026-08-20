@@ -203,7 +203,9 @@ describe('ic-listener', () => {
 
 				syncWallet({ data: mockPostMessageNoTransactions, tokenId });
 
-				expect(get(icTransactionsStatusStore)[tokenId]).toBeUndefined();
+				// Zero, not absent: the token is recorded as checked and not failing. `succeed` writes
+				// the zero so that "never checked" stays distinguishable from "checked and fine".
+				expect(get(icTransactionsStatusStore)[tokenId]).toBe(0);
 			});
 		});
 

@@ -4,13 +4,38 @@ import type {
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
-import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
+
+/**
+ * The gas limit an `eth_sendTransaction` request asks OISY to sign, as a bigint.
+ *
+ * `eth_sendTransaction` quotes it as a hex quantity. Returns `undefined` when the request carries
+ * no limit, or one that is not a usable quantity, in which case the caller falls back to the gas
+ * OISY resolved itself.
+ *
+ * Both the review and the send path resolve the limit through here, so the maximum fee shown for
+ * approval is computed from the very limit that ends up in the signed transaction.
+ */
+export const getSendParamsGas = (gas: string | undefined): bigint | undefined => {
+	if (isNullish(gas)) {
+		return;
+	}
+
+	try {
+		const parsed = BigInt(gas);
+
+		return parsed > ZERO ? parsed : undefined;
+	} catch (_err: unknown) {
+		// A limit that does not parse says nothing about what the dApp wanted, so it is treated as
+		// absent rather than signed as-is.
+	}
+};
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isEthAddress(p))[0];
@@ -271,7 +296,10 @@ export const assertValidEthTypedData = ({
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
-	toApproval: (message: Record<string, unknown>) => WalletConnectEthTypedDataApproval;
+	toApproval: (params: {
+		message: Record<string, unknown>;
+		domain: TypedDataDomain;
+	}) => WalletConnectEthTypedDataApproval;
 }
 
 const toDeclaredAddress = (value: unknown): string | undefined =>
@@ -279,6 +307,45 @@ const toDeclaredAddress = (value: unknown): string | undefined =>
 
 const toDeclaredUint = (value: unknown): bigint | undefined =>
 	typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
+
+/**
+ * The chain a typed-data domain states, as a number.
+ *
+ * EIP-712 declares `chainId` as a `uint256`, so a domain may state it as a number, as a decimal
+ * string, or as a hex one, and every form hashes to the same digest. Comparing them as text
+ * matched only the form OISY happens to write, dropping the token for the rest, and the amount
+ * hangs off the token.
+ *
+ * Returns `undefined` for anything that is not a chain. The value comes from the dApp, and
+ * `BigInt` throws on what it cannot read rather than reporting it, so a token is then left
+ * unresolved instead of resolved wrongly.
+ */
+export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => {
+	if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'bigint') {
+		return;
+	}
+
+	try {
+		return BigInt(value);
+	} catch (_err: unknown) {
+		// Not a chain id at all.
+	}
+};
+
+/**
+ * A deadline as a number of seconds, when it is one a date can be built from.
+ *
+ * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and that is not a
+ * moment in time: turned into a `Number` it becomes a year with seventy digits. Such a deadline is
+ * left out rather than rendered, since a nonsense date reads as a real one.
+ */
+const toExpirationSeconds = (value: unknown): number | undefined => {
+	const seconds = toDeclaredUint(value);
+
+	return nonNullish(seconds) && seconds >= ZERO && seconds <= BigInt(Number.MAX_SAFE_INTEGER)
+		? Number(seconds)
+		: undefined;
+};
 
 const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
 	nonNullish(value) && typeof value === 'object' && !Array.isArray(value)
@@ -310,16 +377,19 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'nonce', type: 'uint48' }
 			]
 		},
-		toApproval: ({ spender, details }) => {
+		// Permit2 names the token it is granting an allowance over, and the contract verifying the
+		// signature is Permit2 itself rather than that token, so the domain must not be read here.
+		toApproval: ({ message: { spender, details } }) => {
 			const { token, amount, expiration } = toDeclaredStruct(details);
 
-			const expirationSeconds = toDeclaredUint(expiration);
+			const declaredAmount = toDeclaredUint(amount);
 
 			return {
 				spender: toDeclaredAddress(spender),
 				token: toDeclaredAddress(token),
-				amount: toDeclaredUint(amount),
-				expiration: nonNullish(expirationSeconds) ? Number(expirationSeconds) : undefined
+				amount: declaredAmount,
+				unlimited: declaredAmount === MAX_UINT_160,
+				expiration: toExpirationSeconds(expiration)
 			};
 		}
 	},
@@ -335,7 +405,20 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'deadline', type: 'uint256' }
 			]
 		},
-		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+		// ERC-2612 names no token, because the permit is verified by the token contract itself. The
+		// domain is what the digest is separated by, so `verifyingContract` is covered by the
+		// signature exactly as the members of the message are.
+		toApproval: ({ message: { spender, value, deadline }, domain: { verifyingContract } }) => {
+			const declaredValue = toDeclaredUint(value);
+
+			return {
+				spender: toDeclaredAddress(spender),
+				token: toDeclaredAddress(verifyingContract),
+				amount: declaredValue,
+				unlimited: declaredValue === MAX_UINT_256,
+				expiration: toExpirationSeconds(deadline)
+			};
+		}
 	},
 	// DAI's non-standard `Permit`, whose approval is a bool rather than an amount.
 	{
@@ -349,7 +432,16 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'allowed', type: 'bool' }
 			]
 		},
-		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+		// DAI carries no amount: `allowed` sets the allowance to the largest a `uint256` holds, and
+		// clearing it revokes. The bool is the allowance, so it is read as one rather than left as
+		// a word in the folded message.
+		toApproval: ({ message: { spender, expiry, allowed }, domain: { verifyingContract } }) => ({
+			spender: toDeclaredAddress(spender),
+			token: toDeclaredAddress(verifyingContract),
+			amount: allowed === true ? undefined : ZERO,
+			unlimited: allowed === true,
+			expiration: toExpirationSeconds(expiry)
+		})
 	}
 ];
 
@@ -394,6 +486,7 @@ const matchesApprovalSchema = ({
  * cannot be steered by a key that the signature does not cover.
  */
 export const getEthTypedDataApproval = ({
+	domain,
 	types,
 	message
 }: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
@@ -410,7 +503,7 @@ export const getEthTypedDataApproval = ({
 	try {
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
-		return schema.toApproval(message);
+		return schema.toApproval({ message, domain });
 	} catch (_err: unknown) {
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be

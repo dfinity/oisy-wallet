@@ -935,8 +935,8 @@
 		"text": {
 			"send": "Enviar",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Destino",
-			"source": "Origem",
 			"balance": "Saldo",
 			"review": "Revisar",
 			"signing_approval": "Assinando aprovação...",
@@ -1220,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Não foi possível obter o preço de pelo menos um dos tokens. Por favor, <strong>verifique de forma independente</strong> se esta oferta de swap é justa.<br>Observe que a configuração de slippage <strong>não</strong> o protege de uma oferta com um valor de recebimento muito menor!"
 		},
@@ -1611,8 +1612,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
@@ -1621,6 +1628,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1638,7 +1646,8 @@
 			"no_connected_apps": "Nenhum aplicativo está conectado no momento.",
 			"disconnect_all": "Desconectar todos",
 			"disconnect_app": "Desconectar $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "ex: wc:a281567bb3e4..."
@@ -1681,9 +1690,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "O endereço 'De' solicitado para a transação não é o endereço desta carteira.",
 			"unknown_destination": "Endereço de destino desconhecido.",
 			"ambiguous_transaction": "Esta transação movimenta fundos entre vários endereços e não pode ser exibida com precisão para revisão. Para sua segurança, ela não foi assinada.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Erro inesperado: A solicitação não está definida, portanto, não pode ser processada.",
 			"unexpected_processing_request": "Erro inesperado ao processar a solicitação com WalletConnect."
 		}
@@ -1939,7 +1950,9 @@
 			"to_ata": "Conta de token do destinatário (ATA)",
 			"to_ata_copied": "Conta de token do destinatário (ATA) copiada para a área de transferência.",
 			"block": "Bloco",
-			"interacted_with": "Interagido com (Para)",
+			"interacted_with": "Interagido com",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Status",
 			"confirmations": "Confirmações",
 			"for": "",

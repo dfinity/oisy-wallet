@@ -935,8 +935,8 @@
 		"text": {
 			"send": "Отправить",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Получатель",
-			"source": "Источник",
 			"balance": "Баланс",
 			"review": "Подверждение",
 			"signing_approval": "Подписание одобрения...",
@@ -1220,6 +1220,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
@@ -1611,8 +1612,14 @@
 			"simulation_new_close_authority": "",
 			"simulation_new_program": "",
 			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
 			"dapp_prioritization_fee": "",
 			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
@@ -1621,6 +1628,7 @@
 			"sign_transaction": "",
 			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1638,7 +1646,8 @@
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
 			"disconnect_all": "Отключить все",
 			"disconnect_app": "Отключить $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "например, wc:a281567bb3e4..."
@@ -1681,9 +1690,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
 		}
@@ -1939,7 +1950,9 @@
 			"to_ata": "Счет отправителя токенов (ATA)",
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
-			"interacted_with": "Взаимодействовали с (Получатель)",
+			"interacted_with": "Взаимодействовали с",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "Для",
