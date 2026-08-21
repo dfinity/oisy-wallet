@@ -342,9 +342,19 @@ const resolveCkErc20WithdrawalDetails = async (
  * Convert flow deducts too. The ledger fee (for `icrc2_approve`) and the KYT fee are
  * charged beside the amount.
  *
- * The fee estimate depends on the amount, so unlike the Ethereum arms this query has to
- * run again whenever the user edits the input — which the swap flow already does, both on
- * the debounced amount change and on the periodic refetch.
+ * The fee estimate depends on the amount, so unlike the Ethereum arms this query re-runs on
+ * every debounced amount change. It does *not* refresh beyond that: `SwapTokenWizard` sets
+ * `enableAmountUpdates` false for an ICP-network source, so the periodic refetch never runs
+ * for this arm, and reaching Review pauses updates outright. The figure is therefore frozen
+ * as of the user's last edit, and a long deliberation can show a stale
+ * `bitcoin_fee + minter_fee` — and so a stale receive amount.
+ *
+ * Bounded on purpose: nothing computed here reaches execution. `fetchChainFusionIcpSwap`
+ * passes only the amount, and the minter deducts whatever its fee is at that moment, so a
+ * stale estimate misreports the *displayed* receive amount and never the transfer. That is
+ * the same accuracy the Convert flow offers, whose `BitcoinFeeContext` is likewise only
+ * amount-driven. Contrast the ckERC20 arm, where a stale figure would have the minter
+ * *reject* the withdrawal — which is why that one alone is re-queried at the point of use.
  */
 const resolveCkBtcWithdrawalDetails = async ({
 	sourceToken,
