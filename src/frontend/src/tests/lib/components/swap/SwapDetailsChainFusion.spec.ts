@@ -1,5 +1,4 @@
 import SwapDetailsChainFusion from '$lib/components/swap/SwapDetailsChainFusion.svelte';
-import { ZERO } from '$lib/constants/app.constants';
 import { initSwapContext, SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 import { SwapProvider, type ChainFusionSwapDetails } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
@@ -44,118 +43,22 @@ describe('SwapDetailsChainFusion', () => {
 		swapDetails
 	});
 
-	it('renders a deducted fee row with its own label, the formatted amount and token symbol', () => {
-		// 10_000 units at 6 decimals = 0.01
-		const { getByText } = render(SwapDetailsChainFusion, {
+	// The fee breakdown belongs to the form's fee section, which carries every component and
+	// their total. This sheet is the provider's identity and the constraints it imposes, so a
+	// fee row here would either duplicate that list or leave both surfaces incomplete.
+	it('renders no fee rows at all', () => {
+		const { queryByText } = render(SwapDetailsChainFusion, {
 			props: {
 				provider: makeProvider({
 					sourceFees: [
-						{
-							labelPath: 'fee.text.fee',
-							fee: 10_000n,
-							token: sourceToken,
-							deductedFromAmount: true
-						}
-					],
-					externalFees: []
-				})
-			},
-			context: makeContext()
-		});
-
-		expect(getByText(en.fee.text.fee)).toBeInTheDocument();
-		expect(getByText('0.01 ckUSDC')).toBeInTheDocument();
-	});
-
-	it('itemizes fees in the same token into one labelled row each, never summing', () => {
-		const { getByText } = render(SwapDetailsChainFusion, {
-			props: {
-				provider: makeProvider({
-					sourceFees: [
+						{ labelPath: 'fee.text.fee', fee: 10_000n, token: sourceToken },
 						{
 							labelPath: 'fee.text.convert_inter_network_fee',
-							fee: 10_000n,
-							token: sourceToken,
-							deductedFromAmount: true
-						},
-						{
-							labelPath: 'fee.text.convert_btc_network_fee',
 							fee: 5_000n,
 							token: sourceToken,
 							deductedFromAmount: true
 						}
 					],
-					externalFees: []
-				})
-			},
-			context: makeContext()
-		});
-
-		expect(getByText(en.fee.text.convert_inter_network_fee)).toBeInTheDocument();
-		expect(getByText('0.01 ckUSDC')).toBeInTheDocument();
-		expect(getByText(en.fee.text.convert_btc_network_fee)).toBeInTheDocument();
-		expect(getByText('0.005 ckUSDC')).toBeInTheDocument();
-	});
-
-	it('renders each fee at the full precision of its own token, like the Convert flow', () => {
-		const { getByText } = render(SwapDetailsChainFusion, {
-			props: {
-				provider: makeProvider({
-					sourceFees: [
-						{
-							labelPath: 'fee.text.fee',
-							fee: 10_000n,
-							token: sourceToken,
-							deductedFromAmount: true
-						},
-						{
-							labelPath: 'fee.text.estimated_eth',
-							fee: 37_416_829_103_847n,
-							token: ckEthToken,
-							deductedFromAmount: true
-						}
-					],
-					externalFees: []
-				})
-			},
-			context: makeContext()
-		});
-
-		expect(getByText('0.01 ckUSDC')).toBeInTheDocument();
-		expect(getByText('0.000037416829103847 ckETH')).toBeInTheDocument();
-	});
-
-	it('renders a zero fee with the zero-fee label instead of dropping the row', () => {
-		const { getByText, queryByText } = render(SwapDetailsChainFusion, {
-			props: {
-				provider: makeProvider({
-					sourceFees: [
-						{
-							labelPath: 'fee.text.convert_fee',
-							fee: ZERO,
-							token: sourceToken,
-							deductedFromAmount: true
-						}
-					],
-					externalFees: []
-				})
-			},
-			context: makeContext()
-		});
-
-		expect(getByText(en.fee.text.convert_fee)).toBeInTheDocument();
-		expect(getByText(en.fee.text.zero_fee)).toBeInTheDocument();
-		expect(queryByText('0 ckUSDC')).not.toBeInTheDocument();
-	});
-
-	// The exact inverse of `SwapFees`: a fee charged on top of the amount lives once, in
-	// the dedicated fees section — this sheet carries only what is folded into the offer,
-	// the way 1Sec itemizes its transfer and protocol fees.
-	it('omits fees charged on top of the amount — they live in the SwapFees section', () => {
-		const { queryByText } = render(SwapDetailsChainFusion, {
-			props: {
-				provider: makeProvider({
-					sourceFees: [{ labelPath: 'fee.text.fee', fee: 10_000n, token: sourceToken }],
 					externalFees: [
 						{ labelPath: 'fee.text.estimated_eth', fee: 2_000_000_000_000n, token: ckEthToken }
 					]
@@ -165,7 +68,10 @@ describe('SwapDetailsChainFusion', () => {
 		});
 
 		expect(queryByText(en.fee.text.fee)).not.toBeInTheDocument();
+		expect(queryByText(en.fee.text.convert_inter_network_fee)).not.toBeInTheDocument();
 		expect(queryByText(en.fee.text.estimated_eth)).not.toBeInTheDocument();
+		expect(queryByText('0.01 ckUSDC')).not.toBeInTheDocument();
+		expect(queryByText('0.005 ckUSDC')).not.toBeInTheDocument();
 		expect(queryByText('0.000002 ckETH')).not.toBeInTheDocument();
 	});
 

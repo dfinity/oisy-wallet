@@ -20,7 +20,7 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -43,6 +43,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -111,9 +112,20 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
 	);
 
-	// Both close the modal once the funds have left the wallet and finish settling
-	// through the Active User Transactions store.
-	let isActiveTransactionSwap = $derived(isOneSecProvider || isChainFusionProvider);
+	// The user's own address on the destination chain, which is where the minter pays the
+	// withdrawal out. Bitcoin and Ethereum are the only ck destinations.
+	let isBitcoinDestination = $derived(isNetworkIdBitcoin($destinationToken?.network.id));
+
+	let destinationAddress = $derived(isBitcoinDestination ? $btcAddressMainnet : $ethAddress);
+
+	// These close the modal once the funds have left the wallet and finish settling through
+	// the Active User Transactions store. A ckBTC → BTC withdrawal is deliberately excluded:
+	// it settles in the background too, but nothing is tracking it until the Bitcoin
+	// family's AUT poller lands, and promising a row that does not exist is worse than
+	// showing the plain stepper.
+	let isActiveTransactionSwap = $derived(
+		isOneSecProvider || (isChainFusionProvider && !isBitcoinDestination)
+	);
 
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
@@ -206,7 +218,7 @@
 					swapId: crypto.randomUUID()
 				});
 			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
-				if (isNullish($ethAddress)) {
+				if (isNullish(destinationAddress)) {
 					toastsError({
 						msg: { text: $i18n.swap.error.unexpected_missing_data }
 					});
@@ -220,7 +232,7 @@
 					sourceToken: $sourceToken as IcCkToken,
 					destinationToken: $destinationToken,
 					swapAmount,
-					destinationAddress: $ethAddress,
+					destinationAddress,
 					swapId: crypto.randomUUID(),
 					usdSourceValue: sourceTokenUsdValue,
 					enableDestinationToken: () =>

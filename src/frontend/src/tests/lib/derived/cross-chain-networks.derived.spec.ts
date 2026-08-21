@@ -2,6 +2,7 @@ import {
 	SUPPORTED_EVM_MAINNET_NETWORKS,
 	SUPPORTED_EVM_TESTNET_NETWORKS
 } from '$env/networks/networks-evm/networks.evm.env';
+import { BTC_MAINNET_NETWORK } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
@@ -74,6 +75,46 @@ describe('cross-chain-swap derived stores', () => {
 			expect(result).toContain(ETHEREUM_NETWORK);
 			expect(result).not.toContain(SOLANA_MAINNET_NETWORK);
 			expect(result).not.toContain(SOLANA_DEVNET_NETWORK);
+		});
+
+		// Chain Fusion is the only provider that reaches Bitcoin, so the network has nothing
+		// to contribute to the swap filter without it.
+		it('should not include Bitcoin networks while Chain Fusion is off', () => {
+			const result = get(crossChainSwapNetworks);
+
+			expect(result).not.toContain(BTC_MAINNET_NETWORK);
+		});
+
+		it('should include the enabled Bitcoin mainnet network when Chain Fusion is on', async () => {
+			vi.resetModules();
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
+
+			try {
+				const [
+					{ crossChainSwapNetworks: networks },
+					{ setupTestnetsStore: setupTestnets },
+					{ setupUserNetworksStore: setupNetworks },
+					{ BTC_MAINNET_NETWORK: bitcoinMainnet, BTC_TESTNET_NETWORK: bitcoinTestnet }
+				] = await Promise.all([
+					import('$lib/derived/cross-chain-networks.derived'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$env/networks/networks.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				const result = get(networks);
+
+				expect(result).toContain(bitcoinMainnet);
+				// Swap is mainnet-only; the testnet network is dropped downstream by
+				// `crossChainSwapNetworksMainnets`, and testnets are off here anyway.
+				expect(result).not.toContain(bitcoinTestnet);
+			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.resetModules();
+			}
 		});
 	});
 
