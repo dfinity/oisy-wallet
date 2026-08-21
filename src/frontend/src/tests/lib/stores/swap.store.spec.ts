@@ -447,7 +447,8 @@ describe('swapStore', () => {
 				aggregated: {
 					icp: { coverage: 'all', supportedTokenIds: supportedSet },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{

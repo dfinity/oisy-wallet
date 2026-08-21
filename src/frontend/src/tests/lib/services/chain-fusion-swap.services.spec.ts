@@ -1,26 +1,47 @@
+import { sendBtc } from '$btc/services/btc-send.services';
+import { prepareBtcSend } from '$btc/services/btc-utxos.service';
+import { allUtxosStore } from '$btc/stores/all-utxos.store';
+import { feeRatePercentilesStore } from '$btc/stores/fee-rate-percentiles.store';
+import { BtcPrepareSendError } from '$btc/types/btc-send';
 import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { send as sendEth } from '$eth/services/send.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import { estimateFee } from '$icp/api/ckbtc-minter.api';
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
 import { sendIc } from '$icp/services/ic-send.services';
+import { btcAddressStore } from '$icp/stores/btc.store';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
+import { ZERO } from '$lib/constants/app.constants';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { createActiveUserTransaction } from '$lib/services/active-user-transactions.services';
 import {
+	fetchChainFusionBtcQuote,
+	fetchChainFusionBtcSwap,
 	fetchChainFusionEvmQuote,
 	fetchChainFusionEvmSwap,
 	fetchChainFusionIcpQuote,
 	fetchChainFusionIcpSwap
 } from '$lib/services/chain-fusion-swap.services';
-import { SwapProvider, type EvmQuoteParams, type IcpBridgeQuoteParams } from '$lib/types/swap';
+import {
+	SwapProvider,
+	type BtcQuoteParams,
+	type EvmQuoteParams,
+	type IcpBridgeQuoteParams
+} from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockBtcAddress, mockUtxo, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';
+import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
 	mockValidIcCkToken,
@@ -43,6 +64,21 @@ vi.mock('$icp/api/cketh-minter.api', () => ({
 	eip1559TransactionPrice: vi.fn()
 }));
 
+vi.mock('$icp/api/ckbtc-minter.api', () => ({
+	estimateFee: vi.fn()
+}));
+
+// The quote's UTXO selection is a pure function of three stores; stubbing it keeps these
+// cases about what the quote does with the result rather than about UTXO arithmetic, which
+// `btc-utxos.utils` covers on its own.
+vi.mock('$btc/services/btc-utxos.service', () => ({
+	prepareBtcSend: vi.fn()
+}));
+
+vi.mock('$btc/services/btc-send.services', () => ({
+	sendBtc: vi.fn()
+}));
+
 vi.mock('$icp/services/ic-send.services', () => ({
 	sendIc: vi.fn()
 }));
@@ -58,10 +94,16 @@ vi.mock('$lib/services/active-user-transactions.services', () => ({
 const IC_CKETH_LEDGER = 'ss2fx-dyaaa-aaaar-qacoq-cai';
 const IC_CKUSDC_LEDGER = 'xevnm-gaaaa-aaaar-qafnq-cai';
 const LOCAL_CKUSDC_LEDGER = 'yfumr-cyaaa-aaaar-qaela-cai';
+const IC_CKBTC_LEDGER = IC_CKBTC_LEDGER_CANISTER_ID;
 
 const MAX_TRANSACTION_FEE = 500_000n;
 const CKETH_LEDGER_FEE = 2_000n;
 const CK_LEDGER_FEE = 123n;
+const BITCOIN_FEE = 3_000n;
+const MINTER_FEE = 1_500n;
+
+// The minter's per-user deposit address, which is not the user's own address.
+const mockBtcDepositAddress = 'bc1qmintersuppliedaddressforthedepositleg00000000';
 
 const AMOUNT = 1_000_000n;
 
@@ -703,6 +745,340 @@ describe('chain-fusion-swap.services', () => {
 
 			expect(sendEth).toHaveBeenCalledOnce();
 			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('fetchChainFusionBtcQuote', () => {
+		const ckBtcDestination = makeCkToken({
+			ledgerCanisterId: IC_CKBTC_LEDGER,
+			twinToken: BTC_MAINNET_TOKEN,
+			symbol: 'ckBTC-destination'
+		});
+
+		const btcQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+			fetchChainFusionBtcQuote({
+				sourceToken: BTC_MAINNET_TOKEN,
+				destinationToken: ckBtcDestination,
+				amount: AMOUNT,
+				userBtcAddress: mockBtcAddress,
+				slippage: 0,
+				...params
+			} as BtcQuoteParams);
+
+		beforeEach(() => {
+			mockEnabled = true;
+
+			ckBtcMinterInfoStore.reset(ckBtcDestination.id);
+			ckBtcMinterInfoStore.set({
+				id: ckBtcDestination.id,
+				data: { data: mockCkBtcMinterInfo, certified: true }
+			});
+
+			btcAddressStore.reset(ckBtcDestination.id);
+			btcAddressStore.set({
+				id: ckBtcDestination.id,
+				data: { data: mockBtcDepositAddress, certified: true }
+			});
+
+			allUtxosStore.setAllUtxos({ allUtxos: [mockUtxo] });
+			feeRatePercentilesStore.setFeeRateFromPercentiles({ feeRateFromPercentiles: 2_000n });
+
+			vi.mocked(prepareBtcSend).mockReturnValue(mockUtxosFee);
+		});
+
+		// Every fee of a deposit is charged on top of what the minter credits, exactly as
+		// `BtcConvertFees` presents them, so the offer is 1:1.
+		// Verified against a real conversion: depositing 1 000 satoshis minted 900 against a
+		// 100-satoshi `kyt_fee`. The network fee comes out of the transaction's change, so it
+		// is charged on top. `BtcConvertFees`'s zero-valued conversion-fee row is not carried
+		// over — "Free" is not a fee worth a line in an offer list.
+		it('should deduct only the KYT fee from what the minter credits', async () => {
+			await expect(btcQuote()).resolves.toStrictEqual({
+				provider: SwapProvider.CHAIN_FUSION,
+				receiveAmount: AMOUNT - mockCkBtcMinterInfo.kyt_fee,
+				swapDetails: {
+					sourceFees: [
+						{
+							labelPath: 'fee.text.convert_inter_network_fee',
+							fee: mockCkBtcMinterInfo.kyt_fee,
+							token: BTC_MAINNET_TOKEN,
+							deductedFromAmount: true
+						},
+						{
+							labelPath: 'fee.text.convert_btc_network_fee',
+							fee: mockUtxosFee.feeSatoshis,
+							token: BTC_MAINNET_TOKEN
+						}
+					],
+					externalFees: []
+				}
+			});
+		});
+
+		it('should select UTXOs for the amount actually being deposited', async () => {
+			await btcQuote();
+
+			expect(prepareBtcSend).toHaveBeenCalledWith(
+				expect.objectContaining({
+					amount: '0.01',
+					source: mockBtcAddress,
+					allUtxos: [mockUtxo],
+					feeRateMiliSatoshisPerVByte: 2_000n
+				})
+			);
+		});
+
+		it('should not quote a testnet Bitcoin source', async () => {
+			await expect(btcQuote({ sourceToken: BTC_TESTNET_TOKEN })).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the destination is not the ck twin', async () => {
+			await expect(btcQuote({ destinationToken: ckEthToken })).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the minter info is absent', async () => {
+			ckBtcMinterInfoStore.reset(ckBtcDestination.id);
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		// Without it there is nowhere to deposit, so the offer could never be executed.
+		it('should not quote when the minter deposit address is unknown', async () => {
+			btcAddressStore.reset(ckBtcDestination.id);
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the UTXO set has not been loaded', async () => {
+			allUtxosStore.reset();
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the fee rate has not been loaded', async () => {
+			feeRatePercentilesStore.reset();
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		// Quoting an unusable selection would advertise a fee the send then refuses.
+		it.each([
+			BtcPrepareSendError.PendingTransactionsNotAvailable,
+			BtcPrepareSendError.InsufficientBalance,
+			BtcPrepareSendError.InsufficientBalanceForFee,
+			BtcPrepareSendError.UtxoLocked
+		])('should not quote when the UTXO selection fails with %s', async (error) => {
+			vi.mocked(prepareBtcSend).mockReturnValue({ feeSatoshis: ZERO, utxos: [], error });
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the UTXO selection picked no inputs', async () => {
+			vi.mocked(prepareBtcSend).mockReturnValue({ feeSatoshis: 1_000n, utxos: [] });
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the flag is off', async () => {
+			mockEnabled = false;
+
+			await expect(btcQuote()).resolves.toBeUndefined();
+		});
+	});
+
+	describe('fetchChainFusionIcpQuote for the Bitcoin family', () => {
+		const ckBtcSource = makeCkToken({
+			ledgerCanisterId: IC_CKBTC_LEDGER,
+			twinToken: BTC_MAINNET_TOKEN,
+			symbol: 'ckBTC-source'
+		});
+
+		const icpQuote = (params: Partial<{ sourceToken: Token; destinationToken: Token }> = {}) =>
+			fetchChainFusionIcpQuote({
+				sourceToken: ckBtcSource,
+				destinationToken: BTC_MAINNET_TOKEN,
+				amount: AMOUNT,
+				userEthAddress: undefined,
+				slippage: 0,
+				...params
+			} as IcpBridgeQuoteParams);
+
+		beforeEach(() => {
+			mockEnabled = true;
+
+			ckBtcMinterInfoStore.reset(ckBtcSource.id);
+			ckBtcMinterInfoStore.set({
+				id: ckBtcSource.id,
+				data: { data: mockCkBtcMinterInfo, certified: true }
+			});
+
+			vi.mocked(estimateFee).mockResolvedValue({
+				bitcoin_fee: BITCOIN_FEE,
+				minter_fee: MINTER_FEE
+			});
+		});
+
+		// Only the fee the minter pays out of what it withdraws reduces the receive amount —
+		// the same one `IcTokenFees` reports as a destination-token fee.
+		it('should deduct only the Bitcoin network and minter fees', async () => {
+			await expect(icpQuote()).resolves.toStrictEqual({
+				provider: SwapProvider.CHAIN_FUSION,
+				receiveAmount: AMOUNT - (BITCOIN_FEE + MINTER_FEE),
+				swapDetails: {
+					sourceFees: [
+						{ labelPath: 'fee.text.fee', fee: CK_LEDGER_FEE, token: ckBtcSource },
+						{
+							labelPath: 'fee.text.estimated_inter_network',
+							fee: mockCkBtcMinterInfo.kyt_fee,
+							token: ckBtcSource
+						},
+						{
+							labelPath: 'fee.text.estimated_btc',
+							fee: BITCOIN_FEE + MINTER_FEE,
+							token: BTC_MAINNET_TOKEN,
+							deductedFromAmount: true
+						}
+					],
+					externalFees: [],
+					minimumAmount: mockCkBtcMinterInfo.retrieve_btc_min_amount,
+					minterInfoCertified: true
+				}
+			});
+		});
+
+		// The estimate moves with the amount, so it cannot be quoted once and reused.
+		it('should price the withdrawal for the amount being withdrawn', async () => {
+			await icpQuote();
+
+			expect(estimateFee).toHaveBeenCalledWith(
+				expect.objectContaining({ amount: AMOUNT, certified: false })
+			);
+		});
+
+		it('should flag a withdrawal quoted off an uncertified minter info read', async () => {
+			ckBtcMinterInfoStore.set({
+				id: ckBtcSource.id,
+				data: { data: mockCkBtcMinterInfo, certified: false }
+			});
+
+			const result = await icpQuote();
+
+			expect(
+				(result as { swapDetails: { minterInfoCertified?: boolean } }).swapDetails
+					.minterInfoCertified
+			).toBeFalsy();
+		});
+
+		it('should not quote a testnet Bitcoin destination', async () => {
+			const ckTestnetBtc = makeCkToken({
+				ledgerCanisterId: IC_CKBTC_LEDGER,
+				twinToken: BTC_TESTNET_TOKEN,
+				symbol: 'ckTESTBTC'
+			});
+
+			await expect(
+				icpQuote({ sourceToken: ckTestnetBtc, destinationToken: BTC_TESTNET_TOKEN })
+			).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the minter info is absent', async () => {
+			ckBtcMinterInfoStore.reset(ckBtcSource.id);
+
+			await expect(icpQuote()).resolves.toBeUndefined();
+		});
+
+		it('should not quote when the fee estimate fails', async () => {
+			vi.mocked(estimateFee).mockRejectedValue(new Error('minter unreachable'));
+
+			await expect(icpQuote()).resolves.toBeUndefined();
+		});
+
+		it('should clamp the receive amount at zero when the fees reach the amount', async () => {
+			vi.mocked(estimateFee).mockResolvedValue({
+				bitcoin_fee: AMOUNT,
+				minter_fee: MINTER_FEE
+			});
+
+			const result = await icpQuote();
+
+			expect((result as { receiveAmount: bigint }).receiveAmount).toBe(ZERO);
+		});
+
+		it('should not quote when the flag is off', async () => {
+			mockEnabled = false;
+
+			await expect(icpQuote()).resolves.toBeUndefined();
+		});
+	});
+
+	describe('fetchChainFusionBtcSwap', () => {
+		const progress = vi.fn();
+
+		const swapParams = {
+			identity: mockIdentity,
+			progress,
+			amount: '0.01',
+			source: mockBtcAddress,
+			depositAddress: mockBtcDepositAddress,
+			network: 'mainnet' as const,
+			utxosFee: mockUtxosFee
+		};
+
+		beforeEach(() => {
+			mockEnabled = true;
+			vi.mocked(sendBtc).mockResolvedValue('txid');
+		});
+
+		it('should send the deposit to the minter address on the quoted selection', async () => {
+			await fetchChainFusionBtcSwap(swapParams);
+
+			expect(sendBtc).toHaveBeenCalledWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					amount: '0.01',
+					source: mockBtcAddress,
+					destination: mockBtcDepositAddress,
+					network: 'mainnet',
+					utxosFee: mockUtxosFee
+				})
+			);
+		});
+
+		// `sendBtc` reports progress through a bare callback: once before signing, once after
+		// the transaction is recorded as pending.
+		it('should advance the swap stepper on each progress callback', async () => {
+			vi.mocked(sendBtc).mockImplementation(({ onProgress }) => {
+				onProgress?.();
+				onProgress?.();
+				return Promise.resolve('txid');
+			});
+
+			await fetchChainFusionBtcSwap(swapParams);
+
+			expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
+			expect(progress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should enable the destination token once the deposit is broadcast', async () => {
+			const enableDestinationToken = vi.fn().mockResolvedValue(undefined);
+
+			await fetchChainFusionBtcSwap({ ...swapParams, enableDestinationToken });
+
+			expect(enableDestinationToken).toHaveBeenCalledOnce();
+		});
+
+		// The Bitcoin family has no poller yet, so a deposit stays untracked rather than
+		// creating a row nothing would ever terminalize.
+		it('should create no active user transaction row', async () => {
+			await fetchChainFusionBtcSwap(swapParams);
+
+			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should surface a send failure to the caller', async () => {
+			vi.mocked(sendBtc).mockRejectedValue(new Error('signer unavailable'));
+
+			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('signer unavailable');
 		});
 	});
 });

@@ -1,3 +1,4 @@
+import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
@@ -21,7 +22,7 @@ export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapTokenCategory = 'icp' | 'evm' | 'sol';
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc';
 
 export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
 
@@ -83,6 +84,9 @@ export interface FetchSwapAmountsParams {
 	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
 	userSolAddress: OptionSolAddress;
+	// The user's own Bitcoin address. Unlike the other two it is needed to *quote*, not
+	// only to execute: a BTC → ckBTC offer's fee comes from selecting the user's UTXOs.
+	userBtcAddress: OptionBtcAddress;
 }
 
 export type Slippage = string | number;
@@ -278,18 +282,24 @@ export interface OneSecSwapDetails {
 export type ChainFusionFee = ProviderFee & {
 	labelPath: string;
 	/**
-	 * Whether the fee comes out of the converted amount — reducing what the user
-	 * receives — or is charged on top of it, from balance.
+	 * Whether the fee comes out of the converted amount, reducing what the user receives.
 	 *
-	 * A ck ledger fee is charged on top: `approve(amount)` debits `amount + fee` while
-	 * the minter withdraws the full `amount`. Subtracting it would under-report what
-	 * actually lands *and* show the same cost twice, since every fee is already itemized
-	 * below the form. Only a fee the minter genuinely takes out of what it burns — the
-	 * UTXO and KYT fees of the BTC directions — reduces the receive amount. The Ethereum
-	 * gas of a ckETH withdrawal is deliberately *not* flagged although the minter does
-	 * deduct it: the estimate is a doubled, mostly-reimbursed ceiling, so the Convert
-	 * flow — and therefore this one — shows the full 1:1 amount and itemizes the gas
-	 * as a fee row instead.
+	 * It decides the receive amount and nothing else: every fee is disclosed either way, in
+	 * the form's fee section, because the total shown there has to be the user's whole cost of
+	 * the conversion. The provider sheet carries no fees.
+	 *
+	 * The test is what the minter actually takes out of the amount it credits or pays out,
+	 * which is not the same as what the Convert flow displays — a real BTC → ckBTC
+	 * conversion showed Convert quoting 1:1 while the minter withheld its KYT fee. So:
+	 * - **Flagged:** the ckBTC KYT fee on a BTC → ckBTC deposit, and the Bitcoin network +
+	 *   minter fee on a ckBTC → BTC withdrawal (`IcTokenFees`'s `totalDestinationTokenFee`).
+	 * - **Not flagged:** a ck ledger fee, because `approve(amount)` debits `amount + fee`
+	 *   while the minter moves the full `amount`.
+	 * - **Not flagged:** the BTC network fee of a deposit — UTXO selection covers it out of
+	 *   the transaction's change, not out of the deposited amount.
+	 * - **Not flagged:** the Ethereum gas of a ckETH withdrawal, although the minter does
+	 *   deduct it. The estimate is a doubled, mostly-reimbursed ceiling, so quoting it as a
+	 *   deduction would under-report what lands by more than it over-reports.
 	 */
 	deductedFromAmount?: boolean;
 };
@@ -367,6 +377,23 @@ export interface IcpBridgeQuoteParams {
 export interface IcpBridgeSwapProviderConfig {
 	key: SwapProvider;
 	getQuote: (params: IcpBridgeQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
+}
+
+export interface BtcQuoteParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+	// The user's own Bitcoin address, the source of the UTXOs a deposit spends.
+	userBtcAddress: BtcAddress;
+	slippage: Slippage;
+}
+
+export interface BtcSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: BtcQuoteParams) => Promise<SwapMappedResult | undefined>;
 	isEnabled: boolean;
 	getSupportedTokens?: () => Promise<Set<string>>;
 	getSupportedDestinations: GetSupportedDestinationsFn;

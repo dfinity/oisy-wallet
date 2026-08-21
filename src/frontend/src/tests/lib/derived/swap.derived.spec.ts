@@ -9,7 +9,11 @@ import {
 	allSwapCompatibleIcrcTokens
 } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
-import { isPageTokenSwappable, swappableTokens } from '$lib/derived/swap.derived';
+import {
+	allSwapUniverseTokens,
+	isPageTokenSwappable,
+	swappableTokens
+} from '$lib/derived/swap.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { swapSupportedTokensStore } from '$lib/stores/swap-supported-tokens.store';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
@@ -17,6 +21,7 @@ import { bn2Bi } from '$tests/mocks/balances.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { get } from 'svelte/store';
 
 describe('swap.derived', () => {
@@ -151,7 +156,8 @@ describe('swap.derived', () => {
 					aggregated: {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
-						sol: { coverage: 'all', supportedTokenIds: new Set(['some-other-token']) }
+						sol: { coverage: 'all', supportedTokenIds: new Set(['some-other-token']) },
+						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -169,7 +175,8 @@ describe('swap.derived', () => {
 						sol: {
 							coverage: 'all',
 							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
-						}
+						},
+						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -184,7 +191,8 @@ describe('swap.derived', () => {
 					aggregated: {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
-						sol: { coverage: 'all', supportedTokenIds: new Set() }
+						sol: { coverage: 'all', supportedTokenIds: new Set() },
+						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -215,7 +223,8 @@ describe('swap.derived', () => {
 						aggregated: {
 							icp: { coverage: 'none', supportedTokenIds: new Set() },
 							evm: { coverage: 'none', supportedTokenIds: new Set() },
-							sol: { coverage: 'all', supportedTokenIds: new Set(['different-address']) }
+							sol: { coverage: 'all', supportedTokenIds: new Set(['different-address']) },
+							btc: { coverage: 'none', supportedTokenIds: new Set() }
 						},
 						providers: []
 					});
@@ -234,7 +243,8 @@ describe('swap.derived', () => {
 					aggregated: {
 						icp: { coverage: 'none', supportedTokenIds: new Set() },
 						evm: { coverage: 'none', supportedTokenIds: new Set() },
-						sol: { coverage: 'all', supportedTokenIds: new Set(['not-sol']) }
+						sol: { coverage: 'all', supportedTokenIds: new Set(['not-sol']) },
+						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -248,7 +258,8 @@ describe('swap.derived', () => {
 						sol: {
 							coverage: 'all',
 							supportedTokenIds: new Set([SOLANA_TOKEN.symbol.toLowerCase()])
-						}
+						},
+						btc: { coverage: 'none', supportedTokenIds: new Set() }
 					},
 					providers: []
 				});
@@ -320,6 +331,54 @@ describe('swap.derived', () => {
 
 			expect(tokens.sourceToken).toBeUndefined();
 			expect(tokens.destinationToken).toEqual({ ...ETHEREUM_TOKEN, enabled: true });
+		});
+	});
+
+	// Bitcoin joins the swap universe only with Chain Fusion, which is the sole provider
+	// that can move it. It is kept out of `allCrossChainSwapTokens`, which is typed around
+	// the EVM / SOL custom-token unions.
+	describe('allSwapUniverseTokens', () => {
+		beforeEach(() => {
+			setupUserNetworksStore('allEnabled');
+		});
+
+		it('should exclude Bitcoin while Chain Fusion is off', () => {
+			const result = get(allSwapUniverseTokens);
+
+			expect(result.find(({ id }) => id === BTC_MAINNET_TOKEN.id)).toBeUndefined();
+		});
+
+		it('should include the enabled mainnet Bitcoin token when Chain Fusion is on', async () => {
+			vi.resetModules();
+			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
+
+			try {
+				const [
+					{ allSwapUniverseTokens: universe },
+					{ setupUserNetworksStore: setupNetworks },
+					{ setupTestnetsStore: setupTestnets },
+					{ BTC_MAINNET_TOKEN: bitcoin, BTC_TESTNET_TOKEN: bitcoinTestnet }
+				] = await Promise.all([
+					import('$lib/derived/swap.derived'),
+					import('$tests/utils/user-networks.test-utils'),
+					import('$tests/utils/testnets.test-utils'),
+					import('$env/tokens/tokens.btc.env')
+				]);
+
+				setupTestnets('reset');
+				setupNetworks('allEnabled');
+
+				const result = get(universe);
+
+				expect(result.find(({ id }) => id === bitcoin.id)).toEqual({
+					...bitcoin,
+					enabled: true
+				});
+				expect(result.find(({ id }) => id === bitcoinTestnet.id)).toBeUndefined();
+			} finally {
+				vi.doUnmock('$env/chain-fusion-swap.env');
+				vi.resetModules();
+			}
 		});
 	});
 });

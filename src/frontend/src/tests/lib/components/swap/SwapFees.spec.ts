@@ -121,10 +121,11 @@ describe('SwapFees', () => {
 			expect(getByText('0.000002 ckETH')).toBeInTheDocument();
 		});
 
-		// A deducted fee is already reflected in the receive amount, exactly as every other
-		// provider's cost is folded into its rate. Listing it here too would report it twice.
-		it('omits a fee the minter takes out of the converted amount', () => {
-			const { getByText, queryByText } = renderChainFusion({
+		// The total has to be the user's whole cost, so a fee the minter withholds is disclosed
+		// here too — otherwise nothing on the form accounts for the gap between the pay and
+		// receive amounts. `deductedFromAmount` decides the receive amount, not the disclosure.
+		it('lists a fee the minter takes out of the converted amount', () => {
+			const { getByText } = renderChainFusion({
 				sourceFees: [
 					{ labelPath: 'fee.text.fee', fee: LEDGER_FEE, token: sourceToken },
 					{
@@ -138,8 +139,8 @@ describe('SwapFees', () => {
 			});
 
 			expect(getByText(en.fee.text.fee)).toBeInTheDocument();
-			expect(queryByText(en.fee.text.estimated_eth)).not.toBeInTheDocument();
-			expect(queryByText('0.005 ckUSDC')).not.toBeInTheDocument();
+			expect(getByText(en.fee.text.estimated_eth)).toBeInTheDocument();
+			expect(getByText('0.005 ckUSDC')).toBeInTheDocument();
 		});
 
 		it('totals only the source-token rows when a fee token has no exchange rate', () => {

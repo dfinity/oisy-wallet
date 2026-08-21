@@ -17,12 +17,14 @@ describe('swap.constants', () => {
 				{ SUPPORTED_CROSS_SWAP_NETWORKS },
 				{ ETHEREUM_NETWORK_ID },
 				{ ICP_NETWORK_ID },
-				{ BASE_NETWORK_ID }
+				{ BASE_NETWORK_ID },
+				{ BTC_MAINNET_NETWORK_ID }
 			] = await Promise.all([
 				import('$lib/constants/swap.constants'),
 				import('$env/networks/networks.eth.env'),
 				import('$env/networks/networks.icp.env'),
-				import('$env/networks/networks-evm/networks.evm.base.env')
+				import('$env/networks/networks-evm/networks.evm.base.env'),
+				import('$env/networks/networks.btc.env')
 			]);
 
 			return {
@@ -30,8 +32,11 @@ describe('swap.constants', () => {
 					SUPPORTED_CROSS_SWAP_NETWORKS[ICP_NETWORK_ID].includes(networkId),
 				reachesIcp: (networkId: NetworkId) =>
 					SUPPORTED_CROSS_SWAP_NETWORKS[networkId].includes(ICP_NETWORK_ID),
+				reaches: ({ from, to }: { from: NetworkId; to: NetworkId }) =>
+					SUPPORTED_CROSS_SWAP_NETWORKS[from].includes(to),
 				ETHEREUM_NETWORK_ID,
-				BASE_NETWORK_ID
+				BASE_NETWORK_ID,
+				BTC_MAINNET_NETWORK_ID
 			};
 		};
 
@@ -69,6 +74,38 @@ describe('swap.constants', () => {
 
 			expect(icpReaches(BASE_NETWORK_ID)).toBeFalsy();
 			expect(reachesIcp(BASE_NETWORK_ID)).toBeFalsy();
+		});
+
+		// Bitcoin's only route into the swap universe is ck conversion, so the pairing exists
+		// exactly when Chain Fusion does — and never reaches anything but ICP.
+		it('pairs ICP with Bitcoin in both directions when Chain Fusion is on', async () => {
+			const { icpReaches, reachesIcp, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: false,
+				chainFusion: true
+			});
+
+			expect(icpReaches(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
+			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
+		});
+
+		it('does not open Bitcoin to Ethereum', async () => {
+			const { reaches, BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } = await loadMatrix({
+				oneSec: true,
+				chainFusion: true
+			});
+
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ETHEREUM_NETWORK_ID })).toBeFalsy();
+			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
+		});
+
+		it('isolates Bitcoin entirely when Chain Fusion is off', async () => {
+			const { icpReaches, reachesIcp, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: true,
+				chainFusion: false
+			});
+
+			expect(icpReaches(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 		});
 
 		it('isolates ICP entirely when neither provider is on', async () => {

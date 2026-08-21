@@ -1,0 +1,336 @@
+import SwapBtcWizard from '$btc/components/swap/SwapBtcWizard.svelte';
+import type * as btcSendServices from '$btc/services/btc-send.services';
+import { validateBtcSend } from '$btc/services/btc-send.services';
+import { UTXOS_FEE_CONTEXT_KEY, initUtxosFeeStore } from '$btc/stores/utxos-fee.store';
+import {
+	BtcPrepareSendError,
+	BtcSendValidationError,
+	BtcValidationError
+} from '$btc/types/btc-send';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { btcAddressStore } from '$icp/stores/btc.store';
+import {
+	TRACK_COUNT_SWAP_ERROR,
+	TRACK_COUNT_SWAP_SUBMITTED,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
+import * as addrDerived from '$lib/derived/address.derived';
+import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { WizardStepsSwap } from '$lib/enums/wizard-steps';
+import * as analytics from '$lib/services/analytics.services';
+import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
+import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
+import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import * as toasts from '$lib/stores/toasts.store';
+import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
+import { fireEvent, render } from '@testing-library/svelte';
+import { readable, writable } from 'svelte/store';
+
+vi.mock('$lib/services/chain-fusion-swap.services', () => ({
+	fetchChainFusionBtcSwap: vi.fn()
+}));
+
+// `handleBtcValidationError` is left real: the point of these cases is that the mapping
+// from error type to user-facing copy actually happens, which a stub would hide.
+vi.mock('$btc/services/btc-send.services', async (importOriginal) => ({
+	...(await importOriginal<typeof btcSendServices>()),
+	validateBtcSend: vi.fn()
+}));
+
+vi.mock('$lib/services/swap.services', () => ({
+	enableSwapDestinationToken: vi.fn()
+}));
+
+// The loaders behind the UTXO fee are mounted above this wizard, by `SwapBtcContexts`; the
+// context store is all the wizard itself reads, so the tests populate it directly.
+describe('SwapBtcWizard', () => {
+	const ckBtcToken = {
+		...mockValidIcCkToken,
+		id: parseTokenId('ckBTC-destination'),
+		symbol: 'ckBTC',
+		ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+		twinToken: BTC_MAINNET_TOKEN,
+		enabled: true
+	};
+
+	const depositAddress = 'bc1qminterdepositaddressforthischainfusionswap0000';
+
+	const chainFusionOffer: SwapMappedResult = {
+		provider: SwapProvider.CHAIN_FUSION,
+		// 0.01 at the ck token's 8 decimals, so the review step raises no value-difference
+		// warning that would gate the swap button.
+		receiveAmount: 1_000_000n,
+		swapDetails: {
+			sourceFees: [
+				{ labelPath: 'fee.text.convert_btc_network_fee', fee: 1_000n, token: BTC_MAINNET_TOKEN }
+			],
+			externalFees: []
+		}
+	};
+
+	const baseProps = {
+		swapAmount: '0.01',
+		receiveAmount: 0.01,
+		slippageValue: '0.5',
+		swapProgressStep: ProgressStepsSwap.INITIALIZATION,
+		isSwapAmountsLoading: false,
+		onShowTokensList: vi.fn(),
+		onShowProviderList: vi.fn(),
+		onClose: vi.fn(),
+		onNext: vi.fn(),
+		onBack: vi.fn(),
+		onStartTriggerAmount: vi.fn(),
+		onStopTriggerAmount: vi.fn()
+	};
+
+	const createContext = () => {
+		const context = new Map();
+
+		context.set(SWAP_CONTEXT_KEY, {
+			sourceToken: readable({ ...BTC_MAINNET_TOKEN, enabled: true }),
+			destinationToken: readable(ckBtcToken),
+			failedSwapError: writable(undefined),
+			sourceTokenExchangeRate: readable(60_000),
+			sourceTokenBalance: readable(100_000_000n),
+			destinationTokenBalance: readable(undefined),
+			destinationTokenExchangeRate: readable(60_000),
+			isSourceTokenIcrc2: readable(false),
+			isSourceTokenPermitSupported: readable(undefined),
+			setIsTokenPermitSupported: vi.fn(),
+			setSourceToken: () => {},
+			setDestinationToken: () => {},
+			switchTokens: () => {}
+		});
+
+		const swapAmountsStore = initSwapAmountsStore();
+		swapAmountsStore.setSwaps({
+			swaps: [chainFusionOffer],
+			amountForSwap: 0.01,
+			selectedProvider: chainFusionOffer
+		});
+		context.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+
+		const utxosFeeStore = initUtxosFeeStore();
+		utxosFeeStore.setUtxosFee({ utxosFee: mockUtxosFee, amountForFee: 0.01 });
+		context.set(UTXOS_FEE_CONTEXT_KEY, { store: utxosFeeStore });
+
+		return { context, utxosFeeStore };
+	};
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockAuthStore();
+
+		btcAddressStore.reset(ckBtcToken.id);
+		btcAddressStore.set({ id: ckBtcToken.id, data: { data: depositAddress, certified: true } });
+
+		vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(mockBtcAddress));
+		vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
+		vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
+	});
+
+	describe('rendering', () => {
+		it('renders the form on the swap step', () => {
+			const { context } = createContext();
+
+			const { getByText } = render(SwapBtcWizard, {
+				props: { ...baseProps, currentStep: { name: WizardStepsSwap.SWAP, title: 'Swap' } },
+				context
+			});
+
+			expect(getByText(en.tokens.text.source_token_title)).toBeInTheDocument();
+			expect(getByText(en.tokens.text.destination_token_title)).toBeInTheDocument();
+			expect(getByText(en.swap.text.review_button)).toBeInTheDocument();
+		});
+
+		it('renders the review step with the fee breakdown', () => {
+			const { context } = createContext();
+
+			const { getByText } = render(SwapBtcWizard, {
+				props: { ...baseProps, currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' } },
+				context
+			});
+
+			expect(getByText(en.swap.text.swap_button)).toBeInTheDocument();
+			expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
+		});
+
+		// The deposit settles out of band, so the stepper stays a plain foreground swap until
+		// the Bitcoin family has an active-user-transaction poller.
+		it('renders the progress step without the background wording', () => {
+			const { context } = createContext();
+
+			const { getByText, queryByText } = render(SwapBtcWizard, {
+				props: { ...baseProps, currentStep: { name: WizardStepsSwap.SWAPPING, title: 'Swap' } },
+				context
+			});
+
+			expect(getByText(en.swap.text.swapping)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.finishing_in_background)).not.toBeInTheDocument();
+		});
+	});
+
+	describe('execution', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.mocked(validateBtcSend).mockResolvedValue(undefined);
+			vi.mocked(fetchChainFusionBtcSwap).mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const renderExecution = () => {
+			const onClose = vi.fn();
+			const onBack = vi.fn();
+			const onStartTriggerAmount = vi.fn();
+
+			const { context } = createContext();
+
+			const result = render(SwapBtcWizard, {
+				props: {
+					...baseProps,
+					currentStep: { name: WizardStepsSwap.REVIEW, title: 'Swap' },
+					onClose,
+					onBack,
+					onStartTriggerAmount
+				},
+				context
+			});
+
+			return { ...result, onClose, onBack, onStartTriggerAmount };
+		};
+
+		it('sends the deposit to the minter address on the quoted selection', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchChainFusionBtcSwap).toHaveBeenCalledWith(
+				expect.objectContaining({
+					amount: '0.01',
+					source: mockBtcAddress,
+					depositAddress,
+					network: 'mainnet',
+					utxosFee: mockUtxosFee
+				})
+			);
+		});
+
+		it('closes the modal after a successful deposit', async () => {
+			const { getByText, onClose, onBack } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onClose).toHaveBeenCalledOnce();
+			expect(onBack).not.toHaveBeenCalled();
+		});
+
+		// Nothing polls a ckBTC mint yet, so the foreground *is* the tracked flow.
+		it('tracks a success event rather than a submitted one', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+			);
+			expect(analytics.trackEvent).not.toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+			);
+		});
+
+		// Last-line guard against another tab having reserved one of the selected UTXOs.
+		it('validates the selection before broadcasting', async () => {
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(validateBtcSend).toHaveBeenCalledOnce();
+		});
+
+		it('goes back without sending when the selection no longer validates', async () => {
+			vi.mocked(validateBtcSend).mockRejectedValue(BtcPrepareSendError.UtxoLocked);
+
+			const { getByText, onBack, onStartTriggerAmount } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onStartTriggerAmount).toHaveBeenCalledOnce();
+		});
+
+		// Silence here reads as a dead Review button: the quote refetches seconds later and
+		// drops the offer, so the user never learns a pending send holds their inputs.
+		it('names the reason when a pending transaction holds the selected inputs', async () => {
+			vi.mocked(validateBtcSend).mockRejectedValue(
+				new BtcValidationError(BtcSendValidationError.UtxoLocked)
+			);
+
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.send.assertion.btc_utxo_locked } })
+			);
+		});
+
+		it('falls back to a generic message for a non-validation failure', async () => {
+			vi.mocked(validateBtcSend).mockRejectedValue(new Error('minter unreachable'));
+
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.swap.error.unexpected } })
+			);
+		});
+
+		it('goes back and reports the error when the deposit fails', async () => {
+			vi.mocked(fetchChainFusionBtcSwap).mockRejectedValue(new Error('signer unavailable'));
+
+			const { getByText, onBack, onClose } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(onBack).toHaveBeenCalledOnce();
+			expect(onClose).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalled();
+			expect(analytics.trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_ERROR })
+			);
+		});
+
+		it('refuses to send when the minter deposit address is unknown', async () => {
+			btcAddressStore.reset(ckBtcToken.id);
+
+			const { getByText } = renderExecution();
+
+			await fireEvent.click(getByText(en.swap.text.swap_button));
+			await vi.runOnlyPendingTimersAsync();
+
+			expect(fetchChainFusionBtcSwap).not.toHaveBeenCalled();
+			expect(toasts.toastsError).toHaveBeenCalledWith(
+				expect.objectContaining({ msg: { text: en.swap.error.unexpected_missing_data } })
+			);
+		});
+	});
+});

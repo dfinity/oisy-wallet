@@ -1,4 +1,5 @@
 import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { IcCkInterface, IcCkToken } from '$icp/types/ic-token';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
@@ -44,17 +45,24 @@ export const toChainFusionPairs = (ckTokens: IcCkInterface[]): ChainFusionPair[]
 	}, []);
 
 /**
+ * The networks a twin token must live on for its pair to be offerable: Ethereum mainnet,
+ * where the ckETH / ckERC20 helper contracts are deployed, and Bitcoin mainnet, where the
+ * ckBTC minter takes deposits.
+ */
+const ENABLED_TWIN_NETWORK_IDS = [ETHEREUM_NETWORK_ID, BTC_MAINNET_NETWORK_ID];
+
+/**
  * The pairs Chain Fusion may currently offer.
  *
  * This filter, not the flag, is what decides which token families are live: the flag
- * turns the whole provider on, while a family only becomes offerable once its twins
- * pass here. Today that is Ethereum mainnet — exactly where the ckETH / ckERC20 helper
- * contracts are deployed — and the Bitcoin arm is added by widening this one predicate,
- * without reshaping any caller.
+ * turns the whole provider on, while a family only becomes offerable once its twins pass
+ * here. Because the predicate admits both Bitcoin directions at once, the BTC↔ckBTC pair
+ * is never half-offered, and dropping Bitcoin back out is a one-line revert that leaves
+ * the Ethereum family alone.
  */
 const enabledPairs = (pairs: ChainFusionPair[]): ChainFusionPair[] =>
 	CHAIN_FUSION_SWAP_ENABLED
-		? pairs.filter(({ twinToken }) => twinToken.network.id === ETHEREUM_NETWORK_ID)
+		? pairs.filter(({ twinToken }) => ENABLED_TWIN_NETWORK_IDS.includes(twinToken.network.id))
 		: [];
 
 /**
