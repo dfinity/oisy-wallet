@@ -321,7 +321,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(hyperliquidAcceptTerms)
+					params: toParams(hyperliquidAcceptTerms),
+					sessionChainId: ARBITRUM_SESSION
 				})
 			).toBeFalsy();
 		});

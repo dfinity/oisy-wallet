@@ -1,3 +1,4 @@
+import { ARBITRUM_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 import { SESSION_REQUEST_ETH_SIGN_V4 } from '$eth/constants/wallet-connect.constants';
@@ -105,7 +106,9 @@ describe('WalletConnectSignReview', () => {
 						})
 					]
 				},
-				chainId: ETHEREUM_NETWORK.chainId.toString()
+				// Hyperliquid signs its actions under an Arbitrum domain, so that is the chain its
+				// session connects for and the one the domain is held to.
+				chainId: `eip155:${ARBITRUM_MAINNET_NETWORK.chainId}`
 			},
 			verifyContext: {
 				verified: {
