@@ -608,6 +608,46 @@ describe('chain-fusion-swap.services', () => {
 			);
 		});
 
+		it('should key a ckBTC withdrawal on its retrieve_btc block index', async () => {
+			vi.mocked(sendIc).mockResolvedValue({ type: 'ckBtcToBtc', blockIndex: 42n });
+
+			const ckBtcSource = makeCkToken({
+				ledgerCanisterId: IC_CKBTC_LEDGER,
+				twinToken: BTC_MAINNET_TOKEN,
+				symbol: 'ckBTC-source'
+			});
+
+			await fetchChainFusionIcpSwap({
+				...swapParams,
+				sourceToken: { ...ckBtcSource, minterCanisterId: MINTER_CANISTER_ID },
+				destinationToken: BTC_MAINNET_TOKEN,
+				destinationAddress: mockBtcAddress
+			});
+
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					data: {
+						ChainFusion: {
+							direction: { CkBtcToBtc: null },
+							source_token: { Icrc: Principal.fromText(IC_CKBTC_LEDGER) },
+							dest_token: { BtcNativeMainnet: null },
+							amount: 10n ** BigInt(ckBtcSource.decimals)
+						}
+					}
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_retrieve_btc_index: '42',
+					chain_fusion_minter_id: MINTER_CANISTER_ID
+				})
+			);
+
+			// The ckETH minter has nothing to do with this withdrawal.
+			expect(refsOfLastCreate()).not.toHaveProperty('chain_fusion_cketh_index');
+		});
+
 		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
 			const result = { type: 'ckEthToEth', blockIndex: 7n } as const;
 
@@ -1014,19 +1054,31 @@ describe('chain-fusion-swap.services', () => {
 	describe('fetchChainFusionBtcSwap', () => {
 		const progress = vi.fn();
 
+		const ckBtcDestination = makeCkToken({
+			ledgerCanisterId: IC_CKBTC_LEDGER,
+			twinToken: BTC_MAINNET_TOKEN,
+			symbol: 'ckBTC-destination'
+		});
+
 		const swapParams = {
 			identity: mockIdentity,
 			progress,
+			sourceToken: BTC_MAINNET_TOKEN,
+			destinationToken: { ...ckBtcDestination, minterCanisterId: MINTER_CANISTER_ID },
 			amount: '0.01',
 			source: mockBtcAddress,
 			depositAddress: mockBtcDepositAddress,
 			network: 'mainnet' as const,
-			utxosFee: mockUtxosFee
+			utxosFee: mockUtxosFee,
+			swapId: SWAP_ID
 		};
 
 		beforeEach(() => {
+			vi.clearAllMocks();
+
 			mockEnabled = true;
 			vi.mocked(sendBtc).mockResolvedValue('txid');
+			vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
 		});
 
 		it('should send the deposit to the minter address on the quoted selection', async () => {
@@ -1067,18 +1119,68 @@ describe('chain-fusion-swap.services', () => {
 			expect(enableDestinationToken).toHaveBeenCalledOnce();
 		});
 
-		// The Bitcoin family has no poller yet, so a deposit stays untracked rather than
-		// creating a row nothing would ever terminalize.
-		it('should create no active user transaction row', async () => {
-			await fetchChainFusionBtcSwap(swapParams);
+		it('should create an active user transaction keyed on the deposit transaction', async () => {
+			await fetchChainFusionBtcSwap({ ...swapParams, usdSourceValue: '900' });
 
+			expect(createActiveUserTransaction).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					id: SWAP_ID,
+					data: {
+						ChainFusion: {
+							direction: { BtcToCkBtc: null },
+							source_token: { BtcNativeMainnet: null },
+							dest_token: { Icrc: Principal.fromText(IC_CKBTC_LEDGER) },
+							// `amount: '0.01'` in satoshis.
+							amount: 1_000_000n
+						}
+					}
+				})
+			);
+
+			expect(refsOfLastCreate()).toStrictEqual(
+				expect.objectContaining({
+					chain_fusion_btc_tx: 'txid',
+					chain_fusion_btc_deposit: mockBtcDepositAddress,
+					chain_fusion_minter_id: MINTER_CANISTER_ID,
+					amount: '0.01',
+					usd_source_value: '900',
+					source_token_symbol: BTC_MAINNET_TOKEN.symbol,
+					destination_token_symbol: 'ckBTC-destination'
+				})
+			);
+		});
+
+		// The minter is asked about the deposit, so a row without its id could never settle.
+		it('should skip the row when the ckBTC minter is unknown', async () => {
+			await fetchChainFusionBtcSwap({
+				...swapParams,
+				destinationToken: { ...ckBtcDestination, minterCanisterId: undefined }
+			});
+
+			expect(sendBtc).toHaveBeenCalledOnce();
 			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
+			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
+
+			// The deposit is already broadcast — a bookkeeping failure must not read as the
+			// conversion having failed.
+			await expect(fetchChainFusionBtcSwap(swapParams)).resolves.toBeUndefined();
 		});
 
 		it('should surface a send failure to the caller', async () => {
 			vi.mocked(sendBtc).mockRejectedValue(new Error('signer unavailable'));
 
 			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('signer unavailable');
+		});
+
+		it('should create no row when the deposit was never broadcast', async () => {
+			vi.mocked(sendBtc).mockRejectedValue(new Error('signer unavailable'));
+
+			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow();
+
+			expect(createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 	});
 });
