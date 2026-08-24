@@ -62,12 +62,12 @@ not.
 
 ### The link/QR precedents already in the repo
 
-| Precedent                     | What it establishes                                                                                                                                                                                                  | Where                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Note share link**           | Public route with **no identity**, opaque 128-bit token in the path, mandatory expiry, single-use consumption, one collapsed `NotFound` for expired/used/unknown, per-user active cap, rate limiting, hourly pruning | [`(public)/notes/share/[token]`](<../../../../src/frontend/src/routes/(public)/notes/share/[token]>), [`api/personal_note_shares.rs`](../../../../src/backend/src/api/personal_note_shares.rs), [`personal_notes/share/`](../../../../src/backend/src/personal_notes/share), [`personal-note-share.services.ts`](../../../../src/frontend/src/lib/services/personal-note-share.services.ts) |
-| **VIP reward code link + QR** | `${origin}/?code=<code>` rendered as a **QR the user shows to someone else**, and the recipient side: land on the app, **wait for sign-in**, claim, strip the param, show a result modal                             | [`VipQrCodeModal.svelte:116`](../../../../src/frontend/src/lib/components/vip/VipQrCodeModal.svelte), [`UrlGuard.svelte:18`](../../../../src/frontend/src/lib/components/guard/UrlGuard.svelte), [`reward.services.ts`](../../../../src/frontend/src/lib/services/reward.services.ts)                                                                                                       |
-| **QR rendering / scanning**   | Reusable QR primitives, already used for receive addresses and reward codes                                                                                                                                          | [`ui/QrCode.svelte`](../../../../src/frontend/src/lib/components/ui/QrCode.svelte), [`qr/QrCodeScanner.svelte`](../../../../src/frontend/src/lib/components/qr/QrCodeScanner.svelte), [`receive/ReceiveAddressQrCode.svelte`](../../../../src/frontend/src/lib/components/receive/ReceiveAddressQrCode.svelte)                                                                              |
-| **User-menu feature entry**   | The design puts **Issue Tip** in the user menu between Contacts and "Refer your friends" — exactly where Notes and Contacts already live                                                                             | [`core/Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte)                                                                                                                                                                                                                                                                                                          |
+| Precedent                     | What it establishes                                                                                                                                                                                                                                                      | Where                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Note share link**           | Public route with **no identity**, opaque 128-bit token in the path, mandatory expiry, single-use consumption, one collapsed `NotFound` for expired/used/unknown, per-user active cap, rate limiting, hourly pruning                                                     | [`(public)/notes/share/[token]`](<../../../../src/frontend/src/routes/(public)/notes/share/[token]>), [`api/personal_note_shares.rs`](../../../../src/backend/src/api/personal_note_shares.rs), [`personal_notes/share/`](../../../../src/backend/src/personal_notes/share), [`personal-note-share.services.ts`](../../../../src/frontend/src/lib/services/personal-note-share.services.ts) |
+| **VIP reward code link + QR** | `${origin}/?code=<code>` rendered as a **QR the user shows to someone else**, and the recipient side: land on the app, **wait for sign-in**, claim, strip the param, show a result modal                                                                                 | [`VipQrCodeModal.svelte:116`](../../../../src/frontend/src/lib/components/vip/VipQrCodeModal.svelte), [`UrlGuard.svelte:18`](../../../../src/frontend/src/lib/components/guard/UrlGuard.svelte), [`reward.services.ts`](../../../../src/frontend/src/lib/services/reward.services.ts)                                                                                                       |
+| **QR rendering / scanning**   | Reusable QR primitives, already used for receive addresses and reward codes                                                                                                                                                                                              | [`ui/QrCode.svelte`](../../../../src/frontend/src/lib/components/ui/QrCode.svelte), [`qr/QrCodeScanner.svelte`](../../../../src/frontend/src/lib/components/qr/QrCodeScanner.svelte), [`receive/ReceiveAddressQrCode.svelte`](../../../../src/frontend/src/lib/components/receive/ReceiveAddressQrCode.svelte)                                                                              |
+| **User-menu feature entry**   | The design puts **Issue Tip** in the user menu between Contacts (`navigation.text.address_book`) and Refer a friend. The mock reproduces this file's real contents. Notes is **not** here — it lives in `NavigationMenuMainItems.svelte` behind `PERSONAL_NOTES_ENABLED` | [`core/Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte)                                                                                                                                                                                                                                                                                                          |
 
 The tip link needs **both** link precedents: the note-share half (a stranger with no
 identity opens it and sees something) and the VIP half (claiming requires an
@@ -99,6 +99,38 @@ This is the single most important constraint for this spec.
   `allowance`
   ([`icrc-ledger.api.ts`](../../../../src/frontend/src/icp/api/icrc-ledger.api.ts)) —
   plus per-chain send paths for BTC, ETH/EVM, and Solana.
+- **Anonymous endpoints are already a shipped pattern.**
+  [`personal_note_shares.rs`](../../../../src/backend/src/api/personal_note_shares.rs)
+  carries a `#[query]` with **no guard** (`get_personal_note_share`) and, more
+  notably, an unguarded `#[update]` (`consume_personal_note_share`), against a
+  `#[query(guard = "caller_is_not_anonymous")]` on the count endpoint. So the
+  logged-out preview this feature needs is a copy of something that already runs in
+  production, not a new risk.
+
+### Prior art — the closed POC, PR #12018
+
+[PR #12018](https://github.com/dfinity/oisy-wallet/pull/12018) ("POC: Tips") built
+this feature against a **separate escrow canister** in a personal repository
+(`AntonioVentilii/escrow`, `umxj5-niaaa-aaaae-af2sq-cai`), vendoring only its Candid;
+it touched no backend file and was closed unmerged. Doing it through the OISY backend
+is precisely the change this spec describes. Three of its decisions are worth
+inheriting, because they are answers rather than opinions:
+
+- **A per-deal claim code** (128-bit, `raw_rand`), returned to the creator, encoded in
+  the link, and deliberately **excluded from the public preview** — a second secret on
+  top of the deal id.
+- **The sender prepays the payout fee** into the deal's escrow subaccount as a
+  separate transfer after funding, so the outbound transfer at claim has something to
+  pay with.
+- **Both refund paths coexist** — a manual `reclaim_deal` plus a batch
+  `process_expired_deals(limit)` sweep.
+
+Its mistakes are worth recording too, as things not to repeat: the claim code
+travelled in the **query string** (`?tip=…&claim=…`), its errors were
+**distinguishable** (`Expired` vs. `NotFound` vs. `AlreadyFinalised`, so ids can be
+probed), its preview **required an identity** (which is what made the logged-out
+landing impossible), funding was four non-atomic steps with no replay, and it shipped
+with **no tests**.
 
 Consequence: **whichever escrow model wins, it introduces a genuinely new backend
 capability** and must be reviewed as such.
@@ -253,10 +285,12 @@ modal**, not a bottom sheet
 ### 1. Entry point — user menu → "Issue Tip"
 
 [entry-user-menu](./2026-08-05-feat-tips-via-link/designs/entry-user-menu-21710-58095.png).
-A menu item with a bill icon, placed between **Contacts** and **Refer your friends**
-in [`core/Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte).
-(The mock's label reads "Refer your firends" — an existing typo in the design, not a
-string to copy.)
+A menu item with a bill icon, placed between **Contacts** and **Refer a friend** in
+[`core/Menu.svelte`](../../../../src/frontend/src/lib/components/core/Menu.svelte),
+whose shipped order is: Your addresses, Contacts, hide/show balances, WalletConnect,
+Pay, Refer a friend, Support, VIP QR, Binance QR, Settings. The mock renders a subset
+of exactly that menu, so the insertion point is unambiguous. (The mock's label reads
+"Refer your firends" — a typo in the design, not a string to copy.)
 
 ### 2. Intro — "Tip with OISY Wallet"
 
@@ -316,6 +350,12 @@ ICP Tip is Ready!"**, _"Now, let's create your free OISY Wallet to access and ma
 your funds."_, secondary actions **Learn how it works** and **Share on X**, primary
 **Set Up My OISY Wallet**.
 
+Two further frames (`21788:50522` USDC, `21788:47908` ICP) draw the **same state with
+a different call to action** — **Open or Create**, followed by the consent line _"By
+clicking this button, you agree to the Terms of Use"_. Which of the two ships is a
+[pending decision](#pending-decisions-facts-clear--owner-must-decide); the consent
+line makes it more than a wording choice.
+
 ### 7. Recipient, signed in — "Claim tip"
 
 [claim-signed-in](./2026-08-05-feat-tips-via-link/designs/claim-signed-in-21710-59109.png) ·
@@ -325,8 +365,14 @@ Hero card: token icon, **"You received a tip!"**, amount **135 USDC**, fiat
 **Token** — USDC; **Network fee** — **0.1 USDC** ($0.12); **Status** — **Funded**
 (green chip). Footer **Cancel** / **Claim now**.
 
-**Success** ([claim-success](./2026-08-05-feat-tips-via-link/designs/claim-success-21788-50935.png)):
-the same card with one CTA — **Take me to the wallet**.
+**Success** — two variants are drawn. The plain one
+([claim-success](./2026-08-05-feat-tips-via-link/designs/claim-success-21788-50935.png))
+keeps the review card and swaps the footer for a single **Take me to the wallet**
+CTA. The fuller one (`21763:86266`) is a dedicated screen: **"135.00 USDC
+Received!"**, _"The funds have been successfully added to your balance. You can now
+manage, send, or swap your tokens."_, detail rows Network / Token, and **Status —
+Completed**. The fuller one carries the better ending and introduces a third status
+word (see [Discrepancies](#discrepancies-in-the-source-material)).
 
 ### 8. History
 
@@ -365,8 +411,10 @@ Flagged rather than silently resolved — each needs an owner's call.
    transfer with a fee, so the returned amount cannot be 100% for native-chain tips.
    Either the copy softens, or the fee model changes so the sender prepays the refund
    leg at creation.
-3. **Status vocabulary.** The text says **Pending / Claimed / Expired**; the History
-   screen says **Active / Claimed / Refunded**. Pick one.
+3. **Status vocabulary — three of them.** The on-canvas text says **Pending /
+   Claimed / Expired**; History says **Active / Claimed / Refunded**; the fuller
+   success screen (`21763:86266`) says **Completed**. Pick one and use it everywhere,
+   including in `PRODUCT.md`.
 4. **Message field.** Specified at 250 characters and "visible to the recipient", but
    absent from the compact create variant and from every claim screen.
 5. **History's info banner** reads _"We've hidden these transactions as they
@@ -376,7 +424,11 @@ Flagged rather than silently resolved — each needs an owner's call.
    at claim are different legs (funding vs. payout, the latter deducted from the
    tip). The recipient sees a smaller number than the sender sent; the copy must say
    so before the claim, not after.
-7. **"Single-use security"** in the text vs. no explicit single-use control in the
+7. **Two logged-out CTAs.** One frame says **Set Up My OISY Wallet**, two others say
+   **Open or Create** and add a Terms-of-Use consent line. The recipient's very first
+   screen cannot have two different primary actions, and only one of them takes
+   consent.
+8. **"Single-use security"** in the text vs. no explicit single-use control in the
    UI — every tip is implicitly single-use. Confirm that is intended (it follows
    from a tip being a fixed amount).
 
@@ -651,9 +703,12 @@ change.
    `getSchnorrPublicKey` accept derivation paths
    ([`signer.api.ts`](../../../../src/frontend/src/lib/api/signer.api.ts)) — confirm
    the backend can use a tip-scoped path, and what that costs in cycles per tip.
-2. **Payout gas for token tips.** For USDC-on-Ethereum, the canister must spend ETH
-   to move USDC while charging the recipient in USDC. Where does the ETH come from,
-   who eats a short estimate, and is there an existing OISY mechanism for this?
+2. **Payout gas for token tips.** Answered for ICRC ledgers by
+   [PR #12018](#prior-art--the-closed-poc-pr-12018): the sender prepays the payout fee
+   into the escrow subaccount. Still open for EVM and Solana, where the fee is
+   denominated in a **different asset** than the tip — for USDC-on-Ethereum the
+   canister must spend ETH to move USDC while charging the recipient 0.1 USDC. Where
+   does that ETH come from, and who absorbs a short estimate?
 3. **Atomicity across external chains.** Confirm the mark → sign → broadcast →
    settle pattern and its compensation path, including a canister upgrade mid-flight.
 4. **Deposit reconciliation.** Confirm that an orphaned deposit (funds landed, record
@@ -666,15 +721,13 @@ change.
 7. **Tip id shape.** The design shows `0x…a1b21`. Is the id the escrow address, a
    hash committing to it, or an unrelated random value? This decides both the privacy
    properties and the QR density.
-8. **Is a fragment secret warranted after all?** Without one, a leaked server-side id
-   is sufficient to claim. Confirm the design's simpler link is an accepted risk.
-9. **Route shape.** `/tip/<id>` rendered as landing + modal — confirm whether this is
+8. **Route shape.** `/tip/<id>` rendered as landing + modal — confirm whether this is
    a new route in the `(public)` group, an `(app)` route, or a param on the landing
    page, and that a deep link survives the II round-trip on mobile Safari.
-10. **Supported tokens and minimums per token**, and where the minimum comes from.
-11. **Memory-id allocation and migration impact** for the new stable map.
-12. **Compliance / KYT sign-off** for custodied, anonymously-claimable value.
-13. **Analytics on a signed-out surface** — confirm recipient-side events fit the
+9. **Supported tokens and minimums per token**, and where the minimum comes from.
+10. **Memory-id allocation and migration impact** for the new stable map.
+11. **Compliance / KYT sign-off** for custodied, anonymously-claimable value.
+12. **Analytics on a signed-out surface** — confirm recipient-side events fit the
     landing page's analytics setup.
 
 ## Pending decisions (facts clear — owner must decide)
@@ -703,6 +756,15 @@ change.
 11. **Self-claim by the sender** — allow as a self-refund, or reject.
 12. **Intro modal dismissal** — the "Future — skipping the intro screen" frame implies
     remembering it. In for v1?
+13. **A second secret in the link.** The design's link carries only an id, so the id
+    alone authorises the claim. PR #12018 instead used a separate claim code kept out
+    of the public preview. Recommendation: **adopt the claim code**, carried in the
+    URL **fragment** rather than the query string, so a leaked server-side id is not
+    by itself enough to claim.
+14. **The logged-out CTA** — **Open or Create** with the Terms-of-Use consent line, or
+    **Set Up My OISY Wallet** without it. Recommendation: whichever the real landing
+    page already uses, so the recipient's first screen matches the product they are
+    about to sign into.
 
 ## Analytics (Plausible)
 
