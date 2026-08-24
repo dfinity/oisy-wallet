@@ -35,33 +35,51 @@ against a local replica: the local ck-ledgers are the real
 [`scripts/download.ckbtc.sh`](../../../../../scripts/download.ckbtc.sh), so the
 ICRC-2 mechanics proved locally are the mainnet ones.
 
-What it must answer:
+**Settled at the interface level** by reading the ledger candid that the local
+replica actually installs (`target/ic/*.did`, downloaded from the pinned IC
+commit — the same wasm the mainnet ck-ledgers run):
 
-- [ ] **Open question 1** — `approve` to `{owner: backend, subaccount: H(tip_id)}`
-      followed by `icrc2_transfer_from` with the matching `spender_subaccount`,
-      against a live ledger.
-- [ ] **Open question 3** — `expected_allowance` on replace, so a retried
-      creation cannot destroy a live reservation.
-- [ ] **Open question 2** — which ledgers advertise ICRC-2 via
-      `icrc1_supported_standards`. The answer **is** the v1 token list, and it
-      settles the ckETH pending decision. This is the one part the local rig
-      cannot answer: local proves the wasm supports it, not what mainnet has
-      deployed. Query the mainnet ledgers read-only.
+- [x] **Open question 1, candid half.** `TransferFromArgs.spender_subaccount : opt Subaccount`
+      is declared, and `icrc2_approve` / `icrc2_allowance` / `icrc2_transfer_from`
+      are all in the service — in **both** ledger implementations that matter:
+      `ckbtc_ledger.did` (the ICRC-1 ledger, shared by ckBTC, ckETH and ckUSDC)
+      and `icp_ledger.did`.
+- [x] **Open question 2, interface half.** All four v1 candidates — ICP, ckBTC,
+      ckETH, ckUSDC — expose ICRC-2. So the third
+      [pending decision](../2026-08-05-feat-tips-via-link.md#pending-decisions-facts-clear--owner-must-decide)
+      resolves: **ckETH can join v1.**
+- [x] `ApproveArgs` carries both `expected_allowance : opt nat` and
+      `expires_at : opt Timestamp`, which is what lets the allowance carry the
+      tip's own deadline instead of relying on the backend record alone.
+- [x] Confirmed against the **installed** wasm, not only the candid:
+      `dfx canister call icp_ledger icrc1_supported_standards '()'` on the local
+      replica returns ICRC-1, **ICRC-2** and ICRC-21.
 
-Already established from the repo, so nobody re-derives it:
+Also already established from the repo, so nobody re-derives it:
 
-- `spender_subaccount` exists on `TransferFromArgs` in
+- `spender_subaccount` on `TransferFromArgs` in
   [`src/cycles_ledger/types/src/lib.rs`](../../../../../src/cycles_ledger/types/src/lib.rs)
-  (`Option<serde_bytes::ByteBuf>`) — generated from a ledger candid, in a
-  canister this backend already calls ICRC-2 against.
-- The frontend SDK exposes it too: `TransferFromParams.spender_subaccount` in
-  `@icp-sdk/canisters/ledger/icrc`, the package
-  [`icrc-ledger.api.ts`](../../../../../src/frontend/src/icp/api/icrc-ledger.api.ts)
+  — the Rust shape the backend needs, in a canister this backend already calls
+  ICRC-2 against.
+- `TransferFromParams.spender_subaccount` in `@icp-sdk/canisters/ledger/icrc`,
+  the package [`icrc-ledger.api.ts`](../../../../../src/frontend/src/icp/api/icrc-ledger.api.ts)
   already wraps.
 
 So the spec's premise for open question 1 — that the field is absent from every
-vendored candid in this repo — is wrong. What remains is behavioural: does a
-real ledger honour it.
+vendored candid in this repo — was wrong twice over. What is left is behaviour,
+not interface.
+
+**Still to prove:**
+
+- [ ] **Open question 1, behavioural half.** `approve` to
+      `{owner: backend, subaccount: H(tip_id)}` followed by `icrc2_transfer_from`
+      with the matching `spender_subaccount`, executed against the local ledger.
+      A declared field is not a working one.
+- [ ] **Open question 3.** `expected_allowance` on replace, so a retried creation
+      cannot silently destroy a live reservation.
+- [ ] **Open question 2, deployment half.** `icrc1_supported_standards` on the
+      **mainnet** ledgers, read-only. Local proves the wasm supports ICRC-2, not
+      that mainnet runs a version that does.
 
 ## The local rig
 
