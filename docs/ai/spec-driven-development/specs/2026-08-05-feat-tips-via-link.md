@@ -1,12 +1,12 @@
 This spec follows the workflow defined in `docs/ai/spec-driven-development/workflow.md`.
 
-> **Status: DRAFT — awaiting sign-off on the escrow model.** The design is captured
-> from Figma
+> **Status: escrow model decided — no custody.** The design is captured from Figma
 > ([page `21703-14463`, "↪ Tips"](https://www.figma.com/design/duPCw1leqer7ES0sBb6Uua/7.-OISY-UI?node-id=21703-14463))
-> into [`designs/`](./2026-08-05-feat-tips-via-link/designs). The one thing that
-> blocks implementation is
-> [where the money sits between send and claim](#escrow-model--where-the-money-sits-between-send-and-claim) —
-> the design's token list makes this materially harder than it first looks.
+> into [`designs/`](./2026-08-05-feat-tips-via-link/designs), every code claim is
+> verified against `origin/main`, and a clarification round settled fifteen calls —
+> see [Decisions](#decisions-clarification-round). Tips are funded by an **ICRC-2
+> allowance**, so OISY never holds the tokens; the cost is that v1 covers ICP and
+> ck-assets only, and a tip is a **reservation** rather than a guarantee.
 
 # Spec: Send a tip via link or QR code
 
@@ -15,7 +15,8 @@ This spec follows the workflow defined in `docs/ai/spec-driven-development/workf
 Let a signed-in OISY user set aside an amount of a token and hand it to **anyone**
 as a **link or QR code**. The recipient opens it, signs in with **Internet
 Identity**, and **claims** the tokens into their own OISY wallet. If nobody claims
-it, the funds come back to the sender automatically.
+it, the reservation simply lapses and the sender keeps their funds — they never left
+the sender's account in the first place.
 
 The defining property: **the recipient does not need to have a wallet, an address,
 or any prior relationship with OISY.** They need an Internet Identity and nothing
@@ -132,112 +133,189 @@ probed), its preview **required an identity** (which is what made the logged-out
 landing impossible), funding was four non-atomic steps with no replay, and it shipped
 with **no tests**.
 
-Consequence: **whichever escrow model wins, it introduces a genuinely new backend
-capability** and must be reviewed as such.
+Consequence: even the no-custody model
+([decided](#escrow-model--decided-icrc-2-allowance-no-custody)) makes `claim_tip` the
+**first backend method that moves a user's tokens** — as a delegated spender rather
+than a holder, but it is still a first, and it must be reviewed as one.
 
 ### Housekeeping and abuse guards to reuse
 
 - Hourly sweep + lazy pruning:
   [`utils/housekeeping.rs`](../../../../src/backend/src/utils/housekeeping.rs)
-  already calls `prune_expired_shares` on an `ic_cdk_timers` interval — expired tips
-  and their **auto-refunds** hook into the same place.
+  already calls `prune_expired_shares` on an `ic_cdk_timers` interval — expired tip
+  **records** hook into the same place (there is nothing to refund).
 - Per-caller rate limiting:
   [`utils/rate_limiter.rs`](../../../../src/backend/src/utils/rate_limiter.rs),
   `RateLimiter::check_caller`.
 - Result enums and the `From<Result<…>>` pattern:
   [`shared/src/types/result_types.rs`](../../../../src/shared/src/types/result_types.rs).
 
-## Escrow model — where the money sits between send and claim
+## Decisions (clarification round)
 
-A tip has a window (up to a month, per the design) between "sender creates the link"
-and "someone claims it." The tokens have to be _somewhere_ during that window.
+Settled with the feature owner on 2026-08-05, in the terms of
+[Step 2 — Clarify](../workflow.md). Each of these was a
+pending decision in the first draft.
 
-**The design settles the hardest input to this decision, and not in the direction a
-simple v1 would want.** The token picker
-([token-picker](./2026-08-05-feat-tips-via-link/designs/token-picker-21763-84682.png))
-lists **BTC (Bitcoin), ckBTC (Internet Computer), ETH (Ethereum), ICP, SOL (Solana),
-USDC (Ethereum), and USDC (Solana)**, and the History screen shows a **10 SOL** tip.
-So v1 must escrow **native** UTXO, EVM, and Solana assets — not just ICRC ledgers on
-the IC. Everything below follows from that.
+| #   | Decision                                                                                                    | Consequence                                                                                                                   |
+| --- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **ICRC-2 allowance**, no custody by OISY                                                                    | v1 is ICP + ck-assets only; a tip is a reservation, not a guarantee                                                           |
+| 2   | **ck-assets only** — ICP, ckBTC, ckUSDC, ckUSDT (ckETH if its ledger supports ICRC-2)                       | The design's native BTC / ETH / SOL / USDC rows do not ship                                                                   |
+| 3   | Port **only the tip subset** of the POC's escrow interface                                                  | No two-party deals, consents, reject, reliability score, or ICRC-7 deal-as-NFT view                                           |
+| 4   | **Cancellation ships**                                                                                      | Implemented as an allowance revoke; the only real defence for a leaked link                                                   |
+| 5   | **Claim code in the URL fragment**, backend stores only its **hash**                                        | A canister-state leak does not yield claimable secrets                                                                        |
+| 6   | **Both** non-guarantee defences: reserved funds locked in the sender's UI **and** a coverage check at claim | Expands scope into balance derivation — see [Reserved balance](#reserved-balance--the-part-that-leaves-this-features-boundary) |
+| 7   | Statuses are **Reserved / Claimed / Expired**, plus **Cancelled** and **Uncovered**                         | Replaces the three vocabularies in the source material                                                                        |
+| 8   | Expiry options **1h / 24h / 7d**, default 24h                                                               | Shorter than the design's 1 month, because the window is a lock on the sender's balance                                       |
+| 9   | **Message ships** — 250 characters, stored on the backend, shown on the claim screen                        | Needs the notes' safe rendering and a backend length bound                                                                    |
+| 10  | The **anonymous preview shows amount, token and expiry only**                                               | The message is revealed only after sign-in                                                                                    |
+| 11  | The sender **does** see the claimer's principal in History                                                  | The claim screen must disclose this _before_ the claim                                                                        |
+| 12  | Create step uses the design's **radio cards**                                                               | The compact dropdown variant is dropped                                                                                       |
+| 13  | Logged-out CTA is **Open or Create** with the Terms-of-Use consent line                                     | Consent is collected before a wallet is created                                                                               |
+| 14  | **No cap on the number of active tips**                                                                     | The sender's balance is the natural limiter; keep a minimum amount and a rate limit                                           |
+| 15  | **Self-claim rejected**                                                                                     | Under an allowance it is a self-transfer that only burns a fee, and cancellation covers the intent                            |
 
-### Option A — ICRC subaccount escrow (insufficient alone)
+## Escrow model — decided: ICRC-2 allowance, no custody
 
-Sender `icrc1_transfer`s into `{owner: backend, subaccount: H(tip_id)}`; the canister
-transfers out on claim. Clean, cheap, and the claimer needs no gas — but it reaches
-**only** ICP and ckBTC out of the seven tokens drawn. Viable only as a
-scope-reduced v1 (see [Pending decisions](#pending-decisions-facts-clear--owner-must-decide)).
+A tip has a window of up to a week between "sender creates the link" and "someone
+claims it". The decision is that during that window the tokens **stay in the
+sender's own account**, and the canister holds only a bounded, revocable
+**authorisation** to move them.
 
-### Option B — ICRC-2 allowance, `transfer_from` at claim (rejected)
+```
+At creation (signed-in sender, all client-side except the record):
+  1. tip_id   = random, opaque                (the link's path segment)
+  2. code     = 128-bit random                (the link's fragment, never sent)
+  3. approve( spender = { owner: <backend>, subaccount = H(tip_id) },
+              amount  = tip + payout fee,
+              expires_at = now + chosen window )     ← on the token's own ledger
+  4. create_tip( tip_id, ledger, amount, expires_at, H(code), message? )
+  5. Link = oisy.com/tip/<tip_id>#c=<code>
+```
 
-Funds never leave the sender; the ledger enforces expiry; refund is a no-op. But it
-is ICRC-only (same coverage problem as A), and the tip is **not guaranteed** — the
-sender can spend the balance and the claim then fails **at the recipient**, after
-the design has already told them "Status: **Funded**". Rejected: the design's own
-status chip promises something this model cannot.
+```
+At claim (recipient, after Internet Identity):
+  1. get_tip(tip_id)                      [query, anonymous] → amount, token, expiry, status
+  2. claim_tip(tip_id, code)              [update]
+       backend checks H(code), expiry, status, and the live allowance + balance
+       backend calls icrc2_transfer_from( sender → claimer ), spender_subaccount = H(tip_id)
+```
 
-### Option C — bearer key: the link _is_ a private key (rejected)
+**Why the spender is a per-tip subaccount.** An ICRC-2 allowance is keyed by the
+pair (owner, spender). If the spender were the bare backend principal, every tip a
+user creates would share **one** allowance bucket, and claiming tip A could consume
+what tip B reserved. Because `approve` takes an **`Account`**, not a principal
+([`icrc-ledger.api.ts`](../../../../src/frontend/src/icp/api/icrc-ledger.api.ts)
+already types `spender: IcrcAccount`), each tip can get its own isolated allowance
+under `{owner: backend, subaccount: H(tip_id)}`, drawn down with
+`spender_subaccount` at `transfer_from` time. This detail is what makes the model
+viable for more than one concurrent tip, and it is the one mechanism that still
+needs confirming against the ledger's candid — see
+[Open questions](#open-questions-facts-to-confirm).
 
-The link's secret is a fresh keypair; the sender funds the derived address; the
-claimer sweeps it. Chain-agnostic, non-custodial, no new backend capability. But the
-claimer must pay the sweep fee **from an empty address** on every chain, an
-intercepted link is an irreversible theft, and auto-refund would require OISY to
-retain the key — which contradicts the point. Rejected on fee complexity and the
-refund requirement.
+**What this buys.** OISY never holds a user's tokens, so no new custody surface is
+introduced anywhere in the backend. Cancellation is an allowance revoke. Expiry is
+enforced by the **ledger itself**, not only by canister bookkeeping. There is no
+refund path at all, because nothing ever moved — which makes the design's two
+disputed promises literally true: _"you maintain control over the assets until the
+recipient successfully claims them"_ and _"100% of the funds are automatically
+returned"_.
 
-### Option D — per-tip chain-key escrow address **(what the design implies)**
+**What it costs, stated plainly.**
 
-The canister derives a **fresh escrow address per tip** on the tip's own chain via
-chain-key signatures, the sender funds it with one ordinary on-chain transfer, and
-the claim makes the canister **sign an outbound transfer** from that address to the
-claimer's OISY address. Refund signs the same transfer back to the sender.
+- **ICRC-2 only.** Native BTC, ETH and SOL have no allowance primitive, so five of
+  the seven tokens drawn in the picker cannot work this way. v1 ships ICP and
+  ck-assets, and the picker is filtered to what the ledgers actually support.
+- **A tip is a reservation, not a guarantee.** The sender can spend the balance
+  elsewhere or revoke the approval, and the claim then fails **at the recipient**.
+  This is why `Funded` becomes **`Reserved`**, and why the two defences in
+  [decision 6](#decisions-clarification-round) are not optional.
+- **The canister holds authority, not assets.** Weaker than custody, but not
+  nothing: for up to a week a canister method can move a bounded amount out of a
+  user's account. Compliance should be asked about the authorisation, not about a
+  balance.
 
-This is the only option that covers the drawn token list, and it matches three
-things the design shows independently:
+### Alternatives, and why they lost
 
-- **`oisy.com/tip/0x…a1b21`** — the link id is rendered as a `0x…` hex value, which
-  is what an escrow address (or a hash committing to one) looks like.
-- **`Status: Funded`** — a state only meaningful if the money has actually landed
-  somewhere the canister can verify.
-- **`Network fee 0.1 USDC`** shown **on the claim screen**, deducted from the tip —
-  i.e. the outbound transfer is paid out of the escrowed amount, which is exactly
-  the accounting a canister-signed sweep needs.
+- **Canister subaccount escrow** (funds transferred into a per-tip subaccount of
+  the backend) makes the tip guaranteed and `Funded` honest, but it is custody —
+  the thing this decision set out to avoid. It also remains ICRC-only.
+- **Per-tip chain-key escrow addresses** would cover the native tokens the design
+  draws, at the price of custody on four chains, per-tip key derivation, and an
+  unsolved fee problem (spending ETH to move USDC). Recorded here because it is the
+  only route to native-asset tips if that scope ever returns.
+- **A bearer key in the link** (the link _is_ the private key) is non-custodial and
+  chain-agnostic, but it has no auto-lapse — reclaiming would require OISY to keep
+  the key, which is custody by another name — and the claimer would pay gas from an
+  empty address on every chain.
 
-**Cost, stated plainly:** OISY's backend takes custody of user funds for the first
-time, on four chains, with a per-tip key derivation, a fee-accounting problem
-(paying **ETH** gas for a **USDC** tip), and refund/claim paths that must be atomic
-against double-spend across an `await` to an external chain. This is the largest
-single increase in the canister's risk surface in this repo's history and needs
-explicit product + security sign-off, not a technical nod.
+For the recipient to be paid while the sender is offline, something online has to be
+able to move the funds: the canister (custody), the recipient holding a bearer key
+(no lapse), or the ledger under a pre-authorisation. That is the whole option space,
+and this decision picks the third.
 
-**Recommendation.** Option D as the target architecture, but ship it in two waves:
-**wave 1 = ICP + ckBTC only** (Option A's mechanics, which are simple and fully
-reversible), **wave 2 = native BTC / ETH / SOL / ERC-20 / SPL** via chain-key escrow.
-The UI is identical either way; the token picker is simply filtered in wave 1. This
-gets the feature in front of users without betting the canister on multi-chain
-custody in the first PR.
+## Reserved balance — the part that leaves this feature's boundary
+
+[Decision 6](#decisions-clarification-round) requires that funds reserved by an
+active tip **read as locked in the sender's own wallet**. This is deliberately
+recorded as its own section because it is the only part of the feature that reaches
+outside it: the amount reserved by open tips must be subtracted from the spendable
+balance wherever OISY offers to spend it — the token list, the send flow, the swap
+flow, and the **MAX** control in both.
+
+Two independent mechanisms, per the decision:
+
+1. **Sender side — reserve.** Spendable balance excludes the sum of the user's
+   `Reserved` tips per token, so the wallet does not offer to spend money that is
+   already promised. This cannot be complete: the same account can be spent from
+   another wallet or another device entirely, so the reserve is a courtesy to the
+   sender, not a guarantee to the recipient.
+2. **Recipient side — coverage check.** On opening the link and again at claim, the
+   backend compares the live allowance **and** the sender's balance against the tip
+   amount. If it no longer covers, the recipient gets the **`Uncovered`** state
+   saying plainly that the funds are no longer available rather than a false
+   `Reserved`.
+
+The `Uncovered` copy is a deliberate exception to the collapse-everything rule in
+the [security model](#security-model): unknown, expired and already-claimed all
+still return one indistinguishable response, because those protect against probing
+which tip ids exist. `Uncovered` is only reachable by someone already holding a
+valid link, so it leaks nothing about the id space. It does say something about the
+sender, though — that they no longer hold the amount — which is a copy decision to
+land with whoever owns the privacy promise.
 
 ## Link shape
 
-From [share-qr-link](./2026-08-05-feat-tips-via-link/designs/share-qr-link-21710-58677.png):
+The design draws `oisy.com/tip/0x…a1b21`. Per
+[decision 5](#decisions-clarification-round) it gains a fragment, following the
+shipped notes-share pattern in
+[`personal-note-share.services.ts:60`](../../../../src/frontend/src/lib/services/personal-note-share.services.ts)
+(`…/${token}#k=${exportedKey}`):
 
 ```
-oisy.com/tip/0x…a1b21
+oisy.com/tip/<tip_id>#c=<claim_code>
+             └ opaque id, the server knows it   └ 128-bit secret, never sent to the server
 ```
 
-- **No `#k=` fragment.** The design's link carries the id only, so **possession of
-  the id is the entire authorization**. That is a deliberate simplification versus
-  the note-share model, and it means the id must be unguessable and the backend must
-  treat every lookup failure identically.
-- The **public landing** must render with **no identity**. Per
-  [recipient-logged-out](./2026-08-05-feat-tips-via-link/designs/recipient-logged-out-21745-1713.png),
-  the design does **not** use a bespoke public page like the note-share route — it
-  renders the **normal OISY landing page** with a **Tip Status** modal on top. The
-  recipient sees what they've been given before being asked to sign in.
-- Claiming needs an authenticated principal, so the landing hands off to Internet
-  Identity and resumes the claim afterwards — the mechanic
-  [`UrlGuard.svelte`](../../../../src/frontend/src/lib/components/guard/UrlGuard.svelte)
-  already implements for `?code=` (wait for `$authIdentity`, claim, strip the param).
-  The tip id must survive the II round-trip.
+The pattern is copied, but its **guarantee is weaker than for a note, and this must
+not be misread**. A note's fragment holds a _decryption_ key, so the canister
+physically cannot serve the plaintext — it stores only ciphertext. A tip has nothing
+to decrypt: the amount is not secret and the funds move by canister action. The
+canister therefore has to **verify** the claim code, which means knowing something
+about it. Hence the hash: the backend stores `H(code)` only, so a leak of canister
+state does not hand anyone a claimable tip. That is strictly better than the POC,
+which stored `claim_code` in the clear in `DealView` and put it in the **query
+string** where it reached the server on every request.
+
+The **public landing** renders with no identity. Per
+[recipient-logged-out](./2026-08-05-feat-tips-via-link/designs/recipient-logged-out-21745-1713.png)
+the design does not use a bespoke public page — it renders the **normal OISY landing
+page** with a **Tip Status** modal on top, showing amount, token and expiry only
+([decision 10](#decisions-clarification-round)). Claiming needs an authenticated
+principal, so the landing hands off to Internet Identity and resumes afterwards —
+the mechanic
+[`UrlGuard.svelte:18`](../../../../src/frontend/src/lib/components/guard/UrlGuard.svelte)
+already implements for `?code=`. The **fragment must survive that round-trip**,
+which is the fragile part.
 
 ## Happy path (the optimal scenario)
 
@@ -245,36 +323,50 @@ oisy.com/tip/0x…a1b21
 
 1. Opens **Issue Tip** from the user menu → intro modal **"Tip with OISY Wallet"**
    ("Effortless Crypto Tipping"), with **Get Started** and **View History**.
-2. **Select token to issue tip** — searchable list with an **All networks** filter,
-   showing balance and fiat value per token.
-3. **Issue Tip** — enters an amount (with fiat equivalent, balance, and **MAX**),
-   picks an **expiration** (24 hours _Recommended_ / 7 days / 1 month), optionally
-   adds a **message**, sees **Total estimated fee**, and is told _"Unclaimed funds
-   will be refunded to your wallet automatically."_
-4. **Generate** → one on-chain transfer funds the tip's escrow.
+2. **Select token to issue tip** — searchable list, filtered to the ledgers that
+   support ICRC-2, showing balance and fiat value per token.
+3. **Issue Tip** — enters an amount (fiat equivalent, balance, **MAX**), picks an
+   expiry from the radio cards **1 hour / 24 hours _(Recommended)_ / 7 days**, adds
+   an optional **message** (≤ 250 characters), and sees the estimated fee. The info
+   box tells the truth for this model: the amount is **reserved**, stays in their
+   own account, and the reservation lapses on its own.
+4. **Generate** → the wallet issues an `approve` for the tip plus the payout fee to
+   `{owner: backend, subaccount: H(tip_id)}`, then records the tip. Nothing leaves
+   the sender's account.
 5. **Claim Your Digital Tip** — amount, a QR with the OISY mark, the link with
    **share** and **copy** buttons, and _"No wallet needed. You can also take a photo
-   of it to claim later. Expires on April 1, 10:30 CET."_ → **Done**.
+   of it to claim later. Expires on …"_ → **Done**. The reserved amount now shows as
+   locked in their own balance.
 
 **Recipient (may have never used OISY):**
 
 6. Opens the link or scans the QR → the OISY landing page with a **Tip Status**
-   modal: **"Your 135.00 ICP Tip is Ready!"**, _"Now, let's create your free OISY
-   Wallet to access and manage your funds."_, plus **Learn how it works** and
-   **Share on X**. No backend state changes yet.
-7. Taps **Set Up My OISY Wallet** → Internet Identity. That is the entire
-   account-creation step.
+   modal: **"Your 135.00 ICP Tip is Ready!"** with the token and expiry, and
+   **Open or Create** carrying the Terms-of-Use consent line. No state changes, and
+   no message yet.
+7. Taps **Open or Create** → Internet Identity. That is the entire account-creation
+   step.
 8. Back in the app, **Claim tip** shows the amount and fiat value, **To: Your OISY
-   wallet**, Network, Token, **Network fee** (deducted from the tip), and **Status:
-   Funded** → **Claim now**.
-9. Success: the same card with a single **Take me to the wallet** CTA. The tokens are
-   in their own wallet.
+   wallet**, Network, Token, the payout fee, the sender's **message**, a note that
+   the sender will see who claimed, and **Status: Reserved** → **Claim now**. The
+   backend re-checks the allowance and the sender's balance before moving anything.
+9. Success: **"135.00 USDC Received!"** with **Status: Completed** and a single
+   **Take me to the wallet** CTA. The tokens are in their own wallet.
 
-**Sender, afterwards:** **History** lists each tip as **Active** (with "Expires in
-24h"), **Claimed**, or **Refunded** (with "Expired") — and an unclaimed tip returns
-to the balance without the sender doing anything.
+**Sender, afterwards:** **History** lists each tip as **Reserved** (with time to
+expiry), **Claimed** (with the claimer's principal), **Expired**, **Cancelled**, or
+**Uncovered**. An unclaimed tip needs no action — the allowance lapses and the lock
+on their balance disappears.
 
 ## Design (as drawn)
+
+This section records **what the mock draws**, which is not always what ships: the
+[decisions](#decisions-clarification-round) override it in five places — the expiry
+values (1h / 24h / 7d, not 1 month), the create-step layout (radio cards, not the
+dropdown), the statuses (Reserved / Claimed / Expired), the logged-out CTA (Open or
+Create), and the token list (ICRC-2 ledgers only, so five of the seven drawn rows do
+not appear). Where the two disagree, the decision wins and the difference is called
+out inline.
 
 Assets in [`designs/`](./2026-08-05-feat-tips-via-link/designs); every screen below
 is dark-theme in the source file, so **both themes** must be implemented. Desktop
@@ -317,7 +409,10 @@ tip."_, with a **Buy Tokens** action.
 
 ### 4. Create — "Issue Tip"
 
-Two variants exist, and they disagree; the difference must be resolved before build:
+Two variants exist and they disagree. **Resolved: the full variant ships**
+([decision 12](#decisions-clarification-round)), with the expiry values changed to
+**1 hour / 24 hours _(Recommended)_ / 7 days** ([decision 8](#decisions-clarification-round)) —
+the window is a lock on the sender's own balance, so a month is too long for a tip.
 
 - **Full** ([create-tip-full](./2026-08-05-feat-tips-via-link/designs/create-tip-full-21710-11864.png)) —
   **Amount** (value, token selector, fiat equivalent, balance + **MAX**);
@@ -352,9 +447,10 @@ your funds."_, secondary actions **Learn how it works** and **Share on X**, prim
 
 Two further frames (`21788:50522` USDC, `21788:47908` ICP) draw the **same state with
 a different call to action** — **Open or Create**, followed by the consent line _"By
-clicking this button, you agree to the Terms of Use"_. Which of the two ships is a
-[pending decision](#pending-decisions-facts-clear--owner-must-decide); the consent
-line makes it more than a wording choice.
+clicking this button, you agree to the Terms of Use"_. **Resolved: this variant
+ships** ([decision 13](#decisions-clarification-round)), because it collects consent
+before a wallet is created. The modal shows amount, token and expiry only — the
+sender's message is not revealed until after sign-in.
 
 ### 7. Recipient, signed in — "Claim tip"
 
@@ -362,8 +458,16 @@ line makes it more than a wording choice.
 [card detail](./2026-08-05-feat-tips-via-link/designs/claim-card-detail-21710-57634.png).
 Hero card: token icon, **"You received a tip!"**, amount **135 USDC**, fiat
 **$134.99**. Detail rows: **To** — _Your OISY wallet_; **Network** — Ethereum;
-**Token** — USDC; **Network fee** — **0.1 USDC** ($0.12); **Status** — **Funded**
-(green chip). Footer **Cancel** / **Claim now**.
+**Token** — USDC; **Network fee** — **0.1 USDC** ($0.12); **Status** — drawn as
+**Funded**, ships as **Reserved** ([decision 7](#decisions-clarification-round)),
+because nothing has been funded — the amount is authorised in the sender's account.
+Footer **Cancel** / **Claim now**.
+
+Two additions the mock does not carry: the sender's **message**
+([decision 9](#decisions-clarification-round)), and a line disclosing that **the
+sender will see who claimed this tip** ([decision 11](#decisions-clarification-round)).
+The disclosure has to appear **before** the claim, not after — the recipient's
+identity reaching the sender should be a choice, not a surprise.
 
 **Success** — two variants are drawn. The plain one
 ([claim-success](./2026-08-05-feat-tips-via-link/designs/claim-success-21788-50935.png))
@@ -380,11 +484,13 @@ word (see [Discrepancies](#discrepancies-in-the-source-material)).
 from the intro's **View History**. Rows grouped by day (**Today**), each showing
 token icon, **"Tip created · <status>"**, timestamp, and amount:
 
-| Status       | Secondary line   |
-| ------------ | ---------------- |
-| **Active**   | `Expires in 24h` |
-| **Claimed**  | —                |
-| **Refunded** | `Expired`        |
+| Drawn        | Ships as      | Secondary line                |
+| ------------ | ------------- | ----------------------------- |
+| **Active**   | **Reserved**  | `Expires in 24h`              |
+| **Claimed**  | **Claimed**   | the claimer's principal       |
+| **Refunded** | **Expired**   | — (nothing was ever refunded) |
+| —            | **Cancelled** | sender revoked it             |
+| —            | **Uncovered** | funds no longer available     |
 
 Footer: **Cancel**.
 
@@ -400,37 +506,43 @@ Footer: **Cancel**.
 
 ## Discrepancies in the source material
 
-Flagged rather than silently resolved — each needs an owner's call.
+The mock, the on-canvas description and reality disagreed in eight places. The
+[decisions](#decisions-clarification-round) settle seven; one is left to whoever owns
+the privacy promise.
 
-1. **"Non-custodial" vs. "Funded".** The on-canvas text promises _"Non-custodial:
-   You maintain control over the assets until the recipient successfully claims
-   them."_ But **Status: Funded** plus automatic refund means the funds have left the
-   sender and sit under canister control. Under Option D that copy is misleading and
-   should not ship as written.
-2. **"100% of the funds are automatically returned."** A refund is itself an on-chain
-   transfer with a fee, so the returned amount cannot be 100% for native-chain tips.
-   Either the copy softens, or the fee model changes so the sender prepays the refund
-   leg at creation.
-3. **Status vocabulary — three of them.** The on-canvas text says **Pending /
-   Claimed / Expired**; History says **Active / Claimed / Refunded**; the fuller
-   success screen (`21763:86266`) says **Completed**. Pick one and use it everywhere,
-   including in `PRODUCT.md`.
-4. **Message field.** Specified at 250 characters and "visible to the recipient", but
-   absent from the compact create variant and from every claim screen.
+1. **"Non-custodial" — now true.** The text promised _"You maintain control over the
+   assets until the recipient successfully claims them."_ Under an allowance that is
+   literally accurate: the tokens never leave the sender's account. This copy can
+   ship as written, which it could not have under any escrow model.
+2. **"100% of the funds are automatically returned" — now true.** Nothing moves, so
+   there is nothing to return and no refund fee to shave off the total.
+3. **Status vocabulary — resolved.** The source had three (text: Pending / Claimed /
+   Expired; History: Active / Claimed / Refunded; success screen: Completed). Ships
+   as **Reserved / Claimed / Expired** plus **Cancelled** and **Uncovered**.
+4. **Message field — resolved.** Ships at 250 characters, stored on the backend,
+   shown on the claim screen (which no mock draws) and **not** in the anonymous
+   preview.
 5. **History's info banner** reads _"We've hidden these transactions as they
-   considered suspicious…"_ — copy from the spam-token surface, almost certainly a
-   reused component left in the mock. Do not implement.
-6. **Two fees, one story.** **Total estimated fee** at creation and **Network fee**
-   at claim are different legs (funding vs. payout, the latter deducted from the
-   tip). The recipient sees a smaller number than the sender sent; the copy must say
-   so before the claim, not after.
-7. **Two logged-out CTAs.** One frame says **Set Up My OISY Wallet**, two others say
-   **Open or Create** and add a Terms-of-Use consent line. The recipient's very first
-   screen cannot have two different primary actions, and only one of them takes
-   consent.
-8. **"Single-use security"** in the text vs. no explicit single-use control in the
-   UI — every tip is implicitly single-use. Confirm that is intended (it follows
-   from a tip being a fixed amount).
+   considered suspicious…"_ — copy from the spam-token surface, a reused component
+   left in the mock. Do not implement.
+6. **Two fees, one story — mostly dissolved.** There is no funding leg any more: the
+   sender pays the `approve` fee, and the payout fee is drawn from the allowance at
+   claim. Two numbers still exist, but they are now "what you pay to reserve" and
+   "what the transfer costs", and the recipient must see the net amount before
+   claiming.
+7. **Two logged-out CTAs — resolved** in favour of **Open or Create** with the
+   consent line.
+8. **"Single-use security" — inherent.** A tip is a fixed amount with one allowance;
+   claiming consumes it. No explicit single-use control is needed.
+
+**Still open — the `Uncovered` copy.** Telling the recipient that the sender no
+longer holds the funds is a statement about the sender, and the design promises that
+"Tipping links do not expose your full wallet address or entire balance". It is not a
+balance, but it is information. The wording needs an owner.
+
+**Design debris to ignore**, confirmed by reading every text node on the page: a
+leftover `99.7 GLDT / $128.22` token row inside the Issue Tip modal, `Field message`
+placeholders, and an `MA` placeholder in one claim-card variant.
 
 ## Backend sketch
 
@@ -438,135 +550,159 @@ New shared types in `src/shared/src/types/tip.rs`, result enums in
 [`result_types.rs`](../../../../src/shared/src/types/result_types.rs), a
 `StableBTreeMap<tip_id, Tip>` in its own memory region, and a module under
 `src/backend/src/tips/` mirroring
-[`personal_notes/share/`](../../../../src/backend/src/personal_notes/share).
+[`personal_notes/share/`](../../../../src/backend/src/personal_notes/share). Only the
+tip subset of the POC's interface is ported
+([decision 3](#decisions-clarification-round)).
 
-| Endpoint      | Kind     | Guard                                      | Purpose                                                                                                                                  |
-| ------------- | -------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `create_tip`  | `update` | `caller_is_registered_user` + rate-limited | Reserve a tip id, derive/record its escrow target, store `{token, amount, expires_at, message?, sender, status}`. Enforces per-user cap. |
-| `confirm_tip` | `update` | `caller_is_registered_user`                | Verify the sender's deposit landed and flip the tip to **Funded**. Separate from `create_tip` so a failed deposit cannot orphan funds.   |
-| `get_tip`     | `query`  | **none (anonymous OK)**                    | Public metadata for the landing modal: network, token, amount, expiry, status, message. Never the sender's address or the claimer.       |
-| `claim_tip`   | `update` | `caller_is_not_anonymous`                  | Atomically mark claimed and sign the outbound transfer to the caller's address, net of the payout fee. Idempotent per tip.               |
-| `get_my_tips` | `query`  | `caller_is_registered_user`                | The sender's History list.                                                                                                               |
+| Endpoint      | Kind     | Guard                                      | Purpose                                                                                                                                         |
+| ------------- | -------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_tip`  | `update` | `caller_is_registered_user` + rate-limited | Record `{tip_id, ledger, amount, expires_at, H(code), message?, sender}` after the client's `approve`. Validates the allowance actually exists. |
+| `get_tip`     | `query`  | **none (anonymous OK)**                    | The landing modal's data: ledger, token, amount, expiry, status. **Never** the message, the sender, or the claimer.                             |
+| `claim_tip`   | `update` | `caller_is_not_anonymous`                  | Verify `H(code)`, expiry, status, live allowance **and** sender balance; then `icrc2_transfer_from(sender → caller)` with `spender_subaccount`. |
+| `cancel_tip`  | `update` | sender only                                | Mark `Cancelled`. The allowance revoke itself is a client-side `approve(0)` — the canister cannot revoke an approval it does not own.           |
+| `get_my_tips` | `query`  | `caller_is_registered_user`                | History, including the claimer's principal for claimed tips ([decision 11](#decisions-clarification-round)).                                    |
 
-Refunds are **automatic** (the design promises it), driven from
-[`housekeeping.rs`](../../../../src/backend/src/utils/housekeeping.rs) rather than a
-user action — so there is no `refund_tip` endpoint in v1, only an internal sweep that
-must be retry-safe.
+The anonymous `get_tip` is not a new kind of risk: `personal_note_shares.rs` already
+ships an unguarded `#[query]` and an unguarded `#[update]` on `origin/main`.
 
-Non-negotiables: the claim must be **atomic against double-claim** across the
-`await` of an external-chain call (mark-then-send with compensation, never
-send-then-mark); expiry is enforced against **IC time** on every read and claim;
-expired / claimed / unknown collapse to the **same** error so ids cannot be probed;
-the claimer's principal is never exposed; the sender's other addresses and balances
-are never exposed to the recipient (the design's own privacy promise).
+**No `fund_tip`, no refund sweep.** The first draft needed both; the allowance model
+needs neither. There is nothing to fund (the approve is the reservation) and nothing
+to refund (an unclaimed allowance lapses on the ledger). What replaces the sweep is a
+**status reconciler**: a tip whose `expires_at` has passed is reported as `Expired`
+without any transfer, and the record can be pruned lazily on read plus by the
+existing hourly pass in
+[`housekeeping.rs`](../../../../src/backend/src/utils/housekeeping.rs).
+
+Non-negotiables: the claim must be **atomic against double-claim** across the `await`
+to the ledger (mark-then-transfer with compensation, never transfer-then-mark);
+expiry is checked against IC time **and** the ledger's own `expires_at`; unknown,
+expired and already-claimed collapse to the **same** error while `Uncovered` is
+distinct (see [Reserved balance](#reserved-balance--the-part-that-leaves-this-features-boundary));
+the claim code is never stored or returned in the clear; and the sender's other
+balances and addresses are never exposed to the recipient.
 
 ## Edge cases and failure modes
 
-Grouped by where they bite. Each needs a defined behaviour before build.
+The allowance model deletes a whole class of failures the first draft had to plan for
+— there is no funding transfer, so no orphaned deposit, no funded-but-unrecorded tip,
+no reconciliation sweep, and no refund that can fail. It introduces its own.
 
 ### Creation
 
-1. **Insufficient balance** for amount + fee — blocked client-side.
-2. **Amount below the payout fee** — a tip that cannot be claimed profitably. Needs a
-   **minimum tip amount per token**, enforced both sides.
-3. **Deposit succeeds but the record doesn't** (network drop, canister busy, rate
-   limit) — funds in escrow with no tip. The `create_tip` → `confirm_tip` split plus
-   deterministic escrow derivation must make this replayable, with a reconciliation
-   sweep for orphaned escrow balances.
-4. **User closes the tab between Generate and confirmation** — same as above.
-5. **Two tabs, same tip id** — duplicate must be rejected, never overwritten.
-6. **At the per-user active-tip cap** — refuse with a clear message; never evict.
-7. **Empty balance** — the drawn "Your balance is empty" state.
-8. **Unsupported token picked** (NFT, custom token on an unsupported ledger) — filter
-   out of the picker rather than rejecting on submit.
-9. **Fee moves between quote and confirm** — especially on Ethereum, where the gap
-   between "Total estimated fee $0.42" and reality can be large.
-10. **Exchange-rate movement** — the fiat figure shown at creation is not a promise;
-    copy must not imply a locked value.
+1. **Insufficient balance** for amount + payout fee + the `approve` fee itself —
+   blocked client-side. Note the approve carries its **own** ledger fee, which the
+   POC's `amount + fee` maths omitted.
+2. **Amount below the payout fee** — a tip that cannot be claimed profitably. A
+   **minimum amount per token** is enforced on both sides
+   ([decision 14](#decisions-clarification-round) keeps the minimum while dropping the
+   count cap).
+3. **`approve` succeeds but `create_tip` fails** — the reverse of the old orphan
+   problem, and much milder: a live allowance with no tip record. It lapses on its
+   own at `expires_at`, and the client can retry `create_tip` idempotently under the
+   same `tip_id`. Worth surfacing to the sender rather than silently leaving an
+   allowance in place.
+4. **A second `approve` overwrites the first.** ICRC-2 `approve` **sets** rather than
+   increments. This is exactly why the spender is a per-tip subaccount — but it also
+   means a client bug that reuses a subaccount silently destroys the earlier
+   reservation. `expected_allowance` should be used to make the update safe.
+5. **Ledger without ICRC-2 support** — the token must not appear in the picker at
+   all. Which ck-ledgers qualify is an [open question](#open-questions-facts-to-confirm).
+6. **Empty balance** — the drawn "Your balance is empty" state.
+7. **Fee moves between quote and confirm.**
+8. **Exchange-rate movement** — the fiat figure at creation is not a promise.
 
 ### The link in the wild
 
-11. **Never opened** — auto-refund must fire, and History must show **Refunded**.
-12. **Opened by a chat unfurler / preview bot** — must not claim or consume. The
-    landing does a read-only `get_tip`; only **Claim now** moves money.
-13. **Forwarded to several people** — first claim wins; everyone else sees the
-    unavailable state. The share copy should set that expectation.
-14. **Leaked publicly** — anyone can claim; there is no recipient binding and no
-    fragment secret. Mitigated only by expiry and small amounts.
-15. **Photographed QR claimed much later** — the design explicitly invites this
-    ("take a photo of it to claim later"), so the expiry must be legible **in the
-    photo** (it is: "Expires on April 1, 10:30 CET").
-16. **QR density** — a `0x…` id keeps the URL short enough to scan from a phone
-    screen at a distance; verify at realistic print sizes.
-17. **Sender claims their own tip** — allow (a self-refund) or reject? Needs a call.
+9. **Never opened** — the allowance lapses, History shows **Expired**, and the lock
+   on the sender's balance disappears with no action from anyone.
+10. **Opened by a chat unfurler** — the landing does a read-only `get_tip`; only
+    **Claim now** moves money.
+11. **Forwarded to several people** — first claim wins; the rest see the collapsed
+    unavailable state.
+12. **Leaked publicly** — anyone holding the full link (id **and** fragment) can
+    claim. Mitigated by the short expiry and, now, by **cancellation**.
+13. **Fragment stripped** by a messenger, shortener or email client — the tip becomes
+    unclaimable. This is a new failure mode created by
+    [decision 5](#decisions-clarification-round) and needs its own honest message,
+    distinct from "expired".
+14. **Photographed QR claimed later** — the design invites this, so the expiry must be
+    legible in the photo. It is.
+15. **QR density** — the fragment lengthens the URL; verify the code still scans from
+    a phone screen at a realistic distance.
 
 ### Claim
 
-18. **Claim during sign-in** — the tip id must survive the II round-trip and the
-    landing must be resumable if the user abandons II and returns later.
-19. **Two devices claim simultaneously** — exactly one payout, ever.
-20. **Marked claimed but the outbound transfer fails** — no "claimed, unpaid" limbo;
+16. **Claim during sign-in** — both the tip id **and the fragment** must survive the
+    Internet Identity round-trip, and the landing must be resumable if the user
+    abandons II and returns.
+17. **Two devices claim simultaneously** — exactly one payout, ever.
+18. **Marked claimed but `transfer_from` fails** — no "claimed, unpaid" limbo;
     compensating retry required.
-21. **Expiry lands between opening and claiming** — a race the UI cannot prevent; the
-    backend decides and the page degrades honestly.
-22. **Brand-new principal with no OISY profile** — the claim path must work for a
-    principal that has never touched the backend. This is the load-bearing case:
-    **the user's very first action is a claim.** Check any new-signup gating
-    (`newUserSignupsAllowed`) does not block it.
-23. **Claimer has no token entry for the tipped token** — it must appear in their
-    wallet without manual token setup.
-24. **Claimer has no address on that chain yet** — a fresh II has no derived
-    Ethereum/Solana/Bitcoin address until the wallet loads them; the claim must wait
-    for or trigger that derivation.
+19. **The sender spent the balance** → **`Uncovered`**, stated plainly rather than
+    dressed up as expired.
+20. **The sender revoked the approval** (cancellation, or an `approve(0)` from
+    another client) → same `Uncovered` path.
+21. **The allowance expired on the ledger but the record still says Reserved** — the
+    ledger is the source of truth; the claim fails and the status reconciles.
+22. **Expiry lands between opening and claiming** — the backend decides and the page
+    degrades honestly.
+23. **Brand-new principal with no OISY profile** — the load-bearing case: the user's
+    very first action is a claim. Any signup gate must not block it.
+24. **Claimer has no token entry for the tipped token** — it must appear without
+    manual setup.
 25. **In-app webviews** (Instagram, TikTok, Telegram) — where II sign-in commonly
-    breaks. For a link shared socially this is the most frequent real-world failure.
-26. **Gas for the payout** — for an ERC-20 tip the canister must hold **ETH** to send
-    **USDC**, while charging the recipient 0.1 USDC. Where the ETH comes from, and
-    what happens when the fee estimate is short, is unresolved.
+    breaks, and the most likely real-world failure for a socially shared link.
 
-### Sender-side afterwards
+### Sender side
 
-27. **Refund fee** — who pays, and does the sender get less back than they put in?
-28. **No manual cancel** in the design — a leaked link cannot be killed before
-    expiry. Confirm that is acceptable for money (the note-share precedent was
-    fire-and-forget, but a note is not funds).
-29. **Does the sender learn who claimed?** Naming the claimer deanonymizes a
-    recipient who never opted in.
-30. **Sender deletes their profile** with tips outstanding.
+26. **Reserved funds spent from another wallet or device** — the UI reserve is local
+    to OISY and cannot prevent this. It is a courtesy, not a guarantee; the
+    recipient-side coverage check is what actually protects anyone.
+27. **Cancellation after the recipient opened the page but before they claimed** — a
+    race with no clean answer; the recipient must land on `Uncovered`, not on a
+    silent failure.
+28. **The claimer's principal shown in History** — discloses the recipient's identity
+    to the sender, which the claim screen must warn about beforehand.
+29. **Sender deletes their profile** with tips outstanding — the allowances still
+    exist on the ledger and still lapse; the records must not become unreachable
+    garbage.
 
 ### Abuse and scale
 
-31. **Dust flooding** to bloat stable memory and strand escrow addresses — per-user
-    cap, minimum amount, create rate limit.
-32. **Claim hammering** with random ids — unguessable ids, rate limiting, identical
-    error for every miss.
-33. **Cycle cost** of per-tip key derivation, chain-key signing, and the refund sweep.
-34. **Regulatory / KYT** — OISY custodies value and pays it out to an unidentified
-    third party across four chains. Needs a compliance answer **before** ship, and
-    it is the reason the "non-custodial" copy matters legally as well as
-    editorially.
-35. **Phishing lookalikes** — a fake "you received a tip" page harvesting II
-    sign-ins is the obvious follow-on scam, and this design deliberately trains users
-    to sign in from a link.
+30. **Dust spam** — no count cap by decision, so the guards are the minimum amount
+    and a per-caller create rate limit.
+31. **Claim hammering** with random ids — unguessable id plus fragment, rate limiting,
+    one identical error for every miss.
+32. **Regulatory / KYT** — materially smaller than under custody: OISY holds a
+    bounded, revocable authorisation rather than anyone's funds. Still needs an
+    answer, framed as authorisation rather than balance.
+33. **Phishing lookalikes** — a fake "you received a tip" page harvesting II sign-ins
+    is the obvious follow-on scam, and this flow trains users to sign in from a link.
 
 ## Security model
 
-- **Possession of the id is the authorization.** No fragment secret, no recipient
-  binding. The id must be cryptographically random and wide, and every failed lookup
-  must be indistinguishable.
-- **Escrow is the trust boundary.** The canister controls funds between funding and
-  claim; claim and refund are the only exits, and each must be atomic, single-shot,
-  and upgrade-safe.
-- **No enumeration.** Expired / claimed / unknown collapse to one response.
-  `get_tip` never returns the sender's address or the claimer's identity.
-- **Mandatory, bounded expiry** (max 1 month, per the design) — the primary
-  mitigation for a leaked link, and the trigger for auto-refund.
+- **Two factors authorise a claim:** the opaque `tip_id` the server knows, and the
+  128-bit code it only knows the hash of. Neither alone is enough, and there is no
+  recipient binding — possession of the **full link** is the authorisation.
+- **The allowance is the trust boundary,** not a balance. The canister can move at
+  most the approved amount, from one account, until `expires_at`, and the sender can
+  revoke at any time. There is nothing to drain in a canister compromise.
+- **The claim is the only outbound path,** and it must be atomic against
+  double-claim across the `await` to the ledger, single-shot, and upgrade-safe.
+- **No enumeration.** Unknown, expired and already-claimed collapse to one response;
+  `Uncovered` is the sole exception and is reachable only with a valid link.
+  `get_tip` never returns the message, the sender, or the claimer.
+- **Mandatory, bounded expiry** (max 7 days) — enforced by the **ledger** as well as
+  the canister, and the primary mitigation for a leaked link.
+- **Cancellation** is the second mitigation: a leaked link can be killed before it
+  expires, which the notes-share feature deliberately cannot do.
 - **Rate limits** on create (per caller) and claim (coarse/global, since a claimer
   may be a brand-new principal).
-- **Privacy promise from the design:** the link must not expose the sender's full
-  address or balance.
-- **Residual risk, by design:** whoever holds the link first can claim it, and there
-  is no kill switch before expiry.
+- **Privacy:** the link exposes neither the sender's address nor their balance. The
+  claimer's principal is disclosed to the sender by decision — and disclosed to the
+  claimer, before they claim, for that reason.
+- **Residual risk, by design:** whoever holds the full link first can claim it, and a
+  tip is a reservation the sender can break.
 
 ## PRODUCT.md
 
@@ -576,21 +712,22 @@ behaviour-first voice. It must cover, in the same PR as the behaviour change:
 
 - What a tip is, that it is created per token and amount from the user menu, and
   that the recipient needs only an Internet Identity — no wallet, no address.
-- Which tokens are eligible **in the shipped wave** (wave 1: ICP + ckBTC), stated
-  as a deliberate limit rather than an omission, so a future reader can tell
-  "not yet" from "forgotten".
-- The lifecycle and its vocabulary: **Active → Claimed**, or **Active → expired →
-  Refunded**, and that the refund is **automatic** with no user action.
+- Which tokens are eligible — the ICRC-2-capable ledgers only (ICP and ck-assets) —
+  stated as a deliberate limit with its reason (native chains have no allowance
+  primitive), so a future reader can tell "not possible this way" from "forgotten".
+- The lifecycle and its vocabulary: **Reserved → Claimed**, **Reserved → Expired**,
+  **Reserved → Cancelled**, or **Reserved → Uncovered**, and that an expired tip needs
+  no action from anyone because nothing ever moved.
 - Expiry options and the default, and that expiry is enforced by the backend.
 - The two fee legs — funding at creation, payout deducted from the tip at claim —
   and therefore that the recipient receives slightly less than the sender sent.
-- **Custody, stated honestly.** Whatever the [escrow
-  decision](#escrow-model--where-the-money-sits-between-send-and-claim) turns out
-  to be, PRODUCT.md must describe where the funds actually sit between funding and
-  claim. This is the section most likely to be quoted back at OISY, so it must not
-  inherit the design's "non-custodial" phrasing unless that is literally true.
-- The negative guarantees: no revocation, no recipient binding (whoever holds the
-  link first can claim), no multi-claim, no view receipts.
+- **Where the money actually is.** The tokens stay in the sender's account; OISY
+  holds a bounded, revocable authorisation and never a balance. The design's
+  "non-custodial" phrasing is accurate here and can be used — but the flip side has
+  to be said in the same breath: a tip is a **reservation**, and it can fail at claim
+  if the sender spends or revokes.
+- The negative guarantees: no recipient binding (whoever holds the full link first
+  can claim), no multi-claim, no view receipts, and no native-chain tokens.
 - A pointer to the Plausible event, as the notes sections do.
 
 ## Testing
@@ -613,29 +750,37 @@ loses money rather than breaking a screen:
 
 ## Implementation (atomic PRs)
 
-Small and atomic, per AGENTS.md commandments 2–3. Wave 1 is ICP + ckBTC only; the UI
-is complete, the token picker filtered.
+Small and atomic, per AGENTS.md commandments 2–3. The token picker is filtered to
+ICRC-2 ledgers throughout.
 
-- **PR-1 (backend) — tip store + ICRC escrow + API.** Shared types, result enums,
-  stable map, deterministic subaccount derivation, `create_tip` / `confirm_tip` /
-  `get_tip` / `claim_tip` / `get_my_tips`, atomic claim, IC-time expiry, rate
-  limiters, per-user cap, auto-refund sweep in
-  [`housekeeping.rs`](../../../../src/backend/src/utils/housekeeping.rs). Backend
-  `it` tests: double-claim, claim-after-expiry, failed-payout compensation,
-  orphaned-deposit reconciliation, refund idempotency. `npm run generate` after the
-  candid change — never hand-edit `src/declarations/`.
-- **PR-2 (frontend) — tip service + API.** `tip.api.ts` + `tip.services.ts`:
-  create → fund → confirm with idempotent replay, link + QR construction, claim.
-  Unit tests.
+- **PR-0 (spike, throwaway) — confirm the mechanism.** Prove `approve` to
+  `{owner, subaccount}` plus `transfer_from` with `spender_subaccount` works against a
+  real ck-ledger, and record which ledgers implement ICRC-2. Everything below depends
+  on this; nothing should be built before it lands an answer.
+- **PR-1 (backend) — tip store + claim + API.** Shared types, result enums, stable
+  map, `create_tip` / `get_tip` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code
+  hashing, atomic claim against the ledger call, expiry against IC time and the
+  ledger, coverage check, rate limiter, minimum amount, record pruning in
+  [`housekeeping.rs`](../../../../src/backend/src/utils/housekeeping.rs). Backend `it`
+  tests: double-claim, claim-after-expiry, transfer failure and compensation,
+  uncovered path, cancelled path, wrong claim code. `npm run generate` after the candid
+  change — never hand-edit `src/declarations/`.
+- **PR-2 (frontend) — tip service + API.** `tip.api.ts` + `tip.services.ts`: approve →
+  record with idempotent retry, link + QR construction with the fragment, claim,
+  cancel. Unit tests.
+- **PR-2b (frontend) — reserved balance.** Subtract reserved amounts from spendable
+  balance once, in the derived store the token list, send, swap and MAX all read.
+  Deliberately its own PR: it touches the most load-bearing derived state in the app
+  and should be reviewable in isolation.
 - **PR-3 (frontend) — sender UI.** `Issue Tip` menu entry, intro modal, token picker
   (+ empty state), Issue Tip step, share screen with QR / copy / share, `tip.*`
   i18n, test ids. Both themes, desktop + mobile.
 - **PR-4 (frontend) — recipient flow.** `/tip/<id>` landing with the Tip Status
   modal, II hand-off that survives the round-trip, `Claim tip` review, success, and
   the **unavailable** state the design omits.
-- **PR-5 (frontend) — History** with Active / Claimed / Refunded.
-- **PR-6+ (wave 2) — chain-key escrow** for native BTC / ETH / SOL / ERC-20 / SPL,
-  gated behind the resolved fee model. Separate spec if the escrow design grows.
+- **PR-5 (frontend) — History and cancellation** with Reserved / Claimed / Expired /
+  Cancelled / Uncovered, the claimer's principal on claimed rows, and the cancel
+  action (an `approve(0)` plus `cancel_tip`).
 
 **Every PR:** `npm run format`, `npm run lint -- --max-warnings 0`, `npm run check`,
 `npm run test`; backend `./scripts/format.sh`, `./scripts/lint.rust.sh`,
@@ -645,126 +790,118 @@ change.
 
 ## Out of Scope
 
-1. **Native BTC / ETH / SOL / ERC-20 / SPL tips in wave 1** — drawn in the design,
-   deferred to wave 2 behind the escrow decision.
-2. **NFT / collectible tips.**
-3. **Recipient-bound tips** (claimable only by a named principal or handle) — the
+1. **Native BTC / ETH / SOL / ERC-20 / SPL tips** — drawn in the design's picker, but
+   these chains have no allowance primitive, and the no-custody decision rules out
+   the canister-held escrow that would be needed. Reaching them means revisiting
+   custody, which is a new spec, not a later PR.
+2. **Any form of OISY custody** — no canister-held balances, no per-tip chain-key
+   escrow addresses.
+3. **NFT / collectible tips.**
+4. **Recipient-bound tips** (claimable only by a named principal or handle) — the
    point is that the sender need not know the recipient.
-4. **Password- or passphrase-protected links.**
-5. **Multi-claim / split tips** (one link, N claimers — a tip jar or giveaway).
-6. **Recurring or scheduled tips.**
-7. **Tip requests** (asking someone to tip you).
-8. **Fiat-denominated tips** with a locked value.
-9. **Manual cancellation / revocation** — not in the design; auto-refund only.
-10. **View receipts** beyond the sender's own History.
+5. **Password- or passphrase-protected links.**
+6. **Multi-claim / split tips** (one link, N claimers — a tip jar or giveaway).
+7. **Recurring or scheduled tips.**
+8. **Tip requests** (asking someone to tip you).
+9. **Fiat-denominated tips** with a locked value.
+10. **View receipts** beyond the sender's own History — no "your link was opened"
+    notification.
 
 ## Acceptance Criteria
 
-1. **Issue Tip** appears in the user menu and opens the intro modal, with **Get
-   Started** and **View History**.
-2. The token picker lists the user's supported balances with search and network
-   filter, and shows the drawn empty state when no supported token is held.
-3. A tip requires an amount and an expiration (**24 hours** default-recommended / 7
-   days / 1 month), shows the estimated fee, and states that unclaimed funds are
-   refunded automatically.
-4. **Generate** funds the tip and produces a share screen with the amount, a scannable
-   QR, the `oisy.com/tip/<id>` link, copy **and** share actions, and a human-readable
-   absolute expiry.
-5. A funding failure never leaves escrowed funds without a tip record, and never
-   leaves a tip record claiming to be **Funded** without funds.
-6. Opening the link **signed out** shows the branded Tip Status modal with the amount
-   and a **Set Up My OISY Wallet** CTA, and performs **no** state-changing call — an
-   unfurler cannot claim a tip.
-7. After Internet Identity, the claim resumes and shows the review card with To /
-   Network / Token / Network fee / **Funded**, and **Claim now** pays out net of the
-   fee — **including for a principal that has never used OISY before**, with no
-   manual token or address setup.
-8. A tip can be claimed **exactly once**; two simultaneous claims produce exactly one
-   payout; a marked-claimed tip is never left unpaid.
-9. After expiry the tip cannot be claimed, the funds return to the sender
-   automatically, and History shows **Refunded · Expired**.
-10. Expired / already-claimed / unknown ids all show the **same** unavailable state,
-    and the backend returns the same error for each.
-11. History lists the sender's tips as **Active** (with time to expiry), **Claimed**,
-    or **Refunded**.
-12. The recipient never learns the sender's address or balance; the sender never
-    learns the claimer's principal.
-13. Every screen works in **light and dark** themes, on desktop and at 390px.
-14. Abuse guards hold: create is rate-limited and capped per user, a minimum tip
-    amount is enforced, and claim attempts against random ids are rate-limited and
-    indistinguishable.
-15. Negative guarantee: there is **no** endpoint that enumerates another principal's
-    tips, and **no** manual revocation surface.
+1. **Issue Tip** appears in `core/Menu.svelte` between Contacts and Refer a friend,
+   and opens the intro modal with **Get Started** and **View History**.
+2. The token picker lists only balances on **ICRC-2-capable ledgers**, with search
+   and network filter, and shows the drawn empty state when the user holds none.
+3. Creating a tip requires an amount and an expiry (**1h / 24h / 7d**, default 24h),
+   accepts an optional message of up to **250 characters**, and states that the
+   amount is reserved in the user's own account and lapses on its own.
+4. **Generate** issues an `approve` to `{owner: backend, subaccount: H(tip_id)}` for
+   the amount plus the payout fee, records the tip, and produces a share screen with
+   a scannable QR, the `oisy.com/tip/<id>#c=<code>` link, copy **and** share actions,
+   and an absolute expiry.
+5. **No tokens leave the sender's account at creation.** Verifiable in a ledger trace:
+   the only transaction is an `approve`.
+6. The reserved amount is **excluded from spendable balance** in the token list, the
+   send flow, the swap flow and both **MAX** controls.
+7. Opening the link **signed out** shows the branded modal with amount, token and
+   expiry — **not** the message, the sender, or the claimer — and performs no
+   state-changing call.
+8. After **Open or Create** and Internet Identity, the claim resumes with the
+   fragment intact and shows the review card with the payout fee, the message,
+   **Status: Reserved**, and a disclosure that the sender will see who claimed.
+9. **Claim now** pays out via `icrc2_transfer_from` net of the fee, **including for a
+   principal that has never used OISY before**, with no manual token setup.
+10. A tip can be claimed **exactly once**; two simultaneous claims produce exactly one
+    payout; a tip marked claimed is never left unpaid.
+11. If the sender no longer covers the tip — spent, revoked, or cancelled — the
+    recipient sees **`Uncovered`** saying the funds are no longer available, never a
+    false `Reserved`.
+12. After expiry the tip cannot be claimed, **nothing is transferred anywhere**, and
+    History shows **Expired**.
+13. Unknown, expired and already-claimed ids all return the **same** response;
+    `Uncovered` is the sole deliberate exception, reachable only with a valid link.
+14. The sender can **cancel** an unclaimed tip, which revokes the allowance and shows
+    **Cancelled**.
+15. History lists the sender's tips as **Reserved / Claimed / Expired / Cancelled /
+    Uncovered**, with the claimer's principal on claimed ones.
+16. The claim code never reaches the backend in the clear and is never returned by any
+    endpoint; only its hash is stored.
+17. Every screen works in **light and dark**, on desktop and at 390px.
+18. Abuse guards hold: create is rate-limited, a minimum amount per token is enforced,
+    and claim attempts against random ids are rate-limited and indistinguishable.
+19. Negative guarantees: **no endpoint holds or moves funds on OISY's own behalf**, no
+    endpoint enumerates another principal's tips, and no native BTC / ETH / SOL token
+    appears in the picker.
 
 ## Open questions (facts to confirm)
 
-1. **Per-tip escrow derivation.** Can the signer derive and sign for an address keyed
-   to a **tip** rather than a **caller principal**? `genericSignWithEcdsa` /
-   `getSchnorrPublicKey` accept derivation paths
-   ([`signer.api.ts`](../../../../src/frontend/src/lib/api/signer.api.ts)) — confirm
-   the backend can use a tip-scoped path, and what that costs in cycles per tip.
-2. **Payout gas for token tips.** Answered for ICRC ledgers by
-   [PR #12018](#prior-art--the-closed-poc-pr-12018): the sender prepays the payout fee
-   into the escrow subaccount. Still open for EVM and Solana, where the fee is
-   denominated in a **different asset** than the tip — for USDC-on-Ethereum the
-   canister must spend ETH to move USDC while charging the recipient 0.1 USDC. Where
-   does that ETH come from, and who absorbs a short estimate?
-3. **Atomicity across external chains.** Confirm the mark → sign → broadcast →
-   settle pattern and its compensation path, including a canister upgrade mid-flight.
-4. **Deposit reconciliation.** Confirm that an orphaned deposit (funds landed, record
-   lost) is recoverable per chain without scanning whole ledgers.
-5. **Brand-new principal claiming.** What does `claim_tip` require of a principal with
-   no user profile — is `caller_is_not_anonymous` enough, must a profile be created
-   as part of the claim, and does any signup gate interfere?
-6. **Fresh-II address availability.** Confirm a just-created identity has a derived
-   address on the tip's chain in time for the claim, or how the claim waits for it.
-7. **Tip id shape.** The design shows `0x…a1b21`. Is the id the escrow address, a
-   hash committing to it, or an unrelated random value? This decides both the privacy
-   properties and the QR density.
-8. **Route shape.** `/tip/<id>` rendered as landing + modal — confirm whether this is
-   a new route in the `(public)` group, an `(app)` route, or a param on the landing
-   page, and that a deep link survives the II round-trip on mobile Safari.
-9. **Supported tokens and minimums per token**, and where the minimum comes from.
+1. **`spender_subaccount` in `transfer_from`.** The whole model rests on a per-tip
+   spender subaccount. `approve` takes an `Account`
+   ([`icrc-ledger.api.ts`](../../../../src/frontend/src/icp/api/icrc-ledger.api.ts)),
+   which is confirmed — but the matching `spender_subaccount` field on
+   `TransferFromArgs` is **not** present in any vendored candid in this repo. Confirm
+   against the ICRC-1/2 ledger candid before building.
+2. **Which ck-ledgers actually implement ICRC-2.** ICRC-1 support does not imply
+   ICRC-2. Confirm per ledger for ICP, ckBTC, ckUSDC, ckUSDT and ckETH; the answer
+   _is_ the v1 token list.
+3. **`expected_allowance` semantics** for safely replacing an existing approval, so a
+   retry cannot silently destroy a live reservation.
+4. **Atomicity of the claim** across the `await` to the ledger, its compensation path,
+   and behaviour across a canister upgrade mid-flight.
+5. **Brand-new principal claiming.** What `claim_tip` requires of a principal with no
+   user profile, and whether any signup gate interferes.
+6. **Fresh-II token visibility** — that a just-created identity sees the received
+   token without manual setup.
+7. **Reserved-balance plumbing.** Which derived store is the single correct place to
+   subtract reserved amounts so the token list, send, swap and MAX all inherit it,
+   and what it costs to keep in sync.
+8. **Route shape.** `/tip/<id>` rendered as landing + modal — a new `(public)` route,
+   an `(app)` route, or a param on the landing page — and that the **fragment**
+   survives the II round-trip on mobile Safari and in in-app webviews.
+9. **Minimum amount per token**, and where the number comes from.
 10. **Memory-id allocation and migration impact** for the new stable map.
-11. **Compliance / KYT sign-off** for custodied, anonymously-claimable value.
-12. **Analytics on a signed-out surface** — confirm recipient-side events fit the
-    landing page's analytics setup.
+11. **Compliance sign-off** on OISY holding a bounded, revocable authorisation over a
+    user's funds for up to a week.
+12. **Analytics on a signed-out surface** — that recipient-side events fit the landing
+    page's setup.
+
+Answered during the verification pass, and recorded here so they are not re-opened:
+anonymous queries and updates are already shipped in `personal_note_shares.rs`; the
+payout fee is prepaid by the sender (the POC's pattern, now folded into the allowance
+amount); `icrc2_transfer_from` is already used in production by the rewards canister.
 
 ## Pending decisions (facts clear — owner must decide)
 
-1. **Escrow model and wave split.** Option D as the target, wave 1 limited to ICP +
-   ckBTC (Option A mechanics). This is a custody decision and the rest of the spec
-   hangs on it.
-2. **The "non-custodial" claim.** Either change the architecture to match the copy,
-   or change the copy. It cannot ship as drawn under Option D.
-3. **"100% refunded"** — soften the copy, or have the sender prepay the refund leg.
-4. **Status vocabulary** — Active / Claimed / Refunded (design) vs. Pending /
-   Claimed / Expired (text). Recommendation: follow the design.
-5. **Message field** — in or out for v1? If in: 250 characters, shown on the claim
-   screen (which no drawn screen does), and it needs the same safe-rendering
-   treatment as note text
-   ([`personal-note.utils.ts`](../../../../src/frontend/src/lib/utils/personal-note.utils.ts)).
-6. **Create-step layout** — radio cards (full variant) or dropdown (compact
-   variant).
-7. **Expiration set** — 24 hours / 7 days / 1 month as drawn; confirm no shorter
-   option is wanted for in-person tipping.
-8. **Manual cancellation** — absent from the design. Recommendation: **add it**; for
-   money, a kill switch is the only real mitigation for a leaked link.
-9. **Does the sender see who claimed?** Recommendation: **no principal** — show only
-   "Claimed", to avoid deanonymizing a recipient who did not choose to be identified.
-10. **Per-user active-tip cap and minimum tip amount** — pick the numbers.
-11. **Self-claim by the sender** — allow as a self-refund, or reject.
-12. **Intro modal dismissal** — the "Future — skipping the intro screen" frame implies
-    remembering it. In for v1?
-13. **A second secret in the link.** The design's link carries only an id, so the id
-    alone authorises the claim. PR #12018 instead used a separate claim code kept out
-    of the public preview. Recommendation: **adopt the claim code**, carried in the
-    URL **fragment** rather than the query string, so a leaked server-side id is not
-    by itself enough to claim.
-14. **The logged-out CTA** — **Open or Create** with the Terms-of-Use consent line, or
-    **Set Up My OISY Wallet** without it. Recommendation: whichever the real landing
-    page already uses, so the recipient's first screen matches the product they are
-    about to sign into.
+Fifteen of the original decisions are settled in
+[Decisions](#decisions-clarification-round). What remains:
+
+1. **The `Uncovered` wording.** Telling the recipient the sender no longer holds the
+   funds is information about the sender. Needs whoever owns the privacy promise.
+2. **Intro modal dismissal** — the "Future — skipping the intro screen" frame implies
+   remembering it. Recommendation: remember it; it is cheap and reversible.
+3. **Whether ckETH joins v1**, pending the ICRC-2 answer in
+   [open question 2](#open-questions-facts-to-confirm).
 
 ## Analytics (Plausible)
 
