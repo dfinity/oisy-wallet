@@ -69,17 +69,42 @@ So the spec's premise for open question 1 — that the field is absent from ever
 vendored candid in this repo — was wrong twice over. What is left is behaviour,
 not interface.
 
-**Still to prove:**
+**Proven against the local ckBTC ledger** (`icrc2_approve` / `icrc2_transfer_from`
+driven by two dfx identities, sender and spender, with a 32-byte subaccount
+standing in for `H(tip_id)`):
 
-- [ ] **Open question 1, behavioural half.** `approve` to
-      `{owner: backend, subaccount: H(tip_id)}` followed by `icrc2_transfer_from`
-      with the matching `spender_subaccount`, executed against the local ledger.
-      A declared field is not a working one.
-- [ ] **Open question 3.** `expected_allowance` on replace, so a retried creation
-      cannot silently destroy a live reservation.
+- [x] **Open question 1, behavioural half.** `approve` to
+      `{owner: spender, subaccount: SUB_A}` then `icrc2_transfer_from` with the
+      matching `spender_subaccount` pays out: the claimer's balance went from 0 to
+      exactly the transferred amount.
+- [x] **The subaccount genuinely scopes the allowance** — this is the property the
+      whole no-custody model rests on, and it holds three ways:
+      `icrc2_allowance` for `{spender, no subaccount}` reads **0** while
+      `{spender, SUB_A}` reads the full amount; `transfer_from` **without** a
+      `spender_subaccount` fails `InsufficientAllowance { allowance = 0 }`; and
+      `transfer_from` with a **different** subaccount (`SUB_B`) fails the same way.
+      So one tip cannot draw on another tip's allowance, even with the same sender
+      and the same spender canister.
+- [x] **The payout fee comes out of the allowance, not on top of it.** After
+      transferring 100_000 with a ledger fee of 11_500, the remaining allowance
+      fell by 111_500. This is what the spec's "allowance covers the amount plus
+      the payout fee" requires, now measured rather than assumed.
+- [x] **Open question 3.** `approve` with a stale `expected_allowance` fails
+      `AllowanceChanged { current_allowance }` — and the error carries the current
+      value, so a retry can reconcile instead of guessing. With the correct
+      `expected_allowance` it succeeds, and it **replaces** rather than adds: the
+      allowance became exactly the new amount.
+- [x] **`expires_at` is enforced by the ledger.** A future deadline round-trips —
+      `icrc2_allowance` returns it alongside the amount — and an `approve` with a
+      past deadline is rejected outright with `Expired { ledger_time }`. So the
+      reservation carries the tip's own deadline; the backend record is the second
+      line of defence, not the only one.
+
+**Still open:**
+
 - [ ] **Open question 2, deployment half.** `icrc1_supported_standards` on the
-      **mainnet** ledgers, read-only. Local proves the wasm supports ICRC-2, not
-      that mainnet runs a version that does.
+      **mainnet** ledgers, read-only. Local proves the wasm behaves; it does not
+      prove mainnet runs a version matching these candids.
 
 ## The local rig
 
