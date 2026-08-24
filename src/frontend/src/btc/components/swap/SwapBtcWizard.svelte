@@ -15,7 +15,7 @@
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
 		TRACK_COUNT_SWAP_ERROR,
-		TRACK_COUNT_SWAP_SUCCESS
+		TRACK_COUNT_SWAP_SUBMITTED
 	} from '$lib/constants/analytics.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -33,6 +33,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -121,9 +122,18 @@
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 		const utxosFee = $utxosFeeStore?.utxosFee;
 
+		// Re-resolved through the same pair oracle the quote used, so the row the execution
+		// persists cannot disagree with the offer the user accepted about which twin this is —
+		// and it is where the ckBTC minter the poller asks comes from.
+		const ckDestinationToken =
+			nonNullish($sourceToken) && nonNullish($destinationToken)
+				? asCkTwinOf({ ckToken: $destinationToken, nativeToken: $sourceToken })
+				: undefined;
+
 		if (
 			isNullish($sourceToken) ||
 			isNullish($destinationToken) ||
+			isNullish(ckDestinationToken) ||
 			isNullish(swapAmount) ||
 			isNullish(network) ||
 			isNullish(utxosFee) ||
@@ -184,11 +194,15 @@
 			await fetchChainFusionBtcSwap({
 				identity: $authIdentity,
 				progress,
+				sourceToken: $sourceToken,
+				destinationToken: ckDestinationToken,
 				amount: swapAmount,
 				source: sourceAddress,
 				depositAddress,
 				network,
 				utxosFee,
+				swapId: crypto.randomUUID(),
+				usdSourceValue: sourceTokenUsdValue,
 				enableDestinationToken: () =>
 					enableSwapDestinationToken({
 						destinationToken: $destinationToken,
@@ -198,11 +212,11 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// A ckBTC mint has no active-user-transaction row yet, so the foreground *is* the
-			// whole tracked flow: the deposit is broadcast and the minter credits it out of
-			// band, exactly as in the Convert flow. Hence `success`, not `submitted`.
+			// The foreground ends once the deposit is broadcast; the minting itself is tracked
+			// by the active-user-transaction row the execution just created, which fires the
+			// success or failure event when the minter settles. Hence `submitted`.
 			trackEvent({
-				name: TRACK_COUNT_SWAP_SUCCESS,
+				name: TRACK_COUNT_SWAP_SUBMITTED,
 				metadata: swapTrackingMetadata
 			});
 
@@ -263,6 +277,9 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress {swapProgressStep} />
+		<!-- Chain Fusion is the only provider a Bitcoin source has, and its minting phase is
+		     tracked as an active user transaction — so the stepper says the swap starts here
+		     and finishes in the background. -->
+		<SwapProgress {swapProgressStep} swapWithActiveTransaction />
 	{/if}
 {/key}

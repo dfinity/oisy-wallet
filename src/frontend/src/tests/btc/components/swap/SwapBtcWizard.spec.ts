@@ -161,9 +161,9 @@ describe('SwapBtcWizard', () => {
 			expect(getByText(en.swap.text.total_fee)).toBeInTheDocument();
 		});
 
-		// The deposit settles out of band, so the stepper stays a plain foreground swap until
-		// the Bitcoin family has an active-user-transaction poller.
-		it('renders the progress step without the background wording', () => {
+		// The minting is tracked as an active user transaction, so the stepper says the swap
+		// starts here and finishes in the background.
+		it('renders the progress step with the background wording', () => {
 			const { context } = createContext();
 
 			const { getByText, queryByText } = render(SwapBtcWizard, {
@@ -171,8 +171,8 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
-			expect(getByText(en.swap.text.swapping)).toBeInTheDocument();
-			expect(queryByText(en.swap.text.finishing_in_background)).not.toBeInTheDocument();
+			expect(getByText(en.swap.text.finishing_in_background)).toBeInTheDocument();
+			expect(queryByText(en.swap.text.swapping)).not.toBeInTheDocument();
 		});
 	});
 
@@ -220,7 +220,11 @@ describe('SwapBtcWizard', () => {
 					source: mockBtcAddress,
 					depositAddress,
 					network: 'mainnet',
-					utxosFee: mockUtxosFee
+					utxosFee: mockUtxosFee,
+					// Re-resolved through the pair oracle, so the row cannot disagree with the offer
+					// about which twin — and which minter — this is.
+					destinationToken: ckBtcToken,
+					swapId: expect.any(String)
 				})
 			);
 		});
@@ -235,18 +239,19 @@ describe('SwapBtcWizard', () => {
 			expect(onBack).not.toHaveBeenCalled();
 		});
 
-		// Nothing polls a ckBTC mint yet, so the foreground *is* the tracked flow.
-		it('tracks a success event rather than a submitted one', async () => {
+		// The active-user-transaction row reports the mint's own success or failure when the
+		// minter settles, so the foreground only reports what it did: broadcast the deposit.
+		it('tracks a submitted event rather than a success one', async () => {
 			const { getByText } = renderExecution();
 
 			await fireEvent.click(getByText(en.swap.text.swap_button));
 			await vi.runOnlyPendingTimersAsync();
 
 			expect(analytics.trackEvent).toHaveBeenCalledWith(
-				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
 			);
 			expect(analytics.trackEvent).not.toHaveBeenCalledWith(
-				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUBMITTED })
+				expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
 			);
 		});
 
