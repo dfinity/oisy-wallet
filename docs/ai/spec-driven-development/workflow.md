@@ -16,6 +16,7 @@ dfinity/oisy-wallet/
         ├── PRODUCT.md                                  # Living description of all current product behaviors
         └── spec-driven-development/
             ├── workflow.md                             # This document
+            ├── stacked-builds.md                       # Building a multi-PR spec as a local stack
             └── specs/
                 ├── 2026-05-10-feat-add-token-swapping.md
                 ├── 2026-05-24-fix-wallet-sync-race.md
@@ -86,6 +87,8 @@ Open Claude Code in the oisy-wallet repo and say:
 > "Implement `docs/ai/spec-driven-development/specs/your-spec.md`"
 
 Claude Code reads the spec, reads `docs/ai/PRODUCT.md` for system context, and begins building. It has the GitHub MCP configured and can open PRs, create branches, and interact with issues directly.
+
+**Specs that plan more than one PR** — most of them do — are built as a local stack, one branch per planned PR, so the tip of the stack is the whole feature and can be tested end to end before anything is pushed. See [`stacked-builds.md`](./stacked-builds.md).
 
 **Update `docs/ai/PRODUCT.md` in the same PR** as the behaviour change, not afterwards. Claude Code is best placed to write the description because by the time the PR is ready, it has the implementation context (what _actually_ shipped, including any [Step 5 — Adjust](#step-5--adjust-claude-code--spec) deviations from the spec). Landing PRODUCT.md alongside the code also keeps `main` from briefly disagreeing with itself between merge and the cleanup PR. Cowork can still review the draft if a product re-think emerges.
 
