@@ -648,43 +648,45 @@ export const fetchChainFusionIcpSwap = async ({
 		progress: (step: ProgressStepsSendIc) => progress(toSwapProgressStep(step)),
 		// `sendIc` reports completion through `progress` for this flow; the swap wizard has
 		// no separate completion hook to fire.
-		sendCompleted: () => undefined
+		sendCompleted: () => undefined,
+		// The withdrawal is irreversible the moment the burn is registered, so the row is
+		// created right there — ahead of `sendIc`'s wallet-refresh wait, which a refresh or
+		// tab close must not turn into an untracked conversion. The direction comes from
+		// the result rather than from a second look at the token pair: `sendIc` already
+		// decided which minter leg it ran, and each leg surfaces the block index its own
+		// minter keys the withdrawal status on.
+		onSent: ({ result: sent }) =>
+			nonNullish(sent)
+				? createChainFusionActiveUserTransaction({
+						identity,
+						swapId,
+						direction: toChainFusionWithdrawalDirection(sent.type),
+						sourceToken,
+						destinationToken,
+						// The ck source is the token being burned, so its minter is the one to ask.
+						minterCanisterId: sourceToken.minterCanisterId,
+						amount,
+						swapAmount,
+						usdSourceValue,
+						extraRefs:
+							sent.type === 'ckBtcToBtc'
+								? {
+										[CHAIN_FUSION_EXTERNAL_REF_KEYS.RETRIEVE_BTC_BLOCK_INDEX]: `${sent.blockIndex}`
+									}
+								: {
+										// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
+										// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
+										// index rides along as the only pointer back to that burn.
+										[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
+											sent.type === 'ckEthToEth' ? sent.blockIndex : sent.ckEthBlockIndex
+										}`,
+										...(sent.type === 'ckErc20ToErc20' && {
+											[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${sent.ckErc20BlockIndex}`
+										})
+									}
+					})
+				: undefined
 	});
-
-	// The withdrawal is irreversible from here, so the row is created regardless of what
-	// follows. The direction comes from the result rather than from a second look at the
-	// token pair: `sendIc` already decided which minter leg it ran, and each leg surfaces
-	// the block index its own minter keys the withdrawal status on.
-	if (nonNullish(result)) {
-		await createChainFusionActiveUserTransaction({
-			identity,
-			swapId,
-			direction: toChainFusionWithdrawalDirection(result.type),
-			sourceToken,
-			destinationToken,
-			// The ck source is the token being burned, so its minter is the one to ask.
-			minterCanisterId: sourceToken.minterCanisterId,
-			amount,
-			swapAmount,
-			usdSourceValue,
-			extraRefs:
-				result.type === 'ckBtcToBtc'
-					? {
-							[CHAIN_FUSION_EXTERNAL_REF_KEYS.RETRIEVE_BTC_BLOCK_INDEX]: `${result.blockIndex}`
-						}
-					: {
-							// `retrieve_eth_status` is keyed on the ckETH burn index in both directions — a
-							// ckERC20 withdrawal's `withdrawal_id` *is* its `cketh_block_index`. The ckERC20
-							// index rides along as the only pointer back to that burn.
-							[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKETH_BLOCK_INDEX]: `${
-								result.type === 'ckEthToEth' ? result.blockIndex : result.ckEthBlockIndex
-							}`,
-							...(result.type === 'ckErc20ToErc20' && {
-								[CHAIN_FUSION_EXTERNAL_REF_KEYS.CKERC20_BLOCK_INDEX]: `${result.ckErc20BlockIndex}`
-							})
-						}
-		});
-	}
 
 	await enableDestination(enableDestinationToken);
 
@@ -812,9 +814,12 @@ export const fetchChainFusionEvmSwap = async ({
  * deposit address. This is the same call the Convert flow makes, on the same
  * already-quoted UTXO selection, so no fee is recomputed at the point of no return.
  *
- * `sendBtc` records the pending transaction and refreshes the wallet itself, and returns
- * the broadcast transaction id — the row's poll key: the minter is asked whether it has
- * taken *these* coins, and told to mint them once they are confirmed.
+ * `sendBtc` records the pending transaction and refreshes the wallet itself, and hands
+ * over the broadcast transaction id — the row's poll key: the minter is asked whether it
+ * has taken *these* coins, and told to mint them once they are confirmed. The row is
+ * created from `onBroadcast`, not from `sendBtc`'s resolution: the steps between the two
+ * are best-effort bookkeeping whose failure must not leave an irreversible deposit
+ * untracked.
  */
 export const fetchChainFusionBtcSwap = async ({
 	identity,
@@ -844,34 +849,34 @@ export const fetchChainFusionBtcSwap = async ({
 	// before it asks the signer, once after the transaction is recorded as pending.
 	let signed = false;
 
-	const txid = await sendBtc({
+	await sendBtc({
 		...rest,
 		identity,
 		destination: depositAddress,
 		onProgress: () => {
 			progress(signed ? ProgressStepsSwap.UPDATE_UI : ProgressStepsSwap.SWAP);
 			signed = true;
-		}
-	});
-
-	// The deposit is broadcast, so the row is created regardless of what follows. It carries
-	// what the poller needs without any store: the transaction to look for, the address it
-	// was sent to, and the minter that has to be asked to mint it.
-	await createChainFusionActiveUserTransaction({
-		identity,
-		swapId,
-		direction: { BtcToCkBtc: null },
-		sourceToken,
-		destinationToken,
-		// The ck destination is the token being minted, so its minter is the one to ask.
-		minterCanisterId: destinationToken.minterCanisterId,
-		amount: convertNumberToSatoshis({ amount: rest.amount }),
-		swapAmount: rest.amount,
-		usdSourceValue,
-		extraRefs: {
-			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
-			[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
-		}
+		},
+		// The deposit is irreversible the moment it is broadcast, so the row is created
+		// right there. It carries what the poller needs without any store: the transaction
+		// to look for, the address it was sent to, and the minter to ask to mint it.
+		onBroadcast: ({ txid }) =>
+			createChainFusionActiveUserTransaction({
+				identity,
+				swapId,
+				direction: { BtcToCkBtc: null },
+				sourceToken,
+				destinationToken,
+				// The ck destination is the token being minted, so its minter is the one to ask.
+				minterCanisterId: destinationToken.minterCanisterId,
+				amount: convertNumberToSatoshis({ amount: rest.amount }),
+				swapAmount: rest.amount,
+				usdSourceValue,
+				extraRefs: {
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_TXID]: txid,
+					[CHAIN_FUSION_EXTERNAL_REF_KEYS.BTC_DEPOSIT_ADDRESS]: depositAddress
+				}
+			})
 	});
 
 	await enableDestination(enableDestinationToken);

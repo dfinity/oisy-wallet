@@ -132,7 +132,7 @@ interface ChainFusionPollCaches {
 	ckBtcMinterInfo: Map<string, Promise<CkBtcMinterDid.MinterInfo>>;
 	btcWithdrawalStatuses: Map<string, Promise<RetrieveBtcStatusV2WithId[]>>;
 	btcKnownUtxos: Map<string, Promise<CkBtcMinterDid.Utxo[]>>;
-	btcDepositUtxos: Map<string, Promise<BitcoinDid.get_utxos_response>>;
+	btcDepositUtxos: Map<string, Promise<{ utxos: BitcoinDid.utxo[]; tipHeight: number }>>;
 }
 
 const initChainFusionPollCaches = (): ChainFusionPollCaches => ({
@@ -296,6 +296,44 @@ const toBitcoinNetwork = (token: TokenId): BitcoinNetwork | undefined =>
 	'BtcNativeMainnet' in token ? 'mainnet' : 'BtcNativeTestnet' in token ? 'testnet' : undefined;
 
 /**
+ * The complete UTXO set of an address: `get_utxos` paginates for addresses with
+ * many UTXOs, and a deposit sitting beyond the first page must not read as unseen
+ * — that verdict skips the update call, so it would strand the row whenever the
+ * app-wide worker is not also minting for this account. Walked in full rather
+ * than early-exiting on a match, because the memoised result is shared by every
+ * row watching the same address.
+ */
+const getAllAddressUtxos = async ({
+	identity,
+	bitcoinCanisterId,
+	network,
+	address
+}: {
+	identity: Identity;
+	bitcoinCanisterId: string;
+	network: BitcoinNetwork;
+	address: string;
+}): Promise<{ utxos: BitcoinDid.utxo[]; tipHeight: number }> => {
+	const utxos: BitcoinDid.utxo[] = [];
+	let tipHeight: number;
+	let page: Uint8Array | undefined;
+
+	do {
+		const {
+			utxos: pageUtxos,
+			tip_height,
+			next_page
+		} = await getUtxosQuery({ identity, bitcoinCanisterId, network, address, page });
+
+		utxos.push(...pageUtxos);
+		tipHeight = tip_height;
+		page = fromNullable(next_page);
+	} while (nonNullish(page));
+
+	return { utxos, tipHeight };
+};
+
+/**
  * How many confirmations the deposit has, or `undefined` while the Bitcoin
  * canister does not know the transaction yet — it indexes blocks, so a freshly
  * broadcast deposit is absent from its UTXO set rather than listed at zero.
@@ -315,15 +353,15 @@ const resolveBtcDepositConfirmations = async ({
 	txid: string;
 	caches: ChainFusionPollCaches;
 }): Promise<number | undefined> => {
-	const { utxos, tip_height } = await memoize({
+	const { utxos, tipHeight } = await memoize({
 		cache: caches.btcDepositUtxos,
 		key: `${bitcoinCanisterId}:${address}`,
-		load: () => getUtxosQuery({ identity, bitcoinCanisterId, network, address })
+		load: () => getAllAddressUtxos({ identity, bitcoinCanisterId, network, address })
 	});
 
 	const utxo = utxos.find((utxo) => isSameUtxoTxid({ utxo, txid }));
 
-	return nonNullish(utxo) ? tip_height - utxo.height + 1 : undefined;
+	return nonNullish(utxo) ? tipHeight - utxo.height + 1 : undefined;
 };
 
 /**

@@ -465,6 +465,35 @@ describe('chain-fusion-swap-active-tx.services', () => {
 			expect(lastUpdate()).toStrictEqual({ status: { Executing: null } });
 		});
 
+		// `get_utxos` paginates for addresses with many UTXOs; a deposit beyond the first
+		// page must not read as unseen, which would skip the update call for good.
+		it('should find a deposit beyond the first page of the address UTXO set', async () => {
+			const pageToken = Uint8Array.from([1, 2, 3]);
+
+			vi.mocked(getUtxosQuery)
+				.mockResolvedValueOnce({
+					utxos: [OTHER_UTXO],
+					tip_height: CONFIRMED_TIP_HEIGHT,
+					tip_block_hash: Uint8Array.from([]),
+					next_page: [pageToken]
+				})
+				.mockResolvedValueOnce({
+					utxos: [mockUtxo],
+					tip_height: CONFIRMED_TIP_HEIGHT,
+					tip_block_hash: Uint8Array.from([]),
+					next_page: []
+				});
+			vi.mocked(updateBalance).mockResolvedValue([
+				{ Minted: { minted_amount: 900n, block_index: 3n, utxo: mockUtxo } }
+			]);
+
+			await poll([btcMintTx()]);
+
+			expect(getUtxosQuery).toHaveBeenCalledTimes(2);
+			expect(getUtxosQuery).toHaveBeenLastCalledWith(expect.objectContaining({ page: pageToken }));
+			expect(lastUpdate()).toStrictEqual({ status: { Succeeded: null } });
+		});
+
 		// Below the minter's floor `update_balance` could only answer `NoNewUtxos`, so the
 		// update call is skipped outright.
 		it('should not ask the minter to mint before the confirmation floor', async () => {

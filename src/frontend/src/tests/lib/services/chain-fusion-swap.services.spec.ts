@@ -19,6 +19,7 @@ import { sendIc } from '$icp/services/ic-send.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { IcCkWithdrawalResult } from '$icp/types/ic-send';
 import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -475,6 +476,14 @@ describe('chain-fusion-swap.services', () => {
 			swapId: SWAP_ID
 		};
 
+		// The real `sendIc` hands the result over the moment the burn is registered,
+		// ahead of its wallet-refresh wait.
+		const mockSendIc = (result: IcCkWithdrawalResult) =>
+			vi.mocked(sendIc).mockImplementation(async ({ onSent }) => {
+				await onSent?.({ result });
+				return result;
+			});
+
 		beforeEach(() => {
 			vi.clearAllMocks();
 
@@ -491,7 +500,7 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		it('should approve a freshly queried ckETH fee for a ckERC20 withdrawal', async () => {
-			vi.mocked(sendIc).mockResolvedValue({
+			mockSendIc({
 				type: 'ckErc20ToErc20',
 				ckEthBlockIndex: 1n,
 				ckErc20BlockIndex: 2n
@@ -512,7 +521,7 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		it('should approve no ckETH fee for a ckETH withdrawal, without a price round-trip', async () => {
-			vi.mocked(sendIc).mockResolvedValue({ type: 'ckEthToEth', blockIndex: 1n });
+			mockSendIc({ type: 'ckEthToEth', blockIndex: 1n });
 
 			await fetchChainFusionIcpSwap({
 				...swapParams,
@@ -529,7 +538,7 @@ describe('chain-fusion-swap.services', () => {
 		it('should surface the withdrawal result sendIc returns', async () => {
 			const result = { type: 'ckEthToEth', blockIndex: 7n } as const;
 
-			vi.mocked(sendIc).mockResolvedValue(result);
+			mockSendIc(result);
 
 			await expect(
 				fetchChainFusionIcpSwap({
@@ -541,7 +550,7 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		it('should create an active user transaction keyed on the ckETH burn index', async () => {
-			vi.mocked(sendIc).mockResolvedValue({ type: 'ckEthToEth', blockIndex: 7n });
+			mockSendIc({ type: 'ckEthToEth', blockIndex: 7n });
 
 			await fetchChainFusionIcpSwap({
 				...swapParams,
@@ -580,7 +589,7 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		it('should key a ckERC20 withdrawal on its ckETH burn index and carry the ckERC20 one', async () => {
-			vi.mocked(sendIc).mockResolvedValue({
+			mockSendIc({
 				type: 'ckErc20ToErc20',
 				ckEthBlockIndex: 11n,
 				ckErc20BlockIndex: 12n
@@ -609,7 +618,7 @@ describe('chain-fusion-swap.services', () => {
 		});
 
 		it('should key a ckBTC withdrawal on its retrieve_btc block index', async () => {
-			vi.mocked(sendIc).mockResolvedValue({ type: 'ckBtcToBtc', blockIndex: 42n });
+			mockSendIc({ type: 'ckBtcToBtc', blockIndex: 42n });
 
 			const ckBtcSource = makeCkToken({
 				ledgerCanisterId: IC_CKBTC_LEDGER,
@@ -651,7 +660,7 @@ describe('chain-fusion-swap.services', () => {
 		it('should not surface a failed active-user-transaction creation as a swap failure', async () => {
 			const result = { type: 'ckEthToEth', blockIndex: 7n } as const;
 
-			vi.mocked(sendIc).mockResolvedValue(result);
+			mockSendIc(result);
 			vi.mocked(createActiveUserTransaction).mockRejectedValue(new Error('backend down'));
 
 			// The funds have already left the wallet — a bookkeeping failure must not read
@@ -663,6 +672,33 @@ describe('chain-fusion-swap.services', () => {
 					destinationToken: ETHEREUM_TOKEN
 				})
 			).resolves.toStrictEqual(result);
+		});
+
+		// `sendIc` holds its result behind a deliberate wallet-refresh wait; the row must
+		// already exist if that wait never finishes (a refresh, a tab close).
+		it('should create the row from the burn boundary, before sendIc resolves', async () => {
+			vi.mocked(sendIc).mockImplementation(async ({ onSent }) => {
+				await onSent?.({ result: { type: 'ckBtcToBtc', blockIndex: 42n } });
+				throw new Error('interrupted during the wallet refresh');
+			});
+
+			await expect(
+				fetchChainFusionIcpSwap({
+					...swapParams,
+					sourceToken: {
+						...makeCkToken({
+							ledgerCanisterId: IC_CKBTC_LEDGER,
+							twinToken: BTC_MAINNET_TOKEN,
+							symbol: 'ckBTC-boundary-source'
+						}),
+						minterCanisterId: MINTER_CANISTER_ID
+					},
+					destinationToken: BTC_MAINNET_TOKEN,
+					destinationAddress: mockBtcAddress
+				})
+			).rejects.toThrow('interrupted during the wallet refresh');
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -1077,7 +1113,12 @@ describe('chain-fusion-swap.services', () => {
 			vi.clearAllMocks();
 
 			mockEnabled = true;
-			vi.mocked(sendBtc).mockResolvedValue('txid');
+			// The real `sendBtc` hands the txid over the moment the transaction is
+			// broadcast, before its own bookkeeping.
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: 'txid' });
+				return 'txid';
+			});
 			vi.mocked(createActiveUserTransaction).mockResolvedValue(undefined);
 		});
 
@@ -1181,6 +1222,19 @@ describe('chain-fusion-swap.services', () => {
 			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow();
 
 			expect(createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		// The steps between the broadcast and `sendBtc` resolving are best-effort
+		// bookkeeping; their failure must not leave an irreversible deposit untracked.
+		it('should create the row even when sendBtc fails after the broadcast', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: 'txid' });
+				throw new Error('wallet refresh failed');
+			});
+
+			await expect(fetchChainFusionBtcSwap(swapParams)).rejects.toThrow('wallet refresh failed');
+
+			expect(createActiveUserTransaction).toHaveBeenCalledOnce();
 		});
 	});
 });
