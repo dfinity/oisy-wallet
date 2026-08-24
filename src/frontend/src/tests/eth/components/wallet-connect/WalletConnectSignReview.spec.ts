@@ -64,6 +64,58 @@ describe('WalletConnectSignReview', () => {
 			}
 		}) as unknown as WalletKitTypes.SessionRequest;
 
+	// Hyperliquid asks its actions to be signed with routing fields its schema does not declare.
+	// They are absent from the digest, so the request signs like any other and stays approvable.
+	const hyperliquidAcceptTermsRequest = (): WalletKitTypes.SessionRequest =>
+		({
+			id: 2,
+			topic: 'mock-topic',
+			params: {
+				request: {
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: [
+						HOLDER,
+						JSON.stringify({
+							domain: {
+								name: 'HyperliquidSignTransaction',
+								version: '1',
+								chainId: 42161,
+								verifyingContract: '0x0000000000000000000000000000000000000000'
+							},
+							types: {
+								EIP712Domain: [
+									{ name: 'name', type: 'string' },
+									{ name: 'version', type: 'string' },
+									{ name: 'chainId', type: 'uint256' },
+									{ name: 'verifyingContract', type: 'address' }
+								],
+								'Hyperliquid:AcceptTerms': [
+									{ name: 'hyperliquidChain', type: 'string' },
+									{ name: 'time', type: 'uint64' }
+								]
+							},
+							primaryType: 'Hyperliquid:AcceptTerms',
+							message: {
+								type: 'acceptTerms',
+								time: 1787170393018,
+								signatureChainId: '0xa4b1',
+								hyperliquidChain: 'Mainnet'
+							}
+						})
+					]
+				},
+				chainId: ETHEREUM_NETWORK.chainId.toString()
+			},
+			verifyContext: {
+				verified: {
+					verifyUrl: 'https://verify.walletconnect.org',
+					validation: 'VALID',
+					origin: 'https://app.hyperliquid.xyz',
+					isScam: false
+				}
+			}
+		}) as unknown as WalletKitTypes.SessionRequest;
+
 	const props = { onApprove: vi.fn(), onReject: vi.fn() };
 
 	it('warns and disables approval for a type-invalid permit', () => {
@@ -81,6 +133,16 @@ describe('WalletConnectSignReview', () => {
 		});
 
 		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+	});
+
+	it('keeps approval enabled for a Hyperliquid action carrying undeclared routing fields', () => {
+		const { getByText, queryByText, getByRole } = render(WalletConnectSignReview, {
+			props: { ...props, request: hyperliquidAcceptTermsRequest() }
+		});
+
+		expect(queryByText(en.wallet_connect.text.invalid_typed_data)).not.toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.unsigned_typed_data_keys)).toBeInTheDocument();
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 });

@@ -1621,6 +1621,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "此请求包含一个类型与应用声明的架构不匹配的值。显示的内容可能与实际将被签名的内容不同，因此签名功能已被禁用。",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签署消息",

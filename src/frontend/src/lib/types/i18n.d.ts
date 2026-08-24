@@ -1304,6 +1304,7 @@ interface I18nWallet_connect {
 		dapp_gas_limit: string;
 		high_gas_limit: string;
 		invalid_typed_data: string;
+		unsigned_typed_data_keys: string;
 		unverifiable_erc20_request: string;
 		raw_copied: string;
 		sign_message: string;
