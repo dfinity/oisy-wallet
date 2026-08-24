@@ -54,17 +54,17 @@ export const getSignParamsMessageTypedDataV4 = (
 };
 
 /**
- * Thrown when an `eth_signTypedData_v4` request does not conform to its own
- * EIP-712 schema — either a value whose runtime JSON type does not match the
- * declared type, or a message key that the schema does not declare at all.
+ * Thrown when an `eth_signTypedData_v4` request declares a member whose value
+ * does not match the type declared for it.
  *
  * `ethers` does not type-check EIP-712 values before hashing and coerces
  * mismatched values instead of rejecting them — its `bool` encoder, for
  * instance, treats any truthy value (including a non-empty string) as `true`.
- * It also encodes only the declared members, silently ignoring any other key,
- * which lets a request carry data that the wallet may read but the digest never
- * covers. We reject such payloads so OISY only signs typed data that conforms
- * to its declared schema.
+ * We reject such payloads so OISY only signs typed data whose declared members
+ * hash to what they say.
+ *
+ * A key the schema does not declare is a different matter and is not an error:
+ * see {@link getSignedEthTypedData}.
  */
 export class WalletConnectEthTypedDataError extends Error {}
 
@@ -255,18 +255,9 @@ const assertValidTypedDataStruct = ({
 
 	const record = value as Record<string, unknown>;
 
-	// A key the struct does not declare is never encoded, so it cannot be part of
-	// the digest while still being readable by whatever renders the request.
-	// Reject instead of ignoring it, so no request can carry data that the user
-	// might be shown but would not sign.
-	const declared = new Set(fields.map(({ name }) => name));
-	const undeclared = Object.keys(record).find((key) => !declared.has(key));
-	if (nonNullish(undeclared)) {
-		throw new WalletConnectEthTypedDataError(
-			`EIP-712 message contains "${path}.${undeclared}", which type "${type}" does not declare and which would therefore not be signed.`
-		);
-	}
-
+	// Only the declared members are validated. A key the struct does not declare is not part of the
+	// digest, so it says nothing about whether the request conforms to its schema; it is dropped
+	// from what the user is shown instead. See {@link getSignedEthTypedData}.
 	fields.forEach(({ name, type: fieldType }) =>
 		assertValidTypedDataValue({
 			types,
@@ -293,6 +284,107 @@ export const assertValidEthTypedData = ({
 	message: Record<string, unknown>;
 }): void =>
 	assertValidTypedDataStruct({ types, type: primaryType, value: message, path: primaryType });
+
+interface SignedTypedDataStruct {
+	value: Record<string, unknown>;
+	dropped: boolean;
+}
+
+const toSignedTypedDataValue = ({
+	types,
+	type,
+	value
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: unknown;
+}): { value: unknown; dropped: boolean } => {
+	const arrayMatch = type.match(ARRAY_TYPE_REGEX);
+	if (nonNullish(arrayMatch) && Array.isArray(value)) {
+		const [, baseType] = arrayMatch;
+
+		const items = value.map((item) =>
+			toSignedTypedDataValue({ types, type: baseType, value: item })
+		);
+
+		return {
+			value: items.map(({ value: item }) => item),
+			dropped: items.some(({ dropped }) => dropped)
+		};
+	}
+
+	if (type in types && nonNullish(value) && typeof value === 'object' && !Array.isArray(value)) {
+		return toSignedTypedDataStruct({ types, type, value: value as Record<string, unknown> });
+	}
+
+	return { value, dropped: false };
+};
+
+const toSignedTypedDataStruct = ({
+	types,
+	type,
+	value
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: Record<string, unknown>;
+}): SignedTypedDataStruct => {
+	const fields = types[type] ?? [];
+
+	const declared = new Set(fields.map(({ name }) => name));
+
+	return fields.reduce<SignedTypedDataStruct>(
+		(acc, { name, type: fieldType }) => {
+			if (!(name in value)) {
+				return acc;
+			}
+
+			const { value: signed, dropped } = toSignedTypedDataValue({
+				types,
+				type: fieldType,
+				value: value[name]
+			});
+
+			return { value: { ...acc.value, [name]: signed }, dropped: acc.dropped || dropped };
+		},
+		{ value: {}, dropped: Object.keys(value).some((key) => !declared.has(key)) }
+	);
+};
+
+/**
+ * The typed data an `eth_signTypedData_v4` request actually signs: every member its schema
+ * declares and nothing else, together with whether the request carried anything more.
+ *
+ * EIP-712 hashes the declared members only, so a key the schema does not declare is absent from
+ * the digest. `ethers`, like every reference `eth_signTypedData_v4` implementation, ignores such a
+ * key rather than rejecting it, and dApps rely on that: Hyperliquid, for one, carries routing
+ * fields (`type`, `signatureChainId`) alongside the signed members of every action it asks to be
+ * signed, so rejecting the payload locks the user out of the app over data no signature covers.
+ *
+ * Dropping those keys from the preview is what keeps the request honest instead: the user reads
+ * the digest and only the digest, while the request still signs exactly as any other wallet signs
+ * it.
+ */
+export const getSignedEthTypedData = (
+	typedData: WalletConnectEthSignTypedDataV4
+): { typedData: WalletConnectEthSignTypedDataV4; hasUnsignedKeys: boolean } => {
+	const { types, message } = typedData;
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	try {
+		const { value, dropped } = toSignedTypedDataStruct({
+			types: rest,
+			type: TypedDataEncoder.getPrimaryType(rest),
+			value: message
+		});
+
+		return { typedData: { ...typedData, message: value }, hasUnsignedKeys: dropped };
+	} catch (_err: unknown) {
+		// Typed data whose primary type cannot be resolved is rejected for signing anyway, so it is
+		// previewed as it came rather than as a projection of a schema that does not hold.
+		return { typedData, hasUnsignedKeys: false };
+	}
+};
 
 interface EthTypedDataApprovalSchema {
 	primaryType: string;

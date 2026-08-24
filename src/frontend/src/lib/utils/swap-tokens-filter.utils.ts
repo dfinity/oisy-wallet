@@ -1,3 +1,4 @@
+import { isBitcoinToken } from '$btc/utils/token.utils';
 import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
@@ -81,6 +82,16 @@ export const resolveSwapTokenLookup = ({
 			info: supportedData?.sol,
 			identifier: token.symbol.toLowerCase(),
 			category: 'sol'
+		};
+	}
+
+	// Bitcoin has no contract address, so it is keyed on its symbol like the other native
+	// tokens. No collision with them: every guard above discriminates on `standard.code`.
+	if (isBitcoinToken(token)) {
+		return {
+			info: supportedData?.btc,
+			identifier: token.symbol.toLowerCase(),
+			category: 'btc'
 		};
 	}
 };
@@ -171,7 +182,8 @@ export const computeReceiveSupportedTokens = ({
 	const accum: Record<SwapTokenCategory, CategoryAccum> = {
 		icp: { total: 0, withList: 0, ids: new Set() },
 		evm: { total: 0, withList: 0, ids: new Set() },
-		sol: { total: 0, withList: 0, ids: new Set() }
+		sol: { total: 0, withList: 0, ids: new Set() },
+		btc: { total: 0, withList: 0, ids: new Set() }
 	};
 
 	const findProviderSourceTokens = ({
@@ -208,7 +220,8 @@ export const computeReceiveSupportedTokens = ({
 	return {
 		icp: toInfo(accum.icp),
 		evm: toInfo(accum.evm),
-		sol: toInfo(accum.sol)
+		sol: toInfo(accum.sol),
+		btc: toInfo(accum.btc)
 	};
 };
 

@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
@@ -120,10 +121,15 @@
 	});
 
 	// Convert renders this one as info, not error: nothing is wrong with the input, the
-	// certified read of the minter parameters simply has not landed yet.
+	// certified read of the minter parameters simply has not landed yet. Named per minter,
+	// as `IcConvertForm` does — the two minters are separate configurations.
 	let infoMessage = $derived(
-		nonNullish(chainFusionDetails) && errorType === 'minter-info-not-certified'
-			? $i18n.send.info.cketh_certified
+		nonNullish(chainFusionDetails) &&
+			nonNullish($sourceToken) &&
+			errorType === 'minter-info-not-certified'
+			? isTokenCkBtcLedger($sourceToken)
+				? $i18n.send.info.ckbtc_certified
+				: $i18n.send.info.cketh_certified
 			: undefined
 	);
 
