@@ -1634,6 +1634,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Questa richiesta contiene un valore il cui tipo non corrisponde allo schema dichiarato dall'app. Quanto visualizzato potrebbe differire da ciò che verrebbe effettivamente firmato, pertanto la firma è disabilitata.",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio",

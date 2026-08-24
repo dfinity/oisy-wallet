@@ -7,6 +7,7 @@
 	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
 	import {
 		getEthTypedDataApproval,
+		getSignedEthTypedData,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
 		isEthSignTypedDataMethod,
@@ -45,6 +46,15 @@
 			return undefined;
 		}
 	});
+
+	// Only the members the schema declares are previewed: EIP-712 hashes those and nothing else, so
+	// a key the schema leaves out is not part of what the user would sign and is not shown as if it
+	// were. That the request carried such keys is stated instead.
+	let { typedData: signedJson, hasUnsignedKeys } = $derived(
+		nonNullish(json)
+			? getSignedEthTypedData(json)
+			: { typedData: undefined, hasUnsignedKeys: false }
+	);
 
 	let {
 		domain: { chainId }
@@ -112,6 +122,10 @@
 	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
 		{$i18n.wallet_connect.text.invalid_typed_data}
 	</MessageBox>
+{:else if hasUnsignedKeys}
+	<MessageBox level="info" testId="wallet-connect-unsigned-typed-data-info">
+		{$i18n.wallet_connect.text.unsigned_typed_data_keys}
+	</MessageBox>
 {/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
@@ -149,9 +163,9 @@
 {/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
-{#if nonNullish(json)}
+{#if nonNullish(signedJson)}
 	<div class="mt-4 rounded-xs bg-disabled p-4">
-		<Json _collapsed={true} {json} />
+		<Json _collapsed={true} json={signedJson} />
 	</div>
 {:else}
 	<p class="mb-4 font-normal">

@@ -1634,6 +1634,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",

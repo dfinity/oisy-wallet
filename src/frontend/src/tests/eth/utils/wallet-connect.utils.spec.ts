@@ -9,6 +9,7 @@ import {
 	assertValidEthTypedData,
 	getEthTypedDataApproval,
 	getSendParamsGas,
+	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
@@ -126,6 +127,31 @@ const transferWithAuthorization = (
 	}
 });
 
+// Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
+// its schema does not declare, so the request is only signable if such keys are tolerated.
+const hyperliquidAcceptTerms: WalletConnectEthSignTypedDataV4 = {
+	domain: {
+		name: 'HyperliquidSignTransaction',
+		version: '1',
+		chainId: 42161,
+		verifyingContract: '0x0000000000000000000000000000000000000000'
+	},
+	types: {
+		EIP712Domain: EIP712_DOMAIN,
+		'Hyperliquid:AcceptTerms': [
+			{ name: 'hyperliquidChain', type: 'string' },
+			{ name: 'time', type: 'uint64' }
+		]
+	},
+	primaryType: 'Hyperliquid:AcceptTerms',
+	message: {
+		type: 'acceptTerms',
+		time: 1787170393018,
+		signatureChainId: '0xa4b1',
+		hyperliquidChain: 'Mainnet'
+	}
+};
+
 // The keys the summary used to be driven by. The schema above declares none of
 // them, so none of them reaches the digest.
 const UNDECLARED_SUMMARY_KEYS = {
@@ -178,12 +204,20 @@ describe('wallet-connect.utils', () => {
 			expect(getSignParamsMessageTypedDataV4Hash(toParams(permit2))).toBe(ethersHash(permit2));
 		});
 
-		it('rejects an ERC-3009 authorization carrying undeclared summary keys', () => {
-			expect(() =>
+		it('hashes an ERC-3009 authorization carrying undeclared keys exactly as ethers does', () => {
+			// The keys the schema does not declare are not encoded, so the digest is the canonical
+			// one: refusing to hash would have rejected a request that every other wallet signs.
+			expect(
 				getSignParamsMessageTypedDataV4Hash(
 					toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
 				)
-			).toThrow(WalletConnectEthTypedDataError);
+			).toBe(ethersHash(transferWithAuthorization()));
+		});
+
+		it('hashes the Hyperliquid accept-terms action exactly as ethers does', () => {
+			expect(getSignParamsMessageTypedDataV4Hash(toParams(hyperliquidAcceptTerms))).toBe(
+				ethersHash(hyperliquidAcceptTerms)
+			);
 		});
 
 		it('leaves a canonical ERC-3009 authorization unaffected', () => {
@@ -235,13 +269,22 @@ describe('wallet-connect.utils', () => {
 			).toBeFalsy();
 		});
 
-		it('is true for an ERC-3009 authorization carrying undeclared summary keys', () => {
+		it('is false for an ERC-3009 authorization carrying undeclared keys', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
 					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
 				})
-			).toBeTruthy();
+			).toBeFalsy();
+		});
+
+		it('is false for the Hyperliquid accept-terms action', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(hyperliquidAcceptTerms)
+				})
+			).toBeFalsy();
 		});
 
 		it('is false for a canonical ERC-3009 authorization', () => {
@@ -427,28 +470,102 @@ describe('wallet-connect.utils', () => {
 			expect(call(typedData)).toThrow(/Permit\.allowed/);
 		});
 
-		it('rejects a message key the primary type does not declare', () => {
+		// A key the primary type does not declare is not encoded, so it says nothing about whether
+		// the request conforms to its schema. It is dropped from the preview rather than rejected:
+		// see the `getSignedEthTypedData` suite.
+		it('accepts a message key the primary type does not declare', () => {
 			const typedData = daiPermit(false);
 			typedData.message.spenderLabel = 'Trusted dApp';
 
-			expect(call(typedData)).toThrow(/Permit\.spenderLabel/);
+			expect(call(typedData)).not.toThrow();
 		});
 
-		it('rejects a key a nested struct does not declare', () => {
+		it('accepts a key a nested struct does not declare', () => {
 			const typedData = structuredClone(permit2);
 			(typedData.message.details as Record<string, unknown>).label = 'Trusted dApp';
 
-			expect(call(typedData)).toThrow(/PermitSingle\.details\.label/);
+			expect(call(typedData)).not.toThrow();
 		});
 
-		it('rejects the undeclared keys of the ERC-3009 authorization', () => {
-			expect(call(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+		it('accepts the undeclared keys of the ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).not.toThrow();
+		});
+
+		it('still rejects a declared member of the wrong type alongside undeclared keys', () => {
+			expect(call(daiPermit('true'))).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it('accepts a canonical ERC-3009 authorization', () => {
 			expect(call(transferWithAuthorization())).not.toThrow();
+		});
+	});
+
+	describe('getSignedEthTypedData', () => {
+		it('leaves a payload whose every key is declared untouched', () => {
+			expect(getSignedEthTypedData(permit2)).toEqual({
+				typedData: permit2,
+				hasUnsignedKeys: false
+			});
+		});
+
+		it('drops the routing fields of the Hyperliquid accept-terms action', () => {
+			const { typedData, hasUnsignedKeys } = getSignedEthTypedData(hyperliquidAcceptTerms);
+
+			expect(hasUnsignedKeys).toBeTruthy();
+			expect(typedData.message).toEqual({ hyperliquidChain: 'Mainnet', time: 1787170393018 });
+		});
+
+		it('previews only what the digest covers', () => {
+			const { typedData } = getSignedEthTypedData(
+				transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)
+			);
+
+			expect(ethersHash({ ...typedData, message: typedData.message })).toBe(
+				ethersHash(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
+			);
+			expect(typedData.message).toEqual(transferWithAuthorization().message);
+		});
+
+		it('drops a key a nested struct does not declare', () => {
+			const withNestedKey = structuredClone(permit2);
+			(withNestedKey.message.details as Record<string, unknown>).label = 'Trusted dApp';
+
+			const { typedData, hasUnsignedKeys } = getSignedEthTypedData(withNestedKey);
+
+			expect(hasUnsignedKeys).toBeTruthy();
+			expect(typedData.message).toEqual(permit2.message);
+		});
+
+		it('drops a key an array item does not declare', () => {
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				domain: { name: 'Batch', chainId: '1', verifyingContract: DAI },
+				types: {
+					Batch: [{ name: 'calls', type: 'Call[]' }],
+					Call: [{ name: 'to', type: 'address' }]
+				},
+				primaryType: 'Batch',
+				message: { calls: [{ to: RECIPIENT, label: 'Trusted dApp' }] }
+			};
+
+			expect(getSignedEthTypedData(typedData)).toEqual({
+				typedData: { ...typedData, message: { calls: [{ to: RECIPIENT }] } },
+				hasUnsignedKeys: true
+			});
+		});
+
+		it('previews typed data whose primary type cannot be resolved as it came', () => {
+			// Such a request is rejected for signing anyway, so there is no schema to project it onto.
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				domain: { name: 'Cycle', chainId: '1', verifyingContract: DAI },
+				types: {
+					A: [{ name: 'b', type: 'B' }],
+					B: [{ name: 'a', type: 'A' }]
+				},
+				primaryType: 'A',
+				message: { b: { a: {} } }
+			};
+
+			expect(getSignedEthTypedData(typedData)).toEqual({ typedData, hasUnsignedKeys: false });
 		});
 	});
 

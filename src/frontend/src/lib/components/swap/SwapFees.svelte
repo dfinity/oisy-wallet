@@ -54,12 +54,17 @@
 			: '0'
 	);
 
+	// Every fee the quote priced, including the ones the minter withholds from the amount it
+	// converts. The total shown has to be the user's whole cost — what they pay out of balance
+	// plus what is taken out of what lands — or the gap between the pay and receive amounts is
+	// accounted for nowhere. `deductedFromAmount` decides the receive amount, not what is
+	// disclosed.
 	let chainFusionFees = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
 			? [
 					...$swapAmountsStore.selectedProvider.swapDetails.sourceFees,
 					...$swapAmountsStore.selectedProvider.swapDetails.externalFees
-				].filter(({ deductedFromAmount }) => deductedFromAmount !== true)
+				]
 			: undefined
 	);
 

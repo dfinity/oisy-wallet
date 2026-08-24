@@ -1634,6 +1634,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
