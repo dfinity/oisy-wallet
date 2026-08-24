@@ -500,7 +500,8 @@ Footer: **Cancel**.
   recipient's side. Nothing in the design covers it, and it is the single most
   likely state a forwarded link lands in.
 - **Claim failure** — the outbound on-chain transfer fails or times out.
-- **Funding failure** — the sender's deposit fails after **Generate**.
+- **Reservation failure** — the sender's `approve` fails or is rejected after
+  **Generate**.
 - **Sender at cap / rate-limited.**
 - **Light theme** for every screen (the file is dark-theme throughout).
 
@@ -523,8 +524,8 @@ the privacy promise.
    shown on the claim screen (which no mock draws) and **not** in the anonymous
    preview.
 5. **History's info banner** reads _"We've hidden these transactions as they
-   considered suspicious…"_ — copy from the spam-token surface, a reused component
-   left in the mock. Do not implement.
+   considered suspicious…"_ [sic] — copy from the spam-token surface, a reused
+   component left in the mock. Do not implement.
 6. **Two fees, one story — mostly dissolved.** There is no funding leg any more: the
    sender pays the `approve` fee, and the payout fee is drawn from the allowance at
    claim. Two numbers still exist, but they are now "what you pay to reserve" and
@@ -718,9 +719,12 @@ behaviour-first voice. It must cover, in the same PR as the behaviour change:
 - The lifecycle and its vocabulary: **Reserved → Claimed**, **Reserved → Expired**,
   **Reserved → Cancelled**, or **Reserved → Uncovered**, and that an expired tip needs
   no action from anyone because nothing ever moved.
-- Expiry options and the default, and that expiry is enforced by the backend.
-- The two fee legs — funding at creation, payout deducted from the tip at claim —
-  and therefore that the recipient receives slightly less than the sender sent.
+- Expiry options and the default, and that a lapsed tip cannot be claimed —
+  enforced by the backend record and by the reservation itself, which carries the
+  same deadline.
+- The two fees — the ledger fee the sender pays to reserve the amount, and the
+  payout fee taken from the tip at claim — and therefore that the recipient
+  receives slightly less than the amount the sender set aside.
 - **Where the money actually is.** The tokens stay in the sender's account; OISY
   holds a bounded, revocable authorisation and never a balance. The design's
   "non-custodial" phrasing is accurate here and can be used — but the flip side has
@@ -736,12 +740,12 @@ Beyond the per-PR gates, the cases that must be covered because a bug in them
 loses money rather than breaking a screen:
 
 - **Backend `it` tests:** double-claim under concurrency, claim after expiry,
-  payout-transfer failure and its compensation, orphaned deposit (funds landed,
-  record lost) reconciliation, refund idempotency (a sweep that runs twice pays
-  once), and per-user cap plus rate-limit rejection paths.
-- **Frontend unit tests:** the create → fund → confirm sequence including
-  idempotent replay after an interrupted funding, link/QR construction, and the
-  claim path against each backend error.
+  payout-transfer failure and its compensation, the uncovered path (the sender
+  spent, reduced or revoked the allowance), a claim that races a cancellation, a
+  wrong claim code, and per-user cap plus rate-limit rejection paths.
+- **Frontend unit tests:** the approve → record sequence including idempotent
+  replay after an interrupted creation, link/QR construction, and the claim path
+  against each backend error.
 - **Component tests:** every recipient state — logged-out Tip Status, claim
   review, success, and **unavailable** — plus the sender's share screen and
   History statuses, in both themes and at 390px.
@@ -919,7 +923,7 @@ implementation, consistent with what already exists. Track:
   conversion of a non-crypto recipient into an OISY user.**
 - **Share on X clicked** from the recipient modal.
 - **Unavailable state shown**, by reason bucket where that does not leak.
-- **Auto-refund fired**, and **History opened**.
+- **Tip cancelled** by the sender, and **History opened**.
 
 **Privacy:** never include the tip id, the sender's or claimer's principal or
 address, the message text, or an exact fiat amount tied to a user.
