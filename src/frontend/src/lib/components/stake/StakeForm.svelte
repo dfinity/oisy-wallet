@@ -45,6 +45,9 @@
 		onCustomErrorValidate?: (userAmount: bigint) => Error | undefined;
 		onClose: () => void;
 		onNext: () => void;
+		// Label for the primary action. Defaults to "Review", which is right when the
+		// next step is a review — not every flow's is.
+		nextLabel?: string;
 		content?: Snippet;
 	}
 
@@ -65,6 +68,7 @@
 		onCustomErrorValidate,
 		onClose,
 		onNext,
+		nextLabel,
 		content
 	}: Props = $props();
 
@@ -153,7 +157,7 @@
 			<ButtonCancel onclick={onClose} />
 
 			<Button disabled={invalid} onclick={onNext} testId={STAKE_FORM_REVIEW_BUTTON}>
-				{$i18n.send.text.review}
+				{nextLabel ?? $i18n.send.text.review}
 			</Button>
 		</ButtonGroup>
 	{/snippet}

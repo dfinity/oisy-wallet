@@ -47,6 +47,7 @@
 	autofocus={isDesktop()}
 	disabled={messageTooLong}
 	isSelectable
+	nextLabel={$i18n.tip.text.generate}
 	onClick={onSelectToken}
 	{onClose}
 	{onNext}
