@@ -13,6 +13,7 @@ import {
 	InfuraProvider as InfuraProviderLib,
 	type FeeData,
 	type Networkish,
+	type TransactionReceipt,
 	type TransactionResponse
 } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -49,6 +50,11 @@ export class InfuraProvider {
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.broadcastTransaction(signedTransaction);
+
+	// `null` while the transaction is unknown to the node or still unmined; the
+	// receipt's `status` is what distinguishes a successful tx from a reverted one.
+	getTransactionReceipt = (hash: string): Promise<TransactionReceipt | null> =>
+		this.provider.getTransactionReceipt(hash);
 
 	getTransactionCount = ({
 		address,

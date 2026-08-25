@@ -50,6 +50,9 @@ export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
 export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_GROUP_TOGGLE = 'nft-group-toggle';
+export const NFT_GROUP_TOGGLE_UNGROUPED = 'nft-group-toggle-ungrouped';
+export const NFT_GROUP_TOGGLE_COLLECTIONS = 'nft-group-toggle-collections';
 export const NFT_ACTION_SEND = 'nft-action-send';
 export const NFT_PLACEHOLDER_INVALID = 'nft-placeholder-invalid';
 export const NFT_PLACEHOLDER_FILESIZE = 'nft-placeholder-filesize';
@@ -132,6 +135,7 @@ export const MOBILE_NAVIGATION_MENU = 'mobile-navigation-menu';
 
 export const NFT_HERO_COUNT = 'nft-hero-count';
 export const NFT_HERO_NETWORK_COUNT = 'nft-hero-network-count';
+export const NFT_HERO_CHECK_NEW_BUTTON = 'nft-hero-check-new-button';
 
 export const AMOUNT_DATA = 'amount-data';
 export const DESTINATION_INPUT = 'destination-input';
@@ -167,6 +171,7 @@ export const SOL_TRANSACTION_SKELETON_PREFIX = 'sol-txn';
 
 export const XRP_TRANSACTION_SKELETON_PREFIX = 'xrp-txn';
 
+export const TOKEN_INPUT_SELECT_TOKEN_BUTTON = 'token-input-select-token-button';
 export const TOKEN_INPUT_CURRENCY_TOKEN = 'token-input-currency-token';
 export const TOKEN_INPUT_CURRENCY_FIAT = 'token-input-currency-fiat';
 export const TOKEN_INPUT_CURRENCY_FIAT_SYMBOL = 'token-input-currency-fiat-symbol';

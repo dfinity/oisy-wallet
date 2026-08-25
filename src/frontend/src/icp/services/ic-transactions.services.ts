@@ -232,9 +232,9 @@ export const onLoadTransactionsError = ({
 	tokenId: TokenId;
 	error: unknown;
 }) => {
-	icTransactionsStore.reset(tokenId);
-
-	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
+	// A sync failure invalidates the balance, not the history: the transactions already loaded —
+	// including those restored from the IndexedDB cache — stay displayed until a later sync updates
+	// them.
 	balancesStore.reset(tokenId);
 
 	trackLoadTransactionsError({ tokenId, error: err });

@@ -17,9 +17,7 @@
 	import { OISY_TRADE_POLL_INTERVAL_MILLIS } from '$lib/constants/oisy-trade.constants';
 	import { TRADING_ORDER_DETAIL_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { oisyTradePairs } from '$lib/derived/oisy-trade.derived';
 	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import {
@@ -31,13 +29,11 @@
 		trackLimitOrder,
 		type TrackLimitOrderParams
 	} from '$lib/services/trading-analytics.services';
-	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OisyTradeOrderBook, OisyTradeOrderView } from '$lib/types/oisy-trade';
 	import { replaceIcErrorFields } from '$lib/utils/error.utils';
-	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
 		crossesBook,
@@ -54,7 +50,7 @@
 		toTradingPair,
 		valueDifferencePercent
 	} from '$lib/utils/oisy-trade.utils';
-	import { calculateTokenUsdAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
 		order: OisyTradeOrderView;
@@ -76,25 +72,6 @@
 		formatTradeAmount({ amount: quoteAmount, decimals: quote.decimals })
 	);
 	const priceDisplay = $derived(formatTradeAmount({ amount: price, decimals: quote.decimals }));
-
-	// --- Fiat ($) values, recomputed against the live exchange feed. -----------
-	const fiat = ({ amount, token }: { amount: number; token: typeof base }): string | undefined => {
-		const value = calculateTokenUsdAmount({
-			amount: BigInt(Math.round(amount * 10 ** token.decimals)),
-			token,
-			$exchanges
-		});
-		return nonNullish(value)
-			? formatCurrency({
-					value,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})
-			: undefined;
-	};
-	const baseFiat = $derived(fiat({ amount: quantity, token: base }));
-	const quoteFiat = $derived(fiat({ amount: quoteAmount, token: quote }));
 
 	// --- Live valuation from the pair's order book. ----------------------------
 	let orderBook = $state<OisyTradeOrderBook | undefined>();
@@ -125,7 +102,8 @@
 	// "Current value" anchors on the cross of the two legs' USD exchange-rate
 	// prices (base ÷ quote), NOT the DEX order-book mid — mirroring the reference
 	// the limit-order creation flow uses (see `referenceRate`). The book bid/ask
-	// still drive the crossing check below.
+	// still drive the crossing check below. Both rates stay in use here for that
+	// cross and for the analytics payload, and no longer reach the hero.
 	const baseUsdPrice = $derived($exchanges?.[base.id]?.usd);
 	const quoteUsdPrice = $derived($exchanges?.[quote.id]?.usd);
 	const currentValue = $derived(referenceRate({ baseUsd: baseUsdPrice, quoteUsd: quoteUsdPrice }));
@@ -278,18 +256,15 @@
 
 		<LimitOrderIntentHero
 			baseAmount={baseAmountDisplay}
-			{baseFiat}
-			{baseSymbol}
+			baseToken={base}
 			quoteAmount={quoteAmountDisplay}
-			{quoteFiat}
-			{quoteSymbol}
+			quoteToken={quote}
 			{side}
 		/>
 
 		<LimitOrderPriceSummary
 			{baseSymbol}
 			{currentValueDisplay}
-			muted
 			{priceDisplay}
 			{queueText}
 			{quoteSymbol}
@@ -310,9 +285,8 @@
 
 		{#snippet outerContent()}
 			{#if active}
-				<div class="flex justify-start px-3 py-2 sm:px-6 sm:py-3">
+				<div class="flex justify-center px-3 py-2 sm:px-6 sm:py-3">
 					<Button
-						alignLeft
 						ariaLabel={$i18n.trading.order_detail.cancel_order}
 						colorStyle="error"
 						onclick={() => (showCancelConfirm = true)}

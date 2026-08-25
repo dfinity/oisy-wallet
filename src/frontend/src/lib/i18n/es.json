@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Juego",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Coleccionables",
 			"rwa": "RWA",
 			"social": "Social",
 			"staking": "Staking",
@@ -944,8 +944,8 @@
 		"text": {
 			"send": "Enviar",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Destino",
-			"source": "Origen",
 			"balance": "Saldo",
 			"review": "Revisar",
 			"signing_approval": "Firmando aprobación...",
@@ -978,9 +978,9 @@
 			"contacts_empty_state_title": "Tus contactos aparecerán aquí",
 			"contacts_empty_state_description": "Parece que aún no has añadido contactos",
 			"send_review_subtitle": "Tú envías",
-			"no_nfts_found": "No se encontraron NFTs",
-			"no_nfts_found_desc": "Ajusta tu búsqueda o red para encontrar tus NFTs",
-			"select_nft": "Seleccionar NFT"
+			"no_nfts_found": "No se encontraron Coleccionables",
+			"no_nfts_found_desc": "Ajusta tu búsqueda o red para encontrar tus Coleccionables",
+			"select_nft": "Seleccionar Coleccionable"
 		},
 		"placeholder": {
 			"enter_eth_address": "Introduce dirección pública (0x), nombre o alias",
@@ -988,7 +988,7 @@
 			"enter_wallet_address": "Introduce la dirección de la billetera, nombre o alias",
 			"xrp_destination_tag": "",
 			"select_network": "Seleccionar red",
-			"search_nfts": "Buscar NFTs"
+			"search_nfts": "Buscar Coleccionables"
 		},
 		"info": {
 			"ckbtc_certified": "Por favor, espera hasta que los parámetros de ckBTC hayan sido certificados.",
@@ -1034,7 +1034,7 @@
 			"btc_utxo_locked": "Los fondos de Bitcoin están bloqueados por transacciones pendientes",
 			"btc_invalid_fee_calculation": "La validación de la comisión de la transacción de Bitcoin falló",
 			"pending_transactions_not_available": "El servicio de transacciones pendientes no está disponible actualmente. Por favor, inténtalo de nuevo más tarde.",
-			"no_nft_selected": "No se ha seleccionado ningún NFT para enviar."
+			"no_nft_selected": "No se ha seleccionado ningún Coleccionable para enviar."
 		},
 		"error": {
 			"unexpected": "Algo salió mal al enviar la transacción.",
@@ -1209,6 +1209,7 @@
 			"swapping": "Intercambiando...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Actualizando UI",
 			"swap_provider": "Proveedor de intercambio",
 			"swap_provider_website": "sitio_web_del_proveedor_de_intercambio",
@@ -1233,6 +1234,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "No se pudo obtener el precio de al menos uno de los tokens. Por favor, <strong>verifica de forma independiente</strong> que esta oferta de intercambio sea justa.<br>Ten en cuenta que la configuración de slippage <strong>no</strong> te protege de una oferta con un valor de recepción mucho menor."
 		},
@@ -1255,7 +1257,8 @@
 			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1358,7 +1361,7 @@
 		"import": {
 			"text": {
 				"title": "Importar token",
-				"title_nft": "Importar colección de NFT",
+				"title_nft": "Importar colección",
 				"review": "Revisar",
 				"saving": "Guardando...",
 				"updating": "Actualizando lista de tokens",
@@ -1397,12 +1400,12 @@
 		"manage": {
 			"text": {
 				"title": "Gestionar tokens",
-				"title_nft": "Gestionar colecciones de NFT",
+				"title_nft": "Gestionar colecciones",
 				"manage_list": "Gestionar tokens",
 				"manage_list_nft": "",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
-				"import_nft": "Importar colección de NFT",
+				"import_nft": "Importar colección",
 				"network": "Red",
 				"all_tokens_zero_balance": "Todos los tokens tienen saldo cero.",
 				"enable_more_assets": "Habilitar más tokens"
@@ -1480,16 +1483,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Coleccionables",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Tus NFTs aparecerán aquí",
-			"description_empty": "Parece que todavía no has recibido NFTs",
+			"title_empty": "Tus Coleccionables aparecerán aquí",
+			"description_empty": "Parece que todavía no has recibido Coleccionables",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "Agrupación",
-			"as_plain_list": "Mostrar como lista simple",
-			"by_collection": "Agrupar por colección",
 			"show_spam": "Mostrar spam",
 			"show_hidden": "Mostrar ocultos",
 			"recents_first": "Más recientes primero",
@@ -1502,21 +1502,23 @@
 			"quantity": "Cantidad",
 			"item_traits": "Atributos del artículo",
 			"collection_not_loaded": "La colección no se pudo mostrar ya que aún no se ha cargado",
-			"nft_not_loaded": "El NFT no se pudo mostrar ya que aún no se ha cargado",
+			"nft_not_loaded": "El Coleccionable no se pudo mostrar ya que aún no se ha cargado",
 			"collections": "Colecciones",
-			"all_assets": "Todos los activos",
+			"check_new": "Buscar nuevos",
+			"check_new_short": "Buscar",
+			"ungrouped": "Sin agrupar",
 			"address_copied": "Dirección $address copiada",
 			"collection_name_copied": "",
 			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "No es spam",
 			"spam_warning": "¿Mover '$collection' a spam?",
-			"spam_warning_text": "Esto moverá todos los NFTs en <b>$collection</b> a la carpeta de spam. Se ocultarán de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
+			"spam_warning_text": "Esto moverá todos los Coleccionables en <b>$collection</b> a la carpeta de spam. Se ocultarán de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
 			"hide": "Ocultar",
 			"unhide": "Mostrar",
 			"hidden": "Oculto",
 			"hide_warning": "¿Ocultar '$collection'?",
-			"hide_warning_text": "Esto ocultará <b>$collection</b> y todos los NFTs asociados de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
+			"hide_warning_text": "Esto ocultará <b>$collection</b> y todos los Coleccionables asociados de tu vista principal, pero siempre podrás encontrarlos y restaurarlos más tarde.",
 			"open_explorer": "Abrir este contrato en el explorador de blockchain",
 			"img_consent_disabled": "Has desactivado las imágenes de esta colección",
 			"img_consent_none": "Imagen desactivada por razones de seguridad",
@@ -1543,13 +1545,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Aún no hay NFTs",
+			"placeholder_image": "Aún no hay Coleccionables",
 			"card": {
-				"image": "Imagen de NFT con ID de token: $tokenId"
+				"image": "Imagen de Coleccionable con ID de token: $tokenId"
 			},
 			"copy_address": "Copiar esta dirección al portapapeles",
 			"review_preference": "Cambiar preferencia de visualización",
-			"go_to_collection": "Abrir la página de la colección"
+			"go_to_collection": "Abrir la página de la colección",
+			"check_new": "Buscar nuevos coleccionables"
 		}
 	},
 	"fee": {
@@ -1567,7 +1570,8 @@
 			"ata_fee": "Comisión ATA",
 			"transaction_fees": "Comisiones de transacción",
 			"network_fee": "Comisión de red",
-			"approval_fee": "Comisión de aprobación"
+			"approval_fee": "Comisión de aprobación",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cubrir las comisiones."
@@ -1614,10 +1618,32 @@
 			"amount": "Cantidad",
 			"hex_data": "Datos HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
+			"unsigned_typed_data_keys": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1635,7 +1661,8 @@
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"disconnect_all": "Desconectar todas",
 			"disconnect_app": "Desconectar $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "ej. wc:a281567bb3e4..."
@@ -1678,9 +1705,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "La dirección de origen solicitada para la transacción no es la dirección de esta billetera.",
 			"unknown_destination": "Dirección de destino desconocida.",
 			"ambiguous_transaction": "Esta transacción mueve fondos entre varias direcciones y no se puede mostrar con precisión para su revisión. Por tu seguridad, no se ha firmado.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Error inesperado: La solicitud no está definida, por lo tanto no se puede procesar.",
 			"unexpected_processing_request": "Error inesperado al procesar la solicitud con WalletConnect."
 		}
@@ -1831,6 +1860,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1934,7 +1965,9 @@
 			"to_ata": "Cuenta de token del destinatario (ATA)",
 			"to_ata_copied": "Cuenta de token del destinatario (ATA) copiada al portapapeles.",
 			"block": "Bloque",
-			"interacted_with": "Interactuado Con (A)",
+			"interacted_with": "Interactuado con",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Estado",
 			"confirmations": "Confirmaciones",
 			"for": "Para",
@@ -2327,8 +2360,8 @@
 			"hidden_micro_transactions": "Las transacciones con valores de token muy pequeños están actualmente ocultas. Para mostrarlas, ve a <a href=\"/settings/\">Configuración</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Más información</a>"
 		},
 		"warning": {
-			"no_index_canister": "",
-			"unavailable_index_canister": ""
+			"no_index_canister": "$oisy_short no puede cargar las transacciones de $token_list: el emisor del token no ofrece seguimiento de transacciones.",
+			"unavailable_index_canister": "En este momento no se pueden cargar las últimas transacciones de $token_list, porque su servicio de seguimiento no responde. Se cargarán automáticamente en cuanto vuelva a estar disponible."
 		}
 	},
 	"earning": {

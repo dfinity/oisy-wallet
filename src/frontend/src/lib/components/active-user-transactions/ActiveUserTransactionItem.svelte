@@ -15,16 +15,19 @@
 	import { LIQUIDIUM_EXTERNAL_REF_KEYS } from '$lib/types/liquidium-active-tx';
 	import { ONESEC_EXTERNAL_REF_KEYS } from '$lib/types/onesec-swap';
 	import { SwapProvider } from '$lib/types/swap';
+	import { isChainFusionActiveUserTransaction } from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 	import {
 		isLiquidiumActiveUserTransaction,
 		liquidiumActionKey,
 		toLiquidiumExternalRefsMap
 	} from '$lib/utils/liquidium-active-tx.utils';
+	import { isNearIntentsActiveUserTransaction } from '$lib/utils/near-intents-active-tx.utils';
 	import {
 		isOneSecActiveUserTransaction,
 		toOneSecExternalRefsMap
 	} from '$lib/utils/onesec-swap.utils';
+	import { isVeloraActiveUserTransaction } from '$lib/utils/velora-active-tx.utils';
 
 	interface Props {
 		tx: ActiveUserTransaction;
@@ -36,6 +39,14 @@
 	let { tx, isUnseen, dismissing, onDismiss }: Props = $props();
 
 	const isOneSec = $derived(isOneSecActiveUserTransaction(tx));
+	const isNearIntents = $derived(isNearIntentsActiveUserTransaction(tx));
+	const isVelora = $derived(isVeloraActiveUserTransaction(tx));
+	const isChainFusion = $derived(isChainFusionActiveUserTransaction(tx));
+	// Every swap provider is rendered identically — they share the same
+	// display-ref key names in `external_refs`. Velora's Delta/Market distinction
+	// and Chain Fusion's conversion direction are internal routing and deliberately
+	// not surfaced.
+	const isSwap = $derived(isOneSec || isNearIntents || isVelora || isChainFusion);
 	const isLiquidium = $derived(isLiquidiumActiveUserTransaction(tx));
 	const refs = $derived(toOneSecExternalRefsMap(tx.external_refs));
 	const liquidiumRefs = $derived(toLiquidiumExternalRefsMap(tx.external_refs));
@@ -65,9 +76,18 @@
 	const providerName = $derived(
 		isLiquidium
 			? lendBorrowProvidersConfig[LendBorrowProvider.LIQUIDIUM].name
-			: isOneSec
-				? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
-				: undefined
+			: isNearIntents
+				? (swapProvidersDetails[SwapProvider.NEAR_INTENTS]?.name ?? '')
+				: isOneSec
+					? (swapProvidersDetails[SwapProvider.ONE_SEC]?.name ?? '')
+					: isVelora
+						? (swapProvidersDetails[SwapProvider.VELORA]?.name ?? '')
+						: isChainFusion
+							? // Resolves even with `CHAIN_FUSION_SWAP_ENABLED` off: the entry is
+								// unconditional precisely so a row outliving a flag rollback keeps
+								// its provider name.
+								(swapProvidersDetails[SwapProvider.CHAIN_FUSION]?.name ?? '')
+							: undefined
 	);
 
 	const titleText = $derived(
@@ -80,7 +100,7 @@
 					.filter(nonNullish)
 					.join(' ')
 			: [
-					isOneSec ? $i18n.swap.text.swap : undefined,
+					isSwap ? $i18n.swap.text.swap : undefined,
 					refs[ONESEC_EXTERNAL_REF_KEYS.AMOUNT],
 					refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_TOKEN_SYMBOL],
 					'→',
@@ -93,6 +113,14 @@
 	const sourceNetwork = $derived(refs[ONESEC_EXTERNAL_REF_KEYS.SOURCE_NETWORK_SYMBOL] ?? '');
 	const destinationNetwork = $derived(
 		refs[ONESEC_EXTERNAL_REF_KEYS.DESTINATION_NETWORK_SYMBOL] ?? ''
+	);
+
+	// A same-chain swap — always the case for a Velora Market swap — would
+	// otherwise read "Ethereum → Ethereum".
+	const networkText = $derived(
+		sourceNetwork === destinationNetwork
+			? sourceNetwork
+			: `${sourceNetwork} → ${destinationNetwork}`
 	);
 
 	const createdAgo = $derived(
@@ -159,8 +187,7 @@
 			{#if isLiquidium}
 				{providerName}
 			{:else}
-				{sourceNetwork} → {destinationNetwork}{#if nonNullish(providerName)}<Divider
-					/>{providerName}{/if}
+				{networkText}{#if nonNullish(providerName)}<Divider />{providerName}{/if}
 			{/if}
 		{/snippet}
 

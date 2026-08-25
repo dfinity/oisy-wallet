@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use ic_cdk::management_canister::{VetKDCurve, VetKDKeyId};
+use ic_cdk_management_canister::{VetKDCurve, VetKDKeyId};
 use ic_vetkeys::{encrypted_maps::EncryptedMaps, types::AccessRights};
 use shared::types::{
     api_keys::ApiKeys,

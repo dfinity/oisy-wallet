@@ -1,15 +1,19 @@
+import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ARBITRUM_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.env';
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
+import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import type { NetworkId } from '$lib/types/network';
-import { SwapProvider, type SwapProvidersConfig } from '$lib/types/swap';
+import { SwapProvider, type ChainFusionPair, type SwapProvidersConfig } from '$lib/types/swap';
+import { toChainFusionPairs } from '$lib/utils/chain-fusion-swap.utils';
 
 export const SWAP_SLIPPAGE_PRESET_VALUES = [0.5, 1.5, 3];
 export const [_, SWAP_DEFAULT_SLIPPAGE_VALUE] = SWAP_SLIPPAGE_PRESET_VALUES;
@@ -26,8 +30,6 @@ export const ICP_SWAP_POOL_FEE = 3000n;
 
 export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
-export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
-export const SWAP_DELTA_INTERVAL_MS = 3_000;
 export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
 export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
@@ -40,8 +42,6 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
-export const NEAR_INTENTS_POLL_INTERVAL_MS = 2_000;
-export const NEAR_INTENTS_POLL_MAX_ATTEMPTS = 120;
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
@@ -54,6 +54,12 @@ export const SWAP_MODE_MARKET = 'market';
 export const SWAP_SIDE = 'SELL';
 
 export const swapProvidersDetails: Partial<Record<SwapProvider, SwapProvidersConfig>> = {
+	[SwapProvider.CHAIN_FUSION]: {
+		website: 'https://internetcomputer.org/chainfusion',
+		name: 'Chain Fusion',
+		// TODO: replace with a real logo
+		logo: '/images/dapps/chain-fusion-logo.svg'
+	},
 	[SwapProvider.VELORA]: {
 		website: 'https://app.velora.xyz/',
 		name: 'Velora',
@@ -91,6 +97,11 @@ const SUPPORTED_CROSS_SWAP_NETWORK_IDS = [
 	...SUPPORTED_CROSS_SWAP_SOL_NETWORK_IDS
 ];
 
+export const CHAIN_FUSION_PAIRS: ChainFusionPair[] = toChainFusionPairs([
+	...ICRC_CK_TOKENS,
+	...PUBLIC_ICRC_TOKENS
+]);
+
 // EVM networks supported by OneSec for ICP bridging
 export const ONESEC_EVM_NETWORK_IDS = [
 	ETHEREUM_NETWORK_ID,
@@ -98,19 +109,37 @@ export const ONESEC_EVM_NETWORK_IDS = [
 	ARBITRUM_MAINNET_NETWORK_ID
 ];
 
-// For OneSec-supporting EVM chains, also allow ICP as a swap destination
-const SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP = ONESEC_SWAP_ENABLED
-	? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
-	: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
+const CHAIN_FUSION_EVM_NETWORK_IDS = CHAIN_FUSION_SWAP_ENABLED ? [ETHEREUM_NETWORK_ID] : [];
+
+// Bitcoin reaches ICP, and only ICP: ck conversion is its single route into the swap
+// universe, and no DEX in the list quotes a BTC pair.
+const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
+	? [BTC_MAINNET_NETWORK_ID]
+	: [];
+
+const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
+	...new Set<NetworkId>([
+		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
+		...CHAIN_FUSION_EVM_NETWORK_IDS
+	])
+];
+
+const withIcpIfPaired = (networkId: NetworkId): NetworkId[] =>
+	ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId)
+		? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
+		: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
-	[ICP_NETWORK_ID]: ONESEC_SWAP_ENABLED
-		? [ICP_NETWORK_ID, ...ONESEC_EVM_NETWORK_IDS]
-		: [ICP_NETWORK_ID],
-	[ETHEREUM_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
-	[ARBITRUM_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
-	[BSC_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[POLYGON_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS,
-	[BASE_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS_WITH_ICP,
+	[ICP_NETWORK_ID]: [
+		ICP_NETWORK_ID,
+		...ICP_PAIRED_EVM_NETWORK_IDS,
+		...CHAIN_FUSION_BTC_NETWORK_IDS
+	],
+	[BTC_MAINNET_NETWORK_ID]: CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : [],
+	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
+	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
+	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),
+	[POLYGON_MAINNET_NETWORK_ID]: withIcpIfPaired(POLYGON_MAINNET_NETWORK_ID),
+	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
 	[SOLANA_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS
 };

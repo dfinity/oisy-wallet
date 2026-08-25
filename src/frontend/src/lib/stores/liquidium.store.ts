@@ -1,22 +1,30 @@
 import type { LiquidiumStoreData } from '$lib/types/liquidium';
 import { writable, type Readable } from 'svelte/store';
 
-export interface LiquidiumStore extends Readable<LiquidiumStoreData> {
+// `loaded` cannot be inferred from the payload: empty markets and `portfolio: null` are the
+// legitimate settled values for an address without a Liquidium profile, so a loading gate reading
+// the payload alone would take "nothing there" for "still fetching".
+type LiquidiumStoreState = LiquidiumStoreData & { loaded: boolean };
+
+export interface LiquidiumStore extends Readable<LiquidiumStoreState> {
 	set: (data: LiquidiumStoreData) => void;
+	setLoaded: (loaded: boolean) => void;
 	reset: () => void;
 }
 
 const initLiquidiumStore = (): LiquidiumStore => {
-	const defaultStoreValue: LiquidiumStoreData = {
+	const defaultStoreValue: LiquidiumStoreState = {
 		markets: [],
 		portfolio: null,
-		assetPrices: {}
+		assetPrices: {},
+		loaded: false
 	};
-	const { subscribe, set } = writable<LiquidiumStoreData>(defaultStoreValue);
+	const { subscribe, set, update } = writable<LiquidiumStoreState>(defaultStoreValue);
 
 	return {
 		subscribe,
-		set,
+		set: (data: LiquidiumStoreData) => update(({ loaded }) => ({ ...data, loaded })),
+		setLoaded: (loaded: boolean) => update((state) => ({ ...state, loaded })),
 		reset: () => set(defaultStoreValue)
 	};
 };

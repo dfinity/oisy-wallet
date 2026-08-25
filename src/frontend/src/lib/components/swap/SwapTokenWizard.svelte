@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import SwapBtcContexts from '$btc/components/swap/SwapBtcContexts.svelte';
+	import SwapBtcWizard from '$btc/components/swap/SwapBtcWizard.svelte';
 	import SwapEthWizard from '$eth/components/swap/SwapEthWizard.svelte';
 	import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 	import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
@@ -9,7 +11,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep } from '$lib/types/wizard';
-	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import SwapSolWizard from '$sol/components/swap/SwapSolWizard.svelte';
 
 	interface Props {
@@ -47,6 +49,8 @@
 
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
 
+	let isBitcoinSource = $derived(isNetworkIdBitcoin($sourceToken?.network?.id));
+
 	const onStopTriggerAmount = () => {
 		manualPause = true;
 	};
@@ -62,61 +66,79 @@
 	);
 </script>
 
-<SwapAmountsContext
-	amount={swapAmount}
-	destinationToken={$destinationToken}
-	{enableAmountUpdates}
-	isSourceTokenIcrc2={$isSourceTokenIcrc2}
-	pauseAmountUpdates={shouldPause}
-	{slippageValue}
-	sourceToken={$sourceToken}
-	bind:isSwapAmountsLoading
->
-	{#if isNullish($sourceToken) || isNetworkIdICP($sourceToken.network.id)}
-		<SwapIcpWizard
-			{currentStep}
-			{isSwapAmountsLoading}
-			{onBack}
-			{onClose}
-			{onNext}
-			{onShowProviderList}
-			{onShowTokensList}
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-			bind:swapProgressStep
-		/>
-	{:else if isNetworkIdSolana($sourceToken.network.id)}
-		<SwapSolWizard
-			{currentStep}
-			{isSwapAmountsLoading}
-			{onBack}
-			{onClose}
-			{onNext}
-			{onShowProviderList}
-			{onShowTokensList}
-			{onStartTriggerAmount}
-			{onStopTriggerAmount}
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-			bind:swapProgressStep
-		/>
-	{:else}
-		<SwapEthWizard
-			{currentStep}
-			{isSwapAmountsLoading}
-			{onBack}
-			{onClose}
-			{onNext}
-			{onShowProviderList}
-			{onShowTokensList}
-			{onStartTriggerAmount}
-			{onStopTriggerAmount}
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-			bind:swapProgressStep
-		/>
-	{/if}
-</SwapAmountsContext>
+<SwapBtcContexts amount={swapAmount} load={isBitcoinSource} networkId={$sourceToken?.network?.id}>
+	<SwapAmountsContext
+		amount={swapAmount}
+		destinationToken={$destinationToken}
+		{enableAmountUpdates}
+		isSourceTokenIcrc2={$isSourceTokenIcrc2}
+		pauseAmountUpdates={shouldPause}
+		{slippageValue}
+		sourceToken={$sourceToken}
+		bind:isSwapAmountsLoading
+	>
+		{#if isNullish($sourceToken) || isNetworkIdICP($sourceToken.network.id)}
+			<SwapIcpWizard
+				{currentStep}
+				{isSwapAmountsLoading}
+				{onBack}
+				{onClose}
+				{onNext}
+				{onShowProviderList}
+				{onShowTokensList}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+			/>
+		{:else if isNetworkIdSolana($sourceToken.network.id)}
+			<SwapSolWizard
+				{currentStep}
+				{isSwapAmountsLoading}
+				{onBack}
+				{onClose}
+				{onNext}
+				{onShowProviderList}
+				{onShowTokensList}
+				{onStartTriggerAmount}
+				{onStopTriggerAmount}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+			/>
+		{:else if isBitcoinSource}
+			<SwapBtcWizard
+				{currentStep}
+				{isSwapAmountsLoading}
+				{onBack}
+				{onClose}
+				{onNext}
+				{onShowProviderList}
+				{onShowTokensList}
+				{onStartTriggerAmount}
+				{onStopTriggerAmount}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+			/>
+		{:else}
+			<SwapEthWizard
+				{currentStep}
+				{isSwapAmountsLoading}
+				{onBack}
+				{onClose}
+				{onNext}
+				{onShowProviderList}
+				{onShowTokensList}
+				{onStartTriggerAmount}
+				{onStopTriggerAmount}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+			/>
+		{/if}
+	</SwapAmountsContext>
+</SwapBtcContexts>

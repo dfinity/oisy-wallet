@@ -2,7 +2,8 @@ import {
 	bitcoinSignedMessageHash,
 	buildBtcAccountAddresses,
 	deriveBtcPublicKey,
-	encodeRecoverableSignature
+	encodeRecoverableSignature,
+	resolvePsbtInputPrevout
 } from '$btc/utils/wallet-connect.utils';
 import {
 	BTC_MAINNET_NETWORK_ID,
@@ -17,6 +18,7 @@ import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { hmac } from '@noble/hashes/hmac';
 import { sha256 } from '@noble/hashes/sha2';
 import { etc, getPublicKey, sign } from '@noble/secp256k1';
+import { networks, payments, Transaction } from 'bitcoinjs-lib';
 
 describe('btc wallet-connect.utils', () => {
 	const previousHmacSha256Sync = etc.hmacSha256Sync;
@@ -54,7 +56,7 @@ describe('btc wallet-connect.utils', () => {
 			Buffer.from('0000000000000000000000000000000000000000000000000000000000000001', 'hex')
 		);
 
-		it('recovers the recovery id and produces a 65-byte base64 signature', () => {
+		it('recovers the recovery id and produces a 65-byte hex signature', () => {
 			const messageHash = bitcoinSignedMessageHash('hello');
 			const publicKey = getPublicKey(privateKey, true);
 
@@ -67,7 +69,10 @@ describe('btc wallet-connect.utils', () => {
 				publicKey
 			});
 
-			const decoded = Buffer.from(encoded, 'base64');
+			expect(encoded).toHaveLength(130);
+			expect(encoded).toMatch(/^[0-9a-f]+$/);
+
+			const decoded = Buffer.from(encoded, 'hex');
 
 			expect(decoded).toHaveLength(65);
 			// Header byte for a compressed key: 27 + recId + 4.
@@ -185,6 +190,98 @@ describe('btc wallet-connect.utils', () => {
 			// Compressed secp256k1 public key: 33 bytes => 66 hex chars, prefixed with 0x02 / 0x03.
 			expect(publicKey).toHaveLength(66);
 			expect(['02', '03']).toContain(publicKey.slice(0, 2));
+		});
+	});
+
+	describe('resolvePsbtInputPrevout', () => {
+		const script = payments.p2wpkh({
+			pubkey: Buffer.from(
+				'0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',
+				'hex'
+			),
+			network: networks.bitcoin
+		}).output as Buffer;
+
+		const otherScript = payments.p2wpkh({
+			pubkey: Buffer.from(
+				'03d01115d548e7561b15c38f004d734633687cf4419620095bc5b0f47070afe85a',
+				'hex'
+			),
+			network: networks.bitcoin
+		}).output as Buffer;
+
+		const nonWitnessUtxo = ({ script, value }: { script: Buffer; value: number }): Buffer => {
+			const tx = new Transaction();
+			tx.addInput(Buffer.alloc(32, 1), 0);
+			tx.addOutput(script, value);
+
+			return tx.toBuffer();
+		};
+
+		it('reads the witnessUtxo of an input carrying only that field', () => {
+			expect(
+				resolvePsbtInputPrevout({ input: { witnessUtxo: { script, value: 100_000 } }, vout: 0 })
+			).toStrictEqual({ prevout: { script, value: 100_000n }, ambiguous: false });
+		});
+
+		it('leaves an input carrying only a nonWitnessUtxo unpriced', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: { nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 }) },
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: false });
+		});
+
+		it('reads the nonWitnessUtxo the signer consumes when both fields agree', () => {
+			const { prevout, ambiguous } = resolvePsbtInputPrevout({
+				input: {
+					witnessUtxo: { script, value: 100_000 },
+					nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+				},
+				vout: 0
+			});
+
+			expect(ambiguous).toBeFalsy();
+			expect(prevout?.value).toBe(100_000n);
+			expect(Buffer.from(prevout?.script ?? []).equals(script)).toBeTruthy();
+		});
+
+		it('reports an input as ambiguous when the two fields disagree on the value', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 10_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+					},
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
+		});
+
+		it('reports an input as ambiguous when the two fields disagree on the script', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 100_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script: otherScript, value: 100_000 })
+					},
+					vout: 0
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
+		});
+
+		it('reports an input as ambiguous when its nonWitnessUtxo cannot be read', () => {
+			expect(
+				resolvePsbtInputPrevout({
+					input: {
+						witnessUtxo: { script, value: 100_000 },
+						nonWitnessUtxo: nonWitnessUtxo({ script, value: 100_000 })
+					},
+					// The previous transaction has no output at this index.
+					vout: 1
+				})
+			).toStrictEqual({ prevout: undefined, ambiguous: true });
 		});
 	});
 });
