@@ -347,9 +347,10 @@ which is the fragile part.
 7. Taps **Open or Create** → Internet Identity. That is the entire account-creation
    step.
 8. Back in the app, **Claim tip** shows the amount and fiat value, **To: Your OISY
-   wallet**, Network, Token, the payout fee, the sender's **message**, a note that
-   the sender will see who claimed, and **Status: Reserved** → **Claim now**. The
-   backend re-checks the allowance and the sender's balance before moving anything.
+   wallet**, Network, Token, the sender's **message**, a note that the sender will
+   see who claimed, and **Status: Reserved** → **Claim now**. No fee line: the
+   claimer pays nothing and receives the full amount. The backend re-checks the
+   allowance before moving anything.
 9. Success: **"135.00 USDC Received!"** with **Status: Completed** and a single
    **Take me to the wallet** CTA. The tokens are in their own wallet.
 
@@ -526,11 +527,13 @@ the privacy promise.
 5. **History's info banner** reads _"We've hidden these transactions as they
    considered suspicious…"_ [sic] — copy from the spam-token surface, a reused
    component left in the mock. Do not implement.
-6. **Two fees, one story — mostly dissolved.** There is no funding leg any more: the
-   sender pays the `approve` fee, and the payout fee is drawn from the allowance at
-   claim. Two numbers still exist, but they are now "what you pay to reserve" and
-   "what the transfer costs", and the recipient must see the net amount before
-   claiming.
+6. **Two fees — resolved, and both land on the sender.** There is no funding leg
+   any more. The sender pays the `approve` fee to reserve, and the payout fee when
+   the claim moves the tokens; the ledger takes the second from the sender's balance
+   while crediting the claimer the full amount. So the two numbers are "what you pay
+   to reserve" and "what you pay when it is claimed", both quoted to the **sender**
+   at creation. The recipient has no net amount to be shown — what the link says is
+   what they get. Verified against a real ledger in the backend build.
 7. **Two logged-out CTAs — resolved** in favour of **Open or Create** with the
    consent line.
 8. **"Single-use security" — inherent.** A tip is a fixed amount with one allowance;
@@ -722,9 +725,11 @@ behaviour-first voice. It must cover, in the same PR as the behaviour change:
 - Expiry options and the default, and that a lapsed tip cannot be claimed —
   enforced by the backend record and by the reservation itself, which carries the
   same deadline.
-- The two fees — the ledger fee the sender pays to reserve the amount, and the
-  payout fee taken from the tip at claim — and therefore that the recipient
-  receives slightly less than the amount the sender set aside.
+- **Who pays the fees, stated plainly: the sender pays both.** One ledger fee to
+  reserve the amount, a second when the claimer moves it. The claimer receives the
+  **full amount shown** and pays nothing. Measured against a real ledger during the
+  backend build: `icrc2_transfer_from` debits amount + fee from the sender and
+  credits the amount in full, which is why the reservation is sized at amount + fee.
 - **Where the money actually is.** The tokens stay in the sender's account; OISY
   holds a bounded, revocable authorisation and never a balance. The design's
   "non-custodial" phrasing is accurate here and can be used — but the flip side has
@@ -819,21 +824,25 @@ change.
    and network filter, and shows the drawn empty state when the user holds none.
 3. Creating a tip requires an amount and an expiry (**1h / 24h / 7d**, default 24h),
    accepts an optional message of up to **250 characters**, and states that the
-   amount is reserved in the user's own account and lapses on its own.
+   amount is reserved in the user's own account and lapses on its own — quoting
+   **both** fees the sender will pay: one now to reserve, one when it is claimed.
 4. **Generate** issues an `approve` to `{owner: backend, subaccount: H(tip_id)}` for
    the amount plus the payout fee, records the tip, and produces a share screen with
    a scannable QR, the `oisy.com/tip/<id>#c=<code>` link, copy **and** share actions,
    and an absolute expiry.
 5. **No tokens leave the sender's account at creation.** Verifiable in a ledger trace:
    the only transaction is an `approve`.
-6. The reserved amount is **excluded from spendable balance** in the token list, the
-   send flow, the swap flow and both **MAX** controls.
+6. The reserved amount **plus its payout fee** — the whole allowance — is
+   **excluded from spendable balance** in the token list, the send flow, the swap
+   flow and both **MAX** controls. Excluding only the amount would let a user spend
+   down to where their own tip can no longer be claimed.
 7. Opening the link **signed out** shows the branded modal with amount, token and
    expiry — **not** the message, the sender, or the claimer — and performs no
    state-changing call.
 8. After **Open or Create** and Internet Identity, the claim resumes with the
-   fragment intact and shows the review card with the payout fee, the message,
-   **Status: Reserved**, and a disclosure that the sender will see who claimed.
+   fragment intact and shows the review card with the amount, the message,
+   **Status: Reserved**, and a disclosure that the sender will see who claimed —
+   and **no fee line**, since the claimer pays none.
 9. **Claim now** pays out via `icrc2_transfer_from` for the **full amount shown**,
    **including for a principal that has never used OISY before**, with no manual
    token setup. Adjusted during the backend build, and measured against a real
