@@ -40,8 +40,11 @@ surviving modal close, tab close, refresh, and logout.
   tokens. No candid change, hence no breaking-interface process.
 - **AUT polling and UI.** `pollNearIntentsActiveUserTransactions`
   (`src/frontend/src/lib/services/near-intents-active-tx.services.ts`) polls the 1Click
-  status endpoint by `DEPOSIT_ADDRESS` / `DEPOSIT_MEMO` external refs; the header
-  dropdown (`ActiveUserTransactionItem.svelte`) renders every swap provider identically;
+  status endpoint by the `NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS` /
+  `.DEPOSIT_MEMO` external refs (`src/frontend/src/lib/types/near-intents.ts`); the
+  header dropdown
+  (`src/frontend/src/lib/components/active-user-transactions/ActiveUserTransactionItem.svelte`)
+  renders every swap provider identically;
   terminal side effects fire `TRACK_COUNT_SWAP_SUCCESS` / `TRACK_COUNT_SWAP_ERROR` and
   refresh balances. All of this works for BTC rows without modification.
 - **BTC sending.** `sendBtc` (`src/frontend/src/btc/services/btc-send.services.ts`)
