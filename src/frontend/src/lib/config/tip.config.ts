@@ -18,5 +18,9 @@ export const tipWizardSteps = ({ i18n }: WizardStepsParams): WizardSteps<WizardS
 	{
 		name: WizardStepsTip.SHARE,
 		title: i18n.tip.text.share_title
+	},
+	{
+		name: WizardStepsTip.HISTORY,
+		title: i18n.tip.text.history_title
 	}
 ];

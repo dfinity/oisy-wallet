@@ -4,6 +4,7 @@
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import TipCreate from '$lib/components/tip/TipCreate.svelte';
+	import TipHistory from '$lib/components/tip/TipHistory.svelte';
 	import TipIntro from '$lib/components/tip/TipIntro.svelte';
 	import TipShare from '$lib/components/tip/TipShare.svelte';
 	import TipTokensList from '$lib/components/tip/TipTokensList.svelte';
@@ -118,8 +119,13 @@
 			/>
 		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs)}
 			<TipShare {expiresAtNs} {link} onDone={modalStore.close} />
+		{:else if currentStep?.name === WizardStepsTip.HISTORY}
+			<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} />
 		{:else}
-			<TipIntro onGetStarted={enterTokensList} onViewHistory={modalStore.close} />
+			<TipIntro
+				onGetStarted={enterTokensList}
+				onViewHistory={() => goToStep(WizardStepsTip.HISTORY)}
+			/>
 		{/if}
 	</WizardModal>
 </TokenActionContext>

@@ -2323,6 +2323,17 @@ interface I18nTip {
 		uncovered_title: string;
 		uncovered_description: string;
 		claim_failed: string;
+		history_title: string;
+		history_empty: string;
+		status_reserved: string;
+		status_claimed: string;
+		status_expired: string;
+		status_cancelled: string;
+		claimed_by: string;
+		expires_in_short: string;
+		cancel_tip: string;
+		cancel_failed: string;
+		cancelled_toast: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;
