@@ -4,14 +4,20 @@ import type {
 	BtcGetFeePercentilesResponse,
 	Contact,
 	CreatePersonalNoteShareRequest,
+	CreateTipRequest,
 	CustomToken,
 	DeletePersonalNoteRequest,
 	ExchangeRate,
 	GetAllowedCyclesResponse,
+	MyTip,
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
+	PublicTip,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
+	TipClaim,
+	TipClaimRequest,
+	TipDetails,
 	TokenId
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
@@ -657,6 +663,74 @@ export class BackendCanister extends Canister<BackendService> {
 			return response.Ok;
 		}
 		throw mapPersonalNotesVetkeyError(response.Err);
+	};
+
+	// Tips. The canister holds no tokens for these: `createTip` only records a
+	// reservation the caller has already made on the ledger, and `claimTip` spends
+	// it. See `src/backend/src/tips`.
+
+	createTip = async (request: CreateTipRequest): Promise<void> => {
+		const { create_tip } = this.caller({ certified: true });
+		const response = await create_tip(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Anonymous-callable, like `getPersonalNoteShare`: the recipient of a tip link
+	// has no OISY identity yet, which is the entire point of the feature.
+	getTip = async (tipId: string): Promise<PublicTip> => {
+		const { get_tip } = this.caller({ certified: false });
+		const response = await get_tip(tipId);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	// Needs the claim code, so the sender's message is visible only to someone
+	// holding the full link — never in the anonymous preview.
+	getTipDetails = async (request: TipClaimRequest): Promise<TipDetails> => {
+		const { get_tip_details } = this.caller({ certified: false });
+		const response = await get_tip_details(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	claimTip = async (request: TipClaimRequest): Promise<TipClaim> => {
+		const { claim_tip } = this.caller({ certified: true });
+		const response = await claim_tip(request);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	cancelTip = async (tipId: string): Promise<void> => {
+		const { cancel_tip } = this.caller({ certified: true });
+		const response = await cancel_tip(tipId);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	getMyTips = async (): Promise<MyTip[]> => {
+		const { get_my_tips } = this.caller({ certified: false });
+		const response = await get_my_tips();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
 	};
 
 	createPersonalNoteShare = async (request: CreatePersonalNoteShareRequest): Promise<void> => {
