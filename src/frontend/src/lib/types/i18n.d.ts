@@ -2300,6 +2300,13 @@ interface I18nTip {
 		fees_are_yours: string;
 		lapse_notice: string;
 		generate: string;
+		share_heading: string;
+		share_description: string;
+		copy_link: string;
+		share_link: string;
+		expires_at: string;
+		done: string;
+		reserve_failed: string;
 		message_too_long: string;
 		learn_how_it_works: string;
 		view_history: string;

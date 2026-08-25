@@ -1,15 +1,18 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import TipCreate from '$lib/components/tip/TipCreate.svelte';
 	import TipIntro from '$lib/components/tip/TipIntro.svelte';
+	import TipShare from '$lib/components/tip/TipShare.svelte';
 	import TipTokensList from '$lib/components/tip/TipTokensList.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { tipWizardSteps } from '$lib/config/tip.config';
 	import { DEFAULT_TIP_EXPIRY_MS } from '$lib/constants/tip.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
+	import { newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -17,13 +20,20 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
 	let modal: WizardModal<WizardStepsTip> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsTip> | undefined = $state();
 	let selectedToken: IcToken | undefined = $state();
+	let draft: TipDraft | undefined = $state();
+	let link: string | undefined = $state();
+	let expiresAtNs: bigint | undefined = $state();
+	let busy = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
 	let message = $state('');
@@ -48,7 +58,44 @@
 
 	const onSelectToken = (token: IcToken) => {
 		selectedToken = token;
+		// One draft per tip, kept across retries: reusing the id means a retried
+		// approve replaces the same allowance instead of stranding the first one.
+		draft ??= newTipDraft();
 		goToStep(WizardStepsTip.CREATE);
+	};
+
+	const generate = async () => {
+		if (
+			isNullish($authIdentity) ||
+			isNullish(selectedToken) ||
+			isNullish(draft) ||
+			invalidAmount(amount)
+		) {
+			return;
+		}
+
+		busy = true;
+
+		try {
+			const reserved = await reserveTip({
+				identity: $authIdentity,
+				draft,
+				ledgerCanisterId: selectedToken.ledgerCanisterId,
+				amount: parseToken({ value: `${amount}`, unitName: selectedToken.decimals }),
+				fee: selectedToken.fee,
+				durationMs,
+				message: message === '' ? undefined : message
+			});
+
+			({ link, expiresAtNs } = reserved);
+			goToStep(WizardStepsTip.SHARE);
+		} catch (err: unknown) {
+			// Deliberately reassuring about the money: an approve either landed and is
+			// replaceable, or never happened. Either way nothing was transferred.
+			toastsError({ msg: { text: $i18n.tip.text.reserve_failed }, err });
+		} finally {
+			busy = false;
+		}
 	};
 </script>
 
@@ -60,14 +107,17 @@
 			<TipTokensList onClose={() => goToStep(WizardStepsTip.INTRO)} {onSelectToken} />
 		{:else if currentStep?.name === WizardStepsTip.CREATE && nonNullish(selectedToken)}
 			<TipCreate
+				{busy}
 				onClose={modalStore.close}
-				onNext={() => goToStep(WizardStepsTip.SHARE)}
+				onNext={generate}
 				onSelectToken={enterTokensList}
 				token={selectedToken}
 				bind:amount
 				bind:durationMs
 				bind:message
 			/>
+		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs)}
+			<TipShare {expiresAtNs} {link} onDone={modalStore.close} />
 		{:else}
 			<TipIntro onGetStarted={enterTokensList} onViewHistory={modalStore.close} />
 		{/if}

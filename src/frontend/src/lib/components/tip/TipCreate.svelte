@@ -15,6 +15,7 @@
 
 	interface Props {
 		token: IcToken;
+		busy?: boolean;
 		amount: OptionAmount;
 		durationMs: number;
 		message: string;
@@ -25,6 +26,7 @@
 
 	let {
 		token,
+		busy = false,
 		amount = $bindable(),
 		durationMs = $bindable(),
 		message = $bindable(),
@@ -45,7 +47,7 @@
 
 <StakeForm
 	autofocus={isDesktop()}
-	disabled={messageTooLong}
+	disabled={messageTooLong || busy}
 	isSelectable
 	nextLabel={$i18n.tip.text.generate}
 	onClick={onSelectToken}
