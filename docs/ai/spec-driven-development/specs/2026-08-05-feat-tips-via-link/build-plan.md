@@ -27,9 +27,9 @@ blocks nothing; at position 3 it would hold up four UI PRs behind its review.
 Land bottom-up. Each branch is cut from its parent, and a fix goes to the branch
 that owns the code, then cascades down.
 
-## PR-0 — the spike
+## PR-0 — the spike (complete)
 
-Throwaway, no branch, no PR. Everything above waits on it. It runs entirely
+Throwaway, no branch, no PR. Everything above waited on it; nothing does now. It runs entirely
 against a local replica: the local ck-ledgers are the real
 `ic-icrc1-ledger.wasm` from `dfinity/ic` at the commit pinned in
 [`scripts/download.ckbtc.sh`](../../../../../scripts/download.ckbtc.sh), so the
@@ -100,11 +100,29 @@ standing in for `H(tip_id)`):
       reservation carries the tip's own deadline; the backend record is the second
       line of defence, not the only one.
 
-**Still open:**
+**Closed against mainnet** (read-only `icrc1_supported_standards` /
+`icrc1_symbol` queries, `--network ic`):
 
-- [ ] **Open question 2, deployment half.** `icrc1_supported_standards` on the
-      **mainnet** ledgers, read-only. Local proves the wasm behaves; it does not
-      prove mainnet runs a version matching these candids.
+- [x] **Open question 2, deployment half.** Every v1 candidate reports ICRC-2 in
+      production. So the **v1 token list is all five the spec named**:
+
+| Token  | Mainnet ledger                | Standards                          |
+| ------ | ----------------------------- | ---------------------------------- |
+| ICP    | `ryjl3-tyaaa-aaaaa-aaaba-cai` | ICRC-1, **2**, 21                  |
+| ckBTC  | `mxzaz-hqaaa-aaaar-qaada-cai` | ICRC-1, **2**, 3, 10, 21, 103, 106 |
+| ckETH  | `ss2fx-dyaaa-aaaar-qacoq-cai` | ICRC-1, **2**, 3, 10, 21, 103, 106 |
+| ckUSDC | `xevnm-gaaaa-aaaar-qafnq-cai` | ICRC-1, **2**, 3, 10, 21, 103, 106 |
+| ckUSDT | `cngnf-vqaaa-aaaar-qag4q-cai` | ICRC-1, **2**, 3, 10, 21, 103, 106 |
+
+**Do not take ck-ERC20 ledger ids from `dfx.json`.** Its `remote.id.ic` entry for
+`ckusdc_ledger` is `yfumr-cyaaa-aaaar-qaela-cai`, which answers `icrc1_symbol`
+with **`ckSepoliaUSDC`** — the testnet ledger, on mainnet. Production ck-ERC20
+ids live in
+[`tokens.ckerc20.json`](../../../../../src/frontend/src/env/tokens/tokens.ckerc20.json),
+which is what the frontend actually reads. ICP, ckBTC and ckETH are the ledgers
+their `dfx.json` `ic` entries claim; the ck-ERC20 ones are not.
+
+**PR-0 is complete.** Nothing in the stack is blocked on the mechanism any more.
 
 ## The local rig
 
