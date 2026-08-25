@@ -2311,6 +2311,14 @@ interface I18nTip {
 		claim_title: string;
 		claim_amount: string;
 		claim_expires: string;
+		claim_ready_title: string;
+		claim_ready_description: string;
+		claim_received: string;
+		claim_to: string;
+		claim_to_value: string;
+		claim_token: string;
+		claim_status: string;
+		claim_status_reserved: string;
 		open_or_create: string;
 		open_or_create_hint: string;
 		claim_now: string;
@@ -2339,7 +2347,7 @@ interface I18nTip {
 		view_history: string;
 		get_started: string;
 	};
-	alt: { intro_illustration: string };
+	alt: { intro_illustration: string; claim_illustration: string };
 }
 
 interface I18n {
