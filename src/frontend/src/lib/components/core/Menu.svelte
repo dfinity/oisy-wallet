@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import { TIPS_ENABLED } from '$env/tips.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
@@ -13,6 +14,7 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
 	import IconPay from '$lib/components/icons/IconPay.svelte';
+	import IconQr from '$lib/components/icons/IconQr.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
@@ -40,6 +42,7 @@
 		NAVIGATION_MENU,
 		NAVIGATION_MENU_VIP_BUTTON,
 		NAVIGATION_MENU_REFERRAL_BUTTON,
+		NAVIGATION_MENU_TIP_BUTTON,
 		NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 		NAVIGATION_MENU_GOLD_BUTTON,
 		NAVIGATION_MENU_SCANNER_BUTTON,
@@ -118,6 +121,7 @@
 
 	const addressModalId = Symbol();
 	const referralModalId = Symbol();
+	const tipModalId = Symbol();
 	const universalScannerModalId = Symbol();
 	const payDialogModalId = Symbol();
 	const goldModalId = Symbol();
@@ -241,6 +245,17 @@
 					</span>
 				</span>
 			</ButtonMenu>
+
+			{#if TIPS_ENABLED}
+				<ButtonMenu
+					ariaLabel={$i18n.navigation.alt.issue_tip}
+					onclick={() => modalStore.openTip(tipModalId)}
+					testId={NAVIGATION_MENU_TIP_BUTTON}
+				>
+					<IconQr size="20" />
+					{$i18n.navigation.text.issue_tip}
+				</ButtonMenu>
+			{/if}
 
 			<Hr />
 

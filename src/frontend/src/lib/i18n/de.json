@@ -141,7 +141,8 @@
 			"show_balances": "Salden anzeigen",
 			"privacy_mode_enabled": "Privatsphären Modus aktiviert. Drücke [P] um die Salden wieder anzuzeigen.",
 			"privacy_mode_disabled": "Privatsphären Modus deaktiviert. Drücke [P] um die Salden zu verbergen.",
-			"notes": "Notizen"
+			"notes": "Notizen",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Zum Vermögenswerte-Bereich gehen",
@@ -165,7 +166,8 @@
 			"address_book": "Kontakte öffnen",
 			"hide_balances": "Angezeigte Salden verbergen",
 			"show_balances": "Versteckte Salden anzeigen",
-			"notes": "Notizen öffnen"
+			"notes": "Notizen öffnen",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Doku"
@@ -2741,6 +2743,19 @@
 				"discover": "OISY entdecken",
 				"unavailable_title": "Dieser Link ist abgelaufen oder wurde bereits verwendet"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

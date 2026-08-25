@@ -141,7 +141,8 @@
 			"show_balances": "显示余额",
 			"privacy_mode_enabled": "隐私模式已开启。按 [P] 键再次显示余额。",
 			"privacy_mode_disabled": "隐私模式已关闭。按 [P] 键隐藏余额。",
-			"notes": "笔记"
+			"notes": "笔记",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "前往资产视图",
@@ -165,7 +166,8 @@
 			"address_book": "打开联系人",
 			"hide_balances": "隐藏当前显示的余额",
 			"show_balances": "显示已隐藏的余额",
-			"notes": "打开笔记"
+			"notes": "打开笔记",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "文档"
@@ -2741,6 +2743,19 @@
 				"discover": "了解 OISY",
 				"unavailable_title": "此链接已过期或已被使用"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

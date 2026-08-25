@@ -141,7 +141,8 @@
 			"show_balances": "Hiện số dư",
 			"privacy_mode_enabled": "Chế độ riêng tư đã được bật. Nhấn [P] để hiển thị lại số dư của bạn.",
 			"privacy_mode_disabled": "Chế độ riêng tư đã được tắt. Nhấn [P] để ẩn số dư của bạn.",
-			"notes": "Ghi chú"
+			"notes": "Ghi chú",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Đi đến chế độ xem tài sản",
@@ -165,7 +166,8 @@
 			"address_book": "Mở sổ địa chỉ",
 			"hide_balances": "Ẩn số dư hiển thị",
 			"show_balances": "Hiện số dư bị ẩn",
-			"notes": "Mở ghi chú"
+			"notes": "Mở ghi chú",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Tài liệu"
@@ -2741,6 +2743,19 @@
 				"discover": "Khám phá OISY",
 				"unavailable_title": "Liên kết này đã hết hạn hoặc đã được sử dụng"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

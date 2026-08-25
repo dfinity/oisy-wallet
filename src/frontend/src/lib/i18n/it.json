@@ -141,7 +141,8 @@
 			"show_balances": "Mostra saldi",
 			"privacy_mode_enabled": "Modalità privacy attivata. Premi [P] per mostrare di nuovo i tuoi saldi.",
 			"privacy_mode_disabled": "Modalità privacy disattivata. Premi [P] per nascondere i tuoi saldi.",
-			"notes": "Note"
+			"notes": "Note",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Vai alla vista delle risorse",
@@ -165,7 +166,8 @@
 			"address_book": "Apri contatti",
 			"hide_balances": "Nascondi i saldi visualizzati",
 			"show_balances": "Mostra i saldi nascosti",
-			"notes": "Apri le note"
+			"notes": "Apri le note",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2741,6 +2743,19 @@
 				"discover": "Scopri OISY",
 				"unavailable_title": "Questo link è scaduto o è già stato usato"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

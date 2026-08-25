@@ -141,7 +141,8 @@
 			"show_balances": "Pokaż salda",
 			"privacy_mode_enabled": "Tryb prywatności włączony. Naciśnij [P], aby ponownie pokazać salda.",
 			"privacy_mode_disabled": "Tryb prywatności wyłączony. Naciśnij [P], aby ukryć salda.",
-			"notes": "Notatki"
+			"notes": "Notatki",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Przejdź do widoku aktywów",
@@ -165,7 +166,8 @@
 			"address_book": "Otwórz kontakty",
 			"hide_balances": "Ukryj wyświetlane salda",
 			"show_balances": "Pokaż ukryte salda",
-			"notes": "Otwórz notatki"
+			"notes": "Otwórz notatki",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Dokumentacja"
@@ -2741,6 +2743,19 @@
 				"discover": "Odkryj OISY",
 				"unavailable_title": "Ten link wygasł lub został już użyty"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

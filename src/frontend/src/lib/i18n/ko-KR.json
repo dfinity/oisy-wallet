@@ -141,7 +141,8 @@
 			"show_balances": "잔액 표시",
 			"privacy_mode_enabled": "개인정보 보호 모드가 활성화되었습니다. [P]를 눌러 잔액을 다시 표시하세요.",
 			"privacy_mode_disabled": "개인정보 보호 모드가 비활성화되었습니다. [P]를 눌러 잔액을 숨기세요.",
-			"notes": "메모"
+			"notes": "메모",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "자산 보기로 이동",
@@ -165,7 +166,8 @@
 			"address_book": "연락처 열기",
 			"hide_balances": "표시된 잔액 숨기기",
 			"show_balances": "숨겨진 잔액 표시",
-			"notes": "메모 열기"
+			"notes": "메모 열기",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "문서"
@@ -2741,6 +2743,19 @@
 				"discover": "OISY 알아보기",
 				"unavailable_title": "이 링크는 만료되었거나 이미 사용되었습니다"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

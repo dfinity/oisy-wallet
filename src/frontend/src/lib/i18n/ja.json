@@ -141,7 +141,8 @@
 			"show_balances": "残高を表示",
 			"privacy_mode_enabled": "プライバシーモードが有効です。[P]キーを押して残高を再表示します。",
 			"privacy_mode_disabled": "プライバシーモードが無効です。[P]キーを押して残高を非表示にします。",
-			"notes": "メモ"
+			"notes": "メモ",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "資産一覧に移動",
@@ -165,7 +166,8 @@
 			"address_book": "アドレス帳を開く",
 			"hide_balances": "表示中の残高を非表示にする",
 			"show_balances": "非表示の残高を表示する",
-			"notes": "メモを開く"
+			"notes": "メモを開く",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "ドキュメント"
@@ -2741,6 +2743,19 @@
 				"discover": "OISYを見てみる",
 				"unavailable_title": "このリンクは期限切れか、すでに使用されています"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

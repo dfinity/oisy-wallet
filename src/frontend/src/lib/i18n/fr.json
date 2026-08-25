@@ -141,7 +141,8 @@
 			"show_balances": "Afficher les soldes",
 			"privacy_mode_enabled": "Mode de confidentialité activé. Appuyez sur [P] pour afficher à nouveau vos soldes.",
 			"privacy_mode_disabled": "Mode de confidentialité désactivé. Appuyez sur [P] pour masquer vos soldes.",
-			"notes": "Notes"
+			"notes": "Notes",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Aller à la vue des actifs",
@@ -165,7 +166,8 @@
 			"address_book": "Ouvrir les contacts",
 			"hide_balances": "Masquer les soldes affichés",
 			"show_balances": "Afficher les soldes masqués",
-			"notes": "Ouvrir les notes"
+			"notes": "Ouvrir les notes",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2741,6 +2743,19 @@
 				"discover": "Découvrir OISY",
 				"unavailable_title": "Ce lien a expiré ou a déjà été utilisé"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

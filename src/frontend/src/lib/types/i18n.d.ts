@@ -131,6 +131,7 @@ interface I18nNavigation {
 		privacy_mode_enabled: string;
 		privacy_mode_disabled: string;
 		notes: string;
+		issue_tip: string;
 	};
 	alt: {
 		tokens: string;
@@ -155,6 +156,7 @@ interface I18nNavigation {
 		hide_balances: string;
 		show_balances: string;
 		notes: string;
+		issue_tip: string;
 	};
 	short: { documentation: string };
 }
@@ -2273,6 +2275,18 @@ interface I18nNotes {
 	};
 }
 
+interface I18nTip {
+	text: {
+		intro_title: string;
+		intro_heading: string;
+		intro_body: string;
+		learn_how_it_works: string;
+		view_history: string;
+		get_started: string;
+	};
+	alt: { intro_illustration: string };
+}
+
 interface I18n {
 	lang: Languages;
 	borrow: I18nBorrow;
@@ -2331,4 +2345,5 @@ interface I18n {
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 	notes: I18nNotes;
+	tip: I18nTip;
 }

@@ -141,7 +141,8 @@
 			"show_balances": "Mostrar saldos",
 			"privacy_mode_enabled": "Modo privado ativado. Clique [P] para mostrar os seus saldos novamente.",
 			"privacy_mode_disabled": "Modo privado desativado. Clique [P] para ocultar os seus saldos.",
-			"notes": "Notas"
+			"notes": "Notas",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Ir para a visualização de ativos",
@@ -165,7 +166,8 @@
 			"address_book": "Abrir livro de endereços",
 			"hide_balances": "Ocultar os saldos exibidos",
 			"show_balances": "Mostrar os saldos ocultos",
-			"notes": "Abrir notas"
+			"notes": "Abrir notas",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Documentação"
@@ -2741,6 +2743,19 @@
 				"discover": "Descobrir a OISY",
 				"unavailable_title": "Este link expirou ou já foi utilizado"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

@@ -141,7 +141,8 @@
 			"show_balances": "Zobrazit zůstatky",
 			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
 			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků.",
-			"notes": "Poznámky"
+			"notes": "Poznámky",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Přejít na zobrazení Digitálních Aktiv",
@@ -165,7 +166,8 @@
 			"address_book": "Otevřít kontakty",
 			"hide_balances": "Skrýt zobrazené zůstatky",
 			"show_balances": "Zobrazit skryté zůstatky",
-			"notes": "Otevřít poznámky"
+			"notes": "Otevřít poznámky",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Dokumentace"
@@ -2741,6 +2743,19 @@
 				"discover": "Objevit OISY",
 				"unavailable_title": "Tento odkaz vypršel nebo už byl použit"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

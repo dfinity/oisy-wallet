@@ -141,7 +141,8 @@
 			"show_balances": "إظهار الأرصدة",
 			"privacy_mode_enabled": "تم تمكين وضع الخصوصية. اضغط على [P] لإظهار أرصدتك مرة أخرى.",
 			"privacy_mode_disabled": "تم تعطيل وضع الخصوصية. اضغط على [P] لإخفاء أرصدتك.",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "انتقل إلى عرض الأصول",
@@ -165,7 +166,8 @@
 			"address_book": "افتح جهات الاتصال",
 			"hide_balances": "إخفاء الأرصدة المعروضة",
 			"show_balances": "إظهار الأرصدة المخفية",
-			"notes": ""
+			"notes": "",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "وثائق"
@@ -2741,6 +2743,19 @@
 				"discover": "",
 				"unavailable_title": ""
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

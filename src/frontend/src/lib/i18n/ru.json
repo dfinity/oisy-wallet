@@ -141,7 +141,8 @@
 			"show_balances": "Показать балансы",
 			"privacy_mode_enabled": "Режим конфиденциальности включен. Нажмите [P], чтобы снова показать балансы.",
 			"privacy_mode_disabled": "Режим конфиденциальности отключен. Нажмите [P], чтобы скрыть балансы.",
-			"notes": "Заметки"
+			"notes": "Заметки",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "Активы",
@@ -165,7 +166,8 @@
 			"address_book": "Контакты",
 			"hide_balances": "Скрыть балансы",
 			"show_balances": "Показать скрытые балансы",
-			"notes": "Открыть заметки"
+			"notes": "Открыть заметки",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "Документы"
@@ -2741,6 +2743,19 @@
 				"discover": "Узнать про OISY",
 				"unavailable_title": "Срок действия этой ссылки истёк или она уже была использована"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

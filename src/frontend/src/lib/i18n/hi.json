@@ -141,7 +141,8 @@
 			"show_balances": "शेष राशि दिखाएं",
 			"privacy_mode_enabled": "प्राइवेसी मोड सक्षम है। अपनी शेष राशि फिर से दिखाने के लिए [P] दबाएँ।",
 			"privacy_mode_disabled": "प्राइवेसी मोड अक्षम है। अपनी शेष राशि छिपाने के लिए [P] दबाएँ।",
-			"notes": "नोट्स"
+			"notes": "नोट्स",
+			"issue_tip": ""
 		},
 		"alt": {
 			"tokens": "एसेट्स व्यू पर जाएँ",
@@ -165,7 +166,8 @@
 			"address_book": "संपर्क खोलें",
 			"hide_balances": "प्रदर्शित शेष राशि छुपाएं",
 			"show_balances": "छिपी हुई शेष राशि दिखाएं",
-			"notes": "नोट्स खोलें"
+			"notes": "नोट्स खोलें",
+			"issue_tip": ""
 		},
 		"short": {
 			"documentation": "डॉक्युमेंटेशन"
@@ -2741,6 +2743,19 @@
 				"discover": "OISY के बारे में जानें",
 				"unavailable_title": "यह लिंक समाप्त हो चुका है या पहले ही इस्तेमाल किया जा चुका है"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "",
+			"intro_heading": "",
+			"intro_body": "",
+			"learn_how_it_works": "",
+			"view_history": "",
+			"get_started": ""
+		},
+		"alt": {
+			"intro_illustration": ""
 		}
 	}
 }

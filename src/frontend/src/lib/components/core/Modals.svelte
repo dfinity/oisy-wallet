@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { PERSONAL_NOTES_ENABLED } from '$env/personal-notes.env';
+	import { TIPS_ENABLED } from '$env/tips.env';
 	import EthHideTokenModal from '$eth/components/tokens/EthHideTokenModal.svelte';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
@@ -14,6 +15,7 @@
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import TipIntroModal from '$lib/components/tip/TipIntroModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
@@ -27,6 +29,7 @@
 		modalVipQrCode,
 		modalSettingsState,
 		modalReferralCode,
+		modalTip,
 		modalAddressBook,
 		modalNotes,
 		modalVipQrCodeData,
@@ -67,6 +70,8 @@
 		<SettingsModal />
 	{:else if $modalReferralCode}
 		<ReferralCodeModal />
+	{:else if TIPS_ENABLED && $modalTip}
+		<TipIntroModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}

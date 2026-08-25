@@ -141,7 +141,8 @@
 			"show_balances": "Show balances",
 			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
 			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances.",
-			"notes": "Notes"
+			"notes": "Notes",
+			"issue_tip": "Issue Tip"
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -165,7 +166,8 @@
 			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances",
-			"notes": "Open notes"
+			"notes": "Open notes",
+			"issue_tip": "Issue a tip to share by link or QR code"
 		},
 		"short": {
 			"documentation": "Docs"
@@ -2741,6 +2743,19 @@
 				"discover": "Discover OISY",
 				"unavailable_title": "This link has expired or already been used"
 			}
+		}
+	},
+	"tip": {
+		"text": {
+			"intro_title": "Tip with OISY Wallet",
+			"intro_heading": "Effortless Crypto Tipping",
+			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
+			"learn_how_it_works": "Learn how it works",
+			"view_history": "View History",
+			"get_started": "Get Started"
+		},
+		"alt": {
+			"intro_illustration": "A tip QR code being scanned"
 		}
 	}
 }
