@@ -2,6 +2,7 @@ import {
 	ARBITRUM_MAINNET_NETWORK,
 	ARBITRUM_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -449,6 +450,33 @@ describe('near-intents.services', () => {
 
 			expect(result.has('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')).toBeTruthy();
 			expect(result.has('0xA0b86991C6218B36C1D19D4a2E9eB0cE3606eB48')).toBeFalsy();
+		});
+
+		it('should use lowercased symbol for native BTC when filtering by BTC mainnet network', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [BTC_MAINNET_NETWORK_ID] });
+
+			expect(result).toEqual(new Set(['btc']));
+		});
+
+		it('should not treat the btc blockchain as EVM when a contract address is present', async () => {
+			const btcTokenWithAddress: NearIntentsToken = {
+				assetId: 'nep141:btc-MixedCaseAddress.omft.near',
+				decimals: 8,
+				blockchain: 'btc',
+				symbol: 'WBTC',
+				price: 65000.0,
+				priceUpdatedAt: '2026-03-16T00:00:00.000Z',
+				contractAddress: 'MixedCaseAddress'
+			};
+
+			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue([btcTokenWithAddress]);
+
+			const result = await nearIntentsSupportedTokens({ networkIds: [BTC_MAINNET_NETWORK_ID] });
+
+			expect(result.has('MixedCaseAddress')).toBeTruthy();
+			expect(result.has('mixedcaseaddress')).toBeFalsy();
 		});
 
 		it('should keep Solana contract addresses case-sensitive (Base58)', async () => {

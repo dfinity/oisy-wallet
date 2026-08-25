@@ -38,7 +38,8 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 	[BASE_NETWORK_ID]: 'base',
 	[BSC_MAINNET_NETWORK_ID]: 'bsc',
 	[POLYGON_MAINNET_NETWORK_ID]: 'pol',
-	[SOLANA_MAINNET_NETWORK_ID]: 'sol'
+	[SOLANA_MAINNET_NETWORK_ID]: 'sol',
+	[BTC_MAINNET_NETWORK_ID]: 'btc'
 };
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
