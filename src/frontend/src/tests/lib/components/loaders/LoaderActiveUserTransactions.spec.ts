@@ -11,15 +11,21 @@ import * as addressDerived from '$lib/derived/address.derived';
 import * as authDerived from '$lib/derived/auth.derived';
 import * as activeUserTransactionsServices from '$lib/services/active-user-transactions.services';
 import * as analyticsServices from '$lib/services/analytics.services';
+import * as chainFusionPoller from '$lib/services/chain-fusion-swap-active-tx.services';
 import * as liquidiumPoller from '$lib/services/liquidium-active-tx.services';
 import * as liquidiumServices from '$lib/services/liquidium.services';
+import * as nearIntentsPoller from '$lib/services/near-intents-active-tx.services';
 import * as oneSecPoller from '$lib/services/onesec-swap.services';
+import * as veloraPoller from '$lib/services/velora-active-tx.services';
 import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 import { SwapProvider } from '$lib/types/swap';
 import * as walletUtils from '$lib/utils/wallet.utils';
 import {
 	mockActiveUserTransaction,
-	mockLiquidiumActiveUserTransaction
+	mockChainFusionActiveUserTransaction,
+	mockLiquidiumActiveUserTransaction,
+	mockNearIntentsActiveUserTransaction,
+	mockVeloraActiveUserTransaction
 } from '$tests/mocks/active-user-transactions.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -47,6 +53,48 @@ const failed = (id: string) =>
 		id,
 		status: { Failed: null } as const
 	}) satisfies typeof mockActiveUserTransaction;
+
+const pendingNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const succeededNearIntents = (id: string) =>
+	({
+		...mockNearIntentsActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockNearIntentsActiveUserTransaction;
+
+const pendingVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const succeededVelora = (id: string) =>
+	({
+		...mockVeloraActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockVeloraActiveUserTransaction;
+
+const pendingChainFusion = (id: string) =>
+	({
+		...mockChainFusionActiveUserTransaction,
+		id,
+		status: { Pending: null } as const
+	}) satisfies typeof mockChainFusionActiveUserTransaction;
+
+const succeededChainFusion = (id: string) =>
+	({
+		...mockChainFusionActiveUserTransaction,
+		id,
+		status: { Succeeded: null } as const
+	}) satisfies typeof mockChainFusionActiveUserTransaction;
 
 const pendingLiquidium = (id: string) =>
 	({
@@ -181,6 +229,77 @@ describe('LoaderActiveUserTransactions', () => {
 			});
 		});
 
+		it('polls NEAR Intents rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const nearSpy = vi
+				.spyOn(nearIntentsPoller, 'pollNearIntentsActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingNearIntents('near-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(nearSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
+		it('polls Velora rows on each tick when present, with the EVM address', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const veloraSpy = vi
+				.spyOn(veloraPoller, 'pollVeloraActiveUserTransactions')
+				.mockResolvedValue();
+			vi.spyOn(addressDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			const tx = pendingVelora('velora-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(veloraSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx],
+				userAddress: mockEthAddress
+			});
+		});
+
+		it('polls Chain Fusion rows on each tick when present', async () => {
+			const oneSecSpy = vi
+				.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions')
+				.mockResolvedValue();
+			const chainFusionSpy = vi
+				.spyOn(chainFusionPoller, 'pollChainFusionActiveUserTransactions')
+				.mockResolvedValue();
+			const tx = pendingChainFusion('chain-fusion-a');
+
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: tx });
+
+			render(LoaderActiveUserTransactions);
+
+			await vi.advanceTimersByTimeAsync(ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS);
+
+			expect(oneSecSpy).not.toHaveBeenCalled();
+			expect(chainFusionSpy).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				transactions: [tx]
+			});
+		});
+
 		it('stops polling once all rows reach a terminal state', async () => {
 			const spy = vi.spyOn(oneSecPoller, 'pollOneSecActiveUserTransactions').mockResolvedValue();
 
@@ -250,6 +369,89 @@ describe('LoaderActiveUserTransactions', () => {
 				metadata: expect.objectContaining({ dApp: SwapProvider.ONE_SEC })
 			});
 			expect(appliedFlags()).toEqual({ a: true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the NEAR Intents dApp when a NEAR row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingNearIntents('near-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededNearIntents('near-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.NEAR_INTENTS })
+			});
+			expect(appliedFlags()).toEqual({ 'near-a': true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the Velora dApp when a Velora row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingVelora('velora-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededVelora('velora-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.VELORA })
+			});
+			expect(appliedFlags()).toEqual({ 'velora-a': true });
+		});
+
+		it('fires waitAndTriggerWallet and a swap_success event with the Chain Fusion dApp when a ck row succeeds', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingChainFusion('chain-fusion-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).not.toHaveBeenCalled();
+
+			activeUserTransactionsStore.upsert({ transaction: succeededChainFusion('chain-fusion-a') });
+			await tick();
+
+			expect(refreshSpy).toHaveBeenCalledOnce();
+			// A ck conversion reports into the swap funnel, not the convert one.
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_SUCCESS,
+				metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+			});
+			expect(appliedFlags()).toEqual({ 'chain-fusion-a': true });
+		});
+
+		it('fires a swap_error event without a wallet refresh when a ck row fails', async () => {
+			activeUserTransactionsStore.init(mockIdentity.getPrincipal());
+			activeUserTransactionsStore.upsert({ transaction: pendingChainFusion('chain-fusion-a') });
+
+			render(LoaderActiveUserTransactions);
+			await tick();
+
+			activeUserTransactionsStore.upsert({
+				transaction: { ...pendingChainFusion('chain-fusion-a'), status: { Failed: null } }
+			});
+			await tick();
+
+			expect(refreshSpy).not.toHaveBeenCalled();
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_COUNT_SWAP_ERROR,
+				metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+			});
 		});
 
 		it('fires wallet and Liquidium refreshes plus analytics when a Liquidium row succeeds', async () => {

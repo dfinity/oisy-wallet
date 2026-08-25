@@ -1,9 +1,11 @@
+import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -14,19 +16,13 @@ import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { Identity } from '@icp-sdk/core/agent';
-import type {
-	BridgePrice,
-	DeltaPrice,
-	OptimalRate,
-	QuoteParams,
-	SimpleFetchSDK
-} from '@velora-dex/sdk';
+import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
 export type DisplayUnit = 'token' | 'usd';
 
-export type SwapTokenCategory = 'icp' | 'evm' | 'sol';
+export type SwapTokenCategory = 'icp' | 'evm' | 'sol' | 'btc';
 
 export type SwapCategorizedTokenIds = Partial<Record<SwapTokenCategory, Set<string>>>;
 
@@ -50,7 +46,8 @@ export enum SwapProvider {
 	KONG_SWAP = 'kongSwap',
 	VELORA = 'velora',
 	NEAR_INTENTS = 'nearIntents',
-	ONE_SEC = 'oneSec'
+	ONE_SEC = 'oneSec',
+	CHAIN_FUSION = 'chainFusion'
 }
 
 export enum VeloraSwapTypes {
@@ -87,6 +84,9 @@ export interface FetchSwapAmountsParams {
 	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
 	userSolAddress: OptionSolAddress;
+	// The user's own Bitcoin address. Unlike the other two it is needed to *quote*, not
+	// only to execute: a BTC → ckBTC offer's fee comes from selecting the user's UTXOs.
+	userBtcAddress: OptionBtcAddress;
 }
 
 export type Slippage = string | number;
@@ -113,8 +113,15 @@ export type SwapMappedResult =
 			provider: SwapProvider.VELORA;
 			receiveAmount: bigint;
 			receiveOutMinimum?: bigint;
-			swapDetails: VeloraSwapDetails;
-			type: string;
+			swapDetails: DeltaPrice;
+			type: VeloraSwapTypes.DELTA;
+	  }
+	| {
+			provider: SwapProvider.VELORA;
+			receiveAmount: bigint;
+			receiveOutMinimum?: bigint;
+			swapDetails: OptimalRate;
+			type: VeloraSwapTypes.MARKET;
 	  }
 	| {
 			provider: SwapProvider.NEAR_INTENTS;
@@ -128,6 +135,12 @@ export type SwapMappedResult =
 			receiveAmount: bigint;
 			receiveOutMinimum?: bigint;
 			swapDetails: OneSecSwapDetails;
+			type?: string;
+	  }
+	| {
+			provider: SwapProvider.CHAIN_FUSION;
+			receiveAmount: bigint;
+			swapDetails: ChainFusionSwapDetails;
 			type?: string;
 	  };
 
@@ -227,7 +240,12 @@ export interface FormatSlippageParams {
 	decimals: number;
 }
 
-export type VeloraSwapDetails = DeltaPrice & BridgePrice & OptimalRate;
+/**
+ * Quote payload of either Velora execution mode. The two shapes are mutually exclusive —
+ * `DeltaPrice.partner` is an object while `OptimalRate.partner` is a string — so this is a
+ * union discriminated by `VeloraSwapTypes`, never an intersection.
+ */
+export type VeloraSwapDetails = DeltaPrice | OptimalRate;
 
 export interface GetQuoteParams extends QuoteParams<'all' | 'market'> {
 	destChainId?: number;
@@ -259,6 +277,60 @@ export interface GetWithdrawableTokenParams {
 export interface OneSecSwapDetails {
 	transferFeeInUnits: bigint;
 	protocolFeeInPercent: number;
+}
+
+export type ChainFusionFee = ProviderFee & {
+	labelPath: string;
+	/**
+	 * Whether the fee comes out of the converted amount, reducing what the user receives.
+	 *
+	 * It decides the receive amount and nothing else: every fee is disclosed either way, in
+	 * the form's fee section, because the total shown there has to be the user's whole cost of
+	 * the conversion. The provider sheet carries no fees.
+	 *
+	 * The test is what the minter actually takes out of the amount it credits or pays out,
+	 * which is not the same as what the Convert flow displays — a real BTC → ckBTC
+	 * conversion showed Convert quoting 1:1 while the minter withheld its KYT fee. So:
+	 * - **Flagged:** the ckBTC KYT fee on a BTC → ckBTC deposit, and the Bitcoin network +
+	 *   minter fee on a ckBTC → BTC withdrawal (`IcTokenFees`'s `totalDestinationTokenFee`).
+	 * - **Not flagged:** a ck ledger fee, because `approve(amount)` debits `amount + fee`
+	 *   while the minter moves the full `amount`.
+	 * - **Not flagged:** the BTC network fee of a deposit — UTXO selection covers it out of
+	 *   the transaction's change, not out of the deposited amount.
+	 * - **Not flagged:** the Ethereum gas of a ckETH withdrawal, although the minter does
+	 *   deduct it. The estimate is a doubled, mostly-reimbursed ceiling, so quoting it as a
+	 *   deduction would under-report what lands by more than it over-reports.
+	 */
+	deductedFromAmount?: boolean;
+};
+
+export interface ChainFusionSwapDetails {
+	// Charged in the source token, in source-token units. Whether an entry also comes out
+	// of the converted amount is `deductedFromAmount`'s job, not this list's — a ck ledger
+	// fee belongs here yet is paid on top of the amount.
+	sourceFees: ChainFusionFee[];
+	// Charged in a third token the user must hold (ckETH for ckERC20 → ERC20; native
+	// ETH gas is already handled by the EVM wizard's fee context).
+	externalFees: ChainFusionFee[];
+	// Minter-enforced floor, in source-token units, when the direction has one.
+	minimumAmount?: bigint;
+	// Whether the minter info the quote read was certified, set only by the directions
+	// that consult it (ckETH → ETH). Mirrors Convert's `minter-info-not-certified` gate:
+	// an uncertified read blocks Review until the certified update lands.
+	minterInfoCertified?: boolean;
+}
+
+/**
+ * One ck conversion pair: a ck ledger and the native token it is backed by.
+ *
+ * Resolved from the curated ck token environment rather than from a runtime token
+ * list, because a provider's `getSupportedTokens` is invoked with no arguments and
+ * `getSupportedDestinations` only ever sees the source token. The 1Sec analogue is
+ * `DEFAULT_CONFIG.tokens`.
+ */
+export interface ChainFusionPair {
+	ckLedgerCanisterId: LedgerCanisterIdText;
+	twinToken: Token;
 }
 
 export interface OneSecIcpToEvmParams {
@@ -310,13 +382,30 @@ export interface IcpBridgeSwapProviderConfig {
 	getSupportedDestinations: GetSupportedDestinationsFn;
 }
 
+export interface BtcQuoteParams {
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: bigint;
+	// The user's own Bitcoin address, the source of the UTXOs a deposit spends.
+	userBtcAddress: BtcAddress;
+	slippage: Slippage;
+}
+
+export interface BtcSwapProviderConfig {
+	key: SwapProvider;
+	getQuote: (params: BtcQuoteParams) => Promise<SwapMappedResult | undefined>;
+	isEnabled: boolean;
+	getSupportedTokens?: () => Promise<Set<string>>;
+	getSupportedDestinations: GetSupportedDestinationsFn;
+}
+
 export interface SwapProvidersConfig {
 	name: string;
 	logo: string;
 	website: string;
 }
 
-export interface SwapVeloraParams extends RequiredTransactionFeeData {
+interface SwapVeloraParams extends RequiredTransactionFeeData {
 	identity: Identity;
 	progress: (step: ProgressStep) => void;
 	sourceToken: ErcFungibleToken;
@@ -325,10 +414,16 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceNetwork: EthereumNetwork;
-	destinationNetwork: EthereumNetwork;
 	userAddress: EthAddress;
-	swapDetails: VeloraSwapDetails;
 	isGasless: boolean;
+}
+
+export interface SwapVeloraDeltaParams extends SwapVeloraParams {
+	swapDetails: DeltaPrice;
+}
+
+export interface SwapVeloraMarketParams extends SwapVeloraParams {
+	swapDetails: OptimalRate;
 }
 
 interface SwapNearIntentsParams {
@@ -354,15 +449,6 @@ export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	userAddress: SolAddress;
 }
 
-export interface CheckDeltaOrderStatusParams {
-	sdk: SimpleFetchSDK;
-	auctionId: string;
-	onExecuted?: () => void;
-	timeoutMs?: number;
-	intervalMs?: number;
-}
-
 export interface DeltaSwapResponse {
-	delta: DeltaPrice | BridgePrice;
-	deltaAddress: string;
+	delta: DeltaPrice;
 }

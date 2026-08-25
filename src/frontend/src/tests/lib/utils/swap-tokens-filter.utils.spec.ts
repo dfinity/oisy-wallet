@@ -78,7 +78,8 @@ describe('filterSwapTokens', () => {
 					])
 				},
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [icpTokenActive, icpTokenInactive, icpTokenInactiveUnsupported];
@@ -101,7 +102,8 @@ describe('filterSwapTokens', () => {
 					supportedTokenIds: new Set([icpTokenActive.ledgerCanisterId])
 				},
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({
@@ -122,7 +124,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'some',
 					supportedTokenIds: new Set([erc20Inactive.address.toLowerCase()])
 				},
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [erc20Active, erc20Inactive, erc20InactiveUnsupported];
@@ -140,7 +143,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'some',
 					supportedTokenIds: new Set()
 				},
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({
@@ -157,7 +161,8 @@ describe('filterSwapTokens', () => {
 			const supportedData: SwapSupportedTokensData = {
 				icp: { coverage: 'none', supportedTokenIds: new Set() },
 				evm: { coverage: 'none', supportedTokenIds: new Set() },
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [erc20Active, erc20Inactive, splActive, splInactive];
@@ -184,7 +189,8 @@ describe('filterSwapTokens', () => {
 				sol: {
 					coverage: 'all',
 					supportedTokenIds: new Set([splActive.address])
-				}
+				},
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const tokens = [
@@ -227,7 +233,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'all',
 					supportedTokenIds: new Set(['0xabcdef1234567890'])
 				},
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -247,7 +254,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'all',
 					supportedTokenIds: new Set(['0xabcdef1234567890'])
 				},
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -267,7 +275,8 @@ describe('filterSwapTokens', () => {
 					coverage: 'all',
 					supportedTokenIds: new Set(['0xsomeotheraddress'])
 				},
-				sol: { coverage: 'none', supportedTokenIds: new Set() }
+				sol: { coverage: 'none', supportedTokenIds: new Set() },
+				btc: { coverage: 'none', supportedTokenIds: new Set() }
 			};
 
 			const result = filterSwapTokens({ tokens: [token], supportedData });
@@ -276,26 +285,60 @@ describe('filterSwapTokens', () => {
 		});
 	});
 
-	describe('unknown network tokens (nullish lookup)', () => {
+	describe('Bitcoin token identifier matching', () => {
 		const btcActive = asToggleable({ token: BTC_MAINNET_TOKEN, enabled: true });
 		const btcInactive = asToggleable({ token: BTC_MAINNET_TOKEN, enabled: false });
+
+		const withBtcSupport = (supportedTokenIds: Set<string>): SwapSupportedTokensData => ({
+			icp: { coverage: 'none', supportedTokenIds: new Set() },
+			evm: { coverage: 'none', supportedTokenIds: new Set() },
+			sol: { coverage: 'none', supportedTokenIds: new Set() },
+			btc: { coverage: 'all', supportedTokenIds }
+		});
+
+		it('matches Bitcoin on its lowercased symbol', () => {
+			const supportedData = withBtcSupport(new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]));
+
+			const result = filterSwapTokens({ tokens: [btcActive, btcInactive], supportedData });
+
+			expect(result).toContain(btcActive);
+			expect(result).toContain(btcInactive);
+		});
+
+		it('filters out an unsupported Bitcoin token when coverage is all', () => {
+			const supportedData = withBtcSupport(new Set(['not-btc']));
+
+			const result = filterSwapTokens({ tokens: [btcActive], supportedData });
+
+			expect(result).not.toContain(btcActive);
+		});
+	});
+
+	describe('unknown network tokens (nullish lookup)', () => {
+		// Bitcoin is a swap category now, so the "no known category" case needs a standard
+		// none of the lookup branches claim.
+		const unknownToken = { ...BTC_MAINNET_TOKEN, standard: { code: 'erc721' as const } };
+
+		const unknownActive = asToggleable({ token: unknownToken, enabled: true });
+		const unknownInactive = asToggleable({ token: unknownToken, enabled: false });
 
 		const supportedData: SwapSupportedTokensData = {
 			icp: { coverage: 'all', supportedTokenIds: new Set() },
 			evm: { coverage: 'all', supportedTokenIds: new Set() },
-			sol: { coverage: 'all', supportedTokenIds: new Set() }
+			sol: { coverage: 'all', supportedTokenIds: new Set() },
+			btc: { coverage: 'all', supportedTokenIds: new Set() }
 		};
 
 		it('keeps active tokens that do not belong to a known swap network', () => {
-			const result = filterSwapTokens({ tokens: [btcActive], supportedData });
+			const result = filterSwapTokens({ tokens: [unknownActive], supportedData });
 
-			expect(result).toContain(btcActive);
+			expect(result).toContain(unknownActive);
 		});
 
 		it('filters out inactive tokens that do not belong to a known swap network', () => {
-			const result = filterSwapTokens({ tokens: [btcInactive], supportedData });
+			const result = filterSwapTokens({ tokens: [unknownInactive], supportedData });
 
-			expect(result).not.toContain(btcInactive);
+			expect(result).not.toContain(unknownInactive);
 		});
 	});
 });
@@ -324,6 +367,47 @@ describe('computeReceiveSupportedTokens', () => {
 		expect(data.icp).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 		expect(data.evm).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 		expect(data.sol).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+		expect(data.btc).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
+	});
+
+	it('Chain Fusion ICP→BTC narrows Bitcoin destinations to the native symbol', () => {
+		const btcIdentifier = BTC_MAINNET_TOKEN.symbol.toLowerCase();
+
+		const providers: SwapProviderSupport[] = [
+			{
+				key: SwapProvider.CHAIN_FUSION,
+				sourceCategory: 'icp',
+				supportedSourceTokens: new Set([icpSourceId]),
+				getSupportedDestinations: () => ({ btc: new Set([btcIdentifier]) })
+			}
+		];
+
+		const data = computeReceiveSupportedTokens({ sourceToken: icpSourceToken, providers });
+
+		expect(data.btc.coverage).toBe('all');
+		expect(data.btc.supportedTokenIds).toEqual(new Set([btcIdentifier]));
+
+		const enabledBtc = { ...BTC_MAINNET_TOKEN, enabled: true };
+
+		expect(filterSwapTokens({ tokens: [enabledBtc], supportedData: data })).toHaveLength(1);
+	});
+
+	it('Chain Fusion BTC→ICP narrows ICP destinations to the ck ledger', () => {
+		const providers: SwapProviderSupport[] = [
+			{
+				key: SwapProvider.CHAIN_FUSION,
+				sourceCategory: 'btc',
+				supportedSourceTokens: new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]),
+				getSupportedDestinations: () => ({ icp: new Set([icpSourceId]) })
+			}
+		];
+
+		const data = computeReceiveSupportedTokens({ sourceToken: BTC_MAINNET_TOKEN, providers });
+
+		expect(data.icp.coverage).toBe('all');
+		expect(data.icp.supportedTokenIds).toEqual(new Set([icpSourceId]));
+		// No provider offers a Bitcoin destination from a Bitcoin source.
+		expect(data.btc).toEqual({ coverage: 'all', supportedTokenIds: new Set() });
 	});
 
 	it('symmetric ICP provider returns its supported set as ICP destinations', () => {

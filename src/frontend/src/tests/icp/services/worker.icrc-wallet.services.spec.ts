@@ -208,25 +208,7 @@ describe('worker.icrc-wallet.services', () => {
 					});
 				});
 
-				it('should restart the worker with ledger only on error', () => {
-					const payload = {
-						ref: ledgerCanisterId,
-						msg: 'syncIcrcWalletError',
-						data: { error: 'error' }
-					};
-					workerInstance.onmessage?.({ data: payload } as MessageEvent);
-
-					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
-						msg: 'startIcrcWalletTimer',
-						workerId: mockId,
-						data: {
-							ledgerCanisterId,
-							env
-						}
-					});
-				});
-
-				it('should restart the worker with ledger only on error but only once', () => {
+				it('should not restart the worker with ledger only on error', () => {
 					const payload = {
 						ref: ledgerCanisterId,
 						msg: 'syncIcrcWalletError',
@@ -237,14 +219,7 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
-						msg: 'startIcrcWalletTimer',
-						workerId: mockId,
-						data: {
-							ledgerCanisterId,
-							env
-						}
-					});
+					expect(postMessageSpy).not.toHaveBeenCalled();
 				});
 			});
 		});

@@ -15,11 +15,9 @@ export const ENV =
 			? 'staging'
 			: REQUESTED_ENV === 'audit'
 				? 'staging'
-				: REQUESTED_ENV === 'e2e'
-					? 'staging'
-					: ['staging', 'beta'].includes(REQUESTED_ENV)
-						? REQUESTED_ENV
-						: 'development';
+				: ['staging', 'beta'].includes(REQUESTED_ENV)
+					? REQUESTED_ENV
+					: 'development';
 
 const SIGNER_TARGET_MAP = {
 	signer: 'signer_frontend',

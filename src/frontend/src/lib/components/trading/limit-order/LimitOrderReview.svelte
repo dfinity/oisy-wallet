@@ -11,6 +11,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Html from '$lib/components/ui/Html.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { oisyTradeIcTokenBySymbol } from '$lib/derived/oisy-trade.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import {
@@ -67,11 +68,18 @@
 	const baseAmountDisplay = $derived(
 		formatTradeAmount({ amount: baseAmount, decimals: pairView?.baseDecimals ?? 8 })
 	);
+	// Undefined rather than a dash below the min notional: the hero's shared
+	// `SwapToken` row parses the amount, so a placeholder string would throw.
 	const quoteAmountDisplay = $derived(
 		quoteAmount > 0
 			? formatTradeAmount({ amount: quoteAmount, decimals: pairView?.quoteDecimals ?? 8 })
-			: '-'
+			: undefined
 	);
+
+	// Resolved the same way the form does, so the hero can show each leg's logo
+	// exactly as the Swap review does.
+	const baseToken = $derived($oisyTradeIcTokenBySymbol[base]);
+	const quoteToken = $derived($oisyTradeIcTokenBySymbol[quote]);
 	const priceDisplay = $derived(
 		formatTradeAmount({ amount: price, decimals: pairView?.quoteDecimals ?? 8 })
 	);
@@ -124,16 +132,15 @@
 <ContentWithToolbar>
 	<LimitOrderIntentHero
 		baseAmount={baseAmountDisplay}
-		baseSymbol={base}
+		{baseToken}
 		quoteAmount={quoteAmountDisplay}
-		quoteSymbol={quote}
+		{quoteToken}
 		{side}
 	/>
 
 	<LimitOrderPriceSummary
 		baseSymbol={base}
 		{currentValueDisplay}
-		muted={!(crossing || fillOrKill)}
 		{priceDisplay}
 		{queueText}
 		quoteSymbol={quote}
