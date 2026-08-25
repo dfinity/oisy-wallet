@@ -188,6 +188,12 @@ until PR 6, so every intermediate PR is safe to merge on its own.
 
 ## 10. Pending decisions (facts are clear, someone must decide)
 
-- Which destination networks BTC advertises in `SUPPORTED_CROSS_SWAP_NETWORKS`: all
-  NEAR Intents chains, or a curated initial set.
 - When to flip the flag to production after staging QA (owner: product).
+
+## 11. Decided during implementation
+
+- BTC advertises **all chains currently in `NEAR_INTENTS_BLOCKCHAIN_MAP`** as
+  destinations (Ethereum, Arbitrum, Base, BSC, Polygon, Solana), alongside the existing
+  ICP destination via Chain Fusion. The whole set is behind the feature flag, so it is
+  a local/staging surface only; a curated narrowing, if wanted before the production
+  flip, is a one-line edit to the destination set.
