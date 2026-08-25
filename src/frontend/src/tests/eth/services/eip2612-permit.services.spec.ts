@@ -24,7 +24,8 @@ vi.mock('ethers/crypto', () => ({
 
 vi.mock('ethers/hash', () => ({
 	TypedDataEncoder: {
-		hash: vi.fn()
+		hash: vi.fn(),
+		hashDomain: vi.fn()
 	}
 }));
 
@@ -54,10 +55,26 @@ describe('EIP2612 Permit Services', () => {
 
 	const mockContract = vi.mocked(Contract);
 
+	// The on-chain domain name deliberately differs from the token metadata name: the domain
+	// must be built from the contract's name(), not from what we display.
+	const mockOnChainName = 'EURC';
+	const mockDomainSeparator = `0x${'ab'.repeat(32)}`;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+
+		mockContract.prototype.name = vi
+			.fn()
+			.mockResolvedValue(mockOnChainName) as unknown as typeof mockContract.prototype.name;
+		mockContract.prototype.DOMAIN_SEPARATOR = vi
+			.fn()
+			.mockResolvedValue(
+				mockDomainSeparator
+			) as unknown as typeof mockContract.prototype.DOMAIN_SEPARATOR;
+
+		vi.mocked(TypedDataEncoder.hashDomain).mockReturnValue(mockDomainSeparator);
 	});
 
 	afterEach(() => {
@@ -195,7 +212,7 @@ describe('EIP2612 Permit Services', () => {
 
 			expect(TypedDataEncoder.hash).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: mockValidErc20Token.name,
+					name: mockOnChainName,
 					version: '2',
 					chainId: mockChainId,
 					verifyingContract: mockValidErc20Token.address
@@ -203,6 +220,66 @@ describe('EIP2612 Permit Services', () => {
 				EIP2612_TYPES,
 				expect.any(Object)
 			);
+		});
+
+		it('should verify the domain against the on-chain DOMAIN_SEPARATOR', async () => {
+			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
+
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
+			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
+			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
+			vi.mocked(Signature.from).mockReturnValue({
+				v: 27,
+				r: `0x${'a'.repeat(64)}`,
+				s: `0x${'b'.repeat(64)}`
+			} as unknown as Signature);
+			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
+
+			await createPermit({
+				token: mockValidErc20Token,
+				userAddress: mockUserAddress,
+				spender: mockSpenderAddress,
+				value: mockValue,
+				identity: mockIdentity
+			});
+
+			expect(TypedDataEncoder.hashDomain).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: mockOnChainName,
+					version: '2',
+					chainId: mockChainId,
+					verifyingContract: mockValidErc20Token.address
+				})
+			);
+		});
+
+		it('should throw without signing when the domain does not reproduce the DOMAIN_SEPARATOR', async () => {
+			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
+
+			mockContract.prototype.nonces = mockNonces as unknown as typeof mockContract.prototype.nonces;
+			mockContract.prototype.version =
+				mockVersionFn as unknown as typeof mockContract.prototype.version;
+
+			vi.mocked(TypedDataEncoder.hashDomain).mockReturnValue(`0x${'cd'.repeat(32)}`);
+
+			await expect(
+				createPermit({
+					token: mockValidErc20Token,
+					userAddress: mockUserAddress,
+					spender: mockSpenderAddress,
+					value: mockValue,
+					identity: mockIdentity
+				})
+			).rejects.toThrow(
+				`The EIP-2612 domain of token ${mockValidErc20Token.symbol} (${mockValidErc20Token.address}) does not match its on-chain DOMAIN_SEPARATOR; the token cannot be used with a permit.`
+			);
+
+			expect(signerApi.signPrehash).not.toHaveBeenCalled();
 		});
 
 		it('should create correct values structure', async () => {

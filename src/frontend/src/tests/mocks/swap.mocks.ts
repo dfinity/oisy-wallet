@@ -1,9 +1,14 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
-import { SwapProvider, VeloraSwapTypes, type SwapMappedResult } from '$lib/types/swap';
+import {
+	SwapProvider,
+	VeloraSwapTypes,
+	type ChainFusionSwapDetails,
+	type SwapMappedResult
+} from '$lib/types/swap';
 import { mockNearIntentsQuoteResponse } from '$tests/mocks/near-intents.mock';
-import { mockVeloraSwapDetails } from '$tests/mocks/velora.mock';
+import { mockVeloraDeltaPrice, mockVeloraOptimalRate } from '$tests/mocks/velora.mock';
 
 export const mockSwapProviders: SwapMappedResult[] = [
 	{
@@ -35,7 +40,7 @@ export const mockVeloraMarketProvider: SwapMappedResult = {
 	provider: SwapProvider.VELORA,
 	receiveAmount: 900000000n,
 	receiveOutMinimum: 891000000n,
-	swapDetails: mockVeloraSwapDetails,
+	swapDetails: mockVeloraOptimalRate,
 	type: VeloraSwapTypes.MARKET
 };
 
@@ -43,7 +48,7 @@ export const mockVeloraDeltaProvider: SwapMappedResult = {
 	provider: SwapProvider.VELORA,
 	receiveAmount: 900000000n,
 	receiveOutMinimum: 891000000n,
-	swapDetails: mockVeloraSwapDetails,
+	swapDetails: mockVeloraDeltaPrice,
 	type: VeloraSwapTypes.DELTA
 };
 
@@ -60,3 +65,12 @@ export const mockOneSecProvider: SwapMappedResult = {
 	swapDetails: { transferFeeInUnits: 1000n, protocolFeeInPercent: 0.1 },
 	type: undefined
 };
+
+export const mockChainFusionProvider = (
+	swapDetails: ChainFusionSwapDetails = { sourceFees: [], externalFees: [] }
+): SwapMappedResult => ({
+	provider: SwapProvider.CHAIN_FUSION,
+	receiveAmount: 870000000n,
+	swapDetails,
+	type: undefined
+});

@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Hra",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Sběratelské předměty",
 			"rwa": "RWA",
 			"social": "Sociální",
 			"staking": "Staking",
@@ -943,8 +943,8 @@
 		"text": {
 			"send": "Odeslat",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Cíl",
-			"source": "Zdroj",
 			"balance": "Zůstatek",
 			"review": "Zkontrolovat",
 			"signing_approval": "Podepisování schválení...",
@@ -976,16 +976,16 @@
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
-			"no_nfts_found": "Nebyly nalezeny žádné NFT",
-			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své NFT.",
-			"select_nft": "Vyberte NFT"
+			"no_nfts_found": "Nebyly nalezeny žádné sběratelské předměty",
+			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své sběratelské předměty.",
+			"select_nft": "Vyberte sběratelský předmět"
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
 			"select_network": "Vybrat síť",
-			"search_nfts": "Hledat NFT"
+			"search_nfts": "Hledat sběratelské předměty"
 		},
 		"info": {
 			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
@@ -1030,7 +1030,7 @@
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
 			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
-			"no_nft_selected": "Pro odeslání nebyl vybrán žádný NFT."
+			"no_nft_selected": "Pro odeslání nebyl vybrán žádný sběratelský předmět."
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce došlo k chybě.",
@@ -1203,6 +1203,7 @@
 			"swapping": "Výměna...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Aktualizace uživatelského rozhraní",
 			"swap_provider": "Poskytovatel výměny",
 			"swap_provider_website": "Webové stránky",
@@ -1227,6 +1228,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Cenu alespoň jednoho z tokenů se nepodařilo získat. <strong>Nezávisle ověřte</strong>, zda tato nabídka swapu představuje férovou výměnu.<br>Upozorňujeme, že nastavení slippage vás <strong>nechrání</strong> před nabídkou s podstatně nižší přijatou hodnotou!"
 		},
@@ -1249,7 +1251,8 @@
 			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1352,7 +1355,7 @@
 		"import": {
 			"text": {
 				"title": "Importovat token",
-				"title_nft": "Import kolekce NFT",
+				"title_nft": "Import kolekce",
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
@@ -1391,12 +1394,12 @@
 		"manage": {
 			"text": {
 				"title": "Spravovat tokeny",
-				"title_nft": "Správa NFT kolekcí",
+				"title_nft": "Správa kolekcí",
 				"manage_list": "Spravovat tokeny",
-				"manage_list_nft": "Spravovat NFT",
+				"manage_list_nft": "Spravovat sběratelské předměty",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
-				"import_nft": "Importovat kolekci NFT",
+				"import_nft": "Importovat kolekci",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
 				"enable_more_assets": "Povolit další tokeny"
@@ -1474,16 +1477,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Sběratelské předměty",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Your NFTs will appear here",
-			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
-			"title_not_supported": "NFT zatím nejsou na vybrané síti podporovány",
-			"description_not_supported": "Neposílejte NFT na tuto adresu",
-			"grouping": "Seskupování",
-			"as_plain_list": "Zobrazit jako prostý seznam",
-			"by_collection": "Seskupit podle kolekce",
+			"title_empty": "Vaše sběratelské předměty se zde zobrazí",
+			"description_empty": "Vypadá to, že jste ještě neobdrželi sběratelské předměty.",
+			"title_not_supported": "Sběratelské předměty zatím nejsou na vybrané síti podporovány",
+			"description_not_supported": "Neposílejte sběratelské předměty na tuto adresu",
 			"show_spam": "Zobrazit spam",
 			"show_hidden": "Zobrazit skryté",
 			"recents_first": "Od nejnovějších",
@@ -1496,21 +1496,23 @@
 			"quantity": "Množství",
 			"item_traits": "Vlastnosti položky",
 			"collection_not_loaded": "Kolekci nelze zobrazit, protože ještě nebyla načtena",
-			"nft_not_loaded": "NFT nelze zobrazit, protože ještě nebylo načteno",
+			"nft_not_loaded": "Sběratelský předmět nelze zobrazit, protože ještě nebyl načten",
 			"collections": "Kolekce",
-			"all_assets": "Všechna aktiva",
+			"check_new": "Zjistit nové",
+			"check_new_short": "Zjistit",
+			"ungrouped": "Neseskupené",
 			"address_copied": "Adresa $address zkopírována",
 			"collection_name_copied": "Název kolekce zkopírován",
 			"id_copied": "ID tokenu zkopírováno",
 			"spam": "Spam",
 			"not_spam": "Ne spam",
 			"spam_warning": "Přesunout „$collection“ do spamu?",
-			"spam_warning_text": "Tímto se všechny NFT v <b>$collection</b> přesunou do spamu. Budou skryté, ale kdykoli je můžete obnovit.",
+			"spam_warning_text": "Tímto se všechny sběratelské předměty v <b>$collection</b> přesunou do spamu. Budou skryté, ale kdykoli je můžete obnovit.",
 			"hide": "Skrýt",
 			"unhide": "Zobrazit",
 			"hidden": "Skryté",
 			"hide_warning": "Skrýt „$collection“?",
-			"hide_warning_text": "Tímto se <b>$collection</b> a všechny související NFT skryjí z hlavního přehledu, ale lze je později obnovit.",
+			"hide_warning_text": "Tímto se <b>$collection</b> a všechny související sběratelské předměty skryjí z hlavního přehledu, ale lze je později obnovit.",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
 			"img_consent_disabled": "Zakázali jste obrázky z této kolekce",
 			"img_consent_none": "Obrázek je z bezpečnostních důvodů zakázán.",
@@ -1537,13 +1539,14 @@
 			"media_stored_at_different_location": "Média jsou uložena na jiném místě. Pro přístup použijte tento odkaz po pečlivé kontrole:"
 		},
 		"alt": {
-			"placeholder_image": "Zatím žádné NFT",
+			"placeholder_image": "Zatím žádné sběratelské předměty",
 			"card": {
-				"image": "Obrázek NFT s ID tokenu: $tokenId"
+				"image": "Obrázek sběratelského předmětu s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
 			"review_preference": "Změnit předvolbu zobrazení",
-			"go_to_collection": "Otevřít stránku kolekce"
+			"go_to_collection": "Otevřít stránku kolekce",
+			"check_new": "Zkontrolovat nové sběratelské předměty"
 		}
 	},
 	"fee": {
@@ -1561,7 +1564,8 @@
 			"ata_fee": "Poplatek ATA",
 			"transaction_fees": "Poplatky za transakci",
 			"network_fee": "Síťový poplatek",
-			"approval_fee": "Poplatek za schválení"
+			"approval_fee": "Poplatek za schválení",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."
@@ -1608,10 +1612,32 @@
 			"amount": "Částka",
 			"hex_data": "HEX data",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
+			"unsigned_typed_data_keys": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1629,7 +1655,8 @@
 			"no_connected_apps": "Aktuálně nejsou připojeny žádné aplikace.",
 			"disconnect_all": "Odpojit vše",
 			"disconnect_app": "Odpojit $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "např. wc:a281567bb3e4..."
@@ -1672,9 +1699,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
 			"unknown_destination": "Neznámá cílová adresa.",
 			"ambiguous_transaction": "Tato transakce přesouvá prostředky mezi několika adresami a nelze ji přesně zobrazit ke kontrole. Z důvodu vaší bezpečnosti nebyla podepsána.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
 			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
 		}
@@ -1825,6 +1854,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1928,7 +1959,9 @@
 			"to_ata": "Účet tokenu příjemce (ATA)",
 			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
 			"block": "Blok",
-			"interacted_with": "Interakce s (do)",
+			"interacted_with": "Interakce s",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Stav",
 			"confirmations": "Potvrzení",
 			"for": "Pro",
@@ -2321,8 +2354,8 @@
 			"hidden_micro_transactions": "Transakce s velmi malými hodnotami tokenů jsou aktuálně skryty. Chcete-li je zobrazit, přejděte do <a href=\"/settings/\">Nastavení</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Zjistit více</a>"
 		},
 		"warning": {
-			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",
-			"unavailable_index_canister": "Transakce pro $token_list nelze zobrazit. Indexový kanystr je aktuálně nedostupný."
+			"no_index_canister": "$oisy_short nemůže načíst transakce pro $token_list – vydavatel tokenu neposkytuje sledování transakcí.",
+			"unavailable_index_canister": "Nejnovější transakce pro $token_list se teď nedají načíst, protože jejich sledovací služba neodpovídá. Načtou se automaticky, jakmile bude opět dostupná."
 		}
 	},
 	"earning": {

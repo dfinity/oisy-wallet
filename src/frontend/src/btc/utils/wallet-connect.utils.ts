@@ -1,14 +1,18 @@
 import { btcWalletConnectDerivationPath } from '$btc/constants/wallet-connect.constants';
 import type { OptionBtcAddress } from '$btc/types/address';
-import type { WalletConnectBtcAccountAddresses } from '$btc/types/wallet-connect';
+import type {
+	WalletConnectBtcAccountAddresses,
+	WalletConnectBtcPsbtInputPrevout,
+	WalletConnectBtcPsbtPrevout
+} from '$btc/types/wallet-connect';
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import type { NetworkId } from '$lib/types/network';
 import { secp256k1 } from '@dfinity/ic-pub-key/ecdsa';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 import { Signature } from '@noble/secp256k1';
-import { crypto as btcCrypto } from 'bitcoinjs-lib';
+import { crypto as btcCrypto, Transaction, type Psbt } from 'bitcoinjs-lib';
 
 const { DerivationPath, PublicKeyWithChainCode: Secp256k1PublicKeyWithChainCode } = secp256k1;
 
@@ -124,8 +128,8 @@ const compressedPublicKeysMatch = ({ a, b }: { a: Uint8Array; b: Uint8Array }): 
 	a.length === b.length && a.every((byte, index) => byte === b[index]);
 
 /**
- * Encode a 64-byte raw `r || s` ECDSA signature as the 65-byte recoverable, base64-encoded
- * signature expected by the standard Bitcoin `signMessage` response.
+ * Encode a 64-byte raw `r || s` ECDSA signature as the 65-byte recoverable, hex-encoded
+ * signature expected by Reown's Bitcoin `signMessage` response.
  *
  * The signer (`generic_sign_with_ecdsa`) returns only `r || s` with no recovery id, so we recover
  * it by trying every candidate id (0..3) and keeping the one whose recovered compressed public key
@@ -157,7 +161,7 @@ export const encodeRecoverableSignature = ({
 				const header = 27 + recId + 4;
 				const recoverable = Buffer.concat([Buffer.from([header]), Buffer.from(signature)]);
 
-				return recoverable.toString('base64');
+				return recoverable.toString('hex');
 			}
 		} catch (_: unknown) {
 			// Some recovery ids do not yield a valid point; ignore and try the next one.
@@ -165,4 +169,90 @@ export const encodeRecoverableSignature = ({
 	}
 
 	throw new Error('Could not recover the signature recovery id for the BTC public key.');
+};
+
+type PsbtInput = Psbt['data']['inputs'][number];
+
+const nonWitnessPrevout = ({
+	nonWitnessUtxo,
+	vout
+}: {
+	nonWitnessUtxo: Uint8Array;
+	vout: number;
+}): WalletConnectBtcPsbtPrevout | undefined => {
+	try {
+		const { outs } = Transaction.fromBuffer(Buffer.from(nonWitnessUtxo));
+
+		const out = outs[vout];
+
+		return nonNullish(out) ? { value: BigInt(out.value), script: out.script } : undefined;
+	} catch (_: unknown) {
+		// An unparsable previous transaction states no readable previous output.
+	}
+};
+
+const prevoutsMatch = ({
+	a,
+	b
+}: {
+	a: WalletConnectBtcPsbtPrevout;
+	b: WalletConnectBtcPsbtPrevout;
+}): boolean =>
+	a.value === b.value && Buffer.compare(Buffer.from(a.script), Buffer.from(b.script)) === 0;
+
+/**
+ * Resolve the previous output of a PSBT input as the signing path reads it.
+ *
+ * bitcoinjs-lib builds the sighash from `nonWitnessUtxo` whenever the input carries it and only
+ * falls back to `witnessUtxo` otherwise (`getHashForSig`), and the value and the script of that
+ * previous output are committed to by the signature. BIP-174 lets an input carry both fields and
+ * does not require them to agree, so a dApp could state one previous output in the field a review
+ * reads and another in the field the signer consumes, and have the user approve figures that are
+ * not the ones being signed.
+ *
+ * Therefore: when both fields are present they must describe the same previous output, and the
+ * resolved prevout is taken from `nonWitnessUtxo`, the field the signature actually commits to.
+ * A disagreement, or a `nonWitnessUtxo` that cannot be read, is reported as `ambiguous` with no
+ * prevout, so the caller refuses the request instead of picking one of two contradicting readings.
+ *
+ * An input carrying only `nonWitnessUtxo` resolves to no prevout: OISY signs P2WPKH inputs only and
+ * rejects such an input before signing, so the review leaves it unpriced rather than pricing a
+ * previous output no signature will commit to.
+ */
+export const resolvePsbtInputPrevout = ({
+	input,
+	vout
+}: {
+	input: PsbtInput;
+	vout: number;
+}): WalletConnectBtcPsbtInputPrevout => {
+	const { witnessUtxo, nonWitnessUtxo } = input;
+
+	if (isNullish(nonWitnessUtxo)) {
+		return {
+			prevout: nonNullish(witnessUtxo)
+				? { value: BigInt(witnessUtxo.value), script: witnessUtxo.script }
+				: undefined,
+			ambiguous: false
+		};
+	}
+
+	const signedPrevout = nonWitnessPrevout({ nonWitnessUtxo, vout });
+
+	if (isNullish(signedPrevout)) {
+		return { prevout: undefined, ambiguous: true };
+	}
+
+	if (isNullish(witnessUtxo)) {
+		return { prevout: undefined, ambiguous: false };
+	}
+
+	const declaredPrevout: WalletConnectBtcPsbtPrevout = {
+		value: BigInt(witnessUtxo.value),
+		script: witnessUtxo.script
+	};
+
+	return prevoutsMatch({ a: declaredPrevout, b: signedPrevout })
+		? { prevout: signedPrevout, ambiguous: false }
+		: { prevout: undefined, ambiguous: true };
 };
