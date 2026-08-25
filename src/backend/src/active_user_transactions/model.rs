@@ -544,6 +544,58 @@ mod tests {
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }
 
+    fn near_intents_btc_source_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::BtcNativeMainnet,
+            dest_token: TokenId::EvmNative(8453),
+            amount: Nat::from(amount),
+        })
+    }
+
+    fn near_intents_btc_dest_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::SolNativeMainnet,
+            dest_token: TokenId::BtcNativeMainnet,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn near_intents_btc_create_roundtrip() {
+        // The BTC-via-NEAR-Intents swap relies on the chain-agnostic variant
+        // accepting BTC token ids in either position with no extra validation;
+        // pin both directions so a validation change cannot break it silently.
+        for (id, data) in [
+            ("near-btc-src", near_intents_btc_source_data(250_000)),
+            ("near-btc-dst", near_intents_btc_dest_data(250_000)),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req(id);
+            req.data = data.clone();
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(listed[0].data, data);
+        }
+    }
+
+    #[test]
+    fn near_intents_btc_zero_amount_rejected() {
+        for data in [
+            near_intents_btc_source_data(0),
+            near_intents_btc_dest_data(0),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("near-btc-1");
+            req.data = data;
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
     fn velora_data(amount: u64, mode: VeloraSwapMode) -> ActiveUserTransactionData {
         ActiveUserTransactionData::Velora(VeloraData {
             mode,
