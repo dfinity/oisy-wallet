@@ -929,6 +929,14 @@
 				"solana_address_copied": "सोलाना पता क्लिपबोर्ड पर कॉपी किया गया",
 				"display_solana_address_qr": "सोलाना पते को क्यूआर कोड के रूप में प्रदर्शित करें"
 			}
+		},
+		"xrp": {
+			"text": {
+				"xrp_address": "",
+				"xrp_address_title": "",
+				"xrp_address_copied": "",
+				"display_xrp_address_qr": ""
+			}
 		}
 	},
 	"send": {
