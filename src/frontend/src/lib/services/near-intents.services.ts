@@ -34,10 +34,16 @@ export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
 };
 
+// Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive) and
+// Bitcoin (1Click may list btc assets with a contractAddress, and those identifiers
+// are not case-insensitive hex). Only the remaining chains may have their contract
+// addresses lowercased.
+const NON_EVM_BLOCKCHAINS = new Set(['sol', 'btc']);
+
 const EVM_BLOCKCHAINS = new Set(
 	Object.getOwnPropertySymbols(NEAR_INTENTS_BLOCKCHAIN_MAP)
 		.map((s) => NEAR_INTENTS_BLOCKCHAIN_MAP[s as NetworkId])
-		.filter((b) => b !== 'sol')
+		.filter((b) => !NON_EVM_BLOCKCHAINS.has(b))
 );
 
 /**
