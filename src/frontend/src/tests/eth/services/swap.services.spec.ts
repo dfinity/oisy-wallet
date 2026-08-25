@@ -106,7 +106,7 @@ describe('swap.services', () => {
 		it('should perform swap successfully', async () => {
 			const result = await swap(mockSwapParams);
 
-			expect(result).toEqual({ hash: mockTransactionHash });
+			expect(result).toEqual({ hash: mockTransactionHash, nonce: mockNonce });
 
 			expect(infuraProviders).toHaveBeenCalled();
 			expect(mockGetTransactionCount).toHaveBeenCalledOnce();

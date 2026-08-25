@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use candid::Principal;
-use ic_cdk::bitcoin_canister::Utxo;
+use ic_cdk_bitcoin_canister::{Txid, Utxo};
 use shared::types::bitcoin::StoredPendingTransaction;
 
 use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
@@ -168,9 +168,9 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
     /// - `true` if there is at least one overlapping UTXO.
     /// - `false` if no overlap is found.
     pub fn has_intersecting_pending_utxos(&self, principal: Principal, new_utxos: &[Utxo]) -> bool {
-        let new_keys: HashSet<(&[u8], u32)> = new_utxos
+        let new_keys: HashSet<(Txid, u32)> = new_utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         let stored_principal = StoredPrincipal(principal);
@@ -183,7 +183,7 @@ impl<'a> BtcUserPendingTransactionsModel<'a> {
             .values()
             .flat_map(|txs| txs.iter())
             .flat_map(|tx| tx.utxos.iter())
-            .any(|u| new_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)))
+            .any(|u| new_keys.contains(&(u.outpoint.txid, u.outpoint.vout)))
     }
 }
 
@@ -192,7 +192,7 @@ mod tests {
     use std::{cell::RefCell, collections::HashMap, sync::LazyLock};
 
     use candid::Principal;
-    use ic_cdk::bitcoin_canister::{Outpoint, Utxo};
+    use ic_cdk_bitcoin_canister::{OutPoint, Txid, Utxo};
     use ic_stable_structures::{
         memory_manager::{MemoryId, MemoryManager},
         DefaultMemoryImpl,
@@ -203,45 +203,45 @@ mod tests {
     use super::{BtcUserPendingTransactionsModel, HOUR_IN_NS};
     use crate::types::{BtcUserPendingTransactionsMap, Candid, StoredPrincipal};
 
-    const TXID_A: &[u8] = &[0xAA; 32];
-    const TXID_B: &[u8] = &[0xBB; 32];
-    const TXID_C: &[u8] = &[0xCC; 32];
+    const TXID_A: [u8; 32] = [0xAA; 32];
+    const TXID_B: [u8; 32] = [0xBB; 32];
+    const TXID_C: [u8; 32] = [0xCC; 32];
 
     static UTXO_1: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_A.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_A),
             vout: 0,
         },
         value: 1000,
         height: 100,
     });
     static UTXO_2: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_A.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_A),
             vout: 1,
         },
         value: 2000,
         height: 120,
     });
     static UTXO_3: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_B.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_B),
             vout: 2,
         },
         value: 3000,
         height: 150,
     });
     static UTXO_4: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_B.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_B),
             vout: 2,
         },
         value: 8000,
         height: 160,
     });
     static UTXO_5: LazyLock<Utxo> = LazyLock::new(|| Utxo {
-        outpoint: Outpoint {
-            txid: TXID_C.to_vec(),
+        outpoint: OutPoint {
+            txid: Txid::from(TXID_C),
             vout: 9,
         },
         value: 9000,
@@ -724,8 +724,8 @@ mod tests {
         let pending = StoredPendingTransaction {
             txid: vec![1],
             utxos: vec![Utxo {
-                outpoint: Outpoint {
-                    txid: TXID_A.to_vec(),
+                outpoint: OutPoint {
+                    txid: Txid::from(TXID_A),
                     vout: 7,
                 },
                 value: 1111,
@@ -740,8 +740,8 @@ mod tests {
 
         // New utxo has same vout=7 but different txid => must NOT intersect
         let candidate = Utxo {
-            outpoint: Outpoint {
-                txid: TXID_B.to_vec(),
+            outpoint: OutPoint {
+                txid: Txid::from(TXID_B),
                 vout: 7,
             },
             value: 2222,

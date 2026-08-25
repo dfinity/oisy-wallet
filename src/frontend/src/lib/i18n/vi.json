@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Trò chơi",
 			"lending": "Lending",
-			"nft": "NFT",
+			"nft": "Vật phẩm sưu tầm",
 			"rwa": "RWA",
 			"social": "Mạng xã hội",
 			"staking": "Staking",
@@ -943,8 +943,8 @@
 		"text": {
 			"send": "Gửi",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Tới",
-			"source": "Nguồn",
 			"balance": "Số dư",
 			"review": "Xem lại",
 			"signing_approval": "Đang ký chấp thuận...",
@@ -976,16 +976,16 @@
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
 			"send_review_subtitle": "Bạn gửi",
-			"no_nfts_found": "Không NFT nào được tìm thấy",
-			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm NFT",
-			"select_nft": "Chọn NFT"
+			"no_nfts_found": "Không vật phẩm sưu tầm nào được tìm thấy",
+			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm vật phẩm sưu tầm",
+			"select_nft": "Chọn vật phẩm sưu tầm"
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
 			"select_network": "Chọn mạng",
-			"search_nfts": "Tìm kiếm NFT"
+			"search_nfts": "Tìm kiếm vật phẩm sưu tầm"
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
@@ -1030,7 +1030,7 @@
 			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
 			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
 			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
-			"no_nft_selected": "Không NFT đã được chọn để gửi"
+			"no_nft_selected": "Không vật phẩm sưu tầm nào đã được chọn để gửi"
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi khi gửi giao dịch.",
@@ -1203,6 +1203,7 @@
 			"swapping": "Đang hoán đổi...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Đang làm mới giao diện người dùng",
 			"swap_provider": "Nhà cung cấp hoán đổi",
 			"swap_provider_website": "Trang web",
@@ -1227,6 +1228,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Không thể truy xuất giá của ít nhất một trong các token. Vui lòng <strong>xác minh độc lập</strong> rằng giao dịch swap này là một thỏa thuận công bằng.<br>Lưu ý rằng cài đặt trượt giá <strong>không</strong> bảo vệ bạn khỏi giao dịch với giá trị nhận thấp hơn nhiều!"
 		},
@@ -1249,7 +1251,8 @@
 			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1474,16 +1477,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "Vật phẩm sưu tầm",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
-			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
+			"title_empty": "Vật phẩm sưu tầm của bạn sẽ xuất hiện ở đây",
+			"description_empty": "Có vẻ như bạn chưa nhận được vật phẩm sưu tầm nào",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "Nhóm",
-			"as_plain_list": "Hiển thị dưới dạng danh sách đơn giản",
-			"by_collection": "Nhóm theo bộ sưu tập",
 			"show_spam": "Hiển thị spam",
 			"show_hidden": "Hiển thị ẩn",
 			"recents_first": "Gần đây trước",
@@ -1496,9 +1496,11 @@
 			"quantity": "Số lượng",
 			"item_traits": "Đặc điểm vật phẩm",
 			"collection_not_loaded": "Không thể hiển thị bộ sưu tập do chưa được tải",
-			"nft_not_loaded": "Không thể hiển thị NFT do chưa được tải",
+			"nft_not_loaded": "Không thể hiển thị vật phẩm sưu tầm do chưa được tải",
 			"collections": "Các bộ sưu tập",
-			"all_assets": "Tất cả tài sản",
+			"check_new": "Tìm mới",
+			"check_new_short": "Tìm",
+			"ungrouped": "Không nhóm",
 			"address_copied": "Đã sao chép địa chỉ $address",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1537,13 +1539,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Chưa có NFT nào",
+			"placeholder_image": "Chưa có vật phẩm sưu tầm nào",
 			"card": {
-				"image": "Hình ảnh NFT với ID token: $tokenId"
+				"image": "Hình ảnh vật phẩm sưu tầm với ID token: $tokenId"
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
 			"review_preference": "Thay đổi tùy chọn hiển thị",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "Kiểm tra vật phẩm sưu tầm mới"
 		}
 	},
 	"fee": {
@@ -1561,7 +1564,8 @@
 			"ata_fee": "Phí ATA",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
@@ -1608,10 +1612,32 @@
 			"amount": "",
 			"hex_data": "Dữ liệu HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "Yêu cầu này chứa một giá trị có kiểu không khớp với schema mà ứng dụng đã khai báo. Nội dung hiển thị có thể khác với nội dung thực sự sẽ được ký, vì vậy việc ký đã bị vô hiệu hóa.",
+			"unsigned_typed_data_keys": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1629,7 +1655,8 @@
 			"no_connected_apps": "Hiện không có ứng dụng nào được kết nối.",
 			"disconnect_all": "Ngắt kết nối tất cả",
 			"disconnect_app": "Ngắt kết nối $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "ví dụ: wc:a281567bb3e4..."
@@ -1672,9 +1699,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Địa chỉ gửi được yêu cầu cho giao dịch không phải là địa chỉ của ví này.",
 			"unknown_destination": "Địa chỉ đích không xác định.",
 			"ambiguous_transaction": "Giao dịch này chuyển tiền giữa nhiều địa chỉ và không thể hiển thị chính xác để xem xét. Vì sự an toàn của bạn, giao dịch này đã không được ký.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Lỗi không mong muốn: Yêu cầu không được xác định nên không thể xử lý.",
 			"unexpected_processing_request": "Lỗi không mong muốn trong khi xử lý yêu cầu với WalletConnect."
 		}
@@ -1825,6 +1854,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1928,7 +1959,9 @@
 			"to_ata": "Tài khoản token người nhận (ATA)",
 			"to_ata_copied": "Tài khoản token người nhận (ATA) đã được sao chép vào khay nhớ tạm.",
 			"block": "Khối",
-			"interacted_with": "Đã tương tác với (Đến)",
+			"interacted_with": "Đã tương tác với",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Trạng thái",
 			"confirmations": "Xác nhận",
 			"for": "",
@@ -2321,8 +2354,8 @@
 			"hidden_micro_transactions": "Các giao dịch có giá trị token rất nhỏ hiện đang bị ẩn. Để hiển thị chúng, hãy vào <a href=\"/settings/\">Cài đặt</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Tìm hiểu thêm</a>"
 		},
 		"warning": {
-			"no_index_canister": "Không thể hiển thị giao dịch cho $token_list. Không có canister index khả dụng.",
-			"unavailable_index_canister": "Không thể hiển thị giao dịch cho $token_list. Canister index hiện không khả dụng."
+			"no_index_canister": "$oisy_short không thể tải giao dịch của $token_list — đơn vị phát hành token không cung cấp tính năng theo dõi giao dịch.",
+			"unavailable_index_canister": "Hiện không thể tải các giao dịch mới nhất của $token_list, vì dịch vụ theo dõi của chúng không phản hồi. Chúng sẽ được tải tự động ngay khi dịch vụ hoạt động trở lại."
 		}
 	},
 	"earning": {

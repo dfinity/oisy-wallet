@@ -1,5 +1,10 @@
 import type { AccountInfo, ParsedAccount } from '$declarations/sol_rpc/sol_rpc.did';
-import type { Address, GetAccountInfoApi } from '@solana/kit';
+import type {
+	Address,
+	GetAccountInfoApi,
+	TransactionForFullMetaInnerInstructionsParsed,
+	TransactionForFullMetaInnerInstructionsUnparsed
+} from '@solana/kit';
 
 export type ParsedAccountInfo = Omit<AccountInfo, 'data'> & {
 	data: { json: Omit<ParsedAccount, 'parsed'> & { parsed: { info: object } } };
@@ -29,3 +34,21 @@ export type SolanaGetAccountInfoReturn = ReturnTypeWithArgs<
 	GetAccountInfoApi['getAccountInfo'],
 	[Address, { encoding: 'jsonParsed' }]
 >;
+
+// A single account as the RPC returns it under `jsonParsed`, `null` when the account does not
+// exist. `getMultipleAccounts` and `simulateTransaction`'s `accounts` both answer in this shape,
+// which is what lets the simulated preview diff a "before" list against an "after" one.
+export type SolanaParsedAccountInfo = SolanaGetAccountInfoReturn['value'];
+
+export type SolanaParsedAccountsInfo = readonly SolanaParsedAccountInfo[];
+
+// The cross-program invocations a simulated run would make, grouped by the index of the top-level
+// instruction that produced them. The RPC documents them as "`jsonParsed` where possible,
+// otherwise `json`", so it picks the arm per instruction and the union has to survive as far as
+// the mapper, which already contributes nothing for an instruction it was not given parsed.
+export type SolanaSimulatedInnerInstructions = (
+	TransactionForFullMetaInnerInstructionsParsed | TransactionForFullMetaInnerInstructionsUnparsed
+)['innerInstructions'];
+
+export type SolanaSimulatedInnerInstruction =
+	SolanaSimulatedInnerInstructions[number]['instructions'][number];

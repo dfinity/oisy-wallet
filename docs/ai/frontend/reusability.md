@@ -105,16 +105,23 @@ Add new feature folders only if your concern doesn't fit any of the above.
 
 ### Common utils
 
-| Util                                                        | Where                             | Purpose                           |
-| ----------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.       |
-| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.        |
-| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper. |
-| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.         |
-| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates.            |
-| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                 |
-| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                 |
-| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                    |
+| Util                                                        | Where                             | Purpose                                                           |
+| ----------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------- |
+| `format.utils`, `bigint.utils`, `array.utils`, `json.utils` | `$lib/utils/`                     | Generic formatting helpers.                                       |
+| `i18n.utils` (incl. `replacePlaceholders`)                  | `$lib/utils/`                     | i18n string interpolation.                                        |
+| `console.utils` (`consoleError`, `consoleWarn`)             | `$lib/utils/`                     | The only allowed console wrapper.                                 |
+| `error.utils`, `assert-amount.utils`, `validation` helpers  | `$lib/utils/`, `$lib/validation/` | Error & input validation.                                         |
+| `network.utils`, `networks.utils`                           | `$lib/utils/`                     | Network ID predicates, `findEvmNetworkByChainId`.                 |
+| `token-id.utils`                                            | `$lib/utils/`                     | Backend `TokenId` ↔ app token (`toBackendTokenId`, `tokenIdKey`). |
+| `nav.utils`, `before-navigate.utils`, `before-unload.utils` | `$lib/utils/`                     | Navigation hooks.                                                 |
+| `clipboard.utils`, `device.utils`, `events.utils`           | `$lib/utils/`                     | Browser plumbing.                                                 |
+| `derived-memo.utils`, `certified-store.utils`               | `$lib/utils/`                     | Store helpers.                                                    |
+
+### Chain-specific utils worth knowing
+
+| Util                         | Where         | Purpose                                                                                                                                                                                                        |
+| ---------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sol-transfer-parties.utils` | `$sol/utils/` | Transfer legs and the Sources / Destinations rules. One derivation for the WalletConnect review and the activity list; adapters onto both instruction mappers live here, do not re-derive parties per surface. |
 
 ### REST + workers
 
