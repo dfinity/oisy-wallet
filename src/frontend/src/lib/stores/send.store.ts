@@ -69,6 +69,10 @@ export const initSendContext = ({
 	// To persist the value between components, we need to put it in a context outside the WizardModal
 	const sendEthCustomNonce = writable<number | undefined>();
 
+	// Same rationale as `sendEthCustomNonce`: the XRP destination tag is entered in the send form
+	// but consumed at the send step, so it must survive the WizardModal step re-renders.
+	const sendXrpDestinationTag = writable<number | undefined>();
+
 	return {
 		sendToken,
 		sendTokenDecimals,
@@ -80,7 +84,8 @@ export const initSendContext = ({
 		sendBalance,
 		sendDestination,
 		isIcBurning,
-		sendEthCustomNonce
+		sendEthCustomNonce,
+		sendXrpDestinationTag
 	};
 };
 
@@ -96,6 +101,7 @@ export interface SendContext {
 	sendDestination: Writable<Address>;
 	isIcBurning: Readable<boolean>;
 	sendEthCustomNonce: Writable<number | undefined>;
+	sendXrpDestinationTag: Writable<number | undefined>;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

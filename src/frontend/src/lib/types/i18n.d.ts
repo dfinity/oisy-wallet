@@ -701,6 +701,7 @@ interface I18nSend {
 		network: string;
 		source_network: string;
 		destination_network: string;
+		xrp_destination_tag: string;
 		initializing_transaction: string;
 		convert_to_native_icp: string;
 		open_qr_modal: string;
@@ -723,6 +724,7 @@ interface I18nSend {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
+		xrp_destination_tag: string;
 		select_network: string;
 		search_nfts: string;
 	};
@@ -750,6 +752,7 @@ interface I18nSend {
 		destination_address_invalid: string;
 		amount_invalid: string;
 		insufficient_funds_verbose_btc: string;
+		insufficient_funds_for_reserve: string;
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
@@ -784,6 +787,8 @@ interface I18nSend {
 		incompatible_token: string;
 		no_btc_network_id: string;
 		no_solana_network_id: string;
+		no_xrp_network_id: string;
+		xrp_confirmation_failed: string;
 		no_pending_bitcoin_transaction: string;
 		unexpected_utxos_fee: string;
 		unable_to_retrieve_amount: string;
