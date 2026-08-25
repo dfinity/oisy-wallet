@@ -4,6 +4,7 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN_ID } from '$env/tokens/tokens.sol.env';
+import { XRP_TOKEN_ID } from '$env/tokens/tokens.xrp.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { icTransactionsStatusStore } from '$icp/stores/ic-transactions-status.store';
 import { icTransactionsWarningStore } from '$icp/stores/ic-transactions-warning.store';
@@ -28,6 +29,7 @@ import {
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
 import { mockUserProfile, mockUserSettings } from '$tests/mocks/user-profile.mock';
+import { xrpTransactionsStore } from '$xrp/stores/xrp-transactions.store';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -320,6 +322,7 @@ describe('AllTransactions', () => {
 		ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
 		icTransactionsStore.reset(ICP_TOKEN_ID);
 		solTransactionsStore.reset(SOLANA_TOKEN_ID);
+		xrpTransactionsStore.reset(XRP_TOKEN_ID);
 
 		const { getByText } = render(AllTransactions);
 
