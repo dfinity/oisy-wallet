@@ -770,6 +770,60 @@ describe('swap.services', () => {
 					})
 				);
 			});
+
+			// A missing destination-chain address must suppress the quote entirely: quoting
+			// anyway would let the request fall back to the source-chain address as the
+			// payout destination.
+			it('should not quote a Solana destination when the user Solana address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmDestToken,
+					destinationToken: solSourceToken,
+					amount: 100,
+					tokens: [evmDestToken, solSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should not quote an EVM destination when the user EVM address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: evmDestToken,
+					amount: 100,
+					tokens: [solSourceToken, evmDestToken],
+					slippage: 1,
+					userEthAddress: undefined,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should not quote a BTC destination when the user Bitcoin address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 100,
+					tokens: [solSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('with Bitcoin tokens', () => {
@@ -899,6 +953,23 @@ describe('swap.services', () => {
 				expect(mockSolGetQuote).not.toHaveBeenCalled();
 			});
 
+			it('should not quote a Solana destination when the user Solana address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidSplToken,
+					amount: 1,
+					tokens: [btcSourceToken, mockValidSplToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(result).toEqual([]);
+				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
 			// Regression: BTC → ckBTC, today's only live BTC-source pair, keeps the exact
 			// quote payload it had before the recipient threading.
 			it('should quote an ICP destination without a recipient address', async () => {
@@ -956,6 +1027,25 @@ describe('swap.services', () => {
 					})
 				);
 				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
+			// The user's BTC payout address is not available yet: quoting anyway would let
+			// the request fall back to the EVM source address as the BTC recipient.
+			it('should not quote a BTC destination when the user Bitcoin address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 1000,
+					tokens: [evmSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
 			});
 
 			// Regression: an EVM → EVM quote's recipient resolves to the user's own EVM

@@ -343,14 +343,21 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
+type SwapRecipientResolution =
+	// The destination network has no cross-chain payout address (e.g. ICP, where
+	// providers credit the user's principal); quotes proceed without a recipient.
+	| { type: 'not-required' }
+	// The user's destination-chain address is known and becomes the quote's recipient.
+	| { type: 'resolved'; recipientAddress: string }
+	// The destination needs a payout address the user does not have (yet). Such a pair
+	// must not be quoted at all: a cross-chain quote request falls back to the
+	// source-chain user address as recipient, which would pay out to a wrong-chain
+	// address.
+	| { type: 'missing' };
+
 /**
  * A cross-chain swap pays out on the destination chain, so the quote's recipient is the
  * user's address for the destination token's network, never the source-chain address.
- *
- * Networks without a cross-chain payout address (e.g. ICP, where providers credit the
- * user's principal) resolve to `undefined`; a cross-chain quote request then falls back
- * to the source-chain user address, which is only reachable for same-address-space pairs
- * (EVM to EVM).
  */
 const resolveSwapRecipientAddress = ({
 	destinationToken,
@@ -360,24 +367,32 @@ const resolveSwapRecipientAddress = ({
 }: Pick<
 	FetchSwapAmountsParams,
 	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress'
->): string | undefined => {
+>): SwapRecipientResolution => {
 	const {
 		network: { id: networkId }
 	} = destinationToken;
 
 	if (isNetworkIdSolana(networkId)) {
-		return userSolAddress ?? undefined;
+		return nonNullish(userSolAddress)
+			? { type: 'resolved', recipientAddress: userSolAddress }
+			: { type: 'missing' };
 	}
 
 	// Mainnet only: the address at hand is the user's mainnet address, and cross-chain
 	// providers do not serve BTC testnets.
 	if (isNetworkIdBTCMainnet(networkId)) {
-		return userBtcAddress ?? undefined;
+		return nonNullish(userBtcAddress)
+			? { type: 'resolved', recipientAddress: userBtcAddress }
+			: { type: 'missing' };
 	}
 
 	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
-		return userEthAddress ?? undefined;
+		return nonNullish(userEthAddress)
+			? { type: 'resolved', recipientAddress: userEthAddress }
+			: { type: 'missing' };
 	}
+
+	return { type: 'not-required' };
 };
 
 export const fetchSwapAmounts = async ({
@@ -419,12 +434,19 @@ export const fetchSwapAmounts = async ({
 		});
 	}
 
-	const recipientAddress = resolveSwapRecipientAddress({
+	const recipientResolution = resolveSwapRecipientAddress({
 		destinationToken,
 		userEthAddress,
 		userSolAddress,
 		userBtcAddress
 	});
+
+	if (recipientResolution.type === 'missing') {
+		return [];
+	}
+
+	const recipientAddress =
+		recipientResolution.type === 'resolved' ? recipientResolution.recipientAddress : undefined;
 
 	// Ahead of the EVM fall-through, which would otherwise cast a Bitcoin token to
 	// `Erc20Token` and hand it to providers that cannot quote it.
