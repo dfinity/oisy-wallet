@@ -1,5 +1,4 @@
 import {
-	SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES,
 	SESSION_REQUEST_BTC_SIGN_MESSAGE,
 	SESSION_REQUEST_BTC_SIGN_PSBT
 } from '$btc/constants/wallet-connect.constants';
@@ -9,16 +8,8 @@ import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { SESSION_REQUEST_SOL_SIGN_MESSAGE } from '$sol/constants/wallet-connect.constants';
 import type { WalletKitTypes } from '@reown/walletkit';
 
-const mockBtcWalletConnectEnabled = vi.hoisted(() => ({ value: true }));
-
-vi.mock('$env/btc-wallet-connect.env', () => ({
-	get BTC_WALLET_CONNECT_ENABLED() {
-		return mockBtcWalletConnectEnabled.value;
-	}
-}));
-
 describe('wallet-connect-handlers.services', () => {
-	describe('onSessionRequest BTC gating', () => {
+	describe('onSessionRequest BTC methods', () => {
 		const mockRejectRequest = vi.fn();
 		const listener = {
 			rejectRequest: mockRejectRequest
@@ -33,40 +24,20 @@ describe('wallet-connect-handlers.services', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
-			mockBtcWalletConnectEnabled.value = true;
 			modalStore.close();
 		});
 
-		it.each([
-			SESSION_REQUEST_BTC_SIGN_MESSAGE,
-			SESSION_REQUEST_BTC_SIGN_PSBT,
-			SESSION_REQUEST_BTC_GET_ACCOUNT_ADDRESSES
-		])(
-			'should reject %s without opening a modal when BTC WalletConnect is disabled',
+		it.each([SESSION_REQUEST_BTC_SIGN_MESSAGE, SESSION_REQUEST_BTC_SIGN_PSBT])(
+			'should open the sign modal for %s',
 			async (method) => {
-				mockBtcWalletConnectEnabled.value = false;
 				const openSign = vi.spyOn(modalStore, 'openWalletConnectSign');
 
 				await onSessionRequest({ listener, sessionRequest: sessionRequest(method) });
 
-				expect(mockRejectRequest).toHaveBeenCalledExactlyOnceWith(
-					expect.objectContaining({ id: 1, topic: 'mock-topic' })
-				);
-				expect(openSign).not.toHaveBeenCalled();
+				expect(openSign).toHaveBeenCalledOnce();
+				expect(mockRejectRequest).not.toHaveBeenCalled();
 			}
 		);
-
-		it('should open the sign modal for a BTC method when BTC WalletConnect is enabled', async () => {
-			const openSign = vi.spyOn(modalStore, 'openWalletConnectSign');
-
-			await onSessionRequest({
-				listener,
-				sessionRequest: sessionRequest(SESSION_REQUEST_BTC_SIGN_MESSAGE)
-			});
-
-			expect(openSign).toHaveBeenCalledOnce();
-			expect(mockRejectRequest).not.toHaveBeenCalled();
-		});
 	});
 
 	describe('onSessionRequest Solana signMessage', () => {
