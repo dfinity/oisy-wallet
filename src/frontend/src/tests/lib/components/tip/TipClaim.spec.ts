@@ -77,6 +77,20 @@ describe('TipClaim', () => {
 			expect(getByText(get(i18n).tip.text.claim_ready_description)).toBeInTheDocument();
 		});
 
+		it('never prints raw base units when the ledger will not say how to format them', async () => {
+			// 1 ICP is 100_000_000 base units. Printing the integer because the
+			// metadata lookup came back empty is not a degraded label, it is a wrong
+			// number eight orders of magnitude out — on the one line the whole page
+			// exists to deliver.
+			const { getByText, queryByText } = await renderPreview();
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.claim_ready_title_plain)).toBeInTheDocument()
+			);
+
+			expect(queryByText(/500000/)).not.toBeInTheDocument();
+		});
+
 		it('offers sign-in but never the message', async () => {
 			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
 
