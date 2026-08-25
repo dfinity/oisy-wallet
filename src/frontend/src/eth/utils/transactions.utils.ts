@@ -1,3 +1,4 @@
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import {
 	ERC20_APPROVE_HASH,
 	ERC20_DEPOSIT_ERC20_HASH,
@@ -31,6 +32,9 @@ export const isErc20TransactionApprove = (data: string | undefined): boolean =>
 
 export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
 	nonNullish(data) && data.startsWith(ERC20_TRANSFER_HASH);
+
+export const isErcTransactionSetApprovalForAll = (data: string | undefined): boolean =>
+	nonNullish(data) && data.startsWith(ERC_SET_APPROVAL_FOR_ALL_HASH);
 
 export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
 	nonNullish(data) &&
@@ -88,6 +92,20 @@ export const tryDecodeErc20AbiData = ({
 	} catch (_: unknown) {
 		return { to: undefined, value: undefined };
 	}
+};
+
+/**
+ * Decodes an ERC-721/ERC-1155 `setApprovalForAll` call.
+ *
+ * The grant has no amount: it hands the operator every token the caller holds in the collection, so
+ * the operator and whether the call grants or revokes are the whole of what is being authorized.
+ */
+export const decodeSetApprovalForAllData = (
+	data: string
+): { operator: EthAddress; approved: boolean } => {
+	const [operator, approved] = abiCoder.decode(['address', 'bool'], dataSlice(data, 4));
+
+	return { operator, approved };
 };
 
 /**
