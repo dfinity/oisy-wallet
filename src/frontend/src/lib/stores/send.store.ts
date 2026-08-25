@@ -1,6 +1,6 @@
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { balancesStore } from '$lib/stores/balances.store';
+import { spendableBalances } from '$lib/derived/spendable-balances.derived';
 import type { Address } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
@@ -47,8 +47,10 @@ export const initSendContext = ({
 		nonNullish($sendToken) ? $exchanges?.[$sendToken.id]?.usd : undefined
 	);
 
+	// `spendableBalances` rather than the raw store, so the send flow, the swap
+	// flow and both MAX controls all stop offering money a live tip has promised.
 	const sendBalance = derived(
-		[balancesStore, sendTokenId],
+		[spendableBalances, sendTokenId],
 		([$balanceStore, $sendTokenId]) => customSendBalance ?? $balanceStore?.[$sendTokenId]?.data
 	);
 
