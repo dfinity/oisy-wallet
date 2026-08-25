@@ -1,5 +1,5 @@
 import TipClaim from '$lib/components/tip/TipClaim.svelte';
-import { TIP_CLAIM_BUTTON, TIP_CLAIM_SIGN_IN_BUTTON } from '$lib/constants/test-ids.constants';
+import { LOGIN_BUTTON, TIP_CLAIM_BUTTON } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -52,9 +52,8 @@ describe('TipClaim', () => {
 	});
 
 	describe('signed out', () => {
-		it('offers sign-in and shows the amount but never the message', async () => {
+		const renderPreview = async () => {
 			setFragment(`#c=${claimCode}`);
-			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
 			vi.spyOn(tipServices, 'loadTipPreview').mockResolvedValue({
 				amount: 500_000n,
 				ledger_canister_id: (await import('@icp-sdk/core/principal')).Principal.fromText(
@@ -64,15 +63,29 @@ describe('TipClaim', () => {
 			});
 			mockAuthStore(null);
 
-			const { container, getByText } = render(TipClaim, { props: { tipId } });
+			return render(TipClaim, { props: { tipId } });
+		};
+
+		it('leads with what there is to claim, not with a sign-in prompt', async () => {
+			// The whole point of the landing page: someone who has never heard of
+			// OISY has to learn what they have been given before being asked to
+			// create anything.
+			const { getByText } = await renderPreview();
+
+			await waitFor(() => expect(getByText(/Tip is Ready/)).toBeInTheDocument());
+
+			expect(getByText(get(i18n).tip.text.claim_ready_description)).toBeInTheDocument();
+		});
+
+		it('offers sign-in but never the message', async () => {
+			const detailsSpy = vi.spyOn(tipServices, 'loadTipDetails');
+
+			const { container } = await renderPreview();
 
 			await waitFor(() =>
-				expect(getByText(get(i18n).tip.text.open_or_create_hint)).toBeInTheDocument()
+				expect(container.querySelector(`button[data-tid=${LOGIN_BUTTON}]`)).toBeInTheDocument()
 			);
 
-			expect(
-				container.querySelector(`button[data-tid=${TIP_CLAIM_SIGN_IN_BUTTON}]`)
-			).toBeInTheDocument();
 			// The message belongs to the authenticated review only: the anonymous
 			// preview must not fetch it, let alone show it.
 			expect(detailsSpy).not.toHaveBeenCalled();
@@ -107,6 +120,20 @@ describe('TipClaim', () => {
 
 			expect(getByText(`“${details.message[0]}”`)).toBeInTheDocument();
 			expect(container.querySelector(`button[data-tid=${TIP_CLAIM_BUTTON}]`)).toBeInTheDocument();
+		});
+
+		it('quotes no fee to the claimer, who pays none', async () => {
+			// The drawn design carries a "Network fee" row. The allowance covers the
+			// payout fee out of the sender's balance, so showing one here would be a
+			// lie about the recipient's side of the trade.
+			const { queryByText } = await renderReview();
+
+			await waitFor(() =>
+				expect(queryByText(get(i18n).tip.text.claimer_disclosure)).toBeInTheDocument()
+			);
+
+			expect(queryByText(get(i18n).tip.text.total_estimated_fee)).not.toBeInTheDocument();
+			expect(queryByText(get(i18n).tip.text.payout_fee)).not.toBeInTheDocument();
 		});
 
 		it('tells the claimer plainly when the reservation is gone', async () => {

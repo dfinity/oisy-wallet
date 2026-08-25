@@ -2781,6 +2781,14 @@
 			"claim_title": "Claim tip",
 			"claim_amount": "You are claiming",
 			"claim_expires": "Claimable until $date",
+			"claim_ready_title": "Your $amount Tip is Ready!",
+			"claim_ready_description": "Now, let's create your free OISY Wallet to access and manage your funds.",
+			"claim_received": "You received a tip!",
+			"claim_to": "To",
+			"claim_to_value": "Your OISY wallet",
+			"claim_token": "Token",
+			"claim_status": "Status",
+			"claim_status_reserved": "Reserved",
 			"open_or_create": "Open or Create",
 			"open_or_create_hint": "You need an Internet Identity to receive this tip. Creating one takes seconds — no seed phrase, no app to install.",
 			"claim_now": "Claim now",
@@ -2810,7 +2818,8 @@
 			"get_started": "Get Started"
 		},
 		"alt": {
-			"intro_illustration": "A tip QR code being scanned"
+			"intro_illustration": "A tip QR code being scanned",
+			"claim_illustration": "A stack of coins waiting to be claimed"
 		}
 	}
 }

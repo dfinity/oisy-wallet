@@ -2781,6 +2781,14 @@
 			"claim_title": "",
 			"claim_amount": "",
 			"claim_expires": "",
+			"claim_ready_title": "",
+			"claim_ready_description": "",
+			"claim_received": "",
+			"claim_to": "",
+			"claim_to_value": "",
+			"claim_token": "",
+			"claim_status": "",
+			"claim_status_reserved": "",
 			"open_or_create": "",
 			"open_or_create_hint": "",
 			"claim_now": "",
@@ -2810,7 +2818,8 @@
 			"get_started": ""
 		},
 		"alt": {
-			"intro_illustration": ""
+			"intro_illustration": "",
+			"claim_illustration": ""
 		}
 	}
 }
