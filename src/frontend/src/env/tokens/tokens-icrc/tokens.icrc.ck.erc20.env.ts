@@ -32,7 +32,7 @@ import {
 import { ckErc20Production, ckErc20Staging } from '$env/tokens/tokens.ckerc20.env';
 import type { EnvCkErc20Tokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
-import type { IcCkInterface, IcInterface } from '$icp/types/ic-token';
+import type { IcCkInterface } from '$icp/types/ic-token';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
@@ -261,7 +261,7 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
 	...CKERC20_LEDGER_CANISTER_TESTNET_IDS
 ];
 
-export const ICRC_CK_ERC20_TOKENS: IcInterface[] = [
+export const ICRC_CK_ERC20_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
 	...(nonNullish(CKLINK_STAGING_DATA) ? [CKLINK_STAGING_DATA] : []),

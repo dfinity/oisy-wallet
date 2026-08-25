@@ -14,9 +14,17 @@ import type {
 import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import {
+	AccountRole,
 	address,
+	appendTransactionMessageInstruction,
 	blockhash,
+	compileTransactionMessage,
+	createTransactionMessage,
+	getCompiledTransactionMessageEncoder,
 	lamports,
+	pipe,
+	setTransactionMessageFeePayer,
+	setTransactionMessageLifetimeUsingBlockhash,
 	signature,
 	stringifiedBigInt,
 	stringifiedNumber,
@@ -1262,6 +1270,44 @@ export const mockSolSignedTransaction: SolSignedTransaction = {
 		])
 	} as SignaturesMap
 } as unknown as SolSignedTransaction;
+
+/**
+ * A genuine compiled transaction message, i.e. the exact byte string a `solana_signTransaction`
+ * signature is taken over. Specs use it to submit a transaction through paths that are not the
+ * transaction flow.
+ */
+export const createMockSolCompiledTransactionMessageBytes = (version: 'legacy' | 0): Uint8Array => {
+	const feePayer = address(mockSolAddress);
+
+	const transactionMessage = pipe(
+		createTransactionMessage({ version }),
+		(tx) => setTransactionMessageFeePayer(feePayer, tx),
+		(tx) =>
+			setTransactionMessageLifetimeUsingBlockhash(
+				{
+					blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+					lastValidBlockHeight: 100n
+				},
+				tx
+			),
+		(tx) =>
+			appendTransactionMessageInstruction(
+				{
+					programAddress: address(SYSTEM_PROGRAM_ADDRESS),
+					accounts: [
+						{ address: feePayer, role: AccountRole.WRITABLE_SIGNER },
+						{ address: address(mockSolAddress2), role: AccountRole.WRITABLE }
+					],
+					data: Uint8Array.from([2, 0, 0, 0, 0, 202, 154, 59, 0, 0, 0, 0])
+				},
+				tx
+			)
+	);
+
+	return Uint8Array.from(
+		getCompiledTransactionMessageEncoder().encode(compileTransactionMessage(transactionMessage))
+	);
+};
 
 export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {
 	feePayer: {
