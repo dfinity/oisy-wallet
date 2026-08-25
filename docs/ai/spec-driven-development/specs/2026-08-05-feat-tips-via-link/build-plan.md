@@ -10,14 +10,27 @@ The spec stays the source of truth for **what** to build; this only records
 
 ## The stack
 
-| #   | Branch                         | Spec PR | Contains                                                                                                                                                                       | Status      |
-| --- | ------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| 1   | `feat/tips-1-backend`          | PR-1    | tip store, `create_tip` / `get_tip` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiter, pruning, candid + `npm run generate` | not started |
-| 2   | `feat/tips-2-service`          | PR-2    | `tip.api.ts` + `tip.services.ts`: approve → record with idempotent retry, link + QR construction, claim, cancel                                                                | not started |
-| 3   | `feat/tips-3-sender-ui`        | PR-3    | `Issue Tip` menu entry, intro modal, token picker + empty state, Issue Tip step, share screen, `tip.*` i18n                                                                    | not started |
-| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `/tip/<id>` landing, Tip Status modal, II hand-off across the fragment, claim review, success, **unavailable**                                                                 | not started |
-| 5   | `feat/tips-5-history`          | PR-5    | History with all five statuses, claimer principal on claimed rows, cancel action                                                                                               | not started |
-| 6   | `feat/tips-6-reserved-balance` | PR-2b   | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | not started |
+| #   | Branch                         | Spec PR | Head        | Contains                                                                                                                                                                      | Status |
+| --- | ------------------------------ | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1   | `feat/tips-1-backend`          | PR-1    | `34b6e076d` | tip store, `create_tip` / `get_tip` / `get_tip_details` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiters, pruning, candid | built  |
+| 2   | `feat/tips-2-service`          | PR-2    | `0c6f8f2e1` | `base64url.utils`, `tip.crypto`, `tip.services`, api + canister layer, pinned cross-language hash vectors                                                                      | built  |
+| 3   | `feat/tips-3-sender-ui`        | PR-3    | `c311f6c4c` | `Issue Tip` menu entry, intro, token picker + empty state, create step, expiry, share screen with QR, `tip.*` i18n, flag off                                                   | built  |
+| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `bc3997164` | `/tip/<id>` **standalone landing page**, claim review, success, **unavailable**, **uncovered**                                                                                 | built  |
+| 5   | `feat/tips-5-history`          | PR-5    | `16e88309a` | History with four stored statuses, claimer principal on claimed rows, cancel action                                                                                            | built  |
+| 6   | `feat/tips-6-reserved-balance` | PR-2b   | `d712296f6` | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | built  |
+| 7   | `feat/tips-7-enable`           | PR-6    | `2654f16aa` | flip `TIPS_ENABLED` to `true` — the release, on its own, after everything above lands                                                                                          | built  |
+
+24 commits over `main`, none pushed. `main` here is the merged spec
+([#13768](https://github.com/dfinity/oisy-wallet/pull/13768)).
+
+**Why the claim page is a standalone route.** It started under `(app)`, which
+looked right — the claim needs an authenticated agent. But `AuthGuard` swaps the
+whole route out for the marketing landing page whenever there is no identity,
+which is exactly the visitor a tip link arrives at, so the claim view never
+rendered for them at all. It is now a `+page@` that resets the layout hierarchy,
+the same shape as the shared-note recipient page. Component tests could not have
+caught this: they render the component directly, above the layout that was
+discarding it.
 
 **Why reserved-balance sits at the top, not at position 3 as the spec lists it.**
 It touches the most load-bearing derived state in the app, so it is the slowest
@@ -155,3 +168,24 @@ These do not block building, but they block landing. Longest lead time first.
 | Compliance sign-off on OISY holding a bounded, revocable authorisation over user funds for up to a week (open question 11) | branch 1         | —                                |
 | The `Uncovered` wording — it is information about the sender                                                               | branch 4         | whoever owns the privacy promise |
 | The five undrawn states, plus a light theme for every screen (the Figma page is dark-only)                                 | branches 3, 4, 5 | design                           |
+
+## Still to build
+
+Code, not sign-off. Neither blocks the stack from landing; both are worth their
+own branch on top.
+
+| What                                                                                                                                                                                              | Where it goes         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| **Analytics.** Nothing is instrumented. The spec's [Analytics section](../2026-08-05-feat-tips-via-link.md#analytics-plausible) names the funnel — open → token → created, and landing → sign-in → claimed. That second funnel is the number the feature exists to produce: cold-start conversion of a non-crypto recipient. Follow `personal-notes-analytics.services.ts`. | a branch of its own   |
+| **`Uncovered` in History.** Criterion 15 lists it as a sender-visible status; `tip-status.utils.ts` deliberately cannot show it, because it is the outcome of a claim attempt rather than a stored state, and History would have to query every tip's allowance on every read. Either accept the deviation and amend the spec, or pay for the query. | decision, then either |
+
+## Not yet verified
+
+Facts the stack asserts but nothing has measured. Each is a real risk, not a
+formality.
+
+| What                                                                                                                                                                       | How to close it                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **The fragment surviving Internet Identity on mobile Safari and in in-app webviews** (open question 8, second half). The entire link model rests on it. Desktop is fine — II opens in a popup, so the page never unmounts — but an in-app webview may not keep it. | a real phone, and a link opened from a DM      |
+| **A fresh identity seeing the received token without manual setup** (open question 6). The backend half is covered by `a_tip_pays_a_brand_new_principal_…`; the wallet-UI half is not. | claim on a never-before-used anchor, then look |
+| **Claim atomicity across a canister upgrade mid-flight** (open question 4). The design answers it — `Claiming` plus a five-minute in-flight timeout — but no test upgrades the canister while a claim is in the air. | a pocket-ic test that upgrades mid-claim       |
