@@ -2782,6 +2782,7 @@
 			"claim_amount": "",
 			"claim_expires": "",
 			"claim_ready_title": "",
+			"claim_ready_title_plain": "",
 			"claim_ready_description": "",
 			"claim_received": "",
 			"claim_to": "",

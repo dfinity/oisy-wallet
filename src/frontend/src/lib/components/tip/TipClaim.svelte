@@ -153,16 +153,17 @@
 
 	const toWallet = async () => await goto(AppPath.Tokens);
 
+	// Stays undefined until the ledger has told us how to render the number. The
+	// earlier fallback printed raw base units, so a slow or silent ledger turned
+	// "1 ICP" into "100000000" in the headline — a claim about money that is off
+	// by eight orders of magnitude. Saying nothing is the honest failure here; the
+	// claim itself never depended on this lookup.
 	let amountLabel = $derived.by(() => {
 		const value = details?.amount ?? preview?.amount;
 
-		if (isNullish(value)) {
-			return undefined;
-		}
-
-		return nonNullish(decimals) && nonNullish(symbol)
+		return nonNullish(value) && nonNullish(decimals) && nonNullish(symbol)
 			? `${formatToken({ value, unitName: decimals, displayDecimals: decimals })} ${symbol}`
-			: `${value}`;
+			: undefined;
 	});
 
 	let expiresAt = $derived.by(() => {
@@ -176,7 +177,9 @@
 		<TipClaimHero {logo} {symbol} />
 
 		<h1 class="mb-3 text-center text-xl">
-			{replacePlaceholders($i18n.tip.text.claim_ready_title, { $amount: amountLabel ?? '' })}
+			{nonNullish(amountLabel)
+				? replacePlaceholders($i18n.tip.text.claim_ready_title, { $amount: amountLabel })
+				: $i18n.tip.text.claim_ready_title_plain}
 		</h1>
 
 		<p class="mb-2 text-center text-tertiary">{$i18n.tip.text.claim_ready_description}</p>
@@ -201,7 +204,9 @@
 
 			<p class="mt-3 text-tertiary">{$i18n.tip.text.claim_received}</p>
 
-			<p class="text-3xl font-bold">{amountLabel}</p>
+			{#if nonNullish(amountLabel)}
+				<p class="text-3xl font-bold">{amountLabel}</p>
+			{/if}
 		</div>
 
 		{#if nonNullish(details.message[0])}

@@ -2312,6 +2312,7 @@ interface I18nTip {
 		claim_amount: string;
 		claim_expires: string;
 		claim_ready_title: string;
+		claim_ready_title_plain: string;
 		claim_ready_description: string;
 		claim_received: string;
 		claim_to: string;

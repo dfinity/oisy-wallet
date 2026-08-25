@@ -2782,6 +2782,7 @@
 			"claim_amount": "You are claiming",
 			"claim_expires": "Claimable until $date",
 			"claim_ready_title": "Your $amount Tip is Ready!",
+			"claim_ready_title_plain": "Your Tip is Ready!",
 			"claim_ready_description": "Now, let's create your free OISY Wallet to access and manage your funds.",
 			"claim_received": "You received a tip!",
 			"claim_to": "To",
