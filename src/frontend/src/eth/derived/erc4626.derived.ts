@@ -138,6 +138,13 @@ export const erc4626CustomTokensNotInitialized: Readable<boolean> = derived(
 	([$erc4626CustomTokensInitialized]) => !$erc4626CustomTokensInitialized
 );
 
+export const erc4626CustomTokensLoading: Readable<boolean> = derived(
+	[erc4626CustomTokensNotInitialized, enabledEthereumNetworksIds, enabledEvmNetworksIds],
+	([$erc4626CustomTokensNotInitialized, $enabledEthereumNetworksIds, $enabledEvmNetworksIds]) =>
+		$erc4626CustomTokensNotInitialized &&
+		$enabledEthereumNetworksIds.length + $enabledEvmNetworksIds.length > 0
+);
+
 export const erc4626AssetAddresses: Readable<Erc4626ContractAddressWithNetwork[]> = derived(
 	[erc4626Tokens],
 	([$erc4626Tokens]) =>

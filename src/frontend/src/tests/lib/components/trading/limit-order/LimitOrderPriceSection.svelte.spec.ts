@@ -1,6 +1,7 @@
 import LimitOrderPriceSection from '$lib/components/trading/limit-order/LimitOrderPriceSection.svelte';
 import type { LimitOrderPairView, LimitOrderSide, PricePreset } from '$lib/utils/oisy-trade.utils';
 import en from '$tests/mocks/i18n.mock';
+import type { Nullish } from '@dfinity/zod-schemas';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('LimitOrderPriceSection', () => {
@@ -113,22 +114,28 @@ describe('LimitOrderPriceSection', () => {
 		expect(parseFloat(props.price)).toBeGreaterThan(0);
 	});
 
-	it('borders the latched preset and no other', () => {
+	// The presets are `PillButton`s, so the latched one is marked by `aria-pressed`
+	// rather than a class of this component's own — assert the semantics, not the
+	// pill's styling.
+	const pressed = (element: HTMLElement): Nullish<string> =>
+		element.closest('button')?.getAttribute('aria-pressed');
+
+	it('marks the latched preset and no other', () => {
 		const { getByText } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, activePreset: 1 as PricePreset | null }
 		});
 
-		expect(getByText(en.trading.limit_order.preset_sell_1)).toHaveClass('border-brand-primary');
-		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
+		expect(pressed(getByText(en.trading.limit_order.preset_sell_1))).toBe('true');
+		expect(pressed(getByText(en.trading.limit_order.preset_market))).toBe('false');
 	});
 
-	it('borders no preset when none is latched', () => {
+	it('marks no preset when none is latched', () => {
 		const { getByText } = render(LimitOrderPriceSection, {
 			props: { ...baseProps, activePreset: null as PricePreset | null }
 		});
 
-		expect(getByText(en.trading.limit_order.preset_market)).not.toHaveClass('border-brand-primary');
-		expect(getByText(en.trading.limit_order.preset_sell_1)).not.toHaveClass('border-brand-primary');
+		expect(pressed(getByText(en.trading.limit_order.preset_market))).toBe('false');
+		expect(pressed(getByText(en.trading.limit_order.preset_sell_1))).toBe('false');
 	});
 
 	it('renders the value difference when price and current value are positive', () => {

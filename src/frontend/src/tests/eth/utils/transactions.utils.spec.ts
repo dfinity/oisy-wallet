@@ -1,15 +1,23 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
-import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { ErcTransfer } from '$eth/types/eth-transaction';
 import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
+	decodeErc20TransferRecipient,
+	findErcTransfer,
+	findErcTransfers,
+	formatErcTransferAsset,
+	groupEthTransactionsByNetworkAndHash,
+	isErc20TransactionTransfer,
 	isMaxUint256,
 	mapAddressToName,
-	mapEthTransactionUi
+	mapEthTransactionUi,
+	tryDecodeErc20AbiData
 } from '$eth/utils/transactions.utils';
 import { toCkMinterBuiltInContacts } from '$icp-eth/utils/ck-minter-contacts.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
@@ -17,12 +25,15 @@ import type { ContactUi } from '$lib/types/contact';
 import type { NetworkId } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction } from '$lib/types/transaction';
+import { formatToken } from '$lib/utils/format.utils';
+import { getTokenDisplayName, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import {
 	mockCkEthereumMinterAddress,
 	mockCkMinterInfo,
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
 
@@ -41,6 +52,11 @@ const transaction: Transaction = {
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
 
 const ethAddress: OptionEthAddress = '0xffff';
+
+// transfer(0x1234567890AbcdEF1234567890aBcdef12345678, 10000000)
+const transferRecipient = '0x1234567890AbcdEF1234567890aBcdef12345678';
+
+const transferData = `${ERC20_TRANSFER_HASH}0000000000000000000000001234567890abcdef1234567890abcdef123456780000000000000000000000000000000000000000000000000000000000989680`;
 
 describe('transactions.utils', () => {
 	describe('mapAddressToName', () => {
@@ -251,6 +267,18 @@ describe('transactions.utils', () => {
 			);
 		});
 
+		it('should map a transaction whose approve calldata does not decode', () => {
+			// Anyone can send a transaction to the wallet carrying a known selector and garbage.
+			const result = mapEthTransactionUi({
+				transaction: { ...transaction, data: `${ERC20_APPROVE_HASH}00` },
+				ckMinterInfoAddresses,
+				ethAddress
+			});
+
+			expect(result.type).toBe('approve');
+			expect(result.approveSpender).toBeUndefined();
+		});
+
 		it('should prioritize approve over other types when data starts with ERC20 approve hash', () => {
 			const approveData = `${ERC20_APPROVE_HASH}000000000000000000000000abcdef1234567890abcdef1234567890abcdef12ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff`;
 
@@ -261,6 +289,208 @@ describe('transactions.utils', () => {
 			});
 
 			expect(result.type).toBe('approve');
+		});
+
+		it('should map the decoded recipient of an ERC20 transfer', () => {
+			const result = mapEthTransactionUi({
+				transaction: { ...transaction, data: transferData },
+				ckMinterInfoAddresses,
+				ethAddress
+			});
+
+			expect(result.transferRecipient).toBe(transferRecipient);
+		});
+
+		it('should not map a recipient for a transaction that is not an ERC20 transfer', () => {
+			const result = mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				ethAddress
+			});
+
+			expect(result.transferRecipient).toBeUndefined();
+		});
+	});
+
+	describe('decodeErc20TransferRecipient', () => {
+		it('should decode the recipient of an ERC20 transfer', () => {
+			expect(decodeErc20TransferRecipient(transferData)).toBe(transferRecipient);
+		});
+
+		it('should return undefined for data that is not an ERC20 transfer', () => {
+			expect(decodeErc20TransferRecipient(`${ERC20_APPROVE_HASH}0000`)).toBeUndefined();
+
+			expect(decodeErc20TransferRecipient(undefined)).toBeUndefined();
+		});
+
+		it('should return undefined instead of throwing for truncated transfer data', () => {
+			expect(decodeErc20TransferRecipient(`${ERC20_TRANSFER_HASH}00`)).toBeUndefined();
+		});
+	});
+
+	describe('groupEthTransactionsByNetworkAndHash', () => {
+		const items = [
+			{ networkId: ETHEREUM_NETWORK_ID, hash: '0xaaa' },
+			{ networkId: ETHEREUM_NETWORK_ID, hash: '0xaaa' },
+			{ networkId: ETHEREUM_NETWORK_ID, hash: '0xbbb' },
+			{ networkId: SEPOLIA_NETWORK_ID, hash: '0xaaa' },
+			{ networkId: ETHEREUM_NETWORK_ID, hash: undefined }
+		];
+
+		const groups = groupEthTransactionsByNetworkAndHash({
+			items,
+			networkId: ({ networkId }) => networkId,
+			hash: ({ hash }) => hash
+		});
+
+		it('should group by network and hash', () => {
+			expect(groups.get(ETHEREUM_NETWORK_ID)?.get('0xaaa')).toStrictEqual([items[0], items[1]]);
+
+			expect(groups.get(ETHEREUM_NETWORK_ID)?.get('0xbbb')).toStrictEqual([items[2]]);
+		});
+
+		it('should not mix up the same hash on different networks', () => {
+			expect(groups.get(SEPOLIA_NETWORK_ID)?.get('0xaaa')).toStrictEqual([items[3]]);
+		});
+
+		it('should skip items without a hash', () => {
+			expect([...(groups.get(ETHEREUM_NETWORK_ID)?.values() ?? [])].flat()).not.toContain(items[4]);
+		});
+	});
+
+	describe('formatErcTransferAsset', () => {
+		it('should format the amount and symbol of a fungible transfer', () => {
+			expect(formatErcTransferAsset({ token: USDC_TOKEN, value: 10000000n })).toBe(
+				`${formatToken({
+					value: 10000000n,
+					displayDecimals: USDC_TOKEN.decimals,
+					unitName: USDC_TOKEN.decimals
+				})} ${getTokenDisplaySymbol(USDC_TOKEN)}`
+			);
+		});
+
+		it('should return undefined for a fungible transfer without a value', () => {
+			expect(formatErcTransferAsset({ token: USDC_TOKEN, value: undefined })).toBeUndefined();
+		});
+
+		it('should describe a non-fungible transfer by collection and token id', () => {
+			expect(formatErcTransferAsset({ token: mockValidErc721Token, value: 1n, tokenId: 123 })).toBe(
+				`${getTokenDisplayName(mockValidErc721Token)} #123`
+			);
+		});
+
+		it('should not format the value of a non-fungible transfer as an amount', () => {
+			expect(
+				formatErcTransferAsset({ token: mockValidErc721Token, value: 1n, tokenId: 123 })
+			).not.toContain(mockValidErc721Token.symbol);
+		});
+
+		it('should fall back to the collection alone without a token id', () => {
+			expect(formatErcTransferAsset({ token: mockValidErc721Token, value: 1n })).toBe(
+				getTokenDisplayName(mockValidErc721Token)
+			);
+		});
+	});
+
+	describe('findErcTransfer', () => {
+		const transfer: ErcTransfer = {
+			transaction: { ...transaction, hash: '0xaaa' },
+			token: USDC_TOKEN
+		};
+
+		const transfers = new Map([
+			[
+				ETHEREUM_NETWORK_ID,
+				new Map([
+					['0xaaa', [transfer]],
+					// A swap emits a transfer per leg under the same hash.
+					['0xbbb', [transfer, transfer]]
+				])
+			]
+		]);
+
+		it('should find the unique transfer of a hash', () => {
+			expect(
+				findErcTransfer({ hash: '0xaaa', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual(transfer);
+		});
+
+		it('should return undefined when several transfers share the hash', () => {
+			expect(
+				findErcTransfer({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toBeUndefined();
+		});
+
+		it('should return every transfer of a hash', () => {
+			expect(
+				findErcTransfers({ hash: '0xbbb', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([transfer, transfer]);
+
+			expect(
+				findErcTransfers({ hash: '0xaaa', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([transfer]);
+		});
+
+		it('should return no transfers for an unknown hash, network or nullish hash', () => {
+			expect(
+				findErcTransfers({ hash: '0xccc', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([]);
+
+			expect(
+				findErcTransfers({ hash: '0xaaa', networkId: SEPOLIA_NETWORK_ID, transfers })
+			).toStrictEqual([]);
+
+			expect(
+				findErcTransfers({ hash: undefined, networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toStrictEqual([]);
+		});
+
+		it('should return undefined for an unknown hash, network or nullish hash', () => {
+			expect(
+				findErcTransfer({ hash: '0xccc', networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toBeUndefined();
+
+			expect(
+				findErcTransfer({ hash: '0xaaa', networkId: SEPOLIA_NETWORK_ID, transfers })
+			).toBeUndefined();
+
+			expect(
+				findErcTransfer({ hash: undefined, networkId: ETHEREUM_NETWORK_ID, transfers })
+			).toBeUndefined();
+		});
+	});
+
+	describe('isErc20TransactionTransfer', () => {
+		it('should return true for calldata starting with the transfer selector', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeTruthy();
+		});
+
+		it('should return false for calldata of another ERC20 method', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+		});
+
+		it('should return false for nullish calldata', () => {
+			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('tryDecodeErc20AbiData', () => {
+		const txData =
+			'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+
+		it('should decode well-formed calldata like decodeErc20AbiData', () => {
+			expect(tryDecodeErc20AbiData({ data: txData })).toStrictEqual(
+				decodeErc20AbiData({ data: txData })
+			);
+		});
+
+		it('should return undefined values instead of throwing on truncated calldata', () => {
+			expect(() => decodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toThrow();
+
+			expect(tryDecodeErc20AbiData({ data: `${ERC20_APPROVE_HASH}00` })).toStrictEqual({
+				to: undefined,
+				value: undefined
+			});
 		});
 	});
 

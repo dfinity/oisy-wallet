@@ -10,6 +10,9 @@
 		sendWithTransfer?: boolean;
 		swapWithWithdrawing?: boolean;
 		swapWithActiveTransaction?: boolean;
+		// Only meaningful together with `swapWithActiveTransaction`: whether the
+		// background phase is a bridge (1Sec) rather than a plain swap settlement.
+		swapWithBridging?: boolean;
 		failedSteps?: string[];
 	}
 
@@ -19,7 +22,8 @@
 		sendWithApproval = false,
 		sendWithTransfer = false,
 		swapWithWithdrawing = false,
-		swapWithActiveTransaction = false
+		swapWithActiveTransaction = false,
+		swapWithBridging = false
 	}: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
@@ -68,7 +72,9 @@
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: swapWithActiveTransaction
-				? $i18n.swap.text.starting_to_bridge
+				? swapWithBridging
+					? $i18n.swap.text.starting_to_bridge
+					: $i18n.swap.text.finishing_in_background
 				: $i18n.swap.text.refreshing_ui,
 			state: 'next'
 		}

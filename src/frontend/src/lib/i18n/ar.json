@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "لعبة",
 			"lending": "الإقراض",
-			"nft": "NFT",
+			"nft": "المقتنيات",
 			"rwa": "RWA",
 			"social": "اجتماعي",
 			"staking": "التخزين",
@@ -944,8 +944,8 @@
 		"text": {
 			"send": "إرسال",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "الوجهة",
-			"source": "المصدر",
 			"balance": "الرصيد",
 			"review": "مراجعة",
 			"signing_approval": "جاري توقيع المعاملة...",
@@ -1204,6 +1204,7 @@
 			"swapping": "جاري التبديل...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "جاري تحديث واجهة المستخدم",
 			"swap_provider": "مزود التبديل",
 			"swap_provider_website": "الموقع الإلكتروني",
@@ -1228,6 +1229,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "تعذر استرجاع سعر واحد على الأقل من الرموز. يرجى <strong>التحقق بشكل مستقل</strong> من أن عرض المبادلة هذا يقدم صفقة عادلة.<br>لاحظ أن إعداد الانزلاق السعري <strong>لا</strong> يحميك من عرض بقيمة استلام أقل بكثير!"
 		},
@@ -1250,7 +1252,8 @@
 			"swap_sucess_manually_withdraw_success": "",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1475,16 +1478,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFTs",
+			"title": "المقتنيات",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "ستظهر NFTs الخاصة بك هنا",
-			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_empty": "ستظهر مقتنياتك هنا",
+			"description_empty": "يبدو أنك لم تتلق بعد أي مقتنيات",
 			"title_not_supported": "",
 			"description_not_supported": "",
-			"grouping": "",
-			"as_plain_list": "",
-			"by_collection": "",
 			"show_spam": "",
 			"show_hidden": "",
 			"recents_first": "",
@@ -1499,7 +1499,9 @@
 			"collection_not_loaded": "",
 			"nft_not_loaded": "",
 			"collections": "",
-			"all_assets": "",
+			"check_new": "البحث عن جديد",
+			"check_new_short": "بحث",
+			"ungrouped": "غير مجمّع",
 			"address_copied": "",
 			"collection_name_copied": "",
 			"id_copied": "",
@@ -1538,13 +1540,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "لا توجد NFTs بعد",
+			"placeholder_image": "لا توجد مقتنيات بعد",
 			"card": {
-				"image": "صورة NFT مع معرف التوكن: $tokenId"
+				"image": "صورة المقتنى مع معرف التوكن: $tokenId"
 			},
 			"copy_address": "",
 			"review_preference": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"check_new": "التحقق من وجود مقتنيات جديدة"
 		}
 	},
 	"fee": {
@@ -1562,7 +1565,8 @@
 			"ata_fee": "رسوم ATA",
 			"transaction_fees": "",
 			"network_fee": "",
-			"approval_fee": ""
+			"approval_fee": "",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1609,10 +1613,32 @@
 			"amount": "",
 			"hex_data": "بيانات HEX",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "",
+			"unsigned_typed_data_keys": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1630,7 +1656,8 @@
 			"no_connected_apps": "لا توجد تطبيقات متصلة حاليًا.",
 			"disconnect_all": "قطع اتصال الكل",
 			"disconnect_app": "قطع الاتصال بـ $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "على سبيل المثال: wc:a281567bb3e4..."
@@ -1673,9 +1700,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "عنوان المرسل المطلوب للمعاملة ليس عنوان هذه المحفظة.",
 			"unknown_destination": "عنوان الوجهة غير معروف.",
 			"ambiguous_transaction": "تنقل هذه المعاملة الأموال بين عدة عناوين ولا يمكن عرضها بدقة للمراجعة. حفاظًا على أمانك، لم يتم توقيعها.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "خطأ غير متوقع: الطلب غير معرف وبالتالي لا يمكن معالجته.",
 			"unexpected_processing_request": "خطأ غير متوقع أثناء معالجة الطلب باستخدام WalletConnect."
 		}
@@ -1826,6 +1855,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1930,6 +1961,8 @@
 			"to_ata_copied": "تم نسخ حساب توكن المستلم (ATA) إلى الحافظة.",
 			"block": "الكتلة",
 			"interacted_with": "تم التفاعل مع (إلى)",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "الحالة",
 			"confirmations": "التأكيدات",
 			"for": "",

@@ -133,10 +133,31 @@ describe('harvest-autopilots.derived', () => {
 	});
 
 	describe('harvestAutopilotsMaxApy', () => {
-		it('should return "0" when there are no autopilots', () => {
-			mockErc4626TokensStore([]);
+		it('should return "0" when no vault APY was loaded', () => {
+			mockErc4626TokensStore([mockHarvestToken]);
 
 			expect(get(harvestAutopilotsMaxApy)).toBe('0');
+		});
+
+		it('should return the highest APY across the shipped vaults', () => {
+			mockErc4626TokensStore([mockHarvestToken]);
+
+			harvestVaultsStore.set([
+				{ id: 'vault-1', vaultAddress: mockHarvestAddress, estimatedApy: '5.5' },
+				{ id: 'vault-2', vaultAddress: mockDisabledHarvestToken.address, estimatedApy: '12.25' }
+			]);
+
+			expect(get(harvestAutopilotsMaxApy)).toBe('12.3');
+		});
+
+		it('should return the APY even when no autopilot network is enabled', () => {
+			mockErc4626TokensStore([]);
+
+			harvestVaultsStore.set([
+				{ id: 'vault-1', vaultAddress: mockHarvestAddress, estimatedApy: '5.5' }
+			]);
+
+			expect(get(harvestAutopilotsMaxApy)).toBe('5.5');
 		});
 	});
 

@@ -1,3 +1,4 @@
+import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
@@ -71,38 +72,50 @@ export const loadSwapSupportedTokens = async ({
 }: {
 	identity: Identity;
 }): Promise<void> => {
-	const [icpProviders, icpBridgeProvidersResolved, evmProviders, solProviders] = await Promise.all([
-		resolveProviderGroup({
-			providers: swapProviders,
-			sourceCategory: 'icp',
-			callFn: (fn) => fn({ identity })
-		}),
-		resolveProviderGroup({
-			providers: icpBridgeProviders,
-			sourceCategory: 'icp',
-			callFn: (fn) => fn()
-		}),
-		resolveProviderGroup({
-			providers: evmSwapProviders,
-			sourceCategory: 'evm',
-			callFn: (fn) => fn()
-		}),
-		resolveProviderGroup({
-			providers: solSwapProviders,
-			sourceCategory: 'sol',
-			callFn: (fn) => fn()
-		})
-	]);
+	const [icpProviders, icpBridgeProvidersResolved, evmProviders, solProviders, btcProviders] =
+		await Promise.all([
+			resolveProviderGroup({
+				providers: swapProviders,
+				sourceCategory: 'icp',
+				callFn: (fn) => fn({ identity })
+			}),
+			resolveProviderGroup({
+				providers: icpBridgeProviders,
+				sourceCategory: 'icp',
+				callFn: (fn) => fn()
+			}),
+			resolveProviderGroup({
+				providers: evmSwapProviders,
+				sourceCategory: 'evm',
+				callFn: (fn) => fn()
+			}),
+			resolveProviderGroup({
+				providers: solSwapProviders,
+				sourceCategory: 'sol',
+				callFn: (fn) => fn()
+			}),
+			resolveProviderGroup({
+				providers: btcSwapProviders,
+				sourceCategory: 'btc',
+				callFn: (fn) => fn()
+			})
+		]);
 
 	const icpResolutions = [...icpProviders, ...icpBridgeProvidersResolved];
 
 	const aggregated: SwapSupportedTokensData = {
 		icp: aggregateCategory(icpResolutions),
 		evm: aggregateCategory(evmProviders),
-		sol: aggregateCategory(solProviders)
+		sol: aggregateCategory(solProviders),
+		btc: aggregateCategory(btcProviders)
 	};
 
-	const providers: SwapProviderSupport[] = [...icpResolutions, ...evmProviders, ...solProviders];
+	const providers: SwapProviderSupport[] = [
+		...icpResolutions,
+		...evmProviders,
+		...solProviders,
+		...btcProviders
+	];
 
 	swapSupportedTokensStore.set({ aggregated, providers });
 };

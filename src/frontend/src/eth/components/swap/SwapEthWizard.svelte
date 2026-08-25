@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
+	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+	import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
@@ -16,9 +18,16 @@
 	} from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isTokenErcFungible } from '$eth/utils/erc-fungible.utils';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -36,8 +45,10 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { fetchChainFusionEvmSwap } from '$lib/services/chain-fusion-swap.services';
 	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
 	import {
+		enableSwapDestinationToken,
 		fetchNearIntentsEvmSwap,
 		fetchOneSecEvmToIcpSwap,
 		fetchVeloraDeltaSwap,
@@ -54,6 +65,7 @@
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -158,7 +170,8 @@
 			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
 			const isPermitSupported = await isErc20SupportsPermit({
 				contractAddress: $sourceToken.address,
-				userAddress: $ethAddress
+				userAddress: $ethAddress,
+				chainId: $sourceToken.network.chainId
 			});
 			setIsTokenPermitSupported({
 				address: $sourceToken.address,
@@ -187,6 +200,42 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
 	);
 
+	const isChainFusionProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	const ckMinterInfo = $derived($ckEthMinterInfoStore?.[ETHEREUM_TOKEN_ID]);
+
+	const ckHelperContractAddress = $derived(
+		nonNullish($sourceToken) && isTokenErcFungible($sourceToken)
+			? toCkErc20HelperContractAddress(ckMinterInfo)
+			: toCkEthHelperContractAddress(ckMinterInfo)
+	);
+
+	const ckDepositDestination = $derived(
+		isChainFusionProvider ? (ckHelperContractAddress ?? '') : ''
+	);
+
+	$effect(() => {
+		[ckDepositDestination];
+
+		untrack(() => evaluateFee());
+	});
+
+	const isOneSecProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
+	);
+
+	// Velora, OneSec, NEAR Intents and Chain Fusion all close the modal at initiation
+	// and settle in the background via the Active User Transactions store. Only the
+	// ICP-native providers still complete inside the modal.
+	const isActiveTransactionSwap = $derived(
+		isNearIntentsProvider ||
+			isOneSecProvider ||
+			isChainFusionProvider ||
+			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
+	);
+
 	const isApproveNeeded = $derived(
 		!isNearIntentsProvider &&
 			$swapAmountsStore?.selectedProvider?.type === VeloraSwapTypes.MARKET &&
@@ -195,7 +244,8 @@
 
 	const swapEmitsApprovalSteps = $derived(
 		!isNearIntentsProvider &&
-			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA &&
+			($swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA ||
+				isChainFusionProvider) &&
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
@@ -329,15 +379,15 @@
 					...baseParams,
 					destinationToken: $destinationToken as Erc20Token,
 					receiveAmount: selectedProvider.receiveAmount,
-					isGasless: $isSourceTokenPermitSupported ?? false,
-					destinationNetwork: $destinationToken.network,
-					swapDetails: selectedProvider.swapDetails
+					isGasless: $isSourceTokenPermitSupported ?? false
 				};
 
+				// `swapDetails` is spread inside each branch so that `type` narrows it to the quote
+				// shape of the matching mode.
 				if (selectedProvider.type === VeloraSwapTypes.DELTA) {
-					await fetchVeloraDeltaSwap(params);
+					await fetchVeloraDeltaSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				} else {
-					await fetchVeloraMarketSwap(params);
+					await fetchVeloraMarketSwap({ ...params, swapDetails: selectedProvider.swapDetails });
 				}
 			} else if (selectedProvider?.provider === SwapProvider.ONE_SEC) {
 				if (!isIcToken($destinationToken) || isNullish($ethAddress)) {
@@ -363,6 +413,70 @@
 					maxPriorityFeePerGas,
 					swapId: crypto.randomUUID()
 				});
+			} else if (selectedProvider?.provider === SwapProvider.CHAIN_FUSION) {
+				if (isNullish(ckHelperContractAddress)) {
+					toastsError({
+						msg: { text: $i18n.send.assertion.address_unknown }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				const { valid } = assertCkEthMinterInfoLoaded({
+					minterInfo: ckMinterInfo,
+					network: ICP_NETWORK
+				});
+
+				if (!valid) {
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				// Re-resolved through the same pair oracle the quote used, so the row the
+				// execution persists cannot disagree with the offer the user accepted about
+				// which twin this is.
+				const ckDestinationToken = asCkTwinOf({
+					ckToken: $destinationToken,
+					nativeToken: $sourceToken
+				});
+
+				if (isNullish(ckDestinationToken)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchChainFusionEvmSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: ckDestinationToken,
+					swapAmount,
+					userAddress: $ethAddress,
+					helperContractAddress: ckHelperContractAddress,
+					sourceNetwork: $sourceToken.network,
+					minterInfo: ckMinterInfo,
+					gas,
+					maxFeePerGas,
+					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
 			} else {
 				toastsError({
 					msg: { text: $i18n.swap.error.unexpected }
@@ -376,15 +490,13 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec swaps, the foreground completes once the user's funds have
-			// left their wallet; success/failure of the background phase is tracked
-			// separately via the AUT store. Other providers (Velora, Near) still
+			// For AUT-tracked swaps the foreground completes once the swap is
+			// committed — funds have left the wallet, or the order is live in the
+			// auction; success/failure of the background phase is tracked separately
+			// via the AUT store, so we fire `submitted` here. The ICP-native providers
 			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name:
-					$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
-						? TRACK_COUNT_SWAP_SUBMITTED
-						: TRACK_COUNT_SWAP_SUCCESS,
+				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -435,11 +547,13 @@
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
+		destination={ckDepositDestination}
 		{nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsSwap.SWAPPING}
 		sendToken={$sourceToken}
 		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network}
+		targetNetwork={isChainFusionProvider ? ICP_NETWORK : undefined}
 	>
 		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
@@ -481,10 +595,10 @@
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress
 					sendWithApproval={swapEmitsApprovalSteps}
-					sendWithTransfer={isTransferNeeded}
+					sendWithTransfer={isTransferNeeded || isChainFusionProvider}
 					{swapProgressStep}
-					swapWithActiveTransaction={$swapAmountsStore?.selectedProvider?.provider ===
-						SwapProvider.ONE_SEC}
+					swapWithActiveTransaction={isActiveTransactionSwap}
+					swapWithBridging={isOneSecProvider}
 				/>
 			{/if}
 		{/key}

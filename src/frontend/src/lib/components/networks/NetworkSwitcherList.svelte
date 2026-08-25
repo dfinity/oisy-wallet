@@ -4,7 +4,7 @@
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import {
 		enabledMainnetTokensUsdBalancesPerNetwork,
 		enabledMainnetTokensUsdStakeBalancesPerNetwork
@@ -59,20 +59,20 @@
 
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
-		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}>
+		<li class="logo-button-list-item" transition:slide={SLIDE_PARAMS}>
 			<MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} {showStakeBalance} />
 		</li>
 	{/each}
 </ul>
 
 {#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
-	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_PARAMS}
 		>{$i18n.networks.test_networks}</span
 	>
 
-	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
+	<ul class="flex list-none flex-col" transition:slide={SLIDE_PARAMS}>
 		{#each $networksTestnets as network (network.id)}
-			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
+			<li class="logo-button-list-item" transition:slide={SLIDE_PARAMS}
 				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}

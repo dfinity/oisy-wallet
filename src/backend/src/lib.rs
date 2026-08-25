@@ -1,11 +1,8 @@
 #![warn(clippy::wildcard_imports)]
 
 use candid::Principal;
-use ic_cdk::{
-    export_candid, init,
-    management_canister::{HttpRequestResult, TransformArgs},
-    post_upgrade,
-};
+use ic_cdk::{export_candid, init, post_upgrade};
+use ic_cdk_management_canister::{HttpRequestResult, TransformArgs};
 use serde_bytes::ByteBuf;
 use shared::{
     http::{HttpRequest, HttpResponse},
