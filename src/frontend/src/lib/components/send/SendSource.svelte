@@ -13,25 +13,28 @@
 		balance: OptionBalance;
 		source: string;
 		exchangeRate?: number;
+		showBalance?: boolean;
 	}
 
-	let { token, balance, source, exchangeRate }: Props = $props();
+	let { token, balance, source, exchangeRate, showBalance = true }: Props = $props();
 </script>
 
-<WalletConnectModalValue label={$i18n.send.text.balance} ref="balance">
-	{#if nonNullish(token)}
-		<ExchangeAmountDisplay
-			amount={balance ?? ZERO}
-			decimals={token.decimals}
-			{exchangeRate}
-			symbol={token.symbol}
-		/>
-	{:else}
-		&ZeroWidthSpace;
-	{/if}
-</WalletConnectModalValue>
+{#if showBalance}
+	<WalletConnectModalValue label={$i18n.send.text.balance} ref="balance">
+		{#if nonNullish(token)}
+			<ExchangeAmountDisplay
+				amount={balance ?? ZERO}
+				decimals={token.decimals}
+				{exchangeRate}
+				symbol={token.symbol}
+			/>
+		{:else}
+			&ZeroWidthSpace;
+		{/if}
+	</WalletConnectModalValue>
+{/if}
 
-<WalletConnectModalValue label={$i18n.send.text.source} ref="source">
+<WalletConnectModalValue label={$i18n.wallet_connect.text.signer} ref="signer">
 	<div class="flex flex-col gap-1">
 		{source}
 		<ContactOrToken identifier={source} />

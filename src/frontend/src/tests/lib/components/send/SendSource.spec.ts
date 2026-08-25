@@ -3,6 +3,7 @@ import SendSource from '$lib/components/send/SendSource.svelte';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
+import en from '$tests/mocks/i18n.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
@@ -13,7 +14,7 @@ describe('SendSource', () => {
 		source: mockEthAddress
 	};
 
-	const sourceSelector = 'div[id="source"]';
+	const signerSelector = 'div[id="signer"]';
 	const balanceSelector = 'div[id="balance"]';
 
 	const contact: ContactUi = {
@@ -37,33 +38,39 @@ describe('SendSource', () => {
 	it('should render all fields with values', () => {
 		const { container } = render(SendSource, { props });
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
+		const signer: HTMLDivElement | null = container.querySelector(signerSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
-		expect(source).toHaveTextContent(mockEthAddress);
+		expect(signer).toHaveTextContent(mockEthAddress);
 		expect(balance?.textContent).toContain('0.22');
 		expect(balance?.textContent).toContain('BTC');
+	});
+
+	it('should label the address field as signer', () => {
+		const { container } = render(SendSource, { props });
+
+		expect(container).toHaveTextContent(en.wallet_connect.text.signer);
 	});
 
 	it('should render all field but balance without value', () => {
 		const { container } = render(SendSource, { ...props, token: undefined });
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
+		const signer: HTMLDivElement | null = container.querySelector(signerSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
-		expect(source).toHaveTextContent(mockEthAddress);
+		expect(signer).toHaveTextContent(mockEthAddress);
 		expect(balance?.textContent).toBe('\u200B');
 	});
 
 	it('should render the contact if it is saved', () => {
 		const { container } = render(SendSource, { ...props, token: undefined });
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
+		const signer: HTMLDivElement | null = container.querySelector(signerSelector);
 
 		assertNonNullish(contact.addresses[0].label);
 
-		expect(source).toHaveTextContent(contact.name);
-		expect(source).toHaveTextContent(contact.addresses[0].label);
+		expect(signer).toHaveTextContent(contact.name);
+		expect(signer).toHaveTextContent(contact.addresses[0].label);
 	});
 
 	it('should not render the contact if it is not saved', () => {
@@ -71,11 +78,11 @@ describe('SendSource', () => {
 
 		const { container } = render(SendSource, { ...props, token: undefined });
 
-		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
+		const signer: HTMLDivElement | null = container.querySelector(signerSelector);
 
 		assertNonNullish(contact.addresses[0].label);
 
-		expect(source).not.toHaveTextContent(contact.name);
-		expect(source).not.toHaveTextContent(contact.addresses[0].label);
+		expect(signer).not.toHaveTextContent(contact.name);
+		expect(signer).not.toHaveTextContent(contact.addresses[0].label);
 	});
 });

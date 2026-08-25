@@ -4,6 +4,7 @@ use ic_cdk::{
     api::{is_controller, msg_caller, time},
     query, update,
 };
+use ic_cdk_bitcoin_canister::Txid;
 use shared::types::{
     bitcoin::{
         BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
@@ -90,10 +91,10 @@ pub async fn btc_add_pending_transaction(
             return Err(BtcAddPendingTransactionError::EmptyUtxos);
         }
 
-        let unique_keys: HashSet<(&[u8], u32)> = params
+        let unique_keys: HashSet<(Txid, u32)> = params
             .utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         if unique_keys.len() != params.utxos.len() {
@@ -112,15 +113,15 @@ pub async fn btc_add_pending_transaction(
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
 
-        let current_keys: HashSet<(&[u8], u32)> = current_utxos
+        let current_keys: HashSet<(Txid, u32)> = current_utxos
             .iter()
-            .map(|u| (u.outpoint.txid.as_slice(), u.outpoint.vout))
+            .map(|u| (u.outpoint.txid, u.outpoint.vout))
             .collect();
 
         let all_param_utxos_are_current = params
             .utxos
             .iter()
-            .all(|u| current_keys.contains(&(u.outpoint.txid.as_slice(), u.outpoint.vout)));
+            .all(|u| current_keys.contains(&(u.outpoint.txid, u.outpoint.vout)));
 
         if !all_param_utxos_are_current {
             return Err(BtcAddPendingTransactionError::InvalidUtxos);

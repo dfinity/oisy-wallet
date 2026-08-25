@@ -189,8 +189,8 @@ The root `Cargo.toml` enables strict lints (`pedantic`, `warnings = "deny"`,
   → use `ic_cdk::print` / `ic_cdk::println`. `std::assert_eq` in tests →
   `pretty_assertions::assert_eq`.
 - **Methods:** `dfn_core::api::print`,
-  `ic_cdk::api::management_canister::ecdsa::sign_with_ecdsa`,
-  `…::schnorr::sign_with_schnorr`.
+  `ic_cdk_management_canister::sign_with_ecdsa`,
+  `ic_cdk_management_canister::sign_with_schnorr`.
 
 ## Anti-patterns (reject these)
 
