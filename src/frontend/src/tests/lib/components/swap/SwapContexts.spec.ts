@@ -192,7 +192,8 @@ describe('SwapContexts', () => {
 				aggregated: {
 					icp: { coverage: 'all', supportedTokenIds: new Set([icpLedgerId]) },
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{
@@ -236,7 +237,8 @@ describe('SwapContexts', () => {
 						supportedTokenIds: new Set([mockValidIcToken.ledgerCanisterId, otherIcrcLedger])
 					},
 					evm: { coverage: 'none', supportedTokenIds: new Set() },
-					sol: { coverage: 'none', supportedTokenIds: new Set() }
+					sol: { coverage: 'none', supportedTokenIds: new Set() },
+					btc: { coverage: 'none', supportedTokenIds: new Set() }
 				},
 				providers: [
 					{

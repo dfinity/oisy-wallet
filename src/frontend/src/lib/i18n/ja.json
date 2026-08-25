@@ -1621,6 +1621,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
@@ -1646,7 +1647,8 @@
 			"no_connected_apps": "現在接続されているアプリはありません。",
 			"disconnect_all": "すべて切断",
 			"disconnect_app": "$name を切断",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "例: wc:a281567bb3e4..."

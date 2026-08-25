@@ -6,7 +6,9 @@ use candid::{encode_one, CandidType, Nat, Principal};
 use ic_cdk_bitcoin_canister::Network as BitcoinNetwork;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
-use pocket_ic::{CanisterSettings, PocketIc, PocketIcBuilder};
+use pocket_ic::{
+    CanisterSettings, CreateCanisterParams, CreateCanisterPlacement, PocketIc, PocketIcBuilder,
+};
 use shared::types::{
     backend_config::{Arg, InitArg},
     user_profile::{CreateUserProfileError, HasUserProfileResponse, OisyUser, UserProfile},
@@ -68,14 +70,13 @@ struct BitcoinInitConfig {
 ///    .with_wasm("path/to/backend.wasm")
 ///    .with_arg(vec![1, 2, 3])
 ///    .with_controllers(vec![Principal::from_text("controller").unwrap()])
-///    .with_cycles(1_000_000_000_000)
 ///    .deploy();
 /// ```
 #[derive(Debug)]
 pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
     canister_id: Option<Principal>,
-    /// Cycles to add to the backend canister.
+    /// Cycles the backend canister is created with.
     cycles: u128,
     /// Path to the backend wasm file.
     wasm_path: String,
@@ -94,10 +95,17 @@ pub struct BackendBuilder {
 }
 // Defaults
 impl BackendBuilder {
-    /// The default number of cycles to add to the backend canister on deployment.
+    /// The number of cycles the backend canister is created with.
     ///
-    /// To override, please use `with_cycles()`.
-    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+    /// Sized to sit between two limits, both exercised by the cycles-ledger tests:
+    /// - High enough that after the housekeeping top-up donates half the balance to the cycles
+    ///   ledger, the rest still covers the canister's in-flight call reservations. With a 2T budget
+    ///   only ~30B cycles stay liquid once the timers have calls in flight, and the next
+    ///   inter-canister call is rejected with `InsufficientLiquidCycleBalance`.
+    /// - Low enough that half of it stays under the per-user signing allowance
+    ///   (`per_user_cycles_allowance`, ~2.9T), which caps how much the signer can pull from the
+    ///   topped-up patron account.
+    pub const DEFAULT_CYCLES: u128 = 4_000_000_000_000;
 
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
@@ -265,17 +273,22 @@ impl BackendBuilder {
                 .topology()
                 .get_fiduciary()
                 .expect("pic should have a fiduciary subnet.");
-            let canister_id = pic.create_canister_on_subnet(None, None, fiduciary_subnet_id);
+            // `PocketIC` endows a new canister with 100T cycles unless an explicit amount is
+            // given, so the balance has to be set at creation time: the cycles-ledger top-up sends
+            // a percentage of it, and an implicit endowment would swamp `self.cycles` and make
+            // those tests meaningless.
+            let canister_id = pic
+                .create_canister_with_params(
+                    None,
+                    CreateCanisterParams {
+                        cycles: Some(self.cycles),
+                        placement: Some(CreateCanisterPlacement::SubnetId(fiduciary_subnet_id)),
+                        ..Default::default()
+                    },
+                )
+                .expect("Test setup error: Failed to create the backend canister");
             self.canister_id = Some(canister_id);
             canister_id
-        }
-    }
-
-    /// Add cycles to the backend canister.
-    fn add_cycles(&mut self, pic: &PocketIc) {
-        if self.cycles > 0 {
-            let canister_id = self.canister_id(pic);
-            pic.add_cycles(canister_id, self.cycles);
         }
     }
 
@@ -346,7 +359,6 @@ impl BackendBuilder {
 
     pub fn deploy_backend(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
-        self.add_cycles(pic);
         self.install_backend(pic);
         self.set_controllers(pic);
         self.zero_freezing_threshold(pic);
@@ -367,6 +379,10 @@ impl BackendBuilder {
         let pic = PocketIcBuilder::new()
             .with_ii_subnet()
             .with_fiduciary_subnet()
+            // `PocketIC` serves the mainnet threshold keys (`key_1`) from its regular subnets and
+            // the test keys (`test_key_1`, the name the backend is initialised with here) only
+            // from a dedicated test-threshold-keys subnet.
+            .with_test_threshold_keys_subnet()
             .build();
         // Since the timestamp of the first block starts 4 years earlier, we must enable
         // auto-progress before deployment to avoid burning cycles for this entire duration.
@@ -428,6 +444,8 @@ fn setup_with_ii_internal(cycles_ledger_enabled: bool) -> (PicBackend, super::ii
         .with_nns_subnet()
         .with_ii_subnet()
         .with_fiduciary_subnet()
+        // See `BackendBuilder::deploy`: `test_key_1` lives on the test-threshold-keys subnet.
+        .with_test_threshold_keys_subnet()
         .build();
 
     let root_key = pic

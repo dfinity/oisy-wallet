@@ -4,6 +4,7 @@ import { BASE_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.base.en
 import { BSC_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.bsc.env';
 import { SUPPORTED_EVM_MAINNET_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.env';
 import { POLYGON_MAINNET_NETWORK_ID } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
@@ -110,6 +111,12 @@ export const ONESEC_EVM_NETWORK_IDS = [
 
 const CHAIN_FUSION_EVM_NETWORK_IDS = CHAIN_FUSION_SWAP_ENABLED ? [ETHEREUM_NETWORK_ID] : [];
 
+// Bitcoin reaches ICP, and only ICP: ck conversion is its single route into the swap
+// universe, and no DEX in the list quotes a BTC pair.
+const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
+	? [BTC_MAINNET_NETWORK_ID]
+	: [];
+
 const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	...new Set<NetworkId>([
 		...(ONESEC_SWAP_ENABLED ? ONESEC_EVM_NETWORK_IDS : []),
@@ -123,7 +130,12 @@ const withIcpIfPaired = (networkId: NetworkId): NetworkId[] =>
 		: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
-	[ICP_NETWORK_ID]: [ICP_NETWORK_ID, ...ICP_PAIRED_EVM_NETWORK_IDS],
+	[ICP_NETWORK_ID]: [
+		ICP_NETWORK_ID,
+		...ICP_PAIRED_EVM_NETWORK_IDS,
+		...CHAIN_FUSION_BTC_NETWORK_IDS
+	],
+	[BTC_MAINNET_NETWORK_ID]: CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : [],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
 	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),

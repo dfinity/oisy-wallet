@@ -5,6 +5,10 @@ on:
   merge_group:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: {}
 
 jobs:
@@ -120,7 +124,7 @@ jobs:
         # until deployment to production.  As it is, any PRs that change the backend candid
         # will still need to be announced as a breaking change, but that is probably acceptable,
         # and it makes it clear if the API is revised to no longer be breaking.
-        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: api-changes
         with:
           filters: |

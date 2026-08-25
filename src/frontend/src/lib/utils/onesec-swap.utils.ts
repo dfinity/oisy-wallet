@@ -19,7 +19,7 @@ import {
 	type OneSecExternalRefKey,
 	type OneSecStatus
 } from '$lib/types/onesec-swap';
-import { SwapProvider } from '$lib/types/swap';
+import { SwapProvider, type SwapCategorizedTokenIds } from '$lib/types/swap';
 import type { Token as AppToken } from '$lib/types/token';
 import { toBackendTokenId } from '$lib/utils/token-id.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -111,7 +111,7 @@ export const oneSecCompatibleDestinations = ({
 }: {
 	sourceToken: AppToken;
 	networkIds: NetworkId[];
-}): Partial<Record<'icp' | 'evm' | 'sol', Set<string>>> | undefined => {
+}): SwapCategorizedTokenIds | undefined => {
 	if (!ONESEC_SWAP_ENABLED) {
 		return;
 	}

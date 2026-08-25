@@ -1621,6 +1621,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Esta solicitud contiene un valor cuyo tipo no coincide con el esquema declarado por la aplicación. Lo que se muestra puede diferir de lo que realmente se firmaría, por lo que la firma está deshabilitada.",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Datos brutos de la transacción copiados al portapapeles.",
 			"sign_message": "Firmar Mensaje",
@@ -1646,7 +1647,8 @@
 			"no_connected_apps": "Actualmente no hay aplicaciones conectadas.",
 			"disconnect_all": "Desconectar todas",
 			"disconnect_app": "Desconectar $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "ej. wc:a281567bb3e4..."

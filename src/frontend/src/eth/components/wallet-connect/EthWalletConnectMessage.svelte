@@ -7,9 +7,11 @@
 	import type { WalletConnectEthTypedDataApproval } from '$eth/types/wallet-connect';
 	import {
 		getEthTypedDataApproval,
+		getSignedEthTypedData,
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8,
-		isEthSignTypedDataMethod
+		isEthSignTypedDataMethod,
+		toTypedDataDomainChainId
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -17,6 +19,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -44,6 +47,15 @@
 		}
 	});
 
+	// Only the members the schema declares are previewed: EIP-712 hashes those and nothing else, so
+	// a key the schema leaves out is not part of what the user would sign and is not shown as if it
+	// were. That the request carried such keys is stated instead.
+	let { typedData: signedJson, hasUnsignedKeys } = $derived(
+		nonNullish(json)
+			? getSignedEthTypedData(json)
+			: { typedData: undefined, hasUnsignedKeys: false }
+	);
+
 	let {
 		domain: { chainId }
 	} = $derived(json ?? { domain: { chainId: undefined } });
@@ -55,10 +67,14 @@
 		(nonNullish(json) ? getEthTypedDataApproval(json) : undefined) ?? {}
 	);
 
-	let { spender, token: address, amount, expiration } = $derived(approval);
+	let { spender, token: address, amount, unlimited, expiration } = $derived(approval);
+
+	// EIP-712 declares `chainId` as a `uint256`, so a number, a decimal string and a hex string are
+	// all the same chain and all hash alike. Comparing the text matched one form only.
+	let domainChainId = $derived(toTypedDataDomainChainId(chainId));
 
 	let token = $derived.by(() => {
-		if (isNullish(address) || isNullish(chainId)) {
+		if (isNullish(address) || isNullish(domainChainId)) {
 			return;
 		}
 
@@ -70,8 +86,29 @@
 					address1: tokenAddress,
 					address2: address,
 					networkId
-				}) && tokenChainId.toString() === chainId
+				}) && tokenChainId === domainChainId
 		);
+	});
+
+	// The allowance is stated whether or not the token is one OISY lists. An unlimited approval is
+	// the one that matters most and the one whose figure is least readable: 2^256-1 written out in
+	// digits is how an unlimited allowance passes for an ordinary number, so it is named instead.
+	let amountText = $derived.by(() => {
+		if (unlimited === true) {
+			return replacePlaceholders($i18n.core.text.unlimited, {
+				$items: token?.symbol ?? ''
+			}).trim();
+		}
+
+		if (isNullish(amount)) {
+			return;
+		}
+
+		return nonNullish(token)
+			? `${formatToken({ value: amount, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`
+			: // With no token there are no decimals to scale by, so the figure stays in the units the
+				// struct states it in and says so, rather than posing as a token amount.
+				`${amount} ${$i18n.wallet_connect.text.token_units}`;
 	});
 
 	let expirationDate = $derived(
@@ -84,6 +121,10 @@
 {#if invalidTypedData}
 	<MessageBox level="warning" testId="wallet-connect-invalid-typed-data-warning">
 		{$i18n.wallet_connect.text.invalid_typed_data}
+	</MessageBox>
+{:else if hasUnsignedKeys}
+	<MessageBox level="info" testId="wallet-connect-unsigned-typed-data-info">
+		{$i18n.wallet_connect.text.unsigned_typed_data_keys}
 	</MessageBox>
 {/if}
 
@@ -99,18 +140,16 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
 	<p class="mb-4 font-normal">{token.network.name}</p>
+{:else if nonNullish(address)}
+	<!-- A token OISY does not list is still the contract the allowance is over, so the address is
+	     shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+	<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
+{/if}
 
-	{#if nonNullish(amount)}
-		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
-		<p class="mb-4 font-normal"
-			>{formatToken({
-				value: amount,
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})}
-			{token.symbol}</p
-		>
-	{/if}
+{#if nonNullish(amountText)}
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
+	<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
 {/if}
 
 {#if nonNullish(spender)}
@@ -124,9 +163,9 @@
 {/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
-{#if nonNullish(json)}
+{#if nonNullish(signedJson)}
 	<div class="mt-4 rounded-xs bg-disabled p-4">
-		<Json _collapsed={true} {json} />
+		<Json _collapsed={true} json={signedJson} />
 	</div>
 {:else}
 	<p class="mb-4 font-normal">

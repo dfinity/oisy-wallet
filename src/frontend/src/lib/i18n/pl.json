@@ -1621,6 +1621,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "To żądanie zawiera wartość, której typ nie odpowiada schematowi zadeklarowanemu przez aplikację. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego podpisywanie jest wyłączone.",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość",
@@ -1646,7 +1647,8 @@
 			"no_connected_apps": "Obecnie żadne aplikacje nie są połączone.",
 			"disconnect_all": "Rozłącz wszystkie",
 			"disconnect_app": "Rozłącz $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "np. wc:a281567bb3e4..."

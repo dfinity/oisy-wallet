@@ -7,6 +7,10 @@ on:
       - 'src/frontend/src/lib/i18n/*'
       - 'src/frontend/src/lib/types/i18n.d.ts'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions: {}
 
 jobs:

@@ -1,15 +1,16 @@
+import { EIP155_CHAINS } from '$env/eip155-chains.env';
 import { SESSION_REQUEST_ETH_SIGN_TYPED_DATA_METHODS } from '$eth/constants/wallet-connect.constants';
 import type {
 	WalletConnectEthSignTypedDataV4,
 	WalletConnectEthTypedDataApproval
 } from '$eth/types/wallet-connect';
 import { isEthAddress } from '$eth/utils/account.utils';
-import { ZERO } from '$lib/constants/app.constants';
+import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import { consoleError } from '$lib/utils/console.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Verify } from '@walletconnect/types';
-import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+import { TypedDataEncoder, type TypedDataDomain, type TypedDataField } from 'ethers/hash';
 import { isHexString, toUtf8String } from 'ethers/utils';
 
 /**
@@ -53,17 +54,17 @@ export const getSignParamsMessageTypedDataV4 = (
 };
 
 /**
- * Thrown when an `eth_signTypedData_v4` request does not conform to its own
- * EIP-712 schema — either a value whose runtime JSON type does not match the
- * declared type, or a message key that the schema does not declare at all.
+ * Thrown when an `eth_signTypedData_v4` request declares a member whose value
+ * does not match the type declared for it.
  *
  * `ethers` does not type-check EIP-712 values before hashing and coerces
  * mismatched values instead of rejecting them — its `bool` encoder, for
  * instance, treats any truthy value (including a non-empty string) as `true`.
- * It also encodes only the declared members, silently ignoring any other key,
- * which lets a request carry data that the wallet may read but the digest never
- * covers. We reject such payloads so OISY only signs typed data that conforms
- * to its declared schema.
+ * We reject such payloads so OISY only signs typed data whose declared members
+ * hash to what they say.
+ *
+ * A key the schema does not declare is a different matter and is not an error:
+ * see {@link getSignedEthTypedData}.
  */
 export class WalletConnectEthTypedDataError extends Error {}
 
@@ -254,18 +255,9 @@ const assertValidTypedDataStruct = ({
 
 	const record = value as Record<string, unknown>;
 
-	// A key the struct does not declare is never encoded, so it cannot be part of
-	// the digest while still being readable by whatever renders the request.
-	// Reject instead of ignoring it, so no request can carry data that the user
-	// might be shown but would not sign.
-	const declared = new Set(fields.map(({ name }) => name));
-	const undeclared = Object.keys(record).find((key) => !declared.has(key));
-	if (nonNullish(undeclared)) {
-		throw new WalletConnectEthTypedDataError(
-			`EIP-712 message contains "${path}.${undeclared}", which type "${type}" does not declare and which would therefore not be signed.`
-		);
-	}
-
+	// Only the declared members are validated. A key the struct does not declare is not part of the
+	// digest, so it says nothing about whether the request conforms to its schema; it is dropped
+	// from what the user is shown instead. See {@link getSignedEthTypedData}.
 	fields.forEach(({ name, type: fieldType }) =>
 		assertValidTypedDataValue({
 			types,
@@ -293,10 +285,114 @@ export const assertValidEthTypedData = ({
 }): void =>
 	assertValidTypedDataStruct({ types, type: primaryType, value: message, path: primaryType });
 
+interface SignedTypedDataStruct {
+	value: Record<string, unknown>;
+	dropped: boolean;
+}
+
+const toSignedTypedDataValue = ({
+	types,
+	type,
+	value
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: unknown;
+}): { value: unknown; dropped: boolean } => {
+	const arrayMatch = type.match(ARRAY_TYPE_REGEX);
+	if (nonNullish(arrayMatch) && Array.isArray(value)) {
+		const [, baseType] = arrayMatch;
+
+		const items = value.map((item) =>
+			toSignedTypedDataValue({ types, type: baseType, value: item })
+		);
+
+		return {
+			value: items.map(({ value: item }) => item),
+			dropped: items.some(({ dropped }) => dropped)
+		};
+	}
+
+	if (type in types && nonNullish(value) && typeof value === 'object' && !Array.isArray(value)) {
+		return toSignedTypedDataStruct({ types, type, value: value as Record<string, unknown> });
+	}
+
+	return { value, dropped: false };
+};
+
+const toSignedTypedDataStruct = ({
+	types,
+	type,
+	value
+}: {
+	types: Record<string, Array<TypedDataField>>;
+	type: string;
+	value: Record<string, unknown>;
+}): SignedTypedDataStruct => {
+	const fields = types[type] ?? [];
+
+	const declared = new Set(fields.map(({ name }) => name));
+
+	return fields.reduce<SignedTypedDataStruct>(
+		(acc, { name, type: fieldType }) => {
+			if (!(name in value)) {
+				return acc;
+			}
+
+			const { value: signed, dropped } = toSignedTypedDataValue({
+				types,
+				type: fieldType,
+				value: value[name]
+			});
+
+			return { value: { ...acc.value, [name]: signed }, dropped: acc.dropped || dropped };
+		},
+		{ value: {}, dropped: Object.keys(value).some((key) => !declared.has(key)) }
+	);
+};
+
+/**
+ * The typed data an `eth_signTypedData_v4` request actually signs: every member its schema
+ * declares and nothing else, together with whether the request carried anything more.
+ *
+ * EIP-712 hashes the declared members only, so a key the schema does not declare is absent from
+ * the digest. `ethers`, like every reference `eth_signTypedData_v4` implementation, ignores such a
+ * key rather than rejecting it, and dApps rely on that: Hyperliquid, for one, carries routing
+ * fields (`type`, `signatureChainId`) alongside the signed members of every action it asks to be
+ * signed, so rejecting the payload locks the user out of the app over data no signature covers.
+ *
+ * Dropping those keys from the preview is what keeps the request honest instead: the user reads
+ * the digest and only the digest, while the request still signs exactly as any other wallet signs
+ * it.
+ */
+export const getSignedEthTypedData = (
+	typedData: WalletConnectEthSignTypedDataV4
+): { typedData: WalletConnectEthSignTypedDataV4; hasUnsignedKeys: boolean } => {
+	const { types, message } = typedData;
+	const { EIP712Domain: _EIP712Domain, ...rest } = types;
+
+	try {
+		const { value, dropped } = toSignedTypedDataStruct({
+			types: rest,
+			type: TypedDataEncoder.getPrimaryType(rest),
+			value: message
+		});
+
+		return { typedData: { ...typedData, message: value }, hasUnsignedKeys: dropped };
+	} catch (_err: unknown) {
+		// Typed data whose primary type cannot be resolved is rejected for signing anyway, so it is
+		// previewed as it came rather than as a projection of a schema that does not hold.
+		return { typedData, hasUnsignedKeys: false };
+	}
+};
+
 interface EthTypedDataApprovalSchema {
 	primaryType: string;
 	types: Record<string, Array<TypedDataField>>;
-	toApproval: (message: Record<string, unknown>) => WalletConnectEthTypedDataApproval;
+	toApproval: (params: {
+		message: Record<string, unknown>;
+		domain: TypedDataDomain;
+	}) => WalletConnectEthTypedDataApproval;
 }
 
 const toDeclaredAddress = (value: unknown): string | undefined =>
@@ -304,6 +400,45 @@ const toDeclaredAddress = (value: unknown): string | undefined =>
 
 const toDeclaredUint = (value: unknown): bigint | undefined =>
 	typeof value === 'string' || typeof value === 'number' ? BigInt(value) : undefined;
+
+/**
+ * The chain a typed-data domain states, as a number.
+ *
+ * EIP-712 declares `chainId` as a `uint256`, so a domain may state it as a number, as a decimal
+ * string, or as a hex one, and every form hashes to the same digest. Comparing them as text
+ * matched only the form OISY happens to write, dropping the token for the rest, and the amount
+ * hangs off the token.
+ *
+ * Returns `undefined` for anything that is not a chain. The value comes from the dApp, and
+ * `BigInt` throws on what it cannot read rather than reporting it, so a token is then left
+ * unresolved instead of resolved wrongly.
+ */
+export const toTypedDataDomainChainId = (value: unknown): bigint | undefined => {
+	if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'bigint') {
+		return;
+	}
+
+	try {
+		return BigInt(value);
+	} catch (_err: unknown) {
+		// Not a chain id at all.
+	}
+};
+
+/**
+ * A deadline as a number of seconds, when it is one a date can be built from.
+ *
+ * ERC-2612 permits routinely say "never expires" with a saturated `uint256`, and that is not a
+ * moment in time: turned into a `Number` it becomes a year with seventy digits. Such a deadline is
+ * left out rather than rendered, since a nonsense date reads as a real one.
+ */
+const toExpirationSeconds = (value: unknown): number | undefined => {
+	const seconds = toDeclaredUint(value);
+
+	return nonNullish(seconds) && seconds >= ZERO && seconds <= BigInt(Number.MAX_SAFE_INTEGER)
+		? Number(seconds)
+		: undefined;
+};
 
 const toDeclaredStruct = (value: unknown): Record<string, unknown> =>
 	nonNullish(value) && typeof value === 'object' && !Array.isArray(value)
@@ -335,16 +470,19 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'nonce', type: 'uint48' }
 			]
 		},
-		toApproval: ({ spender, details }) => {
+		// Permit2 names the token it is granting an allowance over, and the contract verifying the
+		// signature is Permit2 itself rather than that token, so the domain must not be read here.
+		toApproval: ({ message: { spender, details } }) => {
 			const { token, amount, expiration } = toDeclaredStruct(details);
 
-			const expirationSeconds = toDeclaredUint(expiration);
+			const declaredAmount = toDeclaredUint(amount);
 
 			return {
 				spender: toDeclaredAddress(spender),
 				token: toDeclaredAddress(token),
-				amount: toDeclaredUint(amount),
-				expiration: nonNullish(expirationSeconds) ? Number(expirationSeconds) : undefined
+				amount: declaredAmount,
+				unlimited: declaredAmount === MAX_UINT_160,
+				expiration: toExpirationSeconds(expiration)
 			};
 		}
 	},
@@ -360,7 +498,20 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'deadline', type: 'uint256' }
 			]
 		},
-		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+		// ERC-2612 names no token, because the permit is verified by the token contract itself. The
+		// domain is what the digest is separated by, so `verifyingContract` is covered by the
+		// signature exactly as the members of the message are.
+		toApproval: ({ message: { spender, value, deadline }, domain: { verifyingContract } }) => {
+			const declaredValue = toDeclaredUint(value);
+
+			return {
+				spender: toDeclaredAddress(spender),
+				token: toDeclaredAddress(verifyingContract),
+				amount: declaredValue,
+				unlimited: declaredValue === MAX_UINT_256,
+				expiration: toExpirationSeconds(deadline)
+			};
+		}
 	},
 	// DAI's non-standard `Permit`, whose approval is a bool rather than an amount.
 	{
@@ -374,7 +525,16 @@ const ETH_TYPED_DATA_APPROVAL_SCHEMAS: EthTypedDataApprovalSchema[] = [
 				{ name: 'allowed', type: 'bool' }
 			]
 		},
-		toApproval: ({ spender }) => ({ spender: toDeclaredAddress(spender) })
+		// DAI carries no amount: `allowed` sets the allowance to the largest a `uint256` holds, and
+		// clearing it revokes. The bool is the allowance, so it is read as one rather than left as
+		// a word in the folded message.
+		toApproval: ({ message: { spender, expiry, allowed }, domain: { verifyingContract } }) => ({
+			spender: toDeclaredAddress(spender),
+			token: toDeclaredAddress(verifyingContract),
+			amount: allowed === true ? undefined : ZERO,
+			unlimited: allowed === true,
+			expiration: toExpirationSeconds(expiry)
+		})
 	}
 ];
 
@@ -419,6 +579,7 @@ const matchesApprovalSchema = ({
  * cannot be steered by a key that the signature does not cover.
  */
 export const getEthTypedDataApproval = ({
+	domain,
 	types,
 	message
 }: WalletConnectEthSignTypedDataV4): WalletConnectEthTypedDataApproval | undefined => {
@@ -435,7 +596,7 @@ export const getEthTypedDataApproval = ({
 	try {
 		assertValidEthTypedData({ types: rest, primaryType: schema.primaryType, message });
 
-		return schema.toApproval(message);
+		return schema.toApproval({ message, domain });
 	} catch (_err: unknown) {
 		// A payload that does not conform to its own schema is not summarized: it
 		// is rejected for signing anyway, and any value read from it would be
@@ -443,7 +604,60 @@ export const getEthTypedDataApproval = ({
 	}
 };
 
-export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
+/**
+ * Asserts that the typed data being hashed belongs to the chain the session was granted for.
+ *
+ * The domain separator carries the chain, and OISY's Ethereum key carries none: one key signs for
+ * every EVM network. So without this the chain a dApp connected under constrains nothing. A session
+ * scoped to a testnet could ask for a domain on mainnet, and the digest it got back would be
+ * accepted there by a real token — an unlimited permit obtained through a session that was never
+ * granted mainnet at all.
+ *
+ * The envelope chain is required too. Treating an absent or unrecognised one as "nothing to check"
+ * would leave the check bypassable by simply omitting it.
+ *
+ * A domain that states no chain is rejected on the same grounds rather than waved through: such a
+ * signature is bound to no network, which makes it valid on all of them.
+ */
+const assertTypedDataChain = ({
+	domain,
+	sessionChainId
+}: {
+	domain: TypedDataDomain;
+	sessionChainId: string | undefined;
+}): void => {
+	const granted = nonNullish(sessionChainId)
+		? toTypedDataDomainChainId(EIP155_CHAINS[sessionChainId]?.chainId)
+		: undefined;
+
+	if (isNullish(granted)) {
+		throw new WalletConnectEthTypedDataError(
+			`The session states no chain OISY recognizes ("${sessionChainId ?? 'none'}"), so there is nothing the signed domain can be held to.`
+		);
+	}
+
+	const signed = toTypedDataDomainChainId(domain.chainId);
+
+	if (isNullish(signed)) {
+		throw new WalletConnectEthTypedDataError(
+			'The EIP-712 domain states no chain, which would make the signature valid on every one of them.'
+		);
+	}
+
+	if (signed !== granted) {
+		throw new WalletConnectEthTypedDataError(
+			`The EIP-712 domain is on chain ${signed}, which this session was not granted: it connected for chain ${granted}.`
+		);
+	}
+};
+
+export const getSignParamsMessageTypedDataV4Hash = ({
+	params,
+	sessionChainId
+}: {
+	params: string[];
+	sessionChainId: string | undefined;
+}): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
 	const { EIP712Domain: _, ...rest } = types;
 
@@ -454,6 +668,10 @@ export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string =>
 		primaryType: TypedDataEncoder.getPrimaryType(rest),
 		message
 	});
+
+	// Checked here rather than in the review, so that the gate and the signer cannot disagree:
+	// both reach the digest through this function, and neither can produce one without a chain.
+	assertTypedDataChain({ domain, sessionChainId });
 
 	return TypedDataEncoder.hash(domain, { ...rest }, message);
 };
@@ -478,17 +696,19 @@ export const isEthSignTypedDataMethod = (method: string): boolean =>
  */
 export const hasInvalidTypedData = ({
 	method,
-	params
+	params,
+	sessionChainId
 }: {
 	method: string;
 	params: string[];
+	sessionChainId: string | undefined;
 }): boolean => {
 	if (!isEthSignTypedDataMethod(method)) {
 		return false;
 	}
 
 	try {
-		getSignParamsMessageTypedDataV4Hash(params);
+		getSignParamsMessageTypedDataV4Hash({ params, sessionChainId });
 		return false;
 	} catch (_err: unknown) {
 		return true;

@@ -71,13 +71,13 @@
 		"governanceCanisterId": "4l7o7-uiaaa-aaaaq-aaa2q-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Mimic Clay",
-			"symbol": "CLAY",
+			"name": "GHOST",
+			"symbol": "GHOST",
 			"fee": {
 				"__bigint__": "100000000"
 			},
-			"alternativeName": "Mimic",
-			"url": "https://github.com/dragginzgame/mimic"
+			"alternativeName": "ICGhost",
+			"url": "https://yadjb-mqaaa-aaaan-qaqlq-cai.raw.ic0.app/"
 		}
 	},
 	{
@@ -374,13 +374,13 @@
 		"governanceCanisterId": "lyqgk-ziaaa-aaaaq-aadeq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Swampies",
-			"symbol": "SWAMP",
+			"name": "ICPCC DAO LLC",
+			"symbol": "CONF",
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "Swampies",
-			"url": "https://dragginz.io"
+			"alternativeName": "ICPCC DAO LLC",
+			"url": "https://osjzm-oaaaa-aaaal-ajcoq-cai.icp0.io/"
 		}
 	},
 	{

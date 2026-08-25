@@ -1,3 +1,4 @@
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
 import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
@@ -258,6 +259,7 @@ describe('SwapIcpForm', () => {
 		// still loading and disables Review for that reason instead.
 		const renderWithChainFusionQuote = ({
 			amountForSwap,
+			sourceToken = mockValidIcToken,
 			swapDetails = {
 				sourceFees: [
 					{
@@ -271,12 +273,25 @@ describe('SwapIcpForm', () => {
 			}
 		}: {
 			amountForSwap: number;
+			sourceToken?: typeof mockValidIcToken;
 			swapDetails?: ChainFusionSwapDetails;
 		}) => {
 			balancesStore.set({
-				id: mockValidIcToken.id,
+				id: sourceToken.id,
 				data: { data: 100_000_000_000n, certified: true }
 			});
+
+			mockContext.set(SWAP_CONTEXT_KEY, {
+				...initSwapContext({
+					sourceToken: sourceToken as IcTokenToggleable,
+					destinationToken: mockValidIcCkToken as IcTokenToggleable
+				}),
+				sourceTokenExchangeRate: readable(10),
+				destinationTokenExchangeRate: readable(2),
+				isSourceTokenIcrc2: readable(false)
+			});
+
+			icTokenFeeStore.setIcTokenFee({ tokenSymbol: sourceToken.symbol, fee: 1000n });
 
 			const provider = mockChainFusionProvider(swapDetails);
 
@@ -292,6 +307,14 @@ describe('SwapIcpForm', () => {
 				props: { ...props, swapAmount: undefined },
 				context: mockContext
 			});
+		};
+
+		// `mockValidIcToken` carries the mainnet ckBTC ledger id, so it exercises the ckBTC
+		// half of the per-minter copy. A ckETH withdrawal needs a ledger the ckBTC guard
+		// does not claim.
+		const ckEthSourceToken = {
+			...mockValidIcToken,
+			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
 		};
 
 		// The gas the minter burns comes out of the withdrawal, so an amount at or below it
@@ -339,6 +362,7 @@ describe('SwapIcpForm', () => {
 		it('disables review and explains while the minter info is not certified', async () => {
 			const { container, getByText } = renderWithChainFusionQuote({
 				amountForSwap: 2,
+				sourceToken: ckEthSourceToken,
 				swapDetails: {
 					sourceFees: [],
 					externalFees: [],
@@ -351,6 +375,25 @@ describe('SwapIcpForm', () => {
 			await waitFor(() => {
 				expect(getByText(en.swap.text.review_button).closest('button')).toBeDisabled();
 				expect(getByText(en.send.info.cketh_certified)).toBeInTheDocument();
+			});
+		});
+
+		// The two minters are separate configurations, so the message names the one the
+		// source token belongs to — exactly as `IcConvertForm` does.
+		it('names the ckBTC minter when the source is ckBTC', async () => {
+			const { container, getByText } = renderWithChainFusionQuote({
+				amountForSwap: 2,
+				swapDetails: {
+					sourceFees: [],
+					externalFees: [],
+					minterInfoCertified: false
+				}
+			});
+
+			await enterAmount({ container, value: '2' });
+
+			await waitFor(() => {
+				expect(getByText(en.send.info.ckbtc_certified)).toBeInTheDocument();
 			});
 		});
 

@@ -41,6 +41,7 @@ import { ICP_SWAP_POOL_FEE, SWAP_SIDE } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
 import { evmSwapProviders } from '$lib/providers/evm-swap.providers';
 import { icpBridgeProviders } from '$lib/providers/icp-bridge-swap.providers';
 import { solSwapProviders } from '$lib/providers/sol-swap.providers';
@@ -69,6 +70,7 @@ import type { Amount } from '$lib/types/send';
 import {
 	SwapErrorCodes,
 	SwapProvider,
+	type BtcQuoteParams,
 	type EvmQuoteParams,
 	type FetchSwapAmountsParams,
 	type ICPSwapResult,
@@ -96,7 +98,12 @@ import {
 	toNearIntentsDisplayRefs,
 	toNearIntentsExternalRefs
 } from '$lib/utils/near-intents-active-tx.utils';
-import { isNetworkIdICP, isNetworkIdSOLDevnet, isNetworkIdSolana } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBitcoin,
+	isNetworkIdICP,
+	isNetworkIdSOLDevnet,
+	isNetworkIdSolana
+} from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
 	calculateSlippage,
@@ -342,7 +349,8 @@ export const fetchSwapAmounts = async ({
 	slippage,
 	isSourceTokenIcrc2,
 	userEthAddress,
-	userSolAddress
+	userSolAddress,
+	userBtcAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
 		value: `${amount}`,
@@ -368,6 +376,22 @@ export const fetchSwapAmounts = async ({
 			tokens,
 			slippage,
 			isSourceTokenIcrc2
+		});
+	}
+
+	// Ahead of the EVM fall-through, which would otherwise cast a Bitcoin token to
+	// `Erc20Token` and hand it to providers that cannot quote it.
+	if (isNetworkIdBitcoin(sourceToken.network.id)) {
+		if (isNullish(userBtcAddress)) {
+			return [];
+		}
+
+		return await fetchSwapAmountsBTC({
+			sourceToken,
+			destinationToken,
+			amount: sourceAmount,
+			userBtcAddress,
+			slippage
 		});
 	}
 
@@ -409,7 +433,10 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'userSolAddress' | 'amount'> & {
+}: Omit<
+	FetchSwapAmountsParams,
+	'userEthAddress' | 'userSolAddress' | 'userBtcAddress' | 'amount'
+> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
@@ -1075,6 +1102,36 @@ export const fetchSwapAmountsEVM = async ({
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
 			getQuote({ sourceToken, destinationToken, amount, userAddress, slippage })
+		)
+	);
+
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
+// Fan-out for a Bitcoin source. Only Chain Fusion registers here, but the shape matches
+// its three siblings so a second `btc`-source provider needs no change.
+export const fetchSwapAmountsBTC = async ({
+	sourceToken,
+	destinationToken,
+	amount,
+	userBtcAddress,
+	slippage
+}: BtcQuoteParams): Promise<SwapMappedResult[]> => {
+	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
+
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({ sourceToken, destinationToken, amount, userBtcAddress, slippage })
 		)
 	);
 

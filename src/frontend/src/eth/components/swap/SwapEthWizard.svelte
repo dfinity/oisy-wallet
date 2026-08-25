@@ -65,6 +65,7 @@
 	import { SwapProvider, VeloraSwapTypes } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import type { WizardStep } from '$lib/types/wizard';
+	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -225,12 +226,13 @@
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
 
-	// Velora, OneSec and NEAR Intents all close the modal at initiation and settle
-	// in the background via the Active User Transactions store. Only the ICP-native
-	// providers still complete inside the modal.
+	// Velora, OneSec, NEAR Intents and Chain Fusion all close the modal at initiation
+	// and settle in the background via the Active User Transactions store. Only the
+	// ICP-native providers still complete inside the modal.
 	const isActiveTransactionSwap = $derived(
 		isNearIntentsProvider ||
 			isOneSecProvider ||
+			isChainFusionProvider ||
 			$swapAmountsStore?.selectedProvider?.provider === SwapProvider.VELORA
 	);
 
@@ -435,10 +437,30 @@
 					return;
 				}
 
+				// Re-resolved through the same pair oracle the quote used, so the row the
+				// execution persists cannot disagree with the offer the user accepted about
+				// which twin this is.
+				const ckDestinationToken = asCkTwinOf({
+					ckToken: $destinationToken,
+					nativeToken: $sourceToken
+				});
+
+				if (isNullish(ckDestinationToken)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+					onStartTriggerAmount();
+
+					return;
+				}
+
 				await fetchChainFusionEvmSwap({
 					identity: $authIdentity,
 					progress,
 					sourceToken: $sourceToken as Erc20Token,
+					destinationToken: ckDestinationToken,
 					swapAmount,
 					userAddress: $ethAddress,
 					helperContractAddress: ckHelperContractAddress,
@@ -447,6 +469,8 @@
 					gas,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
 							destinationToken: $destinationToken,

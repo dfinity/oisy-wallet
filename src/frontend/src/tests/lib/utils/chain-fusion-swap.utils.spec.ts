@@ -3,7 +3,7 @@ import { USDC_TOKEN as BASE_USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-bas
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.eth.env';
-import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import type { IcCkInterface, IcCkToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
@@ -95,6 +95,13 @@ const ckBtcToken = makeCkToken({
 
 const importedUsdcToken: Token = { ...USDC_TOKEN, id: parseTokenId('USDC') };
 
+// `mockValidIcrcToken` carries the mainnet ckBTC ledger id, which is a ck ledger now that
+// the Bitcoin pair is enabled — so a genuinely unrelated ICRC token needs its own id.
+const nonCkIcrcToken = {
+	...mockValidIcrcToken,
+	ledgerCanisterId: 'uf2wh-taaaa-aaaaq-aabna-cai'
+};
+
 const makeFee = (fee: bigint): ChainFusionFee => ({
 	fee,
 	token: ETHEREUM_TOKEN,
@@ -159,9 +166,19 @@ describe('chain-fusion-swap.utils', () => {
 	});
 
 	describe('chainFusionSupportedSourceTokens', () => {
-		it('should return the ck ledgers of the Ethereum family for the icp category', () => {
+		it('should return every enabled ck ledger for the icp category', () => {
 			expect(chainFusionSupportedSourceTokens({ category: 'icp', pairs: PAIRS })).toStrictEqual(
-				new Set([IC_CKETH_LEDGER_CANISTER_ID, CKUSDC_LEDGER_CANISTER_ID])
+				new Set([
+					IC_CKETH_LEDGER_CANISTER_ID,
+					CKUSDC_LEDGER_CANISTER_ID,
+					IC_CKBTC_LEDGER_CANISTER_ID
+				])
+			);
+		});
+
+		it('should return the native identifier for the btc category', () => {
+			expect(chainFusionSupportedSourceTokens({ category: 'btc', pairs: PAIRS })).toStrictEqual(
+				new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()])
 			);
 		});
 
@@ -220,19 +237,25 @@ describe('chain-fusion-swap.utils', () => {
 			).toBeUndefined();
 		});
 
-		it('should offer nothing for the Bitcoin family under the Ethereum-family flag', () => {
+		it('should narrow the Bitcoin pair in both directions', () => {
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: ckBtcToken, pairs: PAIRS })
-			).toBeUndefined();
+			).toStrictEqual({ btc: new Set([BTC_MAINNET_TOKEN.symbol.toLowerCase()]) });
 
 			expect(
 				chainFusionCompatibleDestinations({ sourceToken: BTC_MAINNET_TOKEN, pairs: PAIRS })
+			).toStrictEqual({ icp: new Set([IC_CKBTC_LEDGER_CANISTER_ID]) });
+		});
+
+		it('should offer nothing for a testnet Bitcoin token', () => {
+			expect(
+				chainFusionCompatibleDestinations({ sourceToken: BTC_TESTNET_TOKEN, pairs: PAIRS })
 			).toBeUndefined();
 		});
 
 		it('should offer nothing for an IC token that is not a ck ledger', () => {
 			expect(
-				chainFusionCompatibleDestinations({ sourceToken: mockValidIcrcToken, pairs: PAIRS })
+				chainFusionCompatibleDestinations({ sourceToken: nonCkIcrcToken, pairs: PAIRS })
 			).toBeUndefined();
 		});
 

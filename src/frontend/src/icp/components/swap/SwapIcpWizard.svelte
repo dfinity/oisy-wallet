@@ -20,7 +20,7 @@
 		TRACK_COUNT_SWAP_SUBMITTED,
 		TRACK_COUNT_SWAP_SUCCESS
 	} from '$lib/constants/analytics.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -43,6 +43,7 @@
 	import type { WizardStep } from '$lib/types/wizard';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
 
 	interface Props {
@@ -101,11 +102,26 @@
 			: undefined
 	);
 
-	// 1Sec is the only provider on this wizard that settles in the background, and
-	// its background phase is a bridge.
+	// 1Sec's background phase is a bridge; Chain Fusion's is a ck minter settling a
+	// withdrawal, so it gets the plain background wording.
 	let isOneSecProvider = $derived(
 		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ONE_SEC
 	);
+
+	let isChainFusionProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.CHAIN_FUSION
+	);
+
+	// The user's own address on the destination chain, which is where the minter pays the
+	// withdrawal out. Bitcoin and Ethereum are the only ck destinations.
+	let isBitcoinDestination = $derived(isNetworkIdBitcoin($destinationToken?.network.id));
+
+	let destinationAddress = $derived(isBitcoinDestination ? $btcAddressMainnet : $ethAddress);
+
+	// These close the modal once the funds have left the wallet and finish settling through
+	// the Active User Transactions store — every ck withdrawal included, whichever minter
+	// pays it out.
+	let isActiveTransactionSwap = $derived(isOneSecProvider || isChainFusionProvider);
 
 	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
@@ -198,7 +214,7 @@
 					swapId: crypto.randomUUID()
 				});
 			} else if ($swapAmountsStore.selectedProvider.provider === SwapProvider.CHAIN_FUSION) {
-				if (isNullish($ethAddress)) {
+				if (isNullish(destinationAddress)) {
 					toastsError({
 						msg: { text: $i18n.swap.error.unexpected_missing_data }
 					});
@@ -212,7 +228,9 @@
 					sourceToken: $sourceToken as IcCkToken,
 					destinationToken: $destinationToken,
 					swapAmount,
-					destinationAddress: $ethAddress,
+					destinationAddress,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
 					enableDestinationToken: () =>
 						enableSwapDestinationToken({
 							destinationToken: $destinationToken,
@@ -245,15 +263,12 @@
 
 			progress(ProgressStepsSwap.DONE);
 
-			// For OneSec swaps, the foreground completes once the user's funds have
-			// left their wallet; success/failure of the background phase is tracked
+			// For OneSec and Chain Fusion, the foreground completes once the user's funds
+			// have left their wallet; success/failure of the background phase is tracked
 			// separately via the AUT store. Other providers (ICPSwap, KongSwap) still
 			// complete fully inside `await` and reach this point only on success.
 			trackEvent({
-				name:
-					$swapAmountsStore.selectedProvider.provider === SwapProvider.ONE_SEC
-						? TRACK_COUNT_SWAP_SUBMITTED
-						: TRACK_COUNT_SWAP_SUCCESS,
+				name: isActiveTransactionSwap ? TRACK_COUNT_SWAP_SUBMITTED : TRACK_COUNT_SWAP_SUCCESS,
 				metadata: swapTrackingMetadata
 			});
 
@@ -341,7 +356,7 @@
 		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapProgress
 				{swapProgressStep}
-				swapWithActiveTransaction={isOneSecProvider}
+				swapWithActiveTransaction={isActiveTransactionSwap}
 				swapWithBridging={isOneSecProvider}
 				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
 					SwapProvider.ICP_SWAP}

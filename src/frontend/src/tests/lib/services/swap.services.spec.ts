@@ -1,6 +1,7 @@
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { createPermit } from '$eth/services/eip2612-permit.services';
 import { loadCustomTokens as loadCustomErc20Tokens } from '$eth/services/erc20.services';
 import { send as sendEvm } from '$eth/services/send.services';
@@ -53,6 +54,7 @@ import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -108,6 +110,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
 const mockSolGetQuote = vi.hoisted(() => vi.fn());
 const mockIcpBridgeGetQuote = vi.hoisted(() => vi.fn());
+const mockBtcGetQuote = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/providers/evm-swap.providers', () => ({
 	evmSwapProviders: [
@@ -134,6 +137,16 @@ vi.mock('$lib/providers/icp-bridge-swap.providers', () => ({
 		{
 			key: 'one_sec',
 			getQuote: mockIcpBridgeGetQuote,
+			isEnabled: true
+		}
+	]
+}));
+
+vi.mock('$lib/providers/btc-swap.providers', () => ({
+	btcSwapProviders: [
+		{
+			key: 'chainFusion',
+			getQuote: mockBtcGetQuote,
 			isEnabled: true
 		}
 	]
@@ -262,7 +275,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -300,7 +314,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -331,7 +346,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
@@ -366,7 +382,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -392,7 +409,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -418,7 +436,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(2);
@@ -445,7 +464,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(result).toHaveLength(1);
@@ -474,7 +494,8 @@ describe('swap.services', () => {
 				slippage: 0.5,
 				isSourceTokenIcrc2: true,
 				userEthAddress: '0xUser',
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(mockVeloraGetQuote).toHaveBeenCalled();
@@ -504,7 +525,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
-					userSolAddress: undefined
+					userSolAddress: undefined,
+					userBtcAddress: undefined
 				});
 
 				expect(mockIcpBridgeGetQuote).toHaveBeenCalledWith(
@@ -533,7 +555,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					isSourceTokenIcrc2: false,
 					userEthAddress: mockEthAddress,
-					userSolAddress: undefined
+					userSolAddress: undefined,
+					userBtcAddress: undefined
 				});
 
 				expect(mockIcpBridgeGetQuote).not.toHaveBeenCalled();
@@ -551,7 +574,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
-					userSolAddress: undefined
+					userSolAddress: undefined,
+					userBtcAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -569,7 +593,8 @@ describe('swap.services', () => {
 					slippage: 0.5,
 					isSourceTokenIcrc2: true,
 					userEthAddress: mockEthAddress,
-					userSolAddress: undefined
+					userSolAddress: undefined,
+					userBtcAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -603,7 +628,8 @@ describe('swap.services', () => {
 					tokens: [solSourceToken, evmDestToken],
 					slippage: 1,
 					userEthAddress: mockEthAddress,
-					userSolAddress: mockSolAddress
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -627,7 +653,8 @@ describe('swap.services', () => {
 					tokens: [evmDestToken, solSourceToken],
 					slippage: 1,
 					userEthAddress: mockEthAddress,
-					userSolAddress: mockSolAddress
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
 				});
 
 				expect(result).toHaveLength(1);
@@ -643,7 +670,8 @@ describe('swap.services', () => {
 					tokens: [solSourceToken, evmDestToken],
 					slippage: 1,
 					userEthAddress: mockEthAddress,
-					userSolAddress: undefined
+					userSolAddress: undefined,
+					userBtcAddress: undefined
 				});
 
 				expect(result).toEqual([]);
@@ -661,7 +689,8 @@ describe('swap.services', () => {
 					tokens: [evmDestToken, solSourceToken],
 					slippage: 1,
 					userEthAddress: mockEthAddress,
-					userSolAddress: mockSolAddress
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
 				});
 
 				expect(mockSolGetQuote).toHaveBeenCalledWith(
@@ -669,6 +698,85 @@ describe('swap.services', () => {
 						userAddress: mockEthAddress
 					})
 				);
+			});
+		});
+
+		describe('with Bitcoin tokens', () => {
+			const btcSourceToken = BTC_MAINNET_TOKEN;
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+			});
+
+			// Without its own branch a Bitcoin source falls through to the EVM fan-out and is
+			// cast to `Erc20Token`, which no EVM provider can quote.
+			it('should route a Bitcoin source to the BTC fan-out', async () => {
+				mockBtcGetQuote.mockResolvedValue({
+					provider: SwapProvider.CHAIN_FUSION,
+					receiveAmount: 500n,
+					swapDetails: { sourceFees: [], externalFees: [] }
+				});
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidIcCkToken as IcToken,
+					amount: 1,
+					tokens: [btcSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(result).toHaveLength(1);
+				expect(result[0].provider).toBe(SwapProvider.CHAIN_FUSION);
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+				expect(mockBtcGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({ userBtcAddress: mockBtcAddress })
+				);
+			});
+
+			it('should return [] when the user Bitcoin address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidIcCkToken as IcToken,
+					amount: 1,
+					tokens: [btcSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
+			// A ckBTC source is an ICP source: it keeps taking the ICP-bridge fan-out.
+			it('should route a Bitcoin destination through the ICP bridge fan-out', async () => {
+				mockIcpBridgeGetQuote.mockResolvedValue({
+					provider: SwapProvider.CHAIN_FUSION,
+					receiveAmount: 500n,
+					swapDetails: { sourceFees: [], externalFees: [] }
+				});
+
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: mockValidIcCkToken as IcToken,
+					destinationToken: btcSourceToken,
+					amount: 1,
+					tokens: [btcSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(result).toHaveLength(1);
+				expect(mockIcpBridgeGetQuote).toHaveBeenCalledOnce();
+				expect(mockBtcGetQuote).not.toHaveBeenCalled();
 			});
 		});
 	});
@@ -2069,7 +2177,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -2107,7 +2216,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: false,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith({
@@ -2138,7 +2248,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -2165,7 +2276,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledWith(
@@ -2202,7 +2314,8 @@ describe('swap.services', () => {
 				slippage,
 				isSourceTokenIcrc2: true,
 				userEthAddress: mockEthAddress,
-				userSolAddress: undefined
+				userSolAddress: undefined,
+				userBtcAddress: undefined
 			});
 
 			expect(trackEvent).toHaveBeenCalledTimes(2);

@@ -9,12 +9,20 @@ import {
 	assertValidEthTypedData,
 	getEthTypedDataApproval,
 	getSendParamsGas,
+	getSignedEthTypedData,
 	getSignParamsMessageTypedDataV4Hash,
 	hasInvalidTypedData,
 	isEthSignTypedDataMethod,
+	toTypedDataDomainChainId,
 	WalletConnectEthTypedDataError
 } from '$eth/utils/wallet-connect.utils';
+import { MAX_UINT_160, MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { TypedDataEncoder, type TypedDataField } from 'ethers/hash';
+
+// The fixtures below state chain 1 in their domain, so the session allowed to sign them is chain 1
+// — bar the Hyperliquid one, which states Arbitrum.
+const MAINNET_SESSION = 'eip155:1';
+const ARBITRUM_SESSION = 'eip155:42161';
 
 const HOLDER = '0x96329840d29ab4ac4A324cA0B01F64EAE7aA7a6a';
 const SPENDER = '0xcA11bde05977b3631167028862bE2a173976CA11';
@@ -124,6 +132,31 @@ const transferWithAuthorization = (
 	}
 });
 
+// Hyperliquid asks every action to be signed with routing fields (`type`, `signatureChainId`) that
+// its schema does not declare, so the request is only signable if such keys are tolerated.
+const hyperliquidAcceptTerms: WalletConnectEthSignTypedDataV4 = {
+	domain: {
+		name: 'HyperliquidSignTransaction',
+		version: '1',
+		chainId: 42161,
+		verifyingContract: '0x0000000000000000000000000000000000000000'
+	},
+	types: {
+		EIP712Domain: EIP712_DOMAIN,
+		'Hyperliquid:AcceptTerms': [
+			{ name: 'hyperliquidChain', type: 'string' },
+			{ name: 'time', type: 'uint64' }
+		]
+	},
+	primaryType: 'Hyperliquid:AcceptTerms',
+	message: {
+		type: 'acceptTerms',
+		time: 1787170393018,
+		signatureChainId: '0xa4b1',
+		hyperliquidChain: 'Mainnet'
+	}
+};
+
 // The keys the summary used to be driven by. The schema above declares none of
 // them, so none of them reaches the digest.
 const UNDECLARED_SUMMARY_KEYS = {
@@ -146,15 +179,21 @@ const ethersHash = ({ domain, types, message }: WalletConnectEthSignTypedDataV4)
 describe('wallet-connect.utils', () => {
 	describe('getSignParamsMessageTypedDataV4Hash', () => {
 		it('rejects a DAI permit whose bool `allowed` is the string "false"', () => {
-			expect(() => getSignParamsMessageTypedDataV4Hash(toParams(daiPermit('false')))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it('rejects a DAI permit whose bool `allowed` is the string "true"', () => {
-			expect(() => getSignParamsMessageTypedDataV4Hash(toParams(daiPermit('true')))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit('true')),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it.each([false, true])(
@@ -162,32 +201,57 @@ describe('wallet-connect.utils', () => {
 			(allowed) => {
 				const params = toParams(daiPermit(allowed));
 
-				expect(getSignParamsMessageTypedDataV4Hash(params)).toBe(ethersHash(daiPermit(allowed)));
+				expect(
+					getSignParamsMessageTypedDataV4Hash({ params, sessionChainId: MAINNET_SESSION })
+				).toBe(ethersHash(daiPermit(allowed)));
 			}
 		);
 
 		it('leaves a standard ERC-2612 permit (uint256 value) unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(erc2612Permit))).toBe(
-				ethersHash(erc2612Permit)
-			);
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(erc2612Permit),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(erc2612Permit));
 		});
 
 		it('leaves a Permit2 request with nested structs unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(permit2))).toBe(ethersHash(permit2));
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(permit2));
 		});
 
-		it('rejects an ERC-3009 authorization carrying undeclared summary keys', () => {
-			expect(() =>
-				getSignParamsMessageTypedDataV4Hash(
-					toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
-				)
-			).toThrow(WalletConnectEthTypedDataError);
+		it('hashes an ERC-3009 authorization carrying undeclared keys exactly as ethers does', () => {
+			// The keys the schema does not declare are not encoded, so the digest is the canonical
+			// one: refusing to hash would have rejected a request that every other wallet signs.
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(transferWithAuthorization()));
+		});
+
+		it('hashes the Hyperliquid accept-terms action exactly as ethers does', () => {
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(hyperliquidAcceptTerms),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBe(ethersHash(hyperliquidAcceptTerms));
 		});
 
 		it('leaves a canonical ERC-3009 authorization unaffected', () => {
-			expect(getSignParamsMessageTypedDataV4Hash(toParams(transferWithAuthorization()))).toBe(
-				ethersHash(transferWithAuthorization())
-			);
+			expect(
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toBe(ethersHash(transferWithAuthorization()));
 		});
 
 		it('throws a non-typed-data error for a plain (non-JSON) message', () => {
@@ -195,7 +259,10 @@ describe('wallet-connect.utils', () => {
 			// and the request is rejected rather than signed.
 			let caught: unknown;
 			try {
-				getSignParamsMessageTypedDataV4Hash(['0xdeadbeef']);
+				getSignParamsMessageTypedDataV4Hash({
+					params: ['0xdeadbeef'],
+					sessionChainId: MAINNET_SESSION
+				});
 			} catch (err: unknown) {
 				caught = err;
 			}
@@ -210,7 +277,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeTruthy();
 		});
@@ -219,34 +287,52 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(daiPermit(true))
+					params: toParams(daiPermit(true)),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(erc2612Permit)
+					params: toParams(erc2612Permit),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 			expect(
-				hasInvalidTypedData({ method: SESSION_REQUEST_ETH_SIGN_V4, params: toParams(permit2) })
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(permit2),
+					sessionChainId: MAINNET_SESSION
+				})
 			).toBeFalsy();
 		});
 
-		it('is true for an ERC-3009 authorization carrying undeclared summary keys', () => {
+		it('is false for an ERC-3009 authorization carrying undeclared keys', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
+					params: toParams(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)),
+					sessionChainId: MAINNET_SESSION
 				})
-			).toBeTruthy();
+			).toBeFalsy();
+		});
+
+		it('is false for the Hyperliquid accept-terms action', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(hyperliquidAcceptTerms),
+					sessionChainId: ARBITRUM_SESSION
+				})
+			).toBeFalsy();
 		});
 
 		it('is false for a canonical ERC-3009 authorization', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_V4,
-					params: toParams(transferWithAuthorization())
+					params: toParams(transferWithAuthorization()),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 		});
@@ -255,7 +341,8 @@ describe('wallet-connect.utils', () => {
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_ETH_SIGN_LEGACY,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeTruthy();
 		});
@@ -263,12 +350,17 @@ describe('wallet-connect.utils', () => {
 		it('is false for a raw-message method, even with a typed-data payload', () => {
 			// personal_sign is signed as a raw message and must stay approvable.
 			expect(
-				hasInvalidTypedData({ method: SESSION_REQUEST_PERSONAL_SIGN, params: ['0xdeadbeef'] })
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_PERSONAL_SIGN,
+					params: ['0xdeadbeef'],
+					sessionChainId: MAINNET_SESSION
+				})
 			).toBeFalsy();
 			expect(
 				hasInvalidTypedData({
 					method: SESSION_REQUEST_PERSONAL_SIGN,
-					params: toParams(daiPermit('false'))
+					params: toParams(daiPermit('false')),
+					sessionChainId: MAINNET_SESSION
 				})
 			).toBeFalsy();
 		});
@@ -425,28 +517,102 @@ describe('wallet-connect.utils', () => {
 			expect(call(typedData)).toThrow(/Permit\.allowed/);
 		});
 
-		it('rejects a message key the primary type does not declare', () => {
+		// A key the primary type does not declare is not encoded, so it says nothing about whether
+		// the request conforms to its schema. It is dropped from the preview rather than rejected:
+		// see the `getSignedEthTypedData` suite.
+		it('accepts a message key the primary type does not declare', () => {
 			const typedData = daiPermit(false);
 			typedData.message.spenderLabel = 'Trusted dApp';
 
-			expect(call(typedData)).toThrow(/Permit\.spenderLabel/);
+			expect(call(typedData)).not.toThrow();
 		});
 
-		it('rejects a key a nested struct does not declare', () => {
+		it('accepts a key a nested struct does not declare', () => {
 			const typedData = structuredClone(permit2);
 			(typedData.message.details as Record<string, unknown>).label = 'Trusted dApp';
 
-			expect(call(typedData)).toThrow(/PermitSingle\.details\.label/);
+			expect(call(typedData)).not.toThrow();
 		});
 
-		it('rejects the undeclared keys of the ERC-3009 authorization', () => {
-			expect(call(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).toThrow(
-				WalletConnectEthTypedDataError
-			);
+		it('accepts the undeclared keys of the ERC-3009 authorization', () => {
+			expect(call(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))).not.toThrow();
+		});
+
+		it('still rejects a declared member of the wrong type alongside undeclared keys', () => {
+			expect(call(daiPermit('true'))).toThrow(WalletConnectEthTypedDataError);
 		});
 
 		it('accepts a canonical ERC-3009 authorization', () => {
 			expect(call(transferWithAuthorization())).not.toThrow();
+		});
+	});
+
+	describe('getSignedEthTypedData', () => {
+		it('leaves a payload whose every key is declared untouched', () => {
+			expect(getSignedEthTypedData(permit2)).toEqual({
+				typedData: permit2,
+				hasUnsignedKeys: false
+			});
+		});
+
+		it('drops the routing fields of the Hyperliquid accept-terms action', () => {
+			const { typedData, hasUnsignedKeys } = getSignedEthTypedData(hyperliquidAcceptTerms);
+
+			expect(hasUnsignedKeys).toBeTruthy();
+			expect(typedData.message).toEqual({ hyperliquidChain: 'Mainnet', time: 1787170393018 });
+		});
+
+		it('previews only what the digest covers', () => {
+			const { typedData } = getSignedEthTypedData(
+				transferWithAuthorization(UNDECLARED_SUMMARY_KEYS)
+			);
+
+			expect(ethersHash({ ...typedData, message: typedData.message })).toBe(
+				ethersHash(transferWithAuthorization(UNDECLARED_SUMMARY_KEYS))
+			);
+			expect(typedData.message).toEqual(transferWithAuthorization().message);
+		});
+
+		it('drops a key a nested struct does not declare', () => {
+			const withNestedKey = structuredClone(permit2);
+			(withNestedKey.message.details as Record<string, unknown>).label = 'Trusted dApp';
+
+			const { typedData, hasUnsignedKeys } = getSignedEthTypedData(withNestedKey);
+
+			expect(hasUnsignedKeys).toBeTruthy();
+			expect(typedData.message).toEqual(permit2.message);
+		});
+
+		it('drops a key an array item does not declare', () => {
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				domain: { name: 'Batch', chainId: '1', verifyingContract: DAI },
+				types: {
+					Batch: [{ name: 'calls', type: 'Call[]' }],
+					Call: [{ name: 'to', type: 'address' }]
+				},
+				primaryType: 'Batch',
+				message: { calls: [{ to: RECIPIENT, label: 'Trusted dApp' }] }
+			};
+
+			expect(getSignedEthTypedData(typedData)).toEqual({
+				typedData: { ...typedData, message: { calls: [{ to: RECIPIENT }] } },
+				hasUnsignedKeys: true
+			});
+		});
+
+		it('previews typed data whose primary type cannot be resolved as it came', () => {
+			// Such a request is rejected for signing anyway, so there is no schema to project it onto.
+			const typedData: WalletConnectEthSignTypedDataV4 = {
+				domain: { name: 'Cycle', chainId: '1', verifyingContract: DAI },
+				types: {
+					A: [{ name: 'b', type: 'B' }],
+					B: [{ name: 'a', type: 'A' }]
+				},
+				primaryType: 'A',
+				message: { b: { a: {} } }
+			};
+
+			expect(getSignedEthTypedData(typedData)).toEqual({ typedData, hasUnsignedKeys: false });
 		});
 	});
 
@@ -475,16 +641,71 @@ describe('wallet-connect.utils', () => {
 				spender: SPENDER,
 				token: DAI,
 				amount: 123456789n,
+				unlimited: false,
 				expiration: 1761743754
 			});
 		});
 
-		it('summarizes an ERC-2612 permit with its declared spender', () => {
-			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({ spender: SPENDER });
+		// Permit2 saturates at its declared uint160, not at the 256-bit maximum.
+		it('calls a saturated Permit2 allowance unlimited', () => {
+			const typedData = structuredClone(permit2);
+			(typedData.message.details as Record<string, unknown>).amount = MAX_UINT_160.toString();
+
+			expect(getEthTypedDataApproval(typedData)?.unlimited).toBeTruthy();
 		});
 
-		it('summarizes a DAI permit with its declared spender', () => {
-			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({ spender: SPENDER });
+		it('summarizes an ERC-2612 permit from its value, deadline and verifying contract', () => {
+			expect(getEthTypedDataApproval(erc2612Permit)).toEqual({
+				spender: SPENDER,
+				// ERC-2612 names no token: the contract that verifies the permit is the token.
+				token: DAI,
+				amount: 1000000n,
+				unlimited: false,
+				expiration: 1893456000
+			});
+		});
+
+		// The report this fixes: an unlimited permit summarized as a bare spender.
+		it('calls a saturated ERC-2612 value unlimited', () => {
+			const typedData = structuredClone(erc2612Permit);
+			typedData.message.value = MAX_UINT_256.toString();
+
+			expect(getEthTypedDataApproval(typedData)).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: MAX_UINT_256,
+				unlimited: true,
+				expiration: 1893456000
+			});
+		});
+
+		// "Never expires" is written as a saturated uint256, which is not a moment in time.
+		it('states no expiration for a deadline no date can hold', () => {
+			const typedData = structuredClone(erc2612Permit);
+			typedData.message.deadline = MAX_UINT_256.toString();
+
+			expect(getEthTypedDataApproval(typedData)?.expiration).toBeUndefined();
+		});
+
+		// DAI carries no amount: `allowed` is the allowance, and it is an unlimited one.
+		it('summarizes an allowed DAI permit as unlimited', () => {
+			expect(getEthTypedDataApproval(daiPermit(true))).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: undefined,
+				unlimited: true,
+				expiration: 1893456000
+			});
+		});
+
+		it('summarizes a cleared DAI permit as a revocation', () => {
+			expect(getEthTypedDataApproval(daiPermit(false))).toEqual({
+				spender: SPENDER,
+				token: DAI,
+				amount: ZERO,
+				unlimited: false,
+				expiration: 1893456000
+			});
 		});
 
 		it('summarizes nothing for an ERC-3009 authorization carrying undeclared summary keys', () => {
@@ -528,6 +749,101 @@ describe('wallet-connect.utils', () => {
 			(typedData.message.details as Record<string, unknown>).token = 'not-an-address';
 
 			expect(getEthTypedDataApproval(typedData)).toBeUndefined();
+		});
+	});
+
+	describe('toTypedDataDomainChainId', () => {
+		// EIP-712 declares `chainId` as a uint256, so every one of these is chain 1 and all of them
+		// hash to the same digest.
+		it.each(['1', 1, 1n, '0x1', '01', '0x01'])('reads %s as the same chain', (chainId) => {
+			expect(toTypedDataDomainChainId(chainId)).toBe(1n);
+		});
+
+		it.each([undefined, null, 'mainnet', '', {}, [], 1.5, '0x'])(
+			'reads %s as no chain at all',
+			(value) => {
+				expect(toTypedDataDomainChainId(value)).not.toBe(1n);
+			}
+		);
+
+		// The value comes from the dApp, so what it cannot read must not take the review down.
+		it('does not throw on a value that is not a number', () => {
+			expect(() => toTypedDataDomainChainId('mainnet')).not.toThrow();
+			expect(toTypedDataDomainChainId('mainnet')).toBeUndefined();
+		});
+	});
+
+	// The reported attack: a session granted only for a testnet asking for a signature over a
+	// mainnet domain. The key is the same on every EVM chain, so nothing but this check stands
+	// between that request and a digest real mainnet DAI would accept.
+	describe('chain binding', () => {
+		const SEPOLIA_SESSION = 'eip155:11155111';
+
+		it('refuses a mainnet domain asked for by a testnet session', () => {
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
+		});
+
+		it('refuses it in the review as well, so it cannot be approved', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN_V4,
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toBeTruthy();
+		});
+
+		// Omitting the envelope chain must not be a way around the check.
+		it.each([undefined, '', 'eip155:999999', 'not-a-chain'])(
+			'refuses when the session states %s as its chain',
+			(sessionChainId) => {
+				expect(() =>
+					getSignParamsMessageTypedDataV4Hash({ params: toParams(daiPermit(true)), sessionChainId })
+				).toThrow(WalletConnectEthTypedDataError);
+			}
+		);
+
+		// A domain with no chain is bound to none, so it is valid on all of them.
+		it('refuses a domain that states no chain at all', () => {
+			const { chainId: _chainId, ...domain } = daiPermit(true).domain;
+
+			expect(() =>
+				getSignParamsMessageTypedDataV4Hash({
+					params: toParams({ ...daiPermit(true), domain }),
+					sessionChainId: MAINNET_SESSION
+				})
+			).toThrow(WalletConnectEthTypedDataError);
+		});
+
+		// A chain is a number, not a spelling: these are all chain 1 and all hash alike.
+		it.each(['1', 1, '0x1', '01'])(
+			'accepts %s as the same chain the session granted',
+			(chainId) => {
+				const permit = daiPermit(true);
+
+				expect(
+					getSignParamsMessageTypedDataV4Hash({
+						params: toParams({ ...permit, domain: { ...permit.domain, chainId } }),
+						sessionChainId: MAINNET_SESSION
+					})
+				).toBe(ethersHash({ ...permit, domain: { ...permit.domain, chainId } }));
+			}
+		);
+
+		// Raw-message methods are signed differently and are not chain-bound.
+		it('leaves a raw-message request approvable whatever the session chain', () => {
+			expect(
+				hasInvalidTypedData({
+					method: SESSION_REQUEST_ETH_SIGN,
+					params: toParams(daiPermit(true)),
+					sessionChainId: SEPOLIA_SESSION
+				})
+			).toBeFalsy();
 		});
 	});
 });

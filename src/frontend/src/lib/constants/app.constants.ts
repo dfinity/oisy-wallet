@@ -165,6 +165,9 @@ export const EIGHT_DECIMALS = 8;
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 export const MAX_UINT_256 = (1n << 256n) - 1n;
+// Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
+// at the 256-bit maximum.
+export const MAX_UINT_160 = (1n << 160n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -189,6 +192,11 @@ export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 sec
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `update_balance` calls for the same pending
+// BTC → ckBTC row. Same reasoning as above — minting is an update call, polling is
+// 5s — and it is the outer bound on top of the query gate that skips the call
+// entirely while the deposit is still gathering confirmations.
+export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds

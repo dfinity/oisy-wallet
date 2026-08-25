@@ -1621,6 +1621,7 @@
 			"dapp_gas_limit": "",
 			"high_gas_limit": "",
 			"invalid_typed_data": "Diese Anfrage enthält einen Wert, dessen Typ nicht mit dem von der App deklarierten Schema übereinstimmt. Die angezeigten Daten können von den tatsächlich zu signierenden Daten abweichen, daher ist das Signieren deaktiviert.",
+			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren",
@@ -1646,7 +1647,8 @@
 			"no_connected_apps": "Derzeit sind keine Apps verbunden.",
 			"disconnect_all": "Alle trennen",
 			"disconnect_app": "$name trennen",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "z. B. wc:a281567bb3e4..."
