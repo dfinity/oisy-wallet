@@ -1,4 +1,5 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { UtxosFee } from '$btc/types/btc-send';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { ErcFungibleToken } from '$eth/types/erc-fungible';
@@ -15,6 +16,7 @@ import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { OptionSolAddress, SolAddress } from '$sol/types/address';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { DeltaPrice, OptimalRate, QuoteParams } from '@velora-dex/sdk';
 
@@ -447,6 +449,14 @@ export interface SwapNearIntentsEvmParams
 export interface SwapNearIntentsSolParams extends SwapNearIntentsParams {
 	destinationToken: Token;
 	userAddress: SolAddress;
+}
+
+export interface SwapNearIntentsBtcParams extends SwapNearIntentsParams {
+	destinationToken: Token;
+	// The user's own Bitcoin address, the source of the UTXOs the deposit spends.
+	userAddress: BtcAddress;
+	network: BitcoinNetwork;
+	utxosFee: UtxosFee;
 }
 
 export interface DeltaSwapResponse {
