@@ -3327,6 +3327,25 @@ describe('swap.services', () => {
 			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
 		});
 
+		// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+		// (pending-transaction registration, wallet refresh). The deposit is real by then,
+		// so the swap must resolve and carry on with the broadcast txid.
+		it('should not surface a sendBtc failure after the broadcast as a swap failure', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: btcTxid });
+				throw new Error('wallet refresh failed');
+			});
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: btcTxid
+			});
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
 		it('should enable a disabled destination token once the swap foreground resolves', async () => {
 			const disabledDestinationToken = { ...destinationToken, enabled: false };
 

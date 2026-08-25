@@ -1018,19 +1018,39 @@ export const fetchNearIntentsBtcSwap = async ({
 		swapDetails,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: ({ depositAddress, registerSwap }) =>
-			sendBtc({
-				identity,
-				network,
-				utxosFee,
-				source: userAddress,
-				destination: depositAddress,
-				amount: swapAmount,
-				// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-				// registered right there, before the pending-transaction bookkeeping and before
-				// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
-				onBroadcast: registerSwap
-			}),
+		sendTransaction: async ({ depositAddress, registerSwap }) => {
+			let broadcastTxid: string | undefined;
+
+			try {
+				return await sendBtc({
+					identity,
+					network,
+					utxosFee,
+					source: userAddress,
+					destination: depositAddress,
+					amount: swapAmount,
+					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
+					// registered right there, before the pending-transaction bookkeeping and before
+					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					onBroadcast: async ({ txid }) => {
+						broadcastTxid = txid;
+						await registerSwap();
+					}
+				});
+			} catch (err: unknown) {
+				if (isNullish(broadcastTxid)) {
+					throw err;
+				}
+
+				// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+				// (pending-transaction registration, wallet refresh). The deposit is real by
+				// then and the AUT row exists, so the swap must not read as failed; the flow
+				// carries on with the broadcast txid.
+				consoleError(err);
+
+				return broadcastTxid;
+			}
+		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
 };
