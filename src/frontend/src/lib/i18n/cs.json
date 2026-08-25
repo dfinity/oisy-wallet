@@ -764,7 +764,8 @@
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
 			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
-			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
+			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL.",
+			"xrp_wallet_error": ""
 		}
 	},
 	"hero": {
