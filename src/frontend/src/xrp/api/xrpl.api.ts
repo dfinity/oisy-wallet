@@ -3,8 +3,8 @@ import { xrpHttpRpcUrl } from '$xrp/providers/xrp-rpc.providers';
 import type { XrpAddress } from '$xrp/types/address';
 import type { XrpNetworkType } from '$xrp/types/network';
 import type { XrpBalance } from '$xrp/types/xrp-balance';
-import type { XrpSubmitResult } from '$xrp/types/xrp-transaction';
-import { isNullish } from '@dfinity/utils';
+import type { XrpAccountInfo, XrpSubmitResult } from '$xrp/types/xrp-transaction';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 const xrpJsonRpc = async ({
 	network,
@@ -78,6 +78,88 @@ export const loadXrpBalance = async ({
 	}
 
 	return BigInt(account_data.Balance);
+};
+
+/**
+ * Account balance (drops) and current `Sequence` for a funded account. Unlike
+ * {@link loadXrpBalance}, this throws for an unfunded account (`actNotFound`): you
+ * cannot build a valid transaction without a sequence number.
+ */
+export const loadXrpAccountInfo = async ({
+	address,
+	network
+}: {
+	address: XrpAddress;
+	network: XrpNetworkType;
+}): Promise<XrpAccountInfo> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'account_info',
+		params: { account: address, ledger_index: 'validated' }
+	});
+
+	const accountData = result.account_data as { Balance: string; Sequence: number } | undefined;
+
+	if (isNullish(accountData)) {
+		throw new Error(
+			`Unexpected XRPL account_info response: ${(result.error as string) ?? 'missing account_data'}`
+		);
+	}
+
+	return { balance: BigInt(accountData.Balance), sequence: accountData.Sequence };
+};
+
+/**
+ * Current open-ledger fee in drops via the `fee` method. Falls back to the base fee,
+ * and finally to `fallbackFee`, if the node omits the open-ledger estimate.
+ */
+export const loadXrpOpenLedgerFee = async ({
+	network,
+	fallbackFee
+}: {
+	network: XrpNetworkType;
+	fallbackFee: XrpBalance;
+}): Promise<XrpBalance> => {
+	const result = await xrpJsonRpc({ network, method: 'fee', params: {} });
+
+	const drops = result.drops as { open_ledger_fee?: string; base_fee?: string } | undefined;
+	const fee = drops?.open_ledger_fee ?? drops?.base_fee;
+
+	return nonNullish(fee) ? BigInt(fee) : fallbackFee;
+};
+
+/** Current (in-progress) ledger index via `ledger_current`, used to set `LastLedgerSequence`. */
+export const loadXrpLedgerIndex = async ({
+	network
+}: {
+	network: XrpNetworkType;
+}): Promise<number> => {
+	const result = await xrpJsonRpc({ network, method: 'ledger_current', params: {} });
+
+	const ledgerIndex = result.ledger_current_index as number | undefined;
+
+	if (isNullish(ledgerIndex)) {
+		throw new Error('Unexpected XRPL ledger_current response: missing ledger_current_index');
+	}
+
+	return ledgerIndex;
+};
+
+/** Whether a transaction hash has been included in a validated ledger (via the `tx` method). */
+export const isXrpTransactionValidated = async ({
+	hash,
+	network
+}: {
+	hash: string;
+	network: XrpNetworkType;
+}): Promise<boolean> => {
+	const result = await xrpJsonRpc({
+		network,
+		method: 'tx',
+		params: { transaction: hash }
+	});
+
+	return result.validated === true;
 };
 
 /**

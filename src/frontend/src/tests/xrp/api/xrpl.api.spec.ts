@@ -1,5 +1,12 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { loadXrpBalance, submitXrpTransaction } from '$xrp/api/xrpl.api';
+import {
+	isXrpTransactionValidated,
+	loadXrpAccountInfo,
+	loadXrpBalance,
+	loadXrpLedgerIndex,
+	loadXrpOpenLedgerFee,
+	submitXrpTransaction
+} from '$xrp/api/xrpl.api';
 import { XrpNetworks } from '$xrp/types/network';
 
 describe('xrpl.api', () => {
@@ -127,6 +134,68 @@ describe('xrpl.api', () => {
 			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
 				'invalidTransaction'
 			);
+		});
+	});
+
+	describe('loadXrpAccountInfo', () => {
+		it('returns the balance and sequence for a funded account', async () => {
+			mockFetchResponse({
+				body: { result: { account_data: { Balance: '30000000', Sequence: 42 } } }
+			});
+
+			const info = await loadXrpAccountInfo({ address, network: XrpNetworks.mainnet });
+
+			expect(info).toEqual({ balance: 30_000_000n, sequence: 42 });
+		});
+
+		it('throws for an unfunded account', async () => {
+			mockFetchResponse({ body: { result: { error: 'actNotFound' } } });
+
+			await expect(loadXrpAccountInfo({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'actNotFound'
+			);
+		});
+	});
+
+	describe('loadXrpOpenLedgerFee', () => {
+		it('returns the open-ledger fee in drops', async () => {
+			mockFetchResponse({ body: { result: { drops: { open_ledger_fee: '15', base_fee: '10' } } } });
+
+			const fee = await loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n });
+
+			expect(fee).toBe(15n);
+		});
+
+		it('falls back to the provided fee when the node omits it', async () => {
+			mockFetchResponse({ body: { result: { drops: {} } } });
+
+			const fee = await loadXrpOpenLedgerFee({ network: XrpNetworks.mainnet, fallbackFee: 10n });
+
+			expect(fee).toBe(10n);
+		});
+	});
+
+	describe('loadXrpLedgerIndex', () => {
+		it('returns the current ledger index', async () => {
+			mockFetchResponse({ body: { result: { ledger_current_index: 987654 } } });
+
+			await expect(loadXrpLedgerIndex({ network: XrpNetworks.mainnet })).resolves.toBe(987654);
+		});
+	});
+
+	describe('isXrpTransactionValidated', () => {
+		it('is true only when the transaction is validated', async () => {
+			mockFetchResponse({ body: { result: { validated: true } } });
+
+			await expect(
+				isXrpTransactionValidated({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toBeTruthy();
+
+			mockFetchResponse({ body: { result: { validated: false } } });
+
+			await expect(
+				isXrpTransactionValidated({ hash: 'H', network: XrpNetworks.mainnet })
+			).resolves.toBeFalsy();
 		});
 	});
 });
