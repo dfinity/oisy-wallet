@@ -22,6 +22,34 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
+ * Where paging through the backend's stored history has got to, per token.
+ *
+ * The initial load reads the newest page and is handed the cursor to the one below it. Without
+ * keeping that cursor, scrolling back would skip the backend and ask Etherscan for history the
+ * backend already holds.
+ */
+const ethBackendPaginationCursors = new Map<TokenId, bigint>();
+
+export const setEthBackendPaginationCursor = ({
+	tokenId,
+	nextStart
+}: {
+	tokenId: TokenId;
+	nextStart: bigint | undefined;
+}) => {
+	if (nonNullish(nextStart)) {
+		ethBackendPaginationCursors.set(tokenId, nextStart);
+
+		return;
+	}
+
+	ethBackendPaginationCursors.delete(tokenId);
+};
+
+export const getEthBackendPaginationCursor = (tokenId: TokenId): bigint | undefined =>
+	ethBackendPaginationCursors.get(tokenId);
+
+/**
  * Loads a page of stored ETH transactions from the backend, mapping each
  * `UserTransaction` into a frontend `Transaction`.
  *
@@ -135,11 +163,16 @@ export const loadNextEthUserTransactions = async ({
 
 			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
 
+			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+
 			return {
 				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
 			};
 		}
 	}
+
+	// The backend has nothing more to give, so the next intersection must not ask it again.
+	setEthBackendPaginationCursor({ tokenId, nextStart: undefined });
 
 	return loadOlderFromEtherscan({
 		identity,

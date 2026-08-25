@@ -276,7 +276,7 @@
 			"dex": "DEX",
 			"game": "Игра",
 			"lending": "Лендинг",
-			"nft": "NFT",
+			"nft": "Коллекционные предметы",
 			"rwa": "RWA",
 			"social": "Социальные",
 			"staking": "Стейкинг",
@@ -944,8 +944,8 @@
 		"text": {
 			"send": "Отправить",
 			"send_token": "",
+			"send_unknown_token": "",
 			"destination": "Получатель",
-			"source": "Источник",
 			"balance": "Баланс",
 			"review": "Подверждение",
 			"signing_approval": "Подписание одобрения...",
@@ -978,9 +978,9 @@
 			"contacts_empty_state_title": "Ваши контакты появятся здесь",
 			"contacts_empty_state_description": "Похоже, вы еще не добавили контактов",
 			"send_review_subtitle": "Вы отправляете",
-			"no_nfts_found": "NFT не найдены",
-			"no_nfts_found_desc": "Измените параметры поиска или сеть, чтобы найти нужные вам NFT.",
-			"select_nft": "Выбрать NFT"
+			"no_nfts_found": "Коллекционные предметы не найдены",
+			"no_nfts_found_desc": "Измените параметры поиска или сеть, чтобы найти нужные вам коллекционные предметы.",
+			"select_nft": "Выбрать коллекционный предмет"
 		},
 		"placeholder": {
 			"enter_eth_address": "Введите публичный адрес (0x), имя или псевдоним",
@@ -988,7 +988,7 @@
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
 			"xrp_destination_tag": "",
 			"select_network": "Выбрать сеть",
-			"search_nfts": "Поиск NFT"
+			"search_nfts": "Поиск коллекционных предметов"
 		},
 		"info": {
 			"ckbtc_certified": "Пожалуйста, подождите, пока параметры ckBTC будут сертифицированы.",
@@ -1034,7 +1034,7 @@
 			"btc_utxo_locked": "Средства Bitcoin заблокированы ожидающими транзакциями",
 			"btc_invalid_fee_calculation": "Ошибка проверки комиссии транзакции Bitcoin",
 			"pending_transactions_not_available": "Сервис ожидающих транзакций в настоящее время недоступен. Пожалуйста, попробуйте позже.",
-			"no_nft_selected": "Не был выбран NFT для отправки"
+			"no_nft_selected": "Не был выбран коллекционный предмет для отправки"
 		},
 		"error": {
 			"unexpected": "При отправке транзакции произошла ошибка.",
@@ -1209,6 +1209,7 @@
 			"swapping": "Обмен...",
 			"starting_to_swap": "",
 			"starting_to_bridge": "",
+			"finishing_in_background": "",
 			"refreshing_ui": "Обновление пользовательского интерфейса",
 			"swap_provider": "Поставщик обмена",
 			"swap_provider_website": "Веб-сайт",
@@ -1233,6 +1234,7 @@
 			"near_intents_tos": "",
 			"onesec_transfer_fee": "",
 			"onesec_protocol_fee": "",
+			"chain_fusion_minimum_amount": "",
 			"value_difference_error_confirmation": "",
 			"value_difference_missing_price_confirmation": "Не удалось получить цену хотя бы одного из токенов. Пожалуйста, <strong>проверьте самостоятельно</strong>, что это предложение свопа является справедливым.<br>Обратите внимание, что настройка проскальзывания <strong>не</strong> защищает вас от предложения с гораздо меньшей суммой получения!"
 		},
@@ -1255,7 +1257,8 @@
 			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
-			"swap_refunded": ""
+			"swap_refunded": "",
+			"swap_replaced_or_dropped": ""
 		}
 	},
 	"buy": {
@@ -1358,7 +1361,7 @@
 		"import": {
 			"text": {
 				"title": "Добавить токен",
-				"title_nft": "Добавить NFT",
+				"title_nft": "Добавить коллекцию",
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
@@ -1397,12 +1400,12 @@
 		"manage": {
 			"text": {
 				"title": "Управление токенами",
-				"title_nft": "Управление NFT",
+				"title_nft": "Управление коллекциями",
 				"manage_list": "Управление токенами",
-				"manage_list_nft": "Управление NFT",
+				"manage_list_nft": "Управление коллекционными предметами",
 				"list_settings": "Настройки списка",
 				"import_token": "Добавить",
-				"import_nft": "Добавить NFT",
+				"import_nft": "Добавить коллекцию",
 				"network": "Сеть",
 				"all_tokens_zero_balance": "Все токены имеют нулевой баланс.",
 				"enable_more_assets": "Включить больше активов"
@@ -1480,16 +1483,13 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT",
+			"title": "Коллекционные предметы",
 			"count_one": "",
 			"count_other": "",
-			"title_empty": "Ваши NFT появятся здесь",
-			"description_empty": "Похоже, вы еще не получали NFT",
-			"title_not_supported": "В выбранной сети поддержка NFT пока отсутствует.",
-			"description_not_supported": "Пожалуйста, не отправляйте NTF-файлы на ваш адрес.",
-			"grouping": "Группировка",
-			"as_plain_list": "Простой список",
-			"by_collection": "По коллекции",
+			"title_empty": "Ваши коллекционные предметы появятся здесь",
+			"description_empty": "Похоже, вы еще не получали коллекционные предметы",
+			"title_not_supported": "В выбранной сети поддержка коллекционных предметов пока отсутствует.",
+			"description_not_supported": "Пожалуйста, не отправляйте коллекционные предметы на ваш адрес.",
 			"show_spam": "Показывать спам",
 			"show_hidden": "Показать скрытое",
 			"recents_first": "Сначала недавние",
@@ -1502,21 +1502,23 @@
 			"quantity": "Количество",
 			"item_traits": "Характеристики предмета",
 			"collection_not_loaded": "Коллекция не загружена",
-			"nft_not_loaded": "NFT не загружен",
+			"nft_not_loaded": "Коллекционный предмет не загружен",
 			"collections": "Коллекции",
-			"all_assets": "Все активы",
+			"check_new": "Найти новые",
+			"check_new_short": "Найти",
+			"ungrouped": "Без группировки",
 			"address_copied": "Адрес скопирован",
 			"collection_name_copied": "Название коллекции скопировано",
 			"id_copied": "ID скопирован",
 			"spam": "Спам",
 			"not_spam": "Не спам",
 			"spam_warning": "Предупреждение о спаме",
-			"spam_warning_text": "Этот NFT может быть спамом",
+			"spam_warning_text": "Этот коллекционный предмет может быть спамом",
 			"hide": "Скрыть",
 			"unhide": "Показать",
 			"hidden": "Скрытый",
 			"hide_warning": "Предупреждение о скрытии",
-			"hide_warning_text": "Этот NFT будет скрыт",
+			"hide_warning_text": "Этот коллекционный предмет будет скрыт",
 			"open_explorer": "Открыть в обозревателе",
 			"img_consent_disabled": "Вы отключили изображения из этой коллекции",
 			"img_consent_none": "Изображение отключено по соображениям безопасности",
@@ -1543,13 +1545,14 @@
 			"media_stored_at_different_location": ""
 		},
 		"alt": {
-			"placeholder_image": "Пока нет NFT",
+			"placeholder_image": "Пока нет коллекционных предметов",
 			"card": {
-				"image": "Изображение NFT с ID токена: $tokenId"
+				"image": "Изображение коллекционного предмета с ID токена: $tokenId"
 			},
 			"copy_address": "Скопировать адрес",
 			"review_preference": "Изменить настройки отображения",
-			"go_to_collection": "Перейти к коллекции"
+			"go_to_collection": "Перейти к коллекции",
+			"check_new": "Проверить наличие новых коллекционных предметов"
 		}
 	},
 	"fee": {
@@ -1567,7 +1570,8 @@
 			"ata_fee": "Комиссия ATA",
 			"transaction_fees": "Комиссии за транзакции",
 			"network_fee": "Сетевая комиссия",
-			"approval_fee": "Комиссия за одобрение"
+			"approval_fee": "Комиссия за одобрение",
+			"prioritization_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."
@@ -1614,10 +1618,32 @@
 			"amount": "Сумма",
 			"hex_data": "HEX-данные",
 			"unreviewed_instructions": "",
+			"simulated_changes": "",
+			"simulation_note": "",
+			"simulation_control_change": "",
+			"simulation_new_owner": "",
+			"simulation_new_spender": "",
+			"simulation_new_close_authority": "",
+			"simulation_new_program": "",
+			"simulation_control_removed": "",
+			"transfer_sources": "",
+			"transfer_destinations": "",
+			"transfer_party_own": "",
+			"transfer_parties_partial": "",
+			"dapp_prioritization_fee": "",
+			"high_prioritization_fee": "",
+			"dapp_gas_limit": "",
+			"high_gas_limit": "",
+			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
+			"unsigned_typed_data_keys": "",
+			"unverifiable_erc20_request": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
 			"sign_psbt": "",
+			"sign_transaction": "",
+			"sign_and_send_transaction": "",
 			"signing_address": "",
+			"signer": "",
 			"fee": "",
 			"btc_symbol": "",
 			"psbt_inputs": "",
@@ -1635,7 +1661,8 @@
 			"no_connected_apps": "В настоящее время нет подключённых приложений.",
 			"disconnect_all": "Отключить все",
 			"disconnect_app": "Отключить $name",
-			"wallet_connect": ""
+			"wallet_connect": "",
+			"token_units": ""
 		},
 		"alt": {
 			"connect_input": "например, wc:a281567bb3e4..."
@@ -1678,9 +1705,11 @@
 			"btc_psbt_decode": "",
 			"btc_psbt_input_not_segwit": "",
 			"btc_psbt_input_not_owned": "",
+			"btc_psbt_input_ambiguous": "",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
 			"unknown_destination": "Неизвестный адрес получателя.",
 			"ambiguous_transaction": "Эта транзакция перемещает средства между несколькими адресами и не может быть точно отображена для проверки. В целях вашей безопасности она не была подписана.",
+			"sol_transaction_as_message": "",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
 		}
@@ -1831,6 +1860,8 @@
 			"buy": "",
 			"select_sell_token": "",
 			"select_buy_token": "",
+			"select_sell_token_first": "",
+			"select_buy_token_first": "",
 			"you_sell": "",
 			"you_buy": "",
 			"hero_prefix": "",
@@ -1934,7 +1965,9 @@
 			"to_ata": "Счет отправителя токенов (ATA)",
 			"to_ata_copied": "Счет отправителя токенов (ATA) скопирован в буфер обмена.",
 			"block": "Блок",
-			"interacted_with": "Взаимодействовали с (Получатель)",
+			"interacted_with": "Взаимодействовали с",
+			"unknown_token": "",
+			"raw_value": "",
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "Для",
@@ -2327,8 +2360,8 @@
 			"hidden_micro_transactions": "Транзакции с очень маленькими значениями токенов в настоящее время скрыты. Чтобы показать их, перейдите в <a href=\"/settings/\">Настройки</a>.<a class='no-underline blue-link' style='margin-left: 1.25em' href=\"https://docs.oisy.com/introduction/oisy-keeps-you-protected#filter-for-small-transactions\" target=\"_blank\" rel=\"noopener noreferrer\">Узнать больше</a>"
 		},
 		"warning": {
-			"no_index_canister": "Транзакции для $token_list не могут быть отображены. Нет доступного контейнера индекса.",
-			"unavailable_index_canister": "Транзакции для $token_list не могут быть отображены. Контейнер индекса в настоящее время недоступен."
+			"no_index_canister": "$oisy_short не может загрузить транзакции для $token_list — эмитент токена не предоставляет отслеживание транзакций.",
+			"unavailable_index_canister": "Последние транзакции для $token_list сейчас не могут быть загружены, так как их сервис отслеживания не отвечает. Они загрузятся автоматически, как только он снова заработает."
 		}
 	},
 	"earning": {

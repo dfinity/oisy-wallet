@@ -1,6 +1,12 @@
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/tokens/tokens-icrc/tokens.icrc.ck.btc.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SwapIcpWizard from '$icp/components/swap/SwapIcpWizard.svelte';
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
+import {
+	TRACK_COUNT_SWAP_SUBMITTED,
+	TRACK_COUNT_SWAP_SUCCESS
+} from '$lib/constants/analytics.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -8,12 +14,18 @@ import * as analytics from '$lib/services/analytics.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
 import * as toasts from '$lib/stores/toasts.store';
+import { SwapProvider, type ChainFusionSwapDetails } from '$lib/types/swap';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockOneSecProvider, mockSwapProviders } from '$tests/mocks/swap.mocks';
+import {
+	mockChainFusionProvider,
+	mockOneSecProvider,
+	mockSwapProviders
+} from '$tests/mocks/swap.mocks';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -27,12 +39,18 @@ vi.mock('$icp/api/icrc-ledger.api', () => ({
 
 const mockSwapFn = vi.fn();
 const mockOneSecFn = vi.fn();
+const mockChainFusionFn = vi.fn();
 
 vi.mock('$lib/services/swap.services', () => ({
 	fetchOneSecIcpToEvmSwap: (...args: unknown[]) => mockOneSecFn(...args),
+	enableSwapDestinationToken: vi.fn(),
 	swapService: {
 		icpSwap: (...args: unknown[]) => mockSwapFn(...args)
 	}
+}));
+
+vi.mock('$lib/services/chain-fusion-swap.services', () => ({
+	fetchChainFusionIcpSwap: (...args: unknown[]) => mockChainFusionFn(...args)
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -340,6 +358,192 @@ describe('SwapIcpWizard', () => {
 				expect(mockOneSecFn).not.toHaveBeenCalled();
 				expect(toasts.toastsError).toHaveBeenCalled();
 				expect(BASE_PROPS.onBack).toHaveBeenCalledOnce();
+			});
+		});
+
+		describe('Chain Fusion ICP→Ethereum withdrawal', () => {
+			const ckEthFeeToken = {
+				...mockValidIcCkToken,
+				symbol: 'ckETH',
+				decimals: 18,
+				ledgerCanisterId: 'ss2fx-dyaaa-aaaar-qacoq-cai'
+			};
+
+			// A ckERC20 source names the ckETH ledger as its fee ledger — the field
+			// `convertCkErc20ToErc20` approves on, and the one the wizard now picks the
+			// external fees to approve by.
+			const ckErc20SourceToken = {
+				...mockToken,
+				feeLedgerCanisterId: ckEthFeeToken.ledgerCanisterId
+			};
+
+			const setChainFusionContext = (swapDetails?: ChainFusionSwapDetails) => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...(mockContext.get(SWAP_CONTEXT_KEY) as object),
+					sourceToken: readable(ckErc20SourceToken),
+					destinationToken: readable(mockValidErc20Token)
+				});
+
+				const provider = mockChainFusionProvider(swapDetails);
+				const chainFusionAmountsStore = initSwapAmountsStore();
+				chainFusionAmountsStore.setSwaps({
+					swaps: [provider],
+					amountForSwap: 1,
+					selectedProvider: provider
+				});
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: chainFusionAmountsStore });
+			};
+
+			const submit = async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+			};
+
+			beforeEach(() => {
+				mockChainFusionFn.mockResolvedValue(undefined);
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+			});
+
+			// No ckETH fee allowance is passed on purpose: `fetchChainFusionIcpSwap` resolves
+			// it itself, freshly, at execution time — a quote-time figure goes stale while the
+			// user sits on Review, and the minter rejects a stale allowance with
+			// `InsufficientAllowance`.
+			it('dispatches the withdrawal to the user own Ethereum address', async () => {
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						destinationAddress: mockEthAddress,
+						sourceToken: ckErc20SourceToken
+					})
+				);
+			});
+
+			// The id the active user transaction is created under, so the row and the
+			// `swap_submitted` event describe the same conversion.
+			it('passes a swap id and the USD value the row is snapshotted with', async () => {
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ swapId: expect.any(String) })
+				);
+
+				expect(mockChainFusionFn.mock.lastCall?.[0].swapId).not.toBe('');
+			});
+
+			// The foreground ends when the funds leave the wallet; the minter settles
+			// afterwards, and the AUT row is what reports success or failure.
+			it('reports the conversion as submitted rather than succeeded', async () => {
+				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+				setChainFusionContext({ sourceFees: [], externalFees: [] });
+
+				await submit();
+
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_SWAP_SUBMITTED,
+						metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+					})
+				);
+
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+				);
+			});
+		});
+
+		describe('Chain Fusion ICP→Bitcoin withdrawal', () => {
+			const ckBtcSourceToken = {
+				...mockToken,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			};
+
+			const setChainFusionBtcContext = () => {
+				mockContext.set(SWAP_CONTEXT_KEY, {
+					...(mockContext.get(SWAP_CONTEXT_KEY) as object),
+					sourceToken: readable(ckBtcSourceToken),
+					destinationToken: readable(BTC_MAINNET_TOKEN)
+				});
+
+				const provider = mockChainFusionProvider({ sourceFees: [], externalFees: [] });
+				const amountsStore = initSwapAmountsStore();
+				amountsStore.setSwaps({ swaps: [provider], amountForSwap: 1, selectedProvider: provider });
+				mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: amountsStore });
+			};
+
+			const submit = async () => {
+				const { getByText, queryByRole } = renderWithStep(WizardStepsSwap.REVIEW);
+
+				const valueDifferenceCheckbox = queryByRole('checkbox');
+				if (valueDifferenceCheckbox) {
+					await fireEvent.click(valueDifferenceCheckbox);
+				}
+
+				await fireEvent.click(getByText(en.swap.text.swap_button));
+				await vi.runOnlyPendingTimersAsync();
+			};
+
+			beforeEach(() => {
+				mockChainFusionFn.mockResolvedValue(undefined);
+				vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(mockEthAddress));
+				vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(mockBtcAddress));
+			});
+
+			// The minter pays the withdrawal out on the destination chain, so the address has to
+			// follow the destination rather than always being the Ethereum one.
+			it('dispatches the withdrawal to the user own Bitcoin address', async () => {
+				setChainFusionBtcContext();
+
+				await submit();
+
+				expect(mockChainFusionFn).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ destinationAddress: mockBtcAddress })
+				);
+			});
+
+			it('refuses to dispatch when the Bitcoin address is unknown', async () => {
+				vi.spyOn(addrDerived, 'btcAddressMainnet', 'get').mockReturnValue(readable(undefined));
+
+				setChainFusionBtcContext();
+
+				await submit();
+
+				expect(mockChainFusionFn).not.toHaveBeenCalled();
+				expect(toasts.toastsError).toHaveBeenCalled();
+			});
+
+			// The ckBTC minter settles the withdrawal in the background, tracked by the row the
+			// execution persists — so the foreground reports the burn as submitted, as every
+			// other ck withdrawal does.
+			it('reports the conversion as submitted rather than succeeded', async () => {
+				const trackEventSpy = vi.spyOn(analytics, 'trackEvent');
+
+				setChainFusionBtcContext();
+
+				await submit();
+
+				expect(trackEventSpy).toHaveBeenCalledWith(
+					expect.objectContaining({
+						name: TRACK_COUNT_SWAP_SUBMITTED,
+						metadata: expect.objectContaining({ dApp: SwapProvider.CHAIN_FUSION })
+					})
+				);
+
+				expect(trackEventSpy).not.toHaveBeenCalledWith(
+					expect.objectContaining({ name: TRACK_COUNT_SWAP_SUCCESS })
+				);
 			});
 		});
 	});

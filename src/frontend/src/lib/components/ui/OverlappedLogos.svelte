@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
 
@@ -16,8 +15,11 @@
 	let { icons, size = 'xxs', invertColor, color = 'off-white', styleClass = '' }: Props = $props();
 </script>
 
-<div class={`${styleClass} flex items-center`}>
-	{#if icons.length > 0}
+<!-- An empty `icons` list renders no node at all — not even the wrapper — so a caller's `styleClass`
+     (e.g. spacing) adds nothing when there is nothing to show. Absence of icons is not a loading
+     state: callers that need a loading placeholder own that themselves rather than relying on this. -->
+{#if icons.length > 0}
+	<div class={`${styleClass} flex items-center`}>
 		{#each icons as icon, i (icon)}
 			<div
 				style={`max-height: ${logoSizes[size]}; ${i < icons.length - 1 ? `margin-right: calc(-${logoSizes[size]} / 3);` : ''} z-index: ${i + 1};`}
@@ -29,9 +31,5 @@
 				</span>
 			</div>
 		{/each}
-	{:else}
-		<div class="w-12">
-			<SkeletonText />
-		</div>
-	{/if}
-</div>
+	</div>
+{/if}

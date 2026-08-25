@@ -426,6 +426,40 @@ describe('ic-send.services', () => {
 					expect(mockProgress).not.toHaveBeenCalled();
 					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
 				});
+
+				it('should hand the result to onSent ahead of the wallet-refresh wait', async () => {
+					const result = { type: 'ckBtcToBtc', blockIndex: 42n } as const;
+
+					vi.mocked(convertCkBTCToBtc).mockResolvedValueOnce(result);
+
+					const onSent = vi.fn(() => {
+						expect(waitAndTriggerWallet).not.toHaveBeenCalled();
+					});
+
+					await sendIc({ ...mockParams, onSent });
+
+					expect(onSent).toHaveBeenCalledExactlyOnceWith({ result });
+					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+				});
+
+				// The callback is best-effort decoration; the flow's own completion — the
+				// reload step and the wallet refresh — must not depend on it.
+				it('should not let a throwing onSent derail the completion', async () => {
+					const result = { type: 'ckBtcToBtc', blockIndex: 42n } as const;
+
+					vi.mocked(convertCkBTCToBtc).mockResolvedValueOnce(result);
+
+					await expect(
+						sendIc({
+							...mockParams,
+							onSent: () => {
+								throw new Error('callback failure');
+							}
+						})
+					).resolves.toStrictEqual(result);
+
+					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+				});
 			});
 
 			describe.each(SUPPORTED_ETHEREUM_NETWORK_IDS)('and it is %s', (networkId) => {

@@ -29,6 +29,16 @@ type ActiveUserTransactionData = variant {
 	// source/destination leg (EVM and Solana); the deposit address, its
 	// optional memo, and origin/destination tx hashes ride in `external_refs`.
 	NearIntents : NearIntentsData;
+	// Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
+	// single variant covers all six directions, discriminated by the
+	// `direction` field; the minter block indices, the BTC txid and deposit
+	// address, and the Ethereum deposit tx hash and block number ride in
+	// `external_refs`.
+	ChainFusion : ChainFusionData;
+	// Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+	// modes, discriminated by the `mode` field; the auction id, order hash,
+	// transaction hash and nonce ride in `external_refs`.
+	Velora : VeloraData;
 	// Liquidium lend/borrow flow. A single variant covers all four actions
 	// (supply, borrow, repay, withdraw).
 	Liquidium : LiquidiumData
@@ -373,6 +383,34 @@ type CanisterStatusType = variant {
 	stopping;
 	// The canister is running.
 	running
+};
+// Chain Fusion ck conversion payload. Every settlement pointer is learned
+// mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
+// those live in `external_refs`; only the canonical immutable fields are
+// captured here, which is why all six directions share one variant.
+//
+// `direction` is explicit rather than inferred from the token pair: the poller
+// selects its settlement oracle from it, and re-deriving "is this a mint or a
+// withdrawal?" from two token ids on every tick would rediscover something
+// known for certain at creation.
+type ChainFusionData = record {
+	direction : ChainFusionDirection;
+	source_token : TokenId;
+	// Source-token amount in base units.
+	amount : nat;
+	dest_token : TokenId
+};
+// Which ck conversion an active transaction tracks. Determines which minter the
+// frontend asks about settlement, and how: the three withdrawal directions have
+// an exact status keyed by the minter's burn block index, while the mint
+// directions are observed from the deposit side.
+type ChainFusionDirection = variant {
+	BtcToCkBtc;
+	CkBtcToBtc;
+	EthToCkEth;
+	CkErc20ToErc20;
+	Erc20ToCkErc20;
+	CkEthToEth
 };
 type Config = record {
 	// The derivation origin used for II authentication, ensuring users get a
@@ -784,13 +822,12 @@ type NearIntentsData = record {
 	amount : nat;
 	dest_token : TokenId
 };
-// Bitcoin Network.
 type Network = variant {
-	// The Bitcoin mainnet.
+	// Bitcoin Mainnet.
 	mainnet;
-	// The Bitcoin regtest, used for local testing purposes.
+	// Bitcoin Regtest.
 	regtest;
-	// The Bitcoin testnet.
+	// Bitcoin Testnet4.
 	testnet
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
@@ -844,15 +881,12 @@ type OneSecIcpToEvmData = record {
 // `wallets`, or `(ethereum, <address>)` inside `networkWallets`. The canister normalizes the
 // `key` to lowercase before signing.
 type OnramperSignedEntry = record { key : text; value : text };
-// Outpoint.
-type Outpoint = record {
-	// Transaction ID (TxID).
-	//
-	// The hash of the transaction that created the UTXO.
+// A reference to a transaction output.
+type OutPoint = record {
+	// A cryptographic hash of the transaction.
+	// A transaction can output multiple UTXOs.
 	txid : blob;
-	// Output Index (vout).
-	//
-	// The index of the specific output within that transaction (since a transaction can have multiple outputs).
+	// The index of the output within the transaction.
 	vout : nat32
 };
 type PendingTransaction = record { txid : blob; utxos : vec Utxo };
@@ -1266,15 +1300,23 @@ type UserTransactionError = variant {
 	// Reserved for future caller-validation logic.
 	UserNotFound
 };
-// Unspent Transaction Output (UTXO).
-type Utxo = record {
-	// The block height at which the UTXO was created.
-	height : nat32;
-	// The value of the UTXO in satoshis.
-	value : nat64;
-	// The outpoint of the UTXO.
-	outpoint : Outpoint
+// An unspent transaction output.
+type Utxo = record { height : nat32; value : nat64; outpoint : OutPoint };
+// Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+// id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+// pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+// `external_refs`; only the canonical immutable fields are captured here.
+type VeloraData = record {
+	mode : VeloraSwapMode;
+	source_token : TokenId;
+	// Source-token amount in base units.
+	amount : nat;
+	dest_token : TokenId
 };
+// Which Velora execution mode an active transaction tracks. Determines how the
+// frontend polls for settlement: `Delta` by auction id against Velora's Delta
+// API, `Market` by transaction receipt on the source chain.
+type VeloraSwapMode = variant { Delta; Market };
 service : (Arg) -> {
 	// Adds one or more dismissed notifications to the user's profile.
 	//

@@ -8,6 +8,7 @@ import {
 } from '$lib/constants/oisy.constants';
 import { Languages } from '$lib/enums/languages';
 import {
+	formatList,
 	getDefaultLang,
 	mergeWithFallback,
 	replaceOisyPlaceholders,
@@ -70,6 +71,45 @@ describe('i18n-utils', () => {
 			expect(replaceOisyPlaceholders('Url: $oisy_url')).toBe(`Url: ${OISY_URL}`);
 
 			expect(replaceOisyPlaceholders('Url: $oisy_repo_url')).toBe(`Url: ${OISY_REPO_URL}`);
+		});
+	});
+
+	describe('formatList', () => {
+		it('should return the single item on its own', () => {
+			expect(formatList({ items: ['ICP'], language: Languages.ENGLISH })).toBe('ICP');
+		});
+
+		it('should join two items with a conjunction, not a comma', () => {
+			expect(formatList({ items: ['ICP', 'GLDT'], language: Languages.ENGLISH })).toBe(
+				'ICP and GLDT'
+			);
+		});
+
+		it('should use the conjunction only before the last item', () => {
+			// Note the serial comma: that is what `en` prescribes, and following the locale is the point.
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language: Languages.ENGLISH })).toBe(
+				'ICP, GLDT, and PANDA'
+			);
+		});
+
+		it('should be empty for no items', () => {
+			expect(formatList({ items: [], language: Languages.ENGLISH })).toBe('');
+		});
+
+		it.each([
+			{ language: Languages.GERMAN, expected: 'ICP, GLDT und PANDA' },
+			{ language: Languages.FRENCH, expected: 'ICP, GLDT et PANDA' },
+			{ language: Languages.SPANISH, expected: 'ICP, GLDT y PANDA' },
+			{ language: Languages.ITALIAN, expected: 'ICP, GLDT e PANDA' }
+		])('should use the conjunction of $language', ({ language, expected }) => {
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language })).toBe(expected);
+		});
+
+		it('should follow the locale rather than inserting a Latin comma', () => {
+			// Japanese separates with an ideographic comma and no trailing conjunction word.
+			expect(formatList({ items: ['ICP', 'GLDT', 'PANDA'], language: Languages.JAPANESE })).toBe(
+				'ICP、GLDT、PANDA'
+			);
 		});
 	});
 

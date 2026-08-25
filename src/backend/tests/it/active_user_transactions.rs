@@ -5,9 +5,11 @@ use pretty_assertions::assert_eq;
 use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
-        ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
-        NearIntentsData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, NearIntentsData,
+        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
     },
+    custom_token::ErcTokenId,
     result_types::{
         ActiveUserTransactionResult, DeleteActiveUserTransactionResult,
         GetActiveUserTransactionsResult,
@@ -215,6 +217,108 @@ fn create_near_intents_variant_roundtrip() {
         }
         ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
     }
+}
+
+#[test]
+fn create_velora_variant_roundtrip() {
+    // Both Velora modes share one variant; the mode must survive the canister
+    // round-trip untouched, since the FE poller routes on it.
+    for (mode, id) in [
+        (VeloraSwapMode::Delta, "velora-delta"),
+        (VeloraSwapMode::Market, "velora-market"),
+    ] {
+        let pic = setup();
+        let user = caller();
+        pic.ensure_user_profile(user);
+
+        let data = ActiveUserTransactionData::Velora(VeloraData {
+            mode,
+            source_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000abc".to_string()),
+                1,
+            ),
+            dest_token: TokenId::Erc20(
+                ErcTokenId("0x0000000000000000000000000000000000000def".to_string()),
+                1,
+            ),
+            amount: Nat::from(7_500u64),
+        });
+
+        let created = pic
+            .update::<ActiveUserTransactionResult>(
+                user,
+                "create_active_user_transaction",
+                CreateActiveUserTransactionRequest {
+                    id: id.to_string(),
+                    data: data.clone(),
+                    progress_step: Some("initialization".to_string()),
+                    external_refs: vec![ActiveUserTransactionRef {
+                        key: "velora_auction_id".to_string(),
+                        value: "11111111-1111-4111-8111-111111111111".to_string(),
+                    }],
+                },
+            )
+            .expect("create_active_user_transaction call should succeed");
+
+        match created {
+            ActiveUserTransactionResult::Ok(tx) => {
+                assert_eq!(tx.id, id);
+                assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+                assert_eq!(tx.data, data);
+                assert_eq!(tx.external_refs.len(), 1);
+            }
+            ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+        }
+    }
+}
+
+#[test]
+fn create_chain_fusion_variant_roundtrip() {
+    // Per-direction candid fidelity is covered in-process by the shared-crate
+    // round-trip tests, so one canister round-trip proves the end-to-end wiring.
+    // `BtcToCkBtc` keeps `BtcNativeMainnet` on the wire — no other AUT variant
+    // can carry it.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+        direction: ChainFusionDirection::BtcToCkBtc,
+        source_token: TokenId::BtcNativeMainnet,
+        dest_token: TokenId::Icrc(Principal::from_text("mxzaz-hqaaa-aaaar-qaada-cai").unwrap()),
+        amount: Nat::from(1_000u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "btc_txid".to_string(),
+                    value: "aa".repeat(32),
+                }],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
 }
 
 #[test]
