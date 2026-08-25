@@ -372,7 +372,7 @@ describe('NftHero', () => {
 
 		await fireEvent.click(backButton);
 
-		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/collectibles'));
 		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('collection='));
 	});
 });

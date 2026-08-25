@@ -13,20 +13,35 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { loadActiveUserTransactions } from '$lib/services/active-user-transactions.services';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { pollChainFusionActiveUserTransactions } from '$lib/services/chain-fusion-swap-active-tx.services';
 	import { pollLiquidiumActiveUserTransactions } from '$lib/services/liquidium-active-tx.services';
 	import { loadLiquidium } from '$lib/services/liquidium.services';
+	import { pollNearIntentsActiveUserTransactions } from '$lib/services/near-intents-active-tx.services';
 	import { pollOneSecActiveUserTransactions } from '$lib/services/onesec-swap.services';
+	import { pollVeloraActiveUserTransactions } from '$lib/services/velora-active-tx.services';
 	import { activeUserTransactionsStore } from '$lib/stores/active-user-transactions.store';
 	import { isTerminalActiveUserTransaction } from '$lib/utils/active-user-transactions.utils';
+	import {
+		buildChainFusionSwapTrackingMetadata,
+		isChainFusionActiveUserTransaction
+	} from '$lib/utils/chain-fusion-swap-active-tx.utils';
 	import { consoleError } from '$lib/utils/console.utils';
 	import {
 		buildLiquidiumTrackingMetadata,
 		isLiquidiumActiveUserTransaction
 	} from '$lib/utils/liquidium-active-tx.utils';
 	import {
+		buildNearIntentsSwapTrackingMetadata,
+		isNearIntentsActiveUserTransaction
+	} from '$lib/utils/near-intents-active-tx.utils';
+	import {
 		buildOneSecSwapTrackingMetadata,
 		isOneSecActiveUserTransaction
 	} from '$lib/utils/onesec-swap.utils';
+	import {
+		buildVeloraSwapTrackingMetadata,
+		isVeloraActiveUserTransaction
+	} from '$lib/utils/velora-active-tx.utils';
 	import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 
 	// `loadActiveUserTransactions` resets the store on nullish identity.
@@ -64,6 +79,28 @@
 
 			if (liquidium.length > 0) {
 				await pollLiquidiumActiveUserTransactions({ identity, transactions: liquidium });
+			}
+
+			const nearIntents = $activeUserTransactionsPending.filter(isNearIntentsActiveUserTransaction);
+
+			if (nearIntents.length > 0) {
+				await pollNearIntentsActiveUserTransactions({ identity, transactions: nearIntents });
+			}
+
+			const velora = $activeUserTransactionsPending.filter(isVeloraActiveUserTransaction);
+
+			if (velora.length > 0) {
+				await pollVeloraActiveUserTransactions({
+					identity,
+					transactions: velora,
+					userAddress: $ethAddress
+				});
+			}
+
+			const chainFusion = $activeUserTransactionsPending.filter(isChainFusionActiveUserTransaction);
+
+			if (chainFusion.length > 0) {
+				await pollChainFusionActiveUserTransactions({ identity, transactions: chainFusion });
 			}
 		} catch (err: unknown) {
 			consoleError(err);
@@ -128,6 +165,53 @@
 				trackEvent({
 					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
 					metadata: buildOneSecSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isNearIntentsActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildNearIntentsSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isVeloraActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildVeloraSwapTrackingMetadata({ tx })
+				});
+
+				if (isSucceeded) {
+					shouldRefresh = true;
+				}
+			} else if (
+				isTerminalActiveUserTransaction(tx) &&
+				!alreadyApplied &&
+				isChainFusionActiveUserTransaction(tx)
+			) {
+				newlyAppliedIds.push(tx.id);
+
+				// A ck conversion started from the Swap modal reports into the swap funnel.
+				// The untouched Convert flow keeps firing its own `TRACK_COUNT_CONVERT_*`.
+				trackEvent({
+					name: isSucceeded ? TRACK_COUNT_SWAP_SUCCESS : TRACK_COUNT_SWAP_ERROR,
+					metadata: buildChainFusionSwapTrackingMetadata({ tx })
 				});
 
 				if (isSucceeded) {

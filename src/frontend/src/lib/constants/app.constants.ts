@@ -165,6 +165,9 @@ export const EIGHT_DECIMALS = 8;
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 export const MAX_UINT_256 = (1n << 256n) - 1n;
+// Permit2 declares its allowance as a `uint160`, so an unlimited one saturates there rather than
+// at the 256-bit maximum.
+export const MAX_UINT_160 = (1n << 160n) - 1n;
 
 // NFTs
 export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 seconds in milliseconds
@@ -173,6 +176,9 @@ export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1_000; // 20 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1_000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
+// How many consecutive jobs must fail to fetch the transactions of an IC token before we tell the user about it.
+// At the interval above, that is about 90 seconds of silence - long enough to skip transient hiccups.
+export const IC_TRANSACTIONS_UNAVAILABLE_THRESHOLD = 3;
 // Solana wallets
 // Until we find a way to reduce the number of calls (that we pay proportionally) done to the Solana RPC, we delay them more than the other wallets.
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
@@ -188,6 +194,11 @@ export const ACTIVE_USER_TRANSACTIONS_POLL_INTERVAL_MILLIS = 5 * 1_000; // 5 sec
 // Minimum delay between two `forward_evm_to_icp` re-notifications for the same
 // pending OneSec EVM→ICP row (notifying is an update call, polling is 5s).
 export const ONESEC_FORWARDING_NOTIFY_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
+// Minimum delay between two `update_balance` calls for the same pending
+// BTC → ckBTC row. Same reasoning as above — minting is an update call, polling is
+// 5s — and it is the outer bound on top of the query gate that skips the call
+// entirely while the deposit is still gathering confirmations.
+export const CHAIN_FUSION_UPDATE_BALANCE_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1_000; // 1 minute
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1_000; // 5 minutes in milliseconds

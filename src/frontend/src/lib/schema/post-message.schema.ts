@@ -207,7 +207,10 @@ export const JsonTransactionsTextSchema = z.string();
 
 export const PostMessageWalletDataSchema = z.object({
 	balance: z.custom<CertifiedData<bigint>>(),
-	newTransactions: JsonTransactionsTextSchema.optional()
+	newTransactions: JsonTransactionsTextSchema.optional(),
+	// Set when the balance could be fetched but the transactions could not — i.e. the Index canister
+	// did not answer, or answered with data we cannot trust. Absent means the check succeeded.
+	transactionsUnavailable: z.boolean().optional()
 });
 
 export const PostMessageDataResponseWalletSchema = PostMessageDataResponseSchema.extend({

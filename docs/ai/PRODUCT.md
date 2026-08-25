@@ -148,6 +148,22 @@ ICP on the same EVM chains is intentionally **not** metadata-only: some users ma
 
 ---
 
+## Activity
+
+### IC transactions and Index-canister outages
+
+For tokens on the Internet Computer, balances and transaction history come from two different canisters: the balance from the token's Ledger canister, the history from its Index canister. OISY refreshes both every 30 seconds.
+
+The two are treated independently, because only one of them is essential. If the Ledger canister cannot be reached the sync fails and the balance is dropped, since a wrong balance is worse than none. If the **Index** canister cannot be reached — it does not answer, or it answers with data OISY can tell is stale, which happens when it runs low on cycles and silently stops following the ledger — the balance still updates normally and the transactions already loaded stay on screen. OISY keeps retrying on the regular 30-second cycle; there is no separate back-off and no point at which it gives up for the session.
+
+The user is only told about it once the problem looks real rather than transient: a warning appears on the Activity page after **three consecutive** failed checks for a token (roughly 90 seconds), listing the affected tokens, and disappears as soon as one check succeeds. Because the check succeeds or fails per token, a single misbehaving token does not implicate the others.
+
+The same warning appears on the token's own page, above its transaction list — naming only that token, and labelling the list as stale rather than replacing it, since what was loaded before the outage is still worth showing. The warning can be dismissed, and the dismissal is remembered **per token and for that outage only**, and is shared between the two places: dismissing it on the token page also stops that token being named on the Activity page. Dismissing it while token A is failing does not silence token B failing later — the warning returns naming only B. And once A's Index canister answers again, A is forgotten, so a fresh outage of A is surfaced again rather than staying hidden for the rest of the session. The dismissal lives in the browser session, not in the user's profile: it is about the outage in front of them, not a lasting preference. Tokens are identified by their ledger canister ID rather than their symbol, so two tokens that happen to share a symbol are never confused for one another.
+
+This is distinct from a token whose issuer provides **no** Index canister at all. There is nothing to retry there and no history will ever load, so that case shows its own notice, which the user can dismiss permanently per token — that one _is_ a lasting preference, and is stored in the user profile.
+
+---
+
 ## Exchange-rate sourcing
 
 OISY prices tokens against USD (and, for non-USD display currencies, derives an FX rate by cross-referencing BTC). Prices come from two layers that work together rather than as an either/or.
@@ -227,6 +243,32 @@ OISY connects to external dApps over WalletConnect (Reown WalletKit). When a dAp
 - **Solana (`solana`)** — supports `solana_signTransaction`, `solana_signAndSendTransaction`, and `solana_signMessage`, advertised for the mainnet and devnet addresses that are present (including the legacy CAIP-10 namespaces for compatibility). For `solana_signMessage`, OISY decodes the base58 message and shows the decoded text for review when possible (falling back to the raw value if decoding fails), then returns the base58-encoded Ed25519 signature.
 - **Bitcoin (`bip122`)** — supports `getAccountAddresses`, `signMessage`, and `signPsbt`. The namespace is advertised whenever any BTC address (mainnet, testnet, or regtest) is loaded, with one `bip122:<genesis>` chain and matching `bip122:<genesis>:<address>` account per present network, and the `bip122_addressesChanged` event.
 
+### Simulated preview of a Solana transaction
+
+Before a Solana `signTransaction` / `signAndSendTransaction` review renders, OISY asks the network to **simulate** the request and shows what it would do **to the user's own accounts**: the native SOL change on the user's address (which absorbs the transaction and priority fees), the per-mint SPL token changes across the user's token accounts, and — separately and as a warning — any change to who controls one of those accounts.
+
+That last part is the reason the preview exists in the form it does. Handing a token account to a new owner, granting a delegate, granting a close authority, or reassigning the account to a different program moves no balance at all: the account keeps exactly the tokens it had. A preview built on amounts alone would show nothing and imply the request is harmless, so OISY diffs the owner, delegate, close-authority and owning-program fields as well as the amounts.
+
+Simulation also sees what a static decode structurally cannot. Effects produced inside cross-program invocations do not exist in an unsigned message, so no decoder can read them; running the message reveals them as account changes.
+
+The preview is deliberately **not** a safety verdict. It runs against the network's state at the current slot, and a program can behave differently when the transaction actually executes, so the review always says so and never claims a transaction is safe or verified. It is also **not** a substitute for the existing checks: a transaction OISY cannot review faithfully is still refused outright, whatever a simulation says about it.
+
+Scope is deliberately narrow. The preview reports only the user's own accounts, never the counterparty's; and it is **best effort** — if the simulation fails, is unsupported, is too slow, or reports that the transaction would itself fail, the review renders with exactly the information it would have shown anyway, with no error and no preview. It never blocks a user from seeing or rejecting a request. For an approval, the spender is shown as before.
+
+### Sources and destinations of a Solana transaction
+
+The same review answers "where is this going?" with two lists rather than one address. **Sources** holds the accounts the transaction spends from, and **Destinations** the accounts it pays into. The two rules are asymmetric on purpose: Sources holds the sources of transfers **the user's account is the source of**, while Destinations holds the destinations of transfers the user's account is **either the source or the destination** of. So a counterparty paying into a pool is never listed as a source, and the user appears as a source only when value genuinely leaves one of their accounts. A plain send yields exactly one entry in each list; a swap yields several, because every leg the user is on one side of contributes its destination.
+
+That asymmetry is what makes a swap describable at all. The leg that pays the user out puts one of the **user's own** accounts among the destinations, which is how the review shows what the user receives and not only what they spend. Such an entry is **marked as the user's own account**, so it does not read as a counterparty. Sources, by contrast, is hidden when it holds nothing but the wallet the review already names, since repeating it says nothing.
+
+Only transfers count. Creating an associated token account, changing an authority, setting a compute budget, or approving a spender contributes to neither list (an approval keeps its own spender row). Accounts are listed by the **wallet that owns them** wherever OISY knows it, because SPL transfers name token accounts and nobody recognises their own associated token account.
+
+The lists are built from the same simulation as the preview above, which is the only way to see a routed swap: such a swap performs every one of its transfers inside cross-program invocations, which do not exist in the unsigned message at all. When there is no simulation to build them from, OISY falls back to the instructions the message states itself **and says that the lists are partial**. That warning is not optional: without it, a routed swap would show two empty lists for a transaction that moves several amounts, and an empty list reads as an answer rather than as a gap.
+
+Showing several addresses does not make a self-contradicting transaction showable. A transaction whose instructions **disagree** about source, destination, payer, token or action type is still refused outright, exactly as before. Several addresses that agree about what happened is a swap; instructions that disagree about what happened is something OISY cannot state faithfully at all.
+
+The lists currently appear on the WalletConnect sign review. Showing them on an executed transaction in the activity list is a follow-up.
+
 `signPsbt` is **sign-only**: OISY signs the PSBT the dApp provides and returns it, but does not broadcast the resulting transaction itself. Broadcasting is deferred to the dApp (and the `sendTransfer` method is intentionally not offered) so OISY never broadcasts a transaction it cannot fully account for — see the spec's broadcast-atomicity rationale.
 
 ### Starting a pairing from the scanner
@@ -274,6 +316,37 @@ The send flow therefore exposes the destination tag as an explicit, optional fie
 ### Base reserve
 
 The XRP Ledger requires an account to keep a minimum balance on-ledger (the **base reserve**) for the account to continue to exist. The maximum sendable amount therefore subtracts that reserve as well as the fee — the full balance is never sendable, and the balance shown is the full ledger balance rather than the spendable remainder.
+
+---
+
+## Swap
+
+### Chain Fusion as a swap provider
+
+Turning ETH into ckETH, a twinned ERC-20 into its ckERC-20 counterpart, or BTC into ckBTC is offered inside the Swap modal as an ordinary provider named **Chain Fusion**, competing on rate with ICPSwap, KongSwap, Velora, NEAR Intents and 1Sec. Selecting ETH as the pay token puts ckETH among the receive options; selecting ckETH puts ETH among them, and the same holds for every ck twin whose native side is on **Ethereum mainnet** — the only network where the ck helper contracts are deployed. USDC on Base or Arbitrum therefore gets no Chain Fusion offer, because a ckUSDC deposit made there could never be minted.
+
+**Bitcoin joins the swap universe through this provider, and only through it.** Before Chain Fusion, a user holding BTC opened Swap and saw no offers at all: no DEX in the list quotes a Bitcoin pair. Bitcoin now appears as a pay token with ckBTC as its sole receive option, and ckBTC offers BTC back alongside whatever the IC DEXes and 1Sec quote. The pairing is Bitcoin↔ICP only — Bitcoin never reaches Ethereum or Solana in the network filter, because no provider can take it there.
+
+The offer carries no slippage: a ck conversion is deterministic, so the rate is 1:1 apart from fees, and the form's fee section itemizes those fees one row at a time rather than as a single sum — the provider sheet carries no fees, only the provider's identity and the minimum amount the minter imposes. Two cases are worth calling out:
+
+- A **ckERC-20 withdrawal** is the one case that charges in a _third token_ — the minter's Ethereum gas is paid in ckETH — so the fee list names it separately and the form blocks Review when the user's ckETH balance cannot cover it.
+- A **BTC deposit**'s fee depends on the user's own coins, since the Bitcoin network fee falls out of which UTXOs a deposit of that size has to spend. When those coins cannot fund the deposit — the balance is short, the confirmations are not in yet, or another send has already reserved the inputs — no offer appears at all, and the form explains which of those it is rather than quoting a fee the send would then refuse. A deposit is also held to the same minimum amount as a plain Bitcoin send, below which the output would be un-relayable dust.
+
+The quoted receive amount is what the minter actually credits, which is **not** always what the Convert flow shows. Two directions are not 1:1: a **BTC deposit** loses the minter's KYT fee (Convert quotes it 1:1 and is wrong — a 1 000-satoshi deposit mints 900), and a **ckBTC withdrawal** loses the Bitcoin network and minter fees. Everything else is 1:1, with its fees charged on top. Either way the fee breakdown lists every component that costs something, and its total is the user's whole cost of the conversion — the part paid out of balance plus the part withheld from what lands.
+
+The pre-existing **Convert** flow is unchanged and still reachable from a token's own page. Both paths coexist; the two mechanisms are identical, only the entry point, the presentation and — for a BTC deposit — the honesty of the quoted amount differ.
+
+### Cross-session settlement
+
+Every ck conversion outlives the modal. Once the user's funds have left their wallet the conversion becomes an **active user transaction**: a backend-persisted row that keeps settling with the modal closed, survives a tab close, a refresh and a logout, and resumes polling on next login from what it stored rather than from anything held in memory. This is a capability the Convert flow has never had — there, a conversion's progress dies with the modal.
+
+How settlement is observed differs by direction, because the minters answer different questions:
+
+- A **withdrawal** (ckETH → ETH, ckERC-20 → ERC-20, ckBTC → BTC) is exact. The minter is asked about the withdrawal directly, keyed on the ledger burn index it returned. Note that a freshly submitted withdrawal is unknown to its minter until it indexes the request, which is treated as "still in flight" and never as a failure — a terminal verdict cannot be taken back. A withdrawal the minter reimburses is reported as failed, as soon as that is decided rather than when the refund lands.
+- An **Ethereum mint** (ETH → ckETH, ERC-20 → ckERC-20) has no per-deposit status endpoint, so it is followed the same way the Convert flow's pending "virtual" transaction is: the deposit counts as in flight for as long as the minter has not yet scanned past the Ethereum block it landed in, and the helper contract's deposit log is what confirms, once the minter has, that there was a deposit to mint at all. A transaction that reverted, or that mined without producing a deposit log for this user, is reported as failed rather than quietly counted as a success.
+- A **Bitcoin deposit** (BTC → ckBTC) is the one conversion the app has to _finish_, not merely watch: the ckBTC minter credits nothing until someone asks it to look at the deposit address, so a deposit whose tab was closed before its confirmations landed would otherwise sit there indefinitely. The row therefore asks the minter to mint once the deposit has enough confirmations — sparingly, since OISY already does this for every enabled ckBTC wallet, and the request is harmless to repeat — and takes the minter's own answer as the verdict: minted, or rejected because the Bitcoin checker flagged the coins or they were too small to cover the check fee. A deposit that is confirmed but not yet minted, and any failure to reach the minter, leave the conversion in flight so the next attempt retries.
+
+When a row reaches a terminal state it refreshes the wallet and reports into the **swap** analytics funnel — not the convert one — exactly once, including when it finalizes across a page refresh.
 
 ---
 

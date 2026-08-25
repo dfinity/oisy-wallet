@@ -1,3 +1,4 @@
+import { USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import { BASE_ETH_TOKEN } from '$env/tokens/tokens-evm/tokens-base/tokens.eth.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
@@ -265,6 +266,26 @@ describe('applyTransactionsFilter', () => {
 			});
 
 			expect(result).toEqual([ethSendTx]);
+		});
+
+		it('matches ETH by the recipient of a token transfer, which the transaction `to` is not', () => {
+			// The fee entry of a token transfer is addressed to the token contract.
+			const erc20FeeTx = {
+				...ethSendTx,
+				transaction: {
+					...ethSendTx.transaction,
+					to: USDC_TOKEN.address,
+					transferRecipient: mockEthAddress2
+				}
+			} as unknown as AllTransactionUiWithCmp;
+
+			const result = applyTransactionsFilter({
+				transactions: [erc20FeeTx],
+				filter: { ...EMPTY_TRANSACTIONS_FILTER, contactIds: ['1'] },
+				contacts: allContacts
+			});
+
+			expect(result).toEqual([erc20FeeTx]);
 		});
 
 		it('matches BTC by sender or recipient', () => {

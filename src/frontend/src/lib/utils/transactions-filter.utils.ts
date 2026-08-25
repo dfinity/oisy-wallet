@@ -40,6 +40,9 @@ const candidateAddresses = (transactionUi: AllTransactionUiWithCmp): string[] =>
 		if (typeof to === 'string') {
 			collected.push(to);
 		}
+		// A token transfer is addressed to the token contract, so the counterparty a user would filter
+		// by is the recipient decoded from the calldata, not the transaction `to`.
+		collected.push(transaction.transferRecipient);
 	} else if (transactionUi.component === 'ic') {
 		const { transaction } = transactionUi;
 		collected.push(transaction.from);

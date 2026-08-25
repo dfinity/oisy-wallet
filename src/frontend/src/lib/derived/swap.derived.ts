@@ -1,3 +1,5 @@
+import { enabledMainnetBitcoinToken } from '$btc/derived/tokens.derived';
+import { CHAIN_FUSION_SWAP_ENABLED } from '$env/chain-fusion-swap.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -21,29 +23,52 @@ export interface SwappableTokens {
 }
 
 /**
+ * Bitcoin's contribution to the swap universe: the enabled mainnet BTC token, and only
+ * when Chain Fusion is on, since ck conversion is the sole route out of Bitcoin.
+ *
+ * Kept out of `allCrossChainSwapTokens`, which is typed around the EVM / SOL custom-token
+ * unions that BTC does not belong to.
+ */
+const swapUniverseBitcoinTokens: Readable<TokenToggleable<Token>[]> = derived(
+	[enabledMainnetBitcoinToken],
+	([$enabledMainnetBitcoinToken]) =>
+		CHAIN_FUSION_SWAP_ENABLED && nonNullish($enabledMainnetBitcoinToken)
+			? [{ ...$enabledMainnetBitcoinToken, enabled: true }]
+			: []
+);
+
+/**
  * The unfiltered universe of tokens that can appear in either side of the swap UI:
- * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens. Provider-supported
- * filtering is applied on top via `filterSwapTokens`.
+ * ICP + all known ICRC tokens + all cross-chain (EVM/SOL) tokens + Bitcoin.
+ * Provider-supported filtering is applied on top via `filterSwapTokens`.
  */
 export const allSwapUniverseTokens: Readable<TokenToggleable<Token>[]> = derived(
-	[allSortedIcrcTokens, allCrossChainSwapTokens],
-	([$allSortedIcrcTokens, $allCrossChainSwapTokens]) => [
+	[allSortedIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens],
+	([$allSortedIcrcTokens, $allCrossChainSwapTokens, $swapUniverseBitcoinTokens]) => [
 		{ ...ICP_TOKEN, enabled: true },
 		...$allSortedIcrcTokens,
-		...$allCrossChainSwapTokens
+		...$allCrossChainSwapTokens,
+		...$swapUniverseBitcoinTokens
 	]
 );
 
 const selectedSwappableToken: Readable<Token | undefined> = derived(
-	[pageToken, allSwapCompatibleIcrcTokens, allCrossChainSwapTokens],
-	([$pageToken, $allSwapCompatibleIcrcTokens, $allCrossChainSwapTokens]) => {
+	[pageToken, allSwapCompatibleIcrcTokens, allCrossChainSwapTokens, swapUniverseBitcoinTokens],
+	([
+		$pageToken,
+		$allSwapCompatibleIcrcTokens,
+		$allCrossChainSwapTokens,
+		$swapUniverseBitcoinTokens
+	]) => {
 		if (nonNullish($pageToken)) {
 			const selectedToken = $pageToken;
 
 			const swappableToken: Token | undefined = [
 				{ ...ICP_TOKEN, enabled: true },
 				...$allSwapCompatibleIcrcTokens,
-				...$allCrossChainSwapTokens
+				...$allCrossChainSwapTokens,
+				// Without this, opening Swap from the BTC token page would fail to preselect BTC.
+				...$swapUniverseBitcoinTokens
 			].find((t) => t.id === selectedToken.id);
 
 			if (nonNullish(swappableToken)) {

@@ -139,6 +139,8 @@ export const defineViteReplacements = (): {
 
 	const signerTarget = process.env.OISY_SIGNER_TARGET;
 
+	// The legacy signer is still built from main, so its pin is held equal to the wallet version by
+	// the release workflow. The pin only starts to differ once it is frozen at a v4 snapshot.
 	const version =
 		(signerTarget === 'legacy_signer' ? SIGNER_VERSIONS['legacy_signer_frontend'] : undefined) ??
 		packageVersion;

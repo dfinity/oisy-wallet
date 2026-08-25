@@ -76,7 +76,7 @@ describe('TokensFilter', () => {
 			{ label: 'Settings', routeId: `${ROUTE_ID_GROUP_APP}/settings` },
 			{ label: 'Activity', routeId: `${ROUTE_ID_GROUP_APP}/activity` },
 			{ label: 'Explore', routeId: `${ROUTE_ID_GROUP_APP}/explore` },
-			{ label: 'NFTs page', routeId: `${ROUTE_ID_GROUP_APP}/nfts` },
+			{ label: 'Collectibles page', routeId: `${ROUTE_ID_GROUP_APP}/collectibles` },
 			{ label: 'null (fresh load)', routeId: null }
 		])('should reset filter when navigating from $label', ({ routeId }) => {
 			render(TokensFilter);
