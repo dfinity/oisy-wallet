@@ -11,11 +11,15 @@ import { get } from 'svelte/store';
 describe('TipHistory', () => {
 	const claimer = Principal.fromText('aaaaa-aa');
 
-	const tip = (
-		tip_id: string,
-		status: MyTip['status'],
-		claimed_by: MyTip['claimed_by'] = []
-	): MyTip => ({
+	const tip = ({
+		tip_id,
+		status,
+		claimed_by = []
+	}: {
+		tip_id: string;
+		status: MyTip['status'];
+		claimed_by?: MyTip['claimed_by'];
+	}): MyTip => ({
 		tip_id,
 		ledger_canister_id: Principal.fromText('ryjl3-tyaaa-aaaaa-aaaba-cai'),
 		amount: 500_000n,
@@ -33,10 +37,10 @@ describe('TipHistory', () => {
 
 	it('offers Cancel only on live reservations', async () => {
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
-			tip('live', { Reserved: null }),
-			tip('gone', { Expired: null }),
-			tip('done', { Claimed: null }, [claimer]),
-			tip('stopped', { Cancelled: null })
+			tip({ tip_id: 'live', status: { Reserved: null } }),
+			tip({ tip_id: 'gone', status: { Expired: null } }),
+			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] }),
+			tip({ tip_id: 'stopped', status: { Cancelled: null } })
 		]);
 
 		const { container } = render(TipHistory, { props: { onClose: vi.fn() } });
@@ -52,7 +56,7 @@ describe('TipHistory', () => {
 		// The claim screen told the recipient the sender would see this, so History
 		// has to actually show it.
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
-			tip('done', { Claimed: null }, [claimer])
+			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] })
 		]);
 
 		const { getByText } = render(TipHistory, { props: { onClose: vi.fn() } });
@@ -73,8 +77,8 @@ describe('TipHistory', () => {
 		// stale row cannot keep offering Cancel on a tip that is already stopped.
 		const loadSpy = vi
 			.spyOn(tipServices, 'loadMyTips')
-			.mockResolvedValueOnce([tip('live', { Reserved: null })])
-			.mockResolvedValueOnce([tip('live', { Cancelled: null })]);
+			.mockResolvedValueOnce([tip({ tip_id: 'live', status: { Reserved: null } })])
+			.mockResolvedValueOnce([tip({ tip_id: 'live', status: { Cancelled: null } })]);
 		const cancelSpy = vi.spyOn(tipServices, 'cancelTip').mockResolvedValue(undefined);
 
 		const { container } = render(TipHistory, { props: { onClose: vi.fn() } });
