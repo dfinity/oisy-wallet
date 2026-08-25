@@ -1246,8 +1246,8 @@ export const fetchSwapAmountsEVM = async ({
 	);
 };
 
-// Fan-out for a Bitcoin source. Only Chain Fusion registers here, but the shape matches
-// its three siblings so a second `btc`-source provider needs no change.
+// Fan-out for a Bitcoin source; Chain Fusion and NEAR Intents register here. The shape
+// matches its three siblings so further `btc`-source providers need no change.
 export const fetchSwapAmountsBTC = async ({
 	sourceToken,
 	destinationToken,

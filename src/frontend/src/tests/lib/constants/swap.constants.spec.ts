@@ -17,27 +17,35 @@ describe('swap.constants', () => {
 	describe('SUPPORTED_CROSS_SWAP_NETWORKS', () => {
 		const loadMatrix = async ({
 			oneSec,
-			chainFusion
+			chainFusion,
+			nearIntentsBtc = false
 		}: {
 			oneSec: boolean;
 			chainFusion: boolean;
+			nearIntentsBtc?: boolean;
 		}) => {
 			vi.resetModules();
 			vi.doMock('$env/rest/onesec.env', () => ({ ONESEC_SWAP_ENABLED: oneSec }));
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: chainFusion }));
+			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
+				...(await importOriginal<typeof import('$env/rest/near-intents.env')>()),
+				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc
+			}));
 
 			const [
 				{ SUPPORTED_CROSS_SWAP_NETWORKS },
 				{ ETHEREUM_NETWORK_ID },
 				{ ICP_NETWORK_ID },
 				{ BASE_NETWORK_ID },
-				{ BTC_MAINNET_NETWORK_ID }
+				{ BTC_MAINNET_NETWORK_ID },
+				{ SOLANA_MAINNET_NETWORK_ID }
 			] = await Promise.all([
 				import('$lib/constants/swap.constants'),
 				import('$env/networks/networks.eth.env'),
 				import('$env/networks/networks.icp.env'),
 				import('$env/networks/networks-evm/networks.evm.base.env'),
-				import('$env/networks/networks.btc.env')
+				import('$env/networks/networks.btc.env'),
+				import('$env/networks/networks.sol.env')
 			]);
 
 			return {
@@ -49,13 +57,15 @@ describe('swap.constants', () => {
 					SUPPORTED_CROSS_SWAP_NETWORKS[from].includes(to),
 				ETHEREUM_NETWORK_ID,
 				BASE_NETWORK_ID,
-				BTC_MAINNET_NETWORK_ID
+				BTC_MAINNET_NETWORK_ID,
+				SOLANA_MAINNET_NETWORK_ID
 			};
 		};
 
 		afterEach(() => {
 			vi.doUnmock('$env/rest/onesec.env');
 			vi.doUnmock('$env/chain-fusion-swap.env');
+			vi.doUnmock('$env/rest/near-intents.env');
 			vi.resetModules();
 		});
 
@@ -89,8 +99,8 @@ describe('swap.constants', () => {
 			expect(reachesIcp(BASE_NETWORK_ID)).toBeFalsy();
 		});
 
-		// Bitcoin's only route into the swap universe is ck conversion, so the pairing exists
-		// exactly when Chain Fusion does — and never reaches anything but ICP.
+		// The ICP pairing belongs to ck conversion, so it exists exactly when Chain
+		// Fusion does; NEAR Intents contributes the non-ICP destinations further below.
 		it('pairs ICP with Bitcoin in both directions when Chain Fusion is on', async () => {
 			const { icpReaches, reachesIcp, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
 				oneSec: false,
@@ -101,7 +111,7 @@ describe('swap.constants', () => {
 			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
 		});
 
-		it('does not open Bitcoin to Ethereum', async () => {
+		it('does not open Bitcoin to Ethereum without the NEAR Intents BTC flag', async () => {
 			const { reaches, BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } = await loadMatrix({
 				oneSec: true,
 				chainFusion: true
@@ -111,7 +121,7 @@ describe('swap.constants', () => {
 			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
 		});
 
-		it('isolates Bitcoin entirely when Chain Fusion is off', async () => {
+		it('isolates Bitcoin entirely when no provider reaches it', async () => {
 			const { icpReaches, reachesIcp, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
 				oneSec: true,
 				chainFusion: false
@@ -119,6 +129,56 @@ describe('swap.constants', () => {
 
 			expect(icpReaches(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
 			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		// NEAR Intents opens Bitcoin to its whole map (spec: decided destination set), in
+		// both directions, without touching the ICP pairing that belongs to Chain Fusion.
+		it('opens Bitcoin to Ethereum and Solana in both directions with the NEAR Intents BTC flag', async () => {
+			const { reaches, BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID } =
+				await loadMatrix({
+					oneSec: false,
+					chainFusion: false,
+					nearIntentsBtc: true
+				});
+
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ETHEREUM_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: ETHEREUM_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: SOLANA_MAINNET_NETWORK_ID })).toBeTruthy();
+			expect(reaches({ from: SOLANA_MAINNET_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeTruthy();
+		});
+
+		it('does not pair Bitcoin with ICP through the NEAR Intents BTC flag alone', async () => {
+			const { icpReaches, reachesIcp, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: false,
+				chainFusion: false,
+				nearIntentsBtc: true
+			});
+
+			expect(icpReaches(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeFalsy();
+		});
+
+		it('keeps the ICP pairing next to the NEAR Intents destinations when both flags are on', async () => {
+			const { reachesIcp, reaches, BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } = await loadMatrix(
+				{
+					oneSec: false,
+					chainFusion: true,
+					nearIntentsBtc: true
+				}
+			);
+
+			expect(reachesIcp(BTC_MAINNET_NETWORK_ID)).toBeTruthy();
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: ETHEREUM_NETWORK_ID })).toBeTruthy();
+		});
+
+		it('never opens Bitcoin to itself', async () => {
+			const { reaches, BTC_MAINNET_NETWORK_ID } = await loadMatrix({
+				oneSec: true,
+				chainFusion: true,
+				nearIntentsBtc: true
+			});
+
+			expect(reaches({ from: BTC_MAINNET_NETWORK_ID, to: BTC_MAINNET_NETWORK_ID })).toBeFalsy();
 		});
 
 		it('isolates ICP entirely when neither provider is on', async () => {
