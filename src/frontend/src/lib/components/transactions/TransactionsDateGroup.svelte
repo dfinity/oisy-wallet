@@ -8,6 +8,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction-ui';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+	import XrpTransaction from '$xrp/components/transactions/XrpTransaction.svelte';
 
 	interface Props {
 		formattedDate: string;
@@ -37,6 +38,8 @@
 						<EthTransaction iconType="token" {token} {transaction} />
 					{:else if component === 'solana'}
 						<SolTransaction iconType="token" {token} {transaction} />
+					{:else if component === 'xrp'}
+						<XrpTransaction iconType="token" {token} {transaction} />
 					{:else}
 						<IcTransaction iconType="token" {token} {transaction} />
 					{/if}

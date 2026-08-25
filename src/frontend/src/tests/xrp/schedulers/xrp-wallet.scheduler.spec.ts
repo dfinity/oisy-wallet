@@ -7,6 +7,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as xrplApi from '$xrp/api/xrpl.api';
 import { XrpWalletScheduler } from '$xrp/schedulers/xrp-wallet.scheduler';
 import { XrpNetworks } from '$xrp/types/network';
+import { jsonReplacer, jsonReviver } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/utils/time.utils', () => ({
@@ -28,8 +29,23 @@ vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
 
 describe('xrp-wallet.scheduler', () => {
 	let spyLoadBalance: MockInstance;
+	let spyLoadTransactions: MockInstance;
 
 	const mockBalance = 25_000_000n;
+
+	const mockRawTransaction = {
+		tx: {
+			TransactionType: 'Payment',
+			Account: 'rSender',
+			Destination: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD',
+			Amount: '5000000',
+			hash: 'HASH1',
+			ledger_index: 42,
+			date: 1
+		},
+		meta: { TransactionResult: 'tesSUCCESS' },
+		validated: true
+	};
 
 	const startData: PostMessageDataRequestXrp = {
 		address: { data: 'rLUEXYuLiQptky37CqLcm9USQpPiz5rkpD', certified: false },
@@ -53,7 +69,8 @@ describe('xrp-wallet.scheduler', () => {
 		ref,
 		data: {
 			wallet: {
-				balance: { certified: false, data: mockBalance }
+				balance: { certified: false, data: mockBalance },
+				newTransactions: JSON.stringify([], jsonReplacer)
 			}
 		}
 	};
@@ -76,6 +93,9 @@ describe('xrp-wallet.scheduler', () => {
 		mockAuthStore();
 
 		spyLoadBalance = vi.spyOn(xrplApi, 'loadXrpBalance').mockResolvedValue(mockBalance);
+		spyLoadTransactions = vi
+			.spyOn(xrplApi, 'loadXrpTransactions')
+			.mockResolvedValue({ transactions: [] });
 
 		const provider = AuthClientProvider.getInstance();
 		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
@@ -142,6 +162,29 @@ describe('xrp-wallet.scheduler', () => {
 		await vi.advanceTimersByTimeAsync(XRP_WALLET_TIMER_INTERVAL_MILLIS);
 
 		expect(spyLoadBalance).toHaveBeenCalledTimes(2);
+
+		scheduler.stop();
+	});
+
+	it('should load transactions and postMessage the mapped new ones', async () => {
+		spyLoadTransactions.mockResolvedValue({ transactions: [mockRawTransaction] });
+
+		const scheduler = new XrpWalletScheduler();
+
+		await scheduler.start(startData);
+		await awaitJobExecution();
+
+		expect(spyLoadTransactions).toHaveBeenCalledOnce();
+
+		const walletCall = postMessageMock.mock.calls.find(
+			([message]) => message?.msg === 'syncXrpWallet'
+		);
+		const transactions = JSON.parse(walletCall?.[0].data.wallet.newTransactions, jsonReviver);
+
+		expect(transactions).toHaveLength(1);
+		expect(transactions[0].data.id).toBe('HASH1');
+		expect(transactions[0].data.type).toBe('receive');
+		expect(transactions[0].data.value).toBe(5_000_000n);
 
 		scheduler.stop();
 	});

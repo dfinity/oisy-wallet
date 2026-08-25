@@ -14,6 +14,7 @@ import { filterAddressFromContact, getContactForAddress } from '$lib/utils/conta
 import type { CsvColumn, CsvRow } from '$lib/utils/csv.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import type { XrpTransactionUi } from '$xrp/types/xrp-transaction';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
@@ -287,6 +288,8 @@ export const buildTokenRows = ({
 // all use 18; SOL uses 9; BTC uses 8.
 const EVM_NATIVE_DECIMALS = 18;
 const SOL_NATIVE_DECIMALS = 9;
+
+const XRP_NATIVE_DECIMALS = 6;
 const BTC_DECIMALS = 8;
 
 const normalizeType = (rawType: string): string => {
@@ -671,6 +674,56 @@ const toSolanaRow = ({
 	};
 };
 
+const toXrpRow = ({
+	transaction: tx,
+	token,
+	exportedAt
+}: {
+	transaction: XrpTransactionUi;
+	token: Token;
+	exportedAt: string;
+}): TransactionCsvRow => {
+	const type = normalizeType(tx.type);
+	const { from, to } = tx;
+	// XrpTransactionUi is only ever 'send' or 'receive', so the direction never needs the
+	// address-comparison fallback the other chains use.
+	const direction: string = type === 'send' ? 'out' : 'in';
+
+	return {
+		timestamp_iso: formatTimestamp(tx.timestamp),
+		timestamp_local: formatTimestampLocal(tx.timestamp),
+		timestamp_utc: formatTimestampUtc(tx.timestamp),
+		network: token.network.name,
+		token_symbol: token.symbol,
+		token_address_or_ledger_id: getAddressOrLedgerId(token),
+		type,
+		type_display: formatTypeDisplay(type),
+		type_raw: tx.type,
+		direction,
+		status: tx.status,
+		from: from ?? '',
+		to: to ?? '',
+		amount: formatAmount({ value: tx.value, decimals: token.decimals }),
+		amount_raw: tx.value ?? undefined,
+		fee: formatAmount({ value: tx.fee, decimals: XRP_NATIVE_DECIMALS }),
+		fee_raw: tx.fee ?? undefined,
+		fee_token: 'XRP',
+		counterparty: '',
+		credit: '',
+		credit_raw: undefined,
+		debit: '',
+		debit_raw: undefined,
+		fee_token_debit: '',
+		fee_token_debit_raw: undefined,
+		effective_token: '',
+		effective_fee_token: '',
+		tx_id: tx.id,
+		explorer_url:
+			tx.txExplorerUrl ?? buildTxExplorerUrl({ template: token.network.explorerUrl, txId: tx.id }),
+		exported_at: exportedAt
+	};
+};
+
 // Negates a decimal-string amount, suppressing "-0" for zero values.
 const negate = (decimal: string): string => {
 	if (decimal === '') {
@@ -921,6 +974,18 @@ export const buildTransactionRows = ({
 				isSelfTransfer = addressesEqual({
 					a: entry.transaction.fromOwner ?? entry.transaction.from,
 					b: entry.transaction.toOwner ?? entry.transaction.to
+				});
+				isStandaloneRoundTrip = isSelfTransfer;
+				break;
+			case 'xrp':
+				row = toXrpRow({
+					transaction: entry.transaction,
+					token: entry.token,
+					exportedAt: exportedAtIso
+				});
+				isSelfTransfer = addressesEqual({
+					a: entry.transaction.from,
+					b: entry.transaction.to
 				});
 				isStandaloneRoundTrip = isSelfTransfer;
 				break;
