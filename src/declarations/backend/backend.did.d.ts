@@ -523,6 +523,7 @@ export type BtcGetPendingTransactionsResult =
 export interface BtcTransactionData {
 	fee: [] | [bigint];
 }
+export type CancelTipResult = { Ok: null } | { Err: TipError };
 /**
  * Copy of the synonymous Rosetta type.
  */
@@ -596,6 +597,7 @@ export type ChainFusionDirection =
 	| { CkErc20ToErc20: null }
 	| { Erc20ToCkErc20: null }
 	| { CkEthToEth: null };
+export type ClaimTipResult = { Ok: TipClaim } | { Err: TipError };
 export interface Config {
 	/**
 	 * The derivation origin used for II authentication, ensuring users get a
@@ -702,6 +704,38 @@ export interface CreatePersonalNoteShareRequest {
 	expires_at_ns: bigint;
 }
 export type CreatePersonalNoteShareResult = { Ok: null } | { Err: PersonalNoteShareError };
+/**
+ * Create-tip request. The canister stores the tip and verifies the sender's
+ * allowance covers it; it never takes custody.
+ */
+export interface CreateTipRequest {
+	/**
+	 * Opaque, client-generated random id; also the map key and the `<id>` in
+	 * the share link.
+	 */
+	tip_id: string;
+	/**
+	 * SHA-256 of the claim code held in the link fragment.
+	 */
+	claim_code_hash: Uint8Array;
+	/**
+	 * Optional note shown to the claimer *after* they sign in — never in the
+	 * anonymous preview.
+	 */
+	message: [] | [string];
+	/**
+	 * Ledger the tip is denominated in. Must be ICRC-2 capable — the sender's
+	 * allowance is what makes the tip claimable.
+	 */
+	ledger_canister_id: Principal;
+	/**
+	 * What the claimer receives, in the ledger's base units. The sender's
+	 * allowance must additionally cover one ledger fee, which the ledger
+	 * draws from the allowance at claim rather than from this amount.
+	 */
+	amount: bigint;
+	expires_at_ns: bigint;
+}
 export type CreateUserProfileError = {
 	/**
 	 * Sign-ups of new users are currently disabled on the backend. Callers that already have a
@@ -929,6 +963,7 @@ export type GetContactsResult =
 			 */
 			Err: ContactError;
 	  };
+export type GetMyTipsResult = { Ok: Array<MyTip> } | { Err: TipError };
 export type GetPersonalNoteShareResult =
 	{ Ok: PersonalNoteShareContent } | { Err: PersonalNoteShareError };
 export type GetPersonalNoteSharesCountResult = { Ok: bigint } | { Err: PersonalNoteShareError };
@@ -958,6 +993,8 @@ export type GetPersonalNotesResult =
 			 */
 			Err: PersonalNoteError;
 	  };
+export type GetTipDetailsResult = { Ok: TipDetails } | { Err: TipError };
+export type GetTipResult = { Ok: PublicTip } | { Err: TipError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult =
 	| {
@@ -1198,6 +1235,23 @@ export interface LiquidiumData {
 	 * Amount in the token's base units.
 	 */
 	amount: bigint;
+}
+/**
+ * One of the caller's own tips, as returned by `get_my_tips`.
+ */
+export interface MyTip {
+	status: TipStatus;
+	/**
+	 * Set once claimed. The sender learns who claimed their tip; the claim
+	 * screen discloses this before the claimer commits.
+	 */
+	claimed_by: [] | [Principal];
+	tip_id: string;
+	created_at_ns: bigint;
+	message: [] | [string];
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
 }
 /**
  * NEAR Intents (1Click) cross-chain swap payload. Settlement is tracked
@@ -1457,6 +1511,16 @@ export interface ProviderAgreementType {
 	provider: ProviderAgreementProvider;
 	scope: ProviderAgreementScope;
 }
+/**
+ * What an **anonymous** reader of a tip link sees. Deliberately excludes the
+ * message, the sender, and the claimer: enough to decide whether to sign in,
+ * nothing that identifies anyone.
+ */
+export interface PublicTip {
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
+}
 export type QualifiedNotificationKind =
 	{ NoIndexCanister: null } | { UnavailableIndexCanister: null };
 /**
@@ -1656,6 +1720,159 @@ export interface Stats {
 export interface TestnetsSettings {
 	show_testnets: boolean;
 }
+/**
+ * Outcome of a successful claim.
+ */
+export interface TipClaim {
+	/**
+	 * Ledger block index of the payout, so the client can link to it.
+	 */
+	block_index: bigint;
+	ledger_canister_id: Principal;
+	/**
+	 * What was transferred to the claimer, in base units.
+	 */
+	amount: bigint;
+}
+/**
+ * What an authenticated claimer sees before claiming: the preview plus the
+ * sender's message. The payout fee is not included — the client reads it from
+ * the ledger directly (`icrc1_fee`), which is also the value the ledger will
+ * actually charge.
+ */
+export interface TipDetails {
+	message: [] | [string];
+	ledger_canister_id: Principal;
+	amount: bigint;
+	expires_at_ns: bigint;
+}
+export type TipError =
+	| {
+			/**
+			 * `expires_at_ns` is not strictly in the future of IC time, or is further
+			 * out than [`MAX_TIP_EXPIRY_NS`].
+			 */
+			InvalidExpiry: null;
+	  }
+	| {
+			/**
+			 * A claim is already in flight for this tip. Resolves on its own: either
+			 * it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
+			 * may take it over.
+			 */
+			ClaimInProgress: null;
+	  }
+	| {
+			/**
+			 * The tip exists and the claim code is right, but the sender's allowance
+			 * no longer covers it — they spent, reduced or revoked it. The one
+			 * deliberately distinguishable failure, reachable only with a valid link,
+			 * because telling the claimer "come back later" is useless.
+			 */
+			Uncovered: null;
+	  }
+	| {
+			/**
+			 * No claimable tip for this id. Also returned for an expired, cancelled or
+			 * already-claimed tip, and for a wrong claim code — every case collapsed
+			 * into one response so a prober can never distinguish them.
+			 */
+			NotFound: null;
+	  }
+	| {
+			/**
+			 * The caller is not the sender of this tip.
+			 */
+			NotYourTip: null;
+	  }
+	| {
+			/**
+			 * The `claim_code_hash` is not exactly [`TIP_CLAIM_CODE_HASH_BYTES`] long.
+			 */
+			InvalidClaimCodeHash: null;
+	  }
+	| {
+			/**
+			 * The `tip_id` is empty or exceeds [`MAX_TIP_ID_BYTES`].
+			 */
+			InvalidTipId: null;
+	  }
+	| { RateLimited: RateLimitError }
+	| {
+			/**
+			 * The `tip_id` already exists; the client should generate a fresh random
+			 * id and retry.
+			 */
+			DuplicateTipId: null;
+	  }
+	| {
+			/**
+			 * Only a `Reserved` tip can be cancelled.
+			 */
+			NotCancellable: null;
+	  }
+	| {
+			/**
+			 * The ledger rejected or failed to answer the payout. The tip stays
+			 * claimable — nothing was transferred.
+			 */
+			TransferFailed: { msg: string };
+	  }
+	| { InternalError: { msg: string } }
+	| {
+			/**
+			 * `message` exceeds [`MAX_TIP_MESSAGE_CHARS`] characters.
+			 */
+			MessageTooLong: null;
+	  }
+	| {
+			/**
+			 * The caller already holds [`MAX_TIPS_PER_USER`] active tips.
+			 */
+			TooManyTips: null;
+	  }
+	| {
+			/**
+			 * The amount is zero, or below one ledger fee — a tip that cannot cover
+			 * its own payout is not a tip.
+			 */
+			AmountTooSmall: null;
+	  };
+/**
+ * Lifecycle as the **sender** sees it in History.
+ *
+ * `Uncovered` is deliberately absent: it is not a stored state but the
+ * outcome of a claim attempt against an allowance the sender has since spent,
+ * reduced or revoked. Reporting it here would mean querying every tip's
+ * allowance on every History read; it surfaces on the claim path instead, as
+ * [`TipError::Uncovered`].
+ */
+export type TipStatus =
+	| {
+			/**
+			 * Funds are authorised in the sender's own account, waiting for a claimer.
+			 */
+			Reserved: null;
+	  }
+	| {
+			/**
+			 * A claimer moved the tokens.
+			 */
+			Claimed: null;
+	  }
+	| {
+			/**
+			 * The sender revoked it before anyone claimed.
+			 */
+			Cancelled: null;
+	  }
+	| {
+			/**
+			 * The deadline passed unclaimed. Nothing was ever transferred, so nothing
+			 * is returned — the allowance simply lapsed on the ledger.
+			 */
+			Expired: null;
+	  };
 /**
  * A variant describing any token
  */
@@ -2135,6 +2352,30 @@ export interface _SERVICE {
 		BtcGetPendingTransactionsResult
 	>;
 	/**
+	 * Stops an unclaimed tip of the caller's from being claimable. The allowance
+	 * itself is the caller's to revoke — the client pairs this with an
+	 * `icrc2_approve` of zero.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`NotFound`, `NotYourTip`,
+	 * `NotCancellable`, `ClaimInProgress`, `RateLimited`).
+	 */
+	cancel_tip: ActorMethod<[string], CancelTipResult>;
+	/**
+	 * Pays the tip out to the caller, exactly once.
+	 *
+	 * Guarded on a non-anonymous caller rather than a registered one: the claimer
+	 * may be an identity that has never used OISY before — that is the point of the
+	 * feature — so requiring a user profile would defeat it. A principal is still
+	 * required, since the payout needs somewhere to land.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`NotFound` for an unclaimable tip or a
+	 * wrong code, `Uncovered` when the sender's allowance no longer covers it,
+	 * `ClaimInProgress`, `TransferFailed`, `RateLimited`).
+	 */
+	claim_tip: ActorMethod<[string, string], ClaimTipResult>;
+	/**
 	 * Gets the canister configuration.
 	 */
 	config: ActorMethod<[], Config>;
@@ -2182,6 +2423,19 @@ export interface _SERVICE {
 		[CreatePersonalNoteShareRequest],
 		CreatePersonalNoteShareResult
 	>;
+	/**
+	 * Records a tip against an ICRC-2 allowance the caller has already granted to
+	 * this canister under the tip's own spender subaccount.
+	 *
+	 * No tokens move here, and none are held: the amount stays in the caller's
+	 * account until someone claims it, and lapses in place if nobody does.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (e.g. `Uncovered` when the allowance does
+	 * not cover the amount plus its fee, `TooManyTips`, `AmountTooSmall`,
+	 * `InvalidExpiry`, `DuplicateTipId`, `RateLimited`).
+	 */
+	create_tip: ActorMethod<[CreateTipRequest], CancelTipResult>;
 	/**
 	 * It creates a new user profile for the caller.
 	 * If the user has already a profile, it will return that profile.
@@ -2312,6 +2566,14 @@ export interface _SERVICE {
 	 */
 	get_exchange_rates: ActorMethod<[], Array<[TokenId, [] | [ExchangeRate]]>>;
 	/**
+	 * Returns the caller's own tips, newest first, for History. Bounded by
+	 * `MAX_TIPS_RETURNED`.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError`.
+	 */
+	get_my_tips: ActorMethod<[], GetMyTipsResult>;
+	/**
 	 * Returns the note ciphertext for a **reusable** (non-single-use), unexpired
 	 * share. A single-use share's content is only ever returned by
 	 * `consume_personal_note_share`. Callable anonymously — a deliberate,
@@ -2368,6 +2630,33 @@ export interface _SERVICE {
 	 * Errors are enumerated by `PersonalNoteError`.
 	 */
 	get_personal_notes_vetkey_public_key: ActorMethod<[], PersonalNotesVetkeyResult>;
+	/**
+	 * Returns what an anonymous holder of a tip link may see: amount, token and
+	 * deadline — never the message, the sender, or the claimer.
+	 *
+	 * Callable without an identity, deliberately: the recipient of a tip link has
+	 * no OISY account yet, and the whole feature exists so they don't need one
+	 * first. Same narrowly-scoped exception as `get_personal_note_share`.
+	 *
+	 * Not rate-limited, for the same reason that endpoint isn't: state changes
+	 * during a query are not persisted, so a stateful limiter would be a no-op on
+	 * the non-certified query path. The abuse surface is a cheap O(log n) lookup
+	 * against a 128-bit id space.
+	 *
+	 * # Errors
+	 * `TipError::NotFound` for anything not currently claimable — unknown,
+	 * expired, cancelled and already-claimed are indistinguishable.
+	 */
+	get_tip: ActorMethod<[string], GetTipResult>;
+	/**
+	 * Returns the claim review for a signed-in claimer: the public preview plus
+	 * the sender's message. Requires the claim code, so the message is visible only
+	 * to someone holding the full link.
+	 *
+	 * # Errors
+	 * `TipError::NotFound` for an unclaimable tip or a wrong claim code.
+	 */
+	get_tip_details: ActorMethod<[string, string], GetTipDetailsResult>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *

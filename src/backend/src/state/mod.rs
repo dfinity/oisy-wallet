@@ -16,16 +16,17 @@ use crate::{
         EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
-        PERSONAL_NOTE_SHARES_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID,
-        USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
-        USER_TRANSACTIONS_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_MEMORY_ID, TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
             ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
             BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
-            PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TokenActivityMap, UserProfileMap,
-            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
+            PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TipMap, TipsBySenderMap,
+            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+            UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -74,6 +75,12 @@ pub(crate) struct State {
     /// By-creator index over `personal_note_shares`, used only to enforce the
     /// per-user active-share cap without scanning the primary map.
     pub(crate) personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap,
+    /// Tips: the canister holds no tokens for these, only the record of an
+    /// allowance the sender granted under a per-tip subaccount. See `tips`.
+    pub(crate) tips: TipMap,
+    /// By-sender index over `tips`, for the active-tip cap and the sender's
+    /// History, without scanning the primary map.
+    pub(crate) tips_by_sender: TipsBySenderMap,
 }
 
 impl From<&State> for Stats {
@@ -122,6 +129,8 @@ thread_local! {
             personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap::init(
                 mm.borrow().get(PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID),
             ),
+            tips: TipMap::init(mm.borrow().get(TIPS_MEMORY_ID)),
+            tips_by_sender: TipsBySenderMap::init(mm.borrow().get(TIPS_BY_SENDER_MEMORY_ID)),
         })
     );
 }

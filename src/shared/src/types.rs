@@ -26,6 +26,7 @@ pub mod pow;
 pub mod result_types;
 pub mod settings;
 pub mod signer;
+pub mod tip;
 pub mod token;
 pub mod token_id;
 pub mod token_standard;

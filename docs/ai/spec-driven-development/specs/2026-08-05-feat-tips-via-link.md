@@ -834,8 +834,14 @@ change.
 8. After **Open or Create** and Internet Identity, the claim resumes with the
    fragment intact and shows the review card with the payout fee, the message,
    **Status: Reserved**, and a disclosure that the sender will see who claimed.
-9. **Claim now** pays out via `icrc2_transfer_from` net of the fee, **including for a
-   principal that has never used OISY before**, with no manual token setup.
+9. **Claim now** pays out via `icrc2_transfer_from` for the **full amount shown**,
+   **including for a principal that has never used OISY before**, with no manual
+   token setup. Adjusted during the backend build, and measured against a real
+   ledger: the ledger charges the transfer fee to the **allowance**, not to the
+   transferred amount, so an allowance sized at amount + fee (criterion 4) pays the
+   claimer the whole amount and the sender carries both fees. The earlier "net of
+   the fee" wording described a model where the fee came out of the tip, which the
+   allowance design does not do.
 10. A tip can be claimed **exactly once**; two simultaneous claims produce exactly one
     payout; a tip marked claimed is never left unpaid.
 11. If the sender no longer covers the tip — spent, revoked, or cancelled — the

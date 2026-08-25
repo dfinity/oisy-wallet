@@ -37,6 +37,11 @@ pub(crate) const PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::n
 // a by-creator index used only to range-scan a creator's active-share count.
 pub(crate) const PERSONAL_NOTE_SHARES_MEMORY_ID: MemoryId = MemoryId::new(18);
 pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId::new(19);
+// Tips: one map keyed by the opaque tip id, and a by-sender index used to
+// range-scan a sender's active-tip count and their History without walking the
+// primary map. Same two-map shape as the note shares above.
+pub(crate) const TIPS_MEMORY_ID: MemoryId = MemoryId::new(20);
+pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(21);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

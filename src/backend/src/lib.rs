@@ -31,23 +31,25 @@ use shared::{
         result_types::{
             ActiveUserTransactionResult, AddUserDismissedNotificationResult,
             AddUserHiddenDappIdResult, AllowSigningResult, BtcAddPendingTransactionResult,
-            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult,
-            ConsumePersonalNoteShareResult, CreateContactResult, CreatePersonalNoteShareResult,
-            CreateUserProfileResult, DeleteActiveUserTransactionResult, DeleteContactResult,
-            DeletePersonalNoteResult, GetActiveUserTransactionsResult, GetAgreementHistoryResult,
-            GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetPersonalNoteShareResult, GetPersonalNoteSharesCountResult,
-            GetPersonalNotesCountResult, GetPersonalNotesResult, GetUserProfileResult,
-            GetUserTransactionsResult, PersonalNotesVetkeyResult, SaveUserTransactionsResult,
-            SetPersonalNoteResult, SetUserShowTestnetsResult, SignOnramperWidgetUrlResult,
-            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
-            UpdateProviderAgreementsResult, UpdateTransactionFilterSettingsResult,
-            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            BtcGetFeePercentilesResult, BtcGetPendingTransactionsResult, CancelTipResult,
+            ClaimTipResult, ConsumePersonalNoteShareResult, CreateContactResult,
+            CreatePersonalNoteShareResult, CreateTipResult, CreateUserProfileResult,
+            DeleteActiveUserTransactionResult, DeleteContactResult, DeletePersonalNoteResult,
+            GetActiveUserTransactionsResult, GetAgreementHistoryResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetMyTipsResult, GetPersonalNoteShareResult,
+            GetPersonalNoteSharesCountResult, GetPersonalNotesCountResult, GetPersonalNotesResult,
+            GetTipDetailsResult, GetTipResult, GetUserProfileResult, GetUserTransactionsResult,
+            PersonalNotesVetkeyResult, SaveUserTransactionsResult, SetPersonalNoteResult,
+            SetUserShowTestnetsResult, SignOnramperWidgetUrlResult, UpdateContactResult,
+            UpdateExperimentalFeaturesSettingsResult, UpdateProviderAgreementsResult,
+            UpdateTransactionFilterSettingsResult, UpdateUserAgreementsResult,
+            UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest,
         },
+        tip::{CreateTipRequest, TipClaimRequest},
         token_id::TokenId,
         transaction_settings::UpdateTransactionFilterSettingsRequest,
         user_profile::HasUserProfileResponse,
@@ -69,6 +71,7 @@ mod personal_notes;
 mod signer;
 mod state;
 mod status;
+mod tips;
 mod token;
 mod transactions;
 mod types;

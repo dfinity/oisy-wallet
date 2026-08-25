@@ -73,6 +73,27 @@ thread_local! {
     pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(600, 60 * 1_000_000_000);
 
+    /// Rate-limits `create_tip`: max 20 calls per caller per minute. The sender
+    /// is an authenticated principal, so this is a normal per-caller limit
+    /// (mirrors `CREATE_PERSONAL_NOTE_SHARE_RATE_LIMITER`). Each call makes two
+    /// ledger queries, so the limit also bounds cycle spend per user.
+    pub(crate) static CREATE_TIP_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Rate-limits `claim_tip`: max 20 calls per caller per minute. Per-caller
+    /// is meaningful here — unlike `consume_personal_note_share`, a claim
+    /// requires a non-anonymous principal, since the payout needs a destination.
+    /// This is what makes brute-forcing a claim code expensive; a wrong code is
+    /// rejected from state alone, before any ledger call.
+    pub(crate) static CLAIM_TIP_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(20, 60 * 1_000_000_000);
+
+    /// Rate-limits `cancel_tip`: max 30 calls per caller per minute. Cheap
+    /// state-only work, bounded mostly to keep a loop from writing to stable
+    /// memory without limit.
+    pub(crate) static CANCEL_TIP_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
+
     /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
     /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
     /// global (20/min, 100/hour). See [`VetKeyRateLimiters`].
