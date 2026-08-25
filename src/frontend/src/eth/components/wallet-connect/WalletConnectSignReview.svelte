@@ -13,13 +13,14 @@
 
 	let { request, onApprove, onReject }: Props = $props();
 
-	// The signer rejects an eth_signTypedData_v4 request that fails to parse/hash;
-	// mirror that in the review so the user sees a warning and cannot approve what
-	// would not be signed.
+	// The signer rejects an eth_signTypedData_v4 request that fails to parse, validate, hash, or
+	// that is on a chain this session was not granted; mirror that in the review so the user sees a
+	// warning and cannot approve what would not be signed.
 	let invalidTypedData = $derived(
 		hasInvalidTypedData({
 			method: request.params.request.method,
-			params: request.params.request.params
+			params: request.params.request.params,
+			sessionChainId: request.params.chainId
 		})
 	);
 </script>
