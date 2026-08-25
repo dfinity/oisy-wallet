@@ -1735,6 +1735,23 @@ export interface TipClaim {
 	amount: bigint;
 }
 /**
+ * Identifies a tip **and** proves the caller holds its link.
+ *
+ * One type for both `get_tip_details` and `claim_tip` on purpose: reading the
+ * claim review and claiming are the same claim of authority, differing only in
+ * whether they move money. Two structurally identical records would also
+ * collapse into one name in the generated candid anyway — better to say so than
+ * to have the interface say it for us.
+ */
+export interface TipClaimRequest {
+	tip_id: string;
+	/**
+	 * The plaintext code from the link fragment. Only ever compared against the
+	 * stored hash; never persisted, never returned.
+	 */
+	claim_code: string;
+}
+/**
  * What an authenticated claimer sees before claiming: the preview plus the
  * sender's message. The payout fee is not included — the client reads it from
  * the ledger directly (`icrc1_fee`), which is also the value the ledger will
@@ -2374,7 +2391,7 @@ export interface _SERVICE {
 	 * wrong code, `Uncovered` when the sender's allowance no longer covers it,
 	 * `ClaimInProgress`, `TransferFailed`, `RateLimited`).
 	 */
-	claim_tip: ActorMethod<[string, string], ClaimTipResult>;
+	claim_tip: ActorMethod<[TipClaimRequest], ClaimTipResult>;
 	/**
 	 * Gets the canister configuration.
 	 */
@@ -2656,7 +2673,7 @@ export interface _SERVICE {
 	 * # Errors
 	 * `TipError::NotFound` for an unclaimable tip or a wrong claim code.
 	 */
-	get_tip_details: ActorMethod<[string, string], GetTipDetailsResult>;
+	get_tip_details: ActorMethod<[TipClaimRequest], GetTipDetailsResult>;
 	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *

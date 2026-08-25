@@ -1149,6 +1149,19 @@ type TipClaim = record {
 	// What was transferred to the claimer, in base units.
 	amount : nat
 };
+// Identifies a tip **and** proves the caller holds its link.
+//
+// One type for both `get_tip_details` and `claim_tip` on purpose: reading the
+// claim review and claiming are the same claim of authority, differing only in
+// whether they move money. Two structurally identical records would also
+// collapse into one name in the generated candid anyway — better to say so than
+// to have the interface say it for us.
+type TipClaimRequest = record {
+	tip_id : text;
+	// The plaintext code from the link fragment. Only ever compared against the
+	// stored hash; never persisted, never returned.
+	claim_code : text
+};
 // What an authenticated claimer sees before claiming: the preview plus the
 // sender's message. The payout fee is not included — the client reads it from
 // the ledger directly (`icrc1_fee`), which is also the value the ledger will
@@ -1546,7 +1559,7 @@ service : (Arg) -> {
 	// Errors are enumerated by `TipError` (`NotFound` for an unclaimable tip or a
 	// wrong code, `Uncovered` when the sender's allowance no longer covers it,
 	// `ClaimInProgress`, `TransferFailed`, `RateLimited`).
-	claim_tip : (text, text) -> (ClaimTipResult);
+	claim_tip : (TipClaimRequest) -> (ClaimTipResult);
 	// Gets the canister configuration.
 	config : () -> (Config) query;
 	// Returns a **single-use** share's content exactly once, atomically deleting
@@ -1778,7 +1791,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// `TipError::NotFound` for an unclaimable tip or a wrong claim code.
-	get_tip_details : (text, text) -> (GetTipDetailsResult) query;
+	get_tip_details : (TipClaimRequest) -> (GetTipDetailsResult) query;
 	// Returns the full agreement consent/rejection history for the caller.
 	//
 	// # Returns

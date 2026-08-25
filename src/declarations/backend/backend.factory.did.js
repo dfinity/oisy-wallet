@@ -202,6 +202,10 @@ export const idlFactory = ({ IDL }) => {
 		AmountTooSmall: IDL.Null
 	});
 	const CancelTipResult = IDL.Variant({ Ok: IDL.Null, Err: TipError });
+	const TipClaimRequest = IDL.Record({
+		tip_id: IDL.Text,
+		claim_code: IDL.Text
+	});
 	const TipClaim = IDL.Record({
 		block_index: IDL.Nat,
 		ledger_canister_id: IDL.Principal,
@@ -951,7 +955,7 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		cancel_tip: IDL.Func([IDL.Text], [CancelTipResult], []),
-		claim_tip: IDL.Func([IDL.Text, IDL.Text], [ClaimTipResult], []),
+		claim_tip: IDL.Func([TipClaimRequest], [ClaimTipResult], []),
 		config: IDL.Func([], [Config], ['query']),
 		consume_personal_note_share: IDL.Func([IDL.Text], [ConsumePersonalNoteShareResult], []),
 		create_active_user_transaction: IDL.Func(
@@ -996,7 +1000,7 @@ export const idlFactory = ({ IDL }) => {
 		),
 		get_personal_notes_vetkey_public_key: IDL.Func([], [PersonalNotesVetkeyResult], []),
 		get_tip: IDL.Func([IDL.Text], [GetTipResult], ['query']),
-		get_tip_details: IDL.Func([IDL.Text, IDL.Text], [GetTipDetailsResult], ['query']),
+		get_tip_details: IDL.Func([TipClaimRequest], [GetTipDetailsResult], ['query']),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
