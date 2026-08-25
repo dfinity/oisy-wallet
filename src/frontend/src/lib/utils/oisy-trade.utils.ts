@@ -8,8 +8,10 @@ import type {
 	UserOrder,
 	UserTokenBalance
 } from '$declarations/oisy_trade/oisy_trade.did';
+import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
 import { ZERO } from '$lib/constants/app.constants';
+import { TokenCategoryTagValue, TokenTagType } from '$lib/enums/token-tag';
 import type { ExchangesData } from '$lib/types/exchange';
 import type {
 	OisyTradeAsset,
@@ -29,6 +31,7 @@ import {
 } from '$lib/utils/string.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 import { doesTokenMatchFilter } from '$lib/utils/tokens.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 
 // The distinct union of every base and quote token symbol across the trading
@@ -677,20 +680,77 @@ export const toCandidSide = (side: LimitOrderSide): Side =>
 const orderStatusKey = (status: OrderStatus): OisyTradeOrderStatus =>
 	Object.keys(status)[0] as OisyTradeOrderStatus;
 
+// Cached per ledger so the synthetic `TokenId` (a symbol) stays stable across
+// derivations — a fresh id would never match balance/exchange lookups keyed by
+// token id and would churn object identity on every re-derive.
+const oisyTradeFallbackTokens = new Map<string, IcToken>();
+
+const toOisyTradeFallbackToken = ({
+	token,
+	ledgerCanisterId
+}: {
+	token: OisyTradeToken;
+	ledgerCanisterId: string;
+}): IcToken => {
+	const cached = oisyTradeFallbackTokens.get(ledgerCanisterId);
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const fallback: IcToken = {
+		id: parseTokenId(`OisyTrade:${ledgerCanisterId}`),
+		network: ICP_NETWORK,
+		standard: { code: 'icrc' },
+		category: 'default',
+		tags: [{ type: TokenTagType.CATEGORY, value: TokenCategoryTagValue.CRYPTO }],
+		name: token.metadata.symbol,
+		symbol: token.metadata.symbol,
+		decimals: token.metadata.decimals,
+		ledgerCanisterId,
+		fee: ZERO
+	};
+
+	oisyTradeFallbackTokens.set(ledgerCanisterId, fallback);
+
+	return fallback;
+};
+
 // Resolve a `UserOrder` to OISY tokens (by ledger canister id, like the rest of
-// the Trading tab) and scale amounts to human units. Orders whose base or quote
-// ledger the wallet doesn't know are dropped — nothing to render them with.
+// the Trading tab) and scale amounts to human units. Prefer the user's enabled
+// wallet token so logos/exchange ids stay available, but fall back to the DEX
+// canister's supported-token metadata so active orders remain visible/cancelable
+// even after the user disables one leg in Manage Tokens.
 export const mapOisyTradeOrder = ({
 	order: { id, pair, order },
-	tokens
+	tokens,
+	supportedTokens = []
 }: {
 	order: UserOrder;
 	tokens: IcToken[];
+	supportedTokens?: OisyTradeToken[];
 }): OisyTradeOrderView | undefined => {
 	const byLedger = new Map(tokens.map((token) => [token.ledgerCanisterId, token]));
+	const supportedByLedger = new Map(
+		supportedTokens.map((token) => [token.id.ledger_id.toText(), token])
+	);
 
-	const base = byLedger.get(pair.base.toText());
-	const quote = byLedger.get(pair.quote.toText());
+	const resolveToken = (ledgerCanisterId: string): IcToken | undefined => {
+		const walletToken = byLedger.get(ledgerCanisterId);
+
+		if (nonNullish(walletToken)) {
+			return walletToken;
+		}
+
+		const supportedToken = supportedByLedger.get(ledgerCanisterId);
+
+		return nonNullish(supportedToken)
+			? toOisyTradeFallbackToken({ token: supportedToken, ledgerCanisterId })
+			: undefined;
+	};
+
+	const base = resolveToken(pair.base.toText());
+	const quote = resolveToken(pair.quote.toText());
 
 	if (isNullish(base) || isNullish(quote)) {
 		return undefined;
@@ -714,15 +774,18 @@ export const mapOisyTradeOrder = ({
 };
 
 // Map a list of `UserOrder`s to view models, dropping any whose tokens can't be
-// resolved (preserving the canister's newest-first order).
+// resolved from either wallet metadata or DEX supported-token metadata (preserving
+// the canister's newest-first order).
 export const mapOisyTradeOrders = ({
 	orders,
-	tokens
+	tokens,
+	supportedTokens = []
 }: {
 	orders: UserOrder[];
 	tokens: IcToken[];
+	supportedTokens?: OisyTradeToken[];
 }): OisyTradeOrderView[] =>
-	orders.map((order) => mapOisyTradeOrder({ order, tokens })).filter(nonNullish);
+	orders.map((order) => mapOisyTradeOrder({ order, tokens, supportedTokens })).filter(nonNullish);
 
 // Terminal-order breakdown for the Order-history header, e.g. "2 filled · 1
 // canceled". Only non-zero buckets appear; an all-empty history yields "".

@@ -3,7 +3,10 @@ import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env'
 import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import type { OptionEthAddress } from '$eth/types/address';
 import { isTokenEthereumNative } from '$eth/utils/native-token.utils';
-import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import {
+	groupEthTransactionsByNetworkAndHash,
+	mapEthTransactionUi
+} from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
@@ -55,36 +58,11 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 const findDuplicateEthNativeTransactions = (
 	ethTransactions: EthAllTransactionUiWithCmp[]
 ): Set<EthAllTransactionUiWithCmp> => {
-	// Group ETH transactions by (networkId, hash) to detect duplicates.
-	const groupsByNetworkAndHash = new Map<symbol, Map<string, EthAllTransactionUiWithCmp[]>>();
-
-	for (const tx of ethTransactions) {
-		const { hash } = tx.transaction;
-
-		if (nonNullish(hash)) {
-			const networkId = tx.token.network.id;
-
-			if (!groupsByNetworkAndHash.has(networkId)) {
-				groupsByNetworkAndHash.set(networkId, new Map());
-			}
-
-			const networkMap = groupsByNetworkAndHash.get(networkId);
-
-			if (isNullish(networkMap)) {
-				const newNetworkMap = new Map<string, EthAllTransactionUiWithCmp[]>();
-
-				newNetworkMap.set(hash, [tx]);
-
-				groupsByNetworkAndHash.set(networkId, newNetworkMap);
-			} else {
-				if (!networkMap.has(hash)) {
-					networkMap.set(hash, []);
-				}
-
-				networkMap.get(hash)?.push(tx);
-			}
-		}
-	}
+	const groupsByNetworkAndHash = groupEthTransactionsByNetworkAndHash({
+		items: ethTransactions,
+		networkId: ({ token: { network } }) => network.id,
+		hash: ({ transaction }) => transaction.hash
+	});
 
 	// For each group with duplicates, mark native fee entries for removal
 	// only when the group also contains at least one non-native (e.g. ERC-20) transfer.

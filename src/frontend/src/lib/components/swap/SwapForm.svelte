@@ -41,7 +41,16 @@
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
+		message?: Snippet;
 		errorType?: TokenActionErrorType;
+		/**
+		 * Set by a form that already accounts for the absence of an offer itself — because the
+		 * inputs a quote needs are still loading, or because it is showing the specific reason
+		 * the amount cannot be quoted. Suppresses the generic "swap is not offered", which in
+		 * those cases contradicts the message beside it: a swap *is* offered, just not for this
+		 * amount or not yet.
+		 */
+		notOfferedExplained?: boolean;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
@@ -55,7 +64,9 @@
 		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
+		message,
 		errorType = $bindable(),
+		notOfferedExplained = false,
 		onCustomValidate,
 		fee,
 		onShowTokensList,
@@ -89,6 +100,7 @@
 		nonNullish($swapAmountsStore) &&
 			$swapAmountsStore.swaps.length === 0 &&
 			!isSwapAmountsLoading &&
+			!notOfferedExplained &&
 			nonNullish(swapAmount) &&
 			Number(swapAmount) > 0
 	);
@@ -263,6 +275,8 @@
 				{/snippet}
 			</TokenInputNetworkWrapper>
 		</div>
+
+		{@render message?.()}
 
 		<SwapCrossChainInfo />
 

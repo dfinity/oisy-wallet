@@ -63,7 +63,7 @@ describe('NftCollectionHero', () => {
 
 		await fireEvent.click(closeButton);
 
-		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/collectibles'));
 		expect(mockGoto).not.toHaveBeenCalledWith(expect.stringContaining('collection='));
 	});
 
@@ -79,7 +79,7 @@ describe('NftCollectionHero', () => {
 
 		await fireEvent.click(backButton);
 
-		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/nfts'));
+		expect(mockGoto).toHaveBeenCalledWith(expect.stringContaining('/collectibles'));
 	});
 
 	it('should render the collection data', async () => {

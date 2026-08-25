@@ -81,6 +81,16 @@ pub enum ActiveUserTransactionData {
     /// source/destination leg (EVM and Solana); the deposit address, its
     /// optional memo, and origin/destination tx hashes ride in `external_refs`.
     NearIntents(NearIntentsData),
+    /// Velora (`ParaSwap`) EVM swap. A single variant covers both execution
+    /// modes, discriminated by the `mode` field; the auction id, order hash,
+    /// transaction hash and nonce ride in `external_refs`.
+    Velora(VeloraData),
+    /// Chain Fusion ck conversion (BTC↔ckBTC, ETH↔ckETH, ERC20↔ckERC20). A
+    /// single variant covers all six directions, discriminated by the
+    /// `direction` field; the minter block indices, the BTC txid and deposit
+    /// address, and the Ethereum deposit tx hash and block number ride in
+    /// `external_refs`.
+    ChainFusion(ChainFusionData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -126,6 +136,73 @@ pub struct LiquidiumData {
 /// captured here.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct NearIntentsData {
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
+    pub amount: Nat,
+}
+
+/// Which Velora execution mode an active transaction tracks. Determines how the
+/// frontend polls for settlement: `Delta` by auction id against Velora's Delta
+/// API, `Market` by transaction receipt on the source chain.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum VeloraSwapMode {
+    Delta,
+    Market,
+}
+
+/// Velora (`ParaSwap`) swap payload. Settlement is tracked off-chain — by auction
+/// id (`Delta`) or by transaction hash plus nonce (`Market`) — so those
+/// pointers, and the learned-mid-flow settlement / refund tx hashes, live in
+/// `external_refs`; only the canonical immutable fields are captured here.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct VeloraData {
+    pub mode: VeloraSwapMode,
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
+    pub amount: Nat,
+}
+
+/// Which ck conversion an active transaction tracks. Determines which minter the
+/// frontend asks about settlement, and how: the three withdrawal directions have
+/// an exact status keyed by the minter's burn block index, while the mint
+/// directions are observed from the deposit side.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum ChainFusionDirection {
+    BtcToCkBtc,
+    CkBtcToBtc,
+    EthToCkEth,
+    CkEthToEth,
+    Erc20ToCkErc20,
+    CkErc20ToErc20,
+}
+
+impl ChainFusionDirection {
+    /// Every direction, in declaration order. Tests iterate this instead of
+    /// hand-spelling the list, so a new direction is added in one place.
+    pub const ALL: [Self; 6] = [
+        Self::BtcToCkBtc,
+        Self::CkBtcToBtc,
+        Self::EthToCkEth,
+        Self::CkEthToEth,
+        Self::Erc20ToCkErc20,
+        Self::CkErc20ToErc20,
+    ];
+}
+
+/// Chain Fusion ck conversion payload. Every settlement pointer is learned
+/// mid-flow — a minter block index, a BTC txid, an Ethereum deposit tx hash — so
+/// those live in `external_refs`; only the canonical immutable fields are
+/// captured here, which is why all six directions share one variant.
+///
+/// `direction` is explicit rather than inferred from the token pair: the poller
+/// selects its settlement oracle from it, and re-deriving "is this a mint or a
+/// withdrawal?" from two token ids on every tick would rediscover something
+/// known for certain at creation.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct ChainFusionData {
+    pub direction: ChainFusionDirection,
     pub source_token: TokenId,
     pub dest_token: TokenId,
     /// Source-token amount in base units.
@@ -197,11 +274,13 @@ mod tests {
 
     use super::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
-        ActiveUserTransactionRef, ActiveUserTransactionStatus, CreateActiveUserTransactionRequest,
+        ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
+        ChainFusionDirection, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
-        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest,
+        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+        VeloraSwapMode,
     };
-    use crate::types::token_id::TokenId;
+    use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
 
     fn sample_record() -> ActiveUserTransaction {
         ActiveUserTransaction {
@@ -271,6 +350,88 @@ mod tests {
             amount: Nat::from(250_000u64),
         });
         assert_eq!(roundtrip(&original), original);
+    }
+
+    fn erc20(address: &str, chain_id: u64) -> TokenId {
+        TokenId::Erc20(ErcTokenId(address.to_string()), chain_id)
+    }
+
+    #[test]
+    fn velora_delta_variant_roundtrips() {
+        let original = ActiveUserTransactionData::Velora(VeloraData {
+            mode: VeloraSwapMode::Delta,
+            source_token: erc20("0x0000000000000000000000000000000000000abc", 1),
+            dest_token: erc20("0x0000000000000000000000000000000000000def", 1),
+            amount: Nat::from(7_500u64),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn velora_market_variant_roundtrips() {
+        // Market is the only mode reachable from a native source coin, so the
+        // round-trip covers `EvmNative` on the source side too.
+        let original = ActiveUserTransactionData::Velora(VeloraData {
+            mode: VeloraSwapMode::Market,
+            source_token: TokenId::EvmNative(8453),
+            dest_token: erc20("0x0000000000000000000000000000000000000def", 8453),
+            amount: Nat::from(1_250u64),
+        });
+        assert_eq!(roundtrip(&original), original);
+    }
+
+    #[test]
+    fn velora_swap_mode_roundtrips() {
+        for mode in [VeloraSwapMode::Delta, VeloraSwapMode::Market] {
+            assert_eq!(roundtrip(&mode), mode);
+        }
+    }
+
+    const CKBTC_LEDGER: &str = "mxzaz-hqaaa-aaaar-qaada-cai";
+    const CKETH_LEDGER: &str = "ss2fx-dyaaa-aaaar-qacoq-cai";
+    const CKUSDC_LEDGER: &str = "xevnm-gaaaa-aaaar-qafnq-cai";
+    const USDC_ETHEREUM: &str = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+
+    fn icrc(ledger: &str) -> TokenId {
+        TokenId::Icrc(Principal::from_text(ledger).unwrap())
+    }
+
+    /// The token pair each direction actually carries, so the round-trip also
+    /// covers `BtcNativeMainnet` — which no other `ActiveUserTransactionData`
+    /// variant can reach. The match is exhaustive, so a new direction cannot
+    /// ship without declaring its legs here.
+    fn chain_fusion_leg(direction: &ChainFusionDirection) -> (TokenId, TokenId) {
+        match direction {
+            ChainFusionDirection::BtcToCkBtc => (TokenId::BtcNativeMainnet, icrc(CKBTC_LEDGER)),
+            ChainFusionDirection::CkBtcToBtc => (icrc(CKBTC_LEDGER), TokenId::BtcNativeMainnet),
+            ChainFusionDirection::EthToCkEth => (TokenId::EvmNative(1), icrc(CKETH_LEDGER)),
+            ChainFusionDirection::CkEthToEth => (icrc(CKETH_LEDGER), TokenId::EvmNative(1)),
+            ChainFusionDirection::Erc20ToCkErc20 => (erc20(USDC_ETHEREUM, 1), icrc(CKUSDC_LEDGER)),
+            ChainFusionDirection::CkErc20ToErc20 => (icrc(CKUSDC_LEDGER), erc20(USDC_ETHEREUM, 1)),
+        }
+    }
+
+    #[test]
+    fn chain_fusion_variant_roundtrips() {
+        // All six directions share one variant, so each must survive the
+        // round-trip untouched — the direction is what the FE poller routes on.
+        for direction in ChainFusionDirection::ALL {
+            let (source_token, dest_token) = chain_fusion_leg(&direction);
+            let original = ActiveUserTransactionData::ChainFusion(ChainFusionData {
+                direction,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000u64),
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
+    #[test]
+    fn chain_fusion_direction_roundtrips() {
+        for direction in ChainFusionDirection::ALL {
+            assert_eq!(roundtrip(&direction), direction);
+        }
     }
 
     #[test]
