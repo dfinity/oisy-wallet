@@ -10,6 +10,7 @@
 	} from '$btc/stores/utxos-fee.store';
 	import { BtcValidationError } from '$btc/types/btc-send';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import type { ProgressStep } from '$eth/types/send';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -47,7 +48,7 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
-		swapProgressStep: ProgressStepsSwap;
+		swapProgressStep: ProgressStep;
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
@@ -225,7 +226,7 @@
 
 				await fetchNearIntentsBtcSwap({
 					identity: $authIdentity,
-					progress,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
 					sourceToken: $sourceToken,
 					destinationToken: $destinationToken,
 					swapAmount,
