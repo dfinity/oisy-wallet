@@ -220,6 +220,73 @@ fn create_near_intents_variant_roundtrip() {
 }
 
 #[test]
+fn create_near_intents_btc_variant_roundtrip() {
+    // The BTC-via-NEAR-Intents swap relies on the chain-agnostic NearIntents
+    // variant carrying BTC token ids in either position. Read back through the
+    // query path so the stored (not just echoed) representation is what the
+    // assertion sees.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let cases = [
+        (
+            "near-btc-src",
+            ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token: TokenId::BtcNativeMainnet,
+                dest_token: TokenId::EvmNative(8453),
+                amount: Nat::from(250_000u64),
+            }),
+        ),
+        (
+            "near-btc-dst",
+            ActiveUserTransactionData::NearIntents(NearIntentsData {
+                source_token: TokenId::SolNativeMainnet,
+                dest_token: TokenId::BtcNativeMainnet,
+                amount: Nat::from(250_000u64),
+            }),
+        ),
+    ];
+
+    for (id, data) in &cases {
+        let created = pic
+            .update::<ActiveUserTransactionResult>(
+                user,
+                "create_active_user_transaction",
+                CreateActiveUserTransactionRequest {
+                    id: (*id).to_string(),
+                    data: data.clone(),
+                    progress_step: Some("initialization".to_string()),
+                    external_refs: vec![ActiveUserTransactionRef {
+                        key: "deposit_address".to_string(),
+                        value: "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4".to_string(),
+                    }],
+                },
+            )
+            .expect("create_active_user_transaction call should succeed");
+
+        match created {
+            ActiveUserTransactionResult::Ok(tx) => {
+                assert_eq!(tx.id, *id);
+                assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+                assert_eq!(tx.data, *data);
+            }
+            ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+        }
+    }
+
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), cases.len());
+    for (id, data) in &cases {
+        let row = listed
+            .iter()
+            .find(|tx| tx.id == *id)
+            .unwrap_or_else(|| panic!("row {id} should be listed"));
+        assert_eq!(row.data, *data);
+    }
+}
+
+#[test]
 fn create_velora_variant_roundtrip() {
     // Both Velora modes share one variant; the mode must survive the canister
     // round-trip untouched, since the FE poller routes on it.
