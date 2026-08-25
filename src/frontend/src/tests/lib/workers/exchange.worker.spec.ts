@@ -177,7 +177,7 @@ describe('exchange.worker', () => {
 			it('should sync prices for native tokens', async () => {
 				await onExchangeMessage(event);
 
-				expect(simplePrice).toHaveBeenCalledTimes(6);
+				expect(simplePrice).toHaveBeenCalledTimes(7);
 				expect(simplePrice).toHaveBeenNthCalledWith(1, {
 					ids: 'ethereum',
 					vs_currencies: Currency.USD,
@@ -199,11 +199,16 @@ describe('exchange.worker', () => {
 					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(5, {
-					ids: 'binancecoin',
+					ids: 'ripple',
 					vs_currencies: Currency.USD,
 					include_24hr_change: true
 				});
 				expect(simplePrice).toHaveBeenNthCalledWith(6, {
+					ids: 'binancecoin',
+					vs_currencies: Currency.USD,
+					include_24hr_change: true
+				});
+				expect(simplePrice).toHaveBeenNthCalledWith(7, {
 					ids: 'polygon-ecosystem-token',
 					vs_currencies: Currency.USD,
 					include_24hr_change: true
@@ -230,6 +235,7 @@ describe('exchange.worker', () => {
 						currentIcrcPrices: {},
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 						currentSolPrice: { solana: { usd: 1 } },
+						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
 						currentArbitrumEthPrice: { ethereum: { usd: 1 } },
 						currentBaseEthPrice: { ethereum: { usd: 1 } }
@@ -437,6 +443,7 @@ describe('exchange.worker', () => {
 						currentIcpPrice: undefined,
 						currentIcrcPrices: {},
 						currentSolPrice: undefined,
+						currentXrpPrice: undefined,
 						currentSplPrices: {},
 						currentBnbPrice: undefined,
 						currentPolPrice: undefined,
@@ -498,6 +505,7 @@ describe('exchange.worker', () => {
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
 						currentIcrcPrices: {},
 						currentSolPrice: { solana: { usd: 1 } },
+						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
@@ -542,6 +550,7 @@ describe('exchange.worker', () => {
 						currentIcpPrice: { 'internet-computer': { usd: 1 } },
 						currentIcrcPrices: {},
 						currentSolPrice: { solana: { usd: 1 } },
+						currentXrpPrice: { ripple: { usd: 1 } },
 						currentSplPrices: {},
 						currentBnbPrice: { binancecoin: { usd: 1 } },
 						currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
@@ -778,7 +787,7 @@ describe('exchange.worker', () => {
 					await onExchangeMessage(mockEvent);
 
 					// Native tokens + BTCUSD/BTCXXX
-					expect(simplePrice).toHaveBeenCalledTimes(6 + 1);
+					expect(simplePrice).toHaveBeenCalledTimes(7 + 1);
 
 					expect(simplePrice).toHaveBeenNthCalledWith(1, {
 						ids: 'bitcoin',
@@ -806,7 +815,7 @@ describe('exchange.worker', () => {
 					await onExchangeMessage(mockEvent);
 
 					// Native tokens ONLY
-					expect(simplePrice).toHaveBeenCalledTimes(6);
+					expect(simplePrice).toHaveBeenCalledTimes(7);
 				});
 
 				it('should sync prices for all tokens and for the current currency', async () => {
@@ -899,6 +908,7 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1 } },
 							currentSolPrice: { solana: { usd: 1 } },
+							currentXrpPrice: { ripple: { usd: 1 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
 							currentArbitrumEthPrice: { ethereum: { usd: 1 } },
 							currentBaseEthPrice: { ethereum: { usd: 1 } }
@@ -962,6 +972,7 @@ describe('exchange.worker', () => {
 							currentIcrcPrices: { icrc1: { usd: 1 }, icrc2: { usd: 1 } },
 							currentPolPrice: { 'polygon-ecosystem-token': { usd: 1, usd_24h_change: 3 } },
 							currentSolPrice: { solana: { usd: 1, usd_24h_change: 3 } },
+							currentXrpPrice: { ripple: { usd: 1, usd_24h_change: 3 } },
 							currentSplPrices: { spl1: { usd: 1 }, spl2: { usd: 1 } },
 							currentArbitrumEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } },
 							currentBaseEthPrice: { ethereum: { usd: 1, usd_24h_change: 3 } }
@@ -1250,6 +1261,7 @@ describe('exchange.worker', () => {
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
 						[{ SolNativeMainnet: null }, mockExchangeRate],
+						[{ XrpNativeMainnet: null }, mockExchangeRate],
 						[{ EvmNative: 56n }, mockExchangeRate],
 						[{ EvmNative: 137n }, mockExchangeRate]
 					)
@@ -1409,6 +1421,7 @@ describe('exchange.worker', () => {
 						currentIcpPrice: undefined,
 						currentIcrcPrices: {},
 						currentSolPrice: undefined,
+						currentXrpPrice: undefined,
 						currentSplPrices: {},
 						currentErc4626Prices: {},
 						currentBnbPrice: undefined,
@@ -1483,6 +1496,7 @@ describe('exchange.worker', () => {
 						currentIcpPrice: undefined,
 						currentIcrcPrices: {},
 						currentSolPrice: undefined,
+						currentXrpPrice: undefined,
 						currentSplPrices: {},
 						currentErc4626Prices: {},
 						currentBnbPrice: undefined,
@@ -1505,6 +1519,7 @@ describe('exchange.worker', () => {
 						[{ BtcNativeMainnet: null }, mockExchangeRate],
 						[{ IcpNative: null }, mockExchangeRate],
 						[{ SolNativeMainnet: null }, mockExchangeRate],
+						[{ XrpNativeMainnet: null }, mockExchangeRate],
 						[{ EvmNative: 56n }, mockExchangeRate],
 						[{ EvmNative: 137n }, mockExchangeRate],
 						[{ EvmNative: 42161n }, mockExchangeRate],
@@ -1654,7 +1669,7 @@ describe('exchange.worker', () => {
 
 						await onExchangeMessage(mockEvent);
 
-						// No native CoinGecko calls — backend priced all natives.
+						// No native CoinGecko calls — backend priced all natives, XRP included.
 						expect(simplePrice).not.toHaveBeenCalled();
 
 						// Only the missing ERC-20 (0xmissing), missing ICRC (icrc1) and missing SPL (spl1).
@@ -1710,7 +1725,7 @@ describe('exchange.worker', () => {
 						await onExchangeMessage(mockEvent);
 
 						// ETH, BTC, ICP, SOL, BNB, POL — ETH covers Arbitrum + Base too (no duplicate).
-						expect(simplePrice).toHaveBeenCalledTimes(6);
+						expect(simplePrice).toHaveBeenCalledTimes(7);
 						expect(simplePrice).toHaveBeenCalledWith({
 							ids: 'ethereum',
 							vs_currencies: Currency.USD,

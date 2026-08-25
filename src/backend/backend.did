@@ -836,6 +836,7 @@ type NetworkSettingsFor = variant {
 	ArbitrumMainnet;
 	InternetComputer;
 	BaseSepolia;
+	XrpMainnet;
 	PolygonMainnet;
 	BitcoinRegtest;
 	SolanaDevnet;
@@ -1129,6 +1130,8 @@ type TokenId = variant {
 	SolNativeDevnet;
 	// ICRC token on ICP
 	Icrc : principal;
+	// Native XRP on mainnet
+	XrpNativeMainnet;
 	// Native EVM token (ETH, MATIC, BNB, etc.) identified by chain ID
 	EvmNative : nat64;
 	// ICRC-7 NFT collection on the Internet Computer
