@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import { loadXrpBalance } from '$xrp/api/xrpl.api';
+import { loadXrpBalance, submitXrpTransaction } from '$xrp/api/xrpl.api';
 import { XrpNetworks } from '$xrp/types/network';
 
 describe('xrpl.api', () => {
@@ -76,6 +76,56 @@ describe('xrpl.api', () => {
 
 			await expect(loadXrpBalance({ address, network: XrpNetworks.mainnet })).rejects.toThrow(
 				'invalidParams'
+			);
+		});
+	});
+
+	describe('submitXrpTransaction', () => {
+		const txBlob = '1200002280000000';
+
+		it('returns an accepted result for a tesSUCCESS engine result', async () => {
+			mockFetchResponse({
+				body: {
+					result: {
+						engine_result: 'tesSUCCESS',
+						engine_result_message: 'The transaction was applied.',
+						tx_json: { hash: 'ABCDEF' }
+					}
+				}
+			});
+
+			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+			expect(result).toEqual({
+				engineResult: 'tesSUCCESS',
+				engineResultMessage: 'The transaction was applied.',
+				txHash: 'ABCDEF',
+				accepted: true
+			});
+		});
+
+		it('marks a non-tes/ter engine result as not accepted', async () => {
+			mockFetchResponse({ body: { result: { engine_result: 'tecUNFUNDED_PAYMENT' } } });
+
+			const result = await submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet });
+
+			expect(result.accepted).toBeFalsy();
+			expect(result.engineResult).toBe('tecUNFUNDED_PAYMENT');
+		});
+
+		it('throws on a non-ok HTTP response', async () => {
+			mockFetchResponse({ body: {}, ok: false, status: 500 });
+
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'XRPL submit request failed with status 500'
+			);
+		});
+
+		it('throws when the response has no engine_result', async () => {
+			mockFetchResponse({ body: { result: { error: 'invalidTransaction' } } });
+
+			await expect(submitXrpTransaction({ txBlob, network: XrpNetworks.mainnet })).rejects.toThrow(
+				'invalidTransaction'
 			);
 		});
 	});
