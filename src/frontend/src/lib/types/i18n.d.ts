@@ -2280,6 +2280,13 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		select_token: string;
+		create_title: string;
+		share_title: string;
+		empty_balance_title: string;
+		empty_balance_description: string;
+		no_supported_tokens_title: string;
+		no_supported_tokens_description: string;
 		learn_how_it_works: string;
 		view_history: string;
 		get_started: string;

@@ -2750,6 +2750,13 @@
 			"intro_title": "",
 			"intro_heading": "",
 			"intro_body": "",
+			"select_token": "",
+			"create_title": "",
+			"share_title": "",
+			"empty_balance_title": "",
+			"empty_balance_description": "",
+			"no_supported_tokens_title": "",
+			"no_supported_tokens_description": "",
 			"learn_how_it_works": "",
 			"view_history": "",
 			"get_started": ""

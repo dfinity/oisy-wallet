@@ -15,7 +15,7 @@
 	import ScannerModal from '$lib/components/scanner/ScannerModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
-	import TipIntroModal from '$lib/components/tip/TipIntroModal.svelte';
+	import TipModal from '$lib/components/tip/TipModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
@@ -71,7 +71,7 @@
 	{:else if $modalReferralCode}
 		<ReferralCodeModal />
 	{:else if TIPS_ENABLED && $modalTip}
-		<TipIntroModal />
+		<TipModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
