@@ -256,6 +256,9 @@ export interface EvmQuoteParams {
 	destinationToken: Erc20Token | IcToken;
 	amount: bigint;
 	userAddress: OptionEthAddress;
+	// The user's address on the destination chain, for cross-chain providers that pay out
+	// there. Absent, such providers fall back to `userAddress`.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
@@ -388,6 +391,9 @@ export interface BtcQuoteParams {
 	amount: bigint;
 	// The user's own Bitcoin address, the source of the UTXOs a deposit spends.
 	userBtcAddress: BtcAddress;
+	// The user's address on the destination chain. Chain Fusion ignores it (a BTC → ckBTC
+	// deposit credits the user's own principal); cross-chain providers pay out to it.
+	recipientAddress?: string;
 	slippage: Slippage;
 }
 
