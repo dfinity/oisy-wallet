@@ -16,3 +16,19 @@ import type { Token } from '$lib/types/token';
  */
 export const tippableTokens = (tokens: Token[]): IcToken[] =>
 	tokens.filter((token): token is IcToken => isTokenIcp(token) || isTokenIcrc(token));
+
+/**
+ * The two fees a tip costs its sender, both one ledger fee.
+ *
+ * There are two because the flow touches the ledger twice: once to reserve
+ * (`icrc2_approve`) and once when someone claims (`icrc2_transfer_from`). The
+ * ledger charges the second to the sender's balance while crediting the claimer
+ * the full amount — so the claimer pays nothing, and the sender's spendable
+ * balance has to account for both. Measured against a real ledger in the spec's
+ * PR-0 spike rather than inferred.
+ */
+export const tipFees = (fee: bigint): { reserve: bigint; payout: bigint; total: bigint } => ({
+	reserve: fee,
+	payout: fee,
+	total: fee * 2n
+});

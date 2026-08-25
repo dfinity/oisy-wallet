@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import type { IcToken } from '$icp/types/ic-token';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -13,7 +15,7 @@
 	import { tippableTokens } from '$lib/utils/tip.utils';
 
 	interface Props {
-		onSelectToken: (token: Token) => void;
+		onSelectToken: (token: IcToken) => void;
 		onClose: () => void;
 	}
 
@@ -26,9 +28,20 @@
 	$effect(() => {
 		setTokens(tokens);
 	});
+
+	// The list is built from `tokens`, so the clicked token is always one of them —
+	// recovering it by id hands the caller the IC type the approve needs, without
+	// casting away the list component's generic `Token`.
+	const onTokenButtonClick = (token: Token) => {
+		const selected = tokens.find(({ id }) => id === token.id);
+
+		if (nonNullish(selected)) {
+			onSelectToken(selected);
+		}
+	};
 </script>
 
-<ModalTokensList networkSelectorViewOnly onTokenButtonClick={onSelectToken}>
+<ModalTokensList networkSelectorViewOnly {onTokenButtonClick}>
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />
 	{/snippet}
