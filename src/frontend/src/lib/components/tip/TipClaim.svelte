@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
+	import { AnonymousIdentity } from '@icp-sdk/core/agent';
+	import type { Principal } from '@icp-sdk/core/principal';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import type { PublicTip, TipDetails } from '$declarations/backend/backend.did';
+	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -21,6 +25,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { InternetIdentityDomain } from '$lib/types/auth';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -41,6 +46,11 @@
 	let preview = $state<PublicTip | undefined>();
 	let details = $state<TipDetails | undefined>();
 	let busy = $state(false);
+	// Symbol and decimals come from the ledger itself rather than the recipient's
+	// token list: whoever opens a tip link may never have held this token, so the
+	// list is exactly the wrong place to look for how to render it.
+	let symbol = $state<string | undefined>();
+	let decimals = $state<number | undefined>();
 
 	// The claim code never leaves the fragment, so it is read here rather than
 	// from route params — and it survives sign-in because Internet Identity opens
@@ -71,13 +81,34 @@
 			if (nonNullish($authIdentity)) {
 				details = await loadTipDetails({ identity: $authIdentity, tipId, claimCode: code });
 				claimState = 'review';
+				void loadTokenMetadata(details.ledger_canister_id);
 				return;
 			}
 
 			preview = await loadTipPreview({ tipId });
 			claimState = 'preview';
+			void loadTokenMetadata(preview.ledger_canister_id);
 		} catch (_: unknown) {
 			toUnavailable();
+		}
+	};
+
+	const loadTokenMetadata = async (ledger: Principal) => {
+		try {
+			const meta = mapTokenMetadata(
+				await ledgerMetadata({
+					certified: false,
+					identity: new AnonymousIdentity(),
+					ledgerCanisterId: ledger.toText()
+				})
+			);
+
+			if (nonNullish(meta)) {
+				({ symbol, decimals } = meta);
+			}
+		} catch (_: unknown) {
+			// Non-fatal: the amount falls back to base units rather than blocking a
+			// claim over a cosmetic lookup.
 		}
 	};
 
@@ -122,6 +153,18 @@
 
 	const toWallet = async () => await goto(AppPath.Tokens);
 
+	let amountLabel = $derived.by(() => {
+		const value = details?.amount ?? preview?.amount;
+
+		if (isNullish(value)) {
+			return undefined;
+		}
+
+		return nonNullish(decimals) && nonNullish(symbol)
+			? `${formatToken({ value, unitName: decimals, displayDecimals: decimals })} ${symbol}`
+			: `${value}`;
+	});
+
 	let expiresAt = $derived.by(() => {
 		const ns = details?.expires_at_ns ?? preview?.expires_at_ns;
 		return nonNullish(ns) ? new Date(Number(ns / 1_000_000n)).toLocaleString() : undefined;
@@ -140,7 +183,7 @@
 			{#if claimState === 'preview' && nonNullish(preview)}
 				<p class="text-tertiary">{$i18n.tip.text.claim_amount}</p>
 
-				<p class="mb-4 text-3xl font-bold">{preview.amount}</p>
+				<p class="mb-4 text-3xl font-bold">{amountLabel}</p>
 
 				{#if nonNullish(expiresAt)}
 					<p class="mb-4 text-sm text-tertiary">
@@ -152,7 +195,7 @@
 			{:else if claimState === 'review' && nonNullish(details)}
 				<p class="text-tertiary">{$i18n.tip.text.claim_amount}</p>
 
-				<p class="mb-4 text-3xl font-bold">{details.amount}</p>
+				<p class="mb-4 text-3xl font-bold">{amountLabel}</p>
 
 				{#if nonNullish(details.message[0])}
 					<p class="mb-4 italic">“{details.message[0]}”</p>
