@@ -13,7 +13,7 @@
 	<legend class="mb-2 font-bold">{$i18n.tip.text.expiration}</legend>
 
 	<div class="flex gap-2" aria-label={$i18n.tip.text.expiration} role="radiogroup">
-		{#each TIP_EXPIRY_OPTIONS as { ms, labelKey, recommended } (labelKey)}
+		{#each TIP_EXPIRY_OPTIONS as { ms, labelKey } (labelKey)}
 			<button
 				class="flex flex-1 flex-col items-center justify-center rounded-lg border px-2 py-3 text-sm transition-colors {durationMs ===
 				ms
@@ -25,10 +25,6 @@
 				type="button"
 			>
 				<span class="font-bold whitespace-nowrap">{$i18n.tip.text[labelKey]}</span>
-
-				{#if recommended}
-					<span class="text-xs text-tertiary">{$i18n.tip.text.recommended}</span>
-				{/if}
 			</button>
 		{/each}
 	</div>
