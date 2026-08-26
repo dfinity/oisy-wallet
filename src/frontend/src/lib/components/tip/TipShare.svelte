@@ -9,6 +9,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
 	import {
 		TIP_HISTORY_CANCEL_BUTTON,
