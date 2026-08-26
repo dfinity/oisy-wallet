@@ -470,6 +470,11 @@ sender will see who claimed this tip** ([decision 11](#decisions-clarification-r
 The disclosure has to appear **before** the claim, not after — the recipient's
 identity reaching the sender should be a choice, not a surprise.
 
+**This screen no longer ships as drawn.** The review card and its **Claim now**
+footer were replaced after the first build by claiming on sign-in; the disclosure
+moved earlier rather than being dropped. See
+[Claiming without a review step](#claiming-without-a-review-step--changed-after-the-first-build).
+
 **Success** — two variants are drawn. The plain one
 ([claim-success](./2026-08-05-feat-tips-via-link/designs/claim-success-21788-50935.png))
 keeps the review card and swaps the footer for a single **Take me to the wallet**
@@ -719,10 +724,13 @@ which is to say not at all.
 - **Cancelling drops the stored code** — the link is worthless then. Claimed and
   expired tips keep theirs until pruned: the cleanup runs as the caller, and
   neither of those paths has the sender as caller.
-- History carries a **Link** action per live row, which decrypts and reopens the
-  share step. An action rather than a clickable row: the row already carries
-  Cancel, and nesting interactive elements is both invalid markup and ambiguous
-  when one outcome is irreversible.
+- **The whole live row opens the tip**, decrypting the code and reopening the
+  share step. It started as a **Link** action beside a **Cancel** one, on the
+  reasoning that nesting interactive elements is invalid markup and ambiguous when
+  one outcome is irreversible. That reasoning held; the conclusion was wrong way
+  round. The row is now the only control, and the irreversible action moved
+  _inside_ what the row opens — where it is one action on a screen that shows what
+  it would destroy, rather than a button next to a list entry.
 - A tip created before this store existed has no ciphertext. That is a fact about
   the tip, not a failure, and reads as one.
 
@@ -750,6 +758,44 @@ already existed:
 - The funnel question — how many people opened a link and converted — is
   structurally invisible to the canister. That is what the
   [Analytics](#analytics-plausible) section is for, and it remains unbuilt.
+
+## Claiming without a review step — changed after the first build
+
+The built flow asked the recipient to press **Claim now** on a review card after
+signing in. Two presses, and the second one had nothing left to decide: whoever
+opens a tip link and signs in has already decided. It shipped that way because
+[decision 11](#decisions-clarification-round) put the disclosure — the sender
+learns who claimed — before the claim, and the review card was where it sat.
+
+**What ships now:** the claim fires as soon as there is an identity, and the
+disclosure moved to the screen _before_ sign-in. That is strictly earlier than
+the review card, and it is read by someone who has not yet identified themselves
+to anyone, so signing in **is** the consent. Criterion 8 is revised, not dropped.
+
+- The confirmation is the **fuller success variant** the design already carried
+  (`21763:86266`), rendered **inside the wallet** rather than on the claim page:
+  the claim page opens the modal, then navigates, and `core/Modals.svelte` picks
+  it up once the app shell mounts. It is the one screen that shows the sender's
+  message, which no longer has a review card to live on.
+- **Claim first, hand over second.** A lost handover costs a confirmation the
+  recipient can also read off their own balance; a lost claim would cost them the
+  money. The navigation is therefore outside the claim's error handling — a
+  failure to reach the wallet must never be reported as a failed claim.
+- The receipt that crosses into the app carries **finished display values and
+  nothing secret**. The claim code is spent by then and has no business travelling
+  with it; a test pins that it does not.
+- Removing the button removed the only retry, so a transport failure — where
+  nothing moved and the tip is still claimable — now has a **Try again** of its
+  own. `Uncovered` keeps its own state, which is not retryable in the same sense.
+- The confirmation modal is **not behind `TIPS_ENABLED`**, unlike the create
+  surface. Outstanding links stay claimable while the flag is off, so closing the
+  flag must not swallow the confirmation for a claim that has just paid out.
+- The signed-out welcome screen takes the drawn artwork as an asset
+  (`tip-welcome-img.svg`) with the **token's own mark composited on top** at the
+  two positions the design draws it. Figma draws one frame per token; compositing
+  covers any ICRC-2 ledger, including one added after this ships. A ledger that
+  publishes no `icrc1:logo` (the plain ICP ledger is one) falls back to its symbol,
+  because a blank badge on a coin reads as a failed image.
 
 ## Security model
 
@@ -908,9 +954,13 @@ change.
    expiry — **not** the message, the sender, or the claimer — and performs no
    state-changing call.
 8. After **Open or Create** and Internet Identity, the claim resumes with the
-   fragment intact and shows the review card with the amount, the message,
-   **Status: Reserved**, and a disclosure that the sender will see who claimed —
-   and **no fee line**, since the claimer pays none.
+   fragment intact and **pays out without a second press**, landing the recipient
+   in their wallet with a confirmation carrying the amount, the sender's message
+   and **Status: Completed** — and **no fee line**, since the claimer pays none.
+   The disclosure that the sender will see who claimed sits on the screen
+   **before** sign-in, so it is read before any identity exists. Revised after the
+   first build; the review card this replaces is described in
+   [Claiming without a review step](#claiming-without-a-review-step--changed-after-the-first-build).
 9. **Claim now** pays out via `icrc2_transfer_from` for the **full amount shown**,
    **including for a principal that has never used OISY before**, with no manual
    token setup. Adjusted during the backend build, and measured against a real
