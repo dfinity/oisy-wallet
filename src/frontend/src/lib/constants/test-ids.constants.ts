@@ -10,6 +10,7 @@ export const TIP_INTRO_HISTORY_BUTTON = 'tip-intro-history-button';
 export const TIP_SHARE_COPY_BUTTON = 'tip-share-copy-button';
 export const TIP_CLAIM_BUTTON = 'tip-claim-button';
 export const TIP_HISTORY_CANCEL_BUTTON = 'tip-history-cancel-button';
+export const TIP_HISTORY_LINK_BUTTON = 'tip-history-link-button';
 export const NAVIGATION_MENU_ADDRESS_BOOK_BUTTON = 'navigation-menu-address-book-button';
 export const NAVIGATION_MENU_SCANNER_BUTTON = 'navigation-menu-scanner-button';
 export const NAVIGATION_MENU_PAY_BUTTON = 'navigation-menu-pay-button';
