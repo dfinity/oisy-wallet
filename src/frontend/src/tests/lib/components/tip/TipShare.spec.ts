@@ -76,4 +76,41 @@ describe('TipShare', () => {
 			expect(queryByText(get(i18n).core.text.back)).not.toBeInTheDocument();
 		});
 	});
+
+	describe('a link that is still on its way', () => {
+		it('draws everything the row already knew while the link is missing', () => {
+			// The screen opens on the click and the link arrives after, so the amount
+			// and the deadline have to stand on their own — otherwise the transition
+			// would be to an empty box.
+			const { getByText, queryByText } = render(TipShare, {
+				props: { ...props, link: undefined }
+			});
+
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+			expect(queryByText(link)).not.toBeInTheDocument();
+		});
+
+		it('keeps the cancel action usable before the link lands', () => {
+			// Cancelling needs the tip id and its ledger, both of which the row
+			// carried. Waiting on a decryption to offer it would be arbitrary.
+			const { container } = render(TipShare, {
+				props: { ...props, link: undefined, onCancel: vi.fn() }
+			});
+
+			expect(
+				container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
+			).toBeEnabled();
+		});
+
+		it('says why there is no link instead of pulsing for ever', () => {
+			// A tip from before the recovery store exists has no code to recover. The
+			// screen stays — the amount, the deadline and Cancel are still the point.
+			const { getByText } = render(TipShare, {
+				props: { ...props, link: undefined, linkMessage: 'No link for this one' }
+			});
+
+			expect(getByText('No link for this one')).toBeInTheDocument();
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+		});
+	});
 });

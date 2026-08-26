@@ -50,7 +50,7 @@ describe('TipHistory', () => {
 			tip({ tip_id: 'stopped', status: { Cancelled: null } })
 		]);
 
-		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
+		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
 
 		await waitFor(() =>
 			expect(container.querySelectorAll(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)).toHaveLength(
@@ -71,7 +71,7 @@ describe('TipHistory', () => {
 			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] })
 		]);
 
-		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
+		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
 
 		await waitFor(() => expect(getByText(/aaaaa-aa/)).toBeInTheDocument());
 	});
@@ -85,7 +85,7 @@ describe('TipHistory', () => {
 		]);
 
 		const { getAllByText, queryByText } = render(TipHistory, {
-			props: { onClose: vi.fn(), onViewLink: vi.fn() }
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
 		});
 
 		await waitFor(() => expect(getAllByText('Tip 0.005 ICP')).toHaveLength(2));
@@ -104,7 +104,7 @@ describe('TipHistory', () => {
 		]);
 
 		const { getAllByText } = render(TipHistory, {
-			props: { onClose: vi.fn(), onViewLink: vi.fn() }
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
 		});
 
 		await waitFor(() => expect(getAllByText(get(i18n).tip.text.status_expired)).toHaveLength(1));
@@ -115,50 +115,22 @@ describe('TipHistory', () => {
 			{ ...tip({ tip_id: 'live', status: { Reserved: null } }), created_at_ns: nowNs }
 		]);
 
-		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
+		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
 
 		await waitFor(() => expect(getByText(/today/i)).toBeInTheDocument());
 	});
 
-	it('hands the recovered link up rather than recovering it twice', async () => {
-		// The link is rebuilt from the sender's own encrypted copy and then handed
-		// to the share step, which already knows how to render a QR and a copy
-		// action. Nothing here builds a second link screen.
-		const onViewLink = vi.fn();
+	it('hands the tip over on the click, without recovering anything first', async () => {
+		// The bug this closes: the row awaited a vetKey derivation before the screen
+		// moved, so a click on a slow first derivation looked like it had missed.
+		// Recovering the link is the next screen's job, which knows how to wait.
+		const onOpenTip = vi.fn();
+		const recoverSpy = vi.spyOn(tipServices, 'recoverTipLink');
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
 			tip({ tip_id: 'live', status: { Reserved: null } })
 		]);
-		vi.spyOn(tipServices, 'recoverTipLink').mockResolvedValue('https://oisy.com/tip/live#c=code');
 
-		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink } });
-
-		await waitFor(() =>
-			expect(
-				container.querySelector(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
-			).toBeInTheDocument()
-		);
-
-		container
-			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
-			?.click();
-
-		await waitFor(() =>
-			expect(onViewLink).toHaveBeenCalledWith(
-				expect.objectContaining({ link: 'https://oisy.com/tip/live#c=code' })
-			)
-		);
-	});
-
-	it('says so plainly when a tip has no recoverable link', async () => {
-		// Tips created before the encrypted store existed have no copy to recover.
-		// That is a fact about the tip, not a failure, so it must not read as one.
-		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
-			tip({ tip_id: 'old', status: { Reserved: null } })
-		]);
-		vi.spyOn(tipServices, 'recoverTipLink').mockResolvedValue(undefined);
-		const onViewLink = vi.fn();
-
-		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink } });
+		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip } });
 
 		await waitFor(() =>
 			expect(
@@ -170,9 +142,8 @@ describe('TipHistory', () => {
 			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
 			?.click();
 
-		await waitFor(() => expect(tipServices.recoverTipLink).toHaveBeenCalledOnce());
-
-		expect(onViewLink).not.toHaveBeenCalled();
+		expect(onOpenTip).toHaveBeenCalledWith(expect.objectContaining({ tip_id: 'live' }));
+		expect(recoverSpy).not.toHaveBeenCalled();
 	});
 
 	it('shows skeleton rows while the list is loading', async () => {
@@ -201,7 +172,7 @@ describe('TipHistory', () => {
 	it('shows an empty state rather than a bare list', async () => {
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([]);
 
-		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
+		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
 
 		await waitFor(() => expect(getByText(get(i18n).tip.text.history_empty)).toBeInTheDocument());
 	});

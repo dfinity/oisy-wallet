@@ -15,7 +15,13 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
-	import { cancelTip, newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
+	import {
+		cancelTip,
+		newTipDraft,
+		recoverTipLink,
+		reserveTip,
+		type TipDraft
+	} from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -36,6 +42,8 @@
 	let selectedToken: IcToken | undefined = $state();
 	let draft: TipDraft | undefined = $state();
 	let link: string | undefined = $state();
+	// Why there is no link, when there is not going to be one.
+	let linkMessage: string | undefined = $state();
 	let expiresAtNs: bigint | undefined = $state();
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
@@ -105,15 +113,44 @@
 		}
 	};
 
-	const showRecoveredLink = ({ tip, link: recovered }: { tip: MyTip; link: string }) => {
+	/**
+	 * Opens a tip from its History row: transition first, link second.
+	 *
+	 * Everything the row already knew — token, amount, deadline — is enough to
+	 * draw the screen, so it opens on the click. Recovering the link derives a
+	 * vetKey and decrypts, which can take seconds; doing that before the
+	 * transition made the click look like it had missed, so it now happens with
+	 * the screen already up and its own loading state showing.
+	 *
+	 * A link that cannot be recovered leaves the screen standing rather than
+	 * bouncing back: the amount, the deadline and Cancel are all still useful, and
+	 * `linkMessage` says why the code is missing where the code would have been.
+	 */
+	const openTip = async (tip: MyTip) => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
 		selectedToken = tippableTokens($tokens).find(
 			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
 		);
 		reservedAmount = tip.amount;
 		expiresAtNs = tip.expires_at_ns;
-		link = recovered;
 		viewingTip = tip;
+		link = undefined;
+		linkMessage = undefined;
 		goToStep(WizardStepsTip.SHARE);
+
+		try {
+			const recovered = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
+
+			// Not an error: a tip created before the recovery store existed has no
+			// stored code, and no amount of retrying will conjure one.
+			linkMessage = isNullish(recovered) ? $i18n.tip.text.link_unavailable : undefined;
+			link = recovered;
+		} catch (_: unknown) {
+			linkMessage = $i18n.tip.text.link_recovery_failed;
+		}
 	};
 
 	const generate = async () => {
@@ -146,6 +183,7 @@
 
 			viewingTip = undefined;
 			reservedAmount = parsedAmount;
+			linkMessage = undefined;
 			({ link, expiresAtNs } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
@@ -175,18 +213,19 @@
 				bind:durationMs
 				bind:message
 			/>
-		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
+		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
 			<TipShare
 				amount={reservedAmount}
 				{cancelling}
 				{expiresAtNs}
 				{link}
+				{linkMessage}
 				onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
 				onDone={nonNullish(viewingTip) ? () => goToStep(WizardStepsTip.HISTORY) : modalStore.close}
 				token={selectedToken}
 			/>
 		{:else if currentStep?.name === WizardStepsTip.HISTORY}
-			<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onViewLink={showRecoveredLink} />
+			<TipHistory onClose={() => goToStep(WizardStepsTip.INTRO)} onOpenTip={openTip} />
 		{:else}
 			<TipIntro
 				onGetStarted={enterTokensList}
