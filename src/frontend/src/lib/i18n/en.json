@@ -1936,6 +1936,8 @@
 			"details": "Transaction details",
 			"hash": "Transaction hash",
 			"hash_copied": "Transaction hash $hash copied to clipboard.",
+			"signature": "Transaction signature",
+			"signature_copied": "Transaction signature $signature copied to clipboard.",
 			"id": "Transaction ID",
 			"id_copied": "Transaction ID copied to clipboard.",
 			"timestamp": "Timestamp",
