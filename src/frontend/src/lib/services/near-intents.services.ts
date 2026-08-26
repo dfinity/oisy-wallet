@@ -1,6 +1,7 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
+	NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS,
 	NEAR_INTENTS_QUOTE_DEADLINE_MS
 } from '$lib/constants/swap.constants';
 import {
@@ -108,6 +109,13 @@ export const fetchNearIntentsSwapQuote = async ({
 		return;
 	}
 
+	// A BTC deposit needs a much longer window to confirm on-chain before the 1Click
+	// deadline triggers a refund; see the constants for the rationale.
+	const deadlineMs =
+		assets.srcAsset.blockchain === 'btc'
+			? NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS
+			: NEAR_INTENTS_QUOTE_DEADLINE_MS;
+
 	const quoteResponse = await fetchNearIntentsQuote(
 		buildNearIntentsQuoteRequest({
 			slippageTolerance: Math.round(Number(slippage) * 100),
@@ -115,7 +123,7 @@ export const fetchNearIntentsSwapQuote = async ({
 			amount,
 			userAddress,
 			recipientAddress,
-			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
+			deadlineMs
 		})
 	);
 
