@@ -110,9 +110,15 @@
 		it should be legible without competing with the amount above it.
 	-->
 	<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
-		<p class="font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
+		<!--
+			`m-0` on both, then one explicit step between them. A bare `<p>` carries an
+			18px bottom margin in this app, which is more than this block's own padding
+			— so the heading sat further from its own paragraph than the paragraph sat
+			from the edge, and the whole box read bottom-heavy.
+		-->
+		<p class="m-0 font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
 
-		<p class="text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+		<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
 	</div>
 
 	<!--
@@ -120,7 +126,7 @@
 		screen that changes what the reader should do next, and inside the reassuring
 		box it read as part of the reassurance.
 	-->
-	<div class="mb-2 flex items-center justify-center gap-2 text-sm text-secondary">
+	<div class="mb-3 flex items-center justify-center gap-2 text-sm text-secondary">
 		<IconClock size="16" />
 
 		{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
