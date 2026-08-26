@@ -12,7 +12,11 @@ import { get } from 'svelte/store';
 // Handing the tip to the wallet is now what this page does last, so the
 // navigation is part of its behaviour and has to be observable.
 const goto = vi.fn();
-vi.mock('$app/navigation', () => ({ goto: (path: string) => goto(path) }));
+vi.mock('$app/navigation', () => ({
+	goto: (path: string) => goto(path),
+	// The page warms the wallet route on mount; the test only needs it to exist.
+	preloadData: vi.fn()
+}));
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
 
@@ -52,6 +56,27 @@ describe('TipClaim', () => {
 			);
 
 			expect(previewSpy).not.toHaveBeenCalled();
+		});
+
+		it('says it is working while the wallet route loads', async () => {
+			// Leaving for the wallet is a cold route fetch, measured at about four
+			// seconds. Without this the button takes the click and sits there, which
+			// is indistinguishable from a broken one.
+			setFragment(`#c=${claimCode}`);
+			vi.spyOn(tipServices, 'loadTipPreview').mockRejectedValue({ NotFound: null });
+			mockAuthStore(null);
+			goto.mockReturnValue(new Promise(() => {}));
+
+			const { container, getByText } = render(TipClaim, { props: { tipId } });
+
+			await waitFor(() =>
+				expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+			);
+
+			const button = container.querySelector<HTMLButtonElement>('button');
+			button?.click();
+
+			await waitFor(() => expect(button).toBeDisabled());
 		});
 
 		it('collapses a rejected lookup into the same unavailable state', async () => {
