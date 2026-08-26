@@ -6,7 +6,9 @@ import {
 	createTip as createTipApi,
 	getMyTips,
 	getTip,
-	getTipDetails
+	getTipDetails,
+	getTipSecret,
+	setTipSecret
 } from '$lib/api/backend.api';
 import { BACKEND_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
 import {
@@ -15,8 +17,10 @@ import {
 	generateTipId,
 	tipSpenderSubaccount
 } from '$lib/services/tip.crypto';
+import { decryptClaimCode, encryptClaimCode } from '$lib/services/tip.vetkeys';
 import type { CanisterIdText } from '$lib/types/canister';
-import { toNullable } from '@dfinity/utils';
+import { consoleWarn } from '$lib/utils/console.utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
@@ -132,7 +136,55 @@ export const reserveTip = async ({
 		claim_code_hash: await claimCodeHash(draft.claimCode)
 	});
 
+	// Best-effort, and deliberately after the tip exists: this is a convenience
+	// so the sender can find the link again, and a failure here must not look
+	// like a failed reservation — the tip is real and the link is on screen. The
+	// canister cannot read what it stores.
+	try {
+		await setTipSecret({
+			identity,
+			tip_id: draft.tipId,
+			encrypted_claim_code: await encryptClaimCode({
+				claimCode: draft.claimCode,
+				tipId: draft.tipId,
+				identity
+			})
+		});
+	} catch (err: unknown) {
+		consoleWarn('Could not store the recoverable claim code for this tip', err);
+	}
+
 	return { link: buildTipLink(draft), expiresAtNs };
+};
+
+/**
+ * Rebuilds the share link for one of the sender's own tips.
+ *
+ * `undefined` when no ciphertext is stored — a tip created before the recovery
+ * store existed, or one whose secret was dropped when it was cancelled. The
+ * caller shows "no longer available" rather than an error, because neither case
+ * is a fault.
+ */
+export const recoverTipLink = async ({
+	identity,
+	tipId
+}: {
+	identity: Identity;
+	tipId: string;
+}): Promise<string | undefined> => {
+	const encrypted = await getTipSecret({ identity, tipId });
+
+	if (isNullish(encrypted)) {
+		return undefined;
+	}
+
+	const claimCode = await decryptClaimCode({
+		encrypted: encrypted instanceof Uint8Array ? encrypted : Uint8Array.from(encrypted),
+		tipId,
+		identity
+	});
+
+	return buildTipLink({ tipId, claimCode });
 };
 
 /**
