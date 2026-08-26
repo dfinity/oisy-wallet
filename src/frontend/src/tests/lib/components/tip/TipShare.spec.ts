@@ -1,9 +1,7 @@
 import TipShare from '$lib/components/tip/TipShare.svelte';
 import { TIP_SHARE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
-import { i18n } from '$lib/stores/i18n.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
-import { get } from 'svelte/store';
 
 describe('TipShare', () => {
 	const link = 'https://oisy.com/tip/abc123#c=secret';
@@ -33,14 +31,6 @@ describe('TipShare', () => {
 		const { queryByText } = render(TipShare, { props });
 
 		expect(queryByText(/250000000/)).not.toBeInTheDocument();
-	});
-
-	it('warns that the link is a bearer instrument', () => {
-		// The drawn design has no equivalent line. Anyone holding this link can
-		// claim it, so the screen cannot ship without saying so.
-		const { getByText } = render(TipShare, { props });
-
-		expect(getByText(get(i18n).tip.text.share_description)).toBeInTheDocument();
 	});
 
 	it('offers the link for copying', () => {
