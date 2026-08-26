@@ -1,7 +1,13 @@
+import { LOCAL, STAGING } from '$lib/constants/app.constants';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { safeParse } from '$lib/validation/utils.validation';
 
 export const NEAR_INTENTS_SWAP_ENABLED = true;
+
+// BTC via NEAR Intents rolls out on local and staging first; production stays off
+// until the flag is flipped deliberately. Intentionally unused for now; later PRs
+// consume it.
+export const NEAR_INTENTS_BTC_SWAP_ENABLED = LOCAL || STAGING;
 
 // Apparently we do not need any API keys for Near Intents; we can make unauthorised calls
 export const NEAR_INTENTS_API_KEY = import.meta.env.VITE_NEAR_INTENTS_API_KEY;

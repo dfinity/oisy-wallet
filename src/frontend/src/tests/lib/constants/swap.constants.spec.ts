@@ -1,6 +1,19 @@
+import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { NEAR_INTENTS_BLOCKCHAIN_MAP } from '$lib/constants/swap.constants';
 import type { NetworkId } from '$lib/types/network';
 
 describe('swap.constants', () => {
+	describe('NEAR_INTENTS_BLOCKCHAIN_MAP', () => {
+		it('maps BTC mainnet to the btc blockchain code', () => {
+			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[BTC_MAINNET_NETWORK_ID]).toBe('btc');
+		});
+
+		it('maps Solana mainnet to the sol blockchain code', () => {
+			expect(NEAR_INTENTS_BLOCKCHAIN_MAP[SOLANA_MAINNET_NETWORK_ID]).toBe('sol');
+		});
+	});
+
 	describe('SUPPORTED_CROSS_SWAP_NETWORKS', () => {
 		const loadMatrix = async ({
 			oneSec,

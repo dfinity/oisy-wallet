@@ -6,7 +6,7 @@ use shared::types::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest,
-        GetActiveUserTransactionsResponse, UpdateActiveUserTransactionRequest,
+        GetActiveUserTransactionsResponse, OisyTradeData, UpdateActiveUserTransactionRequest,
         MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_ACTIVE_USER_TRANSACTION_ERROR_LEN,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REFS,
         MAX_ACTIVE_USER_TRANSACTION_EXTERNAL_REF_KEY_LEN,
@@ -242,6 +242,10 @@ fn validate_data(data: &ActiveUserTransactionData) -> Result<(), ActiveUserTrans
             require_positive_amount(&d.amount)?;
             require_chain_fusion_pair(d)?;
         }
+        ActiveUserTransactionData::OisyTrade(d) => {
+            require_positive_amount(&d.amount)?;
+            require_oisy_trade_pair(d)?;
+        }
     }
     Ok(())
 }
@@ -295,6 +299,24 @@ fn require_chain_fusion_pair(data: &ChainFusionData) -> Result<(), ActiveUserTra
     } else {
         Err(ActiveUserTransactionError::InvalidData(
             "token pair does not match chain-fusion direction".to_string(),
+        ))
+    }
+}
+
+/// An OISY Trade pair is two ledger principals on the Internet Computer, so a
+/// row naming an EVM or Solana token is unsatisfiable by construction. `data` is
+/// immutable after creation, so such a row could never settle and would occupy
+/// one of the user's slots forever — reject it up front. Kinds only,
+/// deliberately: any ICRC ledger stays valid, so a newly listed pair needs no
+/// change here.
+fn require_oisy_trade_pair(data: &OisyTradeData) -> Result<(), ActiveUserTransactionError> {
+    let is_ic = |t: &TokenId| matches!(t, TokenId::Icrc(_) | TokenId::IcpNative);
+
+    if is_ic(&data.source_token) && is_ic(&data.dest_token) {
+        Ok(())
+    } else {
+        Err(ActiveUserTransactionError::InvalidData(
+            "oisy-trade tokens must both be Internet Computer ledgers".to_string(),
         ))
     }
 }
@@ -354,8 +376,9 @@ mod tests {
             ActiveUserTransactionData, ActiveUserTransactionError, ActiveUserTransactionRef,
             ActiveUserTransactionStatus, ChainFusionData, ChainFusionDirection,
             CreateActiveUserTransactionRequest, LiquidiumAction, LiquidiumData, NearIntentsData,
-            OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-            VeloraSwapMode, MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
+            OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+            UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+            MAX_ACTIVE_USER_TRANSACTIONS_PER_USER, MAX_LIQUIDIUM_POOL_ID_LEN,
         },
         custom_token::ErcTokenId,
         token_id::TokenId,
@@ -544,6 +567,58 @@ mod tests {
         assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
     }
 
+    fn near_intents_btc_source_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::BtcNativeMainnet,
+            dest_token: TokenId::EvmNative(8453),
+            amount: Nat::from(amount),
+        })
+    }
+
+    fn near_intents_btc_dest_data(amount: u64) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::NearIntents(NearIntentsData {
+            source_token: TokenId::SolNativeMainnet,
+            dest_token: TokenId::BtcNativeMainnet,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn near_intents_btc_create_roundtrip() {
+        // The BTC-via-NEAR-Intents swap relies on the chain-agnostic variant
+        // accepting BTC token ids in either position with no extra validation;
+        // pin both directions so a validation change cannot break it silently.
+        for (id, data) in [
+            ("near-btc-src", near_intents_btc_source_data(250_000)),
+            ("near-btc-dst", near_intents_btc_dest_data(250_000)),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req(id);
+            req.data = data.clone();
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(listed[0].data, data);
+        }
+    }
+
+    #[test]
+    fn near_intents_btc_zero_amount_rejected() {
+        for data in [
+            near_intents_btc_source_data(0),
+            near_intents_btc_dest_data(0),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("near-btc-1");
+            req.data = data;
+            let err = create(&mut map, principal(), req, 1).unwrap_err();
+            assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
     fn velora_data(amount: u64, mode: VeloraSwapMode) -> ActiveUserTransactionData {
         ActiveUserTransactionData::Velora(VeloraData {
             mode,
@@ -670,6 +745,99 @@ mod tests {
             });
             let err = create(&mut map, principal(), req, 1).unwrap_err();
             assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+        }
+    }
+
+    fn oisy_trade_data(
+        amount: u64,
+        side: OisyTradeSide,
+        source_token: TokenId,
+        dest_token: TokenId,
+    ) -> ActiveUserTransactionData {
+        ActiveUserTransactionData::OisyTrade(OisyTradeData {
+            side,
+            source_token,
+            dest_token,
+            amount: Nat::from(amount),
+        })
+    }
+
+    #[test]
+    fn oisy_trade_create_roundtrip() {
+        // The ICP ledger reaches the wallet as `IcpNative` rather than `Icrc`,
+        // so both spellings of an IC leg must survive create — and the
+        // stable-memory read path — in either position. `side` fixes the
+        // base/quote orientation the token pair alone cannot express, and the
+        // recovery paths route on it, so both sides must survive too.
+        for (side, source_token, dest_token) in [
+            (OisyTradeSide::Sell, icrc(CKBTC_LEDGER), icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), icrc(CKBTC_LEDGER)),
+            (OisyTradeSide::Sell, TokenId::IcpNative, icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), TokenId::IcpNative),
+        ] {
+            let (mut map, _mm) = setup();
+            let mut req = create_req("trade-1");
+            req.data = oisy_trade_data(
+                1_000_000,
+                side.clone(),
+                source_token.clone(),
+                dest_token.clone(),
+            );
+            let tx = create(&mut map, principal(), req, 1).expect("create");
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+
+            let listed = list(&map, principal()).transactions;
+            assert_eq!(listed.len(), 1);
+            assert_eq!(
+                listed[0].data,
+                oisy_trade_data(1_000_000, side, source_token, dest_token)
+            );
+        }
+    }
+
+    #[test]
+    fn oisy_trade_zero_amount_rejected() {
+        let (mut map, _mm) = setup();
+        let mut req = create_req("trade-1");
+        req.data = oisy_trade_data(
+            0,
+            OisyTradeSide::Sell,
+            icrc(CKBTC_LEDGER),
+            icrc(CKUSDC_LEDGER),
+        );
+        let err = create(&mut map, principal(), req, 1).unwrap_err();
+        assert!(matches!(err, ActiveUserTransactionError::InvalidData(_)));
+    }
+
+    #[test]
+    fn oisy_trade_non_ic_token_rejected() {
+        // OISY Trade pairs are ledger principals, so a non-IC leg in either
+        // position is unsatisfiable by construction — and `data` is immutable
+        // after creation, so the row could never settle.
+        let non_ic = [
+            TokenId::EvmNative(1),
+            TokenId::Erc20(ErcTokenId(USDC_ETHEREUM.to_string()), 1),
+            TokenId::BtcNativeMainnet,
+            TokenId::SolNativeMainnet,
+        ];
+
+        for token in non_ic {
+            for (source_token, dest_token) in [
+                (token.clone(), icrc(CKUSDC_LEDGER)),
+                (icrc(CKUSDC_LEDGER), token.clone()),
+            ] {
+                let (mut map, _mm) = setup();
+                let mut req = create_req("trade-1");
+                req.data =
+                    oisy_trade_data(1_000_000, OisyTradeSide::Sell, source_token, dest_token);
+                let err = create(&mut map, principal(), req, 1).unwrap_err();
+                assert_eq!(
+                    err,
+                    ActiveUserTransactionError::InvalidData(
+                        "oisy-trade tokens must both be Internet Computer ledgers".to_string()
+                    )
+                );
+            }
         }
     }
 
