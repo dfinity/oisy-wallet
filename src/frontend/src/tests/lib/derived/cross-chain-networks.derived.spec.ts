@@ -9,13 +9,13 @@ import {
 } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK,
 	SUPPORTED_SOLANA_MAINNET_NETWORKS
 } from '$env/networks/networks.sol.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import {
 	crossChainSwapNetwoksEnvs,
 	crossChainSwapNetworks,
