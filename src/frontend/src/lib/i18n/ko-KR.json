@@ -2802,6 +2802,7 @@
 			"unavailable_description": "",
 			"uncovered_title": "",
 			"uncovered_description": "",
+			"claim_failed_title": "",
 			"claim_failed": "",
 			"history_title": "",
 			"history_empty": "",

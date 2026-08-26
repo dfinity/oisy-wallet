@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
-	import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
+	import { AnonymousIdentity } from '@icp-sdk/core/agent';
 	import type { Principal } from '@icp-sdk/core/principal';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -12,21 +12,13 @@
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { TIP_CLAIM_RETRY_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
-	import {
-		claimTip,
-		loadTipDetails,
-		loadTipPreview,
-		parseClaimCodeFromFragment
-	} from '$lib/services/tip.services';
+	import { loadTipPreview, parseClaimCodeFromFragment } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { TipReceipt } from '$lib/types/tip';
 	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -38,21 +30,21 @@
 	let { tipId }: Props = $props();
 
 	/**
-	 * `uncovered` is the only backend failure told apart from the rest, and only
-	 * because "come back later" is actionable while "expired" is not. Everything
-	 * else — unknown id, expired, already claimed, wrong or missing code —
-	 * collapses into `unavailable`, so someone probing random ids learns nothing.
+	 * This page has one job: show someone who has never heard of OISY what they
+	 * have been given, and get them signed in. The claim itself happens in the
+	 * wallet — see `TipClaimModal` — so `handing-off` is the last thing this page
+	 * does before the app takes over.
 	 *
-	 * `failed` is different in kind: the call itself did not land, nothing moved,
-	 * and the tip is still claimable — so it is the one state that offers a retry.
+	 * `unavailable` covers a link nobody can claim: unknown id, expired, already
+	 * claimed, or a fragment that did not survive the trip. They are deliberately
+	 * indistinguishable, so probing random ids teaches nothing.
 	 */
-	type ClaimState =
-		'loading' | 'preview' | 'claiming' | 'claimed' | 'unavailable' | 'uncovered' | 'failed';
+	type PageState = 'loading' | 'preview' | 'handing-off' | 'unavailable';
 
-	let claimState = $state<ClaimState>('loading');
+	let pageState = $state<PageState>('loading');
 	let preview = $state<PublicTip | undefined>();
 	// Symbol, decimals and logo come from the ledger itself rather than the
-	// recipient's token list: whoever opens a tip link may never have held this
+	// visitor's token list: whoever opens a tip link may never have held this
 	// token, so the list is exactly the wrong place to look for how to render it.
 	let symbol = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
@@ -66,11 +58,8 @@
 
 	const toUnavailable = () => {
 		preview = undefined;
-		claimState = 'unavailable';
+		pageState = 'unavailable';
 	};
-
-	const isUncovered = (err: unknown): boolean =>
-		typeof err === 'object' && err !== null && 'Uncovered' in err;
 
 	const loadTokenMetadata = async (ledger: Principal) => {
 		try {
@@ -87,105 +76,37 @@
 				logo = meta.icon;
 			}
 		} catch (_: unknown) {
-			// Non-fatal: a missing symbol costs a label, and no label is a better
-			// outcome than blocking a payout over a cosmetic lookup.
+			// Non-fatal, and it has to stay that way: this page is the cold-start
+			// funnel, so a ledger that will not answer must not stop someone signing
+			// in.
 		}
 	};
 
 	/**
-	 * Never prints a number the ledger has not told us how to render. The earlier
-	 * fallback printed raw base units, so a slow or silent ledger turned "1 ICP"
-	 * into "100000000" in the headline — a claim about money that is off by eight
-	 * orders of magnitude. Saying nothing is the honest failure here.
-	 */
-	const amountLabel = (value: bigint): string | undefined =>
-		nonNullish(decimals) && nonNullish(symbol)
-			? `${formatToken({ value, unitName: decimals, displayDecimals: decimals })} ${symbol}`
-			: undefined;
-
-	/**
-	 * Pays the tip out, and returns what the confirmation should say.
+	 * Hands the tip to the wallet and goes there.
 	 *
-	 * `undefined` means the page has been put into a state that explains why
-	 * nothing moved — `uncovered` when the reservation is gone, `failed` when the
-	 * call itself did not land and a retry is worth offering.
+	 * The tip travels in memory as the modal's data, never in the URL the wallet
+	 * lands on. Nothing has been consumed at this point, so the worst a lost
+	 * handover costs is a claim that did not happen, on a link that still works.
 	 */
-	const payOut = async ({
-		identity,
-		code
-	}: {
-		identity: Identity;
-		code: string;
-	}): Promise<TipReceipt | undefined> => {
-		try {
-			// Still fetched, though nothing is reviewed: it validates the code before
-			// anything moves, and it carries the sender's message, which is revealed
-			// to whoever claimed and to nobody else.
-			const details = await loadTipDetails({ identity, tipId, claimCode: code });
-
-			// Started, not awaited: the label needs the ledger's decimals and symbol,
-			// and that lookup has no business delaying a payout.
-			const metadata = loadTokenMetadata(details.ledger_canister_id);
-
-			const claimed = await claimTip({ identity, tipId, claimCode: code });
-
-			await metadata;
-
-			return {
-				// The amount the ledger actually moved, not the one a review promised.
-				amountLabel: amountLabel(claimed.amount),
-				symbol,
-				logo,
-				message: details.message[0]
-			};
-		} catch (err: unknown) {
-			claimState = isUncovered(err) ? 'uncovered' : 'failed';
-			return undefined;
-		}
-	};
-
-	/**
-	 * Claims as soon as there is an identity, with no confirmation step.
-	 *
-	 * The step this replaces asked the recipient to press **Claim now** on a
-	 * review card. What that step was for was disclosure — the sender learns who
-	 * claimed — so the disclosure moved to the screen *before* sign-in, where it
-	 * is read by someone who has not yet identified themselves to anyone. Signing
-	 * in is now the consent, given at the earliest point it can be rather than the
-	 * latest.
-	 *
-	 * The confirmation lands in the wallet instead: the modal is opened here, then
-	 * this page navigates, and `core/Modals.svelte` renders it once the app shell
-	 * mounts. Ordering matters — claim first, hand over second. A lost handover
-	 * costs a confirmation the recipient can also read off their own balance; a
-	 * lost claim would cost them the money.
-	 */
-	const claim = async () => {
+	const handOff = async () => {
 		const code = claimCode();
-		const identity = $authIdentity;
 
-		if (isNullish(identity) || isNullish(code)) {
+		if (isNullish(code)) {
+			toUnavailable();
 			return;
 		}
 
-		claimState = 'claiming';
+		// Set before the navigation, both to keep this from running twice and
+		// because `core/Modals.svelte` reads the store as the app shell mounts.
+		pageState = 'handing-off';
 
-		const receipt = await payOut({ identity, code });
-
-		if (isNullish(receipt)) {
-			return;
-		}
-
-		modalStore.openTipReceived({ id: Symbol(), data: receipt });
-
-		claimState = 'claimed';
+		modalStore.openTipClaim({ id: Symbol(), data: { tipId, claimCode: code } });
 
 		try {
 			await goto(AppPath.Tokens);
 		} catch (err: unknown) {
-			// Deliberately not a claim failure. The money has moved; only the ride
-			// into the wallet did not, and the `claimed` state above is the way out.
-			consoleWarn('Could not open the wallet after claiming a tip', err);
+			consoleWarn('Could not open the wallet to claim a tip', err);
 		}
 	};
 
@@ -199,15 +120,15 @@
 			return;
 		}
 
-		// Someone who is already signed in has nothing left to decide.
+		// Someone already signed in has nothing left to read here.
 		if (nonNullish($authIdentity)) {
-			await claim();
+			await handOff();
 			return;
 		}
 
 		try {
 			preview = await loadTipPreview({ tipId });
-			claimState = 'preview';
+			pageState = 'preview';
 			void loadTokenMetadata(preview.ledger_canister_id);
 		} catch (_: unknown) {
 			toUnavailable();
@@ -217,18 +138,25 @@
 	onMount(load);
 
 	// Signing in happens in a popup, so this component stays mounted and simply
-	// carries on as the identity appears — no round-trip through a URL. Gated on
-	// `preview` so the claim cannot be started twice.
+	// carries on as the identity appears — no round-trip through a URL.
 	$effect(() => {
-		if (nonNullish($authIdentity) && claimState === 'preview') {
-			void claim();
+		if (nonNullish($authIdentity) && pageState === 'preview') {
+			void handOff();
 		}
 	});
 
 	const toWallet = async () => await goto(AppPath.Tokens);
 
-	let previewAmountLabel = $derived.by(() =>
-		nonNullish(preview) ? amountLabel(preview.amount) : undefined
+	/**
+	 * Never prints a number the ledger has not told us how to render. The earlier
+	 * fallback printed raw base units, so a slow or silent ledger turned "1 ICP"
+	 * into "100000000" in the headline — a claim about money that is off by eight
+	 * orders of magnitude. Saying nothing is the honest failure here.
+	 */
+	let amountLabel = $derived.by(() =>
+		nonNullish(preview) && nonNullish(decimals) && nonNullish(symbol)
+			? `${formatToken({ value: preview.amount, unitName: decimals, displayDecimals: decimals })} ${symbol}`
+			: undefined
 	);
 
 	let expiresAt = $derived.by(() =>
@@ -238,84 +166,52 @@
 	);
 </script>
 
-{#if claimState !== 'loading'}
-	{#if claimState === 'preview'}
-		<TipClaimHero {logo} {symbol} />
+{#if pageState === 'preview'}
+	<TipClaimHero {logo} {symbol} />
 
-		<h1 class="mb-3 text-center text-xl">
-			{nonNullish(previewAmountLabel)
-				? replacePlaceholders($i18n.tip.text.claim_ready_title, { $amount: previewAmountLabel })
-				: $i18n.tip.text.claim_ready_title_plain}
-		</h1>
+	<h1 class="mb-3 text-center text-xl">
+		{nonNullish(amountLabel)
+			? replacePlaceholders($i18n.tip.text.claim_ready_title, { $amount: amountLabel })
+			: $i18n.tip.text.claim_ready_title_plain}
+	</h1>
 
-		<p class="mb-2 text-center text-tertiary">{$i18n.tip.text.claim_ready_description}</p>
+	<p class="mb-2 text-center text-tertiary">{$i18n.tip.text.claim_ready_description}</p>
 
-		{#if nonNullish(expiresAt)}
-			<p class="mb-2 text-center text-sm text-tertiary">
-				{replacePlaceholders($i18n.tip.text.claim_expires, { $date: expiresAt })}
-			</p>
-		{/if}
-
-		<!--
-			Ahead of sign-in on purpose. Claiming now follows straight from signing
-			in, so this is the last moment the recipient can decide whether the sender
-			learning their identity is a price they want to pay — and the first moment
-			they can read it without having identified themselves to anyone.
-		-->
-		<p class="mb-6 text-center text-sm text-tertiary">{$i18n.tip.text.claimer_disclosure}</p>
-
-		<!--
-			The same sign-in block as the landing page, deliberately: this page is the
-			feature's cold-start funnel, so it must offer every provider the landing
-			page does — not a reduced one — and it carries the terms line with it.
-		-->
-		<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
-	{:else if claimState === 'claiming'}
-		<TipClaimHero {logo} {symbol} />
-
-		<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.claiming_title}</h1>
-
-		<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.claiming_description}</p>
-
-		<div class="flex justify-center text-brand-primary">
-			<Spinner size="32px" />
-		</div>
-	{:else if claimState === 'claimed'}
-		<!--
-			Only seen if the navigation into the wallet did not happen — the
-			confirmation itself lives there. A dead end here would leave someone
-			looking at a spinner after their money had already arrived.
-		-->
-		<TipClaimHero {logo} {symbol} />
-
-		<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.claimed_title}</h1>
-
-		<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.claimed_description}</p>
-
-		<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
-	{:else if claimState === 'failed'}
-		<MessageBox level="warning" styleClass="mb-6">
-			<p>{$i18n.tip.text.claim_failed}</p>
-		</MessageBox>
-
-		<Button fullWidth onclick={claim} testId={TIP_CLAIM_RETRY_BUTTON}>
-			{$i18n.tip.text.claim_retry}
-		</Button>
-	{:else if claimState === 'uncovered'}
-		<MessageBox level="warning" styleClass="mb-6">
-			<h1 class="mb-2 text-xl">{$i18n.tip.text.uncovered_title}</h1>
-
-			<p>{$i18n.tip.text.uncovered_description}</p>
-		</MessageBox>
-
-		<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
-	{:else}
-		<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.unavailable_title}</h1>
-
-		<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unavailable_description}</p>
-
-		<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
+	{#if nonNullish(expiresAt)}
+		<p class="mb-2 text-center text-sm text-tertiary">
+			{replacePlaceholders($i18n.tip.text.claim_expires, { $date: expiresAt })}
+		</p>
 	{/if}
+
+	<!--
+		Ahead of sign-in on purpose. The claim follows straight from signing in, so
+		this is the last moment the recipient can decide whether the sender learning
+		their identity is a price they want to pay — and the first moment they can
+		read it without having identified themselves to anyone.
+	-->
+	<p class="mb-6 text-center text-sm text-tertiary">{$i18n.tip.text.claimer_disclosure}</p>
+
+	<!--
+		The same sign-in block as the landing page, deliberately: this page is the
+		feature's cold-start funnel, so it must offer every provider the landing
+		page does — not a reduced one — and it carries the terms line with it.
+	-->
+	<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
+{:else if pageState === 'handing-off'}
+	<!--
+		One frame in practice: the wallet is a client-side navigation away, and the
+		claim is announced there. Unlabelled on purpose — anything said here would be
+		replaced before it could be read.
+	-->
+	<div class="flex justify-center py-12 text-brand-primary">
+		<Spinner size="32px" />
+	</div>
+{:else if pageState === 'unavailable'}
+	<h1 class="mb-3 text-center text-xl">{$i18n.tip.text.unavailable_title}</h1>
+
+	<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unavailable_description}</p>
+
+	<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
 {/if}
 
 <!--

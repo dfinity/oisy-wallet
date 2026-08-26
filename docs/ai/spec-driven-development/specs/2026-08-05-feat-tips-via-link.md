@@ -772,30 +772,50 @@ disclosure moved to the screen _before_ sign-in. That is strictly earlier than
 the review card, and it is read by someone who has not yet identified themselves
 to anyone, so signing in **is** the consent. Criterion 8 is revised, not dropped.
 
+### The claim happens in the wallet, not on the link's page
+
+`/tip/<id>` is a standalone page precisely because a tip link arrives at someone
+signed out ([Link shape](#link-shape)). It is the wrong place to _run_ a claim:
+money landing in your wallet should be watched from your wallet, the way a reward
+is. So the route's last act is to hand the tip over and navigate; everything from
+the payout onwards belongs to `TipClaimModal`, which `core/Modals.svelte` renders
+over the wallet.
+
+- Signed in, the route shows **nothing** — it hands over and goes. Signed out it
+  is the welcome screen, and sign-in hands over the same way.
+- The modal owns the whole outcome: **claiming** (a spinner, and
+  **not dismissible** — a modal clicked away mid-payout would leave the result of
+  a money movement unreported), then **received**, or one of three failures.
+  Received gets **`Sprinkles`**, the same welcome a reward gets, because that is
+  what this is.
+- The failures are told apart by which call failed, which the old single-catch
+  could not do: a `get_tip_details` rejection is the **link** (unknown, expired,
+  already claimed, wrong code — one indistinguishable answer by design) and never
+  attempts a payout; `Uncovered` is a reservation the sender no longer covers; a
+  transport failure is neither, and is the only one offering **Try again**.
+- The tip travels **in memory**, as the modal's data — not in the URL the wallet
+  lands on, which would leave the entire authorisation in browser history. A test
+  pins that the code never reaches `goto`.
+- The handover is therefore losable (a reload mid-flight). It costs a claim that
+  did not happen, on a link that still works, because **nothing is consumed until
+  the modal calls `claim_tip`** — which is why the claim runs after the navigation
+  rather than before it.
 - The confirmation is the **fuller success variant** the design already carried
-  (`21763:86266`), rendered **inside the wallet** rather than on the claim page:
-  the claim page opens the modal, then navigates, and `core/Modals.svelte` picks
-  it up once the app shell mounts. It is the one screen that shows the sender's
-  message, which no longer has a review card to live on.
-- **Claim first, hand over second.** A lost handover costs a confirmation the
-  recipient can also read off their own balance; a lost claim would cost them the
-  money. The navigation is therefore outside the claim's error handling — a
-  failure to reach the wallet must never be reported as a failed claim.
-- The receipt that crosses into the app carries **finished display values and
-  nothing secret**. The claim code is spent by then and has no business travelling
-  with it; a test pins that it does not.
-- Removing the button removed the only retry, so a transport failure — where
-  nothing moved and the tip is still claimable — now has a **Try again** of its
-  own. `Uncovered` keeps its own state, which is not retryable in the same sense.
-- The confirmation modal is **not behind `TIPS_ENABLED`**, unlike the create
-  surface. Outstanding links stay claimable while the flag is off, so closing the
-  flag must not swallow the confirmation for a claim that has just paid out.
+  (`21763:86266`): amount, Network / Token, **Status: Completed**. It is the one
+  screen that shows the sender's message, which no longer has a review card to
+  live on.
+- The modal is **not behind `TIPS_ENABLED`**, unlike the create surface.
+  Outstanding links stay claimable while the flag is off, so closing the flag must
+  not strand a claim that is already under way.
 - The signed-out welcome screen takes the drawn artwork as an asset
   (`tip-welcome-img.svg`) with the **token's own mark composited on top** at the
   two positions the design draws it. Figma draws one frame per token; compositing
-  covers any ICRC-2 ledger, including one added after this ships. A ledger that
-  publishes no `icrc1:logo` (the plain ICP ledger is one) falls back to its symbol,
-  because a blank badge on a coin reads as a failed image.
+  covers any ICRC-2 ledger, including one added after this ships. Measured against
+  the drawing rather than the frame — the design's crop is tighter than the export,
+  so its frame percentages leave both marks floating clear of the coins. A ledger
+  that publishes no `icrc1:logo` (the plain ICP ledger is one) falls back to its
+  symbol on the larger mark only, because a six-character symbol clips inside the
+  smaller one and a blank badge on a coin reads as a failed image.
 
 ## Security model
 
@@ -954,9 +974,10 @@ change.
    expiry — **not** the message, the sender, or the claimer — and performs no
    state-changing call.
 8. After **Open or Create** and Internet Identity, the claim resumes with the
-   fragment intact and **pays out without a second press**, landing the recipient
-   in their wallet with a confirmation carrying the amount, the sender's message
-   and **Status: Completed** — and **no fee line**, since the claimer pays none.
+   fragment intact and **pays out without a second press**, from inside the
+   wallet: the recipient lands there and a modal reports the claim as it happens,
+   carrying the amount, the sender's message and **Status: Completed** — and **no
+   fee line**, since the claimer pays none.
    The disclosure that the sender will see who claimed sits on the screen
    **before** sign-in, so it is read before any identity exists. Revised after the
    first build; the review card this replaces is described in

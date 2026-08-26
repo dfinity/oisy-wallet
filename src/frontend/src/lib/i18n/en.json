@@ -2802,6 +2802,7 @@
 			"unavailable_description": "It may already have been claimed, it may have expired, or the link may be incomplete. Ask whoever sent it for a new one.",
 			"uncovered_title": "PLACEHOLDER — needs copy review: this tip cannot be paid right now",
 			"uncovered_description": "PLACEHOLDER — needs copy review. The reserved funds are no longer available, so the tip cannot be claimed at the moment. It may work later, or the sender may have cancelled it.",
+			"claim_failed_title": "The claim did not go through",
 			"claim_failed": "The tip could not be claimed. Nothing was transferred — try again.",
 			"history_title": "Tips History",
 			"history_empty": "You have not issued any tips yet.",
