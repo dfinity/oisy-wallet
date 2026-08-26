@@ -2,6 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SeasonalIconAstronautHelmet from '$lib/components/core/SeasonalIconAstronautHelmet.svelte';
+	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
+	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
 	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -14,8 +16,13 @@
 		TIP_HISTORY_CANCEL_BUTTON,
 		TIP_SHARE_COPY_BUTTON
 	} from '$lib/constants/test-ids.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { usdValue } from '$lib/utils/exchange.utils';
+	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { canShare, shareText } from '$lib/utils/share.utils';
 
@@ -59,17 +66,62 @@
 	let amountLabel = $derived(
 		`${formatToken({ value: amount, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`
 	);
+
+	// Absent when no rate has loaded for this ledger, which is normal for a local
+	// or newly listed token. The token amount is the fact; the fiat line is the
+	// gloss, so it simply does not appear rather than showing a zero.
+	let fiatLabel = $derived.by(() => {
+		const exchangeRate = $exchanges?.[token.id]?.usd;
+
+		if (isNullish(exchangeRate)) {
+			return undefined;
+		}
+
+		return formatCurrency({
+			value: usdValue({ decimals: token.decimals, balance: amount, exchangeRate }),
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage,
+			notBelowThreshold: true
+		});
+	});
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-3 flex items-center justify-center gap-2">
-		<Logo alt={token.symbol} size="xs" src={token.icon} />
+	<p class="mb-4 text-center text-tertiary">{$i18n.tip.text.share_invite}</p>
 
-		<span class="text-xl font-bold">{amountLabel}</span>
+	<!--
+		The amount leads, and large. This screen does two jobs at once: it is the
+		sender's only receipt for what they committed, and it is the thing they hold
+		up to whoever is about to claim it — so the sum, not the QR, is the subject.
+	-->
+	<div class="tip-amount mb-4 flex flex-col items-center rounded-2xl px-4 py-5 text-center">
+		<span class="text-xs font-bold tracking-wider text-tertiary uppercase">
+			{$i18n.tip.text.they_will_receive}
+		</span>
+
+		<span class="mt-2 text-4xl font-bold">{amountLabel}</span>
+
+		{#if nonNullish(fiatLabel)}
+			<span class="mt-1 text-tertiary">{fiatLabel}</span>
+		{/if}
+
+		<span class="mt-3 flex items-center gap-2 text-sm text-tertiary">
+			<Logo alt={token.symbol} size="xs" src={token.icon} />
+
+			{token.name}
+		</span>
 	</div>
 
+	<!--
+		Bordered, not just white: in light theme the modal surface is white too, so
+		without the outline the code floats instead of reading as something held up
+		to be scanned.
+	-->
 	{#if nonNullish(link)}
-		<div class="mx-auto mb-4 aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4">
+		<div
+			class="mx-auto mb-4 aspect-square h-56 max-h-[36vh] max-w-full rounded-2xl border border-secondary bg-white p-4"
+		>
 			<QrCode ariaLabel={$i18n.tip.text.share_heading} value={link}>
 				{#snippet logo()}
 					<div class="flex items-center justify-center rounded-full bg-white p-1">
@@ -81,18 +133,35 @@
 	{:else if isNullish(linkMessage)}
 		<!-- Same box, so nothing below it moves when the real code lands in it. -->
 		<div
-			class="mx-auto mb-4 aspect-square h-64 max-h-[40vh] max-w-full animate-pulse rounded-xl bg-disabled-alt"
+			class="mx-auto mb-4 aspect-square h-56 max-h-[36vh] max-w-full animate-pulse rounded-2xl bg-disabled-alt"
 			aria-hidden="true"
 		></div>
 	{/if}
 
-	<MessageBox level="info" styleClass="mb-4">
-		<p>{$i18n.tip.text.no_wallet_needed}</p>
+	<MessageBox level="info" styleClass="mb-3">
+		{#snippet icon()}
+			<div
+				class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-brand-primary"
+			>
+				<IconCircleCheck size="18" />
+			</div>
+		{/snippet}
 
-		<p class="font-bold">
-			{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
-		</p>
+		<p class="font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
+
+		<p>{$i18n.tip.text.no_wallet_needed}</p>
 	</MessageBox>
+
+	<!--
+		Out of the box and on its own line: the deadline is the one fact on this
+		screen that changes what the reader should do next, and inside the reassuring
+		box it read as part of the reassurance.
+	-->
+	<div class="mb-3 flex items-center justify-center gap-2 text-sm text-tertiary">
+		<IconClock size="16" />
+
+		{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
+	</div>
 
 	{#if nonNullish(link)}
 		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
@@ -154,3 +223,17 @@
 		</Button>
 	{/snippet}
 </ContentWithToolbar>
+
+<style lang="scss">
+	// Follows `FeatureCards`: a tinted brand layer over the surface, so the card
+	// keeps its lift in both themes without hard-coding either one's colours.
+	.tip-amount {
+		background:
+			linear-gradient(
+				160deg,
+				var(--color-background-brand-subtle-20),
+				var(--color-background-brand-subtle-5)
+			),
+			var(--color-background-primary);
+	}
+</style>
