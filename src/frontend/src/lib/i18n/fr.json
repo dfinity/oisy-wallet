@@ -1936,6 +1936,8 @@
 			"details": "Détails de la transaction",
 			"hash": "Hash de la transaction",
 			"hash_copied": "Hash de la transaction $hash copié dans le presse-papiers.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID de la transaction",
 			"id_copied": "ID de la transaction copié dans le presse-papiers.",
 			"timestamp": "Horodatage",

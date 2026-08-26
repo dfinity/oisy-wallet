@@ -1936,6 +1936,8 @@
 			"details": "Szczegóły transakcji",
 			"hash": "Hash transakcji",
 			"hash_copied": "Hash transakcji $hash skopiowany do schowka.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "Identyfikator transakcji",
 			"id_copied": "Identyfikator transakcji skopiowany do schowka.",
 			"timestamp": "Znacznik czasu",
