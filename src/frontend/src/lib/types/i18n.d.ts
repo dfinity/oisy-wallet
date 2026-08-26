@@ -2332,6 +2332,7 @@ interface I18nTip {
 		unavailable_description: string;
 		uncovered_title: string;
 		uncovered_description: string;
+		claim_failed_title: string;
 		claim_failed: string;
 		message_too_long: string;
 		learn_how_it_works: string;
