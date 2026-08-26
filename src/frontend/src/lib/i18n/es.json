@@ -1936,6 +1936,8 @@
 			"details": "Detalles de la transacción",
 			"hash": "Hash de la transacción",
 			"hash_copied": "Hash de la transacción $hash copiado al portapapeles.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID de la transacción",
 			"id_copied": "ID de la transacción copiado al portapapeles.",
 			"timestamp": "Marca de tiempo",
