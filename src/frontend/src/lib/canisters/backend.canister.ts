@@ -13,6 +13,7 @@ import type {
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
 	PublicTip,
+	SetTipSecretRequest,
 	SignOnramperWidgetUrlRequest,
 	SignOnramperWidgetUrlResponse,
 	TipClaim,
@@ -726,6 +727,50 @@ export class BackendCanister extends Canister<BackendService> {
 	getMyTips = async (): Promise<MyTip[]> => {
 		const { get_my_tips } = this.caller({ certified: false });
 		const response = await get_my_tips();
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	setTipSecret = async (request: SetTipSecretRequest): Promise<void> => {
+		const { set_tip_secret } = this.caller({ certified: true });
+		const response = await set_tip_secret(request);
+
+		if ('Ok' in response) {
+			return;
+		}
+		throw response.Err;
+	};
+
+	// Certified: this is the sender's own ciphertext and the whole point of
+	// storing it is that they can trust what comes back.
+	getTipSecret = async (tipId: string): Promise<Uint8Array | number[] | undefined> => {
+		const { get_tip_secret } = this.caller({ certified: true });
+		const response = await get_tip_secret(tipId);
+
+		if ('Ok' in response) {
+			return fromNullable(response.Ok);
+		}
+		throw response.Err;
+	};
+
+	getTipEncryptedVetkey = async (
+		transportPublicKey: Uint8Array
+	): Promise<Uint8Array | number[]> => {
+		const { get_tip_encrypted_vetkey } = this.caller({ certified: true });
+		const response = await get_tip_encrypted_vetkey(transportPublicKey);
+
+		if ('Ok' in response) {
+			return response.Ok;
+		}
+		throw response.Err;
+	};
+
+	getTipVetkeyPublicKey = async (): Promise<Uint8Array | number[]> => {
+		const { get_tip_vetkey_public_key } = this.caller({ certified: true });
+		const response = await get_tip_vetkey_public_key();
 
 		if ('Ok' in response) {
 			return response.Ok;
