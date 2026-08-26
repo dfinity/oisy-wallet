@@ -10,4 +10,5 @@
 
 pub mod icrc2;
 pub mod model;
+pub mod secrets;
 pub mod service;

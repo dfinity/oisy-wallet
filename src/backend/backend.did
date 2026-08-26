@@ -679,6 +679,9 @@ type GetPersonalNotesResult = variant {
 };
 type GetTipDetailsResult = variant { Ok : TipDetails; Err : TipError };
 type GetTipResult = variant { Ok : PublicTip; Err : TipError };
+// The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+// stored — a tip from before the store existed, or one already cleaned up.
+type GetTipSecretResult = variant { Ok : opt blob; Err : TipError };
 type GetUserProfileError = variant { NotFound };
 type GetUserProfileResult = variant {
 	// The user's profile was retrieved successfully.
@@ -1045,6 +1048,17 @@ type SetShowTestnetsRequest = record {
 	show_testnets : bool
 };
 type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
+// Stores the sender's own encrypted claim code so they can recover the link.
+//
+// A single request struct rather than two arguments, matching
+// `SetPersonalNoteRequest`: it keeps the candid signature stable if the store
+// ever needs another field.
+type SetTipSecretRequest = record {
+	tip_id : text;
+	// AES-GCM ciphertext of the claim code, opaque to the canister. Bounded by
+	// [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+	encrypted_claim_code : blob
+};
 type SetUserShowTestnetsResult = variant {
 	// The user's show testnets was set successfully.
 	Ok;
@@ -1135,6 +1149,11 @@ type Stats = record {
 	// not yet pruned).
 	personal_note_shares_count : nat64;
 	agreement_history_count : nat64;
+	// Total number of tips ever created and not yet pruned, across all users
+	// and every status. Aggregate only, deliberately: the negative guarantee
+	// that no endpoint enumerates another principal's tips holds for this one
+	// too, so there is a count here and never a row.
+	tips_count : nat64;
 	// Total number of stored (encrypted) personal-note entries across all users.
 	personal_notes_count : nat64;
 	user_timestamps_count : nat64;
@@ -1180,6 +1199,8 @@ type TipError = variant {
 	// it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
 	// may take it over.
 	ClaimInProgress;
+	// The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+	SecretCiphertextTooLarge;
 	// The tip exists and the claim code is right, but the sender's allowance
 	// no longer covers it — they spent, reduced or revoked it. The one
 	// deliberately distinguishable failure, reachable only with a valid link,
@@ -1230,6 +1251,12 @@ type TipStatus = variant {
 	// The deadline passed unclaimed. Nothing was ever transferred, so nothing
 	// is returned — the allowance simply lapsed on the ledger.
 	Expired
+};
+// vetKey material for the tip-secrets store, or why it could not be derived.
+type TipVetkeyResult = variant {
+	// vetKey bytes, opaque to the canister.
+	Ok : blob;
+	Err : TipError
 };
 // A variant describing any token
 type Token = variant {
@@ -1792,6 +1819,26 @@ service : (Arg) -> {
 	// # Errors
 	// `TipError::NotFound` for an unclaimable tip or a wrong claim code.
 	get_tip_details : (TipClaimRequest) -> (GetTipDetailsResult) query;
+	// Derives the caller's vetKey for the tip-secrets store, secured to a
+	// browser-supplied transport public key.
+	//
+	// # Errors
+	// Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	get_tip_encrypted_vetkey : (blob) -> (TipVetkeyResult);
+	// The caller's encrypted claim code for one of their own tips, if stored.
+	//
+	// `EncryptedMaps` keys every map by its owner, so this can only ever return
+	// the caller's own ciphertext.
+	//
+	// # Errors
+	// Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
+	get_tip_secret : (text) -> (GetTipSecretResult) query;
+	// The vetKey verification key for the tip-secrets store. Identical for every
+	// caller; the browser needs it to verify its derived vetKey.
+	//
+	// # Errors
+	// Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	get_tip_vetkey_public_key : () -> (TipVetkeyResult);
 	// Returns the full agreement consent/rejection history for the caller.
 	//
 	// # Returns
@@ -1911,6 +1958,17 @@ service : (Arg) -> {
 	// Errors are enumerated by `PersonalNoteError` (e.g. `TooManyNotes`,
 	// `NoteCiphertextTooLarge`, `RateLimited`).
 	set_personal_note : (PersonalNoteEntry) -> (SetPersonalNoteResult);
+	// Stores the caller's encrypted claim code for one of their own tips, so they
+	// can recover the link after closing the share screen.
+	//
+	// The value is ciphertext the canister cannot read: the browser encrypts it
+	// under a vetKey only this principal can derive. Storing it changes nothing
+	// about who can claim the tip — the canister still only holds the code's hash.
+	//
+	// # Errors
+	// Errors are enumerated by `TipError` (`InvalidTipId`,
+	// `SecretCiphertextTooLarge`, `InternalError`).
+	set_tip_secret : (SetTipSecretRequest) -> (CancelTipResult);
 	// Sets the user's preference to show (or hide) testnets in the interface.
 	//
 	// # Returns
