@@ -1,3 +1,4 @@
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
@@ -361,7 +362,7 @@ describe('swap.derived', () => {
 		it('should exclude Bitcoin while no provider reaches it', async () => {
 			vi.resetModules();
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
-				...(await importOriginal<typeof import('$env/rest/near-intents.env')>()),
+				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
 
@@ -394,7 +395,7 @@ describe('swap.derived', () => {
 			vi.resetModules();
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: true }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
-				...(await importOriginal<typeof import('$env/rest/near-intents.env')>()),
+				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: false
 			}));
 

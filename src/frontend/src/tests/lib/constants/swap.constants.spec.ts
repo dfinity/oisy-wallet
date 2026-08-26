@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { NEAR_INTENTS_BLOCKCHAIN_MAP } from '$lib/constants/swap.constants';
 import type { NetworkId } from '$lib/types/network';
 
@@ -28,7 +29,7 @@ describe('swap.constants', () => {
 			vi.doMock('$env/rest/onesec.env', () => ({ ONESEC_SWAP_ENABLED: oneSec }));
 			vi.doMock('$env/chain-fusion-swap.env', () => ({ CHAIN_FUSION_SWAP_ENABLED: chainFusion }));
 			vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
-				...(await importOriginal<typeof import('$env/rest/near-intents.env')>()),
+				...(await importOriginal<typeof nearIntentsEnv>()),
 				NEAR_INTENTS_BTC_SWAP_ENABLED: nearIntentsBtc
 			}));
 

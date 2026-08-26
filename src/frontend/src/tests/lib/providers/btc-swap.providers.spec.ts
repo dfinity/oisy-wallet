@@ -1,4 +1,5 @@
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
+import type * as nearIntentsEnv from '$env/rest/near-intents.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { btcSwapProviders } from '$lib/providers/btc-swap.providers';
@@ -31,7 +32,7 @@ describe('btc-swap.providers', () => {
 	it('should not register NEAR Intents when its BTC flag is off', async () => {
 		vi.resetModules();
 		vi.doMock('$env/rest/near-intents.env', async (importOriginal) => ({
-			...(await importOriginal<typeof import('$env/rest/near-intents.env')>()),
+			...(await importOriginal<typeof nearIntentsEnv>()),
 			NEAR_INTENTS_BTC_SWAP_ENABLED: false
 		}));
 
