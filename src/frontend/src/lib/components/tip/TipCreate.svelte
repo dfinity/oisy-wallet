@@ -1,15 +1,22 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import TipExpiry from '$lib/components/tip/TipExpiry.svelte';
 	import InputText from '$lib/components/ui/InputText.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { TIP_MESSAGE_MAX_CHARS } from '$lib/constants/tip.constants';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isDesktop } from '$lib/utils/device.utils';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { usdValue } from '$lib/utils/exchange.utils';
+	import { formatCurrency, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { tipFees } from '$lib/utils/tip.utils';
 
@@ -39,10 +46,32 @@
 
 	// Counted in characters, matching the canister's own limit — a byte count
 	// would reject a message the user sees as well within length.
-	let messageTooLong = $derived([...message].length > TIP_MESSAGE_MAX_CHARS);
+	let messageLength = $derived([...message].length);
+	let messageTooLong = $derived(messageLength > TIP_MESSAGE_MAX_CHARS);
+	// Silent until the limit is in sight. A counter that is always on is noise on a
+	// field most tips leave empty; one that appears only at the end is a surprise.
+	let showMessageCount = $derived(messageLength > TIP_MESSAGE_MAX_CHARS - 40);
 
 	const formatFee = (value: bigint) =>
 		`${formatToken({ value, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`;
+
+	let exchangeRate = $derived($exchanges?.[token.id]?.usd);
+
+	// The fee is the number a sender actually weighs, and they weigh it in their
+	// own currency. Absent when no rate is known rather than shown as zero.
+	let feeInFiat = $derived.by(() => {
+		if (isNullish(exchangeRate)) {
+			return undefined;
+		}
+
+		return formatCurrency({
+			value: usdValue({ decimals: token.decimals, balance: fees.total, exchangeRate }),
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage,
+			notBelowThreshold: true
+		});
+	});
 </script>
 
 <StakeForm
@@ -74,6 +103,10 @@
 						$max: `${TIP_MESSAGE_MAX_CHARS}`
 					})}
 				</p>
+			{:else if showMessageCount}
+				<p class="mt-1 text-right text-sm text-tertiary">
+					{messageLength}/{TIP_MESSAGE_MAX_CHARS}
+				</p>
 			{/if}
 		</div>
 
@@ -82,6 +115,11 @@
 				<ModalValue>
 					{#snippet label()}{$i18n.tip.text.total_estimated_fee}{/snippet}
 					{#snippet mainValue()}{formatFee(fees.total)}{/snippet}
+					{#snippet secondaryValue()}
+						{#if nonNullish(feeInFiat)}
+							<span class="text-tertiary">{feeInFiat}</span>
+						{/if}
+					{/snippet}
 				</ModalValue>
 			{/snippet}
 
@@ -102,6 +140,13 @@
 			{/snippet}
 		</ModalExpandableValues>
 
-		<p class="mt-4 text-sm text-tertiary">{$i18n.tip.text.lapse_notice}</p>
+		<!--
+			An info panel rather than a line of small print. It is the answer to the
+			question every sender asks before committing money to a link — what
+			happens if nobody claims it — and the drawn design gives it this weight.
+		-->
+		<MessageBox level="info" styleClass="mt-4">
+			{$i18n.tip.text.lapse_notice}
+		</MessageBox>
 	{/snippet}
 </StakeForm>
