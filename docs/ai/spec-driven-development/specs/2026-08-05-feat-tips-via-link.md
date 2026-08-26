@@ -172,7 +172,22 @@ pending decision in the first draft.
 | 12  | Create step uses the design's **radio cards**                                                               | The compact dropdown variant is dropped                                                                                        |
 | 13  | Logged-out CTA is **Open or Create** with the Terms-of-Use consent line                                     | Consent is collected before a wallet is created                                                                                |
 | 14  | **No cap on the number of active tips**                                                                     | The sender's balance is the natural limiter; keep a minimum amount and a rate limit                                            |
-| 15  | **Self-claim rejected**                                                                                     | Under an allowance it is a self-transfer that only burns a fee, and cancellation covers the intent                             |
+| 15  | **Self-claim rejected** — _not built, see below_                                                            | Under an allowance it is a self-transfer that only burns a fee, and cancellation covers the intent                             |
+
+### Decision 15 is not implemented
+
+Measured, not assumed: against the local ledger, `get_tip_details` and
+`claim_tip` both succeed for the sender's own tip, and the payout goes through as
+a self-transfer that costs one fee. No guard compares the claimer to the sender.
+
+Leaving it that way is defensible — it is the sender's money either way, and it
+makes a link testable end to end in one browser, which is how the build was
+actually exercised. Closing it needs a `SelfClaim` variant (a breaking candid
+change, harmless while tips have never shipped) rejected before any state moves,
+and a claim screen that says _this is your own tip_ rather than offering a retry
+that can never work. Owner's call, and worth making before tips ship: the sender
+who tries it today burns a fee and gets a History row reading **Claimed by
+<themselves>**.
 
 ## Escrow model — decided: ICRC-2 allowance, no custody
 
