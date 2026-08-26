@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { IcToken } from '$icp/types/ic-token';
+	import { nonNullish } from '@dfinity/utils';
+import type { IcToken } from '$icp/types/ic-token';
 	import SeasonalIconAstronautHelmet from '$lib/components/core/SeasonalIconAstronautHelmet.svelte';
 	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -9,7 +10,10 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import QrCode from '$lib/components/ui/QrCode.svelte';
-	import { TIP_SHARE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		TIP_HISTORY_CANCEL_BUTTON,
+		TIP_SHARE_COPY_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -21,9 +25,20 @@
 		token: IcToken;
 		amount: bigint;
 		onDone: () => void;
+		/** Present when this screen is a live tip reopened from History. */
+		onCancel?: () => void;
+		cancelling?: boolean;
 	}
 
-	let { link, expiresAtNs, token, amount, onDone }: Props = $props();
+	let {
+		link,
+		expiresAtNs,
+		token,
+		amount,
+		onDone,
+		onCancel,
+		cancelling = false
+	}: Props = $props();
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
@@ -84,6 +99,27 @@
 	</div>
 
 	{#snippet toolbar()}
-		<Button fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
+		{#if nonNullish(onCancel)}
+			<!--
+				Cancelling is offered here rather than in the History row because this
+				is where the sender can see what they are giving up — the amount, the
+				deadline and the live link — before revoking it.
+			-->
+			<div class="flex gap-3">
+				<Button
+					colorStyle="secondary-light"
+					disabled={cancelling}
+					fullWidth
+					onclick={onCancel}
+					testId={TIP_HISTORY_CANCEL_BUTTON}
+				>
+					{$i18n.tip.text.cancel_tip}
+				</Button>
+
+				<Button disabled={cancelling} fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
+			</div>
+		{:else}
+			<Button fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
+		{/if}
 	{/snippet}
 </ContentWithToolbar>

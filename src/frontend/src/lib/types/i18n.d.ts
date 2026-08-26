@@ -2340,7 +2340,6 @@ interface I18nTip {
 		claimed_by: string;
 		tip_amount: string;
 		expires_in: string;
-		view_link: string;
 		link_unavailable: string;
 		link_recovery_failed: string;
 		cancel_tip: string;
