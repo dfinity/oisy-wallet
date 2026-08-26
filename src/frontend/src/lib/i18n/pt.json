@@ -1936,6 +1936,8 @@
 			"details": "Detalhes da transação",
 			"hash": "Hash da transação",
 			"hash_copied": "Hash da transação $hash copiado para a área de transferência.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID da transação",
 			"id_copied": "ID da transação copiado para a área de transferência.",
 			"timestamp": "Timestamp",
