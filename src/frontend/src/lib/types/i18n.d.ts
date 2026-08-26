@@ -2297,6 +2297,7 @@ interface I18nTip {
 		reserve_fee: string;
 		payout_fee: string;
 		fees_are_yours: string;
+		reserved_by_tips: string;
 		lapse_notice: string;
 		generate: string;
 		share_heading: string;
