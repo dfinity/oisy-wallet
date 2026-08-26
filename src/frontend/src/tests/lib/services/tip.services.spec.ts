@@ -9,6 +9,8 @@ import {
 	parseClaimCodeFromFragment,
 	reserveTip
 } from '$lib/services/tip.services';
+import * as tipVetkeys from '$lib/services/tip.vetkeys';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -46,6 +48,16 @@ describe('tip.services', () => {
 	});
 
 	describe('reserveTip', () => {
+		// Reserving also stores an encrypted copy of the claim code, so that the
+		// sender can get their own link back. Stubbed in every test here: left
+		// real, it reaches for a vetKey over an agent that does not exist, and the
+		// best-effort `catch` turns that into a warning on a test that is not about
+		// recovery at all.
+		beforeEach(() => {
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			vi.spyOn(backendApi, 'setTipSecret').mockResolvedValue(undefined);
+		});
+
 		it('approves the amount plus one fee, and records only the amount', async () => {
 			const approveSpy = vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
 			const createSpy = vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
@@ -135,6 +147,59 @@ describe('tip.services', () => {
 				toHex(first.spender.subaccount as Uint8Array)
 			);
 			expect(second.amount).toBe(first.amount);
+		});
+
+		it('stores the encrypted claim code only once the tip exists', async () => {
+			const order: string[] = [];
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockImplementation(() => {
+				order.push('create');
+				return Promise.resolve(undefined);
+			});
+			vi.spyOn(backendApi, 'setTipSecret').mockImplementation(() => {
+				order.push('secret');
+				return Promise.resolve(undefined);
+			});
+
+			await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				durationMs: HOUR_MS
+			});
+
+			// A secret written first would outlive a create that failed, leaving a
+			// recoverable link to a tip that never existed.
+			expect(order).toEqual(['create', 'secret']);
+		});
+
+		it('reserves successfully even when the recoverable copy cannot be stored', async () => {
+			const warnSpy = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+			vi.spyOn(backendApi, 'setTipSecret').mockRejectedValue(new Error('vetkd unavailable'));
+
+			const draft = newTipDraft();
+
+			// The tip is real and its link is about to go on screen. Reporting a
+			// failed reservation here would tell the sender their money is free when
+			// it is reserved.
+			await expect(
+				reserveTip({
+					identity: mockIdentity,
+					draft,
+					ledgerCanisterId: LEDGER_ID,
+					amount: AMOUNT,
+					fee: FEE,
+					durationMs: HOUR_MS
+				})
+			).resolves.toEqual(
+				expect.objectContaining({ link: expect.stringContaining(draft.claimCode) })
+			);
+
+			expect(warnSpy).toHaveBeenCalledOnce();
 		});
 	});
 
