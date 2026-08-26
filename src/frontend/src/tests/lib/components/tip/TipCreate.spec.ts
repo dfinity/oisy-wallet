@@ -4,8 +4,7 @@ import { initSendContext, SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import type { TokenId } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render, waitFor } from '@testing-library/svelte';
-import type { Writable } from 'svelte/store';
-import { get } from 'svelte/store';
+import { get, type Writable } from 'svelte/store';
 
 // Mocked rather than spied on: the component reads a module-level `derived`,
 // which captures its input stores the first time the module is imported.

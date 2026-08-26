@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-import type { IcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
 	import SeasonalIconAstronautHelmet from '$lib/components/core/SeasonalIconAstronautHelmet.svelte';
 	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -30,15 +30,7 @@ import type { IcToken } from '$icp/types/ic-token';
 		cancelling?: boolean;
 	}
 
-	let {
-		link,
-		expiresAtNs,
-		token,
-		amount,
-		onDone,
-		onCancel,
-		cancelling = false
-	}: Props = $props();
+	let { link, expiresAtNs, token, amount, onDone, onCancel, cancelling = false }: Props = $props();
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
@@ -98,28 +90,28 @@ import type { IcToken } from '$icp/types/ic-token';
 		{/if}
 	</div>
 
-	{#snippet toolbar()}
-		{#if nonNullish(onCancel)}
-			<!--
-				Cancelling is offered here rather than in the History row because this
-				is where the sender can see what they are giving up — the amount, the
-				deadline and the live link — before revoking it.
-			-->
-			<div class="flex gap-3">
-				<Button
-					colorStyle="secondary-light"
-					disabled={cancelling}
-					fullWidth
-					onclick={onCancel}
-					testId={TIP_HISTORY_CANCEL_BUTTON}
-				>
-					{$i18n.tip.text.cancel_tip}
-				</Button>
+	{#if nonNullish(onCancel)}
+		<Button
+			colorStyle="secondary-light"
+			disabled={cancelling}
+			fullWidth
+			onclick={onCancel}
+			styleClass="mt-4"
+			testId={TIP_HISTORY_CANCEL_BUTTON}
+		>
+			{$i18n.tip.text.cancel_tip}
+		</Button>
+	{/if}
 
-				<Button disabled={cancelling} fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
-			</div>
-		{:else}
-			<Button fullWidth onclick={onDone}>{$i18n.tip.text.done}</Button>
-		{/if}
+	{#snippet toolbar()}
+		<!--
+			"Back" when the tip was opened from History, because that is all this
+			button does — the footer is for leaving the screen. Cancelling lives in the
+			content above, next to the link it revokes, so the two are not adjacent
+			buttons a reader has to tell apart.
+		-->
+		<Button disabled={cancelling} fullWidth onclick={onDone}>
+			{nonNullish(onCancel) ? $i18n.core.text.back : $i18n.tip.text.done}
+		</Button>
 	{/snippet}
 </ContentWithToolbar>

@@ -11,8 +11,8 @@
 	import { TIP_MESSAGE_MAX_CHARS } from '$lib/constants/tip.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { reservedTipAmounts } from '$lib/derived/tips.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { reservedTipAmounts } from '$lib/derived/tips.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
