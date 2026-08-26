@@ -36,7 +36,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -513,6 +513,71 @@ describe('AllTransactionsLoader', () => {
 			await waitFor(() => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length + counter);
 			});
+		});
+	});
+
+	describe('load more', () => {
+		interface LoaderControls {
+			loadMore: () => Promise<void>;
+			exhausted: boolean;
+		}
+
+		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
+			let captured: LoaderControls | undefined;
+
+			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
+				render: () => {
+					captured = getControls();
+
+					return '<span></span>';
+				}
+			}));
+
+			render(AllTransactionsLoader, { props: { ...props, children } });
+
+			return { controls: () => captured };
+		};
+
+		beforeEach(() => {
+			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+		});
+
+		it('should hand the children a way to page further back', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.loadMore).toBeInstanceOf(Function);
+			});
+		});
+
+		it('should not report exhausted while tokens still have history', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.exhausted).toBeFalsy();
+			});
+		});
+
+		it('should page every token once regardless of the floor', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextIcTransactions.mockClear();
+			spyLoadNextSolTransactions.mockClear();
+
+			await controls()?.loadMore();
+
+			// No `minTimestamp`: the floor itself is what this call is pushing deeper.
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
 		});
 	});
 
