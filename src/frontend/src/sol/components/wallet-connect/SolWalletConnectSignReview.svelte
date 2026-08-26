@@ -141,6 +141,9 @@
 	<!-- The review names no recipient of its own: a single destination had to pick one winner out
 	     of a swap, and where the value ends up is what the simulated balance changes describe. An
 	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
+	<!-- The signer is the connected account and never varies between the requests of a session, so
+	     here it costs a row without saying anything about the message in front of the user. The
+	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 	<SendData
 		{amount}
 		{application}
@@ -148,6 +151,7 @@
 		destination={null}
 		showAmount={decoded}
 		showBalance={decoded}
+		showSigner={false}
 		{source}
 		{token}
 	>
