@@ -44,6 +44,12 @@ export const NEAR_INTENTS_BLOCKCHAIN_MAP: Record<NetworkId, string> = {
 
 export const NEAR_INTENTS_QUOTE_DEADLINE_MS = 3 * 60 * 1000;
 
+// The 1Click deadline is the time by which the deposit must arrive; on expiry the swap
+// refunds minus a fee. BTC deposits confirm in tens of minutes, so the window must
+// comfortably cover slow blocks. EVM and SOL keep the short deadline above because their
+// deposits land in seconds and shorter deadlines mean fresher quotes.
+export const NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS = 60 * 60 * 1000;
+
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
 
