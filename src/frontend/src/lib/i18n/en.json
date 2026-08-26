@@ -2812,7 +2812,7 @@
 			"expires_in": "Expires in $duration",
 			"link_unavailable": "The link for this tip is not recoverable — it was created before OISY started keeping an encrypted copy for you.",
 			"link_recovery_failed": "The link could not be recovered. Nothing has changed about the tip — try again.",
-			"cancel_tip": "Cancel",
+			"cancel_tip": "Cancel this tip",
 			"cancel_failed": "The tip could not be cancelled. Nothing has moved — try again.",
 			"cancelled_toast": "Tip cancelled. The reservation has been revoked.",
 			"message_too_long": "Keep the message to $max characters or fewer.",
