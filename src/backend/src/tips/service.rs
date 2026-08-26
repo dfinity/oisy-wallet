@@ -23,6 +23,7 @@ use super::{
         validate_claim_code_hash, validate_expiry, validate_message, validate_tip_id, TipRecord,
         TipState,
     },
+    secrets,
 };
 use crate::{
     state::{mutate_state, read_state, State},
@@ -405,7 +406,15 @@ pub fn cancel_tip(tip_id: String) -> Result<(), TipError> {
             },
         );
         Ok(())
-    })
+    })?;
+
+    // The link is worthless once cancelled, so the recoverable copy of its claim
+    // code goes with it. Best-effort: a tip with no stored secret (created before
+    // the store existed) is not an error, and failing to drop opaque bytes the
+    // canister cannot read must not fail a cancellation that already succeeded.
+    let _ = secrets::remove_tip_secret(key.0);
+
+    Ok(())
 }
 
 /// The caller's own tips, newest first, capped at [`MAX_TIPS_RETURNED`].

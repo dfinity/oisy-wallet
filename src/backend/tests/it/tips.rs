@@ -14,8 +14,12 @@ use candid::{Nat, Principal};
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
-use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimRequest, TipDetails, TipError, TipStatus,
+use shared::types::{
+    result_types::{CancelTipResult, GetTipSecretResult, SetTipSecretResult},
+    tip::{
+        CreateTipRequest, MyTip, PublicTip, SetTipSecretRequest, TipClaim, TipClaimRequest,
+        TipDetails, TipError, TipStatus,
+    },
 };
 
 use crate::utils::{
@@ -452,5 +456,96 @@ fn a_tip_without_a_covering_allowance_is_refused_at_creation() {
     assert_eq!(
         env.create(short_lived, "code-short", TIP_AMOUNT, expires_at_ns),
         Err(TipError::InvalidExpiry)
+    );
+}
+
+#[test]
+fn a_stored_claim_code_is_readable_only_by_the_sender_who_stored_it() {
+    // The recovery store exists so a sender can get back to their own link. It
+    // must not become a way to read anybody else's: `EncryptedMaps` keys every
+    // map by its owner, and this pins that the isolation actually holds through
+    // the endpoints rather than only in the library.
+    let env = setup_tips();
+    let tip_id = "tip-secret";
+    env.reserve(tip_id, "claim-code-secret", TIP_AMOUNT);
+
+    // Opaque bytes as far as the canister is concerned — in production this is
+    // AES-GCM ciphertext under a vetKey only the sender can derive.
+    let ciphertext = ByteBuf::from(vec![7u8; 48]);
+
+    let stored: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ciphertext.clone(),
+            },
+        )
+        .expect("storing an encrypted claim code should succeed");
+    assert!(matches!(stored, SetTipSecretResult::Ok));
+
+    // The sender reads back exactly what they wrote.
+    let mine: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the sender may read their own secret");
+    assert_eq!(
+        mine,
+        GetTipSecretResult::Ok(Some(ciphertext)),
+        "a sender must get their own ciphertext back verbatim"
+    );
+
+    // Anyone else asking for the same tip id sees an empty map of their own —
+    // not the sender's ciphertext, and not an error that would confirm one
+    // exists.
+    let stranger = Principal::self_authenticating("tip-stranger");
+    env.pic_setup.ensure_user_profile(stranger);
+    let theirs: GetTipSecretResult = env
+        .pic_setup
+        .query(stranger, "get_tip_secret", tip_id.to_string())
+        .expect("the query itself is allowed for any registered user");
+    assert_eq!(
+        theirs,
+        GetTipSecretResult::Ok(None),
+        "another principal must never see the sender's stored claim code"
+    );
+}
+
+#[test]
+fn cancelling_a_tip_drops_its_recoverable_claim_code() {
+    // Once cancelled the link is worthless, so the recoverable copy should not
+    // outlive it.
+    let env = setup_tips();
+    let tip_id = "tip-cancel-secret";
+    env.reserve(tip_id, "claim-code-cancel", TIP_AMOUNT);
+
+    let _: SetTipSecretResult = env
+        .pic_setup
+        .update(
+            env.sender,
+            "set_tip_secret",
+            SetTipSecretRequest {
+                tip_id: tip_id.to_string(),
+                encrypted_claim_code: ByteBuf::from(vec![9u8; 32]),
+            },
+        )
+        .expect("storing should succeed");
+
+    let cancelled: CancelTipResult = env
+        .pic_setup
+        .update(env.sender, "cancel_tip", tip_id.to_string())
+        .expect("the sender may cancel their own tip");
+    assert!(matches!(cancelled, CancelTipResult::Ok(_)));
+
+    let after: GetTipSecretResult = env
+        .pic_setup
+        .query(env.sender, "get_tip_secret", tip_id.to_string())
+        .expect("the query still answers");
+    assert_eq!(
+        after,
+        GetTipSecretResult::Ok(None),
+        "cancelling must drop the stored claim code"
     );
 }
