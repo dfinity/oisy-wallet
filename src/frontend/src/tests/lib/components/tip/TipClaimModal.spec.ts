@@ -3,11 +3,13 @@ import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import * as consoleUtils from '$lib/utils/console.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
 
@@ -31,10 +33,16 @@ describe('TipClaimModal', () => {
 			ledger_canister_id: ledgerCanisterId
 		});
 
+	let warnSpy: MockInstance<typeof consoleUtils.consoleWarn>;
+
 	beforeEach(async () => {
 		vi.restoreAllMocks();
 		modalStore.close();
 		mockAuthStore();
+
+		// The failure paths log what went wrong on purpose, so the paths that fail
+		// have to expect it rather than leak it into the test output.
+		warnSpy = vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
 
 		const { metadata } = await import('$icp/api/icrc-ledger.api');
 		vi.mocked(metadata).mockResolvedValue([
@@ -144,6 +152,8 @@ describe('TipClaimModal', () => {
 
 		expect(queryByText(get(i18n).tip.text.unavailable_title)).not.toBeInTheDocument();
 		expect(claimSpy).not.toHaveBeenCalled();
+		// The reason has to end up somewhere a developer can read it.
+		expect(warnSpy).toHaveBeenCalledOnce();
 	});
 
 	it('says a tip claimed by someone else is gone, not retryable', async () => {
