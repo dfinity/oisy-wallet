@@ -20,6 +20,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { PendingTipClaim } from '$lib/types/tip';
+	import { consoleWarn } from '$lib/utils/console.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -102,6 +103,11 @@
 		try {
 			return { details: await loadTipDetails(params) };
 		} catch (err: unknown) {
+			// Logged, not swallowed. A silent catch here cost an afternoon: the screen
+			// said the tip was gone while the canister was answering fine, and there
+			// was nothing anywhere to say which call had actually failed.
+			consoleWarn('Could not read the tip to claim', err);
+
 			return { failure: isUnavailable(err) ? 'unavailable' : 'failed' };
 		}
 	};
@@ -160,6 +166,8 @@
 			message = fromNullable(details.message);
 			claimState = 'received';
 		} catch (err: unknown) {
+			consoleWarn('Could not claim the tip', err);
+
 			// A tip claimed by someone else in the meantime is gone, and a retry
 			// would never work; a failed call is the opposite.
 			claimState = isUncovered(err) ? 'uncovered' : isUnavailable(err) ? 'unavailable' : 'failed';
