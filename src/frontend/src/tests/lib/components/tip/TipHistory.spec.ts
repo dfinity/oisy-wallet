@@ -146,6 +146,29 @@ describe('TipHistory', () => {
 		expect(recoverSpy).not.toHaveBeenCalled();
 	});
 
+	it('shows skeleton rows while the list is loading', async () => {
+		// The first load waits on a canister query and used to render an empty modal
+		// while it did, which reads as "you have no tips".
+		let resolve: (tips: MyTip[]) => void = () => undefined;
+		vi.spyOn(tipServices, 'loadMyTips').mockReturnValue(
+			new Promise<MyTip[]>((r) => {
+				resolve = r;
+			})
+		);
+
+		const { container, queryByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onViewLink: vi.fn() }
+		});
+
+		expect(container.querySelectorAll('[data-tid^="tip-history-"]').length).toBeGreaterThan(0);
+		// Crucially not the empty state, which would be a lie mid-flight.
+		expect(queryByText(get(i18n).tip.text.history_empty)).not.toBeInTheDocument();
+
+		resolve([]);
+
+		await waitFor(() => expect(queryByText(get(i18n).tip.text.history_empty)).toBeInTheDocument());
+	});
+
 	it('shows an empty state rather than a bare list', async () => {
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([]);
 
