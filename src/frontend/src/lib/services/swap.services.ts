@@ -101,7 +101,10 @@ import {
 	toNearIntentsExternalRefs
 } from '$lib/utils/near-intents-active-tx.utils';
 import {
+	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
+	isNetworkIdEthereum,
+	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdSOLDevnet,
 	isNetworkIdSolana
@@ -342,6 +345,58 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
+type SwapRecipientResolution =
+	// The destination network has no cross-chain payout address (e.g. ICP, where
+	// providers credit the user's principal); quotes proceed without a recipient.
+	| { type: 'not-required' }
+	// The user's destination-chain address is known and becomes the quote's recipient.
+	| { type: 'resolved'; recipientAddress: string }
+	// The destination needs a payout address the user does not have (yet). Such a pair
+	// must not be quoted at all: a cross-chain quote request falls back to the
+	// source-chain user address as recipient, which would pay out to a wrong-chain
+	// address.
+	| { type: 'missing' };
+
+/**
+ * A cross-chain swap pays out on the destination chain, so the quote's recipient is the
+ * user's address for the destination token's network, never the source-chain address.
+ */
+const resolveSwapRecipientAddress = ({
+	destinationToken,
+	userEthAddress,
+	userSolAddress,
+	userBtcAddress
+}: Pick<
+	FetchSwapAmountsParams,
+	'destinationToken' | 'userEthAddress' | 'userSolAddress' | 'userBtcAddress'
+>): SwapRecipientResolution => {
+	const {
+		network: { id: networkId }
+	} = destinationToken;
+
+	if (isNetworkIdSolana(networkId)) {
+		return nonNullish(userSolAddress)
+			? { type: 'resolved', recipientAddress: userSolAddress }
+			: { type: 'missing' };
+	}
+
+	// Mainnet only: the address at hand is the user's mainnet address, and cross-chain
+	// providers do not serve BTC testnets.
+	if (isNetworkIdBTCMainnet(networkId)) {
+		return nonNullish(userBtcAddress)
+			? { type: 'resolved', recipientAddress: userBtcAddress }
+			: { type: 'missing' };
+	}
+
+	if (isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId)) {
+		return nonNullish(userEthAddress)
+			? { type: 'resolved', recipientAddress: userEthAddress }
+			: { type: 'missing' };
+	}
+
+	return { type: 'not-required' };
+};
+
 export const fetchSwapAmounts = async ({
 	identity,
 	sourceToken,
@@ -381,6 +436,20 @@ export const fetchSwapAmounts = async ({
 		});
 	}
 
+	const recipientResolution = resolveSwapRecipientAddress({
+		destinationToken,
+		userEthAddress,
+		userSolAddress,
+		userBtcAddress
+	});
+
+	if (recipientResolution.type === 'missing') {
+		return [];
+	}
+
+	const recipientAddress =
+		recipientResolution.type === 'resolved' ? recipientResolution.recipientAddress : undefined;
+
 	// Ahead of the EVM fall-through, which would otherwise cast a Bitcoin token to
 	// `Erc20Token` and hand it to providers that cannot quote it.
 	if (isNetworkIdBitcoin(sourceToken.network.id)) {
@@ -393,6 +462,7 @@ export const fetchSwapAmounts = async ({
 			destinationToken,
 			amount: sourceAmount,
 			userBtcAddress,
+			recipientAddress,
 			slippage
 		});
 	}
@@ -402,7 +472,6 @@ export const fetchSwapAmounts = async ({
 
 	if (isSourceSolana || isDestSolana) {
 		const sourceAddress = isSourceSolana ? userSolAddress : userEthAddress;
-		const destAddress = isDestSolana ? userSolAddress : userEthAddress;
 
 		if (isNullish(sourceAddress)) {
 			return [];
@@ -413,7 +482,7 @@ export const fetchSwapAmounts = async ({
 			destinationToken,
 			amount: sourceAmount,
 			userAddress: sourceAddress,
-			recipientAddress: destAddress ?? undefined,
+			recipientAddress,
 			slippage
 		});
 	}
@@ -423,6 +492,7 @@ export const fetchSwapAmounts = async ({
 		destinationToken: destinationToken as Erc20Token,
 		amount: sourceAmount,
 		userAddress: userEthAddress,
+		recipientAddress,
 		slippage
 	});
 };
@@ -948,19 +1018,39 @@ export const fetchNearIntentsBtcSwap = async ({
 		swapDetails,
 		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
 		// `swapAmount` rather than the parsed base-unit amount the core hands over.
-		sendTransaction: ({ depositAddress, registerSwap }) =>
-			sendBtc({
-				identity,
-				network,
-				utxosFee,
-				source: userAddress,
-				destination: depositAddress,
-				amount: swapAmount,
-				// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
-				// registered right there, before the pending-transaction bookkeeping and before
-				// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
-				onBroadcast: registerSwap
-			}),
+		sendTransaction: async ({ depositAddress, registerSwap }) => {
+			let broadcastTxid: string | undefined;
+
+			try {
+				return await sendBtc({
+					identity,
+					network,
+					utxosFee,
+					source: userAddress,
+					destination: depositAddress,
+					amount: swapAmount,
+					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
+					// registered right there, before the pending-transaction bookkeeping and before
+					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					onBroadcast: async ({ txid }) => {
+						broadcastTxid = txid;
+						await registerSwap();
+					}
+				});
+			} catch (err: unknown) {
+				if (isNullish(broadcastTxid)) {
+					throw err;
+				}
+
+				// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+				// (pending-transaction registration, wallet refresh). The deposit is real by
+				// then and the AUT row exists, so the swap must not read as failed; the flow
+				// carries on with the broadcast txid.
+				consoleError(err);
+
+				return broadcastTxid;
+			}
+		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
 };
@@ -1148,6 +1238,7 @@ export const fetchSwapAmountsEVM = async ({
 	destinationToken,
 	amount,
 	userAddress,
+	recipientAddress,
 	slippage
 }: EvmQuoteParams): Promise<SwapMappedResult[]> => {
 	if (isNullish(userAddress)) {
@@ -1158,7 +1249,7 @@ export const fetchSwapAmountsEVM = async ({
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userAddress, slippage })
+			getQuote({ sourceToken, destinationToken, amount, userAddress, recipientAddress, slippage })
 		)
 	);
 
@@ -1182,13 +1273,21 @@ export const fetchSwapAmountsBTC = async ({
 	destinationToken,
 	amount,
 	userBtcAddress,
+	recipientAddress,
 	slippage
 }: BtcQuoteParams): Promise<SwapMappedResult[]> => {
 	const enabledProviders = btcSwapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
 		enabledProviders.map(({ getQuote }) =>
-			getQuote({ sourceToken, destinationToken, amount, userBtcAddress, slippage })
+			getQuote({
+				sourceToken,
+				destinationToken,
+				amount,
+				userBtcAddress,
+				recipientAddress,
+				slippage
+			})
 		)
 	);
 

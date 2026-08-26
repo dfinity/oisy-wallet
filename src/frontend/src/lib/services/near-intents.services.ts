@@ -35,8 +35,9 @@ export const clearNearIntentsTokensCache = (): void => {
 };
 
 // Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive) and
-// Bitcoin (native asset only, no contract addresses). Only the remaining chains may
-// have their contract addresses lowercased.
+// Bitcoin (1Click may list btc assets with a contractAddress, and those identifiers
+// are not case-insensitive hex). Only the remaining chains may have their contract
+// addresses lowercased.
 const NON_EVM_BLOCKCHAINS = new Set(['sol', 'btc']);
 
 const EVM_BLOCKCHAINS = new Set(
