@@ -1,3 +1,4 @@
+import { sendBtc } from '$btc/services/btc-send.services';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -27,6 +28,7 @@ import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
 	enableSwapDestinationToken,
+	fetchNearIntentsBtcSwap,
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
 	fetchOneSecEvmToIcpSwap,
@@ -54,7 +56,7 @@ import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -172,6 +174,10 @@ vi.mock('$eth/services/send.services', () => ({
 
 vi.mock('$sol/services/sol-send.services', () => ({
 	sendSol: vi.fn()
+}));
+
+vi.mock('$btc/services/btc-send.services', () => ({
+	sendBtc: vi.fn()
 }));
 
 // `OrderHelpers` stays real: its status predicates are pure, and re-implementing them here would
@@ -2971,6 +2977,37 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
 		});
 
+		// Regression for the BTC broadcast-time hook: a reversible transport keeps the
+		// original ordering, creating the AUT row only once, after the send has resolved
+		// and the deposit been submitted.
+		it('should create the AUT row after the send resolves and the deposit is submitted', async () => {
+			await fetchNearIntentsEvmSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [sendOrder] = vi.mocked(sendEvm).mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+
+			expect(sendOrder).toBeLessThan(submitOrder);
+			expect(submitOrder).toBeLessThan(createOrder);
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
 		it('should pass depositMemo when present in quote', async () => {
 			const quoteWithMemo = {
 				...mockNearIntentsQuoteResponse,
@@ -3075,6 +3112,31 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
 		});
 
+		// Regression for the BTC broadcast-time hook: a reversible transport keeps the
+		// original ordering, creating the AUT row only once, after the send has resolved
+		// and the deposit been submitted.
+		it('should create the AUT row after the send resolves and the deposit is submitted', async () => {
+			await fetchNearIntentsSolSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				userAddress: mockSolAddress,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [sendOrder] = vi.mocked(sendSol).mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+
+			expect(sendOrder).toBeLessThan(submitOrder);
+			expect(submitOrder).toBeLessThan(createOrder);
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
 		it('should pass depositMemo when present in quote', async () => {
 			const quoteWithMemo = {
 				...mockNearIntentsQuoteResponse,
@@ -3104,6 +3166,196 @@ describe('swap.services', () => {
 					])
 				})
 			);
+		});
+	});
+
+	describe('fetchNearIntentsBtcSwap', () => {
+		const sourceToken = BTC_MAINNET_TOKEN;
+		const destinationToken = { ...mockValidErc20Token, decimals: 6, enabled: true };
+		const mockProgress = vi.fn();
+		const btcTxid = 'btc-txid-123';
+		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			destinationToken,
+			swapAmount: '0.01',
+			userAddress: mockBtcAddress,
+			network: 'mainnet' as const,
+			utxosFee: mockUtxosFee,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			// The real `sendBtc` fires `onBroadcast` the moment the transaction is
+			// broadcast, before its own bookkeeping resolves.
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: btcTxid });
+				return btcTxid;
+			});
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should send the deposit to the quoted address on the quoted UTXO selection', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			expect(sendBtc).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					network: 'mainnet',
+					utxosFee: mockUtxosFee,
+					source: mockBtcAddress,
+					destination: depositAddress,
+					amount: '0.01'
+				})
+			);
+		});
+
+		it('should register the AUT row at broadcast time, before the send resolves', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+
+				await onBroadcast?.({ txid: btcTxid });
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+
+				return btcTxid;
+			});
+
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			// Exactly once: the after-send path must not create a second row.
+			expect(
+				activeUserTransactionsServices.createActiveUserTransaction
+			).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					data: {
+						NearIntents: expect.objectContaining({
+							source_token: { BtcNativeMainnet: null },
+							// `swapAmount: '0.01'` in satoshis.
+							amount: 1_000_000n
+						})
+					},
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+					])
+				})
+			);
+		});
+
+		it('should register the row before submitting the broadcast txid to 1Click', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+
+			expect(createOrder).toBeLessThan(submitOrder);
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: btcTxid
+			});
+		});
+
+		it('should include the depositMemo in the row refs and the 1Click submit when present', async () => {
+			const quoteWithMemo = {
+				...mockNearIntentsQuoteResponse,
+				quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: 'btc-memo-123' }
+			};
+
+			await fetchNearIntentsBtcSwap({ ...baseParams, swapDetails: quoteWithMemo });
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress,
+				txHash: btcTxid,
+				depositMemo: 'btc-memo-123'
+			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress },
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: 'btc-memo-123' }
+					])
+				})
+			);
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			expect(mockProgress).toHaveBeenCalledTimes(3);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		// The deposit is already broadcast when the row is created, so a bookkeeping
+		// failure must never read as the swap having failed.
+		it('should not surface a failed AUT creation as a swap failure', async () => {
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+				new Error('backend down')
+			);
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+		});
+
+		it('should not surface a failed 1Click submit as a swap failure', async () => {
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockRejectedValue(
+				new Error('1click down')
+			);
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+
+			// The row was registered at broadcast, so it exists despite the failed submit.
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		it('should surface a send failure and create no row when nothing was broadcast', async () => {
+			vi.mocked(sendBtc).mockRejectedValue(new Error('signer unavailable'));
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('signer unavailable');
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+		});
+
+		// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+		// (pending-transaction registration, wallet refresh). The deposit is real by then,
+		// so the swap must resolve and carry on with the broadcast txid.
+		it('should not surface a sendBtc failure after the broadcast as a swap failure', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: btcTxid });
+				throw new Error('wallet refresh failed');
+			});
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: btcTxid
+			});
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should enable a disabled destination token once the swap foreground resolves', async () => {
+			const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+			await fetchNearIntentsBtcSwap({
+				...baseParams,
+				destinationToken: disabledDestinationToken
+			});
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
 	});
 

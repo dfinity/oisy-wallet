@@ -1,3 +1,4 @@
+import { sendBtc } from '$btc/services/btc-send.services';
 import type { VeloraSwapMode } from '$declarations/backend/backend.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/approve.services';
@@ -82,6 +83,7 @@ import {
 	type OneSecEvmToIcpParams,
 	type OneSecIcpToEvmParams,
 	type SwapMappedResult,
+	type SwapNearIntentsBtcParams,
 	type SwapNearIntentsEvmParams,
 	type SwapNearIntentsSolParams,
 	type SwapParams,
@@ -846,7 +848,16 @@ const executeNearIntentsSwap = async ({
 	destinationToken: Token;
 	swapAmount: Amount;
 	swapDetails: NearIntentsQuoteResponse;
-	sendTransaction: (params: { amount: bigint; depositAddress: string }) => Promise<string>;
+	// `registerSwap` creates the swap's AUT row. A transport whose send is irreversible
+	// the moment it is broadcast (BTC) must invoke it from its broadcast callback, so the
+	// row exists even if any later step of the send throws (the `fetchChainFusionBtcSwap`
+	// guarantee). A transport that ignores it keeps the default ordering below, where the
+	// row is created only after the send has resolved and the deposit been submitted.
+	sendTransaction: (params: {
+		amount: bigint;
+		depositAddress: string;
+		registerSwap: () => Promise<void>;
+	}) => Promise<string>;
 	enableDestinationToken?: () => Promise<void>;
 }): Promise<void> => {
 	const parsedSwapAmount = parseToken({
@@ -856,9 +867,44 @@ const executeNearIntentsSwap = async ({
 
 	const { depositAddress, depositMemo } = swapDetails.quote;
 
+	// Registers the swap as an Active User Transaction so settlement is tracked by
+	// the global poller (survives modal close, tab close, refresh, logout).
+	// Best-effort, single attempt: it only ever runs once funds have left the wallet
+	// (point of no return), so a failed create must NOT surface as a swap failure;
+	// mirrors OneSec's `createAutAndDetachCloser`.
+	let swapRegistered = false;
+	const registerSwap = async (): Promise<void> => {
+		swapRegistered = true;
+
+		try {
+			const data = toNearIntentsData({
+				sourceToken,
+				destinationToken,
+				amount: parsedSwapAmount
+			});
+
+			if (nonNullish(data)) {
+				await createActiveUserTransaction({
+					identity,
+					id: crypto.randomUUID(),
+					data,
+					externalRefs: toNearIntentsExternalRefs({
+						...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
+						[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
+						...(nonNullish(depositMemo)
+							? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
+							: {})
+					})
+				});
+			}
+		} catch (err: unknown) {
+			consoleError(err);
+		}
+	};
+
 	progress(ProgressStepsSwap.SIGN_TRANSFER);
 
-	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress });
+	const txHash = await sendTransaction({ amount: parsedSwapAmount, depositAddress, registerSwap });
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -875,34 +921,8 @@ const executeNearIntentsSwap = async ({
 		consoleError(err);
 	}
 
-	// Register the swap as an Active User Transaction so settlement is tracked by
-	// the global poller (survives modal close, tab close, refresh, logout).
-	// Best-effort: the funds have already left the wallet (point of no return), so
-	// a failed create must NOT surface as a swap failure — mirrors OneSec's
-	// `createAutAndDetachCloser`.
-	try {
-		const data = toNearIntentsData({
-			sourceToken,
-			destinationToken,
-			amount: parsedSwapAmount
-		});
-
-		if (nonNullish(data)) {
-			await createActiveUserTransaction({
-				identity,
-				id: crypto.randomUUID(),
-				data,
-				externalRefs: toNearIntentsExternalRefs({
-					...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
-					[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
-					...(nonNullish(depositMemo)
-						? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
-						: {})
-				})
-			});
-		}
-	} catch (err: unknown) {
-		consoleError(err);
+	if (!swapRegistered) {
+		await registerSwap();
 	}
 
 	progress(ProgressStepsSwap.UPDATE_UI);
@@ -974,6 +994,63 @@ export const fetchNearIntentsSolSwap = async ({
 				source: userAddress,
 				prioritizationFee: ZERO
 			}),
+		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
+	});
+};
+
+export const fetchNearIntentsBtcSwap = async ({
+	identity,
+	progress,
+	sourceToken,
+	destinationToken,
+	swapAmount,
+	swapDetails,
+	userAddress,
+	network,
+	utxosFee
+}: SwapNearIntentsBtcParams): Promise<void> => {
+	await executeNearIntentsSwap({
+		identity,
+		progress,
+		sourceToken,
+		destinationToken,
+		swapAmount,
+		swapDetails,
+		// `sendBtc` converts the display amount to satoshis itself, so it takes the raw
+		// `swapAmount` rather than the parsed base-unit amount the core hands over.
+		sendTransaction: async ({ depositAddress, registerSwap }) => {
+			let broadcastTxid: string | undefined;
+
+			try {
+				return await sendBtc({
+					identity,
+					network,
+					utxosFee,
+					source: userAddress,
+					destination: depositAddress,
+					amount: swapAmount,
+					// A BTC deposit is irreversible the moment it is broadcast, so the AUT row is
+					// registered right there, before the pending-transaction bookkeeping and before
+					// the send resolves; mirrors the ordering of `fetchChainFusionBtcSwap`.
+					onBroadcast: async ({ txid }) => {
+						broadcastTxid = txid;
+						await registerSwap();
+					}
+				});
+			} catch (err: unknown) {
+				if (isNullish(broadcastTxid)) {
+					throw err;
+				}
+
+				// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+				// (pending-transaction registration, wallet refresh). The deposit is real by
+				// then and the AUT row exists, so the swap must not read as failed; the flow
+				// carries on with the broadcast txid.
+				consoleError(err);
+
+				return broadcastTxid;
+			}
+		},
 		enableDestinationToken: () => enableSwapDestinationToken({ destinationToken, identity })
 	});
 };
