@@ -8,6 +8,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { TIP_HISTORY_ROW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -133,7 +134,14 @@
 </script>
 
 <ContentWithToolbar>
-	{#if !loading && tips.length === 0}
+	<!--
+		`SkeletonCards` rather than a centred spinner: it is what every other list in
+		the app shows while loading, and it reserves the rows' height so the content
+		does not jump into place underneath the reader's cursor.
+	-->
+	{#if loading}
+		<SkeletonCards rows={3} testIdPrefix="tip-history" />
+	{:else if tips.length === 0}
 		<p class="py-12 text-center text-tertiary">{$i18n.tip.text.history_empty}</p>
 	{/if}
 
