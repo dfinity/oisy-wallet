@@ -199,8 +199,9 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
+			// Derived from the i18n copy (tags stripped) so copy-only edits cannot break this.
 			expect(container.textContent).toContain(
-				'If you do not agree with those terms, do not use this swap provider.'
+				en.swap.text.near_intents_tos.replace(/<[^>]*>/g, '')
 			);
 		});
 
