@@ -22,13 +22,12 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import type { EthereumChainId } from '$eth/types/network';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isTokenErc4626 } from '$eth/utils/erc4626.utils';
+import { isTokenErc4626, normalizeErc4626MintBurnTransfers } from '$eth/utils/erc4626.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { filterSpamErc20Transfers } from '$eth/utils/eth-transactions-spam.utils';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
-import { ZERO_ETH_ADDRESS } from '$lib/constants/app.constants';
 import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
@@ -387,22 +386,8 @@ const loadErc20Transactions = async ({
 };
 
 /**
- * Loads ERC4626 vault token transactions and normalizes mint/burn addresses for UI/analytics.
- *
- * ERC4626 vaults emit standard ERC20 Transfer events for share minting/burning:
- * - Deposit (mint shares): Transfer(from=0x0, to=user, amount)
- * - Redeem (burn shares): Transfer(from=user, to=0x0, amount)
- *
- * On-chain, these represent supply changes between the user and the zero address, not transfers
- * to or from the vault's own balance.
- *
- * Since Etherscan's `tokentx` API returns the event's from/to (not the tx signer), we normalize
- * the zero address to the vault contract address in our transaction list so that:
- * - Mint: from=0x0 → from=vault (treated as vault-issued shares for display)
- * - Burn: to=0x0 → to=vault (treated as vault-received/burned shares for display)
- *
- * This is a presentation/analytics convention only; the underlying on-chain events still use
- * the zero address as the mint/burn counterparty.
+ * Loads ERC4626 vault token transactions, presenting share mints and burns as transfers with the
+ * vault - see `normalizeErc4626MintBurnTransfers` for why.
  */
 const loadErc4626Transactions = async ({
 	networkId,
@@ -415,16 +400,7 @@ const loadErc4626Transactions = async ({
 }): Promise<Transaction[]> => {
 	const transactions = await loadErc20Transactions({ networkId, token, address });
 
-	return transactions.map((tx) => {
-		const isMint = tx.from.toLowerCase() === ZERO_ETH_ADDRESS;
-		const isBurn = tx.to?.toLowerCase() === ZERO_ETH_ADDRESS;
-
-		return {
-			...tx,
-			...(isMint ? { from: token.address } : {}),
-			...(isBurn ? { to: token.address } : {})
-		};
-	});
+	return normalizeErc4626MintBurnTransfers({ transactions, vaultAddress: token.address });
 };
 
 const loadErc721Transactions = async ({

@@ -30,12 +30,27 @@ import {
 } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-interface TransactionsParams {
-	address: EthAddress;
+interface TransactionsWindow {
 	startBlock?: BlockTag;
 	endBlock?: BlockTag;
 	sort?: 'asc' | 'desc';
 }
+
+interface TransactionsParams extends TransactionsWindow {
+	address: EthAddress;
+}
+
+/**
+ * Maps a block window onto the Etherscan query parameters shared by the token-transfer actions.
+ *
+ * Newest-first by default, unlike the native history actions: a token transfer list is read from the
+ * most recent transfer, and paging back asks for a window that ends where the list currently does.
+ */
+const ercWindowParams = ({ startBlock, endBlock, sort }: TransactionsWindow) => ({
+	startblock: startBlock ?? 0,
+	...(nonNullish(endBlock) ? { endblock: endBlock } : {}),
+	sort: sort ?? 'desc'
+});
 
 export class EtherscanProvider {
 	private readonly provider: EtherscanProviderLib;
@@ -151,17 +166,17 @@ export class EtherscanProvider {
 	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc20-token-transfer-events-by-address
 	erc20Transactions = async ({
 		address,
-		contract: { address: contractAddress }
+		contract: { address: contractAddress },
+		...window
 	}: {
 		address: EthAddress;
 		contract: Erc20Token | Erc4626Token;
-	}): Promise<Transaction[]> => {
+	} & TransactionsWindow): Promise<Transaction[]> => {
 		const params = {
 			action: 'tokentx',
 			contractAddress,
 			address,
-			startblock: 0,
-			sort: 'desc'
+			...ercWindowParams(window)
 		};
 
 		const result: EtherscanProviderTokenTransferTransaction[] | string = await this.provider.fetch(
@@ -206,17 +221,17 @@ export class EtherscanProvider {
 	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc721-token-transfer-events-by-address
 	erc721Transactions = async ({
 		address,
-		contract: { address: contractAddress }
+		contract: { address: contractAddress },
+		...window
 	}: {
 		address: EthAddress;
 		contract: Erc721Token;
-	}): Promise<Transaction[]> => {
+	} & TransactionsWindow): Promise<Transaction[]> => {
 		const params = {
 			action: 'tokennfttx',
 			contractAddress,
 			address,
-			startblock: 0,
-			sort: 'desc'
+			...ercWindowParams(window)
 		};
 
 		const result: EtherscanProviderErc721TokenTransferTransaction[] | string =
@@ -260,17 +275,17 @@ export class EtherscanProvider {
 	// Docs: https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
 	erc1155Transactions = async ({
 		address,
-		contract: { address: contractAddress }
+		contract: { address: contractAddress },
+		...window
 	}: {
 		address: EthAddress;
 		contract: Erc1155Token;
-	}): Promise<Transaction[]> => {
+	} & TransactionsWindow): Promise<Transaction[]> => {
 		const params = {
 			action: 'token1155tx',
 			contractAddress,
 			address,
-			startblock: 0,
-			sort: 'desc'
+			...ercWindowParams(window)
 		};
 
 		const result: EtherscanProviderErc1155TokenTransferTransaction[] | string =
