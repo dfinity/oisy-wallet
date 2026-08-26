@@ -13,6 +13,7 @@
 	import { tipWizardSteps } from '$lib/config/tip.config';
 	import { DEFAULT_TIP_EXPIRY_MS } from '$lib/constants/tip.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { tokens } from '$lib/derived/tokens.derived';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
 	import { newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,7 +22,6 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { tokens } from '$lib/derived/tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
