@@ -1,8 +1,10 @@
 <script lang="ts">
-	import IconQr from '$lib/components/icons/IconQr.svelte';
+	import tipIntroImg from '$lib/assets/tip-intro-img.webp';
+	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TIP_INTRO_GET_STARTED_BUTTON,
@@ -19,19 +21,23 @@
 </script>
 
 <ContentWithToolbar>
-	<div
-		class="mx-auto mb-6 flex aspect-square h-40 max-w-full items-center justify-center rounded-xl bg-brand-subtle-10 text-brand-primary"
-		aria-label={$i18n.tip.alt.intro_illustration}
+	<!--
+		No aspect box and no tinted ground: the artwork is the drawn panel, at its
+		own 1024x480, and letting it size itself keeps that ratio exactly rather
+		than cropping it to whichever one we would have hard-coded here.
+	-->
+	<Img
+		alt={$i18n.tip.alt.intro_illustration}
 		role="img"
-	>
-		<IconQr size="64" />
-	</div>
+		src={tipIntroImg}
+		styleClass="mb-6 h-auto w-full rounded-xl"
+	/>
 
-	<h3 class="mb-3 text-center">{$i18n.tip.text.intro_heading}</h3>
+	<h3 class="mb-3">{$i18n.tip.text.intro_heading}</h3>
 
-	<p class="mb-4 text-center text-tertiary">{$i18n.tip.text.intro_body}</p>
+	<p class="mb-4 text-tertiary">{$i18n.tip.text.intro_body}</p>
 
-	<div class="mb-4 flex justify-center">
+	<div class="mb-4">
 		<ExternalLink
 			ariaLabel={$i18n.tip.text.learn_how_it_works}
 			href={OISY_DOCS_URL}
@@ -54,6 +60,8 @@
 
 			<Button fullWidth onclick={onGetStarted} testId={TIP_INTRO_GET_STARTED_BUTTON}>
 				{$i18n.tip.text.get_started}
+
+				<IconArrowRight />
 			</Button>
 		</div>
 	{/snippet}
