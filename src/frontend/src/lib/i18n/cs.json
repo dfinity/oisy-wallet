@@ -1935,6 +1935,8 @@
 			"details": "Podrobnosti transakce",
 			"hash": "Hash transakce",
 			"hash_copied": "Hash transakce $hash zkopírován do schránky.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID transakce",
 			"id_copied": "ID transakce zkopírováno do schránky.",
 			"timestamp": "Časové razítko",
