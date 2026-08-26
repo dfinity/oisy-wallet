@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-import type { IcToken } from '$icp/types/ic-token';
+	import type { IcToken } from '$icp/types/ic-token';
 	import SeasonalIconAstronautHelmet from '$lib/components/core/SeasonalIconAstronautHelmet.svelte';
 	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -30,15 +30,7 @@ import type { IcToken } from '$icp/types/ic-token';
 		cancelling?: boolean;
 	}
 
-	let {
-		link,
-		expiresAtNs,
-		token,
-		amount,
-		onDone,
-		onCancel,
-		cancelling = false
-	}: Props = $props();
+	let { link, expiresAtNs, token, amount, onDone, onCancel, cancelling = false }: Props = $props();
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
