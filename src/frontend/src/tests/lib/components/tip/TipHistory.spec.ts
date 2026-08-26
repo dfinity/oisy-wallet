@@ -10,6 +10,7 @@ import { get } from 'svelte/store';
 
 describe('TipHistory', () => {
 	const claimer = Principal.fromText('aaaaa-aa');
+	const nowNs = BigInt(Date.now()) * 1_000_000n;
 
 	const tip = ({
 		tip_id,
@@ -62,6 +63,33 @@ describe('TipHistory', () => {
 		const { getByText } = render(TipHistory, { props: { onClose: vi.fn() } });
 
 		await waitFor(() => expect(getByText(/aaaaa-aa/)).toBeInTheDocument());
+	});
+
+	it('signs only the amount that actually moved', async () => {
+		// A reserved tip has not left the wallet and a lapsed one never will, so a
+		// minus on those rows would assert a debit that never happened.
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] }),
+			tip({ tip_id: 'live', status: { Reserved: null } }),
+			tip({ tip_id: 'gone', status: { Expired: null } })
+		]);
+
+		const { getByText, getAllByText } = render(TipHistory, { props: { onClose: vi.fn() } });
+
+		await waitFor(() => expect(getByText('-0.005 ICP')).toBeInTheDocument());
+
+		// The other two carry the same figure, unsigned.
+		expect(getAllByText('0.005 ICP')).toHaveLength(2);
+	});
+
+	it('groups rows under the day they were created', async () => {
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			{ ...tip({ tip_id: 'live', status: { Reserved: null } }), created_at_ns: nowNs }
+		]);
+
+		const { getByText } = render(TipHistory, { props: { onClose: vi.fn() } });
+
+		await waitFor(() => expect(getByText(/today/i)).toBeInTheDocument());
 	});
 
 	it('shows an empty state rather than a bare list', async () => {
