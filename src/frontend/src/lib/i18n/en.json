@@ -2810,7 +2810,7 @@
 			"status_expired": "Expired",
 			"status_cancelled": "Cancelled",
 			"claimed_by": "Claimed by $principal",
-			"tip_created": "Tip created",
+			"tip_amount": "Tip $amount",
 			"expires_in": "Expires in $duration",
 			"cancel_tip": "Cancel",
 			"cancel_failed": "The tip could not be cancelled. Nothing has moved — try again.",

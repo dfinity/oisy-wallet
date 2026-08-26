@@ -15,7 +15,11 @@
 	import { cancelTip, loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { formatSecondsToNormalizedDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatNanosecondsToDate,
+		formatSecondsToNormalizedDate,
+		formatToken
+	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isTipCancellable, tipStatusKey, tipStatusTextClass } from '$lib/utils/tip-status.utils';
 	import { tippableTokens } from '$lib/utils/tip.utils';
@@ -38,23 +42,16 @@
 			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
 		);
 
+	// Unsigned: the amount is part of the row's title now ("Tip 10 SOL"), where a
+	// minus would read as a negative tip rather than as money leaving. The status
+	// on the right already says whether it moved.
 	const amountLabel = (tip: MyTip): string => {
 		const token = tokenFor(tip);
-		const value = nonNullish(token)
+
+		return nonNullish(token)
 			? `${formatToken({ value: tip.amount, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`
 			: `${tip.amount}`;
-
-		// Signed only when the money actually moved. A reserved tip has not left the
-		// wallet and a lapsed one never will, so a minus on those rows would claim a
-		// debit that never happened.
-		return tipStatusKey(tip.status) === 'claimed' ? `-${value}` : value;
 	};
-
-	const timeLabel = (ns: bigint): string =>
-		new Date(Number(ns / 1_000_000n)).toLocaleTimeString($currentLanguage, {
-			hour: '2-digit',
-			minute: '2-digit'
-		});
 
 	// Second line of a live row: how long is left, not the absolute instant. The
 	// share screen carries the absolute one, where the sender is about to hand the
@@ -158,19 +155,20 @@
 						</div>
 					{/snippet}
 
-					{$i18n.tip.text.tip_created}
+					{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
 
-					<span class="text-tertiary">&bull;</span>
-
-					<span class={tipStatusTextClass(status)}>
-						{$i18n.tip.text[`status_${status}`]}
-					</span>
-
-					{#snippet amount()}{amountLabel(tip)}{/snippet}
+					{#snippet amount()}
+						<span class={tipStatusTextClass(status)}>
+							{$i18n.tip.text[`status_${status}`]}
+						</span>
+					{/snippet}
 
 					{#snippet description()}
 						<span class="truncate text-sm">
-							{timeLabel(tip.created_at_ns)}
+							{formatNanosecondsToDate({
+								nanoseconds: tip.created_at_ns,
+								language: $currentLanguage
+							})}
 
 							{#if status === 'claimed' && nonNullish(claimer)}
 								&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
