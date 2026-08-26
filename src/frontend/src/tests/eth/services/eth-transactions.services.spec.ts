@@ -422,6 +422,34 @@ describe('eth-transactions.services', () => {
 				);
 			});
 
+			it('should measure finality against the chain tip, not the batch', async () => {
+				const [newer] = createMockEthTransactions(1);
+
+				mockErc20Transactions.mockResolvedValue([newer]);
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(12_345_678);
+
+				await load();
+
+				expect(saveErc20FinalizedTransactions).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ currentBlockNumber: 12_345_678 })
+				);
+			});
+
+			it('should fall back to the batch newest block when the tip cannot be read', async () => {
+				const [newer] = createMockEthTransactions(1);
+
+				mockErc20Transactions.mockResolvedValue([{ ...newer, blockNumber: 4242 }]);
+
+				infuraMocks.mockInfuraGetBlockNumber.mockRejectedValueOnce(new Error('no provider'));
+
+				await load();
+
+				expect(saveErc20FinalizedTransactions).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ currentBlockNumber: 4242 })
+				);
+			});
+
 			it('should not persist anything when Etherscan returned nothing new', async () => {
 				await load();
 
