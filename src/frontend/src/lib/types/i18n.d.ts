@@ -2340,7 +2340,7 @@ interface I18nTip {
 		status_expired: string;
 		status_cancelled: string;
 		claimed_by: string;
-		tip_created: string;
+		tip_amount: string;
 		expires_in: string;
 		cancel_tip: string;
 		cancel_failed: string;

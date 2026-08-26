@@ -65,21 +65,32 @@ describe('TipHistory', () => {
 		await waitFor(() => expect(getByText(/aaaaa-aa/)).toBeInTheDocument());
 	});
 
-	it('signs only the amount that actually moved', async () => {
-		// A reserved tip has not left the wallet and a lapsed one never will, so a
-		// minus on those rows would assert a debit that never happened.
+	it('names each row by its amount rather than repeating one label', async () => {
+		// Every row used to lead with the words "Tip created", which said nothing
+		// and pushed the only distinguishing fact — the sum — off to one side.
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
 			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] }),
-			tip({ tip_id: 'live', status: { Reserved: null } }),
-			tip({ tip_id: 'gone', status: { Expired: null } })
+			tip({ tip_id: 'live', status: { Reserved: null } })
 		]);
 
-		const { getByText, getAllByText } = render(TipHistory, { props: { onClose: vi.fn() } });
+		const { getAllByText, queryByText } = render(TipHistory, { props: { onClose: vi.fn() } });
 
-		await waitFor(() => expect(getByText('-0.005 ICP')).toBeInTheDocument());
+		await waitFor(() => expect(getAllByText('Tip 0.005 ICP')).toHaveLength(2));
 
-		// The other two carry the same figure, unsigned.
-		expect(getAllByText('0.005 ICP')).toHaveLength(2);
+		// Unsigned: "Tip -0.005 ICP" would read as a negative tip, not as a debit.
+		expect(queryByText(/-0.005 ICP/)).not.toBeInTheDocument();
+	});
+
+	it('states each status once, on the right', async () => {
+		// The design draws it twice on some rows — inline after the amount and again
+		// in the right-hand column. Saying it twice is not emphasis, it is noise.
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({ tip_id: 'live', status: { Reserved: null } })
+		]);
+
+		const { getAllByText } = render(TipHistory, { props: { onClose: vi.fn() } });
+
+		await waitFor(() => expect(getAllByText(get(i18n).tip.text.status_reserved)).toHaveLength(1));
 	});
 
 	it('groups rows under the day they were created', async () => {
