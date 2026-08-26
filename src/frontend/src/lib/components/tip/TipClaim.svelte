@@ -88,6 +88,14 @@
 	 * The tip travels in memory as the modal's data, never in the URL the wallet
 	 * lands on. Nothing has been consumed at this point, so the worst a lost
 	 * handover costs is a claim that did not happen, on a link that still works.
+	 *
+	 * **The modal is opened after the navigation, not before.**
+	 * `ModalExitHandler` sits in the root layout and closes whatever modal is open
+	 * on *every* navigation, this one included — so a modal opened first is wiped
+	 * on the way out, and the wallet arrives with nothing to show and no claim to
+	 * make. Awaiting `goto` first puts the store write past that handler. The
+	 * continuation survives this component being destroyed because it writes to a
+	 * module-level store, not to component state.
 	 */
 	const handOff = async () => {
 		const code = claimCode();
@@ -97,17 +105,17 @@
 			return;
 		}
 
-		// Set before the navigation, both to keep this from running twice and
-		// because `core/Modals.svelte` reads the store as the app shell mounts.
+		// Set before awaiting, so this cannot start twice.
 		pageState = 'handing-off';
-
-		modalStore.openTipClaim({ id: Symbol(), data: { tipId, claimCode: code } });
 
 		try {
 			await goto(AppPath.Tokens);
 		} catch (err: unknown) {
 			consoleWarn('Could not open the wallet to claim a tip', err);
+			return;
 		}
+
+		modalStore.openTipClaim({ id: Symbol(), data: { tipId, claimCode: code } });
 	};
 
 	const load = async () => {

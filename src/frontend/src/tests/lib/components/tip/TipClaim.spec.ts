@@ -156,6 +156,21 @@ describe('TipClaim', () => {
 			expect(claimSpy).not.toHaveBeenCalled();
 		});
 
+		it('opens the claim only once the navigation is done', async () => {
+			// The bug this closes: `ModalExitHandler` sits in the root layout and
+			// closes whatever modal is open on *every* navigation, this one included.
+			// A modal opened before `goto` was wiped on the way out, so the wallet
+			// arrived with nothing to show and no claim to make — which is exactly
+			// what "nothing happened" looked like.
+			goto.mockImplementation(() => {
+				modalStore.close();
+			});
+
+			render(TipClaim, { props: { tipId } });
+
+			await waitFor(() => expect(pendingClaim()).toEqual({ tipId, claimCode }));
+		});
+
 		it('keeps the claim code out of the URL the wallet lands on', async () => {
 			// The code travels in memory as the modal's data. Putting it in the URL
 			// would leave the whole authorisation in the wallet's history.
