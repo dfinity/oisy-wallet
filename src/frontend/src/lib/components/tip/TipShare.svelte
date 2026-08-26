@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcToken } from '$icp/types/ic-token';
 	import SeasonalIconAstronautHelmet from '$lib/components/core/SeasonalIconAstronautHelmet.svelte';
-	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
 	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
 	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
@@ -108,7 +107,7 @@
 			Fiat and network share a line. Both are context for the number above, and
 			the whole screen has to fit a phone without scrolling past the QR.
 		-->
-		<span class="mt-1 text-sm text-tertiary">
+		<span class="mt-1 text-sm text-secondary">
 			{nonNullish(fiatLabel) ? `${fiatLabel} · ${token.name}` : token.name}
 		</span>
 	</div>
@@ -138,26 +137,23 @@
 		></div>
 	{/if}
 
-	<MessageBox level="info">
-		{#snippet icon()}
-			<div
-				class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-brand-primary"
-			>
-				<IconCircleCheck size="18" />
-			</div>
-		{/snippet}
-
+	<!--
+		Not a `MessageBox`: that component is an icon beside left-aligned text, and
+		this block is neither. Centred and quiet on purpose — it is reassurance, so
+		it should be legible without competing with the amount above it.
+	-->
+	<div class="mb-3 rounded-xl bg-secondary px-4 py-3 text-center text-sm">
 		<p class="font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
 
-		<p>{$i18n.tip.text.no_wallet_needed}</p>
-	</MessageBox>
+		<p class="text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+	</div>
 
 	<!--
 		Out of the box and on its own line: the deadline is the one fact on this
 		screen that changes what the reader should do next, and inside the reassuring
 		box it read as part of the reassurance.
 	-->
-	<div class="mb-2 flex items-center justify-center gap-2 text-sm text-tertiary">
+	<div class="mb-2 flex items-center justify-center gap-2 text-sm text-secondary">
 		<IconClock size="16" />
 
 		{replacePlaceholders($i18n.tip.text.expires_at, { $date: expiresAt })}
