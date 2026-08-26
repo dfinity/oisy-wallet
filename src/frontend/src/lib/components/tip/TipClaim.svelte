@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
 	import { AnonymousIdentity } from '@icp-sdk/core/agent';
 	import type { Principal } from '@icp-sdk/core/principal';
@@ -100,7 +100,17 @@
 	const handOff = async () => {
 		const code = claimCode();
 
-		if (isNullish(code)) {
+		// Both captured *before* the navigation. `tipId` is a prop derived from
+		// `page.params.id`, so the moment `goto` lands on the wallet it becomes
+		// undefined — reading it after the await handed the canister an empty id and
+		// earned an `InvalidTipId` that the claim screen reported as "this tip is no
+		// longer available", about a tip that was perfectly fine.
+		const id = tipId;
+
+		// A missing id is as unclaimable as a missing code, and sending either only
+		// earns a rejection that reads like a verdict on the tip.
+		if (isNullish(code) || !notEmptyString(id)) {
+			consoleWarn('Nothing to claim from this link', { hasCode: nonNullish(code), tipId: id });
 			toUnavailable();
 			return;
 		}
@@ -115,7 +125,7 @@
 			return;
 		}
 
-		modalStore.openTipClaim({ id: Symbol(), data: { tipId, claimCode: code } });
+		modalStore.openTipClaim({ id: Symbol(), data: { tipId: id, claimCode: code } });
 	};
 
 	const load = async () => {
