@@ -337,7 +337,8 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
 			expect(container.querySelector('#destination')).toBeNull();
-			expect(queryByText(en.wallet_connect.text.transfer_destinations)).not.toBeInTheDocument();
+			expect(container.querySelector('#transfer-destinations')).toBeNull();
+			expect(queryByText(mockSolAddress2)).not.toBeInTheDocument();
 		});
 
 		it('should render the sources of the transaction', () => {

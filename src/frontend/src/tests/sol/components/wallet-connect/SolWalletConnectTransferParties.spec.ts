@@ -20,11 +20,11 @@ describe('SolWalletConnectTransferParties', () => {
 	// Where the value ends up is described by the balance changes, so no list of recipients is
 	// rendered here at all.
 	it('should not render a destinations list', () => {
-		const { queryByText } = render(SolWalletConnectTransferParties, {
+		const { queryByText, container } = render(SolWalletConnectTransferParties, {
 			props: props({ destinations: [{ address: mockSolAddress2, own: false }] })
 		});
 
-		expect(queryByText(en.wallet_connect.text.transfer_destinations)).not.toBeInTheDocument();
+		expect(container.querySelector('#transfer-destinations')).toBeNull();
 		expect(queryByText(mockSolAddress2)).not.toBeInTheDocument();
 	});
 
