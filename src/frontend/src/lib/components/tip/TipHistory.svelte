@@ -12,9 +12,9 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { loadMyTips, recoverTipLink } from '$lib/services/tip.services';
+	import { loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import {
 		formatNanosecondsToDate,
 		formatSecondsToNormalizedDate,
@@ -26,14 +26,13 @@
 
 	interface Props {
 		onClose: () => void;
-		onViewLink: (params: { tip: MyTip; link: string }) => void;
+		onOpenTip: (tip: MyTip) => void;
 	}
 
-	let { onClose, onViewLink }: Props = $props();
+	let { onClose, onOpenTip }: Props = $props();
 
 	let tips = $state<MyTip[]>([]);
 	let loading = $state(true);
-	let recovering = $state<string | undefined>();
 
 	// The sender holds these tokens by definition — they reserved them — so their
 	// own token list is a sound source for symbol and decimals here, unlike on the
@@ -106,30 +105,11 @@
 	// the row: a button inside a button is invalid markup, and it left the reader
 	// guessing which of two outcomes a click would pick when one of them is
 	// irreversible.
-	const handleOpen = async (tip: MyTip) => {
-		if (isNullish($authIdentity)) {
-			return;
-		}
-
-		recovering = tip.tip_id;
-
-		try {
-			const link = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
-
-			if (isNullish(link)) {
-				// Not an error: a tip created before the recovery store existed has no
-				// stored code, and no amount of retrying will conjure one.
-				toastsShow({ text: $i18n.tip.text.link_unavailable, level: 'info' });
-				return;
-			}
-
-			onViewLink({ tip, link });
-		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.tip.text.link_recovery_failed }, err });
-		} finally {
-			recovering = undefined;
-		}
-	};
+	//
+	// It hands the tip straight over rather than recovering the link first. The
+	// recovery derives a vetKey, which can take seconds, and holding the row until
+	// it finished made a click look like it had missed. The screen it opens knows
+	// how to wait.
 </script>
 
 <ContentWithToolbar>
@@ -161,8 +141,7 @@
 					<button
 						class="contents"
 						data-tid={TIP_HISTORY_ROW_BUTTON}
-						disabled={recovering === tip.tip_id}
-						onclick={async () => await handleOpen(tip)}
+						onclick={() => onOpenTip(tip)}
 						type="button"
 					>
 						<span class="block w-full rounded-xl px-2 py-2 text-left hover:bg-brand-subtle-10">
