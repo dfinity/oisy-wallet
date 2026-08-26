@@ -1,5 +1,4 @@
 import type { MyTip, TipStatus } from '$declarations/backend/backend.did';
-import type { BadgeVariant } from '$lib/types/style';
 
 /** The four statuses the canister stores, as a discriminant a component can switch on. */
 export type TipStatusKey = 'reserved' | 'claimed' | 'expired' | 'cancelled';
@@ -26,18 +25,16 @@ export const tipStatusKey = (status: TipStatus): TipStatusKey => {
 	return 'reserved';
 };
 
-export const tipStatusVariant = (status: TipStatusKey): BadgeVariant => {
-	switch (status) {
-		case 'claimed':
-			return 'success';
-		case 'expired':
-			return 'disabled';
-		case 'cancelled':
-			return 'disabled';
-		default:
-			return 'info';
-	}
-};
+/**
+ * Colour for the status word in a History row.
+ *
+ * Only a live reservation is highlighted, which reads the opposite way round
+ * from a transaction list: the green is not "this succeeded" but "this is still
+ * open, and still yours to cancel". Everything else has finished and is history,
+ * so it recedes.
+ */
+export const tipStatusTextClass = (status: TipStatusKey): string =>
+	status === 'reserved' ? 'text-success-primary' : 'text-tertiary';
 
 /**
  * Whether the sender can still cancel. Only a live reservation can be — an

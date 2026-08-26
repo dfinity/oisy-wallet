@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import type { MyTip } from '$declarations/backend/backend.did';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import IconShareArrow from '$lib/components/icons/lucide/IconShareArrow.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { TIP_HISTORY_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { cancelTip, loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { formatToken } from '$lib/utils/format.utils';
+	import { formatSecondsToNormalizedDate, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isTipCancellable, tipStatusKey, tipStatusVariant } from '$lib/utils/tip-status.utils';
+	import { isTipCancellable, tipStatusKey, tipStatusTextClass } from '$lib/utils/tip-status.utils';
 	import { tippableTokens } from '$lib/utils/tip.utils';
 
 	interface Props {
@@ -37,13 +40,53 @@
 
 	const amountLabel = (tip: MyTip): string => {
 		const token = tokenFor(tip);
-
-		return nonNullish(token)
+		const value = nonNullish(token)
 			? `${formatToken({ value: tip.amount, unitName: token.decimals, displayDecimals: token.decimals })} ${token.symbol}`
 			: `${tip.amount}`;
+
+		// Signed only when the money actually moved. A reserved tip has not left the
+		// wallet and a lapsed one never will, so a minus on those rows would claim a
+		// debit that never happened.
+		return tipStatusKey(tip.status) === 'claimed' ? `-${value}` : value;
 	};
 
-	const dateLabel = (ns: bigint): string => new Date(Number(ns / 1_000_000n)).toLocaleString();
+	const timeLabel = (ns: bigint): string =>
+		new Date(Number(ns / 1_000_000n)).toLocaleTimeString($currentLanguage, {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+
+	// Second line of a live row: how long is left, not the absolute instant. The
+	// share screen carries the absolute one, where the sender is about to hand the
+	// link over; here the useful question is whether there is still time to cancel.
+	const remainingLabel = (tip: MyTip): string | undefined => {
+		const remainingMs = Number(tip.expires_at_ns / 1_000_000n) - Date.now();
+
+		if (remainingMs <= 0) {
+			return undefined;
+		}
+
+		return replacePlaceholders($i18n.tip.text.expires_in, {
+			$duration: secondsToDuration({
+				seconds: BigInt(Math.floor(remainingMs / 1000)),
+				i18n: $i18n.temporal.seconds_to_duration
+			})
+		});
+	};
+
+	let grouped = $derived.by(() => {
+		const currentDate = new Date();
+
+		return tips.reduce<Record<string, MyTip[]>>((acc, tip) => {
+			const key = formatSecondsToNormalizedDate({
+				seconds: Number(tip.created_at_ns / 1_000_000_000n),
+				currentDate,
+				language: $currentLanguage
+			});
+
+			return { ...acc, [key]: [...(acc[key] ?? []), tip] };
+		}, {});
+	});
 
 	const load = async () => {
 		if (isNullish($authIdentity)) {
@@ -89,51 +132,85 @@
 		<p class="py-12 text-center text-tertiary">{$i18n.tip.text.history_empty}</p>
 	{/if}
 
-	<ul class="list-none p-0">
-		{#each tips as tip (tip.tip_id)}
-			{@const status = tipStatusKey(tip.status)}
+	{#each Object.entries(grouped) as [dateLabel, group] (dateLabel)}
+		<div class="mb-5 flex flex-col gap-3">
+			<!--
+				Capitalised in CSS rather than JS: the formatter returns a localised
+				"today"/"yesterday" in lower case, and `TransactionsDateGroup` reaches
+				into a *test* util to fix that. Not a dependency worth copying.
+			-->
+			<span class="flex text-lg font-medium text-tertiary first-letter:uppercase">{dateLabel}</span>
 
-			<li class="flex items-center justify-between gap-3 border-b border-secondary py-3">
-				<div class="min-w-0">
-					<p class="font-bold">{amountLabel(tip)}</p>
+			{#each group as tip (tip.tip_id)}
+				{@const status = tipStatusKey(tip.status)}
+				{@const token = tokenFor(tip)}
+				{@const remaining = remainingLabel(tip)}
+				{@const [claimer] = tip.claimed_by}
 
-					{#if status === 'claimed' && nonNullish(tip.claimed_by[0])}
-						<p class="truncate text-sm text-tertiary">
-							{replacePlaceholders($i18n.tip.text.claimed_by, {
-								$principal: tip.claimed_by[0].toText()
-							})}
-						</p>
-					{:else if status === 'reserved'}
-						<p class="text-sm text-tertiary">
-							{replacePlaceholders($i18n.tip.text.expires_in_short, {
-								$date: dateLabel(tip.expires_at_ns)
-							})}
-						</p>
-					{/if}
-				</div>
+				<Card noMargin>
+					{#snippet icon()}
+						<div class="relative shrink-0">
+							<Logo alt={token?.symbol ?? ''} size="md" src={token?.icon} />
 
-				<div class="flex shrink-0 items-center gap-2">
-					<Badge variant={tipStatusVariant(status)} width="w-fit">
+							<span class="absolute -right-1 -bottom-1">
+								<RoundedIcon icon={IconShareArrow} paddingClass="p-1" size="12" />
+							</span>
+						</div>
+					{/snippet}
+
+					{$i18n.tip.text.tip_created}
+
+					<span class="text-tertiary">&bull;</span>
+
+					<span class={tipStatusTextClass(status)}>
 						{$i18n.tip.text[`status_${status}`]}
-					</Badge>
+					</span>
 
-					{#if isTipCancellable(tip)}
-						<Button
-							colorStyle="secondary-light"
-							disabled={cancelling === tip.tip_id}
-							onclick={async () => await handleCancel(tip)}
-							paddingSmall
-							testId={TIP_HISTORY_CANCEL_BUTTON}
-						>
-							{$i18n.tip.text.cancel_tip}
-						</Button>
-					{/if}
-				</div>
-			</li>
-		{/each}
-	</ul>
+					{#snippet amount()}{amountLabel(tip)}{/snippet}
+
+					{#snippet description()}
+						<span class="truncate text-sm">
+							{timeLabel(tip.created_at_ns)}
+
+							{#if status === 'claimed' && nonNullish(claimer)}
+								&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
+									$principal: claimer.toText()
+								})}
+							{:else if status === 'reserved' && nonNullish(remaining)}
+								&nbsp;|&nbsp;{remaining}
+							{:else if status === 'expired'}
+								&nbsp;|&nbsp;{$i18n.tip.text.status_expired}
+							{/if}
+						</span>
+					{/snippet}
+
+					{#snippet action()}
+						{#if isTipCancellable(tip)}
+							<Button
+								colorStyle="secondary-light"
+								disabled={cancelling === tip.tip_id}
+								onclick={async () => await handleCancel(tip)}
+								paddingSmall
+								testId={TIP_HISTORY_CANCEL_BUTTON}
+							>
+								{$i18n.tip.text.cancel_tip}
+							</Button>
+						{/if}
+					{/snippet}
+				</Card>
+			{/each}
+		</div>
+	{/each}
 
 	{#snippet toolbar()}
-		<ButtonCancel fullWidth onclick={onClose} />
+		<!--
+			"Close", not "Cancel". Every live row already carries a Cancel that
+			revokes a reservation, and the drawn design puts a second Cancel in the
+			footer that only dismisses the screen. Two buttons with one word and two
+			very different consequences, one of them irreversible.
+		-->
+		<Button colorStyle="secondary-light" fullWidth onclick={onClose}>
+			{$i18n.core.text.close}
+		</Button>
 	{/snippet}
 </ContentWithToolbar>
