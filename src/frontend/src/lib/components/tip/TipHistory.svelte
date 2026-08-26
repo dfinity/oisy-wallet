@@ -135,8 +135,13 @@
 				Capitalised in CSS rather than JS: the formatter returns a localised
 				"today"/"yesterday" in lower case, and `TransactionsDateGroup` reaches
 				into a *test* util to fix that. Not a dependency worth copying.
+
+				`block`, not `flex`: text sitting directly in a flex container becomes an
+				anonymous flex item, and `::first-letter` does not apply to those — which
+				is why the heading still read "yesterday" on screen.
 			-->
-			<span class="flex text-lg font-medium text-tertiary first-letter:uppercase">{dateLabel}</span>
+			<span class="block text-lg font-medium text-tertiary first-letter:uppercase">{dateLabel}</span
+			>
 
 			{#each group as tip (tip.tip_id)}
 				{@const status = tipStatusKey(tip.status)}
@@ -155,7 +160,15 @@
 						</div>
 					{/snippet}
 
-					{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
+					<!--
+						`flex-1` so the status is pushed to the far right. `Card` renders the
+						title and the amount as siblings in one flex row with no spacer
+						between them, and a bare text title does not grow — which put the
+						status hard against the amount instead of across the row.
+					-->
+					<span class="min-w-0 flex-1 truncate">
+						{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
+					</span>
 
 					{#snippet amount()}
 						<span class={tipStatusTextClass(status)}>
@@ -176,8 +189,6 @@
 								})}
 							{:else if status === 'reserved' && nonNullish(remaining)}
 								&nbsp;|&nbsp;{remaining}
-							{:else if status === 'expired'}
-								&nbsp;|&nbsp;{$i18n.tip.text.status_expired}
 							{/if}
 						</span>
 					{/snippet}
