@@ -1,6 +1,7 @@
 import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
 import {
 	NEAR_INTENTS_BLOCKCHAIN_MAP,
+	NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS,
 	NEAR_INTENTS_QUOTE_DEADLINE_MS
 } from '$lib/constants/swap.constants';
 import {
@@ -34,10 +35,16 @@ export const clearNearIntentsTokensCache = (): void => {
 	cachedTokens = undefined;
 };
 
+// Blockchains whose addresses are not EVM hex: Solana (Base58, case-sensitive) and
+// Bitcoin (1Click may list btc assets with a contractAddress, and those identifiers
+// are not case-insensitive hex). Only the remaining chains may have their contract
+// addresses lowercased.
+const NON_EVM_BLOCKCHAINS = new Set(['sol', 'btc']);
+
 const EVM_BLOCKCHAINS = new Set(
 	Object.getOwnPropertySymbols(NEAR_INTENTS_BLOCKCHAIN_MAP)
 		.map((s) => NEAR_INTENTS_BLOCKCHAIN_MAP[s as NetworkId])
-		.filter((b) => b !== 'sol')
+		.filter((b) => !NON_EVM_BLOCKCHAINS.has(b))
 );
 
 /**
@@ -102,6 +109,13 @@ export const fetchNearIntentsSwapQuote = async ({
 		return;
 	}
 
+	// A BTC deposit needs a much longer window to confirm on-chain before the 1Click
+	// deadline triggers a refund; see the constants for the rationale.
+	const deadlineMs =
+		assets.srcAsset.blockchain === 'btc'
+			? NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS
+			: NEAR_INTENTS_QUOTE_DEADLINE_MS;
+
 	const quoteResponse = await fetchNearIntentsQuote(
 		buildNearIntentsQuoteRequest({
 			slippageTolerance: Math.round(Number(slippage) * 100),
@@ -109,7 +123,7 @@ export const fetchNearIntentsSwapQuote = async ({
 			amount,
 			userAddress,
 			recipientAddress,
-			deadlineMs: NEAR_INTENTS_QUOTE_DEADLINE_MS
+			deadlineMs
 		})
 	);
 
