@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { mapTokenMetadata } from '@icp-sdk/canisters/ledger/icrc';
 	import { AnonymousIdentity } from '@icp-sdk/core/agent';
 	import type { Principal } from '@icp-sdk/core/principal';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, preloadData } from '$app/navigation';
 	import type { PublicTip } from '$declarations/backend/backend.did';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
@@ -100,7 +100,17 @@
 	const handOff = async () => {
 		const code = claimCode();
 
-		if (isNullish(code)) {
+		// Both captured *before* the navigation. `tipId` is a prop derived from
+		// `page.params.id`, so the moment `goto` lands on the wallet it becomes
+		// undefined — reading it after the await handed the canister an empty id and
+		// earned an `InvalidTipId` that the claim screen reported as "this tip is no
+		// longer available", about a tip that was perfectly fine.
+		const id = tipId;
+
+		// A missing id is as unclaimable as a missing code, and sending either only
+		// earns a rejection that reads like a verdict on the tip.
+		if (isNullish(code) || !notEmptyString(id)) {
+			consoleWarn('Nothing to claim from this link', { hasCode: nonNullish(code), tipId: id });
 			toUnavailable();
 			return;
 		}
@@ -115,7 +125,7 @@
 			return;
 		}
 
-		modalStore.openTipClaim({ id: Symbol(), data: { tipId, claimCode: code } });
+		modalStore.openTipClaim({ id: Symbol(), data: { tipId: id, claimCode: code } });
 	};
 
 	const load = async () => {
@@ -153,7 +163,32 @@
 		}
 	});
 
-	const toWallet = async () => await goto(AppPath.Tokens);
+	/**
+	 * Leaving for the wallet takes seconds: it is the first time this visitor's
+	 * browser fetches the app's route, and until it lands nothing on screen moves.
+	 * The button therefore says it is working, and the route is warmed on mount so
+	 * there is less to wait for. Measured at ~4s cold before this, which reads
+	 * exactly like a dead button.
+	 */
+	let leaving = $state(false);
+
+	const toWallet = async () => {
+		leaving = true;
+
+		try {
+			await goto(AppPath.Tokens);
+		} finally {
+			leaving = false;
+		}
+	};
+
+	// Every way out of this page ends at the wallet — signing in, or giving up on a
+	// link that cannot be claimed — so the route is worth fetching before it is
+	// asked for. Its `load` only parses route params, so this costs modules and
+	// nothing else.
+	onMount(() => {
+		void preloadData(AppPath.Tokens);
+	});
 
 	/**
 	 * Never prints a number the ledger has not told us how to render. The earlier
@@ -219,7 +254,9 @@
 
 	<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unavailable_description}</p>
 
-	<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
+	<Button disabled={leaving} fullWidth loading={leaving} onclick={toWallet}>
+		{$i18n.tip.text.take_me_to_wallet}
+	</Button>
 {/if}
 
 <!--
