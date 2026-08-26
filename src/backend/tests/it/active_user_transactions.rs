@@ -6,8 +6,9 @@ use shared::types::{
     active_user_transaction::{
         ActiveUserTransaction, ActiveUserTransactionData, ActiveUserTransactionError,
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
-        ChainFusionDirection, CreateActiveUserTransactionRequest, NearIntentsData,
-        OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
+        ChainFusionDirection, CreateActiveUserTransactionRequest, NearIntentsData, OisyTradeData,
+        OisyTradeSide, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
+        VeloraSwapMode,
     },
     custom_token::ErcTokenId,
     result_types::{
@@ -365,6 +366,54 @@ fn create_chain_fusion_variant_roundtrip() {
                 external_refs: vec![ActiveUserTransactionRef {
                     key: "btc_txid".to_string(),
                     value: "aa".repeat(32),
+                }],
+                ..create_req(TX_ID)
+            },
+        )
+        .expect("create_active_user_transaction call should succeed");
+
+    match created {
+        ActiveUserTransactionResult::Ok(tx) => {
+            assert_eq!(tx.id, TX_ID);
+            assert_eq!(tx.status, ActiveUserTransactionStatus::Pending);
+            assert_eq!(tx.data, data);
+            assert_eq!(tx.external_refs.len(), 1);
+        }
+        ActiveUserTransactionResult::Err(err) => panic!("expected Ok, got {err:?}"),
+    }
+
+    // Read back through the query path so the stored (not just echoed)
+    // representation is what the assertion sees.
+    let listed = list_active(&pic, user);
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].data, data);
+}
+
+#[test]
+fn create_oisy_trade_variant_roundtrip() {
+    // Both legs are Internet Computer ledgers, and `IcpNative` is how the ICP
+    // ledger reaches the wallet — so the source leg here is the spelling the
+    // pair table cannot express as a principal.
+    let pic = setup();
+    let user = caller();
+    pic.ensure_user_profile(user);
+
+    let data = ActiveUserTransactionData::OisyTrade(OisyTradeData {
+        side: OisyTradeSide::Sell,
+        source_token: TokenId::IcpNative,
+        dest_token: TokenId::Icrc(Principal::from_text("xevnm-gaaaa-aaaar-qafnq-cai").unwrap()),
+        amount: Nat::from(1_000_000u64),
+    });
+
+    let created = pic
+        .update::<ActiveUserTransactionResult>(
+            user,
+            "create_active_user_transaction",
+            CreateActiveUserTransactionRequest {
+                data: data.clone(),
+                external_refs: vec![ActiveUserTransactionRef {
+                    key: "order_id".to_string(),
+                    value: "ab".repeat(16),
                 }],
                 ..create_req(TX_ID)
             },
