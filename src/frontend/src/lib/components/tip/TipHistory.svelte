@@ -8,14 +8,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import {
-		TIP_HISTORY_CANCEL_BUTTON,
-		TIP_HISTORY_LINK_BUTTON
-	} from '$lib/constants/test-ids.constants';
+	import { TIP_HISTORY_ROW_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { cancelTip, loadMyTips, recoverTipLink } from '$lib/services/tip.services';
+	import { loadMyTips, recoverTipLink } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import {
@@ -36,7 +33,6 @@
 
 	let tips = $state<MyTip[]>([]);
 	let loading = $state(true);
-	let cancelling = $state<string | undefined>();
 	let recovering = $state<string | undefined>();
 
 	// The sender holds these tokens by definition — they reserved them — so their
@@ -106,11 +102,11 @@
 
 	onMount(load);
 
-	// An explicit action rather than a clickable row: the row already carries a
-	// Cancel button, and nesting one interactive element inside another is both
-	// invalid and ambiguous about what a click does — one of the two options here
-	// is irreversible.
-	const handleViewLink = async (tip: MyTip) => {
+	// The whole row opens the tip. That only became possible once Cancel moved off
+	// the row: a button inside a button is invalid markup, and it left the reader
+	// guessing which of two outcomes a click would pick when one of them is
+	// irreversible.
+	const handleOpen = async (tip: MyTip) => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -132,28 +128,6 @@
 			toastsError({ msg: { text: $i18n.tip.text.link_recovery_failed }, err });
 		} finally {
 			recovering = undefined;
-		}
-	};
-
-	const handleCancel = async (tip: MyTip) => {
-		if (isNullish($authIdentity)) {
-			return;
-		}
-
-		cancelling = tip.tip_id;
-
-		try {
-			await cancelTip({
-				identity: $authIdentity,
-				tipId: tip.tip_id,
-				ledgerCanisterId: tip.ledger_canister_id.toText()
-			});
-			toastsShow({ text: $i18n.tip.text.cancelled_toast, level: 'success' });
-			await load();
-		} catch (err: unknown) {
-			toastsError({ msg: { text: $i18n.tip.text.cancel_failed }, err });
-		} finally {
-			cancelling = undefined;
 		}
 	};
 </script>
@@ -183,74 +157,111 @@
 				{@const remaining = remainingLabel(tip)}
 				{@const [claimer] = tip.claimed_by}
 
-				<Card noMargin>
-					{#snippet icon()}
-						<div class="relative shrink-0">
-							<Logo alt={token?.symbol ?? ''} size="md" src={token?.icon} />
+				{#if isTipCancellable(tip)}
+					<button
+						class="contents"
+						data-tid={TIP_HISTORY_ROW_BUTTON}
+						disabled={recovering === tip.tip_id}
+						onclick={async () => await handleOpen(tip)}
+						type="button"
+					>
+						<span class="block w-full rounded-xl px-2 py-2 text-left hover:bg-brand-subtle-10">
+							<Card noMargin>
+								{#snippet icon()}
+									<div class="relative shrink-0">
+										<Logo alt={token?.symbol ?? ''} size="md" src={token?.icon} />
 
-							<span class="absolute -right-1 -bottom-1">
-								<RoundedIcon icon={IconShareArrow} paddingClass="p-1" size="12" />
-							</span>
-						</div>
-					{/snippet}
+										<span class="absolute -right-1 -bottom-1">
+											<RoundedIcon icon={IconShareArrow} paddingClass="p-1" size="12" />
+										</span>
+									</div>
+								{/snippet}
 
-					<!--
+								<!--
 						`flex-1` so the status is pushed to the far right. `Card` renders the
 						title and the amount as siblings in one flex row with no spacer
 						between them, and a bare text title does not grow — which put the
 						status hard against the amount instead of across the row.
 					-->
-					<span class="min-w-0 flex-1 truncate">
-						{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
-					</span>
+								<span class="min-w-0 flex-1 truncate">
+									{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
+								</span>
 
-					{#snippet amount()}
-						<span class={tipStatusTextClass(status)}>
-							{$i18n.tip.text[`status_${status}`]}
+								{#snippet amount()}
+									<span class={tipStatusTextClass(status)}>
+										{$i18n.tip.text[`status_${status}`]}
+									</span>
+								{/snippet}
+
+								{#snippet description()}
+									<span class="truncate text-sm">
+										{formatNanosecondsToDate({
+											nanoseconds: tip.created_at_ns,
+											language: $currentLanguage
+										})}
+
+										{#if status === 'claimed' && nonNullish(claimer)}
+											&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
+												$principal: claimer.toText()
+											})}
+										{:else if status === 'reserved' && nonNullish(remaining)}
+											&nbsp;|&nbsp;{remaining}
+										{/if}
+									</span>
+								{/snippet}
+							</Card>
 						</span>
-					{/snippet}
+					</button>
+				{:else}
+					<!-- Nothing to open: a finished tip has no live link, so the row must
+					     not offer a click that would do nothing. -->
+					<div class="px-2 py-2">
+						<Card noMargin>
+							{#snippet icon()}
+								<div class="relative shrink-0">
+									<Logo alt={token?.symbol ?? ''} size="md" src={token?.icon} />
 
-					{#snippet description()}
-						<span class="truncate text-sm">
-							{formatNanosecondsToDate({
-								nanoseconds: tip.created_at_ns,
-								language: $currentLanguage
-							})}
+									<span class="absolute -right-1 -bottom-1">
+										<RoundedIcon icon={IconShareArrow} paddingClass="p-1" size="12" />
+									</span>
+								</div>
+							{/snippet}
 
-							{#if status === 'claimed' && nonNullish(claimer)}
-								&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
-									$principal: claimer.toText()
-								})}
-							{:else if status === 'reserved' && nonNullish(remaining)}
-								&nbsp;|&nbsp;{remaining}
-							{/if}
-						</span>
-					{/snippet}
+							<!--
+						`flex-1` so the status is pushed to the far right. `Card` renders the
+						title and the amount as siblings in one flex row with no spacer
+						between them, and a bare text title does not grow — which put the
+						status hard against the amount instead of across the row.
+					-->
+							<span class="min-w-0 flex-1 truncate">
+								{replacePlaceholders($i18n.tip.text.tip_amount, { $amount: amountLabel(tip) })}
+							</span>
 
-					{#snippet action()}
-						{#if isTipCancellable(tip)}
-							<Button
-								colorStyle="secondary-light"
-								disabled={recovering === tip.tip_id}
-								onclick={async () => await handleViewLink(tip)}
-								paddingSmall
-								testId={TIP_HISTORY_LINK_BUTTON}
-							>
-								{$i18n.tip.text.view_link}
-							</Button>
+							{#snippet amount()}
+								<span class={tipStatusTextClass(status)}>
+									{$i18n.tip.text[`status_${status}`]}
+								</span>
+							{/snippet}
 
-							<Button
-								colorStyle="secondary-light"
-								disabled={cancelling === tip.tip_id}
-								onclick={async () => await handleCancel(tip)}
-								paddingSmall
-								testId={TIP_HISTORY_CANCEL_BUTTON}
-							>
-								{$i18n.tip.text.cancel_tip}
-							</Button>
-						{/if}
-					{/snippet}
-				</Card>
+							{#snippet description()}
+								<span class="truncate text-sm">
+									{formatNanosecondsToDate({
+										nanoseconds: tip.created_at_ns,
+										language: $currentLanguage
+									})}
+
+									{#if status === 'claimed' && nonNullish(claimer)}
+										&nbsp;|&nbsp;{replacePlaceholders($i18n.tip.text.claimed_by, {
+											$principal: claimer.toText()
+										})}
+									{:else if status === 'reserved' && nonNullish(remaining)}
+										&nbsp;|&nbsp;{remaining}
+									{/if}
+								</span>
+							{/snippet}
+						</Card>
+					</div>
+				{/if}
 			{/each}
 		</div>
 	{/each}

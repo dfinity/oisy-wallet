@@ -15,7 +15,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
-	import { newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
+	import { cancelTip, newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initModalTokensListContext,
@@ -23,7 +23,7 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { WizardStep, WizardSteps } from '$lib/types/wizard';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -40,6 +40,10 @@
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
 	let reservedAmount: bigint | undefined = $state();
+	// The History row currently open on the share step, if any. Distinguishes a
+	// freshly created tip (nothing to cancel yet from here) from a live one
+	// reopened for a second look.
+	let viewingTip = $state<MyTip | undefined>();
 	let busy = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
@@ -74,6 +78,33 @@
 	// Reuses the share step rather than building a second link screen: the QR, the
 	// copy and share actions and the deadline are all already there, and a
 	// recovered link is the same thing the sender saw when they created it.
+	let cancelling = $state(false);
+
+	const cancelViewedTip = async () => {
+		if (isNullish($authIdentity) || isNullish(viewingTip)) {
+			return;
+		}
+
+		cancelling = true;
+
+		try {
+			await cancelTip({
+				identity: $authIdentity,
+				tipId: viewingTip.tip_id,
+				ledgerCanisterId: viewingTip.ledger_canister_id.toText()
+			});
+			toastsShow({ text: $i18n.tip.text.cancelled_toast, level: 'success' });
+			viewingTip = undefined;
+			// Back to the list, which reloads on mount, so the cancelled row cannot
+			// linger claiming to be live.
+			goToStep(WizardStepsTip.HISTORY);
+		} catch (err: unknown) {
+			toastsError({ msg: { text: $i18n.tip.text.cancel_failed }, err });
+		} finally {
+			cancelling = false;
+		}
+	};
+
 	const showRecoveredLink = ({ tip, link: recovered }: { tip: MyTip; link: string }) => {
 		selectedToken = tippableTokens($tokens).find(
 			({ ledgerCanisterId }) => ledgerCanisterId === tip.ledger_canister_id.toText()
@@ -81,6 +112,7 @@
 		reservedAmount = tip.amount;
 		expiresAtNs = tip.expires_at_ns;
 		link = recovered;
+		viewingTip = tip;
 		goToStep(WizardStepsTip.SHARE);
 	};
 
@@ -112,6 +144,7 @@
 				message: message === '' ? undefined : message
 			});
 
+			viewingTip = undefined;
 			reservedAmount = parsedAmount;
 			({ link, expiresAtNs } = reserved);
 			goToStep(WizardStepsTip.SHARE);
@@ -145,9 +178,11 @@
 		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
 			<TipShare
 				amount={reservedAmount}
+				{cancelling}
 				{expiresAtNs}
 				{link}
-				onDone={modalStore.close}
+				onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
+				onDone={nonNullish(viewingTip) ? () => goToStep(WizardStepsTip.HISTORY) : modalStore.close}
 				token={selectedToken}
 			/>
 		{:else if currentStep?.name === WizardStepsTip.HISTORY}

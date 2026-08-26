@@ -2810,7 +2810,6 @@
 			"claimed_by": "Claimed by $principal",
 			"tip_amount": "Tip $amount",
 			"expires_in": "Expires in $duration",
-			"view_link": "Link",
 			"link_unavailable": "The link for this tip is not recoverable — it was created before OISY started keeping an encrypted copy for you.",
 			"link_recovery_failed": "The link could not be recovered. Nothing has changed about the tip — try again.",
 			"cancel_tip": "Cancel",
