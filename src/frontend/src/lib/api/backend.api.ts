@@ -11,6 +11,7 @@ import type {
 	PersonalNoteEntry,
 	PersonalNoteShareContent,
 	PublicTip,
+	SetTipSecretRequest,
 	SignOnramperWidgetUrlResponse,
 	TipClaim,
 	TipClaimRequest,
@@ -411,6 +412,39 @@ export const getPersonalNotesVetkeyPublicKey = async ({
 }: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
 	const { getPersonalNotesVetkeyPublicKey } = await backendCanister({ identity });
 	return getPersonalNotesVetkeyPublicKey();
+};
+
+export const setTipSecret = async ({
+	identity,
+	...request
+}: CanisterApiFunctionParams<SetTipSecretRequest>): Promise<void> => {
+	const { setTipSecret } = await backendCanister({ identity });
+	return setTipSecret(request);
+};
+
+export const getTipSecret = async ({
+	identity,
+	tipId
+}: CanisterApiFunctionParams<{ tipId: string }>): Promise<Uint8Array | number[] | undefined> => {
+	const { getTipSecret } = await backendCanister({ identity });
+	return getTipSecret(tipId);
+};
+
+export const getTipEncryptedVetkey = async ({
+	identity,
+	transportPublicKey
+}: CanisterApiFunctionParams<{
+	transportPublicKey: Uint8Array;
+}>): Promise<Uint8Array | number[]> => {
+	const { getTipEncryptedVetkey } = await backendCanister({ identity });
+	return getTipEncryptedVetkey(transportPublicKey);
+};
+
+export const getTipVetkeyPublicKey = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<Uint8Array | number[]> => {
+	const { getTipVetkeyPublicKey } = await backendCanister({ identity });
+	return getTipVetkeyPublicKey();
 };
 
 export const createTip = async ({

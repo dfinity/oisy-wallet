@@ -8,11 +8,14 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { TIP_HISTORY_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
+	import {
+		TIP_HISTORY_CANCEL_BUTTON,
+		TIP_HISTORY_LINK_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { cancelTip, loadMyTips } from '$lib/services/tip.services';
+	import { cancelTip, loadMyTips, recoverTipLink } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import {
@@ -26,13 +29,15 @@
 
 	interface Props {
 		onClose: () => void;
+		onViewLink: (params: { tip: MyTip; link: string }) => void;
 	}
 
-	let { onClose }: Props = $props();
+	let { onClose, onViewLink }: Props = $props();
 
 	let tips = $state<MyTip[]>([]);
 	let loading = $state(true);
 	let cancelling = $state<string | undefined>();
+	let recovering = $state<string | undefined>();
 
 	// The sender holds these tokens by definition — they reserved them — so their
 	// own token list is a sound source for symbol and decimals here, unlike on the
@@ -100,6 +105,35 @@
 	};
 
 	onMount(load);
+
+	// An explicit action rather than a clickable row: the row already carries a
+	// Cancel button, and nesting one interactive element inside another is both
+	// invalid and ambiguous about what a click does — one of the two options here
+	// is irreversible.
+	const handleViewLink = async (tip: MyTip) => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		recovering = tip.tip_id;
+
+		try {
+			const link = await recoverTipLink({ identity: $authIdentity, tipId: tip.tip_id });
+
+			if (isNullish(link)) {
+				// Not an error: a tip created before the recovery store existed has no
+				// stored code, and no amount of retrying will conjure one.
+				toastsShow({ text: $i18n.tip.text.link_unavailable, level: 'info' });
+				return;
+			}
+
+			onViewLink({ tip, link });
+		} catch (err: unknown) {
+			toastsError({ msg: { text: $i18n.tip.text.link_recovery_failed }, err });
+		} finally {
+			recovering = undefined;
+		}
+	};
 
 	const handleCancel = async (tip: MyTip) => {
 		if (isNullish($authIdentity)) {
@@ -195,6 +229,16 @@
 
 					{#snippet action()}
 						{#if isTipCancellable(tip)}
+							<Button
+								colorStyle="secondary-light"
+								disabled={recovering === tip.tip_id}
+								onclick={async () => await handleViewLink(tip)}
+								paddingSmall
+								testId={TIP_HISTORY_LINK_BUTTON}
+							>
+								{$i18n.tip.text.view_link}
+							</Button>
+
 							<Button
 								colorStyle="secondary-light"
 								disabled={cancelling === tip.tip_id}
