@@ -683,6 +683,74 @@ no reconciliation sweep, and no refund that can fail. It introduces its own.
 33. **Phishing lookalikes** — a fake "you received a tip" page harvesting II sign-ins
     is the obvious follow-on scam, and this flow trains users to sign in from a link.
 
+## Link recovery and auditability — added after the first build
+
+Two gaps the built flow surfaced, both closed in the stack rather than deferred.
+
+### The sender could not get their link back
+
+The claim code is generated in the browser and only its SHA-256 reaches the
+canister (criterion 16). That is what makes a link unforgeable — and it also
+meant closing the share screen destroyed the only copy. The sender could still
+`cancel_tip` to free the reservation, so no money was ever stuck, but a tip they
+meant to re-send was unrecoverable.
+
+Closed **without weakening criterion 16**: the browser encrypts the claim code
+under a vetKey only that principal can derive and stores the ciphertext. The
+canister holds opaque bytes and can read a claim code exactly as well as before,
+which is to say not at all.
+
+- A second `ic_vetkeys::EncryptedMaps`, mirroring `personal_notes` — see
+  [`src/backend/src/tips/secrets.rs`](../../../../src/backend/src/tips/secrets.rs)
+  and [`tip.vetkeys.ts`](../../../../src/frontend/src/lib/services/tip.vetkeys.ts).
+  `EncryptedMaps` keys every map by its owner, so "only the sender reads their own
+  codes" is the library's guarantee rather than ours — and an integration test
+  pins it, because that is not a property to take on faith.
+- Its **own map name and domain separator** (`tip_secrets` / `oisy_tip_secrets`),
+  so a fault or a key rotation in the notes store cannot reach tips. Its own rate
+  limiters for the same reason. Neither string may ever change for a deployed
+  canister: both are bound into the key derivation, so a change orphans every
+  stored ciphertext.
+- The **tip id is the AES-GCM domain separator**, so ciphertext lifted from one
+  entry cannot decrypt under another.
+- Storage is **best-effort and happens after the tip exists**. It is a
+  convenience; a failure must not read as a failed reservation when the tip is
+  real and the link is on screen.
+- **Cancelling drops the stored code** — the link is worthless then. Claimed and
+  expired tips keep theirs until pruned: the cleanup runs as the caller, and
+  neither of those paths has the sender as caller.
+- History carries a **Link** action per live row, which decrypts and reopens the
+  share step. An action rather than a clickable row: the row already carries
+  Cancel, and nesting interactive elements is both invalid markup and ambiguous
+  when one outcome is irreversible.
+- A tip created before this store existed has no ciphertext. That is a fact about
+  the tip, not a failure, and reads as one.
+
+### OISY-side auditability
+
+Encryption is orthogonal to this, and worth stating plainly because it is easy to
+assume otherwise: vetKey-encrypted data is opaque to OISY **by construction**, so
+it contributes nothing to auditability. It does not have to — the interesting
+data was never hidden. Every tip is a `TipRecord` in stable memory with its
+amount, ledger, status and timestamps.
+
+What was missing was a way to read the aggregate, and the endpoint for that
+already existed:
+
+- `tips_count` on `Stats`, off the map's own `len()`, behind the same
+  `caller_is_allowed` guard as every other stat. `personal_note_shares_count` is
+  the precedent.
+- **Aggregate only.** Criterion 19 promises no endpoint enumerates another
+  principal's tips, and this one must not become the way around it: a count, never
+  a row. Note the precedent cuts both ways — `get_account_creation_timestamps`
+  returns per-principal data under the same guard. Tips must not follow it.
+- A per-status or per-ledger breakdown needs either an `O(n)` scan (fine now, an
+  instruction-limit trap later) or counters maintained on each transition. Its own
+  change, deliberately not smuggled into this one.
+- The funnel question — how many people opened a link and converted — is
+  structurally invisible to the canister. That is what the
+  [Analytics](#analytics-plausible) section is for, and it remains unbuilt.
+
 ## Security model
 
 - **Two factors authorise a claim:** the opaque `tip_id` the server knows, and the
