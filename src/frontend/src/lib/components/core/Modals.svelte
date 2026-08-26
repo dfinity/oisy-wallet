@@ -16,6 +16,7 @@
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import TipModal from '$lib/components/tip/TipModal.svelte';
+	import TipReceivedModal from '$lib/components/tip/TipReceivedModal.svelte';
 	import FullscreenMediaModal from '$lib/components/ui/FullscreenMediaModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import WalletConnectSessionsModal from '$lib/components/wallet-connect/WalletConnectSessionsModal.svelte';
@@ -30,6 +31,8 @@
 		modalSettingsState,
 		modalReferralCode,
 		modalTip,
+		modalTipReceived,
+		modalTipReceivedData,
 		modalAddressBook,
 		modalNotes,
 		modalVipQrCodeData,
@@ -72,6 +75,13 @@
 		<ReferralCodeModal />
 	{:else if TIPS_ENABLED && $modalTip}
 		<TipModal />
+	{:else if $modalTipReceived && nonNullish($modalTipReceivedData)}
+		<!--
+			Not behind `TIPS_ENABLED`, unlike the create surface above: outstanding
+			links stay claimable while the flag is off, so closing the flag must not
+			swallow the confirmation for a claim that has just paid out.
+		-->
+		<TipReceivedModal receipt={$modalTipReceivedData} />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
 	{:else if PERSONAL_NOTES_ENABLED && $modalNotes}
