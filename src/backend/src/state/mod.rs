@@ -17,9 +17,12 @@ use crate::{
         PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
         PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
         PERSONAL_NOTE_SHARES_MEMORY_ID, TIPS_BY_SENDER_MEMORY_ID, TIPS_MEMORY_ID,
+        TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID,
+        TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID, TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID,
         TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
         USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
+    tips::secrets::TIP_SECRETS_DOMAIN_SEPARATOR,
     types::{
         maps::{
             ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
@@ -67,6 +70,11 @@ pub(crate) struct State {
     /// (ids 14–17) and survives upgrades regardless of this field;
     /// [`EncryptedMaps::init`] re-attaches to it on first access.
     pub(crate) personal_notes: Option<EncryptedMaps<AccessRights>>,
+
+    /// Per-user end-to-end-encrypted claim codes, so a sender can recover a tip
+    /// link after closing the share screen. Same lazy-init reasoning as
+    /// `personal_notes` above: it needs the vetKD key name from `config`.
+    pub(crate) tip_secrets: Option<EncryptedMaps<AccessRights>>,
     /// Publicly-readable, token-keyed store of personal-note shares. Unlike
     /// `personal_notes` above, this is a plain `StableBTreeMap` (the value is
     /// already client-side ciphertext under a per-share key, so there is no
@@ -100,6 +108,7 @@ impl From<&State> for Stats {
                 .as_ref()
                 .map_or(0, |em| em.mapkey_vals.len()),
             personal_note_shares_count: state.personal_note_shares.len(),
+            tips_count: state.tips.len(),
         }
     }
 }
@@ -125,6 +134,8 @@ thread_local! {
             active_user_transactions: ActiveUserTransactionsMap::init(mm.borrow().get(ACTIVE_USER_TRANSACTIONS_MEMORY_ID)),
             // Initialised lazily on first access (see `ensure_personal_notes`).
             personal_notes: None,
+            // Initialised lazily on first access (see `ensure_tip_secrets`).
+            tip_secrets: None,
             personal_note_shares: PersonalNoteShareMap::init(mm.borrow().get(PERSONAL_NOTE_SHARES_MEMORY_ID)),
             personal_note_shares_by_creator: PersonalNoteSharesByCreatorMap::init(
                 mm.borrow().get(PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID),
@@ -192,6 +203,58 @@ pub(crate) fn with_personal_notes_mut<R>(
         f(s.personal_notes
             .as_mut()
             .expect("personal notes store initialised by ensure_personal_notes"))
+    })
+}
+
+/// Initialises the tip-secrets [`EncryptedMaps`] store. Mirrors
+/// [`init_personal_notes`], including reusing `config.ecdsa_key_name` as the
+/// vetKD key name.
+fn init_tip_secrets() {
+    let key_id = VetKDKeyId {
+        curve: VetKDCurve::Bls12_381_G2,
+        name: read_config(|c| c.ecdsa_key_name.clone()),
+    };
+
+    let encrypted_maps = MEMORY_MANAGER.with(|mm| {
+        let mm = mm.borrow();
+        EncryptedMaps::init(
+            TIP_SECRETS_DOMAIN_SEPARATOR,
+            key_id,
+            mm.get(TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID),
+            mm.get(TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID),
+            mm.get(TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID),
+            mm.get(TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID),
+        )
+    });
+
+    mutate_state(|s| s.tip_secrets = Some(encrypted_maps));
+}
+
+/// Ensures the tip-secrets store is initialised, creating it on first use.
+pub(crate) fn ensure_tip_secrets() {
+    if read_state(|s| s.tip_secrets.is_none()) {
+        init_tip_secrets();
+    }
+}
+
+/// Runs `f` against the tip-secrets store, initialising it on first access.
+pub(crate) fn with_tip_secrets<R>(f: impl FnOnce(&EncryptedMaps<AccessRights>) -> R) -> R {
+    ensure_tip_secrets();
+    read_state(|s| {
+        f(s.tip_secrets
+            .as_ref()
+            .expect("tip secrets store initialised by ensure_tip_secrets"))
+    })
+}
+
+/// Runs `f` against the mutable tip-secrets store, initialising it on first
+/// access.
+pub(crate) fn with_tip_secrets_mut<R>(f: impl FnOnce(&mut EncryptedMaps<AccessRights>) -> R) -> R {
+    ensure_tip_secrets();
+    mutate_state(|s| {
+        f(s.tip_secrets
+            .as_mut()
+            .expect("tip secrets store initialised by ensure_tip_secrets"))
     })
 }
 
