@@ -13,6 +13,8 @@ import {
 	findErcTransfers,
 	formatErcTransferAsset,
 	groupEthTransactionsByNetworkAndHash,
+	isErc20TransactionApprove,
+	isErc20TransactionDeposit,
 	isErc20TransactionTransfer,
 	isMaxUint256,
 	mapAddressToName,
@@ -471,6 +473,42 @@ describe('transactions.utils', () => {
 
 		it('should return false for nullish calldata', () => {
 			expect(isErc20TransactionTransfer(undefined)).toBeFalsy();
+		});
+	});
+
+	// Casing is not part of calldata: the EVM sees the same four bytes either way, so a classifier
+	// that reads the text can be stepped around without changing the call that executes. That let a
+	// token transfer reach the review as a native zero-value send, with the fail-closed warning
+	// silent because the calldata was never recognised as ERC-20 in the first place.
+	describe('ERC20 selectors are matched as bytes, not as text', () => {
+		const args =
+			'000000000000000000000000ca11bde05977b3631167028862be2a173976ca110000000000000000000000000000000000000000000000000de0b6b3a7640000';
+
+		it.each(['0xA9059CBB', '0xa9059CBB', '0xA9059cbb'])(
+			'should recognise %s as a transfer',
+			(selector) => {
+				expect(isErc20TransactionTransfer(`${selector}${args}`)).toBeTruthy();
+			}
+		);
+
+		it.each(['0x095EA7B3', '0x095eA7B3'])('should recognise %s as an approve', (selector) => {
+			expect(isErc20TransactionApprove(`${selector}${args}`)).toBeTruthy();
+		});
+
+		it.each(['0x26B3293F', '0xDB9751AF'])('should recognise %s as a deposit', (selector) => {
+			expect(isErc20TransactionDeposit(`${selector}${args}`)).toBeTruthy();
+		});
+
+		// The selector is four bytes and no more: a longer prefix that merely starts the same way is
+		// a different call.
+		it('should not mistake one selector for another that shares a prefix', () => {
+			expect(isErc20TransactionTransfer(`${ERC20_APPROVE_HASH}${args}`)).toBeFalsy();
+			expect(isErc20TransactionApprove(`${ERC20_TRANSFER_HASH}${args}`)).toBeFalsy();
+		});
+
+		it('should return false for calldata too short to carry a selector', () => {
+			expect(isErc20TransactionTransfer('0xa905')).toBeFalsy();
+			expect(isErc20TransactionApprove('0x')).toBeFalsy();
 		});
 	});
 
