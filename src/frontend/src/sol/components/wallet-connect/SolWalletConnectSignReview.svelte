@@ -143,10 +143,6 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
-	<!-- A steep priority fee is a legitimate choice when the network is congested, so both tiers
-	     inform instead of blocking the way invalid typed data does on Ethereum. That is also why the
-	     pair sits last among the notices: what a message does to the user's funds outranks what it
-	     costs to send. -->
 	{#if dappPrioritizationFee}
 		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 	{:else if highPrioritizationFee}
