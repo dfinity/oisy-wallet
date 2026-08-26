@@ -1,18 +1,21 @@
 use ic_cdk::{query, update};
+use serde_bytes::ByteBuf;
 use shared::types::{
     result_types::{
         CancelTipResult, ClaimTipResult, CreateTipResult, GetMyTipsResult, GetTipDetailsResult,
-        GetTipResult,
+        GetTipResult, GetTipSecretResult, SetTipSecretResult, TipVetkeyResult,
     },
-    tip::{CreateTipRequest, TipClaimRequest, TipError},
+    tip::{CreateTipRequest, SetTipSecretRequest, TipClaimRequest, TipError},
 };
 
 use crate::{
-    tips::service,
+    tips::{secrets, service},
     utils::{
         guards::{caller_is_not_anonymous, caller_is_registered_user},
         rate_limiter::{
-            self, CANCEL_TIP_RATE_LIMITER, CLAIM_TIP_RATE_LIMITER, CREATE_TIP_RATE_LIMITER,
+            self, VetKeyRateLimiters, CANCEL_TIP_RATE_LIMITER, CLAIM_TIP_RATE_LIMITER,
+            CREATE_TIP_RATE_LIMITER, GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER,
+            GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER,
         },
     },
 };
@@ -114,4 +117,61 @@ pub fn cancel_tip(tip_id: String) -> CancelTipResult {
 #[must_use]
 pub fn get_my_tips() -> GetMyTipsResult {
     service::get_my_tips().into()
+}
+
+/// Stores the caller's encrypted claim code for one of their own tips, so they
+/// can recover the link after closing the share screen.
+///
+/// The value is ciphertext the canister cannot read: the browser encrypts it
+/// under a vetKey only this principal can derive. Storing it changes nothing
+/// about who can claim the tip — the canister still only holds the code's hash.
+///
+/// # Errors
+/// Errors are enumerated by `TipError` (`InvalidTipId`,
+/// `SecretCiphertextTooLarge`, `InternalError`).
+#[update(guard = "caller_is_registered_user")]
+#[must_use]
+pub fn set_tip_secret(request: SetTipSecretRequest) -> SetTipSecretResult {
+    secrets::set_tip_secret(request).into()
+}
+
+/// The caller's encrypted claim code for one of their own tips, if stored.
+///
+/// `EncryptedMaps` keys every map by its owner, so this can only ever return
+/// the caller's own ciphertext.
+///
+/// # Errors
+/// Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
+#[query(guard = "caller_is_registered_user")]
+#[must_use]
+pub fn get_tip_secret(tip_id: String) -> GetTipSecretResult {
+    secrets::get_tip_secret(tip_id).into()
+}
+
+/// Derives the caller's vetKey for the tip-secrets store, secured to a
+/// browser-supplied transport public key.
+///
+/// # Errors
+/// Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+#[update(guard = "caller_is_registered_user")]
+#[must_use]
+pub async fn get_tip_encrypted_vetkey(transport_key: ByteBuf) -> TipVetkeyResult {
+    if let Err(e) = GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller) {
+        return TipVetkeyResult::Err(TipError::RateLimited(e));
+    }
+    secrets::get_encrypted_vetkey(transport_key).await.into()
+}
+
+/// The vetKey verification key for the tip-secrets store. Identical for every
+/// caller; the browser needs it to verify its derived vetKey.
+///
+/// # Errors
+/// Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+#[update(guard = "caller_is_registered_user")]
+#[must_use]
+pub async fn get_tip_vetkey_public_key() -> TipVetkeyResult {
+    if let Err(e) = GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller) {
+        return TipVetkeyResult::Err(TipError::RateLimited(e));
+    }
+    secrets::get_vetkey_public_key().await.into()
 }

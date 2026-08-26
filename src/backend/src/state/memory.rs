@@ -43,6 +43,14 @@ pub(crate) const PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID: MemoryId = MemoryId:
 pub(crate) const TIPS_MEMORY_ID: MemoryId = MemoryId::new(20);
 pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(21);
 
+/// The four memories an `EncryptedMaps` needs for the per-tip claim-code store.
+/// Mirrors `PERSONAL_NOTES_*` (14-17). Never renumber these: the ids are how the
+/// memory manager finds existing data across an upgrade.
+pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(22);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(23);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(24);
+pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(25);
+
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
         MemoryManager::init(DefaultMemoryImpl::default())
