@@ -1,3 +1,4 @@
+import { sendBtc } from '$btc/services/btc-send.services';
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
@@ -27,6 +28,7 @@ import * as nearIntentsServices from '$lib/services/near-intents.services';
 import * as oneSecSwapServices from '$lib/services/onesec-swap.services';
 import {
 	enableSwapDestinationToken,
+	fetchNearIntentsBtcSwap,
 	fetchNearIntentsEvmSwap,
 	fetchNearIntentsSolSwap,
 	fetchOneSecEvmToIcpSwap,
@@ -54,7 +56,7 @@ import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc4626Token } from '$tests/mocks/erc4626-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -172,6 +174,10 @@ vi.mock('$eth/services/send.services', () => ({
 
 vi.mock('$sol/services/sol-send.services', () => ({
 	sendSol: vi.fn()
+}));
+
+vi.mock('$btc/services/btc-send.services', () => ({
+	sendBtc: vi.fn()
 }));
 
 // `OrderHelpers` stays real: its status predicates are pure, and re-implementing them here would
@@ -699,6 +705,131 @@ describe('swap.services', () => {
 					})
 				);
 			});
+
+			// Regression: the two live cross-chain directions keep the recipient they had
+			// before the recipient resolution was shared across the fan-out branches.
+			it('should keep passing the Solana address as recipient when the destination is Solana', async () => {
+				mockSolGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmDestToken,
+					destinationToken: solSourceToken,
+					amount: 100,
+					tokens: [evmDestToken, solSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(mockSolGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userAddress: mockEthAddress,
+						recipientAddress: mockSolAddress
+					})
+				);
+			});
+
+			it('should keep passing the EVM address as recipient when the destination is EVM', async () => {
+				mockSolGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: evmDestToken,
+					amount: 100,
+					tokens: [solSourceToken, evmDestToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(mockSolGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userAddress: mockSolAddress,
+						recipientAddress: mockEthAddress
+					})
+				);
+			});
+
+			it('should pass the user Bitcoin address as recipient when the destination is BTC mainnet', async () => {
+				mockSolGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 100,
+					tokens: [solSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockSolGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userAddress: mockSolAddress,
+						recipientAddress: mockBtcAddress
+					})
+				);
+			});
+
+			// A missing destination-chain address must suppress the quote entirely: quoting
+			// anyway would let the request fall back to the source-chain address as the
+			// payout destination.
+			it('should not quote a Solana destination when the user Solana address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmDestToken,
+					destinationToken: solSourceToken,
+					amount: 100,
+					tokens: [evmDestToken, solSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should not quote an EVM destination when the user EVM address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: evmDestToken,
+					amount: 100,
+					tokens: [solSourceToken, evmDestToken],
+					slippage: 1,
+					userEthAddress: undefined,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should not quote a BTC destination when the user Bitcoin address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: solSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 100,
+					tokens: [solSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('with Bitcoin tokens', () => {
@@ -777,6 +908,203 @@ describe('swap.services', () => {
 				expect(result).toHaveLength(1);
 				expect(mockIcpBridgeGetQuote).toHaveBeenCalledOnce();
 				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should pass the EVM address as recipient for an EVM destination', async () => {
+				mockBtcGetQuote.mockResolvedValue(undefined);
+
+				const evmDest = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: evmDest,
+					amount: 1,
+					tokens: [btcSourceToken, evmDest],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockBtcGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userBtcAddress: mockBtcAddress,
+						recipientAddress: mockEthAddress
+					})
+				);
+			});
+
+			it('should pass the Solana address as recipient for a Solana destination', async () => {
+				mockBtcGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidSplToken,
+					amount: 1,
+					tokens: [btcSourceToken, mockValidSplToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockBtcGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userBtcAddress: mockBtcAddress,
+						recipientAddress: mockSolAddress
+					})
+				);
+				expect(mockSolGetQuote).not.toHaveBeenCalled();
+			});
+
+			it('should not quote a Solana destination when the user Solana address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidSplToken,
+					amount: 1,
+					tokens: [btcSourceToken, mockValidSplToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(result).toEqual([]);
+				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
+			// Regression: BTC → ckBTC, today's only live BTC-source pair, keeps the exact
+			// quote payload it had before the recipient threading.
+			it('should quote an ICP destination without a recipient address', async () => {
+				mockBtcGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidIcCkToken as IcToken,
+					amount: 1,
+					tokens: [btcSourceToken],
+					slippage: 1,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockBtcGetQuote).toHaveBeenCalledWith({
+					sourceToken: btcSourceToken,
+					destinationToken: mockValidIcCkToken,
+					amount: 100_000_000n,
+					userBtcAddress: mockBtcAddress,
+					recipientAddress: undefined,
+					slippage: 1
+				});
+			});
+		});
+
+		describe('with an EVM source and a non-EVM, non-Solana destination', () => {
+			const evmSourceToken = { ...mockValidErc20Token, network: ETHEREUM_NETWORK } as Erc20Token;
+
+			beforeEach(() => {
+				vi.clearAllMocks();
+			});
+
+			it('should pass the user Bitcoin address as recipient when the destination is BTC mainnet', async () => {
+				mockVeloraGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 1000,
+					tokens: [evmSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockVeloraGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userAddress: mockEthAddress,
+						recipientAddress: mockBtcAddress
+					})
+				);
+				expect(mockBtcGetQuote).not.toHaveBeenCalled();
+			});
+
+			// The user's BTC payout address is not available yet: quoting anyway would let
+			// the request fall back to the EVM source address as the BTC recipient.
+			it('should not quote a BTC destination when the user Bitcoin address is nullish', async () => {
+				const result = await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmSourceToken,
+					destinationToken: BTC_MAINNET_TOKEN,
+					amount: 1000,
+					tokens: [evmSourceToken, BTC_MAINNET_TOKEN],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(result).toEqual([]);
+				expect(mockVeloraGetQuote).not.toHaveBeenCalled();
+			});
+
+			// Regression: an EVM → EVM quote's recipient resolves to the user's own EVM
+			// address, the value the quote request builder already fell back to when no
+			// recipient was passed, so the request payload is unchanged.
+			it('should mirror the user EVM address as recipient for an EVM destination', async () => {
+				mockVeloraGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmSourceToken,
+					destinationToken: mockValidErc20Token,
+					amount: 1000,
+					tokens: [evmSourceToken, mockValidErc20Token],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: undefined,
+					userBtcAddress: undefined
+				});
+
+				expect(mockVeloraGetQuote).toHaveBeenCalledWith(
+					expect.objectContaining({
+						userAddress: mockEthAddress,
+						recipientAddress: mockEthAddress
+					})
+				);
+			});
+
+			// Regression: an ICP destination has no cross-chain payout address, so the quote
+			// payload stays exactly what it was before the recipient threading.
+			it('should not pass a recipient for an ICP destination', async () => {
+				mockVeloraGetQuote.mockResolvedValue(undefined);
+
+				await fetchSwapAmounts({
+					identity: mockIdentity,
+					sourceToken: evmSourceToken,
+					destinationToken: mockValidIcrcToken as IcToken,
+					amount: 1000,
+					tokens: [evmSourceToken, mockValidIcrcToken as IcToken],
+					slippage: 0.5,
+					userEthAddress: mockEthAddress,
+					userSolAddress: mockSolAddress,
+					userBtcAddress: mockBtcAddress
+				});
+
+				expect(mockVeloraGetQuote).toHaveBeenCalledWith({
+					sourceToken: evmSourceToken,
+					destinationToken: mockValidIcrcToken,
+					amount: expect.any(BigInt),
+					userAddress: mockEthAddress,
+					recipientAddress: undefined,
+					slippage: 0.5
+				});
 			});
 		});
 	});
@@ -2649,6 +2977,37 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
 		});
 
+		// Regression for the BTC broadcast-time hook: a reversible transport keeps the
+		// original ordering, creating the AUT row only once, after the send has resolved
+		// and the deposit been submitted.
+		it('should create the AUT row after the send resolves and the deposit is submitted', async () => {
+			await fetchNearIntentsEvmSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [sendOrder] = vi.mocked(sendEvm).mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+
+			expect(sendOrder).toBeLessThan(submitOrder);
+			expect(submitOrder).toBeLessThan(createOrder);
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
 		it('should pass depositMemo when present in quote', async () => {
 			const quoteWithMemo = {
 				...mockNearIntentsQuoteResponse,
@@ -2753,6 +3112,31 @@ describe('swap.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
 		});
 
+		// Regression for the BTC broadcast-time hook: a reversible transport keeps the
+		// original ordering, creating the AUT row only once, after the send has resolved
+		// and the deposit been submitted.
+		it('should create the AUT row after the send resolves and the deposit is submitted', async () => {
+			await fetchNearIntentsSolSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				userAddress: mockSolAddress,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			const [sendOrder] = vi.mocked(sendSol).mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+
+			expect(sendOrder).toBeLessThan(submitOrder);
+			expect(submitOrder).toBeLessThan(createOrder);
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
 		it('should pass depositMemo when present in quote', async () => {
 			const quoteWithMemo = {
 				...mockNearIntentsQuoteResponse,
@@ -2782,6 +3166,196 @@ describe('swap.services', () => {
 					])
 				})
 			);
+		});
+	});
+
+	describe('fetchNearIntentsBtcSwap', () => {
+		const sourceToken = BTC_MAINNET_TOKEN;
+		const destinationToken = { ...mockValidErc20Token, decimals: 6, enabled: true };
+		const mockProgress = vi.fn();
+		const btcTxid = 'btc-txid-123';
+		const { depositAddress } = mockNearIntentsQuoteResponse.quote;
+
+		const baseParams = {
+			identity: mockIdentity,
+			progress: mockProgress,
+			sourceToken,
+			destinationToken,
+			swapAmount: '0.01',
+			userAddress: mockBtcAddress,
+			network: 'mainnet' as const,
+			utxosFee: mockUtxosFee,
+			swapDetails: mockNearIntentsQuoteResponse
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			// The real `sendBtc` fires `onBroadcast` the moment the transaction is
+			// broadcast, before its own bookkeeping resolves.
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: btcTxid });
+				return btcTxid;
+			});
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should send the deposit to the quoted address on the quoted UTXO selection', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			expect(sendBtc).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					network: 'mainnet',
+					utxosFee: mockUtxosFee,
+					source: mockBtcAddress,
+					destination: depositAddress,
+					amount: '0.01'
+				})
+			);
+		});
+
+		it('should register the AUT row at broadcast time, before the send resolves', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+
+				await onBroadcast?.({ txid: btcTxid });
+
+				expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+
+				return btcTxid;
+			});
+
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			// Exactly once: the after-send path must not create a second row.
+			expect(
+				activeUserTransactionsServices.createActiveUserTransaction
+			).toHaveBeenCalledExactlyOnceWith(
+				expect.objectContaining({
+					identity: mockIdentity,
+					data: {
+						NearIntents: expect.objectContaining({
+							source_token: { BtcNativeMainnet: null },
+							// `swapAmount: '0.01'` in satoshis.
+							amount: 1_000_000n
+						})
+					},
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress }
+					])
+				})
+			);
+		});
+
+		it('should register the row before submitting the broadcast txid to 1Click', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			const [createOrder] = vi.mocked(activeUserTransactionsServices.createActiveUserTransaction)
+				.mock.invocationCallOrder;
+			const [submitOrder] = vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mock
+				.invocationCallOrder;
+
+			expect(createOrder).toBeLessThan(submitOrder);
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: btcTxid
+			});
+		});
+
+		it('should include the depositMemo in the row refs and the 1Click submit when present', async () => {
+			const quoteWithMemo = {
+				...mockNearIntentsQuoteResponse,
+				quote: { ...mockNearIntentsQuoteResponse.quote, depositMemo: 'btc-memo-123' }
+			};
+
+			await fetchNearIntentsBtcSwap({ ...baseParams, swapDetails: quoteWithMemo });
+
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledWith({
+				depositAddress,
+				txHash: btcTxid,
+				depositMemo: 'btc-memo-123'
+			});
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS, value: depositAddress },
+						{ key: NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO, value: 'btc-memo-123' }
+					])
+				})
+			);
+		});
+
+		it('should report progress steps in correct order', async () => {
+			await fetchNearIntentsBtcSwap(baseParams);
+
+			expect(mockProgress).toHaveBeenCalledTimes(3);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SIGN_TRANSFER);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		// The deposit is already broadcast when the row is created, so a bookkeeping
+		// failure must never read as the swap having failed.
+		it('should not surface a failed AUT creation as a swap failure', async () => {
+			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockRejectedValue(
+				new Error('backend down')
+			);
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+		});
+
+		it('should not surface a failed 1Click submit as a swap failure', async () => {
+			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockRejectedValue(
+				new Error('1click down')
+			);
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+
+			// The row was registered at broadcast, so it exists despite the failed submit.
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+		});
+
+		it('should surface a send failure and create no row when nothing was broadcast', async () => {
+			vi.mocked(sendBtc).mockRejectedValue(new Error('signer unavailable'));
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).rejects.toThrow('signer unavailable');
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+		});
+
+		// `sendBtc` can still throw after the broadcast, in its best-effort bookkeeping
+		// (pending-transaction registration, wallet refresh). The deposit is real by then,
+		// so the swap must resolve and carry on with the broadcast txid.
+		it('should not surface a sendBtc failure after the broadcast as a swap failure', async () => {
+			vi.mocked(sendBtc).mockImplementation(async ({ onBroadcast }) => {
+				await onBroadcast?.({ txid: btcTxid });
+				throw new Error('wallet refresh failed');
+			});
+
+			await expect(fetchNearIntentsBtcSwap(baseParams)).resolves.toBeUndefined();
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledOnce();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).toHaveBeenCalledExactlyOnceWith({
+				depositAddress,
+				txHash: btcTxid
+			});
+			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsSwap.UPDATE_UI);
+		});
+
+		it('should enable a disabled destination token once the swap foreground resolves', async () => {
+			const disabledDestinationToken = { ...destinationToken, enabled: false };
+
+			await fetchNearIntentsBtcSwap({
+				...baseParams,
+				destinationToken: disabledDestinationToken
+			});
+
+			expect(setCustomToken).toHaveBeenCalledOnce();
+			expect(loadCustomErc20Tokens).toHaveBeenCalledOnce();
 		});
 	});
 
