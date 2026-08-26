@@ -199,10 +199,13 @@ describe('SwapBtcWizard', () => {
 				context
 			});
 
-			// Derived from the i18n copy (tags stripped) so copy-only edits cannot break this.
-			expect(container.textContent).toContain(
-				en.swap.text.near_intents_tos.replace(/<[^>]*>/g, '')
-			);
+			// Derived from the i18n copy, parsed to its rendered text, so copy-only edits
+			// cannot break this.
+			const tosText =
+				new DOMParser().parseFromString(en.swap.text.near_intents_tos, 'text/html').body
+					.textContent ?? '';
+
+			expect(container.textContent).toContain(tosText);
 		});
 
 		// The minting is tracked as an active user transaction, so the stepper says the swap
