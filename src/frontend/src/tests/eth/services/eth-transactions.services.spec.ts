@@ -6,6 +6,11 @@ import { USDT_TOKEN, USDT_TOKEN_ID } from '$env/tokens/tokens-erc20/tokens.usdt.
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
 import * as etherscanProvidersModule from '$eth/providers/etherscan.providers';
+import type * as Erc20UserTransactionsServices from '$eth/services/erc20-user-transactions.services';
+import {
+	loadErc20UserTransactions,
+	saveErc20FinalizedTransactions
+} from '$eth/services/erc20-user-transactions.services';
 import {
 	loadEthereumTransactions,
 	reloadEthereumTransactions
@@ -50,6 +55,14 @@ vi.mock('$eth/services/eth-user-transactions.services', () => ({
 	setEthBackendPaginationCursor: vi.fn()
 }));
 
+// Only the canister round-trips are stubbed; `fetchErc20Transfers` stays real so it keeps
+// exercising the mocked Etherscan provider.
+vi.mock('$eth/services/erc20-user-transactions.services', async (importOriginal) => ({
+	...(await importOriginal<typeof Erc20UserTransactionsServices>()),
+	loadErc20UserTransactions: vi.fn(),
+	saveErc20FinalizedTransactions: vi.fn()
+}));
+
 vi.mock('$lib/utils/console.utils', () => ({
 	consoleError: vi.fn()
 }));
@@ -79,6 +92,9 @@ describe('eth-transactions.services', () => {
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20CustomTokensStore.setAll(mockErc20CustomTokens);
+
+		vi.mocked(loadErc20UserTransactions).mockResolvedValue(undefined);
+		vi.mocked(saveErc20FinalizedTransactions).mockResolvedValue({ success: true });
 	});
 
 	describe('loadEthereumTransactions', () => {
@@ -295,6 +311,123 @@ describe('eth-transactions.services', () => {
 				}
 			);
 		}, 60000);
+
+		describe('when token is ERC20 and backed by the canister cache', () => {
+			const mockErc20Transactions = vi.fn();
+
+			const {
+				id: tokenId,
+				network: { id: networkId, chainId },
+				standard,
+				address: contractAddress
+			} = USDC_TOKEN;
+
+			const backendTokenId = { Erc20: [contractAddress, chainId] };
+
+			beforeEach(() => {
+				ethTransactionsStore.reinitialize();
+
+				mockErc20Transactions.mockResolvedValue([]);
+
+				vi.spyOn(etherscanProvidersModule, 'etherscanProviders').mockReturnValue({
+					erc20Transactions: mockErc20Transactions
+				} as unknown as EtherscanProvider);
+
+				vi.mocked(loadErc20UserTransactions).mockResolvedValue(undefined);
+			});
+
+			const load = () =>
+				loadEthereumTransactions({
+					identity: mockIdentity,
+					networkId,
+					tokenId,
+					chainId,
+					standard
+				});
+
+			it('should read the stored page under the ERC20 token id', async () => {
+				await load();
+
+				expect(loadErc20UserTransactions).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({ identity: mockIdentity, tokenId: backendTokenId })
+				);
+			});
+
+			it('should ask Etherscan only for blocks above the newest stored one', async () => {
+				vi.mocked(loadErc20UserTransactions).mockResolvedValue({
+					transactions: [],
+					newestBlockIndex: 500n,
+					oldestBlockIndex: 100n,
+					totalStored: 4n,
+					nextStart: undefined
+				});
+
+				await load();
+
+				expect(mockErc20Transactions).toHaveBeenCalledExactlyOnceWith({
+					contract: { ...USDC_TOKEN, enabled: true },
+					address: mockEthAddress,
+					startBlock: 501
+				});
+			});
+
+			it('should skip Etherscan entirely while the tip is still below the stored height', async () => {
+				vi.mocked(loadErc20UserTransactions).mockResolvedValue({
+					transactions: [],
+					newestBlockIndex: 500n,
+					oldestBlockIndex: 100n,
+					totalStored: 4n,
+					nextStart: undefined
+				});
+
+				infuraMocks.mockInfuraGetBlockNumber.mockResolvedValueOnce(400);
+
+				await load();
+
+				expect(mockErc20Transactions).not.toHaveBeenCalled();
+			});
+
+			it('should keep the stored page in the store alongside the newer transactions', async () => {
+				const [stored] = createMockEthTransactions(1);
+				const newer = { ...stored, hash: '0xnewer', blockNumber: 900 };
+
+				vi.mocked(loadErc20UserTransactions).mockResolvedValue({
+					transactions: [stored],
+					newestBlockIndex: 500n,
+					oldestBlockIndex: 100n,
+					totalStored: 4n,
+					nextStart: 3n
+				});
+
+				mockErc20Transactions.mockResolvedValue([newer]);
+
+				await load();
+
+				expect(get(ethTransactionsStore)?.[tokenId]).toHaveLength(2);
+			});
+
+			it('should persist the newly fetched transactions', async () => {
+				const [newer] = createMockEthTransactions(1);
+
+				mockErc20Transactions.mockResolvedValue([newer]);
+
+				await load();
+
+				expect(saveErc20FinalizedTransactions).toHaveBeenCalledExactlyOnceWith(
+					expect.objectContaining({
+						identity: mockIdentity,
+						tokenId: backendTokenId,
+						transactions: [newer]
+					})
+				);
+			});
+
+			it('should not persist anything when Etherscan returned nothing new', async () => {
+				await load();
+
+				expect(saveErc20FinalizedTransactions).not.toHaveBeenCalled();
+			});
+		});
 
 		describe('when token is native ETH', () => {
 			let etherscanProvidersSpy: MockInstance;
