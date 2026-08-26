@@ -995,6 +995,11 @@ export type GetPersonalNotesResult =
 	  };
 export type GetTipDetailsResult = { Ok: TipDetails } | { Err: TipError };
 export type GetTipResult = { Ok: PublicTip } | { Err: TipError };
+/**
+ * The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+ * stored — a tip from before the store existed, or one already cleaned up.
+ */
+export type GetTipSecretResult = { Ok: [] | [Uint8Array] } | { Err: TipError };
 export type GetUserProfileError = { NotFound: null };
 export type GetUserProfileResult =
 	| {
@@ -1567,6 +1572,21 @@ export interface SetShowTestnetsRequest {
 	show_testnets: boolean;
 }
 export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+/**
+ * Stores the sender's own encrypted claim code so they can recover the link.
+ *
+ * A single request struct rather than two arguments, matching
+ * `SetPersonalNoteRequest`: it keeps the candid signature stable if the store
+ * ever needs another field.
+ */
+export interface SetTipSecretRequest {
+	tip_id: string;
+	/**
+	 * AES-GCM ciphertext of the claim code, opaque to the canister. Bounded by
+	 * [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+	 */
+	encrypted_claim_code: Uint8Array;
+}
 export type SetUserShowTestnetsResult =
 	| {
 			/**
@@ -1711,6 +1731,13 @@ export interface Stats {
 	personal_note_shares_count: bigint;
 	agreement_history_count: bigint;
 	/**
+	 * Total number of tips ever created and not yet pruned, across all users
+	 * and every status. Aggregate only, deliberately: the negative guarantee
+	 * that no endpoint enumerates another principal's tips holds for this one
+	 * too, so there is a count here and never a row.
+	 */
+	tips_count: bigint;
+	/**
 	 * Total number of stored (encrypted) personal-note entries across all users.
 	 */
 	personal_notes_count: bigint;
@@ -1778,6 +1805,12 @@ export type TipError =
 			 * may take it over.
 			 */
 			ClaimInProgress: null;
+	  }
+	| {
+			/**
+			 * The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+			 */
+			SecretCiphertextTooLarge: null;
 	  }
 	| {
 			/**
@@ -1890,6 +1923,17 @@ export type TipStatus =
 			 */
 			Expired: null;
 	  };
+/**
+ * vetKey material for the tip-secrets store, or why it could not be derived.
+ */
+export type TipVetkeyResult =
+	| {
+			/**
+			 * vetKey bytes, opaque to the canister.
+			 */
+			Ok: Uint8Array;
+	  }
+	| { Err: TipError };
 /**
  * A variant describing any token
  */
@@ -2675,6 +2719,32 @@ export interface _SERVICE {
 	 */
 	get_tip_details: ActorMethod<[TipClaimRequest], GetTipDetailsResult>;
 	/**
+	 * Derives the caller's vetKey for the tip-secrets store, secured to a
+	 * browser-supplied transport public key.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	 */
+	get_tip_encrypted_vetkey: ActorMethod<[Uint8Array], TipVetkeyResult>;
+	/**
+	 * The caller's encrypted claim code for one of their own tips, if stored.
+	 *
+	 * `EncryptedMaps` keys every map by its owner, so this can only ever return
+	 * the caller's own ciphertext.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`InvalidTipId`, `InternalError`).
+	 */
+	get_tip_secret: ActorMethod<[string], GetTipSecretResult>;
+	/**
+	 * The vetKey verification key for the tip-secrets store. Identical for every
+	 * caller; the browser needs it to verify its derived vetKey.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`RateLimited`, `InternalError`).
+	 */
+	get_tip_vetkey_public_key: ActorMethod<[], TipVetkeyResult>;
+	/**
 	 * Returns the full agreement consent/rejection history for the caller.
 	 *
 	 * # Returns
@@ -2823,6 +2893,19 @@ export interface _SERVICE {
 	 * `NoteCiphertextTooLarge`, `RateLimited`).
 	 */
 	set_personal_note: ActorMethod<[PersonalNoteEntry], SetPersonalNoteResult>;
+	/**
+	 * Stores the caller's encrypted claim code for one of their own tips, so they
+	 * can recover the link after closing the share screen.
+	 *
+	 * The value is ciphertext the canister cannot read: the browser encrypts it
+	 * under a vetKey only this principal can derive. Storing it changes nothing
+	 * about who can claim the tip — the canister still only holds the code's hash.
+	 *
+	 * # Errors
+	 * Errors are enumerated by `TipError` (`InvalidTipId`,
+	 * `SecretCiphertextTooLarge`, `InternalError`).
+	 */
+	set_tip_secret: ActorMethod<[SetTipSecretRequest], CancelTipResult>;
 	/**
 	 * Sets the user's preference to show (or hide) testnets in the interface.
 	 *

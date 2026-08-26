@@ -105,6 +105,16 @@ thread_local! {
     /// [`VetKeyRateLimiters`].
     pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
         VetKeyRateLimiters::new();
+
+    /// vetKD derivation for the tip-secrets store. Its own limiter rather than a
+    /// shared one, so a sender recovering tip links cannot exhaust the budget for
+    /// reading their notes, or the reverse.
+    pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
+        VetKeyRateLimiters::new();
+
+    /// Verification-key reads for the tip-secrets store.
+    pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
+        VetKeyRateLimiters::new();
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
