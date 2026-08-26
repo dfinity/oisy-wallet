@@ -5,7 +5,7 @@
 	import type { Principal } from '@icp-sdk/core/principal';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { goto, preloadData } from '$app/navigation';
 	import type { PublicTip } from '$declarations/backend/backend.did';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
@@ -153,7 +153,32 @@
 		}
 	});
 
-	const toWallet = async () => await goto(AppPath.Tokens);
+	/**
+	 * Leaving for the wallet takes seconds: it is the first time this visitor's
+	 * browser fetches the app's route, and until it lands nothing on screen moves.
+	 * The button therefore says it is working, and the route is warmed on mount so
+	 * there is less to wait for. Measured at ~4s cold before this, which reads
+	 * exactly like a dead button.
+	 */
+	let leaving = $state(false);
+
+	const toWallet = async () => {
+		leaving = true;
+
+		try {
+			await goto(AppPath.Tokens);
+		} finally {
+			leaving = false;
+		}
+	};
+
+	// Every way out of this page ends at the wallet — signing in, or giving up on a
+	// link that cannot be claimed — so the route is worth fetching before it is
+	// asked for. Its `load` only parses route params, so this costs modules and
+	// nothing else.
+	onMount(() => {
+		void preloadData(AppPath.Tokens);
+	});
 
 	/**
 	 * Never prints a number the ledger has not told us how to render. The earlier
@@ -219,7 +244,9 @@
 
 	<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unavailable_description}</p>
 
-	<Button fullWidth onclick={toWallet}>{$i18n.tip.text.take_me_to_wallet}</Button>
+	<Button disabled={leaving} fullWidth loading={leaving} onclick={toWallet}>
+		{$i18n.tip.text.take_me_to_wallet}
+	</Button>
 {/if}
 
 <!--
