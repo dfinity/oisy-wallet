@@ -132,27 +132,23 @@ const resolveEthIncrementalStartBlock = ({
 };
 
 /**
- * Whether the chain has produced a block at or above `startBlock`.
+ * The chain's latest block, or `undefined` when it cannot be read.
  *
- * Guards the incremental fetch: when the tip has not moved past everything we already hold, the
- * explorer call cannot return anything new and is worth skipping outright.
+ * Two callers want it: the incremental fetch skips the explorer entirely when the tip has not
+ * moved past everything we already hold, and the save uses it as the reference the finality check
+ * measures against.
  */
-const chainTipReachesStartBlock = async ({
-	networkId,
-	startBlock
+const readChainTip = async ({
+	networkId
 }: {
 	networkId: NetworkId;
-	startBlock: number;
-}): Promise<boolean> => {
+}): Promise<number | undefined> => {
 	try {
 		const { getBlockNumber } = infuraProviders(networkId);
 
-		const latestBlockNumber = await getBlockNumber();
-
-		return latestBlockNumber >= startBlock;
+		return await getBlockNumber();
 	} catch (_: unknown) {
-		// If we cannot read the tip, still query the explorer rather than leave the UI stale.
-		return true;
+		return undefined;
 	}
 };
 
@@ -175,7 +171,10 @@ const loadNewEthNativeTransactionsAfterStartBlock = async ({
 		return transactionsProvider({ address, startBlock: 0, sort: 'desc' });
 	}
 
-	if (!(await chainTipReachesStartBlock({ networkId, startBlock }))) {
+	const chainTip = await readChainTip({ networkId });
+
+	// If we cannot read the tip, still query Etherscan rather than leave the UI stale.
+	if (nonNullish(chainTip) && chainTip < startBlock) {
 		return [];
 	}
 
@@ -223,15 +222,20 @@ const loadCachedErc20Transactions = async ({
 			: maxEthBlockNumberInStore(tokenId)
 	});
 
-	const newTransactions =
-		startBlock > 0 && !(await chainTipReachesStartBlock({ networkId, startBlock }))
-			? []
-			: await fetchErc20Transfers({
-					networkId,
-					token,
-					address,
-					...(startBlock > 0 && { startBlock })
-				});
+	// One read serves both purposes below: skipping a fetch that cannot return anything, and giving
+	// the finality check a real reference point rather than the batch's own newest block.
+	const chainTip = await readChainTip({ networkId });
+
+	const tipIsBehindWhatWeHold = startBlock > 0 && nonNullish(chainTip) && chainTip < startBlock;
+
+	const newTransactions = tipIsBehindWhatWeHold
+		? []
+		: await fetchErc20Transfers({
+				networkId,
+				token,
+				address,
+				...(startBlock > 0 && { startBlock })
+			});
 
 	const certifiedTransactions = [...newTransactions, ...(stored?.transactions ?? [])].map(
 		(transaction) => ({
@@ -256,12 +260,17 @@ const loadCachedErc20Transactions = async ({
 		const blockNumbers = newTransactions.map(({ blockNumber }) => blockNumber).filter(nonNullish);
 		const maxBlockNumber = blockNumbers.length > 0 ? Math.max(...blockNumbers) : 0;
 
+		// The batch's own newest block under-states how far behind the chain the rest of it sits, so
+		// measuring finality against it holds back transfers that are already final. Fall back to it
+		// only when the tip could not be read, where being conservative beats persisting too early.
+		const currentBlockNumber = chainTip ?? maxBlockNumber;
+
 		if (maxBlockNumber > 0) {
 			saveErc20FinalizedTransactions({
 				identity,
 				tokenId: transactionTokenId,
 				transactions: newTransactions,
-				currentBlockNumber: maxBlockNumber
+				currentBlockNumber
 			}).catch((err) =>
 				consoleError('Background save of finalized ERC-20 transactions failed:', err)
 			);
