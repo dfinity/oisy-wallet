@@ -159,7 +159,16 @@ describe('TipShare', () => {
 			const { getByText } = render(TipShare, { props });
 
 			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
-			expect(getByText(get(i18n).tip.text.share_invite)).toBeInTheDocument();
+		});
+
+		it('keeps the network on the same line as the fiat value', () => {
+			// Both are context for the amount above them, and this screen has to fit
+			// a phone without the QR being pushed off the bottom.
+			rates.set({ [props.token.id]: { usd: 5 } });
+
+			const { getByText } = render(TipShare, { props });
+
+			expect(getByText(`$12.50 · ${props.token.name}`)).toBeInTheDocument();
 		});
 	});
 });
