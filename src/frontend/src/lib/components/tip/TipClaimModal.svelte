@@ -50,8 +50,22 @@
 
 	const close = () => modalStore.close();
 
+	// The canister wrapper throws the candid `Err` variant; a call that never
+	// completed throws an `Error`. That difference is the whole point below.
 	const isUncovered = (err: unknown): boolean =>
 		typeof err === 'object' && err !== null && 'Uncovered' in err;
+
+	/**
+	 * Only the canister itself saying the link is dead may be reported as dead.
+	 *
+	 * Anything else — a dropped connection, an expired delegation, a rate limit, a
+	 * stale bundle — is this end failing, and "this tip is no longer available"
+	 * would then be a false statement about someone's money, and one they cannot
+	 * act on. Those get the retryable state instead. Found the hard way: a live
+	 * tip with a valid code read as gone because the call failed locally.
+	 */
+	const isUnavailable = (err: unknown): boolean =>
+		typeof err === 'object' && err !== null && ('NotFound' in err || 'InvalidTipId' in err);
 
 	const loadTokenMetadata = async (ledger: Principal) => {
 		try {
@@ -74,19 +88,21 @@
 	};
 
 	/**
-	 * `undefined` for every reason a link can fail to resolve — unknown id,
-	 * expired, already claimed, wrong code. The backend answers all of those
-	 * identically on purpose, and so does this.
+	 * The review, or which state to fall into instead.
+	 *
+	 * `unavailable` covers every reason the canister refuses a link — unknown id,
+	 * expired, already claimed, wrong code — which it answers identically on
+	 * purpose, and so does this.
 	 */
 	const loadDetails = async (params: {
 		identity: Identity;
 		tipId: string;
 		claimCode: string;
-	}): Promise<TipDetails | undefined> => {
+	}): Promise<{ details: TipDetails } | { failure: ClaimState }> => {
 		try {
-			return await loadTipDetails(params);
-		} catch (_: unknown) {
-			return undefined;
+			return { details: await loadTipDetails(params) };
+		} catch (err: unknown) {
+			return { failure: isUnavailable(err) ? 'unavailable' : 'failed' };
 		}
 	};
 
@@ -116,12 +132,14 @@
 		// Reading the review the recipient no longer has to confirm. It validates the
 		// code before anything moves, and it carries the sender's message, which is
 		// revealed to whoever claimed and to nobody else.
-		const details = await loadDetails({ identity, tipId, claimCode });
+		const outcome = await loadDetails({ identity, tipId, claimCode });
 
-		if (isNullish(details)) {
-			claimState = 'unavailable';
+		if (!('details' in outcome)) {
+			claimState = outcome.failure;
 			return;
 		}
+
+		const { details } = outcome;
 
 		// Started, not awaited: the label needs the ledger's decimals and symbol,
 		// and that lookup has no business delaying a payout.
@@ -142,7 +160,9 @@
 			message = fromNullable(details.message);
 			claimState = 'received';
 		} catch (err: unknown) {
-			claimState = isUncovered(err) ? 'uncovered' : 'failed';
+			// A tip claimed by someone else in the meantime is gone, and a retry
+			// would never work; a failed call is the opposite.
+			claimState = isUncovered(err) ? 'uncovered' : isUnavailable(err) ? 'unavailable' : 'failed';
 		}
 	};
 

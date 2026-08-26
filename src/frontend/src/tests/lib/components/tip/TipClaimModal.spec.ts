@@ -130,6 +130,38 @@ describe('TipClaimModal', () => {
 		expect(claimSpy).not.toHaveBeenCalled();
 	});
 
+	it('offers a retry when the review call never landed, rather than declaring the tip dead', async () => {
+		// The bug this closes: a live tip with a valid code read as "no longer
+		// available" because the call failed at this end. The canister rejects with a
+		// candid variant; a dropped call throws an Error, and only the first is
+		// evidence about the tip.
+		vi.spyOn(tipServices, 'loadTipDetails').mockRejectedValueOnce(new Error('connection lost'));
+		const claimSpy = mockClaim();
+
+		const { getByText, queryByText } = render(TipClaimModal, { props: { pending } });
+
+		await waitFor(() => expect(getByText(get(i18n).tip.text.claim_retry)).toBeInTheDocument());
+
+		expect(queryByText(get(i18n).tip.text.unavailable_title)).not.toBeInTheDocument();
+		expect(claimSpy).not.toHaveBeenCalled();
+	});
+
+	it('says a tip claimed by someone else is gone, not retryable', async () => {
+		// A race with another claimer comes back from `claim_tip` as NotFound. A
+		// "Try again" there is an invitation to keep pressing a button that cannot
+		// work.
+		mockDetails();
+		vi.spyOn(tipServices, 'claimTip').mockRejectedValue({ NotFound: null });
+
+		const { getByText, queryByText } = render(TipClaimModal, { props: { pending } });
+
+		await waitFor(() =>
+			expect(getByText(get(i18n).tip.text.unavailable_title)).toBeInTheDocument()
+		);
+
+		expect(queryByText(get(i18n).tip.text.claim_retry)).not.toBeInTheDocument();
+	});
+
 	it('tells the claimer plainly when the reservation is gone', async () => {
 		// `Uncovered` is the one failure deliberately distinguishable from the rest,
 		// because "try later" is actionable where "expired" is not.
