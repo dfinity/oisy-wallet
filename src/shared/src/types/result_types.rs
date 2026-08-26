@@ -680,6 +680,53 @@ impl From<Result<(), TipError>> for CancelTipResult {
     }
 }
 
+/// vetKey material for the tip-secrets store, or why it could not be derived.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum TipVetkeyResult {
+    /// vetKey bytes, opaque to the canister.
+    Ok(ByteBuf),
+    Err(TipError),
+}
+impl From<Result<ByteBuf, TipError>> for TipVetkeyResult {
+    fn from(result: Result<ByteBuf, TipError>) -> Self {
+        match result {
+            Ok(vetkey) => TipVetkeyResult::Ok(vetkey),
+            Err(err) => TipVetkeyResult::Err(err),
+        }
+    }
+}
+
+/// The caller's encrypted claim code for one tip. `Ok(None)` means no secret is
+/// stored — a tip from before the store existed, or one already cleaned up.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum GetTipSecretResult {
+    Ok(Option<ByteBuf>),
+    Err(TipError),
+}
+impl From<Result<Option<ByteBuf>, TipError>> for GetTipSecretResult {
+    fn from(result: Result<Option<ByteBuf>, TipError>) -> Self {
+        match result {
+            Ok(secret) => GetTipSecretResult::Ok(secret),
+            Err(err) => GetTipSecretResult::Err(err),
+        }
+    }
+}
+
+/// Outcome of storing an encrypted claim code.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum SetTipSecretResult {
+    Ok,
+    Err(TipError),
+}
+impl From<Result<(), TipError>> for SetTipSecretResult {
+    fn from(result: Result<(), TipError>) -> Self {
+        match result {
+            Ok(()) => SetTipSecretResult::Ok,
+            Err(err) => SetTipSecretResult::Err(err),
+        }
+    }
+}
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetMyTipsResult {
     Ok(Vec<MyTip>),

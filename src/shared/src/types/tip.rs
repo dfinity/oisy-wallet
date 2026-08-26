@@ -39,6 +39,12 @@ pub const TIP_CLAIM_CODE_HASH_BYTES: usize = 32;
 /// be set (7 days — the longest expiry option in the creator UI).
 /// Defense-in-depth against a client bypassing the UI to encumber a balance
 /// indefinitely.
+/// Largest accepted encrypted-claim-code blob. A claim code is 16 random bytes
+/// base64url-encoded; AES-GCM adds a nonce and a tag, so the ciphertext is well
+/// under 100 bytes. The cap is generous but bounded — the point is that this
+/// store can never be used as general-purpose storage.
+pub const MAX_TIP_SECRET_CIPHERTEXT_BYTES: usize = 512;
+
 pub const MAX_TIP_EXPIRY_NS: u64 = 7 * 24 * 60 * 60 * 1_000_000_000;
 
 /// How long a claim may stay in flight before another claimer may take it over.
@@ -170,6 +176,19 @@ pub struct TipClaim {
     pub block_index: Nat,
 }
 
+/// Stores the sender's own encrypted claim code so they can recover the link.
+///
+/// A single request struct rather than two arguments, matching
+/// `SetPersonalNoteRequest`: it keeps the candid signature stable if the store
+/// ever needs another field.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct SetTipSecretRequest {
+    pub tip_id: String,
+    /// AES-GCM ciphertext of the claim code, opaque to the canister. Bounded by
+    /// [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+    pub encrypted_claim_code: ByteBuf,
+}
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum TipError {
     /// The `tip_id` is empty or exceeds [`MAX_TIP_ID_BYTES`].
@@ -206,6 +225,8 @@ pub enum TipError {
     NotYourTip,
     /// Only a `Reserved` tip can be cancelled.
     NotCancellable,
+    /// The encrypted claim code exceeds [`MAX_TIP_SECRET_CIPHERTEXT_BYTES`].
+    SecretCiphertextTooLarge,
     /// The ledger rejected or failed to answer the payout. The tip stays
     /// claimable — nothing was transferred.
     TransferFailed {

@@ -187,6 +187,7 @@ export const idlFactory = ({ IDL }) => {
 	const TipError = IDL.Variant({
 		InvalidExpiry: IDL.Null,
 		ClaimInProgress: IDL.Null,
+		SecretCiphertextTooLarge: IDL.Null,
 		Uncovered: IDL.Null,
 		NotFound: IDL.Null,
 		NotYourTip: IDL.Null,
@@ -675,6 +676,14 @@ export const idlFactory = ({ IDL }) => {
 		Ok: TipDetails,
 		Err: TipError
 	});
+	const TipVetkeyResult = IDL.Variant({
+		Ok: IDL.Vec(IDL.Nat8),
+		Err: TipError
+	});
+	const GetTipSecretResult = IDL.Variant({
+		Ok: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		Err: TipError
+	});
 	const AgreementType = IDL.Variant({
 		TermsOfUse: IDL.Null,
 		PrivacyPolicy: IDL.Null,
@@ -831,6 +840,10 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: PersonalNoteError
 	});
+	const SetTipSecretRequest = IDL.Record({
+		tip_id: IDL.Text,
+		encrypted_claim_code: IDL.Vec(IDL.Nat8)
+	});
 	const SetShowTestnetsRequest = IDL.Record({
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
@@ -871,6 +884,7 @@ export const idlFactory = ({ IDL }) => {
 		token_activity_count: IDL.Nat64,
 		personal_note_shares_count: IDL.Nat64,
 		agreement_history_count: IDL.Nat64,
+		tips_count: IDL.Nat64,
 		personal_notes_count: IDL.Nat64,
 		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
@@ -1001,6 +1015,9 @@ export const idlFactory = ({ IDL }) => {
 		get_personal_notes_vetkey_public_key: IDL.Func([], [PersonalNotesVetkeyResult], []),
 		get_tip: IDL.Func([IDL.Text], [GetTipResult], ['query']),
 		get_tip_details: IDL.Func([TipClaimRequest], [GetTipDetailsResult], ['query']),
+		get_tip_encrypted_vetkey: IDL.Func([IDL.Vec(IDL.Nat8)], [TipVetkeyResult], []),
+		get_tip_secret: IDL.Func([IDL.Text], [GetTipSecretResult], ['query']),
+		get_tip_vetkey_public_key: IDL.Func([], [TipVetkeyResult], []),
 		get_user_agreement_history: IDL.Func([], [GetAgreementHistoryResult], ['query']),
 		get_user_profile: IDL.Func([], [GetUserProfileResult], ['query']),
 		get_user_transactions: IDL.Func(
@@ -1027,6 +1044,7 @@ export const idlFactory = ({ IDL }) => {
 		set_new_user_signups_allowed: IDL.Func([IDL.Bool], [], []),
 		set_onramper_signing_secret: IDL.Func([IDL.Opt(IDL.Text)], [], []),
 		set_personal_note: IDL.Func([PersonalNoteEntry], [SetPersonalNoteResult], []),
+		set_tip_secret: IDL.Func([SetTipSecretRequest], [CancelTipResult], []),
 		set_user_show_testnets: IDL.Func([SetShowTestnetsRequest], [SetUserShowTestnetsResult], []),
 		sign_onramper_widget_url: IDL.Func(
 			[SignOnramperWidgetUrlRequest],
