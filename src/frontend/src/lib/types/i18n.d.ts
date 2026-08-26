@@ -2288,10 +2288,9 @@ interface I18nTip {
 		no_supported_tokens_title: string;
 		no_supported_tokens_description: string;
 		expiration: string;
-		expiry_1h: string;
 		expiry_24h: string;
+		expiry_3d: string;
 		expiry_7d: string;
-		recommended: string;
 		message: string;
 		message_placeholder: string;
 		total_estimated_fee: string;
@@ -2301,7 +2300,6 @@ interface I18nTip {
 		lapse_notice: string;
 		generate: string;
 		share_heading: string;
-		share_description: string;
 		copy_link: string;
 		share_link: string;
 		no_wallet_needed: string;

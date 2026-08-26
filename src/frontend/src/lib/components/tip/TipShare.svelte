@@ -43,13 +43,6 @@
 		<span class="text-xl font-bold">{amountLabel}</span>
 	</div>
 
-	<!--
-		The one thing the sender has to understand before sending this anywhere: the
-		link is a bearer instrument. The drawn design has no equivalent line, but
-		leaving it out makes the screen quietly unsafe.
-	-->
-	<p class="mb-4 text-center text-tertiary">{$i18n.tip.text.share_description}</p>
-
 	<div class="mx-auto mb-4 aspect-square h-64 max-h-[40vh] max-w-full rounded-xl bg-white p-4">
 		<QrCode ariaLabel={$i18n.tip.text.share_heading} value={link}>
 			{#snippet logo()}
