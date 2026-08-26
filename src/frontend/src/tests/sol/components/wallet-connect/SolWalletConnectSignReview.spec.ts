@@ -66,6 +66,15 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 	});
 
+	it('should not render the signer row', () => {
+		const { queryByText, container } = render(SolWalletConnectSignReview, {
+			props
+		});
+
+		expect(queryByText(en.wallet_connect.text.signer)).not.toBeInTheDocument();
+		expect(container.querySelector('#signer')).toBeNull();
+	});
+
 	it('should render the base network fee as a labelled row', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props
@@ -311,7 +320,6 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(getByText(en.send.text.network)).toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
 			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();

@@ -149,6 +149,9 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 	{/if}
 
+	<!-- The signer is the connected account and never varies between the requests of a session, so
+	     here it costs a row without saying anything about the message in front of the user. The
+	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 	<SendData
 		{amount}
 		{application}
@@ -156,6 +159,7 @@
 		destination={isApproval || !decoded || showParties ? null : destination}
 		showAmount={decoded}
 		showBalance={decoded}
+		showSigner={false}
 		{source}
 		{token}
 	>
