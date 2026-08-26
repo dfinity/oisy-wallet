@@ -2,7 +2,7 @@ import type { MyTip } from '$declarations/backend/backend.did';
 import TipHistory from '$lib/components/tip/TipHistory.svelte';
 import {
 	TIP_HISTORY_CANCEL_BUTTON,
-	TIP_HISTORY_LINK_BUTTON
+	TIP_HISTORY_ROW_BUTTON
 } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -39,7 +39,10 @@ describe('TipHistory', () => {
 		mockAuthStore();
 	});
 
-	it('offers Cancel only on live reservations', async () => {
+	it('makes only a live row openable', async () => {
+		// A finished tip has no live link, so its row must not offer a click that
+		// would do nothing — and there are no other buttons in the list at all now
+		// that cancelling lives on the detail screen.
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
 			tip({ tip_id: 'live', status: { Reserved: null } }),
 			tip({ tip_id: 'gone', status: { Expired: null } }),
@@ -50,10 +53,15 @@ describe('TipHistory', () => {
 		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
 
 		await waitFor(() =>
-			expect(
-				container.querySelectorAll(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
-			).toHaveLength(1)
+			expect(container.querySelectorAll(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)).toHaveLength(
+				1
+			)
 		);
+
+		// Cancel moved to the detail screen, so no row carries one any more.
+		expect(
+			container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
+		).not.toBeInTheDocument();
 	});
 
 	it('names the claimer on a claimed tip', async () => {
@@ -126,12 +134,12 @@ describe('TipHistory', () => {
 
 		await waitFor(() =>
 			expect(
-				container.querySelector(`button[data-tid=${TIP_HISTORY_LINK_BUTTON}]`)
+				container.querySelector(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
 			).toBeInTheDocument()
 		);
 
 		container
-			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_LINK_BUTTON}]`)
+			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
 			?.click();
 
 		await waitFor(() =>
@@ -154,12 +162,12 @@ describe('TipHistory', () => {
 
 		await waitFor(() =>
 			expect(
-				container.querySelector(`button[data-tid=${TIP_HISTORY_LINK_BUTTON}]`)
+				container.querySelector(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
 			).toBeInTheDocument()
 		);
 
 		container
-			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_LINK_BUTTON}]`)
+			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_ROW_BUTTON}]`)
 			?.click();
 
 		await waitFor(() => expect(tipServices.recoverTipLink).toHaveBeenCalledOnce());
@@ -173,35 +181,5 @@ describe('TipHistory', () => {
 		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
 
 		await waitFor(() => expect(getByText(get(i18n).tip.text.history_empty)).toBeInTheDocument());
-	});
-
-	it('revokes the allowance as well as cancelling, and reloads', async () => {
-		// Cancelling is two operations and the list must reflect the result, so a
-		// stale row cannot keep offering Cancel on a tip that is already stopped.
-		const loadSpy = vi
-			.spyOn(tipServices, 'loadMyTips')
-			.mockResolvedValueOnce([tip({ tip_id: 'live', status: { Reserved: null } })])
-			.mockResolvedValueOnce([tip({ tip_id: 'live', status: { Cancelled: null } })]);
-		const cancelSpy = vi.spyOn(tipServices, 'cancelTip').mockResolvedValue(undefined);
-
-		const { container } = render(TipHistory, { props: { onClose: vi.fn(), onViewLink: vi.fn() } });
-
-		await waitFor(() =>
-			expect(
-				container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
-			).toBeInTheDocument()
-		);
-
-		container
-			.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
-			?.click();
-
-		await waitFor(() => expect(cancelSpy).toHaveBeenCalledOnce());
-		await waitFor(() => expect(loadSpy).toHaveBeenCalledTimes(2));
-		await waitFor(() =>
-			expect(
-				container.querySelector(`button[data-tid=${TIP_HISTORY_CANCEL_BUTTON}]`)
-			).not.toBeInTheDocument()
-		);
 	});
 });
