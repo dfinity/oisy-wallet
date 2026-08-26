@@ -91,6 +91,11 @@ pub enum ActiveUserTransactionData {
     /// address, and the Ethereum deposit tx hash and block number ride in
     /// `external_refs`.
     ChainFusion(ChainFusionData),
+    /// OISY Trade order-book swap. Both legs are Internet Computer ledgers, and
+    /// the row is opened *before* the deposit — it is the record that tells a
+    /// later session which token to pull back out of the DEX's custody: the
+    /// destination token on a fill, the source token on a kill.
+    OisyTrade(OisyTradeData),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -209,6 +214,34 @@ pub struct ChainFusionData {
     pub amount: Nat,
 }
 
+/// Which side of the pair a swap-placed order takes. Equivalently, which leg of
+/// the pair the source token is: `Sell` spends the base token, `Buy` spends the
+/// quote token.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum OisyTradeSide {
+    Buy,
+    Sell,
+}
+
+/// OISY Trade order-book swap payload. The order id, the deposit and withdrawal
+/// block indices and the submitted price/quantity all ride in `external_refs`;
+/// only the fields fixed at creation are captured here.
+///
+/// `side` is explicit rather than left to the poll. `get_my_orders` does return
+/// the side and the pair, but only once an order exists — and the two recovery
+/// paths this row is opened early for (a deposit that landed with no order, and
+/// a row abandoned before either) have no order to read, while still needing to
+/// know which token to pull back out. It also fixes the base/quote orientation,
+/// which `source_token` / `dest_token` alone cannot express.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct OisyTradeData {
+    pub side: OisyTradeSide,
+    pub source_token: TokenId,
+    pub dest_token: TokenId,
+    /// Source-token amount in base units.
+    pub amount: Nat,
+}
+
 /// In-flight high-level user operation, persisted so the FE can resume polling
 /// across logout / tab close.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -277,8 +310,8 @@ mod tests {
         ActiveUserTransactionRef, ActiveUserTransactionStatus, ChainFusionData,
         ChainFusionDirection, CreateActiveUserTransactionRequest,
         GetActiveUserTransactionsResponse, LiquidiumAction, LiquidiumData, NearIntentsData,
-        OneSecEvmToIcpData, OneSecIcpToEvmData, UpdateActiveUserTransactionRequest, VeloraData,
-        VeloraSwapMode,
+        OisyTradeData, OisyTradeSide, OneSecEvmToIcpData, OneSecIcpToEvmData,
+        UpdateActiveUserTransactionRequest, VeloraData, VeloraSwapMode,
     };
     use crate::types::{custom_token::ErcTokenId, token_id::TokenId};
 
@@ -431,6 +464,36 @@ mod tests {
     fn chain_fusion_direction_roundtrips() {
         for direction in ChainFusionDirection::ALL {
             assert_eq!(roundtrip(&direction), direction);
+        }
+    }
+
+    #[test]
+    fn oisy_trade_variant_roundtrips() {
+        // Both legs are always Internet Computer ledgers, and the ICP ledger
+        // reaches the wallet as `IcpNative` rather than `Icrc` — so both
+        // spellings of an IC leg must survive, in either position. `side` fixes
+        // the base/quote orientation the token pair alone cannot express, so
+        // both sides must survive too.
+        for (side, source_token, dest_token) in [
+            (OisyTradeSide::Sell, icrc(CKBTC_LEDGER), icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), icrc(CKBTC_LEDGER)),
+            (OisyTradeSide::Sell, TokenId::IcpNative, icrc(CKUSDC_LEDGER)),
+            (OisyTradeSide::Buy, icrc(CKUSDC_LEDGER), TokenId::IcpNative),
+        ] {
+            let original = ActiveUserTransactionData::OisyTrade(OisyTradeData {
+                side,
+                source_token,
+                dest_token,
+                amount: Nat::from(1_000_000u64),
+            });
+            assert_eq!(roundtrip(&original), original);
+        }
+    }
+
+    #[test]
+    fn oisy_trade_side_roundtrips() {
+        for side in [OisyTradeSide::Buy, OisyTradeSide::Sell] {
+            assert_eq!(roundtrip(&side), side);
         }
     }
 
