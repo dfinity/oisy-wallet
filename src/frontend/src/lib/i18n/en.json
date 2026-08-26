@@ -2767,6 +2767,7 @@
 			"reserve_fee": "Fee to reserve",
 			"payout_fee": "Fee when claimed",
 			"fees_are_yours": "Both fees are paid by you. Whoever claims the tip receives the full amount.",
+			"reserved_by_tips": "$amount is already promised to tips you have created and waiting to be claimed, so it cannot be tipped again. Cancel one from your history to free it up.",
 			"lapse_notice": "If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
 			"generate": "Generate",
 			"share_heading": "Your tip is ready",

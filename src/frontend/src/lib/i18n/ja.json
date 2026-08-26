@@ -2767,6 +2767,7 @@
 			"reserve_fee": "",
 			"payout_fee": "",
 			"fees_are_yours": "",
+			"reserved_by_tips": "",
 			"lapse_notice": "",
 			"generate": "",
 			"share_heading": "",

@@ -7,9 +7,11 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalExpandableValues from '$lib/components/ui/ModalExpandableValues.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { TIP_MESSAGE_MAX_CHARS } from '$lib/constants/tip.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { reservedTipAmounts } from '$lib/derived/tips.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -43,6 +45,10 @@
 	}: Props = $props();
 
 	let fees = $derived(tipFees(token.fee));
+
+	// What live tips in this token are already holding back, so the amount field's
+	// ceiling can explain itself.
+	let reserved = $derived($reservedTipAmounts[token.id] ?? ZERO);
 
 	// Counted in characters, matching the canister's own limit — a byte count
 	// would reject a message the user sees as well within length.
@@ -145,6 +151,19 @@
 			question every sender asks before committing money to a link — what
 			happens if nobody claims it — and the drawn design gives it this weight.
 		-->
+		{#if reserved > ZERO}
+			<!--
+				Without this, a sender whose tips already cover their balance sees a red
+				"Max: 0" and no reason for it — a correct number that reads as a broken
+				screen. Only shown when a reservation is actually holding something back.
+			-->
+			<MessageBox level="warning" styleClass="mt-4">
+				{replacePlaceholders($i18n.tip.text.reserved_by_tips, {
+					$amount: formatFee(reserved)
+				})}
+			</MessageBox>
+		{/if}
+
 		<MessageBox level="info" styleClass="mt-4">
 			{$i18n.tip.text.lapse_notice}
 		</MessageBox>
