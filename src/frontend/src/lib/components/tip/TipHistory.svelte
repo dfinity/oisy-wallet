@@ -122,7 +122,9 @@
 	{#if loading}
 		<SkeletonCards rows={3} testIdPrefix="tip-history" />
 	{:else if tips.length === 0}
-		<p class="py-12 text-center text-tertiary">{$i18n.tip.text.history_empty}</p>
+		<!-- `m-0`: the 18px a bare `<p>` carries would sit under an otherwise
+		     symmetrically padded empty state. -->
+		<p class="m-0 py-12 text-center text-tertiary">{$i18n.tip.text.history_empty}</p>
 	{/if}
 
 	{#each Object.entries(grouped) as [dateLabel, group] (dateLabel)}
