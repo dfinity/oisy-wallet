@@ -136,7 +136,8 @@
 					{#snippet mainValue()}{formatFee(fees.payout)}{/snippet}
 				</ModalValue>
 
-				<p class="text-sm text-tertiary">{$i18n.tip.text.fees_are_yours}</p>
+				<!-- `m-0`: a bare `<p>` here would leave 18px hanging under the fee rows. -->
+				<p class="m-0 mt-2 text-sm text-tertiary">{$i18n.tip.text.fees_are_yours}</p>
 			{/snippet}
 		</ModalExpandableValues>
 
