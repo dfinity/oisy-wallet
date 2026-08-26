@@ -1,9 +1,10 @@
 <script lang="ts">
+	import tipIntroImg from '$lib/assets/tip-intro-img.webp';
 	import IconArrowRight from '$lib/components/icons/IconArrowRight.svelte';
-	import IconQr from '$lib/components/icons/IconQr.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import {
 		TIP_INTRO_GET_STARTED_BUTTON,
@@ -21,17 +22,16 @@
 
 <ContentWithToolbar>
 	<!--
-		Landscape, matching the drawn panel, rather than the square it was. The
-		illustration itself is still a placeholder: the Figma page composes it from
-		layers and exports no asset, so this is a holding pattern, not a decision.
+		No aspect box and no tinted ground: the artwork is the drawn panel, at its
+		own 1024x480, and letting it size itself keeps that ratio exactly rather
+		than cropping it to whichever one we would have hard-coded here.
 	-->
-	<div
-		class="mb-6 flex aspect-16/9 w-full items-center justify-center rounded-xl bg-brand-subtle-10 text-brand-primary"
-		aria-label={$i18n.tip.alt.intro_illustration}
+	<Img
+		alt={$i18n.tip.alt.intro_illustration}
 		role="img"
-	>
-		<IconQr size="64" />
-	</div>
+		src={tipIntroImg}
+		styleClass="mb-6 h-auto w-full rounded-xl"
+	/>
 
 	<h3 class="mb-3">{$i18n.tip.text.intro_heading}</h3>
 
