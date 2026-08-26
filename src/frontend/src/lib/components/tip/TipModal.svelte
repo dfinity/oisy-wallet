@@ -33,6 +33,9 @@
 	let draft: TipDraft | undefined = $state();
 	let link: string | undefined = $state();
 	let expiresAtNs: bigint | undefined = $state();
+	// What was actually reserved, in base units. The share screen confirms this
+	// rather than re-deriving it from the input, which the user can still edit.
+	let reservedAmount: bigint | undefined = $state();
 	let busy = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
@@ -77,16 +80,22 @@
 		busy = true;
 
 		try {
+			const parsedAmount = parseToken({
+				value: `${amount}`,
+				unitName: selectedToken.decimals
+			});
+
 			const reserved = await reserveTip({
 				identity: $authIdentity,
 				draft,
 				ledgerCanisterId: selectedToken.ledgerCanisterId,
-				amount: parseToken({ value: `${amount}`, unitName: selectedToken.decimals }),
+				amount: parsedAmount,
 				fee: selectedToken.fee,
 				durationMs,
 				message: message === '' ? undefined : message
 			});
 
+			reservedAmount = parsedAmount;
 			({ link, expiresAtNs } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
@@ -116,8 +125,14 @@
 				bind:durationMs
 				bind:message
 			/>
-		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs)}
-			<TipShare {expiresAtNs} {link} onDone={modalStore.close} />
+		{:else if currentStep?.name === WizardStepsTip.SHARE && nonNullish(link) && nonNullish(expiresAtNs) && nonNullish(selectedToken) && nonNullish(reservedAmount)}
+			<TipShare
+				amount={reservedAmount}
+				{expiresAtNs}
+				{link}
+				onDone={modalStore.close}
+				token={selectedToken}
+			/>
 		{:else}
 			<TipIntro onGetStarted={enterTokensList} onViewHistory={modalStore.close} />
 		{/if}
