@@ -82,15 +82,17 @@ describe('TipHistory', () => {
 	});
 
 	it('states each status once, on the right', async () => {
-		// The design draws it twice on some rows — inline after the amount and again
-		// in the right-hand column. Saying it twice is not emphasis, it is noise.
+		// An expired row said "Expired" twice — once in the status column and again
+		// after the date, where it added nothing. Reserved and Claimed rows put
+		// something genuinely new on that second line (time left, who claimed it),
+		// so it is only the redundant case being held here.
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
-			tip({ tip_id: 'live', status: { Reserved: null } })
+			tip({ tip_id: 'gone', status: { Expired: null } })
 		]);
 
 		const { getAllByText } = render(TipHistory, { props: { onClose: vi.fn() } });
 
-		await waitFor(() => expect(getAllByText(get(i18n).tip.text.status_reserved)).toHaveLength(1));
+		await waitFor(() => expect(getAllByText(get(i18n).tip.text.status_expired)).toHaveLength(1));
 	});
 
 	it('groups rows under the day they were created', async () => {
