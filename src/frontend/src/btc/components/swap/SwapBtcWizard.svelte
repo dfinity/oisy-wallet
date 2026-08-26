@@ -10,6 +10,7 @@
 	} from '$btc/stores/utxos-fee.store';
 	import { BtcValidationError } from '$btc/types/btc-send';
 	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
+	import type { ProgressStep } from '$eth/types/send';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -19,11 +20,14 @@
 	} from '$lib/constants/analytics.constants';
 	import { btcAddressMainnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { userProfileVersion } from '$lib/derived/user-profile.derived';
+	import { hasAcknowledgedNearIntentsSwap } from '$lib/derived/user-provider-agreements.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { fetchChainFusionBtcSwap } from '$lib/services/chain-fusion-swap.services';
-	import { enableSwapDestinationToken } from '$lib/services/swap.services';
+	import { acceptProviderAgreement } from '$lib/services/provider-agreements.services';
+	import { enableSwapDestinationToken, fetchNearIntentsBtcSwap } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -32,6 +36,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider } from '$lib/types/swap';
 	import type { WizardStep } from '$lib/types/wizard';
 	import { asCkTwinOf } from '$lib/utils/chain-fusion-swap.utils';
 	import { errorDetailToString } from '$lib/utils/error.utils';
@@ -43,7 +48,7 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
-		swapProgressStep: ProgressStepsSwap;
+		swapProgressStep: ProgressStep;
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
@@ -112,6 +117,10 @@
 			: undefined
 	);
 
+	let isNearIntentsProvider = $derived(
+		$swapAmountsStore?.selectedProvider?.provider === SwapProvider.NEAR_INTENTS
+	);
+
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
 			return;
@@ -133,12 +142,10 @@
 		if (
 			isNullish($sourceToken) ||
 			isNullish($destinationToken) ||
-			isNullish(ckDestinationToken) ||
 			isNullish(swapAmount) ||
 			isNullish(network) ||
 			isNullish(utxosFee) ||
 			isNullishOrEmpty(sourceAddress) ||
-			isNullishOrEmpty(depositAddress) ||
 			isNullish($swapAmountsStore?.selectedProvider?.provider)
 		) {
 			toastsError({
@@ -190,31 +197,86 @@
 			}
 		}
 
+		const { selectedProvider } = $swapAmountsStore;
+
 		try {
-			await fetchChainFusionBtcSwap({
-				identity: $authIdentity,
-				progress,
-				sourceToken: $sourceToken,
-				destinationToken: ckDestinationToken,
-				amount: swapAmount,
-				source: sourceAddress,
-				depositAddress,
-				network,
-				utxosFee,
-				swapId: crypto.randomUUID(),
-				usdSourceValue: sourceTokenUsdValue,
-				enableDestinationToken: () =>
-					enableSwapDestinationToken({
-						destinationToken: $destinationToken,
-						identity: $authIdentity
-					})
-			});
+			if (selectedProvider?.provider === SwapProvider.NEAR_INTENTS) {
+				if (!$hasAcknowledgedNearIntentsSwap) {
+					// To be conservative on the legal side, we only allow the swap if persisting
+					// the provider agreement succeeds. If it fails we abort, since the user must
+					// explicitly accept the ToS before funds move through a third-party provider.
+					try {
+						await acceptProviderAgreement({
+							identity: $authIdentity,
+							currentUserVersion: $userProfileVersion
+						});
+					} catch (err) {
+						toastsError({
+							msg: { text: $i18n.swap.error.cannot_save_provider_agreement },
+							err
+						});
+
+						onBack();
+
+						onStartTriggerAmount();
+
+						return;
+					}
+				}
+
+				await fetchNearIntentsBtcSwap({
+					identity: $authIdentity,
+					progress: (step: ProgressStep) => (swapProgressStep = step),
+					sourceToken: $sourceToken,
+					destinationToken: $destinationToken,
+					swapAmount,
+					swapDetails: selectedProvider.swapDetails,
+					userAddress: sourceAddress,
+					network,
+					utxosFee
+				});
+			} else {
+				// The ck twin and the minter's deposit address come from app state rather than
+				// from the offer, so only this branch requires them; a NEAR Intents deposit goes
+				// to the address carried by the quote instead.
+				if (isNullish(ckDestinationToken) || isNullishOrEmpty(depositAddress)) {
+					toastsError({
+						msg: { text: $i18n.swap.error.unexpected_missing_data }
+					});
+
+					onBack();
+
+					onStartTriggerAmount();
+
+					return;
+				}
+
+				await fetchChainFusionBtcSwap({
+					identity: $authIdentity,
+					progress,
+					sourceToken: $sourceToken,
+					destinationToken: ckDestinationToken,
+					amount: swapAmount,
+					source: sourceAddress,
+					depositAddress,
+					network,
+					utxosFee,
+					swapId: crypto.randomUUID(),
+					usdSourceValue: sourceTokenUsdValue,
+					enableDestinationToken: () =>
+						enableSwapDestinationToken({
+							destinationToken: $destinationToken,
+							identity: $authIdentity
+						})
+				});
+			}
 
 			progress(ProgressStepsSwap.DONE);
 
-			// The foreground ends once the deposit is broadcast; the minting itself is tracked
-			// by the active-user-transaction row the execution just created, which fires the
-			// success or failure event when the minter settles. Hence `submitted`.
+			// The foreground ends once the deposit is broadcast; the settlement (ckBTC minting
+			// or NEAR Intents fulfillment) is tracked by the active-user-transaction row the
+			// execution just created, which fires the success or failure event when it reaches
+			// a terminal state. Hence `submitted`.
 			trackEvent({
 				name: TRACK_COUNT_SWAP_SUBMITTED,
 				metadata: swapTrackingMetadata
@@ -277,9 +339,13 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<!-- Chain Fusion is the only provider a Bitcoin source has, and its minting phase is
-		     tracked as an active user transaction — so the stepper says the swap starts here
-		     and finishes in the background. -->
-		<SwapProgress {swapProgressStep} swapWithActiveTransaction />
+		<!-- Both providers settle as an active user transaction once the deposit is broadcast,
+		     so the stepper says the swap starts here and finishes in the background. NEAR
+		     Intents additionally signs a plain BTC transfer, hence the extra signing step. -->
+		<SwapProgress
+			sendWithTransfer={isNearIntentsProvider}
+			{swapProgressStep}
+			swapWithActiveTransaction
+		/>
 	{/if}
 {/key}

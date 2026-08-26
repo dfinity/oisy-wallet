@@ -12,6 +12,7 @@ import {
 	initEthFeeStore,
 	type EthFeeStore
 } from '$eth/stores/eth-fee.store';
+import { isErc20TransactionTransfer } from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
@@ -122,6 +123,55 @@ describe('EthWalletConnectSendReview', () => {
 
 		expect(queryByText(`0 ${ETHEREUM_TOKEN.symbol}`)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.address)).not.toBeInTheDocument();
+	});
+
+	// The classifier decides whether the review enters its ERC20 branch at all, so it is wired in
+	// here rather than assumed: a selector that differs only in casing is the same call to the same
+	// contract, and used to leave every protection below dormant.
+	it.each([ERC20_TRANSFER_HASH, ERC20_TRANSFER_HASH.toUpperCase().replace('0X', '0x')])(
+		'should describe a transfer sent with selector %s',
+		(selector) => {
+			const data = encodeCall({ selector, to: RECIPIENT, value: 1_500_000n });
+
+			const { getByText, queryByText, queryByTestId, getByRole } = render(
+				EthWalletConnectSendReview,
+				{
+					props: {
+						...props,
+						data,
+						destination: USDC_TOKEN.address,
+						erc20Transfer: isErc20TransactionTransfer(data)
+					},
+					context: mockContext
+				}
+			);
+
+			expect(getByText(`1.5 ${USDC_SYMBOL}`)).toBeInTheDocument();
+			expect(getByText(RECIPIENT)).toBeInTheDocument();
+
+			// The shape the report described: a token transfer wearing a native zero-value send.
+			expect(queryByText(`0 ${ETHEREUM_TOKEN.symbol}`)).not.toBeInTheDocument();
+
+			expect(queryByTestId(warningTestId)).not.toBeInTheDocument();
+			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		}
+	);
+
+	it('should warn and disable approval for a mixed-case transfer whose arguments do not decode', () => {
+		const data = `${ERC20_TRANSFER_HASH.toUpperCase().replace('0X', '0x')}deadbeef`;
+
+		const { getByTestId, getByRole } = render(EthWalletConnectSendReview, {
+			props: {
+				...props,
+				data,
+				destination: USDC_TOKEN.address,
+				erc20Transfer: isErc20TransactionTransfer(data)
+			},
+			context: mockContext
+		});
+
+		expect(getByTestId(warningTestId)).toBeInTheDocument();
+		expect(getByRole('button', { name: en.core.text.approve })).toBeDisabled();
 	});
 
 	it('should warn and disable approval for an ERC20 transfer of an unknown token', () => {
