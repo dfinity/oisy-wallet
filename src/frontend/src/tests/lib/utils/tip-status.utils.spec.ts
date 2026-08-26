@@ -1,5 +1,5 @@
 import type { MyTip } from '$declarations/backend/backend.did';
-import { isTipCancellable, tipStatusKey, tipStatusVariant } from '$lib/utils/tip-status.utils';
+import { isTipCancellable, tipStatusKey, tipStatusTextClass } from '$lib/utils/tip-status.utils';
 import { Principal } from '@icp-sdk/core/principal';
 
 describe('tip-status.utils', () => {
@@ -38,17 +38,19 @@ describe('tip-status.utils', () => {
 		});
 	});
 
-	describe('tipStatusVariant', () => {
-		it('marks a claim as the only success', () => {
-			expect(tipStatusVariant('claimed')).toBe('success');
-			expect(tipStatusVariant('reserved')).toBe('info');
+	describe('tipStatusTextClass', () => {
+		it('highlights only the row the sender can still act on', () => {
+			// Inverted from a transaction list on purpose: the green does not mean
+			// "this succeeded", it means "still open, still yours to cancel".
+			expect(tipStatusTextClass('reserved')).toBe('text-success-primary');
 		});
 
-		it('does not dress a lapsed or cancelled tip as a failure', () => {
-			// Nothing went wrong in either case and no money moved, so an error
-			// colour would tell the sender something untrue.
-			expect(tipStatusVariant('expired')).toBe('disabled');
-			expect(tipStatusVariant('cancelled')).toBe('disabled');
+		it('lets every finished tip recede', () => {
+			// Nothing went wrong in any of these and no money is at stake any more, so
+			// none of them earns a colour.
+			expect(tipStatusTextClass('claimed')).toBe('text-tertiary');
+			expect(tipStatusTextClass('expired')).toBe('text-tertiary');
+			expect(tipStatusTextClass('cancelled')).toBe('text-tertiary');
 		});
 	});
 });
