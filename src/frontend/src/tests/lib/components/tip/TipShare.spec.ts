@@ -1,7 +1,17 @@
 import TipShare from '$lib/components/tip/TipShare.svelte';
 import { TIP_SHARE_COPY_BUTTON } from '$lib/constants/test-ids.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
+import { get, type Writable } from 'svelte/store';
+
+// Mocked rather than spied on: the component reads a module-level `derived`,
+// which captures its input stores the first time the module is imported.
+vi.mock('$lib/derived/exchange.derived', async () => {
+	const { writable } = await import('svelte/store');
+
+	return { exchanges: writable<Record<symbol, { usd: number }>>({}) };
+});
 
 describe('TipShare', () => {
 	const link = 'https://oisy.com/tip/abc123#c=secret';
@@ -15,6 +25,18 @@ describe('TipShare', () => {
 		amount: 250_000_000n,
 		onDone: vi.fn()
 	};
+
+	let rates: Writable<Record<symbol, { usd: number }>>;
+
+	beforeAll(async () => {
+		({ exchanges: rates } = (await import('$lib/derived/exchange.derived')) as unknown as {
+			exchanges: Writable<Record<symbol, { usd: number }>>;
+		});
+	});
+
+	beforeEach(() => {
+		rates.set({});
+	});
 
 	it('confirms the amount that was actually reserved', () => {
 		// This screen is the sender's only confirmation of what they committed. It
@@ -40,5 +62,34 @@ describe('TipShare', () => {
 		expect(
 			container.querySelector(`button[data-tid=${TIP_SHARE_COPY_BUTTON}]`)
 		).toBeInTheDocument();
+	});
+
+	describe('what the sender is holding up', () => {
+		it('quotes the fiat value beside the token amount', () => {
+			// The screen is shown to whoever is about to claim, and a token amount
+			// alone does not tell most people what they are being handed.
+			rates.set({ [props.token.id]: { usd: 5 } });
+
+			const { getByText } = render(TipShare, { props });
+
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+			expect(getByText(/12\.50/)).toBeInTheDocument();
+		});
+
+		it('says nothing about fiat when no rate has loaded', () => {
+			// A local or newly listed ledger has no rate. Quoting one anyway — or
+			// quoting zero — would be a claim about money that is simply untrue.
+			const { getByText, queryByText } = render(TipShare, { props });
+
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+			expect(queryByText(/\$/)).not.toBeInTheDocument();
+		});
+
+		it('leads with the reassurance a first-time claimer needs', () => {
+			const { getByText } = render(TipShare, { props });
+
+			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
+			expect(getByText(get(i18n).tip.text.share_invite)).toBeInTheDocument();
+		});
 	});
 });
