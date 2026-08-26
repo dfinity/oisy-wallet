@@ -2303,6 +2303,9 @@ interface I18nTip {
 		share_heading: string;
 		copy_link: string;
 		share_link: string;
+		they_will_receive: string;
+		share_invite: string;
+		no_wallet_needed_title: string;
 		no_wallet_needed: string;
 		expires_at: string;
 		done: string;
