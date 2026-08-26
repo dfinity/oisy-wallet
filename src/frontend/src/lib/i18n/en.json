@@ -2752,7 +2752,7 @@
 			"intro_body": "Create a crypto tip instantly. Generate a secure QR code or link and share it with anyone. If nobody claims it, the reservation lapses on its own and the funds never leave your wallet.",
 			"select_token": "Select token to issue tip",
 			"create_title": "Issue Tip",
-			"share_title": "Claim your tip",
+			"share_title": "Tip is ready",
 			"empty_balance_title": "Your balance is empty",
 			"empty_balance_description": "You need at least one supported token to generate a tip.",
 			"no_supported_tokens_title": "No tippable tokens",
