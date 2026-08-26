@@ -5,7 +5,12 @@ import {
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import {
+	NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS,
+	NEAR_INTENTS_QUOTE_DEADLINE_MS
+} from '$lib/constants/swap.constants';
 import * as nearIntentsApi from '$lib/rest/near-intents.rest';
 import {
 	clearNearIntentsTokensCache,
@@ -19,6 +24,7 @@ import { SwapProvider } from '$lib/types/swap';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import {
@@ -238,6 +244,76 @@ describe('near-intents.services', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+
+		describe('quote deadline per origin chain', () => {
+			const now = new Date('2026-03-16T00:00:00.000Z');
+
+			const solSourceToken: SplToken = {
+				...mockValidSplToken,
+				address: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+			};
+
+			beforeEach(() => {
+				vi.useFakeTimers();
+				vi.setSystemTime(now);
+
+				vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+					mockNearIntentsQuoteResponse
+				);
+			});
+
+			afterEach(() => {
+				vi.useRealTimers();
+			});
+
+			const requestedDeadline = (): string => {
+				const [[request]] = vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mock.calls;
+
+				return request.deadline;
+			};
+
+			it('should use the extended deadline for a BTC origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken: BTC_MAINNET_TOKEN,
+					destinationToken,
+					amount: 100_000n,
+					userAddress: mockBtcAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
+
+			it('should keep the short deadline for an EVM origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
+
+			it('should keep the short deadline for a SOL origin', async () => {
+				await fetchNearIntentsSwapQuote({
+					sourceToken: solSourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockSolAddress,
+					slippage
+				});
+
+				expect(requestedDeadline()).toBe(
+					new Date(now.getTime() + NEAR_INTENTS_QUOTE_DEADLINE_MS).toISOString()
+				);
+			});
 		});
 
 		describe('with Solana tokens', () => {
