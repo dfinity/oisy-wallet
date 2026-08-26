@@ -724,10 +724,13 @@ which is to say not at all.
 - **Cancelling drops the stored code** — the link is worthless then. Claimed and
   expired tips keep theirs until pruned: the cleanup runs as the caller, and
   neither of those paths has the sender as caller.
-- History carries a **Link** action per live row, which decrypts and reopens the
-  share step. An action rather than a clickable row: the row already carries
-  Cancel, and nesting interactive elements is both invalid markup and ambiguous
-  when one outcome is irreversible.
+- **The whole live row opens the tip**, decrypting the code and reopening the
+  share step. It started as a **Link** action beside a **Cancel** one, on the
+  reasoning that nesting interactive elements is invalid markup and ambiguous when
+  one outcome is irreversible. That reasoning held; the conclusion was wrong way
+  round. The row is now the only control, and the irreversible action moved
+  _inside_ what the row opens — where it is one action on a screen that shows what
+  it would destroy, rather than a button next to a list entry.
 - A tip created before this store existed has no ciphertext. That is a fact about
   the tip, not a failure, and reads as one.
 
