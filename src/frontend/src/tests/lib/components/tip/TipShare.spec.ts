@@ -187,6 +187,17 @@ describe('TipShare', () => {
 		});
 	});
 
+	it('breaks the claim instructions onto two lines', () => {
+		// One sentence did two jobs: whether they can claim at all, and what to do
+		// with the code. Asserted as separate elements, since that is the change.
+		const { getByText } = render(TipShare, { props });
+
+		const { text } = get(i18n).tip;
+
+		expect(getByText(text.no_wallet_needed)).toBeInTheDocument();
+		expect(getByText(text.scan_or_photo)).toBeInTheDocument();
+	});
+
 	describe('when the link could not be saved', () => {
 		it('tells the sender to copy it now', () => {
 			// The tip is real either way; what is lost is finding this link again. Said

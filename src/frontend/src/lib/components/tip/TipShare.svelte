@@ -193,7 +193,14 @@
 		-->
 		<p class="m-0 font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
 
+		<!--
+			Two lines, not one sentence: the first answers "can they even claim this",
+			the second says what to do with the code. `m-0` on the second so they read
+			as one paragraph broken for scanning, rather than two separate blocks.
+		-->
 		<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+
+		<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
 	</div>
 
 	<!--
