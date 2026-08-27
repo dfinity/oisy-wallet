@@ -170,7 +170,9 @@ pub async fn get_tip_encrypted_vetkey(transport_key: ByteBuf) -> TipVetkeyResult
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn get_tip_vetkey_public_key() -> TipVetkeyResult {
-    if let Err(e) = GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller) {
+    if let Err(e) =
+        GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
         return TipVetkeyResult::Err(TipError::RateLimited(e));
     }
     secrets::get_vetkey_public_key().await.into()
