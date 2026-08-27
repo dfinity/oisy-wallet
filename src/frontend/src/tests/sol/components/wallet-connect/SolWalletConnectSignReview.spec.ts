@@ -4,7 +4,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
 import en from '$tests/mocks/i18n.mock';
-import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { mockAtaAddress, mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SolWalletConnectSignReview', () => {
@@ -339,8 +339,8 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
-	// The three rows describe what will be signed, which the simulation only predicts.
-	it('should render the amount, the balance and the destination of a decoded transfer', () => {
+	// The two rows describe what will be signed, which the simulation only predicts.
+	it('should render the amount and the balance of a decoded transfer', () => {
 		balancesStore.set({ id: SOLANA_TOKEN.id, data: { data: 5_000_000_000n, certified: false } });
 
 		const { getByText, container } = render(SolWalletConnectSignReview, { props });
@@ -350,18 +350,28 @@ describe('SolWalletConnectSignReview', () => {
 
 		expect(getByText(en.send.text.balance)).toBeInTheDocument();
 		expect(container.querySelector('#balance')).toHaveTextContent('5 SOL');
-
-		expect(getByText(en.send.text.destination)).toBeInTheDocument();
-		expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
 	});
 
-	describe('sources and destinations', () => {
-		it('should replace the single destination field with the lists', () => {
-			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
+	// The delegate of an approval is not a recipient, so it keeps its own row even though the
+	// review names no destination.
+	it('should render the spender of an approval', () => {
+		const { getByText } = render(SolWalletConnectSignReview, {
+			props: { ...props, isApproval: true }
+		});
+
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
+		expect(getByText(mockSolAddress2)).toBeInTheDocument();
+	});
+
+	describe('transfer parties', () => {
+		// Where the value ends up is described by the balance changes, so neither the lists nor the
+		// single field the lists once replaced name a recipient.
+		it('should render no destination at all', () => {
+			const { queryByText, container } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
 					parties: {
-						sources: [{ address: mockSolAddress, own: true }],
+						sources: [{ address: mockAtaAddress, own: true }],
 						destinations: [{ address: mockSolAddress2, own: false }],
 						partial: false
 					}
@@ -369,26 +379,43 @@ describe('SolWalletConnectSignReview', () => {
 			});
 
 			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.transfer_destinations)).toBeInTheDocument();
+			expect(container.querySelector('#destination')).toBeNull();
+			expect(container.querySelector('#transfer-destinations')).toBeNull();
+			expect(queryByText(mockSolAddress2)).not.toBeInTheDocument();
 		});
 
-		it('should keep the destination field when the lists have nothing to put in its place', () => {
-			const { getByText, container } = render(SolWalletConnectSignReview, {
+		it('should render the sources of the transaction', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					parties: {
+						sources: [{ address: mockAtaAddress, own: true }],
+						destinations: [],
+						partial: false
+					}
+				}
+			});
+
+			expect(getByText(en.wallet_connect.text.transfer_sources)).toBeInTheDocument();
+			expect(getByText(mockAtaAddress)).toBeInTheDocument();
+		});
+
+		it('should render no destination either when the lists are empty', () => {
+			const { getByText, queryByText } = render(SolWalletConnectSignReview, {
 				props: {
 					...props,
 					parties: { sources: [], destinations: [], partial: true }
 				}
 			});
 
-			expect(getByText(en.send.text.destination)).toBeInTheDocument();
-			expect(container.querySelector('#destination')).toHaveTextContent(mockSolAddress2);
+			expect(queryByText(en.send.text.destination)).not.toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
 		});
 
 		it('should render no lists at all until the decode settles', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, { props });
 
-			expect(queryByText(en.wallet_connect.text.transfer_destinations)).not.toBeInTheDocument();
+			expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
 			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
 		});
 	});
