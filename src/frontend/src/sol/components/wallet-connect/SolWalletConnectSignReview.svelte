@@ -169,6 +169,13 @@
 			<SolWalletConnectTransferParties {parties} userAddress={source} />
 		{/if}
 
+		{#if nonNullish(preview)}
+			<SolWalletConnectSimulationPreview {feeToken} {preview} />
+		{/if}
+
+		<!-- What the transaction costs comes after what it does. The fees are the same on almost
+		     every request, so keeping them above the balance changes pushed the part that actually
+		     varies further from the approve button. -->
 		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
 			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
 		</WalletConnectModalValue>
@@ -177,10 +184,6 @@
 			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
 				{@render feeValue(prioritizationFee)}
 			</WalletConnectModalValue>
-		{/if}
-
-		{#if nonNullish(preview)}
-			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
