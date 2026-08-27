@@ -2804,8 +2804,10 @@
 			"take_me_to_wallet": "Take me to the wallet",
 			"unavailable_title": "This tip is no longer available",
 			"unavailable_description": "It may already have been claimed, it may have expired, or the link may be incomplete. Ask whoever sent it for a new one.",
-			"uncovered_title": "PLACEHOLDER (needs copy review): this tip cannot be paid right now",
-			"uncovered_description": "PLACEHOLDER (needs copy review). The reserved funds are no longer available, so the tip cannot be claimed at the moment. It may work later, or the sender may have cancelled it.",
+			"uncovered_title": "This tip is not available right now",
+			"uncovered_description": "The sender has taken back the funds they set aside for it. Ask them for a new link.",
+			"short_balance_title": "The sender is out of funds",
+			"short_balance_description": "Their balance no longer covers this tip. Nothing was transferred and your link still works, so try again once they have topped up.",
 			"claim_failed_title": "The claim did not go through",
 			"claim_failed": "The tip could not be claimed. Nothing was transferred, so try again.",
 			"message_too_long": "Keep the message to $max characters or fewer.",
@@ -2815,7 +2817,8 @@
 		},
 		"alt": {
 			"intro_illustration": "A tip QR code being scanned",
-			"claim_illustration": "A stack of coins waiting to be claimed"
+			"claim_illustration": "A stack of coins waiting to be claimed",
+			"claim_failed_illustration": "A tip that could not be claimed"
 		}
 	}
 }

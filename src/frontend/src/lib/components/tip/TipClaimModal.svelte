@@ -10,10 +10,12 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
+	import failedTipImg from '$lib/assets/failed-vip-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
@@ -40,10 +42,13 @@
 	 * `unavailable` and `uncovered` come from different calls and mean different
 	 * things: the first is the link (unknown, expired, already claimed, wrong
 	 * code — one indistinguishable response by design), the second is a payout the
-	 * sender no longer covers. `failed` is neither — nothing moved and the tip is
-	 * still claimable, which is the only state a retry makes sense in.
+	 * sender no longer covers, and `shortBalance` is the reservation still standing
+	 * with the sender's money gone. `failed` is none of those — our own call did
+	 * not complete. Everything except `unavailable` is worth retrying, but only
+	 * these three can say anything useful about why.
 	 */
-	type ClaimState = 'claiming' | 'received' | 'unavailable' | 'uncovered' | 'failed';
+	type ClaimState =
+		'claiming' | 'received' | 'unavailable' | 'uncovered' | 'shortBalance' | 'failed';
 
 	let claimState = $state<ClaimState>('claiming');
 	let amountLabel = $state<string | undefined>();
@@ -102,6 +107,12 @@
 	// completed throws an `Error`. That difference is the whole point below.
 	const isUncovered = (err: unknown): boolean =>
 		typeof err === 'object' && err !== null && 'Uncovered' in err;
+
+	// The canister distinguishes this from `Uncovered` because the difference
+	// matters to the reader: the reservation still stands and their link still
+	// works, so coming back later is a real option rather than a platitude.
+	const isShortBalance = (err: unknown): boolean =>
+		typeof err === 'object' && err !== null && 'InsufficientFunds' in err;
 
 	/**
 	 * Only the canister itself saying the link is dead may be reported as dead.
@@ -243,9 +254,11 @@
 			// would silently survive either union gaining a member.
 			const outcome: TipClaimOutcome = isUncovered(err)
 				? 'uncovered'
-				: isUnavailable(err)
-					? 'unavailable'
-					: 'failed';
+				: isShortBalance(err)
+					? 'shortBalance'
+					: isUnavailable(err)
+						? 'unavailable'
+						: 'failed';
 
 			claimState = outcome;
 
@@ -260,6 +273,27 @@
 	};
 
 	onMount(claim);
+
+	// Kept together rather than spread across four template branches: these three
+	// differ only in what they say, and a reader comparing them should be able to
+	// see all of it at once.
+	let failure = $derived.by(() => {
+		const { text } = $i18n.tip;
+
+		if (claimState === 'uncovered') {
+			return { title: text.uncovered_title, description: text.uncovered_description };
+		}
+
+		if (claimState === 'shortBalance') {
+			return { title: text.short_balance_title, description: text.short_balance_description };
+		}
+
+		if (claimState === 'unavailable') {
+			return { title: text.unavailable_title, description: text.unavailable_description };
+		}
+
+		return { title: text.claim_failed_title, description: text.claim_failed };
+	});
 
 	let title = $derived(
 		nonNullish(amountLabel) && notEmptyString(amountLabel)
@@ -327,18 +361,17 @@
 						>{/snippet}
 				</ModalValue>
 			</div>
-		{:else if claimState === 'uncovered'}
-			<h3 class="mb-3 text-center">{$i18n.tip.text.uncovered_title}</h3>
-
-			<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.uncovered_description}</p>
-		{:else if claimState === 'unavailable'}
-			<h3 class="mb-3 text-center">{$i18n.tip.text.unavailable_title}</h3>
-
-			<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.unavailable_description}</p>
 		{:else}
-			<h3 class="mb-3 text-center">{$i18n.tip.text.claim_failed_title}</h3>
+			<!--
+				The same artwork every bad state in the app uses, so a claimer who has
+				seen a failed reward recognises the shape of this screen before reading
+				it. Text alone made all four outcomes look identical.
+			-->
+			<ImgBanner alt={$i18n.tip.alt.claim_failed_illustration} src={failedTipImg} />
 
-			<p class="mb-6 text-center text-tertiary">{$i18n.tip.text.claim_failed}</p>
+			<h3 class="mt-6 mb-3 text-center">{failure.title}</h3>
+
+			<p class="mb-6 text-center text-tertiary">{failure.description}</p>
 		{/if}
 
 		{#snippet toolbar()}
@@ -351,14 +384,29 @@
 				>
 					{$i18n.tip.text.take_me_to_wallet}
 				</Button>
-			{:else if claimState === 'failed'}
-				<Button fullWidth onclick={claim} testId={TIP_CLAIM_RETRY_BUTTON}>
-					{$i18n.tip.text.claim_retry}
-				</Button>
 			{:else if claimState !== 'claiming'}
-				<Button colorStyle="secondary-light" fullWidth onclick={close}>
-					{$i18n.core.text.close}
-				</Button>
+				<!--
+					Close is always here. The failed state used to offer "Try again" and
+					nothing else, and since this modal has no title bar there was no cross
+					either — a reader whose claim failed was stuck on the screen with no way
+					out but the browser.
+
+					Retry only where it could work. `unavailable` means the canister says the
+					link is dead, and `uncovered` means the sender has taken the reservation
+					back — both would fail identically every time, and offering a retry
+					would contradict what the screen just said to do instead.
+				-->
+				<div class="flex w-full gap-3">
+					<Button colorStyle="secondary-light" fullWidth onclick={close}>
+						{$i18n.core.text.close}
+					</Button>
+
+					{#if claimState === 'failed' || claimState === 'shortBalance'}
+						<Button fullWidth onclick={claim} testId={TIP_CLAIM_RETRY_BUTTON}>
+							{$i18n.tip.text.claim_retry}
+						</Button>
+					{/if}
+				</div>
 			{/if}
 		{/snippet}
 	</ContentWithToolbar>

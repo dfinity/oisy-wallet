@@ -2336,6 +2336,8 @@ interface I18nTip {
 		unavailable_description: string;
 		uncovered_title: string;
 		uncovered_description: string;
+		short_balance_title: string;
+		short_balance_description: string;
 		claim_failed_title: string;
 		claim_failed: string;
 		message_too_long: string;
@@ -2343,7 +2345,11 @@ interface I18nTip {
 		view_history: string;
 		get_started: string;
 	};
-	alt: { intro_illustration: string; claim_illustration: string };
+	alt: {
+		intro_illustration: string;
+		claim_illustration: string;
+		claim_failed_illustration: string;
+	};
 }
 
 interface I18n {

@@ -273,4 +273,61 @@ describe('TipClaimModal', () => {
 			});
 		});
 	});
+
+	describe('every failure has a way out', () => {
+		// The bug this closes: the failed state offered "Try again" and nothing else,
+		// and this modal has no title bar so there was no cross either. A claimer
+		// whose payout failed was stuck on the screen.
+		const cases: { name: string; err: unknown; retryable: boolean }[] = [
+			{ name: 'a failed call', err: new Error('boom'), retryable: true },
+			{ name: 'a short sender balance', err: { InsufficientFunds: null }, retryable: true },
+			{ name: 'a withdrawn reservation', err: { Uncovered: null }, retryable: false },
+			{ name: 'a dead link', err: { NotFound: null }, retryable: false }
+		];
+
+		it.each(cases)('offers Close after $name', async ({ err }) => {
+			mockDetails();
+			vi.spyOn(tipServices, 'claimTip').mockRejectedValue(err);
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+			const { getByText } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByText(get(i18n).core.text.close)).toBeInTheDocument());
+		});
+
+		it.each(cases)(
+			'offers a retry after $name only when it could work',
+			async ({ err, retryable }) => {
+				// Offering a retry where it cannot help contradicts what the screen just
+				// told the reader to do instead.
+				mockDetails();
+				vi.spyOn(tipServices, 'claimTip').mockRejectedValue(err);
+				vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+				const { getByText, queryByText } = render(TipClaimModal, { props: { pending } });
+
+				await waitFor(() => expect(getByText(get(i18n).core.text.close)).toBeInTheDocument());
+
+				const retry = queryByText(get(i18n).tip.text.claim_retry);
+
+				expect(retry === null).toBe(!retryable);
+			}
+		);
+	});
+
+	it('names the sender being out of funds rather than blaming the claim', async () => {
+		// "Nothing was transferred, so try again" was shown for this too, which told
+		// the reader nothing about who could fix it or when to come back.
+		mockDetails();
+		vi.spyOn(tipServices, 'claimTip').mockRejectedValue({ InsufficientFunds: null });
+		vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+
+		const { getByText } = render(TipClaimModal, { props: { pending } });
+
+		await waitFor(() =>
+			expect(getByText(get(i18n).tip.text.short_balance_title)).toBeInTheDocument()
+		);
+
+		expect(getByText(get(i18n).tip.text.short_balance_description)).toBeInTheDocument();
+	});
 });
