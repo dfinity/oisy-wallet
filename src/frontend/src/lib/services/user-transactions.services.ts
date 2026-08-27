@@ -1,10 +1,12 @@
 import type { TokenId as BackendTokenId, UserTransaction } from '$declarations/backend/backend.did';
 import { getUserTransactions, saveUserTransactions } from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_SAVE_USER_TRANSACTIONS_BATCH } from '$lib/constants/user-transactions.constants';
 import type { NullishIdentity } from '$lib/types/identity';
 import type { Transaction as EthTransaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
+import { consoleError } from '$lib/utils/console.utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish } from '@dfinity/utils';
 
@@ -83,14 +85,34 @@ export const saveFinalizedTransactions = async <T>({
 		return { success: true };
 	}
 
-	try {
-		await saveUserTransactions({
-			identity,
-			tokenId,
-			transactions: finalized.map(mapToBackend)
-		});
-		return { success: true };
-	} catch (_: unknown) {
-		return { success: false };
+	const mapped = finalized.map(mapToBackend);
+
+	// The canister rejects an over-sized batch outright rather than truncating it, so sending a long
+	// history in one call persists nothing at all. A cold start fetches the full history from the
+	// explorer, which is exactly when the list is long enough to trip that.
+	const batches = Array.from(
+		{ length: Math.ceil(mapped.length / MAX_SAVE_USER_TRANSACTIONS_BATCH) },
+		(_, index) =>
+			mapped.slice(
+				index * MAX_SAVE_USER_TRANSACTIONS_BATCH,
+				(index + 1) * MAX_SAVE_USER_TRANSACTIONS_BATCH
+			)
+	);
+
+	// Sequential rather than concurrent: each call is an update, and the canister merges into one
+	// entry per (user, token), so firing them together buys nothing and multiplies the load.
+	for (const batch of batches) {
+		try {
+			await saveUserTransactions({ identity, tokenId, transactions: batch });
+		} catch (err: unknown) {
+			// Not worth surfacing to the user: the cache is a warm-up, and the transactions are already
+			// on screen. Worth logging, because a silent total failure here is what kept a rejected
+			// over-sized batch invisible.
+			consoleError('Failed to save a batch of user transactions:', err);
+
+			return { success: false };
+		}
 	}
+
+	return { success: true };
 };

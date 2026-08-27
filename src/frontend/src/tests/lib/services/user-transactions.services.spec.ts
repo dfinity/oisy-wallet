@@ -1,5 +1,6 @@
 import * as backendApi from '$lib/api/backend.api';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { MAX_SAVE_USER_TRANSACTIONS_BATCH } from '$lib/constants/user-transactions.constants';
 import {
 	loadUserTransactions,
 	saveFinalizedTransactions
@@ -124,6 +125,75 @@ describe('user-transactions.services', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('saveFinalizedTransactions batching', () => {
+		const makeTransactions = (count: number): Transaction[] =>
+			Array.from({ length: count }, (_, index) => ({
+				...mockEthTransaction,
+				hash: `0x${index}`
+			}));
+
+		const save = (transactions: Transaction[]) =>
+			saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: mockMapToBackendUserTransaction
+			});
+
+		beforeEach(() => {
+			vi.spyOn(backendApi, 'saveUserTransactions').mockResolvedValue(undefined);
+		});
+
+		it('should send a single call when the batch fits', async () => {
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH));
+
+			expect(result).toEqual({ success: true });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledOnce();
+		});
+
+		// The canister rejects an over-sized batch outright, so one call for a long history saved
+		// nothing at all. A cold start is exactly when the history is long enough to trip that.
+		it('should split a history longer than the cap across calls', async () => {
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 2 + 1));
+
+			expect(result).toEqual({ success: true });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
+		});
+
+		it('should never exceed the cap in any single call', async () => {
+			await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 2 + 7));
+
+			vi.mocked(backendApi.saveUserTransactions).mock.calls.forEach(([{ transactions }]) => {
+				expect(transactions.length).toBeLessThanOrEqual(MAX_SAVE_USER_TRANSACTIONS_BATCH);
+			});
+		});
+
+		it('should persist every transaction across the batches, in order', async () => {
+			const transactions = makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH + 3);
+
+			await save(transactions);
+
+			const sent = vi
+				.mocked(backendApi.saveUserTransactions)
+				.mock.calls.flatMap(([{ transactions: batch }]) => batch);
+
+			expect(sent).toHaveLength(transactions.length);
+		});
+
+		it('should stop and report failure when a batch is rejected', async () => {
+			vi.spyOn(backendApi, 'saveUserTransactions')
+				.mockResolvedValueOnce(undefined)
+				.mockRejectedValueOnce(new Error('TooManyTransactions'));
+
+			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 3));
+
+			expect(result).toEqual({ success: false });
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(2);
 		});
 	});
 
