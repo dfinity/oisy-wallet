@@ -14,6 +14,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
@@ -30,6 +31,11 @@
 	}
 
 	let { link, expiresAtNs, token, amount, onDone }: Props = $props();
+
+	// Copy and share are tracked separately: which one a sender reaches for says
+	// whether the QR, the link or the share sheet is doing the work, and that is
+	// the only way to know which of the three earns its place on this screen.
+	const trackCopy = () => trackTip({ step: 'copy', side: 'sender', symbol: token.symbol });
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
@@ -138,6 +144,7 @@
 		<ReceiveCopy
 			address={link}
 			copyAriaLabel={$i18n.tip.text.copy_link}
+			onCopy={trackCopy}
 			testId={TIP_SHARE_COPY_BUTTON}
 		/>
 

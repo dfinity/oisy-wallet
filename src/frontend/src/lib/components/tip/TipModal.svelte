@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import TokenActionContext from '$lib/components/send/TokenActionContext.svelte';
 	import TipCreate from '$lib/components/tip/TipCreate.svelte';
@@ -9,9 +9,11 @@
 	import TipTokensList from '$lib/components/tip/TipTokensList.svelte';
 	import WizardModal from '$lib/components/ui/WizardModal.svelte';
 	import { tipWizardSteps } from '$lib/config/tip.config';
-	import { DEFAULT_TIP_EXPIRY_MS } from '$lib/constants/tip.constants';
+	import { DEFAULT_TIP_EXPIRY_MS, TIP_EXPIRY_OPTIONS } from '$lib/constants/tip.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
 	import { WizardStepsTip } from '$lib/enums/wizard-steps';
+	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { newTipDraft, reserveTip, type TipDraft } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -40,6 +42,15 @@
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
 	let message = $state('');
+
+	// The top of the funnel. Every later step is the same `tip` event with a
+	// different modifier, so the drop-off between them is answerable.
+	onMount(() => trackTip({ step: 'open', side: 'sender' }));
+
+	// The label, not the millisecond count: `7d` is what a reader of the dashboard
+	// can act on, and it is already the vocabulary of the form.
+	const expiryLabel = (ms: number): string =>
+		TIP_EXPIRY_OPTIONS.find((option) => option.ms === ms)?.labelKey ?? `${ms}ms`;
 
 	const tokensListContext = initModalTokensListContext({ tokens: [] });
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, tokensListContext);
@@ -99,6 +110,14 @@
 			({ link, expiresAtNs } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
+			trackTip({
+				step: 'create',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				expiry: expiryLabel(durationMs),
+				symbol: selectedToken?.symbol
+			});
+
 			// Deliberately reassuring about the money: an approve either landed and is
 			// replaceable, or never happened. Either way nothing was transferred.
 			toastsError({ msg: { text: $i18n.tip.text.reserve_failed }, err });
