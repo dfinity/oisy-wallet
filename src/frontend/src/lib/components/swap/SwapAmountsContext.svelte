@@ -133,9 +133,9 @@
 				return;
 			}
 
-			// if swapAmounts fails, it means no pool is currently available for the provided
-			// tokens. A provider that refused the amount as below its minimum names the reason,
-			// which the form surfaces instead of the generic "swap is not offered".
+			// Any fetch failure (no pool for the pair, provider or network error) surfaces as
+			// "no offers". A provider that refused the amount as below its minimum names the
+			// reason, which the form surfaces instead of the generic "swap is not offered".
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
