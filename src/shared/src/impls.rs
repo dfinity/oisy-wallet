@@ -6,6 +6,7 @@ use serde::{de, Deserializer};
 
 use crate::{
     types::{
+        account::{BtcAddress, EthAddress, SolPrincipal, TokenAccountId},
         agreement::{
             Agreements, ProviderAgreementType, UpdateAgreementsError, UserAgreement, UserAgreements,
         },
@@ -46,6 +47,12 @@ use crate::{
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
 const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
+/// Maximum length of the address string inside a `TokenAccountId`.
+///
+/// Deliberately generous: the longest address any supported chain produces is 62 characters
+/// (bech32 P2WSH and bech32m P2TR), so this bounds stored addresses without being able to reject
+/// anything a real wallet would hand us.
+const CONTACT_MAX_ADDRESS_LENGTH: usize = 128;
 /// Maximum image size in bytes (100 KB)
 pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 
@@ -856,9 +863,40 @@ impl Validate for Contact {
     }
 }
 
+impl Validate for TokenAccountId {
+    fn validate(&self) -> Result<(), Error> {
+        // Icrcv2 carries a Principal and a [u8; 32], both already bounded by their own types, so
+        // only the string-bearing arms need a length check.
+        let address = match self {
+            TokenAccountId::Icrcv2(_) => return Ok(()),
+            TokenAccountId::Sol(SolPrincipal(address))
+            | TokenAccountId::Eth(EthAddress::Public(address))
+            | TokenAccountId::Btc(
+                BtcAddress::P2PKH(address)
+                | BtcAddress::P2SH(address)
+                | BtcAddress::P2WPKH(address)
+                | BtcAddress::P2WSH(address)
+                | BtcAddress::P2TR(address),
+            ) => address,
+        };
+
+        validate_string_length(
+            address,
+            CONTACT_MAX_ADDRESS_LENGTH,
+            "TokenAccountId.address",
+        )
+    }
+}
+
 impl Validate for ContactAddressData {
     fn validate(&self) -> Result<(), Error> {
-        // Note: We don't need to validate TokenAccountId since it has its own validation
+        // `TokenAccountId` is deliberately NOT validated here. This type is deserialized both from
+        // inbound requests and from stored state, and `ContactAddressData` is wired into
+        // `validate_on_deserialize!`, so a length bound applied here would also run against
+        // addresses already in stable memory. Anything stored before the bound existed that failed
+        // it would trap on read and take the whole contact list with it. The bound is enforced on
+        // the write path in `UpdateContactRequest::validate` instead, which reaches every address
+        // that can enter storage without re-judging what is already there.
 
         // Check if the label exists
         if let Some(label) = &self.label {
@@ -922,6 +960,10 @@ impl Validate for UpdateContactRequest {
             "UpdateContactRequest.addresses",
         )?;
 
+        for address in &self.addresses {
+            address.token_account_id.validate()?;
+        }
+
         Ok(())
     }
 }
@@ -950,6 +992,94 @@ impl Validate for ExchangeData {
 impl Validate for ExchangeRate {
     fn validate(&self) -> Result<(), Error> {
         self.usd.validate()
+    }
+}
+
+#[cfg(test)]
+mod address_validation_tests {
+    use candid::Principal;
+
+    use super::CONTACT_MAX_ADDRESS_LENGTH;
+    use crate::{
+        types::{
+            account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId},
+            contact::{ContactAddressData, UpdateContactRequest},
+        },
+        validate::Validate,
+    };
+
+    fn request_with_address(address: TokenAccountId) -> UpdateContactRequest {
+        UpdateContactRequest {
+            id: 1,
+            name: "Test".to_string(),
+            addresses: vec![ContactAddressData {
+                token_account_id: address,
+                label: None,
+            }],
+            update_timestamp_ns: 0,
+            image: None,
+        }
+    }
+
+    #[test]
+    fn accepts_real_world_addresses() {
+        let addresses = vec![
+            TokenAccountId::Btc(BtcAddress::P2PKH(
+                "1RainRzqJtJxHTngafpCejDLfYq2y4KBc".to_string(),
+            )),
+            TokenAccountId::Btc(BtcAddress::P2TR(
+                "bc1pxwww0ct9ue7e8tdnlmug5m2tamfn7q06sahstg39ys4c9f3340qqxrdu9k".to_string(),
+            )),
+            TokenAccountId::Eth(EthAddress::Public(
+                "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+            )),
+            TokenAccountId::Sol(SolPrincipal(
+                "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM".to_string(),
+            )),
+            TokenAccountId::Icrcv2(Icrcv2AccountId::WithPrincipal {
+                owner: Principal::anonymous(),
+                subaccount: None,
+            }),
+        ];
+
+        for address in addresses {
+            assert!(
+                address.validate().is_ok(),
+                "expected {address:?} to be accepted"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_an_address_over_the_length_bound() {
+        let address = TokenAccountId::Sol(SolPrincipal("a".repeat(CONTACT_MAX_ADDRESS_LENGTH + 1)));
+
+        assert!(address.validate().is_err());
+    }
+
+    #[test]
+    fn accepts_an_address_exactly_at_the_length_bound() {
+        let address = TokenAccountId::Sol(SolPrincipal("a".repeat(CONTACT_MAX_ADDRESS_LENGTH)));
+
+        assert!(address.validate().is_ok());
+    }
+
+    #[test]
+    fn update_request_rejects_an_over_long_address() {
+        let request = request_with_address(TokenAccountId::Btc(BtcAddress::P2PKH(
+            "1".repeat(CONTACT_MAX_ADDRESS_LENGTH + 1),
+        )));
+
+        assert!(request.validate().is_err());
+    }
+
+    #[test]
+    fn update_request_accepts_a_normal_address() {
+        let request = request_with_address(TokenAccountId::Eth(EthAddress::Public(
+            "0x1D1479C185d32EB90533a08b36B3CFa5F84A0E6B".to_string(),
+        )));
+
+        assert!(request.validate().is_ok());
     }
 }
 
