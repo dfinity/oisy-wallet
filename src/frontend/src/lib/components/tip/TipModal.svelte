@@ -182,20 +182,35 @@
 				unitName: selectedToken.decimals
 			});
 
+			// Client wall-clock is fine: the canister validates this against IC time
+			// and the 24h–7d options dwarf any client/replica skew. Decided here rather
+			// than inside `reserveTip` so the deadline is known without waiting for the
+			// reservation to finish.
+			const deadline = BigInt(Date.now() + durationMs) * 1_000_000n;
+
 			const reserved = await reserveTip({
 				identity: $authIdentity,
 				draft,
 				ledgerCanisterId: selectedToken.ledgerCanisterId,
 				amount: parsedAmount,
 				fee: selectedToken.fee,
-				durationMs,
+				expiresAtNs: deadline,
 				message: message === '' ? undefined : message
+			});
+
+			trackTip({
+				step: 'create',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				expiry: expiryLabel(durationMs),
+				symbol: selectedToken.symbol
 			});
 
 			viewingTip = undefined;
 			reservedAmount = parsedAmount;
+			expiresAtNs = deadline;
 			linkMessage = undefined;
-			({ link, expiresAtNs } = reserved);
+			({ link } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
 			trackTip({

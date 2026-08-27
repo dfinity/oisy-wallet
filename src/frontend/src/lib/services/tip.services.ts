@@ -89,6 +89,11 @@ export const parseClaimCodeFromFragment = (fragment: string): string | undefined
  * `DuplicateTipId` because the first attempt already landed. This is why the
  * draft is the caller's to hold — generating a fresh one on retry would strand
  * the first allowance until it expired.
+ *
+ * **The deadline is the caller's too.** It used to be derived here from a
+ * duration, which meant the only way to learn it was to wait for this whole
+ * function to finish — and the share screen needs it to draw anything at all. The
+ * caller now decides it, so it can show the screen while this is still running.
  */
 export const reserveTip = async ({
 	identity,
@@ -96,7 +101,7 @@ export const reserveTip = async ({
 	ledgerCanisterId,
 	amount,
 	fee,
-	durationMs,
+	expiresAtNs,
 	message
 }: {
 	identity: Identity;
@@ -104,16 +109,10 @@ export const reserveTip = async ({
 	ledgerCanisterId: CanisterIdText;
 	amount: bigint;
 	fee: bigint;
-	durationMs: number;
+	expiresAtNs: bigint;
 	message?: string;
-}): Promise<{ link: string; expiresAtNs: bigint }> => {
+}): Promise<{ link: string }> => {
 	const subaccount = await tipSpenderSubaccount(draft.tipId);
-
-	// Client wall-clock is fine: the canister validates the expiry against IC
-	// time, and the 1h–7d options dwarf any client/replica skew. The same value
-	// goes on the allowance, so the reservation cannot outlive the tip or lapse
-	// before it.
-	const expiresAtNs = BigInt(Date.now() + durationMs) * 1_000_000n;
 
 	await approve({
 		identity,
@@ -154,7 +153,7 @@ export const reserveTip = async ({
 		consoleWarn('Could not store the recoverable claim code for this tip', err);
 	}
 
-	return { link: buildTipLink(draft), expiresAtNs };
+	return { link: buildTipLink(draft) };
 };
 
 /**
