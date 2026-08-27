@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import TipExpiry from '$lib/components/tip/TipExpiry.svelte';
@@ -15,6 +16,7 @@
 	import { reservedTipAmounts } from '$lib/derived/tips.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { usdValue } from '$lib/utils/exchange.utils';
@@ -44,11 +46,45 @@
 		onNext
 	}: Props = $props();
 
+	// The real balance, from the same context `StakeForm` reads. The subtraction
+	// happens here rather than in the store, so nothing outside this form sees a
+	// reduced number.
+	const { sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let fees = $derived(tipFees(token.fee));
 
 	// What live tips in this token are already holding back, so the amount field's
 	// ceiling can explain itself.
 	let reserved = $derived($reservedTipAmounts[token.id] ?? ZERO);
+
+	/**
+	 * The ceiling for this form, and only this form.
+	 *
+	 * Deliberately not done by reducing the balance store: that made the send flow,
+	 * the swap flow and every MAX control quietly offer less, misstated the
+	 * portfolio total as though the money had left the account, and still could not
+	 * be enforced — staking, depositing and any other wallet bypass it. So the
+	 * subtraction lives where the decision is actually made, and everywhere else
+	 * sees the real balance with the reservation shown as a status instead.
+	 *
+	 * `undefined` when nothing is reserved, so `StakeForm` keeps its own
+	 * fee-aware maximum rather than being handed a cap it does not need.
+	 */
+	let maxAmount = $derived.by(() => {
+		if (reserved === ZERO) {
+			return undefined;
+		}
+
+		const balance = $sendBalance;
+
+		if (isNullish(balance)) {
+			return undefined;
+		}
+
+		const spendable = balance - reserved - fees.total;
+
+		return spendable > ZERO ? spendable : ZERO;
+	});
 
 	// Counted in characters, matching the canister's own limit — a byte count
 	// would reject a message the user sees as well within length.
@@ -84,6 +120,7 @@
 	autofocus={isDesktop()}
 	disabled={messageTooLong || busy}
 	isSelectable
+	{maxAmount}
 	nextLabel={$i18n.tip.text.generate}
 	onClick={onSelectToken}
 	{onClose}
