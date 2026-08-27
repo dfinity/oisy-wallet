@@ -185,15 +185,18 @@ describe('user-transactions.services', () => {
 			expect(sent).toHaveLength(transactions.length);
 		});
 
-		it('should stop and report failure when a batch is rejected', async () => {
+		// The canister validates a batch as a unit and refuses all of it on the first transaction that
+		// breaches a field bound, so one unusual transaction must not cost every later batch too.
+		it('should keep saving the later batches when one is rejected', async () => {
 			vi.spyOn(backendApi, 'saveUserTransactions')
 				.mockResolvedValueOnce(undefined)
-				.mockRejectedValueOnce(new Error('TooManyTransactions'));
+				.mockRejectedValueOnce(new Error('InvalidTransaction'))
+				.mockResolvedValue(undefined);
 
 			const result = await save(makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH * 3));
 
 			expect(result).toEqual({ success: false });
-			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(2);
+			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
 		});
 	});
 
