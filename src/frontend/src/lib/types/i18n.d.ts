@@ -2307,6 +2307,7 @@ interface I18nTip {
 		they_will_receive: string;
 		no_wallet_needed_title: string;
 		no_wallet_needed: string;
+		scan_or_photo: string;
 		expires_at: string;
 		done: string;
 		generating_link: string;
