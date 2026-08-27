@@ -26,15 +26,34 @@ import { dataSlice } from 'ethers/utils';
 export const isTransactionPending = ({ blockNumber }: EthTransactionUi): boolean =>
 	isNullish(blockNumber);
 
+// `0x` and the four bytes of a function selector, as hex.
+const SELECTOR_LENGTH = 10;
+
+/**
+ * Whether calldata begins with a given function selector.
+ *
+ * Casing is not part of calldata: `0xA9059CBB` and `0xa9059cbb` are the same four bytes and the
+ * same call to the same contract. Comparing them as text therefore let a dApp miss every ERC-20
+ * check by changing nothing the EVM can see — the review described a native zero-value send, the
+ * fail-closed warning never fired because the calldata was never recognised as ERC-20 at all, and
+ * the transfer was signed and broadcast regardless.
+ *
+ * The comparison is on the selector alone. The calldata is passed on untouched, because what gets
+ * signed must be what was received.
+ */
+const hasSelector = ({ data, selector }: { data: string; selector: string }): boolean =>
+	data.slice(0, SELECTOR_LENGTH).toLowerCase() === selector.toLowerCase();
+
 export const isErc20TransactionApprove = (data: string | undefined): boolean =>
-	nonNullish(data) && data.startsWith(ERC20_APPROVE_HASH);
+	nonNullish(data) && hasSelector({ data, selector: ERC20_APPROVE_HASH });
 
 export const isErc20TransactionTransfer = (data: string | undefined): boolean =>
-	nonNullish(data) && data.startsWith(ERC20_TRANSFER_HASH);
+	nonNullish(data) && hasSelector({ data, selector: ERC20_TRANSFER_HASH });
 
 export const isErc20TransactionDeposit = (data: string | undefined): boolean =>
 	nonNullish(data) &&
-	(data.startsWith(ERC20_DEPOSIT_HASH) || data.startsWith(ERC20_DEPOSIT_ERC20_HASH));
+	(hasSelector({ data, selector: ERC20_DEPOSIT_HASH }) ||
+		hasSelector({ data, selector: ERC20_DEPOSIT_ERC20_HASH }));
 
 const abiCoder = AbiCoder.defaultAbiCoder();
 
