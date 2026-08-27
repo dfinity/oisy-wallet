@@ -1,6 +1,7 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
+import { ERC_SET_APPROVAL_FOR_ALL_HASH } from '$eth/constants/erc.constants';
 import { ERC20_APPROVE_HASH, ERC20_TRANSFER_HASH } from '$eth/constants/erc20.constants';
 import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -9,6 +10,7 @@ import {
 	decodeErc20AbiData,
 	decodeErc20AbiDataValue,
 	decodeErc20TransferRecipient,
+	decodeSetApprovalForAllData,
 	findErcTransfer,
 	findErcTransfers,
 	formatErcTransferAsset,
@@ -16,6 +18,7 @@ import {
 	isErc20TransactionApprove,
 	isErc20TransactionDeposit,
 	isErc20TransactionTransfer,
+	isErcTransactionSetApprovalForAll,
 	isMaxUint256,
 	mapAddressToName,
 	mapEthTransactionUi,
@@ -38,6 +41,7 @@ import {
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { CkEthMinterDid } from '@icp-sdk/canisters/cketh';
+import { AbiCoder } from 'ethers/abi';
 
 const transaction: Transaction = {
 	blockNumber: 123456,
@@ -476,6 +480,51 @@ describe('transactions.utils', () => {
 		});
 	});
 
+	describe('isErcTransactionSetApprovalForAll', () => {
+		it('should return true for calldata starting with the setApprovalForAll selector', () => {
+			expect(
+				isErcTransactionSetApprovalForAll(`${ERC_SET_APPROVAL_FOR_ALL_HASH}deadbeef`)
+			).toBeTruthy();
+		});
+
+		it('should return false for calldata of an ERC20 method', () => {
+			expect(isErcTransactionSetApprovalForAll(`${ERC20_APPROVE_HASH}deadbeef`)).toBeFalsy();
+
+			expect(isErcTransactionSetApprovalForAll(`${ERC20_TRANSFER_HASH}deadbeef`)).toBeFalsy();
+		});
+
+		it('should return false for nullish calldata', () => {
+			expect(isErcTransactionSetApprovalForAll(undefined)).toBeFalsy();
+		});
+	});
+
+	describe('decodeSetApprovalForAllData', () => {
+		const operator = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+
+		const encode = (approved: boolean): string =>
+			`${ERC_SET_APPROVAL_FOR_ALL_HASH}${AbiCoder.defaultAbiCoder()
+				.encode(['address', 'bool'], [operator, approved])
+				.slice(2)}`;
+
+		it('should decode the operator and a granted approval', () => {
+			expect(decodeSetApprovalForAllData(encode(true))).toStrictEqual({
+				operator,
+				approved: true
+			});
+		});
+
+		it('should decode the operator and a revoked approval', () => {
+			expect(decodeSetApprovalForAllData(encode(false))).toStrictEqual({
+				operator,
+				approved: false
+			});
+		});
+
+		it('should throw on truncated calldata rather than inventing an operator', () => {
+			expect(() => decodeSetApprovalForAllData(`${ERC_SET_APPROVAL_FOR_ALL_HASH}00`)).toThrow();
+		});
+	});
+
 	// Casing is not part of calldata: the EVM sees the same four bytes either way, so a classifier
 	// that reads the text can be stepped around without changing the call that executes. That let a
 	// token transfer reach the review as a native zero-value send, with the fail-closed warning
@@ -498,6 +547,13 @@ describe('transactions.utils', () => {
 		it.each(['0x26B3293F', '0xDB9751AF'])('should recognise %s as a deposit', (selector) => {
 			expect(isErc20TransactionDeposit(`${selector}${args}`)).toBeTruthy();
 		});
+
+		it.each(['0xA22CB465', '0xa22CB465', '0xA22cb465'])(
+			'should recognise %s as a setApprovalForAll',
+			(selector) => {
+				expect(isErcTransactionSetApprovalForAll(`${selector}${args}`)).toBeTruthy();
+			}
+		);
 
 		// The selector is four bytes and no more: a longer prefix that merely starts the same way is
 		// a different call.

@@ -309,7 +309,7 @@ The Bitcoin address scoped to a reservation is always **derived from the authent
 
 Turning ETH into ckETH, a twinned ERC-20 into its ckERC-20 counterpart, or BTC into ckBTC is offered inside the Swap modal as an ordinary provider named **Chain Fusion**, competing on rate with ICPSwap, KongSwap, Velora, NEAR Intents and 1Sec. Selecting ETH as the pay token puts ckETH among the receive options; selecting ckETH puts ETH among them, and the same holds for every ck twin whose native side is on **Ethereum mainnet** — the only network where the ck helper contracts are deployed. USDC on Base or Arbitrum therefore gets no Chain Fusion offer, because a ckUSDC deposit made there could never be minted.
 
-**Bitcoin joins the swap universe through this provider, and only through it.** Before Chain Fusion, a user holding BTC opened Swap and saw no offers at all: no DEX in the list quotes a Bitcoin pair. Bitcoin now appears as a pay token with ckBTC as its sole receive option, and ckBTC offers BTC back alongside whatever the IC DEXes and 1Sec quote. The pairing is Bitcoin↔ICP only — Bitcoin never reaches Ethereum or Solana in the network filter, because no provider can take it there.
+**Bitcoin joins the swap universe through this provider, and in production only through it.** Before Chain Fusion, a user holding BTC opened Swap and saw no offers at all: no DEX in the list quotes a Bitcoin pair. Bitcoin now appears as a pay token with ckBTC as its sole receive option, and ckBTC offers BTC back alongside whatever the IC DEXes and 1Sec quote. In production the pairing is Bitcoin↔ICP only: Bitcoin never reaches Ethereum or Solana in the network filter, because no provider there can take it. On local and staging, NEAR Intents also serves Bitcoin (see [NEAR Intents as a Bitcoin swap provider](#near-intents-as-a-bitcoin-swap-provider-local-and-staging)).
 
 The offer carries no slippage: a ck conversion is deterministic, so the rate is 1:1 apart from fees, and the form's fee section itemizes those fees one row at a time rather than as a single sum — the provider sheet carries no fees, only the provider's identity and the minimum amount the minter imposes. Two cases are worth calling out:
 
@@ -319,6 +319,14 @@ The offer carries no slippage: a ck conversion is deterministic, so the rate is 
 The quoted receive amount is what the minter actually credits, which is **not** always what the Convert flow shows. Two directions are not 1:1: a **BTC deposit** loses the minter's KYT fee (Convert quotes it 1:1 and is wrong — a 1 000-satoshi deposit mints 900), and a **ckBTC withdrawal** loses the Bitcoin network and minter fees. Everything else is 1:1, with its fees charged on top. Either way the fee breakdown lists every component that costs something, and its total is the user's whole cost of the conversion — the part paid out of balance plus the part withheld from what lands.
 
 The pre-existing **Convert** flow is unchanged and still reachable from a token's own page. Both paths coexist; the two mechanisms are identical, only the entry point, the presentation and — for a BTC deposit — the honesty of the quoted amount differ.
+
+### NEAR Intents as a Bitcoin swap provider (local and staging)
+
+Behind `NEAR_INTENTS_BTC_SWAP_ENABLED` (`src/frontend/src/env/rest/near-intents.env.ts`, on for local and staging builds, off in production), NEAR Intents also serves Bitcoin. Native BTC then appears as a pay token toward the NEAR Intents destination chains (Ethereum, Arbitrum, Base, BSC, Polygon and Solana mainnets), competing with the Chain Fusion ckBTC offer, and EVM and Solana tokens quote toward BTC, with the payout going to the user's own BTC address. A destination whose address the user does not hold yet is simply not quoted, so a quote can never pay out to a wrong-chain address.
+
+Funds cannot move before the user has acknowledged the NEAR Intents terms of service, exactly as in the EVM and Solana wizards. A BTC-source swap broadcasts the deposit transaction and becomes an **active user transaction at the moment of broadcast**, not when the flow finishes: a BTC broadcast is irreversible, so the swap is tracked even if a later step throws, and the global poller drives it to success or failure across modal close, refresh and logout, identically to the EVM and Solana NEAR Intents swaps. The spent UTXOs stay reserved while the deposit is pending, so a concurrent send cannot double-spend them.
+
+What this deliberately does not do: no BTC testnet or regtest support (mainnet only, like the rest of NEAR Intents), and no production enablement. With the flag off, production behavior is byte-for-byte the previous sections.
 
 ### Cross-session settlement
 

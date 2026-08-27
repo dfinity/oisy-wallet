@@ -8,7 +8,10 @@ import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { NEAR_INTENTS_SWAP_ENABLED } from '$env/rest/near-intents.env';
+import {
+	NEAR_INTENTS_BTC_SWAP_ENABLED,
+	NEAR_INTENTS_SWAP_ENABLED
+} from '$env/rest/near-intents.env';
 import { ONESEC_SWAP_ENABLED } from '$env/rest/onesec.env';
 import { ICRC_CK_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/tokens/tokens-icrc/tokens.icrc.ck.env';
 import type { NetworkId } from '$lib/types/network';
@@ -118,9 +121,15 @@ export const ONESEC_EVM_NETWORK_IDS = [
 
 const CHAIN_FUSION_EVM_NETWORK_IDS = CHAIN_FUSION_SWAP_ENABLED ? [ETHEREUM_NETWORK_ID] : [];
 
-// Bitcoin reaches ICP, and only ICP: ck conversion is its single route into the swap
-// universe, and no DEX in the list quotes a BTC pair.
+// Bitcoin reaches ICP through Chain Fusion: ck conversion is its route into the ICP
+// side of the swap universe, and no DEX in the list quotes a BTC pair.
 const CHAIN_FUSION_BTC_NETWORK_IDS: NetworkId[] = CHAIN_FUSION_SWAP_ENABLED
+	? [BTC_MAINNET_NETWORK_ID]
+	: [];
+
+// NEAR Intents bridges BTC mainnet to and from every EVM and Solana chain in its map.
+// Local and staging only until the flag flips; production keeps today's matrix.
+const NEAR_INTENTS_BTC_NETWORK_IDS: NetworkId[] = NEAR_INTENTS_BTC_SWAP_ENABLED
 	? [BTC_MAINNET_NETWORK_ID]
 	: [];
 
@@ -131,10 +140,11 @@ const ICP_PAIRED_EVM_NETWORK_IDS: NetworkId[] = [
 	])
 ];
 
-const withIcpIfPaired = (networkId: NetworkId): NetworkId[] =>
-	ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId)
-		? [ICP_NETWORK_ID, ...SUPPORTED_CROSS_SWAP_NETWORK_IDS]
-		: SUPPORTED_CROSS_SWAP_NETWORK_IDS;
+const withIcpIfPaired = (networkId: NetworkId): NetworkId[] => [
+	...(ICP_PAIRED_EVM_NETWORK_IDS.includes(networkId) ? [ICP_NETWORK_ID] : []),
+	...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+	...NEAR_INTENTS_BTC_NETWORK_IDS
+];
 
 export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 	[ICP_NETWORK_ID]: [
@@ -142,11 +152,17 @@ export const SUPPORTED_CROSS_SWAP_NETWORKS: Record<NetworkId, NetworkId[]> = {
 		...ICP_PAIRED_EVM_NETWORK_IDS,
 		...CHAIN_FUSION_BTC_NETWORK_IDS
 	],
-	[BTC_MAINNET_NETWORK_ID]: CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : [],
+	[BTC_MAINNET_NETWORK_ID]: [
+		...(CHAIN_FUSION_BTC_NETWORK_IDS.length > 0 ? [ICP_NETWORK_ID] : []),
+		...(NEAR_INTENTS_BTC_SWAP_ENABLED ? SUPPORTED_CROSS_SWAP_NETWORK_IDS : [])
+	],
 	[ETHEREUM_NETWORK_ID]: withIcpIfPaired(ETHEREUM_NETWORK_ID),
 	[ARBITRUM_MAINNET_NETWORK_ID]: withIcpIfPaired(ARBITRUM_MAINNET_NETWORK_ID),
 	[BSC_MAINNET_NETWORK_ID]: withIcpIfPaired(BSC_MAINNET_NETWORK_ID),
 	[POLYGON_MAINNET_NETWORK_ID]: withIcpIfPaired(POLYGON_MAINNET_NETWORK_ID),
 	[BASE_NETWORK_ID]: withIcpIfPaired(BASE_NETWORK_ID),
-	[SOLANA_MAINNET_NETWORK_ID]: SUPPORTED_CROSS_SWAP_NETWORK_IDS
+	[SOLANA_MAINNET_NETWORK_ID]: [
+		...SUPPORTED_CROSS_SWAP_NETWORK_IDS,
+		...NEAR_INTENTS_BTC_NETWORK_IDS
+	]
 };
