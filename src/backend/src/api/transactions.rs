@@ -43,6 +43,10 @@ pub fn get_user_transactions(request: GetUserTransactionsRequest) -> GetUserTran
 
 /// Saves finalized transactions for the caller. Transactions are deduplicated by hash.
 ///
+/// A transaction with an oversized field is not chain data, so the call is
+/// rejected outright rather than returned as an error, the same way
+/// `set_custom_token` handles input that is too large.
+///
 /// # Errors
 /// Errors are enumerated by: `UserTransactionError`.
 #[update(guard = "caller_is_registered_user")]
@@ -51,6 +55,10 @@ pub fn save_user_transactions(request: SaveUserTransactionsRequest) -> SaveUserT
         token_id,
         transactions,
     } = request;
+
+    if let Err(err) = model::validate_transactions(&transactions) {
+        ic_cdk::trap(format!("Invalid transaction: {err}"));
+    }
 
     let principal = msg_caller();
 

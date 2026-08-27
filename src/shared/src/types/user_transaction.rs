@@ -11,6 +11,31 @@ pub const MAX_SAVE_USER_TRANSACTIONS_BATCH: usize = 500;
 /// Maximum number of transactions that can be returned in a single response.
 pub const MAX_GET_USER_TRANSACTIONS_RESULTS: u64 = 100;
 
+/// Maximum length of a transaction `id`. The longest identifier we store is a
+/// Solana signature (88 characters) plus a disambiguating suffix.
+pub const MAX_USER_TRANSACTION_ID_LEN: usize = 128;
+
+/// Maximum length of an address or account field. The longest form we store is
+/// an ICRC textual account (principal plus checksum plus subaccount), which is
+/// about 135 characters; EVM (42), Solana (44) and Bitcoin (90) are shorter.
+pub const MAX_USER_TRANSACTION_ADDRESS_LEN: usize = 160;
+
+/// Maximum length of the hex-encoded EVM input data. Ordinary token transfers
+/// use 138 characters and even large contract calls stay well below this, so
+/// the cap only excludes payloads that are not transaction calldata.
+pub const MAX_USER_TRANSACTION_DATA_LEN: usize = 16 * 1024;
+
+/// Maximum length, in bytes, of an ICRC memo. The ledgers we read cap memos at
+/// 32 or 64 bytes.
+pub const MAX_USER_TRANSACTION_MEMO_LEN: usize = 512;
+
+/// Maximum width, in bits, of any amount stored on a transaction (value, fee,
+/// gas, NFT token id). Every chain OISY supports expresses these in at most
+/// 256 bits, so a wider value is never real chain data. `Nat` is
+/// variable-length on the wire, so without this bound a single transaction
+/// could carry megabytes of digits.
+pub const MAX_USER_TRANSACTION_AMOUNT_BITS: u64 = 256;
+
 /// A finalized transaction stored in the backend.
 ///
 /// Contains common fields shared across all networks plus a network-specific
