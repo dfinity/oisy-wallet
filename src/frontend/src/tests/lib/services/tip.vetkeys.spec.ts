@@ -1,5 +1,19 @@
-import { decryptClaimCodeWithKey, encryptClaimCodeWithKey } from '$lib/services/tip.vetkeys';
+import { getTipEncryptedVetkey, getTipVetkeyPublicKey } from '$lib/api/backend.api';
+import {
+	decryptClaimCodeWithKey,
+	deriveTipKeyMaterial,
+	encryptClaimCodeWithKey,
+	resetTipKeyCache
+} from '$lib/services/tip.vetkeys';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { DerivedKeyMaterial } from '@dfinity/vetkeys';
+
+vi.mock('$lib/api/backend.api', () => ({
+	getTipEncryptedVetkey: vi.fn(),
+	getTipVetkeyPublicKey: vi.fn()
+}));
+
+const VERIFICATION_KEY_STORAGE_KEY = 'oisy-tip-vetkey-verification-key';
 
 describe('tip.vetkeys', () => {
 	const claimCode = 'Q12pPcMkDKCfkNOiyX8Hnw';
@@ -52,5 +66,48 @@ describe('tip.vetkeys', () => {
 		await expect(
 			decryptClaimCodeWithKey({ keyMaterial: await buildKeyMaterial(2), encrypted, tipId })
 		).rejects.toThrow();
+	});
+
+	// The verification key is a canister-wide public constant, so it is cached in
+	// `sessionStorage` to stop a page reload spending an update call — and a
+	// derivation's rate-limit budget — on bytes we already had.
+	describe('cached verification key', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+			resetTipKeyCache();
+			sessionStorage.clear();
+
+			// Junk on purpose: these tests are about which calls are made and what
+			// the cache holds afterwards, so the derivation is expected to reject.
+			vi.mocked(getTipEncryptedVetkey).mockResolvedValue(new Uint8Array(32).fill(7));
+			vi.mocked(getTipVetkeyPublicKey).mockResolvedValue(new Uint8Array(48).fill(9));
+		});
+
+		it('does not refetch the constant when it is already cached', async () => {
+			sessionStorage.setItem(VERIFICATION_KEY_STORAGE_KEY, 'CQkJCQkJCQkJCQkJ');
+
+			await expect(deriveTipKeyMaterial({ identity: mockIdentity })).rejects.toThrow();
+
+			expect(getTipVetkeyPublicKey).not.toHaveBeenCalled();
+			// The paid derivation is still fetched: it is per-caller and per-session.
+			expect(getTipEncryptedVetkey).toHaveBeenCalledOnce();
+		});
+
+		it('caches the constant after fetching it once', async () => {
+			await expect(deriveTipKeyMaterial({ identity: mockIdentity })).rejects.toThrow();
+
+			expect(getTipVetkeyPublicKey).toHaveBeenCalledOnce();
+		});
+
+		it('forgets a cached constant a derivation could not verify against', async () => {
+			// Otherwise one corrupt value is permanent: the derivation rejects, the
+			// session cache evicts the rejected promise so the next call retries, and
+			// that retry reads the same bad bytes straight back out of storage.
+			sessionStorage.setItem(VERIFICATION_KEY_STORAGE_KEY, 'CQkJCQkJCQkJCQkJ');
+
+			await expect(deriveTipKeyMaterial({ identity: mockIdentity })).rejects.toThrow();
+
+			expect(sessionStorage.getItem(VERIFICATION_KEY_STORAGE_KEY)).toBeNull();
+		});
 	});
 });
