@@ -138,6 +138,12 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
+	{#if dappPrioritizationFee}
+		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+	{:else if highPrioritizationFee}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+	{/if}
+
 	<!-- The review names no recipient of its own: a single destination had to pick one winner out
 	     of a swap, and where the value ends up is what the simulated balance changes describe. An
 	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
@@ -171,14 +177,6 @@
 			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
 				{@render feeValue(prioritizationFee)}
 			</WalletConnectModalValue>
-		{/if}
-
-		<!-- A steep priority fee is a legitimate choice when the network is congested, so both tiers
-		     inform instead of blocking the way invalid typed data does on Ethereum. -->
-		{#if dappPrioritizationFee}
-			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
-		{:else if highPrioritizationFee}
-			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 		{/if}
 
 		{#if nonNullish(preview)}

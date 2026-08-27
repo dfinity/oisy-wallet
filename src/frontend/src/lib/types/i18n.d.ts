@@ -1609,6 +1609,8 @@ interface I18nTransaction {
 		details: string;
 		hash: string;
 		hash_copied: string;
+		signature: string;
+		signature_copied: string;
 		id: string;
 		id_copied: string;
 		timestamp: string;
