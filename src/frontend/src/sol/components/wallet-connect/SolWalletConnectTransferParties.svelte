@@ -19,7 +19,7 @@
 
 	let { parties, userAddress }: Props = $props();
 
-	let { sources, destinations, partial } = $derived(parties);
+	let { sources, partial } = $derived(parties);
 
 	// Every source is one of the user's own accounts by the rule itself, so a list that resolves to
 	// the wallet the review already displays only repeats it. Suppressing it is safe only because
@@ -37,8 +37,8 @@
 		<span class="flex flex-wrap items-center gap-2">
 			{displayed}
 
-			<!-- Our own account is a destination of every swap, since a swap is how the user receives.
-			     Marking it is what keeps it from reading as a counterparty. -->
+			<!-- A source displayed by an account address rather than by the wallet the review names
+			     would otherwise read as a counterparty. Marking it is what says it is still ours. -->
 			{#if party.own}
 				<span class="text-tertiary" data-tid="transfer-party-own">
 					{$i18n.wallet_connect.text.transfer_party_own}
@@ -63,22 +63,9 @@
 	</WalletConnectModalValue>
 {/if}
 
-{#if destinations.length > 0}
-	<WalletConnectModalValue
-		label={$i18n.wallet_connect.text.transfer_destinations}
-		ref="transfer-destinations"
-	>
-		<div class="flex flex-col gap-3">
-			{#each destinations as destination (destination.address)}
-				{@render partyRow(destination)}
-			{/each}
-		</div>
-	</WalletConnectModalValue>
-{/if}
-
-<!-- Stated whenever the lists were built without inner instructions, not only when something
-     visibly failed: two empty lists on a transaction that clearly does something are the single
-     most dangerous thing these lists can show. -->
+<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+     something visibly failed: an empty list on a transaction that clearly spends something is the
+     single most dangerous thing this section can show. -->
 {#if partial}
 	<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
 {/if}
