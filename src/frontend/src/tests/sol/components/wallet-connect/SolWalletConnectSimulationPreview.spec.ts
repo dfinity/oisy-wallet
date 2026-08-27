@@ -136,13 +136,4 @@ describe('SolWalletConnectSimulationPreview', () => {
 
 		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
-
-	it('should always state that the real execution can differ', () => {
-		const { getByText } = render(
-			SolWalletConnectSimulationPreview,
-			props({ tokenDeltas: [], controlChanges: [] })
-		);
-
-		expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
-	});
 });

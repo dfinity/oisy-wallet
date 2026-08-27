@@ -1190,6 +1190,8 @@
 			"max_slippage_error": "滑点容忍度不能为 0% 或超过 $maxSlippage%",
 			"swap_button": "立即兑换",
 			"swap_is_not_offered": "当前不支持此兑换。",
+			"swap_amount_too_low": "",
+			"swap_amount_too_low_minimum": "",
 			"executing_transaction": "正在执行交易...",
 			"initializing": "正在初始化交易...",
 			"swapping": "正在兑换...",

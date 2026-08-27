@@ -131,6 +131,37 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 	});
 
+	describe('the placement of the fees', () => {
+		it('should render the fees below the simulated changes', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			const changes = getByText(en.wallet_connect.text.simulated_changes);
+			const fee = getByText(en.fee.text.network_fee);
+
+			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the fees above the hex data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
+			});
+
+			const fee = getByText(en.fee.text.prioritization_fee);
+			const hex = getByText(en.wallet_connect.text.hex_data);
+
+			expect(fee.compareDocumentPosition(hex) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+	});
+
 	describe('comparing the requested fee against the baseline', () => {
 		it('should say nothing about a fee in line with the network', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, {
@@ -291,6 +322,37 @@ describe('SolWalletConnectSignReview', () => {
 			const warning = getByText(en.wallet_connect.text.high_prioritization_fee);
 
 			expect(unreviewed.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+	});
+
+	describe('the simulation note', () => {
+		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
+
+		it('should state that the real execution can differ once a simulation ran', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+		});
+
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.simulation_note)).not.toBeInTheDocument();
+		});
+
+		it('should render the note above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			const note = getByText(en.wallet_connect.text.simulation_note);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(note.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
 				Node.DOCUMENT_POSITION_FOLLOWING
 			);
 		});
