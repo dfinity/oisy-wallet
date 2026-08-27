@@ -131,6 +131,37 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.fee.text.prioritization_fee)).not.toBeInTheDocument();
 	});
 
+	describe('the placement of the fees', () => {
+		it('should render the fees below the simulated changes', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					preview: { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] }
+				}
+			});
+
+			const changes = getByText(en.wallet_connect.text.simulated_changes);
+			const fee = getByText(en.fee.text.network_fee);
+
+			expect(changes.compareDocumentPosition(fee) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the fees above the hex data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, data: 'AQID', prioritizationFee: 238_217n }
+			});
+
+			const fee = getByText(en.fee.text.prioritization_fee);
+			const hex = getByText(en.wallet_connect.text.hex_data);
+
+			expect(fee.compareDocumentPosition(hex) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+	});
+
 	describe('comparing the requested fee against the baseline', () => {
 		it('should say nothing about a fee in line with the network', () => {
 			const { queryByText } = render(SolWalletConnectSignReview, {
