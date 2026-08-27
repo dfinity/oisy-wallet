@@ -47,6 +47,16 @@ pub struct TipRecord {
     pub message: Option<String>,
     pub claim_code_hash: ByteBuf,
     pub state: TipState,
+    /// When the tip reached a terminal state, which is where its retention
+    /// window starts counting from.
+    ///
+    /// Only `Cancelled` needs it — `Claimed` already carries `claimed_at_ns`,
+    /// and a live tip has no terminal instant. An `Option` rather than a field
+    /// on the variant so records already in stable memory keep decoding:
+    /// candid reads a missing `opt` as `None`, whereas turning the unit
+    /// `Cancelled` into a record would make every stored cancellation
+    /// undecodable.
+    pub terminal_at_ns: Option<u64>,
 }
 
 impl TipRecord {
@@ -248,6 +258,7 @@ mod tests {
             message: Some("thanks!".to_string()),
             claim_code_hash: ByteBuf::from(sha256(b"code").to_vec()),
             state,
+            terminal_at_ns: None,
         }
     }
 
