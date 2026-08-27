@@ -1,25 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>cloud-engines-logo</title>
-    <g id="Dapps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Cloud-Engines" transform="translate(-684, -82)">
-            <g id="cloud-engines-logo" transform="translate(684, 82)">
-                <circle id="Oval" fill="#FAF9F5" cx="64" cy="64" r="64"></circle>
-                <g id="Group" transform="translate(20, 14)">
-                    <g fill="#0D5E5D" id="Oval">
-                        <ellipse cx="44.3029126" cy="9.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="78.9921733" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="78.9921733" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="44.3029126" cy="89.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="9.61365193" cy="69.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="9.61365193" cy="29.6" rx="9.61365193" ry="9.6"></ellipse>
-                        <ellipse cx="44.3029126" cy="49.6" rx="11.2159272" ry="11.2"></ellipse>
-                    </g>
-                    <g transform="translate(9.6137, 9.6)" id="Shape" stroke="#0D5E5D" stroke-opacity="0.25" stroke-width="3.968">
-                        <path d="M34.6892607,0 L34.6892607,40 M69.3785214,20 L34.6892607,40 M69.3785214,60 L34.6892607,40 M34.6892607,80 L34.6892607,40 M0,60 L34.6892607,40 M0,20 L34.6892607,40"></path>
-                    </g>
-                </g>
-            </g>
-        </g>
-    </g>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_33_2)">
+<mask id="mask0_33_2" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128">
+<path d="M128 0H0V128H128V0Z" fill="white"/>
+<path d="M64 83.125C74.5624 83.125 83.125 74.5624 83.125 64C83.125 53.4376 74.5624 44.875 64 44.875C53.4376 44.875 44.875 53.4376 44.875 64C44.875 74.5624 53.4376 83.125 64 83.125Z" fill="black"/>
+</mask>
+<g mask="url(#mask0_33_2)">
+<path d="M64 120.25C95.066 120.25 120.25 95.066 120.25 64C120.25 32.934 95.066 7.75 64 7.75C32.934 7.75 7.75 32.934 7.75 64C7.75 95.066 32.934 120.25 64 120.25Z" fill="#FFF200"/>
+<path d="M65.6875 112.375C93.0256 112.375 115.188 90.2131 115.188 62.875C115.188 35.5369 93.0256 13.375 65.6875 13.375C38.3494 13.375 16.1875 35.5369 16.1875 62.875C16.1875 90.2131 38.3494 112.375 65.6875 112.375Z" fill="#F15A29"/>
+<path d="M63.8594 105.906C86.8482 105.906 105.484 87.2701 105.484 64.2812C105.484 41.2924 86.8482 22.6562 63.8594 22.6562C40.8705 22.6562 22.2344 41.2924 22.2344 64.2812C22.2344 87.2701 40.8705 105.906 63.8594 105.906Z" fill="#27AAE1"/>
+<path d="M61.1875 101.828C79.8271 101.828 94.9375 86.7177 94.9375 68.0781C94.9375 49.4385 79.8271 34.3281 61.1875 34.3281C42.5479 34.3281 27.4375 49.4385 27.4375 68.0781C27.4375 86.7177 42.5479 101.828 61.1875 101.828Z" fill="url(#paint0_linear_33_2)"/>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_33_2" x1="24.2977" y1="97.9508" x2="98.0772" y2="38.2054" gradientUnits="userSpaceOnUse">
+<stop offset="0.28" stop-color="#EA1F79"/>
+<stop offset="0.78" stop-color="#522D81"/>
+</linearGradient>
+<clipPath id="clip0_33_2">
+<rect width="128" height="128" fill="white"/>
+</clipPath>
+</defs>
 </svg>
