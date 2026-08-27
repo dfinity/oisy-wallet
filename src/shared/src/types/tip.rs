@@ -168,6 +168,10 @@ pub enum TipStatus {
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum TipClaimFailureReason {
     Uncovered,
+    /// The sender's account no longer holds the amount. Distinct from
+    /// `Uncovered`: the reservation is still granted, the money is simply not
+    /// there, so topping up makes the same link work again.
+    InsufficientFunds,
     TransferFailed,
 }
 
@@ -254,6 +258,10 @@ pub enum TipError {
     /// A claim is already in flight for this tip. Resolves on its own: either
     /// it completes, or [`TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS`] passes and a retry
     /// may take it over.
+    /// The sender's account no longer holds the amount. The reservation is still
+    /// granted and the claim code is still valid, so the same link works again
+    /// once they top up — which is why this is not folded into `TransferFailed`.
+    InsufficientFunds,
     ClaimInProgress,
     /// The caller is not the sender of this tip.
     NotYourTip,
