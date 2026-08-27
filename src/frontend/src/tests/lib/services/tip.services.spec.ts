@@ -13,10 +13,10 @@ import * as tipVetkeys from '$lib/services/tip.vetkeys';
 import * as consoleUtils from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 
-const HOUR_MS = 60 * 60 * 1000;
 const LEDGER_ID = 'mxzaz-hqaaa-aaaar-qaada-cai';
 const AMOUNT = 500_000n;
 const FEE = 10_000n;
+const EXPIRES_AT_NS = 1_800_000_000_000_000_000n;
 
 const toHex = (bytes: Uint8Array): string =>
 	[...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -69,7 +69,7 @@ describe('tip.services', () => {
 				ledgerCanisterId: LEDGER_ID,
 				amount: AMOUNT,
 				fee: FEE,
-				durationMs: 24 * HOUR_MS,
+				expiresAtNs: EXPIRES_AT_NS,
 				message: 'thanks!'
 			});
 
@@ -104,7 +104,7 @@ describe('tip.services', () => {
 				ledgerCanisterId: LEDGER_ID,
 				amount: AMOUNT,
 				fee: FEE,
-				durationMs: HOUR_MS
+				expiresAtNs: EXPIRES_AT_NS
 			});
 
 			const [[recorded]] = createSpy.mock.calls;
@@ -132,7 +132,7 @@ describe('tip.services', () => {
 				ledgerCanisterId: LEDGER_ID,
 				amount: AMOUNT,
 				fee: FEE,
-				durationMs: HOUR_MS
+				expiresAtNs: EXPIRES_AT_NS
 			};
 
 			await expect(reserveTip(args)).rejects.toThrow('network');
@@ -167,7 +167,7 @@ describe('tip.services', () => {
 				ledgerCanisterId: LEDGER_ID,
 				amount: AMOUNT,
 				fee: FEE,
-				durationMs: HOUR_MS
+				expiresAtNs: EXPIRES_AT_NS
 			});
 
 			// A secret written first would outlive a create that failed, leaving a
@@ -193,7 +193,7 @@ describe('tip.services', () => {
 					ledgerCanisterId: LEDGER_ID,
 					amount: AMOUNT,
 					fee: FEE,
-					durationMs: HOUR_MS
+					expiresAtNs: EXPIRES_AT_NS
 				})
 			).resolves.toEqual(
 				expect.objectContaining({ link: expect.stringContaining(draft.claimCode) })
