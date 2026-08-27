@@ -16,13 +16,16 @@
 	import { loadMyTips } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import {
-		formatNanosecondsToDate,
-		formatSecondsToNormalizedDate,
-		formatToken
-	} from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isTipCancellable, tipStatusKey, tipStatusTextClass } from '$lib/utils/tip-status.utils';
+	import {
+		isTipCancellable,
+		TIP_HISTORY_GROUP_ORDER,
+		tipHistoryGroup,
+		tipStatusKey,
+		tipStatusTextClass,
+		type TipHistoryGroup
+	} from '$lib/utils/tip-status.utils';
 	import { tippableTokens } from '$lib/utils/tip.utils';
 
 	interface Props {
@@ -72,19 +75,31 @@
 		});
 	};
 
-	let grouped = $derived.by(() => {
-		const currentDate = new Date();
+	/**
+	 * Grouped by what the row needs from the reader, not by when it was created.
+	 *
+	 * Dates made a poor top-level split here: a sender scanning this screen wants
+	 * to know whether anything is stuck, and a date heading buries a failed tip
+	 * among yesterday's successful ones. Each row still carries its own date.
+	 *
+	 * Order comes from `TIP_HISTORY_GROUP_ORDER` rather than object key order, and
+	 * within a group the newest tip is first — `get_my_tips` already returns them
+	 * that way, so the reduce preserves it.
+	 */
+	let grouped = $derived.by(() =>
+		TIP_HISTORY_GROUP_ORDER.map((group) => ({
+			group,
+			tips: tips.filter((tip) => tipHistoryGroup(tipStatusKey(tip.status)) === group)
+		})).filter(({ tips: groupTips }) => groupTips.length > 0)
+	);
 
-		return tips.reduce<Record<string, MyTip[]>>((acc, tip) => {
-			const key = formatSecondsToNormalizedDate({
-				seconds: Number(tip.created_at_ns / 1_000_000_000n),
-				currentDate,
-				language: $currentLanguage
-			});
-
-			return { ...acc, [key]: [...(acc[key] ?? []), tip] };
-		}, {});
-	});
+	const groupHeading = (group: TipHistoryGroup): string =>
+		({
+			failed: $i18n.tip.text.group_failed,
+			open: $i18n.tip.text.group_open,
+			claimed: $i18n.tip.text.group_claimed,
+			expired: $i18n.tip.text.group_expired
+		})[group];
 
 	const load = async () => {
 		if (isNullish($authIdentity)) {
@@ -127,21 +142,21 @@
 		<p class="m-0 py-12 text-center text-tertiary">{$i18n.tip.text.history_empty}</p>
 	{/if}
 
-	{#each Object.entries(grouped) as [dateLabel, group] (dateLabel)}
+	{#each grouped as { group, tips: groupTips } (group)}
 		<div class="mb-5 flex flex-col gap-3">
+			<span class="block text-lg font-medium text-tertiary">{groupHeading(group)}</span>
+
 			<!--
-				Capitalised in CSS rather than JS: the formatter returns a localised
-				"today"/"yesterday" in lower case, and `TransactionsDateGroup` reaches
-				into a *test* util to fix that. Not a dependency worth copying.
-
-				`block`, not `flex`: text sitting directly in a flex container becomes an
-				anonymous flex item, and `::first-letter` does not apply to those — which
-				is why the heading still read "yesterday" on screen.
+				One line of explanation, only on the group that asks something of the
+				reader. "Failed" alone invites the wrong conclusion — that the money went
+				somewhere or the link is dead — when in fact nothing moved and the same
+				link still works.
 			-->
-			<span class="block text-lg font-medium text-tertiary first-letter:uppercase">{dateLabel}</span
-			>
+			{#if group === 'failed'}
+				<p class="m-0 text-sm text-tertiary">{$i18n.tip.text.group_failed_hint}</p>
+			{/if}
 
-			{#each group as tip (tip.tip_id)}
+			{#each groupTips as tip (tip.tip_id)}
 				{@const status = tipStatusKey(tip.status)}
 				{@const token = tokenFor(tip)}
 				{@const remaining = remainingLabel(tip)}
