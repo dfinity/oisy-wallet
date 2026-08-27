@@ -618,9 +618,18 @@ export const idlFactory = ({ IDL }) => {
 	const ExchangeRate = IDL.Record({ usd: ExchangeData });
 	const TipStatus = IDL.Variant({
 		Reserved: IDL.Null,
+		Failed: IDL.Null,
 		Claimed: IDL.Null,
 		Cancelled: IDL.Null,
 		Expired: IDL.Null
+	});
+	const TipClaimFailureReason = IDL.Variant({
+		Uncovered: IDL.Null,
+		TransferFailed: IDL.Null
+	});
+	const TipClaimFailure = IDL.Record({
+		at_ns: IDL.Nat64,
+		reason: TipClaimFailureReason
 	});
 	const MyTip = IDL.Record({
 		status: TipStatus,
@@ -630,6 +639,7 @@ export const idlFactory = ({ IDL }) => {
 		message: IDL.Opt(IDL.Text),
 		ledger_canister_id: IDL.Principal,
 		amount: IDL.Nat,
+		last_claim_failure: IDL.Opt(TipClaimFailure),
 		expires_at_ns: IDL.Nat64
 	});
 	const GetMyTipsResult = IDL.Variant({
