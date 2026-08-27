@@ -1256,6 +1256,12 @@ export interface MyTip {
 	message: [] | [string];
 	ledger_canister_id: Principal;
 	amount: bigint;
+	/**
+	 * The most recent claim that did not pay out, if any. Present alongside
+	 * `status = Failed` for a live tip, and kept afterwards so a tip that
+	 * eventually succeeded can still show it was not first time lucky.
+	 */
+	last_claim_failure: [] | [TipClaimFailure];
 	expires_at_ns: bigint;
 }
 /**
@@ -1897,12 +1903,25 @@ export type TipError =
  * allowance on every History read; it surfaces on the claim path instead, as
  * [`TipError::Uncovered`].
  */
+export interface TipClaimFailure {
+	at_ns: bigint;
+	reason: TipClaimFailureReason;
+}
+export type TipClaimFailureReason = { Uncovered: null } | { TransferFailed: null };
 export type TipStatus =
 	| {
 			/**
 			 * Funds are authorised in the sender's own account, waiting for a claimer.
 			 */
 			Reserved: null;
+	  }
+	| {
+			/**
+			 * Somebody tried to claim and the payout did not go through, and the tip is
+			 * still live. The code stays valid, so this is the one status the sender can
+			 * act on — typically by topping up the account the tip draws from.
+			 */
+			Failed: null;
 	  }
 	| {
 			/**

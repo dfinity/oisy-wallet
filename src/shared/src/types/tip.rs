@@ -142,6 +142,14 @@ pub struct TipDetails {
 pub enum TipStatus {
     /// Funds are authorised in the sender's own account, waiting for a claimer.
     Reserved,
+    /// Somebody tried to claim and the payout did not go through, and the tip is
+    /// still live. The code stays valid, so this is the one status the sender can
+    /// act on — typically by topping up the account the tip draws from.
+    ///
+    /// Distinct from `Reserved` precisely because it is actionable: without it a
+    /// tip nobody has touched and a tip that has already failed a claimer look
+    /// identical in History.
+    Failed,
     /// A claimer moved the tokens.
     Claimed,
     /// The deadline passed unclaimed. Nothing was ever transferred, so nothing
@@ -149,6 +157,28 @@ pub enum TipStatus {
     Expired,
     /// The sender revoked it before anyone claimed.
     Cancelled,
+}
+
+/// Why a claim attempt did not pay out.
+///
+/// Only the two outcomes the ledger lets us tell apart today. `Uncovered` is the
+/// sender having reduced or revoked the reservation; `TransferFailed` is
+/// everything else, including the sender's balance having dropped below the
+/// amount.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum TipClaimFailureReason {
+    Uncovered,
+    TransferFailed,
+}
+
+/// The most recent failed claim on a tip. Returned only to the tip's own sender.
+///
+/// Deliberately not the ledger's error text: that is written for an operator, it
+/// can name balances, and it has no business being rendered to a user.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct TipClaimFailure {
+    pub at_ns: u64,
+    pub reason: TipClaimFailureReason,
 }
 
 /// One of the caller's own tips, as returned by `get_my_tips`.
@@ -164,6 +194,10 @@ pub struct MyTip {
     /// Set once claimed. The sender learns who claimed their tip; the claim
     /// screen discloses this before the claimer commits.
     pub claimed_by: Option<Principal>,
+    /// The most recent claim that did not pay out, if any. Present alongside
+    /// `status = Failed` for a live tip, and kept afterwards so a tip that
+    /// eventually succeeded can still show it was not first time lucky.
+    pub last_claim_failure: Option<TipClaimFailure>,
 }
 
 /// Outcome of a successful claim.
