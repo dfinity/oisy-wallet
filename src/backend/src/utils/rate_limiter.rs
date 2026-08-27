@@ -73,38 +73,47 @@ thread_local! {
     pub(crate) static CONSUME_PERSONAL_NOTE_SHARE_ANONYMOUS_RATE_LIMITER: RateLimiter =
         RateLimiter::new(600, 60 * 1_000_000_000);
 
-    /// Rate-limits `create_tip`: max 20 calls per caller per minute. The sender
-    /// is an authenticated principal, so this is a normal per-caller limit
-    /// (mirrors `CREATE_PERSONAL_NOTE_SHARE_RATE_LIMITER`). Each call makes two
-    /// ledger queries, so the limit also bounds cycle spend per user.
-    pub(crate) static CREATE_TIP_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(20, 60 * 1_000_000_000);
+    /// Rate-limits `create_tip`. The sender is an authenticated principal, so the
+    /// per-caller tiers (20/min, 200/hour) carry most of the weight; the global
+    /// tiers (300/min, 3000/hour) are what a per-caller limit cannot see, namely
+    /// a flood spread across many principals.
+    ///
+    /// The global numbers are generous on purpose. Each call makes two ledger
+    /// *queries* — a few million cycles, three orders of magnitude below a vetKD
+    /// derivation — so the ceiling is here to stop a runaway, not to ration
+    /// ordinary use. Any value is stricter than what this had before, which was
+    /// no global ceiling at all.
+    pub(crate) static CREATE_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
 
-    /// Rate-limits `claim_tip`: max 20 calls per caller per minute. Per-caller
-    /// is meaningful here — unlike `consume_personal_note_share`, a claim
-    /// requires a non-anonymous principal, since the payout needs a destination.
-    /// This is what makes brute-forcing a claim code expensive; a wrong code is
-    /// rejected from state alone, before any ledger call.
-    pub(crate) static CLAIM_TIP_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(20, 60 * 1_000_000_000);
+    /// Rate-limits `claim_tip`. Per-caller (20/min, 200/hour) is what makes
+    /// brute-forcing a claim code expensive — a wrong code is rejected from state
+    /// alone, before any ledger call — and unlike `consume_personal_note_share` a
+    /// claim always has a real principal to charge it to, since the payout needs
+    /// a destination.
+    ///
+    /// The global tiers (300/min, 3000/hour) bound what that cannot: a guessing
+    /// campaign spread over many fresh identities, which are free to create.
+    pub(crate) static CLAIM_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(20, 200, 300, 3000);
 
-    /// Rate-limits `cancel_tip`: max 30 calls per caller per minute. Cheap
-    /// state-only work, bounded mostly to keep a loop from writing to stable
-    /// memory without limit.
-    pub(crate) static CANCEL_TIP_RATE_LIMITER: RateLimiter =
-        RateLimiter::new(30, 60 * 1_000_000_000);
+    /// Rate-limits `cancel_tip`. Cheap state-only work, so the tiers exist to
+    /// keep a loop from writing to stable memory without limit rather than to
+    /// bound cycles.
+    pub(crate) static CANCEL_TIP_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_tiers(30, 300, 400, 4000);
 
     /// Rate-limits `get_personal_notes_encrypted_vetkey` — the paid vetKD
     /// derivation. Per-caller (2/min, 10/hour) is checked before a shared
-    /// global (20/min, 100/hour). See [`VetKeyRateLimiters`].
-    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+    /// global (20/min, 100/hour). See [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
 
     /// Rate-limits `get_personal_notes_vetkey_public_key`, with the same tiers
     /// as the encrypted endpoint but its own independent counters. See
-    /// [`VetKeyRateLimiters`].
-    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+    /// [`TieredRateLimiter`].
+    pub(crate) static GET_PERSONAL_NOTES_VETKEY_PUBLIC_KEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::new();
 
     /// vetKD derivation for the tip-secrets store. Its own limiter rather than a
     /// shared one, so a sender recovering tip links cannot exhaust the budget for
@@ -115,12 +124,12 @@ thread_local! {
     /// and at 2/min a third reload inside a minute failed — which silently cost
     /// that tip its recoverable link. The hourly tiers are untouched, so
     /// worst-case cycle spend is unchanged.
-    pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::with_caller_burst(5);
+    pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: TieredRateLimiter =
+        TieredRateLimiter::with_caller_burst(5);
 
     /// Verification-key reads for the tip-secrets store.
     ///
-    /// Deliberately an ordinary limiter, not [`VetKeyRateLimiters`]: this
+    /// Deliberately an ordinary limiter, not [`TieredRateLimiter`]: this
     /// endpoint returns a caller-independent constant that the canister now
     /// caches after the first call, so it costs no vetKD derivation and metering
     /// it like one was actively harmful. The browser fetches it alongside the
@@ -314,9 +323,15 @@ impl RateLimiter {
     }
 }
 
-/// Two-tier rate limiter for a vetKey endpoint: a per-caller limit plus a
-/// shared global limit, each over a short (per-minute) and a long (per-hour)
-/// window, backed by four [`RateLimiter`]s.
+/// Two-tier rate limiter: a per-caller limit plus a shared global limit, each
+/// over a short (per-minute) and a long (per-hour) window, backed by four
+/// [`RateLimiter`]s.
+///
+/// The per-caller tiers bound one principal; the global tiers bound aggregate
+/// load, which is the only thing that stops a flood spread across many
+/// principals. Built for the vetKey endpoints, hence [`Self::new`]'s defaults,
+/// but the shape is what any endpoint wants when a single caller's budget is not
+/// the whole risk — see [`Self::with_tiers`].
 ///
 /// Every tier is peeked before any tier records (see [`Self::check_at`]), so a
 /// rejected call leaves no state: a per-caller rejection never touches the
@@ -325,20 +340,37 @@ impl RateLimiter {
 /// fixed key (`Principal::anonymous()`, never a real registered caller on these
 /// endpoints), capping aggregate load against a many-principals flood the
 /// per-caller tiers cannot see.
-pub(crate) struct VetKeyRateLimiters {
+pub(crate) struct TieredRateLimiter {
     caller_minute: RateLimiter,
     caller_hour: RateLimiter,
     global_minute: RateLimiter,
     global_hour: RateLimiter,
 }
 
-impl VetKeyRateLimiters {
+impl TieredRateLimiter {
     const HOUR_NS: u64 = 60 * 60 * 1_000_000_000;
     const MINUTE_NS: u64 = 60 * 1_000_000_000;
 
     #[must_use]
     pub fn new() -> Self {
         Self::with_caller_burst(2)
+    }
+
+    /// All four tiers chosen explicitly, for endpoints that are not vetKD
+    /// derivations and so have entirely different economics.
+    #[must_use]
+    pub fn with_tiers(
+        caller_minute: u32,
+        caller_hour: u32,
+        global_minute: u32,
+        global_hour: u32,
+    ) -> Self {
+        Self {
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
+            caller_hour: RateLimiter::new(caller_hour, Self::HOUR_NS),
+            global_minute: RateLimiter::new(global_minute, Self::MINUTE_NS),
+            global_hour: RateLimiter::new(global_hour, Self::HOUR_NS),
+        }
     }
 
     /// Same tiers as [`Self::new`] but with a chosen per-caller **burst** cap.
@@ -399,7 +431,7 @@ impl VetKeyRateLimiters {
     }
 }
 
-impl Default for VetKeyRateLimiters {
+impl Default for TieredRateLimiter {
     fn default() -> Self {
         Self::new()
     }
@@ -414,7 +446,7 @@ mod tests {
         signer::{topup::TopUpCyclesLedgerError, AllowSigningError, GetAllowedCyclesError},
     };
 
-    use super::{RateLimiter, VetKeyRateLimiters};
+    use super::{RateLimiter, TieredRateLimiter};
 
     fn test_principal(id: u8) -> Principal {
         Principal::from_slice(&[id])
@@ -652,7 +684,7 @@ mod tests {
 
     #[test]
     fn vetkey_per_caller_minute_limit() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let caller = test_principal(1);
 
         assert!(rl.check_at(caller, ONE_SEC).is_ok());
@@ -665,7 +697,7 @@ mod tests {
 
     #[test]
     fn vetkey_per_caller_hour_limit() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let caller = test_principal(1);
 
         // 61s apart so the per-minute tier (2/min) never trips; the per-hour
@@ -684,7 +716,7 @@ mod tests {
 
     #[test]
     fn vetkey_global_minute_limit_across_callers() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
 
         // 20 distinct callers, one call each — the global per-minute cap is 20.
         for id in 1..=20u8 {
@@ -703,8 +735,29 @@ mod tests {
     }
 
     #[test]
+    fn a_global_tier_catches_a_flood_the_per_caller_tier_cannot_see() {
+        // The reason `create_tip` and friends gained global tiers: a per-caller
+        // limit is blind to one call each from a thousand fresh principals, and
+        // identities are free to create.
+        let rl = TieredRateLimiter::with_tiers(20, 200, 5, 50);
+
+        for id in 1..=5u8 {
+            assert!(
+                rl.check_at(test_principal(id), ONE_SEC).is_ok(),
+                "caller {id} is well inside its own budget"
+            );
+        }
+
+        let err = rl.check_at(test_principal(6), ONE_SEC).unwrap_err();
+        assert_eq!(
+            err.max_calls, 5,
+            "the sixth distinct caller is refused by the global tier, not its own"
+        );
+    }
+
+    #[test]
     fn a_raised_burst_lifts_the_minute_tier_and_leaves_the_hour_tier_binding() {
-        let burst = VetKeyRateLimiters::with_caller_burst(5);
+        let burst = TieredRateLimiter::with_caller_burst(5);
         let caller = test_principal(1);
 
         // Five inside one minute, where the default would have stopped at two.
@@ -740,7 +793,7 @@ mod tests {
 
     #[test]
     fn the_default_burst_is_unchanged_for_every_other_caller_of_new() {
-        let default = VetKeyRateLimiters::new();
+        let default = TieredRateLimiter::new();
         let caller = test_principal(1);
 
         assert!(default.check_at(caller, ONE_SEC).is_ok());
@@ -753,7 +806,7 @@ mod tests {
 
     #[test]
     fn vetkey_per_caller_rejection_does_not_consume_global() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
         let heavy = test_principal(1);
 
         // Heavy caller: 2 pass (2 global slots used); the 3rd is rejected by the
@@ -801,7 +854,7 @@ mod tests {
 
     #[test]
     fn vetkey_global_rejection_does_not_consume_caller_budget() {
-        let rl = VetKeyRateLimiters::new();
+        let rl = TieredRateLimiter::new();
 
         // Saturate the global minute tier with 20 distinct callers.
         for id in 1..=20u8 {
