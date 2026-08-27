@@ -35,6 +35,10 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 /**
  * Fetches ERC-20 transfers from Etherscan and drops address-poisoning spam.
  *
+ * Returns the transfers alongside the block of the oldest one whose spam verdict could not be
+ * resolved. Nothing re-examines a transfer once it is cached, so persisting past that block would
+ * fix an unresolved guess in place forever.
+ *
  * `startBlock` / `endBlock` bound the window so incremental loads never refetch history the
  * backend already holds. That matters more here than for the native asset: the spam filter
  * resolves the outer transaction sender over RPC for every zero-value transfer, so each
@@ -52,7 +56,7 @@ export const fetchErc20Transfers = async ({
 	address: EthAddress;
 	startBlock?: number;
 	endBlock?: number;
-}): Promise<Transaction[]> => {
+}): Promise<{ transactions: Transaction[]; oldestUnresolvedBlockNumber: number | undefined }> => {
 	const { erc20Transactions } = etherscanProviders(networkId);
 
 	const transactions = await retryWithDelay({
@@ -67,7 +71,7 @@ export const fetchErc20Transfers = async ({
 
 	const { getTransaction } = alchemyProviders(networkId);
 
-	return filterSpamErc20Transfers({
+	const { transactions: filtered, unresolvedHashes } = await filterSpamErc20Transfers({
 		transactions,
 		userAddress: address,
 		// The `transaction.from` is the `Transfer` event's _from (who tokens move from), not
@@ -79,7 +83,35 @@ export const fetchErc20Transfers = async ({
 			return tx?.from;
 		}
 	});
+
+	const unresolvedBlockNumbers = filtered
+		.filter(({ hash }) => nonNullish(hash) && unresolvedHashes.has(hash))
+		.map(({ blockNumber }) => blockNumber)
+		.filter(nonNullish);
+
+	return {
+		transactions: filtered,
+		oldestUnresolvedBlockNumber:
+			unresolvedBlockNumbers.length > 0 ? Math.min(...unresolvedBlockNumbers) : undefined
+	};
 };
+
+/**
+ * Drops everything at or above the oldest unresolved spam verdict, so the stored high-water mark
+ * stays below it and a later load re-examines that transfer instead of inheriting the guess.
+ */
+export const persistableErc20Transfers = ({
+	transactions,
+	oldestUnresolvedBlockNumber
+}: {
+	transactions: Transaction[];
+	oldestUnresolvedBlockNumber: number | undefined;
+}): Transaction[] =>
+	isNullish(oldestUnresolvedBlockNumber)
+		? transactions
+		: transactions.filter(
+				({ blockNumber }) => nonNullish(blockNumber) && blockNumber < oldestUnresolvedBlockNumber
+			);
 
 /**
  * Loads a page of stored ERC-20 transfers from the backend.
@@ -187,12 +219,13 @@ export const loadNextErc20UserTransactions = async ({
 	}
 
 	try {
-		const olderTransactions = await fetchErc20Transfers({
-			networkId,
-			token,
-			address,
-			endBlock: oldestLoadedBlockNumber - 1
-		});
+		const { transactions: olderTransactions, oldestUnresolvedBlockNumber } =
+			await fetchErc20Transfers({
+				networkId,
+				token,
+				address,
+				endBlock: oldestLoadedBlockNumber - 1
+			});
 
 		if (olderTransactions.length === 0) {
 			return { hasMore: false };
@@ -217,7 +250,10 @@ export const loadNextErc20UserTransactions = async ({
 				await saveErc20FinalizedTransactions({
 					identity,
 					tokenId: transactionTokenId,
-					transactions: olderTransactions,
+					transactions: persistableErc20Transfers({
+						transactions: olderTransactions,
+						oldestUnresolvedBlockNumber
+					}),
 					currentBlockNumber: latestBlockNumber
 				});
 			} catch (_: unknown) {

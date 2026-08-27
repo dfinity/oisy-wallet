@@ -10,6 +10,7 @@ import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	fetchErc20Transfers,
 	loadNextErc20UserTransactions,
+	persistableErc20Transfers,
 	saveErc20FinalizedTransactions
 } from '$eth/services/erc20-user-transactions.services';
 import {
@@ -144,13 +145,50 @@ describe('erc20-user-transactions.services', () => {
 			mockErc20Transactions.mockResolvedValue([kept, spam]);
 			mockGetTransaction.mockResolvedValue({ from: '0xattacker' });
 
-			const result = await fetchErc20Transfers({
+			const { transactions } = await fetchErc20Transfers({
 				networkId: ETHEREUM_NETWORK_ID,
 				token: USDC_TOKEN,
 				address: mockEthAddress
 			});
 
-			expect(result).toEqual([kept]);
+			expect(transactions).toEqual([kept]);
+		});
+	});
+
+	describe('persistableErc20Transfers', () => {
+		it('should keep everything when every verdict was resolved', () => {
+			const transactions = [
+				makeTx({ hash: '0xa', blockNumber: 10 }),
+				makeTx({ hash: '0xb', blockNumber: 20 })
+			];
+
+			expect(
+				persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: undefined })
+			).toEqual(transactions);
+		});
+
+		// Nothing re-examines a transfer once it is cached, so the stored high-water mark has to stay
+		// below the oldest unresolved one for a later load to get another look at it.
+		it('should drop everything at or above the oldest unresolved verdict', () => {
+			const older = makeTx({ hash: '0xolder', blockNumber: 10 });
+
+			const transactions = [
+				older,
+				makeTx({ hash: '0xunresolved', blockNumber: 20 }),
+				makeTx({ hash: '0xnewer', blockNumber: 30 })
+			];
+
+			expect(persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: 20 })).toEqual([
+				older
+			]);
+		});
+
+		it('should keep nothing when the oldest transfer is the unresolved one', () => {
+			const transactions = [makeTx({ hash: '0xunresolved', blockNumber: 10 })];
+
+			expect(persistableErc20Transfers({ transactions, oldestUnresolvedBlockNumber: 10 })).toEqual(
+				[]
+			);
 		});
 	});
 
