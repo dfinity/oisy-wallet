@@ -537,7 +537,7 @@ fn cancelling_a_tip_drops_its_recoverable_claim_code() {
         .pic_setup
         .update(env.sender, "cancel_tip", tip_id.to_string())
         .expect("the sender may cancel their own tip");
-    assert!(matches!(cancelled, CancelTipResult::Ok(_)));
+    assert!(matches!(cancelled, CancelTipResult::Ok(())));
 
     let after: GetTipSecretResult = env
         .pic_setup
