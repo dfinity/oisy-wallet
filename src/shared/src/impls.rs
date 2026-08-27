@@ -49,9 +49,7 @@ const CONTACT_MAX_ADDRESSES: usize = 40;
 const CONTACT_MAX_LABEL_LENGTH: usize = 50;
 /// Maximum length of the address string inside a `TokenAccountId`.
 ///
-/// Deliberately generous: the longest address any supported chain produces is 62 characters
-/// (bech32 P2WSH and bech32m P2TR), so this bounds stored addresses without being able to reject
-/// anything a real wallet would hand us.
+/// Generous headroom: the longest address any supported chain produces is 62 characters.
 const CONTACT_MAX_ADDRESS_LENGTH: usize = 128;
 /// Maximum image size in bytes (100 KB)
 pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
@@ -865,8 +863,7 @@ impl Validate for Contact {
 
 impl Validate for TokenAccountId {
     fn validate(&self) -> Result<(), Error> {
-        // Icrcv2 carries a Principal and a [u8; 32], both already bounded by their own types, so
-        // only the string-bearing arms need a length check.
+        // Icrcv2 holds a Principal and a [u8; 32], both bounded by their own types.
         let address = match self {
             TokenAccountId::Icrcv2(_) => return Ok(()),
             TokenAccountId::Sol(SolPrincipal(address))
@@ -890,13 +887,10 @@ impl Validate for TokenAccountId {
 
 impl Validate for ContactAddressData {
     fn validate(&self) -> Result<(), Error> {
-        // `TokenAccountId` is deliberately NOT validated here. This type is deserialized both from
-        // inbound requests and from stored state, and `ContactAddressData` is wired into
-        // `validate_on_deserialize!`, so a length bound applied here would also run against
-        // addresses already in stable memory. Anything stored before the bound existed that failed
-        // it would trap on read and take the whole contact list with it. The bound is enforced on
-        // the write path in `UpdateContactRequest::validate` instead, which reaches every address
-        // that can enter storage without re-judging what is already there.
+        // `TokenAccountId` is deliberately not validated here: `ContactAddressData` is wired into
+        // `validate_on_deserialize!`, so a bound applied here would also run against addresses
+        // already in stable memory, and anything failing it would trap on read. The bound lives on
+        // the write path in `UpdateContactRequest::validate` instead.
 
         // Check if the label exists
         if let Some(label) = &self.label {
