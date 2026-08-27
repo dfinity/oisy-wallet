@@ -36,7 +36,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
+import { createRawSnippet, tick } from 'svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -513,6 +513,111 @@ describe('AllTransactionsLoader', () => {
 			await waitFor(() => {
 				expect(spyLoadNextSolTransactions).toHaveBeenCalledTimes(solTokens.length + counter);
 			});
+		});
+	});
+
+	describe('load more', () => {
+		interface LoaderControls {
+			loadMore: () => Promise<boolean>;
+			exhausted: boolean;
+		}
+
+		const renderWithControls = (): { controls: () => LoaderControls | undefined } => {
+			let captured: LoaderControls | undefined;
+
+			const children = createRawSnippet<[LoaderControls]>((getControls) => ({
+				render: () => {
+					captured = getControls();
+
+					return '<span></span>';
+				}
+			}));
+
+			render(AllTransactionsLoader, { props: { ...props, children } });
+
+			return { controls: () => captured };
+		};
+
+		beforeEach(() => {
+			spyLoadNextIcTransactions.mockResolvedValue({ success: false });
+			spyLoadNextSolTransactions.mockResolvedValue({ success: false });
+		});
+
+		it('should hand the children a way to page further back', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.loadMore).toBeInstanceOf(Function);
+			});
+		});
+
+		it('should not report exhausted while tokens still have history', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()?.exhausted).toBeFalsy();
+			});
+		});
+
+		it('should report that nothing loaded when no store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeFalsy();
+		});
+
+		// The scroll decides whether to keep paging from this result, so it has to reflect the stores
+		// rather than any filtered view of them.
+		it('should report that history loaded when a store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextSolTransactions.mockImplementation(async () => {
+				solTransactionsStore.append({
+					tokenId: SOLANA_TOKEN.id,
+					transactions: [
+						{
+							data: {
+								...createMockSolTransactionsUi(1)[0],
+								id: `older-${Math.random()}`,
+								timestamp: mockMinTimestampStart - 1n
+							} as SolTransactionUi,
+							certified: false
+						}
+					]
+				});
+
+				return await Promise.resolve({ success: false });
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeTruthy();
+		});
+
+		it('should page every token once regardless of the floor', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextIcTransactions.mockClear();
+			spyLoadNextSolTransactions.mockClear();
+
+			await controls()?.loadMore();
+
+			// No `minTimestamp`: the floor itself is what this call is pushing deeper.
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith(
+				expect.not.objectContaining({ minTimestamp: expect.anything() })
+			);
 		});
 	});
 

@@ -128,21 +128,28 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader transactions={allTransactions}>
-		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
-			{#if Object.values(groupedTransactions).length > 0}
-				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-					<TransactionsDateGroup
-						{formattedDate}
-						testId={`all-transactions-date-group-${index}`}
-						{transactions}
-					/>
-				{/each}
-			{/if}
+		{#snippet children({ loadMore, exhausted })}
+			<AllTransactionsScroll
+				{exhausted}
+				onLoadMore={loadMore}
+				{sortedTransactions}
+				bind:transactionsToDisplay
+			>
+				{#if Object.values(groupedTransactions).length > 0}
+					{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+						<TransactionsDateGroup
+							{formattedDate}
+							testId={`all-transactions-date-group-${index}`}
+							{transactions}
+						/>
+					{/each}
+				{/if}
 
-			{#if Object.values(groupedTransactions).length === 0}
-				<TransactionsPlaceholder />
-			{/if}
-		</AllTransactionsScroll>
+				{#if Object.values(groupedTransactions).length === 0}
+					<TransactionsPlaceholder />
+				{/if}
+			</AllTransactionsScroll>
+		{/snippet}
 	</AllTransactionsLoader>
 </AllTransactionsSkeletons>
 
