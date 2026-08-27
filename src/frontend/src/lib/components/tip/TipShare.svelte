@@ -152,7 +152,11 @@
 			<ButtonIcon
 				ariaLabel={$i18n.tip.text.share_link}
 				link={false}
-				onclick={async () => await shareText(link)}
+				onclick={async () => {
+					trackTip({ step: 'share', side: 'sender', symbol: token.symbol });
+
+					await shareText(link);
+				}}
 			>
 				{#snippet icon()}
 					<IconShareArrow size="24" />
