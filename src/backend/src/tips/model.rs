@@ -5,8 +5,8 @@ use candid::{CandidType, Deserialize, Nat, Principal};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 use shared::types::tip::{
-    MyTip, PublicTip, TipDetails, TipError, TipStatus, MAX_TIPS_PER_USER, MAX_TIP_EXPIRY_NS,
-    MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS, TIP_CLAIM_CODE_HASH_BYTES,
+    MyTip, PublicTip, TipClaimFailure, TipDetails, TipError, TipStatus, MAX_TIPS_PER_USER,
+    MAX_TIP_EXPIRY_NS, MAX_TIP_ID_BYTES, MAX_TIP_MESSAGE_CHARS, TIP_CLAIM_CODE_HASH_BYTES,
     TIP_CLAIM_IN_FLIGHT_TIMEOUT_NS,
 };
 
@@ -47,6 +47,23 @@ pub struct TipRecord {
     pub message: Option<String>,
     pub claim_code_hash: ByteBuf,
     pub state: TipState,
+    /// When the tip reached a terminal state, which is where its retention
+    /// window starts counting from.
+    ///
+    /// Only `Cancelled` needs it — `Claimed` already carries `claimed_at_ns`,
+    /// and a live tip has no terminal instant. An `Option` rather than a field
+    /// on the variant so records already in stable memory keep decoding:
+    /// candid reads a missing `opt` as `None`, whereas turning the unit
+    /// `Cancelled` into a record would make every stored cancellation
+    /// undecodable.
+    pub terminal_at_ns: Option<u64>,
+    /// The most recent claim attempt that did not pay out.
+    ///
+    /// Set on every failed payout and never cleared: a tip that failed once and
+    /// then succeeded is worth being able to see. `status` decides what that
+    /// means for the reader, and only reports `Failed` while the tip is still
+    /// live. `Option` so records already in stable memory keep decoding.
+    pub last_claim_failure: Option<TipClaimFailure>,
 }
 
 impl TipRecord {
@@ -87,7 +104,11 @@ impl TipRecord {
             TipState::Cancelled => TipStatus::Cancelled,
             TipState::Reserved | TipState::Claiming { .. } => {
                 if self.is_expired(now_ns) {
+                    // Expired outranks Failed: once the deadline has passed there
+                    // is nothing left for the sender to do about the failure.
                     TipStatus::Expired
+                } else if self.last_claim_failure.is_some() {
+                    TipStatus::Failed
                 } else {
                     TipStatus::Reserved
                 }
@@ -133,6 +154,7 @@ impl TipRecord {
             status: self.status(now_ns),
             message: self.message.clone(),
             claimed_by: self.claimed_by(),
+            last_claim_failure: self.last_claim_failure.clone(),
         }
     }
 }
@@ -229,6 +251,7 @@ pub fn new_tip_exceeds_cap(active_count: usize) -> bool {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
+    use shared::types::tip::TipClaimFailureReason;
 
     use super::*;
 
@@ -248,6 +271,8 @@ mod tests {
             message: Some("thanks!".to_string()),
             claim_code_hash: ByteBuf::from(sha256(b"code").to_vec()),
             state,
+            terminal_at_ns: None,
+            last_claim_failure: None,
         }
     }
 
@@ -365,6 +390,67 @@ mod tests {
         assert!(!tip.is_claimable(101));
         assert_eq!(tip.status(99), TipStatus::Reserved);
         assert_eq!(tip.status(100), TipStatus::Expired);
+    }
+
+    #[test]
+    fn a_failed_claim_shows_as_failed_only_while_the_tip_is_still_live() {
+        let now = 10 * ONE_SEC;
+        let failure = Some(TipClaimFailure {
+            at_ns: now - ONE_SEC,
+            reason: TipClaimFailureReason::TransferFailed,
+        });
+
+        // Live and untouched vs live and already failed: the distinction the
+        // status exists to make, since only the second is actionable.
+        let live = record(TipState::Reserved, now + ONE_SEC);
+        assert_eq!(live.status(now), TipStatus::Reserved);
+        assert_eq!(
+            TipRecord {
+                last_claim_failure: failure.clone(),
+                ..live
+            }
+            .status(now),
+            TipStatus::Failed
+        );
+
+        // Expiry outranks it: past the deadline there is nothing to act on.
+        assert_eq!(
+            TipRecord {
+                last_claim_failure: failure.clone(),
+                ..record(TipState::Reserved, now - ONE_SEC)
+            }
+            .status(now),
+            TipStatus::Expired
+        );
+
+        // And a tip that failed once, then paid out, reads as Claimed — while
+        // still carrying the failure, so History can say it was not first time
+        // lucky.
+        let claimed = TipRecord {
+            last_claim_failure: failure.clone(),
+            ..record(
+                TipState::Claimed {
+                    claimer: principal(2),
+                    block_index: Nat::from(1u64),
+                    claimed_at_ns: now,
+                },
+                now + ONE_SEC,
+            )
+        };
+        assert_eq!(claimed.status(now), TipStatus::Claimed);
+        assert_eq!(
+            claimed.to_my_tip("t".to_string(), now).last_claim_failure,
+            failure
+        );
+
+        assert_eq!(
+            TipRecord {
+                last_claim_failure: failure,
+                ..record(TipState::Cancelled, now + ONE_SEC)
+            }
+            .status(now),
+            TipStatus::Cancelled
+        );
     }
 
     #[test]

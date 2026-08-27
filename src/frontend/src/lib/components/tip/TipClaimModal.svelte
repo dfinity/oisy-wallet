@@ -7,6 +7,9 @@
 	import type { TipDetails } from '$declarations/backend/backend.did';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { metadata as ledgerMetadata } from '$icp/api/icrc-ledger.api';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import { setCustomToken } from '$icp-eth/services/icrc-token.services';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import TipClaimHero from '$lib/components/tip/TipClaimHero.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -16,7 +19,10 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails } from '$lib/services/tip.services';
+	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { PendingTipClaim } from '$lib/types/tip';
@@ -48,8 +54,49 @@
 	let symbol = $state<string | undefined>();
 	let decimals = $state<number | undefined>();
 	let logo = $state<string | undefined>();
+	// Kept from the claim so the token can be switched on for a claimer who has
+	// never held it.
+	let claimedLedgerId = $state<Principal | undefined>();
 
 	const close = () => modalStore.close();
+
+	/**
+	 * Makes the tokens visible.
+	 *
+	 * An ICRC token only renders in the wallet once it is enabled, so a claimer who
+	 * has never held this ck-asset would watch a payout succeed and then find
+	 * nothing in their list. Same treatment a reward gets on the way out
+	 * (`VipRewardStateModal`) and a swap gives its ck destination.
+	 *
+	 * Nothing to do for ICP, which is never a custom token — the lookup simply
+	 * misses and `autoLoadSingleToken` skips. It also skips a token already
+	 * enabled, and it swallows and reports its own failures, so this can never turn
+	 * a successful claim into a failed one.
+	 */
+	const enableClaimedToken = async () => {
+		if (isNullish(claimedLedgerId)) {
+			return;
+		}
+
+		const ledgerCanisterId = claimedLedgerId.toText();
+
+		await autoLoadSingleToken({
+			token: $icrcTokens.find((token) => token.ledgerCanisterId === ledgerCanisterId),
+			identity: $authIdentity,
+			setToken: setCustomToken,
+			loadTokens: loadCustomTokens,
+			errorMessage: $i18n.init.error.icrc_custom_token
+		});
+	};
+
+	// On the way out rather than while the confirmation is up: enabling shows the
+	// global busy overlay, which belongs over a transition and not over the
+	// celebration. By the time the wallet appears the balance is already there.
+	const leaveForWallet = async () => {
+		await enableClaimedToken();
+
+		close();
+	};
 
 	// The canister wrapper throws the candid `Err` variant; a call that never
 	// completed throws an `Error`. That difference is the whole point below.
@@ -99,7 +146,7 @@
 		identity: Identity;
 		tipId: string;
 		claimCode: string;
-	}): Promise<{ details: TipDetails } | { failure: ClaimState }> => {
+	}): Promise<{ details: TipDetails } | { failure: TipClaimOutcome }> => {
 		try {
 			return { details: await loadTipDetails(params) };
 		} catch (err: unknown) {
@@ -142,6 +189,17 @@
 
 		if (!('details' in outcome)) {
 			claimState = outcome.failure;
+
+			// Tracked here too: a claim that never got past reading the tip is still a
+			// claim that failed, and leaving it out would make the funnel look better
+			// than it is.
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				outcome: outcome.failure
+			});
+
 			return;
 		}
 
@@ -159,18 +217,45 @@
 			// Never a number the ledger has not told us how to render: printing base
 			// units would put a figure eight orders of magnitude out on the line
 			// confirming what someone was just paid.
+			claimedLedgerId = details.ledger_canister_id;
 			amountLabel =
 				nonNullish(decimals) && nonNullish(symbol)
 					? `${formatToken({ value: claimed.amount, unitName: decimals, displayDecimals: decimals })} ${symbol}`
 					: undefined;
 			message = fromNullable(details.message);
 			claimState = 'received';
+
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				symbol
+			});
 		} catch (err: unknown) {
 			consoleWarn('Could not claim the tip', err);
 
 			// A tip claimed by someone else in the meantime is gone, and a retry
 			// would never work; a failed call is the opposite.
-			claimState = isUncovered(err) ? 'uncovered' : isUnavailable(err) ? 'unavailable' : 'failed';
+			//
+			// Named rather than assigned straight to `claimState`, so the same value
+			// types-checks as an analytics outcome without a cast — `ClaimState` also
+			// covers `claiming` and `received`, which are not outcomes, and a cast here
+			// would silently survive either union gaining a member.
+			const outcome: TipClaimOutcome = isUncovered(err)
+				? 'uncovered'
+				: isUnavailable(err)
+					? 'unavailable'
+					: 'failed';
+
+			claimState = outcome;
+
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				outcome,
+				symbol
+			});
 		}
 	};
 
@@ -258,7 +343,12 @@
 
 		{#snippet toolbar()}
 			{#if claimState === 'received'}
-				<Button colorStyle="secondary-light" fullWidth onclick={close} testId={TIP_RECEIVED_BUTTON}>
+				<Button
+					colorStyle="secondary-light"
+					fullWidth
+					onclick={leaveForWallet}
+					testId={TIP_RECEIVED_BUTTON}
+				>
 					{$i18n.tip.text.take_me_to_wallet}
 				</Button>
 			{:else if claimState === 'failed'}

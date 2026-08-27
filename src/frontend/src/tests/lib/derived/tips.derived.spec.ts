@@ -41,7 +41,8 @@ describe('reservedTipAmounts', () => {
 		created_at_ns: 1_700_000_000_000_000_000n,
 		status,
 		message: [],
-		claimed_by: []
+		claimed_by: [],
+		last_claim_failure: []
 	});
 
 	beforeEach(() => {
@@ -81,5 +82,26 @@ describe('reservedTipAmounts', () => {
 		// `undefined` is "not loaded", which must not be confused with "none": the
 		// alternative is briefly offering the full balance on every sign-in.
 		expect(get(reservedTipAmounts)).toEqual({});
+	});
+
+	it('counts a failed tip, which still holds its allowance', () => {
+		// A failed tip is one somebody tried to claim and could not. Nothing moved,
+		// the allowance is still granted and the code still works — so it encumbers
+		// the balance exactly as an untouched reservation does. Missing this would
+		// understate the reservation in the one situation where the sender most needs
+		// the number right, since topping up is the fix.
+		tipsStore.set([tip({ tip_id: 'stuck', status: { Failed: null } })]);
+
+		expect(get(reservedTipAmounts)[token.id]).toBe(500_000n + fee);
+	});
+
+	it('ignores tips that hold nothing', () => {
+		tipsStore.set([
+			tip({ tip_id: 'done', status: { Claimed: null } }),
+			tip({ tip_id: 'gone', status: { Expired: null } }),
+			tip({ tip_id: 'revoked', status: { Cancelled: null } })
+		]);
+
+		expect(get(reservedTipAmounts)[token.id]).toBeUndefined();
 	});
 });

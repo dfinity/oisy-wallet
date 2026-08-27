@@ -16,6 +16,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
+	import { trackTip } from '$lib/services/tip-analytics.services';
 	import { loadTipPreview, parseClaimCodeFromFragment } from '$lib/services/tip.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -187,6 +188,10 @@
 	// asked for. Its `load` only parses route params, so this costs modules and
 	// nothing else.
 	onMount(() => {
+		// The top of the claimer's funnel: a link was opened. Fired before sign-in,
+		// so the drop-off at the sign-in step is visible.
+		trackTip({ step: 'open', side: 'claimer' });
+
 		void preloadData(AppPath.Tokens);
 	});
 

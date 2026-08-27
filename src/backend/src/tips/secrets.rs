@@ -13,6 +13,8 @@
 //! reusing it means the "only the sender can read their own codes" property is
 //! the library's job and not ours. Mirrors `personal_notes`.
 
+use std::cell::RefCell;
+
 use candid::Principal;
 use ic_cdk::api::msg_caller;
 use ic_stable_structures::storable::Blob;
@@ -153,11 +155,32 @@ pub async fn get_encrypted_vetkey(transport_key: ByteBuf) -> Result<ByteBuf, Tip
     Ok(ByteBuf::from(Vec::<u8>::from(vetkey)))
 }
 
+thread_local! {
+    /// The verification key, once fetched.
+    ///
+    /// It is a property of this canister's key name, the domain separator and
+    /// the map name — none of which depend on the caller and none of which
+    /// change — so fetching it more than once per canister lifetime is pure
+    /// waste. Heap rather than stable memory on purpose: it is derivable, so
+    /// re-fetching once after an upgrade costs one call and needs no migration.
+    static VETKEY_PUBLIC_KEY: RefCell<Option<Vec<u8>>> = const { RefCell::new(None) };
+}
+
 /// The vetKey verification (public) key for the tip-secrets store, which the
-/// browser needs to verify the derived vetKey. The same for every user.
+/// browser needs to verify the derived vetKey. The same for every user, so it is
+/// fetched once and cached.
 pub async fn get_vetkey_public_key() -> Result<ByteBuf, TipError> {
+    if let Some(cached) = VETKEY_PUBLIC_KEY.with_borrow(Clone::clone) {
+        return Ok(ByteBuf::from(cached));
+    }
+
     let future =
         with_tip_secrets(|encrypted_maps| Ok(encrypted_maps.get_vetkey_verification_key()))?;
-    let verification_key = future.await;
-    Ok(ByteBuf::from(Vec::<u8>::from(verification_key)))
+    let verification_key = Vec::<u8>::from(future.await);
+
+    // Two callers racing the first fetch both write the same bytes, so last
+    // write wins is not a race worth guarding.
+    VETKEY_PUBLIC_KEY.set(Some(verification_key.clone()));
+
+    Ok(ByteBuf::from(verification_key))
 }

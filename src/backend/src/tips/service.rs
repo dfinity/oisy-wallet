@@ -12,8 +12,8 @@ use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use serde_bytes::ByteBuf;
 use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimRequest, TipDetails, TipError,
-    MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
+    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
@@ -33,17 +33,31 @@ use crate::{
     },
 };
 
-/// The value stored in the by-sender index: the instant a tip stops occupying a
-/// cap slot.
+/// The value stored in the by-sender index: the instant a tip stopped, or will
+/// stop, occupying a cap slot.
 ///
-/// For a live tip that is its expiry; for a terminal one (claimed or cancelled)
-/// it is `0`, which frees the slot immediately while keeping the row in the
-/// index so History can still enumerate it. Storing this rather than the raw
-/// expiry is what lets the cap check stay a single range scan over one `u64`.
+/// For a live tip that is its expiry. For a terminal one it is **the instant it
+/// became terminal**, which is already in the past — so the slot is freed
+/// immediately (`value > now` is false) while the row stays in the index for
+/// History, and the retention arithmetic below gets a real age to measure.
+/// One `u64` answers both questions, which is what keeps the cap check a single
+/// range scan.
+///
+/// This used to store `0` for a terminal tip. That freed the slot correctly and
+/// silently broke retention: the test is `now - value > retention`, and with
+/// `value = 0` that reads `now > 30 days`, which is true by a factor of ~700
+/// for every nanosecond timestamp there will ever be. Every claimed and
+/// cancelled tip was therefore collectable the moment it became terminal, and
+/// vanished from History on the next create or the next hourly sweep.
 fn active_until(record: &TipRecord) -> u64 {
     match record.state {
         TipState::Reserved | TipState::Claiming { .. } => record.expires_at_ns,
-        TipState::Claimed { .. } | TipState::Cancelled => 0,
+        TipState::Claimed { claimed_at_ns, .. } => claimed_at_ns,
+        // `created_at_ns` only for a cancellation written before
+        // `terminal_at_ns` existed: it starts the window early rather than
+        // never, and a tip lives at most 7 days, so such a row loses at most a
+        // week of its 30.
+        TipState::Cancelled => record.terminal_at_ns.unwrap_or(record.created_at_ns),
     }
 }
 
@@ -198,6 +212,8 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
                 message: request.message,
                 claim_code_hash: request.claim_code_hash,
                 state: TipState::Reserved,
+                terminal_at_ns: None,
+                last_claim_failure: None,
             },
         );
         Ok(())
@@ -333,7 +349,11 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             })
         }
         Err(err) => {
-            release_claim(&key, claimer, now);
+            let reason = match &err {
+                TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
+                TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
+            };
+            release_claim(&key, claimer, now, reason);
             match err {
                 TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
                 TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
@@ -342,10 +362,20 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     }
 }
 
-/// Returns a failed claim's tip to `Reserved`, but only if this claim still
-/// owns it. A claim that timed out and was taken over by someone else must not
-/// have its late failure clobber the new claimer's state.
-fn release_claim(key: &TipId, claimer: Principal, started_at_ns: u64) {
+/// Returns a failed claim's tip to `Reserved` and records why it failed, but
+/// only if this claim still owns it. A claim that timed out and was taken over by
+/// someone else must not have its late failure clobber the new claimer's state —
+/// nor mark the tip failed when somebody else is mid-payout.
+///
+/// The record is what lets History separate "nobody has tried this yet" from
+/// "somebody tried and it did not pay out", which is the only one of the two the
+/// sender can act on.
+fn release_claim(
+    key: &TipId,
+    claimer: Principal,
+    started_at_ns: u64,
+    reason: TipClaimFailureReason,
+) {
     mutate_state(|s| {
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
@@ -363,6 +393,10 @@ fn release_claim(key: &TipId, claimer: Principal, started_at_ns: u64) {
                 key,
                 TipRecord {
                     state: TipState::Reserved,
+                    last_claim_failure: Some(TipClaimFailure {
+                        at_ns: time(),
+                        reason,
+                    }),
                     ..current
                 },
             );
@@ -402,6 +436,7 @@ pub fn cancel_tip(tip_id: String) -> Result<(), TipError> {
             &key,
             TipRecord {
                 state: TipState::Cancelled,
+                terminal_at_ns: Some(now),
                 ..record
             },
         );
@@ -504,12 +539,24 @@ mod tests {
             message: None,
             claim_code_hash: ByteBuf::from(vec![0u8; 32]),
             state,
+            terminal_at_ns: None,
+            last_claim_failure: None,
+        }
+    }
+
+    fn claimed_at(claimed_at_ns: u64) -> TipState {
+        TipState::Claimed {
+            claimer: test_principal(2),
+            block_index: Nat::from(1u64),
+            claimed_at_ns,
         }
     }
 
     #[test]
-    fn active_until_frees_the_slot_for_terminal_tips_only() {
-        let expiry = 1_000u64;
+    fn active_until_is_the_expiry_while_live_and_the_terminal_instant_after() {
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+        let expiry = now + 1;
+
         assert_eq!(
             active_until(&record_with(TipState::Reserved, expiry)),
             expiry
@@ -524,22 +571,95 @@ mod tests {
             )),
             expiry
         );
+
+        let claimed = record_with(claimed_at(now), expiry);
         assert_eq!(
-            active_until(&record_with(TipState::Cancelled, expiry)),
-            0,
-            "a cancelled tip must stop occupying a cap slot immediately"
+            active_until(&claimed),
+            now,
+            "a claimed tip reports when it was claimed, not a sentinel"
         );
+        assert!(
+            active_until(&claimed) <= now,
+            "and that is already in the past, so the cap slot is free"
+        );
+
+        let cancelled = TipRecord {
+            terminal_at_ns: Some(now),
+            ..record_with(TipState::Cancelled, expiry)
+        };
+        assert_eq!(active_until(&cancelled), now);
+    }
+
+    #[test]
+    fn a_cancellation_written_before_terminal_at_ns_falls_back_to_creation() {
+        let created_at_ns = 7_000u64;
+        let legacy = TipRecord {
+            created_at_ns,
+            terminal_at_ns: None,
+            ..record_with(TipState::Cancelled, 9_000)
+        };
+
         assert_eq!(
-            active_until(&record_with(
-                TipState::Claimed {
-                    claimer: test_principal(2),
-                    block_index: Nat::from(1u64),
-                    claimed_at_ns: 1,
-                },
-                expiry
-            )),
-            0,
-            "a claimed tip must stop occupying a cap slot immediately"
+            active_until(&legacy),
+            created_at_ns,
+            "an early retention start, not an immediate one"
+        );
+    }
+
+    /// The regression. The old code stored `0` for a terminal tip, and `0` is
+    /// what [`partition_sender_tips`] measures retention against — so
+    /// `now - 0 > retention` held for every claimed tip and History lost it on
+    /// the next create or the next hourly sweep.
+    ///
+    /// This test feeds a terminal record's `active_until` *through* the
+    /// partition, which is precisely what the two original tests did not do:
+    /// one asserted the sentinel, the other fed the partition only realistic
+    /// timestamps, and the bug lived in the seam between them.
+    #[test]
+    fn a_freshly_claimed_tip_survives_pruning() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let just_claimed = record_with(claimed_at(now), now + 1_000);
+        map.insert(
+            TipSenderKey(StoredPrincipal(alice), TipId("claimed-now".into())),
+            active_until(&just_claimed),
+        );
+
+        let (active, collectable) = partition_sender_tips(&map, alice, now);
+
+        assert_eq!(active, 0, "a claimed tip must not hold a cap slot");
+        assert!(
+            collectable.is_empty(),
+            "but it must stay in History: it was claimed this instant, not 30 days ago"
+        );
+    }
+
+    #[test]
+    fn a_claimed_tip_is_collected_once_past_retention() {
+        let mut map = in_memory_by_sender_map();
+        let alice = test_principal(1);
+        let now = 10 * TIP_RETENTION_AFTER_TERMINAL_NS;
+
+        let long_claimed = record_with(
+            claimed_at(now - TIP_RETENTION_AFTER_TERMINAL_NS - 1),
+            now - 1_000,
+        );
+        map.insert(
+            TipSenderKey(StoredPrincipal(alice), TipId("claimed-long-ago".into())),
+            active_until(&long_claimed),
+        );
+
+        let (_, collectable) = partition_sender_tips(&map, alice, now);
+
+        assert_eq!(
+            collectable
+                .iter()
+                .map(|id| id.0.clone())
+                .collect::<Vec<_>>(),
+            vec!["claimed-long-ago".to_string()],
+            "retention still expires — the fix keeps rows, it does not keep them forever"
         );
     }
 

@@ -2308,6 +2308,7 @@ interface I18nTip {
 		no_wallet_needed: string;
 		expires_at: string;
 		done: string;
+		generating_link: string;
 		reserve_failed: string;
 		status_title: string;
 		claim_title: string;
@@ -2339,7 +2340,13 @@ interface I18nTip {
 		claim_failed: string;
 		history_title: string;
 		history_empty: string;
+		group_failed: string;
+		group_failed_hint: string;
+		group_open: string;
+		group_claimed: string;
+		group_expired: string;
 		status_reserved: string;
+		status_failed: string;
 		status_claimed: string;
 		status_expired: string;
 		status_cancelled: string;

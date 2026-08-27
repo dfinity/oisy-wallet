@@ -1,5 +1,6 @@
 import { getTipEncryptedVetkey, getTipVetkeyPublicKey } from '$lib/api/backend.api';
-import { nonNullish } from '@dfinity/utils';
+import { fromBase64Url, toBase64Url } from '$lib/utils/base64url.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	DerivedPublicKey,
 	EncryptedVetKey,
@@ -40,13 +41,76 @@ const vetkdInput = (principal: Principal): Uint8Array => {
 };
 
 // Per-session, per-principal cache of the derived key material. Held in memory
-// only — never persisted — so it is discarded on reload and on sign-out. A
-// separate cache from the personal-notes one because it is a different key: the
+// only and never persisted: the claim codes it decrypts are bearer instruments,
+// so a key on disk would outlive the delegation and let whoever found it claim
+// the sender's outstanding tips. Keyed by principal, so a second identity in the
+// same tab gets its own entry rather than the previous one's key.
+//
+// A separate cache from the personal-notes one because it is a different key: the
 // two stores derive under different map names on purpose.
 const sessionCache = new Map<string, Promise<DerivedKeyMaterial>>();
 
 const toUint8Array = (value: Uint8Array | number[]): Uint8Array =>
 	value instanceof Uint8Array ? value : Uint8Array.from(value);
+
+const VERIFICATION_KEY_STORAGE_KEY = 'oisy-tip-vetkey-verification-key';
+
+/**
+ * The verification key is a canister-wide **public constant**: identical for
+ * every caller and unchanged for the canister's life. Refetching it on every
+ * page load was one wasted update call per load, and worse — it was requested
+ * in the same `Promise.all` as the paid derivation, so a rejection on the
+ * constant discarded a derivation that had already been paid for.
+ *
+ * `sessionStorage` rather than `localStorage`: it survives the reloads that
+ * caused the waste, it cannot go permanently stale, and signing out already
+ * clears it. Every access is guarded because storage throws rather than returns
+ * in some privacy modes, and a cache is never worth failing a payout over.
+ */
+const readCachedVerificationKey = (): Uint8Array | undefined => {
+	try {
+		const stored = sessionStorage.getItem(VERIFICATION_KEY_STORAGE_KEY);
+		return isNullish(stored) ? undefined : fromBase64Url(stored);
+	} catch (_: unknown) {
+		return undefined;
+	}
+};
+
+const cacheVerificationKey = (bytes: Uint8Array): void => {
+	try {
+		sessionStorage.setItem(VERIFICATION_KEY_STORAGE_KEY, toBase64Url(bytes));
+	} catch (_: unknown) {
+		// Not being able to cache costs a round trip, nothing more.
+	}
+};
+
+/**
+ * Dropped whenever a derivation fails to verify against it.
+ *
+ * Without this a single corrupt cached value would be permanent: the derivation
+ * rejects, the rejected promise is evicted from the session cache so the next
+ * call retries, and that retry reads the same bad bytes back out of storage.
+ */
+const forgetCachedVerificationKey = (): void => {
+	try {
+		sessionStorage.removeItem(VERIFICATION_KEY_STORAGE_KEY);
+	} catch (_: unknown) {
+		// Nothing to do: the next verification failure clears it again.
+	}
+};
+
+const verificationKey = async ({ identity }: { identity: Identity }): Promise<Uint8Array> => {
+	const cached = readCachedVerificationKey();
+
+	if (nonNullish(cached)) {
+		return cached;
+	}
+
+	const fetched = toUint8Array(await getTipVetkeyPublicKey({ identity }));
+	cacheVerificationKey(fetched);
+
+	return fetched;
+};
 
 /**
  * Derives the caller's key material for the tip-secrets store via vetKD and
@@ -68,21 +132,29 @@ export const deriveTipKeyMaterial = ({
 
 	const promise = (async (): Promise<DerivedKeyMaterial> => {
 		const transportSecretKey = TransportSecretKey.random();
-		const [encryptedVetkey, verificationKey] = await Promise.all([
+		const [encryptedVetkey, verification] = await Promise.all([
 			getTipEncryptedVetkey({
 				identity,
 				transportPublicKey: transportSecretKey.publicKeyBytes()
 			}),
-			getTipVetkeyPublicKey({ identity })
+			verificationKey({ identity })
 		]);
 
-		const vetKey = EncryptedVetKey.deserialize(toUint8Array(encryptedVetkey)).decryptAndVerify(
-			transportSecretKey,
-			DerivedPublicKey.deserialize(toUint8Array(verificationKey)),
-			vetkdInput(principal)
-		);
+		try {
+			const vetKey = EncryptedVetKey.deserialize(toUint8Array(encryptedVetkey)).decryptAndVerify(
+				transportSecretKey,
+				DerivedPublicKey.deserialize(verification),
+				vetkdInput(principal)
+			);
 
-		return vetKey.asDerivedKeyMaterial();
+			return vetKey.asDerivedKeyMaterial();
+		} catch (err: unknown) {
+			// The cached constant is the one input here that could be wrong, so a
+			// verification failure retires it rather than leaving the next attempt
+			// to read the same bad bytes back.
+			forgetCachedVerificationKey();
+			throw err;
+		}
 	})();
 
 	sessionCache.set(cacheKey, promise);

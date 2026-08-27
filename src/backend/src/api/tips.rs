@@ -13,7 +13,7 @@ use crate::{
     utils::{
         guards::{caller_is_not_anonymous, caller_is_registered_user},
         rate_limiter::{
-            self, VetKeyRateLimiters, CANCEL_TIP_RATE_LIMITER, CLAIM_TIP_RATE_LIMITER,
+            self, TieredRateLimiter, CANCEL_TIP_RATE_LIMITER, CLAIM_TIP_RATE_LIMITER,
             CREATE_TIP_RATE_LIMITER, GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER,
             GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER,
         },
@@ -33,7 +33,7 @@ use crate::{
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn create_tip(request: CreateTipRequest) -> CreateTipResult {
-    if let Err(e) = CREATE_TIP_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller) {
+    if let Err(e) = CREATE_TIP_RATE_LIMITER.with(TieredRateLimiter::check_caller) {
         return CreateTipResult::Err(TipError::RateLimited(e));
     }
     service::create_tip(request).await.into()
@@ -86,7 +86,7 @@ pub fn get_tip_details(request: TipClaimRequest) -> GetTipDetailsResult {
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub async fn claim_tip(request: TipClaimRequest) -> ClaimTipResult {
-    if let Err(e) = CLAIM_TIP_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller) {
+    if let Err(e) = CLAIM_TIP_RATE_LIMITER.with(TieredRateLimiter::check_caller) {
         return ClaimTipResult::Err(TipError::RateLimited(e));
     }
     service::claim_tip(request).await.into()
@@ -102,7 +102,7 @@ pub async fn claim_tip(request: TipClaimRequest) -> ClaimTipResult {
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn cancel_tip(tip_id: String) -> CancelTipResult {
-    if let Err(e) = CANCEL_TIP_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller) {
+    if let Err(e) = CANCEL_TIP_RATE_LIMITER.with(TieredRateLimiter::check_caller) {
         return CancelTipResult::Err(TipError::RateLimited(e));
     }
     service::cancel_tip(tip_id).into()
@@ -156,7 +156,7 @@ pub fn get_tip_secret(tip_id: String) -> GetTipSecretResult {
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn get_tip_encrypted_vetkey(transport_key: ByteBuf) -> TipVetkeyResult {
-    if let Err(e) = GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller) {
+    if let Err(e) = GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER.with(TieredRateLimiter::check_caller) {
         return TipVetkeyResult::Err(TipError::RateLimited(e));
     }
     secrets::get_encrypted_vetkey(transport_key).await.into()
@@ -170,7 +170,9 @@ pub async fn get_tip_encrypted_vetkey(transport_key: ByteBuf) -> TipVetkeyResult
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub async fn get_tip_vetkey_public_key() -> TipVetkeyResult {
-    if let Err(e) = GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(VetKeyRateLimiters::check_caller) {
+    if let Err(e) =
+        GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER.with(rate_limiter::RateLimiter::check_caller)
+    {
         return TipVetkeyResult::Err(TipError::RateLimited(e));
     }
     secrets::get_vetkey_public_key().await.into()
