@@ -121,7 +121,7 @@ describe('TipHistory', () => {
 			tip({ tip_id: 'stuck', status: { Failed: null } })
 		]);
 
-		const { container, getByText } = render(TipHistory, {
+		const { container } = render(TipHistory, {
 			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
 		});
 
@@ -170,6 +170,7 @@ describe('TipHistory', () => {
 		await waitFor(() =>
 			expect(container.querySelector('span.text-lg')?.textContent).toBe(text.group_expired)
 		);
+
 		expect(getByText(text.status_cancelled)).toBeInTheDocument();
 		expect(queryByText(text.group_open)).toBeNull();
 	});
