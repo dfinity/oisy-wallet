@@ -23,23 +23,14 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
 
     // Now do the state mutation without any async operations
     mutate_state(|s| {
-        // Get the user's contacts directly from the state instead of using the helper function
-        // `get_stored_contacts_safely` to avoid a "BorrowError" caused by nested state borrowing
-        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
-            // Try to access the contacts safely with catch_unwind
-            if let Ok(contacts) = std::panic::catch_unwind(|| stored_contacts.clone()) {
-                contacts
-            } else {
-                // Log deserialization failure and create empty contacts
-                ic_cdk::api::debug_print(format!(
-                    "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
-                    stored_principal.0
-                ));
-                create_empty_contacts()
-            }
-        } else {
-            create_empty_contacts()
-        };
+        // Read the state directly instead of going through `get_stored_contacts` to avoid a
+        // "BorrowError" caused by nested state borrowing.
+        let mut stored_contacts = s
+            .contact
+            .get(&stored_principal)
+            .map_or_else(create_empty_contacts, |stored_contacts| {
+                stored_contacts.clone()
+            });
 
         if stored_contacts.contacts.len() >= MAX_CONTACTS_PER_USER {
             return Err(ContactError::TooManyContacts);
@@ -75,7 +66,7 @@ pub(crate) fn get_contacts() -> Vec<Contact> {
     let stored_principal = StoredPrincipal(msg_caller());
 
     // Use our helper function to safely get contacts
-    let stored_contacts = get_stored_contacts_safely(&stored_principal);
+    let stored_contacts = get_stored_contacts(&stored_principal);
 
     // Convert BTreeMap values to a vector to avoid having to change the exposed data structure
     stored_contacts.contacts.values().cloned().collect()
@@ -93,7 +84,7 @@ pub(crate) fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(msg_caller());
 
     // Use our helper function to safely get contacts
-    let stored_contacts = get_stored_contacts_safely(&stored_principal);
+    let stored_contacts = get_stored_contacts(&stored_principal);
 
     // Find the specific contact by ID
     stored_contacts
@@ -117,23 +108,13 @@ pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, C
     let current_time = time();
 
     mutate_state(|s| {
-        // Get the user's contacts directly from the state
-        let mut stored_contacts = if let Some(stored_contacts) = s.contact.get(&stored_principal) {
-            // Try to access the contacts safely with catch_unwind
-            if let Ok(contacts) = std::panic::catch_unwind(|| stored_contacts.clone()) {
-                contacts
-            } else {
-                // Log deserialization failure and create empty contacts
-                ic_cdk::api::debug_print(format!(
-                    "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
-                    stored_principal.0
-                ));
-                create_empty_contacts()
-            }
-        } else {
+        // Read the state directly instead of going through `get_stored_contacts` to avoid a
+        // "BorrowError" caused by nested state borrowing.
+        let Some(stored_contacts) = s.contact.get(&stored_principal) else {
             // If the user has no contacts, return ContactNotFound
             return Err(ContactError::ContactNotFound);
         };
+        let mut stored_contacts = stored_contacts.clone();
 
         // Replacing or clearing an image leaves the image count unchanged, so only a contact
         // gaining its first image counts against the per-principal cap.
@@ -174,31 +155,22 @@ fn create_empty_contacts() -> StoredContacts {
     }
 }
 
-/// Safely retrieves stored contacts for a user principal, handling deserialization failures.
+/// Retrieves stored contacts for a user principal.
 ///
 /// # Arguments
 /// * `stored_principal` - The stored principal identifier of the user
 ///
 /// # Returns
-/// * `StoredContacts` - The user's stored contacts if found and successfully deserialized or an
-///   empty contacts structure if not found or deserialization fails
-fn get_stored_contacts_safely(stored_principal: &StoredPrincipal) -> StoredContacts {
+/// * `StoredContacts` - The user's stored contacts, or an empty contacts structure if the user has
+///   none stored
+fn get_stored_contacts(stored_principal: &StoredPrincipal) -> StoredContacts {
     read_state(|state| {
-        if let Some(stored_contacts) = state.contact.get(stored_principal) {
-            // Try to access the contacts safely with catch_unwind
-            if let Ok(contacts) = std::panic::catch_unwind(|| stored_contacts.clone()) {
-                contacts
-            } else {
-                // Log deserialization failure and return empty contacts
-                ic_cdk::api::debug_print(format!(
-                    "Failed to deserialize contacts for principal: {}. Creating empty contacts.",
-                    stored_principal.0
-                ));
-                create_empty_contacts()
-            }
-        } else {
-            create_empty_contacts()
-        }
+        state
+            .contact
+            .get(stored_principal)
+            .map_or_else(create_empty_contacts, |stored_contacts| {
+                stored_contacts.clone()
+            })
     })
 }
 

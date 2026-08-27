@@ -94,13 +94,6 @@ fn create_test_jpeg_image() -> ContactImage {
         mime_type: ImageMimeType::Jpeg,
     }
 }
-fn create_empty_contacts() -> shared::types::contact::StoredContacts {
-    shared::types::contact::StoredContacts {
-        contacts: std::collections::BTreeMap::new(),
-        update_timestamp_ns: 0,
-    }
-}
-
 // -------------------------------------------------------------------------------------------------
 // - Integration tests for the contact management functionality
 // -------------------------------------------------------------------------------------------------
@@ -898,125 +891,6 @@ fn test_update_contact_image_jpeg() {
     assert!(result.is_ok());
     let contact_with_image = result.unwrap();
     assert_eq!(contact_with_image.image, Some(jpeg_image));
-}
-
-#[cfg(test)]
-mod tests {
-    use pretty_assertions::assert_eq;
-    use serde_bytes::ByteBuf;
-    use shared::types::contact::{Contact, ContactImage, ImageMimeType, UpdateContactRequest};
-
-    use super::create_empty_contacts;
-
-    #[test]
-    fn test_update_contact_image_png() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        stored_contacts.contacts.insert(1, contact.clone());
-        let png_image = ContactImage {
-            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
-            mime_type: ImageMimeType::Png,
-        };
-        let request = UpdateContactRequest {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(png_image.clone()),
-        };
-        let updated = Contact {
-            id: 1,
-            name: "Test".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(png_image),
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
-    }
-
-    #[test]
-    fn test_update_contact_image_remove() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(ContactImage {
-                data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF]),
-                mime_type: ImageMimeType::Jpeg,
-            }),
-        };
-        stored_contacts.contacts.insert(2, contact.clone());
-        let request = UpdateContactRequest {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        let updated = Contact {
-            id: 2,
-            name: "Test2".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
-    }
-
-    #[test]
-    fn test_update_contact_image_jpeg() {
-        let mut stored_contacts = create_empty_contacts();
-        let contact = Contact {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: None,
-        };
-        stored_contacts.contacts.insert(3, contact.clone());
-        let jpeg_image = ContactImage {
-            data: ByteBuf::from(vec![0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10]),
-            mime_type: ImageMimeType::Jpeg,
-        };
-        let request = UpdateContactRequest {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(jpeg_image.clone()),
-        };
-        let updated = Contact {
-            id: 3,
-            name: "Test3".to_string(),
-            addresses: vec![],
-            update_timestamp_ns: 0,
-            image: Some(jpeg_image),
-        };
-        let result = if request.image.is_none() {
-            None
-        } else {
-            request.image.clone()
-        };
-        assert_eq!(result, updated.image);
-    }
 }
 
 #[test]
