@@ -68,6 +68,66 @@ export const parseClaimCodeFromFragment = (fragment: string): string | undefined
 	return code === null || code === '' ? undefined : code;
 };
 
+/** How long to wait before the one retry of the claim-code write. */
+const SECRET_RETRY_DELAY_MS = 1_500;
+
+/**
+ * Stores the recoverable copy of a claim code, and says whether it worked.
+ *
+ * Deliberately after the tip exists, and it never throws: the reservation has
+ * already succeeded, so a failure here must not look like a failed tip. But it
+ * is no longer silent either. It returns `false` so the caller can tell the
+ * sender to copy the link now, which is the only moment the link still exists —
+ * a failure here used to cost that tip its recoverable link permanently, with
+ * nothing on screen and only a console line to say so.
+ *
+ * Retried once, because the causes seen in the wild are transient: a boundary
+ * node returning 503, or a rate limit that a moment's wait clears. Only once,
+ * and only the write: an `encryptClaimCode` that fails may have spent a vetKD
+ * derivation, and hammering a metered endpoint is how a blip becomes an outage.
+ */
+const storeClaimCode = async ({
+	identity,
+	draft
+}: {
+	identity: Identity;
+	draft: TipDraft;
+}): Promise<boolean> => {
+	const attempt = async (): Promise<void> => {
+		await setTipSecret({
+			identity,
+			tip_id: draft.tipId,
+			encrypted_claim_code: await encryptClaimCode({
+				claimCode: draft.claimCode,
+				tipId: draft.tipId,
+				identity
+			})
+		});
+	};
+
+	try {
+		await attempt();
+
+		return true;
+	} catch (err: unknown) {
+		consoleWarn('Could not store the recoverable claim code for this tip, retrying', err);
+	}
+
+	await new Promise((resolve) => setTimeout(resolve, SECRET_RETRY_DELAY_MS));
+
+	try {
+		await attempt();
+
+		return true;
+	} catch (err: unknown) {
+		// The sender keeps their tip and their money either way. What they lose is
+		// the ability to find this link again, which is why the caller is told.
+		consoleWarn('Gave up storing the recoverable claim code for this tip', err);
+
+		return false;
+	}
+};
+
 /**
  * Reserves a tip: approves the backend canister for it on the ledger, then
  * records it.
@@ -90,6 +150,11 @@ export const parseClaimCodeFromFragment = (fragment: string): string | undefined
  * draft is the caller's to hold — generating a fresh one on retry would strand
  * the first allowance until it expired.
  *
+ * Returns `secretStored: false` when the recoverable copy of the claim code
+ * could not be saved. The tip is real and claimable either way; what the sender
+ * loses is the ability to find this link again, so the screen has to say so
+ * while the link is still in front of them.
+ *
  * **The deadline is the caller's too.** It used to be derived here from a
  * duration, which meant the only way to learn it was to wait for this whole
  * function to finish — and the share screen needs it to draw anything at all. The
@@ -111,7 +176,7 @@ export const reserveTip = async ({
 	fee: bigint;
 	expiresAtNs: bigint;
 	message?: string;
-}): Promise<{ link: string }> => {
+}): Promise<{ link: string; secretStored: boolean }> => {
 	const subaccount = await tipSpenderSubaccount(draft.tipId);
 
 	await approve({
@@ -135,25 +200,7 @@ export const reserveTip = async ({
 		claim_code_hash: await claimCodeHash(draft.claimCode)
 	});
 
-	// Best-effort, and deliberately after the tip exists: this is a convenience
-	// so the sender can find the link again, and a failure here must not look
-	// like a failed reservation — the tip is real and the link is on screen. The
-	// canister cannot read what it stores.
-	try {
-		await setTipSecret({
-			identity,
-			tip_id: draft.tipId,
-			encrypted_claim_code: await encryptClaimCode({
-				claimCode: draft.claimCode,
-				tipId: draft.tipId,
-				identity
-			})
-		});
-	} catch (err: unknown) {
-		consoleWarn('Could not store the recoverable claim code for this tip', err);
-	}
-
-	return { link: buildTipLink(draft) };
+	return { link: buildTipLink(draft), secretStored: await storeClaimCode({ identity, draft }) };
 };
 
 /**

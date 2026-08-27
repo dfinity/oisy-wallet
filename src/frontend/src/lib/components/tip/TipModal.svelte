@@ -38,6 +38,9 @@
 	// What was actually reserved, in base units. The share screen confirms this
 	// rather than re-deriving it from the input, which the user can still edit.
 	let reservedAmount: bigint | undefined = $state();
+	// The recoverable copy of the claim code could not be saved, so this link is
+	// the only one there will be.
+	let linkNotSaved = $state(false);
 	let busy = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
@@ -122,6 +125,7 @@
 
 			reservedAmount = parsedAmount;
 			expiresAtNs = deadline;
+			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
 			goToStep(WizardStepsTip.SHARE);
 		} catch (err: unknown) {
@@ -164,6 +168,7 @@
 				amount={reservedAmount}
 				{expiresAtNs}
 				{link}
+				{linkNotSaved}
 				onDone={modalStore.close}
 				token={selectedToken}
 			/>
