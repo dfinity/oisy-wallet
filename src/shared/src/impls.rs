@@ -50,7 +50,7 @@ const CONTACT_MAX_LABEL_LENGTH: usize = 50;
 /// Maximum length of the address string inside a `TokenAccountId`.
 ///
 /// Generous headroom: the longest address any supported chain produces is 62 characters.
-const CONTACT_MAX_ADDRESS_LENGTH: usize = 128;
+const TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH: usize = 128;
 /// Maximum image size in bytes (100 KB)
 pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
 
@@ -879,7 +879,7 @@ impl Validate for TokenAccountId {
 
         validate_string_length(
             address,
-            CONTACT_MAX_ADDRESS_LENGTH,
+            TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH,
             "TokenAccountId.address",
         )
     }
@@ -993,7 +993,7 @@ impl Validate for ExchangeRate {
 mod address_validation_tests {
     use candid::Principal;
 
-    use super::CONTACT_MAX_ADDRESS_LENGTH;
+    use super::TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH;
     use crate::{
         types::{
             account::{BtcAddress, EthAddress, Icrcv2AccountId, SolPrincipal, TokenAccountId},
@@ -1046,14 +1046,18 @@ mod address_validation_tests {
 
     #[test]
     fn rejects_an_address_over_the_length_bound() {
-        let address = TokenAccountId::Sol(SolPrincipal("a".repeat(CONTACT_MAX_ADDRESS_LENGTH + 1)));
+        let address = TokenAccountId::Sol(SolPrincipal(
+            "a".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
+        ));
 
         assert!(address.validate().is_err());
     }
 
     #[test]
     fn accepts_an_address_exactly_at_the_length_bound() {
-        let address = TokenAccountId::Sol(SolPrincipal("a".repeat(CONTACT_MAX_ADDRESS_LENGTH)));
+        let address = TokenAccountId::Sol(SolPrincipal(
+            "a".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH),
+        ));
 
         assert!(address.validate().is_ok());
     }
@@ -1061,7 +1065,7 @@ mod address_validation_tests {
     #[test]
     fn update_request_rejects_an_over_long_address() {
         let request = request_with_address(TokenAccountId::Btc(BtcAddress::P2PKH(
-            "1".repeat(CONTACT_MAX_ADDRESS_LENGTH + 1),
+            "1".repeat(TOKEN_ACCOUNT_ID_MAX_ADDRESS_LENGTH + 1),
         )));
 
         assert!(request.validate().is_err());

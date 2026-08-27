@@ -1024,7 +1024,7 @@ fn test_update_contact_rejects_an_over_long_address() {
         },
     )
     .expect("that a normal address is accepted");
-    assert_eq!(updated.addresses, vec![valid_address]);
+    assert_eq!(updated.addresses, vec![valid_address.clone()]);
 
     // An address longer than the bound is rejected before it can reach storage. Validation runs
     // during candid deserialization, so the call is rejected outright rather than returning a
@@ -1049,8 +1049,10 @@ fn test_update_contact_rejects_an_over_long_address() {
         "an address over the length bound should be rejected"
     );
 
-    // The rejected write left the stored contact untouched.
+    // The rejected write left the stored contact untouched: the addresses must still be exactly
+    // what the last successful update wrote, not merely the same number of them.
     let after =
         call_get_contact(&pic_setup, caller, contact.id).expect("that the contact survives");
-    assert_eq!(after.addresses.len(), 1);
+    assert_eq!(after.addresses, vec![valid_address]);
+    assert_eq!(after.name, contact.name);
 }
