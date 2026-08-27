@@ -1244,7 +1244,8 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1593,7 @@
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
 			"spender": "Спишется с",
+			"operator": "",
 			"application": "Приложение",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
@@ -1622,6 +1624,9 @@
 			"invalid_typed_data": "Этот запрос содержит значение, тип которого не соответствует схеме, заявленной приложением. Отображаемые данные могут отличаться от тех, что были бы фактически подписаны, поэтому подписание отключено.",
 			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение",
 			"sign_psbt": "",

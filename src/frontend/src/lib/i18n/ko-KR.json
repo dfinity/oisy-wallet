@@ -1244,7 +1244,8 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1593,7 @@
 			"or_use_link": "또는 WalletConnect 링크 사용",
 			"proposer": "제안자",
 			"spender": "사용자",
+			"operator": "",
 			"application": "애플리케이션",
 			"review": "$chain_name ($key) 필수 권한 검토",
 			"method": "메서드",
@@ -1622,6 +1624,9 @@
 			"invalid_typed_data": "이 요청에는 앱이 선언한 스키마와 유형이 일치하지 않는 값이 포함되어 있습니다. 표시된 내용이 실제로 서명될 내용과 다를 수 있으므로 서명이 비활성화되었습니다.",
 			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "원시 트랜잭션 데이터가 클립보드에 복사되었습니다.",
 			"sign_message": "메시지 서명",
 			"sign_psbt": "",

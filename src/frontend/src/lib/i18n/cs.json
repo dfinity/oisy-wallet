@@ -1244,7 +1244,8 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1593,7 @@
 			"or_use_link": "nebo použít odkaz WalletConnect",
 			"proposer": "Navrhovatel",
 			"spender": "Příjemce",
+			"operator": "",
 			"application": "Aplikace",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
@@ -1622,6 +1624,9 @@
 			"invalid_typed_data": "Tento požadavek obsahuje hodnotu, jejíž typ neodpovídá schématu deklarovanému aplikací. Zobrazený obsah se může lišit od toho, co by bylo skutečně podepsáno, proto je podepsání zakázáno.",
 			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu",
 			"sign_psbt": "",

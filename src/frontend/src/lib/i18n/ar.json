@@ -1244,7 +1244,8 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1593,7 @@
 			"or_use_link": "أو استخدم رابط WalletConnect",
 			"proposer": "المقترح",
 			"spender": "",
+			"operator": "",
 			"application": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
@@ -1622,6 +1624,9 @@
 			"invalid_typed_data": "",
 			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة",
 			"sign_psbt": "",

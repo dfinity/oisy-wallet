@@ -1244,7 +1244,8 @@
 			"swap_completed_close_failed": "",
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
-			"swap_replaced_or_dropped": ""
+			"swap_replaced_or_dropped": "",
+			"near_intents_quote_unverified": ""
 		}
 	},
 	"buy": {
@@ -1592,6 +1593,7 @@
 			"or_use_link": "またはWalletConnectリンクを使用",
 			"proposer": "接続元",
 			"spender": "承認先",
+			"operator": "",
 			"application": "アプリケーション",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
@@ -1622,6 +1624,9 @@
 			"invalid_typed_data": "このリクエストには、アプリが宣言したスキーマと型が一致しない値が含まれています。表示内容と実際に署名される内容が異なる可能性があるため、署名は無効になっています。",
 			"unsigned_typed_data_keys": "",
 			"unverifiable_erc20_request": "",
+			"unverifiable_approval_for_all_request": "",
+			"approval_for_all_grant": "",
+			"approval_for_all_revoke": "",
 			"raw_copied": "生のトランザクションデータをクリップボードにコピーしました。",
 			"sign_message": "メッセージに署名",
 			"sign_psbt": "",
