@@ -49,6 +49,13 @@
 		 * than broken, and what stops them leaving before the link arrives.
 		 */
 		generating?: boolean;
+		/**
+		 * True when the recoverable copy of the claim code could not be stored. The
+		 * tip is real and claimable either way; what is lost is the sender's ability
+		 * to find this link again, so it has to be said while the link is still in
+		 * front of them.
+		 */
+		linkNotSaved?: boolean;
 		cancelling?: boolean;
 	}
 
@@ -61,7 +68,8 @@
 		onDone,
 		onCancel,
 		cancelling = false,
-		generating = false
+		generating = false,
+		linkNotSaved = false
 	}: Props = $props();
 
 	// Copy and share are tracked separately: which one a sender reaches for says
@@ -71,7 +79,17 @@
 
 	// The absolute instant, not "in 24 hours": the sender may share this link days
 	// later, and a relative deadline stops being true the moment the modal closes.
-	let expiresAt = $derived(new Date(Number(expiresAtNs / 1_000_000n)).toLocaleString());
+	// "30 Aug, 15:30" rather than a full locale timestamp. The year and the seconds
+	// were noise on a line whose only job is to tell the sender roughly how long
+	// they have, and the long form crowded the one number that matters above it.
+	let expiresAt = $derived(
+		new Date(Number(expiresAtNs / 1_000_000n)).toLocaleString($currentLanguage, {
+			day: 'numeric',
+			month: 'short',
+			hour: '2-digit',
+			minute: '2-digit'
+		})
+	);
 
 	// The reserved amount, not the text that was typed — this line is the sender's
 	// only confirmation of what they actually committed.
@@ -110,19 +128,30 @@
 			{$i18n.tip.text.they_will_receive}
 		</span>
 
-		<span class="mt-1 flex items-center gap-2">
-			<Logo alt={token.symbol} size="xs" src={token.icon} />
-
-			<span class="text-3xl font-bold">{amountLabel}</span>
-		</span>
-
 		<!--
-			Fiat and network share a line. Both are context for the number above, and
-			the whole screen has to fit a phone without scrolling past the QR.
+			The fiat value leads when we know it. "$0.50" is what the person being
+			tipped actually understands; "0.5 ckUSDT" is the mechanism. The token line
+			stays directly underneath, with the logo, so what is being sent is never in
+			doubt — and it becomes the headline when no rate has loaded, which is normal
+			for a local or newly listed token.
 		-->
-		<span class="mt-1 text-sm text-secondary">
-			{nonNullish(fiatLabel) ? `${fiatLabel} · ${token.name}` : token.name}
-		</span>
+		{#if nonNullish(fiatLabel)}
+			<span class="mt-1 text-3xl font-bold">{fiatLabel}</span>
+
+			<span class="mt-1 flex items-center gap-2 text-sm text-secondary">
+				<Logo alt={token.symbol} size="xs" src={token.icon} />
+
+				{amountLabel}
+			</span>
+		{:else}
+			<span class="mt-1 flex items-center gap-2">
+				<Logo alt={token.symbol} size="xs" src={token.icon} />
+
+				<span class="text-3xl font-bold">{amountLabel}</span>
+			</span>
+
+			<span class="mt-1 text-sm text-secondary">{token.name}</span>
+		{/if}
 	</div>
 
 	<!--
@@ -164,7 +193,14 @@
 		-->
 		<p class="m-0 font-bold">{$i18n.tip.text.no_wallet_needed_title}</p>
 
+		<!--
+			Two lines, not one sentence: the first answers "can they even claim this",
+			the second says what to do with the code. `m-0` on the second so they read
+			as one paragraph broken for scanning, rather than two separate blocks.
+		-->
 		<p class="m-0 mt-1 text-secondary">{$i18n.tip.text.no_wallet_needed}</p>
+
+		<p class="m-0 text-secondary">{$i18n.tip.text.scan_or_photo}</p>
 	</div>
 
 	<!--
@@ -241,6 +277,15 @@
 		>
 			{$i18n.tip.text.cancel_tip}
 		</Button>
+	{/if}
+
+	<!--
+		Directly under the link, because it is about this link and it asks for
+		something to be done right now. Warning rather than info: leaving this screen
+		without copying loses the only copy there will ever be.
+	-->
+	{#if linkNotSaved}
+		<MessageBox level="warning" styleClass="mt-3">{$i18n.tip.text.link_not_saved}</MessageBox>
 	{/if}
 
 	{#snippet toolbar()}

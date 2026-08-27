@@ -46,10 +46,27 @@ pub(crate) const TIPS_BY_SENDER_MEMORY_ID: MemoryId = MemoryId::new(21);
 /// The four memories an `EncryptedMaps` needs for the per-tip claim-code store.
 /// Mirrors `PERSONAL_NOTES_*` (14-17). Never renumber these: the ids are how the
 /// memory manager finds existing data across an upgrade.
-pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(22);
-pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(23);
-pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(24);
-pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(25);
+///
+/// Renumbered once, from 22-25, and 22-25 must never be reused. `KeyManager`
+/// stores its vetKD key id in a `StableCell`, and `Cell::init` *loads* the stored
+/// value whenever the memory is non-empty — it only writes the value passed in
+/// when the region is fresh. So the key name a store sees is whichever one was
+/// configured the very first time it was touched, permanently, and no
+/// redeployment can change it.
+///
+/// A test environment initialised this store while its backend was configured
+/// with `dfx_test_key`, a name that exists only on a local replica. Every
+/// derivation there trapped with `SignCostError(InvalidKeyName)`, and correcting
+/// the deployment argument could not help: the bad name was already frozen in
+/// memory 22. Moving to a fresh region is what lets `init` write the corrected
+/// name.
+///
+/// The abandoned region holds ciphertexts nobody could decrypt anyway — the key
+/// to read them was never derivable. Nothing recoverable is lost.
+pub(crate) const TIP_SECRETS_KEY_MANAGER_CONFIG_MEMORY_ID: MemoryId = MemoryId::new(26);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_ACCESS_MEMORY_ID: MemoryId = MemoryId::new(27);
+pub(crate) const TIP_SECRETS_KEY_MANAGER_SHARED_MEMORY_ID: MemoryId = MemoryId::new(28);
+pub(crate) const TIP_SECRETS_ENCRYPTED_MAPS_MEMORY_ID: MemoryId = MemoryId::new(29);
 
 thread_local! {
     pub(crate) static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(

@@ -25,10 +25,11 @@ export type TipStep =
 /**
  * Why a claim did not pay out, when the step is `claim` and the status is not
  * success. Kept separate from `result_status` so the funnel can distinguish a
- * dead link from a live tip that could not be paid — the two mean very different
- * things about whether the sender needs telling.
+ * dead link from a live tip that could not be paid — they mean very different
+ * things about whether the sender needs telling, and `shortBalance` is the one
+ * the sender can actually fix.
  */
-export type TipClaimOutcome = 'unavailable' | 'uncovered' | 'failed';
+export type TipClaimOutcome = 'unavailable' | 'uncovered' | 'shortBalance' | 'failed';
 
 export interface TrackTipParams {
 	// The funnel step → `event_modifier`.

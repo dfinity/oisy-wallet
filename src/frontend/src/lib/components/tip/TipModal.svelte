@@ -54,6 +54,9 @@
 	// freshly created tip (nothing to cancel yet from here) from a live one
 	// reopened for a second look.
 	let viewingTip = $state<MyTip | undefined>();
+	// The recoverable copy of the claim code could not be saved, so this link is
+	// the only one there will be.
+	let linkNotSaved = $state(false);
 	let busy = $state(false);
 	// True while a reservation is in flight and the share screen is already up.
 	let generating = $state(false);
@@ -233,6 +236,7 @@
 				symbol: selectedToken.symbol
 			});
 
+			linkNotSaved = !reserved.secretStored;
 			({ link } = reserved);
 		} catch (err: unknown) {
 			// Back to the form. The tip does not exist, so a share screen for it must
@@ -259,7 +263,15 @@
 
 <TokenActionContext token={selectedToken}>
 	<WizardModal bind:this={modal} onClose={modalStore.close} {steps} bind:currentStep>
-		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
+		<!--
+			The title tracks the state, not just the step. A screen that opens on the
+			click and is still filling in should not already claim "Tip is ready" — the
+			tip is not reserved yet, and saying so is how the sender knows the wait is
+			expected rather than a stall.
+		-->
+		{#snippet title()}{generating
+				? $i18n.tip.text.preparing_title
+				: (currentStep?.title ?? '')}{/snippet}
 
 		{#if currentStep?.name === WizardStepsTip.TOKENS_LIST}
 			<TipTokensList onClose={() => goToStep(WizardStepsTip.INTRO)} {onSelectToken} />
@@ -282,6 +294,7 @@
 				{generating}
 				{link}
 				{linkMessage}
+				{linkNotSaved}
 				onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
 				onDone={nonNullish(viewingTip) ? () => goToStep(WizardStepsTip.HISTORY) : modalStore.close}
 				token={selectedToken}

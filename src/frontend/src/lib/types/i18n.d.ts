@@ -2280,9 +2280,15 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		overview_window: string;
+		overview_failed: string;
+		overview_failed_hint: string;
+		overview_open: string;
+		overview_claimed: string;
 		select_token: string;
 		create_title: string;
 		share_title: string;
+		preparing_title: string;
 		empty_balance_title: string;
 		empty_balance_description: string;
 		no_supported_tokens_title: string;
@@ -2306,9 +2312,11 @@ interface I18nTip {
 		they_will_receive: string;
 		no_wallet_needed_title: string;
 		no_wallet_needed: string;
+		scan_or_photo: string;
 		expires_at: string;
 		done: string;
 		generating_link: string;
+		link_not_saved: string;
 		reserve_failed: string;
 		status_title: string;
 		claim_title: string;
@@ -2336,6 +2344,8 @@ interface I18nTip {
 		unavailable_description: string;
 		uncovered_title: string;
 		uncovered_description: string;
+		short_balance_title: string;
+		short_balance_description: string;
 		claim_failed_title: string;
 		claim_failed: string;
 		history_title: string;
@@ -2363,7 +2373,11 @@ interface I18nTip {
 		view_history: string;
 		get_started: string;
 	};
-	alt: { intro_illustration: string; claim_illustration: string };
+	alt: {
+		intro_illustration: string;
+		claim_illustration: string;
+		claim_failed_illustration: string;
+	};
 }
 
 interface I18n {
