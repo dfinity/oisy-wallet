@@ -171,4 +171,41 @@ describe('TipShare', () => {
 			expect(getByText(`$12.50 · ${props.token.name}`)).toBeInTheDocument();
 		});
 	});
+	describe('while the reservation is still running', () => {
+		// The screen now opens on the click and fills in, so it has to be honest
+		// about being unfinished. Before this the sender stared at an inactive button
+		// on the form for an approve plus two canister calls.
+		const generatingProps = { ...props, link: undefined, generating: true };
+
+		it('says the link is being built rather than leaving the reader to guess', () => {
+			const { getByText } = render(TipShare, { props: generatingProps });
+
+			expect(getByText(get(i18n).tip.text.generating_link)).toBeInTheDocument();
+		});
+
+		it('still states the amount and the deadline, which are already known', () => {
+			// The whole reason the transition can happen early: nothing on this part of
+			// the screen is waiting on the canister.
+			const { getByText } = render(TipShare, { props: generatingProps });
+
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+			expect(getByText(/Claimable until/)).toBeInTheDocument();
+		});
+
+		it('will not let the sender leave before the link arrives', () => {
+			// Dismissing here would drop them into the wallet without the link they
+			// came for, and the tip may not even exist yet.
+			const { getByText } = render(TipShare, { props: generatingProps });
+
+			expect(getByText(get(i18n).tip.text.done).closest('button')).toBeDisabled();
+		});
+
+		it('drops the notice once the link is in', () => {
+			const { queryByText } = render(TipShare, {
+				props: { ...props, generating: false }
+			});
+
+			expect(queryByText(get(i18n).tip.text.generating_link)).toBeNull();
+		});
+	});
 });

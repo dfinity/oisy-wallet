@@ -2778,6 +2778,7 @@
 			"no_wallet_needed": "Whoever you send it to can create one in seconds, or photograph this code and claim later.",
 			"expires_at": "Claimable until $date",
 			"done": "Done",
+			"generating_link": "Reserving your tip and building the link. This takes a few seconds.",
 			"reserve_failed": "The tip could not be reserved. Nothing has left your wallet, so try again.",
 			"status_title": "Tip Status",
 			"claim_title": "Claim tip",

@@ -55,6 +55,8 @@
 	// reopened for a second look.
 	let viewingTip = $state<MyTip | undefined>();
 	let busy = $state(false);
+	// True while a reservation is in flight and the share screen is already up.
+	let generating = $state(false);
 	let amount: OptionAmount = $state();
 	let durationMs: number = $state(DEFAULT_TIP_EXPIRY_MS);
 	let message = $state('');
@@ -112,12 +114,24 @@
 				tipId: viewingTip.tip_id,
 				ledgerCanisterId: viewingTip.ledger_canister_id.toText()
 			});
+			trackTip({
+				step: 'cancel',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				symbol: selectedToken?.symbol
+			});
 			toastsShow({ text: $i18n.tip.text.cancelled_toast, level: 'success' });
 			viewingTip = undefined;
 			// Back to the list, which reloads on mount, so the cancelled row cannot
 			// linger claiming to be live.
 			goToStep(WizardStepsTip.HISTORY);
 		} catch (err: unknown) {
+			trackTip({
+				step: 'cancel',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				symbol: selectedToken?.symbol
+			});
 			toastsError({ msg: { text: $i18n.tip.text.cancel_failed }, err });
 		} finally {
 			cancelling = false;
@@ -148,6 +162,7 @@
 		reservedAmount = tip.amount;
 		expiresAtNs = tip.expires_at_ns;
 		viewingTip = tip;
+		trackTip({ step: 'reopen', side: 'sender', symbol: selectedToken?.symbol });
 		link = undefined;
 		linkMessage = undefined;
 		goToStep(WizardStepsTip.SHARE);
@@ -175,29 +190,55 @@
 		}
 
 		busy = true;
+		generating = true;
+
+		const parsedAmount = parseToken({
+			value: `${amount}`,
+			unitName: selectedToken.decimals
+		});
+
+		// Client wall-clock is fine: the canister validates this against IC time
+		// and the 24h–7d options dwarf any client/replica skew. Decided here rather
+		// than inside `reserveTip` so the deadline is known without waiting for the
+		// reservation to finish.
+		const deadline = BigInt(Date.now() + durationMs) * 1_000_000n;
+
+		// Everything the share screen needs to draw itself is already known, so it
+		// opens on the click and the link lands in it. Before this the button just
+		// went inactive for an approve plus two canister calls while the form sat
+		// there, which reads as a dead click.
+		viewingTip = undefined;
+		reservedAmount = parsedAmount;
+		expiresAtNs = deadline;
+		link = undefined;
+		linkMessage = undefined;
+		goToStep(WizardStepsTip.SHARE);
 
 		try {
-			const parsedAmount = parseToken({
-				value: `${amount}`,
-				unitName: selectedToken.decimals
-			});
-
 			const reserved = await reserveTip({
 				identity: $authIdentity,
 				draft,
 				ledgerCanisterId: selectedToken.ledgerCanisterId,
 				amount: parsedAmount,
 				fee: selectedToken.fee,
-				durationMs,
+				expiresAtNs: deadline,
 				message: message === '' ? undefined : message
 			});
 
-			viewingTip = undefined;
-			reservedAmount = parsedAmount;
-			linkMessage = undefined;
-			({ link, expiresAtNs } = reserved);
-			goToStep(WizardStepsTip.SHARE);
+			trackTip({
+				step: 'create',
+				side: 'sender',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				expiry: expiryLabel(durationMs),
+				symbol: selectedToken.symbol
+			});
+
+			({ link } = reserved);
 		} catch (err: unknown) {
+			// Back to the form. The tip does not exist, so a share screen for it must
+			// not stay up with skeletons that will never resolve.
+			goToStep(WizardStepsTip.CREATE);
+
 			trackTip({
 				step: 'create',
 				side: 'sender',
@@ -211,6 +252,7 @@
 			toastsError({ msg: { text: $i18n.tip.text.reserve_failed }, err });
 		} finally {
 			busy = false;
+			generating = false;
 		}
 	};
 </script>
@@ -237,6 +279,7 @@
 				amount={reservedAmount}
 				{cancelling}
 				{expiresAtNs}
+				{generating}
 				{link}
 				{linkMessage}
 				onCancel={nonNullish(viewingTip) ? cancelViewedTip : undefined}
