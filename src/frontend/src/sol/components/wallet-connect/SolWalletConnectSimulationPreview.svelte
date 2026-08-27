@@ -122,5 +122,3 @@
 		{/each}
 	</div>
 </WalletConnectModalValue>
-
-<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>

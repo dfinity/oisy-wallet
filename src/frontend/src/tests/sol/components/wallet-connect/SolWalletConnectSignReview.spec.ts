@@ -296,6 +296,37 @@ describe('SolWalletConnectSignReview', () => {
 		});
 	});
 
+	describe('the simulation note', () => {
+		const preview = { solDelta: -5_000n, tokenDeltas: [], controlChanges: [] };
+
+		it('should state that the real execution can differ once a simulation ran', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
+		});
+
+		it('should say nothing when no simulation was obtained', () => {
+			const { queryByText } = render(SolWalletConnectSignReview, { props });
+
+			expect(queryByText(en.wallet_connect.text.simulation_note)).not.toBeInTheDocument();
+		});
+
+		it('should render the note above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: { ...props, preview }
+			});
+
+			const note = getByText(en.wallet_connect.text.simulation_note);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(note.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+	});
+
 	describe('when the decode produced no amount', () => {
 		const undecodedProps = { ...props, amount: undefined };
 
