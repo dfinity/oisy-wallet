@@ -916,6 +916,8 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
+		swap_amount_too_low: string;
+		swap_amount_too_low_minimum: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
@@ -1275,6 +1277,7 @@ interface I18nWallet_connect {
 		or_use_link: string;
 		proposer: string;
 		spender: string;
+		operator: string;
 		application: string;
 		review: string;
 		method: string;
@@ -1305,6 +1308,9 @@ interface I18nWallet_connect {
 		invalid_typed_data: string;
 		unsigned_typed_data_keys: string;
 		unverifiable_erc20_request: string;
+		unverifiable_approval_for_all_request: string;
+		approval_for_all_grant: string;
+		approval_for_all_revoke: string;
 		raw_copied: string;
 		sign_message: string;
 		sign_psbt: string;

@@ -33,6 +33,12 @@ pub const MAX_EVM_ADDRESS_LEN: usize = 42;
 /// is at most 63 characters, so anything longer can never be a valid pool id.
 pub const MAX_LIQUIDIUM_POOL_ID_LEN: usize = 63;
 
+/// Maximum width, in bits, of an `amount`. Every chain OISY supports expresses
+/// base-unit amounts in at most 256 bits, so a wider value is never a real
+/// balance. `Nat` is variable-length on the wire, so without this bound a
+/// single record could carry megabytes of digits.
+pub const MAX_ACTIVE_USER_TRANSACTION_AMOUNT_BITS: u64 = 256;
+
 /// Learned-mid-flow `(key, value)` reference attached to an active transaction,
 /// e.g. `{ key: "tx_hash", value: "0x…" }`. Modelled as a named record (not a
 /// tuple) so the generated TS bindings expose `.key` / `.value` instead of
