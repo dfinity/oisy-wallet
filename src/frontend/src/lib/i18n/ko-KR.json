@@ -2814,6 +2814,8 @@
 			"unavailable_description": "",
 			"uncovered_title": "",
 			"uncovered_description": "",
+			"short_balance_title": "",
+			"short_balance_description": "",
 			"claim_failed_title": "",
 			"claim_failed": "",
 			"history_title": "",
@@ -2843,7 +2845,8 @@
 		},
 		"alt": {
 			"intro_illustration": "",
-			"claim_illustration": ""
+			"claim_illustration": "",
+			"claim_failed_illustration": ""
 		}
 	}
 }

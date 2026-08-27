@@ -351,11 +351,15 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
         Err(err) => {
             let reason = match &err {
                 TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
+                TransferFromCallError::InsufficientFunds => {
+                    TipClaimFailureReason::InsufficientFunds
+                }
                 TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
             };
             release_claim(&key, claimer, now, reason);
             match err {
                 TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
+                TransferFromCallError::InsufficientFunds => Err(TipError::InsufficientFunds),
                 TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
             }
         }
