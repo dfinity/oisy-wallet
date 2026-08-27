@@ -1297,7 +1297,6 @@ interface I18nWallet_connect {
 		simulation_new_program: string;
 		simulation_control_removed: string;
 		transfer_sources: string;
-		transfer_destinations: string;
 		transfer_party_own: string;
 		transfer_parties_partial: string;
 		dapp_prioritization_fee: string;

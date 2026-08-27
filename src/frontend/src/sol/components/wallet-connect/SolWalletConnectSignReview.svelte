@@ -43,8 +43,8 @@
 		// What a simulation says this message would do to the user's own accounts. Absent whenever
 		// the simulation could not be obtained, in which case the review shows what it always has.
 		preview?: SolSimulationPreview;
-		// Who the transaction spends from and who it pays, derived from the transfer instructions
-		// it contains. Absent until the decode settles.
+		// Who the transaction spends from, derived from the transfer instructions it contains. Where
+		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
 		approveDisabled?: boolean;
 		onApprove: () => void;
@@ -72,14 +72,9 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
-	// The lists replace the single destination field, which had to pick one winner out of a swap.
-	// They only replace it once they have something to say: a message that yields no destination at
-	// all would otherwise lose the field the review shows today, for nothing.
-	let showParties = $derived(nonNullish(parties) && parties.destinations.length > 0);
-
-	// Instructions OISY cannot decode yield no amount, and with it no destination and no balance
-	// worth showing: what the transaction does is then told by the simulated changes alone. The
-	// rows are dropped rather than filled with a zero the decode never produced.
+	// Instructions OISY cannot decode yield no amount and no balance worth showing: what the
+	// transaction does is then told by the simulated changes alone. The rows are dropped rather
+	// than filled with a zero the decode never produced.
 	let decoded = $derived(nonNullish(amount));
 
 	let feeExchangeRate = $derived($exchanges?.[feeToken.id]?.usd);
@@ -149,6 +144,9 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 	{/if}
 
+	<!-- The review names no recipient of its own: a single destination had to pick one winner out
+	     of a swap, and where the value ends up is what the simulated balance changes describe. An
+	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
 	<!-- The signer is the connected account and never varies between the requests of a session, so
 	     here it costs a row without saying anything about the message in front of the user. The
 	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
@@ -156,7 +154,7 @@
 		{amount}
 		{application}
 		{balance}
-		destination={isApproval || !decoded || showParties ? null : destination}
+		destination={null}
 		showAmount={decoded}
 		showBalance={decoded}
 		showSigner={false}
