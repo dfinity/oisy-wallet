@@ -173,18 +173,40 @@ until PR 6, so every intermediate PR is safe to merge on its own.
    Provider registration (source and destination sides), gate widening, PRODUCT.md
    update, component and e2e tests. The flip-the-switch PR.
 
-## 9. Open questions (facts to confirm)
+## 9. Open questions (all resolved)
 
-- Confirm against the live 1Click API that `btc:mainnet` is a supported origin and
-  destination blockchain on `/tokens`, and how the native BTC asset is identified there
-  (the frontend lookup keys native assets by lowercased symbol).
-- Confirm the 1Click quote `deadline` is long enough for a BTC deposit to confirm
-  (block times of ~10 minutes vs the settlement window observed for EVM/SOL), and what
-  status the swap reports while the deposit has been broadcast but not yet confirmed
-  (`INCOMPLETE_DEPOSIT` handling is already non-terminal in
-  `near-intents-active-tx.utils.ts`).
-- Confirm whether 1Click ever assigns a `depositMemo` for BTC deposits (expected: no;
-  the external ref stays optional either way).
+No open questions remain. The last one, what status 1Click reports while a BTC deposit
+has been broadcast but not yet confirmed, was closed by staging QA (2026-08-27). The
+observed timeline of a real swap: while the deposit awaited Bitcoin confirmation, the
+active user transaction row stayed pending the entire time (surviving modal close and
+page refresh, never surfacing a terminal state early); once the deposit confirmed and
+1Click settled the swap, the global poller moved the row to `Succeeded`. Both
+directions behaved this way. This matches the 1Click status model, where the
+pre-confirmation window reports the non-terminal `PENDING_DEPOSIT`
+(`KNOWN_DEPOSIT_TX` once the broadcast txid has been submitted via `/deposit/submit`),
+both of which OISY maps as non-terminal in `near-intents-active-tx.utils.ts` alongside
+the deliberate non-terminal handling of `INCOMPLETE_DEPOSIT`.
+
+Staging QA also surfaced one practical bound: the 1Click bridge minimum for a BTC
+source (8300 sats for BTC to ETH at the time of testing); a below-minimum quote fails
+with HTTP 400, which the swap UI initially rendered as the generic "swap not offered"
+message. Surfacing the provider's minimum is a small follow-up outside this spec.
+
+Answered against the live 1Click API (2026-08-25):
+
+- `btc` is a supported blockchain on `/tokens`, listed twice: native BTC as
+  `nep141:btc.omft.near` (symbol `BTC`, no `contractAddress`, so the frontend's
+  symbol-keyed native lookup matches as-is) and a `BTC(OMNI)` variant that carries a
+  `contractAddress`, which confirms btc entries must be excluded from EVM-style
+  address lowercasing.
+- A dry `POST /quote` for BTC to native ETH succeeds (`EXACT_INPUT`, deposit and
+  refund on the origin chain, recipient on the destination chain) with
+  `timeEstimate: 812` seconds and accepts a deadline more than a day out: the
+  deadline is caller-chosen, which surfaced that OISY's fixed 3-minute
+  `NEAR_INTENTS_QUOTE_DEADLINE_MS` would expire every BTC deposit into a refund.
+  See the deadline decision below.
+- The dry quote response carries no `depositMemo`; as expected for a UTXO chain,
+  the memo external ref stays optional and is simply absent for BTC.
 
 ## 10. Pending decisions (facts are clear, someone must decide)
 
@@ -197,3 +219,7 @@ until PR 6, so every intermediate PR is safe to merge on its own.
   ICP destination via Chain Fusion. The whole set is behind the feature flag, so it is
   a local/staging surface only; a curated narrowing, if wanted before the production
   flip, is a one-line edit to the destination set.
+- The NEAR Intents quote deadline becomes origin-aware: BTC-source quotes use a
+  1-hour `NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS` (deposits confirm in tens of minutes,
+  and expiry refunds minus a fee, so the window must cover slow blocks), while EVM
+  and SOL keep the 3-minute deadline for fresher quotes. Landed as its own PR.

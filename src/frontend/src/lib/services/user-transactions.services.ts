@@ -99,20 +99,26 @@ export const saveFinalizedTransactions = async <T>({
 			)
 	);
 
+	let allSaved = true;
+
 	// Sequential rather than concurrent: each call is an update, and the canister merges into one
 	// entry per (user, token), so firing them together buys nothing and multiplies the load.
 	for (const batch of batches) {
 		try {
 			await saveUserTransactions({ identity, tokenId, transactions: batch });
 		} catch (err: unknown) {
-			// Not worth surfacing to the user: the cache is a warm-up, and the transactions are already
-			// on screen. Worth logging, because a silent total failure here is what kept a rejected
-			// over-sized batch invisible.
-			consoleError('Failed to save a batch of user transactions:', err);
+			// Keep going rather than abandoning the rest. The canister validates a batch as a unit and
+			// refuses all of it on the first transaction that breaches a field bound, so bailing here
+			// would let one unusual transaction cost the user every later batch too. Saves are
+			// deduplicated by id, so retrying the survivors on a future load stays cheap.
+			allSaved = false;
 
-			return { success: false };
+			// Not worth surfacing to the user: the cache is a warm-up, and the transactions are already
+			// on screen. Worth logging, because a silent failure here is what kept a rejected batch
+			// invisible in the first place.
+			consoleError('Failed to save a batch of user transactions:', err);
 		}
 	}
 
-	return { success: true };
+	return { success: allSaved };
 };
