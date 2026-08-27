@@ -34,7 +34,8 @@ export const sortActiveUserTransactionsByTimestampDesc = (
 	transactions: ActiveUserTransaction[]
 ): ActiveUserTransaction[] =>
 	[...transactions].sort((a, b) => {
-		const [timestampA, timestampB] = [a, b].map(activeUserTransactionTimestampNs);
+		const timestampA = activeUserTransactionTimestampNs(a);
+		const timestampB = activeUserTransactionTimestampNs(b);
 
 		return timestampA < timestampB ? 1 : timestampA > timestampB ? -1 : 0;
 	});
