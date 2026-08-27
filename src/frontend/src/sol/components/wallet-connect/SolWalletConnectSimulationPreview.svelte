@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import { enabledSplTokens } from '$sol/derived/spl.derived';
 	import type { SolSimulationControlField, SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SplTokenAddress } from '$sol/types/spl';
@@ -109,6 +110,8 @@
 			<span class="flex flex-col gap-1" data-tid="simulated-control-change">
 				<span class="text-tertiary">
 					{`${controlLabels[field]} · ${shortenWithMiddleEllipsis({ text: account })}`}
+
+					<SolAddressActions address={account} network={feeToken.network} />
 				</span>
 				{to ?? $i18n.wallet_connect.text.simulation_control_removed}
 			</span>

@@ -15,6 +15,7 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolAddressActions from '$sol/components/wallet-connect/SolAddressActions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
@@ -179,11 +180,15 @@
 		{token}
 	>
 		{#if isApproval}
-			<SendDataSpender spender={destination} />
+			<SendDataSpender spender={destination}>
+				{#snippet actions()}
+					<SolAddressActions address={destination} network={token.network} />
+				{/snippet}
+			</SendDataSpender>
 		{/if}
 
 		{#if nonNullish(parties)}
-			<SolWalletConnectTransferParties {parties} userAddress={source} />
+			<SolWalletConnectTransferParties network={token.network} {parties} userAddress={source} />
 		{/if}
 
 		{#if nonNullish(preview)}

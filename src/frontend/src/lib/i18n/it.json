@@ -1656,7 +1656,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "es. wc:a281567bb3e4..."
+			"connect_input": "es. wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Verifica Dominio",

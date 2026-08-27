@@ -1656,7 +1656,8 @@
 			"token_units": ""
 		},
 		"alt": {
-			"connect_input": "z. B. wc:a281567bb3e4..."
+			"connect_input": "z. B. wc:a281567bb3e4...",
+			"open_address_block_explorer": ""
 		},
 		"domain": {
 			"title": "Domain-Verifikation",

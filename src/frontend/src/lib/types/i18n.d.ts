@@ -1338,7 +1338,7 @@ interface I18nWallet_connect {
 		wallet_connect: string;
 		token_units: string;
 	};
-	alt: { connect_input: string };
+	alt: { connect_input: string; open_address_block_explorer: string };
 	domain: {
 		title: string;
 		valid: string;
