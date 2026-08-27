@@ -99,11 +99,22 @@ pub enum ContactError {
     RandomnessError,
     TooManyContacts,
     TooManyContactsWithImages,
-    // The variants below have no producer. Image size and format are rejected during candid
-    // deserialization (see `Validate for ContactImage`), which traps before a handler can map the
-    // failure onto a typed error, and canister-wide memory pressure is handled by monitoring and
-    // cycles ops rather than by individual write paths. They are kept rather than removed because
-    // dropping a candid variant is a breaking interface change.
+    // The variants below have no producer, for three separate reasons.
+    //
+    // An oversized image is rejected while the request is being decoded, not by a handler:
+    // `validate_on_deserialize!(ContactImage)` in `impls.rs` gives `ContactImage` a `Deserialize`
+    // impl that runs `Validate` (non-recursive thanks to `#[serde(remote = "Self")]`), so candid
+    // decoding is what fails the call. `types::tests::contact_image` pins this by asserting the
+    // `Decode!` of an oversized image errors.
+    //
+    // An unsupported mime type fails decoding earlier still, as an unknown `ImageMimeType`
+    // variant, so it never reaches `Validate` at all.
+    //
+    // Canister-wide memory pressure is handled by monitoring and cycles ops rather than by
+    // individual write paths.
+    //
+    // All five are kept rather than removed because dropping a candid variant is a breaking
+    // interface change.
     ImageTooLarge,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
