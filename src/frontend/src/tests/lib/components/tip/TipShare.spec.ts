@@ -171,6 +171,7 @@ describe('TipShare', () => {
 			expect(getByText(`$12.50 · ${props.token.name}`)).toBeInTheDocument();
 		});
 	});
+
 	describe('while the reservation is still running', () => {
 		// The screen now opens on the click and fills in, so it has to be honest
 		// about being unfinished. Before this the sender stared at an inactive button
