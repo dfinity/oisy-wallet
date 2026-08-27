@@ -31,7 +31,8 @@ describe('TipHistory', () => {
 		created_at_ns: 1_700_000_000_000_000_000n,
 		status,
 		message: [],
-		claimed_by
+		claimed_by,
+		last_claim_failure: []
 	});
 
 	beforeEach(() => {
@@ -110,14 +111,67 @@ describe('TipHistory', () => {
 		await waitFor(() => expect(getAllByText(get(i18n).tip.text.status_expired)).toHaveLength(1));
 	});
 
-	it('groups rows under the day they were created', async () => {
+	it('groups rows by what they need, with the failed ones first', async () => {
+		// Replaces grouping by creation date. A sender scanning this screen wants to
+		// know whether anything is stuck, and a date heading buried a failed tip
+		// among yesterday's successful ones.
 		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
-			{ ...tip({ tip_id: 'live', status: { Reserved: null } }), created_at_ns: nowNs }
+			{ ...tip({ tip_id: 'live', status: { Reserved: null } }), created_at_ns: nowNs },
+			tip({ tip_id: 'done', status: { Claimed: null }, claimed_by: [claimer] }),
+			tip({ tip_id: 'stuck', status: { Failed: null } })
+		]);
+
+		const { container, getByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
+
+		const { text } = get(i18n).tip;
+
+		// Queried as headings rather than by text: "Claimed" is also a row's status
+		// word, so a bare text match is ambiguous by construction here.
+		const headings = () =>
+			Array.from(container.querySelectorAll('span.text-lg')).map((node) => node.textContent);
+
+		await waitFor(() => expect(headings()).toHaveLength(3));
+
+		// Order matters more than presence: the actionable group has to be the one
+		// the reader meets first, without scrolling past what is already done.
+		expect(headings()).toEqual([text.group_failed, text.group_open, text.group_claimed]);
+	});
+
+	it('explains the failed group rather than leaving "Failed" to be guessed at', async () => {
+		// "Failed" on its own invites the wrong conclusion — that the money went
+		// somewhere, or that the link is dead. Neither is true: nothing moved and the
+		// same link still works.
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({ tip_id: 'stuck', status: { Failed: null } })
 		]);
 
 		const { getByText } = render(TipHistory, { props: { onClose: vi.fn(), onOpenTip: vi.fn() } });
 
-		await waitFor(() => expect(getByText(/today/i)).toBeInTheDocument());
+		await waitFor(() =>
+			expect(getByText(get(i18n).tip.text.group_failed_hint)).toBeInTheDocument()
+		);
+	});
+
+	it('files a cancelled tip with the expired ones, still labelled Cancelled', async () => {
+		// Four groups, not five: the group answers "is there anything to do here",
+		// and for both of these the answer is no. The row keeps the real status.
+		vi.spyOn(tipServices, 'loadMyTips').mockResolvedValue([
+			tip({ tip_id: 'revoked', status: { Cancelled: null } })
+		]);
+
+		const { container, getByText, queryByText } = render(TipHistory, {
+			props: { onClose: vi.fn(), onOpenTip: vi.fn() }
+		});
+
+		const { text } = get(i18n).tip;
+
+		await waitFor(() =>
+			expect(container.querySelector('span.text-lg')?.textContent).toBe(text.group_expired)
+		);
+		expect(getByText(text.status_cancelled)).toBeInTheDocument();
+		expect(queryByText(text.group_open)).toBeNull();
 	});
 
 	it('hands the tip over on the click, without recovering anything first', async () => {
