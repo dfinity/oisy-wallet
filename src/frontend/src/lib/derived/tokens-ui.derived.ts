@@ -1,8 +1,8 @@
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { spendableBalances } from '$lib/derived/spendable-balances.derived';
 import { stakeBalances } from '$lib/derived/stake.derived';
 import { enabledFungibleTokens } from '$lib/derived/tokens.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenUi } from '$lib/types/token-ui';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
@@ -12,9 +12,7 @@ import { derived, type Readable } from 'svelte/store';
  * All user-enabled fungible tokens with financial data.
  */
 export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
-	// `spendableBalances`, not `balancesStore`: money promised to a live tip must
-	// not read as available to spend.
-	[enabledFungibleTokens, spendableBalances, stakeBalances, exchanges],
+	[enabledFungibleTokens, balancesStore, stakeBalances, exchanges],
 	([$enabledFungibleTokens, $balances, $stakeBalances, $exchanges]) =>
 		$enabledFungibleTokens.map((token) =>
 			mapTokenUi({

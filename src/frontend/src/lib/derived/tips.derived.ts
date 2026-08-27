@@ -16,8 +16,12 @@ import { derived, type Readable } from 'svelte/store';
  * their own tip can no longer be claimed — a failure the recipient sees as
  * `Uncovered`, caused by our arithmetic rather than by anything they did.
  *
- * Only `Reserved` tips count. Claimed, cancelled and expired ones hold nothing:
- * the allowance is spent, revoked, or lapsed on the ledger.
+ * `Reserved` **and** `Failed` count. A failed tip is one somebody tried to claim
+ * and could not: its allowance is still granted and its code still works, so it
+ * encumbers the balance exactly as a untouched one does — and it is the case
+ * where the sender most needs the number to be right, since topping up is the
+ * fix. Claimed, cancelled and expired tips hold nothing: the allowance is spent,
+ * revoked, or lapsed on the ledger.
  */
 export const reservedTipAmounts: Readable<Record<TokenId, bigint>> = derived(
 	[tipsStore, tokens],
@@ -29,7 +33,7 @@ export const reservedTipAmounts: Readable<Record<TokenId, bigint>> = derived(
 		const icTokens = tippableTokens($tokens);
 
 		return $tipsStore.reduce<Record<TokenId, bigint>>((acc, tip) => {
-			if (tipStatusKey(tip.status) !== 'reserved') {
+			if (!['reserved', 'failed'].includes(tipStatusKey(tip.status))) {
 				return acc;
 			}
 
