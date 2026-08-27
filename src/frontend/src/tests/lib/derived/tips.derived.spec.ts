@@ -1,5 +1,5 @@
 import type { MyTip } from '$declarations/backend/backend.did';
-import { reservedTipAmounts } from '$lib/derived/tips.derived';
+import { reservedTipAmounts, tipsOverview } from '$lib/derived/tips.derived';
 import { tipsStore } from '$lib/stores/tips.store';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { Principal } from '@icp-sdk/core/principal';
@@ -12,11 +12,14 @@ const { mockedToken } = vi.hoisted(() => ({
 	mockedToken: { fee: 10_000n }
 }));
 
-vi.mock('$lib/derived/tokens.derived', async () => {
+vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
+	const actual = await importOriginal();
 	const { mockValidIcToken } = await import('$tests/mocks/ic-tokens.mock');
 	const { readable } = await import('svelte/store');
 
-	return { tokens: readable([{ ...mockValidIcToken, fee: mockedToken.fee }]) };
+	// Partial: `tipsOverview` also reads the exchange store, whose import chain
+	// pulls other exports from this module.
+	return { ...actual, tokens: readable([{ ...mockValidIcToken, fee: mockedToken.fee }]) };
 });
 
 describe('reservedTipAmounts', () => {
@@ -103,5 +106,80 @@ describe('reservedTipAmounts', () => {
 		]);
 
 		expect(get(reservedTipAmounts)[token.id]).toBeUndefined();
+	});
+});
+
+describe('tipsOverview', () => {
+	const fee = 10_000n;
+	const token = { ...mockValidIcToken, fee };
+	const ledger = Principal.fromText(token.ledgerCanisterId);
+
+	const tip = ({
+		tip_id,
+		status,
+		amount = 500_000n
+	}: {
+		tip_id: string;
+		status: MyTip['status'];
+		amount?: bigint;
+	}): MyTip => ({
+		tip_id,
+		ledger_canister_id: ledger,
+		amount,
+		expires_at_ns: 1_800_000_000_000_000_000n,
+		created_at_ns: 1_700_000_000_000_000_000n,
+		status,
+		message: [],
+		claimed_by: [],
+		last_claim_failure: []
+	});
+
+	beforeEach(() => {
+		tipsStore.reset();
+	});
+
+	it('says there is nothing to show before any tip exists', () => {
+		// A first-time sender must not be shown an empty summary block.
+		expect(get(tipsOverview).hasAny).toBeFalsy();
+	});
+
+	it('counts each group separately, with failed on its own', () => {
+		// The whole point of the summary: a tip nobody could claim must not be
+		// indistinguishable from one nobody has tried yet.
+		tipsStore.set([
+			tip({ tip_id: 'a', status: { Reserved: null } }),
+			tip({ tip_id: 'b', status: { Reserved: null } }),
+			tip({ tip_id: 'c', status: { Failed: null } }),
+			tip({ tip_id: 'd', status: { Claimed: null } }),
+			tip({ tip_id: 'e', status: { Expired: null } }),
+			tip({ tip_id: 'f', status: { Cancelled: null } })
+		]);
+
+		const overview = get(tipsOverview);
+
+		expect(overview.failed).toBe(1);
+		expect(overview.open).toBe(2);
+		expect(overview.claimed).toBe(1);
+		expect(overview.hasAny).toBeTruthy();
+	});
+
+	it('counts a failed tip as money still held', () => {
+		// Its allowance is still granted, so it belongs with the open figure rather
+		// than with what has already been paid out.
+		tipsStore.set([tip({ tip_id: 'stuck', status: { Failed: null } })]);
+
+		const overview = get(tipsOverview);
+
+		expect(overview.claimedUsd).toBe(0);
+		expect(overview.failed).toBe(1);
+	});
+
+	it('leaves the money at zero when no rate has loaded', () => {
+		// Counts still work; the fiat figure is simply absent, and the screen omits
+		// it rather than printing $0.00 over real tips.
+		tipsStore.set([tip({ tip_id: 'a', status: { Claimed: null } })]);
+
+		expect(get(tipsOverview).claimedUsd).toBe(0);
+		expect(get(tipsOverview).claimed).toBe(1);
 	});
 });
