@@ -1940,6 +1940,8 @@
 			"details": "Chi tiết giao dịch",
 			"hash": "Hash giao dịch",
 			"hash_copied": "Hash giao dịch $hash đã được sao chép vào khay nhớ tạm.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "ID giao dịch",
 			"id_copied": "ID giao dịch đã được sao chép vào khay nhớ tạm.",
 			"timestamp": "Thời gian",

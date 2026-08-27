@@ -1940,6 +1940,8 @@
 			"details": "交易详情",
 			"hash": "交易哈希",
 			"hash_copied": "交易哈希 $hash 已复制到剪贴板。",
+			"signature": "",
+			"signature_copied": "",
 			"id": "交易 ID",
 			"id_copied": "交易 ID 已复制到剪贴板。",
 			"timestamp": "时间戳",

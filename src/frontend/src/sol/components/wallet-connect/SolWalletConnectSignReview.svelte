@@ -143,6 +143,15 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
+	{#if dappPrioritizationFee}
+		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
+	{:else if highPrioritizationFee}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+	{/if}
+
+	<!-- The signer is the connected account and never varies between the requests of a session, so
+	     here it costs a row without saying anything about the message in front of the user. The
+	     Ethereum review keeps the row, which is why this is opted out rather than removed. -->
 	<SendData
 		{amount}
 		{application}
@@ -150,6 +159,7 @@
 		destination={isApproval || !decoded || showParties ? null : destination}
 		showAmount={decoded}
 		showBalance={decoded}
+		showSigner={false}
 		{source}
 		{token}
 	>
@@ -169,14 +179,6 @@
 			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
 				{@render feeValue(prioritizationFee)}
 			</WalletConnectModalValue>
-		{/if}
-
-		<!-- A steep priority fee is a legitimate choice when the network is congested, so both tiers
-		     inform instead of blocking the way invalid typed data does on Ethereum. -->
-		{#if dappPrioritizationFee}
-			<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
-		{:else if highPrioritizationFee}
-			<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 		{/if}
 
 		{#if nonNullish(preview)}

@@ -119,6 +119,19 @@ describe('EthWalletConnectSendReview', () => {
 		expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
 	});
 
+	it('should render the signer row', () => {
+		const { getByText, container } = render(EthWalletConnectSendReview, {
+			props: {
+				...props,
+				destination: UNKNOWN_CONTRACT
+			},
+			context: mockContext
+		});
+
+		expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
+		expect(container.querySelector('#signer')).not.toBeNull();
+	});
+
 	it('should never summarize an ERC20 transfer as a native zero-value send', () => {
 		const { queryByText } = render(EthWalletConnectSendReview, {
 			props: {

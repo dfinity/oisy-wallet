@@ -66,6 +66,15 @@ describe('SolWalletConnectSignReview', () => {
 		expect(queryByText(en.wallet_connect.text.unreviewed_instructions)).not.toBeInTheDocument();
 	});
 
+	it('should not render the signer row', () => {
+		const { queryByText, container } = render(SolWalletConnectSignReview, {
+			props
+		});
+
+		expect(queryByText(en.wallet_connect.text.signer)).not.toBeInTheDocument();
+		expect(container.querySelector('#signer')).toBeNull();
+	});
+
 	it('should render the base network fee as a labelled row', () => {
 		const { getByText } = render(SolWalletConnectSignReview, {
 			props
@@ -250,6 +259,41 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByText('0.000005 SOL')).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
 		});
+
+		it('should render the notice above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 3_000_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const notice = getByText(en.wallet_connect.text.dapp_prioritization_fee);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(notice.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the warning below the unreviewed instructions warning', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					unreviewed: true,
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const unreviewed = getByText(en.wallet_connect.text.unreviewed_instructions);
+			const warning = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(unreviewed.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
 	});
 
 	describe('when the decode produced no amount', () => {
@@ -276,7 +320,6 @@ describe('SolWalletConnectSignReview', () => {
 
 			expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 			expect(getByText(en.send.text.network)).toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.signer)).toBeInTheDocument();
 			expect(getByText(en.fee.text.network_fee)).toBeInTheDocument();
 			expect(getByText(en.fee.text.prioritization_fee)).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.hex_data)).toBeInTheDocument();

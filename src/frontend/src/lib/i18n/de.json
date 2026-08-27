@@ -1940,6 +1940,8 @@
 			"details": "Transaktionsdetails",
 			"hash": "Transaktions-Hash",
 			"hash_copied": "Transaktions-Hash $hash in die Zwischenablage kopiert.",
+			"signature": "",
+			"signature_copied": "",
 			"id": "Transaktions-ID",
 			"id_copied": "Transaktions-ID in die Zwischenablage kopiert.",
 			"timestamp": "Zeitstempel",

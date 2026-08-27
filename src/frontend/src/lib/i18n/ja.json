@@ -1940,6 +1940,8 @@
 			"details": "トランザクション詳細",
 			"hash": "トランザクションハッシュ",
 			"hash_copied": "トランザクションハッシュ$hashがコピーされました。",
+			"signature": "",
+			"signature_copied": "",
 			"id": "トランザクションID",
 			"id_copied": "トランザクションIDがコピーされました。",
 			"timestamp": "タイムスタンプ",
