@@ -1245,7 +1245,8 @@
 			"cannot_save_provider_agreement": "",
 			"swap_refunded": "",
 			"swap_replaced_or_dropped": "",
-			"near_intents_quote_unverified": ""
+			"near_intents_quote_unverified": "",
+			"near_intents_quote_expired": ""
 		}
 	},
 	"buy": {
