@@ -189,6 +189,7 @@ export const idlFactory = ({ IDL }) => {
 		ClaimInProgress: IDL.Null,
 		SecretCiphertextTooLarge: IDL.Null,
 		Uncovered: IDL.Null,
+		InsufficientFunds: IDL.Null,
 		NotFound: IDL.Null,
 		NotYourTip: IDL.Null,
 		InvalidClaimCodeHash: IDL.Null,
@@ -625,6 +626,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const TipClaimFailureReason = IDL.Variant({
 		Uncovered: IDL.Null,
+		InsufficientFunds: IDL.Null,
 		TransferFailed: IDL.Null
 	});
 	const TipClaimFailure = IDL.Record({
