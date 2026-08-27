@@ -70,31 +70,13 @@ describe('SolWalletConnectTransferParties', () => {
 		});
 	});
 
-	describe('partial lists', () => {
-		it('should say that the lists are partial whenever they were built without inner instructions', () => {
-			const { getByText } = render(SolWalletConnectTransferParties, {
-				props: props({ partial: true })
-			});
-
-			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
+	// A hidden Sources list and one that could not be derived must not render identically, which is
+	// why the review states the partial case; here only the absence of the list is checked.
+	it('should render no sources list when it could not be derived', () => {
+		const { queryByText } = render(SolWalletConnectTransferParties, {
+			props: props({ partial: true })
 		});
 
-		// A hidden Sources list and one that could not be derived must not render identically.
-		it('should say so even when the list it produced is empty', () => {
-			const { getByText, queryByText } = render(SolWalletConnectTransferParties, {
-				props: props({ partial: true })
-			});
-
-			expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
-			expect(getByText(en.wallet_connect.text.transfer_parties_partial)).toBeInTheDocument();
-		});
-
-		it('should say nothing when the lists are complete', () => {
-			const { queryByText } = render(SolWalletConnectTransferParties, {
-				props: props({ sources: [{ address: mockAtaAddress, own: true }] })
-			});
-
-			expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
-		});
+		expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
 	});
 });

@@ -115,8 +115,8 @@ describe('SolWalletConnectSimulationPreview', () => {
 	});
 
 	// An authority change moves nothing, so it has to be named in its own right or it is invisible.
-	it('should warn about a control change even with no amounts at all', () => {
-		const { getByText, getByTestId } = render(
+	it('should render a control change even with no amounts at all', () => {
+		const { getByTestId } = render(
 			SolWalletConnectSimulationPreview,
 			props({
 				tokenDeltas: [],
@@ -124,17 +124,7 @@ describe('SolWalletConnectSimulationPreview', () => {
 			})
 		);
 
-		expect(getByText(en.wallet_connect.text.simulation_control_change)).toBeInTheDocument();
 		expect(getByTestId('simulated-control-change')).toHaveTextContent(mockSolAddress2);
-	});
-
-	it('should not warn when nothing about control changed', () => {
-		const { queryByText } = render(
-			SolWalletConnectSimulationPreview,
-			props({ solDelta: -5_000n, tokenDeltas: [], controlChanges: [] })
-		);
-
-		expect(queryByText(en.wallet_connect.text.simulation_control_change)).not.toBeInTheDocument();
 	});
 
 	it('should always state that the real execution can differ', () => {

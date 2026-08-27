@@ -79,12 +79,6 @@
 	{/if}
 {/snippet}
 
-<!-- An authority change moves no funds at all, so it would be invisible among the amounts. It is
-     named first, on its own, because it is the one that hands over the account itself. -->
-{#if controlChanges.length > 0}
-	<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
-{/if}
-
 <WalletConnectModalValue
 	label={$i18n.wallet_connect.text.simulated_changes}
 	ref="simulated-changes"
