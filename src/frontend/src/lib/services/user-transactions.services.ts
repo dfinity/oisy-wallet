@@ -85,25 +85,32 @@ export const saveFinalizedTransactions = async <T>({
 		return { success: true };
 	}
 
-	const mapped = finalized.map(mapToBackend);
+	// Callers supply the mapper, and some of them throw on a shape they cannot store, so this stays
+	// inside the failure path rather than escaping to the caller.
+	let mapped: UserTransaction[];
+
+	try {
+		mapped = finalized.map(mapToBackend);
+	} catch (err: unknown) {
+		consoleError('Failed to map transactions for saving:', err);
+
+		return { success: false };
+	}
+
+	let allSaved = true;
 
 	// The canister rejects an over-sized batch outright rather than truncating it, so sending a long
 	// history in one call persists nothing at all. A cold start fetches the full history from the
 	// explorer, which is exactly when the list is long enough to trip that.
-	const batches = Array.from(
-		{ length: Math.ceil(mapped.length / MAX_SAVE_USER_TRANSACTIONS_BATCH) },
-		(_, index) =>
-			mapped.slice(
-				index * MAX_SAVE_USER_TRANSACTIONS_BATCH,
-				(index + 1) * MAX_SAVE_USER_TRANSACTIONS_BATCH
-			)
-	);
-
-	let allSaved = true;
-
+	//
+	// Sliced as we go rather than precomputed: a cold-start history is long, and the batches are only
+	// ever consumed one at a time.
+	//
 	// Sequential rather than concurrent: each call is an update, and the canister merges into one
 	// entry per (user, token), so firing them together buys nothing and multiplies the load.
-	for (const batch of batches) {
+	for (let index = 0; index < mapped.length; index += MAX_SAVE_USER_TRANSACTIONS_BATCH) {
+		const batch = mapped.slice(index, index + MAX_SAVE_USER_TRANSACTIONS_BATCH);
+
 		try {
 			await saveUserTransactions({ identity, tokenId, transactions: batch });
 		} catch (err: unknown) {

@@ -6,6 +6,7 @@ import {
 	saveFinalizedTransactions
 } from '$lib/services/user-transactions.services';
 import type { Transaction } from '$lib/types/transaction';
+import { consoleError } from '$lib/utils/console.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockEthTransaction,
@@ -19,6 +20,10 @@ import {
 vi.mock('$lib/api/backend.api', () => ({
 	getUserTransactions: vi.fn(),
 	saveUserTransactions: vi.fn()
+}));
+
+vi.mock('$lib/utils/console.utils', () => ({
+	consoleError: vi.fn()
 }));
 
 describe('user-transactions.services', () => {
@@ -176,13 +181,39 @@ describe('user-transactions.services', () => {
 		it('should persist every transaction across the batches, in order', async () => {
 			const transactions = makeTransactions(MAX_SAVE_USER_TRANSACTIONS_BATCH + 3);
 
-			await save(transactions);
+			// The shared mock mapper returns one fixed object for every input, which would let a
+			// dropped or reordered transaction slip through a length-only assertion.
+			await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions,
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: ({ hash }: Transaction) => ({ ...mockUserTransaction, id: `${hash}` })
+			});
 
 			const sent = vi
 				.mocked(backendApi.saveUserTransactions)
-				.mock.calls.flatMap(([{ transactions: batch }]) => batch);
+				.mock.calls.flatMap(([{ transactions: batch }]) => batch.map(({ id }) => id));
 
-			expect(sent).toHaveLength(transactions.length);
+			expect(sent).toEqual(transactions.map(({ hash }) => `${hash}`));
+		});
+
+		it('should report failure rather than throwing when the mapper rejects a transaction', async () => {
+			const result = await saveFinalizedTransactions({
+				identity: mockIdentity,
+				tokenId: mockUserTransactionTokenId,
+				transactions: makeTransactions(3),
+				isFinalizedFn: () => true,
+				canSave: () => true,
+				mapToBackend: () => {
+					throw new Error('Cannot store a transaction without a hash');
+				}
+			});
+
+			expect(result).toEqual({ success: false });
+			expect(backendApi.saveUserTransactions).not.toHaveBeenCalled();
+			expect(consoleError).toHaveBeenCalled();
 		});
 
 		// The canister validates a batch as a unit and refuses all of it on the first transaction that
@@ -197,6 +228,9 @@ describe('user-transactions.services', () => {
 
 			expect(result).toEqual({ success: false });
 			expect(backendApi.saveUserTransactions).toHaveBeenCalledTimes(3);
+
+			// A save that fails without a trace is what let the over-sized batch go unnoticed.
+			expect(consoleError).toHaveBeenCalledOnce();
 		});
 	});
 
