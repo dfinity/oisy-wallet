@@ -13,11 +13,6 @@ pub const MAX_CONTACTS_PER_USER: usize = 500;
 /// Maximum number of images per principal (100)
 pub const MAX_IMAGES_PER_PRINCIPAL: usize = 100;
 
-/// Memory usage threshold (80%) above which new images cannot be added
-pub const MEMORY_USAGE_THRESHOLD: f64 = 0.8;
-
-pub type ImageId = u64;
-
 /// Represents the MIME type of image.
 #[derive(CandidType, Deserialize, serde::Serialize, Clone, Debug, Eq, PartialEq)]
 pub enum ImageMimeType {
@@ -102,27 +97,18 @@ pub enum ContactError {
     ContactNotFound,
     InvalidContactData,
     RandomnessError,
-    ImageTooLarge,
     TooManyContacts,
     TooManyContactsWithImages,
+    // The variants below have no producer. Image size and format are rejected during candid
+    // deserialization (see `Validate for ContactImage`), which traps before a handler can map the
+    // failure onto a typed error, and canister-wide memory pressure is handled by monitoring and
+    // cycles ops rather than by individual write paths. They are kept rather than removed because
+    // dropping a candid variant is a breaking interface change.
+    ImageTooLarge,
     CanisterMemoryNearCapacity,
     CanisterStatusError,
     InvalidImageFormat,
     ImageExceedsMaxSize,
-}
-
-// Helper struct for serialization
-#[derive(serde::Serialize)]
-pub struct ContactImageTemp<'a> {
-    pub mime_type: &'a ImageMimeType,
-    pub data: &'a serde_bytes::ByteBuf,
-}
-
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, serde::Serialize)]
-pub struct ImageStatistics {
-    pub total_contacts: usize,
-    pub contacts_with_images: usize,
-    pub total_image_size: usize,
 }
 
 /// Counts the number of contacts with images for a specific principal
@@ -133,17 +119,6 @@ pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
         .values()
         .filter(|contact| contact.image.is_some())
         .count()
-}
-
-/// Calculates the total size of all images in the contact store
-#[must_use]
-pub fn calculate_total_image_size(stored_contacts: &StoredContacts) -> usize {
-    stored_contacts
-        .contacts
-        .values()
-        .filter_map(|contact| contact.image.as_ref())
-        .map(|image| image.data.len())
-        .sum()
 }
 
 /// Validates that adding a new image won't exceed the per-principal image limit
@@ -164,4 +139,92 @@ pub fn validate_principal_memory_limit(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::BTreeMap;
+
+    use pretty_assertions::assert_eq;
+    use serde_bytes::ByteBuf;
+
+    use super::{
+        count_contacts_with_images, validate_principal_memory_limit, Contact, ContactError,
+        ContactImage, ImageMimeType, StoredContacts, MAX_IMAGES_PER_PRINCIPAL,
+    };
+
+    fn image() -> ContactImage {
+        ContactImage {
+            data: ByteBuf::from(vec![0x89, 0x50, 0x4E, 0x47]),
+            mime_type: ImageMimeType::Png,
+        }
+    }
+
+    fn contacts_with_images(count: usize) -> StoredContacts {
+        let mut contacts = BTreeMap::new();
+        for id in 0..count {
+            let id = id as u64;
+            contacts.insert(
+                id,
+                Contact {
+                    id,
+                    name: format!("contact {id}"),
+                    addresses: vec![],
+                    update_timestamp_ns: 0,
+                    image: Some(image()),
+                },
+            );
+        }
+        StoredContacts {
+            contacts,
+            update_timestamp_ns: 0,
+        }
+    }
+
+    #[test]
+    fn counts_only_contacts_that_carry_an_image() {
+        let mut stored_contacts = contacts_with_images(3);
+        stored_contacts.contacts.insert(
+            99,
+            Contact {
+                id: 99,
+                name: "no image".to_string(),
+                addresses: vec![],
+                update_timestamp_ns: 0,
+                image: None,
+            },
+        );
+
+        assert_eq!(count_contacts_with_images(&stored_contacts), 3);
+    }
+
+    #[test]
+    fn allows_a_new_image_below_the_cap() {
+        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL - 1);
+
+        assert_eq!(
+            validate_principal_memory_limit(&stored_contacts, true),
+            Ok(())
+        );
+    }
+
+    #[test]
+    fn rejects_a_new_image_at_the_cap() {
+        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL);
+
+        assert_eq!(
+            validate_principal_memory_limit(&stored_contacts, true),
+            Err(ContactError::TooManyContactsWithImages)
+        );
+    }
+
+    #[test]
+    fn allows_writes_that_do_not_add_an_image_at_the_cap() {
+        let stored_contacts = contacts_with_images(MAX_IMAGES_PER_PRINCIPAL);
+
+        assert_eq!(
+            validate_principal_memory_limit(&stored_contacts, false),
+            Ok(())
+        );
+    }
 }
