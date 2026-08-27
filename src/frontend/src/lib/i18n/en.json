@@ -2838,7 +2838,7 @@
 			"cancelled_toast": "Tip cancelled. The reservation has been revoked.",
 			"message_too_long": "Keep the message to $max characters or fewer.",
 			"learn_how_it_works": "Learn how it works",
-			"view_history": "View History",
+			"view_history": "Show previous tips",
 			"get_started": "Get Started"
 		},
 		"alt": {

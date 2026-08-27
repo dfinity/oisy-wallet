@@ -163,6 +163,18 @@ describe('tipsOverview', () => {
 		expect(overview.hasAny).toBeTruthy();
 	});
 
+	it('shows nothing when every tip has already lapsed', () => {
+		// The hole this closes: `hasAny` used to mean "this sender has rows", so
+		// somebody whose tips had all expired or been cancelled got a block of three
+		// zeros instead of nothing.
+		tipsStore.set([
+			tip({ tip_id: 'gone', status: { Expired: null } }),
+			tip({ tip_id: 'revoked', status: { Cancelled: null } })
+		]);
+
+		expect(get(tipsOverview).hasAny).toBeFalsy();
+	});
+
 	it('counts a failed tip as money still held', () => {
 		// Its allowance is still granted, so it belongs with the open figure rather
 		// than with what has already been paid out.

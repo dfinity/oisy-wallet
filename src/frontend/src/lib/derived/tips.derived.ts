@@ -98,13 +98,15 @@ export const tipsOverview: Readable<TipsOverview> = derived(
 			hasAny: false
 		};
 
+		// Nullish while the load is still in flight, so the screen shows nothing
+		// rather than a block of zeros that fills in a moment later.
 		if (isNullish($tipsStore) || $tipsStore.length === 0) {
 			return empty;
 		}
 
 		const icTokens = tippableTokens($tokens);
 
-		return $tipsStore.reduce<TipsOverview>(
+		const counted = $tipsStore.reduce<TipsOverview>(
 			(acc, tip) => {
 				const status = tipStatusKey(tip.status);
 				const token = icTokens.find(
@@ -128,12 +130,18 @@ export const tipsOverview: Readable<TipsOverview> = derived(
 					return { ...acc, claimed: acc.claimed + 1, claimedUsd: acc.claimedUsd + usd };
 				}
 
-				// Expired and cancelled tips are counted by `hasAny` only. Nothing moved
-				// and nothing is held, so a figure for them would be money that never
-				// went anywhere.
+				// Expired and cancelled tips are deliberately invisible here. Nothing
+				// moved and nothing is held, so a figure for them would be money that
+				// never went anywhere — and they must not switch the block on either,
+				// or a sender whose only tips have lapsed gets three zeros.
 				return acc;
 			},
-			{ ...empty, hasAny: true }
+			{ ...empty }
 		);
+
+		// Shown only when one of the three groups it displays has something in it.
+		// `hasAny` used to mean "this sender has rows", which lit the block up with
+		// three zeros for someone whose tips had all lapsed.
+		return { ...counted, hasAny: counted.failed + counted.open + counted.claimed > 0 };
 	}
 );

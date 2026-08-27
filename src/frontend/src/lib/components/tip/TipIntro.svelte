@@ -44,25 +44,42 @@
 
 <ContentWithToolbar>
 	<!--
-		Status first, above the artwork. The illustration is for someone who has
-		never sent a tip; anybody who has is here to find out whether one of them is
-		stuck, and making them scroll past a picture to learn that is the wrong way
-		round. Absent entirely for a first-time sender, so the screen they see is
-		unchanged.
+		No aspect box and no tinted ground: the artwork is the drawn panel, at its
+		own 1024x480, and letting it size itself keeps that ratio exactly rather
+		than cropping it to whichever one we would have hard-coded here.
+	-->
+	<Img
+		alt={$i18n.tip.alt.intro_illustration}
+		role="img"
+		src={tipIntroImg}
+		styleClass="mb-6 h-auto w-full rounded-xl"
+	/>
+
+	<h3 class="mb-3">{$i18n.tip.text.intro_heading}</h3>
+
+	<!--
+		Below the heading rather than above the artwork, and on the surface rather
+		than a tinted card: it is part of this screen's content, not a banner bolted
+		on top of it.
+
+		Two columns, because the two figures are peers and reading them side by side
+		is one glance instead of two. Absent entirely unless one of the three groups
+		has something in it — a first-time sender, a still-loading store and a sender
+		whose tips have all lapsed all see the screen unchanged.
 
 		Everything shown comes from the `get_my_tips` the app already made on
 		sign-in, so this costs no extra call.
 	-->
 	{#if $tipsOverview.hasAny}
-		<div class="mb-6 rounded-xl bg-secondary px-4 py-3">
+		<div class="mb-4 rounded-xl border border-secondary px-4 py-3">
 			<span class="text-xs font-bold tracking-wider text-tertiary uppercase">
 				{$i18n.tip.text.overview_window}
 			</span>
 
 			{#if $tipsOverview.failed > 0}
 				<!--
-					A button, because it is the one row with something to do about it, and
-					History now opens with the failed tips at the top.
+					Full width and above the pair: it is the only row with something to do
+					about it, and History now opens with the failed tips at the top.
 				-->
 				<button
 					class="mt-2 flex w-full items-center justify-between gap-2 text-left"
@@ -79,41 +96,31 @@
 				<p class="m-0 mt-1 text-xs text-tertiary">{$i18n.tip.text.overview_failed_hint}</p>
 			{/if}
 
-			<div class="mt-2 flex items-center justify-between gap-2 text-sm">
-				<span class="text-tertiary">{$i18n.tip.text.overview_open}</span>
+			<div class="mt-3 grid grid-cols-2 gap-3">
+				<div>
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_open}</span>
 
-				<span>
-					{$tipsOverview.open}{#if nonNullish(openFiat)}<span class="text-tertiary">
-							&middot; {openFiat}</span
-						>{/if}
-				</span>
-			</div>
+					<span class="block text-sm font-bold">
+						{$tipsOverview.open}{#if nonNullish(openFiat)}<span class="font-normal text-tertiary">
+								&middot; {openFiat}</span
+							>{/if}
+					</span>
+				</div>
 
-			<div class="mt-1 flex items-center justify-between gap-2 text-sm">
-				<span class="text-tertiary">{$i18n.tip.text.overview_claimed}</span>
+				<div>
+					<span class="block text-xs text-tertiary">{$i18n.tip.text.overview_claimed}</span>
 
-				<span>
-					{$tipsOverview.claimed}{#if nonNullish(claimedFiat)}<span class="text-tertiary">
-							&middot; {claimedFiat}</span
-						>{/if}
-				</span>
+					<span class="block text-sm font-bold">
+						{$tipsOverview.claimed}{#if nonNullish(claimedFiat)}<span
+								class="font-normal text-tertiary"
+							>
+								&middot; {claimedFiat}</span
+							>{/if}
+					</span>
+				</div>
 			</div>
 		</div>
 	{/if}
-
-	<!--
-		No aspect box and no tinted ground: the artwork is the drawn panel, at its
-		own 1024x480, and letting it size itself keeps that ratio exactly rather
-		than cropping it to whichever one we would have hard-coded here.
-	-->
-	<Img
-		alt={$i18n.tip.alt.intro_illustration}
-		role="img"
-		src={tipIntroImg}
-		styleClass="mb-6 h-auto w-full rounded-xl"
-	/>
-
-	<h3 class="mb-3">{$i18n.tip.text.intro_heading}</h3>
 
 	<p class="mb-4 text-tertiary">{$i18n.tip.text.intro_body}</p>
 
