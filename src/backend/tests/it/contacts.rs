@@ -6,7 +6,7 @@ use serde_bytes::ByteBuf;
 use shared::types::{
     contact::{
         Contact, ContactError, ContactImage, CreateContactRequest, ImageMimeType,
-        UpdateContactRequest,
+        UpdateContactRequest, MAX_IMAGES_PER_PRINCIPAL,
     },
     user_profile::OisyUser,
 };
@@ -27,6 +27,19 @@ pub fn call_create_contact(
 ) -> Result<Contact, ContactError> {
     pic_setup.ensure_user_profile(caller);
     let request = CreateContactRequest { name, image: None };
+    let wrapped_result =
+        pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
+    wrapped_result.expect("that create_contact succeeds")
+}
+
+pub fn call_create_contact_with_image(
+    pic_setup: &PicBackend,
+    caller: Principal,
+    name: String,
+    image: Option<ContactImage>,
+) -> Result<Contact, ContactError> {
+    pic_setup.ensure_user_profile(caller);
+    let request = CreateContactRequest { name, image };
     let wrapped_result =
         pic_setup.update::<Result<Contact, ContactError>>(caller, "create_contact", request);
     wrapped_result.expect("that create_contact succeeds")
@@ -1003,4 +1016,112 @@ mod tests {
         };
         assert_eq!(result, updated.image);
     }
+}
+
+#[test]
+fn test_create_contact_stores_the_requested_image() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+    let contact = call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Created With Image".to_string(),
+        Some(png_image.clone()),
+    )
+    .expect("that a contact can be created with an image");
+
+    assert_eq!(contact.image, Some(png_image.clone()));
+
+    // The image must survive the round trip, not just the create response.
+    let retrieved = call_get_contact(&pic_setup, caller, contact.id)
+        .expect("that the created contact can be read back");
+    assert_eq!(retrieved.image, Some(png_image));
+}
+
+#[test]
+fn test_image_limit_is_enforced_per_principal() {
+    let pic_setup = setup();
+    let caller: Principal = Principal::from_text(CALLER).unwrap();
+
+    let png_image = create_test_png_image();
+
+    let mut first_contact_with_image = None;
+    for index in 0..MAX_IMAGES_PER_PRINCIPAL {
+        let contact = call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            format!("With Image {index}"),
+            Some(png_image.clone()),
+        )
+        .expect("that contacts up to the image cap can be created");
+
+        if index == 0 {
+            first_contact_with_image = Some(contact);
+        }
+    }
+
+    // One more image is over the cap.
+    assert_eq!(
+        call_create_contact_with_image(
+            &pic_setup,
+            caller,
+            "One Too Many".to_string(),
+            Some(png_image.clone()),
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // The cap is on images, not on contacts: an image-less contact is still accepted.
+    let contact_without_image =
+        call_create_contact_with_image(&pic_setup, caller, "No Image".to_string(), None)
+            .expect("that an image-less contact can still be created at the image cap");
+
+    // Attaching an image to that contact would exceed the cap.
+    let jpeg_image = create_test_jpeg_image();
+    assert_eq!(
+        call_update_contact(
+            &pic_setup,
+            caller,
+            Contact {
+                image: Some(jpeg_image.clone()),
+                ..contact_without_image
+            },
+        ),
+        Err(ContactError::TooManyContactsWithImages)
+    );
+
+    // Replacing an image on a contact that already has one does not change the count, so it is
+    // allowed even at the cap.
+    let existing = first_contact_with_image.expect("that the first contact was recorded");
+    let replaced = call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            image: Some(jpeg_image.clone()),
+            ..existing.clone()
+        },
+    )
+    .expect("that replacing an existing image is allowed at the cap");
+    assert_eq!(replaced.image, Some(jpeg_image));
+
+    // Clearing an image is allowed too, and frees a slot.
+    call_update_contact(
+        &pic_setup,
+        caller,
+        Contact {
+            image: None,
+            ..existing
+        },
+    )
+    .expect("that clearing an image is allowed at the cap");
+
+    call_create_contact_with_image(
+        &pic_setup,
+        caller,
+        "Back Under The Cap".to_string(),
+        Some(png_image),
+    )
+    .expect("that a freed slot can be reused");
 }
