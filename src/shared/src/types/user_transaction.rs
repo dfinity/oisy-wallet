@@ -11,18 +11,20 @@ pub const MAX_SAVE_USER_TRANSACTIONS_BATCH: usize = 500;
 /// Maximum number of transactions that can be returned in a single response.
 pub const MAX_GET_USER_TRANSACTIONS_RESULTS: u64 = 100;
 
-/// Maximum length of a transaction `id`. The longest identifier we store is a
-/// Solana signature (88 characters) plus a disambiguating suffix.
+/// Maximum length, in bytes, of a transaction `id`. The longest identifier we
+/// store is a Solana signature (88 bytes) plus a disambiguating suffix.
 pub const MAX_USER_TRANSACTION_ID_LEN: usize = 128;
 
-/// Maximum length of an address or account field. The longest form we store is
-/// an ICRC textual account (principal plus checksum plus subaccount), which is
-/// about 135 characters; EVM (42), Solana (44) and Bitcoin (90) are shorter.
+/// Maximum length, in bytes, of an address or account field. The longest form
+/// we store is an ICRC textual account (principal plus checksum plus
+/// subaccount), about 135 bytes; EVM (42), Solana (44) and Bitcoin (90) are
+/// shorter. Every address format we read is ASCII, so bytes and characters
+/// coincide here.
 pub const MAX_USER_TRANSACTION_ADDRESS_LEN: usize = 160;
 
-/// Maximum length of the hex-encoded EVM input data. Ordinary token transfers
-/// use 138 characters and even large contract calls stay well below this, so
-/// the cap only excludes payloads that are not transaction calldata.
+/// Maximum length, in bytes, of the hex-encoded EVM input data. Ordinary token
+/// transfers use 138 bytes and even large contract calls stay well below this,
+/// so the cap only excludes payloads that are not transaction calldata.
 pub const MAX_USER_TRANSACTION_DATA_LEN: usize = 16 * 1024;
 
 /// Maximum length, in bytes, of an ICRC memo. The ledgers we read cap memos at

@@ -146,9 +146,12 @@ fn validate_transaction(tx: &UserTransaction) -> Result<(), String> {
     Ok(())
 }
 
+/// Every field measured here is an address, a hash or hex calldata, so it is
+/// ASCII in practice. The cap is on bytes regardless, which is what bounds the
+/// stored size.
 fn require_len(field: &str, value: &str, max: usize) -> Result<(), String> {
     if value.len() > max {
-        return Err(format!("{field} exceeds {max} characters"));
+        return Err(format!("{field} exceeds {max} bytes"));
     }
     Ok(())
 }
