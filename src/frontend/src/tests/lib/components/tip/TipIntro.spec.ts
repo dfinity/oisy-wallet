@@ -80,6 +80,17 @@ describe('TipIntro', () => {
 			expect(getByText(get(i18n).tip.text.overview_failed_hint)).toBeInTheDocument();
 		});
 
+		it('stays away when every tip has already lapsed', () => {
+			// Nothing moved and nothing is held, so there is nothing to report.
+			tipsStore.set([tip({ Expired: null }), tip({ Cancelled: null })]);
+
+			const { queryByText } = render(TipIntro, {
+				props: { onGetStarted: vi.fn(), onViewHistory: vi.fn() }
+			});
+
+			expect(queryByText(get(i18n).tip.text.overview_window)).toBeNull();
+		});
+
 		it('says nothing about attention when nothing needs it', () => {
 			tipsStore.set([tip({ Claimed: null })]);
 
