@@ -2778,6 +2778,7 @@
 			"no_wallet_needed": "",
 			"expires_at": "",
 			"done": "",
+			"generating_link": "",
 			"reserve_failed": "",
 			"status_title": "",
 			"claim_title": "",
