@@ -19,6 +19,8 @@
 	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { PLAUSIBLE_EVENT_RESULT_STATUSES } from '$lib/enums/plausible';
+	import { trackTip, type TipClaimOutcome } from '$lib/services/tip-analytics.services';
 	import { claimTip, loadTipDetails } from '$lib/services/tip.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -144,7 +146,7 @@
 		identity: Identity;
 		tipId: string;
 		claimCode: string;
-	}): Promise<{ details: TipDetails } | { failure: ClaimState }> => {
+	}): Promise<{ details: TipDetails } | { failure: TipClaimOutcome }> => {
 		try {
 			return { details: await loadTipDetails(params) };
 		} catch (err: unknown) {
@@ -187,6 +189,17 @@
 
 		if (!('details' in outcome)) {
 			claimState = outcome.failure;
+
+			// Tracked here too: a claim that never got past reading the tip is still a
+			// claim that failed, and leaving it out would make the funnel look better
+			// than it is.
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				outcome: outcome.failure
+			});
+
 			return;
 		}
 
@@ -211,12 +224,38 @@
 					: undefined;
 			message = fromNullable(details.message);
 			claimState = 'received';
+
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.SUCCESS,
+				symbol
+			});
 		} catch (err: unknown) {
 			consoleWarn('Could not claim the tip', err);
 
 			// A tip claimed by someone else in the meantime is gone, and a retry
 			// would never work; a failed call is the opposite.
-			claimState = isUncovered(err) ? 'uncovered' : isUnavailable(err) ? 'unavailable' : 'failed';
+			//
+			// Named rather than assigned straight to `claimState`, so the same value
+			// types-checks as an analytics outcome without a cast — `ClaimState` also
+			// covers `claiming` and `received`, which are not outcomes, and a cast here
+			// would silently survive either union gaining a member.
+			const outcome: TipClaimOutcome = isUncovered(err)
+				? 'uncovered'
+				: isUnavailable(err)
+					? 'unavailable'
+					: 'failed';
+
+			claimState = outcome;
+
+			trackTip({
+				step: 'claim',
+				side: 'claimer',
+				resultStatus: PLAUSIBLE_EVENT_RESULT_STATUSES.ERROR,
+				outcome,
+				symbol
+			});
 		}
 	};
 
