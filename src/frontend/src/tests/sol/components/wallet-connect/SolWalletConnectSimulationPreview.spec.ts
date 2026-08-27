@@ -115,7 +115,10 @@ describe('SolWalletConnectSimulationPreview', () => {
 	});
 
 	describe('naming a mint OISY does not know', () => {
-		const otherMint = 'So11111111111111111111111111111111111111112';
+		// Deliberately synthetic. A real mint address would resolve the moment the default SPL
+		// tokens are seeded into the store, and this case would quietly stop exercising the
+		// unlisted path it exists to cover.
+		const otherMint = 'notAKnownMint11111111111111111111111111111';
 
 		const delta = (tokenAddress: string) => ({
 			account: mockAtaAddress,
