@@ -1,6 +1,7 @@
 import TipClaimModal from '$lib/components/tip/TipClaimModal.svelte';
 import { TIP_CLAIM_RETRY_BUTTON, TIP_RECEIVED_BUTTON } from '$lib/constants/test-ids.constants';
 import * as tipServices from '$lib/services/tip.services';
+import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import * as consoleUtils from '$lib/utils/console.utils';
@@ -12,6 +13,29 @@ import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({ metadata: vi.fn() }));
+
+// The claim enables the token on the way out. Both halves are canister writes, so
+// they are stubbed; what is asserted is which token is handed to
+// `autoLoadSingleToken`, since that is the decision this component makes.
+vi.mock('$icp/services/icrc.services', () => ({ loadCustomTokens: vi.fn() }));
+vi.mock('$icp-eth/services/icrc-token.services', () => ({ setCustomToken: vi.fn() }));
+
+vi.mock(import('$icp/derived/icrc.derived'), async (importOriginal) => {
+	const actual = await importOriginal();
+	const { readable } = await import('svelte/store');
+
+	return {
+		...actual,
+		icrcTokens: readable([
+			{
+				id: Symbol('ckTest'),
+				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				enabled: false,
+				symbol: 'ckTEST'
+			}
+		])
+	};
+});
 
 describe('TipClaimModal', () => {
 	const pending = { tipId: 'the-tip-id', claimCode: 'the-claim-code' };
@@ -221,5 +245,32 @@ describe('TipClaimModal', () => {
 		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
 
 		await waitFor(() => expect(get(modalStore)).toBeNull());
+	});
+
+	describe('making the tokens visible', () => {
+		it('enables the claimed token when leaving for the wallet', async () => {
+			// An ICRC token only renders once enabled, so a claimer who has never held
+			// this ck-asset would watch the payout succeed and find nothing in their
+			// list.
+			const autoLoad = vi
+				.spyOn(tokenServices, 'autoLoadSingleToken')
+				.mockResolvedValue({ result: 'loaded' });
+
+			mockDetails();
+			mockClaim();
+
+			const { getByTestId } = render(TipClaimModal, { props: { pending } });
+
+			await waitFor(() => expect(getByTestId(TIP_RECEIVED_BUTTON)).toBeInTheDocument());
+
+			getByTestId(TIP_RECEIVED_BUTTON).click();
+
+			await waitFor(() => expect(autoLoad).toHaveBeenCalledOnce());
+
+			expect(autoLoad.mock.calls[0][0].token).toMatchObject({
+				ledgerCanisterId: 'ryjl3-tyaaa-aaaaa-aaaba-cai',
+				enabled: false
+			});
+		});
 	});
 });
