@@ -12,8 +12,8 @@ use candid::Principal;
 use ic_cdk::api::{canister_self, msg_caller, time};
 use serde_bytes::ByteBuf;
 use shared::types::tip::{
-    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimRequest, TipDetails, TipError,
-    MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
+    CreateTipRequest, MyTip, PublicTip, TipClaim, TipClaimFailure, TipClaimFailureReason,
+    TipClaimRequest, TipDetails, TipError, MAX_TIPS_RETURNED, TIP_RETENTION_AFTER_TERMINAL_NS,
 };
 
 use super::{
@@ -213,6 +213,7 @@ pub async fn create_tip(request: CreateTipRequest) -> Result<(), TipError> {
                 claim_code_hash: request.claim_code_hash,
                 state: TipState::Reserved,
                 terminal_at_ns: None,
+                last_claim_failure: None,
             },
         );
         Ok(())
@@ -348,7 +349,11 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
             })
         }
         Err(err) => {
-            release_claim(&key, claimer, now);
+            let reason = match &err {
+                TransferFromCallError::InsufficientAllowance => TipClaimFailureReason::Uncovered,
+                TransferFromCallError::Failed(_) => TipClaimFailureReason::TransferFailed,
+            };
+            release_claim(&key, claimer, now, reason);
             match err {
                 TransferFromCallError::InsufficientAllowance => Err(TipError::Uncovered),
                 TransferFromCallError::Failed(msg) => Err(TipError::TransferFailed { msg }),
@@ -357,10 +362,20 @@ pub async fn claim_tip(request: TipClaimRequest) -> Result<TipClaim, TipError> {
     }
 }
 
-/// Returns a failed claim's tip to `Reserved`, but only if this claim still
-/// owns it. A claim that timed out and was taken over by someone else must not
-/// have its late failure clobber the new claimer's state.
-fn release_claim(key: &TipId, claimer: Principal, started_at_ns: u64) {
+/// Returns a failed claim's tip to `Reserved` and records why it failed, but
+/// only if this claim still owns it. A claim that timed out and was taken over by
+/// someone else must not have its late failure clobber the new claimer's state —
+/// nor mark the tip failed when somebody else is mid-payout.
+///
+/// The record is what lets History separate "nobody has tried this yet" from
+/// "somebody tried and it did not pay out", which is the only one of the two the
+/// sender can act on.
+fn release_claim(
+    key: &TipId,
+    claimer: Principal,
+    started_at_ns: u64,
+    reason: TipClaimFailureReason,
+) {
     mutate_state(|s| {
         let Some(Candid(current)) = s.tips.get(key) else {
             return;
@@ -378,6 +393,10 @@ fn release_claim(key: &TipId, claimer: Principal, started_at_ns: u64) {
                 key,
                 TipRecord {
                     state: TipState::Reserved,
+                    last_claim_failure: Some(TipClaimFailure {
+                        at_ns: time(),
+                        reason,
+                    }),
                     ..current
                 },
             );
@@ -521,6 +540,7 @@ mod tests {
             claim_code_hash: ByteBuf::from(vec![0u8; 32]),
             state,
             terminal_at_ns: None,
+            last_claim_failure: None,
         }
     }
 
