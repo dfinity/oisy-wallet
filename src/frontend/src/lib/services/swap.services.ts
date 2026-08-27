@@ -63,6 +63,7 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -1202,6 +1203,36 @@ export const performManualWithdraw = async ({
 	}
 };
 
+// Shared tail of the provider fan-outs: keep the fulfilled quotes, best first. When no
+// provider quoted at all but one refused the amount as below its minimum, rethrow that
+// refusal so the UI can name the reason instead of the generic "swap is not offered".
+const reduceSettledSwapResults = (
+	settledResults: PromiseSettledResult<SwapMappedResult | undefined>[]
+): SwapMappedResult[] => {
+	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		return acc;
+	}, []);
+
+	if (results.length === 0) {
+		const amountTooLow = settledResults.find(
+			(result): result is PromiseRejectedResult =>
+				result.status === 'rejected' && result.reason instanceof SwapAmountTooLowError
+		);
+
+		if (nonNullish(amountTooLow)) {
+			throw amountTooLow.reason;
+		}
+	}
+
+	return results.sort((a, b) =>
+		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
+	);
+};
+
 const fetchSwapAmountsICPBridge = async ({
 	sourceToken,
 	destinationToken,
@@ -1217,17 +1248,7 @@ const fetchSwapAmountsICPBridge = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
@@ -1253,17 +1274,7 @@ export const fetchSwapAmountsEVM = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // Fan-out for a Bitcoin source; Chain Fusion and NEAR Intents register here. The shape
@@ -1291,17 +1302,7 @@ export const fetchSwapAmountsBTC = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 // This wrapper keeps the return type uniform (array of SwapMappedResult),
@@ -1327,17 +1328,7 @@ export const fetchSwapAmountsSOL = async ({
 		)
 	);
 
-	const results = settledResults.reduce<SwapMappedResult[]>((acc, result) => {
-		if (result.status === 'fulfilled' && nonNullish(result.value)) {
-			acc.push(result.value);
-		}
-
-		return acc;
-	}, []);
-
-	return results.sort((a, b) =>
-		a.receiveAmount === b.receiveAmount ? 0 : a.receiveAmount > b.receiveAmount ? -1 : 1
-	);
+	return reduceSettledSwapResults(settledResults);
 };
 
 export const withdrawUserUnusedBalance = async ({

@@ -1,5 +1,7 @@
 import ActiveUserTransactionItem from '$lib/components/active-user-transactions/ActiveUserTransactionItem.svelte';
+import { NANO_SECONDS_IN_MILLISECOND, NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 import en from '$lib/i18n/en.json';
+import { formatNanosecondsToShortRelativeTime } from '$lib/utils/format.utils';
 import {
 	mockChainFusionActiveUserTransaction,
 	mockLiquidiumActiveUserTransaction,
@@ -71,6 +73,63 @@ describe('ActiveUserTransactionItem', () => {
 		expect(screen.getByText(`${en.liquidium.text.action_supply} 1 BTC`)).toBeInTheDocument();
 		expect(screen.getByText('Liquidium')).toBeInTheDocument();
 		expect(screen.queryByText(/→/)).not.toBeInTheDocument();
+	});
+
+	describe('relative time', () => {
+		const now = new Date(2026, 0, 1, 12);
+		const nowNs = BigInt(now.getTime()) * NANO_SECONDS_IN_MILLISECOND;
+		const threeHoursAgoNs = nowNs - 3n * 60n * 60n * NANO_SECONDS_IN_SECOND;
+		const oneMinuteAgoNs = nowNs - 60n * NANO_SECONDS_IN_SECOND;
+
+		const relativeTime = (nanoseconds: bigint): string =>
+			formatNanosecondsToShortRelativeTime({ nanoseconds, currentDate: now });
+
+		beforeEach(() => {
+			vi.useFakeTimers();
+			vi.setSystemTime(now);
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('shows the time since the terminal status change, not since creation', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockNearIntentsActiveUserTransaction,
+						status: { Succeeded: null },
+						created_at_ns: threeHoursAgoNs,
+						updated_at_ns: oneMinuteAgoNs
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(container).toHaveTextContent(relativeTime(oneMinuteAgoNs));
+			expect(container).not.toHaveTextContent(relativeTime(threeHoursAgoNs));
+		});
+
+		it('shows the time since creation while the transaction is still running', () => {
+			const { container } = render(ActiveUserTransactionItem, {
+				props: {
+					tx: {
+						...mockNearIntentsActiveUserTransaction,
+						status: { Executing: null },
+						created_at_ns: threeHoursAgoNs,
+						updated_at_ns: oneMinuteAgoNs
+					},
+					isUnseen: false,
+					dismissing: false,
+					onDismiss: vi.fn()
+				}
+			});
+
+			expect(container).toHaveTextContent(relativeTime(threeHoursAgoNs));
+			expect(container).not.toHaveTextContent(relativeTime(oneMinuteAgoNs));
+		});
 	});
 
 	it('calls onDismiss from a terminal Liquidium row', async () => {
