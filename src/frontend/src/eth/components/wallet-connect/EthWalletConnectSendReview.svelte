@@ -10,7 +10,7 @@
 	import { ercFungibleTokens } from '$eth/derived/erc-fungible.derived';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { decodeErc20AbiData } from '$eth/utils/transactions.utils';
+	import { decodeErc20AbiData, decodeSetApprovalForAllData } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import SendDataSpender from '$lib/components/send/SendDataSpender.svelte';
@@ -20,6 +20,7 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -35,6 +36,7 @@
 		data?: string;
 		erc20Approve: boolean;
 		erc20Transfer?: boolean;
+		setApprovalForAll?: boolean;
 		// The gas limit the dApp asked for, when it asked for one. It is what gets signed, so it is
 		// also what the maximum fee below is priced on.
 		requestedGas?: bigint;
@@ -52,6 +54,7 @@
 		data,
 		erc20Approve,
 		erc20Transfer = false,
+		setApprovalForAll = false,
 		requestedGas,
 		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
@@ -99,6 +102,19 @@
 
 	let spender = $derived(erc20Approve ? decodedErc20Data?.to : undefined);
 
+	let decodedSetApprovalForAll = $derived.by(() => {
+		if (!setApprovalForAll || isNullish(data)) {
+			return;
+		}
+
+		try {
+			return decodeSetApprovalForAllData(data);
+		} catch (_: unknown) {
+			// Calldata that does not decode must not be summarized: the review would
+			// otherwise describe something else than what gets signed and broadcast.
+		}
+	});
+
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let token = $derived(
@@ -122,6 +138,17 @@
 	// undecodable approve would otherwise render as a zero-amount interaction and stay approvable.
 	let unverifiableErc20 = $derived(erc20 && (isNullish(decodedErc20Data) || isNullish(token)));
 
+	// Same reasoning for an operator grant: the operator is the whole of what is being authorized,
+	// and calldata that hides it would otherwise fall through to a native zero-value summary.
+	let unverifiableSetApprovalForAll = $derived(
+		setApprovalForAll && isNullish(decodedSetApprovalForAll)
+	);
+
+	// An operator grant authorizes rather than moves, so it has no amount and no balance to spend
+	// against. Native value carried alongside it is still real value leaving the wallet, and hiding
+	// that would repeat, in the other direction, the summary this review exists to prevent.
+	let noAmount = $derived(setApprovalForAll && amount === ZERO);
+
 	let balance = $derived(nonNullish(token) ? $balancesStore?.[token.id]?.data : undefined);
 </script>
 
@@ -130,6 +157,19 @@
 		<MessageBox level="warning" testId="wallet-connect-unverifiable-erc20-warning">
 			{$i18n.wallet_connect.text.unverifiable_erc20_request}
 		</MessageBox>
+	{:else if unverifiableSetApprovalForAll}
+		<MessageBox level="warning" testId="wallet-connect-unverifiable-approval-for-all-warning">
+			{$i18n.wallet_connect.text.unverifiable_approval_for_all_request}
+		</MessageBox>
+	{:else if nonNullish(decodedSetApprovalForAll)}
+		<MessageBox
+			level={decodedSetApprovalForAll.approved ? 'warning' : 'info'}
+			testId="wallet-connect-approval-for-all"
+		>
+			{decodedSetApprovalForAll.approved
+				? $i18n.wallet_connect.text.approval_for_all_grant
+				: $i18n.wallet_connect.text.approval_for_all_revoke}
+		</MessageBox>
 	{/if}
 
 	<SendData
@@ -137,6 +177,8 @@
 		{application}
 		{balance}
 		destination={destinationDisplay}
+		showAmount={!noAmount}
+		showBalance={!noAmount}
 		showNullishAmountLabel={unverifiableErc20}
 		showUnlimitedAmountLabel={erc20Approve}
 		source={$ethAddress ?? ''}
@@ -161,6 +203,12 @@
 
 		{#if erc20Approve && nonNullish(spender)}
 			<SendDataSpender {spender} />
+		{:else if nonNullish(decodedSetApprovalForAll)}
+			<SendDataSpender
+				label={$i18n.wallet_connect.text.operator}
+				ref="operator"
+				spender={decodedSetApprovalForAll.operator}
+			/>
 		{/if}
 
 		<EthFeeDisplay gas={signedGas}>
@@ -186,7 +234,7 @@
 
 	{#snippet toolbar()}
 		<WalletConnectActions
-			approveDisabled={approveDisabled || unverifiableErc20}
+			approveDisabled={approveDisabled || unverifiableErc20 || unverifiableSetApprovalForAll}
 			{onApprove}
 			{onReject}
 		/>
