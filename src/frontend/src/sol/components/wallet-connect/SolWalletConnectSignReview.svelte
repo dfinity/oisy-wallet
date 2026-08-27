@@ -138,10 +138,27 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.unreviewed_instructions}</MessageBox>
 	{/if}
 
+	<!-- An authority change moves no funds at all, so a diff of amounts alone would describe the
+	     theft as nothing happening. It is named first among the fund warnings for that reason. -->
+	{#if nonNullish(preview) && preview.controlChanges.length > 0}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.simulation_control_change}</MessageBox>
+	{/if}
+
+	<!-- Stated whenever the parties were derived from top-level instructions alone, not only when
+	     something visibly failed: an empty list on a transaction that clearly spends something is
+	     the single most dangerous thing this review can show. -->
+	{#if parties?.partial === true}
+		<MessageBox level="warning">{$i18n.wallet_connect.text.transfer_parties_partial}</MessageBox>
+	{/if}
+
 	{#if dappPrioritizationFee}
 		<MessageBox level="info">{$i18n.wallet_connect.text.dapp_prioritization_fee}</MessageBox>
 	{:else if highPrioritizationFee}
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
+	{/if}
+
+	{#if nonNullish(preview)}
+		<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>
 	{/if}
 
 	<!-- The review names no recipient of its own: a single destination had to pick one winner out
@@ -169,6 +186,10 @@
 			<SolWalletConnectTransferParties {parties} userAddress={source} />
 		{/if}
 
+		{#if nonNullish(preview)}
+			<SolWalletConnectSimulationPreview {feeToken} {preview} />
+		{/if}
+
 		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
 			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
 		</WalletConnectModalValue>
@@ -177,10 +198,6 @@
 			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
 				{@render feeValue(prioritizationFee)}
 			</WalletConnectModalValue>
-		{/if}
-
-		{#if nonNullish(preview)}
-			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
