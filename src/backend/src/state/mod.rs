@@ -12,20 +12,21 @@ use crate::{
     personal_notes::PERSONAL_NOTES_DOMAIN_SEPARATOR,
     state::memory::{
         ACTIVE_USER_TRANSACTIONS_MEMORY_ID, AGREEMENT_HISTORY_MEMORY_ID, API_KEYS_MEMORY_ID,
-        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_MEMORY_ID,
-        EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER, PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID,
-        PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID,
-        PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID, PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID,
-        PERSONAL_NOTE_SHARES_MEMORY_ID, TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID,
-        USER_PROFILE_MEMORY_ID, USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID,
-        USER_TRANSACTIONS_MEMORY_ID,
+        BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID, CONFIG_MEMORY_ID, CONTACT_IMAGE_MEMORY_ID,
+        CONTACT_MEMORY_ID, EXCHANGE_RATE_MEMORY_ID, MEMORY_MANAGER,
+        PERSONAL_NOTES_ENCRYPTED_MAPS_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_ACCESS_MEMORY_ID,
+        PERSONAL_NOTES_KEY_MANAGER_CONFIG_MEMORY_ID, PERSONAL_NOTES_KEY_MANAGER_SHARED_MEMORY_ID,
+        PERSONAL_NOTE_SHARES_BY_CREATOR_MEMORY_ID, PERSONAL_NOTE_SHARES_MEMORY_ID,
+        TOKEN_ACTIVITY_MEMORY_ID, USER_CUSTOM_TOKEN_MEMORY_ID, USER_PROFILE_MEMORY_ID,
+        USER_PROFILE_UPDATED_MEMORY_ID, USER_TOKEN_MEMORY_ID, USER_TRANSACTIONS_MEMORY_ID,
     },
     types::{
         maps::{
             ActiveUserTransactionsMap, AgreementHistoryMap, ApiKeysCell,
-            BtcUserPendingTransactionsMap, ConfigCell, ContactMap, CustomTokenMap, ExchangeRateMap,
-            PersonalNoteShareMap, PersonalNoteSharesByCreatorMap, TokenActivityMap, UserProfileMap,
-            UserProfileUpdatedMap, UserTokenMap, UserTransactionsMap,
+            BtcUserPendingTransactionsMap, ConfigCell, ContactImageMap, ContactMap, CustomTokenMap,
+            ExchangeRateMap, PersonalNoteShareMap, PersonalNoteSharesByCreatorMap,
+            TokenActivityMap, UserProfileMap, UserProfileUpdatedMap, UserTokenMap,
+            UserTransactionsMap,
         },
         storable::Candid,
     },
@@ -45,6 +46,11 @@ pub(crate) struct State {
     pub(crate) user_profile: UserProfileMap,
     pub(crate) user_profile_updated: UserProfileUpdatedMap,
     pub(crate) contact: ContactMap,
+    /// Contact images, keyed `(principal, contact_id)`. Kept out of `contact` so that a contact
+    /// read or write does not decode every image the principal has stored. Contacts written before
+    /// this split still carry their image inline in `contact`; those move here the next time the
+    /// contact is written.
+    pub(crate) contact_image: ContactImageMap,
     pub(crate) btc_user_pending_transactions: BtcUserPendingTransactionsMap,
     // TODO: limit the map size with an eviction policy
     pub(crate) token_activity: TokenActivityMap,
@@ -108,6 +114,7 @@ thread_local! {
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
             contact: ContactMap::init(mm.borrow().get(CONTACT_MEMORY_ID)),
+            contact_image: ContactImageMap::init(mm.borrow().get(CONTACT_IMAGE_MEMORY_ID)),
             btc_user_pending_transactions: BtcUserPendingTransactionsMap::init(
                 mm.borrow().get(BTC_USER_PENDING_TRANSACTIONS_MEMORY_ID),
             ),
