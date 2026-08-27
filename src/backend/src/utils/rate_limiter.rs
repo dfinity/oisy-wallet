@@ -109,12 +109,25 @@ thread_local! {
     /// vetKD derivation for the tip-secrets store. Its own limiter rather than a
     /// shared one, so a sender recovering tip links cannot exhaust the budget for
     /// reading their notes, or the reverse.
+    ///
+    /// A raised burst cap (5/min instead of 2), because unlike notes this
+    /// derivation sits on the *create* path: a sender spends one per page load,
+    /// and at 2/min a third reload inside a minute failed — which silently cost
+    /// that tip its recoverable link. The hourly tiers are untouched, so
+    /// worst-case cycle spend is unchanged.
     pub(crate) static GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+        VetKeyRateLimiters::with_caller_burst(5);
 
     /// Verification-key reads for the tip-secrets store.
-    pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: VetKeyRateLimiters =
-        VetKeyRateLimiters::new();
+    ///
+    /// Deliberately an ordinary limiter, not [`VetKeyRateLimiters`]: this
+    /// endpoint returns a caller-independent constant that the canister now
+    /// caches after the first call, so it costs no vetKD derivation and metering
+    /// it like one was actively harmful. The browser fetches it alongside the
+    /// derivation, so a rejection here used to discard a derivation that had
+    /// already been paid for.
+    pub(crate) static GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER: RateLimiter =
+        RateLimiter::new(30, 60 * 1_000_000_000);
 }
 
 /// Per-caller sliding-window rate limiter for IC canister methods.
@@ -325,8 +338,20 @@ impl VetKeyRateLimiters {
 
     #[must_use]
     pub fn new() -> Self {
+        Self::with_caller_burst(2)
+    }
+
+    /// Same tiers as [`Self::new`] but with a chosen per-caller **burst** cap.
+    ///
+    /// Only the per-minute caller tier moves. That tier is a burst damper, not a
+    /// cost control — the per-hour caller tier is, and it still binds at 10 — so
+    /// raising this cannot increase worst-case hourly cycle spend for a caller.
+    /// It exists because 2/min throttles ordinary use: one derivation is spent
+    /// per page load, so two reloads inside a minute made the third fail.
+    #[must_use]
+    pub fn with_caller_burst(caller_minute: u32) -> Self {
         Self {
-            caller_minute: RateLimiter::new(2, Self::MINUTE_NS),
+            caller_minute: RateLimiter::new(caller_minute, Self::MINUTE_NS),
             caller_hour: RateLimiter::new(10, Self::HOUR_NS),
             global_minute: RateLimiter::new(20, Self::MINUTE_NS),
             global_hour: RateLimiter::new(100, Self::HOUR_NS),
@@ -675,6 +700,55 @@ mod tests {
         // The global tier buckets under `Principal::anonymous()` internally, but
         // the error must report the real caller, not the bucket key.
         assert_eq!(err.caller, test_principal(21));
+    }
+
+    #[test]
+    fn a_raised_burst_lifts_the_minute_tier_and_leaves_the_hour_tier_binding() {
+        let burst = VetKeyRateLimiters::with_caller_burst(5);
+        let caller = test_principal(1);
+
+        // Five inside one minute, where the default would have stopped at two.
+        for call in 1..=5 {
+            assert!(
+                burst.check_at(caller, ONE_SEC).is_ok(),
+                "call {call} of the raised burst"
+            );
+        }
+        assert!(
+            burst.check_at(caller, ONE_SEC).is_err(),
+            "six is still too many"
+        );
+
+        // The point of the change: worst-case hourly spend is unmoved, because
+        // the hour tier binds at 10 regardless of how the bursts are shaped.
+        // Five more across later minutes reach that cap, and the eleventh fails.
+        for call in 6..=10u64 {
+            let minute_later = ONE_SEC + call * 60 * ONE_SEC;
+            assert!(
+                burst.check_at(caller, minute_later).is_ok(),
+                "call {call} within the hour"
+            );
+        }
+        let err = burst
+            .check_at(caller, ONE_SEC + 11 * 60 * ONE_SEC)
+            .unwrap_err();
+        assert_eq!(
+            err.max_calls, 10,
+            "the hour tier is what refused, so the cost ceiling is unchanged"
+        );
+    }
+
+    #[test]
+    fn the_default_burst_is_unchanged_for_every_other_caller_of_new() {
+        let default = VetKeyRateLimiters::new();
+        let caller = test_principal(1);
+
+        assert!(default.check_at(caller, ONE_SEC).is_ok());
+        assert!(default.check_at(caller, ONE_SEC).is_ok());
+        assert!(
+            default.check_at(caller, ONE_SEC).is_err(),
+            "personal notes must keep the tiers it was sized with"
+        );
     }
 
     #[test]
