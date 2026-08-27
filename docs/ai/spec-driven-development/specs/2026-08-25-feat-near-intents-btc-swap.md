@@ -173,18 +173,19 @@ until PR 6, so every intermediate PR is safe to merge on its own.
    Provider registration (source and destination sides), gate widening, PRODUCT.md
    update, component and e2e tests. The flip-the-switch PR.
 
-## 9. Open questions (facts to confirm)
+## 9. Open questions (all resolved)
 
-None remaining. The last one, what status 1Click reports while a BTC deposit has been
-broadcast but not yet confirmed, was closed by staging QA (2026-08-27): real swaps in
-both directions were driven to `Succeeded` by the global poller, with the active user
-transaction row remaining pending across the whole unconfirmed window, surviving modal
-close and page refresh, and never surfacing a terminal state early. This matches the
-1Click status model, where the pre-confirmation window reports the non-terminal
-`PENDING_DEPOSIT` (`KNOWN_DEPOSIT_TX` once the broadcast txid has been submitted via
-`/deposit/submit`), both of which OISY maps as non-terminal in
-`near-intents-active-tx.utils.ts` alongside the deliberate non-terminal handling of
-`INCOMPLETE_DEPOSIT`.
+No open questions remain. The last one, what status 1Click reports while a BTC deposit
+has been broadcast but not yet confirmed, was closed by staging QA (2026-08-27). The
+observed timeline of a real swap: while the deposit awaited Bitcoin confirmation, the
+active user transaction row stayed pending the entire time (surviving modal close and
+page refresh, never surfacing a terminal state early); once the deposit confirmed and
+1Click settled the swap, the global poller moved the row to `Succeeded`. Both
+directions behaved this way. This matches the 1Click status model, where the
+pre-confirmation window reports the non-terminal `PENDING_DEPOSIT`
+(`KNOWN_DEPOSIT_TX` once the broadcast txid has been submitted via `/deposit/submit`),
+both of which OISY maps as non-terminal in `near-intents-active-tx.utils.ts` alongside
+the deliberate non-terminal handling of `INCOMPLETE_DEPOSIT`.
 
 Staging QA also surfaced one practical bound: the 1Click bridge minimum for a BTC
 source (8300 sats for BTC to ETH at the time of testing); a below-minimum quote fails
