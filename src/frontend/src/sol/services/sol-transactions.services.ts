@@ -615,7 +615,7 @@ export const loadNextSolTransactionsByOldest = async ({
 	...rest
 }: {
 	identity: NullishIdentity;
-	minTimestamp: number;
+	minTimestamp?: number;
 	transactions: SolTransactionUi[];
 	token: Token;
 	signalEnd: () => void;
@@ -629,7 +629,9 @@ export const loadNextSolTransactionsByOldest = async ({
 
 	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
 
+	// Without a floor the caller wants one page regardless, which is how the floor gets deeper.
 	if (
+		nonNullish(minTimestamp) &&
 		nonNullish(minIcTimestamp) &&
 		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
 	) {

@@ -183,15 +183,15 @@
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>
-						{$i18n.transaction.text.hash}
+						{$i18n.transaction.text.signature}
 					</span>
 
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
 						<AddressActions
 							copyAddress={id}
-							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
-								$hash: id
+							copyAddressText={replacePlaceholders($i18n.transaction.text.signature_copied, {
+								$signature: id
 							})}
 							externalLink={txExplorerUrl}
 							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}

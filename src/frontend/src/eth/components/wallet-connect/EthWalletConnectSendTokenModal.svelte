@@ -24,7 +24,8 @@
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import {
 		isErc20TransactionApprove,
-		isErc20TransactionTransfer
+		isErc20TransactionTransfer,
+		isErcTransactionSetApprovalForAll
 	} from '$eth/utils/transactions.utils';
 	import { getSendParamsGas } from '$eth/utils/wallet-connect.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
@@ -61,6 +62,12 @@
 	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
 
 	let erc20Transfer = $derived(isErc20TransactionTransfer(firstTransaction.data));
+
+	let setApprovalForAll = $derived(isErcTransactionSetApprovalForAll(firstTransaction.data));
+
+	// An operator grant authorizes someone else to move the user's tokens. It is an approval, not a
+	// send, whatever native value the request carries alongside it.
+	let approve = $derived(erc20Approve || setApprovalForAll);
 
 	/**
 	 * Send context store
@@ -192,7 +199,7 @@
 
 	{#snippet title()}
 		<WalletConnectModalTitle>
-			{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}
+			{approve ? $i18n.core.text.approve : $i18n.send.text.send}
 		</WalletConnectModalTitle>
 	{/snippet}
 
@@ -225,6 +232,7 @@
 						onApprove={send}
 						onReject={reject}
 						{requestedGas}
+						{setApprovalForAll}
 						{sourceNetwork}
 						{targetNetwork}
 					/>
