@@ -10,17 +10,17 @@ The spec stays the source of truth for **what** to build; this only records
 
 ## The stack
 
-| #   | Branch                         | Spec PR | Head        | Contains                                                                                                                                                                      | Status |
-| --- | ------------------------------ | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 1   | `feat/tips-1-backend`          | PR-1    | `34b6e076d` | tip store, `create_tip` / `get_tip` / `get_tip_details` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiters, pruning, candid | built  |
-| 2   | `feat/tips-2-service`          | PR-2    | `0c6f8f2e1` | `base64url.utils`, `tip.crypto`, `tip.services`, api + canister layer, pinned cross-language hash vectors                                                                      | built  |
-| 3   | `feat/tips-3-sender-ui`        | PR-3    | `c311f6c4c` | `Issue Tip` menu entry, intro, token picker + empty state, create step, expiry, share screen with QR, `tip.*` i18n, flag off                                                   | built  |
-| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `bc3997164` | `/tip/<id>` **standalone landing page**, claim review, success, **unavailable**, **uncovered**                                                                                 | built  |
-| 5   | `feat/tips-5-history`          | PR-5    | `16e88309a` | History with four stored statuses, claimer principal on claimed rows, cancel action                                                                                            | built  |
-| 6   | `feat/tips-6-reserved-balance` | PR-2b   | `d712296f6` | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | built  |
-| 7   | `feat/tips-7-enable`           | PR-6    | `2654f16aa` | flip `TIPS_ENABLED` to `true` — the release, on its own, after everything above lands                                                                                          | built  |
+| #   | Branch                         | Spec PR | Head        | Contains                                                                                                                                                                       | Status |
+| --- | ------------------------------ | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| 1   | `feat/tips-1-backend`          | PR-1    | `ee4dcab82` | tip store, `create_tip` / `get_tip` / `get_tip_details` / `claim_tip` / `cancel_tip` / `get_my_tips`, claim-code hashing, atomic claim, expiry, rate limiters, pruning, candid | built  |
+| 2   | `feat/tips-2-service`          | PR-2    | `7f34c4674` | `base64url.utils`, `tip.crypto`, `tip.services`, api + canister layer, pinned cross-language hash vectors                                                                      | built  |
+| 3   | `feat/tips-3-sender-ui`        | PR-3    | `3848ef5e1` | `Issue Tip` menu entry, intro, token picker + empty state, create step, expiry, share screen with QR, `tip.*` i18n, flag off                                                   | built  |
+| 4   | `feat/tips-4-recipient-ui`     | PR-4    | `2eb4e9dbd` | `/tip/<id>` **standalone landing page**, claim review, success, **unavailable**, **uncovered**                                                                                 | built  |
+| 5   | `feat/tips-5-history`          | PR-5    | `4d607e162` | History with four stored statuses, claimer principal on claimed rows, cancel action                                                                                            | built  |
+| 6   | `feat/tips-6-reserved-balance` | PR-2b   | `d3b78adb8` | subtract reserved amounts once, in the derived store the token list, send, swap and both MAX controls read                                                                     | built  |
+| 7   | `feat/tips-7-enable`           | PR-6    | `10666311b` | flip `TIPS_ENABLED` to `true` — the release, on its own, after everything above lands                                                                                          | built  |
 
-24 commits over `main`, none pushed. `main` here is the merged spec
+241 commits over `main`, none pushed. `main` here is the merged spec
 ([#13768](https://github.com/dfinity/oisy-wallet/pull/13768)).
 
 **Why the claim page is a standalone route.** It started under `(app)`, which
@@ -174,18 +174,128 @@ These do not block building, but they block landing. Longest lead time first.
 Code, not sign-off. Neither blocks the stack from landing; both are worth their
 own branch on top.
 
-| What                                                                                                                                                                                              | Where it goes         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| **Analytics.** Nothing is instrumented. The spec's [Analytics section](../2026-08-05-feat-tips-via-link.md#analytics-plausible) names the funnel — open → token → created, and landing → sign-in → claimed. That second funnel is the number the feature exists to produce: cold-start conversion of a non-crypto recipient. Follow `personal-notes-analytics.services.ts`. | a branch of its own   |
-| **`Uncovered` in History.** Criterion 15 lists it as a sender-visible status; `tip-status.utils.ts` deliberately cannot show it, because it is the outcome of a claim attempt rather than a stored state, and History would have to query every tip's allowance on every read. Either accept the deviation and amend the spec, or pay for the query. | decision, then either |
+| What                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Where it goes         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| ~~**Analytics.**~~ **Done.** One `tip` event with the step in `event_modifier` and the side in `source_location`, per `trackPersonalNoteShare`. Sender steps on branch 3, claimer steps on branch 4. No amounts, ever — the symbol answers "which assets get tipped" without making the stream a spending log. Original note: The spec's [Analytics section](../2026-08-05-feat-tips-via-link.md#analytics-plausible) names the funnel — open → token → created, and landing → sign-in → claimed. That second funnel is the number the feature exists to produce: cold-start conversion of a non-crypto recipient. Follow `personal-notes-analytics.services.ts`. | a branch of its own   |
+| ~~**`Uncovered` in History.**~~ **Superseded.** The canister now records a failed claim on the tip (`last_claim_failure`) and reports `TipStatus::Failed`, so History shows it without querying any allowance. Original note: `tip-status.utils.ts` deliberately cannot show it, because it is the outcome of a claim attempt rather than a stored state, and History would have to query every tip's allowance on every read. Either accept the deviation and amend the spec, or pay for the query.                                                                                                                                                              | decision, then either |
 
 ## Not yet verified
 
 Facts the stack asserts but nothing has measured. Each is a real risk, not a
 formality.
 
-| What                                                                                                                                                                       | How to close it                                |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| **The fragment surviving Internet Identity on mobile Safari and in in-app webviews** (open question 8, second half). The entire link model rests on it. Desktop is fine — II opens in a popup, so the page never unmounts — but an in-app webview may not keep it. | a real phone, and a link opened from a DM      |
-| **A fresh identity seeing the received token without manual setup** (open question 6). The backend half is covered by `a_tip_pays_a_brand_new_principal_…`; the wallet-UI half is not. | claim on a never-before-used anchor, then look |
-| **Claim atomicity across a canister upgrade mid-flight** (open question 4). The design answers it — `Claiming` plus a five-minute in-flight timeout — but no test upgrades the canister while a claim is in the air. | a pocket-ic test that upgrades mid-claim       |
+| What                                                                                                                                                                                                                                                                                     | How to close it                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **The fragment surviving Internet Identity on mobile Safari and in in-app webviews** (open question 8, second half). The entire link model rests on it. Desktop is fine — II opens in a popup, so the page never unmounts — but an in-app webview may not keep it.                       | a real phone, and a link opened from a DM      |
+| **A fresh identity seeing the received token without manual setup** (open question 6). The wallet-UI half is now built — `TipClaimModal` calls `autoLoadSingleToken` on the way out, so a claimed ck-asset is enabled — but nobody has claimed on a never-before-used anchor and looked. | claim on a never-before-used anchor, then look |
+| **Claim atomicity across a canister upgrade mid-flight** (open question 4). The design answers it — `Claiming` plus a five-minute in-flight timeout — but no test upgrades the canister while a claim is in the air.                                                                     | a pocket-ic test that upgrades mid-claim       |
+
+## Deploying to be1 / fe1
+
+The stack is exercised on the shared test environment from `test/tips-be1`, which
+is branch 7 plus three commits that must **never** reach a feature PR:
+
+- `dfx.json` and `canister_ids.json`, pointing `test_fe_1`'s backend at be1
+  (`jloto-byaaa-aaaap-anryq-cai`). Without this fe1 talks to **staging**, which
+  has no tips endpoints at all.
+- `scripts/build.backend.args.sh`, giving `test_be_*` / `test_fe_*` a real vetKD
+  key name. This one belongs in main as its own reviewed change — it is a shared
+  script other teams build from.
+
+`git diff feat/tips-7-enable test/tips-be1 --stat` must show only those three
+files. Anything else means work landed on the deploy branch by mistake.
+
+```bash
+gh workflow run deploy-to-environment.yml --ref test/tips-be1 -f network=test_fe_1 -f canister=frontend
+gh workflow run deploy-to-environment.yml --ref test/tips-be1 -f network=test_be_1 -f canister=backend -f force-backend=true
+```
+
+**Frontend first.** Adding a case to a variant the canister _returns_ is a
+breaking candid change: a client that does not know the case cannot decode it, and
+dfx says so out loud. `TipStatus::Failed`, `TipError::InsufficientFunds` and
+`TipClaimFailureReason::InsufficientFunds` are all in return position. Adding an
+`opt` record field is safe in either direction. An earlier deploy went
+backend-first and only got away with it because the new variants require a failed
+claim to appear.
+
+**Verify from the artefacts, not the green checks.** Grepping the bundle proves
+nothing — `app.constants.ts` embeds the staging fallback alongside the selected
+id, so both appear. Load `https://fe1.oisy.com/tip/probe/#c=probe` and read which
+canister the page actually calls. Expect transient 503 `no_healthy_nodes` right
+after an asset deploy; it clears on reload.
+
+## Mechanics that cost real time
+
+Each of these produced a wrong diagnosis first.
+
+**The vetKD key name is frozen at first init.** `KeyManager` keeps its key id in a
+`StableCell`, and `Cell::init` _loads_ the stored value whenever the region is
+non-empty — it writes the value passed in only when the memory is fresh. So a
+store uses whichever key name was configured the first time it was ever touched,
+permanently, and correcting the deployment argument does nothing. The fix is to
+move the store to a fresh memory region: tip secrets went 22-25 → **26-29**, and
+22-25 must never be reused.
+
+**`ECDSA_KEY_NAME` is also the vetKD key name.** `build.backend.args.sh` picks it
+per network and the backend reuses that one field for both. `test_be_*` and
+`test_fe_*` were unlisted and fell through to the local default `dfx_test_key`,
+which exists only on a local replica, so every derivation on be1 trapped with
+`SignCostError(InvalidKeyName)`. It reached the sender as "the link for this tip
+is not recoverable" — a confident, invented explanation for a live bug. Personal
+notes was unaffected only because its store had captured a valid name earlier.
+
+**A silently swallowed failure is expensive.** The claim-code write was
+best-effort with a `consoleWarn` and no retry, so one transient failure cost a tip
+its recoverable link permanently with nothing on screen. It now retries once and
+returns `secretStored`, and the share screen says "copy this link now" when it
+could not be saved.
+
+**Tooling quirks.** A plain `dfx deploy backend` _and_ `scripts/lint.did.sh` both
+reflow the whole of `backend.did` from tabs to spaces — pre-existing formatter
+drift; discard it rather than commit it. `scripts/generate.sh` needs `didc`, which
+is not installed, and `dfx generate` writes a different file layout than this
+repo's pipeline, so candid declarations are hand-edited and validated by having
+dfx parse the interface.
+
+## Open decisions
+
+Answers change what gets built; none of them block the rest.
+
+| Question                                                                                                                                                          | Default if nobody answers                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `Cancelled` is a fifth status. Fold it into the Expired group, give it its own, or hide it?                                                                       | folded into Expired, row keeps its own label    |
+| Should the four History groups also appear on the wallet home screen, or only inside the tips modal?                                                              | modal only; the home screen gets just the badge |
+| Apply the II delegation guard to `claim_tip` too? It would mean turning `cancel_tip(text)` into a record.                                                         | sender-side endpoints only                      |
+| Raise the vetKey `caller_hour` (10) and global (100/hour) tiers? They are real cost ceilings at ~26B cycles a derivation, and personal notes shares the exposure. | left alone, needs whoever sized them            |
+| Reject a self-claim (spec decision 15)? Verified end to end that a self-claim currently succeeds.                                                                 | not implemented; owner's call                   |
+
+## Where be1 stands
+
+Deployed from `63c2122bd`, both canisters, frontend first. Tips work; **link
+recovery does not**, and the remaining blocker is not code:
+
+```
+Canister cannot grow memory by 8388608 bytes due to its reserved cycles limit.
+The current limit (10_000_000_000_000) would be exceeded by 216_531_593_707.
+```
+
+be1 cannot allocate the 8 MiB the fresh memory region needs. That error is itself
+proof the new wasm is live — the old one reused existing regions and needed no
+growth. It also means the key-name fix is **untested**, because
+`ensure_tip_secrets()` runs before the derivation, so the cost check is never
+reached and `InvalidKeyName` disappearing proves nothing yet.
+
+Needs a controller (be1 has five, none of them ours). Either raise the limit and
+keep be1's data:
+
+```bash
+dfx canister update-settings --network ic jloto-byaaa-aaaap-anryq-cai \
+  --reserved-cycles-limit 20000000000000
+```
+
+or reinstall the backend, which wipes be1 state but needs no limit change: a
+reinstall clears stable memory, so the store re-initialises with the corrected
+name in the existing region and no new allocation is required.
+
+Meanwhile be1 is usable for everything except recovery — `create_tip` never
+touches the secrets store, and the failure is now graceful rather than silent.
