@@ -6,6 +6,7 @@ import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { GiftCodeRedeemStateData } from '$lib/types/gift-code';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OisyTradeOrderView, OisyTradeWithdrawToken } from '$lib/types/oisy-trade';
@@ -82,6 +83,9 @@ export interface Modal<T> {
 		| 'liquidium-repay'
 		| 'universal-scanner'
 		| 'pay-dialog'
+		| 'gift-code-create'
+		| 'gift-code-list'
+		| 'gift-code-redeem-result';
 		| 'wallet-connect-sessions';
 	data?: T;
 	id?: symbol;
@@ -163,6 +167,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openUniversalScanner: (params: SetWithOptionalDataParams<UniversalScannerData>) => void;
 	openPayDialog: (id: symbol) => void;
 	openGetToken: (id: symbol) => void;
+	openGiftCodeCreate: (id: symbol) => void;
+	openGiftCodeList: (id: symbol) => void;
+	openGiftCodeRedeemResult: (params: SetWithDataParams<GiftCodeRedeemStateData>) => void;
 	openWalletConnectSessions: (id: symbol) => void;
 	close: () => void;
 }
@@ -287,6 +294,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openPayDialog: setType('pay-dialog'),
 		openGetToken: setType('get-token'),
+		openGiftCodeCreate: setType('gift-code-create'),
+		openGiftCodeList: setType('gift-code-list'),
+		openGiftCodeRedeemResult: <(params: SetWithDataParams<GiftCodeRedeemStateData>) => void>(
+			setTypeWithData('gift-code-redeem-result')
+		),
 		openWalletConnectSessions: setType('wallet-connect-sessions'),
 		close: () => set(null),
 		subscribe

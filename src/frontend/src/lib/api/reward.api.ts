@@ -1,7 +1,14 @@
 import type {
+	CancelQrGiftCodeResponse,
 	ClaimedVipReward,
+	CreateQrGiftCodeRequest,
+	CreateQrGiftCodeResponse,
 	EligibilityReport,
 	NewVipRewardResponse,
+	QrGiftCodeEntry,
+	QrGiftCodeInfoResponse,
+	RedeemQrGiftCodeRequest,
+	RedeemQrGiftCodeResponse,
 	ReferrerInfo,
 	SetReferrerResponse,
 	UserData,
@@ -86,6 +93,60 @@ export const registerAirdropRecipient = async ({
 	const { registerAirdropRecipient } = await rewardCanister({ identity });
 
 	return registerAirdropRecipient(userSnapshot);
+};
+
+export const createQrGiftCode = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request: CreateQrGiftCodeRequest;
+}>): Promise<CreateQrGiftCodeResponse> => {
+	const { createQrGiftCode } = await rewardCanister({ identity });
+
+	return createQrGiftCode(request);
+};
+
+export const redeemQrGiftCode = async ({
+	request,
+	identity
+}: CanisterApiFunctionParams<{
+	request: RedeemQrGiftCodeRequest;
+}>): Promise<RedeemQrGiftCodeResponse> => {
+	const { redeemQrGiftCode } = await rewardCanister({ identity });
+
+	return redeemQrGiftCode(request);
+};
+
+export const cancelQrGiftCode = async ({
+	code,
+	identity
+}: CanisterApiFunctionParams<{
+	code: string;
+}>): Promise<CancelQrGiftCodeResponse> => {
+	const { cancelQrGiftCode } = await rewardCanister({ identity });
+
+	return cancelQrGiftCode(code);
+};
+
+export const getQrGiftCodeInfo = async ({
+	code,
+	identity,
+	certified
+}: CanisterApiFunctionParams<{ code: string } & QueryParams>): Promise<
+	QrGiftCodeInfoResponse | undefined
+> => {
+	const { getQrGiftCodeInfo } = await rewardCanister({ identity });
+
+	return getQrGiftCodeInfo({ certified, code });
+};
+
+export const getMyQrGiftCodes = async ({
+	identity,
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<QrGiftCodeEntry[]> => {
+	const { getMyQrGiftCodes } = await rewardCanister({ identity });
+
+	return getMyQrGiftCodes({ certified });
 };
 
 const rewardCanister = async ({
