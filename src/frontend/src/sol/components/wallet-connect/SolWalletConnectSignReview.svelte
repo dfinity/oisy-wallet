@@ -154,8 +154,6 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 	{/if}
 
-	<!-- Last of the notices: it qualifies how everything below was obtained rather than warning
-	     about anything the message does, and it only has something to say once a simulation ran. -->
 	{#if nonNullish(preview)}
 		<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>
 	{/if}
@@ -185,16 +183,6 @@
 			<SolWalletConnectTransferParties {parties} userAddress={source} />
 		{/if}
 
-		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
-			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
-		</WalletConnectModalValue>
-
-		{#if nonNullish(prioritizationFee)}
-			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
-				{@render feeValue(prioritizationFee)}
-			</WalletConnectModalValue>
-		{/if}
-
 		{#if nonNullish(preview)}
 			<SolWalletConnectSimulationPreview {feeToken} {preview} />
 		{/if}
@@ -205,6 +193,16 @@
 				shown={instructionsShown}
 				total={instructionsTotal}
 			/>
+		{/if}
+
+		<WalletConnectModalValue label={$i18n.fee.text.network_fee} ref="network-fee">
+			{@render feeValue(SOLANA_TRANSACTION_FEE_IN_LAMPORTS)}
+		</WalletConnectModalValue>
+
+		{#if nonNullish(prioritizationFee)}
+			<WalletConnectModalValue label={$i18n.fee.text.prioritization_fee} ref="prioritization-fee">
+				{@render feeValue(prioritizationFee)}
+			</WalletConnectModalValue>
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
