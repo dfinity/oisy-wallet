@@ -22,7 +22,12 @@ import {
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import { authIdentity } from '$lib/derived/auth.derived';
-import { modalUniversalScannerOpen, modalWalletConnect } from '$lib/derived/modal.derived';
+import {
+	modalUniversalScannerOpen,
+	modalWalletConnect,
+	modalWalletConnectSend,
+	modalWalletConnectSign
+} from '$lib/derived/modal.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -77,7 +82,15 @@ export const onSessionRequest = async ({
 	}
 
 	// Another modal, like Send or Receive, is already in progress
-	if (nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen)) {
+	const otherModalInProgress =
+		nonNullish(get(modalStore)) && !get(modalWalletConnect) && !get(modalUniversalScannerOpen);
+
+	// A review the user has not answered yet is itself in progress. Letting a second request replace
+	// it would swap the summary under the user's cursor, so the decision they end up making would be
+	// about a transaction they never reviewed.
+	const reviewInProgress = get(modalWalletConnectSign) || get(modalWalletConnectSend);
+
+	if (otherModalInProgress || reviewInProgress) {
 		toastsError({
 			msg: {
 				text: get(i18n).wallet_connect.error.skipping_request
