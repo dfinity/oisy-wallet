@@ -259,6 +259,41 @@ describe('SolWalletConnectSignReview', () => {
 			expect(getByText('0.000005 SOL')).toBeInTheDocument();
 			expect(getByText(en.wallet_connect.text.high_prioritization_fee)).toBeInTheDocument();
 		});
+
+		it('should render the notice above the transaction data', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					prioritizationFee: 3_000_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const notice = getByText(en.wallet_connect.text.dapp_prioritization_fee);
+			const application = getByText(en.wallet_connect.text.application);
+
+			expect(notice.compareDocumentPosition(application) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
+
+		it('should render the warning below the unreviewed instructions warning', () => {
+			const { getByText } = render(SolWalletConnectSignReview, {
+				props: {
+					...props,
+					unreviewed: true,
+					prioritizationFee: 5_600_000n,
+					prioritizationFeeEstimate: networkEstimate
+				}
+			});
+
+			const unreviewed = getByText(en.wallet_connect.text.unreviewed_instructions);
+			const warning = getByText(en.wallet_connect.text.high_prioritization_fee);
+
+			expect(unreviewed.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+				Node.DOCUMENT_POSITION_FOLLOWING
+			);
+		});
 	});
 
 	describe('when the decode produced no amount', () => {
