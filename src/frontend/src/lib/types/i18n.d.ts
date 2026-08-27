@@ -2283,6 +2283,7 @@ interface I18nTip {
 		select_token: string;
 		create_title: string;
 		share_title: string;
+		preparing_title: string;
 		empty_balance_title: string;
 		empty_balance_description: string;
 		no_supported_tokens_title: string;
@@ -2309,6 +2310,7 @@ interface I18nTip {
 		expires_at: string;
 		done: string;
 		generating_link: string;
+		link_not_saved: string;
 		reserve_failed: string;
 		status_title: string;
 		claim_title: string;
