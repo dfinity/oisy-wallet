@@ -1210,6 +1210,10 @@ type TipError = variant {
 	// deliberately distinguishable failure, reachable only with a valid link,
 	// because telling the claimer "come back later" is useless.
 	Uncovered;
+	// The sender's account no longer holds the amount. The reservation is still
+	// granted and the claim code is still valid, so the same link works again once
+	// they top up, which is why this is not folded into `TransferFailed`.
+	InsufficientFunds;
 	// No claimable tip for this id. Also returned for an expired, cancelled or
 	// already-claimed tip, and for a wrong claim code — every case collapsed
 	// into one response so a prober can never distinguish them.
@@ -1266,6 +1270,10 @@ type TipStatus = variant {
 // balance having dropped below the amount.
 type TipClaimFailureReason = variant {
 	Uncovered;
+	// The sender's account no longer holds the amount. Distinct from `Uncovered`:
+	// the reservation is still granted, the money is simply not there, so topping
+	// up makes the same link work again.
+	InsufficientFunds;
 	TransferFailed
 };
 // The most recent failed claim on a tip. Returned only to the tip's own sender.
