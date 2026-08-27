@@ -25,7 +25,12 @@ mkdir -p "$(dirname "$CANISTER_ARG_PATH_BACKEND")"
 ln -s -f "$(basename "$CANISTER_ARG_PATH_BACKEND_FOR_NETWORK")" "$CANISTER_ARG_PATH_BACKEND"
 
 case "$DFX_NETWORK" in
-"staging")
+# `test_be_*` and `test_fe_*` are canisters on mainnet, so they need a key name
+# that exists there. Without them listed here they fall through to the `*` branch
+# and get `dfx_test_key`, which only a local replica has — and the backend reuses
+# this field as its vetKD key name, so every derivation traps with
+# `SignCostError(InvalidKeyName)`. That is what broke tip-link recovery on be1.
+"staging" | test_be_* | test_fe_*)
   ECDSA_KEY_NAME="test_key_1"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
