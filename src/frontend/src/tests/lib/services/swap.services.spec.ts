@@ -47,6 +47,7 @@ import { fetchVeloraSwapAmount } from '$lib/services/velora-swap.services';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
+import { SwapAmountTooLowError } from '$lib/types/errors';
 import {
 	NEAR_INTENTS_EXTERNAL_REF_KEYS,
 	type NearIntentsQuoteResponse
@@ -110,6 +111,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 const mockVeloraGetQuote = vi.hoisted(() => vi.fn());
+const mockEvmNearIntentsGetQuote = vi.hoisted(() => vi.fn());
 const mockSolGetQuote = vi.hoisted(() => vi.fn());
 const mockIcpBridgeGetQuote = vi.hoisted(() => vi.fn());
 const mockBtcGetQuote = vi.hoisted(() => vi.fn());
@@ -119,6 +121,11 @@ vi.mock('$lib/providers/evm-swap.providers', () => ({
 		{
 			key: 'velora',
 			getQuote: mockVeloraGetQuote,
+			isEnabled: true
+		},
+		{
+			key: 'near_intents',
+			getQuote: mockEvmNearIntentsGetQuote,
 			isEnabled: true
 		}
 	]
@@ -1223,6 +1230,46 @@ describe('swap.services', () => {
 
 			expect(result).toEqual([]);
 		});
+
+		it('rethrows an amount-too-low refusal when no provider quoted', async () => {
+			mockVeloraGetQuote.mockResolvedValueOnce(undefined);
+			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+			);
+
+			await expect(
+				fetchSwapAmountsEVM({
+					sourceToken,
+					destinationToken,
+					amount,
+					userAddress,
+					slippage
+				})
+			).rejects.toThrow(SwapAmountTooLowError);
+		});
+
+		it('drops an amount-too-low refusal when another provider quoted', async () => {
+			mockVeloraGetQuote.mockResolvedValueOnce({
+				provider: SwapProvider.VELORA,
+				receiveAmount: 123n,
+				swapDetails: {},
+				type: 'delta'
+			});
+			mockEvmNearIntentsGetQuote.mockRejectedValueOnce(
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+			);
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userAddress,
+				slippage
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+		});
 	});
 
 	describe('fetchSwapAmountsSOL', () => {
@@ -1308,6 +1355,22 @@ describe('swap.services', () => {
 			});
 
 			expect(result).toEqual([]);
+		});
+
+		it('should rethrow an amount-too-low refusal when no provider quoted', async () => {
+			mockSolGetQuote.mockRejectedValueOnce(
+				new SwapAmountTooLowError('Amount is too low for bridge, try at least 8300', 8300n)
+			);
+
+			await expect(
+				fetchSwapAmountsSOL({
+					sourceToken,
+					destinationToken,
+					amount,
+					userAddress: mockSolAddress,
+					slippage
+				})
+			).rejects.toThrow(SwapAmountTooLowError);
 		});
 	});
 

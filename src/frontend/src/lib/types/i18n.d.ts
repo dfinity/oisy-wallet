@@ -916,6 +916,8 @@ interface I18nSwap {
 		max_slippage_error: string;
 		swap_button: string;
 		swap_is_not_offered: string;
+		swap_amount_too_low: string;
+		swap_amount_too_low_minimum: string;
 		executing_transaction: string;
 		initializing: string;
 		swapping: string;
