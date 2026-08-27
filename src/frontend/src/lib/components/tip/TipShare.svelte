@@ -43,6 +43,12 @@
 		onDone: () => void;
 		/** Present when this screen is a live tip reopened from History. */
 		onCancel?: () => void;
+		/**
+		 * True while a reservation is still in flight, having opened this screen on
+		 * the click. It is what tells the reader the empty QR is on its way rather
+		 * than broken, and what stops them leaving before the link arrives.
+		 */
+		generating?: boolean;
 		cancelling?: boolean;
 	}
 
@@ -54,7 +60,8 @@
 		amount,
 		onDone,
 		onCancel,
-		cancelling = false
+		cancelling = false,
+		generating = false
 	}: Props = $props();
 
 	// Copy and share are tracked separately: which one a sender reaches for says
@@ -209,6 +216,18 @@
 		<div class="flex items-center gap-2 rounded-lg bg-brand-subtle-10 px-3 py-2">
 			<span class="h-5 w-full animate-pulse rounded bg-disabled-alt" aria-hidden="true"></span>
 		</div>
+
+		<!--
+			Says what the skeletons are for. Without it the screen arrives looking
+			finished but blank, which reads as a failure rather than as work still in
+			progress — and this screen is the sender's receipt for money they have just
+			committed, so it is the wrong thing to leave anyone guessing about.
+		-->
+		{#if generating}
+			<p class="m-0 mt-3 text-center text-sm text-tertiary">
+				{$i18n.tip.text.generating_link}
+			</p>
+		{/if}
 	{/if}
 
 	{#if nonNullish(onCancel)}
@@ -231,7 +250,11 @@
 			content above, next to the link it revokes, so the two are not adjacent
 			buttons a reader has to tell apart.
 		-->
-		<Button disabled={cancelling} fullWidth onclick={onDone}>
+		<!--
+			Also disabled while generating: the tip may not exist yet, and leaving here
+			would drop the sender back into the wallet without the link they came for.
+		-->
+		<Button disabled={cancelling || generating} fullWidth onclick={onDone}>
 			{nonNullish(onCancel) ? $i18n.core.text.back : $i18n.tip.text.done}
 		</Button>
 	{/snippet}
