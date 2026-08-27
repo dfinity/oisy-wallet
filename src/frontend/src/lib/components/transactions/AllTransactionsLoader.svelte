@@ -5,14 +5,21 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { transactionsStoreWithTokens } from '$lib/derived/transactions.derived';
-	import { loadOlderTransactionsFor } from '$lib/services/transactions-pagination.services';
+	import {
+		loadedTransactionsCount,
+		loadOlderTransactionsFor
+	} from '$lib/services/transactions-pagination.services';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 
 	interface LoaderControls {
-		/** Pages every token one step further back. */
-		loadMore: () => Promise<void>;
+		/**
+		 * Pages every token one step further back. Resolves to whether any new transaction was
+		 * actually loaded, counted across the stores themselves so an active filter cannot make a
+		 * successful fetch look empty.
+		 */
+		loadMore: () => Promise<boolean>;
 		/** True once no enabled token has any history left to give. */
 		exhausted: boolean;
 	}
@@ -94,16 +101,26 @@
 		await levelToOldest(oldestLoadedTimestamp());
 	};
 
-	const loadMore = async () => {
+	const totalLoaded = (): number =>
+		$enabledFungibleNetworkTokens.reduce(
+			(total, token) => total + loadedTransactionsCount(token),
+			0
+		);
+
+	const loadMore = async (): Promise<boolean> => {
 		if (isNullish($authIdentity) || transactions.length === 0) {
-			return;
+			return false;
 		}
+
+		const loadedBefore = totalLoaded();
 
 		// One unconditional page per token first: without it every token already sits at the floor
 		// and levelling alone would find nothing left to do.
 		await Promise.allSettled($enabledFungibleNetworkTokens.map((token) => pageToken({ token })));
 
 		await levelToOldest(oldestLoadedTimestamp());
+
+		return totalLoaded() > loadedBefore;
 	};
 
 	let allStoresAreLoaded = $derived(areTransactionsStoresLoaded($transactionsStoreWithTokens));

@@ -559,6 +559,46 @@ describe('AllTransactionsLoader', () => {
 			});
 		});
 
+		it('should report that nothing loaded when no store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeFalsy();
+		});
+
+		// The scroll decides whether to keep paging from this result, so it has to reflect the stores
+		// rather than any filtered view of them.
+		it('should report that history loaded when a store grew', async () => {
+			const { controls } = renderWithControls();
+
+			await waitFor(() => {
+				expect(controls()).toBeDefined();
+			});
+
+			spyLoadNextSolTransactions.mockImplementation(async () => {
+				solTransactionsStore.append({
+					tokenId: SOLANA_TOKEN.id,
+					transactions: [
+						{
+							data: {
+								...createMockSolTransactionsUi(1)[0],
+								id: `older-${Math.random()}`,
+								timestamp: mockMinTimestampStart - 1n
+							} as SolTransactionUi,
+							certified: false
+						}
+					]
+				});
+
+				return await Promise.resolve({ success: false });
+			});
+
+			await expect(controls()?.loadMore()).resolves.toBeTruthy();
+		});
+
 		it('should page every token once regardless of the floor', async () => {
 			const { controls } = renderWithControls();
 

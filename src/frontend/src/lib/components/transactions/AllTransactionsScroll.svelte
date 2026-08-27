@@ -9,8 +9,11 @@
 	interface Props {
 		sortedTransactions: AllTransactionUiWithCmp[];
 		transactionsToDisplay: AllTransactionUiWithCmp[];
-		/** Fetches another page from every chain. Absent while the list has no loader above it. */
-		onLoadMore?: () => Promise<void>;
+		/**
+		 * Fetches another page from every chain, resolving to whether anything new was loaded.
+		 * Absent while the list has no loader above it.
+		 */
+		onLoadMore?: () => Promise<boolean>;
 		/** True once no chain has any history left to give. */
 		exhausted?: boolean;
 		children: Snippet;
@@ -28,7 +31,7 @@
 
 	let loading = $state(false);
 
-	// Length the list had when a fetch last came back empty. Anything arriving after that (a wallet
+	// Length the list had when a fetch last loaded nothing. Anything arriving after that (a wallet
 	// worker delivering newer transactions, say) makes it worth asking the chains again.
 	let dryAtLength = $state<number | undefined>(undefined);
 
@@ -69,20 +72,25 @@
 
 		loading = true;
 
+		let loadedMore = false;
+
 		try {
-			await onLoadMore();
+			loadedMore = await onLoadMore();
 		} finally {
 			loading = false;
 		}
 
-		if (sortedTransactions.length > lengthBeforeFetch) {
+		// Whether the fetch achieved anything has to come from the loader, not from this list: it is
+		// filtered, so history that loaded but does not match the current filter leaves its length
+		// untouched. Reading the length here would strand the user on a narrow filter.
+		if (loadedMore) {
 			pages++;
 
 			return;
 		}
 
-		// Nothing came back. Stop asking until the list grows again, otherwise the observer would
-		// keep firing against chains that have nothing left.
+		// Nothing loaded. Stop asking until the list grows again, otherwise the observer would keep
+		// firing against chains that have nothing left.
 		dryAtLength = lengthBeforeFetch;
 	};
 

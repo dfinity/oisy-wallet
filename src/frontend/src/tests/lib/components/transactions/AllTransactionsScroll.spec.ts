@@ -33,7 +33,7 @@ describe('AllTransactionsScroll', () => {
 	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('should reveal every page in memory before asking the chains, and ask only once', async () => {
-		const onLoadMore = vi.fn().mockResolvedValue(undefined);
+		const onLoadMore = vi.fn().mockResolvedValue(false);
 
 		render(AllTransactionsScroll, {
 			props: {
@@ -51,7 +51,7 @@ describe('AllTransactionsScroll', () => {
 	});
 
 	it('should ask the chains for more once everything loaded is on screen', async () => {
-		const onLoadMore = vi.fn().mockResolvedValue(undefined);
+		const onLoadMore = vi.fn().mockResolvedValue(false);
 
 		render(AllTransactionsScroll, {
 			props: {
@@ -70,7 +70,7 @@ describe('AllTransactionsScroll', () => {
 	// The observer fires again on every layout change, so a fetch that brings nothing back has to
 	// stop the scroll asking. Without this the component spins against chains that are already dry.
 	it('should stop asking after a fetch brings nothing back', async () => {
-		const onLoadMore = vi.fn().mockResolvedValue(undefined);
+		const onLoadMore = vi.fn().mockResolvedValue(false);
 
 		render(AllTransactionsScroll, {
 			props: {
@@ -86,8 +86,31 @@ describe('AllTransactionsScroll', () => {
 		});
 	});
 
+	// The list handed to this component is filtered, so history that loads but does not match the
+	// current filter leaves its length untouched. Going dry on that would strand the user.
+	it('should keep asking while the loader reports new history, even if nothing new is displayed', async () => {
+		const onLoadMore = vi
+			.fn()
+			.mockResolvedValueOnce(true)
+			.mockResolvedValueOnce(true)
+			.mockResolvedValue(false);
+
+		render(AllTransactionsScroll, {
+			props: {
+				sortedTransactions: makeTransactions(pageSize),
+				transactionsToDisplay: makeTransactions(pageSize),
+				onLoadMore,
+				children: mockSnippet
+			}
+		});
+
+		await waitFor(() => {
+			expect(onLoadMore).toHaveBeenCalledTimes(3);
+		});
+	});
+
 	it('should not ask the chains when they are already exhausted', async () => {
-		const onLoadMore = vi.fn().mockResolvedValue(undefined);
+		const onLoadMore = vi.fn().mockResolvedValue(false);
 
 		render(AllTransactionsScroll, {
 			props: {
