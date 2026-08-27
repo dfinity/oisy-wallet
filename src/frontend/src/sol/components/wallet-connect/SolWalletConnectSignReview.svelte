@@ -154,6 +154,12 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 	{/if}
 
+	<!-- Last of the notices: it qualifies how everything below was obtained rather than warning
+	     about anything the message does, and it only has something to say once a simulation ran. -->
+	{#if nonNullish(preview)}
+		<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>
+	{/if}
+
 	<!-- The review names no recipient of its own: a single destination had to pick one winner out
 	     of a swap, and where the value ends up is what the simulated balance changes describe. An
 	     approval is the exception, since its delegate is not a recipient and keeps its own row. -->
