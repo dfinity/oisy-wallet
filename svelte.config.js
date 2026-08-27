@@ -32,6 +32,9 @@ const config = {
 			precompress: false
 		}),
 		prerender: {
+			// The design-study route is linked from nowhere, so the crawler never reaches it and a
+			// prerenderable-but-unseen route fails the build. Naming it here is what gets it built.
+			entries: ['*', '/mock-transactions'],
 			...(notEmptyString(signerTarget) && { handleUnseenRoutes: 'ignore' })
 		},
 		files: {

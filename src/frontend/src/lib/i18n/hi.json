@@ -1606,6 +1606,8 @@
 			"hex_data": "हेक्स डेटा",
 			"unreviewed_instructions": "",
 			"simulated_changes": "",
+			"simulated_instructions": "",
+			"instructions_none": "",
 			"simulation_note": "",
 			"simulation_control_change": "",
 			"simulation_new_owner": "",

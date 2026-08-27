@@ -15,6 +15,7 @@
 	import type { Token } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { formatToken } from '$lib/utils/format.utils';
+	import SolWalletConnectInstructions from '$sol/components/wallet-connect/SolWalletConnectInstructions.svelte';
 	import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 	import SolWalletConnectTransferParties from '$sol/components/wallet-connect/SolWalletConnectTransferParties.svelte';
 	import {
@@ -23,6 +24,7 @@
 		SOLANA_PRIORITIZATION_FEE_WARNING_MULTIPLIER,
 		SOLANA_TRANSACTION_FEE_IN_LAMPORTS
 	} from '$sol/constants/sol.constants';
+	import type { SolInstructionViewRow } from '$sol/types/sol-instructions-view';
 	import type { SolSimulationPreview } from '$sol/types/sol-simulation';
 	import type { SolTransferParties } from '$sol/types/sol-transaction';
 
@@ -46,6 +48,11 @@
 		// Who the transaction spends from, derived from the transfer instructions it contains. Where
 		// the value ends up is left to the simulated balance changes. Absent until the decode settles.
 		parties?: SolTransferParties;
+		// What the message actually does to the user's own accounts, instruction by instruction.
+		// Absent when the decode could not produce it, in which case the section is simply not shown.
+		instructions?: SolInstructionViewRow[];
+		instructionsTotal?: number;
+		instructionsShown?: number;
 		approveDisabled?: boolean;
 		onApprove: () => void;
 		onReject: () => void;
@@ -65,6 +72,9 @@
 		unreviewed = false,
 		preview,
 		parties,
+		instructions,
+		instructionsTotal = 0,
+		instructionsShown = 0,
 		approveDisabled = false,
 		onApprove,
 		onReject
@@ -181,6 +191,14 @@
 
 		{#if nonNullish(preview)}
 			<SolWalletConnectSimulationPreview {feeToken} {preview} />
+		{/if}
+
+		{#if nonNullish(instructions)}
+			<SolWalletConnectInstructions
+				rows={instructions}
+				shown={instructionsShown}
+				total={instructionsTotal}
+			/>
 		{/if}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
