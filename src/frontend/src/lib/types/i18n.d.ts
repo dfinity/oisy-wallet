@@ -2280,6 +2280,11 @@ interface I18nTip {
 		intro_title: string;
 		intro_heading: string;
 		intro_body: string;
+		overview_window: string;
+		overview_failed: string;
+		overview_failed_hint: string;
+		overview_open: string;
+		overview_claimed: string;
 		select_token: string;
 		create_title: string;
 		share_title: string;
