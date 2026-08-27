@@ -518,7 +518,7 @@ describe('AllTransactionsLoader', () => {
 
 	describe('load more', () => {
 		interface LoaderControls {
-			loadMore: () => Promise<void>;
+			loadMore: () => Promise<boolean>;
 			exhausted: boolean;
 		}
 
