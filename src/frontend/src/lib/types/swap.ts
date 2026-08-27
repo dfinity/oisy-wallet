@@ -93,6 +93,17 @@ export interface FetchSwapAmountsParams {
 
 export type Slippage = string | number;
 
+/**
+ * The reason no offer could be quoted, when a provider named one.
+ *
+ * `minAmount` is the provider's minimum, in the source token's smallest unit,
+ * when the provider communicated it.
+ */
+export interface SwapQuoteError {
+	type: 'amount-too-low';
+	minAmount?: bigint;
+}
+
 export type SwapMappedResult =
 	| {
 			provider: SwapProvider.ICP_SWAP;

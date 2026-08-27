@@ -61,6 +61,43 @@ describe('i18n-utils', () => {
 			).toBe('The quick brown fox jumps over the lazy dog');
 		});
 
+		it('should insert regexp replacement patterns in the value literally', () => {
+			const template = 'Move $collection to spam?';
+
+			expect(replacePlaceholders(template, { $collection: '$&' })).toBe('Move $& to spam?');
+
+			expect(replacePlaceholders(template, { $collection: '$`' })).toBe('Move $` to spam?');
+
+			expect(replacePlaceholders(template, { $collection: "$'" })).toBe("Move $' to spam?");
+
+			expect(replacePlaceholders(template, { $collection: '$$' })).toBe('Move $$ to spam?');
+
+			expect(replacePlaceholders(template, { $collection: '$1' })).toBe('Move $1 to spam?');
+		});
+
+		it('should not substitute a placeholder key carried by another value', () => {
+			expect(
+				replacePlaceholders('Send $amount of $token to $to', {
+					$token: 'X$amount Y',
+					$amount: '5.00',
+					$to: 'the address'
+				})
+			).toBe('Send 5.00 of X$amount Y to the address');
+		});
+
+		it('should prefer the longest key when one key is a prefix of another', () => {
+			expect(
+				replacePlaceholders('$token_symbol on $token', {
+					$token: 'Ethereum',
+					$token_symbol: 'ETH'
+				})
+			).toBe('ETH on Ethereum');
+		});
+
+		it('should return the original text when there is nothing to substitute', () => {
+			expect(replacePlaceholders('Lorem Ipsum!', {})).toBe('Lorem Ipsum!');
+		});
+
 		it('should replace Oisy placeholders', () => {
 			expect(
 				replaceOisyPlaceholders(
