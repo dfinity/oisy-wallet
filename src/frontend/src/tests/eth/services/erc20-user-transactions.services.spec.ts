@@ -18,6 +18,7 @@ import {
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
+import { mapUserTransactionToTransaction } from '$eth/utils/user-transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { Transaction } from '$lib/types/transaction';
@@ -245,6 +246,47 @@ describe('erc20-user-transactions.services', () => {
 			expect(mockErc20Transactions).not.toHaveBeenCalled();
 
 			expect(get(ethTransactionsStore)?.[USDC_TOKEN.id]).toHaveLength(1);
+		});
+
+		// The read cursor is a position in the stored list, so a trim at the per-token cap shifts every
+		// entry under it and pages start repeating rows we already hold. Asking again would spin.
+		it('should fall through to Etherscan when a cursor page repeats rows we already hold', async () => {
+			const stored = createMockBackendUserTransaction({
+				hash: '0xstored',
+				blockIndex: 50n,
+				timestamp: 500n
+			});
+
+			// Already in the store, so `append` will dedupe the page away.
+			ethTransactionsStore.append({
+				tokenId: USDC_TOKEN.id,
+				transactions: [{ data: mapUserTransactionToTransaction(stored), certified: false }]
+			});
+
+			setEthBackendPaginationCursor({ tokenId: USDC_TOKEN.id, nextStart: 42n });
+
+			mockGetUserTransactions.mockResolvedValue({
+				transactions: [stored],
+				newestBlockIndex: 50n,
+				oldestBlockIndex: 50n,
+				totalStored: 1n,
+				nextStart: 32n
+			});
+
+			mockErc20Transactions.mockResolvedValue([makeTx({ hash: '0xolder', blockNumber: 20 })]);
+
+			const { hasMore } = await loadNextErc20UserTransactions({
+				identity: mockIdentity,
+				address: mockEthAddress,
+				transactionTokenId: backendTokenId,
+				token: USDC_TOKEN,
+				tokenId: USDC_TOKEN.id,
+				networkId: ETHEREUM_NETWORK_ID,
+				oldestLoadedBlockNumber: 60
+			});
+
+			expect(hasMore).toBeTruthy();
+			expect(mockErc20Transactions).toHaveBeenCalledOnce();
 		});
 
 		it('should fall back to Etherscan below the oldest loaded block once the cache is drained', async () => {

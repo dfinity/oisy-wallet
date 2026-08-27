@@ -21,6 +21,7 @@ import type { Transaction } from '$lib/types/transaction';
 import type { LoadUserTransactionsResult } from '$lib/types/user-transactions';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 /**
  * Where paging through the backend's stored history has got to, per token.
@@ -188,19 +189,30 @@ export const loadNextEthUserTransactions = async ({
 		});
 
 		if (nonNullish(result) && result.transactions.length > 0) {
-			const certifiedTransactions = result.transactions.map((transaction) => ({
-				data: transaction,
-				certified: false
-			}));
+			const loadedBefore = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
 
-			ethTransactionsStore.append({ tokenId, transactions: certifiedTransactions });
+			ethTransactionsStore.append({
+				tokenId,
+				transactions: result.transactions.map((transaction) => ({
+					data: transaction,
+					certified: false
+				}))
+			});
 
-			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
-			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+			const loadedAfter = (get(ethTransactionsStore)?.[tokenId] ?? []).length;
 
-			return {
-				hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
-			};
+			// The cursor is a position in the stored list, so trimming at the per-token cap shifts every
+			// entry under it and the cursor stops lining up. Pages then come back full of transactions
+			// we already have, which `append` dedupes away. Treat that like an empty page and fall
+			// through to the explorer rather than asking the canister for the same rows again.
+			if (loadedAfter > loadedBefore) {
+				setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+				setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
+
+				return {
+					hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex)
+				};
+			}
 		}
 	}
 
