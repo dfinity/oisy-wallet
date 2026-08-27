@@ -175,10 +175,21 @@ until PR 6, so every intermediate PR is safe to merge on its own.
 
 ## 9. Open questions (facts to confirm)
 
-- What status 1Click reports while a BTC deposit has been broadcast but not yet
-  confirmed (`INCOMPLETE_DEPOSIT` handling is already non-terminal in
-  `near-intents-active-tx.utils.ts`); observable only with a real deposit, so this is
-  verified during staging QA.
+None remaining. The last one, what status 1Click reports while a BTC deposit has been
+broadcast but not yet confirmed, was closed by staging QA (2026-08-27): real swaps in
+both directions were driven to `Succeeded` by the global poller, with the active user
+transaction row remaining pending across the whole unconfirmed window, surviving modal
+close and page refresh, and never surfacing a terminal state early. This matches the
+1Click status model, where the pre-confirmation window reports the non-terminal
+`PENDING_DEPOSIT` (`KNOWN_DEPOSIT_TX` once the broadcast txid has been submitted via
+`/deposit/submit`), both of which OISY maps as non-terminal in
+`near-intents-active-tx.utils.ts` alongside the deliberate non-terminal handling of
+`INCOMPLETE_DEPOSIT`.
+
+Staging QA also surfaced one practical bound: the 1Click bridge minimum for a BTC
+source (8300 sats for BTC to ETH at the time of testing); a below-minimum quote fails
+with HTTP 400, which the swap UI initially rendered as the generic "swap not offered"
+message. Surfacing the provider's minimum is a small follow-up outside this spec.
 
 Answered against the live 1Click API (2026-08-25):
 
@@ -210,5 +221,4 @@ Answered against the live 1Click API (2026-08-25):
 - The NEAR Intents quote deadline becomes origin-aware: BTC-source quotes use a
   1-hour `NEAR_INTENTS_BTC_QUOTE_DEADLINE_MS` (deposits confirm in tens of minutes,
   and expiry refunds minus a fee, so the window must cover slow blocks), while EVM
-  and SOL keep the 3-minute deadline for fresher quotes. Lands as its own PR stacked
-  on the groundwork PR.
+  and SOL keep the 3-minute deadline for fresher quotes. Landed as its own PR.
