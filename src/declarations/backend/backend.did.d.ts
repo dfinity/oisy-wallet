@@ -2487,10 +2487,6 @@ export interface _SERVICE {
 	/**
 	 * Saves finalized transactions for the caller. Transactions are deduplicated by hash.
 	 *
-	 * A transaction with an oversized field is not chain data, so the call is
-	 * rejected outright rather than returned as an error, the same way
-	 * `set_custom_token` handles input that is too large.
-	 *
 	 * # Errors
 	 * Errors are enumerated by: `UserTransactionError`.
 	 */
