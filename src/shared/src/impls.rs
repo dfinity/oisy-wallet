@@ -103,6 +103,19 @@ fn validate_non_negative_float(value: f64, field_name: &str) -> Result<(), Error
     Ok(())
 }
 
+/// Merges a requested agreement over the currently stored one, discarding the client-supplied
+/// `last_accepted_at_ns`.
+///
+/// That field is server-owned, so the stored value is carried over here and the caller stamps it
+/// with the canister clock on acceptance. Dropping it before the caller's change check also keeps
+/// a forged timestamp from registering as a change on its own.
+fn merge_agreement(current: Option<&UserAgreement>, requested: UserAgreement) -> UserAgreement {
+    UserAgreement {
+        last_accepted_at_ns: current.and_then(|agreement| agreement.last_accepted_at_ns),
+        ..requested
+    }
+}
+
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
         match token {
@@ -413,6 +426,9 @@ impl StoredUserProfile {
 
     /// Returns a copy with the specified user agreements updated.
     ///
+    /// Only fields where `accepted` is `Some(_)` are applied. `last_accepted_at_ns` is server-owned
+    /// and never read from the request; see [`merge_agreement`].
+    ///
     /// # Errors
     ///
     /// Will return Err if there is a version mismatch.
@@ -435,13 +451,18 @@ impl StoredUserProfile {
         let privacy_updated = agreements.privacy_policy.accepted.is_some();
 
         if license_updated {
-            new_agreements.license_agreement = agreements.license_agreement;
+            new_agreements.license_agreement = merge_agreement(
+                Some(&current.license_agreement),
+                agreements.license_agreement,
+            );
         }
         if terms_updated {
-            new_agreements.terms_of_use = agreements.terms_of_use;
+            new_agreements.terms_of_use =
+                merge_agreement(Some(&current.terms_of_use), agreements.terms_of_use);
         }
         if privacy_updated {
-            new_agreements.privacy_policy = agreements.privacy_policy;
+            new_agreements.privacy_policy =
+                merge_agreement(Some(&current.privacy_policy), agreements.privacy_policy);
         }
 
         if current.eq(&new_agreements) {
@@ -472,7 +493,8 @@ impl StoredUserProfile {
     /// Returns a copy with the specified provider agreements updated.
     ///
     /// Only entries where `accepted` is `Some(_)` are applied. Existing provider agreements not
-    /// present in the request are left unchanged.
+    /// present in the request are left unchanged. `last_accepted_at_ns` is server-owned and never
+    /// read from the request; see [`merge_agreement`].
     ///
     /// # Errors
     ///
@@ -499,8 +521,9 @@ impl StoredUserProfile {
         let mut updated_keys = Vec::new();
         for (provider_type, agreement) in provider_agreements {
             if agreement.accepted.is_some() {
-                merged.insert(provider_type.clone(), agreement.clone());
-                updated_keys.push(provider_type.clone());
+                let merged_agreement = merge_agreement(current.get(&provider_type), agreement);
+                merged.insert(provider_type.clone(), merged_agreement);
+                updated_keys.push(provider_type);
             }
         }
 
@@ -965,6 +988,9 @@ mod tests {
         user_profile::StoredUserProfile,
     };
 
+    /// A client-supplied `last_accepted_at_ns` that the canister must never persist.
+    const FORGED_TIMESTAMP: u64 = 9_999_999_999_999_999_999;
+
     fn swap_key() -> ProviderAgreementType {
         ProviderAgreementType {
             provider: ProviderAgreementProvider::NearIntents,
@@ -997,7 +1023,7 @@ mod tests {
         use super::{
             profile_with_provider, swap_key, BTreeMap, ProviderAgreementProvider,
             ProviderAgreementScope, ProviderAgreementType, StoredUserProfile,
-            UpdateAgreementsError, UserAgreement,
+            UpdateAgreementsError, UserAgreement, FORGED_TIMESTAMP,
         };
 
         #[test]
@@ -1059,6 +1085,8 @@ mod tests {
                 swap_key(),
                 UserAgreement {
                     accepted: Some(true),
+                    // A client-supplied timestamp must never survive.
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
                     ..Default::default()
                 },
             )]);
@@ -1080,6 +1108,8 @@ mod tests {
                 swap_key(),
                 UserAgreement {
                     accepted: Some(false),
+                    // A forged timestamp on the rejection path must be discarded, not stored.
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
                     ..Default::default()
                 },
             )]);
@@ -1092,6 +1122,49 @@ mod tests {
 
             assert_eq!(agreement.accepted, Some(false));
             assert_eq!(agreement.last_accepted_at_ns, None);
+        }
+
+        #[test]
+        fn test_rejection_preserves_previously_accepted_timestamp() {
+            let profile = profile_with_provider(&swap_key(), true, Some(1_000));
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let provider_agreements = result.agreements.unwrap().provider_agreements.unwrap();
+            let agreement = provider_agreements.get(&swap_key()).unwrap();
+
+            assert_eq!(agreement.accepted, Some(false));
+            assert_eq!(agreement.last_accepted_at_ns, Some(1_000));
+        }
+
+        #[test]
+        fn test_resent_rejection_with_forged_timestamp_is_a_no_op() {
+            let profile = profile_with_provider(&swap_key(), false, None);
+            let request = BTreeMap::from([(
+                swap_key(),
+                UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+            )]);
+
+            let result = profile
+                .with_provider_agreements(profile.version, 2_000, request)
+                .unwrap();
+
+            // Nothing the caller controls changed, so the profile version must not move and no
+            // audit-trail entry may be recorded.
+            assert_eq!(result.version, profile.version);
         }
 
         #[test]
@@ -1168,7 +1241,7 @@ mod tests {
     }
 
     mod with_agreements {
-        use super::StoredUserProfile;
+        use super::{StoredUserProfile, FORGED_TIMESTAMP};
         use crate::types::agreement::{UserAgreement, UserAgreements};
 
         fn profile_with_user_agreements(agreements: UserAgreements) -> StoredUserProfile {
@@ -1259,6 +1332,113 @@ mod tests {
                 agreements.terms_of_use.last_updated_at_ms,
                 Some(1_800_000_000_000)
             );
+        }
+
+        #[test]
+        fn test_acceptance_ignores_client_supplied_timestamp() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(true));
+            assert_eq!(
+                agreements.license_agreement.last_accepted_at_ns,
+                Some(2_000)
+            );
+        }
+
+        #[test]
+        fn test_rejection_ignores_client_supplied_timestamp() {
+            let profile = StoredUserProfile::from_timestamp(1_000);
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(false));
+            assert_eq!(agreements.license_agreement.last_accepted_at_ns, None);
+        }
+
+        #[test]
+        fn test_rejection_preserves_previously_accepted_timestamp() {
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(true),
+                    last_accepted_at_ns: Some(1_000),
+                    ..Default::default()
+                },
+                ..Default::default()
+            });
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+            let agreements = result.agreements.unwrap().agreements;
+
+            assert_eq!(agreements.license_agreement.accepted, Some(false));
+            assert_eq!(
+                agreements.license_agreement.last_accepted_at_ns,
+                Some(1_000)
+            );
+        }
+
+        #[test]
+        fn test_resent_rejection_with_forged_timestamp_is_a_no_op() {
+            let profile = profile_with_user_agreements(UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    ..Default::default()
+                },
+                ..Default::default()
+            });
+
+            let request = UserAgreements {
+                license_agreement: UserAgreement {
+                    accepted: Some(false),
+                    last_accepted_at_ns: Some(FORGED_TIMESTAMP),
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+
+            let result = profile
+                .with_agreements(profile.version, 2_000, request)
+                .unwrap();
+
+            // Nothing the caller controls changed, so the profile version must not move and no
+            // audit-trail entry may be recorded.
+            assert_eq!(result.version, profile.version);
         }
     }
 }
