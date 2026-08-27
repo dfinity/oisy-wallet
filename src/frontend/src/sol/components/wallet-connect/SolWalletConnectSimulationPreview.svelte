@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -116,5 +115,3 @@
 		{/each}
 	</div>
 </WalletConnectModalValue>
-
-<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>

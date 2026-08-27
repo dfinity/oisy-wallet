@@ -4,7 +4,6 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import SolWalletConnectSimulationPreview from '$sol/components/wallet-connect/SolWalletConnectSimulationPreview.svelte';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import type { SolSimulationPreview } from '$sol/types/sol-simulation';
-import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress2, mockSplAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { render } from '@testing-library/svelte';
@@ -125,14 +124,5 @@ describe('SolWalletConnectSimulationPreview', () => {
 		);
 
 		expect(getByTestId('simulated-control-change')).toHaveTextContent(mockSolAddress2);
-	});
-
-	it('should always state that the real execution can differ', () => {
-		const { getByText } = render(
-			SolWalletConnectSimulationPreview,
-			props({ tokenDeltas: [], controlChanges: [] })
-		);
-
-		expect(getByText(en.wallet_connect.text.simulation_note)).toBeInTheDocument();
 	});
 });
