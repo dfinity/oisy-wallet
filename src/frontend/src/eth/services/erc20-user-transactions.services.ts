@@ -4,6 +4,8 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import {
 	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
@@ -171,6 +173,7 @@ export const loadNextErc20UserTransactions = async ({
 			});
 
 			setEthBackendPaginationCursor({ tokenId, nextStart: result.nextStart });
+			setEthBackendAtCapacity({ tokenId, totalStored: result.totalStored });
 
 			return { hasMore: nonNullish(result.nextStart) || nonNullish(result.oldestBlockIndex) };
 		}
@@ -203,19 +206,23 @@ export const loadNextErc20UserTransactions = async ({
 			}))
 		});
 
-		try {
-			const { getBlockNumber } = infuraProviders(networkId);
+		// At the cap the canister trims the oldest entries on every save, so history older than what it
+		// already holds would be written and evicted in the same call.
+		if (!isEthBackendAtCapacity(tokenId)) {
+			try {
+				const { getBlockNumber } = infuraProviders(networkId);
 
-			const latestBlockNumber = await getBlockNumber();
+				const latestBlockNumber = await getBlockNumber();
 
-			await saveErc20FinalizedTransactions({
-				identity,
-				tokenId: transactionTokenId,
-				transactions: olderTransactions,
-				currentBlockNumber: latestBlockNumber
-			});
-		} catch (_: unknown) {
-			// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+				await saveErc20FinalizedTransactions({
+					identity,
+					tokenId: transactionTokenId,
+					transactions: olderTransactions,
+					currentBlockNumber: latestBlockNumber
+				});
+			} catch (_: unknown) {
+				// We silently ignore the saving errors since it is just useful for the next time, and not necessary for the user experience
+			}
 		}
 
 		return { hasMore: true };

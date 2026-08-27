@@ -7,13 +7,16 @@ import type { InfuraProvider } from '$eth/providers/infura.providers';
 import * as infuraProvidersModule from '$eth/providers/infura.providers';
 import {
 	getEthBackendPaginationCursor,
+	isEthBackendAtCapacity,
 	loadEthUserTransactions,
 	loadNextEthUserTransactions,
 	saveEthFinalizedTransactions,
+	setEthBackendAtCapacity,
 	setEthBackendPaginationCursor
 } from '$eth/services/eth-user-transactions.services';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { ZERO } from '$lib/constants/app.constants';
+import { MAX_USER_TRANSACTIONS_PER_TOKEN } from '$lib/constants/user-transactions.constants';
 import type { GetUserTransactionsResponse } from '$lib/types/api';
 import type { Transaction } from '$lib/types/transaction';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -188,6 +191,50 @@ describe('eth-user-transactions.services', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('capacity tracking', () => {
+		beforeEach(() => {
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+		});
+
+		it('should not flag a token below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN - 1)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should flag a token at the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeTruthy();
+		});
+
+		it('should clear the flag once the token drops back below the cap', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: 10n });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
+		});
+
+		it('should clear the flag when the backend said nothing about it', () => {
+			setEthBackendAtCapacity({
+				tokenId: mockTokenId,
+				totalStored: BigInt(MAX_USER_TRANSACTIONS_PER_TOKEN)
+			});
+			setEthBackendAtCapacity({ tokenId: mockTokenId, totalStored: undefined });
+
+			expect(isEthBackendAtCapacity(mockTokenId)).toBeFalsy();
 		});
 	});
 
