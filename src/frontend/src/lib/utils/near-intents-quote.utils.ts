@@ -5,6 +5,7 @@ import type {
 	NearIntentsQuoteResponse
 } from '$lib/types/near-intents';
 import { consoleError } from '$lib/utils/console.utils';
+import { nonNullish } from '@dfinity/utils';
 import type { Nullish } from '@dfinity/zod-schemas';
 import { getBase58Decoder, getBase58Encoder } from '@solana/kit';
 
@@ -157,13 +158,29 @@ export const verifyNearIntentsQuoteSignature = async (
 	}
 };
 
+/**
+ * Whether the quote is past the window the service signed for it.
+ *
+ * A signature carries no freshness, so a captured quote stays cryptographically valid
+ * forever and its stale deposit address would still pass verification. Both bounds are
+ * part of the signed payload, so the tighter of the two is authoritative. A quote with no
+ * parseable bound counts as expired: an unbounded deposit address must not execute.
+ */
+export const isNearIntentsQuoteExpired = ({
+	quote: { deadline, timeWhenInactive }
+}: NearIntentsQuoteResponse): boolean => {
+	const bounds = [deadline, timeWhenInactive].filter(nonNullish).map((bound) => Date.parse(bound));
+
+	if (bounds.length === 0 || bounds.some((bound) => Number.isNaN(bound))) {
+		return true;
+	}
+
+	return Math.min(...bounds) <= Date.now();
+};
+
 // A valid signature only proves 1Click issued the quote, not that it issued it to us: an
 // attacker can request a genuine quote paying out to their own address and substitute the
 // whole signed response. Comparing the echoed request against what we sent closes that gap.
-//
-// Asset identifiers are deliberately excluded, because 1Click legitimately re-routes them
-// (a BTC origin of `nep141:btc.omft.near` comes back as `1cs_v1:btc:native:coin`). They
-// carry no theft path while `recipient` and `refundTo` are pinned to the user's addresses.
 const SIGNED_REQUEST_MATCHED_FIELDS = [
 	'amount',
 	'recipient',
@@ -176,6 +193,25 @@ const SIGNED_REQUEST_MATCHED_FIELDS = [
 	'dry'
 ] as const satisfies readonly (keyof NearIntentsQuoteRequest)[];
 
+const ASSET_FIELDS = [
+	'originAsset',
+	'destinationAsset'
+] as const satisfies readonly (keyof NearIntentsQuoteRequest)[];
+
+// 1Click answers some requests with an internal id for the same underlying coin, so the
+// echoed asset is not always the one we sent: a BTC origin of `nep141:btc.omft.near` comes
+// back as `1cs_v1:btc:native:coin`. Each group lists ids that denote the same asset. Only
+// these substitutions are accepted; every other asset must be echoed exactly, otherwise a
+// genuinely signed quote for a different token would pass and the wallet would send its
+// source token to a deposit address opened for another asset.
+const NEAR_INTENTS_ASSET_ALIASES: readonly (readonly string[])[] = [
+	['nep141:btc.omft.near', '1cs_v1:btc:native:coin']
+];
+
+const isSameNearIntentsAsset = ({ sent, echoed }: { sent: string; echoed: string }): boolean =>
+	sent === echoed ||
+	NEAR_INTENTS_ASSET_ALIASES.some((group) => group.includes(sent) && group.includes(echoed));
+
 /**
  * Returns the name of the first field the service echoed back differently from what was
  * requested, or `undefined` when the echoed request matches.
@@ -186,4 +222,14 @@ export const findNearIntentsQuoteRequestMismatch = ({
 }: {
 	sent: NearIntentsQuoteRequest;
 	echoed: NearIntentsQuoteRequest;
-}): string | undefined => SIGNED_REQUEST_MATCHED_FIELDS.find((key) => sent[key] !== echoed[key]);
+}): string | undefined => {
+	const mismatch = SIGNED_REQUEST_MATCHED_FIELDS.find((key) => sent[key] !== echoed[key]);
+
+	if (nonNullish(mismatch)) {
+		return mismatch;
+	}
+
+	return ASSET_FIELDS.find(
+		(key) => !isSameNearIntentsAsset({ sent: sent[key], echoed: echoed[key] })
+	);
+};

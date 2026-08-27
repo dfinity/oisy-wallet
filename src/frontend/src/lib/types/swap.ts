@@ -66,7 +66,8 @@ export enum SwapErrorCodes {
 	SWAP_FAILED_WITHDRAW_FAILED = 'swap_failed_withdraw_failed',
 	ICP_SWAP_WITHDRAW_SUCCESS = 'ICPSwap_withdraw_success',
 	ICP_SWAP_WITHDRAW_FAILED = 'ICPSwap_withdraw_failed',
-	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified'
+	NEAR_INTENTS_QUOTE_UNVERIFIED = 'near_intents_quote_unverified',
+	NEAR_INTENTS_QUOTE_EXPIRED = 'near_intents_quote_expired'
 }
 export interface ProviderFee {
 	fee: bigint;

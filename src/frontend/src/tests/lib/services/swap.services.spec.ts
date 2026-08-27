@@ -53,7 +53,10 @@ import {
 } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
-import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
+import {
+	isNearIntentsQuoteExpired,
+	verifyNearIntentsQuoteSignature
+} from '$lib/utils/near-intents-quote.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -164,7 +167,8 @@ vi.mock('$lib/services/onesec-swap.services', () => ({
 // a captured response in near-intents-quote.utils.spec.ts. The default implementation lives
 // in the factory so the suite's many `clearAllMocks` calls do not strip it.
 vi.mock('$lib/utils/near-intents-quote.utils', () => ({
-	verifyNearIntentsQuoteSignature: vi.fn().mockResolvedValue(true)
+	verifyNearIntentsQuoteSignature: vi.fn().mockResolvedValue(true),
+	isNearIntentsQuoteExpired: vi.fn().mockReturnValue(false)
 }));
 
 vi.mock('$lib/services/near-intents.services', () => ({
@@ -260,6 +264,7 @@ describe('swap.services', () => {
 	// set in the module factory for every test that runs after them.
 	beforeEach(() => {
 		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
 	});
 
 	describe('fetchSwapAmounts', () => {
@@ -2953,6 +2958,31 @@ describe('swap.services', () => {
 
 			expect(sendEvm).not.toHaveBeenCalled();
 			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should not send funds when the quote has expired', async () => {
+			vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(true);
+
+			await expect(
+				fetchNearIntentsEvmSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					receiveAmount: 900000n,
+					slippageValue: '1',
+					sourceNetwork: ETHEREUM_NETWORK,
+					userAddress: mockEthAddress,
+					gas: 21000n,
+					maxFeePerGas: 20000000000n,
+					maxPriorityFeePerGas: 2000000000n,
+					swapDetails: mockNearIntentsQuoteResponse
+				})
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED });
+
+			expect(sendEvm).not.toHaveBeenCalled();
 			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
 		});
 

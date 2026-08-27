@@ -23,6 +23,7 @@ import type { NearIntentsToken } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
 import {
 	findNearIntentsQuoteRequestMismatch,
+	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
@@ -49,7 +50,8 @@ vi.mock('$env/rest/near-intents.env', () => ({
 // near-intents-quote.utils.spec.ts; here the quotes are fixtures with no genuine signature.
 vi.mock('$lib/utils/near-intents-quote.utils', () => ({
 	verifyNearIntentsQuoteSignature: vi.fn(),
-	findNearIntentsQuoteRequestMismatch: vi.fn()
+	findNearIntentsQuoteRequestMismatch: vi.fn(),
+	isNearIntentsQuoteExpired: vi.fn()
 }));
 
 vi.mock('$lib/rest/near-intents.rest', () => ({
@@ -65,6 +67,7 @@ describe('near-intents.services', () => {
 
 		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
 		vi.mocked(findNearIntentsQuoteRequestMismatch).mockReturnValue(undefined);
+		vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(false);
 
 		clearNearIntentsTokensCache();
 	});
@@ -181,6 +184,23 @@ describe('near-intents.services', () => {
 					slippage
 				})
 			).rejects.toThrow('does not match the request: recipient');
+		});
+
+		it('should reject a captured quote whose signed window has lapsed', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(isNearIntentsQuoteExpired).mockReturnValue(true);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('past the window it was signed for');
 		});
 
 		it('should verify the quote against the request it sent', async () => {

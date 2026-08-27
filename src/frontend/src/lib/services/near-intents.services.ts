@@ -18,6 +18,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { NearIntentsQuoteParams, SwapMappedResult } from '$lib/types/swap';
 import {
 	findNearIntentsQuoteRequestMismatch,
+	isNearIntentsQuoteExpired,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
 import {
@@ -102,8 +103,9 @@ export const nearIntentsSupportedTokens = async ({
  *
  * The quote names the address the wallet then irreversibly sends the swap amount to, so it
  * is authenticated before it can reach the UI: the signature proves the service issued it,
- * and the echoed request proves it was issued for us rather than replayed from someone
- * else's quote. Callers reach this through `Promise.allSettled`, so a rejection drops the
+ * the echoed request proves it was issued for us rather than replayed from someone else's
+ * quote, and the signed deadline proves it is not a captured quote whose deposit address
+ * has gone stale. Callers reach this through `Promise.allSettled`, so a rejection drops the
  * NEAR Intents option instead of surfacing an unverified deposit address.
  */
 const assertNearIntentsQuoteAuthentic = async ({
@@ -121,6 +123,10 @@ const assertNearIntentsQuoteAuthentic = async ({
 
 	if (nonNullish(mismatch)) {
 		throw new Error(`NEAR Intents quote does not match the request: ${mismatch}`);
+	}
+
+	if (isNearIntentsQuoteExpired(response)) {
+		throw new Error('NEAR Intents quote is past the window it was signed for');
 	}
 };
 

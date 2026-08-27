@@ -43,6 +43,7 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
+	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -300,9 +301,13 @@
 				}
 			});
 
+			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
+
 			toastsError({
-				msg: { text: $i18n.swap.error.unexpected },
-				err
+				msg: { text: quoteRejected ?? $i18n.swap.error.unexpected },
+				// The gate aborted before any funds moved, so there is no underlying failure to
+				// attach; the message above already says everything the user needs.
+				...(isNullish(quoteRejected) ? { err } : {})
 			});
 
 			onBack();

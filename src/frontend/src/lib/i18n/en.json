@@ -1245,7 +1245,8 @@
 			"cannot_save_provider_agreement": "Failed to save the provider agreement. Please try again.",
 			"swap_refunded": "The swap transaction was refunded.",
 			"swap_replaced_or_dropped": "This swap transaction was replaced or dropped before it was confirmed.",
-			"near_intents_quote_unverified": "$oisy_short protects you: this swap quote could not be verified as genuine, so no funds were sent. Please try again or choose a different provider."
+			"near_intents_quote_unverified": "This swap quote could not be verified as genuine, so no funds were sent. Please try again or choose a different provider.",
+			"near_intents_quote_expired": "This swap quote has expired, so no funds were sent. Please try again to get a fresh quote."
 		}
 	},
 	"buy": {

@@ -100,7 +100,10 @@ import {
 	toNearIntentsDisplayRefs,
 	toNearIntentsExternalRefs
 } from '$lib/utils/near-intents-active-tx.utils';
-import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
+import {
+	isNearIntentsQuoteExpired,
+	verifyNearIntentsQuoteSignature
+} from '$lib/utils/near-intents-quote.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
@@ -874,6 +877,15 @@ const executeNearIntentsSwap = async ({
 		throwSwapError({
 			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
 			message: get(i18n).swap.error.near_intents_quote_unverified
+		});
+	}
+
+	// Re-checked here rather than only at quote time: the review screen can sit open long
+	// enough for the window the service signed to lapse before the user confirms.
+	if (isNearIntentsQuoteExpired(swapDetails)) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_EXPIRED,
+			message: get(i18n).swap.error.near_intents_quote_expired
 		});
 	}
 

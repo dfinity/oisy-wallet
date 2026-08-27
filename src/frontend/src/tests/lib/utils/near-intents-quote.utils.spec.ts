@@ -1,6 +1,7 @@
 import type { NearIntentsQuoteResponse } from '$lib/types/near-intents';
 import {
 	findNearIntentsQuoteRequestMismatch,
+	isNearIntentsQuoteExpired,
 	nearIntentsQuoteHash,
 	verifyNearIntentsQuoteSignature
 } from '$lib/utils/near-intents-quote.utils';
@@ -108,6 +109,56 @@ describe('near-intents-quote.utils', () => {
 		});
 	});
 
+	describe('isNearIntentsQuoteExpired', () => {
+		// The captured quote carries fixed bounds, so the clock is pinned rather than the
+		// fixture: otherwise these assertions would flip once the real date passes them.
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		it('accepts a quote inside the window it was signed for', () => {
+			vi.setSystemTime(new Date('2026-08-28T00:00:00.000Z'));
+
+			expect(isNearIntentsQuoteExpired(mockSignedQuoteResponse)).toBeFalsy();
+		});
+
+		it('rejects a captured quote once the window has lapsed', () => {
+			vi.setSystemTime(new Date('2026-08-31T00:00:00.000Z'));
+
+			expect(isNearIntentsQuoteExpired(mockSignedQuoteResponse)).toBeTruthy();
+		});
+
+		// Both bounds are signed, so the tighter one governs.
+		it('honours the earlier of the two signed bounds', () => {
+			vi.setSystemTime(new Date('2026-08-28T00:00:00.000Z'));
+
+			expect(
+				isNearIntentsQuoteExpired({
+					...mockSignedQuoteResponse,
+					quote: {
+						...mockSignedQuoteResponse.quote,
+						timeWhenInactive: '2026-08-27T00:00:00.000Z'
+					}
+				})
+			).toBeTruthy();
+		});
+
+		it('rejects a quote with no parseable bound', () => {
+			vi.setSystemTime(new Date('2026-08-28T00:00:00.000Z'));
+
+			expect(
+				isNearIntentsQuoteExpired({
+					...mockSignedQuoteResponse,
+					quote: { ...mockSignedQuoteResponse.quote, deadline: 'not-a-date' }
+				})
+			).toBeTruthy();
+		});
+	});
+
 	describe('findNearIntentsQuoteRequestMismatch', () => {
 		const sent = mockSignedQuoteResponse.quoteRequest;
 
@@ -124,15 +175,34 @@ describe('near-intents-quote.utils', () => {
 			).toBeUndefined();
 		});
 
-		// 1Click re-routes a BTC origin to its own asset id, so the identifier is
-		// deliberately not compared: pinning it would reject every BTC swap.
-		it('tolerates a re-routed origin asset', () => {
+		// The one substitution 1Click actually makes: both ids denote native BTC.
+		it('tolerates the known BTC asset alias', () => {
 			expect(
 				findNearIntentsQuoteRequestMismatch({
 					sent: { ...sent, originAsset: 'nep141:btc.omft.near' },
 					echoed: { ...sent, originAsset: '1cs_v1:btc:native:coin' }
 				})
 			).toBeUndefined();
+		});
+
+		// Otherwise a genuinely signed quote for a different token would pass, and the wallet
+		// would send its source token to a deposit address opened for another asset.
+		it.each([
+			{ field: 'originAsset', value: 'nep141:arb-0xdeadbeef.omft.near' },
+			{ field: 'destinationAsset', value: 'nep141:sol-0xdeadbeef.omft.near' }
+		])('catches a substituted $field', ({ field, value }) => {
+			expect(
+				findNearIntentsQuoteRequestMismatch({ sent, echoed: { ...sent, [field]: value } })
+			).toBe(field);
+		});
+
+		it('catches an asset swapped for an unrelated one on the same chain', () => {
+			expect(
+				findNearIntentsQuoteRequestMismatch({
+					sent: { ...sent, originAsset: 'nep141:btc.omft.near' },
+					echoed: { ...sent, originAsset: 'nep141:eth.omft.near' }
+				})
+			).toBe('originAsset');
 		});
 
 		it.each([

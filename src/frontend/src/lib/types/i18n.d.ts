@@ -972,6 +972,7 @@ interface I18nSwap {
 		swap_refunded: string;
 		swap_replaced_or_dropped: string;
 		near_intents_quote_unverified: string;
+		near_intents_quote_expired: string;
 	};
 }
 
