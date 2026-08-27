@@ -2307,6 +2307,7 @@ interface I18nTip {
 		no_wallet_needed: string;
 		expires_at: string;
 		done: string;
+		link_not_saved: string;
 		reserve_failed: string;
 		message_too_long: string;
 		learn_how_it_works: string;

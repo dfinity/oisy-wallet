@@ -91,14 +91,45 @@ describe('TipShare', () => {
 			expect(getByText(get(i18n).tip.text.no_wallet_needed_title)).toBeInTheDocument();
 		});
 
-		it('keeps the network on the same line as the fiat value', () => {
-			// Both are context for the amount above them, and this screen has to fit
-			// a phone without the QR being pushed off the bottom.
+		it('leads with the fiat value and keeps the token amount beneath it', () => {
+			// "$12.50" is what the person being tipped understands; "2.5 ICP" is the
+			// mechanism. Both are shown, and the order is the point.
 			rates.set({ [props.token.id]: { usd: 5 } });
 
-			const { getByText } = render(TipShare, { props });
+			const { container, getByText } = render(TipShare, { props });
 
-			expect(getByText(`$12.50 · ${props.token.name}`)).toBeInTheDocument();
+			expect(getByText('$12.50')).toBeInTheDocument();
+			expect(getByText('2.5 ICP')).toBeInTheDocument();
+
+			// The headline is the fiat one, not the token one.
+			expect(container.querySelector('.text-3xl')?.textContent).toBe('$12.50');
+		});
+
+		it('falls back to the token amount as the headline when no rate has loaded', () => {
+			// Normal for a local or newly listed token. Better a token amount in the
+			// headline than an empty space where a price should be.
+			rates.set({});
+
+			const { container, queryByText } = render(TipShare, { props });
+
+			expect(container.querySelector('.text-3xl')?.textContent).toContain('2.5 ICP');
+			expect(queryByText('$12.50')).toBeNull();
+		});
+	});
+
+	describe('when the link could not be saved', () => {
+		it('tells the sender to copy it now', () => {
+			// The tip is real either way; what is lost is finding this link again. Said
+			// here because this is the only moment the link is still on screen.
+			const { getByText } = render(TipShare, { props: { ...props, linkNotSaved: true } });
+
+			expect(getByText(get(i18n).tip.text.link_not_saved)).toBeInTheDocument();
+		});
+
+		it('stays quiet when it was saved', () => {
+			const { queryByText } = render(TipShare, { props });
+
+			expect(queryByText(get(i18n).tip.text.link_not_saved)).toBeNull();
 		});
 	});
 });
