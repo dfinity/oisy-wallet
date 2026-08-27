@@ -70,13 +70,14 @@ describe('SolWalletConnectTransferParties', () => {
 		});
 	});
 
-	// A hidden Sources list and one that could not be derived must not render identically, which is
-	// why the review states the partial case; here only the absence of the list is checked.
-	it('should render no sources list when it could not be derived', () => {
+	// The review states the partial case now, above the fee notices. Saying it here as well would
+	// put the same warning on screen twice, so this pins that the component stays silent about it.
+	it('should leave the partial notice to the review', () => {
 		const { queryByText } = render(SolWalletConnectTransferParties, {
-			props: props({ partial: true })
+			props: props({ partial: true, sources: [{ address: mockAtaAddress, own: false }] })
 		});
 
-		expect(queryByText(en.wallet_connect.text.transfer_sources)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_parties_partial)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.transfer_sources)).toBeInTheDocument();
 	});
 });
