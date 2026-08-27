@@ -1829,6 +1829,14 @@ export type TipError =
 	  }
 	| {
 			/**
+			 * The sender's account no longer holds the amount. The reservation is still
+			 * granted and the claim code is still valid, so the same link works again
+			 * once they top up, which is why this is not folded into `TransferFailed`.
+			 */
+			InsufficientFunds: null;
+	  }
+	| {
+			/**
 			 * No claimable tip for this id. Also returned for an expired, cancelled or
 			 * already-claimed tip, and for a wrong claim code — every case collapsed
 			 * into one response so a prober can never distinguish them.
@@ -1907,7 +1915,10 @@ export interface TipClaimFailure {
 	at_ns: bigint;
 	reason: TipClaimFailureReason;
 }
-export type TipClaimFailureReason = { Uncovered: null } | { TransferFailed: null };
+export type TipClaimFailureReason =
+	| { Uncovered: null }
+	| { InsufficientFunds: null }
+	| { TransferFailed: null };
 export type TipStatus =
 	| {
 			/**

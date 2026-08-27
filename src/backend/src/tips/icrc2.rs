@@ -66,13 +66,17 @@ pub enum TransferFromResult {
 
 /// Why a payout did not happen.
 ///
-/// The split matters: `InsufficientAllowance` is the sender having spent,
-/// reduced or revoked the reservation, which the claimer is told about
-/// (`Uncovered`); everything else is collapsed into `Failed`, which leaves the
-/// tip claimable.
+/// The split matters. `InsufficientAllowance` is the sender having reduced or
+/// revoked the reservation; `InsufficientFunds` is the reservation still standing
+/// with the money gone, which topping up fixes. Everything else is `Failed`. All
+/// three leave the tip claimable.
 #[derive(Debug)]
 pub enum TransferFromCallError {
     InsufficientAllowance,
+    /// The sender's balance dropped below the amount. Kept apart from `Failed`
+    /// because it is the one failure the sender can fix, and the claimer can be
+    /// told to come back rather than just "try again".
+    InsufficientFunds,
     Failed(String),
 }
 
@@ -128,6 +132,9 @@ pub async fn transfer_from(
         TransferFromResult::Ok(block_index) => Ok(block_index),
         TransferFromResult::Err(TransferFromError::InsufficientAllowance { .. }) => {
             Err(TransferFromCallError::InsufficientAllowance)
+        }
+        TransferFromResult::Err(TransferFromError::InsufficientFunds { .. }) => {
+            Err(TransferFromCallError::InsufficientFunds)
         }
         TransferFromResult::Err(err) => Err(TransferFromCallError::Failed(format!("{err:?}"))),
     }
