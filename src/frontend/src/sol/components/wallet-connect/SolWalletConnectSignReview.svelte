@@ -144,8 +144,6 @@
 		<MessageBox level="warning">{$i18n.wallet_connect.text.high_prioritization_fee}</MessageBox>
 	{/if}
 
-	<!-- Last of the notices: it qualifies how the review below was obtained rather than warning
-	     about anything the message does, and it only has something to say once a simulation ran. -->
 	{#if nonNullish(preview)}
 		<MessageBox level="plain">{$i18n.wallet_connect.text.simulation_note}</MessageBox>
 	{/if}
