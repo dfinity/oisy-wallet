@@ -100,6 +100,7 @@ import {
 	toNearIntentsDisplayRefs,
 	toNearIntentsExternalRefs
 } from '$lib/utils/near-intents-active-tx.utils';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
@@ -865,6 +866,17 @@ const executeNearIntentsSwap = async ({
 		unitName: sourceToken.decimals
 	});
 
+	// Last gate before the funds leave the wallet. The quote reached here through the
+	// provider fan-out, so it was already verified once at quote time; re-checking binds
+	// the signature to the exact response this send reads its deposit address from, and
+	// covers any caller that assembles a quote by another route.
+	if (!(await verifyNearIntentsQuoteSignature(swapDetails))) {
+		throwSwapError({
+			code: SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED,
+			message: get(i18n).swap.error.near_intents_quote_unverified
+		});
+	}
+
 	const { depositAddress, depositMemo } = swapDetails.quote;
 
 	// Registers the swap as an Active User Transaction so settlement is tracked by
@@ -891,6 +903,9 @@ const executeNearIntentsSwap = async ({
 					externalRefs: toNearIntentsExternalRefs({
 						...toNearIntentsDisplayRefs({ sourceToken, destinationToken, amount: `${swapAmount}` }),
 						[NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_ADDRESS]: depositAddress,
+						// 1Click documents the signature as the client's receipt for disputing a
+						// deposit, so it is kept next to the address it authenticates.
+						[NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE]: swapDetails.signature,
 						...(nonNullish(depositMemo)
 							? { [NEAR_INTENTS_EXTERNAL_REF_KEYS.DEPOSIT_MEMO]: depositMemo }
 							: {})

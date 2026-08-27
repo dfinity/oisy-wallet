@@ -21,6 +21,10 @@ import {
 } from '$lib/services/near-intents.services';
 import type { NearIntentsToken } from '$lib/types/near-intents';
 import { SwapProvider } from '$lib/types/swap';
+import {
+	findNearIntentsQuoteRequestMismatch,
+	verifyNearIntentsQuoteSignature
+} from '$lib/utils/near-intents-quote.utils';
 import { mapNearIntentsQuoteResult } from '$lib/utils/swap.utils';
 import { parseNetworkId } from '$lib/validation/network.validation';
 import type { SplToken } from '$sol/types/spl';
@@ -41,6 +45,13 @@ vi.mock('$env/rest/near-intents.env', () => ({
 	NEAR_INTENTS_API_KEY: 'mock-api-key'
 }));
 
+// The real implementation is covered against a captured 1Click response in
+// near-intents-quote.utils.spec.ts; here the quotes are fixtures with no genuine signature.
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn(),
+	findNearIntentsQuoteRequestMismatch: vi.fn()
+}));
+
 vi.mock('$lib/rest/near-intents.rest', () => ({
 	fetchNearIntentsTokens: vi.fn(),
 	fetchNearIntentsQuote: vi.fn(),
@@ -51,6 +62,9 @@ vi.mock('$lib/rest/near-intents.rest', () => ({
 describe('near-intents.services', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+		vi.mocked(findNearIntentsQuoteRequestMismatch).mockReturnValue(undefined);
 
 		clearNearIntentsTokensCache();
 	});
@@ -131,6 +145,61 @@ describe('near-intents.services', () => {
 
 		beforeEach(() => {
 			vi.mocked(nearIntentsApi.fetchNearIntentsTokens).mockResolvedValue(mockNearIntentsTokens);
+		});
+
+		it('should reject a quote whose signature does not verify', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('signature verification failed');
+		});
+
+		// A replayed quote carries a genuine signature, so only the echoed request reveals
+		// that it was issued to someone else.
+		it('should reject a genuinely signed quote issued for another request', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+			vi.mocked(findNearIntentsQuoteRequestMismatch).mockReturnValue('recipient');
+
+			await expect(
+				fetchNearIntentsSwapQuote({
+					sourceToken,
+					destinationToken,
+					amount: 1_000_000n,
+					userAddress: mockEthAddress,
+					slippage
+				})
+			).rejects.toThrow('does not match the request: recipient');
+		});
+
+		it('should verify the quote against the request it sent', async () => {
+			vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mockResolvedValue(
+				mockNearIntentsQuoteResponse
+			);
+
+			await fetchNearIntentsSwapQuote({
+				sourceToken,
+				destinationToken,
+				amount: 1_000_000n,
+				userAddress: mockEthAddress,
+				slippage
+			});
+
+			expect(findNearIntentsQuoteRequestMismatch).toHaveBeenCalledWith({
+				sent: vi.mocked(nearIntentsApi.fetchNearIntentsQuote).mock.calls[0][0],
+				echoed: mockNearIntentsQuoteResponse.quoteRequest
+			});
 		});
 
 		it('should return a SwapMappedResult on successful quote', async () => {

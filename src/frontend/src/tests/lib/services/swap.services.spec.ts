@@ -53,6 +53,7 @@ import {
 } from '$lib/types/near-intents';
 import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 import { VELORA_EXTERNAL_REF_KEYS } from '$lib/types/velora-swap';
+import { verifyNearIntentsQuoteSignature } from '$lib/utils/near-intents-quote.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { sendSol } from '$sol/services/sol-send.services';
 import { loadCustomTokens as loadCustomSplTokens } from '$sol/services/spl.services';
@@ -159,6 +160,13 @@ vi.mock('$lib/services/onesec-swap.services', () => ({
 	executeOneSecIcpToEvmBridge: vi.fn()
 }));
 
+// Quote fixtures carry no genuine 1Click signature; the real verifier is exercised against
+// a captured response in near-intents-quote.utils.spec.ts. The default implementation lives
+// in the factory so the suite's many `clearAllMocks` calls do not strip it.
+vi.mock('$lib/utils/near-intents-quote.utils', () => ({
+	verifyNearIntentsQuoteSignature: vi.fn().mockResolvedValue(true)
+}));
+
 vi.mock('$lib/services/near-intents.services', () => ({
 	fetchNearIntentsSwapQuote: vi.fn(),
 	submitNearIntentsDepositTx: vi.fn()
@@ -248,6 +256,12 @@ vi.mock('$env/rest/kongswap.env', () => ({
 }));
 
 describe('swap.services', () => {
+	// Re-applied per test: nested suites call `vi.resetAllMocks`, which strips the default
+	// set in the module factory for every test that runs after them.
+	beforeEach(() => {
+		vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(true);
+	});
+
 	describe('fetchSwapAmounts', () => {
 		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
 
@@ -2914,6 +2928,61 @@ describe('swap.services', () => {
 			vi.mocked(sendEvm).mockResolvedValue({ hash: '0xTxHash123' });
 			vi.mocked(nearIntentsServices.submitNearIntentsDepositTx).mockResolvedValue(undefined);
 			vi.mocked(activeUserTransactionsServices.createActiveUserTransaction).mockResolvedValue();
+		});
+
+		it('should not send funds when the quote signature does not verify', async () => {
+			vi.mocked(verifyNearIntentsQuoteSignature).mockResolvedValue(false);
+
+			await expect(
+				fetchNearIntentsEvmSwap({
+					identity: mockIdentity,
+					progress: mockProgress,
+					sourceToken,
+					destinationToken,
+					swapAmount: '1',
+					receiveAmount: 900000n,
+					slippageValue: '1',
+					sourceNetwork: ETHEREUM_NETWORK,
+					userAddress: mockEthAddress,
+					gas: 21000n,
+					maxFeePerGas: 20000000000n,
+					maxPriorityFeePerGas: 2000000000n,
+					swapDetails: mockNearIntentsQuoteResponse
+				})
+			).rejects.toMatchObject({ code: SwapErrorCodes.NEAR_INTENTS_QUOTE_UNVERIFIED });
+
+			expect(sendEvm).not.toHaveBeenCalled();
+			expect(nearIntentsServices.submitNearIntentsDepositTx).not.toHaveBeenCalled();
+			expect(activeUserTransactionsServices.createActiveUserTransaction).not.toHaveBeenCalled();
+		});
+
+		it('should retain the quote signature on the AUT row', async () => {
+			await fetchNearIntentsEvmSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken,
+				destinationToken,
+				swapAmount: '1',
+				receiveAmount: 900000n,
+				slippageValue: '1',
+				sourceNetwork: ETHEREUM_NETWORK,
+				userAddress: mockEthAddress,
+				gas: 21000n,
+				maxFeePerGas: 20000000000n,
+				maxPriorityFeePerGas: 2000000000n,
+				swapDetails: mockNearIntentsQuoteResponse
+			});
+
+			expect(activeUserTransactionsServices.createActiveUserTransaction).toHaveBeenCalledWith(
+				expect.objectContaining({
+					externalRefs: expect.arrayContaining([
+						{
+							key: NEAR_INTENTS_EXTERNAL_REF_KEYS.SIGNATURE,
+							value: mockNearIntentsQuoteResponse.signature
+						}
+					])
+				})
+			);
 		});
 
 		it('should execute the full NEAR Intents swap flow using swapDetails directly', async () => {
