@@ -199,7 +199,9 @@ describe('tip.services', () => {
 				expect.objectContaining({ link: expect.stringContaining(draft.claimCode) })
 			);
 
-			expect(warnSpy).toHaveBeenCalledOnce();
+			// Twice now, not once: the write is retried before it gives up, and each
+			// attempt says so.
+			expect(warnSpy).toHaveBeenCalledTimes(2);
 		});
 	});
 
@@ -242,6 +244,77 @@ describe('tip.services', () => {
 			expect(toHex(revoked.spender.subaccount as Uint8Array)).toBe(
 				toHex(await tipSpenderSubaccount('the-id'))
 			);
+		});
+	});
+
+	describe('the recoverable claim code', () => {
+		beforeEach(() => {
+			// These tests provoke the warnings on purpose; the repo fails a test that
+			// leaves console output behind.
+			vi.spyOn(consoleUtils, 'consoleWarn').mockImplementation(() => {});
+		});
+
+		it('retries once before giving up, and says it failed', async () => {
+			// The failure this closes: a single 503 or a rate limit used to cost the tip
+			// its recoverable link permanently, with nothing on screen to say so.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			const setSpy = vi
+				.spyOn(backendApi, 'setTipSecret')
+				.mockRejectedValue(new Error('no_healthy_nodes'));
+
+			const { secretStored } = await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(setSpy).toHaveBeenCalledTimes(2);
+			expect(secretStored).toBeFalsy();
+		});
+
+		it('reports success when the retry lands', async () => {
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockResolvedValue(new Uint8Array([1, 2, 3]));
+			vi.spyOn(backendApi, 'setTipSecret')
+				.mockRejectedValueOnce(new Error('503'))
+				.mockResolvedValueOnce(undefined);
+
+			const { secretStored } = await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(secretStored).toBeTruthy();
+		});
+
+		it('still returns the link when the code cannot be stored', async () => {
+			// The tip is real and claimable; only its recoverability is lost. Failing
+			// the whole reservation here would be much worse than saying so.
+			vi.spyOn(icrcLedgerApi, 'approve').mockResolvedValue(1n);
+			vi.spyOn(backendApi, 'createTip').mockResolvedValue(undefined);
+			vi.spyOn(tipVetkeys, 'encryptClaimCode').mockRejectedValue(new Error('InvalidKeyName'));
+
+			const { link, secretStored } = await reserveTip({
+				identity: mockIdentity,
+				draft: newTipDraft(),
+				ledgerCanisterId: LEDGER_ID,
+				amount: AMOUNT,
+				fee: FEE,
+				expiresAtNs: EXPIRES_AT_NS
+			});
+
+			expect(link).toContain('/tip/');
+			expect(secretStored).toBeFalsy();
 		});
 	});
 });
