@@ -78,7 +78,6 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
 pub(crate) fn get_contacts() -> Vec<Contact> {
     let stored_principal = StoredPrincipal(msg_caller());
 
-    // Use our helper function to safely get contacts
     let stored_contacts = get_stored_contacts(&stored_principal);
 
     // Convert BTreeMap values to a vector to avoid having to change the exposed data structure
@@ -100,7 +99,6 @@ pub(crate) fn get_contacts() -> Vec<Contact> {
 pub(crate) fn get_contact(contact_id: u64) -> Result<Contact, ContactError> {
     let stored_principal = StoredPrincipal(msg_caller());
 
-    // Use our helper function to safely get contacts
     let mut stored_contacts = get_stored_contacts(&stored_principal);
 
     // Find the specific contact by ID
