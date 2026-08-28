@@ -4,6 +4,7 @@ import * as tipServices from '$lib/services/tip.services';
 import * as tokenServices from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { userProfileCreated } from '$lib/stores/user-profile.store';
 import * as consoleUtils from '$lib/utils/console.utils';
 import * as tipUtils from '$lib/utils/tip.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -64,6 +65,8 @@ describe('TipClaimModal', () => {
 		vi.restoreAllMocks();
 		modalStore.close();
 		mockAuthStore();
+		// Describes one sign-in, so it must not leak between tests.
+		userProfileCreated.set(false);
 
 		// The failure paths log what went wrong on purpose, so the paths that fail
 		// have to expect it rather than leak it into the test output.
@@ -246,18 +249,11 @@ describe('TipClaimModal', () => {
 		container.querySelector<HTMLButtonElement>(`button[data-tid=${TIP_RECEIVED_BUTTON}]`)?.click();
 	};
 
-	it('closes on acknowledgement for a claimer who has been here before', async () => {
-		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(true);
-
-		await acknowledge();
-
-		await waitFor(() => expect(get(modalStore)).toBeNull());
-	});
-
-	it('introduces OISY to a first-time claimer instead of just closing', async () => {
+	it('introduces OISY to a claimer who signed up to receive this tip', async () => {
 		// Somebody who arrived from a QR code has no idea what they just signed into
 		// or how to get back to it. Acknowledging the payout is the one moment their
 		// attention is already on the screen.
+		userProfileCreated.set(true);
 		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
 		const remember = vi.spyOn(tipUtils, 'rememberTipWelcomeSeen');
 
@@ -265,8 +261,29 @@ describe('TipClaimModal', () => {
 
 		await waitFor(() => expect(get(modalStore)?.type).toBe('tip-welcome'));
 
-		// Remembered, so the second tip does not repeat the introduction.
+		// Remembered, so a second tip in the same session does not repeat it.
 		expect(remember).toHaveBeenCalledOnce();
+	});
+
+	it('spares an established user the introduction', async () => {
+		// The case the stored flag alone could not catch: somebody who has used OISY
+		// for months and happens to be claiming their first tip does not need to be
+		// told where the wallet lives.
+		userProfileCreated.set(false);
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(false);
+
+		await acknowledge();
+
+		await waitFor(() => expect(get(modalStore)).toBeNull());
+	});
+
+	it('closes for a new user who has already been introduced', async () => {
+		userProfileCreated.set(true);
+		vi.spyOn(tipUtils, 'hasSeenTipWelcome').mockReturnValue(true);
+
+		await acknowledge();
+
+		await waitFor(() => expect(get(modalStore)).toBeNull());
 	});
 
 	describe('making the tokens visible', () => {
