@@ -20,7 +20,8 @@ export type TipStep =
 	| 'share' // the sender used the native share sheet
 	| 'cancel' // the sender revoked a reservation
 	| 'reopen' // the sender reopened a live tip from History
-	| 'claim'; // a recipient claimed, or tried to
+	| 'claim' // a recipient claimed, or tried to
+	| 'welcome'; // a first-time claimer was shown what OISY is
 
 /**
  * Why a claim did not pay out, when the step is `claim` and the status is not
