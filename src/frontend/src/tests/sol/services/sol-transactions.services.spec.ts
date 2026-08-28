@@ -131,6 +131,7 @@ describe('sol-transactions.services', () => {
 			({
 				...mockSolTransactionDetail,
 				transaction: {
+					...mockSolTransactionDetail.transaction,
 					message: {
 						...mockSolTransactionDetail.transaction.message,
 						instructions,
