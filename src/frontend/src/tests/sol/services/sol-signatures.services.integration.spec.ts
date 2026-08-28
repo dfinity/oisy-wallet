@@ -1,14 +1,11 @@
-import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { ZERO } from '$lib/constants/app.constants';
 import { last } from '$lib/utils/array.utils';
-import * as solApi from '$sol/api/solana.api';
 import {
 	fetchSignatures,
 	fetchTransactionDetailForSignature,
 	loadSolLamportsBalance,
 	loadTokenBalance
 } from '$sol/api/solana.api';
-import * as solSigSvc from '$sol/services/sol-signatures.services';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -19,99 +16,44 @@ import {
 } from '$tests/fixtures/solana/addresses.fixture';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { loadJsonFixture, sigSlug } from '$tests/utils/fixture.test-utils';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import {
-	lamports,
-	signature,
-	address as solAddress,
-	type ProgramDerivedAddressBump
-} from '@solana/kit';
+import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
 
-const USE_FIXTURES = true;
+// Everything above the RPC boundary runs for real; only the boundary itself is served from
+// recorded fixtures. That is what makes this a meaningful check of our parsing and mapping.
+vi.mock('$sol/providers/sol-rpc.providers', async () => {
+	const { mockSolanaHttpRpcFromFixtures } = await import('$tests/utils/sol-rpc-fixture.test-utils');
+
+	return {
+		solanaHttpRpc: mockSolanaHttpRpcFromFixtures,
+		solanaWebSocketRpc: vi.fn()
+	};
+});
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
 
-describe.skip('sol-signatures.services integration', () => {
+describe('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
-		beforeAll(() => {
-			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
-			assert(
-				notEmptyString(ALCHEMY_API_KEY),
-				'`ALCHEMY_API_KEY` is empty, please provide a valid key in the `.env.test` file as `VITE_ALCHEMY_API_KEY`'
-			);
-		});
-
 		beforeEach(() => {
 			vi.clearAllMocks();
 
 			mockAuthStore();
-
-			if (USE_FIXTURES) {
-				// fetchSignatures → fixtures
-				vi.spyOn(solApi, 'fetchSignatures').mockImplementation(
-					// eslint-disable-next-line require-await
-					async ({ wallet, before }) => {
-						const addr = wallet.toString();
-
-						const file = `${sigSlug(before?.toString())}.json`;
-
-						return loadJsonFixture<SolSignature[]>('solana', addr, 'signatures', file);
-					}
-				);
-
-				// getSolTransactions → fixtures
-				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(
-					// eslint-disable-next-line require-await
-					async ({ address, before, tokenAddress }) => {
-						const baseParts = nonNullish(tokenAddress)
-							? ['solana', address, 'tokens', tokenAddress, 'transactions']
-							: ['solana', address, 'transactions'];
-
-						const file = `${sigSlug(before)}.json`;
-
-						return loadJsonFixture<SolTransactionUi[]>(...baseParts, file);
-					}
-				);
-
-				// SOL (lamports) balance -> fixtures
-				vi.spyOn(solApi, 'loadSolLamportsBalance').mockImplementation(
-					// eslint-disable-next-line require-await
-					async ({ address, network: _ }) => {
-						const data = loadJsonFixture<Readonly<{ lamports: string }>>(
-							'solana',
-							address,
-							'balances',
-							'lamports',
-							'current.json'
-						);
-
-						return lamports(BigInt(data.lamports));
-					}
-				);
-
-				// SPL token balance -> fixtures (keyed by ATA address)
-				vi.spyOn(solApi, 'loadTokenBalance').mockImplementation(
-					// eslint-disable-next-line require-await
-					async ({ ataAddress }) => {
-						const data = loadJsonFixture<Readonly<{ balance: string }>>(
-							'solana',
-							ataAddress,
-							'balances',
-							'spl',
-							'current.json'
-						);
-
-						return BigInt(data.balance);
-					}
-				);
-			}
 		});
 
-		it.each(fixtureSolAddresses)(
+		// These currently fail, and `it.fails` records that on purpose rather than hiding it behind a
+		// skip. Two mapping gaps around SPL token-account rent make the native SOL total drift:
+		//
+		// 1. A transfer out of an associated token account back to the wallet that owns it is typed
+		//    `send` instead of `receive`, because the owner match is checked before the direct one.
+		// 2. The rent that funds or is reclaimed from an associated token account is counted in the
+		//    wallet's native SOL total, even though the wallet's own balance never moves.
+		//
+		// Once the mapping is fixed these start passing, `it.fails` turns red, and it has to be
+		// flipped back to `it.each`. That is the point: unlike a skip, this cannot rot unnoticed.
+		it.fails.each(fixtureSolAddresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
