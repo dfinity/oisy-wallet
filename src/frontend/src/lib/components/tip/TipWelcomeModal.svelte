@@ -9,17 +9,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	/**
-	 * Three points, in the order the questions actually arrive.
+	 * Two points, in the order the questions arrive.
 	 *
-	 * Somebody who has just been handed money by a stranger's QR code wants to
-	 * know whose it is before they want to know what it can do, and the breadth of
-	 * the wallet matters least of the three — it is the reason to come back, not
-	 * the reason to trust the screen in front of them.
+	 * Somebody handed money by a stranger's QR code wants to know whose it is
+	 * before they want to know it will still be there tomorrow.
 	 */
 	const points = $derived([
-		{ title: $i18n.tip.welcome.point_yours_title, text: $i18n.tip.welcome.point_yours_text },
-		{ title: $i18n.tip.welcome.point_use_title, text: $i18n.tip.welcome.point_use_text },
-		{ title: $i18n.tip.welcome.point_chains_title, text: $i18n.tip.welcome.point_chains_text }
+		{ title: $i18n.tip.welcome.point_access_title, text: $i18n.tip.welcome.point_access_text },
+		{ title: $i18n.tip.welcome.point_stay_title, text: $i18n.tip.welcome.point_stay_text }
 	]);
 </script>
 
