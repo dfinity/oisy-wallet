@@ -39,6 +39,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+	import { nearIntentsQuoteRejectedMessage } from '$lib/utils/swap.utils';
 	import SolFeeContext from '$sol/components/fee/SolFeeContext.svelte';
 	import SwapSolFees from '$sol/components/swap/SwapSolFees.svelte';
 	import SwapSolForm from '$sol/components/swap/SwapSolForm.svelte';
@@ -253,9 +254,13 @@
 
 			failedSwapError.set(undefined);
 
+			const quoteRejected = nearIntentsQuoteRejectedMessage(err);
+
 			toastsError({
-				msg: { text: mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
-				err
+				msg: { text: quoteRejected ?? mapSolanaErrorMsg(err) ?? $i18n.swap.error.unexpected },
+				// The gate aborted before any funds moved, so there is no underlying failure to
+				// attach; the message above already says everything the user needs.
+				...(isNullish(quoteRejected) ? { err } : {})
 			});
 
 			onBack();
