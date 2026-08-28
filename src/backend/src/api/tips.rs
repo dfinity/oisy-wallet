@@ -15,7 +15,7 @@ use crate::{
         rate_limiter::{
             self, TieredRateLimiter, CANCEL_TIP_RATE_LIMITER, CLAIM_TIP_RATE_LIMITER,
             CREATE_TIP_RATE_LIMITER, GET_TIP_ENCRYPTED_VETKEY_RATE_LIMITER,
-            GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER,
+            GET_TIP_VETKEY_PUBLIC_KEY_RATE_LIMITER, SET_TIP_SECRET_RATE_LIMITER,
         },
     },
 };
@@ -127,11 +127,15 @@ pub fn get_my_tips() -> GetMyTipsResult {
 /// about who can claim the tip — the canister still only holds the code's hash.
 ///
 /// # Errors
-/// Errors are enumerated by `TipError` (`InvalidTipId`,
+/// Errors are enumerated by `TipError` (`RateLimited`, `InvalidTipId`,
 /// `SecretCiphertextTooLarge`, `InternalError`).
 #[update(guard = "caller_is_registered_user")]
 #[must_use]
 pub fn set_tip_secret(request: SetTipSecretRequest) -> SetTipSecretResult {
+    if let Err(e) = SET_TIP_SECRET_RATE_LIMITER.with(TieredRateLimiter::check_caller) {
+        return SetTipSecretResult::Err(TipError::RateLimited(e));
+    }
+
     secrets::set_tip_secret(request).into()
 }
 
