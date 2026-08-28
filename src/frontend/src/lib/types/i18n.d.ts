@@ -1310,6 +1310,8 @@ interface I18nWallet_connect {
 		invalid_typed_data: string;
 		unreviewable_typed_data: string;
 		unsigned_typed_data_keys: string;
+		tab_summary: string;
+		tab_raw_data: string;
 		method_without_selector: string;
 		methods_capped: string;
 		unknown_call_title: string;

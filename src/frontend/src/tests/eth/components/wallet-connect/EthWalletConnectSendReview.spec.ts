@@ -23,7 +23,7 @@ import { classifyWalletConnectEthCall } from '$eth/utils/wallet-connect.utils';
 import { MAX_UINT_256, ZERO } from '$lib/constants/app.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import { AbiCoder } from 'ethers/abi';
 import { writable } from 'svelte/store';
 
@@ -455,23 +455,30 @@ describe('EthWalletConnectSendReview', () => {
 			expect(getByTestId(unknownTestId)).toHaveTextContent(en.wallet_connect.text.unknown_call);
 		});
 
-		it('should name the function it could not decode', () => {
-			const { getByText } = renderUnknownCall({ data: `${PERMIT2_APPROVE_HASH}deadbeef` });
+		it('should name the function it could not decode', async () => {
+			const { getByText, getByRole } = renderUnknownCall({
+				data: `${PERMIT2_APPROVE_HASH}deadbeef`
+			});
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
 
 			expect(getByText(en.wallet_connect.text.methods)).toBeInTheDocument();
 			expect(getByText(PERMIT2_APPROVE_HASH)).toBeInTheDocument();
 		});
 
-		it('should treat calldata too short to carry a selector as unreadable, and name none', () => {
-			const { getByTestId, getByText } = renderUnknownCall({ data: '0xab' });
+		it('should treat calldata too short to carry a selector as unreadable, and name none', async () => {
+			const { getByTestId, getByText, getByRole } = renderUnknownCall({ data: '0xab' });
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
 			expect(getByText(en.wallet_connect.text.method_without_selector)).toBeInTheDocument();
 		});
 
 		// A batch names its own wrapper and nothing else, so the wrapper alone answers "what does
 		// this call?" with a name that describes neither the approve nor the swap inside it.
-		it('should list the calls batched inside a multicall, not only the wrapper', () => {
+		it('should list the calls batched inside a multicall, not only the wrapper', async () => {
 			const inner = [
 				encodeCall({ selector: ERC20_APPROVE_HASH, to: RECIPIENT, value: MAX_UINT_256 }),
 				encodeCall({ selector: PERMIT2_APPROVE_HASH, to: RECIPIENT, value: 1n })
@@ -481,7 +488,9 @@ describe('EthWalletConnectSendReview', () => {
 				.encode(['bytes[]'], [inner])
 				.slice(2)}`;
 
-			const { getByText } = renderUnknownCall({ data });
+			const { getByText, getByRole } = renderUnknownCall({ data });
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
 
 			expect(getByText(MULTICALL_HASH)).toBeInTheDocument();
 			expect(getByText(ERC20_APPROVE_HASH)).toBeInTheDocument();
@@ -507,6 +516,20 @@ describe('EthWalletConnectSendReview', () => {
 
 			expect(getByTestId(unknownTestId)).toBeInTheDocument();
 			expect(getByRole('button', { name: en.core.text.approve })).not.toBeDisabled();
+		});
+
+		// A warning the user has to go looking for is one they can miss. Every message box sits above
+		// the tabs, so switching to the raw data does not take the warning off the screen.
+		it('should keep the warning visible on both tabs', async () => {
+			const { getByTestId, getByRole } = renderUnknownCall({
+				data: `${PERMIT2_APPROVE_HASH}deadbeef`
+			});
+
+			expect(getByTestId(unknownTestId)).toBeInTheDocument();
+
+			await fireEvent.click(getByRole('button', { name: en.wallet_connect.text.tab_raw_data }));
+
+			expect(getByTestId(unknownTestId)).toBeInTheDocument();
 		});
 
 		it('should not warn about a request that carries no calldata at all', () => {

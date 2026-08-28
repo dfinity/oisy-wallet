@@ -1627,6 +1627,8 @@
 			"invalid_typed_data": "Esta solicitação contém um valor cujo tipo não corresponde ao esquema declarado pelo aplicativo. O que é exibido pode diferir do que seria realmente assinado, portanto a assinatura está desativada.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

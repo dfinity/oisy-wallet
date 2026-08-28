@@ -1627,6 +1627,8 @@
 			"invalid_typed_data": "इस अनुरोध में एक ऐसा मान है जिसका प्रकार ऐप द्वारा घोषित स्कीमा से मेल नहीं खाता। जो दिखाया गया है वह वास्तव में हस्ताक्षरित होने वाली जानकारी से भिन्न हो सकता है, इसलिए हस्ताक्षर करना अक्षम कर दिया गया है।",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",

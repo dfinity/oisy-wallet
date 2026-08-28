@@ -16,6 +16,7 @@
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -126,6 +127,8 @@
 			? formatSecondsToDate({ seconds: expiration, language: $currentLanguage })
 			: undefined
 	);
+
+	let activeTab = $state('summary');
 </script>
 
 {#if invalidTypedData}
@@ -142,62 +145,73 @@
 	</MessageBox>
 {/if}
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
-<p class="mb-4 font-normal">{application}</p>
+<Tabs
+	styleClass="mt-4"
+	tabs={[
+		{ label: $i18n.wallet_connect.text.tab_summary, id: 'summary' },
+		{ label: $i18n.wallet_connect.text.tab_raw_data, id: 'raw' }
+	]}
+	bind:activeTab
+>
+	{#if activeTab === 'summary'}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}</p>
+		<p class="mb-4 font-normal">{application}</p>
 
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
-<p class="mb-4 font-normal">{method}</p>
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}</p>
+		<p class="mb-4 font-normal">{method}</p>
 
-<!-- The RPC method above names how the request arrived. What it would authorize is the struct being
+		<!-- The RPC method above names how the request arrived. What it would authorize is the struct being
      hashed, which is the only thing left to state once the summary rows come up empty. -->
-{#if methods.length > 0}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.methods}</p>
-	<ul class="mb-4 flex list-none flex-col gap-1 font-normal">
-		{#each methods as { name, depth } (name)}
-			<li class:pl-4={depth > 0}>
-				<span class="break-all font-mono text-sm">{name}</span>
-			</li>
-		{/each}
-	</ul>
-{/if}
+		{#if methods.length > 0}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.methods}</p>
+			<ul class="mb-4 flex list-none flex-col gap-1 font-normal">
+				{#each methods as { name, depth } (name)}
+					<li class:pl-4={depth > 0}>
+						<span class="break-all font-mono text-sm">{name}</span>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 
-{#if nonNullish(token)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-	<p class="mb-4 font-normal">{token.symbol}</p>
+		{#if nonNullish(token)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+			<p class="mb-4 font-normal">{token.symbol}</p>
 
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
-	<p class="mb-4 font-normal">{token.network.name}</p>
-{:else if nonNullish(address)}
-	<!-- A token OISY does not list is still the contract the allowance is over, so the address is
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}</p>
+			<p class="mb-4 font-normal">{token.network.name}</p>
+		{:else if nonNullish(address)}
+			<!-- A token OISY does not list is still the contract the allowance is over, so the address is
 	     shown rather than the row dropped: an unnamed contract is a fact, its absence is not. -->
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
-	<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
-{/if}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}</p>
+			<p class="mb-4 font-normal"><output class="break-all">{address}</output></p>
+		{/if}
 
-{#if nonNullish(amountText)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
-	<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
-{/if}
+		{#if nonNullish(amountText)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}</p>
+			<p class="mb-4 font-normal" data-tid="wallet-connect-typed-data-amount">{amountText}</p>
+		{/if}
 
-{#if nonNullish(spender)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
-	<p class="mb-4 font-normal">{spender}</p>
-{/if}
+		{#if nonNullish(spender)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}</p>
+			<p class="mb-4 font-normal">{spender}</p>
+		{/if}
 
-{#if nonNullish(expirationDate)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
-	<p class="mb-4 font-normal">{expirationDate}</p>
-{/if}
-
-<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
-{#if nonNullish(signedJson)}
-	<!-- Collapsed while the rows above summarize the request. When they are empty because the schema
-	     was not recognised, the message is the whole of the review and is opened. -->
-	<div class="mt-4 rounded-xs bg-disabled p-4">
-		<Json _collapsed={!unreviewableTypedData} json={signedJson} />
-	</div>
-{:else}
-	<p class="mb-4 font-normal">
-		<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
-	</p>
-{/if}
+		{#if nonNullish(expirationDate)}
+			<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.expiration}</p>
+			<p class="mb-4 font-normal">{expirationDate}</p>
+		{/if}
+	{:else}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}</p>
+		{#if nonNullish(signedJson)}
+			<!-- Opened rather than collapsed: the tab exists to be read, and a reader who switched to
+			     it has already said the summary was not enough. -->
+			<div class="mt-4 rounded-xs bg-disabled p-4">
+				<Json _collapsed={false} json={signedJson} />
+			</div>
+		{:else}
+			<p class="mb-4 font-normal">
+				<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+			</p>
+		{/if}
+	{/if}
+</Tabs>

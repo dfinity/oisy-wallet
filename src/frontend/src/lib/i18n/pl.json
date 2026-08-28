@@ -1627,6 +1627,8 @@
 			"invalid_typed_data": "To żądanie zawiera wartość, której typ nie odpowiada schematowi zadeklarowanemu przez aplikację. Wyświetlana treść może różnić się od tej, która faktycznie zostałaby podpisana, dlatego podpisywanie jest wyłączone.",
 			"unreviewable_typed_data": "",
 			"unsigned_typed_data_keys": "",
+			"tab_summary": "",
+			"tab_raw_data": "",
 			"method_without_selector": "",
 			"methods_capped": "",
 			"unknown_call_title": "",
