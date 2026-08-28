@@ -10,6 +10,7 @@ import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import {
 	fixtureSolAddresses,
 	fixtureSolAtaAddresses
@@ -117,18 +118,13 @@ describe('sol-signatures.services integration', () => {
 					return accTotalFee + (feePayer === address ? (fee ?? ZERO) : ZERO);
 				}, Promise.resolve(ZERO));
 
-				const { solBalance: transactionSolBalance } = transactions.reduce<{
-					solBalance: bigint;
-					signatures: string[];
-				}>(
-					({ solBalance, signatures }, { value, type, signature }) => ({
-						solBalance: solBalance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
-						signatures: [...signatures, signature]
-					}),
-					{
-						solBalance: ZERO,
-						signatures: []
-					}
+				// A record carries one `value`, the primary asset it moved, which for a swap is a token
+				// rather than SOL. `netChanges` is the per-asset net the record is built from, so it is
+				// what a balance reconciles against.
+				const transactionSolBalance = transactions.reduce<bigint>(
+					(acc, { netChanges }) =>
+						acc + ((netChanges ?? []).find(isSolNetBalanceChangeSol)?.delta ?? ZERO),
+					ZERO
 				);
 
 				const fetchedSolBalance = await loadSolLamportsBalance({
@@ -177,15 +173,12 @@ describe('sol-signatures.services integration', () => {
 
 				const transactions = await loadTransactions();
 
-				const { balance: transactionBalance } = transactions.reduce<{
-					balance: bigint;
-					signatures: string[];
-				}>(
-					({ balance, signatures }, { value, type, signature }) => ({
-						balance: balance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
-						signatures: [...signatures, signature]
-					}),
-					{ balance: ZERO, signatures: [] }
+				const transactionBalance = transactions.reduce<bigint>(
+					(acc, { netChanges }) =>
+						acc +
+						((netChanges ?? []).find(({ tokenAddress: mint }) => mint === tokenAddress)?.delta ??
+							ZERO),
+					ZERO
 				);
 
 				const fetchedBalance = await loadTokenBalance({
