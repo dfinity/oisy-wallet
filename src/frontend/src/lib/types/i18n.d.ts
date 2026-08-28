@@ -2378,12 +2378,10 @@ interface I18nTip {
 		title: string;
 		heading: string;
 		body: string;
-		point_yours_title: string;
-		point_yours_text: string;
-		point_use_title: string;
-		point_use_text: string;
-		point_chains_title: string;
-		point_chains_text: string;
+		point_access_title: string;
+		point_access_text: string;
+		point_stay_title: string;
+		point_stay_text: string;
 		cta: string;
 	};
 }

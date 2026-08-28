@@ -11,41 +11,35 @@ describe('TipWelcomeModal', () => {
 		modalStore.close();
 	});
 
-	it('answers who owns the money before what can be done with it', () => {
+	it('answers who owns the money before whether it will still be there', () => {
 		// The order is the point. Somebody handed money by a stranger's QR code asks
-		// whose it is first; the multi-chain pitch is the reason to come back, not
-		// the reason to trust the screen in front of them.
+		// whose it is first; that it keeps is the reason to come back, not the reason
+		// to trust the screen in front of them.
 		const { getByText } = render(TipWelcomeModal);
 		const { welcome } = get(i18n).tip;
 
-		const ownership = getByText(welcome.point_yours_title);
-		const chains = getByText(welcome.point_chains_title);
+		const access = getByText(welcome.point_access_title);
+		const stays = getByText(welcome.point_stay_title);
 
-		expect(
-			ownership.compareDocumentPosition(chains) & Node.DOCUMENT_POSITION_FOLLOWING
-		).toBeTruthy();
+		expect(access.compareDocumentPosition(stays) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 
-	it('says where the wallet lives, which is the thing a newcomer cannot guess', () => {
+	it('leads with the address, which is the one thing a newcomer cannot guess', () => {
 		const { getByText } = render(TipWelcomeModal);
 		const { welcome } = get(i18n).tip;
 
 		expect(getByText(welcome.heading)).toBeInTheDocument();
 		expect(getByText(welcome.body)).toBeInTheDocument();
-		// Asserted on the copy itself: the address is the one fact that gets them
-		// back in, and an edit that drops it would leave the screen looking fine.
-		expect(welcome.body).toContain('oisy.com');
+		// Asserted on the copy itself: the address is what gets them back in, and an
+		// edit that dropped it would leave the screen looking perfectly fine.
+		expect(welcome.heading).toContain('oisy.com');
 	});
 
-	it('shows all three points', () => {
+	it('shows both points', () => {
 		const { getByText } = render(TipWelcomeModal);
 		const { welcome } = get(i18n).tip;
 
-		for (const text of [
-			welcome.point_yours_text,
-			welcome.point_use_text,
-			welcome.point_chains_text
-		]) {
+		for (const text of [welcome.point_access_text, welcome.point_stay_text]) {
 			expect(getByText(text)).toBeInTheDocument();
 		}
 	});

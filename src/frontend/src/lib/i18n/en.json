@@ -2848,16 +2848,14 @@
 			"description": "Tap to claim it. No app to install, nothing to write down, and only you can move it."
 		},
 		"welcome": {
-			"title": "Your tip is in",
-			"heading": "Nothing to install, nothing to write down",
-			"body": "OISY runs at oisy.com. Sign in the way you just did and it is here waiting.",
-			"point_yours_title": "Only you can move it",
-			"point_yours_text": "Not OISY, and not whoever sent it.",
-			"point_use_title": "Send it, swap it, or leave it",
-			"point_use_text": "Nothing expires.",
-			"point_chains_title": "Bitcoin, Ethereum and Solana too",
-			"point_chains_text": "Same wallet, same sign-in.",
-			"cta": "See my balance"
+			"title": "Welcome to OISY Wallet",
+			"heading": "Come back anytime at oisy.com",
+			"body": "Your tip is waiting in your web wallet. Sign in the same way you just did — nothing to install or write down.",
+			"point_access_title": "Only you can access it",
+			"point_access_text": "Not OISY Wallet, and not the person who sent it.",
+			"point_stay_title": "Your funds stay here",
+			"point_stay_text": "Come back whenever you want. Nothing expires.",
+			"cta": "Open my wallet"
 		}
 	}
 }
