@@ -672,6 +672,7 @@ describe('sol-transactions.services', () => {
 			const storedTransactions = createMockSolTransactionsUi(2).map((tx, i) => ({
 				...tx,
 				id: `stored-${i}`,
+				signature: mockSolSignature(),
 				summary: { kind: 'send' as const }
 			}));
 
@@ -686,6 +687,7 @@ describe('sol-transactions.services', () => {
 			const olderRpcTransaction = {
 				...createMockSolTransactionsUi(1)[0],
 				id: 'older-rpc',
+				signature: mockSolSignature(),
 				blockNumber: 40
 			};
 			const before = mockSolSignature();

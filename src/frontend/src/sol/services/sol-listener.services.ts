@@ -6,7 +6,10 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
 import type { TokenId } from '$lib/types/token';
 import { consoleWarn } from '$lib/utils/console.utils';
-import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+import {
+	solTransactionsStore,
+	type SolCertifiedTransaction
+} from '$sol/stores/sol-transactions.store';
 import type { SolPostMessageDataResponseWallet } from '$sol/types/sol-post-message';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -37,9 +40,28 @@ export const syncWallet = ({
 		balancesStore.reset(tokenId);
 	}
 
+	const transactions: SolCertifiedTransaction[] = JSON.parse(newTransactions, jsonReviver);
+
+	// A record re-derived under its signature id supersedes the per-instruction rows the store may
+	// still hold for the same signature: same transaction, older shape, different ids.
+	const incomingSignatures = new Set(
+		transactions.map(({ data: { signature } }) => String(signature))
+	);
+	const staleIds = (get(solTransactionsStore)?.[tokenId] ?? [])
+		.filter(
+			({ data }) =>
+				incomingSignatures.has(String(data.signature)) &&
+				!transactions.some(({ data: incoming }) => incoming.id === data.id)
+		)
+		.map(({ data: { id } }) => `${id}`);
+
+	if (staleIds.length > 0) {
+		solTransactionsStore.cleanUp({ tokenId, transactionIds: staleIds });
+	}
+
 	solTransactionsStore.prepend({
 		tokenId,
-		transactions: JSON.parse(newTransactions, jsonReviver)
+		transactions
 	});
 };
 

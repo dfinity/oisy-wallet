@@ -1634,8 +1634,8 @@ interface I18nTransaction {
 		to_ata: string;
 		to_ata_copied: string;
 		block: string;
-		tab_summary: string;
 		kind_other: string;
+		tab_summary: string;
 		tab_balance_changes: string;
 		tab_instructions: string;
 		tab_unavailable: string;
@@ -1653,9 +1653,6 @@ interface I18nTransaction {
 		instruction_rent: string;
 		instruction_rent_returned: string;
 		instruction_own_account: string;
-		summary_send: string;
-		summary_receive: string;
-		summary_swap: string;
 		summary_other: string;
 		interacted_with: string;
 		unknown_token: string;
