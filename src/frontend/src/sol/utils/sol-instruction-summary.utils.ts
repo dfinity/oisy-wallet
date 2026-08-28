@@ -239,13 +239,15 @@ const toEffect = ({
 	},
 	owned,
 	accountMints,
-	accountLamports
+	accountLamports,
+	flattened
 }: {
 	instruction: SolParsedRpcInstruction;
 	owned: Set<SolAddress>;
 	accountMints: Record<SolAddress, SplTokenAddress>;
 	// What each account held going in, so a close can say what it hands back.
 	accountLamports: Record<SolAddress, bigint>;
+	flattened: { instruction: SolParsedRpcInstruction }[];
 }): Omit<Effect, 'parentIndex'> | undefined => {
 	if (PLUMBING_TYPES.includes(type)) {
 		return undefined;
@@ -307,7 +309,10 @@ const toEffect = ({
 			}
 
 			const mint = accountMints[account];
-			const returned = accountLamports[account];
+
+			// An account the same transaction opened held nothing before it ran, so its balance
+			// going in says zero. What it hands back is the rent it was funded with moments earlier.
+			const returned = rentOf({ account, flattened }) ?? accountLamports[account];
 
 			return {
 				kind: mint === WSOL_TOKEN.address ? 'unwrap' : 'closeTokenAccount',
@@ -510,7 +515,7 @@ export const mapSolInstructionSummaries = ({
 	}, {});
 
 	const effects = flattened.reduce<Effect[]>((acc, { parentIndex, instruction }) => {
-		const effect = toEffect({ instruction, owned, accountMints, accountLamports });
+		const effect = toEffect({ instruction, owned, accountMints, accountLamports, flattened });
 
 		if (isNullish(effect)) {
 			return acc;
