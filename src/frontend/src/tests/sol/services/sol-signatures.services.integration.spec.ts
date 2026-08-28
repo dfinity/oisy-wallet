@@ -10,6 +10,7 @@ import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { extractFeePayer } from '$sol/services/sol-transactions.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolRpcTransaction, SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
+import { isSolNetBalanceChangeSol } from '$sol/utils/sol-net-changes.utils';
 import {
 	fixtureSolAddresses,
 	fixtureSolAtaAddresses
@@ -43,17 +44,7 @@ describe('sol-signatures.services integration', () => {
 			mockAuthStore();
 		});
 
-		// These currently fail, and `it.fails` records that on purpose rather than hiding it behind a
-		// skip. Two mapping gaps around SPL token-account rent make the native SOL total drift:
-		//
-		// 1. A transfer out of an associated token account back to the wallet that owns it is typed
-		//    `send` instead of `receive`, because the owner match is checked before the direct one.
-		// 2. The rent that funds or is reclaimed from an associated token account is counted in the
-		//    wallet's native SOL total, even though the wallet's own balance never moves.
-		//
-		// Once the mapping is fixed these start passing, `it.fails` turns red, and it has to be
-		// flipped back to `it.each`. That is the point: unlike a skip, this cannot rot unnoticed.
-		it.fails.each(fixtureSolAddresses)(
+		it.each(fixtureSolAddresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
@@ -127,18 +118,13 @@ describe('sol-signatures.services integration', () => {
 					return accTotalFee + (feePayer === address ? (fee ?? ZERO) : ZERO);
 				}, Promise.resolve(ZERO));
 
-				const { solBalance: transactionSolBalance } = transactions.reduce<{
-					solBalance: bigint;
-					signatures: string[];
-				}>(
-					({ solBalance, signatures }, { value, type, signature }) => ({
-						solBalance: solBalance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
-						signatures: [...signatures, signature]
-					}),
-					{
-						solBalance: ZERO,
-						signatures: []
-					}
+				// A record carries one `value`, the primary asset it moved, which for a swap is a token
+				// rather than SOL. `netChanges` is the per-asset net the record is built from, so it is
+				// what a balance reconciles against.
+				const transactionSolBalance = transactions.reduce<bigint>(
+					(acc, { netChanges }) =>
+						acc + ((netChanges ?? []).find(isSolNetBalanceChangeSol)?.delta ?? ZERO),
+					ZERO
 				);
 
 				const fetchedSolBalance = await loadSolLamportsBalance({
@@ -187,15 +173,12 @@ describe('sol-signatures.services integration', () => {
 
 				const transactions = await loadTransactions();
 
-				const { balance: transactionBalance } = transactions.reduce<{
-					balance: bigint;
-					signatures: string[];
-				}>(
-					({ balance, signatures }, { value, type, signature }) => ({
-						balance: balance + (value ?? ZERO) * (type === 'send' ? -1n : 1n),
-						signatures: [...signatures, signature]
-					}),
-					{ balance: ZERO, signatures: [] }
+				const transactionBalance = transactions.reduce<bigint>(
+					(acc, { netChanges }) =>
+						acc +
+						((netChanges ?? []).find(({ tokenAddress: mint }) => mint === tokenAddress)?.delta ??
+							ZERO),
+					ZERO
 				);
 
 				const fetchedBalance = await loadTokenBalance({
