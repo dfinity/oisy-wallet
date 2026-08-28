@@ -197,6 +197,79 @@ describe('sol-instruction-summary.utils', () => {
 			expect(view.amount).toBe(415_968n);
 		});
 
+		// Closing hands the destination the account's whole balance. For a wrapped SOL account that
+		// is the rent-exempt reserve plus the SOL that was wrapped, which is why the amount is worth
+		// stating rather than calling it rent.
+		it('should say what a closed account hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				accountLamports: { [ata]: 2_039_280n }
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.returned).toBe(2_039_280n);
+		});
+
+		it('should count the wrapped SOL in what an unwrap hands back', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'wsolAta11111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata],
+				addressToToken: { [ata]: WSOL_TOKEN.address },
+				// rent plus the wrapped SOL still sitting in the account
+				accountLamports: { [ata]: 2_039_280n + 5_000_000n }
+			});
+
+			expect(view.kind).toBe('unwrap');
+			expect(view.returned).toBe(7_039_280n);
+		});
+
+		it('should say nothing about the amount when the balance is unknown', () => {
+			const owner = 'ownerWa11etAddress1111111111111111111111111';
+			const ata = 'ataAddress111111111111111111111111111111111';
+
+			const [view] = mapSolInstructionSummaries({
+				instructions: [
+					{
+						program: 'spl-token',
+						programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+						parsed: {
+							type: 'closeAccount',
+							info: { account: ata, destination: owner, owner }
+						}
+					}
+				],
+				ownedAddresses: [owner, ata]
+			});
+
+			expect(view.kind).toBe('closeTokenAccount');
+			expect(view.returned).toBeUndefined();
+		});
+
 		describe('control changes', () => {
 			const owner = 'ownerWa11etAddress1111111111111111111111111';
 			const ata = 'ownerTokenAccount111111111111111111111111111';
