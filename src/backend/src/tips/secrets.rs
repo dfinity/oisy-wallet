@@ -24,7 +24,7 @@ use shared::types::tip::{
     SetTipSecretRequest, TipError, MAX_TIP_ID_BYTES, MAX_TIP_SECRET_CIPHERTEXT_BYTES,
 };
 
-use crate::state::{with_tip_secrets, with_tip_secrets_mut};
+use crate::state::{with_existing_tip_secrets_mut, with_tip_secrets, with_tip_secrets_mut};
 
 /// Domain separator bound into the vetKD derivation for the tip-secrets store.
 /// Never change this for a deployed canister — it is part of the key derivation,
@@ -116,21 +116,35 @@ pub fn get_tip_secret(tip_id: String) -> Result<Option<ByteBuf>, TipError> {
     })
 }
 
-/// Drops the stored code for one of the caller's tips.
+/// Drops the stored code for a tip, addressed by its **owner** rather than by
+/// whoever is calling.
 ///
-/// Called when a tip reaches a state where the link is worthless — cancelled, or
-/// already claimed — so a recoverable secret does not outlive its usefulness.
-pub fn remove_tip_secret(tip_id: String) -> Result<(), TipError> {
+/// Called when a tip reaches a state where the link is worthless — cancelled,
+/// claimed, or swept after its retention window — so a recoverable secret does
+/// not outlive its usefulness.
+///
+/// Takes the owner explicitly because two of those three callers are not the
+/// sender: a claim runs as the recipient, and the retention sweep runs as the
+/// canister on a timer. `EncryptedMaps` checks writes with
+/// `ensure_user_can_write(caller, key_id)`, which an owner satisfies implicitly,
+/// so passing the owner as both is what lets those paths clean up at all. The
+/// earlier caller-scoped version is why nothing but an explicit cancel ever
+/// released a secret.
+///
+/// Never initialises the store — see [`with_existing_tip_secrets_mut`]. A
+/// canister with no stored codes has nothing to clean up, and `Ok(())` is the
+/// honest answer rather than a reason to allocate its memory.
+pub fn remove_tip_secret_for(owner: Principal, tip_id: String) -> Result<(), TipError> {
     let map_key = tip_id_to_map_key(tip_id)?;
-    let key_id = caller_key_id();
-    let caller = key_id.0;
+    let key_id = (owner, tip_secrets_map_name());
 
-    with_tip_secrets_mut(|encrypted_maps| {
+    with_existing_tip_secrets_mut(|encrypted_maps| {
         encrypted_maps
-            .remove_encrypted_value(caller, key_id, map_key)
-            .map_err(internal)?;
-        Ok(())
+            .remove_encrypted_value(owner, key_id, map_key)
+            .map_err(internal)
+            .map(|_| ())
     })
+    .unwrap_or(Ok(()))
 }
 
 /// Derives the caller's encrypted vetKey for the tip-secrets store, secured to
