@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use ic_cdk::api::{msg_caller, time};
 use shared::types::contact::{
-    count_contacts_with_images, validate_principal_memory_limit, Contact, ContactError,
+    count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
     CreateContactRequest, StoredContacts, UpdateContactRequest, MAX_CONTACTS_PER_USER,
 };
 
@@ -36,8 +36,15 @@ pub(crate) async fn create_contact(request: CreateContactRequest) -> Result<Cont
             return Err(ContactError::TooManyContacts);
         }
 
-        let image_count = count_images(s, &stored_principal, &stored_contacts);
-        validate_principal_memory_limit(image_count, request.image.is_some())?;
+        // Only pay for the prefix scan when it can actually change the outcome: the cap check is
+        // a no-op unless an image is being added.
+        let is_adding_new_image = request.image.is_some();
+        let image_count = if is_adding_new_image {
+            count_images(s, &stored_principal, &stored_contacts)
+        } else {
+            0
+        };
+        validate_principal_memory_limit(image_count, is_adding_new_image)?;
 
         // Check if a contact with this ID already exists
         if stored_contacts.contacts.contains_key(&new_id) {
@@ -143,7 +150,11 @@ pub(crate) fn update_contact(request: UpdateContactRequest) -> Result<Contact, C
         };
         let is_adding_new_image = request.image.is_some() && !had_image;
 
-        let image_count = count_images(s, &stored_principal, &stored_contacts);
+        let image_count = if is_adding_new_image {
+            count_images(s, &stored_principal, &stored_contacts)
+        } else {
+            0
+        };
         validate_principal_memory_limit(image_count, is_adding_new_image)?;
 
         let image = request.image;
@@ -206,7 +217,7 @@ fn count_images(
     stored_principal: &StoredPrincipal,
     stored_contacts: &StoredContacts,
 ) -> usize {
-    let inline = count_contacts_with_images(stored_contacts);
+    let inline = count_contacts_with_inline_images(stored_contacts);
 
     // `keys_range` walks keys without loading the image bytes, which is the whole point of the
     // split: the cap check must not cost what it is capping.

@@ -127,7 +127,7 @@ pub enum ContactError {
 /// Images written since they were split into their own map are not counted here; the caller adds
 /// those. See `contacts::service::count_images`.
 #[must_use]
-pub fn count_contacts_with_images(stored_contacts: &StoredContacts) -> usize {
+pub fn count_contacts_with_inline_images(stored_contacts: &StoredContacts) -> usize {
     stored_contacts
         .contacts
         .values()
@@ -166,7 +166,7 @@ mod tests {
     use serde_bytes::ByteBuf;
 
     use super::{
-        count_contacts_with_images, validate_principal_memory_limit, Contact, ContactError,
+        count_contacts_with_inline_images, validate_principal_memory_limit, Contact, ContactError,
         ContactImage, ImageMimeType, StoredContacts, MAX_IMAGES_PER_PRINCIPAL,
     };
 
@@ -212,7 +212,7 @@ mod tests {
             },
         );
 
-        assert_eq!(count_contacts_with_images(&stored_contacts), 3);
+        assert_eq!(count_contacts_with_inline_images(&stored_contacts), 3);
     }
 
     #[test]
